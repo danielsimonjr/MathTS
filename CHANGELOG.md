@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<<<<<<< HEAD
+### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
+
+- #291 converted the typed `@param {T}` tags in `core` to TSDoc but left 95 typed `@returns {T}` /
+  `@return {T}` / `@throws {T}` tags. code-docs 0.3.6 now reads a typed return tag as JSDoc, so
+  `array.ts`, `is.ts`, `object.ts`, `types/unit/Unit.ts`, `types/matrix/Range.ts` and
+  `bignumber-formatter.ts` were flagged M5 (mixed dialect) and `code_docs check core/src` went red on
+  main. The `{type}` is removed; the TypeScript signature already carries it. `@throws` keeps the
+  error name as text (`@throws {Error} x` -> `@throws Error x`). Doc comments only: every changed line
+  is a comment line. Gate: `PASS -- 253/253`.
+
 ### docs(expression): doc comments for every exported symbol
 
 - `expression/src`: TSDoc comments for the 81 undocumented exported symbols (71 in `utils/is.ts`, and
@@ -26,18 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Formatter-only reflows (pre-commit prettier, no logic change): `RuntimeIndex` in `node/AssignmentNode.ts`, the `parenthesizeLower` call in `node/OperatorNode.ts`, and the `index` parameter type in `node/utils/assign.ts`.
 - After the merge of `main`: 4 `@throws {Error}` tags (3 in `node/Node.ts`, 1 in `operators.ts`) are now `@throws Error`. code-docs 0.3.6 counts a typed `@throws` as JSDoc, so these files had mixed dialects (M5).
 - `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336930 (the new comment lines on top of main, after the pre-commit formatter).
-=======
-### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
-
-- #291 converted the typed `@param {T}` tags in `core` to TSDoc but left 95 typed `@returns {T}` /
-  `@return {T}` / `@throws {T}` tags. code-docs 0.3.6 now reads a typed return tag as JSDoc, so
-  `array.ts`, `is.ts`, `object.ts`, `types/unit/Unit.ts`, `types/matrix/Range.ts` and
-  `bignumber-formatter.ts` were flagged M5 (mixed dialect) and `code_docs check core/src` went red on
-  main. The `{type}` is removed; the TypeScript signature already carries it. `@throws` keeps the
-  error name as text (`@throws {Error} x` -> `@throws Error x`). Doc comments only: every changed line
-  is a comment line. Gate: `PASS -- 253/253`.
-
->>>>>>> origin/main
 ### fix(core): map.d.ts iterator types match TS >= 5.6 Map; consumer typecheck in CI
 
 - `core/src/map.ts`: `ObjectWrappingMap` and `PartitionedMap` declare `keys()`, `values()` and
