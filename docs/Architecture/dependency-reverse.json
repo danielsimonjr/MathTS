@@ -3908,13 +3908,13 @@
     "workbook/src/pdf.ts": ["workbook/src/cli.ts"],
     "workbook/src/ipynb.ts": ["workbook/src/cli.ts"],
     "workbook/src/timeout-runner.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
-    "workbook/src/svg.ts": ["workbook/src/cli.ts"],
     "workbook/src/yaml-safe.ts": [
       "workbook/src/cli.ts",
       "workbook/src/executor.ts",
       "workbook/src/parser.ts"
     ],
     "workbook/src/markdown.ts": ["workbook/src/html.ts", "workbook/src/tex.ts"],
+    "workbook/src/svg.ts": ["workbook/src/html.ts", "workbook/src/ipynb.ts", "workbook/src/tex.ts"],
     "workbook/src/svg-math.ts": ["workbook/src/index.ts"],
     "workbook/src/worker-protocol.ts": [
       "workbook/src/run-worker.ts",

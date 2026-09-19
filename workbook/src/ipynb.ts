@@ -20,6 +20,7 @@
  */
 
 import type { RenderDoc, RenderCell } from './html.js';
+import { renderChart } from './svg.js';
 
 interface ExecuteResultOutput {
   output_type: 'execute_result';
@@ -94,10 +95,11 @@ function renderCodeCell(cell: RenderCell, counter: Counter): CodeIpynbCell {
       traceback: [cell.error],
     });
   } else if (cell.type === 'chart') {
-    if (cell.chartSvg !== undefined) {
+    if (cell.chart !== undefined) {
+      const svg = renderChart(cell.chart.spec, cell.chart.x, cell.chart.y, 'svg');
       outputs.push({
         output_type: 'display_data',
-        data: { 'image/svg+xml': toSourceLines(cell.chartSvg), 'text/plain': ['<chart>'] },
+        data: { 'image/svg+xml': toSourceLines(svg), 'text/plain': ['<chart>'] },
         metadata: {},
       });
     }

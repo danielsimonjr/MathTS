@@ -1,9 +1,9 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-19", "f": 1174, "e": 5842, "re": 2363 },
   "s": {
-    "loc": 198547,
+    "loc": 198556,
     "cls": 55,
-    "int": 508,
+    "int": 509,
     "fn": 1885,
     "tg": 158,
     "en": 0,
@@ -1675,12 +1675,12 @@
         "DescribeDoc",
         "CellPosition",
         "RemoveResult",
+        "RenderChart",
         "RenderCell",
         "RenderDoc",
         "ToHtmlOptions",
         "ToPdfOptions",
-        "JsonRpcRequest",
-        "JsonRpcResponse"
+        "JsonRpcRequest"
       ]
     },
     "assembly/algebra": {

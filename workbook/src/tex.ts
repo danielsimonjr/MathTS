@@ -7,6 +7,7 @@
  */
 
 import type { RenderDoc, RenderCell } from './html.js';
+import { renderChart } from './svg.js';
 import { markdownToTex, texEscape, verbatimBody } from './markdown.js';
 
 /**
@@ -71,7 +72,9 @@ function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): str
       return `${cap}\\begin{verbatim}\n${verbatimBody(val, 'verbatim')}\n\\end{verbatim}`;
     }
     case 'chart': {
-      const chart = cell.chartTikz ?? '% no chart';
+      const chart = cell.chart
+        ? renderChart(cell.chart.spec, cell.chart.x, cell.chart.y, 'tikz')
+        : '% no chart';
       const note = cell.note ? `\n\n\\textit{${texEscape(cell.note)}}` : '';
       return `\\begin{center}\n${chart}\n\\end{center}${note}`;
     }

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(workbook): exporters make chart markup from the chart settings (security)
+
+- Before this change, `RenderCell` had two markup fields, `chartSvg` and `chartTikz`. `toHTML()`,
+  `toIpynb()` and `toTeX()` wrote these fields to the output without escaping.
+- Measured on `main`: the only writer is `buildRenderDoc()` in `workbook/src/cli.ts` (lines 737,
+  738, 756 and 757). It calls `renderChart()` from the chart settings on each export. The `.mtsw`
+  parser has no chart markup field. Thus a shared workbook file cannot carry chart markup through
+  the CLI. The unsafe part was the `RenderCell` contract: any caller of the exporters could put
+  markup into these fields.
+- `RenderCell.chartSvg` and `RenderCell.chartTikz` are replaced by `RenderCell.chart`, which holds
+  the chart settings and the raw x and y data. Each exporter calls `renderChart()` itself. The
+  plot package escapes the title and the axis labels (since plot 0.4.4). A markup field on a cell
+  is ignored.
+- `buildRenderDoc()` no longer takes a format argument.
+- `toHTML`, `toTeX`, `toIpynb` and `RenderCell` are not exported from the package entry, so the
+  published API does not change.
+- Tests: `workbook/tests/chart-markup.test.ts` (5 tests) sends hostile markup through `toHTML()`,
+  `toTeX()` and `toIpynb()` and parses the HTML chart figure with `@xmldom/xmldom`. On `main`,
+  0 of 5 pass. After the change, 5 of 5 pass.
+
 ### chore(deps): workerpool 10.2.2 fixes Bun at the source; remove bun-worker-bridge
 
 - `@danielsimonjr/workerpool` 10.2.2 prefers `parentPort` from `node:worker_threads` over the

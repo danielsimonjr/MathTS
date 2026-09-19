@@ -76,9 +76,9 @@ describe('toTeX', () => {
     );
     expect(toTeX(doc([{ type: 'test', content: 't', error: 'e' }]))).toContain('[ERROR]');
   });
-  it('chart → embeds chartTikz in a center env', () => {
+  it('chart → renders TikZ from the chart spec in a center env', () => {
     const out = toTeX(
-      doc([{ type: 'chart', content: '', chartTikz: '\\begin{tikzpicture}\\end{tikzpicture}' }])
+      doc([{ type: 'chart', content: '', chart: { spec: { type: 'line' }, x: [0, 1], y: [1, 2] } }])
     );
     expect(out).toContain('\\begin{center}');
     expect(out).toContain('\\begin{tikzpicture}');
