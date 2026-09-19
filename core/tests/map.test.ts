@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { ObjectWrappingMap, PartitionedMap } from '../src/map.js';
 
 /**
- * Drain an iterator with next(). entries() and [Symbol.iterator]() return a bare iterator that
- * is not itself iterable (a pre-existing limitation of mapIterator), so spread cannot be used.
+ * Drain an iterator with next(). entries() returns a bare iterator that is not itself iterable
+ * (a pre-existing limitation of mapIterator), so spread cannot be used on it.
  */
 function drain<T>(it: Iterator<T>): T[] {
   const out: T[] = [];
