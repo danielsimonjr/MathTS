@@ -23,6 +23,7 @@ import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lu as matrixLU } from '@danielsimonjr/mathts-matrix';
 
+/** Contains the L and U factors, the row permutation, and its parity from `tensorLU`. */
 export interface TensorLUResult {
   /** Unit lower-triangular L. Shape [...rowDims, n]. */
   L: Tensor;
@@ -34,6 +35,7 @@ export interface TensorLUResult {
   parity: 1 | -1;
 }
 
+/** Configures the joining index name between the L and U factors of `tensorLU`. */
 export interface TensorLUOpts {
   /** Optional name for the joining index between L and U. Defaults to "lu". */
   joiningIndexName?: string;

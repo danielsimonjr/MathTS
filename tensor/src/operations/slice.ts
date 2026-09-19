@@ -17,6 +17,7 @@
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 
+/** Defines the start, stop, and step of a slice along one axis. */
 export interface SliceRange {
   /** Default 0. Supports negative indexing: -1 means shape[axis]-1. */
   start?: number;

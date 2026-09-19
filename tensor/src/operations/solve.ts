@@ -31,6 +31,7 @@ import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lu as matrixLU } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the row (contracting) axes of A and b for `tensorSolve`. */
 export interface TensorSolveOpts {
   /**
    * Axis indices (integers) or Index objects of A that form the "contracting"
@@ -44,6 +45,7 @@ export interface TensorSolveOpts {
   rowAxesB?: ReadonlyArray<number | Index>;
 }
 
+/** Contains the solution tensor x from `tensorSolve`. */
 export interface TensorSolveResult {
   /** Solution tensor x satisfying A·x ≈ b. */
   x: Tensor;

@@ -22,6 +22,7 @@ import { Tensor } from '../Tensor.js';
 import { eig as matrixEig, eigWasm } from '@danielsimonjr/mathts-matrix';
 import type { EigResult } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the symmetry hint and eigenvector computation for `tensorEig`. */
 export interface TensorEigOpts {
   /** Hint that the input is symmetric; routes through a stable real-eigenvalue path. */
   symmetric?: boolean;
@@ -29,6 +30,7 @@ export interface TensorEigOpts {
   computeVectors?: boolean;
 }
 
+/** Contains the eigenvalues and, when requested, the eigenvectors from `tensorEig`. */
 export interface TensorEigResult {
   /** Real parts of the eigenvalues. 1-D Tensor of length n. */
   eigenvalues: Tensor;

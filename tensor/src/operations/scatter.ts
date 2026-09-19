@@ -20,6 +20,7 @@
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 
+/** Configures how `scatter` combines updates with the existing values. */
 export interface ScatterOpts {
   /**
    * How to combine `updates` with existing values at the target positions.

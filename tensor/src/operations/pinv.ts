@@ -20,6 +20,7 @@ import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { svd } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the relative singular-value threshold for `tensorPinv`. */
 export interface TensorPinvOpts {
   /**
    * Relative condition threshold for singular-value truncation.
