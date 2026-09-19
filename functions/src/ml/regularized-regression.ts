@@ -14,11 +14,16 @@
  */
 import { linsolve } from '../typed/numeric.js';
 
+/** Options for `ridge`. */
 export interface RidgeOptions {
   /** Center X/y and fit an unpenalized intercept (default true). */
   intercept?: boolean;
 }
 
+/**
+ * Options for `lasso` and `elasticNet`, which add an iteration limit and a tolerance
+ * to `RidgeOptions`.
+ */
 export interface CoordinateDescentOptions extends RidgeOptions {
   /** Maximum coordinate-descent sweeps (default 1000). */
   maxIter?: number;
@@ -26,6 +31,7 @@ export interface CoordinateDescentOptions extends RidgeOptions {
   tol?: number;
 }
 
+/** Result of a regularized regression: the coefficients and the intercept. */
 export interface RegularizedRegressionResult {
   /** Fitted coefficients, one per predictor column (intercept excluded). */
   coefficients: number[];

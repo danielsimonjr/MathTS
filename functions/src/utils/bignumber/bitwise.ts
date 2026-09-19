@@ -259,7 +259,7 @@ function decCoefficientToBinaryString(x: BigNumberValue): number[] {
 
   for (let i = 1; i < a.length; ++i) {
     let s = a[i] + '';
-    for (let z = 7 - s.length; z--; ) {
+    for (let z = 7 - s.length; z--;) {
       s = '0' + s;
     }
 
@@ -288,7 +288,7 @@ function decCoefficientToBinaryString(x: BigNumberValue): number[] {
 
   // Convert from base 10 (decimal) to base 2
   const arr = [0];
-  for (let i = 0; i < str.length; ) {
+  for (let i = 0; i < str.length;) {
     let arrL = arr.length;
     while (arrL--) {
       arr[arrL] *= 10;
@@ -409,7 +409,9 @@ export function leftShiftBigNumber(x: BigNumberValue, y: BigNumberValue): BigNum
   return x.times(new BigNumber(2).pow(y));
 }
 
-/*
+/**
+ * Arithmetic right shift `x >> y` of two BigNumber integers.
+ *
  * Special Cases:
  *   n >> -n =  N
  *   n >>  N =  N
@@ -423,8 +425,8 @@ export function leftShiftBigNumber(x: BigNumberValue, y: BigNumberValue): BigNum
  *  -n >>  I = -1
  *   0 >>  n =  0
  *
- * @param {BigNumber} value
- * @param {BigNumber} value
+ * @param {BigNumber} x
+ * @param {BigNumber} y
  * @return {BigNumber} Result of `x` >> `y`
  *
  */

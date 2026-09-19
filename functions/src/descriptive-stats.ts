@@ -48,7 +48,7 @@ export function rankdata(x: Vec): number[] {
   const n = a.length;
   const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => a[i] - a[j]);
   const ranks = new Array<number>(n);
-  for (let i = 0; i < n; ) {
+  for (let i = 0; i < n;) {
     let j = i;
     while (j < n && a[order[j]] === a[order[i]]) j++;
     const avg = (i + 1 + j) / 2; // mean of 1-based ranks i+1 … j
@@ -459,6 +459,14 @@ export interface DescribeResult {
   kurtosis: number;
 }
 
+/**
+ * Return summary statistics of `x`, as `scipy.stats.describe` does.
+ *
+ * The variance is the sample variance (ddof = 1). The skewness and the excess kurtosis are
+ * the biased estimates.
+ *
+ * @throws Error if `x` is empty.
+ */
 export function describe(x: Vec): DescribeResult {
   const a = Array.from(x);
   const n = a.length;
@@ -495,6 +503,14 @@ export interface HistogramResult {
   edges: number[];
 }
 
+/**
+ * Count the values of `x` in `bins` equal-width bins from the minimum to the maximum.
+ *
+ * The last bin includes the maximum. If all values are equal, the range is that value
+ * plus and minus 0.5.
+ *
+ * @throws Error if `x` is empty, or if `bins` is not a positive integer.
+ */
 export function histogram(x: Vec, bins = 10): HistogramResult {
   const a = Array.from(x);
   if (a.length === 0) throw new Error('histogram: input must be non-empty');

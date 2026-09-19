@@ -62,8 +62,8 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
      *
      *     simplify, evaluate
      *
-     * @param {Node|string} expr1  The first expression to compare
-     * @param {Node|string} expr2  The second expression to compare
+     * @param {Node|string} e1  The first expression to compare
+     * @param {Node|string} e2  The second expression to compare
      * @param {Object} [options] Optional option object, passed to simplify
      * @returns {boolean}
      *     Returns true if a valid manipulation making the expressions equal

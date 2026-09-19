@@ -8,11 +8,13 @@
  */
 import { studentTCDF } from '../distribution-functions.js';
 
+/** Options for `ols`. */
 export interface OlsOptions {
   /** Prepend a column of ones (default true). */
   intercept?: boolean;
 }
 
+/** Result of `ols`: the coefficients and their inference statistics. */
 export interface OlsResult {
   /** Fitted coefficients (intercept first, if included). */
   coefficients: number[];

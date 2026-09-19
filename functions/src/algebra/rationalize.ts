@@ -179,7 +179,7 @@ export const createRationalize = /* #__PURE__ */ factory(
      *     simplify
      *
      * @param  {Node|string} expr    The expression to check if is a polynomial expression
-     * @param  {Object|boolean}      optional scope of expression or true for already evaluated rational expression at input
+     * @param  {Object|boolean} scope  optional scope of expression or true for already evaluated rational expression at input
      * @param  {Boolean}  detailed   optional True if return an object, false if return expression node (default)
      *
      * @return {Object | Node}    The rational polynomial of `expr` or an object
@@ -355,9 +355,7 @@ export const createRationalize = /* #__PURE__ */ factory(
           } else {
             const op = (node as OperatorNode).op;
             if (op !== '+' && op !== '-' && op !== '*' && op !== '^' && (!extended || op !== '/')) {
-              throw new Error(
-                'Operator ' + op + ' invalid in polynomial expression'
-              );
+              throw new Error('Operator ' + op + ' invalid in polynomial expression');
             }
             for (let i = 0; i < (node as OperatorNode).args.length; i++) {
               recPoly((node as OperatorNode).args[i]);
@@ -490,7 +488,7 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      * @param  {Node} node         Current expression node
      * @param  {node} parent       Parent current node inside the recursion
-     * @param  {int}               Parent number of chid inside the rercursion
+     * @param  {int} indParent     Parent number of chid inside the rercursion
      *
      * @return {node}        node expression with all powers expanded.
      */
@@ -590,7 +588,7 @@ export const createRationalize = /* #__PURE__ */ factory(
      *
      *     polyToCanonical(node [, coefficients])
      *
-     * @param  {Node | string} expr       The near canonical polynomial expression to convert in a a canonical polynomial expression
+     * @param  {Node | string} node       The near canonical polynomial expression to convert in a a canonical polynomial expression
      *
      *        The string or tree expression needs to be at below syntax, with free spaces:
      *         (  (^(-)? | [+-]? )cte (*)? var (^expo)?  | cte )+
@@ -670,7 +668,7 @@ export const createRationalize = /* #__PURE__ */ factory(
        *
        * @param  {Node} node        The current subpolynomial expression
        * @param  {Node | Null}  noPai   The current parent node
-       * @param  {object}    obj        Object with many internal flags
+       * @param  {object}    o          Object with many internal flags
        *
        * @return {}                    No return. If error, throws an exception
        */

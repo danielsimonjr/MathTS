@@ -64,14 +64,17 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
   meta?: FactoryMeta;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- the dependency-object constraint must accept interface types that lack an index signature (e.g. `{ typed: TypedFunction }`); `Record<string, unknown>` would reject every such factory's deps. `any` is the only constraint that admits them. */
 /**
- * Type for the create callback function
+ * Type for the create callback function. The callback gets the resolved dependencies and
+ * returns the result.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- the dependency-object constraint must accept interface types that lack an index signature (e.g. `{ typed: TypedFunction }`); `Record<string, unknown>` would reject every such factory's deps. `any` is the only constraint that admits them.
 export type CreateFunction<TDeps extends Record<string, any>, TResult> = (
   dependencies: TDeps
 ) => TResult;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped factories (the majority across the package) rely on the `any` TDeps default so their destructured dependencies resolve to a usable type rather than `unknown`; tightening this would require annotating every factory's deps object across all packages. */
 /**
  * Create a factory function, which can be used to inject dependencies.
  *
@@ -98,8 +101,8 @@ export type CreateFunction<TDeps extends Record<string, any>, TResult> = (
  *                       docs/core/extension.md.
  * @returns The factory function
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- untyped factories (the majority across the package) rely on the `any` TDeps default so their destructured dependencies resolve to a usable type rather than `unknown`; tightening this would require annotating every factory's deps object across all packages.
 export function factory<TDeps extends Record<string, any> = any, TResult = any>(
+  /* eslint-enable @typescript-eslint/no-explicit-any */
   name: string,
   dependencies: DependencyName[],
   create: CreateFunction<TDeps, TResult>,

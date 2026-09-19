@@ -13,56 +13,67 @@ import {
 const n1 = 'number';
 const n2 = 'number, number';
 
+/** Return the absolute value of `a`. */
 export function absNumber(a: number): number {
   return Math.abs(a);
 }
 absNumber.signature = n1;
 
+/** Return the sum `a + b`. */
 export function addNumber(a: number, b: number): number {
   return a + b;
 }
 addNumber.signature = n2;
 
+/** Return the difference `a - b`. */
 export function subtractNumber(a: number, b: number): number {
   return a - b;
 }
 subtractNumber.signature = n2;
 
+/** Return the product `a * b`. */
 export function multiplyNumber(a: number, b: number): number {
   return a * b;
 }
 multiplyNumber.signature = n2;
 
+/** Return the quotient `a / b`. Division by 0 gives an infinity or NaN, as in JavaScript. */
 export function divideNumber(a: number, b: number): number {
   return a / b;
 }
 divideNumber.signature = n2;
 
+/** Return the negation `-x`. */
 export function unaryMinusNumber(x: number): number {
   return -x;
 }
 unaryMinusNumber.signature = n1;
 
+/** Return `x` unchanged. */
 export function unaryPlusNumber(x: number): number {
   return x;
 }
 unaryPlusNumber.signature = n1;
 
+/** Return the real cube root of `x`. */
 export function cbrtNumber(x: number): number {
   return cbrt(x);
 }
 cbrtNumber.signature = n1;
 
+/** Return the cube `x * x * x`. */
 export function cubeNumber(x: number): number {
   return x * x * x;
 }
 cubeNumber.signature = n1;
 
+/** Return `e` to the power `x` (`Math.exp`). */
 export function expNumber(x: number): number {
   return Math.exp(x);
 }
 expNumber.signature = n1;
 
+/** Return `exp(x) - 1`. */
 export function expm1Number(x: number): number {
   return expm1(x);
 }
@@ -121,7 +132,7 @@ lcmNumber.signature = n2;
 /**
  * Calculate the logarithm of a value, optionally to a given base.
  * @param x - The value
- * @param base - Optional base
+ * @param y - Optional base
  * @returns Logarithm
  */
 export function logNumber(x: number, y?: number): number {
@@ -234,16 +245,19 @@ export function nthRootNumber(a: number, root: number = 2): number {
   */
 }
 
+/** Return the sign of `x` (`Math.sign`): -1, 0 or 1. NaN gives NaN. */
 export function signNumber(x: number): number {
   return sign(x);
 }
 signNumber.signature = n1;
 
+/** Return the square root of `x` (`Math.sqrt`). A negative `x` gives NaN. */
 export function sqrtNumber(x: number): number {
   return Math.sqrt(x);
 }
 sqrtNumber.signature = n1;
 
+/** Return the square `x * x`. */
 export function squareNumber(x: number): number {
   return x * x;
 }

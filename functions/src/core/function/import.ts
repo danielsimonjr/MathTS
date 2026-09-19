@@ -49,14 +49,13 @@ interface MathNamespace {
  * A value that can be imported into the math namespace
  */
 type ImportableValue =
-  | ((...args: unknown[]) => unknown)
-  | number
-  | string
-  | boolean
-  | null
-  | object
-  | unknown[];
+  ((...args: unknown[]) => unknown) | number | string | boolean | null | object | unknown[];
 
+/**
+ * Create the `import` function for a math.js instance.
+ *
+ * The created function adds functions, values and factories to `math`.
+ */
 export function importFactory(
   typed: TypedFunction,
   _load: (factory: FactoryFunction) => unknown,
@@ -115,8 +114,8 @@ export function importFactory(
    *
    *    math.fibonacci(7) // returns 13
    *
-   * @param {Object | Array} functions  Object with functions to be imported.
-   * @param {Object} [options]          Import options.
+   * @param functions - Object or array with functions to be imported.
+   * @param options - Optional. Import options.
    */
   function mathImport(functions: unknown, options?: ImportOptions): void {
     const num = arguments.length;

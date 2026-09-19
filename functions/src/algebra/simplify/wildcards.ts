@@ -5,13 +5,12 @@ import {
   isParenthesisNode,
 } from '../../utils/is.js';
 export { isConstantNode, isSymbolNode as isVariableNode } from '../../utils/is.js';
-import type {
-  MathNode,
-  OperatorNode,
-  FunctionNode,
-  ParenthesisNode,
-} from '../../utils/node.js';
+import type { MathNode, OperatorNode, FunctionNode, ParenthesisNode } from '../../utils/node.js';
 
+/**
+ * Return true if `x` is a ConstantNode, or a unary OperatorNode whose operand is a
+ * ConstantNode (for example `-2`).
+ */
 export function isNumericNode(x: MathNode): boolean {
   return (
     isConstantNode(x) ||
@@ -21,6 +20,12 @@ export function isNumericNode(x: MathNode): boolean {
   );
 }
 
+/**
+ * Return true if `x` contains no symbols.
+ *
+ * The test is true for a ConstantNode, and for a FunctionNode or an OperatorNode whose
+ * arguments are all constant expressions (recursive test).
+ */
 export function isConstantExpression(x: MathNode): boolean {
   if (isConstantNode(x)) {
     // Basic Constant types

@@ -23,6 +23,7 @@ export type GlmFamily = 'poisson' | 'gamma';
 /** Supported link functions. */
 export type GlmLink = 'log' | 'inverse';
 
+/** Options for `glm`. */
 export interface GlmOptions {
   /** Exponential family: `'poisson'` (counts) or `'gamma'` (positive continuous). */
   family: GlmFamily;
@@ -37,6 +38,7 @@ export interface GlmOptions {
   maxIter?: number;
 }
 
+/** Result of `glm`. */
 export interface GlmResult {
   /** Fitted coefficients (intercept first, if included). */
   coefficients: number[];

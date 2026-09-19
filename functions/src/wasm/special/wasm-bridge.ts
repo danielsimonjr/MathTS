@@ -472,24 +472,52 @@ function _ellipticPiIncomplete(n: number, phi: number, m: number): number {
 // JS fallback array implementations
 // ---------------------------------------------------------------------------
 
+/**
+ * Compute the Carlson integral RC(x, y) for each pair of elements, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with `x < 0` or `y <= 0` gives NaN.
+ */
 export function carlsonRCJS(xs: Float64Array, ys: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) out[i] = _carlsonRC(xs[i], ys[i]);
   return out;
 }
 
+/**
+ * Compute the Carlson integral RF(x, y, z) for each element triple, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with a negative argument gives NaN.
+ */
 export function carlsonRFJS(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) out[i] = _carlsonRF(xs[i], ys[i], zs[i]);
   return out;
 }
 
+/**
+ * Compute the Carlson integral RD(x, y, z) for each element triple, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with `x < 0`, `y < 0`, `z <= 0`, or `x` and `y` both 0 gives NaN.
+ */
 export function carlsonRDJS(xs: Float64Array, ys: Float64Array, zs: Float64Array): Float64Array {
   const out = new Float64Array(xs.length);
   for (let i = 0; i < xs.length; i++) out[i] = _carlsonRD(xs[i], ys[i], zs[i]);
   return out;
 }
 
+/**
+ * Compute the Carlson integral RJ(x, y, z, p) for each element set, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with a negative `x`, `y` or `z`, or with `p` equal to 0, gives NaN.
+ */
 export function carlsonRJJS(
   xs: Float64Array,
   ys: Float64Array,
@@ -501,18 +529,42 @@ export function carlsonRJJS(
   return out;
 }
 
+/**
+ * Compute the incomplete elliptic integral of the first kind F(phi | m) for each element
+ * pair, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with `1 - m sin^2(phi) < 0` gives NaN.
+ */
 export function ellipticFIncompleteJS(phis: Float64Array, ms: Float64Array): Float64Array {
   const out = new Float64Array(phis.length);
   for (let i = 0; i < phis.length; i++) out[i] = _ellipticFIncomplete(phis[i], ms[i]);
   return out;
 }
 
+/**
+ * Compute the incomplete elliptic integral of the second kind E(phi | m) for each element
+ * pair, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with `1 - m sin^2(phi) < 0` gives NaN.
+ */
 export function ellipticEIncompleteJS(phis: Float64Array, ms: Float64Array): Float64Array {
   const out = new Float64Array(phis.length);
   for (let i = 0; i < phis.length; i++) out[i] = _ellipticEIncomplete(phis[i], ms[i]);
   return out;
 }
 
+/**
+ * Compute the incomplete elliptic integral of the third kind Pi(n; phi | m) for each
+ * element set, in JavaScript.
+ *
+ * The function reads element `i` of each input array and writes element `i` of a new
+ * array. It does not change the inputs.
+ * An element with `1 - m sin^2(phi) < 0` or `1 - n sin^2(phi) <= 0` gives NaN.
+ */
 export function ellipticPiIncompleteJS(
   ns: Float64Array,
   phis: Float64Array,
@@ -527,24 +579,52 @@ export function ellipticPiIncompleteJS(
 // Scalar exports (for TypedFunction scalar overloads)
 // ---------------------------------------------------------------------------
 
+/** Return the Carlson integral RC(x, y). The result is NaN if `x < 0` or `y <= 0`. */
 export function carlsonRCScalar(x: number, y: number): number {
   return _carlsonRC(x, y);
 }
+/** Return the Carlson integral RF(x, y, z). The result is NaN if an argument is negative. */
 export function carlsonRFScalar(x: number, y: number, z: number): number {
   return _carlsonRF(x, y, z);
 }
+/**
+ * Return the Carlson integral RD(x, y, z).
+ *
+ * The result is NaN if `x < 0`, `y < 0`, `z <= 0`, or `x` and `y` are both 0.
+ */
 export function carlsonRDScalar(x: number, y: number, z: number): number {
   return _carlsonRD(x, y, z);
 }
+/**
+ * Return the Carlson integral RJ(x, y, z, p).
+ *
+ * The result is NaN if `x`, `y` or `z` is negative, or if `p` is 0.
+ */
 export function carlsonRJScalar(x: number, y: number, z: number, p: number): number {
   return _carlsonRJ(x, y, z, p);
 }
+/**
+ * Return the incomplete elliptic integral of the first kind F(phi | m).
+ *
+ * The result is 0 if `phi` is 0, and NaN if `1 - m sin^2(phi) < 0`.
+ */
 export function ellipticFIncompleteScalar(phi: number, m: number): number {
   return _ellipticFIncomplete(phi, m);
 }
+/**
+ * Return the incomplete elliptic integral of the second kind E(phi | m).
+ *
+ * The result is 0 if `phi` is 0, and NaN if `1 - m sin^2(phi) < 0`.
+ */
 export function ellipticEIncompleteScalar(phi: number, m: number): number {
   return _ellipticEIncomplete(phi, m);
 }
+/**
+ * Return the incomplete elliptic integral of the third kind Pi(n; phi | m).
+ *
+ * The result is 0 if `phi` is 0. It is NaN if `1 - m sin^2(phi) < 0` or
+ * `1 - n sin^2(phi) <= 0`.
+ */
 export function ellipticPiIncompleteScalar(n: number, phi: number, m: number): number {
   return _ellipticPiIncomplete(n, phi, m);
 }

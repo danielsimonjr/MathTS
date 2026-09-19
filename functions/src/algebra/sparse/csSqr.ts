@@ -10,6 +10,10 @@ import { factory } from '../../utils/factory.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Sparse matrix internal structure
+/**
+ * Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
+ * value, and the column pointers.
+ */
 export interface SparseMatrixData {
   _size: number[];
   _values?: unknown[];
@@ -24,6 +28,7 @@ interface CsSqrDependencies {
 }
 
 // Symbolic analysis result
+/** Result of `csSqr`: the symbolic analysis for a later LU or QR factorization. */
 export interface SymbolicAnalysis {
   q: number[] | null;
   parent?: number[] | null;

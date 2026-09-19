@@ -96,6 +96,8 @@ export const createNthRoot = /* #__PURE__ */ factory(
      * @param {number | BigNumber} [root=2]    The root.
      * @return {number | Complex | Array | Matrix} Returns the nth root of `a`
      */
+
+    /** Throw an error, because `nthRoot` does not support complex values. */
     function complexErr(): never {
       throw new Error('Complex number not supported in function nthRoot. Use nthRoots instead.');
     }

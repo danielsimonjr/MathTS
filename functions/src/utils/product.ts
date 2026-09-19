@@ -1,4 +1,7 @@
-/** @param {number} i
+/**
+ * Return the product of the integers from `i` to `n`. The result is 1 if `n < i`.
+ *
+ * @param {number} i
  *  @param {number} n
  *  @returns {number} product of i to n
  */

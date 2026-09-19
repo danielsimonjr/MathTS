@@ -12,6 +12,10 @@ import type { TypedFunction } from '../../core/function/typed.js';
 const WASM_AMD_THRESHOLD = 100;
 
 // Sparse matrix internal structure
+/**
+ * Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
+ * value, and the column pointers.
+ */
 export interface SparseMatrixData {
   _size: number[];
   _values?: unknown[];
@@ -392,7 +396,7 @@ export const createCsAmd = /* #__PURE__ */ factory(
             }
             let jlast = i;
             // compare i with all j
-            for (j = W[next + i]; j !== -1; ) {
+            for (j = W[next + i]; j !== -1;) {
               let ok = W[len + j] === ln && W[elen + j] === eln;
               for (p = cptr[j] + 1; ok && p <= cptr[j] + ln - 1; p++) {
                 // compare i and j

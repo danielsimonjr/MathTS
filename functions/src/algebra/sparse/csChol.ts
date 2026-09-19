@@ -7,6 +7,10 @@ import { createCsSymperm } from './csSymperm.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Sparse matrix internal structure
+/**
+ * Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
+ * value, and the column pointers.
+ */
 export interface SparseMatrixData {
   _size: number[];
   _values: unknown[];
@@ -15,7 +19,12 @@ export interface SparseMatrixData {
 }
 
 interface SparseMatrixConstructor {
-  new (data: { values: unknown[]; index: number[]; ptr: number[]; size: number[] }): SparseMatrixData;
+  new (data: {
+    values: unknown[];
+    index: number[];
+    ptr: number[];
+    size: number[];
+  }): SparseMatrixData;
 }
 
 interface CsCholDependencies {
@@ -32,6 +41,10 @@ interface CsCholDependencies {
 }
 
 // Symbolic analysis result from csSchol
+/**
+ * Symbolic analysis that `csChol` reads: the elimination tree `parent`, the column
+ * pointers `cp`, and the optional inverse permutation `pinv`.
+ */
 export interface SymbolicAnalysis {
   parent: number[];
   cp: number[];
@@ -39,6 +52,10 @@ export interface SymbolicAnalysis {
 }
 
 // Cholesky factorization result
+/**
+ * Result of `csChol`: the Cholesky factor `L`, and the permutation matrix `P` if the
+ * analysis has one.
+ */
 export interface CholResult {
   L: SparseMatrixData;
   P?: SparseMatrixData;

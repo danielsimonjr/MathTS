@@ -16,6 +16,7 @@
  */
 import { Dual } from '@danielsimonjr/mathts-core';
 
+/** Function of one dual number, as the forward-mode derivative helpers take it. */
 export type DualFn = (x: Dual) => Dual;
 
 /** Exact derivative of `fn: ℝ → ℝ` at `x0` (forward-mode AD). */

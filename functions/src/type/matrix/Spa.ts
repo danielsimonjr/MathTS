@@ -55,7 +55,7 @@ export const createSpaClass = /* #__PURE__ */ factory(
        * Set the value for index i.
        *
        * @param {number} i                       The index
-       * @param {number | BigNumber | Complex}   The value at index i
+       * @param {number | BigNumber | Complex} v The value at index i
        */
       set(i: number, v: SpaValue): void {
         // check we have a value @ i

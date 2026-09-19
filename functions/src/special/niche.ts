@@ -44,7 +44,7 @@ const RELTOL = 1e-16;
  * @param s - Order (any real number)
  * @param z - Argument, must satisfy `|z| < 1`
  * @returns Li_s(z)
- * @throws {Error} If `|z| >= 1`
+ * @throws Error if `|z| >= 1`
  *
  * @example
  * polylog(2, 0.5) // ~0.5822405265 (dilogarithm)
@@ -266,7 +266,7 @@ function lnBarnesGAsymptotic(y: f64): f64 {
  *
  * @param z - Argument (real, `z > 0`)
  * @returns G(z)
- * @throws {Error} If `z <= 0`
+ * @throws Error if `z <= 0`
  *
  * @example
  * barnesG(4) // 2 (= 1!)

@@ -293,7 +293,7 @@ export const properties: Array<Record<string, OperatorProperty>> = [
  * input is not the name of a function associated with an
  * operator.
  *
- * @param {string} Function name
+ * @param {string} fn Function name
  * @return {string | null} Associated operator symbol, if any
  */
 export function getOperator(fn: string): string | null {

@@ -6,11 +6,19 @@
 
 import { bigintGcd } from '../typed/factorization/integer-poly.js';
 
+/** Exact rational number with a bigint numerator `num` and denominator `den`. */
 export interface Rat {
   num: bigint;
   den: bigint;
 }
 
+/**
+ * Return the rational `num / den` in lowest terms, with a positive denominator.
+ *
+ * A zero numerator gives `0 / 1`.
+ *
+ * @throws Error if `den` is 0.
+ */
 export function ratNormalize(num: bigint, den: bigint): Rat {
   if (den === 0n) {
     throw new Error('Rat: zero denominator');
@@ -28,18 +36,26 @@ export function ratNormalize(num: bigint, den: bigint): Rat {
   return { num: n / g, den: d / g };
 }
 
+/** Return the sum `a + b` in lowest terms. */
 export function ratAdd(a: Rat, b: Rat): Rat {
   return ratNormalize(a.num * b.den + b.num * a.den, a.den * b.den);
 }
 
+/** Return the difference `a - b` in lowest terms. */
 export function ratSub(a: Rat, b: Rat): Rat {
   return ratNormalize(a.num * b.den - b.num * a.den, a.den * b.den);
 }
 
+/** Return the product `a * b` in lowest terms. */
 export function ratMul(a: Rat, b: Rat): Rat {
   return ratNormalize(a.num * b.num, a.den * b.den);
 }
 
+/**
+ * Return the quotient `a / b` in lowest terms.
+ *
+ * @throws Error if `b` is 0.
+ */
 export function ratDiv(a: Rat, b: Rat): Rat {
   if (b.num === 0n) {
     throw new Error('Rat: division by zero');
@@ -47,6 +63,7 @@ export function ratDiv(a: Rat, b: Rat): Rat {
   return ratNormalize(a.num * b.den, a.den * b.num);
 }
 
+/** Return the integer `n` as the rational `n / 1`. */
 export function ratFromBigint(n: bigint): Rat {
   return { num: n, den: 1n };
 }

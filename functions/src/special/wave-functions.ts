@@ -231,7 +231,7 @@ const LERCH_MAX_TERMS = 200000;
  * @param s - Order (any real number)
  * @param a - Offset (real, `a > 0`)
  * @returns Φ(z, s, a)
- * @throws {Error} If `|z| >= 1`, or if `a + k <= 0` for some term (a <= 0)
+ * @throws Error if `|z| >= 1`, or if `a + k <= 0` for some term (a <= 0)
  *
  * @example
  * lerchPhi(0.5, 2, 1) // ~1.1644810529 (= 2·Li_2(0.5))
@@ -342,7 +342,7 @@ function coulombC(L: f64, eta: f64): f64 {
  * @param eta - Sommerfeld parameter (real)
  * @param rho - Radial variable (real, `rho >= 0`)
  * @returns F_L(η, ρ)
- * @throws {Error} If `rho < 0` or `L < 0`
+ * @throws Error if `rho < 0` or `L < 0`
  *
  * @example
  * coulombF(0, 0, 1) // ~0.8414709848 (= sin 1)
@@ -515,7 +515,7 @@ function coulombSteed(L: f64, eta: f64, rho: f64): CoulombFG {
  * @param eta - Sommerfeld parameter (real)
  * @param rho - Radial variable (real, `rho > 0`)
  * @returns G_L(η, ρ)
- * @throws {Error} If `rho <= 0` or `L < 0`
+ * @throws Error if `rho <= 0` or `L < 0`
  *
  * @example
  * coulombG(0, 0, 1) // ~0.5403023059 (= cos 1)
@@ -535,7 +535,7 @@ export function coulombG(L: f64, eta: f64, rho: f64): f64 {
  * @param eta - Sommerfeld parameter (real)
  * @param rho - Radial variable (real, `rho > 0`)
  * @returns `{ F, Fp, G, Gp }`
- * @throws {Error} If `rho <= 0` or `L < 0`
+ * @throws Error if `rho <= 0` or `L < 0`
  *
  * @example
  * coulombFG(0, 0, 1) // { F: sin 1, Fp: cos 1, G: cos 1, Gp: -sin 1 }

@@ -7,6 +7,7 @@
  */
 import { linsolve } from '../typed/numeric.js';
 
+/** Options for `logisticRegression`. */
 export interface LogisticRegressionOptions {
   /** Prepend a column of ones (default true). */
   intercept?: boolean;
@@ -16,6 +17,7 @@ export interface LogisticRegressionOptions {
   maxIter?: number;
 }
 
+/** Result of `logisticRegression`. */
 export interface LogisticRegressionResult {
   /** Fitted coefficients for the original predictors (excludes the intercept). */
   coefficients: number[];

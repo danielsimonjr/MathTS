@@ -8,6 +8,10 @@ import { inv as _invRaw } from './factories/index.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
+/**
+ * Result of `nelderMead` and `gradientDescent`: the best point `x`,
+ * its value `fx`, the iteration count, and a convergence flag.
+ */
 export interface OptimizeResult {
   x: number[];
   fx: number;
@@ -126,6 +130,10 @@ export function gradientDescent(
   return { x, fx: f(x), iterations: iter, converged: iter < maxIter };
 }
 
+/**
+ * Result of `levenbergMarquardt`: the solution `x`, the residual norm, the iteration
+ * count, and a convergence flag.
+ */
 export interface LMResult {
   x: number[];
   residualNorm: number;
