@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(autograd): doc comments for every exported symbol
+
+- `autograd/src`: TSDoc comments for `DualTensor`, `ScalarFn`, `NumericInput`, `reverseGrad`,
+  `Tape` and `TapedTensor`. The `code-docs` gate (`code_docs.py check autograd/src`) now passes:
+  11/11 exported symbols documented, 0 MUST issues (before: 6 MUST issues). Comments only; no
+  code changes.
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335269 (the new comment lines).
+
 ### chore(build): Bun migration Phase 4 - Node out of the dev toolchain
 
 - `.github/workflows/ci.yml`: the `Compile & Lint`, `Coverage` and `Browser (WebGPU smoke)` jobs no

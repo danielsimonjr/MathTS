@@ -17,7 +17,18 @@
  */
 import { Tape, TapedTensor } from './tape.js';
 
+/**
+ * Function that `valueAndGrad`, `grad`, `derivative` and `jacobian` differentiate.
+ *
+ * The function must build its result from TapedTensor operations only, because only these operations record adjoints.
+ * `valueAndGrad`, `grad` and `derivative` require a result of length 1. `jacobian` accepts a vector result.
+ */
 export type ScalarFn = (x: TapedTensor) => TapedTensor;
+/**
+ * Point at which a function is differentiated: a number, a number array, or a Float64Array.
+ *
+ * The helpers copy the input into a new Float64Array, so they do not change the caller's array.
+ */
 export type NumericInput = number | readonly number[] | Float64Array;
 
 function toFloat64(x: NumericInput): Float64Array {
@@ -33,10 +44,7 @@ function toFloat64(x: NumericInput): Float64Array {
  * @returns   `{ value, grad }` where `grad` has the same length as `x`.
  * @throws    if `fn` does not return a length-1 (scalar) result.
  */
-export function valueAndGrad(
-  fn: ScalarFn,
-  x: NumericInput
-): { value: number; grad: Float64Array } {
+export function valueAndGrad(fn: ScalarFn, x: NumericInput): { value: number; grad: Float64Array } {
   const xs = toFloat64(x);
   const tape = new Tape();
   const { id } = tape.allocate(xs.length);
