@@ -29,7 +29,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
        *     new ConstantNode(2.3)
        *     new ConstantNode('hello')
        *
-       * @param {*} value    Value can be any type (number, BigNumber, bigint, string, ...)
+       * @param value - Value can be any type (number, BigNumber, bigint, string, ...)
        * @constructor ConstantNode
        * @extends {Node}
        */
@@ -49,13 +49,13 @@ export const createConstantNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param _math - Math.js namespace with functions and constants.
+       * @param _argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -71,7 +71,7 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param _callback
        */
       forEach(_callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         // nothing to do, we don't have any children
@@ -80,8 +80,8 @@ export const createConstantNode = /* #__PURE__ */ factory(
       /**
        * Create a new ConstantNode with children produced by the given callback.
        * Trivial because there are no children.
-       * @param {function(child: Node, path: string, parent: Node) : Node} callback
-       * @returns {ConstantNode} Returns a clone of the node
+       * @param _callback
+       * @returns Returns a clone of the node
        */
       map(_callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ConstantNode {
         return this.clone();
@@ -89,7 +89,6 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {ConstantNode}
        */
       clone(): ConstantNode {
         return new ConstantNode(this.value);
@@ -97,8 +96,8 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         return format(this.value, options);
@@ -106,8 +105,8 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const value = this._toString(options);
@@ -134,7 +133,6 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; value: unknown } {
         return { mathjs: name, value: this.value };
@@ -142,19 +140,17 @@ export const createConstantNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate a ConstantNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "SymbolNode", value: 2.3}`,
        *                       where mathjs is optional
-       * @returns {ConstantNode}
        */
       static fromJSON(json: { value: unknown }): ConstantNode {
         return new ConstantNode(json.value);
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        */
       _toMathML(): string {
         return constantToMathML(this.value);

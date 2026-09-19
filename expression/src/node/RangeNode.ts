@@ -45,10 +45,10 @@ export const createRangeNode = /* #__PURE__ */ factory(
   ({ Node }: Dependencies) => {
     /**
      * Calculate the necessary parentheses
-     * @param {Node} node
-     * @param {string} parenthesis
-     * @param {string} implicit
-     * @return {Object} parentheses
+     * @param node
+     * @param parenthesis
+     * @param implicit
+     * @returns parentheses
      * @private
      */
     function calculateNecessaryParentheses(
@@ -86,9 +86,9 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @constructor RangeNode
        * @extends {Node}
        * create a range
-       * @param {Node} start  included lower-bound
-       * @param {Node} end    included upper-bound
-       * @param {Node} [step] optional step
+       * @param start - included lower-bound
+       * @param end - included upper-bound
+       * @param step - optional step
        */
       constructor(start: Node, end: Node, step?: Node) {
         super();
@@ -113,7 +113,6 @@ export const createRangeNode = /* #__PURE__ */ factory(
       /**
        * Check whether the RangeNode needs the `end` symbol to be defined.
        * This end is the size of the Matrix in current dimension.
-       * @return {boolean}
        */
       needsEnd(): boolean {
         // find all `end` symbols in this RangeNode
@@ -128,13 +127,13 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -170,7 +169,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: RangeNode) => void): void {
         callback(this.start, 'start', this);
@@ -183,8 +182,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
       /**
        * Create a new RangeNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {RangeNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: Node, path: string, parent: RangeNode) => Node): RangeNode {
         return new RangeNode(
@@ -196,7 +195,6 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {RangeNode}
        */
       clone(): RangeNode {
         return new RangeNode(this.start, this.end, this.step || undefined);
@@ -204,8 +202,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -243,7 +241,6 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -256,11 +253,10 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an RangeNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "RangeNode", "start": ..., "end": ..., "step": ...}`,
        *     where mathjs is optional
-       * @returns {RangeNode}
        */
       static fromJSON(json: { start: Node; end: Node; step?: Node }): RangeNode {
         return new RangeNode(json.start, json.end, json.step);
@@ -268,8 +264,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -317,7 +313,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
       /**
        * Get LaTeX representation
        * @params {Object} options
-       * @return {string} str
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';

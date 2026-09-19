@@ -28,9 +28,9 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
   }) => {
     /**
      * Is parenthesis needed?
-     * @param {Node} node
-     * @param {Object} parenthesis
-     * @param {string} implicit
+     * @param node
+     * @param parenthesis
+     * @param implicit
      * @private
      */
     function needParenthesis(
@@ -57,12 +57,12 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * @extends {Node}
        * Function assignment
        *
-       * @param {string} name           Function name
-       * @param {string[] | Array.<{name: string, type: string}>} params
+       * @param name - Function name
+       * @param params
        *                                Array with function parameter names, or an
        *                                array with objects containing the name
        *                                and type of the parameter
-       * @param {Node} expr             The function expression
+       * @param expr - The function expression
        */
       constructor(name: string, params: string[] | ParamWithType[], expr: MathNode) {
         super();
@@ -113,13 +113,13 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -169,7 +169,7 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         callback(this.expr, 'expr', this);
@@ -179,8 +179,8 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
        * Create a new FunctionAssignmentNode whose children are the results of
        * calling the provided callback function for each child of the original
        * node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {FunctionAssignmentNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(
         callback: (child: MathNode, path: string, parent: MathNode) => MathNode
@@ -192,7 +192,6 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {FunctionAssignmentNode}
        */
       clone(): FunctionAssignmentNode {
         return new FunctionAssignmentNode(this.name, this.params.slice(0), this.expr);
@@ -200,8 +199,8 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -214,7 +213,6 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; name: string; params: ParamWithType[]; expr: MathNode } {
         const types = this.types;
@@ -234,14 +232,13 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an FunctionAssignmentNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     ```
        *     {"mathjs": "FunctionAssignmentNode",
        *      name: ..., params: ..., expr: ...}
        *     ```
        *     where mathjs is optional
-       * @returns {FunctionAssignmentNode}
        */
       static fromJSON(json: {
         name: string;
@@ -253,8 +250,8 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -286,8 +283,8 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';

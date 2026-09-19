@@ -40,7 +40,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @constructor ParenthesisNode
        * @extends {Node}
        * A parenthesis node describes manual parenthesis from the user input
-       * @param {Node} content
+       * @param content
        * @extends {Node}
        */
       constructor(content: Node) {
@@ -64,13 +64,13 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -80,7 +80,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Get the content of the current Node.
-       * @return {Node} content
+       * @returns content
        * @override
        **/
       // @ts-expect-error - method overrides property from Node base class
@@ -90,7 +90,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: ParenthesisNode) => void): void {
         callback(this.content, 'content', this);
@@ -99,8 +99,8 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
       /**
        * Create a new ParenthesisNode whose child is the result of calling
        * the provided callback function on the child of this node.
-       * @param {function(child: Node, path: string, parent: Node) : Node} callback
-       * @returns {ParenthesisNode} Returns a clone of the node
+       * @param callback
+       * @returns Returns a clone of the node
        */
       map(callback: (child: Node, path: string, parent: ParenthesisNode) => Node): ParenthesisNode {
         const content = callback(this.content, 'content', this);
@@ -109,7 +109,6 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {ParenthesisNode}
        */
       clone(): ParenthesisNode {
         return new ParenthesisNode(this.content);
@@ -117,8 +116,8 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toString(options?: StringOptions): string {
@@ -134,7 +133,6 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return { mathjs: name, content: this.content };
@@ -142,10 +140,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an ParenthesisNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "ParenthesisNode", "content": ...}`,
        *                       where mathjs is optional
-       * @returns {ParenthesisNode}
        */
       static fromJSON(json: { content: Node }): ParenthesisNode {
         return new ParenthesisNode(json.content);
@@ -153,8 +150,8 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toHTML(options?: StringOptions): string {
@@ -173,9 +170,8 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        * @override
        */
       _toMathML(): string {

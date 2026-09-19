@@ -28,7 +28,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * @constructor BlockNode
        * @extends {Node}
        * Holds a set with blocks
-       * @param {Array.<{node: Node} | {node: Node, visible: boolean}>} blocks
+       * @param blocks
        *            An array with blocks, where a block is constructed as an
        *            Object with properties block, which is a Node, and visible,
        *            which is a boolean. The property visible is optional and
@@ -62,13 +62,13 @@ export const createBlockNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -102,7 +102,7 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child blocks of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.blocks.length; i++) {
@@ -113,8 +113,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
       /**
        * Create a new BlockNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {BlockNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): BlockNode {
         const blocks: BlockItem[] = [];
@@ -131,7 +131,6 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {BlockNode}
        */
       clone(): BlockNode {
         const blocks = this.blocks.map(function (block) {
@@ -146,8 +145,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toString(options?: StringOptions): string {
@@ -160,7 +159,6 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; blocks: BlockItem[] } {
         return {
@@ -171,11 +169,10 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an BlockNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "BlockNode", blocks: [{node: ..., visible: false}, ...]}`,
        *     where mathjs is optional
-       * @returns {BlockNode}
        */
       static fromJSON(json: { blocks: Array<{ node: MathNode; visible?: boolean }> }): BlockNode {
         return new BlockNode(json.blocks);
@@ -183,8 +180,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toHTML(options?: StringOptions): string {
@@ -200,8 +197,8 @@ export const createBlockNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         return this.blocks

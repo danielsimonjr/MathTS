@@ -39,8 +39,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
   ({ math, Unit, Node }: Dependencies) => {
     /**
      * Check whether some name is a valueless unit like "inch".
-     * @param {string} name
-     * @return {boolean}
+     * @param name
      */
     function isValuelessUnit(name: string): boolean {
       return Unit ? Unit.isValuelessUnit(name) : false;
@@ -53,7 +52,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @constructor SymbolNode
        * @extends {Node}
        * A symbol node can hold and resolve a symbol
-       * @param {string} name
+       * @param name
        * @extends {Node}
        */
       constructor(name: string) {
@@ -77,13 +76,13 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
@@ -127,7 +126,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param _callback
        */
       forEach(_callback: (child: Node, path: string, parent: SymbolNode) => void): void {
         // nothing to do, we don't have any children
@@ -136,8 +135,8 @@ export const createSymbolNode = /* #__PURE__ */ factory(
       /**
        * Create a new SymbolNode with children produced by the given callback.
        * Trivial since a SymbolNode has no children
-       * @param {function(child: Node, path: string, parent: Node) : Node} callback
-       * @returns {SymbolNode} Returns a clone of the node
+       * @param _callback
+       * @returns Returns a clone of the node
        */
       map(_callback: (child: Node, path: string, parent: SymbolNode) => Node): SymbolNode {
         return this.clone();
@@ -145,7 +144,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Throws an error 'Undefined symbol {name}'
-       * @param {string} name
+       * @param name
        */
       static onUndefinedSymbol(name: string): never {
         throw new Error('Undefined symbol ' + name);
@@ -153,7 +152,6 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {SymbolNode}
        */
       // @ts-expect-error - method overrides property from Node base class
       clone(): SymbolNode {
@@ -162,8 +160,8 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param _options
+       * @returns str
        * @override
        */
       _toString(_options?: StringOptions): string {
@@ -172,8 +170,8 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param _options
+       * @returns str
        * @override
        */
       _toHTML(_options?: StringOptions): string {
@@ -198,7 +196,6 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -209,19 +206,17 @@ export const createSymbolNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate a SymbolNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "SymbolNode", name: "x"}`,
        *                       where mathjs is optional
-       * @returns {SymbolNode}
        */
       static fromJSON(json: { name: string }): SymbolNode {
         return new SymbolNode(json.name);
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        * @override
        */
       _toMathML(): string {

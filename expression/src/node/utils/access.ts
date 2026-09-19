@@ -2,6 +2,13 @@ import { errorTransform } from '../../transform/utils/errorTransform.js';
 import { getSafeProperty } from '../../utils/customs.js';
 import { getStringSubset } from './stringSubset.js';
 
+/**
+ * Make the `access` function that the expression nodes use to read a part of a value.
+ * The `subset` dependency reads a part of an Array.
+ * The `access` function reads a Matrix subset, a string subset or an object property.
+ * It throws a TypeError for a numeric index on an object and for other value types.
+ * Before it throws an IndexError again, it changes the indices to one-based.
+ */
 export function accessFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
   /**
    * Retrieve part of an object:

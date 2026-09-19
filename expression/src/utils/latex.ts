@@ -332,12 +332,24 @@ const latexUnits = {
   deg: '^\\circ',
 };
 
+/**
+ * Escape the LaTeX special characters in a string.
+ * This function calls the `escape-latex` package with `preserveFormatting: true`.
+ * @param string - The text to escape.
+ */
 export function escapeLatex(string: string) {
   return escapeLatexLib(string, { preserveFormatting: true });
 }
 
 // @param {string} name
 // @param {boolean} isUnit
+/**
+ * Convert a name to its LaTeX form.
+ * If `isUnit` is truthy, a known unit (only `deg`) gets its symbol, and other names get `\mathrm{...}`.
+ * If not, a known symbol name gets its LaTeX symbol, and other names are escaped.
+ * @param name - The symbol or unit name.
+ * @param isUnit - Optional. Set to a truthy value for a unit name. Default is `false`.
+ */
 export function toSymbol(name: string, isUnit?: unknown) {
   isUnit = typeof isUnit === 'undefined' ? false : isUnit;
   if (isUnit) {

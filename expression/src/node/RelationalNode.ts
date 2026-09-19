@@ -54,9 +54,9 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       /**
        * A node representing a chained conditional expression, such as 'x > y > z'
        *
-       * @param {String[]} conditionals
+       * @param conditionals
        *     An array of conditional operators used to compare the parameters
-       * @param {Node[]} params
+       * @param params
        *     The parameters that will be compared
        *
        * @constructor RelationalNode
@@ -92,13 +92,13 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -130,7 +130,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: RelationalNode) => void): void {
         this.params.forEach((n: Node, i: number) => callback(n, 'params[' + i + ']', this), this);
@@ -139,8 +139,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       /**
        * Create a new RelationalNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {RelationalNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: Node, path: string, parent: RelationalNode) => Node): RelationalNode {
         return new RelationalNode(
@@ -154,7 +154,6 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {RelationalNode}
        */
       clone(): RelationalNode {
         return new RelationalNode(this.conditionals, this.params);
@@ -162,8 +161,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation.
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -200,7 +199,6 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -212,11 +210,10 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate a RelationalNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "RelationalNode", "conditionals": ..., "params": ...}`,
        *     where mathjs is optional
-       * @returns {RelationalNode}
        */
       static fromJSON(json: { conditionals: string[]; params: Node[] }): RelationalNode {
         return new RelationalNode(json.conditionals, json.params);
@@ -224,8 +221,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -267,9 +264,8 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        */
       _toMathML(): string {
         const params = this.params;

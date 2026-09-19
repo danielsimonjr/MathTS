@@ -312,9 +312,8 @@ export const properties: OperatorGroup[] = [
 /**
  * Returns the first non-parenthesis internal node, but only
  * when the 'parenthesis' option is unset or auto.
- * @param {Node} _node
- * @param {string} parenthesis
- * @return {Node}
+ * @param _node
+ * @param parenthesis
  */
 function unwrapParen(_node: PrecedenceNode, parenthesis: string | undefined): PrecedenceNode {
   if (!parenthesis || parenthesis !== 'auto') return _node;
@@ -330,11 +329,10 @@ function unwrapParen(_node: PrecedenceNode, parenthesis: string | undefined): Pr
  * Higher number for higher precedence, starting with 0.
  * Returns null if the precedence is undefined.
  *
- * @param {Node} _node
- * @param {string} parenthesis
- * @param {string} implicit
- * @param {Node} parent (for determining context for implicit multiplication)
- * @return {number | null}
+ * @param _node
+ * @param parenthesis
+ * @param implicit
+ * @param parent - (for determining context for implicit multiplication)
  */
 export function getPrecedence(
   _node: unknown,
@@ -388,10 +386,9 @@ export function getPrecedence(
  * Returns a string containing 'left' or 'right' or null if
  * the associativity is not defined.
  *
- * @param {Node} _node
- * @param {string} parenthesis
- * @return {string|null}
- * @throws {Error}
+ * @param _node
+ * @param parenthesis
+ * @throws Error
  */
 export function getAssociativity(
   _node: unknown,
@@ -431,10 +428,9 @@ export function getAssociativity(
  * Check if an operator is associative with another operator.
  * Returns either true or false or null if not defined.
  *
- * @param {Node} nodeA
- * @param {Node} nodeB
- * @param {string} parenthesis
- * @return {boolean | null}
+ * @param nodeA
+ * @param nodeB
+ * @param parenthesis
  */
 export function isAssociativeWith(
   nodeA: unknown,
@@ -474,8 +470,8 @@ export function isAssociativeWith(
  * input is not the name of a function associated with an
  * operator.
  *
- * @param {string} Function name
- * @return {string | null} Associated operator symbol, if any
+ * @param fn - The function name.
+ * @returns Associated operator symbol, if any
  */
 export function getOperator(fn: string): string | null {
   const identifier = 'OperatorNode:' + fn;

@@ -17,7 +17,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @constructor ArrayNode
        * @extends {Node}
        * Holds an 1-dimensional array with items
-       * @param {Node[]} [items]   1 dimensional array with items
+       * @param items - Optional. 1 dimensional array with items
        */
       constructor(items?: MathNode[]) {
         super();
@@ -40,13 +40,13 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -86,7 +86,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         for (let i = 0; i < this.items.length; i++) {
@@ -98,8 +98,8 @@ export const createArrayNode = /* #__PURE__ */ factory(
       /**
        * Create a new ArrayNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {ArrayNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ArrayNode {
         const items: MathNode[] = [];
@@ -111,7 +111,6 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {ArrayNode}
        */
       clone(): ArrayNode {
         return new ArrayNode(this.items.slice(0));
@@ -119,8 +118,8 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toString(options?: StringOptions): string {
@@ -132,7 +131,6 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; items: MathNode[] } {
         return {
@@ -143,10 +141,9 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an ArrayNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "ArrayNode", items: [...]}`,
        *                       where mathjs is optional
-       * @returns {ArrayNode}
        */
       static fromJSON(json: { items: MathNode[] }): ArrayNode {
         return new ArrayNode(json.items);
@@ -154,8 +151,8 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toHTML(options?: StringOptions): string {
@@ -171,8 +168,8 @@ export const createArrayNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         function itemsToTex(items: MathNode[], nested: boolean): string {
