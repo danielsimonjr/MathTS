@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### test(ci): run the full suite and a dist smoke test on real Node in the test matrix
+
+- Measured on this PR before the fix (CI run 35434515205): in both `Test (20.x)` and
+  `Test (22.x)`, `tests/integration/runtime-probe.test.ts` printed
+  `process.version=v26.3.0 typeof Bun=object`. Every test ran on Bun 1.4.2, not on the matrix
+  Node: 22 `bun test` runs (5562 tests), `functions` vitest (4968) and root vitest (122).
+- New `tools/test/run-vitest-node.mjs`. It runs `vitest run` in every package that has a
+  `vitest.config.ts`, then the root config, then the `assembly` `node` test scripts. It spawns
+  each child with `process.execPath` and refuses to run under Bun.
+- New `tools/test/smoke-dist-node.mjs`. It imports each of the 24 published packages by name, so
+  Node resolves the `exports` entry of the built dist, and calls one representative function.
+- `.github/workflows/ci.yml`: the `Test` matrix legs run both scripts with `node` after
+  `bun run test`. The stale comments that said vitest still runs under Node are corrected, in
+  `ci.yml` and in `bunfig.toml`.
+- `plot`: vitest cannot read the Bun snapshot file (`// Bun Snapshot v1`). `plot/vitest.config.ts`
+  now sets `resolveSnapshotPath` to `tests/__snapshots__/vitest/`, which holds the vitest copy of
+  the 15 golden SVG snapshots. New `plot/tests/snapshot-parity.test.ts` fails when the Bun copy
+  and the vitest copy hold different values (it runs under both runners).
+- No package is excluded from the Node run, and no test is skipped or weakened.
+- `docs/roadmap/BUN_MIGRATION.md` describes the two Node scripts.
+
 ### test(ci): runtime probe for the Node test matrix
 
 - New `tests/integration/runtime-probe.test.ts` prints `process.version` and `typeof Bun` at run

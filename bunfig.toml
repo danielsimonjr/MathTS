@@ -1,6 +1,8 @@
 # Bun configuration for the MathTS monorepo.
-# Package manager + TypeScript script runner; Node remains the consumer runtime
-# and the shebang target for vitest / AssemblyScript tooling. See
+# Package manager, TypeScript script runner and (Phase 3) the runtime of every
+# `bun run` script. Node remains the consumer runtime: CI runs the test suite and a
+# dist smoke test on real Node via tools/test/run-vitest-node.mjs and
+# tools/test/smoke-dist-node.mjs. See
 # docs/roadmap/BUN_MIGRATION.md for the phased cutover plan.
 
 [install]

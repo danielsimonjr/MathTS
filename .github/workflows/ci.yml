@@ -38,9 +38,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # Bun is the monorepo package manager (see packageManager + bun.lock).
-      # Node stays installed because vitest / AssemblyScript / several tools
-      # still run under a Node shebang (bunfig [run].bun = false).
+      # Bun is the monorepo package manager and, with bunfig [run].bun = true, the
+      # runtime of every `bun run` script (vitest, asc, tsc, tsup, turbo included).
+      # Node stays installed because the Test matrix runs the suite and a dist smoke
+      # test on real Node (see the `test` job).
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -94,8 +95,10 @@ jobs:
 
     strategy:
       # Independent legs so one Node version failing doesn't cancel the others.
-      # Vitest still runs under Node (shebang); the matrix keeps validating the
-      # published packages against supported Node engines.
+      # `bun run test` runs every package script on BUN ([run] bun = true), so it
+      # proves nothing about Node. Each leg therefore ALSO runs the full suite under
+      # vitest on the matrix Node, plus a smoke test of the built dist, by calling
+      # `node` directly (a `bun run` script would put them back on Bun).
       fail-fast: false
       matrix:
         # Node 18 reached EOL 2026-04 and the toolchain uses Node 20+ APIs
@@ -135,8 +138,18 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Test
+      - name: Test (Bun runtime)
         run: bun run test
+
+      # Every package's tests under vitest on the matrix Node, plus the root suites
+      # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
+      - name: Test on Node ${{ matrix.node-version }} (vitest)
+        run: node tools/test/run-vitest-node.mjs
+
+      # Import each published package by name (Node resolves its `exports`) and call
+      # one representative function from the built dist.
+      - name: Smoke test dist on Node ${{ matrix.node-version }}
+        run: node tools/test/smoke-dist-node.mjs
 
   coverage:
     name: Coverage

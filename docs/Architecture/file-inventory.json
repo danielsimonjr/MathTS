@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1858,
+  "totalFiles": 1859,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 624,
+    "test": 625,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1175,
-    "tests": 624,
+    "tests": 625,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -37,7 +37,7 @@
     "@danielsimonjr/mathts-workerpool": 10,
     "@danielsimonjr/mathts-parallel": 38,
     "@danielsimonjr/mathts-parser": 3,
-    "@danielsimonjr/mathts-plot": 44,
+    "@danielsimonjr/mathts-plot": 45,
     "@danielsimonjr/mathts-signal": 3,
     "@danielsimonjr/mathts-statistics": 3,
     "@danielsimonjr/mathts-tensor": 52,
@@ -11842,6 +11842,13 @@
       "loc": 63
     },
     {
+      "file": "plot/tests/snapshot-parity.test.ts",
+      "package": "@danielsimonjr/mathts-plot",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
+    },
+    {
       "file": "plot/tests/surface-and-index.test.ts",
       "package": "@danielsimonjr/mathts-plot",
       "area": "tests",
@@ -11888,7 +11895,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "config",
       "disposition": "config",
-      "loc": 31
+      "loc": 37
     },
     {
       "file": "signal/src/index.ts",

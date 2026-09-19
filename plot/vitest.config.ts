@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { readFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Mirror the build-time `define` from tsup.config.ts so tests that import the
@@ -26,5 +27,10 @@ export default defineConfig({
     // A genuine hang still fails, at 30s instead of 5s.
     testTimeout: 30_000,
     hookTimeout: 30_000,
+    // `bun test` owns `tests/__snapshots__/*.snap` (Bun snapshot format). Vitest cannot read
+    // that header, so the vitest run on Node keeps its own copy under `__snapshots__/vitest/`.
+    // `tests/snapshot-parity.test.ts` asserts that both copies hold identical values.
+    resolveSnapshotPath: (testPath, ext) =>
+      join(dirname(testPath), '__snapshots__', 'vitest', basename(testPath) + ext),
   },
 });

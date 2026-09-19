@@ -70,6 +70,19 @@ bun run docs:deps           # runs the CDG TypeScript entry via Bun
 including `node …` calls and node-shebang bins (vitest, `asc`, tsc, tsup, turbo). Consumers of published `@danielsimonjr/mathts-*`
 packages do **not** need Bun.
 
+Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (20.x)` and
+`Test (22.x)` legs therefore also run two scripts with `node` directly (never through `bun run`,
+which would put them back on Bun):
+
+- `node tools/test/run-vitest-node.mjs` runs every package's suite under vitest on the matrix
+  Node, then the root suites and the `assembly` Node test scripts. Each package's
+  `vitest.config.ts` supplies the vitest form of its Bun-only setup: `define` for
+  `__PKG_VERSION__` (Bun uses a `[test] preload`), and in `plot` a separate snapshot path
+  (`tests/__snapshots__/vitest/`), because vitest cannot read the Bun snapshot format.
+  `plot/tests/snapshot-parity.test.ts` fails when the two snapshot copies differ.
+- `node tools/test/smoke-dist-node.mjs` imports every published package by name from its built
+  `dist` and calls one representative function.
+
 ## Known Bun-specific notes
 
 1. **Git dependency integrity.** npm's `package-lock.json` stores integrity
