@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-09-19",
-    "totalFiles": 1174,
+    "totalFiles": 1175,
     "totalModules": 83,
-    "totalExports": 5838
+    "totalExports": 5839
   },
   "entryPoints": [
     {
@@ -229,6 +229,15 @@
       }
     },
     "packages/workerpool": {
+      "packages/workerpool/src/bun-worker-bridge.ts": {
+        "description": "Register workerpool worker methods so that workerpool uses its Node branch",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["registerWorkerMethods"],
+        "functions": ["registerWorkerMethods"]
+      },
       "packages/workerpool/src/fft-core.ts": {
         "description": "Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.",
         "externalDependencies": [],
@@ -317,6 +326,10 @@
           {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./bun-worker-bridge.js",
+            "imports": ["registerWorkerMethods"]
           }
         ],
         "workspaceDependencies": [],
@@ -38577,6 +38590,7 @@
       {
         "name": "Packages/workerpool",
         "files": [
+          "packages/workerpool/src/bun-worker-bridge.ts",
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
           "packages/workerpool/src/worker.ts",
@@ -40099,13 +40113,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1174,
+    "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 196130,
-    "totalExports": 5838,
+    "totalLinesOfCode": 196190,
+    "totalExports": 5839,
     "totalClasses": 55,
     "totalInterfaces": 508,
-    "totalFunctions": 1882,
+    "totalFunctions": 1883,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1598,

@@ -29,11 +29,12 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >         (`addConversion` run twice) failed without it. `workbook` has a `bunfig.toml` `[test] preload`
 >         that supplies `__PKG_VERSION__` (Bun reads `bunfig.toml` from the working directory only,
 >         not the repo root).
->   - [ ] **2c follow-up — `packages/workerpool` stays on vitest.** Its suites dispatch to real
+>   - [x] **2c follow-up — `packages/workerpool` stays on vitest.** Its suites dispatch to real
 >         workers, and the `workerpool` library never answers under Bun 1.4.2 (`workerType` `thread`
 >         and `process` both hang; the same probe passes under Node). 20 tests timed out at 30 s each
 >         and none passed. Revisit when Bun's `worker_threads` / `child_process` fixes land, or when
 >         `workerpool` is replaced.
+>         **Closed by `fix/bun-workers`:** root cause found (see the 2d follow-up); 87 -> 87 under `bun test`.
 >   - [x] **2d — the packages that use `vi.*` mocks** (branch `chore/bun-phase-2d`): `core` and `gpu`
 >         now run `bun test --isolate --timeout 30000`. Same counts (core 811 -> 811, gpu 26 -> 26).
 >         `core` has a `bunfig.toml` `[test] preload` for `__PKG_VERSION__`. `gpu` replaces
@@ -41,10 +42,20 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >         vitest's semantics. `core` wraps two `Fraction` values in `Number()`, because Bun's
 >         `toBeCloseTo` rejects a non-number and vitest coerces it.
 
-- [ ] **2d follow-up — `functions`, `matrix` and `parallel` stay on vitest.** Their suites dispatch
+- [x] **2d follow-up — `functions`, `matrix` and `parallel` stay on vitest.** Their suites dispatch
       to real workers, which never answer under Bun 1.4.2 (as for `workerpool`): `functions` 16
       worker tests time out, `matrix` `ParallelBackend` times out and the module mock of
       `@danielsimonjr/mathts-parallel` does not intercept, `parallel` `ComputePool` hangs.
+      **Closed by `fix/bun-workers`:** the workers never received a task. Bun exposes the Web Worker
+      globals in a `worker_threads` worker, so workerpool's worker took its browser branch, and Bun
+      delivers `worker.postMessage` only to `parentPort`. `packages/workerpool/src/bun-worker-bridge.ts`
+      makes workerpool take its Node branch. `matrix`, `parallel` and `workerpool` now run `bun test`
+      with the same counts (matrix 915 + 4 skip, parallel 435, workerpool 87); see CHANGELOG.
+- [ ] **2d follow-up — `functions` stays on vitest: Bun 1.4.2 segfaults.** Under
+      `bun test --isolate --timeout 30000` the counts are identical (4874 pass + 94 skip, 290 files),
+      but about 1 full run in 5 ends in `panic(main thread): Segmentation fault at address 0x8`. It
+      also crashes in runs that spawn no worker, and with `--parallel`. Switch the `test` script when
+      a Bun release fixes it (re-measure: 10 clean full runs).
 - [ ] **2e — `plot`** (`toMatchSnapshot` in `golden-svg.test.ts`: Bun writes its own snapshot
 
 >         format, so regenerate and review the goldens) and the **root aggregate**, coverage

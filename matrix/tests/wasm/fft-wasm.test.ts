@@ -345,13 +345,13 @@ describe('fft (wasm backend)', () => {
     await wasmLoader.load();
   });
 
-  it.runIf(wasmAvailable)('loads the AssemblyScript binary', () => {
+  it.skipIf(!wasmAvailable)('loads the AssemblyScript binary', () => {
     const mod = wasmLoader.getModule();
     expect(mod).not.toBeNull();
     expect(typeof mod!.fft).toBe('function');
   });
 
-  it.runIf(wasmAvailable)('fft + ifft round-trip with WASM backend', () => {
+  it.skipIf(!wasmAvailable)('fft + ifft round-trip with WASM backend', () => {
     const n = 64;
     const real = new Float64Array(n);
     const imag = new Float64Array(n);
@@ -370,7 +370,7 @@ describe('fft (wasm backend)', () => {
     }
   });
 
-  it.runIf(wasmAvailable)('wasm-backend fft matches js-backend fft for the same input', () => {
+  it.skipIf(!wasmAvailable)('wasm-backend fft matches js-backend fft for the same input', () => {
     const n = 32;
     const real = new Float64Array(n);
     const imag = new Float64Array(n);

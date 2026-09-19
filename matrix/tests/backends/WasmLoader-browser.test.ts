@@ -12,6 +12,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+import { stubGlobal, unstubAllGlobals } from '../helpers/stub-global.js';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -40,7 +41,7 @@ function installFetch() {
       arrayBuffer: async () => wasmBytes.buffer.slice(0),
     } as unknown as Response;
   });
-  vi.stubGlobal('fetch', fetchMock);
+  stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
 
@@ -60,12 +61,12 @@ describe('WasmLoader — browser load path (mocked fetch)', () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    unstubAllGlobals();
     vi.restoreAllMocks();
     WasmLoader.getInstance().reset();
   });
 
-  it.runIf(asAvailable)(
+  it.skipIf(!asAvailable)(
     'verifies + compiles via fetch when a manifest is present (no streaming)',
     async () => {
       const fetchMock = installFetch();
@@ -81,7 +82,7 @@ describe('WasmLoader — browser load path (mocked fetch)', () => {
     }
   );
 
-  it.runIf(asAvailable)('precompile() takes the browser arm and caches the module', async () => {
+  it.skipIf(!asAvailable)('precompile() takes the browser arm and caches the module', async () => {
     installFetch();
     const loader = browserLoader();
     await loader.precompile(asWasmPath);
@@ -91,7 +92,7 @@ describe('WasmLoader — browser load path (mocked fetch)', () => {
     await expect(loader.precompile(asWasmPath)).resolves.toBeUndefined();
   });
 
-  it.runIf(asAvailable)(
+  it.skipIf(!asAvailable)(
     'uses the streaming path when no manifest is present and streaming is available',
     async () => {
       // Copy the wasm to a temp dir with NO sibling manifest so loadWasmManifest
@@ -106,7 +107,7 @@ describe('WasmLoader — browser load path (mocked fetch)', () => {
           arrayBuffer: async () => wasmBytes.buffer.slice(0),
         } as unknown as Response;
       });
-      vi.stubGlobal('fetch', fetchMock);
+      stubGlobal('fetch', fetchMock);
       const streamingMock = vi.fn(async () => {
         const module = await WebAssembly.compile(wasmBytes);
         const instance = await WebAssembly.instantiate(module, {

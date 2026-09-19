@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(workerpool): real workers answer under Bun; matrix, parallel, workerpool move to bun test
+
+Root cause of the Phase 2c/2d holdouts. Bun exposes the Web Worker globals (`self`,
+`postMessage`, `addEventListener`) inside a `node:worker_threads` worker. workerpool's worker
+runtime tests for those globals first, so under Bun it took its BROWSER branch and listened with
+the global `addEventListener('message')`. Bun delivers a parent's `worker.postMessage()` only to
+`parentPort`, so the worker sent `ready` and never received a task: every dispatch timed out. The
+browser branch also has no `worker.exit`, so a graceful `terminate()` waited the full
+`workerTerminateTimeout` (60 s). This was not specific to `bun test`: `bun run` hung the same way.
+
+- `packages/workerpool/src/bun-worker-bridge.ts` (new): `registerWorkerMethods()` hides
+  `addEventListener` only while workerpool's `worker(methods)` call picks its branch, and only in
+  a Bun `worker_threads` worker. workerpool then uses its Node path (`parentPort`,
+  `process.exit`). No effect under Node or in a browser.
+- `matrix`, `parallel` and `packages/workerpool` now run
+  `"test": "bun test --isolate --timeout 30000"`. Counts are identical per file: matrix 915 pass
+  + 4 skip (51 files), parallel 435 (23 files), workerpool 87 (4 files). No crash in 12 runs each.
+- `functions` passes under `bun test --isolate --timeout 30000` with identical counts (4874 pass +
+  94 skip, 290 files; Bun also lists 16 skipped "(unnamed)" entries, which are the
+  `beforeAll`/`afterAll` hooks of skipped `describe` blocks), but it STAYS on vitest: Bun 1.4.2
+  segfaults (`panic(main thread): Segmentation fault at address 0x8`) in about 1 of 5 full runs.
+  The crash also occurs in runs that spawn no worker, and `--parallel` crashes too, so it is a Bun
+  defect and not this fix. The test changes below make `functions` ready to switch.
+- Test changes for Bun 1.4.2 runner differences; none weakens an assertion:
+  - `functions/bunfig.toml`: `pathIgnorePatterns` for `tests/diff-*.test.mjs`. These are node
+    scripts that call `process.exit()`; `bun test` collected them and ended the run early with
+    exit 0. vitest never collected them.
+  - `matrix`: `it.runIf(c)` -> `it.skipIf(!c)` (39 sites). Bun has no `runIf`; the throw at load
+    dropped the rest of each file, which was the 37-test gap (882 vs 919).
+  - `matrix/tests/parallel-matrix.test.ts`: import the module under test after `vi.mock`. Bun does
+    not hoist the mock, and `src/parallel-matrix.ts` copies `computePool` into a const at load.
+  - `matrix`: `vi.stubGlobal` / `vi.unstubAllGlobals` -> the `gpu` helper (copied to
+    `matrix/tests/helpers/stub-global.ts`).
+  - `matrix/tests/wasm/loading.test.ts`: `.resolves.not.toThrow()` -> `.resolves.toBeUndefined()`
+    (`initialize()` is `Promise<void>`; Bun treats the resolved value as thrown).
+  - `functions`: the two closure-capture tests use `Number('3')` / `Number('2')`, because Bun's
+    runtime transpiler inlines a `const` literal into the closure source; one also invokes its async
+    wrapper because Bun's `.rejects` needs a promise.
+  - `parallel/tests/WorkerPool.test.ts`: mark the task promises handled before `terminate()` rejects
+    them; Bun reports the rejection as unhandled, Node does not. The three assertions are unchanged.
+
 ### chore(test): Bun migration Phase 2d - vi.* packages
 
 Third package batch of the vitest -> `bun test` phase (see `TODO.md`).

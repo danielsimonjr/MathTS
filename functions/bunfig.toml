@@ -1,0 +1,5 @@
+# `bun test` reads bunfig.toml from the working directory only (not the repo root).
+[test]
+# tests/diff-*.test.mjs are standalone node scripts (run by `test:diff`) that
+# call process.exit(); vitest never collected them (include: tests/**/*.test.ts).
+pathIgnorePatterns = ["tests/diff-*.test.mjs"]
