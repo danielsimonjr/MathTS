@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   were already correct. `mapIterator` is now a generator, so the result has `next()`, a
   `[Symbol.iterator]()` that returns itself, and `%IteratorPrototype%` members, like a native Map
   iterator. Order and values are unchanged. New tests: `core/tests/map-iterators.test.ts` (34).
+  Architecture numbers refreshed for the new test file (`totalTypeScriptFiles` 1916,
+  `totalLinesOfCode` 337014); `repo_map.py check` and `code_docs.py check core/src` pass.
 
 ### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
 
