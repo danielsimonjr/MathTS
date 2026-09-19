@@ -5,8 +5,8 @@
  */
 
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
-import { VERSION, SCHEMA_VERSION, COMMAND_NAMES } from './contract';
-import { SUPPORTED_CELL_TYPES } from './parser';
+import { VERSION, SCHEMA_VERSION, COMMAND_NAMES } from './contract.js';
+import { SUPPORTED_CELL_TYPES } from './parser.js';
 
 let functionsCache: { functions: string[]; constants: string[] } | undefined;
 

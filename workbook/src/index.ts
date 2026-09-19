@@ -15,10 +15,10 @@ export type {
   WorkbookEvent,
   CellResult,
   RunResult,
-} from './types';
+} from './types.js';
 
 // Parser
-export { parseWorkbook, serializeWorkbook, stripOutputs, detectCellType } from './parser';
+export { parseWorkbook, serializeWorkbook, stripOutputs, detectCellType } from './parser.js';
 
 // Dependency graph
 export {
@@ -28,33 +28,33 @@ export {
   detectCycles,
   getAncestors,
   toMermaid,
-} from './graph';
+} from './graph.js';
 
 // Executor
-export { WorkbookExecutor, createExecutor } from './executor';
+export { WorkbookExecutor, createExecutor } from './executor.js';
 
 // Result formatting
-export { formatResult } from './formatter';
+export { formatResult } from './formatter.js';
 
 // Cell mutation (pure, immutable)
-export { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit';
-export type { CellPosition, RemoveResult } from './edit';
+export { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit.js';
+export type { CellPosition, RemoveResult } from './edit.js';
 
 // Machine contract
-export { SCHEMA_VERSION, VERSION } from './contract';
+export { SCHEMA_VERSION, VERSION } from './contract.js';
 
 // Serve session + JSON-RPC router
-export { Session } from './session';
-export { handleRequest } from './rpc';
+export { Session } from './session.js';
+export { handleRequest } from './rpc.js';
 
 // SVG math typesetting (MathML → SVG)
-export { mathMLToSVG } from './svg-math';
-export type { MathSvgOptions } from './svg-math';
+export { mathMLToSVG } from './svg-math.js';
+export type { MathSvgOptions } from './svg-math.js';
 
 // Kill-able worker-thread execution with a hard timeout
-export { runWorkbookWithTimeout, WorkbookTimeoutError } from './timeout-runner';
+export { runWorkbookWithTimeout, WorkbookTimeoutError } from './timeout-runner.js';
 export type {
   RunWorkbookWithTimeoutOptions,
   SerializedCellResult,
   SerializedRunResult,
-} from './timeout-runner';
+} from './timeout-runner.js';

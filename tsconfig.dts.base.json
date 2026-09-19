@@ -1,0 +1,12 @@
+{
+  "//": "Declaration-emit settings shared by every package's tsconfig.dts.json.",
+  "//module": "The published .d.ts must be consumable under moduleResolution node16/nodenext. tsc copies relative specifiers into the .d.ts verbatim and synthesises them for inferred types, so the ONLY way to make the emitted specifiers carry the explicit .js extension NodeNext requires is to emit under nodenext. It also turns an extensionless relative import in src into a build error (TS2834) instead of a silent consumer break.",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "paths": {}
+  }
+}

@@ -3,7 +3,7 @@
  * @module @danielsimonjr/mathts-core/types/bignumber
  */
 
-import type { Scalar, MathTSValue } from './interfaces';
+import type { Scalar, MathTSValue } from './interfaces.js';
 
 /**
  * Check if a value is a BigNumber

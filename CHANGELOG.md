@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(build): the published .d.ts carries explicit .js extensions (NodeNext consumers)
+
+- Symptom: a consumer with `"moduleResolution": "node16"` or `"nodenext"` got TS2834 from the
+  packed declarations. Measured on `main` by
+  `node tools/test/consumer-typecheck.mjs --module-resolution=NodeNext`: **60 errors** -- 53
+  TS2834 (tensor 36, workbook 14, core 3) and 7 TS2709 in functions.
+- Cause, at the emit. Each package emits its declarations with
+  `tsc -p tsconfig.dts.json` (for example `tensor/package.json` line 24). That config extended
+  only `tensor/tsconfig.json` -> `tsconfig.base.json`, whose `moduleResolution` is `bundler`
+  (`tsconfig.base.json` line 5). `tsc` copies a relative specifier into the `.d.ts` **verbatim**
+  and **synthesises** one for an inferred type, and under `bundler` neither form needs an
+  extension. So the emit mode, not a post-process step, decides whether the extension is there.
+- Fix: new `tsconfig.dts.base.json` sets `module` and `moduleResolution` to `nodenext` for
+  declaration emit, and every package's `tsconfig.dts.json` extends it. An extensionless
+  relative import in `src` is now a build error (TS2834) instead of a silent consumer break.
+- The 98 extensionless relative specifiers in `core`, `tensor` and `workbook` sources now end in
+  `.js`.
+- `functions` imports `Decimal` and `Complex` as **named** exports of `decimal.js` and
+  `complex.js`. NodeNext resolves both packages as CommonJS, where the default export is a
+  namespace and not usable as a type (TS2709). `functions/src/types.ts` line 20 imports
+  `./type/local/Decimal.js`, not `.ts`.
+- Test: CI runs the consumer type check a second time with
+  `--module-resolution=NodeNext`. Red on `main` (60 errors), green here (0 errors).
+- Extensionless relative specifiers in the emitted `.d.ts`, all 24 packages: **53 before, 0
+  after**.
+
 ### ci(release): the version PR refreshes bun.lock
 
 - `changeset version` bumps each released `package.json` but does not touch `bun.lock`, so after every release the workspace versions in `bun.lock` were one release behind (plot and workbook in #313, workerpool after #314).

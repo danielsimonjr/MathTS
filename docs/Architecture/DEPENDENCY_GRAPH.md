@@ -837,9 +837,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports               | Type               |
-| -------------- | --------------------- | ------------------ |
-| `./interfaces` | `Scalar, MathTSValue` | Import (type-only) |
+| File              | Imports               | Type               |
+| ----------------- | --------------------- | ------------------ |
+| `./interfaces.js` | `Scalar, MathTSValue` | Import (type-only) |
 
 **Exports:**
 
@@ -855,9 +855,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports            | Type               |
-| -------------- | ------------------ | ------------------ |
-| `./interfaces` | `Scalar, IComplex` | Import (type-only) |
+| File              | Imports            | Type               |
+| ----------------- | ------------------ | ------------------ |
+| `./interfaces.js` | `Scalar, IComplex` | Import (type-only) |
 
 **Exports:**
 
@@ -896,9 +896,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports             | Type               |
-| -------------- | ------------------- | ------------------ |
-| `./interfaces` | `Scalar, IFraction` | Import (type-only) |
+| File              | Imports             | Type               |
+| ----------------- | ------------------- | ------------------ |
+| `./interfaces.js` | `Scalar, IFraction` | Import (type-only) |
 
 **Exports:**
 
@@ -1917,44 +1917,44 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                                      | Type                  |
-| -------------------------- | -------------------------------------------- | --------------------- |
-| `./Tensor`                 | `Tensor`                                     | Re-export             |
-| `./named-index`            | `Index, idx`                                 | Re-export             |
-| `./operations/svd`         | `tensorSvd, tensorSvdWasm`                   | Re-export             |
-| `./operations/random`      | `randomTensor`                               | Re-export             |
-| `./contraction-sequence`   | `contractNetwork`                            | Re-export             |
-| `./operations/qr`          | `tensorQr`                                   | Re-export             |
-| `./operations/lu`          | `tensorLU`                                   | Re-export             |
-| `./operations/cholesky`    | `tensorCholesky`                             | Re-export             |
-| `./operations/eig`         | `tensorEig, tensorEigWasm`                   | Re-export             |
-| `./operations/pinv`        | `tensorPinv`                                 | Re-export             |
-| `./operations/solve`       | `tensorSolve`                                | Re-export             |
-| `./operations/kron`        | `tensorKron`                                 | Re-export             |
-| `./operations/slice`       | `slice`                                      | Re-export             |
-| `./operations/gather`      | `gather`                                     | Re-export             |
-| `./operations/stack`       | `stack`                                      | Re-export             |
-| `./operations/concatenate` | `concatenate`                                | Re-export             |
-| `./operations/scatter`     | `scatter`                                    | Re-export             |
-| `./operations/pad`         | `pad`                                        | Re-export             |
-| `./operations/roll`        | `roll`                                       | Re-export             |
-| `./operations/flip`        | `flip`                                       | Re-export             |
-| `./Tensor`                 | `NestedArray, EinsumSpec`                    | Re-export (type-only) |
-| `./named-index`            | `IndexOpts`                                  | Re-export (type-only) |
-| `./operations/svd`         | `TensorSvdOpts, TensorSvdResult`             | Re-export (type-only) |
-| `./operations/random`      | `RandomTensorOpts`                           | Re-export (type-only) |
-| `./contraction-sequence`   | `ContractNetworkOpts, ContractNetworkResult` | Re-export (type-only) |
-| `./operations/qr`          | `TensorQrOpts, TensorQrResult`               | Re-export (type-only) |
-| `./operations/lu`          | `TensorLUOpts, TensorLUResult`               | Re-export (type-only) |
-| `./operations/cholesky`    | `TensorCholeskyOpts, TensorCholeskyResult`   | Re-export (type-only) |
-| `./operations/eig`         | `TensorEigOpts, TensorEigResult`             | Re-export (type-only) |
-| `./operations/pinv`        | `TensorPinvOpts`                             | Re-export (type-only) |
-| `./operations/solve`       | `TensorSolveOpts, TensorSolveResult`         | Re-export (type-only) |
-| `./operations/kron`        | `TensorKronOpts`                             | Re-export (type-only) |
-| `./operations/slice`       | `SliceRange`                                 | Re-export (type-only) |
-| `./operations/stack`       | `StackOpts`                                  | Re-export (type-only) |
-| `./operations/scatter`     | `ScatterOpts`                                | Re-export (type-only) |
-| `./operations/pad`         | `PadOptions`                                 | Re-export (type-only) |
+| File                          | Imports                                      | Type                  |
+| ----------------------------- | -------------------------------------------- | --------------------- |
+| `./Tensor.js`                 | `Tensor`                                     | Re-export             |
+| `./named-index.js`            | `Index, idx`                                 | Re-export             |
+| `./operations/svd.js`         | `tensorSvd, tensorSvdWasm`                   | Re-export             |
+| `./operations/random.js`      | `randomTensor`                               | Re-export             |
+| `./contraction-sequence.js`   | `contractNetwork`                            | Re-export             |
+| `./operations/qr.js`          | `tensorQr`                                   | Re-export             |
+| `./operations/lu.js`          | `tensorLU`                                   | Re-export             |
+| `./operations/cholesky.js`    | `tensorCholesky`                             | Re-export             |
+| `./operations/eig.js`         | `tensorEig, tensorEigWasm`                   | Re-export             |
+| `./operations/pinv.js`        | `tensorPinv`                                 | Re-export             |
+| `./operations/solve.js`       | `tensorSolve`                                | Re-export             |
+| `./operations/kron.js`        | `tensorKron`                                 | Re-export             |
+| `./operations/slice.js`       | `slice`                                      | Re-export             |
+| `./operations/gather.js`      | `gather`                                     | Re-export             |
+| `./operations/stack.js`       | `stack`                                      | Re-export             |
+| `./operations/concatenate.js` | `concatenate`                                | Re-export             |
+| `./operations/scatter.js`     | `scatter`                                    | Re-export             |
+| `./operations/pad.js`         | `pad`                                        | Re-export             |
+| `./operations/roll.js`        | `roll`                                       | Re-export             |
+| `./operations/flip.js`        | `flip`                                       | Re-export             |
+| `./Tensor.js`                 | `NestedArray, EinsumSpec`                    | Re-export (type-only) |
+| `./named-index.js`            | `IndexOpts`                                  | Re-export (type-only) |
+| `./operations/svd.js`         | `TensorSvdOpts, TensorSvdResult`             | Re-export (type-only) |
+| `./operations/random.js`      | `RandomTensorOpts`                           | Re-export (type-only) |
+| `./contraction-sequence.js`   | `ContractNetworkOpts, ContractNetworkResult` | Re-export (type-only) |
+| `./operations/qr.js`          | `TensorQrOpts, TensorQrResult`               | Re-export (type-only) |
+| `./operations/lu.js`          | `TensorLUOpts, TensorLUResult`               | Re-export (type-only) |
+| `./operations/cholesky.js`    | `TensorCholeskyOpts, TensorCholeskyResult`   | Re-export (type-only) |
+| `./operations/eig.js`         | `TensorEigOpts, TensorEigResult`             | Re-export (type-only) |
+| `./operations/pinv.js`        | `TensorPinvOpts`                             | Re-export (type-only) |
+| `./operations/solve.js`       | `TensorSolveOpts, TensorSolveResult`         | Re-export (type-only) |
+| `./operations/kron.js`        | `TensorKronOpts`                             | Re-export (type-only) |
+| `./operations/slice.js`       | `SliceRange`                                 | Re-export (type-only) |
+| `./operations/stack.js`       | `StackOpts`                                  | Re-export (type-only) |
+| `./operations/scatter.js`     | `ScatterOpts`                                | Re-export (type-only) |
+| `./operations/pad.js`         | `PadOptions`                                 | Re-export (type-only) |
 
 **Exports:**
 
@@ -4464,7 +4464,7 @@ graph LR
 
 | File                       | Imports                                                              | Type                  |
 | -------------------------- | -------------------------------------------------------------------- | --------------------- |
-| `./type/local/Decimal.ts`  | ``                                                                   | Import (type-only)    |
+| `./type/local/Decimal.js`  | ``                                                                   | Import (type-only)    |
 | `./core/function/typed.js` | `TypedFunction`                                                      | Re-export (type-only) |
 | `./core/config.js`         | `MathJsConfig, ConfigOptions`                                        | Re-export (type-only) |
 | `./core/create.js`         | `MathJsInstance`                                                     | Re-export (type-only) |
@@ -16224,28 +16224,28 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                                            | Type               |
-| ------------------ | ------------------------------------------------------------------ | ------------------ |
-| `./fs-atomic`      | `writeFileAtomic`                                                  | Import             |
-| `./session`        | `Session`                                                          | Import             |
-| `./rpc`            | `handleRequest, JsonRpcRequest`                                    | Import             |
-| `./parser`         | `parseWorkbook, serializeWorkbook, stripOutputs, importWorkbook`   | Import             |
-| `./executor`       | `createExecutor`                                                   | Import             |
-| `./graph`          | `buildDependencyGraph, detectCycles, toMermaid, toDOT`             | Import             |
-| `./formatter`      | `formatResult`                                                     | Import             |
-| `./contract`       | `SCHEMA_VERSION, VERSION`                                          | Import             |
-| `./doc`            | `describeData`                                                     | Import             |
-| `./introspect`     | `capabilitiesInfo, listFunctions`                                  | Import             |
-| `./edit`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata` | Import             |
-| `./edit`           | `CellPosition`                                                     | Import (type-only) |
-| `./types`          | `CellResult, Workbook, ParseResult, CellType, RunResult`           | Import (type-only) |
-| `./html`           | `toHTML`                                                           | Import             |
-| `./tex`            | `toTeX`                                                            | Import             |
-| `./pdf`            | `toPDF`                                                            | Import             |
-| `./ipynb`          | `toIpynb`                                                          | Import             |
-| `./timeout-runner` | `runWorkbookWithTimeout`                                           | Import             |
-| `./html`           | `RenderDoc, RenderCell`                                            | Import (type-only) |
-| `./yaml-safe`      | `parseYamlSafe`                                                    | Import             |
+| File                  | Imports                                                            | Type               |
+| --------------------- | ------------------------------------------------------------------ | ------------------ |
+| `./fs-atomic.js`      | `writeFileAtomic`                                                  | Import             |
+| `./session.js`        | `Session`                                                          | Import             |
+| `./rpc.js`            | `handleRequest, JsonRpcRequest`                                    | Import             |
+| `./parser.js`         | `parseWorkbook, serializeWorkbook, stripOutputs, importWorkbook`   | Import             |
+| `./executor.js`       | `createExecutor`                                                   | Import             |
+| `./graph.js`          | `buildDependencyGraph, detectCycles, toMermaid, toDOT`             | Import             |
+| `./formatter.js`      | `formatResult`                                                     | Import             |
+| `./contract.js`       | `SCHEMA_VERSION, VERSION`                                          | Import             |
+| `./doc.js`            | `describeData`                                                     | Import             |
+| `./introspect.js`     | `capabilitiesInfo, listFunctions`                                  | Import             |
+| `./edit.js`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata` | Import             |
+| `./edit.js`           | `CellPosition`                                                     | Import (type-only) |
+| `./types.js`          | `CellResult, Workbook, ParseResult, CellType, RunResult`           | Import (type-only) |
+| `./html.js`           | `toHTML`                                                           | Import             |
+| `./tex.js`            | `toTeX`                                                            | Import             |
+| `./pdf.js`            | `toPDF`                                                            | Import             |
+| `./ipynb.js`          | `toIpynb`                                                          | Import             |
+| `./timeout-runner.js` | `runWorkbookWithTimeout`                                           | Import             |
+| `./html.js`           | `RenderDoc, RenderCell`                                            | Import (type-only) |
+| `./yaml-safe.js`      | `parseYamlSafe`                                                    | Import             |
 
 **Exports:**
 
@@ -16266,10 +16266,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File      | Imports                              | Type               |
-| --------- | ------------------------------------ | ------------------ |
-| `./types` | `Workbook`                           | Import (type-only) |
-| `./graph` | `buildDependencyGraph, detectCycles` | Import             |
+| File         | Imports                              | Type               |
+| ------------ | ------------------------------------ | ------------------ |
+| `./types.js` | `Workbook`                           | Import (type-only) |
+| `./graph.js` | `buildDependencyGraph, detectCycles` | Import             |
 
 **Exports:**
 
@@ -16282,11 +16282,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File       | Imports                                   | Type               |
-| ---------- | ----------------------------------------- | ------------------ |
-| `./types`  | `Workbook, Cell, CellType`                | Import (type-only) |
-| `./parser` | `isValidIdentifier, SUPPORTED_CELL_TYPES` | Import             |
-| `./graph`  | `buildDependencyGraph, detectCycles`      | Import             |
+| File          | Imports                                   | Type               |
+| ------------- | ----------------------------------------- | ------------------ |
+| `./types.js`  | `Workbook, Cell, CellType`                | Import (type-only) |
+| `./parser.js` | `isValidIdentifier, SUPPORTED_CELL_TYPES` | Import             |
+| `./graph.js`  | `buildDependencyGraph, detectCycles`      | Import             |
 
 **Exports:**
 
@@ -16305,11 +16305,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                                 | Type               |
-| ------------- | ----------------------------------------------------------------------- | ------------------ |
-| `./types`     | `Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult` | Import (type-only) |
-| `./graph`     | `buildDependencyGraph, getDependents, detectCycles, getAncestors`       | Import             |
-| `./yaml-safe` | `parseYamlSafe`                                                         | Import             |
+| File             | Imports                                                                 | Type               |
+| ---------------- | ----------------------------------------------------------------------- | ------------------ |
+| `./types.js`     | `Workbook, Cell, WorkbookEvent, DependencyGraph, CellResult, RunResult` | Import (type-only) |
+| `./graph.js`     | `buildDependencyGraph, getDependents, detectCycles, getAncestors`       | Import             |
+| `./yaml-safe.js` | `parseYamlSafe`                                                         | Import             |
 
 **Exports:**
 
@@ -16344,9 +16344,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File      | Imports                                 | Type               |
-| --------- | --------------------------------------- | ------------------ |
-| `./types` | `Cell, DependencyGraph, DependencyNode` | Import (type-only) |
+| File         | Imports                                 | Type               |
+| ------------ | --------------------------------------- | ------------------ |
+| `./types.js` | `Cell, DependencyGraph, DependencyNode` | Import (type-only) |
 
 **Exports:**
 
@@ -16380,22 +16380,22 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports                                                                                                                       | Type                  |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `./parser`         | `parseWorkbook, serializeWorkbook, stripOutputs, detectCellType`                                                              | Re-export             |
-| `./graph`          | `buildDependencyGraph, topologicalSort, getDependents, detectCycles, getAncestors, toMermaid`                                 | Re-export             |
-| `./executor`       | `WorkbookExecutor, createExecutor`                                                                                            | Re-export             |
-| `./formatter`      | `formatResult`                                                                                                                | Re-export             |
-| `./edit`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata`                                                            | Re-export             |
-| `./contract`       | `SCHEMA_VERSION, VERSION`                                                                                                     | Re-export             |
-| `./session`        | `Session`                                                                                                                     | Re-export             |
-| `./rpc`            | `handleRequest`                                                                                                               | Re-export             |
-| `./svg-math`       | `mathMLToSVG`                                                                                                                 | Re-export             |
-| `./timeout-runner` | `runWorkbookWithTimeout, WorkbookTimeoutError`                                                                                | Re-export             |
-| `./types`          | `Workbook, Cell, CellType, ExecutionMode, WorkbookMetadata, RuntimeConfig, ParseResult, WorkbookEvent, CellResult, RunResult` | Re-export (type-only) |
-| `./edit`           | `CellPosition, RemoveResult`                                                                                                  | Re-export (type-only) |
-| `./svg-math`       | `MathSvgOptions`                                                                                                              | Re-export (type-only) |
-| `./timeout-runner` | `RunWorkbookWithTimeoutOptions, SerializedCellResult, SerializedRunResult`                                                    | Re-export (type-only) |
+| File                  | Imports                                                                                                                       | Type                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./parser.js`         | `parseWorkbook, serializeWorkbook, stripOutputs, detectCellType`                                                              | Re-export             |
+| `./graph.js`          | `buildDependencyGraph, topologicalSort, getDependents, detectCycles, getAncestors, toMermaid`                                 | Re-export             |
+| `./executor.js`       | `WorkbookExecutor, createExecutor`                                                                                            | Re-export             |
+| `./formatter.js`      | `formatResult`                                                                                                                | Re-export             |
+| `./edit.js`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata`                                                            | Re-export             |
+| `./contract.js`       | `SCHEMA_VERSION, VERSION`                                                                                                     | Re-export             |
+| `./session.js`        | `Session`                                                                                                                     | Re-export             |
+| `./rpc.js`            | `handleRequest`                                                                                                               | Re-export             |
+| `./svg-math.js`       | `mathMLToSVG`                                                                                                                 | Re-export             |
+| `./timeout-runner.js` | `runWorkbookWithTimeout, WorkbookTimeoutError`                                                                                | Re-export             |
+| `./types.js`          | `Workbook, Cell, CellType, ExecutionMode, WorkbookMetadata, RuntimeConfig, ParseResult, WorkbookEvent, CellResult, RunResult` | Re-export (type-only) |
+| `./edit.js`           | `CellPosition, RemoveResult`                                                                                                  | Re-export (type-only) |
+| `./svg-math.js`       | `MathSvgOptions`                                                                                                              | Re-export (type-only) |
+| `./timeout-runner.js` | `RunWorkbookWithTimeoutOptions, SerializedCellResult, SerializedRunResult`                                                    | Re-export (type-only) |
 
 **Exports:**
 
@@ -16413,10 +16413,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File         | Imports                                  | Type   |
-| ------------ | ---------------------------------------- | ------ |
-| `./contract` | `VERSION, SCHEMA_VERSION, COMMAND_NAMES` | Import |
-| `./parser`   | `SUPPORTED_CELL_TYPES`                   | Import |
+| File            | Imports                                  | Type   |
+| --------------- | ---------------------------------------- | ------ |
+| `./contract.js` | `VERSION, SCHEMA_VERSION, COMMAND_NAMES` | Import |
+| `./parser.js`   | `SUPPORTED_CELL_TYPES`                   | Import |
 
 **Exports:**
 
@@ -16457,11 +16457,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                                                  | Type               |
-| ------------- | ------------------------------------------------------------------------ | ------------------ |
-| `./yaml-safe` | `parseYamlHardened, findPollutionKeys`                                   | Import             |
-| `./graph`     | `buildDependencyGraph, detectCycles`                                     | Import             |
-| `./types`     | `Workbook, ParseResult, CellType, Cell, RuntimeConfig, WorkbookMetadata` | Import (type-only) |
+| File             | Imports                                                                  | Type               |
+| ---------------- | ------------------------------------------------------------------------ | ------------------ |
+| `./yaml-safe.js` | `parseYamlHardened, findPollutionKeys`                                   | Import             |
+| `./graph.js`     | `buildDependencyGraph, detectCycles`                                     | Import             |
+| `./types.js`     | `Workbook, ParseResult, CellType, Cell, RuntimeConfig, WorkbookMetadata` | Import (type-only) |
 
 **Exports:**
 
@@ -16496,13 +16496,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports                           | Type               |
-| -------------- | --------------------------------- | ------------------ |
-| `./session`    | `Session`                         | Import (type-only) |
-| `./introspect` | `capabilitiesInfo, listFunctions` | Import             |
-| `./doc`        | `describeData`                    | Import             |
-| `./types`      | `CellType`                        | Import (type-only) |
-| `./edit`       | `CellPosition`                    | Import (type-only) |
+| File              | Imports                           | Type               |
+| ----------------- | --------------------------------- | ------------------ |
+| `./session.js`    | `Session`                         | Import (type-only) |
+| `./introspect.js` | `capabilitiesInfo, listFunctions` | Import             |
+| `./doc.js`        | `describeData`                    | Import             |
+| `./types.js`      | `CellType`                        | Import (type-only) |
+| `./edit.js`       | `CellPosition`                    | Import (type-only) |
 
 **Exports:**
 
@@ -16540,14 +16540,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                                             | Type               |
-| ------------- | --------------------------------------------------- | ------------------ |
-| `./types`     | `Workbook, Cell, CellResult, RunResult, CellType`   | Import (type-only) |
-| `./parser`    | `parseWorkbook, serializeWorkbook`                  | Import             |
-| `./executor`  | `WorkbookExecutor`                                  | Import             |
-| `./graph`     | `buildDependencyGraph, getAncestors, getDependents` | Import             |
-| `./fs-atomic` | `writeFileAtomic`                                   | Import             |
-| `./edit`      | `* as edit`                                         | Import             |
+| File             | Imports                                             | Type               |
+| ---------------- | --------------------------------------------------- | ------------------ |
+| `./types.js`     | `Workbook, Cell, CellResult, RunResult, CellType`   | Import (type-only) |
+| `./parser.js`    | `parseWorkbook, serializeWorkbook`                  | Import             |
+| `./executor.js`  | `WorkbookExecutor`                                  | Import             |
+| `./graph.js`     | `buildDependencyGraph, getAncestors, getDependents` | Import             |
+| `./fs-atomic.js` | `writeFileAtomic`                                   | Import             |
+| `./edit.js`      | `* as edit`                                         | Import             |
 
 **Exports:**
 

@@ -9,7 +9,7 @@ const WASM_INV_THRESHOLD = 16; // 4x4 matrix
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
-import type Complex from 'complex.js';
+import type { Complex } from 'complex.js';
 
 /** Scalar types supported by inv */
 type Scalar = number | BigNumber | Complex;

@@ -3,7 +3,7 @@
  * @module @danielsimonjr/mathts-core/types/fraction
  */
 
-import type { Scalar, IFraction } from './interfaces';
+import type { Scalar, IFraction } from './interfaces.js';
 
 /**
  * Check if a value is a Fraction

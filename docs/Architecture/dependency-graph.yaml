@@ -2096,7 +2096,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./interfaces
+        - file: ./interfaces.js
           imports:
             - Scalar
             - MathTSValue
@@ -2133,7 +2133,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./interfaces
+        - file: ./interfaces.js
           imports:
             - Scalar
             - IComplex
@@ -2189,7 +2189,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./interfaces
+        - file: ./interfaces.js
           imports:
             - Scalar
             - IFraction
@@ -4478,173 +4478,173 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./Tensor
+        - file: ./Tensor.js
           imports:
             - Tensor
           reExport: true
-        - file: ./named-index
+        - file: ./named-index.js
           imports:
             - Index
             - idx
           reExport: true
-        - file: ./operations/svd
+        - file: ./operations/svd.js
           imports:
             - tensorSvd
             - tensorSvdWasm
           reExport: true
-        - file: ./operations/random
+        - file: ./operations/random.js
           imports:
             - randomTensor
           reExport: true
-        - file: ./contraction-sequence
+        - file: ./contraction-sequence.js
           imports:
             - contractNetwork
           reExport: true
-        - file: ./operations/qr
+        - file: ./operations/qr.js
           imports:
             - tensorQr
           reExport: true
-        - file: ./operations/lu
+        - file: ./operations/lu.js
           imports:
             - tensorLU
           reExport: true
-        - file: ./operations/cholesky
+        - file: ./operations/cholesky.js
           imports:
             - tensorCholesky
           reExport: true
-        - file: ./operations/eig
+        - file: ./operations/eig.js
           imports:
             - tensorEig
             - tensorEigWasm
           reExport: true
-        - file: ./operations/pinv
+        - file: ./operations/pinv.js
           imports:
             - tensorPinv
           reExport: true
-        - file: ./operations/solve
+        - file: ./operations/solve.js
           imports:
             - tensorSolve
           reExport: true
-        - file: ./operations/kron
+        - file: ./operations/kron.js
           imports:
             - tensorKron
           reExport: true
-        - file: ./operations/slice
+        - file: ./operations/slice.js
           imports:
             - slice
           reExport: true
-        - file: ./operations/gather
+        - file: ./operations/gather.js
           imports:
             - gather
           reExport: true
-        - file: ./operations/stack
+        - file: ./operations/stack.js
           imports:
             - stack
           reExport: true
-        - file: ./operations/concatenate
+        - file: ./operations/concatenate.js
           imports:
             - concatenate
           reExport: true
-        - file: ./operations/scatter
+        - file: ./operations/scatter.js
           imports:
             - scatter
           reExport: true
-        - file: ./operations/pad
+        - file: ./operations/pad.js
           imports:
             - pad
           reExport: true
-        - file: ./operations/roll
+        - file: ./operations/roll.js
           imports:
             - roll
           reExport: true
-        - file: ./operations/flip
+        - file: ./operations/flip.js
           imports:
             - flip
           reExport: true
-        - file: ./Tensor
+        - file: ./Tensor.js
           imports:
             - NestedArray
             - EinsumSpec
           reExport: true
           typeOnly: true
-        - file: ./named-index
+        - file: ./named-index.js
           imports:
             - IndexOpts
           reExport: true
           typeOnly: true
-        - file: ./operations/svd
+        - file: ./operations/svd.js
           imports:
             - TensorSvdOpts
             - TensorSvdResult
           reExport: true
           typeOnly: true
-        - file: ./operations/random
+        - file: ./operations/random.js
           imports:
             - RandomTensorOpts
           reExport: true
           typeOnly: true
-        - file: ./contraction-sequence
+        - file: ./contraction-sequence.js
           imports:
             - ContractNetworkOpts
             - ContractNetworkResult
           reExport: true
           typeOnly: true
-        - file: ./operations/qr
+        - file: ./operations/qr.js
           imports:
             - TensorQrOpts
             - TensorQrResult
           reExport: true
           typeOnly: true
-        - file: ./operations/lu
+        - file: ./operations/lu.js
           imports:
             - TensorLUOpts
             - TensorLUResult
           reExport: true
           typeOnly: true
-        - file: ./operations/cholesky
+        - file: ./operations/cholesky.js
           imports:
             - TensorCholeskyOpts
             - TensorCholeskyResult
           reExport: true
           typeOnly: true
-        - file: ./operations/eig
+        - file: ./operations/eig.js
           imports:
             - TensorEigOpts
             - TensorEigResult
           reExport: true
           typeOnly: true
-        - file: ./operations/pinv
+        - file: ./operations/pinv.js
           imports:
             - TensorPinvOpts
           reExport: true
           typeOnly: true
-        - file: ./operations/solve
+        - file: ./operations/solve.js
           imports:
             - TensorSolveOpts
             - TensorSolveResult
           reExport: true
           typeOnly: true
-        - file: ./operations/kron
+        - file: ./operations/kron.js
           imports:
             - TensorKronOpts
           reExport: true
           typeOnly: true
-        - file: ./operations/slice
+        - file: ./operations/slice.js
           imports:
             - SliceRange
           reExport: true
           typeOnly: true
-        - file: ./operations/stack
+        - file: ./operations/stack.js
           imports:
             - StackOpts
           reExport: true
           typeOnly: true
-        - file: ./operations/scatter
+        - file: ./operations/scatter.js
           imports:
             - ScatterOpts
           reExport: true
           typeOnly: true
-        - file: ./operations/pad
+        - file: ./operations/pad.js
           imports:
             - PadOptions
           reExport: true
@@ -9905,7 +9905,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./type/local/Decimal.ts
+        - file: ./type/local/Decimal.js
           imports: []
           typeOnly: true
         - file: ./core/function/typed.js
@@ -32508,46 +32508,46 @@ modules:
           imports:
             - createInterface
       internalDependencies:
-        - file: ./fs-atomic
+        - file: ./fs-atomic.js
           imports:
             - writeFileAtomic
-        - file: ./session
+        - file: ./session.js
           imports:
             - Session
-        - file: ./rpc
+        - file: ./rpc.js
           imports:
             - handleRequest
             - JsonRpcRequest
-        - file: ./parser
+        - file: ./parser.js
           imports:
             - parseWorkbook
             - serializeWorkbook
             - stripOutputs
             - importWorkbook
-        - file: ./executor
+        - file: ./executor.js
           imports:
             - createExecutor
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - detectCycles
             - toMermaid
             - toDOT
-        - file: ./formatter
+        - file: ./formatter.js
           imports:
             - formatResult
-        - file: ./contract
+        - file: ./contract.js
           imports:
             - SCHEMA_VERSION
             - VERSION
-        - file: ./doc
+        - file: ./doc.js
           imports:
             - describeData
-        - file: ./introspect
+        - file: ./introspect.js
           imports:
             - capabilitiesInfo
             - listFunctions
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - addCell
             - editCell
@@ -32555,11 +32555,11 @@ modules:
             - moveCell
             - renameCell
             - setMetadata
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - CellPosition
           typeOnly: true
-        - file: ./types
+        - file: ./types.js
           imports:
             - CellResult
             - Workbook
@@ -32567,27 +32567,27 @@ modules:
             - CellType
             - RunResult
           typeOnly: true
-        - file: ./html
+        - file: ./html.js
           imports:
             - toHTML
-        - file: ./tex
+        - file: ./tex.js
           imports:
             - toTeX
-        - file: ./pdf
+        - file: ./pdf.js
           imports:
             - toPDF
-        - file: ./ipynb
+        - file: ./ipynb.js
           imports:
             - toIpynb
-        - file: ./timeout-runner
+        - file: ./timeout-runner.js
           imports:
             - runWorkbookWithTimeout
-        - file: ./html
+        - file: ./html.js
           imports:
             - RenderDoc
             - RenderCell
           typeOnly: true
-        - file: ./yaml-safe
+        - file: ./yaml-safe.js
           imports:
             - parseYamlSafe
       workspaceDependencies:
@@ -32650,11 +32650,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
           typeOnly: true
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - detectCycles
@@ -32670,17 +32670,17 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
             - Cell
             - CellType
           typeOnly: true
-        - file: ./parser
+        - file: ./parser.js
           imports:
             - isValidIdentifier
             - SUPPORTED_CELL_TYPES
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - detectCycles
@@ -32707,7 +32707,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
             - Cell
@@ -32716,13 +32716,13 @@ modules:
             - CellResult
             - RunResult
           typeOnly: true
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - getDependents
             - detectCycles
             - getAncestors
-        - file: ./yaml-safe
+        - file: ./yaml-safe.js
           imports:
             - parseYamlSafe
       workspaceDependencies:
@@ -32767,7 +32767,7 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./types
+        - file: ./types.js
           imports:
             - Cell
             - DependencyGraph
@@ -32824,14 +32824,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./parser
+        - file: ./parser.js
           imports:
             - parseWorkbook
             - serializeWorkbook
             - stripOutputs
             - detectCellType
           reExport: true
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - topologicalSort
@@ -32840,16 +32840,16 @@ modules:
             - getAncestors
             - toMermaid
           reExport: true
-        - file: ./executor
+        - file: ./executor.js
           imports:
             - WorkbookExecutor
             - createExecutor
           reExport: true
-        - file: ./formatter
+        - file: ./formatter.js
           imports:
             - formatResult
           reExport: true
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - addCell
             - editCell
@@ -32858,29 +32858,29 @@ modules:
             - renameCell
             - setMetadata
           reExport: true
-        - file: ./contract
+        - file: ./contract.js
           imports:
             - SCHEMA_VERSION
             - VERSION
           reExport: true
-        - file: ./session
+        - file: ./session.js
           imports:
             - Session
           reExport: true
-        - file: ./rpc
+        - file: ./rpc.js
           imports:
             - handleRequest
           reExport: true
-        - file: ./svg-math
+        - file: ./svg-math.js
           imports:
             - mathMLToSVG
           reExport: true
-        - file: ./timeout-runner
+        - file: ./timeout-runner.js
           imports:
             - runWorkbookWithTimeout
             - WorkbookTimeoutError
           reExport: true
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
             - Cell
@@ -32894,18 +32894,18 @@ modules:
             - RunResult
           reExport: true
           typeOnly: true
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - CellPosition
             - RemoveResult
           reExport: true
           typeOnly: true
-        - file: ./svg-math
+        - file: ./svg-math.js
           imports:
             - MathSvgOptions
           reExport: true
           typeOnly: true
-        - file: ./timeout-runner
+        - file: ./timeout-runner.js
           imports:
             - RunWorkbookWithTimeoutOptions
             - SerializedCellResult
@@ -33004,12 +33004,12 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./contract
+        - file: ./contract.js
           imports:
             - VERSION
             - SCHEMA_VERSION
             - COMMAND_NAMES
-        - file: ./parser
+        - file: ./parser.js
           imports:
             - SUPPORTED_CELL_TYPES
       workspaceDependencies:
@@ -33065,15 +33065,15 @@ modules:
             - stringify
       nodeDependencies: []
       internalDependencies:
-        - file: ./yaml-safe
+        - file: ./yaml-safe.js
           imports:
             - parseYamlHardened
             - findPollutionKeys
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - detectCycles
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
             - ParseResult
@@ -33130,22 +33130,22 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./session
+        - file: ./session.js
           imports:
             - Session
           typeOnly: true
-        - file: ./introspect
+        - file: ./introspect.js
           imports:
             - capabilitiesInfo
             - listFunctions
-        - file: ./doc
+        - file: ./doc.js
           imports:
             - describeData
-        - file: ./types
+        - file: ./types.js
           imports:
             - CellType
           typeOnly: true
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - CellPosition
           typeOnly: true
@@ -33194,7 +33194,7 @@ modules:
           imports:
             - readFileSync
       internalDependencies:
-        - file: ./types
+        - file: ./types.js
           imports:
             - Workbook
             - Cell
@@ -33202,22 +33202,22 @@ modules:
             - RunResult
             - CellType
           typeOnly: true
-        - file: ./parser
+        - file: ./parser.js
           imports:
             - parseWorkbook
             - serializeWorkbook
-        - file: ./executor
+        - file: ./executor.js
           imports:
             - WorkbookExecutor
-        - file: ./graph
+        - file: ./graph.js
           imports:
             - buildDependencyGraph
             - getAncestors
             - getDependents
-        - file: ./fs-atomic
+        - file: ./fs-atomic.js
           imports:
             - writeFileAtomic
-        - file: ./edit
+        - file: ./edit.js
           imports:
             - '* as edit'
       workspaceDependencies: []

@@ -3,8 +3,8 @@
  * command and the serve JSON-RPC router (kept out of cli.ts to avoid a cycle).
  */
 
-import type { Workbook } from './types';
-import { buildDependencyGraph, detectCycles } from './graph';
+import type { Workbook } from './types.js';
+import { buildDependencyGraph, detectCycles } from './graph.js';
 
 /**
  * Structured description of a workbook: metadata, runtime settings, cells, and the

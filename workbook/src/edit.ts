@@ -8,9 +8,9 @@
  * file on a throw.
  */
 
-import type { Workbook, Cell, CellType } from './types';
-import { isValidIdentifier, SUPPORTED_CELL_TYPES } from './parser';
-import { buildDependencyGraph, detectCycles } from './graph';
+import type { Workbook, Cell, CellType } from './types.js';
+import { isValidIdentifier, SUPPORTED_CELL_TYPES } from './parser.js';
+import { buildDependencyGraph, detectCycles } from './graph.js';
 
 /**
  * Insertion point for a cell. The functions use the first field that is set, in this

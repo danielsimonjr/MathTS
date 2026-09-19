@@ -9,10 +9,10 @@ import type {
   DependencyGraph,
   CellResult,
   RunResult,
-} from './types';
-import { buildDependencyGraph, getDependents, detectCycles, getAncestors } from './graph';
+} from './types.js';
+import { buildDependencyGraph, getDependents, detectCycles, getAncestors } from './graph.js';
 import { evaluate } from '@danielsimonjr/mathts-functions';
-import { parseYamlSafe } from './yaml-safe';
+import { parseYamlSafe } from './yaml-safe.js';
 
 /**
  * Event handler type
