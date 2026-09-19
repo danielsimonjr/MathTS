@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.2.4
+
+### Patch Changes
+
+- 2959b0d: Adopt `@danielsimonjr/workerpool@10.2.2`, which uses `parentPort` in a `node:worker_threads` worker under Bun. Remove the `bun-worker-bridge.ts` workaround; `worker.ts` now calls `worker(methods)` directly.
+
 ## 0.2.3
 
 ### Patch Changes
