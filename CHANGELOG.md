@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as known errors in the script. The CI step uses npm 11: npm 10 (bundled with Node 20 and 22)
   cannot install `@danielsimonjr/mathts-core` at all, because it crashes while it prepares the
   `github:` `typed-function` dependency. The published 0.14.3 and 0.15.0 have the same problem.
-- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 336685 and `totalTypeScriptFiles` is 1915 (after the merge of main).
+- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 336690 and `totalTypeScriptFiles` is 1915 (after the merge of main).
 
 ### docs(functions): doc comments for every exported symbol
 
