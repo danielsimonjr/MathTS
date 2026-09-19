@@ -24,8 +24,10 @@ interface TapeNode {
  * Records the operations of a forward pass so that `backward` can replay them in reverse.
  *
  * `allocate` gives inputs negative ids. `record` gives operations non-negative ids.
- * Each id owns a gradient slot. `backward` accumulates gradients into these slots.
- * `backward` does not clear the gradient slots. A second call adds to the gradients of the first call.
+ * Each id owns a gradient slot. `backward` writes `outputGrad` into the output slot: it replaces the
+ * value in that slot. `backward` adds gradients into the input and intermediate slots.
+ * `backward` does not clear the input and intermediate slots. A second call adds to the gradients of the
+ * first call in those slots.
  */
 export class Tape {
   private nodes: TapeNode[] = [];

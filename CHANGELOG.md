@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   11/11 exported symbols documented, 0 MUST issues (before: 6 MUST issues). Comments only; no
   code changes.
 - `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335266 (the new comment lines, after the pre-commit formatter).
+- Review fix: the `Tape` comment now says that `backward` REPLACES the output slot (`slot.set(outputGrad)`)
+  and ADDS into the input and intermediate slots. The first draft said it accumulated into every slot.
 
 ### chore(build): Bun migration Phase 4 - Node out of the dev toolchain
 
