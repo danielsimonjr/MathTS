@@ -240,8 +240,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     /**
      * Calculate the prob order quantile of an n-dimensional array.
      *
-     * @param {Array | Matrix} array - Input data
-     * @param {Array | Matrix} prob - Probabilities
+     * @param {Array | Matrix} data - Input data
+     * @param {Array | Matrix} probOrN - Probabilities
      * @param {Boolean} sorted - Is data sorted
      * @return {Number, BigNumber, Unit} prob order quantile
      * @private

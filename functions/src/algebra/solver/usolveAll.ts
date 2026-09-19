@@ -15,6 +15,7 @@ interface MatrixConstructor {
   (data: ScalarValue[] | ScalarValue[][]): DenseMatrix | SparseMatrix;
 }
 
+/** Structural type of the DenseMatrix values that `usolveAll` uses. */
 export interface DenseMatrix {
   type: 'DenseMatrix';
   isDenseMatrix: true;
@@ -90,7 +91,9 @@ export const createUsolveAll = /* #__PURE__ */ factory(
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
-    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
+    } as unknown as Parameters<
+      typeof createSolveValidation
+    >[0]) as unknown as SolveValidationFunction;
 
     /**
      * Finds all solutions of a linear equation system by backward substitution. Matrix must be an upper triangular matrix.

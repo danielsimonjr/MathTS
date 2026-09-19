@@ -205,13 +205,11 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
       }
 
       /**
-       * Replace a single element in the matrix.
-       * @param {Number[]} index Zero-based index
-       * @param {MatrixValue} value
-       * @param {MatrixValue} [defaultValue] Default value, filled in on new entries when
-       *                           the matrix is resized. If not provided,
-       *                           new matrix elements will be left undefined.
-       * @return {ImmutableDenseMatrix} self
+       * Disallows replacing an element in favor of immutability.
+       * @param {Number[]} _index Zero-based index (not used)
+       * @param {MatrixValue} _value The new value (not used)
+       * @param {MatrixValue} [_defaultValue] Default value for new entries (not used)
+       * @throws {Error} Operation not allowed
        */
       set(
         _index: number[],
@@ -222,16 +220,13 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
       }
 
       /**
-       * Resize the matrix to the given size. Returns a copy of the matrix when
-       * `copy=true`, otherwise return the matrix itself (resize in place).
+       * Disallows resizing in favor of immutability.
        *
-       * @param {Number[]} size The new size the matrix should have.
-       * @param {MatrixValue} [defaultValue=0] Default value, filled in on new entries.
-       *                             If not provided, the matrix elements will
-       *                             be filled with zeros.
-       * @param {boolean} [copy] Return a resized copy of the matrix
+       * @param {Number[]} _size The new size (not used)
+       * @param {MatrixValue} [_defaultValue=0] Default value for new entries (not used)
+       * @param {boolean} [_copy] Return a resized copy (not used)
        *
-       * @return {ImmutableDenseMatrix} The resized matrix
+       * @throws {Error} Operation not allowed
        */
       resize(_size: number[], _defaultValue?: MatrixValue, _copy?: boolean): ImmutableDenseMatrix {
         throw new Error('Cannot invoke resize on an Immutable Matrix instance');
@@ -289,12 +284,12 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
       }
 
       /**
-       * Swap rows i and j in Matrix.
+       * Disallows swapping rows in favor of immutability.
        *
-       * @param {Number} i Matrix row index 1
-       * @param {Number} j Matrix row index 2
+       * @param {Number} _i Matrix row index 1 (not used)
+       * @param {Number} _j Matrix row index 2 (not used)
        *
-       * @return {Matrix} The matrix reference
+       * @throws {Error} Operation not allowed
        */
       swapRows(_i: number, _j: number): ImmutableDenseMatrix {
         throw new Error('Cannot invoke swapRows on an Immutable Matrix instance');

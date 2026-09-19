@@ -26,6 +26,10 @@ const maxOf = (a: number[]): number => {
 /** Clamp a number — or each element of an array — to `[lo, hi]`. */
 export function clamp(x: number, lo: number, hi: number): number;
 export function clamp(x: readonly number[], lo: number, hi: number): number[];
+/**
+ * Implementation of the `clamp` overloads. An array input gives a new array. The
+ * function does not change the input.
+ */
 export function clamp(x: number | readonly number[], lo: number, hi: number): number | number[] {
   const c = (v: number) => (v < lo ? lo : v > hi ? hi : v);
   return Array.isArray(x) ? x.map(c) : c(x as number);
@@ -34,6 +38,10 @@ export function clamp(x: number | readonly number[], lo: number, hi: number): nu
 /** Logistic sigmoid `1/(1+e^-x)`, computed in the numerically stable branch. */
 export function sigmoid(x: number): number;
 export function sigmoid(x: readonly number[]): number[];
+/**
+ * Implementation of the `sigmoid` overloads. An array input gives a new array. The
+ * function does not change the input.
+ */
 export function sigmoid(x: number | readonly number[]): number | number[] {
   const s = (v: number) => (v >= 0 ? 1 / (1 + Math.exp(-v)) : Math.exp(v) / (1 + Math.exp(v)));
   return Array.isArray(x) ? x.map(s) : s(x as number);
@@ -113,7 +121,9 @@ export function cumtrapz(y: Vec, x?: Vec | number): number[] {
   } else if (x !== undefined) {
     const xs = toArr(x);
     if (xs.length < a.length)
-      throw new Error(`cumtrapz: abscissa x (length ${xs.length}) is shorter than y (length ${a.length})`);
+      throw new Error(
+        `cumtrapz: abscissa x (length ${xs.length}) is shorter than y (length ${a.length})`
+      );
     dxAt = (i: number) => xs[i + 1] - xs[i];
   } else {
     dxAt = () => 1;

@@ -152,7 +152,7 @@ export function convexHull2D(points: number[][]): number[][] {
     // Reorder by argsort, then sort ties by y (secondary key — typically few).
     sorted = Array.from(idx).map((i) => points[i]);
     // Stable-sort ties by y (JS sort is stable since ES2019).
-    for (let i = 0; i < sorted.length - 1; ) {
+    for (let i = 0; i < sorted.length - 1;) {
       let j = i + 1;
       while (j < sorted.length && sorted[j][0] === sorted[i][0]) j++;
       if (j - i > 1) {
@@ -723,7 +723,7 @@ export function delaunayTriangulation(points: number[][]): number[][] {
  *
  * @param points - Array of [x, y] points
  * @param bounds - Clipping bounds [minX, minY, maxX, maxY]
- * @returns { vertices: number[][], regions: number[][] }
+ * @returns `{ vertices: number[][], regions: number[][] }`
  */
 export function voronoiDiagram(
   points: number[][],
@@ -878,7 +878,7 @@ export function kdTree(points: number[][]): KDTreeNode | null {
  *
  * @param root - K-d tree root
  * @param target - Query point
- * @returns { point, index, distance }
+ * @returns `{ point, index, distance }`
  */
 export function kdTreeNearest(
   root: KDTreeNode | null,
@@ -922,7 +922,7 @@ function distanceNDSq(a: number[], b: number[]): f64 {
  *
  * @param points - Array of points (each same dimensionality)
  * @param query - Query point
- * @returns { point, index, distance } of the nearest neighbor, or null
+ * @returns `{ point, index, distance }` of the nearest neighbor, or null
  */
 export function nearestNeighbor(
   points: number[][],
@@ -1001,7 +1001,7 @@ export type HullFace3D = [i32, i32, i32];
  * @param points - Array of 3-D points, each `[x, y, z]`.
  * @returns Array of triangular faces.  Each face is `[i, j, k]` where i/j/k
  *          are indices into `points`, oriented CCW from outside.
- * @throws {Error} When the input is degenerate (fewer than 4 non-coplanar points).
+ * @throws Error when the input is degenerate (fewer than 4 non-coplanar points).
  */
 export function convexHull3D(points: number[][]): HullFace3D[] {
   const n: i32 = points.length;

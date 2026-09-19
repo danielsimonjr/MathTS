@@ -74,6 +74,8 @@ export const createLog = /* #__PURE__ */ factory(
      * @return {number | BigNumber | Fraction | Complex}
      *            Returns the logarithm of `x`
      */
+
+    /** Return the natural logarithm of a complex value. */
     function complexLog(c: ComplexType): ComplexType {
       return c.log();
     }

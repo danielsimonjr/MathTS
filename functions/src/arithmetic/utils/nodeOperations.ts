@@ -13,6 +13,7 @@ import { factory } from '../../utils/factory.js';
 import { isNode } from '../../utils/is.js';
 
 // Type definitions
+/** Minimum structural type of an expression-tree node, as the node operations use it. */
 export interface MathNode {
   type: string;
   isNode: boolean;

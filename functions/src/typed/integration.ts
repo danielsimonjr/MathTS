@@ -167,7 +167,7 @@ const ALLOWED_GLOBALS = new Set([
  *    ALLOWED_GLOBALS set, and not a numeric literal.
  *
  * @param fnSource - Result of `f.toString()`
- * @throws {Error} When the closure references outer-scope identifiers or is async
+ * @throws Error when the closure references outer-scope identifiers or is async
  */
 export function validateClosureSource(fnSource: string): void {
   // Reject async closures

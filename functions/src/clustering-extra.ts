@@ -14,6 +14,10 @@ const _eigs = _eigsRaw as unknown as (m: number[][]) => {
 const dist2 = (a: readonly number[], b: readonly number[]): number =>
   a.reduce((s, v, i) => s + (v - b[i]) * (v - b[i]), 0);
 
+/**
+ * Result of `kmeans`: the cluster label of each row, the centroids, and the total
+ * within-cluster sum of squares (`inertia`).
+ */
 export interface KMeansResult {
   labels: number[];
   centroids: number[][];

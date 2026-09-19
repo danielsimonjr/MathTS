@@ -10,6 +10,10 @@ import type { TypedFunction } from '../../core/function/typed.js';
 const WASM_COUNTS_THRESHOLD = 50;
 
 // Sparse matrix internal structure
+/**
+ * Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
+ * value, and the column pointers.
+ */
 export interface SparseMatrixData {
   _size: number[];
   _values?: unknown[];

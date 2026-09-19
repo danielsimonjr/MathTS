@@ -18,6 +18,7 @@ export const ROUND_HALF_CEIL = 7;
 export const ROUND_HALF_FLOOR = 8;
 export const EUCLID = 9;
 
+/** Configuration options for the Decimal class (precision, rounding mode, exponent limits). */
 export interface DecimalConfig {
   precision?: number;
   rounding?: number;

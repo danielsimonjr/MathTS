@@ -20,6 +20,7 @@ import { resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm } from './
 import type { LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
 export type { LoadingMetrics };
 
+/** Exports of the WebAssembly module that the loader uses: kernels and memory helpers. */
 export interface WasmModule {
   // Matrix operations
   multiplyDense: (
@@ -832,6 +833,11 @@ interface PoolEntry {
 // `matrix/src/backends/WasmLoader.ts` (see
 // docs/Architecture/duplicate-symbols.json).
 
+/**
+ * Load the WebAssembly module and manage its memory.
+ *
+ * Use `getInstance` to get the one shared loader.
+ */
 export class WasmLoader {
   private static instance: WasmLoader | null = null;
   private wasmModule: WasmModule | null = null;

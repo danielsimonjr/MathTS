@@ -16,16 +16,21 @@ export type {
 } from '../types/index.js';
 
 // Type aliases for common types used internally
+/** The BigNumber type: the local Decimal class. */
 export type BigNumber = import('./type/local/Decimal.ts').Decimal;
+/** The Complex type from `complex.js`. */
 export type Complex = import('complex.js').default;
+/** The Fraction type from `fraction.js`. */
 export type Fraction = import('fraction.js').default;
 
 // Matrix-related types
+/** Minimum structural type of a SparseMatrix value. */
 export interface SparseMatrix {
   type: 'SparseMatrix';
   [key: string]: unknown;
 }
 
+/** Minimum structural type of a Unit value. */
 export interface Unit {
   type: 'Unit';
   /** Numeric magnitude of the unit, stripped of its unit annotation. */
@@ -36,6 +41,7 @@ export interface Unit {
 }
 
 // Constructor types
+/** Minimum structural type of a matrix constructor. */
 export interface MatrixConstructor {
   new (...args: unknown[]): unknown;
   [key: string]: unknown;

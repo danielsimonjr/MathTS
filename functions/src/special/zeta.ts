@@ -141,6 +141,8 @@ export const createZeta = /* #__PURE__ */ factory(
     });
 
     /**
+     * Compute the Riemann zeta function of a real number or BigNumber `s`.
+     *
      * @param {number | BigNumber} s
      * @param {(value: number) => number | BigNumber} createValue
      * @param {(value: number | BigNumber | Complex) => number} determineDigits
@@ -165,6 +167,8 @@ export const createZeta = /* #__PURE__ */ factory(
     }
 
     /**
+     * Compute the Riemann zeta function of a complex number `s`.
+     *
      * @param {Complex} s
      * @returns {Complex}
      */
@@ -194,6 +198,9 @@ export const createZeta = /* #__PURE__ */ factory(
     }
 
     /**
+     * Compute the zeta function for any numeric type. Use the reflection formula if
+     * `Re(s) < 0`, and the Borwein series otherwise.
+     *
      * @param {number | BigNumber | Complex} s
      * @param {(value: number) => number | BigNumber | Complex} createValue
      * @param {(value: number | BigNumber | Complex) => number} determineDigits

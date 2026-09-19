@@ -98,7 +98,6 @@ export const createIndexClass = /* #__PURE__ */ factory(
      *
      * @class Index
      * @Constructor Index
-     * @param {...*} ranges
      */
     class Index {
       /**
@@ -129,6 +128,10 @@ export const createIndexClass = /* #__PURE__ */ factory(
        */
       _isScalar: boolean;
 
+      /**
+       * Create an index from the given ranges.
+       * @param {...*} ranges The index for each dimension
+       */
       constructor(...ranges: unknown[]) {
         if (!(this instanceof Index)) {
           throw new SyntaxError('Constructor must be called with the new operator');

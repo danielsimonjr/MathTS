@@ -76,6 +76,10 @@ interface Dependencies {
 /** Supported data types for eigenvalue computation */
 type DataType = 'number' | 'BigNumber' | 'Complex';
 
+/**
+ * Create the `complexEigs` function, which computes the eigenvalues and the optional
+ * eigenvectors of a matrix that is not real symmetric.
+ */
 export function createComplexEigs({
   addScalar,
   subtract,
@@ -224,7 +228,7 @@ export function createComplexEigs({
    * Balance a matrix to improve numerical stability
    * @param arr the matrix to balance
    * @param N size of the matrix
-   * @param prec precision threshold
+   * @param _prec precision threshold (not used)
    * @param type data type
    * @param findVectors whether to compute transformation matrix
    * @returns diagonal transformation matrix or null

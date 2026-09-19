@@ -91,6 +91,13 @@ function _adaptCallbackArity(
   return callback;
 }
 
+/**
+ * Dense matrix of numbers with the mathjs `DenseMatrix` interface that the activated
+ * factory functions expect.
+ *
+ * The matrix keeps its data as a nested array in `_data`. Use `toNative` and `fromNative`
+ * to convert to and from the MathTS `DenseMatrix`.
+ */
 export class MathJSDenseMatrix {
   _data: number[][];
   _size: number[];

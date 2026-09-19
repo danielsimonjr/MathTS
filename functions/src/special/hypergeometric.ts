@@ -112,7 +112,7 @@ export function hyp1f1(a: number, b: number, z: number): number {
  * @param c - Denominator parameter
  * @param z - Argument, must satisfy |z| < 1
  * @returns 2F1(a, b; c; z)
- * @throws {Error} If |z| >= 1
+ * @throws Error if |z| >= 1
  *
  * @example
  * hyp2f1(1, 2, 3, 0.5) // ~1.5451774445

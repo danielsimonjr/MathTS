@@ -60,6 +60,7 @@ export const createLog10 = /* #__PURE__ */ factory(
      *            Returns the 10-base logarithm of `x`
      */
 
+    /** Return the base-10 logarithm of a complex value. */
     function complexLog(c: ComplexType): ComplexType {
       return c.log().div(Math.LN10);
     }
