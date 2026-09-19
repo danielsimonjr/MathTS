@@ -18,7 +18,14 @@ export function texEsc(s: string): string {
   });
 }
 
-/** A hex color (#rrggbb / #rrggbbaa) or a passthrough tikz color name, with alpha. */
+/**
+ * A named color or an xcolor mix such as `red!50!black`: letters, digits, `!` and `.` only.
+ * Any other character (`]`, `,`, `;`, `{`, a backslash, a space) could end the option list
+ * the color is written into, so a name outside this set is never emitted.
+ */
+const TIKZ_COLOR_NAME = /^[A-Za-z][A-Za-z0-9!.]*$/;
+
+/** A hex color (#rrggbb / #rrggbbaa) or a tikz color name, with alpha. A name that fails `TIKZ_COLOR_NAME` becomes `black`. */
 function tikzColor(c: string): { color: string; alpha: number } {
   if (c === 'none') return { color: 'none', alpha: 1 };
   if (c.startsWith('#')) {
@@ -29,7 +36,7 @@ function tikzColor(c: string): { color: string; alpha: number } {
     const alpha = h.length >= 8 ? Math.round((parseInt(h.slice(6, 8), 16) / 255) * 100) / 100 : 1;
     return { color: `{rgb,255:red,${r};green,${g};blue,${b}}`, alpha };
   }
-  return { color: c, alpha: 1 };
+  return { color: TIKZ_COLOR_NAME.test(c) ? c : 'black', alpha: 1 };
 }
 
 const round = (n: number): number => Math.round(n * 100) / 100;

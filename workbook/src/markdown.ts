@@ -160,6 +160,16 @@ export function texEscape(s: string): string {
   });
 }
 
+/**
+ * Keep text inside a `verbatim` or `lstlisting` environment. The body is not escaped
+ * (the environment prints it as is), but LaTeX ends the environment at the first exact
+ * `\end{<env>}` in it. Each such sequence in the body gets a space after `\end`, so it
+ * prints as text and cannot close the environment early.
+ */
+export function verbatimBody(body: string, env: 'verbatim' | 'lstlisting'): string {
+  return body.split(`\\end{${env}}`).join(`\\end {${env}}`);
+}
+
 /** Escape a non-link prose span, then apply inline markers (their delimiters
  * survive texEscape, so escaping first is safe here). */
 function escapeInlineNonLink(text: string): string {
@@ -206,7 +216,9 @@ export function markdownToTex(src: string): string {
         i++;
       }
       i++;
-      out.push(`\\begin{lstlisting}\n${buf.join('\n')}\n\\end{lstlisting}`);
+      out.push(
+        `\\begin{lstlisting}\n${verbatimBody(buf.join('\n'), 'lstlisting')}\n\\end{lstlisting}`
+      );
       continue;
     }
     if (line.trim() === '') {

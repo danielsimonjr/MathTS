@@ -5,7 +5,7 @@
     "lastUpdated": "2026-09-19",
     "totalFiles": 1175,
     "totalModules": 83,
-    "totalExports": 5841
+    "totalExports": 5843
   },
   "entryPoints": [
     {
@@ -35116,8 +35116,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["markdownToHtml", "texEscape", "markdownToTex"],
-        "functions": ["markdownToHtml", "texEscape", "markdownToTex"]
+        "exports": ["markdownToHtml", "texEscape", "verbatimBody", "markdownToTex"],
+        "functions": ["markdownToHtml", "texEscape", "verbatimBody", "markdownToTex"]
       },
       "workbook/src/parser.ts": {
         "description": "Workbook YAML parser",
@@ -35341,7 +35341,7 @@
           },
           {
             "file": "./markdown.js",
-            "imports": ["markdownToTex", "texEscape"]
+            "imports": ["markdownToTex", "texEscape", "verbatimBody"]
           }
         ],
         "workspaceDependencies": [],
@@ -38431,7 +38431,7 @@
         "interfaces": ["Scene"]
       },
       "plot/src/svg.ts": {
-        "description": "svg module",
+        "description": "Build one SVG element. This is the only place that writes an attribute, and it passes",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -38446,6 +38446,7 @@
           "THEMES",
           "esc",
           "fmt",
+          "escAttr",
           "svgDoc",
           "line",
           "circle",
@@ -38459,6 +38460,7 @@
         "functions": [
           "esc",
           "fmt",
+          "escAttr",
           "svgDoc",
           "line",
           "circle",
@@ -38471,7 +38473,7 @@
         "constants": ["THEMES"]
       },
       "plot/src/tikz.ts": {
-        "description": "tikz module",
+        "description": "A named color or an xcolor mix such as `red!50!black`: letters, digits, `!` and `.` only.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -40131,11 +40133,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 197868,
-    "totalExports": 5841,
+    "totalLinesOfCode": 197979,
+    "totalExports": 5843,
     "totalClasses": 55,
     "totalInterfaces": 508,
-    "totalFunctions": 1884,
+    "totalFunctions": 1886,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1599,

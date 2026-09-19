@@ -16451,7 +16451,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `markdownToHtml`, `texEscape`, `markdownToTex`
+- Functions: `markdownToHtml`, `texEscape`, `verbatimBody`, `markdownToTex`
 
 ---
 
@@ -16592,10 +16592,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports                    | Type               |
-| --------------- | -------------------------- | ------------------ |
-| `./html.js`     | `RenderDoc, RenderCell`    | Import (type-only) |
-| `./markdown.js` | `markdownToTex, texEscape` | Import             |
+| File            | Imports                                  | Type               |
+| --------------- | ---------------------------------------- | ------------------ |
+| `./html.js`     | `RenderDoc, RenderCell`                  | Import (type-only) |
+| `./markdown.js` | `markdownToTex, texEscape, verbatimBody` | Import             |
 
 **Exports:**
 
@@ -17387,7 +17387,7 @@ graph LR
 
 ---
 
-### `plot/src/svg.ts` - svg module
+### `plot/src/svg.ts` - Build one SVG element. This is the only place that writes an attribute, and it passes
 
 **Internal Dependencies:**
 
@@ -17398,12 +17398,12 @@ graph LR
 **Exports:**
 
 - Interfaces: `Theme`
-- Functions: `esc`, `fmt`, `svgDoc`, `line`, `circle`, `rect`, `polyline`, `polygon`, `text`, `emitSVG`
+- Functions: `esc`, `fmt`, `escAttr`, `svgDoc`, `line`, `circle`, `rect`, `polyline`, `polygon`, `text`, `emitSVG`
 - Constants: `THEMES`
 
 ---
 
-### `plot/src/tikz.ts` - tikz module
+### `plot/src/tikz.ts` - A named color or an xcolor mix such as `red!50!black`: letters, digits, `!` and `.` only.
 
 **Internal Dependencies:**
 
@@ -18368,12 +18368,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197868 |
-| Total Exports           | 5841   |
+| Total Lines of Code     | 197979 |
+| Total Exports           | 5843   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |
 | Total Interfaces        | 508    |
-| Total Functions         | 1884   |
+| Total Functions         | 1886   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 582    |
