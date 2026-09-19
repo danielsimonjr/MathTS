@@ -11,6 +11,9 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 
+/**
+ * Result of `cholesky`: the lower-triangular factor of the decomposition.
+ */
 export interface CholeskyResult {
   /** Lower-triangular Cholesky factor L such that A = L · Lᵀ. */
   L: DenseMatrix;

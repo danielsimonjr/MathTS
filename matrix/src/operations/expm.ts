@@ -130,6 +130,12 @@ function pade13(A: number[][]): number[][] {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * Options for the matrix exponential.
+ *
+ * This interface has no usable fields at this time. It is reserved for
+ * future options.
+ */
 export interface ExpmOptions {
   /**
    * When true, return the result as a DenseMatrix.

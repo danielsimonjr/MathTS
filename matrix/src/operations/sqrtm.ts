@@ -213,9 +213,7 @@ function sqrtmGeneral(A: number[][]): number[][] {
 
   for (const v of values) {
     if (Math.abs(v.im) > 1e-7) {
-      throw new Error(
-        'matrixSqrtm: complex eigenvalues detected — real square root not supported'
-      );
+      throw new Error('matrixSqrtm: complex eigenvalues detected — real square root not supported');
     }
     if (v.re < -1e-7) {
       throw new Error(
@@ -380,8 +378,7 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
       if (sol === null) return null;
 
       for (let ii = 0; ii < si; ii++)
-        for (let jj = 0; jj < sj; jj++)
-          U[ri + ii][rj + jj] = sol[ii * sj + jj];
+        for (let jj = 0; jj < sj; jj++) U[ri + ii][rj + jj] = sol[ii * sj + jj];
     }
   }
 
@@ -442,6 +439,9 @@ function sqrtmSchur(A: number[][]): number[][] | null {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * Options for `matrixSqrtm`.
+ */
 export interface SqrtmOptions {
   /**
    * Force the symmetric-eigendecomposition path even for non-SPD matrices.

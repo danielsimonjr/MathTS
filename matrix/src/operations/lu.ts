@@ -15,6 +15,9 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 
+/**
+ * Result of `lu`: the factors L and U and the row permutation P.
+ */
 export interface LUResult {
   /** Unit lower-triangular factor L. */
   L: DenseMatrix;

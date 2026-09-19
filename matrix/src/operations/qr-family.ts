@@ -19,6 +19,9 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { qr } from './qr.js';
 
+/**
+ * Result of the LQ decomposition, where A = L · Q.
+ */
 export interface LQResult {
   /** Lower-triangular (trapezoidal) factor. m × k, k = min(m, n). */
   L: DenseMatrix;
@@ -26,6 +29,9 @@ export interface LQResult {
   Q: DenseMatrix;
 }
 
+/**
+ * Result of the RQ decomposition, where A = R · Q.
+ */
 export interface RQResult {
   /** Upper-triangular (trapezoidal) factor. m × k, k = min(m, n). */
   R: DenseMatrix;
@@ -33,6 +39,9 @@ export interface RQResult {
   Q: DenseMatrix;
 }
 
+/**
+ * Result of the QL decomposition, where A = Q · L.
+ */
 export interface QLResult {
   /** Orthonormal-column factor (Qᵀ · Q = I). m × k, k = min(m, n). */
   Q: DenseMatrix;

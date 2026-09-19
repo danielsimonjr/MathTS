@@ -355,6 +355,9 @@ function schurRaw(
 // Public types and API
 // ---------------------------------------------------------------------------
 
+/**
+ * Result of the real Schur decomposition, where A = Q · T · Qᵀ.
+ */
 export interface SchurResult {
   /** Orthogonal factor Q (Q^T · Q = I, Q · Q^T = I). */
   Q: DenseMatrix;
@@ -362,6 +365,9 @@ export interface SchurResult {
   T: DenseMatrix;
 }
 
+/**
+ * Options for the real Schur decomposition. They control the QR iteration.
+ */
 export interface SchurOptions {
   /** Maximum QR iterations (default: 1000). */
   maxIterations?: number;

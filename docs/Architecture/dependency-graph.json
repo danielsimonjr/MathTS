@@ -4438,7 +4438,7 @@
         "functions": ["add", "subtract", "multiplyElementwise", "multiply", "scale", "transpose"]
       },
       "matrix/src/types/dense/reduction.ts": {
-        "description": "reduction module",
+        "description": "Add all elements of a matrix.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -40131,7 +40131,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 197624,
+    "totalLinesOfCode": 197791,
     "totalExports": 5841,
     "totalClasses": 55,
     "totalInterfaces": 508,

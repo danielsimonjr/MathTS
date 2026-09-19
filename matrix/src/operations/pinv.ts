@@ -20,6 +20,9 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { svd } from './svd.js';
 
+/**
+ * Options for `pinv`.
+ */
 export interface PinvOptions {
   /**
    * Relative condition threshold for singular-value truncation.

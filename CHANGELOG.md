@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(matrix): doc comments for every exported symbol
+
+- Added doc comments to the 30 exported symbols of `@danielsimonjr/mathts-matrix` that had none:
+  `WasmModule`, `WasmLoader`, the result and option interfaces of the decompositions
+  (Cholesky, LU, QR, pivoted QR, LQ/RQ/QL, Schur, pinv, expm, logm, sqrtm), `svd`, and the dense
+  arithmetic and reduction helpers. Comments only: each changed file prints identical to `main`
+  with comments removed. `code_docs.py check matrix/src` now passes (was 30 MUST issues).
+  Architecture numbers refreshed (`totalLinesOfCode` 337245); `repo_map.py check` passes.
+
 ### fix(types): matrix/compat .d.ts resolve typed-function through a declared dependency
 
 - The published `.d.ts` files of `matrix` (`parallel-matrix.d.ts`, `typed-operations.d.ts`) and
