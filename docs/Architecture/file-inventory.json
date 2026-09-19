@@ -11685,7 +11685,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 218
+      "loc": 219
     },
     {
       "file": "plot/src/scale.ts",
@@ -11706,7 +11706,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 131
+      "loc": 141
     },
     {
       "file": "plot/src/three/points3d.ts",
@@ -11720,7 +11720,7 @@
       "package": "@danielsimonjr/mathts-plot",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 24
+      "loc": 25
     },
     {
       "file": "plot/src/three/surface.ts",
