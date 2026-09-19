@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(compat): doc comments for every exported symbol
+
+- `compat/src`: TSDoc comments for `createChain`, `asin`, `acos`, `atan`, `atan2`, `variance`, `std`,
+  `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_` and `isMatrix`. The `code-docs` gate
+  (`code_docs.py check compat/src`) now passes: 31/31 exported symbols documented, 0 MUST issues
+  (before: 12 MUST issues). Comments only; no code changes.
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335356 (the new comment lines, after the pre-commit formatter).
+
 ### docs(autograd): doc comments for every exported symbol
 
 - `autograd/src`: TSDoc comments for `DualTensor`, `ScalarFn`, `NumericInput`, `reverseGrad`,

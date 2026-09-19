@@ -13,9 +13,19 @@ export interface Chain {
   [method: string]: (...args: unknown[]) => Chain | unknown;
 }
 
-export function createChain(
-  math: Record<string, unknown>
-): (value: unknown) => Chain {
+/**
+ * Build the `chain` factory for one math instance.
+ *
+ * Each chain method looks up a function of the same name in `math` when the method is read.
+ * The method calls that function with the wrapped value first, then the method arguments.
+ * The method returns a new chain that wraps the result.
+ * `done()` and `valueOf()` return the wrapped value.
+ * A name that is not a function in `math` gives `undefined`.
+ *
+ * @param math - The math instance that supplies the chain methods.
+ * @returns A function that wraps a value in a chain.
+ */
+export function createChain(math: Record<string, unknown>): (value: unknown) => Chain {
   function chain(value: unknown): Chain {
     const base = {
       done: () => value,
