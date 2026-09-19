@@ -150,7 +150,7 @@ try {
       'install',
       '--no-audit',
       '--no-fund',
-      '--silent',
+      '--loglevel=error',
       `typescript@${tsVersion}`,
       `@types/node@${nodeTypesVersion}`,
       ...tgz.map((f) => join(tarballs, f)),
