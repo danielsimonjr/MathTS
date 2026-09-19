@@ -2807,6 +2807,34 @@ function readWasmExports(path: string): Set<string> | null {
   }
 }
 
+/**
+ * Refuse to generate reports without the built WASM bundle. Without
+ * `functions/dist/wasm/mathts-as.wasm`, the runtime probe reports backend
+ * "unknown" and "0 actually execute wasm". Those values are well-formed, so the
+ * doc gates accept them, but they are false. Returns an error message, or `null`
+ * when the bundle is present and carries the AssemblyScript runtime (`__new`).
+ */
+export function checkWasmBuildOutputs(rootDir: string): string | null {
+  const rel = 'functions/dist/wasm/mathts-as.wasm';
+  const exports = readWasmExports(join(rootDir, rel));
+  if (exports === null) {
+    return (
+      `docs:deps: the WASM bundle ${rel} is missing or unreadable. ` +
+      `The wasm-pairing probe needs it; without it the reports would falsely say ` +
+      `backend "unknown" and 0 functions executing wasm. ` +
+      `Run \`bun run build:wasm && bun run build\` first. No files were written.`
+    );
+  }
+  if (!exports.has('__new')) {
+    return (
+      `docs:deps: ${rel} has no \`__new\` export, so it is not the AssemblyScript ` +
+      `bundle the probe expects. Rebuild with \`bun run build:wasm && bun run build\`. ` +
+      `No files were written.`
+    );
+  }
+  return null;
+}
+
 function analyzeWasmRuntime(rootDir: string): {
   bundledBackend: 'assemblyscript' | 'unknown';
   dispatchWasm: Map<string, boolean | null>;
@@ -4620,6 +4648,13 @@ async function main(): Promise<void> {
     runCensusCheckNoRegen(ROOT_DIR);
     console.log('file-census check passed (no-regen): committed inventory matches the repo.');
     return;
+  }
+
+  // Fail before any write when the build output the WASM probe loads is absent.
+  const wasmBuildError = checkWasmBuildOutputs(ROOT_DIR);
+  if (wasmBuildError) {
+    console.error(wasmBuildError);
+    process.exit(1);
   }
 
   console.log('Scanning codebase for dependencies...');

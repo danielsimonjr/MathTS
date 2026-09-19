@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(docs:deps): wasm-pairing regenerated without the WASM bundle; generator now refuses
+
+- **Degraded report restored**: `wasm-pairing.md` and `wasm-pairing.json` were regenerated when
+  `functions/dist/wasm/mathts-as.wasm` was not built. The runtime probe then reported backend
+  "unknown" and 0 of 41 functions executing wasm. The doc gates check shape, not truth, so they passed.
+  Rebuilt (`bun run build:wasm && bun run build`) and regenerated: backend **assemblyscript**, **39 of
+  41** execute wasm, identical to `origin/main` except the Generated date. The other 16 `docs:deps`
+  outputs do not read build outputs and match `origin/main` except the date.
+- **Guard**: `create-dependency-graph.ts` now calls `checkWasmBuildOutputs()` before any scan or write.
+  A missing, unreadable or non-AssemblyScript bundle exits 1 with a rebuild instruction, and no file
+  is written. Test: `tools/create-dependency-graph/wasm-build-guard.test.mjs` (`bun test tools`).
+- **Verification tables**: counts updated for the new export and files (7650 exports, 1902 files,
+  334749 lines) so `repo_map.py check` stays green.
+
 ### docs: both documentation gates green - root causes fixed
 
 - **architecture-docs gate (`repo_map.py check`)**: the hand-written Verification tables quoted stale
