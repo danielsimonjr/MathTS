@@ -17,6 +17,7 @@
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 
+/** Configures the padding mode and the constant fill value for `pad`. */
 export interface PadOptions {
   /**
    * Padding mode.

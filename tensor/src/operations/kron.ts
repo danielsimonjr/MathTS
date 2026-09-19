@@ -23,6 +23,7 @@
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 
+/** Configures the separator for the axis-label names of `tensorKron` output. */
 export interface TensorKronOpts {
   /**
    * Separator string inserted between a's and b's axis-label names when

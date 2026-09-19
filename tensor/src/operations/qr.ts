@@ -24,6 +24,7 @@ import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { DenseMatrix, qr as matrixQR } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the QR mode (reduced or full) and the joining index name for `tensorQr`. */
 export interface TensorQrOpts {
   /** 'reduced' (default, thin QR) or 'full'. */
   mode?: 'reduced' | 'full';
@@ -35,6 +36,7 @@ export interface TensorQrOpts {
   joiningIndexName?: string;
 }
 
+/** Contains the Q and R factors from `tensorQr`. */
 export interface TensorQrResult {
   /** Q factor with orthonormal columns reshaped to [...rowDims, k]. */
   Q: Tensor;

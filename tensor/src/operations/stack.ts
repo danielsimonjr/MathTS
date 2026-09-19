@@ -18,6 +18,7 @@
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 
+/** Configures the label of the new axis that `stack` inserts. */
 export interface StackOpts {
   /**
    * Optional label for the newly created axis. If omitted, the new axis
