@@ -5,3 +5,7 @@
 # dist files that the tests load. lcov is the file that Codecov reads.
 coverageReporter = ["text", "lcov"]
 coveragePathIgnorePatterns = ["../**"]
+
+[run]
+# Run this package's scripts on the Bun runtime (see the root bunfig.toml).
+bun = true

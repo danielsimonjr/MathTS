@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(build): Bun migration Phase 3 - `[run] bun = true`
+
+- `bun run` now executes every package script on the Bun runtime. `node` calls and node-shebang
+  bins (`asc`, `tsc`, `tsup`, `vitest`, `turbo`, `prettier`) run on Bun 1.4.2.
+- Bun reads `bunfig.toml` from the working directory only. Measured: with only the root flag set,
+  a script started by turbo in `core/` still ran on Node. So the `[run] bun = true` block is in the
+  root `bunfig.toml` and in the `bunfig.toml` of all 24 workspace packages (new for `assembly`).
+- Verified before the flip, Node vs Bun on the same inputs:
+  - `asc` debug + release: all 10 files in `assembly/build` are byte-identical (wasm, wat, source
+    map, JS/`.d.ts` bindings, manifest). `mathts.wasm` sha256 `6773913c...b04a77f3`.
+  - `bun run build`: all 2333 files in the 23 `dist` directories are byte-identical.
+  - `query-dependency-graph` (`--emit`, query, `--check-browser-safety`), `check-duplicates`,
+    `roadmap-check`, both `copy-wasm.mjs`, `workerpool` `postbuild.mjs`, `gen-wasm-manifest.mjs`:
+    same stdout, exit code and written files.
+- Two tools differed; each is fixed in `package.json`:
+  - `generate-functions-reference.mjs` failed under Bun (`__PKG_VERSION__ is not defined`).
+    Cause: Bun applies the root `tsconfig.json` `paths` at run time, so the tool imported
+    `core/src` instead of `core/dist`. `docs:functions` and `docs:functions:check` now pass
+    `--tsconfig-override=tsconfig.base.json` (no `paths`). The output is then identical to Node.
+    Bun 1.4.2 prints a harmless `Internal error: directory mismatch` line on Windows for this flag.
+  - `node --test` fails under Bun ("Cannot use test outside of the test runner"). A script cannot
+    reach the real Node under this setting. `docs:graph:test` and `docs:roadmap-check:test` now use
+    `bun test`; the counts are the same (6/6 and 4/4).
+- Gate after the flip: install, `build:wasm`, `build`, `typecheck`, `lint`, `docs:functions:check`,
+  `check:browser-safety`, `bun audit`, `test` (48/48 tasks, same counts as Node), `test:coverage`.
+- `docs/roadmap/BUN_MIGRATION.md`: non-goal line and Node-on-PATH paragraph updated; note 4 added.
+
 ### fix(plot): tie-tolerant depth sort with a stable key; `plot` on `bun test`
 
 - Bug: the `surface` painter's sort was `b.depth - a.depth`. Two quads of equal true depth then

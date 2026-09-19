@@ -11,6 +11,10 @@ linker = "hoisted"
 auto = "disable"
 
 [run]
-# Keep package scripts on their declared shebang (vitest → node, asc → node).
-# Opt into Bun's runtime per-script with `bun --bun run <script>` when ready.
-bun = false
+# Phase 3 of docs/roadmap/BUN_MIGRATION.md: `bun run` executes every package script on
+# Bun's runtime. A `node` call and every node-shebang bin (asc, tsc, tsup, vitest, turbo,
+# prettier) run on Bun. Bun reads bunfig.toml from the working directory only, so each
+# workspace package carries the same `[run]` block for the scripts that turbo starts there.
+# `docs:functions` passes `--tsconfig-override=tsconfig.base.json`: at run time Bun applies the
+# root tsconfig `paths` (core/matrix/workbook -> src), and that tool must import the built dist.
+bun = true
