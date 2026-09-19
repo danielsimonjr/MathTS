@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.15.3
+
+### Patch Changes
+
+- 3cdf6c6: fix: `ObjectWrappingMap.entries()` and `PartitionedMap.entries()` (and `[Symbol.iterator]()`) now return real iterable iterators, so spread, `for...of` and `Array.from` over them no longer throw.
+
 ## 0.15.2
 
 ### Patch Changes
