@@ -21,10 +21,10 @@ WASM" is _mostly already done_. The AssemblyScript WASM module
 
 So the gap is not one gap — it is **two distinct gaps**:
 
-| Gap                    | What it is                                                                                                                   | Size              | Effort to close                  |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
-| **A — Activation gap** | Pure-JS kernels in `functions/src/typed/` that _already have a WASM kernel_ but never call it — the JS fallback always runs. | ~60–100 functions | Low–medium (wiring, not porting) |
-| **B — True porting gap** | Pure, import-free functions with **no WASM kernel at all**.                                                                | ~45 functions     | Medium–high (new WASM code)      |
+| Gap                      | What it is                                                                                                                   | Size              | Effort to close                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
+| **A — Activation gap**   | Pure-JS kernels in `functions/src/typed/` that _already have a WASM kernel_ but never call it — the JS fallback always runs. | ~60–100 functions | Low–medium (wiring, not porting) |
+| **B — True porting gap** | Pure, import-free functions with **no WASM kernel at all**.                                                                  | ~45 functions     | Medium–high (new WASM code)      |
 
 The single most important concrete fact: **`functions/src/typed/special.ts`'s
 `getWasm()` returns `null` unconditionally** (line 25-32, comment: _"Currently

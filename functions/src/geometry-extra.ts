@@ -25,8 +25,7 @@ export function haversine(
   const phi2 = toRad(lat2);
   const dPhi = toRad(lat2 - lat1);
   const dLambda = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
+  const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
   return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -96,7 +95,10 @@ export function quaternionFromAxisAngle(axis: Vec3, angle: number): number[] {
 
 /** Rotate a 3-vector by a (unit) quaternion: `q · [0,v] · q⁻¹`. */
 export function quaternionRotate(q: Quat, v: Vec3): number[] {
-  const r = quaternionMultiply(quaternionMultiply(q, [0, v[0], v[1], v[2]]), quaternionConjugate(q));
+  const r = quaternionMultiply(
+    quaternionMultiply(q, [0, v[0], v[1], v[2]]),
+    quaternionConjugate(q)
+  );
   return [r[1], r[2], r[3]];
 }
 

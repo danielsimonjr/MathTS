@@ -69,7 +69,8 @@ describe('GC7: multiply(2D, 2D) via accelerated backend', () => {
         return s;
       })
     );
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) expect(got[i][j]).toBeCloseTo(ref[i][j], 9);
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++) expect(got[i][j]).toBeCloseTo(ref[i][j], 9);
   });
 
   it('rejects non-2D Array operands with a clear message', () => {

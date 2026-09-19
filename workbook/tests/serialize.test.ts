@@ -33,7 +33,13 @@ describe('serializeWorkbook round-trip', () => {
     const out = roundTrip(
       wb([
         { id: 'a', type: 'code', content: '10' },
-        { id: 'b', type: 'code', content: 'a * 2', dependsOn: ['a'], metadata: { note: 'doubles a' } },
+        {
+          id: 'b',
+          type: 'code',
+          content: 'a * 2',
+          dependsOn: ['a'],
+          metadata: { note: 'doubles a' },
+        },
         { id: 'doc', type: 'markdown', content: '# Title' },
       ])
     );
@@ -64,7 +70,9 @@ describe('serializeWorkbook round-trip', () => {
   });
 
   it('round-trips an object output (plain shape)', () => {
-    const out = roundTrip(wb([{ id: 'o', type: 'code', content: '{a:1}', output: { a: 1, b: [2, 3] } }]));
+    const out = roundTrip(
+      wb([{ id: 'o', type: 'code', content: '{a:1}', output: { a: 1, b: [2, 3] } }])
+    );
     expect(out.cells[0].output).toEqual({ a: 1, b: [2, 3] });
   });
 
@@ -114,7 +122,14 @@ describe('serializeWorkbook robustness', () => {
       version: '1.0',
       metadata: {},
       runtime: { engine: 'mathts', execution: 'reactive' },
-      cells: [{ id: 'a', type: 'code', content: '1', output: { ['__proto__']: { polluted: true } } as object }],
+      cells: [
+        {
+          id: 'a',
+          type: 'code',
+          content: '1',
+          output: { ['__proto__']: { polluted: true } } as object,
+        },
+      ],
     };
     const yaml = serializeWorkbook(danger);
     const result = parseWorkbook(yaml);

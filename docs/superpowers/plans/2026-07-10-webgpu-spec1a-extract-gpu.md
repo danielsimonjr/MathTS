@@ -32,35 +32,37 @@
 ## File Structure
 
 **New package `gpu/` (leaf):**
-| File | Responsibility |
-|---|---|
-| `gpu/package.json` | Package manifest — `@danielsimonjr/mathts-gpu`, version `0.1.0`, ESM, tsup `--dts` build, `@webgpu/types` devDep. |
-| `gpu/tsconfig.json` | Extends base; `types: ["@webgpu/types","node"]`; includes `src/**`, excludes `tests`. |
-| `gpu/vitest.config.ts` | node environment, `tests/**/*.test.ts`. |
-| `gpu/README.md` | One-paragraph description + CDG nickname note. |
-| `gpu/src/detect.ts` | WebGPU capability probing (moved verbatim from matrix). |
-| `gpu/src/GPUContext.ts` | Device/adapter lifecycle; **hardened** never-throw single-flight `initialize`. |
-| `gpu/src/BufferPool.ts` | GPU buffer recycling (moved verbatim). |
-| `gpu/src/ShaderManager.ts` | **Generic** compile/cache/pipeline infra + name→code registration API. NO builtins. |
-| `gpu/src/device.ts` | Shared `getGpuDevice()` / `resetGpuDevice()` single-flight singleton. |
-| `gpu/src/index.ts` | Barrel — re-exports the whole foundation surface. |
-| `gpu/tests/*.test.ts` | Headless unit tests (detect / context / device / shader-manager / bufferpool). |
+
+| File                       | Responsibility                                                                                                    |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `gpu/package.json`         | Package manifest — `@danielsimonjr/mathts-gpu`, version `0.1.0`, ESM, tsup `--dts` build, `@webgpu/types` devDep. |
+| `gpu/tsconfig.json`        | Extends base; `types: ["@webgpu/types","node"]`; includes `src/**`, excludes `tests`.                             |
+| `gpu/vitest.config.ts`     | node environment, `tests/**/*.test.ts`.                                                                           |
+| `gpu/README.md`            | One-paragraph description + CDG nickname note.                                                                    |
+| `gpu/src/detect.ts`        | WebGPU capability probing (moved verbatim from matrix).                                                           |
+| `gpu/src/GPUContext.ts`    | Device/adapter lifecycle; **hardened** never-throw single-flight `initialize`.                                    |
+| `gpu/src/BufferPool.ts`    | GPU buffer recycling (moved verbatim).                                                                            |
+| `gpu/src/ShaderManager.ts` | **Generic** compile/cache/pipeline infra + name→code registration API. NO builtins.                               |
+| `gpu/src/device.ts`        | Shared `getGpuDevice()` / `resetGpuDevice()` single-flight singleton.                                             |
+| `gpu/src/index.ts`         | Barrel — re-exports the whole foundation surface.                                                                 |
+| `gpu/tests/*.test.ts`      | Headless unit tests (detect / context / device / shader-manager / bufferpool).                                    |
 
 **Matrix changes:**
-| File | Change |
-|---|---|
-| `matrix/src/backends/gpu/detect.ts` | **Delete** (moved to gpu). |
-| `matrix/src/backends/gpu/GPUContext.ts` | **Delete** (moved to gpu). |
-| `matrix/src/backends/gpu/BufferPool.ts` | **Delete** (moved to gpu). |
-| `matrix/src/backends/gpu/ShaderManager.ts` | **Delete** (generic half moved to gpu; builtins → `builtin-shaders.ts`). |
-| `matrix/src/backends/gpu/builtin-shaders.ts` | **Create** — `BUILTIN_SHADERS` + `registerBuiltinShaders(sm)`. |
-| `matrix/src/backends/gpu/index.ts` | **Rewrite** — re-export foundation from the gpu package + local builtins/BatchExecutor/Sync. |
-| `matrix/src/backends/gpu/BatchExecutor.ts` | Retarget type imports to the package; `getBuiltinPipeline` → `getRegisteredPipeline`. |
-| `matrix/src/backends/gpu/Sync.ts` | Retarget type imports to the package. |
-| `matrix/src/backends/GPUBackend.ts` | Import foundation from the package; register builtins at init; `getBuiltinPipeline` → `getRegisteredPipeline`. |
-| `matrix/src/backends/GPUMatrixBackend.ts` | Import `hasWebGPU`/`detectGPUCapabilities`/`GPUCapabilities` from the package. |
-| `matrix/tests/gpu/{initialization,integration,operations}.test.ts` | Retarget deleted-file imports to the package / `builtin-shaders.js`. |
-| `matrix/package.json` | Add `"@danielsimonjr/mathts-gpu": "^0.1.0"` dependency. |
+
+| File                                                               | Change                                                                                                         |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `matrix/src/backends/gpu/detect.ts`                                | **Delete** (moved to gpu).                                                                                     |
+| `matrix/src/backends/gpu/GPUContext.ts`                            | **Delete** (moved to gpu).                                                                                     |
+| `matrix/src/backends/gpu/BufferPool.ts`                            | **Delete** (moved to gpu).                                                                                     |
+| `matrix/src/backends/gpu/ShaderManager.ts`                         | **Delete** (generic half moved to gpu; builtins → `builtin-shaders.ts`).                                       |
+| `matrix/src/backends/gpu/builtin-shaders.ts`                       | **Create** — `BUILTIN_SHADERS` + `registerBuiltinShaders(sm)`.                                                 |
+| `matrix/src/backends/gpu/index.ts`                                 | **Rewrite** — re-export foundation from the gpu package + local builtins/BatchExecutor/Sync.                   |
+| `matrix/src/backends/gpu/BatchExecutor.ts`                         | Retarget type imports to the package; `getBuiltinPipeline` → `getRegisteredPipeline`.                          |
+| `matrix/src/backends/gpu/Sync.ts`                                  | Retarget type imports to the package.                                                                          |
+| `matrix/src/backends/GPUBackend.ts`                                | Import foundation from the package; register builtins at init; `getBuiltinPipeline` → `getRegisteredPipeline`. |
+| `matrix/src/backends/GPUMatrixBackend.ts`                          | Import `hasWebGPU`/`detectGPUCapabilities`/`GPUCapabilities` from the package.                                 |
+| `matrix/tests/gpu/{initialization,integration,operations}.test.ts` | Retarget deleted-file imports to the package / `builtin-shaders.js`.                                           |
+| `matrix/package.json`                                              | Add `"@danielsimonjr/mathts-gpu": "^0.1.0"` dependency.                                                        |
 
 **Repo wiring:** root `package.json` workspaces `+= "gpu"`; `.changeset/webgpu-spec1a-extract-gpu.md`; regenerated `docs/Architecture/*`; `CLAUDE.md`, `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `TODO.md`.
 

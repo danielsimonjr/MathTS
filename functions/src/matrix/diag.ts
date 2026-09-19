@@ -124,7 +124,11 @@ export const createDiag = /* #__PURE__ */ factory(
         return _diag(x, 0, x.size(), format) as Matrix;
       },
 
-      'Matrix, number, string': function (x: Matrix, k: number, format: string): Matrix | unknown[] {
+      'Matrix, number, string': function (
+        x: Matrix,
+        k: number,
+        format: string
+      ): Matrix | unknown[] {
         return _diag(x, k, x.size(), format);
       },
 

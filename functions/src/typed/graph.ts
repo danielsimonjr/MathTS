@@ -923,8 +923,7 @@ export async function betweennessCentrality(
       vectors.push(_betweennessOnce(adj, directed, normalise, seed === 0 ? 1 : seed));
     }
     return _aggregateBetweenness(vectors, aggregation) as
-      | BetweennessResult
-      | BetweennessRestartResult;
+      BetweennessResult | BetweennessRestartResult;
   }
 
   // Fan-out path: Promise.all (Option B — main thread)
@@ -936,8 +935,7 @@ export async function betweennessCentrality(
   }
   const vectors = await Promise.all(tasks);
   return _aggregateBetweenness(vectors, aggregation) as
-    | BetweennessResult
-    | BetweennessRestartResult;
+    BetweennessResult | BetweennessRestartResult;
 }
 
 // =============================================================================
@@ -1117,8 +1115,7 @@ export async function eigenvectorCentrality(
       vectors.push(_eigenvectorOnce(adj, maxIter, tol, seed === 0 ? 1 : seed));
     }
     return _aggregateEigenvector(vectors, aggregation) as
-      | EigenvectorResult
-      | EigenvectorRestartResult;
+      EigenvectorResult | EigenvectorRestartResult;
   }
 
   // Fan-out path: Promise.all (Option B — main thread)
@@ -1130,6 +1127,5 @@ export async function eigenvectorCentrality(
   }
   const vectors = await Promise.all(tasks);
   return _aggregateEigenvector(vectors, aggregation) as
-    | EigenvectorResult
-    | EigenvectorRestartResult;
+    EigenvectorResult | EigenvectorRestartResult;
 }

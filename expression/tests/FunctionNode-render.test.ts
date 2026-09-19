@@ -138,7 +138,10 @@ describe('FunctionNode - custom handler', () => {
 
 describe('FunctionNode - _toTex / expandTemplate (custom math)', () => {
   it('expands a string template with ${args[0]}', () => {
-    const m = { ...math, myfn: Object.assign((x: number) => x, { toTex: '\\myfn\\left(${args[0]}\\right)' }) };
+    const m = {
+      ...math,
+      myfn: Object.assign((x: number) => x, { toTex: '\\myfn\\left(${args[0]}\\right)' }),
+    };
     const b = buildNodes(m);
     const node = new b.FunctionNode(new b.SymbolNode('myfn'), [new b.ConstantNode(2)]);
     const tex = node.toTex();

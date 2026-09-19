@@ -174,7 +174,10 @@ function multiplyTask(task: MultiplyPayload): Float64Array {
  * Element-wise binary task: computes op(A[i], B[i]) for i in [start, end).
  * Returns the computed slice as a flat Float64Array.
  */
-function elementwiseTask(task: ElementwisePayload, op: (a: number, b: number) => number): Float64Array {
+function elementwiseTask(
+  task: ElementwisePayload,
+  op: (a: number, b: number) => number
+): Float64Array {
   const { aData, bData, start, end } = task;
   const out = new Float64Array(end - start);
 

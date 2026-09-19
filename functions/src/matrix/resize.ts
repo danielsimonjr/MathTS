@@ -61,9 +61,13 @@ export const createResize = /* #__PURE__ */ factory(
         return _resize(x, size);
       },
 
-      'any, Array | Matrix, any': function (x: unknown, size: unknown, defaultValue: unknown): unknown {
+      'any, Array | Matrix, any': function (
+        x: unknown,
+        size: unknown,
+        defaultValue: unknown
+      ): unknown {
         return _resize(x, size, defaultValue);
-      }
+      },
     });
 
     function _resize(x: unknown, size: unknown, defaultValue?: unknown): unknown {

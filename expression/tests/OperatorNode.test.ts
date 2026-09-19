@@ -72,10 +72,11 @@ describe('OperatorNode - construction & identity', () => {
 
   it('throws when op is not a string', () => {
     expect(
-      () => new (OperatorNode as unknown as new (...args: unknown[]) => unknown)(42, 'add', [makeConst(1)])
-    ).toThrow(
-      'string expected for parameter "op"'
-    );
+      () =>
+        new (OperatorNode as unknown as new (...args: unknown[]) => unknown)(42, 'add', [
+          makeConst(1),
+        ])
+    ).toThrow('string expected for parameter "op"');
   });
 
   it('throws when fn is not a string', () => {
@@ -85,9 +86,9 @@ describe('OperatorNode - construction & identity', () => {
   });
 
   it('throws when args is not an array of Nodes', () => {
-    expect(() => new OperatorNode('+', 'add', [42 as unknown as ReturnType<typeof makeConst>])).toThrow(
-      'Array containing Nodes expected'
-    );
+    expect(
+      () => new OperatorNode('+', 'add', [42 as unknown as ReturnType<typeof makeConst>])
+    ).toThrow('Array containing Nodes expected');
   });
 });
 
@@ -193,9 +194,7 @@ describe('OperatorNode - map', () => {
     const node = makeOp('+', 'add', [makeConst(1), makeConst(2)]);
     expect(() =>
       node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
-    ).toThrow(
-      'Callback function must return a Node'
-    );
+    ).toThrow('Callback function must return a Node');
   });
 });
 

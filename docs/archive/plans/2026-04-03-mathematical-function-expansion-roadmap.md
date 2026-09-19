@@ -355,7 +355,7 @@ For compute-intensive functions (Bessel, hypergeometric, optimization), implemen
 | Phase                | Functions | Est. Weeks      | WASM Benefit                      |
 | -------------------- | --------- | --------------- | --------------------------------- |
 | Phase 1 (Foundation) | ~80       | 6-8             | HIGH (expose existing WASM)       |
-| Phase 2 (Expansion)  | ~80       | 8-12            | MEDIUM (new WASM implementations)  |
+| Phase 2 (Expansion)  | ~80       | 8-12            | MEDIUM (new WASM implementations) |
 | Phase 3 (Advanced)   | ~40       | 6-8             | LOW (exotic, niche use cases)     |
 | **Total**            | **~200**  | **20-28 weeks** |                                   |
 

@@ -133,7 +133,9 @@ export const createUsolve = /* #__PURE__ */ factory(
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
-    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
+    } as unknown as Parameters<
+      typeof createSolveValidation
+    >[0]) as unknown as SolveValidationFunction;
 
     /**
      * Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Throws an error if there's no solution.

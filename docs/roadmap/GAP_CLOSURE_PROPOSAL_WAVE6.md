@@ -145,14 +145,14 @@ After Wave 6 lands, the entire MathTS gap-closure roadmap from `FUNCTION_GAPS_AU
 
 **All 5 slices shipped. Roadmap closed.**
 
-| Commit    | Slice | Tests | What landed                                                                  |
-| --------- | ----- | ----- | ---------------------------------------------------------------------------- |
+| Commit    | Slice | Tests | What landed                                                                      |
+| --------- | ----- | ----- | -------------------------------------------------------------------------------- |
 | `d0466b3` | 6.1   | +19   | Matrix Schur primitive + Higham-2008 general-case logm/sqrtm (Björck-Hammarling) |
-| `048e9e1` | 6.2   | +13   | `TapedTensor.eig` non-symmetric reverse-mode AD (Townsend/Magnus-Neudecker)  |
-| `3aac312` | 6.5   | infra | `@vitest/browser` + Playwright WebGPU smoke harness + CI job                 |
-| `bba468b` | 6.3   | +18   | `convex_hull_3d_wasm` QuickHull-3D kernel + `convexHull3D` dispatch          |
-| `2be52f9` | 6.4   | +41   | Carlson `RC/RD/RF/RJ` + incomplete elliptic `F/E/Π` WASM (AssemblyScript)    |
-| `dc5c050` | fix   | —     | Manifest SHA-384 regeneration after combined 6.3+6.4 rebuild + AS wiring     |
+| `048e9e1` | 6.2   | +13   | `TapedTensor.eig` non-symmetric reverse-mode AD (Townsend/Magnus-Neudecker)      |
+| `3aac312` | 6.5   | infra | `@vitest/browser` + Playwright WebGPU smoke harness + CI job                     |
+| `bba468b` | 6.3   | +18   | `convex_hull_3d_wasm` QuickHull-3D kernel + `convexHull3D` dispatch              |
+| `2be52f9` | 6.4   | +41   | Carlson `RC/RD/RF/RJ` + incomplete elliptic `F/E/Π` WASM (AssemblyScript)        |
+| `dc5c050` | fix   | —     | Manifest SHA-384 regeneration after combined 6.3+6.4 rebuild + AS wiring         |
 
 **Suite delta:** 6249 → 6308 tests (+59), 236 → 238 files (+2). 172 WASM integration tests pass. Zero regressions.
 

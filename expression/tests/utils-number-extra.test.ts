@@ -41,7 +41,9 @@ describe('number normalizeFormatOptions - BigNumber-typed branches', () => {
   });
 
   it('accepts a BigNumber wordSize inside an options object', () => {
-    expect(normalizeFormatOptions({ notation: 'hex', wordSize: fbn(8) as unknown as number }).wordSize).toBe(8);
+    expect(
+      normalizeFormatOptions({ notation: 'hex', wordSize: fbn(8) as unknown as number }).wordSize
+    ).toBe(8);
   });
 });
 

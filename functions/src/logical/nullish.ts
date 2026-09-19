@@ -31,15 +31,7 @@ interface NullishDependencies {
 }
 
 type NullishScalarType =
-  | number
-  | bigint
-  | Complex
-  | BigNumber
-  | Fraction
-  | Unit
-  | string
-  | boolean
-  | SparseMatrix;
+  number | bigint | Complex | BigNumber | Fraction | Unit | string | boolean | SparseMatrix;
 
 const name = 'nullish';
 const dependencies = ['typed', 'matrix', 'size', 'flatten', 'deepEqual'];
@@ -110,22 +102,40 @@ export const createNullish = /* #__PURE__ */ factory(
       'DenseMatrix, DenseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: DenseMatrix): DenseMatrix =>
-            matAlgo13xDD(x as unknown as Parameters<typeof matAlgo13xDD>[0], y as unknown as Parameters<typeof matAlgo13xDD>[1], self) as unknown as DenseMatrix
+            matAlgo13xDD(
+              x as unknown as Parameters<typeof matAlgo13xDD>[0],
+              y as unknown as Parameters<typeof matAlgo13xDD>[1],
+              self
+            ) as unknown as DenseMatrix
       ),
       'DenseMatrix, SparseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: SparseMatrix): DenseMatrix =>
-            matAlgo03xDSf(x as unknown as Parameters<typeof matAlgo03xDSf>[0], y as unknown as Parameters<typeof matAlgo03xDSf>[1], self, false) as unknown as DenseMatrix
+            matAlgo03xDSf(
+              x as unknown as Parameters<typeof matAlgo03xDSf>[0],
+              y as unknown as Parameters<typeof matAlgo03xDSf>[1],
+              self,
+              false
+            ) as unknown as DenseMatrix
       ),
       'DenseMatrix, Array': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: unknown[]): DenseMatrix =>
-            matAlgo13xDD(x as unknown as Parameters<typeof matAlgo13xDD>[0], toMatrix(y) as unknown as Parameters<typeof matAlgo13xDD>[1], self) as unknown as DenseMatrix
+            matAlgo13xDD(
+              x as unknown as Parameters<typeof matAlgo13xDD>[0],
+              toMatrix(y) as unknown as Parameters<typeof matAlgo13xDD>[1],
+              self
+            ) as unknown as DenseMatrix
       ),
       'DenseMatrix, any': typed.referToSelf(
         (self: TypedFunction) =>
           (x: DenseMatrix, y: unknown): DenseMatrix =>
-            matAlgo14xDs(x as unknown as Parameters<typeof matAlgo14xDs>[0], y, self, false) as unknown as DenseMatrix
+            matAlgo14xDs(
+              x as unknown as Parameters<typeof matAlgo14xDs>[0],
+              y,
+              self,
+              false
+            ) as unknown as DenseMatrix
       ),
 
       // Array-first handlers (bridge via matrix() where needed)
@@ -133,23 +143,43 @@ export const createNullish = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown[]): unknown[][] =>
             (
-              matAlgo13xDD(toMatrix(x) as unknown as Parameters<typeof matAlgo13xDD>[0], toMatrix(y) as unknown as Parameters<typeof matAlgo13xDD>[1], self) as unknown as DenseMatrix
+              matAlgo13xDD(
+                toMatrix(x) as unknown as Parameters<typeof matAlgo13xDD>[0],
+                toMatrix(y) as unknown as Parameters<typeof matAlgo13xDD>[1],
+                self
+              ) as unknown as DenseMatrix
             ).valueOf() as unknown[][]
       ),
       'Array, DenseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: DenseMatrix): DenseMatrix =>
-            matAlgo13xDD(toMatrix(x) as unknown as Parameters<typeof matAlgo13xDD>[0], y as unknown as Parameters<typeof matAlgo13xDD>[1], self) as unknown as DenseMatrix
+            matAlgo13xDD(
+              toMatrix(x) as unknown as Parameters<typeof matAlgo13xDD>[0],
+              y as unknown as Parameters<typeof matAlgo13xDD>[1],
+              self
+            ) as unknown as DenseMatrix
       ),
       'Array, SparseMatrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: SparseMatrix): DenseMatrix =>
-            matAlgo03xDSf(toMatrix(x) as unknown as Parameters<typeof matAlgo03xDSf>[0], y as unknown as Parameters<typeof matAlgo03xDSf>[1], self, false) as unknown as DenseMatrix
+            matAlgo03xDSf(
+              toMatrix(x) as unknown as Parameters<typeof matAlgo03xDSf>[0],
+              y as unknown as Parameters<typeof matAlgo03xDSf>[1],
+              self,
+              false
+            ) as unknown as DenseMatrix
       ),
       'Array, any': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[], y: unknown): unknown[][] =>
-            (matAlgo14xDs(toMatrix(x) as unknown as Parameters<typeof matAlgo14xDs>[0], y, self, false) as unknown as DenseMatrix).valueOf() as unknown[][]
+            (
+              matAlgo14xDs(
+                toMatrix(x) as unknown as Parameters<typeof matAlgo14xDs>[0],
+                y,
+                self,
+                false
+              ) as unknown as DenseMatrix
+            ).valueOf() as unknown[][]
       ),
     }) as unknown as TypedFunction;
   }

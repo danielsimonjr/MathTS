@@ -23,7 +23,9 @@ export function gradient(y: Vec, x?: Vec | number): number[] {
     typeof x === 'number'
       ? Array.from({ length: n }, (_, i) => i * x)
       : x !== undefined
-        ? (Array.isArray(x) ? (x as number[]) : Array.from(x))
+        ? Array.isArray(x)
+          ? (x as number[])
+          : Array.from(x)
         : Array.from({ length: n }, (_, i) => i);
   const out = new Array<number>(n);
   out[0] = (a[1] - a[0]) / (coord[1] - coord[0]);

@@ -212,18 +212,18 @@ const result = backendManager.multiply(a, b); // Never throws
 
 ## Backend Comparison
 
-| Feature            | JS       | WASM-AS                                | GPU      |
-| ------------------ | -------- | -------------------------------------- | -------- |
-| Initialization     | Instant  | ~10ms                                  | ~100ms   |
-| Small matrices     | Fastest  | Overhead                               | Overhead |
-| Medium matrices    | Slow     | Fast                                   | Overhead |
-| Large matrices     | Slowest  | Fast                                   | Fastest  |
-| SIMD support       | No       | Yes                                    | N/A      |
-| Parallel execution | No       | Limited                                | Yes      |
-| Memory efficiency  | Good     | Good                                   | Best     |
-| Browser support    | 100%     | 95%+                                   | 60%+     |
-| Status             | Fallback | Active (sole WASM backend)             | Planned  |
-| Binary location    | —        | `mathts-as.wasm`                       | —        |
+| Feature            | JS       | WASM-AS                    | GPU      |
+| ------------------ | -------- | -------------------------- | -------- |
+| Initialization     | Instant  | ~10ms                      | ~100ms   |
+| Small matrices     | Fastest  | Overhead                   | Overhead |
+| Medium matrices    | Slow     | Fast                       | Overhead |
+| Large matrices     | Slowest  | Fast                       | Fastest  |
+| SIMD support       | No       | Yes                        | N/A      |
+| Parallel execution | No       | Limited                    | Yes      |
+| Memory efficiency  | Good     | Good                       | Best     |
+| Browser support    | 100%     | 95%+                       | 60%+     |
+| Status             | Fallback | Active (sole WASM backend) | Planned  |
+| Binary location    | —        | `mathts-as.wasm`           | —        |
 
 ## Troubleshooting
 

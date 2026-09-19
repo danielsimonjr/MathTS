@@ -222,8 +222,7 @@ export const createCeil = /* #__PURE__ */ factory(
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since ceil(0) = 0
             return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
-              | unknown[]
-              | Matrix;
+              unknown[] | Matrix;
           }
       ),
 
@@ -252,14 +251,24 @@ export const createCeil = /* #__PURE__ */ factory(
       'SparseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo11xS0s(x as unknown as Parameters<typeof matAlgo11xS0s>[0], y, self, false) as unknown as Matrix;
+            return matAlgo11xS0s(
+              x as unknown as Parameters<typeof matAlgo11xS0s>[0],
+              y,
+              self,
+              false
+            ) as unknown as Matrix;
           }
       ),
 
       'DenseMatrix, number | BigNumber': typed.referToSelf(
         (self: TypedFunction) =>
           (x: Matrix, y: number | BigNumberType): Matrix => {
-            return matAlgo14xDs(x as unknown as Parameters<typeof matAlgo14xDs>[0], y, self, false) as unknown as Matrix;
+            return matAlgo14xDs(
+              x as unknown as Parameters<typeof matAlgo14xDs>[0],
+              y,
+              self,
+              false
+            ) as unknown as Matrix;
           }
       ),
 
@@ -267,7 +276,12 @@ export const createCeil = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: number | ComplexType | FractionType | BigNumberType, y: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(y) as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true)).valueOf() as unknown[];
+            return matAlgo14xDs(
+              matrix(y) as unknown as Parameters<typeof matAlgo14xDs>[0],
+              x,
+              self,
+              true
+            ).valueOf() as unknown[];
           }
       ),
 
@@ -276,9 +290,19 @@ export const createCeil = /* #__PURE__ */ factory(
           (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
             if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true) as unknown as Matrix;
+              return matAlgo14xDs(
+                y as unknown as Parameters<typeof matAlgo14xDs>[0],
+                x,
+                self,
+                true
+              ) as unknown as Matrix;
             }
-            return matAlgo12xSfs(y as unknown as Parameters<typeof matAlgo12xSfs>[0], x, self, true) as unknown as Matrix;
+            return matAlgo12xSfs(
+              y as unknown as Parameters<typeof matAlgo12xSfs>[0],
+              x,
+              self,
+              true
+            ) as unknown as Matrix;
           }
       ),
     });

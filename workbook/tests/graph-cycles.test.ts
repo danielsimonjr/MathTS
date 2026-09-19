@@ -13,11 +13,7 @@ function cell(id: string, dependsOn: string[] = []): Cell {
 
 describe('detectCycles - longer cycles and clean DAGs', () => {
   it('should detect a three-node cycle a -> b -> c -> a', () => {
-    const graph = buildDependencyGraph([
-      cell('a', ['c']),
-      cell('b', ['a']),
-      cell('c', ['b']),
-    ]);
+    const graph = buildDependencyGraph([cell('a', ['c']), cell('b', ['a']), cell('c', ['b'])]);
     const cycles = detectCycles(graph);
     expect(cycles.length).toBeGreaterThan(0);
     // The reported cycle should reference the participating nodes.

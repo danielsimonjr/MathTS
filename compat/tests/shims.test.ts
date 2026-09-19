@@ -310,6 +310,20 @@ describe('variadic arithmetic (regression: silent arg-dropping)', () => {
   });
 
   it('matrix operands still work with the variadic wrapper', () => {
-    expect(add([[1, 2], [3, 4]], [[5, 6], [7, 8]])).toEqual([[6, 8], [10, 12]]);
+    expect(
+      add(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [
+          [5, 6],
+          [7, 8],
+        ]
+      )
+    ).toEqual([
+      [6, 8],
+      [10, 12],
+    ]);
   });
 });

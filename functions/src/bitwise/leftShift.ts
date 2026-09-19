@@ -91,7 +91,12 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone();
               }
-              return matAlgo11xS0s(x as unknown as Parameters<typeof matAlgo11xS0s>[0], y, self, false) as unknown as Matrix;
+              return matAlgo11xS0s(
+                x as unknown as Parameters<typeof matAlgo11xS0s>[0],
+                y,
+                self,
+                false
+              ) as unknown as Matrix;
             }
         ),
 
@@ -102,7 +107,12 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(y, 0)) {
                 return x.clone();
               }
-              return matAlgo14xDs(x as unknown as Parameters<typeof matAlgo14xDs>[0], y, self, false) as unknown as Matrix;
+              return matAlgo14xDs(
+                x as unknown as Parameters<typeof matAlgo14xDs>[0],
+                y,
+                self,
+                false
+              ) as unknown as Matrix;
             }
         ),
 
@@ -113,7 +123,12 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
               }
-              return matAlgo10xSids(y as unknown as Parameters<typeof matAlgo10xSids>[0], x, self, true) as unknown as Matrix;
+              return matAlgo10xSids(
+                y as unknown as Parameters<typeof matAlgo10xSids>[0],
+                x,
+                self,
+                true
+              ) as unknown as Matrix;
             }
         ),
 
@@ -124,7 +139,12 @@ export const createLeftShift = /* #__PURE__ */ factory(
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
               }
-              return matAlgo14xDs(y as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true) as unknown as Matrix;
+              return matAlgo14xDs(
+                y as unknown as Parameters<typeof matAlgo14xDs>[0],
+                x,
+                self,
+                true
+              ) as unknown as Matrix;
             }
         ),
       },

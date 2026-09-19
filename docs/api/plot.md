@@ -102,15 +102,15 @@ to external tools that must be pre-installed on PATH — no bundled renderer.
 import { renderToFile, latexToPdf, PlotRenderError } from '@danielsimonjr/mathts-plot/render';
 ```
 
-| Export            | Signature                                                    | Description                                                              |
-| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `renderToFile`    | `(svg, outPath, opts?: RenderOptions) => ...`                | SVG → PNG/PDF via `rsvg-convert` or `resvg`                              |
-| `latexToPdf`      | `(texSource, outPath, opts?: RenderOptions) => ...`          | TikZ/LaTeX → PDF via `pdflatex` or `tectonic`                            |
-| `runTool`         | `(...) => ...`                                               | Low-level external-tool invocation                                       |
-| `hasTool`         | `(...) => boolean`                                           | Probe whether a tool is on PATH                                          |
-| `latexArgs`       | `(...) => ...`                                               | Build LaTeX engine args                                                  |
-| `PlotRenderError` | `extends Error` — `readonly missingTool?: string`            | Plot's one deliberate exception (missing tool or I/O failure)            |
-| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background? }`               | Render options                                                           |
+| Export            | Signature                                           | Description                                                   |
+| ----------------- | --------------------------------------------------- | ------------------------------------------------------------- |
+| `renderToFile`    | `(svg, outPath, opts?: RenderOptions) => ...`       | SVG → PNG/PDF via `rsvg-convert` or `resvg`                   |
+| `latexToPdf`      | `(texSource, outPath, opts?: RenderOptions) => ...` | TikZ/LaTeX → PDF via `pdflatex` or `tectonic`                 |
+| `runTool`         | `(...) => ...`                                      | Low-level external-tool invocation                            |
+| `hasTool`         | `(...) => boolean`                                  | Probe whether a tool is on PATH                               |
+| `latexArgs`       | `(...) => ...`                                      | Build LaTeX engine args                                       |
+| `PlotRenderError` | `extends Error` — `readonly missingTool?: string`   | Plot's one deliberate exception (missing tool or I/O failure) |
+| `RenderOptions`   | `{ tool?, timeoutMs?, density?, background? }`      | Render options                                                |
 
 > `PlotRenderError` is exported **only** from `./render`, never from the main
 > `.` entry.

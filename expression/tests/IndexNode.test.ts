@@ -154,9 +154,7 @@ describe('IndexNode - map', () => {
     const node = new IndexNode([makeConst(0)]);
     expect(() =>
       node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
-    ).toThrow(
-      'Callback function must return a Node'
-    );
+    ).toThrow('Callback function must return a Node');
   });
 });
 

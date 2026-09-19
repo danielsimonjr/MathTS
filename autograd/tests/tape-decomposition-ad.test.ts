@@ -1063,7 +1063,12 @@ describe('TapedTensor.eig (non-symmetric) — backward correctness (FD)', () => 
       // eigvals to a constant taped tensor allocated on the SAME tape with input grad
       // we ignore.
       const { id: cId } = tape.allocate(eigvals.shape[0]);
-      return new TapedTensor([eigvals.shape[0]], new Float64Array(eigvals.shape[0]).fill(1), tape, cId);
+      return new TapedTensor(
+        [eigvals.shape[0]],
+        new Float64Array(eigvals.shape[0]).fill(1),
+        tape,
+        cId
+      );
     })();
     const shifted = eigvals.add(onesT);
     const out = shifted.square().sum();

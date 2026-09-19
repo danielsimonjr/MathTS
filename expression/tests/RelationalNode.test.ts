@@ -46,16 +46,18 @@ describe('RelationalNode - construction & identity', () => {
 
   it('has isNode = true', () => {
     expect(
-      (new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]) as unknown as {
-        isNode: boolean;
-      }).isNode
+      (
+        new RelationalNode(['smaller'], [makeConst(1), makeConst(2)]) as unknown as {
+          isNode: boolean;
+        }
+      ).isNode
     ).toBe(true);
   });
 
   it('throws when conditionals is not an array', () => {
-    expect(() => new RelationalNode('smaller' as unknown as string[], [makeConst(1), makeConst(2)])).toThrow(
-      'Parameter conditionals must be an array'
-    );
+    expect(
+      () => new RelationalNode('smaller' as unknown as string[], [makeConst(1), makeConst(2)])
+    ).toThrow('Parameter conditionals must be an array');
   });
 
   it('throws when params is not an array', () => {

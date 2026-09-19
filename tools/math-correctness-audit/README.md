@@ -18,7 +18,7 @@ JSON files of inputs and results.
 ## Layout
 
 - `audit.py` — single source of oracle truth. A registry of `reg(name, pkg,
-  kind, sampler, oracle)` entries (one per function). Two modes:
+kind, sampler, oracle)` entries (one per function). Two modes:
   - `gen` → `inputs.json` (args for Node) + `oracle.json` (id → oracle value)
   - `report` → `report.md` (mean/max rel.err per function; FLAGs > 1e-6)
 - `eval.mjs` — reads `inputs.json`, calls MathTS from each package's built

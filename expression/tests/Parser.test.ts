@@ -133,7 +133,9 @@ describe('Parser - evaluate', () => {
   it('throws a TypeError if expr is not a string or string array', () => {
     const p = new ParserClass();
     expect(() => p.evaluate(123 as any)).toThrow(TypeError);
-    expect(() => p.evaluate(123 as any)).toThrow('String or string array expected for parameter "expr"');
+    expect(() => p.evaluate(123 as any)).toThrow(
+      'String or string array expected for parameter "expr"'
+    );
     expect(() => p.evaluate({} as any)).toThrow(TypeError);
   });
 });

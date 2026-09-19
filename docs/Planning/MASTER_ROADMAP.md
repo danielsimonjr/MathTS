@@ -50,14 +50,14 @@
 | Workbench Specification | 229 KB | docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md |
 | Enhancement Roadmap     | 46 KB  | docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md     |
 | Workbook Specification  | 8 KB   | docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md  |
-| ISE Gap Analysis        | 8 KB   | docs/archive/plans/2026-03-05-ise-gap-analysis.md                    |
+| ISE Gap Analysis        | 8 KB   | docs/archive/plans/2026-03-05-ise-gap-analysis.md            |
 
 ## Plan Documents
 
 | Plan                                | Location                                                    |
 | ----------------------------------- | ----------------------------------------------------------- |
 | mathjs Sync Roadmap (207 functions) | docs/roadmap/MATHJS_SYNC_ROADMAP.md                         |
-| Scientific Calculator Plan          | docs/archive/plans/2026-03-04-scientific-calculator-plan.md         |
-| ISE Workbench Plan (16 tasks)       | docs/archive/plans/2026-03-05-ise-workbench-plan.md                 |
-| Deno Notebook Option                | docs/archive/plans/2026-03-05-deno-notebook-option.md               |
-| New Math Functions Design           | docs/archive/plans/2026-04-05-new-math-functions-design.md          |
+| Scientific Calculator Plan          | docs/archive/plans/2026-03-04-scientific-calculator-plan.md |
+| ISE Workbench Plan (16 tasks)       | docs/archive/plans/2026-03-05-ise-workbench-plan.md         |
+| Deno Notebook Option                | docs/archive/plans/2026-03-05-deno-notebook-option.md       |
+| New Math Functions Design           | docs/archive/plans/2026-04-05-new-math-functions-design.md  |

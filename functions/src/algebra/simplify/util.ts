@@ -249,7 +249,12 @@ export const createUtil = /* #__PURE__ */ factory(
       if (isOperatorNode(node)) {
         return function (args: MathNode[]): MathNode {
           try {
-            return new OperatorNode((node as OpNodeLike).op, (node as OpNodeLike).fn, args, (node as OpNodeLike).implicit);
+            return new OperatorNode(
+              (node as OpNodeLike).op,
+              (node as OpNodeLike).fn,
+              args,
+              (node as OpNodeLike).implicit
+            );
           } catch (err) {
             console.error(err);
             return [] as unknown as MathNode;

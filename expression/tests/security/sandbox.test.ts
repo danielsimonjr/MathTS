@@ -159,7 +159,10 @@ describe('security: sandbox via tree-walking compiler', () => {
       sum: constantNode(3),
       label: constantNode('ok'),
     });
-    expect(compile(node as unknown as MathNode, mathScope).evaluate()).toEqual({ sum: 3, label: 'ok' });
+    expect(compile(node as unknown as MathNode, mathScope).evaluate()).toEqual({
+      sum: 3,
+      label: 'ok',
+    });
   });
 });
 

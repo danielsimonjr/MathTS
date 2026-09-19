@@ -151,7 +151,10 @@ describe('MATHTS_CONVERSIONS convert callbacks', () => {
   });
 
   it('Array -> Matrix builds a dense-shaped descriptor with get()', () => {
-    const m = convert('Array', 'Matrix')([
+    const m = convert(
+      'Array',
+      'Matrix'
+    )([
       [1, 2],
       [3, 4],
     ]) as { rows: number; cols: number; type: string; get: (r: number, c: number) => number };

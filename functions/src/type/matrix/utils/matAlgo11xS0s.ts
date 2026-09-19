@@ -92,7 +92,11 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
           cf = _cfCache!;
         } else {
           // find signature that matches (dt, dt)
-          eq = (typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [dt, dt]) as EqualScalarFunction) || equalScalar;
+          eq =
+            (typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [
+              dt,
+              dt,
+            ]) as EqualScalarFunction) || equalScalar;
           // callback
           cf = (typed.find(callback, [dt, dt]) as unknown as MatrixCallback) || callback;
 

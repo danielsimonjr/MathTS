@@ -20,10 +20,6 @@
  * @packageDocumentation
  */
 
-export {
-  compile,
-  createEvaluate,
-  compileExpression,
-} from '@danielsimonjr/mathts-expression';
+export { compile, createEvaluate, compileExpression } from '@danielsimonjr/mathts-expression';
 
 export type { CompiledExpression, Scope } from '@danielsimonjr/mathts-expression';

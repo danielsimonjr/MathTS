@@ -16,8 +16,8 @@ import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 /** Multiply two DenseMatrices and return a plain 2D array. */
 function mul(a: DenseMatrix, b: DenseMatrix): number[][] {
   if (a.cols === 0 || b.rows === 0) {
-      // Degenerate zero-dimension matrices
-      return Array.from({ length: a.rows }, () => Array(b.cols).fill(0));
+    // Degenerate zero-dimension matrices
+    return Array.from({ length: a.rows }, () => Array(b.cols).fill(0));
   }
   return a.multiply(b).toArray();
 }

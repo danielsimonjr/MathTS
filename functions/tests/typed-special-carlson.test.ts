@@ -240,10 +240,7 @@ describe('Incomplete elliptic integrals — boundary cases', () => {
 describe('F(π/2, m) = K(m) — consistency with complete integral', () => {
   for (const m of [0.1, 0.5, 0.9]) {
     it(`F(π/2, ${m}) = K(${m})`, () => {
-      const fHalfPi = ellipticFIncompleteJS(
-        new Float64Array([PI / 2]),
-        new Float64Array([m])
-      )[0];
+      const fHalfPi = ellipticFIncompleteJS(new Float64Array([PI / 2]), new Float64Array([m]))[0];
       const kM = ellipticKJS(new Float64Array([m]))[0];
       expect(Math.abs(fHalfPi - kM)).toBeLessThan(TOL);
     });
@@ -257,10 +254,7 @@ describe('F(π/2, m) = K(m) — consistency with complete integral', () => {
 describe('E_incomplete(π/2, m) = E(m) — consistency with complete integral', () => {
   for (const m of [0.0, 0.5, 0.9]) {
     it(`E_incomplete(π/2, ${m}) = E(${m})`, () => {
-      const eHalfPi = ellipticEIncompleteJS(
-        new Float64Array([PI / 2]),
-        new Float64Array([m])
-      )[0];
+      const eHalfPi = ellipticEIncompleteJS(new Float64Array([PI / 2]), new Float64Array([m]))[0];
       const eM = ellipticEJS(new Float64Array([m]))[0];
       expect(Math.abs(eHalfPi - eM)).toBeLessThan(1e-7);
     });

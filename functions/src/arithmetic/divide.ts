@@ -65,15 +65,7 @@ const dependencies = [
 export const createDivide = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    multiply,
-    equalScalar,
-    divideScalar,
-    pinv,
-    nodeOperations,
-  }: Dependencies) => {
+  ({ typed, matrix, multiply, equalScalar, divideScalar, pinv, nodeOperations }: Dependencies) => {
     const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
