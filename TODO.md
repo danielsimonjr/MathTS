@@ -72,9 +72,9 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 > - [x] **Phase 3 — force Bun as the process runtime** (`[run].bun = true` in `bunfig.toml`). Blocked by
 >       `asc` (AssemblyScript) and every `node tools/*.mjs` script: verify each under the Bun runtime.
 >       **Done (branch `chore/bun-phase-3`):** `asc` wasm byte-identical under both runtimes; see CHANGELOG.
-> - [ ] **Phase 4 — drop the Node requirement** (`engines.node`, the CI Node matrix and setup-node)
+> - [x] **Phase 4 — drop the Node requirement** (`engines.node`, the CI Node matrix and setup-node)
 >       where nothing needs it. Consumers of the published packages still run Node: keep the Node matrix
->       for a smoke test of the built `dist`, and drop it only for the toolchain.
+>       for a smoke test of the built `dist`, and drop it only for the toolchain. _Done in PR #288._
 >
 > ## 🎉 BACKLOG BURN-DOWN SWEEP — 2026-07-18/19 (13 items, 9 releases, all oracle-pinned)
 >
