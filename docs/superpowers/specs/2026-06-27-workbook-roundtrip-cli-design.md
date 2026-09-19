@@ -36,11 +36,13 @@ Complete the symmetric other half of the parser — **`serializeWorkbook`** (loa
 ## 4. Components
 
 ### 4.1 `parser.ts` — read `output`/`error` back
+
 - Add `output` and `error` to `RESERVED_CELL_KEYS` so they are NOT swept into `metadata`.
 - In `mapCell`, when present, set `cell.output = raw.output` and `cell.error = String(raw.error)`.
 - Round-trip invariant: a cell serialized with output/error parses back with the same `output`/`error` (best-effort value fidelity per §3.1).
 
 ### 4.2 `parser.ts` — implement `serializeWorkbook(workbook): string`
+
 - Build a plain object: `{ version, metadata, runtime, cells: [...] }`.
   - Omit empty `metadata` and default `runtime`? **No** — emit them for a stable, explicit document (round-trip is what matters, not minimality). Always emit `version`, `metadata` (even if `{}`), `runtime`.
   - Each cell → `{ [cell.type]: cell.content, id, ...(dependsOn ? {depends_on} : {}), ...metadata, ...(output !== undefined ? {output} : {}), ...(error ? {error} : {}) }`. The single type key carries the content (so `detectCellType`/the exactly-one-type-key rule re-detects it on parse).
@@ -48,30 +50,37 @@ Complete the symmetric other half of the parser — **`serializeWorkbook`** (loa
 - **Throws** only on a structurally invalid workbook (e.g. missing `cells` array) — otherwise total.
 
 ### 4.3 `cli.ts` — `strip`
+
 - `strip <file> [-w|--write]`: read → `parseWorkbook` → on error, stderr + exit 1 → `stripOutputs` → `serializeWorkbook` → **stdout** (default) or **overwrite the file** with `-w`. On `-w`, stdout is a short confirmation; the YAML goes to the file.
 
 ### 4.4 `cli.ts` — `new`
+
 - `new <name> [-t basic] [--force]`: resolve target `<name>.mtsw` (append `.mtsw` if absent). If it exists and no `--force` → stderr + exit 1. Else write the `basic` template (a markdown intro + a `code` cell + a `test` cell that passes) and print the path. Unknown `-t` → stderr listing available templates (`basic`).
 
 ### 4.5 `cli.ts` — `run --write`
+
 - When `--write` is present, after `runReport`, write each result back onto the workbook cell (`cell.output`/`cell.error` from the `CellResult`), then `serializeWorkbook` and overwrite the file. Print the normal run summary; note the file was updated on stderr. Exit code unchanged (`ok ? 0 : 1`). Never writes without `--write`.
 
 ### 4.6 `index.ts`
+
 - `serializeWorkbook` is already exported. Export any new helper used by templates if extracted (e.g. `BASIC_TEMPLATE`); otherwise no change.
 
 ## 5. HELP / surface
+
 Restore `strip`/`new` to HELP (with `run`/`validate`/`graph`). Document `run --write`, `strip -w`, `new -t/--force`. Do not advertise `watch`/`export` (still out of scope).
 
 ## 6. Error handling
-| Failure | Handling |
-|---|---|
-| Parse error in strip/run/new-target | structured errors → stderr, exit 1 |
+
+| Failure                                                  | Handling                             |
+| -------------------------------------------------------- | ------------------------------------ |
+| Parse error in strip/run/new-target                      | structured errors → stderr, exit 1   |
 | `serializeWorkbook` on invalid workbook (no cells array) | throws; CLI catches → stderr, exit 1 |
-| `new` target exists without `--force` | stderr, exit 1 |
-| `new` unknown template | stderr (lists templates), exit 1 |
-| File write failure (`-w`/`--write`/`new`) | caught → stderr, exit 1 |
+| `new` target exists without `--force`                    | stderr, exit 1                       |
+| `new` unknown template                                   | stderr (lists templates), exit 1     |
+| File write failure (`-w`/`--write`/`new`)                | caught → stderr, exit 1              |
 
 ## 7. Testing (vitest, TDD)
+
 - **Rewrite** the `serializeWorkbook` "throws" test → real serialization.
 - **Round-trip** tests: `parseWorkbook(serializeWorkbook(wb))` reproduces structure (ids, types, content incl. multi-line **with leading/trailing whitespace and blank lines**, dependsOn, metadata) for a representative workbook; a primitive `output` (number/string) round-trips; `error` round-trips.
 - **String-output type fidelity**: outputs `"true"`, `"123"`, `"null"`, `"[1,2]"` round-trip as the same STRING (not re-typed) — the gate for the raw-output decision.
@@ -83,12 +92,15 @@ Restore `strip`/`new` to HELP (with `run`/`validate`/`graph`). Document `run --w
 - Update `package-index` smoke test if exports change.
 
 ## 8. Out of scope (unchanged)
+
 GUI; `watch`/`export` commands; non-`basic` templates; `tensor`/`equation`/`visualization`/`export` cells; TypeScript execution; rendering/LaTeX/PDF/ipynb.
 
 ## 9. Global constraints
+
 ESM-only; `.js`-or-extensionless per existing package convention; vitest explicit imports; security invariant untouched (no `Function`/`vm`/`eval`); tsup two entry points; `tsc --noEmit` gate; Conventional Commits; **no `npm publish`** (2FA). A Changesets entry (`minor`) accompanies the change.
 
 ## 10. Acceptance criteria
+
 1. `serializeWorkbook` produces YAML that `parseWorkbook` reads back with identical structure (round-trip test green).
 2. `mtsw new demo && mtsw run demo.mtsw` → scaffolds and runs clean (exit 0).
 3. `mtsw run demo.mtsw --write` persists outputs; re-reading shows them; a subsequent `mtsw strip demo.mtsw` removes them.

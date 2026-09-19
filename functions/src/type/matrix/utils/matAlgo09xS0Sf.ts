@@ -98,7 +98,10 @@ export const createMatAlgo09xS0Sf = /* #__PURE__ */ factory(
         // datatype
         dt = adt;
         // find signature that matches (dt, dt)
-        eq = typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [dt, dt]) as EqualScalarFunction;
+        eq = typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [
+          dt,
+          dt,
+        ]) as EqualScalarFunction;
         // convert 0 to the same datatype
         zero = typed.convert(0, dt);
         // callback

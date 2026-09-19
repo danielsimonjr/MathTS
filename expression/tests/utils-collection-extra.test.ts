@@ -37,7 +37,8 @@ class FakeMatrix {
     walk(this._data);
   }
   map(cb: (x: unknown) => unknown, _skipZeros: boolean, _recurse: boolean) {
-    const walk = (arr: unknown[]): unknown[] => arr.map((v) => (Array.isArray(v) ? walk(v) : cb(v)));
+    const walk = (arr: unknown[]): unknown[] =>
+      arr.map((v) => (Array.isArray(v) ? walk(v) : cb(v)));
     return new FakeMatrix(walk(this._data), this._datatype);
   }
   size() {
@@ -90,7 +91,11 @@ describe('collection - Matrix branches', () => {
       ],
       'number'
     );
-    const reduced = reduce(mat, 0, (acc: number, val: number) => acc + val) as unknown as CollectionMatrix<number>;
+    const reduced = reduce(
+      mat,
+      0,
+      (acc: number, val: number) => acc + val
+    ) as unknown as CollectionMatrix<number>;
     // column-wise sum [1+3, 2+4] = [4, 6]
     expect(reduced.valueOf()).toEqual([4, 6]);
     expect(reduced.datatype()).toBe('number');

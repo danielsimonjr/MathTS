@@ -279,17 +279,17 @@ describe('Unit', () => {
   });
 });
 
-  describe('SOLID_ANGLE / steradian units', () => {
-    it('creates steradian (sr) unit', () => {
-      const u = new Unit(2, 'sr');
-      expect(u.value).toBe(2);
-      expect(u.formatUnits()).toBe('sr');
-      expect(u.type).toBe('Unit');
-    });
-
-    it('creates steradian unit from long name', () => {
-      const u = new Unit(2, 'steradian');
-      expect(u.value).toBe(2);
-      expect(u.formatUnits()).toBe('steradian');
-    });
+describe('SOLID_ANGLE / steradian units', () => {
+  it('creates steradian (sr) unit', () => {
+    const u = new Unit(2, 'sr');
+    expect(u.value).toBe(2);
+    expect(u.formatUnits()).toBe('sr');
+    expect(u.type).toBe('Unit');
   });
+
+  it('creates steradian unit from long name', () => {
+    const u = new Unit(2, 'steradian');
+    expect(u.value).toBe(2);
+    expect(u.formatUnits()).toBe('steradian');
+  });
+});

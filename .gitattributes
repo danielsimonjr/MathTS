@@ -1,0 +1,6 @@
+# Check out every text file with LF endings on every platform.
+# Reason: .prettierrc sets "endOfLine": "lf". With core.autocrlf=true (the
+# Git for Windows default), git wrote CRLF into the working tree, and
+# `prettier --check` then failed on every text file. Stored blobs are LF
+# and stay LF; this rule changes only the working-tree checkout.
+* text=auto eol=lf

@@ -25,9 +25,7 @@ export const createUseMatrixForArrayScalar = /* #__PURE__ */ factory(
     // (signature, callback) call signature here.
     const referTo = typed.referTo as unknown as (
       signature: string,
-      callback: (
-        ...refs: Array<(...args: unknown[]) => unknown>
-      ) => (...args: never[]) => unknown
+      callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
     ) => (...args: unknown[]) => unknown;
 
     return {

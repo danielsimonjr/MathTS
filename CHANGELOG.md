@@ -20,6 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Control: with the bridge deleted and 10.2.1 pinned, the Bun worker tests in
   `packages/workerpool` time out (18 tests at 30 s, then the run hangs).
 - Changeset: patch for mathts-workerpool.
+### fix(format): format:check root cause - CRLF working tree under core.autocrlf
+
+- `bun run format:check` failed on 2,243 files on main. Measured causes:
+  2,085 line endings only, 4 generated files, 154 unformatted files, 0 from
+  a prettier version difference (3.9.8 everywhere, the same binary as lint-staged).
+- Add `.gitattributes` (`* text=auto eol=lf`). `.prettierrc` requires LF, but
+  `core.autocrlf=true` checked out CRLF on Windows. Stored blobs were and stay LF.
+- `.prettierignore`: ignore `*.golden.json` and `tools/codebase-inventory.json`
+  (Python generators write them).
+- Reformat the 154 remaining files. Formatting only: the esbuild output of all
+  115 `.ts` files is identical with whitespace removed, and the JSON parses equal.
+- CI: `Format check` step in Compile & Lint.
 
 ### docs(workbook): doc comments for every exported symbol
 

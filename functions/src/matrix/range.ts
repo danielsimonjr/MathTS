@@ -137,7 +137,11 @@ export const createRange = /* #__PURE__ */ factory(
       'number, number, number': function (start: number, end: number, step: number): unknown {
         return _out(_range(start, end, step, false));
       },
-      'number, number, boolean': function (start: number, end: number, includeEnd: boolean): unknown {
+      'number, number, boolean': function (
+        start: number,
+        end: number,
+        includeEnd: boolean
+      ): unknown {
         return _out(_range(start, end, 1, includeEnd));
       },
       'number, number, number, boolean': function (
@@ -177,7 +181,11 @@ export const createRange = /* #__PURE__ */ factory(
       ): unknown {
         return _out(_range(start, end, 1n, includeEnd));
       },
-      'number, bigint, boolean': function (start: number, end: bigint, includeEnd: boolean): unknown {
+      'number, bigint, boolean': function (
+        start: number,
+        end: bigint,
+        includeEnd: boolean
+      ): unknown {
         return _out(_range(BigInt(start), end, 1n, includeEnd));
       },
       'bigint, bigint|number, bigint|number, boolean': function (
@@ -202,10 +210,18 @@ export const createRange = /* #__PURE__ */ factory(
 
         return _out(_range(start, end, new BigNumber(1), false));
       },
-      'BigNumber, BigNumber, BigNumber': function (start: unknown, end: unknown, step: unknown): unknown {
+      'BigNumber, BigNumber, BigNumber': function (
+        start: unknown,
+        end: unknown,
+        step: unknown
+      ): unknown {
         return _out(_range(start, end, step, false));
       },
-      'BigNumber, BigNumber, boolean': function (start: unknown, end: unknown, includeEnd: boolean): unknown {
+      'BigNumber, BigNumber, boolean': function (
+        start: unknown,
+        end: unknown,
+        includeEnd: boolean
+      ): unknown {
         const BigNumber = (start as { constructor: new (v: number) => unknown }).constructor;
 
         return _out(_range(start, end, new BigNumber(1), includeEnd));
@@ -222,10 +238,18 @@ export const createRange = /* #__PURE__ */ factory(
       'Fraction, Fraction': function (start: unknown, end: unknown): unknown {
         return _out(_range(start, end, 1, false));
       },
-      'Fraction, Fraction, Fraction': function (start: unknown, end: unknown, step: unknown): unknown {
+      'Fraction, Fraction, Fraction': function (
+        start: unknown,
+        end: unknown,
+        step: unknown
+      ): unknown {
         return _out(_range(start, end, step, false));
       },
-      'Fraction, Fraction, boolean': function (start: unknown, end: unknown, includeEnd: boolean): unknown {
+      'Fraction, Fraction, boolean': function (
+        start: unknown,
+        end: unknown,
+        includeEnd: boolean
+      ): unknown {
         return _out(_range(start, end, 1, includeEnd));
       },
       'Fraction, Fraction, Fraction, boolean': function (

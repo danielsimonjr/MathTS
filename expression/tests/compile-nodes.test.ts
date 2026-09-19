@@ -239,19 +239,31 @@ describe('compile - ConditionalNode truthiness', () => {
 
   it('handles boolean conditions', () => {
     expect(
-      compile(conditionalNode(constantNode(true), constantNode('T'), constantNode('F')), mathScope).evaluate()
+      compile(
+        conditionalNode(constantNode(true), constantNode('T'), constantNode('F')),
+        mathScope
+      ).evaluate()
     ).toBe('T');
     expect(
-      compile(conditionalNode(constantNode(false), constantNode('T'), constantNode('F')), mathScope).evaluate()
+      compile(
+        conditionalNode(constantNode(false), constantNode('T'), constantNode('F')),
+        mathScope
+      ).evaluate()
     ).toBe('F');
   });
 
   it('handles string conditions', () => {
     expect(
-      compile(conditionalNode(constantNode('x'), constantNode('T'), constantNode('F')), mathScope).evaluate()
+      compile(
+        conditionalNode(constantNode('x'), constantNode('T'), constantNode('F')),
+        mathScope
+      ).evaluate()
     ).toBe('T');
     expect(
-      compile(conditionalNode(constantNode(''), constantNode('T'), constantNode('F')), mathScope).evaluate()
+      compile(
+        conditionalNode(constantNode(''), constantNode('T'), constantNode('F')),
+        mathScope
+      ).evaluate()
     ).toBe('F');
   });
 
@@ -291,7 +303,11 @@ describe('compile - ConditionalNode truthiness', () => {
 
   it('throws on an unsupported condition type', () => {
     // A plain object with no isZero / re / im is unsupported.
-    const node = conditionalNode(constantNode({ weird: true }), constantNode('T'), constantNode('F'));
+    const node = conditionalNode(
+      constantNode({ weird: true }),
+      constantNode('T'),
+      constantNode('F')
+    );
     expect(() => compile(node, mathScope).evaluate()).toThrow('Unsupported type of condition');
   });
 });

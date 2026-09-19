@@ -138,7 +138,9 @@ export const createLusolve = /* #__PURE__ */ factory(
   ({ typed, matrix, lup, slu, usolve, lsolve, DenseMatrix }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
-    } as unknown as Parameters<typeof createSolveValidation>[0]) as unknown as SolveValidationFunction;
+    } as unknown as Parameters<
+      typeof createSolveValidation
+    >[0]) as unknown as SolveValidationFunction;
 
     /**
      * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.

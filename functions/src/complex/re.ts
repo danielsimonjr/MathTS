@@ -44,8 +44,9 @@ export const createRe = /* #__PURE__ */ factory(name, dependencies, ({ typed }: 
    * @return {number | BigNumber | Array | Matrix} The real part of x
    */
   return typed(name, {
-    'number | BigNumber | Fraction': (x: number | BigNumber | Fraction): number | BigNumber | Fraction =>
-      x,
+    'number | BigNumber | Fraction': (
+      x: number | BigNumber | Fraction
+    ): number | BigNumber | Fraction => x,
     Complex: (x: ComplexType): number => x.re,
     'Array | Matrix': typed.referToSelf(
       (self: TypedFunction) =>

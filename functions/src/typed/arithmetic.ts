@@ -1048,7 +1048,9 @@ export const xgcd = mathTyped('xgcd', {
       a = b;
       b = r;
     }
-    return a.lessThan(zero) ? [a.negate(), lastX.negate(), lastY.negate()] : [a, !a.isZero() ? lastX : zero, lastY];
+    return a.lessThan(zero)
+      ? [a.negate(), lastX.negate(), lastY.negate()]
+      : [a, !a.isZero() ? lastX : zero, lastY];
   },
 });
 

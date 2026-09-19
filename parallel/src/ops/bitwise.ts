@@ -34,12 +34,7 @@ import { calculateOptimalChunks, type ChunkOptions } from '../strategies/chunk.j
  *   above 2^31 wrap into negative range, as in `(x >>> n) | 0`)
  */
 export type BitwiseBinaryOp =
-  | 'bitAnd'
-  | 'bitOr'
-  | 'bitXor'
-  | 'leftShift'
-  | 'rightArithShift'
-  | 'rightLogShift';
+  'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift';
 
 /**
  * Apply a binary bitwise op to one chunk of two parallel `Int32Array`

@@ -162,7 +162,9 @@ describe('Help - toString', () => {
       if (expr === '') return undefined;
       throw new Error('evaluation failed');
     };
-    const HelpWithThrow = createHelpClass({ evaluate: throwEvaluate }) as unknown as HelpConstructor;
+    const HelpWithThrow = createHelpClass({
+      evaluate: throwEvaluate,
+    }) as unknown as HelpConstructor;
     const h = new HelpWithThrow({ examples: ['bad_expr'] });
     // Should not throw, should include the error
     const str = h.toString();

@@ -39,13 +39,7 @@ describe('ComputePool — parallel paths and helpers', () => {
       // directly. ∫_0^1 x dx = 1/2 via 2-point Gauss-Legendre (exact for linear).
       const nodes = [-1 / Math.sqrt(3), 1 / Math.sqrt(3)];
       const weights = [1, 1];
-      const result = await pool.exec<number>('integrateChunk', [
-        '(x) => x',
-        0,
-        1,
-        nodes,
-        weights,
-      ]);
+      const result = await pool.exec<number>('integrateChunk', ['(x) => x', 0, 1, nodes, weights]);
       expect(result).toBeCloseTo(0.5, 9);
     });
   });
@@ -150,17 +144,13 @@ describe('ComputePool — parallel paths and helpers', () => {
     it('rejects out-of-range axesA', async () => {
       const a = new Float64Array([1, 2, 3, 4]);
       const b = new Float64Array([1, 2, 3, 4]);
-      await expect(pool.tensordot(a, [2, 2], b, [2, 2], [5], [0])).rejects.toThrow(
-        /out of range/
-      );
+      await expect(pool.tensordot(a, [2, 2], b, [2, 2], [5], [0])).rejects.toThrow(/out of range/);
     });
 
     it('rejects out-of-range axesB', async () => {
       const a = new Float64Array([1, 2, 3, 4]);
       const b = new Float64Array([1, 2, 3, 4]);
-      await expect(pool.tensordot(a, [2, 2], b, [2, 2], [0], [5])).rejects.toThrow(
-        /out of range/
-      );
+      await expect(pool.tensordot(a, [2, 2], b, [2, 2], [0], [5])).rejects.toThrow(/out of range/);
     });
 
     it('rejects a dimension mismatch on contracted axes', async () => {
@@ -247,9 +237,9 @@ describe('ComputePool — parallel paths and helpers', () => {
     // bitAnd/leftShift mismatches are covered in ComputePool.test.ts; cover the
     // remaining binary ops' guard clauses here.
     it('bitOr throws on length mismatch', async () => {
-      await expect(
-        pool.bitOr(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-      ).rejects.toThrow(/lengths must match/);
+      await expect(pool.bitOr(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))).rejects.toThrow(
+        /lengths must match/
+      );
     });
 
     it('bitXor throws on length mismatch', async () => {

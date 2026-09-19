@@ -24,7 +24,13 @@ interface Matrix {
 }
 
 interface MatrixConstructor {
-  (data: unknown[] | unknown[][] | { values: unknown[]; index: number[]; ptr: number[]; size: number[] }, storage?: 'dense' | 'sparse'): Matrix;
+  (
+    data:
+      | unknown[]
+      | unknown[][]
+      | { values: unknown[]; index: number[]; ptr: number[]; size: number[] },
+    storage?: 'dense' | 'sparse'
+  ): Matrix;
 }
 
 interface FlattenFunction {
@@ -89,7 +95,9 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
           allMatrix &&
           !hasArray &&
           arr.some(
-            (item) => typeof (item as Matrix).storage === 'function' && (item as Matrix).storage() === 'sparse'
+            (item) =>
+              typeof (item as Matrix).storage === 'function' &&
+              (item as Matrix).storage() === 'sparse'
           );
 
         if (isSparse) {

@@ -75,7 +75,7 @@ Horizontal toolbar at top of calculator panel. Icons grouped with vertical separ
 | **Matrix**   | det, inv, A^T, λ (eigenvalues), [grid] (matrix editor)        | Inserts: `det()`, `inv()`, `transpose()`, `eigs()`, opens matrix editor        |
 | **Trig**     | sin, cos, tan, sin⁻¹, cos⁻¹, tan⁻¹, hyp toggle                | Inserts: `sin()`, etc. Hyp toggle switches to sinh/cosh/tanh                   |
 | **Stats**    | x̄ (mean), σ (std), med, hist, reg (regression)                | Inserts: `mean()`, `std()`, `median()`, opens histogram, `polyfit()`           |
-| **Plot**     | 📈 y=f(x), ⟳ parametric, ◎ polar, 🏔 3D, 🗑 clear             | Inserts: `plot()`, `plotParametric()`, `plotPolar()`, `plot3d()`, clears graph |
+| **Plot**     | 📈 y=f(x), ⟳ parametric, ◎ polar, 🏔 3D, 🗑 clear               | Inserts: `plot()`, `plotParametric()`, `plotPolar()`, `plot3d()`, clears graph |
 | **Settings** | DEG/RAD, number type, precision, JS/WASM engine               | Opens dropdown menus for each setting                                          |
 
 **Template insertion behavior**: Clicking an icon inserts the function template into the expression bar with the cursor positioned at the first argument. If text is selected in the expression bar, it wraps the selection. Example: select `x^3`, click d/dx → `derivative("x^3", "x")`.

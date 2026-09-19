@@ -226,7 +226,10 @@ describe('signal — JS reference correctness (non-WASM small inputs)', () => {
 const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
 describeIfWasm('signal — WASM dispatch tier (lib/wasm/mathts.wasm present)', () => {
   const N = 128;
-  const sig = Array.from({ length: N }, (_, i) => Math.sin((2 * Math.PI * 5 * i) / N) + 0.3 * Math.cos((2 * Math.PI * 13 * i) / N));
+  const sig = Array.from(
+    { length: N },
+    (_, i) => Math.sin((2 * Math.PI * 5 * i) / N) + 0.3 * Math.cos((2 * Math.PI * 13 * i) / N)
+  );
 
   // Reference outputs from the pure-JS path (no module loaded).
   let jsDct: number[];

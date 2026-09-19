@@ -348,8 +348,14 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
          * The price is that we miss simplifying [..3d array][x,y,1]
          */
         while (remainingDims.length > 0) {
-          if (isConstantNode(remainingDims[0]) && typeof (remainingDims[0] as unknown as ConstNode).value !== 'string') {
-            const first = _toNumber((remainingDims.shift()! as unknown as ConstNode).value, options) as number;
+          if (
+            isConstantNode(remainingDims[0]) &&
+            typeof (remainingDims[0] as unknown as ConstNode).value !== 'string'
+          ) {
+            const first = _toNumber(
+              (remainingDims.shift()! as unknown as ConstNode).value,
+              options
+            ) as number;
             if (isArrayNode(obj)) {
               obj = (obj as unknown as ArrNode).items[first - 1];
             } else {
@@ -364,9 +370,14 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
             isConstantNode(remainingDims[1]) &&
             typeof (remainingDims[1] as unknown as ConstNode).value !== 'string'
           ) {
-            const second = _toNumber((remainingDims[1] as unknown as ConstNode).value, options) as number;
+            const second = _toNumber(
+              (remainingDims[1] as unknown as ConstNode).value,
+              options
+            ) as number;
             const tryItems: MathNode[] = [];
-            const fromItems = isArrayNode(obj) ? (obj as unknown as ArrNode).items : (obj as { valueOf(): unknown[] }).valueOf();
+            const fromItems = isArrayNode(obj)
+              ? (obj as unknown as ArrNode).items
+              : (obj as { valueOf(): unknown[] }).valueOf();
             for (const item of fromItems) {
               if (isArrayNode(item)) {
                 tryItems.push((item as unknown as ArrNode).items[second - 1]);
@@ -410,7 +421,8 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         (index as unknown as IdxNode).dimensions.length === 1 &&
         isConstantNode((index as unknown as IdxNode).dimensions[0])
       ) {
-        const key = ((index as unknown as IdxNode).dimensions[0] as unknown as ConstNode).value as string;
+        const key = ((index as unknown as IdxNode).dimensions[0] as unknown as ConstNode)
+          .value as string;
         if (key in (obj as unknown as ObjNode).properties) {
           return (obj as unknown as ObjNode).properties[key];
         }
@@ -456,7 +468,8 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           // Encountered a Node, or failed folding --
           // collapse everything so far into a single tree:
           sofar.push(_ensureNode(sofar.pop()));
-          const newtree = sofar.length === 1 ? (sofar[0] as MathNode) : makeNode(sofar as MathNode[]);
+          const newtree =
+            sofar.length === 1 ? (sofar[0] as MathNode) : makeNode(sofar as MathNode[]);
           return [makeNode([newtree, _ensureNode(next)])];
         },
         [first]
@@ -527,7 +540,10 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
               }
 
               // Convert all args to nodes and construct a symbolic function call
-              return new FunctionNode((node as unknown as FuncNodeLike).name, args.map(_ensureNode));
+              return new FunctionNode(
+                (node as unknown as FuncNodeLike).name,
+                args.map(_ensureNode)
+              );
             }
             // operator function (add/multiply): fold like an OperatorNode
             return _foldOperatorNode(node, options);
@@ -555,13 +571,18 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
         case 'IndexNode': {
           return new IndexNode(
-            (node as unknown as IdxNode).dimensions.map((n: MathNode) => simplifyConstant(n, options))
+            (node as unknown as IdxNode).dimensions.map((n: MathNode) =>
+              simplifyConstant(n, options)
+            )
           );
         }
         case 'ObjectNode': {
           const foldProps: Record<string, MathNode> = {};
           for (const prop in (node as unknown as ObjNode).properties) {
-            foldProps[prop] = simplifyConstant((node as unknown as ObjNode).properties[prop], options);
+            foldProps[prop] = simplifyConstant(
+              (node as unknown as ObjNode).properties[prop],
+              options
+            );
           }
           return new ObjectNode(foldProps);
         }
@@ -629,7 +650,9 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         }
       } else {
         // non-associative binary operator
-        args = (node as unknown as OpNodeLike).args.map((arg: MathNode) => foldFraction(arg, options));
+        args = (node as unknown as OpNodeLike).args.map((arg: MathNode) =>
+          foldFraction(arg, options)
+        );
         res = foldOp(fn, args, makeNode, options);
       }
       return res;

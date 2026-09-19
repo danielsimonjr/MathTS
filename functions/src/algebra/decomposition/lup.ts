@@ -77,7 +77,14 @@ interface SparseMatrixConstructor {
     size: number[];
     datatype?: string;
   }): SparseMatrix;
-  _swapRows(j: number, pi: number, n: number, values: unknown[], index: number[], ptr: number[]): void;
+  _swapRows(
+    j: number,
+    pi: number,
+    n: number,
+    values: unknown[],
+    index: number[],
+    ptr: number[]
+  ): void;
   _forEachRow(
     j: number,
     values: unknown[],

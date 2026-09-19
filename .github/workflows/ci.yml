@@ -70,6 +70,11 @@ jobs:
       - name: Lint
         run: bun run lint
 
+      # Guard: the pre-commit hook formats only staged files, so drift
+      # accumulated unseen until this check ran nowhere. Keep it in CI.
+      - name: Format check
+        run: bun run format:check
+
       - name: Docs export-index drift check
         run: bun run docs:functions:check
 

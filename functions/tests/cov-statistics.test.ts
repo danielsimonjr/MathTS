@@ -112,10 +112,9 @@ describe('statistics — variance/std normalizations + guards', () => {
       6.666666666666667,
       8
     );
-    expect(await (parallelStatVariance([2, 4, 6, 8], 'uncorrected') as Promise<number>)).toBeCloseTo(
-      5,
-      8
-    );
+    expect(
+      await (parallelStatVariance([2, 4, 6, 8], 'uncorrected') as Promise<number>)
+    ).toBeCloseTo(5, 8);
     expect(await (parallelStatStd([2, 4, 6, 8]) as Promise<number>)).toBeCloseTo(
       Math.sqrt(6.666666666666667),
       8
@@ -159,7 +158,10 @@ describe('statistics — min/max/minMax forms', () => {
   });
 
   it('minMax Float64Array + number[]', async () => {
-    const r1 = await (parallelStatMinMax(F(3, 1, 4, 1, 5)) as Promise<{ min: number; max: number }>);
+    const r1 = await (parallelStatMinMax(F(3, 1, 4, 1, 5)) as Promise<{
+      min: number;
+      max: number;
+    }>);
     expect(r1.min).toBe(1);
     expect(r1.max).toBe(5);
     const r2 = await (parallelStatMinMax([3, 1, 4, 1, 5]) as Promise<{

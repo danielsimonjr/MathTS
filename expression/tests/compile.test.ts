@@ -493,6 +493,8 @@ describe('compile - CompiledExpression reuse', () => {
 describe('compile - error handling', () => {
   it('should throw for unknown node types', () => {
     const unknownNode = { type: 'UnknownNode' };
-    expect(() => compile(unknownNode as unknown as MathNode, mathScope)).toThrow('Unknown node type');
+    expect(() => compile(unknownNode as unknown as MathNode, mathScope)).toThrow(
+      'Unknown node type'
+    );
   });
 });

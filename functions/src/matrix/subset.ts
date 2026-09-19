@@ -147,7 +147,12 @@ export const createSubset = /* #__PURE__ */ factory(
           replacement: unknown,
           defaultValue: unknown
         ): unknown {
-          const subsetResult = subsetRef(matrix(value), index, replacement, defaultValue) as MatrixLike;
+          const subsetResult = subsetRef(
+            matrix(value),
+            index,
+            replacement,
+            defaultValue
+          ) as MatrixLike;
           return subsetResult.isMatrix ? subsetResult.valueOf() : subsetResult;
         };
       }),

@@ -7,7 +7,7 @@ describe('DenseMatrix Reductions', () => {
     it('should compute sum of a 2x2 matrix', () => {
       const m = DenseMatrix.fromArray([
         [1, 2],
-        [3, 4]
+        [3, 4],
       ]);
       expect(sum(m)).toBe(10);
     });
@@ -20,7 +20,7 @@ describe('DenseMatrix Reductions', () => {
     it('should compute sum with negative numbers', () => {
       const m = DenseMatrix.fromArray([
         [-1, -2],
-        [3, 4]
+        [3, 4],
       ]);
       expect(sum(m)).toBe(4);
     });
@@ -30,7 +30,7 @@ describe('DenseMatrix Reductions', () => {
     it('should compute mean of a 2x2 matrix', () => {
       const m = DenseMatrix.fromArray([
         [1, 2],
-        [3, 4]
+        [3, 4],
       ]);
       expect(mean(m)).toBe(2.5); // 10 / 4
     });
@@ -45,7 +45,7 @@ describe('DenseMatrix Reductions', () => {
     it('should find the minimum value in a matrix', () => {
       const m = DenseMatrix.fromArray([
         [5, 2],
-        [9, 1]
+        [9, 1],
       ]);
       expect(min(m)).toBe(1);
     });
@@ -53,7 +53,7 @@ describe('DenseMatrix Reductions', () => {
     it('should handle negative numbers', () => {
       const m = DenseMatrix.fromArray([
         [-5, -2],
-        [9, -10]
+        [9, -10],
       ]);
       expect(min(m)).toBe(-10);
     });
@@ -63,7 +63,7 @@ describe('DenseMatrix Reductions', () => {
     it('should find the maximum value in a matrix', () => {
       const m = DenseMatrix.fromArray([
         [5, 2],
-        [9, 1]
+        [9, 1],
       ]);
       expect(max(m)).toBe(9);
     });
@@ -71,7 +71,7 @@ describe('DenseMatrix Reductions', () => {
     it('should handle negative numbers', () => {
       const m = DenseMatrix.fromArray([
         [-5, -2],
-        [-9, -10]
+        [-9, -10],
       ]);
       expect(max(m)).toBe(-2);
     });
@@ -79,16 +79,12 @@ describe('DenseMatrix Reductions', () => {
 
   describe('norm', () => {
     it('should compute the Frobenius norm of a matrix', () => {
-      const m = DenseMatrix.fromArray([
-        [3, 4]
-      ]);
+      const m = DenseMatrix.fromArray([[3, 4]]);
       expect(norm(m)).toBe(5); // sqrt(3^2 + 4^2) = sqrt(9 + 16) = sqrt(25) = 5
     });
 
     it('should handle negative numbers', () => {
-      const m = DenseMatrix.fromArray([
-        [-3, -4]
-      ]);
+      const m = DenseMatrix.fromArray([[-3, -4]]);
       expect(norm(m)).toBe(5);
     });
 
@@ -103,7 +99,7 @@ describe('DenseMatrix Reductions', () => {
       const m = DenseMatrix.fromArray([
         [1, 2, 3],
         [4, 5, 6],
-        [7, 8, 9]
+        [7, 8, 9],
       ]);
       expect(trace(m)).toBe(15); // 1 + 5 + 9
     });

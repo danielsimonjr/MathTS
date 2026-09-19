@@ -256,9 +256,7 @@ describe('AssignmentNode — name getter & validation', () => {
     expect(() => new AssignmentNode(s('end'), c(2))).toThrow('Cannot assign to symbol "end"');
   });
   it('throws when index is not an IndexNode', () => {
-    expect(() => new AssignmentNode(s('a'), c(1), c(2))).toThrow(
-      'IndexNode expected as "index"'
-    );
+    expect(() => new AssignmentNode(s('a'), c(1), c(2))).toThrow('IndexNode expected as "index"');
   });
   it('throws when value is not a Node', () => {
     expect(() => new AssignmentNode(s('a'), 42 as unknown as MathNode)).toThrow(

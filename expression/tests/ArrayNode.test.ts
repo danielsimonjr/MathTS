@@ -142,9 +142,9 @@ describe('ArrayNode - map', () => {
 
   it('throws if callback returns non-Node', () => {
     const node = new ArrayNode([makeConst(1)]);
-    expect(() => node.map(() => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)).toThrow(
-      'Callback function must return a Node'
-    );
+    expect(() =>
+      node.map(() => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow('Callback function must return a Node');
   });
 });
 

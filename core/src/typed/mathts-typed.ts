@@ -105,7 +105,9 @@ export interface MathTSTyped extends Omit<TypedInstance, never> {
   // Mirror of typed-function's variadic overload (compose/merge form), kept so
   // `MathTSTyped` remains assignable to `TypedInstance`.
   (
-    ...args: Array<string | SignatureRecord | TypedFunction | (SignatureImpl & { signature: string })>
+    ...args: Array<
+      string | SignatureRecord | TypedFunction | (SignatureImpl & { signature: string })
+    >
   ): TypedFunction;
 
   // `referTo`/`referToSelf` callbacks *return* the implementation typed-function

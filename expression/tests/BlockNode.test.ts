@@ -76,9 +76,9 @@ describe('BlockNode - construction & identity', () => {
   });
 
   it('throws when visible is not boolean', () => {
-    expect(() => new BlockNode([{ node: makeConst(1), visible: 'yes' as unknown as boolean }])).toThrow(
-      'Property "visible" must be a boolean'
-    );
+    expect(
+      () => new BlockNode([{ node: makeConst(1), visible: 'yes' as unknown as boolean }])
+    ).toThrow('Property "visible" must be a boolean');
   });
 });
 

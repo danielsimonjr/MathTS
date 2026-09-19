@@ -7,7 +7,8 @@ import { grad, valueAndGrad, derivative, jacobian } from '../src/index.js';
  * and gradients are plain numbers / Float64Arrays. Verified against closed forms
  * and central finite differences.
  */
-const fd = (f: (x: number) => number, x: number, eps = 1e-6) => (f(x + eps) - f(x - eps)) / (2 * eps);
+const fd = (f: (x: number) => number, x: number, eps = 1e-6) =>
+  (f(x + eps) - f(x - eps)) / (2 * eps);
 
 describe('GC15: derivative (scalar ℝ→ℝ)', () => {
   it('d/dx sin(x) = cos(x)', () => {
@@ -20,7 +21,10 @@ describe('GC15: derivative (scalar ℝ→ℝ)', () => {
     for (const x of [0.5, 2, -1]) {
       const got = derivative((t) => t.sin().mul(t), x);
       expect(got).toBeCloseTo(Math.cos(x) * x + Math.sin(x), 8);
-      expect(got).toBeCloseTo(fd((v) => Math.sin(v) * v, x), 5);
+      expect(got).toBeCloseTo(
+        fd((v) => Math.sin(v) * v, x),
+        5
+      );
     }
   });
 });

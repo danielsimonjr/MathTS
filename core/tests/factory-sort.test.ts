@@ -6,7 +6,9 @@ describe('sortFactories', () => {
     const fA = factory('A', ['B'], () => {});
     const fB = factory('B', ['A'], () => {});
 
-    expect(() => sortFactories([fA, fB])).toThrow(/Circular dependency detected: A|Circular dependency detected: B/);
+    expect(() => sortFactories([fA, fB])).toThrow(
+      /Circular dependency detected: A|Circular dependency detected: B/
+    );
   });
 
   it('should detect indirect circular dependencies', () => {

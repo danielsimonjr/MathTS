@@ -23,19 +23,40 @@ const re = (vals: Array<number | { re: number; im: number }>) =>
 
 describe('eig: symmetric matrices with structural zeros (regression)', () => {
   it('tridiagonal 3×3 → [0.585786, 2, 3.414214]', () => {
-    const A = [[2, -1, 0], [-1, 2, -1], [0, -1, 2]];
+    const A = [
+      [2, -1, 0],
+      [-1, 2, -1],
+      [0, -1, 2],
+    ];
     close(re(eigvals(A)), [2 - Math.SQRT2, 2, 2 + Math.SQRT2]);
   });
 
   it('tridiagonal 4×4 → numpy reference', () => {
-    const A = [[2, -1, 0, 0], [-1, 2, -1, 0], [0, -1, 2, -1], [0, 0, -1, 2]];
-    close(re(eigvals(A)), [0.3819660112501051, 1.3819660112501053, 2.618033988749895, 3.618033988749895]);
+    const A = [
+      [2, -1, 0, 0],
+      [-1, 2, -1, 0],
+      [0, -1, 2, -1],
+      [0, 0, -1, 2],
+    ];
+    close(
+      re(eigvals(A)),
+      [0.3819660112501051, 1.3819660112501053, 2.618033988749895, 3.618033988749895]
+    );
   });
 
   it('eigenvalue sum equals the trace (similarity invariant)', () => {
     for (const A of [
-      [[2, -1, 0], [-1, 2, -1], [0, -1, 2]],
-      [[5, -2, 0, 0], [-2, 5, -2, 0], [0, -2, 5, -2], [0, 0, -2, 5]],
+      [
+        [2, -1, 0],
+        [-1, 2, -1],
+        [0, -1, 2],
+      ],
+      [
+        [5, -2, 0, 0],
+        [-2, 5, -2, 0],
+        [0, -2, 5, -2],
+        [0, 0, -2, 5],
+      ],
     ]) {
       const trace = A.reduce((s, r, i) => s + r[i], 0);
       const sum = re(eigvals(A)).reduce((s, x) => s + x, 0);
@@ -44,7 +65,11 @@ describe('eig: symmetric matrices with structural zeros (regression)', () => {
   });
 
   it('eigenvectors satisfy A·v = λ·v for a symmetric tridiagonal', () => {
-    const A = [[2, -1, 0], [-1, 2, -1], [0, -1, 2]];
+    const A = [
+      [2, -1, 0],
+      [-1, 2, -1],
+      [0, -1, 2],
+    ];
     const { values, vectors } = eig(A, { computeVectors: true });
     for (let k = 0; k < A.length; k++) {
       const lam = values[k].re;

@@ -130,12 +130,18 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           ),
           'Array, DenseMatrix': typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown[], y: unknown) => {
-              return matAlgo13xDD(...(bcast(matrix(x as DenseMatrixData), y) as DenseDenseArgs), self);
+              return matAlgo13xDD(
+                ...(bcast(matrix(x as DenseMatrixData), y) as DenseDenseArgs),
+                self
+              );
             }
           ),
           'DenseMatrix, Array': typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown, y: unknown[]) => {
-              return matAlgo13xDD(...(bcast(x, matrix(y as DenseMatrixData)) as DenseDenseArgs), self);
+              return matAlgo13xDD(
+                ...(bcast(x, matrix(y as DenseMatrixData)) as DenseDenseArgs),
+                self
+              );
             }
           ),
         };
@@ -183,9 +189,19 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           matrixSignatures[scalar + ', DenseMatrix'] = (x: unknown, y: unknown) =>
             matAlgo14xDs(y as DenseScalarArg, x, elop, true);
           matrixSignatures['Array,' + scalar] = (x: unknown[], y: unknown) =>
-            matAlgo14xDs(matrix(x as DenseMatrixData) as unknown as DenseScalarArg, y, elop, false).valueOf();
+            matAlgo14xDs(
+              matrix(x as DenseMatrixData) as unknown as DenseScalarArg,
+              y,
+              elop,
+              false
+            ).valueOf();
           matrixSignatures[scalar + ', Array'] = (x: unknown, y: unknown[]) =>
-            matAlgo14xDs(matrix(y as DenseMatrixData) as unknown as DenseScalarArg, x, elop, true).valueOf();
+            matAlgo14xDs(
+              matrix(y as DenseMatrixData) as unknown as DenseScalarArg,
+              x,
+              elop,
+              true
+            ).valueOf();
         } else {
           matrixSignatures['DenseMatrix,' + scalar] = typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown, y: unknown) => {

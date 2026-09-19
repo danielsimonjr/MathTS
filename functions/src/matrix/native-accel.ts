@@ -149,7 +149,8 @@ export function correctEigs(
   options: { eigenvectors?: boolean } | undefined,
   factoryEigs: (m: unknown, o?: unknown) => unknown
 ): unknown {
-  const toFactory = (): unknown => (options === undefined ? factoryEigs(a) : factoryEigs(a, options));
+  const toFactory = (): unknown =>
+    options === undefined ? factoryEigs(a) : factoryEigs(a, options);
   if (!isNumericSquare(a)) return toFactory();
   const wantVectors = options?.eigenvectors !== false;
   try {

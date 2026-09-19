@@ -23,56 +23,56 @@ hardware-specific — re-run on your target machine for authoritative figures.
 
 ### Elementwise transcendentals (AS `array_<op>_ptr` vs `Math.*`)
 
-| op    | n = 16,384 | n = 131,072 | n = 1e6 |
-| ----- | ---------- | ----------- | ------- |
-| abs   | 1.52x (JS) | 1.15x (JS)  | 1.15x (JS) |
-| sin   | 0.43x      | 0.63x       | 0.32x   |
-| cos   | 0.46x      | 0.44x       | 0.46x   |
-| tan   | 0.71x      | 0.42x       | 0.66x   |
-| exp   | 0.54x      | 0.47x       | 0.49x   |
-| log   | 0.82x      | 0.47x       | 0.50x   |
-| sinh  | 0.60x      | 0.70x       | 0.61x   |
-| tanh  | 0.69x      | 0.52x       | 0.55x   |
-| fusion[sin→cos→exp] | 0.99x | 0.94x | 0.78x |
+| op                  | n = 16,384 | n = 131,072 | n = 1e6    |
+| ------------------- | ---------- | ----------- | ---------- |
+| abs                 | 1.52x (JS) | 1.15x (JS)  | 1.15x (JS) |
+| sin                 | 0.43x      | 0.63x       | 0.32x      |
+| cos                 | 0.46x      | 0.44x       | 0.46x      |
+| tan                 | 0.71x      | 0.42x       | 0.66x      |
+| exp                 | 0.54x      | 0.47x       | 0.49x      |
+| log                 | 0.82x      | 0.47x       | 0.50x      |
+| sinh                | 0.60x      | 0.70x       | 0.61x      |
+| tanh                | 0.69x      | 0.52x       | 0.55x      |
+| fusion[sin→cos→exp] | 0.99x      | 0.94x       | 0.78x      |
 
 maxdiff ≤ 4.44e-16 across all of the above. `abs` is the one elementwise op
 where JS wins above ~16K (V8 hardware abs beats wasm+copy) — included honestly.
 
 ### Special functions (AS managed kernels vs JS scalars)
 
-| op         | n = 16,384 | n = 131,072 | n = 1e6 | maxdiff   |
-| ---------- | ---------- | ----------- | ------- | --------- |
-| bessel_j0  | 1.09x (JS) | 0.99x       | 1.25x (JS) | 2.78e-17 |
-| bessel_j1  | 1.02x (JS) | 1.06x (JS)  | 0.91x   | 2.78e-17 |
-| lgamma     | 1.01x (JS) | 0.86x       | 1.02x (JS) | 2.84e-14 |
-| elliptic_k | 0.97x      | 0.95x       | 0.92x   | 0 (exact) |
+| op         | n = 16,384 | n = 131,072 | n = 1e6    | maxdiff   |
+| ---------- | ---------- | ----------- | ---------- | --------- |
+| bessel_j0  | 1.09x (JS) | 0.99x       | 1.25x (JS) | 2.78e-17  |
+| bessel_j1  | 1.02x (JS) | 1.06x (JS)  | 0.91x      | 2.78e-17  |
+| lgamma     | 1.01x (JS) | 0.86x       | 1.02x (JS) | 2.84e-14  |
+| elliptic_k | 0.97x      | 0.95x       | 0.92x      | 0 (exact) |
 
 Bessel is roughly at parity — the JS scalar fallbacks are already tight, so the
 AS kernels mostly trade blows with them rather than dominating.
 
 ### Sort (`sort_f64` introsort vs JS NaN-last comparator sort)
 
-| n        | AS/JS | maxdiff   |
-| -------- | ----- | --------- |
-| 16,384   | 0.30x | 0 (exact) |
-| 131,072  | 0.29x | 0 (exact) |
-| 1e6      | 0.28x | 0 (exact) |
+| n       | AS/JS | maxdiff   |
+| ------- | ----- | --------- |
+| 16,384  | 0.30x | 0 (exact) |
+| 131,072 | 0.29x | 0 (exact) |
+| 1e6     | 0.28x | 0 (exact) |
 
-AS wins ~3x here. Note the JS baseline is a *comparator* sort (NaN-last
+AS wins ~3x here. Note the JS baseline is a _comparator_ sort (NaN-last
 semantics force `Array.prototype.sort(cmp)`, off V8's fast numeric path); against
 a bare `Float64Array.sort()` the gap would close, but that does not implement the
 required NaN-last order.
 
 ### Matrix heavy ops + FFT (AS vs JS)
 
-| op                     | small      | medium     | large       | maxdiff   |
-| ---------------------- | ---------- | ---------- | ----------- | --------- |
-| multiply (64/256/512)  | 0.50x      | 0.28x      | 0.31x       | 0 (exact) |
-| svd (32/64/128)        | 1.61x (JS) | 2.61x (JS) | 1.84x (JS)  | ≤5.68e-13 |
-| eig sym (32/64/128)    | 0.49x      | 0.45x      | 0.31x       | ≤1.71e-13 |
+| op                           | small      | medium     | large      | maxdiff   |
+| ---------------------------- | ---------- | ---------- | ---------- | --------- |
+| multiply (64/256/512)        | 0.50x      | 0.28x      | 0.31x      | 0 (exact) |
+| svd (32/64/128)              | 1.61x (JS) | 2.61x (JS) | 1.84x (JS) | ≤5.68e-13 |
+| eig sym (32/64/128)          | 0.49x      | 0.45x      | 0.31x      | ≤1.71e-13 |
 | welch-psd FFT (16K/131K/1e6) | 1.23x (JS) | 1.40x (JS) | 1.25x (JS) | ≤5.55e-17 |
 
-Honest outliers: **svd** — the AS one-sided Jacobi is ~1.6–2.6x *slower* than the
+Honest outliers: **svd** — the AS one-sided Jacobi is ~1.6–2.6x _slower_ than the
 JS Golub-Reinsch at these sizes (it converges in more sweeps); singular values
 still match to ≤6e-13. **welch-psd** — JS wins ~1.2–1.4x; V8 JITs the frame FFT
 loop well and the per-frame marshalling adds up. multiply and eig are clear AS

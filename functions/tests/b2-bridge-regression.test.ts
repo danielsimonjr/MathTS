@@ -22,7 +22,18 @@ describe('GC13: B2 factory-bridge regression guards', () => {
   });
 
   it('det computes correctly despite its multiplyScalar binding (numeric matrices)', () => {
-    expect(det([[2, 0, 1], [1, 3, 2], [0, 1, 4]])).toBeCloseTo(21, 10);
-    expect(det([[1, 2], [3, 4]])).toBeCloseTo(-2, 10);
+    expect(
+      det([
+        [2, 0, 1],
+        [1, 3, 2],
+        [0, 1, 4],
+      ])
+    ).toBeCloseTo(21, 10);
+    expect(
+      det([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBeCloseTo(-2, 10);
   });
 });

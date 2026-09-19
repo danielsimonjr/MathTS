@@ -44,17 +44,15 @@ export const createConj = /* #__PURE__ */ factory(
      *            The complex conjugate of x
      */
     return typed(name, {
-      'number | BigNumber | Fraction': (x: number | BigNumber | Fraction): number | BigNumber | Fraction =>
-        x,
+      'number | BigNumber | Fraction': (
+        x: number | BigNumber | Fraction
+      ): number | BigNumber | Fraction => x,
       Complex: (x: ComplexType): ComplexType => x.conjugate(),
-      Unit: typed.referToSelf(
-        (self: TypedFunction) =>
-          (x: Unit): Unit => {
-            const ctor = (x as unknown as { constructor: new (value: unknown, units: unknown) => Unit })
-              .constructor;
-            return new ctor(self(x.toNumeric()), x.formatUnits());
-          }
-      ),
+      Unit: typed.referToSelf((self: TypedFunction) => (x: Unit): Unit => {
+        const ctor = (x as unknown as { constructor: new (value: unknown, units: unknown) => Unit })
+          .constructor;
+        return new ctor(self(x.toNumeric()), x.formatUnits());
+      }),
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>

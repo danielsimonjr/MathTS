@@ -49,7 +49,7 @@ import {
   planckMassDocs,
   planckTimeDocs,
   planckChargeDocs,
-  planckTemperatureDocs
+  planckTemperatureDocs,
 } from './physicalConstants/index.js';
 import { eDocs } from './constants/e.js';
 import { falseDocs } from './constants/false.js';

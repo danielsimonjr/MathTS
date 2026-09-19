@@ -27,13 +27,14 @@
 ## Already in WASM (partial coverage)
 
 5 high-value functions already have WASM equivalents:
-| TS Function | WASM Equivalent | Category |
-|-------------|----------------|----------|
-| `findRoot` | `bisectionStep`, `newtonStep`, `brentStep` | numeric |
-| `linsolve` | `luSolve`, `sparseLuSolve` | algebra |
-| `nintegrate` | `simpsonsRule`, `trapezoidalRule`, `gaussLegendre` | numeric |
-| `solveODESystem` | `rk45Step`, `rk23Step` | numeric |
-| `fft2d` | `fft2d` | signal |
+
+| TS Function      | WASM Equivalent                                    | Category |
+| ---------------- | -------------------------------------------------- | -------- |
+| `findRoot`       | `bisectionStep`, `newtonStep`, `brentStep`         | numeric  |
+| `linsolve`       | `luSolve`, `sparseLuSolve`                         | algebra  |
+| `nintegrate`     | `simpsonsRule`, `trapezoidalRule`, `gaussLegendre` | numeric  |
+| `solveODESystem` | `rk45Step`, `rk23Step`                             | numeric  |
+| `fft2d`          | `fft2d`                                            | signal   |
 
 ## Priority 1: High-Value WASM Candidates (32 functions — need WASM kernels)
 

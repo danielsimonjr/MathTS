@@ -10,8 +10,19 @@ import { det } from '@danielsimonjr/mathts-functions';
  */
 describe('det: native-accelerated path', () => {
   it('small matrices keep exact factory values (below threshold)', () => {
-    expect(det([[2, 0, 1], [1, 3, 2], [0, 1, 4]])).toBeCloseTo(21, 10);
-    expect(det([[1, 2], [3, 4]])).toBeCloseTo(-2, 10);
+    expect(
+      det([
+        [2, 0, 1],
+        [1, 3, 2],
+        [0, 1, 4],
+      ])
+    ).toBeCloseTo(21, 10);
+    expect(
+      det([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toBeCloseTo(-2, 10);
   });
 
   it('singular matrix returns 0 (native LU throws → handled)', () => {
@@ -37,8 +48,18 @@ describe('det: native-accelerated path', () => {
 
   it('block-diagonal det equals the product of block dets', () => {
     // 8×8 block-diag of two 4×4s → det = det(B1)·det(B2). Above threshold.
-    const B1 = [[2, 1, 0, 0], [1, 2, 1, 0], [0, 1, 2, 1], [0, 0, 1, 2]];
-    const B2 = [[3, 0, 1, 0], [0, 3, 0, 1], [1, 0, 3, 0], [0, 1, 0, 3]];
+    const B1 = [
+      [2, 1, 0, 0],
+      [1, 2, 1, 0],
+      [0, 1, 2, 1],
+      [0, 0, 1, 2],
+    ];
+    const B2 = [
+      [3, 0, 1, 0],
+      [0, 3, 0, 1],
+      [1, 0, 3, 0],
+      [0, 1, 0, 3],
+    ];
     const A = Array.from({ length: 8 }, (_, i) =>
       Array.from({ length: 8 }, (_, j) =>
         i < 4 && j < 4 ? B1[i][j] : i >= 4 && j >= 4 ? B2[i - 4][j - 4] : 0

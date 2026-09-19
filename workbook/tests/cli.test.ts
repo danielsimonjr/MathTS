@@ -68,7 +68,8 @@ describe('cli run', () => {
   });
 
   it('should report a failing test on stderr and still list cells on stdout', async () => {
-    const wb = 'cells:\n  - code: "5"\n    id: a\n  - test: "a == 9"\n    id: checkA\n    depends_on: [a]';
+    const wb =
+      'cells:\n  - code: "5"\n    id: a\n  - test: "a == 9"\n    id: checkA\n    depends_on: [a]';
     const r = await dispatch(['run', fixture(wb)]);
     expect(r.exitCode).toBe(1);
     expect(r.stderr).toContain('checkA');
@@ -76,7 +77,8 @@ describe('cli run', () => {
   });
 
   it('should emit the envelope and still exit non-zero with --json on failure', async () => {
-    const wb = 'cells:\n  - code: "5"\n    id: a\n  - test: "a == 9"\n    id: checkA\n    depends_on: [a]';
+    const wb =
+      'cells:\n  - code: "5"\n    id: a\n  - test: "a == 9"\n    id: checkA\n    depends_on: [a]';
     const r = await dispatch(['run', fixture(wb), '--json']);
     expect(r.exitCode).toBe(1);
     const env = JSON.parse(r.stdout);
@@ -118,7 +120,8 @@ describe('cli run --cell', () => {
 });
 
 describe('cli describe', () => {
-  const WB = 'cells:\n  - code: "1"\n    id: a\n    output: 1\n  - code: "a+1"\n    id: b\n    depends_on: [a]';
+  const WB =
+    'cells:\n  - code: "1"\n    id: a\n    output: 1\n  - code: "a+1"\n    id: b\n    depends_on: [a]';
 
   it('emits the structured document envelope with cells, outputs, and graph edges', async () => {
     const r = await dispatch(['describe', fixture(WB), '--json']);
@@ -132,7 +135,11 @@ describe('cli describe', () => {
   });
 
   it('returns ok:false with problems on an invalid workbook (still an envelope)', async () => {
-    const r = await dispatch(['describe', fixture('cells:\n  - code: "1"\n    id: bad-id'), '--json']);
+    const r = await dispatch([
+      'describe',
+      fixture('cells:\n  - code: "1"\n    id: bad-id'),
+      '--json',
+    ]);
     expect(r.exitCode).toBe(1);
     const env = JSON.parse(r.stdout);
     expect(env.ok).toBe(false);
@@ -217,7 +224,20 @@ describe('cli cell (mutation)', () => {
 
   it('add appends a cell and writes the file', async () => {
     const p = fixture(BASE);
-    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', 'a + 1', '--depends-on', 'a', '--json']);
+    const r = await dispatch([
+      'cell',
+      'add',
+      p,
+      '--type',
+      'code',
+      '--id',
+      'b',
+      '--content',
+      'a + 1',
+      '--depends-on',
+      'a',
+      '--json',
+    ]);
     expect(r.exitCode).toBe(0);
     const env = JSON.parse(r.stdout);
     expect(env.command).toBe('cell');
@@ -229,7 +249,19 @@ describe('cli cell (mutation)', () => {
     const p = fixture(BASE);
     const cf = join(dir, `content-${counter++}.txt`);
     writeFileSync(cf, 'a * 3', 'utf-8');
-    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content-file', cf, '--depends-on', 'a']);
+    const r = await dispatch([
+      'cell',
+      'add',
+      p,
+      '--type',
+      'code',
+      '--id',
+      'b',
+      '--content-file',
+      cf,
+      '--depends-on',
+      'a',
+    ]);
     expect(r.exitCode).toBe(0);
     expect(readFileSync(p, 'utf-8')).toContain('a * 3');
   });
@@ -281,7 +313,9 @@ describe('cli cell (mutation)', () => {
   });
 
   it('rejects a cycle-forming edit (file unchanged)', async () => {
-    const p = fixture('cells:\n  - code: "b"\n    id: a\n    depends_on: [b]\n  - code: "1"\n    id: b');
+    const p = fixture(
+      'cells:\n  - code: "b"\n    id: a\n    depends_on: [b]\n  - code: "1"\n    id: b'
+    );
     const before = readFileSync(p, 'utf-8');
     const r = await dispatch(['cell', 'edit', p, 'b', '--depends-on', 'a', '--json']);
     expect(r.exitCode).toBe(1);
@@ -292,7 +326,18 @@ describe('cli cell (mutation)', () => {
   it('--dry-run previews without writing', async () => {
     const p = fixture(BASE);
     const before = readFileSync(p, 'utf-8');
-    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', '2', '--dry-run']);
+    const r = await dispatch([
+      'cell',
+      'add',
+      p,
+      '--type',
+      'code',
+      '--id',
+      'b',
+      '--content',
+      '2',
+      '--dry-run',
+    ]);
     expect(r.exitCode).toBe(0);
     expect(r.stdout).toContain('id: b');
     expect(readFileSync(p, 'utf-8')).toBe(before);
@@ -300,14 +345,38 @@ describe('cli cell (mutation)', () => {
 
   it('rejects a non-integer --at', async () => {
     const p = fixture(BASE);
-    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--at', 'x', '--json']);
+    const r = await dispatch([
+      'cell',
+      'add',
+      p,
+      '--type',
+      'code',
+      '--id',
+      'b',
+      '--at',
+      'x',
+      '--json',
+    ]);
     expect(r.exitCode).toBe(1);
     expect(JSON.parse(r.stdout).problems.join(' ')).toMatch(/--at/);
   });
 
   it('normalizes --depends-on (trims, drops empties, de-dups)', async () => {
     const p = fixture(BASE);
-    const r = await dispatch(['cell', 'add', p, '--type', 'code', '--id', 'b', '--content', 'a', '--depends-on', 'a, ,a', '--json']);
+    const r = await dispatch([
+      'cell',
+      'add',
+      p,
+      '--type',
+      'code',
+      '--id',
+      'b',
+      '--content',
+      'a',
+      '--depends-on',
+      'a, ,a',
+      '--json',
+    ]);
     expect(r.exitCode).toBe(0);
     const b = JSON.parse(r.stdout).data.cells.find((c: { id: string }) => c.id === 'b');
     expect(b.dependsOn).toEqual(['a']);
@@ -315,7 +384,17 @@ describe('cli cell (mutation)', () => {
 
   it('errors when both --content and --content-file are given', async () => {
     const p = fixture(BASE);
-    const r = await dispatch(['cell', 'edit', p, 'a', '--content', '1', '--content-file', 'x.txt', '--json']);
+    const r = await dispatch([
+      'cell',
+      'edit',
+      p,
+      'a',
+      '--content',
+      '1',
+      '--content-file',
+      'x.txt',
+      '--json',
+    ]);
     expect(r.exitCode).toBe(1);
     expect(JSON.parse(r.stdout).problems.join(' ').toLowerCase()).toContain('only one');
   });
@@ -347,7 +426,16 @@ describe('cli functions / meta', () => {
 
   it('meta set updates fields and writes the file', async () => {
     const p = fixture('cells:\n  - code: "1"\n    id: a');
-    const r = await dispatch(['meta', 'set', p, '--title', 'New Title', '--tags', 'x, y', '--json']);
+    const r = await dispatch([
+      'meta',
+      'set',
+      p,
+      '--title',
+      'New Title',
+      '--tags',
+      'x, y',
+      '--json',
+    ]);
     expect(r.exitCode).toBe(0);
     const after = readFileSync(p, 'utf-8');
     expect(after).toContain('New Title');
