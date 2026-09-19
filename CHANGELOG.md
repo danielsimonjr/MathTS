@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(core): map entries() returns a real iterable iterator
+
+- `ObjectWrappingMap.entries()` and `PartitionedMap.entries()` returned a plain `{ next }` object
+  from `mapIterator`, cast to `MapIterator`. `[...m.entries()]`, `for...of` and `Array.from` threw
+  `TypeError: ... is not iterable`; `[...m[Symbol.iterator]()]` threw too. `keys()` and `values()`
+  were already correct. `mapIterator` is now a generator, so the result has `next()`, a
+  `[Symbol.iterator]()` that returns itself, and `%IteratorPrototype%` members, like a native Map
+  iterator. Order and values are unchanged. New tests: `core/tests/map-iterators.test.ts` (34).
+
 ### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
 
 - #291 converted the typed `@param {T}` tags in `core` to TSDoc but left 95 typed `@returns {T}` /
