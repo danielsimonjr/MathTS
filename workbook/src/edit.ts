@@ -12,12 +12,21 @@ import type { Workbook, Cell, CellType } from './types';
 import { isValidIdentifier, SUPPORTED_CELL_TYPES } from './parser';
 import { buildDependencyGraph, detectCycles } from './graph';
 
+/**
+ * Insertion point for a cell. The functions use the first field that is set, in this
+ * order: `at` (an index), `before` (a cell id), `after` (a cell id). With no field set,
+ * the cell goes at the end.
+ */
 export interface CellPosition {
   before?: string;
   after?: string;
   at?: number;
 }
 
+/**
+ * Result of `removeCell()`: the new workbook and the cells that were detached from the
+ * removed cell.
+ */
 export interface RemoveResult {
   workbook: Workbook;
   /** Cells whose `depends_on` was edited to detach the removed cell (force). */
@@ -39,7 +48,9 @@ function cloneWorkbook(wb: Workbook): Workbook {
 
 function assertSupportedType(type: string): asserts type is CellType {
   if (!(SUPPORTED_CELL_TYPES as string[]).includes(type)) {
-    throw new Error(`Unsupported cell type '${type}' (supported: ${SUPPORTED_CELL_TYPES.join(', ')})`);
+    throw new Error(
+      `Unsupported cell type '${type}' (supported: ${SUPPORTED_CELL_TYPES.join(', ')})`
+    );
   }
 }
 
@@ -104,6 +115,17 @@ function resolveInsertIndex(wb: Workbook, position?: CellPosition): number {
   return wb.cells.length;
 }
 
+/**
+ * Add a cell and return a new workbook. The input workbook does not change.
+ *
+ * @param wb - The workbook to start from.
+ * @param spec - The id, type, content and dependencies of the new cell.
+ * @param position - Where to put the cell. The default is the end.
+ * @returns A new workbook that contains the cell.
+ * @throws Error if the id is not an identifier or is a duplicate, if the type is not
+ * supported, if a dependency is unknown or is the cell itself, if the position is not
+ * valid, or if the change creates a new dependency cycle.
+ */
 export function addCell(
   wb: Workbook,
   spec: { id: string; type: CellType; content?: string; dependsOn?: string[] },
@@ -127,6 +149,18 @@ export function addCell(
   return next;
 }
 
+/**
+ * Change the content, type or dependencies of a cell and return a new workbook. The
+ * input workbook does not change. A changed cell loses its stored output and error.
+ *
+ * @param wb - The workbook to start from.
+ * @param id - The id of the cell to change.
+ * @param changes - The fields to change. An absent field keeps its value.
+ * @returns A new workbook that contains the changed cell.
+ * @throws Error if the cell does not exist, if the type is not supported, if a
+ * dependency is unknown or is the cell itself, or if the change creates a new
+ * dependency cycle.
+ */
 export function editCell(
   wb: Workbook,
   id: string,
@@ -158,13 +192,28 @@ export function editCell(
   return next;
 }
 
+/**
+ * Remove a cell and return a new workbook. The input workbook does not change.
+ *
+ * If other cells depend on the removed cell, the function throws, unless `force` is
+ * set. With `force`, the function removes the dependency from each dependent cell. It
+ * also clears the stored output and error of each such cell.
+ *
+ * @param wb - The workbook to start from.
+ * @param id - The id of the cell to remove.
+ * @param options - Set `force` to detach the dependent cells.
+ * @returns The new workbook and the ids of the detached cells.
+ * @throws Error if the cell does not exist, or if it has dependents and `force` is not set.
+ */
 export function removeCell(wb: Workbook, id: string, options?: { force?: boolean }): RemoveResult {
   const next = cloneWorkbook(wb);
   indexOfCell(next, id); // throws if missing
 
   const dependents = next.cells.filter((c) => (c.dependsOn ?? []).includes(id)).map((c) => c.id);
   if (dependents.length > 0 && !options?.force) {
-    throw new Error(`Cell '${id}' has dependents: ${dependents.join(', ')} (use --force to remove and detach)`);
+    throw new Error(
+      `Cell '${id}' has dependents: ${dependents.join(', ')} (use --force to remove and detach)`
+    );
   }
 
   const changedCells: string[] = [];
@@ -180,6 +229,16 @@ export function removeCell(wb: Workbook, id: string, options?: { force?: boolean
   return { workbook: next, changedCells };
 }
 
+/**
+ * Move a cell to a new position and return a new workbook. The input workbook does not
+ * change. A move relative to the cell itself returns an unchanged copy.
+ *
+ * @param wb - The workbook to start from.
+ * @param id - The id of the cell to move.
+ * @param position - The new position.
+ * @returns A new workbook with the cell at the new position.
+ * @throws Error if the cell does not exist or if the position is not valid.
+ */
 export function moveCell(wb: Workbook, id: string, position: CellPosition): Workbook {
   // Moving relative to itself is a no-op.
   if (position.before === id || position.after === id) return cloneWorkbook(wb);
@@ -191,6 +250,20 @@ export function moveCell(wb: Workbook, id: string, position: CellPosition): Work
   return next;
 }
 
+/**
+ * Rename a cell and return a new workbook. The input workbook does not change.
+ *
+ * Each dependent cell gets the new id in its `dependsOn` list. The function also
+ * replaces each whole-word match of the old id in the content of those dependent
+ * cells. This replacement can also change the old id inside a string literal. Stored
+ * outputs do not change.
+ *
+ * @param wb - The workbook to start from.
+ * @param oldId - The current id.
+ * @param newId - The new id.
+ * @returns A new workbook with the renamed cell.
+ * @throws Error if the cell does not exist, or if `newId` is not an identifier or is a duplicate.
+ */
 export function renameCell(wb: Workbook, oldId: string, newId: string): Workbook {
   if (oldId === newId) return cloneWorkbook(wb);
 

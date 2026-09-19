@@ -6,6 +6,9 @@
  */
 import { line, scatter, bar } from '@danielsimonjr/mathts-plot';
 
+/**
+ * Chart settings for `renderChart()`. The default `type` is `line`.
+ */
 export interface ChartSpec {
   type?: 'line' | 'scatter' | 'bar';
   title?: string;

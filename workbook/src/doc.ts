@@ -6,6 +6,11 @@
 import type { Workbook } from './types';
 import { buildDependencyGraph, detectCycles } from './graph';
 
+/**
+ * Structured description of a workbook: metadata, runtime settings, cells, and the
+ * dependency graph with its cycles. `describeData()` builds it. The `describe` command
+ * and the JSON-RPC router return it.
+ */
 export interface DescribeDoc {
   version: string;
   metadata: Workbook['metadata'];
@@ -35,7 +40,9 @@ export function describeData(wb: Workbook | undefined): DescribeDoc {
   }));
   const graph = wb ? buildDependencyGraph(wb.cells) : undefined;
   const edges = graph
-    ? [...graph.nodes].flatMap(([id, node]) => node.dependencies.map((dep) => ({ from: dep, to: id })))
+    ? [...graph.nodes].flatMap(([id, node]) =>
+        node.dependencies.map((dep) => ({ from: dep, to: id }))
+      )
     : [];
   const cycles = graph ? detectCycles(graph) : [];
   return {

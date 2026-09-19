@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(workbook): doc comments for every exported symbol
+
+- The `code-docs` gate (`code_docs.py check workbook/src`) failed on `main` with 41 MUST issues
+  (M1, exported symbol with no doc comment). It now passes: 95/95 exported symbols are documented.
+- Added TSDoc comments to 41 symbols in 13 files: `cli.ts`, `doc.ts`, `edit.ts`, `formatter.ts`,
+  `html.ts`, `markdown.ts`, `pdf.ts`, `rpc.ts`, `session.ts`, `svg.ts`, `tex.ts`,
+  `timeout-runner.ts` and `worker-protocol.ts`.
+- Each behavioural statement was checked against the implementation. The comments on
+  `RenderCell` state that `toHTML()` and `toTeX()` insert `chartSvg` and `chartTikz` without
+  escaping, so the caller must supply trusted markup.
+- Comments only: the files compile to identical output with comments removed.
+- `docs/Architecture`: regenerated with `docs:deps`. `OVERVIEW.md` line count updated.
+
 ### fix(plot): escape every SVG attribute value (security)
 
 - `plot/src/svg.ts` wrote attribute values by string interpolation without escaping. Only element

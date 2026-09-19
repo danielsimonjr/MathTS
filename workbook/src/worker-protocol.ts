@@ -29,11 +29,17 @@ export interface SerializedRunResult {
   ok: boolean;
 }
 
+/**
+ * The message a worker posts when the run completes. `report` holds the result.
+ */
 export interface WorkerSuccessMessage {
   ok: true;
   report: SerializedRunResult;
 }
 
+/**
+ * The message a worker posts when the run cannot complete. `error` holds the message.
+ */
 export interface WorkerFailureMessage {
   ok: false;
   error: string;

@@ -12651,7 +12651,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1484
+      "loc": 1618
     },
     {
       "file": "workbook/src/contract.ts",
@@ -12665,14 +12665,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 49
+      "loc": 54
     },
     {
       "file": "workbook/src/edit.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 237
+      "loc": 306
     },
     {
       "file": "workbook/src/executor.ts",
@@ -12686,7 +12686,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 88
+      "loc": 100
     },
     {
       "file": "workbook/src/fs-atomic.ts",
@@ -12707,7 +12707,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 181
+      "loc": 196
     },
     {
       "file": "workbook/src/index.ts",
@@ -12735,7 +12735,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 267
+      "loc": 280
     },
     {
       "file": "workbook/src/parser.ts",
@@ -12749,14 +12749,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 18
+      "loc": 32
     },
     {
       "file": "workbook/src/rpc.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 179
     },
     {
       "file": "workbook/src/run-worker.ts",
@@ -12770,7 +12770,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 186
+      "loc": 195
     },
     {
       "file": "workbook/src/svg-math.ts",
@@ -12784,21 +12784,21 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 66
+      "loc": 69
     },
     {
       "file": "workbook/src/tex.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 92
+      "loc": 95
     },
     {
       "file": "workbook/src/timeout-runner.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 103
     },
     {
       "file": "workbook/src/types.ts",
@@ -12812,7 +12812,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 50
+      "loc": 56
     },
     {
       "file": "workbook/src/yaml-safe.ts",

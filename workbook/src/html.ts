@@ -13,6 +13,13 @@
 import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
 import { markdownToHtml } from './markdown.js';
 
+/**
+ * One cell of a `RenderDoc`.
+ *
+ * SECURITY: `toHTML()` inserts `chartSvg` as is, and `toTeX()` inserts `chartTikz` as
+ * is. Neither function escapes these two fields. The caller must supply trusted markup
+ * in them.
+ */
 export interface RenderCell {
   type: string; // markdown | equation | code | test | data | chart
   content: string;
@@ -30,6 +37,11 @@ export interface RenderCell {
   note?: string;
 }
 
+/**
+ * Document structure that `toHTML()`, `toTeX()` and `toPDF()` render. It does not use
+ * the `Workbook` type. `toHTML()` escapes `title`, `author`, `description` and `tags`.
+ * `toTeX()` escapes `title` and `author`.
+ */
 export interface RenderDoc {
   title?: string;
   author?: string;
@@ -38,6 +50,9 @@ export interface RenderDoc {
   cells: RenderCell[];
 }
 
+/**
+ * Options for `toHTML()`.
+ */
 export interface ToHtmlOptions {
   /** Parser for equation expressions (e.g. the functions package `parse`). */
   parse?: (expr: string) => unknown;

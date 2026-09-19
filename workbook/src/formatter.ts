@@ -54,6 +54,18 @@ function hasCustomToString(value: object): boolean {
   );
 }
 
+/**
+ * Convert a cell result to text for the terminal.
+ *
+ * `null` and `undefined` give `(no result)`. A non-array object with a custom
+ * `toString` method uses that method, if the method returns text other than
+ * `[object Object]`. Other objects use JSON: a BigInt becomes `<digits>n`, and a
+ * circular reference becomes `[Circular]`. The function catches the errors of
+ * `toString` and of JSON conversion, and then uses a fallback text.
+ *
+ * @param value - The value to convert.
+ * @returns The text form of the value.
+ */
 export function formatResult(value: unknown): string {
   if (value === null || value === undefined) return '(no result)';
 
