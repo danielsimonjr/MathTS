@@ -29973,7 +29973,7 @@
         "constants": ["createParserClass"]
       },
       "expression/src/types.ts": {
-        "description": "Type definitions for expression module",
+        "description": "A function that also has a `signatures` record.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -30314,7 +30314,7 @@
         "constants": ["createIndexNode"]
       },
       "expression/src/node/Node.ts": {
-        "description": "Validate the symbol names of a scope.",
+        "description": "The object that `Node.compile` returns.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -30535,7 +30535,7 @@
         "constants": ["createSymbolNode"]
       },
       "expression/src/node/utils/access.ts": {
-        "description": "Retrieve part of an object:",
+        "description": "Make the `access` function that the expression nodes use to read a part of a value.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -30557,7 +30557,7 @@
         "functions": ["accessFactory"]
       },
       "expression/src/node/utils/assign.ts": {
-        "description": "Replace part of an object:",
+        "description": "Make the `assign` function that the expression nodes use to write a part of a value.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -31600,7 +31600,7 @@
         "functions": ["factory"]
       },
       "expression/src/utils/is.ts": {
-        "description": "Test whether a value is a collection: an Array or Matrix",
+        "description": "The minimum shape of a BigNumber that `isBigNumber` tests.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -31731,7 +31731,7 @@
         "constants": ["isArray"]
       },
       "expression/src/utils/latex.ts": {
-        "description": "@ts-expect-error - escape-latex may not have type declarations",
+        "description": "Escape the LaTeX special characters in a string.",
         "externalDependencies": [
           {
             "package": "escape-latex",
@@ -40116,7 +40116,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 196350,
+    "totalLinesOfCode": 196590,
     "totalExports": 5841,
     "totalClasses": 55,
     "totalInterfaces": 508,

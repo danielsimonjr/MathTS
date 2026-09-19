@@ -20,9 +20,9 @@ export interface IndexLike {
 
 /**
  * Retrieve a subset of a string
- * @param {string} str            string from which to get a substring
- * @param {IndexLike} index       An index or list of indices (character positions)
- * @returns {string} substring
+ * @param str - string from which to get a substring
+ * @param index - An index or list of indices (character positions)
+ * @returns substring
  */
 export function getStringSubset(str: string, index: IndexLike): string {
   if (!isIndex(index)) {
@@ -61,12 +61,12 @@ export function getStringSubset(str: string, index: IndexLike): string {
 
 /**
  * Replace a substring in a string
- * @param {string} str            string to be replaced
- * @param {IndexLike} index       An index or list of indices (character positions)
- * @param {string} replacement    Replacement string
- * @param {string} [defaultValue] Default value to be used when resizing
+ * @param str - string to be replaced
+ * @param index - An index or list of indices (character positions)
+ * @param replacement - Replacement string
+ * @param defaultValue - Optional. Default value to be used when resizing
  *                                the string. is ' ' by default
- * @returns {string} result
+ * @returns result
  */
 export function setStringSubset(
   str: string,

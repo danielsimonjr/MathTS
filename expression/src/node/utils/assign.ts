@@ -3,6 +3,14 @@ import { setSafeProperty } from '../../utils/customs.js';
 import { setStringSubset } from './stringSubset.js';
 import type { IndexLike } from './stringSubset.js';
 
+/**
+ * Make the `assign` function that the expression nodes use to write a part of a value.
+ * For an Array, `assign` copies the result of `subset` into the original array and returns that array.
+ * For a Matrix, it returns the result of the `subset` method of the matrix.
+ * For a string, it returns a new string. For an object, it sets the property and returns the object.
+ * It throws a TypeError for a numeric index on an object and for other value types.
+ * Before it throws an IndexError again, it changes the indices to one-based.
+ */
 export function assignFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
   /**
    * Replace part of an object:
@@ -20,7 +28,11 @@ export function assignFactory({ subset }: { subset: (...args: unknown[]) => unkn
   // TODO: change assign to return the value instead of the object
   return function assign(
     object: unknown,
-    index: { isObjectProperty: () => boolean; getObjectProperty: () => string; isIndex?: boolean } & IndexLike,
+    index: {
+      isObjectProperty: () => boolean;
+      getObjectProperty: () => string;
+      isIndex?: boolean;
+    } & IndexLike,
     value: unknown
   ) {
     try {

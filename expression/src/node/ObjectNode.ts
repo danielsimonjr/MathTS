@@ -41,7 +41,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @constructor ObjectNode
        * @extends {Node}
        * Holds an object with keys/values
-       * @param {Object.<string, Node>} [properties]   object with key/value pairs
+       * @param properties - Optional. object with key/value pairs
        */
       constructor(properties?: Record<string, Node>) {
         super();
@@ -71,13 +71,13 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -119,7 +119,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: ObjectNode) => void): void {
         for (const key in this.properties) {
@@ -132,8 +132,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
       /**
        * Create a new ObjectNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {ObjectNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: Node, path: string, parent: ObjectNode) => Node): ObjectNode {
         const properties: Record<string, Node> = {};
@@ -149,7 +149,6 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {ObjectNode}
        */
       clone(): ObjectNode {
         const properties: Record<string, Node> = {};
@@ -163,8 +162,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toString(options?: StringOptions): string {
@@ -179,7 +178,6 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -190,10 +188,9 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an OperatorNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "ObjectNode", "properties": {...}}`,
        *                       where mathjs is optional
-       * @returns {ObjectNode}
        */
       static fromJSON(json: { properties: Record<string, Node> }): ObjectNode {
         return new ObjectNode(json.properties);
@@ -201,8 +198,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       _toHTML(options?: StringOptions): string {
@@ -229,8 +226,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         const entries: string[] = [];

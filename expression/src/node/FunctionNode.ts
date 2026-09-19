@@ -153,10 +153,10 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * @constructor FunctionNode
        * @extends {./Node}
        * invoke a list with arguments on a node
-       * @param {./Node | string} fn
+       * @param fn
        *     Item resolving to a function on which to invoke
        *     the arguments, typically a SymbolNode or AccessorNode
-       * @param {./Node[]} args
+       * @param args
        */
       constructor(fn: MathNode | string, args: MathNode[], optional?: boolean) {
         super();
@@ -195,13 +195,13 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
@@ -402,7 +402,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         callback(this.fn, 'fn', this);
@@ -415,8 +415,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
       /**
        * Create a new FunctionNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {FunctionNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): FunctionNode {
         const fn = this._ifNode(callback(this.fn, 'fn', this));
@@ -429,7 +429,6 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {FunctionNode}
        */
       clone(): FunctionNode {
         return new FunctionNode(this.fn, this.args.slice(0));
@@ -437,7 +436,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Throws an error 'Undefined function {name}'
-       * @param {string} name
+       * @param name
        */
       static onUndefinedFunction = function (name: string): never {
         throw new Error('Undefined function ' + name);
@@ -451,8 +450,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * otherwise it falls back to calling Node's toString
        * function.
        *
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        * @override
        */
       toString(options?: StringOptions): string {
@@ -477,8 +476,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
@@ -495,7 +494,6 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; fn: MathNode; args: MathNode[] } {
         return {
@@ -507,10 +505,9 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an AssignmentNode from its JSON representation
-       * @param {Object} json  An object structured like
+       * @param json - An object structured like
        *                       `{"mathjs": "FunctionNode", fn: ..., args: ...}`,
        *                       where mathjs is optional
-       * @returns {FunctionNode}
        */
       static fromJSON = function (json: { fn: MathNode; args: MathNode[] }): FunctionNode {
         return new FunctionNode(json.fn, json.args);
@@ -518,8 +515,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const args = this.args.map(function (arg) {
@@ -544,8 +541,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        * otherwise it falls back to calling Node's toTex
        * function.
        *
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       toTex(options?: StringOptions): string {
         let customTex;
@@ -567,9 +563,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        */
       _toMathML(): string {
         const fnNode = this.fn as unknown as { name?: string };
@@ -646,7 +641,6 @@ export const createFunctionNode = /* #__PURE__ */ factory(
 
       /**
        * Get identifier.
-       * @return {string}
        */
       getIdentifier(): string {
         return this.type + ':' + this.name;

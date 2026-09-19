@@ -15,12 +15,22 @@ import { createMap } from '../utils/map.js';
 // Type definitions
 type Scope = Map<string, unknown>;
 
+/**
+ * The object that `Node.compile` returns.
+ * Call `evaluate` to get the value of the compiled node.
+ */
 export interface CompiledExpression {
   evaluate: (scope?: Record<string, unknown>) => unknown;
 }
 
 type CompileFunction = (scope: Scope, args: Record<string, unknown>, context: unknown) => unknown;
 
+/**
+ * Options for `toString`, `toTex` and `toHTML` of a node.
+ * `handler` is a custom function, or a map from node type to a custom function.
+ * `parenthesis` sets the parenthesis rule. `implicit` sets how implicit multiplication shows.
+ * The index signature allows other keys.
+ */
 export interface StringOptions {
   handler?:
     | ((node: MathNode, options?: StringOptions) => string)
@@ -44,7 +54,7 @@ export const createNode = /* #__PURE__ */ factory(
     /**
      * Validate the symbol names of a scope.
      * Throws an error when the scope contains an illegal symbol.
-     * @param {Object} scope
+     * @param scope
      */
     function _validateScope(scope: Scope): void {
       for (const symbol of [...keywords]) {
@@ -58,8 +68,7 @@ export const createNode = /* #__PURE__ */ factory(
 
     /**
      * Escape a label for safe embedding inside a DOT `label="..."` attribute.
-     * @param {string} s
-     * @return {string}
+     * @param s
      */
     function dotEscape(s: string): string {
       return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
@@ -68,8 +77,7 @@ export const createNode = /* #__PURE__ */ factory(
     /**
      * Build the (unescaped) DOT label for a single AST node: its type, plus
      * the defining value/name for leaf-ish node kinds.
-     * @param {Node} node
-     * @return {string}
+     * @param node
      */
     function dotNodeLabel(node: Node): string {
       const t = node.type;
@@ -91,8 +99,8 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Evaluate the node
-       * @param {Object} [scope]  Scope to read/write variables
-       * @return {*}              Returns the result
+       * @param scope - Optional. Scope to read/write variables
+       * @returns Returns the result
        */
       evaluate(scope?: Record<string, unknown>): unknown {
         return this.compile().evaluate(scope);
@@ -100,7 +108,7 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Compile the node into an optimized, evauatable JavaScript function
-       * @return {{evaluate: function([Object])}} object
+       * @returns object
        *                Returns an object with a function 'evaluate',
        *                which can be invoked as expr.evaluate([scope: Object]),
        *                where scope is an optional object with
@@ -126,13 +134,13 @@ export const createNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param _math - Math.js namespace with functions and constants.
+       * @param _argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -144,7 +152,7 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param _callback
        */
       forEach(_callback: (child: Node, path: string, parent: Node) => void): void {
         // must be implemented by each of the Node implementations
@@ -154,8 +162,8 @@ export const createNode = /* #__PURE__ */ factory(
       /**
        * Create a new Node whose children are the results of calling the
        * provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {OperatorNode} Returns a transformed copy of the node
+       * @param _callback
+       * @returns Returns a transformed copy of the node
        */
       map(_callback: (child: Node, path: string, parent: Node) => Node): Node {
         // must be implemented by each of the Node implementations
@@ -164,8 +172,8 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Validate whether an object is a Node, for use with map
-       * @param {Node} node
-       * @returns {Node} Returns the input if it's a node, else throws an Error
+       * @param node
+       * @returns Returns the input if it's a node, else throws an Error
        * @protected
        */
       _ifNode(node: unknown): Node {
@@ -178,7 +186,7 @@ export const createNode = /* #__PURE__ */ factory(
       /**
        * Recursively traverse all nodes in a node tree. Executes given callback for
        * this node and each of its child nodes.
-       * @param {function(node: Node, path: string, parent: Node)} callback
+       * @param callback
        *          A callback called for every node in the node tree.
        */
       traverse(callback: (node: Node, path: string | null, parent: Node | null) => void): void {
@@ -214,12 +222,12 @@ export const createNode = /* #__PURE__ */ factory(
        *       }
        *     })
        *
-       * @param {function(node: Node, path: string, parent: Node) : Node} callback
+       * @param callback
        *          A mapping function accepting a node, and returning
        *          a replacement for the node or the original node. The "signature"
        *          of the callback must be:
        *          callback(node: Node, index: string, parent: Node) : Node
-       * @return {Node} Returns the original node or its replacement
+       * @returns Returns the original node or its replacement
        */
       transform(callback: (node: Node, path: string | null, parent: Node | null) => Node): Node {
         function _transform(child: Node, path: string | null, parent: Node | null): Node {
@@ -244,11 +252,11 @@ export const createNode = /* #__PURE__ */ factory(
        *       return (node && node.isSymbolNode) && (node.name === 'x')
        *     })
        *
-       * @param {function(node: Node, path: string, parent: Node) : Node} callback
+       * @param callback
        *            A test function returning true when a node matches, and false
        *            otherwise. Function signature:
        *            callback(node: Node, index: string, parent: Node) : boolean
-       * @return {Node[]} nodes
+       * @returns nodes
        *            An array with nodes matching given filter criteria
        */
       filter(callback: (node: Node, path: string | null, parent: Node | null) => boolean): Node[] {
@@ -265,7 +273,6 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Create a shallow clone of this node
-       * @return {Node}
        */
       clone(): Node {
         // must be implemented by each of the Node implementations
@@ -274,7 +281,6 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Create a deep clone of this node
-       * @return {Node}
        */
       cloneDeep(): Node {
         return this.map(function (node: Node): Node {
@@ -284,8 +290,8 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Deep compare this node with another node.
-       * @param {Node} other
-       * @return {boolean} Returns true when both nodes are of the same type and
+       * @param other
+       * @returns Returns true when both nodes are of the same type and
        *                   contain the same values (as do their childs)
        */
       equals(other: Node | null | undefined): boolean {
@@ -304,8 +310,7 @@ export const createNode = /* #__PURE__ */ factory(
        *    parenthesis: "keep" //the parenthesis option (This is optional)
        * }
        *
-       * @param {Object} [options]
-       * @return {string}
+       * @param options - Optional.
        */
       toString(options?: StringOptions): string {
         const customString = this._getCustomString(options);
@@ -332,7 +337,6 @@ export const createNode = /* #__PURE__ */ factory(
        * Get a JSON representation of the node
        * Both .toJSON() and the static .fromJSON(json) should be implemented by all
        * implementations of Node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         throw new Error('Cannot serialize object: toJSON not implemented by ' + this.type);
@@ -350,8 +354,7 @@ export const createNode = /* #__PURE__ */ factory(
        *    parenthesis: "keep" //the parenthesis option (This is optional)
        * }
        *
-       * @param {Object} [options]
-       * @return {string}
+       * @param options - Optional.
        */
       toHTML(options?: StringOptions): string {
         const customString = this._getCustomString(options);
@@ -386,8 +389,7 @@ export const createNode = /* #__PURE__ */ factory(
        *    parenthesis: "keep" //the parenthesis option (This is optional)
        * }
        *
-       * @param {Object} [options]
-       * @return {string}
+       * @param options - Optional.
        */
       toTex(options?: StringOptions): string {
         const customString = this._getCustomString(options);
@@ -403,8 +405,7 @@ export const createNode = /* #__PURE__ */ factory(
        * Render this node as Markdown-embeddable math. Display (block) math by
        * default (`$$…$$`), inline (`$…$`) when `options.inline` is true. Thin
        * wrapper over toTex(); adds no failure mode beyond toTex's own.
-       * @param {Object} [options]
-       * @return {string}
+       * @param options - Optional.
        */
       toMarkdown(options?: { inline?: boolean } & StringOptions): string {
         const tex = this.toTex(options);
@@ -415,8 +416,7 @@ export const createNode = /* #__PURE__ */ factory(
        * Render the AST subtree rooted at this node as a Graphviz digraph: one
        * DOT node per AST node (label = node type + a value for leaves), with
        * parent→child edges. Never throws.
-       * @param {Object} [options]
-       * @return {string}
+       * @param options - Optional.
        */
       toDOT(options?: { name?: string }): string {
         const ids = new Map<Node, string>();
@@ -441,7 +441,6 @@ export const createNode = /* #__PURE__ */ factory(
        * Like `toTex`, this returns the body — wrap it in a `<math>` element with
        * `mathMLDocument(node)` to render. Never throws: a failing node degrades
        * to an escaped `<merror>` fragment.
-       * @return {string}
        */
       toMathML(): string {
         try {
@@ -464,7 +463,7 @@ export const createNode = /* #__PURE__ */ factory(
        * Internal function to generate the LaTeX output.
        * This has to be implemented by every Node
        *
-       * @param {Object} [options]
+       * @param _options - Optional.
        * @throws {Error}
        */
       _toTex(_options?: StringOptions): string {
@@ -492,7 +491,6 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Get identifier.
-       * @return {string}
        */
       getIdentifier(): string {
         return this.type;
@@ -500,7 +498,7 @@ export const createNode = /* #__PURE__ */ factory(
 
       /**
        * Get the content of the current Node.
-       * @return {Node} node
+       * @returns node
        **/
       getContent(): Node {
         return this;
@@ -513,4 +511,7 @@ export const createNode = /* #__PURE__ */ factory(
 );
 
 // Export the Node type for use in other modules
+/**
+ * The instance type of the `Node` class that `createNode` makes.
+ */
 export type MathNode = InstanceType<ReturnType<typeof createNode>>;

@@ -14719,7 +14719,7 @@ graph LR
 
 ---
 
-### `expression/src/types.ts` - Type definitions for expression module
+### `expression/src/types.ts` - A function that also has a `signatures` record.
 
 **Exports:**
 
@@ -14902,7 +14902,7 @@ graph LR
 
 ---
 
-### `expression/src/node/Node.ts` - Validate the symbol names of a scope.
+### `expression/src/node/Node.ts` - The object that `Node.compile` returns.
 
 **Internal Dependencies:**
 
@@ -15031,7 +15031,7 @@ graph LR
 
 ---
 
-### `expression/src/node/utils/access.ts` - Retrieve part of an object:
+### `expression/src/node/utils/access.ts` - Make the `access` function that the expression nodes use to read a part of a value.
 
 **Internal Dependencies:**
 
@@ -15047,7 +15047,7 @@ graph LR
 
 ---
 
-### `expression/src/node/utils/assign.ts` - Replace part of an object:
+### `expression/src/node/utils/assign.ts` - Make the `assign` function that the expression nodes use to write a part of a value.
 
 **Internal Dependencies:**
 
@@ -15655,7 +15655,7 @@ graph LR
 
 ---
 
-### `expression/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
+### `expression/src/utils/is.ts` - The minimum shape of a BigNumber that `isBigNumber` tests.
 
 **Exports:**
 
@@ -15665,7 +15665,7 @@ graph LR
 
 ---
 
-### `expression/src/utils/latex.ts` - @ts-expect-error - escape-latex may not have type declarations
+### `expression/src/utils/latex.ts` - Escape the LaTeX special characters in a string.
 
 **External Dependencies:**
 
@@ -18365,7 +18365,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 196350 |
+| Total Lines of Code     | 196590 |
 | Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |

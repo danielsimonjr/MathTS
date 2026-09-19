@@ -25,7 +25,11 @@ interface AccessorNodeChild extends MathNode {
 
 // Runtime Index value produced by a compiled IndexNode, as consumed by
 // access()/assign().
-type RuntimeIndex = { isObjectProperty: () => boolean; getObjectProperty: () => string; isIndex: boolean } & IndexLike;
+type RuntimeIndex = {
+  isObjectProperty: () => boolean;
+  getObjectProperty: () => string;
+  isIndex: boolean;
+} & IndexLike;
 
 export const createAssignmentNode = /* #__PURE__ */ factory(
   name,
@@ -90,13 +94,13 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        *                       new IndexNode(1, 2),
        *                       new ConstantNode(3))  // a[1,2]=3
        *
-       * @param {SymbolNode | AccessorNode} object
+       * @param object
        *     Object on which to assign a value
-       * @param {IndexNode} [index=null]
+       * @param index - Default is `null`.
        *     Index, property name or matrix index. Optional. If not provided
        *     and `object` is a SymbolNode, the property is assigned to the
        *     global scope.
-       * @param {Node} value
+       * @param value
        *     The value to be assigned
        */
       constructor(object: MathNode, index: MathNode | null, value?: MathNode) {
@@ -144,13 +148,13 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -260,7 +264,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         callback(this.object, 'object', this);
@@ -273,8 +277,8 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
       /**
        * Create a new AssignmentNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {AssignmentNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): AssignmentNode {
         const object = this._ifNode(callback(this.object, 'object', this));
@@ -286,7 +290,6 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {AssignmentNode}
        */
       clone(): AssignmentNode {
         return new AssignmentNode(this.object, this.index, this.value);
@@ -294,8 +297,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       _toString(options?: StringOptions): string {
         const object = this.object.toString(options);
@@ -310,7 +312,6 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): {
         mathjs: string;
@@ -328,11 +329,10 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an AssignmentNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "AssignmentNode", object: ..., index: ..., value: ...}`,
        *     where mathjs is optional
-       * @returns {AssignmentNode}
        */
       static fromJSON(json: {
         object: MathNode;
@@ -344,8 +344,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       _toHTML(options?: StringOptions): string {
         const object = this.object.toHTML(options);
@@ -368,9 +367,7 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string}
+       * Get the MathML representation of this node.
        */
       _toMathML(): string {
         const obj = this.object;

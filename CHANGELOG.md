@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(expression): doc comments for every exported symbol
+
+- `expression/src`: TSDoc comments for the 81 undocumented exported symbols (71 in `utils/is.ts`, and
+  `CompiledExpression`, `StringOptions`, `MathNode`, `accessFactory`, `assignFactory`,
+  `isNumberOrBigNumber`, `TypedFunction`, `TypedFunctionConstructor`, `escapeLatex`, `toSymbol`).
+  The `code-docs` gate (`code_docs.py check expression/src`) now passes: 114/114 exported symbols
+  documented, 0 MUST issues (before: 123 MUST issues). Comments only; no code changes.
+- 20 files had mixed dialects (M5) or would have them after the new comments. Their typed JSDoc tags
+  are now TSDoc: `@param {T} name` is `@param name - ...`, and `@returns {T} text` is `@returns text`.
+  The gate counts a comment without a typed `@param` as TSDoc, so a JSDoc-only file is not possible
+  for members without parameters. All 19 optional or default markers (`[name]`, `[name=v]`) are kept
+  as "Optional." or "Default is `v`." in the text (0 lost). `@returns {T}` tags with no text are removed.
+- 24 stale `@param` names (M3: 23 before, 1 more exposed by the conversion) now match the signature (`_math`, `_argNames`, `_callback`,
+  `_options`, `expr`, `fn`), or are removed where the method has no parameter (`_toMathML()`).
+- The `_toMathML` comments in 7 node files said "Get LaTeX representation". They now say MathML.
+- Formatter-only reflows (pre-commit prettier, no logic change): `RuntimeIndex` in `node/AssignmentNode.ts`, the `parenthesizeLower` call in `node/OperatorNode.ts`, and the `index` parameter type in `node/utils/assign.ts`.
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335596 (the new comment lines, after the pre-commit formatter).
+
 ### docs(compat): doc comments for every exported symbol
 
 - `compat/src`: TSDoc comments for `createChain`, `asin`, `acos`, `atan`, `atan2`, `variance`, `std`,

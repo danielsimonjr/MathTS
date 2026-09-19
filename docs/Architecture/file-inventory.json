@@ -4006,126 +4006,126 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 299
+      "loc": 293
     },
     {
       "file": "expression/src/node/ArrayNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 201
     },
     {
       "file": "expression/src/node/AssignmentNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 402
+      "loc": 399
     },
     {
       "file": "expression/src/node/BlockNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 219
+      "loc": 216
     },
     {
       "file": "expression/src/node/ConditionalNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 358
+      "loc": 355
     },
     {
       "file": "expression/src/node/ConstantNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 200
     },
     {
       "file": "expression/src/node/FunctionAssignmentNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 314
+      "loc": 311
     },
     {
       "file": "expression/src/node/FunctionNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 660
+      "loc": 654
     },
     {
       "file": "expression/src/node/IndexNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 300
+      "loc": 295
     },
     {
       "file": "expression/src/node/Node.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 517
+      "loc": 518
     },
     {
       "file": "expression/src/node/ObjectNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 250
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 940
+      "loc": 936
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 201
+      "loc": 197
     },
     {
       "file": "expression/src/node/RangeNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 357
+      "loc": 353
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 325
+      "loc": 321
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 251
+      "loc": 246
     },
     {
       "file": "expression/src/node/utils/access.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 44
+      "loc": 51
     },
     {
       "file": "expression/src/node/utils/assign.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 55
+      "loc": 67
     },
     {
       "file": "expression/src/node/utils/stringSubset.ts",
@@ -4139,14 +4139,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 489
+      "loc": 485
     },
     {
       "file": "expression/src/parse.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2013
+      "loc": 2003
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4342,7 +4342,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 18
+      "loc": 22
     },
     {
       "file": "expression/src/transform/utils/errorTransform.ts",
@@ -4377,7 +4377,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 15
+      "loc": 23
     },
     {
       "file": "expression/src/utils/array.ts",
@@ -4412,14 +4412,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 558
+      "loc": 828
     },
     {
       "file": "expression/src/utils/latex.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 357
+      "loc": 369
     },
     {
       "file": "expression/src/utils/map.ts",
