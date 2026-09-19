@@ -17456,7 +17456,7 @@ graph LR
 
 ---
 
-### `plot/src/three/surface.ts` - surface module
+### `plot/src/three/surface.ts` - Depth tolerance for the painter's sort. Every vertex is normalised into the cube
 
 **Internal Dependencies:**
 
@@ -17472,7 +17472,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `surface`
+- Functions: `compareDepth`, `surface`
+- Constants: `DEPTH_EPS`
 
 ---
 
@@ -18364,12 +18365,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 196185 |
-| Total Exports           | 5839   |
+| Total Lines of Code     | 196218 |
+| Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |
 | Total Interfaces        | 508    |
-| Total Functions         | 1883   |
+| Total Functions         | 1884   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 582    |

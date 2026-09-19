@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(plot): tie-tolerant depth sort with a stable key; `plot` on `bun test`
+
+- Bug: the `surface` painter's sort was `b.depth - a.depth`. Two quads of equal true depth then
+  sorted on the last bit of a float. V8 and JavaScriptCore return `Math.sin(Math.PI / 4)` 1 ulp
+  apart, so Node and Bun drew the two quads in different orders. The order was wrong in BOTH
+  runtimes: it was not decided by the geometry.
+- Fix: `compareDepth` in `plot/src/three/surface.ts`. Depths within `DEPTH_EPS = 1e-9` are a tie,
+  and a tie falls back to the face index (lower index first). Every vertex is normalised into
+  [-1, 1]^3 before projection, so |depth| <= sqrt(3). Rounding noise is ~1e-16; a real depth
+  difference is >= ~1e-6 for any grid up to 10^6 cells per side. Other orders do not change.
+- New tests in `plot/tests/surface.test.ts`: two quads 1 ulp apart sort by face index in both
+  directions, and a real depth difference still wins.
+- `surface` golden regenerated. A field-by-field diff of all 15 `golden-svg` snapshots shows
+  14 identical and, in `surface`, only elements 4 and 5 (the two tied quads) swapped.
+- `plot` now runs `bun test --isolate --timeout 30000` (`bunfig.toml`, `bun-test-preload.mjs` as
+  in `core`). The Bun golden has content identical to the new vitest golden (15/15). Counts:
+  vitest on main 100 tests / 21 files; now 104 / 21 (100 + the 4 new tests) under both runners.
+
 ### chore(test): Bun migration Phase 2e - root aggregate, coverage; `plot` stays on vitest
 
 - Root `bun run test` is now `turbo run test && vitest run`. Each package runs its own runner

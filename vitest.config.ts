@@ -55,7 +55,7 @@ export default defineConfig({
     environment: 'node',
     exclude: ['**/*.browser.test.ts', 'node_modules/**'],
     // ROOT-LEVEL suites only. Each package runs its OWN runner through
-    // `turbo run test` (`bun test` for most, vitest for `functions` and `plot`);
+    // `turbo run test` (`bun test` for most, vitest for `functions`);
     // `bun run test` runs that and then this config. The former glob over every
     // `*/tests` directory ran all packages a second time, under vitest, whatever
     // runner the package declares, and it made a CLI filter such as
