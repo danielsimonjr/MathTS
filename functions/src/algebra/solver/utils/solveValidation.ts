@@ -41,6 +41,10 @@ interface MatrixInternal {
   _ptr?: number[];
 }
 
+/**
+ * Create the `solveValidation` function that the triangular solvers use to check `m` and
+ * `b`.
+ */
 export function createSolveValidation({ DenseMatrix }: SolveValidationDependencies) {
   /**
    * Validates matrix and column vector b for backward/forward substitution algorithms.

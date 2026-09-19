@@ -1,6 +1,14 @@
 import { isInteger } from '../../utils/number.js';
 import { product } from '../../utils/product.js';
 
+/**
+ * Return the number of ways to choose `k` items from `n` items, without order.
+ *
+ * The loop alternates multiplication and division to keep intermediate values exact as long
+ * as possible.
+ *
+ * @throws TypeError if `n` or `k` is not a non-negative integer, or if `k > n`.
+ */
 export function combinationsNumber(n: number, k: number): number {
   if (!isInteger(n) || n < 0) {
     throw new TypeError('Positive integer value expected in function combinations');

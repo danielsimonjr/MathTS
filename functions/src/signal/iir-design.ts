@@ -488,6 +488,11 @@ export function buttord(
   gpass: number,
   gstop: number
 ): { N: number; Wn: [number, number] };
+/**
+ * Implementation of the `buttord` overloads.
+ *
+ * @throws Error if `wp` and `ws` are not both scalars or both `[low, high]` pairs.
+ */
 export function buttord(
   wp: number | readonly [number, number],
   ws: number | readonly [number, number],

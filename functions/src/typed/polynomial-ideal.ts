@@ -49,10 +49,15 @@ export function normalize(p: Poly): Poly {
   return out.sort((a, b) => cmpPowers(b.powers, a.powers));
 }
 
+/**
+ * Return the sum of two multivariate polynomials, with like terms combined.
+ * The result drops near-zero terms and is sorted in descending lex order.
+ */
 export function polyAdd(a: Poly, b: Poly): Poly {
   return normalize([...a, ...b]);
 }
 
+/** Return the negation of `a`. The function makes a new polynomial and does not change `a`. */
 export function polyNeg(a: Poly): Poly {
   const out: Poly = [];
   for (let i = 0; i < a.length; i++) {
@@ -61,10 +66,15 @@ export function polyNeg(a: Poly): Poly {
   return out;
 }
 
+/** Return the difference `a - b` of two multivariate polynomials. */
 export function polySub(a: Poly, b: Poly): Poly {
   return polyAdd(a, polyNeg(b));
 }
 
+/**
+ * Return the product of two multivariate polynomials, with like terms combined.
+ * The result drops near-zero terms and is sorted in descending lex order.
+ */
 export function polyMul(a: Poly, b: Poly): Poly {
   const out: Poly = [];
   for (const ta of a) {

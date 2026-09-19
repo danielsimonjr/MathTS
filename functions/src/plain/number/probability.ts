@@ -3,6 +3,14 @@
 import { isInteger } from '../../utils/number.js';
 import { product } from '../../utils/product.js';
 
+/**
+ * Return the gamma function of `n`.
+ *
+ * For a positive integer, the result is the exact product `(n - 1)!`. A non-positive integer
+ * gives Infinity, and a non-finite integer gives NaN. The result overflows to Infinity for
+ * an integer above 171 and for a value of 171.35 or more. Other values use the reflection
+ * formula below 0.5, a Stirling series above 85, and the Lanczos approximation otherwise.
+ */
 export function gammaNumber(n: number): number {
   let x: number;
 
@@ -81,6 +89,12 @@ export const lgammaSeries: number[] = [
   0.1208650973866179e-2, -0.5395239384953e-5,
 ];
 
+/**
+ * Return the natural logarithm of the gamma function of `n`.
+ *
+ * A negative `n` gives NaN, and 0 gives Infinity. A non-finite `n` is returned unchanged.
+ * Values below 0.5 use the reflection formula. Other values use the Lanczos method.
+ */
 export function lgammaNumber(n: number): number {
   if (n < 0) return NaN;
   if (n === 0) return Infinity;

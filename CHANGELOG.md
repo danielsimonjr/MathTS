@@ -23,7 +23,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   but not enabled). It fails on origin/main (the six TS2416) and passes with this fix. Pre-existing
   TS7016 in `matrix` and `compat` (their `.d.ts` import the undeclared `typed-function`) are listed
   as known errors in the script.
-- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 335905 and `totalTypeScriptFiles` is 1915.
+- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 336685 and `totalTypeScriptFiles` is 1915 (after the merge of main).
+
+### docs(functions): doc comments for every exported symbol
+
+- `functions/src`: TSDoc comments for 264 undocumented exported symbols. The largest groups are
+  the `utils/is.ts` type guards and structural interfaces (70), the `plain/number/*` scalar
+  functions (65), the `wasm/special` Carlson, elliptic and Bessel scalars (19), and the
+  hypothesis-test, regression and optimizer result and option interfaces. Each behavioural claim
+  (throws, NaN domains, copy or in-place, default configuration) was checked against the code.
+- M2: summary lines for `zetaNumeric`, `zetaComplex`, `zeta`, `product` and `_tryFunctionWithArgs`.
+- M3: 24 documented parameters that were not in the signature now match it. `csDfs` no longer
+  documents a removed `k`. The public `log`, `log10` and `nthRoot` comments no longer attach to an
+  inner helper, because the helper now has its own comment. The `ImmutableDenseMatrix` `set`,
+  `resize` and `swapRows` comments now say that the method throws, not that it changes the matrix.
+  The `Index` parameters moved to a new constructor comment.
+- M5: 8 mixed-dialect files. `@throws {Error}` became `@throws Error`, and a `@returns { a, b }`
+  object shape is now in backticks. `import.ts` uses `@param name - text`; `[options]` became
+  "Optional." (0 of 6 optional or default markers lost).
+- `utils/factory.ts`: the two `eslint-disable-next-line` comments sat between each doc comment and
+  its declaration, so the doc was not attached. The same rule and reason now use a block
+  `eslint-disable` / `eslint-enable` pair around the declaration line. `nearlyEqual`: its doc
+  comment moved from above a private interface to the function.
+- The `code-docs` gate (`code_docs.py check functions/src`) now passes: 1297/1297 exported symbols
+  documented, 0 MUST issues (before: 301 MUST issues). Comments only; no code changes. The
+  pre-commit formatter also reflowed code lines in 18 of the touched files (layout only).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336352 (the new comment lines, after the
+  pre-commit formatter).
 
 ### docs(core): doc comments for every exported symbol
 

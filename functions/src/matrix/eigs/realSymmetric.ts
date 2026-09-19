@@ -55,6 +55,10 @@ interface Dependencies {
   add: (...args: Scalar[]) => Scalar;
 }
 
+/**
+ * Create the function that computes the eigenvalues and the optional eigenvectors of a
+ * real symmetric matrix.
+ */
 export function createRealSymmetric({
   config,
   addScalar,
@@ -88,7 +92,7 @@ export function createRealSymmetric({
   /**
    * Compute eigenvalues and optionally eigenvectors of a real symmetric matrix
    * @param arr the matrix
-   * @param N size of the matrix
+   * @param _N size of the matrix (not used)
    * @param prec precision threshold
    * @param type data type ('number' or 'BigNumber')
    * @param computeVectors whether to compute eigenvectors
@@ -278,7 +282,9 @@ export function createRealSymmetric({
   function getThetaBig(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
     const denom = subtract(ajj, aii) as BigNumber;
     if (bigLte(abs(denom), bignumber(config.relTol as number))) {
-      return (bignumber(-1) as BigNumber & { acos(): BigNumber }).acos().div(4) as unknown as BigNumber;
+      return (bignumber(-1) as BigNumber & { acos(): BigNumber })
+        .acos()
+        .div(4) as unknown as BigNumber;
     } else {
       return multiplyScalar(
         bignumber(0.5),

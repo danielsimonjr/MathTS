@@ -1539,7 +1539,7 @@ export function solveBVP(
  * @param t0 - Current time
  * @param h - Step size
  * @param tol - Error tolerance
- * @returns { y: number[], t: number, h: number } with updated step size
+ * @returns `{ y: number[], t: number, h: number }` with updated step size
  */
 export function odeAdaptiveStep(
   f: (t: f64, y: number[]) => number[],
@@ -1820,7 +1820,7 @@ export function nullspace(A: number[][]): number[][] {
  *
  * @param p - Numerator polynomial coefficients [a0, a1, ..., an] for a0 + a1*x + ...
  * @param q - Denominator polynomial coefficients
- * @returns { residues: number[], poles: number[] }
+ * @returns `{ residues: number[], poles: number[] }`
  */
 export function residue(p: number[], q: number[]): { residues: number[]; poles: number[] } {
   // Find roots of q using companion matrix eigenvalues (simple for small degree)
@@ -1952,7 +1952,7 @@ export function chebyshevApprox(f: (x: f64) => f64, a: f64, b: f64, n: i32 = 10)
  * @param coeffs - Taylor series coefficients [c0, c1, c2, ...]
  * @param m - Numerator degree
  * @param n - Denominator degree
- * @returns { num: number[], den: number[] } polynomial coefficients
+ * @returns `{ num: number[], den: number[] }` polynomial coefficients
  */
 export function padeApproximant(
   coeffs: number[],
@@ -2180,8 +2180,7 @@ const LINPROG_TOL = 1e-9;
 
 /** How an original variable j maps onto the working (>=0) columns of the two-phase tableau. */
 type LinprogVarExpansion =
-  | { kind: 'shift'; col: number; shift: number }
-  | { kind: 'split'; colPos: number; colNeg: number };
+  { kind: 'shift'; col: number; shift: number } | { kind: 'split'; colPos: number; colNeg: number };
 
 interface LinprogRawResult {
   xWork: number[];
@@ -2530,6 +2529,12 @@ function linprogTwoPhase(c: number[], opts: LinprogOptions): LinprogResult {
  */
 export function linprog(c: number[], A_ub: number[][], b_ub: number[]): number[] | null;
 export function linprog(c: number[], opts: LinprogOptions): LinprogResult;
+/**
+ * Implementation of the `linprog` overloads.
+ *
+ * An array as the second argument selects the legacy one-phase form. An options object
+ * selects the two-phase simplex.
+ */
 export function linprog(
   c: number[],
   arg2: number[][] | LinprogOptions,
@@ -2549,7 +2554,7 @@ export function linprog(
  * @param pde - { alpha: diffusion coefficient }
  * @param domain - { L: domain length, nx: spatial points, nt: time steps, T: final time }
  * @param bc - { left: left BC value, right: right BC value, initial: initial condition function }
- * @returns { x: number[], u: number[] } solution at final time
+ * @returns `{ x: number[], u: number[] }` solution at final time
  */
 export function solvePDE(
   pde: { alpha: f64 },

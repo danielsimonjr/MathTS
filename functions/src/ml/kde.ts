@@ -17,6 +17,7 @@ export interface GaussianKDEOptions {
   bandwidth?: number;
 }
 
+/** Result of `gaussianKDE`: a density evaluator and the bandwidth it uses. */
 export interface GaussianKDEResult {
   /** Evaluate the estimated density at each of `xs`. */
   evaluate: (xs: number[]) => number[];

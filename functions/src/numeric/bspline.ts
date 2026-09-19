@@ -196,6 +196,10 @@ export function bsplineFit(
  */
 export function bsplineEval(spline: BSplineTuple, xnew: f64): f64;
 export function bsplineEval(spline: BSplineTuple, xnew: readonly f64[]): f64[];
+/**
+ * Implementation of the `bsplineEval` overloads. An array input gives a new array. The
+ * function does not change the input.
+ */
 export function bsplineEval(spline: BSplineTuple, xnew: f64 | readonly f64[]): f64 | f64[] {
   const { t, c, k } = spline;
   const nLast = c.length - 1;

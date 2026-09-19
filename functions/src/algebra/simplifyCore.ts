@@ -48,7 +48,12 @@ interface ObjNode extends MathNode {
 
 type ScalarFn = (...args: unknown[]) => unknown;
 type NodeCtor1 = new (a: MathNode) => MathNode;
-type OperatorNodeCtor = new (op: string, fn: string, args: MathNode[], implicit?: boolean) => MathNode;
+type OperatorNodeCtor = new (
+  op: string,
+  fn: string,
+  args: MathNode[],
+  implicit?: boolean
+) => MathNode;
 type FunctionNodeCtor = new (fn: MathNode | string, args: MathNode[]) => MathNode;
 type ConstantNodeCtor = new (value: unknown) => MathNode;
 type ArrayNodeCtor = new (items: MathNode[]) => MathNode;
@@ -174,7 +179,7 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
      *
      *     simplify, simplifyConstant, resolve, derivative
      *
-     * @param {Node | string} node
+     * @param {Node | string} nodeToSimplify
      *     The expression to be simplified
      * @param {Object} options
      *     Simplification options, as per simplify()
@@ -188,7 +193,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
       if (hasProperty(nodeToSimplify, 'trivial', context)) {
         // This node does nothing if it has only one argument, so if so,
         // return that argument simplified
-        if (isFunctionNode(nodeToSimplify) && (nodeToSimplify as unknown as FuncNode).args.length === 1) {
+        if (
+          isFunctionNode(nodeToSimplify) &&
+          (nodeToSimplify as unknown as FuncNode).args.length === 1
+        ) {
           return _simplifyCore((nodeToSimplify as unknown as FuncNode).args[0], options);
         }
         // For other node types, we try the generic methods
@@ -231,13 +239,21 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
 
         if ((node as unknown as OpNode).op === '~') {
           // bitwise not
-          if (isOperatorNode(a0) && (a0 as unknown as OpNode).isUnary() && (a0 as unknown as OpNode).op === '~') {
+          if (
+            isOperatorNode(a0) &&
+            (a0 as unknown as OpNode).isUnary() &&
+            (a0 as unknown as OpNode).op === '~'
+          ) {
             return (a0 as unknown as OpNode).args[0];
           }
         }
         if ((node as unknown as OpNode).op === 'not') {
           // logical not
-          if (isOperatorNode(a0) && (a0 as unknown as OpNode).isUnary() && (a0 as unknown as OpNode).op === 'not') {
+          if (
+            isOperatorNode(a0) &&
+            (a0 as unknown as OpNode).isUnary() &&
+            (a0 as unknown as OpNode).op === 'not'
+          ) {
             // Has the effect of turning the argument into a boolean
             // So can only eliminate the double negation if
             // the inside is already boolean
@@ -250,8 +266,14 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
         if ((node as unknown as OpNode).op === '-') {
           // unary minus
           if (isOperatorNode(a0)) {
-            if ((a0 as unknown as OpNode).isBinary() && (a0 as unknown as OpNode).fn === 'subtract') {
-              node = new OperatorNode('-', 'subtract', [(a0 as unknown as OpNode).args[1], (a0 as unknown as OpNode).args[0]]);
+            if (
+              (a0 as unknown as OpNode).isBinary() &&
+              (a0 as unknown as OpNode).fn === 'subtract'
+            ) {
+              node = new OperatorNode('-', 'subtract', [
+                (a0 as unknown as OpNode).args[1],
+                (a0 as unknown as OpNode).args[0],
+              ]);
               finish = false; // continue to process the new binary node
             }
             if ((a0 as unknown as OpNode).isUnary() && (a0 as unknown as OpNode).op === '-') {
@@ -259,7 +281,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
             }
           }
         }
-        if (finish) return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a0]);
+        if (finish)
+          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [
+            a0,
+          ]);
       }
       if (isOperatorNode(node) && (node as unknown as OpNode).isBinary()) {
         const a0 = _simplifyCore((node as unknown as OpNode).args[0], options);
@@ -272,14 +297,25 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
           if (isConstantNode(a1) && isZero((a1 as unknown as ConstNode).value)) {
             return a0;
           }
-          if (isOperatorNode(a1) && (a1 as unknown as OpNode).isUnary() && (a1 as unknown as OpNode).op === '-') {
+          if (
+            isOperatorNode(a1) &&
+            (a1 as unknown as OpNode).isUnary() &&
+            (a1 as unknown as OpNode).op === '-'
+          ) {
             a1 = (a1 as unknown as OpNode).args[0];
             node = new OperatorNode('-', 'subtract', [a0, a1]);
           }
         }
         if ((node as unknown as OpNode).op === '-') {
-          if (isOperatorNode(a1) && (a1 as unknown as OpNode).isUnary() && (a1 as unknown as OpNode).op === '-') {
-            return _simplifyCore(new OperatorNode('+', 'add', [a0, (a1 as unknown as OpNode).args[0]]), options);
+          if (
+            isOperatorNode(a1) &&
+            (a1 as unknown as OpNode).isUnary() &&
+            (a1 as unknown as OpNode).op === '-'
+          ) {
+            return _simplifyCore(
+              new OperatorNode('+', 'add', [a0, (a1 as unknown as OpNode).args[0]]),
+              options
+            );
           }
           if (isConstantNode(a0) && isZero((a0 as unknown as ConstNode).value)) {
             return _simplifyCore(new OperatorNode('-', 'unaryMinus', [a1]));
@@ -287,7 +323,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
           if (isConstantNode(a1) && isZero((a1 as unknown as ConstNode).value)) {
             return a0;
           }
-          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a0, a1]);
+          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [
+            a0,
+            a1,
+          ]);
         }
         if ((node as unknown as OpNode).op === '*') {
           if (isConstantNode(a0)) {
@@ -304,10 +343,20 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
               return a0;
             }
             if (isCommutative(node, context)) {
-              return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a1, a0], (node as unknown as OpNode).implicit); // constants on left
+              return new OperatorNode(
+                (node as unknown as OpNode).op,
+                (node as unknown as OpNode).fn,
+                [a1, a0],
+                (node as unknown as OpNode).implicit
+              ); // constants on left
             }
           }
-          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a0, a1], (node as unknown as OpNode).implicit);
+          return new OperatorNode(
+            (node as unknown as OpNode).op,
+            (node as unknown as OpNode).fn,
+            [a0, a1],
+            (node as unknown as OpNode).implicit
+          );
         }
         if ((node as unknown as OpNode).op === '/') {
           if (isConstantNode(a0) && isZero((a0 as unknown as ConstNode).value)) {
@@ -316,7 +365,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
           if (isConstantNode(a1) && equal((a1 as unknown as ConstNode).value, 1)) {
             return a0;
           }
-          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a0, a1]);
+          return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [
+            a0,
+            a1,
+          ]);
         }
         if ((node as unknown as OpNode).op === '^') {
           if (isConstantNode(a1)) {
@@ -362,7 +414,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
             }
           }
         }
-        return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [a0, a1]);
+        return new OperatorNode((node as unknown as OpNode).op, (node as unknown as OpNode).fn, [
+          a0,
+          a1,
+        ]);
       }
       if (isOperatorNode(node)) {
         return new OperatorNode(
@@ -372,7 +427,9 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
         );
       }
       if (isArrayNode(node)) {
-        return new ArrayNode((node as unknown as ArrNode).items.map((n: MathNode) => _simplifyCore(n, options)));
+        return new ArrayNode(
+          (node as unknown as ArrNode).items.map((n: MathNode) => _simplifyCore(n, options))
+        );
       }
       if (isAccessorNode(node)) {
         return new AccessorNode(
@@ -381,7 +438,9 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
         );
       }
       if (isIndexNode(node)) {
-        return new IndexNode((node as unknown as IdxNode).dimensions.map((n: MathNode) => _simplifyCore(n, options)));
+        return new IndexNode(
+          (node as unknown as IdxNode).dimensions.map((n: MathNode) => _simplifyCore(n, options))
+        );
       }
       if (isObjectNode(node)) {
         const newProps: Record<string, MathNode> = {};

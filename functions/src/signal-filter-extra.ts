@@ -175,6 +175,7 @@ export interface AnalogProto {
   k: number;
 }
 
+/** Filter band type: lowpass, highpass, bandpass or bandstop. */
 export type FilterBtype = 'low' | 'high' | 'bandpass' | 'bandstop';
 
 function relativeDegree(z: Complex[], p: Complex[]): number {

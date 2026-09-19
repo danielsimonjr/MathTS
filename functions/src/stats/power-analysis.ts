@@ -16,6 +16,7 @@ import { noncentralTCDF } from './inference-extra2.js';
 /** Alternative hypothesis direction. */
 export type TTestPowerAlternative = 'two-sided' | 'larger' | 'smaller';
 
+/** Options for `tTestPower`. */
 export interface TTestPowerOptions {
   /**
    * `'power'` (default): the second positional argument is `nobs` (per-group

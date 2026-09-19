@@ -9,6 +9,7 @@
 /** A vector field ℝⁿ → ℝᵐ. */
 export type VectorField = (x: number[]) => number[];
 
+/** Options for `numericJacobian`. */
 export interface NumericJacobianOptions {
   /** Absolute step override. Default: per-coordinate relative step (see below). */
   h?: number;

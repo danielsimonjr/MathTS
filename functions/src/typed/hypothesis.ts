@@ -43,18 +43,30 @@ import { multipleTest } from '../stats/inference-extra.js';
 /** 64-bit float */
 type f64 = number;
 
+/**
+ * Result of `studentTTest` and `studentTTestPaired`: the t statistic, the p-value, and the
+ * degrees of freedom.
+ */
 export interface TTestResult {
   statistic: f64;
   pValue: f64;
   degreesOfFreedom: f64;
 }
 
+/**
+ * Result of `chiSquareTest` without bootstrap: the chi-squared statistic, the p-value,
+ * and the degrees of freedom.
+ */
 export interface ChiSquareResult {
   statistic: f64;
   pValue: f64;
   degreesOfFreedom: f64;
 }
 
+/**
+ * Result of `anova`: the F statistic, the p-value, and the between-group and within-group
+ * degrees of freedom.
+ */
 export interface AnovaResult {
   fStatistic: f64;
   pValue: f64;
@@ -62,21 +74,31 @@ export interface AnovaResult {
   dfWithin: f64;
 }
 
+/** Result of a Kolmogorov-Smirnov test without bootstrap: the D statistic and the p-value. */
 export interface KSTestResult {
   statistic: f64;
   pValue: f64;
 }
 
+/** Result of `mannWhitneyTest` without bootstrap: the U statistic and the p-value. */
 export interface MannWhitneyResult {
   uStatistic: f64;
   pValue: f64;
 }
 
+/** Result of `shapiroWilkTest` without bootstrap: the W statistic and the p-value. */
 export interface ShapiroWilkResult {
   statistic: f64;
   pValue: f64;
 }
 
+/**
+ * Result of `principalComponentAnalysis`.
+ *
+ * `components` holds the principal directions, `explained` holds the fraction of the total
+ * variance for each component, and `scores` holds the centered data projected onto the
+ * components.
+ */
 export interface PCAResult {
   components: f64[][];
   explained: f64[];
@@ -109,6 +131,7 @@ export interface BootstrapOptions {
   bootstrapSeed?: number;
 }
 
+/** Result of `kolmogorovSmirnovTest` when the `bootstrap` option is set. */
 export interface KSBootstrapResult {
   /** D statistic from the original (un-permuted) samples. */
   statistic: f64;
@@ -120,6 +143,7 @@ export interface KSBootstrapResult {
   bootstrapStd: f64;
 }
 
+/** Result of `mannWhitneyTest` when the `bootstrap` option is set. */
 export interface MWBootstrapResult {
   /** U statistic from the original (un-permuted) samples. */
   uStatistic: f64;
@@ -131,6 +155,7 @@ export interface MWBootstrapResult {
   bootstrapStd: f64;
 }
 
+/** Result of `shapiroWilkTest` when the `bootstrap` option is set. */
 export interface SWBootstrapResult {
   /** W statistic from the original (un-permuted) samples. */
   statistic: f64;
@@ -145,6 +170,7 @@ export interface SWBootstrapResult {
   bootstrapStd: f64;
 }
 
+/** Result of `chiSquareTest` when the `bootstrap` option is set. */
 export interface ChiSquareBootstrapResult {
   /** chi² statistic from the original (un-permuted) samples. */
   statistic: f64;
@@ -1899,7 +1925,7 @@ export function friedmanTest(groups: f64[][]): {
     const row = groups.map((g) => g[block]);
     const order = row.map((_, i) => i).sort((i, j) => row[i] - row[j]);
     const ranks = new Array<number>(k);
-    for (let i = 0; i < k; ) {
+    for (let i = 0; i < k;) {
       let j = i;
       while (j < k && row[order[j]] === row[order[i]]) j++;
       const avg = (i + 1 + j) / 2;

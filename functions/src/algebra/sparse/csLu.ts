@@ -7,6 +7,10 @@ import { createCsSpsolve } from './csSpsolve.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Sparse matrix internal structure
+/**
+ * Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
+ * value, and the column pointers.
+ */
 export interface SparseMatrixData {
   _size: number[];
   _values: unknown[];
@@ -34,6 +38,10 @@ interface CsLuDependencies {
 }
 
 // Symbolic analysis result from csSqr
+/**
+ * Symbolic analysis that `csLu` reads: the column permutation `q` and the estimated
+ * nonzero counts `lnz` and `unz`.
+ */
 export interface SymbolicAnalysis {
   q?: number[];
   lnz?: number;
@@ -41,6 +49,7 @@ export interface SymbolicAnalysis {
 }
 
 // LU factorization result
+/** Result of `csLu`: the factors `L` and `U`, and the inverse row permutation `pinv`. */
 export interface LuResult {
   L: SparseMatrixData;
   U: SparseMatrixData;

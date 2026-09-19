@@ -2627,7 +2627,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/simplify/wildcards.ts` - wildcards module
+### `functions/src/algebra/simplify/wildcards.ts` - Return true if `x` is a ConstantNode, or a unary OperatorNode whose operand is a
 
 **Internal Dependencies:**
 
@@ -2789,7 +2789,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/utils/solveValidation.ts` - Validates matrix and column vector b for backward/forward substitution algorithms.
+### `functions/src/algebra/solver/utils/solveValidation.ts` - Create the `solveValidation` function that the triangular solvers use to check `m` and
 
 **Internal Dependencies:**
 
@@ -2805,7 +2805,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csAmd.ts` - Try WASM-accelerated AMD ordering for large sparse matrices
+### `functions/src/algebra/sparse/csAmd.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -2825,7 +2825,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csChol.ts` - Computes the Cholesky factorization of matrix A. It computes L and P so
+### `functions/src/algebra/sparse/csChol.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -2843,7 +2843,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csCounts.ts` - Computes the column counts using the upper triangular part of A.
+### `functions/src/algebra/sparse/csCounts.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -2940,7 +2940,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csLu.ts` - Computes the numeric LU factorization of the sparse matrix A. Implements a Left-looking LU factorization
+### `functions/src/algebra/sparse/csLu.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -3017,7 +3017,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csSpsolve.ts` - The function csSpsolve() computes the solution to G * x = bk, where bk is the
+### `functions/src/algebra/sparse/csSpsolve.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -3034,7 +3034,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csSqr.ts` - Symbolic ordering and analysis for QR and LU decompositions.
+### `functions/src/algebra/sparse/csSqr.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -3055,7 +3055,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/sparse/csSymperm.ts` - Computes the symmetric permutation of matrix A accessing only
+### `functions/src/algebra/sparse/csSymperm.ts` - Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each
 
 **Internal Dependencies:**
 
@@ -6317,7 +6317,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/utils/zerosAndOnes.ts` - Create an Array or Matrix with zeros or ones
+### `functions/src/matrix/utils/zerosAndOnes.ts` - Create the typed function `name` that returns an array or matrix filled with
 
 **Internal Dependencies:**
 
@@ -6744,7 +6744,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/bitwise.ts` - bitwise module
+### `functions/src/plain/number/bitwise.ts` - Return the bitwise AND `x & y` of two integers.
 
 **Internal Dependencies:**
 
@@ -6758,7 +6758,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/combinations.ts` - combinations module
+### `functions/src/plain/number/combinations.ts` - Return the number of ways to choose `k` items from `n` items, without order.
 
 **Internal Dependencies:**
 
@@ -6811,7 +6811,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/probability.ts` - TODO: comment on the variables g and p
+### `functions/src/plain/number/probability.ts` - Return the gamma function of `n`.
 
 **Internal Dependencies:**
 
@@ -6827,7 +6827,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/relational.ts` - Relational operations for plain numbers
+### `functions/src/plain/number/relational.ts` - Compare `x` and `y` exactly, with no tolerance.
 
 **Exports:**
 
@@ -6835,7 +6835,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/trigonometry.ts` - trigonometry module
+### `functions/src/plain/number/trigonometry.ts` - Return the inverse hyperbolic cotangent of `x`.
 
 **Internal Dependencies:**
 
@@ -7089,7 +7089,7 @@ graph LR
 
 ---
 
-### `functions/src/probability/util/seededRNG.ts` - Type for seedrandom function
+### `functions/src/probability/util/seededRNG.ts` - Create a random number generator that returns values from `seedrandom`.
 
 **External Dependencies:**
 
@@ -10229,7 +10229,7 @@ graph LR
 
 ---
 
-### `functions/src/utils/bignumber/nearlyEqual.ts` - Compares two BigNumbers.
+### `functions/src/utils/bignumber/nearlyEqual.ts` - Internal structural contract for the BigNumber values compared here. Inputs
 
 **Exports:**
 
@@ -10346,7 +10346,7 @@ graph LR
 
 ---
 
-### `functions/src/utils/is.ts` - Test whether a value is a collection: an Array or Matrix
+### `functions/src/utils/is.ts` - Return true if `x` is a BigNumber.
 
 **Exports:**
 
@@ -10635,7 +10635,7 @@ graph LR
 
 ---
 
-### `functions/src/utils/product.ts` - product module
+### `functions/src/utils/product.ts` - Return the product of the integers from `i` to `n`. The result is 1 if `n < i`.
 
 **Exports:**
 
@@ -18365,7 +18365,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 196605 |
+| Total Lines of Code     | 197385 |
 | Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |

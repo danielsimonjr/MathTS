@@ -4,7 +4,9 @@ import { DEFAULT_CONFIG, MathJsConfig } from '../config.js';
 export const MATRIX_OPTIONS = ['Matrix', 'Array'] as const; // valid values for option matrix
 export const NUMBER_OPTIONS = ['number', 'BigNumber', 'bigint', 'Fraction'] as const; // valid values for option number
 
+/** A valid value of the `matrix` configuration option. */
 export type MatrixOption = (typeof MATRIX_OPTIONS)[number];
+/** A valid value of the `number` configuration option. */
 export type NumberOption = (typeof NUMBER_OPTIONS)[number];
 
 /**
@@ -44,6 +46,12 @@ export type EmitFunction = (
   changes: Partial<MathJsConfig>
 ) => void;
 
+/**
+ * Create the `config` function for a math.js instance.
+ *
+ * The created function reads and changes `config`, and calls `emit` with the event
+ * `'config'`.
+ */
 export function configFactory(config: MathJsConfig, emit: EmitFunction): ConfigFunction {
   /**
    * Set configuration options for math.js, and get current options.

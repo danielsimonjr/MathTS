@@ -5583,7 +5583,7 @@ modules:
       constants:
         - createUtil
     functions/src/algebra/simplify/wildcards.ts:
-      description: wildcards module
+      description: Return true if `x` is a ConstantNode, or a unary OperatorNode whose operand is a
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5864,7 +5864,7 @@ modules:
       constants:
         - createUsolveAll
     functions/src/algebra/solver/utils/solveValidation.ts:
-      description: Validates matrix and column vector b for backward/forward substitution algorithms.
+      description: Create the `solveValidation` function that the triangular solvers use to check `m` and
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5886,7 +5886,7 @@ modules:
       functions:
         - createSolveValidation
     functions/src/algebra/sparse/csAmd.ts:
-      description: Try WASM-accelerated AMD ordering for large sparse matrices
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5917,7 +5917,7 @@ modules:
       constants:
         - createCsAmd
     functions/src/algebra/sparse/csChol.ts:
-      description: Computes the Cholesky factorization of matrix A. It computes L and P so
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -5944,7 +5944,7 @@ modules:
       constants:
         - createCsChol
     functions/src/algebra/sparse/csCounts.ts:
-      description: Computes the column counts using the upper triangular part of A.
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6064,7 +6064,7 @@ modules:
       functions:
         - csLeaf
     functions/src/algebra/sparse/csLu.ts:
-      description: Computes the numeric LU factorization of the sparse matrix A. Implements a Left-looking LU factorization
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6153,7 +6153,7 @@ modules:
       functions:
         - csReach
     functions/src/algebra/sparse/csSpsolve.ts:
-      description: The function csSpsolve() computes the solution to G * x = bk, where bk is the
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6175,7 +6175,7 @@ modules:
       constants:
         - createCsSpsolve
     functions/src/algebra/sparse/csSqr.ts:
-      description: Symbolic ordering and analysis for QR and LU decompositions.
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -6210,7 +6210,7 @@ modules:
       constants:
         - createCsSqr
     functions/src/algebra/sparse/csSymperm.ts:
-      description: Computes the symmetric permutation of matrix A accessing only
+      description: 'Compressed-column (CSC) storage of a sparse matrix: the values, the row index of each'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -13645,7 +13645,7 @@ modules:
       constants:
         - createTranspose
     functions/src/matrix/utils/zerosAndOnes.ts:
-      description: Create an Array or Matrix with zeros or ones
+      description: Create the typed function `name` that returns an array or matrix filled with
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14280,7 +14280,7 @@ modules:
         - roundNumber
         - normNumber
     functions/src/plain/number/bitwise.ts:
-      description: bitwise module
+      description: Return the bitwise AND `x & y` of two integers.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14305,7 +14305,7 @@ modules:
         - rightArithShiftNumber
         - rightLogShiftNumber
     functions/src/plain/number/combinations.ts:
-      description: combinations module
+      description: Return the number of ways to choose `k` items from `n` items, without order.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14406,7 +14406,7 @@ modules:
         - xorNumber
         - andNumber
     functions/src/plain/number/probability.ts:
-      description: 'TODO: comment on the variables g and p'
+      description: Return the gamma function of `n`.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14437,7 +14437,7 @@ modules:
         - lgammaN
         - lgammaSeries
     functions/src/plain/number/relational.ts:
-      description: Relational operations for plain numbers
+      description: Compare `x` and `y` exactly, with no tolerance.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -14459,7 +14459,7 @@ modules:
         - largerEqNumber
         - compareNumber
     functions/src/plain/number/trigonometry.ts:
-      description: trigonometry module
+      description: Return the inverse hyperbolic cotangent of `x`.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -14864,7 +14864,7 @@ modules:
       functions:
         - randomMatrix
     functions/src/probability/util/seededRNG.ts:
-      description: Type for seedrandom function
+      description: Create a random number generator that returns values from `seedrandom`.
       externalDependencies:
         - package: seedrandom
           imports:
@@ -21124,7 +21124,7 @@ modules:
         - rightArithShiftBigNumber
         - rightLogShiftBigNumber
     functions/src/utils/bignumber/nearlyEqual.ts:
-      description: Compares two BigNumbers.
+      description: Internal structural contract for the BigNumber values compared here. Inputs
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -21280,7 +21280,7 @@ modules:
       constants:
         - createHasNumericValue
     functions/src/utils/is.ts:
-      description: 'Test whether a value is a collection: an Array or Matrix'
+      description: Return true if `x` is a BigNumber.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -21960,7 +21960,7 @@ modules:
       constants:
         - printTemplate
     functions/src/utils/product.ts:
-      description: product module
+      description: Return the product of the integers from `i` to `n`. The result is 1 if `n < i`.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -37806,7 +37806,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 196605
+  totalLinesOfCode: 197385
   totalExports: 5841
   totalClasses: 55
   totalInterfaces: 508

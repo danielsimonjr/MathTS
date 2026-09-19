@@ -71,6 +71,16 @@ export function _lgamma(x: f64): f64 {
 // Hankel asymptotic shared by J_nu/Y_nu (nu = 0 or 1):
 //   J_nu ~ sqrt(2/(pi x)) [P cos(chi) - Q sin(chi)],
 //   Y_nu ~ sqrt(2/(pi x)) [P sin(chi) + Q cos(chi)], chi = x - (nu/2+1/4)pi.
+/**
+ * Return the Hankel asymptotic value of the Bessel function J or Y of order `nu`.
+ *
+ * The series stops after 40 terms, or earlier when the terms start to grow. The scalar
+ * Bessel functions use this value for arguments above 13, and the ascending series otherwise.
+ *
+ * @param nu - The order, 0 or 1.
+ * @param x - The argument.
+ * @param wantY - If true, return Y; if false, return J.
+ */
 export function besselHankel(nu: f64, x: f64, wantY: boolean): f64 {
   const mu = 4 * nu * nu;
   let P = 1.0;
@@ -98,6 +108,11 @@ export function besselHankel(nu: f64, x: f64, wantY: boolean): f64 {
     : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
 }
 
+/**
+ * Return the Bessel function J0(x) from its ascending power series.
+ *
+ * The series stops after 80 terms, or earlier when a term is small relative to the sum.
+ */
 export function besselJ0Series(x: f64): f64 {
   const z = -0.25 * x * x;
   let term = 1.0;
@@ -110,6 +125,11 @@ export function besselJ0Series(x: f64): f64 {
   return sum;
 }
 
+/**
+ * Return the Bessel function J1(x) from its ascending power series.
+ *
+ * The series stops after 80 terms, or earlier when a term is small relative to the sum.
+ */
 export function besselJ1Series(x: f64): f64 {
   const z = -0.25 * x * x;
   let term = 1.0;
@@ -123,6 +143,7 @@ export function besselJ1Series(x: f64): f64 {
 }
 
 // Y0 = (2/pi)[ (ln(x/2)+gamma) J0 + sum_{k>=1} (-1)^{k+1} H_k (x^2/4)^k/(k!)^2 ].
+/** Return the Bessel function Y0(x) from its ascending series. Use it for positive `x`. */
 export function besselY0Series(x: f64): f64 {
   const z = 0.25 * x * x;
   let u = 1.0;
@@ -144,6 +165,7 @@ export function besselY0Series(x: f64): f64 {
 
 // Y1 = (2/pi)[ln(x/2)+gamma] J1 - 2/(pi x)
 //      - (1/pi) sum_{k>=0} (-1)^k (H_k + H_{k+1}) (x/2)^{2k+1}/(k!(k+1)!).
+/** Return the Bessel function Y1(x) from its ascending series. Use it for positive `x`. */
 export function besselY1Series(x: f64): f64 {
   const z = -0.25 * x * x;
   let v = 0.5 * x;

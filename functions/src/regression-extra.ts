@@ -10,6 +10,7 @@ type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
 const mean = (x: number[]): number => _mean(x) as number;
 
+/** Result of `linearRegression`: the fitted line and its statistics. */
 export interface LinregressResult {
   slope: number;
   intercept: number;
