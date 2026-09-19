@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   last formatted by prettier >= 3.9.7, which changed markdown list-continuation indentation. Measured on
   an LF export of `origin/main`: 3.9.6 flags 44 files, 3.9.8 flags 43, and the only difference is
   `TODO.md`. prettier devDependency raised to `^3.9.8`, so the hook and the file agree.
+- **`assembly/src` excluded from the code-docs gate by configuration**: it is AssemblyScript compiled
+  by `asc` (`@inline`, `i32`/`f64`), not TypeScript, so it can never parse as TS. `.code-docs.json`
+  records the exclusion with its reason (code-docs 0.3.5, skills `01cc8d7`), and the gate report prints
+  it. `assembly/tests` and `assembly/scripts` stay checked. Whole-repo gate: UNPARSED 1 -> 0, 27 files
+  excluded. The ~658 missing docstrings elsewhere are pre-existing and get one PR per package.
 
 ### chore(test): Bun migration Phase 2b - 8 drop-in packages to `bun test`
 

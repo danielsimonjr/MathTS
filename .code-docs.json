@@ -1,0 +1,8 @@
+{
+  "exclude": [
+    {
+      "path": "assembly/src/",
+      "reason": "AssemblyScript compiled by asc (assembly/asconfig.json), not TypeScript: @inline decorators and i32/f64 types do not parse as TS. assembly/tests and assembly/scripts stay checked."
+    }
+  ]
+}
