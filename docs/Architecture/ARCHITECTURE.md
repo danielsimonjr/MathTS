@@ -369,9 +369,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 > monorepo mode with per-package roots and IS authoritative for reachability; read
 > `FILE_INVENTORY.md` for those figures. The two tools disagree by scope, not correctness.
 
-| Claim                | Value | Source                |
-| -------------------- | ----- | --------------------- |
-| totalTypeScriptFiles | 1881  | dependency-graph.json |
-| totalModules         | 5     | dependency-graph.json |
-| runtimeCircularDeps  | 0     | dependency-graph.json |
-| typeOnlyCircularDeps | 0     | dependency-graph.json |
+| Claim                | Value | Source                                                                                                                                |
+| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| totalTypeScriptFiles | 1902  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
+| totalModules         | 5     | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
+| runtimeCircularDeps  | 0     | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
+| typeOnlyCircularDeps | 0     | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
