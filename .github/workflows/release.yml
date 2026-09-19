@@ -75,5 +75,8 @@ jobs:
           # error, not a warning, so they must move with the action bump.
           pr-title: 'chore: release packages'
           commit-message: 'chore: release packages'
+          # `changeset version` bumps package.json but not bun.lock, so every release left the
+          # workspace versions in bun.lock one release behind. This script refreshes the lock too.
+          version: bun run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

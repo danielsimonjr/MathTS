@@ -79,6 +79,7 @@
     "prepare": "bun --bun husky",
     "build:prod": "turbo run build:prod",
     "release": "changeset version && bun run build",
+    "version-packages": "changeset version && bun install --lockfile-only",
     "test:bench": "vitest run --config vitest.config.bench.ts"
   },
   "devDependencies": {

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ci(release): the version PR refreshes bun.lock
+
+- `changeset version` bumps each released `package.json` but does not touch `bun.lock`, so after every release the workspace versions in `bun.lock` were one release behind (plot and workbook in #313, workerpool after #314).
+- New script `version-packages` = `changeset version && bun install --lockfile-only`; `release.yml` passes it to `changesets/action` as `version:`. `--lockfile-only` rewrites the lock without installing.
+- Also syncs the lock for `mathts-workerpool` 0.2.4.
+
 ### fix(workbook): exporters make chart markup from the chart settings (security)
 
 - Before this change, `RenderCell` had two markup fields, `chartSvg` and `chartTikz`. `toHTML()`,
