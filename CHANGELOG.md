@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (Cholesky, LU, QR, pivoted QR, LQ/RQ/QL, Schur, pinv, expm, logm, sqrtm), `svd`, and the dense
   arithmetic and reduction helpers. Comments only: each changed file prints identical to `main`
   with comments removed. `code_docs.py check matrix/src` now passes (was 30 MUST issues).
-  Architecture numbers refreshed (`totalLinesOfCode` 337258); `repo_map.py check` passes.
+  Architecture numbers refreshed (`totalLinesOfCode` 337255); `repo_map.py check` passes.
 
 ### fix(core): map entries() returns a real iterable iterator
 
