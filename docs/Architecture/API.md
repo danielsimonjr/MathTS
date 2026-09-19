@@ -1102,4 +1102,4 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim                | Value | Source                                                                                                                                |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | totalExports         | 7650  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
-| totalTypeScriptFiles | 1902  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
+| totalTypeScriptFiles | 1903  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |

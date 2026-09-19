@@ -20,10 +20,20 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >         `vitest.config.ts`, the root aggregate run and `test:coverage` keep working unchanged.
 >   - [ ] **2b — the other 8 drop-in facade packages** (`arithmetic`, `ast`, `evaluator`, `linalg`,
 >         `numbers`, `parser`, `signal`, `units`): one-line `test` script change each.
->   - [ ] **2c — the plain-vitest packages** (`autograd`, `compat`, `expression`, `tensor`,
->         `workbook`, `packages/typed-function`, `packages/workerpool`): no `vi.*`, no snapshots.
->         Before the switch, port the 5 s/30 s timeout headroom in each `vitest.config.ts` to
->         `bun test --timeout`, and check the worker-pool suites under concurrent turbo load.
+>   - [x] **2c — the plain-vitest packages** (branch `bun-phase2c`, PR not merged): six of the seven
+>         now run `bun test --isolate --timeout 30000`. Same tests, same counts (autograd 259 -> 259,
+>         compat 165 -> 165, expression 1949 -> 1949, tensor 390 -> 390, workbook 337 -> 337,
+>         typed-function 55 -> 55); the full CI gate is green. All seven vitest configs set 30 s (none
+>         set 5 s), so the ported headroom is `--timeout 30000`. `--isolate` is required: `bun test`
+>         shares one global across files, and `compat` (`config().precision`) and `expression`
+>         (`addConversion` run twice) failed without it. `workbook` has a `bunfig.toml` `[test] preload`
+>         that supplies `__PKG_VERSION__` (Bun reads `bunfig.toml` from the working directory only,
+>         not the repo root).
+>   - [ ] **2c follow-up — `packages/workerpool` stays on vitest.** Its suites dispatch to real
+>         workers, and the `workerpool` library never answers under Bun 1.4.2 (`workerType` `thread`
+>         and `process` both hang; the same probe passes under Node). 20 tests timed out at 30 s each
+>         and none passed. Revisit when Bun's `worker_threads` / `child_process` fixes land, or when
+>         `workerpool` is replaced.
 >   - [ ] **2d — the packages that use `vi.*` mocks** (`core`, `functions`, `gpu`, `matrix`,
 >         `parallel`): `vi.fn`, `vi.spyOn`, `vi.stubGlobal`, `vi.mock`. Bun covers these, but
 >         `vi.stubGlobal`/`vi.unstubAllGlobals` and hoisted `vi.mock` need per-file tests. `core` needs a
