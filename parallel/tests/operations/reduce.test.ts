@@ -77,11 +77,7 @@ vi.mock('../../src/ComputePool.js', () => ({
       return { result: counts, duration: 0, chunks: 1, parallelized: false };
     }),
     reduce: vi.fn(
-      async (
-        data: Float64Array,
-        fn: (acc: number, item: number) => number,
-        initial: number
-      ) => {
+      async (data: Float64Array, fn: (acc: number, item: number) => number, initial: number) => {
         return { result: initial, duration: 0, chunks: 1, parallelized: false };
       }
     ),

@@ -23,31 +23,31 @@ Last regenerated: 2026-06-24.
 **297 exported functions · 79 covered · 218 uncovered.** (Before the P0
 differential harness landed this session: 56 covered.)
 
-| Family (source module) | Total | Covered | Uncovered | Method |
-|---|--:|--:|--:|---|
-| `ops/complex-ops` | 44 | 0 | **44** | — |
-| `ops/matrix` | 41 | 0 | **41** | — (`matrix_zeros` is alloc-helper only) |
-| `ops/scalar` | 52 | 13 | **39** | hardcoded KAT (2 inputs each) |
-| `ops/array` | 36 | 0 | **36** | — |
-| `ops/complex-array` | 33 | 0 | **33** | — |
-| `ops/bitwise` | 7 | 0 | **7** | — |
-| `poly` | 5 | 0 | **5** | — |
-| `signal` (Welch/Bartlett/Goertzel/CZT) | 5 | 0 | **5** | — |
-| `sort` | 3 | 0 | **3** | — |
-| `types/complex` | 3 | 0 | **3** | — |
-| `tridiag` | 2 | 0 | **2** | — |
-| `special` (Bessel/Airy/elliptic/Carlson/lgamma) | 18 | 18 | 0 | **differential vs mpmath** (P0, this session) |
-| `algebra/decomposition` (LU/QR/Chol/inv/det) | 5 | 5 | 0 | **numpy + reconstruction** (P0, this session) |
-| `ops/number-theory` | 11 | 11 | 0 | KAT (exact integers) |
-| `ops/special` (orthogonal polys + integral fns) | 9 | 9 | 0 | KAT, single point |
-| `ops/polynomial` | 7 | 7 | 0 | KAT arrays + identities |
-| `ops/curvefit` | 3 | 3 | 0 | parameter recovery |
-| `ops/optimization` | 3 | 3 | 0 | known optimum + null-space property |
-| `ops/signal` (window/medfilt/resample) | 3 | 3 | 0 | KAT |
-| `ops/svd` | 2 | 2 | 0 | reconstruction `A=UΣVᵀ` |
-| `ops/linalg` (RREF/charpoly) | 2 | 2 | 0 | KAT |
-| `ops/approx` | 2 | 2 | 0 | property + KAT |
-| `ops/tensor` | 1 | 1 | 0 | KAT + permutation property |
+| Family (source module)                          | Total | Covered | Uncovered | Method                                        |
+| ----------------------------------------------- | ----: | ------: | --------: | --------------------------------------------- |
+| `ops/complex-ops`                               |    44 |       0 |    **44** | —                                             |
+| `ops/matrix`                                    |    41 |       0 |    **41** | — (`matrix_zeros` is alloc-helper only)       |
+| `ops/scalar`                                    |    52 |      13 |    **39** | hardcoded KAT (2 inputs each)                 |
+| `ops/array`                                     |    36 |       0 |    **36** | —                                             |
+| `ops/complex-array`                             |    33 |       0 |    **33** | —                                             |
+| `ops/bitwise`                                   |     7 |       0 |     **7** | —                                             |
+| `poly`                                          |     5 |       0 |     **5** | —                                             |
+| `signal` (Welch/Bartlett/Goertzel/CZT)          |     5 |       0 |     **5** | —                                             |
+| `sort`                                          |     3 |       0 |     **3** | —                                             |
+| `types/complex`                                 |     3 |       0 |     **3** | —                                             |
+| `tridiag`                                       |     2 |       0 |     **2** | —                                             |
+| `special` (Bessel/Airy/elliptic/Carlson/lgamma) |    18 |      18 |         0 | **differential vs mpmath** (P0, this session) |
+| `algebra/decomposition` (LU/QR/Chol/inv/det)    |     5 |       5 |         0 | **numpy + reconstruction** (P0, this session) |
+| `ops/number-theory`                             |    11 |      11 |         0 | KAT (exact integers)                          |
+| `ops/special` (orthogonal polys + integral fns) |     9 |       9 |         0 | KAT, single point                             |
+| `ops/polynomial`                                |     7 |       7 |         0 | KAT arrays + identities                       |
+| `ops/curvefit`                                  |     3 |       3 |         0 | parameter recovery                            |
+| `ops/optimization`                              |     3 |       3 |         0 | known optimum + null-space property           |
+| `ops/signal` (window/medfilt/resample)          |     3 |       3 |         0 | KAT                                           |
+| `ops/svd`                                       |     2 |       2 |         0 | reconstruction `A=UΣVᵀ`                       |
+| `ops/linalg` (RREF/charpoly)                    |     2 |       2 |         0 | KAT                                           |
+| `ops/approx`                                    |     2 |       2 |         0 | property + KAT                                |
+| `ops/tensor`                                    |     1 |       1 |         0 | KAT + permutation property                    |
 
 Full per-symbol detail in `tests/audit/coverage_matrix.json`.
 
@@ -106,19 +106,20 @@ match numpy; LU/QR/Cholesky reconstruct to ~1e-15.
 
 The original 15 FAIL / 22 WEAK were all resolved in 0.1.5:
 
-| Original problem | Worst error (before) | Fix |
-|---|--|---|
-| `airy_ai/bi` negative args | 6.0e-1 | corrected DLMF 9.7.9/9.7.10 P/Q signs + sin/cos pairing |
-| `airy` asymptotic accuracy | 1.7e-7 | u_k generated by recurrence (wrong hardcoded u_5/u_6) |
-| `bessel_y1` / `bessel_yn` | 9.3e-3 | series + Hankel asymptotic rewrite |
-| `bessel_jn` (n > x) | 1.9e-3 | Miller backward recurrence + off-by-one fix |
-| `bessel_j0/j1/y0` accuracy | ~1e-8 | series + Hankel asymptotic rewrite |
+| Original problem           | Worst error (before) | Fix                                                     |
+| -------------------------- | -------------------- | ------------------------------------------------------- |
+| `airy_ai/bi` negative args | 6.0e-1               | corrected DLMF 9.7.9/9.7.10 P/Q signs + sin/cos pairing |
+| `airy` asymptotic accuracy | 1.7e-7               | u_k generated by recurrence (wrong hardcoded u_5/u_6)   |
+| `bessel_y1` / `bessel_yn`  | 9.3e-3               | series + Hankel asymptotic rewrite                      |
+| `bessel_jn` (n > x)        | 1.9e-3               | Miller backward recurrence + off-by-one fix             |
+| `bessel_j0/j1/y0` accuracy | ~1e-8                | series + Hankel asymptotic rewrite                      |
 
 ---
 
 ## 4. Prioritized remaining work
 
 **P0 fixes (all resolved in 0.1.5):**
+
 1. ✅ `airy_ai/bi` negative-argument branch.
 2. ✅ `bessel_y1` / `bessel_yn` accuracy.
 3. ✅ `bessel_jn` recurrence (direction + Miller off-by-one).
@@ -126,6 +127,7 @@ The original 15 FAIL / 22 WEAK were all resolved in 0.1.5:
 5. ✅ ESM output-parameter limitation (documented; raw-loader path).
 
 **Coverage gaps to extend the harness to next (by risk):**
+
 - **P1:** `ops/matrix` (41 — incl. `matrix_multiply`/`gemm`/`gemv`, the BLAS
   hot path) → numpy oracle; `ops/complex-ops` + `ops/complex-array` (77 —
   branch-cut functions) → mathjs complex oracle.

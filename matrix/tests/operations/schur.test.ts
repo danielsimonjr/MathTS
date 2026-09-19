@@ -48,8 +48,7 @@ function matMulDense(A: DenseMatrix, B: DenseMatrix): DenseMatrix {
   const bArr = B.toArray();
   const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
   for (let i = 0; i < m; i++)
-    for (let k = 0; k < p; k++)
-      for (let j = 0; j < n; j++) C[i][j] += aArr[i][k] * bArr[k][j];
+    for (let k = 0; k < p; k++) for (let j = 0; j < n; j++) C[i][j] += aArr[i][k] * bArr[k][j];
   return DenseMatrix.fromArray(C);
 }
 

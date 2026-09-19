@@ -233,7 +233,7 @@ describe('matrixLogm', () => {
     expect(Math.abs(Rarr[0][0] - Math.log(2))).toBeLessThan(1e-8);
     expect(Math.abs(Rarr[1][1] - Math.log(3))).toBeLessThan(1e-8);
     // Off-diagonal: (log3 - log2)/(3-2) * T_{01}
-    const expected01 = (Math.log(3) - Math.log(2)) / (3 - 2) * 1;
+    const expected01 = ((Math.log(3) - Math.log(2)) / (3 - 2)) * 1;
     expect(Math.abs(Rarr[0][1] - expected01)).toBeLessThan(1e-6);
   });
 

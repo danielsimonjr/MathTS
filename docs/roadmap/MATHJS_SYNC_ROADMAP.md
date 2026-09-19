@@ -7,12 +7,12 @@
 
 The mathjs fork added 216 new mathematical functions across versions 15.4.0–15.6.0. MathTS already has 9 of these (fibonacci, convexHull, pointInPolygon, polyfit, trapz, beta, digamma, erfc, gammainc). The remaining **207 functions** need to be brought into MathTS.
 
-| Strategy                | Functions | Effort                                | Priority                                                               |
-| ----------------------- | --------- | ------------------------------------- | ---------------------------------------------------------------------- |
-| **Sync from mathjs JS** | 54        | Low (copy + factory activate)         | 1 — quickest wins                                                      |
-| **New TypeScript**      | 74        | Medium (implement from spec)          | 2 — CAS, graph theory, distributions                                   |
-| **WASM (AssemblyScript)** | 79      | High (implement in AssemblyScript + TS wrapper) | 3 — numerical methods, signal processing (**infrastructure complete**) |
-| **Total**               | **207**   |                                       |                                                                        |
+| Strategy                  | Functions | Effort                                          | Priority                                                               |
+| ------------------------- | --------- | ----------------------------------------------- | ---------------------------------------------------------------------- |
+| **Sync from mathjs JS**   | 54        | Low (copy + factory activate)                   | 1 — quickest wins                                                      |
+| **New TypeScript**        | 74        | Medium (implement from spec)                    | 2 — CAS, graph theory, distributions                                   |
+| **WASM (AssemblyScript)** | 79        | High (implement in AssemblyScript + TS wrapper) | 3 — numerical methods, signal processing (**infrastructure complete**) |
+| **Total**                 | **207**   |                                                 |                                                                        |
 
 ---
 

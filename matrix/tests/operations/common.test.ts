@@ -100,12 +100,7 @@ describe('operations/common — dense algebra', () => {
       [19, 22],
       [43, 50],
     ]);
-    expect(
-      matMul(
-        [[1, 2, 3]],
-        [[1], [2], [3]]
-      )
-    ).toEqual([[14]]);
+    expect(matMul([[1, 2, 3]], [[1], [2], [3]])).toEqual([[14]]);
   });
 
   it('matAdd / matSub / matScale', () => {

@@ -32,7 +32,10 @@ describe('gap — named optimizers', () => {
   it('levenbergMarquardt recovers exponential-fit parameters', () => {
     const t = [0, 0.5, 1, 1.5, 2, 2.5, 3];
     const y = t.map((ti) => 2.5 * Math.exp(0.5 * ti));
-    const r = levenbergMarquardt((p) => t.map((ti, i) => p[0] * Math.exp(p[1] * ti) - y[i]), [1, 1]);
+    const r = levenbergMarquardt(
+      (p) => t.map((ti, i) => p[0] * Math.exp(p[1] * ti) - y[i]),
+      [1, 1]
+    );
     expect(r.x[0]).toBeCloseTo(2.5, 6);
     expect(r.x[1]).toBeCloseTo(0.5, 6);
     expect(r.residualNorm).toBeLessThan(1e-6);

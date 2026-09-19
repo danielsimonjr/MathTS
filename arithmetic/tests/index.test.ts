@@ -5,10 +5,7 @@ describe('arithmetic/src/index.ts', () => {
   it('should export core arithmetic functions', () => {
     // Check that at least the foundational expected members are exported.
     // The exact list may grow as more mathematical operations are added.
-    const coreExports = [
-      'add',
-      'subtract'
-    ];
+    const coreExports = ['add', 'subtract'];
 
     for (const name of coreExports) {
       expect(arithmetic).toHaveProperty(name);

@@ -531,7 +531,7 @@ function eigGeneral(A: number[][], computeVectors: boolean, symmetric: boolean):
   if (computeVectors) {
     vectors = [];
     vectorsIm = [];
-    for (let j = 0; j < nn; ) {
+    for (let j = 0; j < nn;) {
       if (e[j] === 0.0) {
         // Real eigenvalue: emit the (real) eigenvector column, unit-normalised.
         const vec = new Array<number>(nn).fill(0);

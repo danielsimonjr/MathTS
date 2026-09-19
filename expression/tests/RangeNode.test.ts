@@ -49,26 +49,27 @@ describe('RangeNode - construction & identity', () => {
   });
 
   it('has isNode = true', () => {
-    expect((new RangeNode(makeConst(1), makeConst(5)) as unknown as { isNode: boolean }).isNode).toBe(
-      true
-    );
+    expect(
+      (new RangeNode(makeConst(1), makeConst(5)) as unknown as { isNode: boolean }).isNode
+    ).toBe(true);
   });
 
   it('throws when start is not a node', () => {
-    expect(() => new RangeNode(42 as unknown as ReturnType<typeof makeConst>, makeConst(5))).toThrow(
-      'Node expected'
-    );
+    expect(
+      () => new RangeNode(42 as unknown as ReturnType<typeof makeConst>, makeConst(5))
+    ).toThrow('Node expected');
   });
 
   it('throws when end is not a node', () => {
-    expect(() => new RangeNode(makeConst(1), 42 as unknown as ReturnType<typeof makeConst>)).toThrow(
-      'Node expected'
-    );
+    expect(
+      () => new RangeNode(makeConst(1), 42 as unknown as ReturnType<typeof makeConst>)
+    ).toThrow('Node expected');
   });
 
   it('throws when step is provided but not a node', () => {
-    expect(() =>
-      new RangeNode(makeConst(1), makeConst(5), 'bad' as unknown as ReturnType<typeof makeConst>)
+    expect(
+      () =>
+        new RangeNode(makeConst(1), makeConst(5), 'bad' as unknown as ReturnType<typeof makeConst>)
     ).toThrow('Node expected');
   });
 
@@ -179,9 +180,7 @@ describe('RangeNode - map', () => {
     const node = new RangeNode(makeConst(1), makeConst(5));
     expect(() =>
       node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
-    ).toThrow(
-      'Callback function must return a Node'
-    );
+    ).toThrow('Callback function must return a Node');
   });
 });
 

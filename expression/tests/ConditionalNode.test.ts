@@ -46,21 +46,21 @@ describe('ConditionalNode - construction & identity', () => {
   });
 
   it('throws when condition is not a Node', () => {
-    expect(() => new ConditionalNode(42 as unknown as MathNode, makeConst(1), makeConst(2))).toThrow(
-      'Parameter condition must be a Node'
-    );
+    expect(
+      () => new ConditionalNode(42 as unknown as MathNode, makeConst(1), makeConst(2))
+    ).toThrow('Parameter condition must be a Node');
   });
 
   it('throws when trueExpr is not a Node', () => {
-    expect(() => new ConditionalNode(makeConst(1), 'yes' as unknown as MathNode, makeConst(2))).toThrow(
-      'Parameter trueExpr must be a Node'
-    );
+    expect(
+      () => new ConditionalNode(makeConst(1), 'yes' as unknown as MathNode, makeConst(2))
+    ).toThrow('Parameter trueExpr must be a Node');
   });
 
   it('throws when falseExpr is not a Node', () => {
-    expect(() => new ConditionalNode(makeConst(1), makeConst(2), null as unknown as MathNode)).toThrow(
-      'Parameter falseExpr must be a Node'
-    );
+    expect(
+      () => new ConditionalNode(makeConst(1), makeConst(2), null as unknown as MathNode)
+    ).toThrow('Parameter falseExpr must be a Node');
   });
 });
 

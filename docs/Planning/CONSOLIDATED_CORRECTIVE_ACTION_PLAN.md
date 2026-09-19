@@ -17,14 +17,14 @@ This document consolidates and clarifies two previous corrective action plans in
 
 ### 1.1 Project Metrics
 
-| Metric                        | Verified Value                   | Source                        |
+| Metric | Verified Value | Source |
 | ----------------------------- | -------------------------------- | ----------------------------- | ------ |
-| TypeScript files in `src/`    | 686                              | `find src -name "\*.ts"       | wc -l` |
-| JavaScript files in `src/`    | 673                              | `find src -name "\*.js"       | wc -l` |
-| TypeScript coverage           | ~50.5% (686 of 1359 total files) | File count                    |
-| TypeScript compilation errors | ~347 errors across ~100+ files   | `npm run compile:ts`          |
-| WASM build status             | **WORKING**                      | `npm run build:wasm` succeeds |
-| Dependencies installable      | **YES**                          | `npm install` succeeds        |
+| TypeScript files in `src/` | 686 | `find src -name "\*.ts"       | wc -l` |
+| JavaScript files in `src/` | 673 | `find src -name "\*.js"       | wc -l` |
+| TypeScript coverage | ~50.5% (686 of 1359 total files) | File count |
+| TypeScript compilation errors | ~347 errors across ~100+ files | `npm run compile:ts` |
+| WASM build status | **WORKING** | `npm run build:wasm` succeeds |
+| Dependencies installable | **YES** | `npm install` succeeds |
 
 ### 1.2 Error Distribution (TypeScript Compilation)
 

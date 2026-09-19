@@ -17,10 +17,7 @@ const SymbolNode = createSymbolNode({ math: mathScope, Node });
  * first (and only) registered signature, wrapping it so tests can call
  * the returned function directly.
  */
-function mockTyped(
-  _name: string,
-  signatures: Record<string, (...args: unknown[]) => unknown>
-) {
+function mockTyped(_name: string, signatures: Record<string, (...args: unknown[]) => unknown>) {
   const entries = Object.entries(signatures);
   if (entries.length !== 1) throw new Error('mockTyped: expected exactly 1 signature');
   const impl = entries[0][1];

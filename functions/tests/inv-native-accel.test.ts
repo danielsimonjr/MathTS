@@ -7,17 +7,27 @@ import { inv, multiply } from '@danielsimonjr/mathts-functions';
  * falling back to the factory for small / non-numeric / singular inputs. The
  * defining property A·inv(A) = I is verified independently of the factory.
  */
-const eye = (n: number) => Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+const eye = (n: number) =>
+  Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
 
 function maxAbsDiff(A: number[][], B: number[][]): number {
   let m = 0;
-  for (let i = 0; i < A.length; i++) for (let j = 0; j < A[i].length; j++) m = Math.max(m, Math.abs(A[i][j] - B[i][j]));
+  for (let i = 0; i < A.length; i++)
+    for (let j = 0; j < A[i].length; j++) m = Math.max(m, Math.abs(A[i][j] - B[i][j]));
   return m;
 }
 
 describe('inv: native-accelerated path', () => {
   it('small matrix keeps the exact factory inverse (below threshold)', () => {
-    expect(inv([[1, 2], [3, 4]])).toEqual([[-2, 1], [1.5, -0.5]]);
+    expect(
+      inv([
+        [1, 2],
+        [3, 4],
+      ])
+    ).toEqual([
+      [-2, 1],
+      [1.5, -0.5],
+    ]);
   });
 
   it('A·inv(A) = I for a large well-conditioned matrix (native path)', () => {

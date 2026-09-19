@@ -45,7 +45,7 @@ function _createRandomSignatures(rng: () => number) {
       '': () => _random(0, 1),
       number: (max: number) => _random(0, max),
       'number, number': (min: number, max: number) => _random(min, max),
-    }
+    },
   };
 }
 

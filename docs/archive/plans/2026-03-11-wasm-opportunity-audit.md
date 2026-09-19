@@ -44,12 +44,12 @@ These files have significant compute-heavy code with no WASM path today. Adding 
 
 ### Type Implementations (heaviest code in the project)
 
-| File                                        | Lines       | For-loops | Opportunity                                                                                                                           |
-| ------------------------------------------- | ----------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/type/matrix/SparseMatrix.ts`           | 1846        | 40        | **CSC sparse matrix core** — get/set, forEach, map, multiply all have nested loops over column pointers. The #1 target for WASM. |
-| `src/type/matrix/DenseMatrix.ts`            | 1307        | 20        | **Dense matrix core** — resize, map, forEach, clone all iterate over all elements.                                                    |
-| `src/type/unit/Unit.ts`                     | 3753        | 42        | **Unit system** — parsing, conversion, simplification have many loops. The unit conversion table lookup is hot for large datasets.    |
-| `src/type/matrix/utils/matAlgo*` (15 files) | ~2700 total | ~40       | **Matrix algorithm suite** — sparse/dense combination algorithms used by every binary operator. Each runs O(nnz) or O(n^2) loops.     |
+| File                                        | Lines       | For-loops | Opportunity                                                                                                                        |
+| ------------------------------------------- | ----------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `src/type/matrix/SparseMatrix.ts`           | 1846        | 40        | **CSC sparse matrix core** — get/set, forEach, map, multiply all have nested loops over column pointers. The #1 target for WASM.   |
+| `src/type/matrix/DenseMatrix.ts`            | 1307        | 20        | **Dense matrix core** — resize, map, forEach, clone all iterate over all elements.                                                 |
+| `src/type/unit/Unit.ts`                     | 3753        | 42        | **Unit system** — parsing, conversion, simplification have many loops. The unit conversion table lookup is hot for large datasets. |
+| `src/type/matrix/utils/matAlgo*` (15 files) | ~2700 total | ~40       | **Matrix algorithm suite** — sparse/dense combination algorithms used by every binary operator. Each runs O(nnz) or O(n^2) loops.  |
 
 ---
 
@@ -123,15 +123,15 @@ Symbolic/AST operations (simplify, derivative, rationalize) operate on tree stru
 
 Adding Tier 1 opportunities to the existing AS modules:
 
-| Component                 | Existing AS        | New WASM                                       | Total       |
-| ------------------------- | ------------------ | ---------------------------------------------- | ----------- |
-| Matrix modules            | ~5,500             | +3,000 (SparseMatrix, DenseMatrix inner loops) | ~8,500      |
-| Algebra modules           | ~4,200             | +1,000 (lsolveAll, usolveAll, bridge wiring)   | ~5,200      |
-| Matrix algorithms         | 536 (existing)     | +2,700 (matAlgo01-14)                          | ~3,200      |
-| Signal + SIMD             | ~2,200             | —                                              | ~2,200      |
-| Stats + Numeric + Special | ~3,800             | —                                              | ~3,800      |
-| Simple modules            | ~4,600             | —                                              | ~4,600      |
-| Unit conversion           | 801 (existing)     | +500 (Unit.ts hot paths)                       | ~1,300      |
-| **Total**                 | **~21,600**        | **+7,200**                                     | **~28,800** |
+| Component                 | Existing AS    | New WASM                                       | Total       |
+| ------------------------- | -------------- | ---------------------------------------------- | ----------- |
+| Matrix modules            | ~5,500         | +3,000 (SparseMatrix, DenseMatrix inner loops) | ~8,500      |
+| Algebra modules           | ~4,200         | +1,000 (lsolveAll, usolveAll, bridge wiring)   | ~5,200      |
+| Matrix algorithms         | 536 (existing) | +2,700 (matAlgo01-14)                          | ~3,200      |
+| Signal + SIMD             | ~2,200         | —                                              | ~2,200      |
+| Stats + Numeric + Special | ~3,800         | —                                              | ~3,800      |
+| Simple modules            | ~4,600         | —                                              | ~4,600      |
+| Unit conversion           | 801 (existing) | +500 (Unit.ts hot paths)                       | ~1,300      |
+| **Total**                 | **~21,600**    | **+7,200**                                     | **~28,800** |
 
 The WASM scope grows from ~33,600 lines (existing AS only) to ~40,800 lines (existing AS + new opportunities).

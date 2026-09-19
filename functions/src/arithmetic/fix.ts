@@ -207,8 +207,7 @@ export const createFix = /* #__PURE__ */ factory(
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
             return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
-              | unknown[]
-              | Matrix;
+              unknown[] | Matrix;
           }
       ),
 
@@ -238,7 +237,12 @@ export const createFix = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: number | ComplexType | FractionType | BigNumberType, y: unknown[]): unknown[] => {
             // use matrix implementation
-            return (matAlgo14xDs(matrix(y) as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true)).valueOf() as unknown[];
+            return matAlgo14xDs(
+              matrix(y) as unknown as Parameters<typeof matAlgo14xDs>[0],
+              x,
+              self,
+              true
+            ).valueOf() as unknown[];
           }
       ),
 
@@ -247,9 +251,19 @@ export const createFix = /* #__PURE__ */ factory(
           (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
             if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
-              return matAlgo14xDs(y as unknown as Parameters<typeof matAlgo14xDs>[0], x, self, true) as unknown as Matrix;
+              return matAlgo14xDs(
+                y as unknown as Parameters<typeof matAlgo14xDs>[0],
+                x,
+                self,
+                true
+              ) as unknown as Matrix;
             }
-            return matAlgo12xSfs(y as unknown as Parameters<typeof matAlgo12xSfs>[0], x, self, true) as unknown as Matrix;
+            return matAlgo12xSfs(
+              y as unknown as Parameters<typeof matAlgo12xSfs>[0],
+              x,
+              self,
+              true
+            ) as unknown as Matrix;
           }
       ),
     });

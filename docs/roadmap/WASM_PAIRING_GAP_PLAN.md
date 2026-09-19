@@ -29,11 +29,11 @@ Executed under dev-workflow + honest-claude. Outcome:
   (correctness exact). Copy is O(n), reduction is O(n), so transfer dominates and
   V8's JIT'd `+=` loop wins. Not wired, per "don't wire a path that loses".
 - **T3 (trig/arithmetic elementwise transcendentals) — WIRED (✓ 0.2.13).**
-  *Correction:* an earlier draft of this plan declared T2/T3 "not wired,
+  _Correction:_ an earlier draft of this plan declared T2/T3 "not wired,
   strictly worse" — that was **inferred** from T1, not measured. Measuring
   (`tools/benchmark/wasm/elementwise.bench.mjs`) overturned it:
   `abs/sin/cos/tan/exp/log` over `Float64Array` ≥ 1024 are **1.35–5.1× faster**
-  than JS *including* copy-in **and** copy-out, because `Math.sin` etc. are
+  than JS _including_ copy-in **and** copy-out, because `Math.sin` etc. are
   expensive enough that libm-in-wasm + 2 copies still wins. Wired via
   `functions/src/wasm/elementwise/wasm-bridge.ts` (WASM `simd_*_array`,
   self-managed scratch since the WASM module exports only `memory`).
@@ -51,6 +51,7 @@ Executed under dev-workflow + honest-claude. Outcome:
   Unlike `Math.sin`, the JS scalar bessel/airy (series+Hankel/asymptotic) are
   already efficient and JIT'd and do the same flops as the WASM kernels, so the
   JS↔wasm copy is pure overhead. Not wired.
+
 > Lesson (rules-for-life #4): never conclude a perf decision by inference —
 > measure each case. The reduction result did NOT generalize to elementwise
 > transcendentals (those WON); and the elementwise win did NOT generalize to
@@ -65,15 +66,15 @@ benchmark-gated; only measured winners wired.
 - **Tier 1 — extend the elementwise win (DONE).** Authored 17 new
   `simd_*_array` WASM kernels; benchmarked (`npm run bench:transcendental`). Wired the
   11 that win at every size: `atan, sinh, tanh, atanh, expm1, log1p, log2,
-  log10, sec, csc, cot` (1.4–5× over JS incl. copy). Measured losers left on JS:
+log10, sec, csc, cot` (1.4–5× over JS incl. copy). Measured losers left on JS:
   `sqrt, cbrt, asin, acos, cosh, asinh, acosh` (hardware-fast or fast JS).
 - **Tier 2 — expensive js-only specials (DONE for the kernel-backed one).**
   `erfc` wired — **5–7×** (its JS is a continued-fraction scalar, far costlier
   than `Math.*`). `digamma/expIntegralEi/sin·cosIntegral` are likely wins too but
-  need *authored + mpmath-validated* WASM scalar kernels (no libm equivalent) —
+  need _authored + mpmath-validated_ WASM scalar kernels (no libm equivalent) —
   a separate numerical task, not a libm wrapper. `erf` has no public consumer.
 - **Tier 3 — op-fusion (DONE, primitive + public API).** `fuseUnaryChain(ops,
-  xs)` (`functions/src/typed/fused.ts`) keeps the array resident in wasm across a
+xs)` (`functions/src/typed/fused.ts`) keeps the array resident in wasm across a
   chain, paying the copy once (`elementwiseChainDispatch` ping-pongs two scratch
   buffers). `npm run bench:fusion`: a 4-op chain runs **2.4–3.1× over JS** and
   beats per-op sequential dispatch. Remaining integration: auto-fusing chains
@@ -88,8 +89,8 @@ This plan closes the gaps between the public typed-function API and the WASM
 acceleration layer. It is **agent-driven**: each task is sized for one subagent
 and is executed under the **dev-workflow** pipeline (TDD-strict → review →
 simplify → re-verify → docs → CHANGELOG → atomic commit) with **honest-claude**
-grounding (verify the kernel exists and is correct *before* wiring; benchmark
-the real break-even *before* claiming a speedup; never wire a path that doesn't
+grounding (verify the kernel exists and is correct _before_ wiring; benchmark
+the real break-even _before_ claiming a speedup; never wire a path that doesn't
 beat the one it replaces).
 
 ---
@@ -101,15 +102,15 @@ that detector only recognizes `*Dispatch` routing, so it both **understates**
 real acceleration and **doesn't surface** where SIMD kernels exist but go
 unused. Verified routing (`functions/src/typed/*.ts`):
 
-| Family | Array overloads | Current routing | Available SIMD kernels | Gap? |
-|---|---|---|---|---|
-| `arithmetic` (add/sub/mul/div/scale/abs/sqrt/exp/log…) | yes | **parallel workers (JS), 0 wasm** | `array_add/sub/mul/div/scale/abs/sqrt/exp/log` (assembly) | **G1 — yes** |
-| `trigonometry` (sin/cos + others) | yes | **parallel workers (JS), 0 wasm** | `array_sin/array_cos` (assembly) | **G2 — partial** (only sin/cos have kernels) |
-| `statistics` (sum/mean/variance/std/min/max/dot/norm) | yes | **mostly parallel (JS); only median/quantile wasm** | `array_sum/mean/variance/stddev/min/max/dot/norm` (assembly) | **G3 — yes** |
-| `signal` | yes | **wasm bridge (87 refs)** | welch/bartlett/goertzel/czt/window | no (already wasm) |
-| `bitwise` | Int32Array | **wasm bridge (Int32 path)** | bit*_i32_array | no (already wasm) |
-| matrix ops | — | wasm via `matrix` backend | gemm/decompositions | no (already wasm) |
-| symbolic / string / set / logical / relational / unit / combinatorics / complex-scalar | — | JS (inherent) | none applicable | no (not numeric kernels) |
+| Family                                                                                 | Array overloads | Current routing                                     | Available SIMD kernels                                       | Gap?                                         |
+| -------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------- |
+| `arithmetic` (add/sub/mul/div/scale/abs/sqrt/exp/log…)                                 | yes             | **parallel workers (JS), 0 wasm**                   | `array_add/sub/mul/div/scale/abs/sqrt/exp/log` (assembly)    | **G1 — yes**                                 |
+| `trigonometry` (sin/cos + others)                                                      | yes             | **parallel workers (JS), 0 wasm**                   | `array_sin/array_cos` (assembly)                             | **G2 — partial** (only sin/cos have kernels) |
+| `statistics` (sum/mean/variance/std/min/max/dot/norm)                                  | yes             | **mostly parallel (JS); only median/quantile wasm** | `array_sum/mean/variance/stddev/min/max/dot/norm` (assembly) | **G3 — yes**                                 |
+| `signal`                                                                               | yes             | **wasm bridge (87 refs)**                           | welch/bartlett/goertzel/czt/window                           | no (already wasm)                            |
+| `bitwise`                                                                              | Int32Array      | **wasm bridge (Int32 path)**                        | bit*_i32_array                                               | no (already wasm)                            |
+| matrix ops                                                                             | —               | wasm via `matrix` backend                           | gemm/decompositions                                          | no (already wasm)                            |
+| symbolic / string / set / logical / relational / unit / combinatorics / complex-scalar | —               | JS (inherent)                                       | none applicable                                              | no (not numeric kernels)                     |
 
 Plus a **measurement gap**:
 
@@ -123,7 +124,7 @@ Plus a **measurement gap**:
 `arithmetic`/`trig` **elementwise** array ops are routed to workers with an
 effective threshold of `'never'` (README perf table) — because for pure
 elementwise ops the **transfer/marshalling overhead dominates** at the sizes
-tested. WASM has the *same* copy-in/copy-out overhead, so wiring `array_add`
+tested. WASM has the _same_ copy-in/copy-out overhead, so wiring `array_add`
 will **not automatically be faster**. Therefore:
 
 - **Reductions first** (G3): scalar output, no copy-back of a big array, SIMD
@@ -158,6 +159,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 ## 3. Tasks
 
 ### T0 — Design the special-bridge pattern for elementwise/reduction (architect)
+
 - **Why:** the special-function bridge (`functions/src/wasm/special/wasm-bridge.ts`)
   is the proven template (WASM→JS dispatch, threshold, integrity-checked
   loader, allocate/free). T1–T3 should reuse it, not reinvent.
@@ -166,6 +168,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 - **dev-workflow:** plan → review-plan → tasklist. No code beyond skeletons.
 
 ### T1 — Statistics reductions → WASM (highest expected value)
+
 - **Scope:** `sum`, `mean`, `variance`, `std`, `min`, `max`, plus `dot`/`norm`
   where applicable, in `functions/src/typed/statistics.ts`, `Float64Array`
   overloads ≥ threshold.
@@ -179,6 +182,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
   two-pass); verify the assembly kernel's method and tolerance before trusting.
 
 ### T2 — Arithmetic elementwise → WASM (benchmark-gated)
+
 - **Scope:** `add`, `subtract`, `multiply`, `divide`, `scale`, plus unary
   `abs`/`sqrt`/`exp`/`log` array overloads.
 - **Kernels:** `array_add/sub/mul/div/scale/abs/sqrt/exp/log`.
@@ -190,6 +194,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
   ops" variant if a fusion API is in scope (out of scope here; note it).
 
 ### T3 — Trigonometry elementwise → WASM (partial; benchmark-gated)
+
 - **Scope:** `sin`, `cos` (only these have `array_sin/array_cos` kernels).
 - **Sub-gap:** other trig (`tan`, `asin`, `atan`, hyperbolics, …) have **no**
   array kernel. Either (a) add AssemblyScript `array_tan` etc. kernels (new-kernel
@@ -198,6 +203,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 - Same TDD + benchmark gates as T2.
 
 ### T4 — Upgrade the pairing detector (close the measurement gap G4)
+
 - **Scope:** `tools/create-dependency-graph/create-dependency-graph.ts` —
   extend `analyzeWasmPairing` to classify each typed function as
   `wasm` / `parallel` / `wasm+parallel` / `js-only` by also detecting
@@ -214,7 +220,7 @@ design), `general-purpose` (T1–T4 implementation), `pr-review-toolkit:code-rev
 ## 4. Sequencing & ownership
 
 1. **T0** (architect) — design/skeleton.
-2. **T4** (parallel, independent) — fix the measurement so we can *see* the real
+2. **T4** (parallel, independent) — fix the measurement so we can _see_ the real
    gap and validate T1–T3's effect.
 3. **T1** (reductions) — highest expected win; do first among the wiring tasks.
 4. **T2 / T3** (elementwise) — benchmark-gated; may resolve to "documented, not

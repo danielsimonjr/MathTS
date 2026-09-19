@@ -18,19 +18,18 @@ import { convexHull3D } from '../src/typed/geometry.js';
 // ---------------------------------------------------------------------------
 
 /** Signed volume of tetrahedron (o, a, b, c) — positive when a,b,c are CCW from o. */
-function signedVol(
-  o: number[],
-  a: number[],
-  b: number[],
-  c: number[],
-): number {
-  const bax = a[0] - o[0]; const bay = a[1] - o[1]; const baz = a[2] - o[2];
-  const cax = b[0] - o[0]; const cay = b[1] - o[1]; const caz = b[2] - o[2];
-  const dax = c[0] - o[0]; const day = c[1] - o[1]; const daz = c[2] - o[2];
+function signedVol(o: number[], a: number[], b: number[], c: number[]): number {
+  const bax = a[0] - o[0];
+  const bay = a[1] - o[1];
+  const baz = a[2] - o[2];
+  const cax = b[0] - o[0];
+  const cay = b[1] - o[1];
+  const caz = b[2] - o[2];
+  const dax = c[0] - o[0];
+  const day = c[1] - o[1];
+  const daz = c[2] - o[2];
   return (
-    bax * (cay * daz - caz * day) -
-    bay * (cax * daz - caz * dax) +
-    baz * (cax * day - cay * dax)
+    bax * (cay * daz - caz * day) - bay * (cax * daz - caz * dax) + baz * (cax * day - cay * dax)
   );
 }
 
@@ -117,8 +116,14 @@ describe('convexHull3D — tetrahedron (4 points)', () => {
 
 describe('convexHull3D — cube (8 vertices)', () => {
   const cube = [
-    [0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0],
-    [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1],
+    [0, 0, 0],
+    [1, 0, 0],
+    [0, 1, 0],
+    [1, 1, 0],
+    [0, 0, 1],
+    [1, 0, 1],
+    [0, 1, 1],
+    [1, 1, 1],
   ];
 
   it('returns 12 triangular faces (6 quad faces × 2 triangles)', () => {
@@ -135,7 +140,9 @@ describe('convexHull3D — cube (8 vertices)', () => {
     const faces = convexHull3D(cube) as [number, number, number][];
     const used = new Set<number>();
     for (const [a, b, c] of faces) {
-      used.add(a); used.add(b); used.add(c);
+      used.add(a);
+      used.add(b);
+      used.add(c);
     }
     expect(used.size).toBe(8);
   });
@@ -147,8 +154,14 @@ describe('convexHull3D — cube (8 vertices)', () => {
 
 describe('convexHull3D — cube with interior centroid (9 points)', () => {
   const pts = [
-    [0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0],
-    [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1],
+    [0, 0, 0],
+    [1, 0, 0],
+    [0, 1, 0],
+    [1, 1, 0],
+    [0, 0, 1],
+    [1, 0, 1],
+    [0, 1, 1],
+    [1, 1, 1],
     [0.5, 0.5, 0.5], // interior centroid — index 8
   ];
 
@@ -216,8 +229,14 @@ describe('convexHull3D — points on unit sphere (50 points)', () => {
     const verts = new Set<number>();
     const edgeSet = new Set<string>();
     for (const [a, b, c] of faces) {
-      verts.add(a); verts.add(b); verts.add(c);
-      const edges: [number, number][] = [[a, b], [b, c], [c, a]];
+      verts.add(a);
+      verts.add(b);
+      verts.add(c);
+      const edges: [number, number][] = [
+        [a, b],
+        [b, c],
+        [c, a],
+      ];
       for (const [u, v] of edges) {
         const key = u < v ? `${u},${v}` : `${v},${u}`;
         edgeSet.add(key);
@@ -263,8 +282,14 @@ describe('convexHull3D — large random cluster (1024 points, WASM path)', () =>
     const verts = new Set<number>();
     const edgeSet = new Set<string>();
     for (const [a, b, c] of faces) {
-      verts.add(a); verts.add(b); verts.add(c);
-      for (const [u, v] of [[a, b], [b, c], [c, a]] as [number, number][]) {
+      verts.add(a);
+      verts.add(b);
+      verts.add(c);
+      for (const [u, v] of [
+        [a, b],
+        [b, c],
+        [c, a],
+      ] as [number, number][]) {
         edgeSet.add(u < v ? `${u},${v}` : `${v},${u}`);
       }
     }
@@ -279,15 +304,23 @@ describe('convexHull3D — large random cluster (1024 points, WASM path)', () =>
 describe('convexHull3D — degenerate co-planar input', () => {
   it('throws a descriptive error for all-z=0 points', () => {
     const coplanar = [
-      [0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0],
-      [0.5, 0.5, 0], [0.25, 0.75, 0],
+      [0, 0, 0],
+      [1, 0, 0],
+      [0, 1, 0],
+      [1, 1, 0],
+      [0.5, 0.5, 0],
+      [0.25, 0.75, 0],
     ];
     expect(() => convexHull3D(coplanar)).toThrowError(/degenerate/i);
   });
 
   it('throws for fewer than 4 points', () => {
-    expect(() => convexHull3D([[0, 0, 0], [1, 0, 0], [0, 1, 0]])).toThrowError(
-      /at least 4/i,
-    );
+    expect(() =>
+      convexHull3D([
+        [0, 0, 0],
+        [1, 0, 0],
+        [0, 1, 0],
+      ])
+    ).toThrowError(/at least 4/i);
   });
 });

@@ -119,7 +119,9 @@ describe('variadic add/multiply over non-number types (mathjs parity)', () => {
   it('polynomialRoot cubic with three real roots now works (was blocked by the above)', () => {
     // x^3 - 6x^2 + 11x - 6 = (x-1)(x-2)(x-3)
     const roots = polynomialRoot(-6, 11, -6, 1).map((r) =>
-      typeof r === 'object' && r !== null && 'im' in r ? Math.round((r as Complex).re) : Math.round(r as number)
+      typeof r === 'object' && r !== null && 'im' in r
+        ? Math.round((r as Complex).re)
+        : Math.round(r as number)
     );
     for (const want of [1, 2, 3]) expect(roots).toContain(want);
   });

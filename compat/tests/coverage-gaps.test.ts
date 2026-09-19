@@ -81,9 +81,7 @@ describe('det() remaining branches', () => {
       ])
     );
     expect(() => det(s as unknown as DenseMatrix)).toThrow(TypeError);
-    expect(() => det(s as unknown as DenseMatrix)).toThrow(
-      'Expected DenseMatrix or 2D array'
-    );
+    expect(() => det(s as unknown as DenseMatrix)).toThrow('Expected DenseMatrix or 2D array');
   });
 
   it('returns 0 for a 4x4 singular matrix (LU pivot underflow path)', () => {

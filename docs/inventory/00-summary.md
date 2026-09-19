@@ -6,6 +6,7 @@
 > ⚠️ **PARTIALLY STALE (verified 2026-06-26).** Since this snapshot, the code has
 > moved on — do not trust these specific claims; see `AGENTS.md` (repo root) for
 > current state:
+>
 > - **mathjs leaf factories are ACTIVATED**, not "dormant" — `functions/src/index.ts`
 >   exports `./factories/index.js`.
 > - **The expression evaluator is WIRED**, not "empty stubs" —
@@ -14,7 +15,7 @@
 > - WASM export counts in this doc's figures have drifted from the current
 >   AssemblyScript backend.
 > - AssemblyScript is the sole WASM backend.
-> The structural maps below (packages, kernels, categories) remain broadly accurate.
+>   The structural maps below (packages, kernels, categories) remain broadly accurate.
 
 ---
 

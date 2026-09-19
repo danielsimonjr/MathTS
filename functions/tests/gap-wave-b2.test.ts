@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  rankdata,
-  kruskalWallis,
-  wilcoxon,
-  fisherExact,
-} from '@danielsimonjr/mathts-functions';
+import { rankdata, kruskalWallis, wilcoxon, fisherExact } from '@danielsimonjr/mathts-functions';
 
 /**
  * Wave B (part 2) — rank-based + exact tests. Reference values from scipy.stats
@@ -19,7 +14,11 @@ describe('gap Wave B — rank-based + exact tests (vs SciPy)', () => {
   });
 
   it('kruskalWallis — matches scipy.stats.kruskal (with tie correction)', () => {
-    const r = kruskalWallis([2.9, 3.0, 2.5, 3.2, 3.8], [3.8, 2.7, 4.0, 2.4], [2.8, 3.4, 3.7, 2.2, 2.0]);
+    const r = kruskalWallis(
+      [2.9, 3.0, 2.5, 3.2, 3.8],
+      [3.8, 2.7, 4.0, 2.4],
+      [2.8, 3.4, 3.7, 2.2, 2.0]
+    );
     expect(r.statistic).toBeCloseTo(1.037279735682816, 9);
     expect(r.pValue).toBeCloseTo(0.5953297246553027, 9);
     expect(r.df).toBe(2);

@@ -11,9 +11,9 @@ describe('GC13: reserved cell types rejected at parse time', () => {
     it(`rejects a '${type}' cell with a clear message`, () => {
       const result = parseWorkbook(`cells:\n  - id: c1\n    ${type}: "something"\n`);
       expect(result.errors).toBeDefined();
-      expect(result.errors!.some((e) => e.includes(`'${type}' is reserved but not yet supported`))).toBe(
-        true
-      );
+      expect(
+        result.errors!.some((e) => e.includes(`'${type}' is reserved but not yet supported`))
+      ).toBe(true);
     });
   }
 

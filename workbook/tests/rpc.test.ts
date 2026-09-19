@@ -21,7 +21,12 @@ afterAll(() => {
 
 const WB = 'cells:\n  - code: "10"\n    id: a\n  - code: "a + 1"\n    id: b\n    depends_on: [a]';
 
-function call(session: Session, method: string, params?: Record<string, unknown>, id: number | string | null = 1) {
+function call(
+  session: Session,
+  method: string,
+  params?: Record<string, unknown>,
+  id: number | string | null = 1
+) {
   return handleRequest(session, { jsonrpc: '2.0', id, method, params });
 }
 
@@ -56,7 +61,9 @@ describe('handleRequest (JSON-RPC router)', () => {
     await call(s, 'run');
     await call(s, 'cell/edit', { id: 'b', content: 'a + 100' });
     const r = await call(s, 'run');
-    const started = r.events.filter((e) => e.params.type === 'cell:start').map((e) => e.params.cellId);
+    const started = r.events
+      .filter((e) => e.params.type === 'cell:start')
+      .map((e) => e.params.cellId);
     expect(started).toEqual(['b']);
   });
 
@@ -86,7 +93,9 @@ describe('handleRequest (JSON-RPC router)', () => {
 
   it('capabilities/functions are answerable over rpc', async () => {
     const s = new Session();
-    const caps = (await call(s, 'capabilities')).response.result as { features: Record<string, boolean> };
+    const caps = (await call(s, 'capabilities')).response.result as {
+      features: Record<string, boolean>;
+    };
     expect(caps.features.serve).toBe(true);
     const fns = (await call(s, 'functions')).response.result as { functions: string[] };
     expect(fns.functions.length).toBeGreaterThan(0);
@@ -97,6 +106,8 @@ describe('handleRequest (JSON-RPC router)', () => {
     await call(s, 'open', { path: fixture(WB) });
     await call(s, 'cell/edit', { id: 'a', content: '5' });
     expect((await call(s, 'open', { path: fixture(WB) })).response.error?.code).toBe(-32603);
-    expect((await call(s, 'open', { path: fixture(WB), force: true })).response.result).toBeDefined();
+    expect(
+      (await call(s, 'open', { path: fixture(WB), force: true })).response.result
+    ).toBeDefined();
   });
 });

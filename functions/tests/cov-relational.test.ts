@@ -159,7 +159,10 @@ describe('relational — compareNatural across type branches', () => {
 });
 
 describe('relational — compareUnits duck-typing', () => {
-  function makeUnit(value: number, base: string): {
+  function makeUnit(
+    value: number,
+    base: string
+  ): {
     equalBase: (o: { base: string }) => boolean;
     valueType: () => string;
     value: number;

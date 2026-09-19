@@ -23,14 +23,27 @@ describe('addCell', () => {
     const wb = makeWb([cell('a')]);
     const out = addCell(wb, { id: 'b', type: 'code', content: 'a + 1', dependsOn: ['a'] });
     expect(out.cells.map((c) => c.id)).toEqual(['a', 'b']);
-    expect(out.cells[1]).toMatchObject({ id: 'b', type: 'code', content: 'a + 1', dependsOn: ['a'] });
+    expect(out.cells[1]).toMatchObject({
+      id: 'b',
+      type: 'code',
+      content: 'a + 1',
+      dependsOn: ['a'],
+    });
   });
 
   it('inserts at before/after/at positions', () => {
     const wb = makeWb([cell('a'), cell('b')]);
-    expect(addCell(wb, { id: 'x', type: 'markdown' }, { before: 'b' }).cells.map((c) => c.id)).toEqual(['a', 'x', 'b']);
-    expect(addCell(wb, { id: 'x', type: 'markdown' }, { after: 'a' }).cells.map((c) => c.id)).toEqual(['a', 'x', 'b']);
-    expect(addCell(wb, { id: 'x', type: 'markdown' }, { at: 0 }).cells.map((c) => c.id)).toEqual(['x', 'a', 'b']);
+    expect(
+      addCell(wb, { id: 'x', type: 'markdown' }, { before: 'b' }).cells.map((c) => c.id)
+    ).toEqual(['a', 'x', 'b']);
+    expect(
+      addCell(wb, { id: 'x', type: 'markdown' }, { after: 'a' }).cells.map((c) => c.id)
+    ).toEqual(['a', 'x', 'b']);
+    expect(addCell(wb, { id: 'x', type: 'markdown' }, { at: 0 }).cells.map((c) => c.id)).toEqual([
+      'x',
+      'a',
+      'b',
+    ]);
   });
 
   it('does not mutate the input workbook (immutability)', () => {
@@ -78,7 +91,9 @@ describe('editCell', () => {
   });
 
   it('throws for an unknown cell', () => {
-    expect(() => editCell(makeWb([cell('a')]), 'ghost', { content: 'x' })).toThrow(/[Nn]o such cell/);
+    expect(() => editCell(makeWb([cell('a')]), 'ghost', { content: 'x' })).toThrow(
+      /[Nn]o such cell/
+    );
   });
 });
 

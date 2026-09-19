@@ -15,7 +15,7 @@ against a `1e-6` FLAG threshold.
 ## Why this audit exists
 
 This closes Open Action #5 in `TODO.md`. The internal vitest suite is
-*self-referential*: every assertion checks that "what we computed" equals
+_self-referential_: every assertion checks that "what we computed" equals
 "what we hand-authored as expected." A **shared misunderstanding** — a wrong
 constant, an off-by-one in a series, a wrong branch cut, a swapped
 convention — passes green on both sides because the same author wrote both.
@@ -39,14 +39,14 @@ bug.
 
 ## Scope — 41 functions across 7 categories
 
-| category | functions |
-|---|---|
-| special (mpmath dps=50) | `gamma` `lgamma` `digamma` `erf` `erfc` `erfi` `beta` `besselJ` `besselY` `besselI` `besselK` `airyAi` `airyBi` `zeta` `ellipticK` `ellipticE` `expIntegralEi` `gammainc` `gammaincp` |
-| elementary (precision) | `expm1` `log1p` `cbrt` `hypot` `atan2` |
-| combinatorics (exact) | `factorial` `combinations` `permutations` `gcd` `lcm` |
-| statistics (numpy/scipy) | `mean` `std` `variance` `median` `quantileSeq` `mad` `corr` |
-| signal | `fft` |
-| linear algebra | `det` `norm` `singularValues` `eigvals` |
+| category                 | functions                                                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| special (mpmath dps=50)  | `gamma` `lgamma` `digamma` `erf` `erfc` `erfi` `beta` `besselJ` `besselY` `besselI` `besselK` `airyAi` `airyBi` `zeta` `ellipticK` `ellipticE` `expIntegralEi` `gammainc` `gammaincp` |
+| elementary (precision)   | `expm1` `log1p` `cbrt` `hypot` `atan2`                                                                                                                                                |
+| combinatorics (exact)    | `factorial` `combinations` `permutations` `gcd` `lcm`                                                                                                                                 |
+| statistics (numpy/scipy) | `mean` `std` `variance` `median` `quantileSeq` `mad` `corr`                                                                                                                           |
+| signal                   | `fft`                                                                                                                                                                                 |
+| linear algebra           | `det` `norm` `singularValues` `eigvals`                                                                                                                                               |
 
 Conventions were pinned **empirically** against MathTS before trusting any
 comparison (so a convention difference can never masquerade as a bug):
@@ -64,49 +64,49 @@ comparison (so a convention difference can never masquerade as a bug):
 
 Oracle: mpmath dps=50 / scipy.special / numpy. FLAG threshold: rel.err > 1e-6.
 
-| function | n | mean rel.err | max rel.err | status |
-|---|---|---|---|---|
-| gamma | 40 | 3.22e-16 | 9.62e-16 | OK |
-| lgamma | 40 | 6.17e-16 | 9.31e-15 | OK |
-| digamma | 40 | 3.78e-16 | 3.41e-15 | OK |
-| erf | 40 | 3.05e-17 | 3.21e-16 | OK |
-| erfc | 40 | 2.01e-16 | 1.33e-15 | OK |
-| erfi | 40 | 4.34e-16 | 1.32e-15 | OK |
-| beta | 40 | 2.23e-15 | 7.04e-15 | OK |
-| besselJ | 40 | 3.15e-13 | 9.98e-12 | OK |
-| besselY | 40 | 1.64e-12 | 4.18e-11 | OK |
-| besselI | 40 | 3.95e-16 | 1.50e-15 | OK |
-| besselK | 40 | 5.77e-11 | 6.96e-10 | OK |
-| airyAi | 40 | 7.42e-15 | 1.06e-13 | OK |
-| airyBi | 40 | 1.16e-15 | 1.55e-14 | OK |
-| zeta | 40 | 1.87e-14 | 1.97e-14 | OK |
-| ellipticK | 40 | 6.31e-17 | 2.50e-16 | OK |
-| ellipticE | 40 | 9.86e-17 | 4.10e-16 | OK |
-| expIntegralEi | 40 | 1.46e-16 | 7.12e-16 | OK |
-| gammainc | 40 | 6.23e-16 | 2.97e-15 | OK |
-| gammaincp | 40 | 1.13e-14 | 1.30e-13 | OK |
-| expm1 | 40 | 0.00e+00 | 0.00e+00 | OK |
-| log1p | 40 | 0.00e+00 | 0.00e+00 | OK |
-| cbrt | 40 | 6.93e-17 | 2.16e-16 | OK |
-| hypot | 40 | 6.15e-17 | 2.14e-16 | OK |
-| atan2 | 40 | 2.35e-17 | 1.99e-16 | OK |
-| factorial | 30 | 0.00e+00 | 0.00e+00 | OK |
-| combinations | 30 | 0.00e+00 | 0.00e+00 | OK |
-| permutations | 30 | 0.00e+00 | 0.00e+00 | OK |
-| gcd | 30 | 0.00e+00 | 0.00e+00 | OK |
-| lcm | 30 | 0.00e+00 | 0.00e+00 | OK |
-| mean | 30 | 5.72e-16 | 5.92e-15 | OK |
-| std | 30 | 6.88e-17 | 3.89e-16 | OK |
-| variance | 30 | 1.73e-16 | 7.14e-16 | OK |
-| median | 30 | 0.00e+00 | 0.00e+00 | OK |
-| quantileSeq | 30 | 6.97e-18 | 2.09e-16 | OK |
-| mad | 30 | 0.00e+00 | 0.00e+00 | OK |
-| corr | 30 | 2.14e-16 | 7.26e-16 | OK |
-| fft | 20 | 6.60e-16 | 3.27e-15 | OK |
-| det | 20 | 4.39e-16 | 1.45e-15 | OK |
-| norm | 20 | 0.00e+00 | 0.00e+00 | OK |
-| singularValues | 20 | 1.12e-15 | 4.64e-15 | OK |
-| eigvals | 20 | 9.82e-16 | 2.66e-15 | OK |
+| function       | n   | mean rel.err | max rel.err | status |
+| -------------- | --- | ------------ | ----------- | ------ |
+| gamma          | 40  | 3.22e-16     | 9.62e-16    | OK     |
+| lgamma         | 40  | 6.17e-16     | 9.31e-15    | OK     |
+| digamma        | 40  | 3.78e-16     | 3.41e-15    | OK     |
+| erf            | 40  | 3.05e-17     | 3.21e-16    | OK     |
+| erfc           | 40  | 2.01e-16     | 1.33e-15    | OK     |
+| erfi           | 40  | 4.34e-16     | 1.32e-15    | OK     |
+| beta           | 40  | 2.23e-15     | 7.04e-15    | OK     |
+| besselJ        | 40  | 3.15e-13     | 9.98e-12    | OK     |
+| besselY        | 40  | 1.64e-12     | 4.18e-11    | OK     |
+| besselI        | 40  | 3.95e-16     | 1.50e-15    | OK     |
+| besselK        | 40  | 5.77e-11     | 6.96e-10    | OK     |
+| airyAi         | 40  | 7.42e-15     | 1.06e-13    | OK     |
+| airyBi         | 40  | 1.16e-15     | 1.55e-14    | OK     |
+| zeta           | 40  | 1.87e-14     | 1.97e-14    | OK     |
+| ellipticK      | 40  | 6.31e-17     | 2.50e-16    | OK     |
+| ellipticE      | 40  | 9.86e-17     | 4.10e-16    | OK     |
+| expIntegralEi  | 40  | 1.46e-16     | 7.12e-16    | OK     |
+| gammainc       | 40  | 6.23e-16     | 2.97e-15    | OK     |
+| gammaincp      | 40  | 1.13e-14     | 1.30e-13    | OK     |
+| expm1          | 40  | 0.00e+00     | 0.00e+00    | OK     |
+| log1p          | 40  | 0.00e+00     | 0.00e+00    | OK     |
+| cbrt           | 40  | 6.93e-17     | 2.16e-16    | OK     |
+| hypot          | 40  | 6.15e-17     | 2.14e-16    | OK     |
+| atan2          | 40  | 2.35e-17     | 1.99e-16    | OK     |
+| factorial      | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| combinations   | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| permutations   | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| gcd            | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| lcm            | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| mean           | 30  | 5.72e-16     | 5.92e-15    | OK     |
+| std            | 30  | 6.88e-17     | 3.89e-16    | OK     |
+| variance       | 30  | 1.73e-16     | 7.14e-16    | OK     |
+| median         | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| quantileSeq    | 30  | 6.97e-18     | 2.09e-16    | OK     |
+| mad            | 30  | 0.00e+00     | 0.00e+00    | OK     |
+| corr           | 30  | 2.14e-16     | 7.26e-16    | OK     |
+| fft            | 20  | 6.60e-16     | 3.27e-15    | OK     |
+| det            | 20  | 4.39e-16     | 1.45e-15    | OK     |
+| norm           | 20  | 0.00e+00     | 0.00e+00    | OK     |
+| singularValues | 20  | 1.12e-15     | 4.64e-15    | OK     |
+| eigvals        | 20  | 9.82e-16     | 2.66e-15    | OK     |
 
 ## The two first-run flags — both harness artifacts (not MathTS bugs)
 
@@ -128,7 +128,7 @@ Oracle: mpmath dps=50 / scipy.special / numpy. FLAG threshold: rel.err > 1e-6.
 `besselK` (max `6.96e-10`) and `besselY` (max `4.18e-11`) are the only
 functions above `~1e-13`. Both worst cases are at **large argument**
 (`x ≈ 7.9` for `K₁`, `x ≈ 11.6` for `Y₁`). In these regimes the functions
-are tiny/oscillatory and the *relative* error inflates a small absolute
+are tiny/oscillatory and the _relative_ error inflates a small absolute
 error; the double-precision implementation is behaving correctly to its
 representable precision. These are well within any practical tolerance and
 are **not** action items — recorded only so a future re-run doesn't
@@ -141,7 +141,7 @@ The audited spread — deliberately weighted toward the highest-risk
 incomplete gammas, branch-sensitive elementary ops, the WASM decomposition
 kernels) — shows **no mathematical-correctness defects**. Combined with the
 9,263-case internal suite, the audited functions now have both
-*self-consistency* (internal tests) and *external grounding* (this audit).
+_self-consistency_ (internal tests) and _external grounding_ (this audit).
 
 ### Reproduce
 

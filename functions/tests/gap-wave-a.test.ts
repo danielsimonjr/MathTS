@@ -70,10 +70,13 @@ describe('gap Wave A — descriptive statistics (vs SciPy/NumPy)', () => {
   });
 
   it('zscore (ddof=0)', () => {
-    arrCloseTo(zscore(X), [
-      -0.5986710947139656, 0.19955703157132165, -1.5299372420468005, 1.6629752630943482,
-      -0.06651901052377428, 0.9977851578566089, -1.130823178904157, 0.46563307366641704,
-    ]);
+    arrCloseTo(
+      zscore(X),
+      [
+        -0.5986710947139656, 0.19955703157132165, -1.5299372420468005, 1.6629752630943482,
+        -0.06651901052377428, 0.9977851578566089, -1.130823178904157, 0.46563307366641704,
+      ]
+    );
   });
 
   it('cov(x,y) scalar and cov(M)/corrcoef(M) matrices', () => {
@@ -94,17 +97,23 @@ describe('gap Wave A — elementwise / cumulative (vs SciPy/NumPy)', () => {
     expect(logsumexp(X)).toBeCloseTo(5.303387901183306, 12);
     const s = softmax(X);
     expect(s.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
-    arrCloseTo(s, [
-      0.06060439273344899, 0.11042840338586737, 0.030095250776633654, 0.331745257530474,
-      0.09041112986531034, 0.2012136699064959, 0.0406243393270475, 0.1348775564747222,
-    ]);
+    arrCloseTo(
+      s,
+      [
+        0.06060439273344899, 0.11042840338586737, 0.030095250776633654, 0.331745257530474,
+        0.09041112986531034, 0.2012136699064959, 0.0406243393270475, 0.1348775564747222,
+      ]
+    );
   });
 
   it('sigmoid — stable on large-magnitude inputs', () => {
     expect(sigmoid(0)).toBe(0.5);
     expect(sigmoid(710)).toBeCloseTo(1, 12); // no overflow
     expect(sigmoid(-710)).toBeCloseTo(0, 12); // no overflow
-    arrCloseTo(sigmoid(X) as number[], X.map((v) => 1 / (1 + Math.exp(-v))));
+    arrCloseTo(
+      sigmoid(X) as number[],
+      X.map((v) => 1 / (1 + Math.exp(-v)))
+    );
   });
 
   it('clamp — scalar and array', () => {

@@ -48,9 +48,13 @@ function renderLine(layer: Layer2D, f: Frame, i: number): Prim[] {
 
 function renderScatter(layer: Layer2D, f: Frame, i: number): Prim[] {
   const color = layer.color ?? f.color(i);
-  return xy(layer).map(
-    ([x, y]): Prim => ({ k: 'circle', cx: f.px(x), cy: f.py(y), r: 3, fill: color })
-  );
+  return xy(layer).map(([x, y]): Prim => ({
+    k: 'circle',
+    cx: f.px(x),
+    cy: f.py(y),
+    r: 3,
+    fill: color,
+  }));
 }
 
 function renderBar(layer: Layer2D, f: Frame, i: number): Prim[] {

@@ -6,14 +6,7 @@
  * Supported cell types
  */
 export type CellType =
-  | 'markdown'
-  | 'code'
-  | 'tensor'
-  | 'equation'
-  | 'visualization'
-  | 'data'
-  | 'test'
-  | 'export';
+  'markdown' | 'code' | 'tensor' | 'equation' | 'visualization' | 'data' | 'test' | 'export';
 
 /**
  * Execution modes

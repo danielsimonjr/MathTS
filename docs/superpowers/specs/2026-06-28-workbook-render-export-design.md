@@ -7,12 +7,13 @@
 
 Let the CLI turn a `.mtsw` into a finished, self-contained HTML document —
 rendered math (equations), embedded code + outputs, self-verifying test badges,
-and charts — so a document can be *completed* via the CLI alone (the GUI is
+and charts — so a document can be _completed_ via the CLI alone (the GUI is
 presentation on top). Drives `examples/lightspeed.mtsw` → `lightspeed.html`.
 
 ## Principle
 
 Rendering lives in MathTS as generators, not in external libraries:
+
 - **Math → MathML** (`toMathML`): browsers typeset MathML natively → self-contained, no fonts/JS/deps. (SVG math typesetting from scratch ≈ reimplementing MathJax; rejected. MathML is a structural AST→AST map.)
 - **Charts → SVG** (`toSVG`): tractable; MathTS computes the data, we draw the plot.
 - **Document → HTML/CSS** (`toHTML`/`toCSS`): assemble cells, inline everything.
@@ -42,7 +43,7 @@ interpolated as raw strings into SVG.
 ### `toMathML(input: string | Node): string` (expression package)
 
 **Equation authoring UX (explicit):** an `equation` cell's content is **MathTS
-expression syntax** (e.g. `c = 1 / sqrt(eps0 * mu0)`), *not* raw LaTeX. It is
+expression syntax** (e.g. `c = 1 / sqrt(eps0 * mu0)`), _not_ raw LaTeX. It is
 parsed and rendered to typeset math via `toMathML`. This is the MathTS-native
 equivalent of "LaTeX equations" — the output looks typeset; the source is MathTS.
 
@@ -57,26 +58,26 @@ hand-roll a new precedence model — mirror/import the proven one.
 
 Recursive walk keyed on `node.type` (the base `Node` exposes `get type()`):
 
-| Node | MathML |
-|---|---|
-| `ConstantNode` (number) | plain → `<mn>value</mn>`; **scientific** (`8.854e-12`) → `<mrow><mn>8.854</mn><mo>×</mo><msup><mn>10</mn><mn>-12</mn></msup></mrow>` (detect exponent via the number's string form; negative mantissa → leading `<mo>-</mo>`) |
-| `ConstantNode` (bigint) | `<mn>value</mn>` |
-| `ConstantNode` (string) | `<mtext>escaped</mtext>` |
-| `ConstantNode` (boolean) | `<mi>true\|false</mi>` |
-| `ConstantNode` (Complex/Fraction/Unit/other) | `<mtext>escaped formatted value</mtext>` (via the crash-proof formatter) |
-| `AssignmentNode` (`c = rhs`) | `<mrow> lhs <mo>=</mo> rhs </mrow>` (simple symbol LHS; array/object-pattern LHS → `<mtext>escaped source</mtext>` fallback) |
-| `SymbolNode` | `<mi>glyph</mi>` — **full** Greek map (α…ω, Γ…Ω: `lambda→λ`, `mu→μ`, `nu→ν`, `pi→π`, `epsilon→ε`, `theta→θ`, `Omega→Ω`, …); `name_sub` (one underscore) → `<msub><mi>base</mi><mn-or-mi>sub</></msub>` (numeric sub → `<mn>`, else `<mi>`, multi-char ok) |
-| `OperatorNode` `divide`/`/` (binary) | `<mfrac><mrow>a</mrow><mrow>b</mrow></mfrac>` |
-| `OperatorNode` `pow`/`^` | `<msup><mrow>base</mrow><mrow>exp</mrow></msup>` |
-| `OperatorNode` binary (`+ - *` …) | `<mrow> a <mo>op</mo> b </mrow>`; implicit `*` → invisible-times `<mo>&#x2062;</mo>` |
-| `OperatorNode` unary (`-x`,`+x`) | `<mrow><mo>op</mo> operand</mrow>` |
-| `OperatorNode` relational chains (`=`,`<`,…) | `<mrow> a <mo>op</mo> b </mrow>` |
-| `FunctionNode` `sqrt` | `<msqrt>arg</msqrt>` |
-| `FunctionNode` `nthRoot(x,n)` | `<mroot><mrow>x</mrow><mrow>n</mrow></mroot>` |
-| `FunctionNode` `abs(x)` | `<mrow><mo>\|</mo>x<mo>\|</mo></mrow>` |
-| `FunctionNode` (generic) | `<mi>fn</mi><mo>&#x2061;</mo><mrow><mo>(</mo>args…<mo>)</mo></mrow>` |
-| `ParenthesisNode` | `<mrow><mo>(</mo>content<mo>)</mo></mrow>` |
-| anything else | `<mtext>escaped source</mtext>` (graceful fallback, never throws) |
+| Node                                         | MathML                                                                                                                                                                                                                                                    |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ConstantNode` (number)                      | plain → `<mn>value</mn>`; **scientific** (`8.854e-12`) → `<mrow><mn>8.854</mn><mo>×</mo><msup><mn>10</mn><mn>-12</mn></msup></mrow>` (detect exponent via the number's string form; negative mantissa → leading `<mo>-</mo>`)                             |
+| `ConstantNode` (bigint)                      | `<mn>value</mn>`                                                                                                                                                                                                                                          |
+| `ConstantNode` (string)                      | `<mtext>escaped</mtext>`                                                                                                                                                                                                                                  |
+| `ConstantNode` (boolean)                     | `<mi>true\|false</mi>`                                                                                                                                                                                                                                    |
+| `ConstantNode` (Complex/Fraction/Unit/other) | `<mtext>escaped formatted value</mtext>` (via the crash-proof formatter)                                                                                                                                                                                  |
+| `AssignmentNode` (`c = rhs`)                 | `<mrow> lhs <mo>=</mo> rhs </mrow>` (simple symbol LHS; array/object-pattern LHS → `<mtext>escaped source</mtext>` fallback)                                                                                                                              |
+| `SymbolNode`                                 | `<mi>glyph</mi>` — **full** Greek map (α…ω, Γ…Ω: `lambda→λ`, `mu→μ`, `nu→ν`, `pi→π`, `epsilon→ε`, `theta→θ`, `Omega→Ω`, …); `name_sub` (one underscore) → `<msub><mi>base</mi><mn-or-mi>sub</></msub>` (numeric sub → `<mn>`, else `<mi>`, multi-char ok) |
+| `OperatorNode` `divide`/`/` (binary)         | `<mfrac><mrow>a</mrow><mrow>b</mrow></mfrac>`                                                                                                                                                                                                             |
+| `OperatorNode` `pow`/`^`                     | `<msup><mrow>base</mrow><mrow>exp</mrow></msup>`                                                                                                                                                                                                          |
+| `OperatorNode` binary (`+ - *` …)            | `<mrow> a <mo>op</mo> b </mrow>`; implicit `*` → invisible-times `<mo>&#x2062;</mo>`                                                                                                                                                                      |
+| `OperatorNode` unary (`-x`,`+x`)             | `<mrow><mo>op</mo> operand</mrow>`                                                                                                                                                                                                                        |
+| `OperatorNode` relational chains (`=`,`<`,…) | `<mrow> a <mo>op</mo> b </mrow>`                                                                                                                                                                                                                          |
+| `FunctionNode` `sqrt`                        | `<msqrt>arg</msqrt>`                                                                                                                                                                                                                                      |
+| `FunctionNode` `nthRoot(x,n)`                | `<mroot><mrow>x</mrow><mrow>n</mrow></mroot>`                                                                                                                                                                                                             |
+| `FunctionNode` `abs(x)`                      | `<mrow><mo>\|</mo>x<mo>\|</mo></mrow>`                                                                                                                                                                                                                    |
+| `FunctionNode` (generic)                     | `<mi>fn</mi><mo>&#x2061;</mo><mrow><mo>(</mo>args…<mo>)</mo></mrow>`                                                                                                                                                                                      |
+| `ParenthesisNode`                            | `<mrow><mo>(</mo>content<mo>)</mo></mrow>`                                                                                                                                                                                                                |
+| anything else                                | `<mtext>escaped source</mtext>` (graceful fallback, never throws)                                                                                                                                                                                         |
 
 - Wrapper: `toMathML(src)` returns `<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">…</math>` (attributes quoted).
 - All text nodes escaped. The function NEVER throws (parse failure → `<math …><merror><mtext>escaped src</mtext></merror></math>`, `merror` INSIDE `math`), mirroring the crash-proof formatter.
@@ -93,7 +94,7 @@ can also reference computed values in surrounding markdown.)
 
 Small, dependency-free subset sufficient for notebook prose: ATX headings
 (`#`..`######`), paragraphs, `**bold**`, `*italic*`, `` `code` ``, fenced code
-```` ``` ````, unordered/ordered lists, links `[t](url)`, horizontal rules.
+` ``` `, unordered/ordered lists, links `[t](url)`, horizontal rules.
 
 **Escaping order (XSS-safe):** escape ALL text to HTML entities first (so no raw
 tag can ever survive), THEN apply inline markers via regex on the escaped text;
@@ -112,6 +113,7 @@ allowlist is the safe default.) Not CommonMark-complete — documented.
 ### `html.ts` — `toHTML(workbook, options?)` + `toCSS()`
 
 Assemble one self-contained HTML5 document:
+
 - `<html lang="en">`, `<head>`: `<meta charset="utf-8">`, `<meta name="viewport">`, title (escaped metadata.title), inlined `<style>` from `toCSS()`.
 - **Browser-support honesty:** MathML Core is supported by all modern browsers (Chromium ≥109, Firefox, Safari). The file opens self-contained with no network requests; very old browsers degrade to unstyled tokens. Documented in README — claim "modern browsers", not "anywhere".
 - Body: document title + metadata (author/description/tags, escaped); then each cell in order:
@@ -149,12 +151,14 @@ separate hardening slice — documented, not silently assumed away.
 
 Add `chart` to `SUPPORTED_CELL_TYPES`. A chart cell's content is a small YAML/JSON
 spec (parsed with the hardened YAML loader):
+
 ```yaml
-type: line            # line | scatter | bar
-title: "ν vs 1/λ"
-x: { label: "1/λ (1/m)", data: someCellId }   # data = a cell id whose output is a number[] OR an inline number[]
-y: { label: "ν (Hz)",   data: anotherCellId }
+type: line # line | scatter | bar
+title: 'ν vs 1/λ'
+x: { label: '1/λ (1/m)', data: someCellId } # data = a cell id whose output is a number[] OR an inline number[]
+y: { label: 'ν (Hz)', data: anotherCellId }
 ```
+
 `depends_on` lists the data cells. Display-only (not "executed" as an expression),
 but it READS dependency outputs at export time to get the series.
 
@@ -177,7 +181,8 @@ Enhance `examples/lightspeed.mtsw`: add `equation` cells for `c = 1/√(ε₀μ�
 `c = λν` (rendered math), and a `chart` cell (e.g. a small sweep showing
 `λ·ν` constant across HeNe-region wavelengths, or ε₀-sensitivity of c). Export to
 `examples/lightspeed.html` and verify it opens self-contained with rendered math
-+ chart. Keep the `test` cells (still self-verifying).
+
+- chart. Keep the `test` cells (still self-verifying).
 
 ---
 

@@ -17,8 +17,9 @@ describe('GC2: functions.md export-reference completeness', () => {
 
   it('documents every public export', () => {
     const missing = Object.keys(fns).filter((name) => !documented.has(name));
-    expect(missing, `Undocumented exports — run \`npm run docs:functions\`: ${missing.join(', ')}`).toEqual(
-      []
-    );
+    expect(
+      missing,
+      `Undocumented exports — run \`npm run docs:functions\`: ${missing.join(', ')}`
+    ).toEqual([]);
   });
 });

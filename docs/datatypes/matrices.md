@@ -121,11 +121,11 @@ sparse.toFlatArray(); // number[]
 
 MathTS dispatches matrix operations to one of three backends based on matrix size:
 
-| Backend         | Threshold (elements)       | Technology                                                   |
-| --------------- | -------------------------- | ------------------------------------------------------------ |
-| **JSBackend**   | Always available (default) | Pure TypeScript / `Float64Array`                             |
-| **WASMBackend** | > 1,000 elements           | AssemblyScript WASM with SIMD                                |
-| **GPUBackend**  | > 100,000 elements         | WebGPU compute shaders                                       |
+| Backend         | Threshold (elements)       | Technology                       |
+| --------------- | -------------------------- | -------------------------------- |
+| **JSBackend**   | Always available (default) | Pure TypeScript / `Float64Array` |
+| **WASMBackend** | > 1,000 elements           | AssemblyScript WASM with SIMD    |
+| **GPUBackend**  | > 100,000 elements         | WebGPU compute shaders           |
 
 Operation-specific thresholds override the general rule:
 

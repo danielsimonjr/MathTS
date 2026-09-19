@@ -30,3 +30,13 @@ CHANGELOG.md
 # (asc) is the source of truth for formatting these files.
 assembly/src/
 matrix/assembly/
+
+# Golden fixtures - written by Python generators
+# (assembly/tests/golden/generate_goldens.py,
+# functions/tests/golden/gen_special_goldens.py). Regeneration overwrites
+# any formatting, and the diff tests compare the values, not the layout.
+*.golden.json
+
+# Codebase inventory - written by tools/build-mathts-inventory.py and
+# tools/scan-inventory.py (json.dump layout).
+tools/codebase-inventory.json

@@ -49,27 +49,45 @@ const describeIfAS = AS_PATH ? describe : describe.skip;
 /** Per-op domain-safe input generator. */
 function gen(op: WasmElementwiseOp, i: number): number {
   switch (op) {
-    case 'abs': return (i % 2 ? -1 : 1) * (0.5 + (i % 50) * 0.01);
-    case 'log': case 'log2': case 'log10': return 0.1 + (i % 100) * 0.05;
-    case 'log1p': return (i % 100) * 0.05;
-    case 'atanh': return -0.99 + (i % 199) * 0.01;
-    case 'sec': return -1.4 + (i % 280) * 0.01;
-    case 'csc': case 'cot': return 0.1 + (i % 130) * 0.01;
-    case 'expm1': return -2 + (i % 40) * 0.1;
-    case 'exp': return ((i % 40) - 20) * 0.1;
-    case 'erfc': return -3 + (i % 120) * 0.05;
-    default: return (i % 97) * 0.03;
+    case 'abs':
+      return (i % 2 ? -1 : 1) * (0.5 + (i % 50) * 0.01);
+    case 'log':
+    case 'log2':
+    case 'log10':
+      return 0.1 + (i % 100) * 0.05;
+    case 'log1p':
+      return (i % 100) * 0.05;
+    case 'atanh':
+      return -0.99 + (i % 199) * 0.01;
+    case 'sec':
+      return -1.4 + (i % 280) * 0.01;
+    case 'csc':
+    case 'cot':
+      return 0.1 + (i % 130) * 0.01;
+    case 'expm1':
+      return -2 + (i % 40) * 0.1;
+    case 'exp':
+      return ((i % 40) - 20) * 0.1;
+    case 'erfc':
+      return -3 + (i % 120) * 0.05;
+    default:
+      return (i % 97) * 0.03;
   }
 }
 
 /** Reference Math.* (or reciprocal) for an op; null = no closed-form ref here. */
 function ref(op: WasmElementwiseOp): ((x: number) => number) | null {
   switch (op) {
-    case 'sec': return (x) => 1 / Math.cos(x);
-    case 'csc': return (x) => 1 / Math.sin(x);
-    case 'cot': return (x) => 1 / Math.tan(x);
-    case 'erfc': return null; // covered by diff-special; here we assert finite-ness only
-    default: return (Math as unknown as Record<string, (x: number) => number>)[op] ?? null;
+    case 'sec':
+      return (x) => 1 / Math.cos(x);
+    case 'csc':
+      return (x) => 1 / Math.sin(x);
+    case 'cot':
+      return (x) => 1 / Math.tan(x);
+    case 'erfc':
+      return null; // covered by diff-special; here we assert finite-ness only
+    default:
+      return (Math as unknown as Record<string, (x: number) => number>)[op] ?? null;
   }
 }
 
@@ -109,7 +127,10 @@ describeIfAS('elementwise AS pointer-kernel dispatch (Phase 3a)', () => {
         let maxRel = 0;
         for (let i = 0; i < n; i++) {
           const e = r(xs[i]);
-          maxRel = Math.max(maxRel, Math.abs(out![i] - e) / (Math.abs(e) > 1e-12 ? Math.abs(e) : 1));
+          maxRel = Math.max(
+            maxRel,
+            Math.abs(out![i] - e) / (Math.abs(e) > 1e-12 ? Math.abs(e) : 1)
+          );
         }
         expect(maxRel, `${op}: AS vs JS worst rel`).toBeLessThan(1e-12);
       } else {

@@ -65,7 +65,9 @@ export const createIndex = /* #__PURE__ */ factory(
               elem: unknown
             ) {
               // convert BigNumber to Number
-              return isBigNumber(elem) ? (elem as unknown as { toNumber(): number }).toNumber() : elem;
+              return isBigNumber(elem)
+                ? (elem as unknown as { toNumber(): number }).toNumber()
+                : elem;
             });
           } else {
             return arg;

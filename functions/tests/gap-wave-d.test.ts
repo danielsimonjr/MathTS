@@ -27,9 +27,10 @@ describe('gap Wave D — time series', () => {
     arrCloseTo(movingAverage(X, 3), [4, 6, 7, 6.6666666667, 5, 4.3333333333, 5, 7]);
   });
   it('ewma (alpha 0.4, adjust=False)', () => {
-    arrCloseTo(ewma(X, 0.4), [
-      2, 2.8, 4.08, 5.648, 6.1888, 5.71328, 4.627968, 4.7767808, 5.66606848, 6.999641088,
-    ]);
+    arrCloseTo(
+      ewma(X, 0.4),
+      [2, 2.8, 4.08, 5.648, 6.1888, 5.71328, 4.627968, 4.7767808, 5.66606848, 6.999641088]
+    );
   });
   it('detrend — linear and constant (vs scipy.signal.detrend)', () => {
     arrCloseTo(
@@ -45,9 +46,10 @@ describe('gap Wave D — time series', () => {
     expect(detrend(X, 'constant').reduce((a, b) => a + b, 0)).toBeCloseTo(0, 9);
   });
   it('acf — biased estimator, acf[0] = 1 (vs numpy formula)', () => {
-    arrCloseTo(acf(X, 4), [
-      1.0, 0.35225225225225226, -0.34054054054054056, -0.627927927927928, -0.14954954954954958,
-    ]);
+    arrCloseTo(
+      acf(X, 4),
+      [1.0, 0.35225225225225226, -0.34054054054054056, -0.627927927927928, -0.14954954954954958]
+    );
   });
 });
 

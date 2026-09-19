@@ -18,16 +18,16 @@
 **Completed**: April 2026  
 **Commits**: `e88cd9460` – `55dea0d71`
 
-| #   | Task                                                          | Status | Notes                             |
-| --- | ------------------------------------------------------------ | ------ | --------------------------------- |
-| 0.1 | Set up `assembly/` AssemblyScript workspace                  | ✅     | AssemblyScript modules            |
-| 0.2 | Author 63 WASM modules in AssemblyScript                     | ✅     | 63 modules, ~18,500 lines         |
-| 0.3 | Expose 826 exports via AssemblyScript bindings               | ✅     | `lib/wasm/mathjs.wasm` — 669 KB   |
-| 0.4 | Implement JS↔WASM bridge in `assembly/src/bindings/`         | ✅     |                                   |
-| 0.5 | Write WASM-vs-JS benchmark                                   | ✅     | `test/benchmark/wasm.bench.ts`    |
-| 0.6 | Update `backendManager` to prefer WASM                       | ✅     | Fallback chain: WASM → JS         |
-| 0.7 | Add `npm run build:wasm` and `npm run bench:wasm` scripts    | ✅     |                                   |
-| 0.8 | Resolve all 166→0 test failures                             | ✅     | Mocha + Vitest: 0 failures        |
+| #   | Task                                                      | Status | Notes                           |
+| --- | --------------------------------------------------------- | ------ | ------------------------------- |
+| 0.1 | Set up `assembly/` AssemblyScript workspace               | ✅     | AssemblyScript modules          |
+| 0.2 | Author 63 WASM modules in AssemblyScript                  | ✅     | 63 modules, ~18,500 lines       |
+| 0.3 | Expose 826 exports via AssemblyScript bindings            | ✅     | `lib/wasm/mathjs.wasm` — 669 KB |
+| 0.4 | Implement JS↔WASM bridge in `assembly/src/bindings/`      | ✅     |                                 |
+| 0.5 | Write WASM-vs-JS benchmark                                | ✅     | `test/benchmark/wasm.bench.ts`  |
+| 0.6 | Update `backendManager` to prefer WASM                    | ✅     | Fallback chain: WASM → JS       |
+| 0.7 | Add `npm run build:wasm` and `npm run bench:wasm` scripts | ✅     |                                 |
+| 0.8 | Resolve all 166→0 test failures                           | ✅     | Mocha + Vitest: 0 failures      |
 
 **Key results**:
 

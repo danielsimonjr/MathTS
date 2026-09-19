@@ -43,7 +43,7 @@ describe('bitwise — large Int32Array dispatch (>= WASM threshold)', () => {
 
   it('bitOr large array', async () => {
     const r = await (bitOr(a, b) as Promise<Int32Array>);
-    for (const i of sample) expect(r[i]).toBe((a[i] | b[i]) | 0);
+    for (const i of sample) expect(r[i]).toBe(a[i] | b[i] | 0);
   });
 
   it('bitXor large array', async () => {
@@ -130,10 +130,14 @@ describe('bitwise — BigNumber validation errors', () => {
   });
 
   it('valid BigNumber bit ops compute correctly', () => {
-    expect((bitAnd(BigNumber.fromNumber(12), BigNumber.fromNumber(10)) as BigNumber).toNumber()).toBe(8);
-    expect((rightLogShift(BigNumber.fromNumber(-8), BigNumber.fromNumber(1)) as BigNumber).toNumber()).toBe(
-      (-8 >>> 1) | 0
-    );
-    expect((leftShift(BigNumber.fromNumber(1), BigNumber.fromNumber(4)) as BigNumber).toNumber()).toBe(16);
+    expect(
+      (bitAnd(BigNumber.fromNumber(12), BigNumber.fromNumber(10)) as BigNumber).toNumber()
+    ).toBe(8);
+    expect(
+      (rightLogShift(BigNumber.fromNumber(-8), BigNumber.fromNumber(1)) as BigNumber).toNumber()
+    ).toBe((-8 >>> 1) | 0);
+    expect(
+      (leftShift(BigNumber.fromNumber(1), BigNumber.fromNumber(4)) as BigNumber).toNumber()
+    ).toBe(16);
   });
 });

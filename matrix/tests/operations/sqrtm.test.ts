@@ -210,7 +210,7 @@ describe('matrixSqrtm', () => {
     // Known off-diagonal entries (Björck recurrence)
     expect(Math.abs(Rarr[0][1] - 0.25)).toBeLessThan(1e-8);
     expect(Math.abs(Rarr[1][2] - 0.25)).toBeLessThan(1e-8);
-    expect(Math.abs(Rarr[0][2] - (-0.015625))).toBeLessThan(1e-8);
+    expect(Math.abs(Rarr[0][2] - -0.015625)).toBeLessThan(1e-8);
   });
 
   it('13. Schur path: matrix with complex-conjugate eigenvalues (2D rotation)', () => {

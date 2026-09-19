@@ -174,16 +174,16 @@ Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.
 
 ### Instance methods
 
-| Method                              | Returns | Description                          |
-| ----------------------------------- | ------- | ------------------------------------ |
-| `add(o)` `sub(o)` `mul(o)` `div(o)` | `Dual`  | Arithmetic (propagates derivatives)  |
-| `neg()`                             | `Dual`  | Negation                             |
-| `powConst(k)`                       | `Dual`  | Power with a constant real exponent  |
-| `pow(o)`                            | `Dual`  | General power `aᵇ`                   |
-| `sin()` `cos()` `tan()`             | `Dual`  | Trigonometric                        |
-| `exp()` `log()`                     | `Dual`  | Exponential / natural logarithm      |
-| `sqrt()` `square()` `abs()`         | `Dual`  | Roots / square / absolute value      |
-| `sinh()` `cosh()` `tanh()`          | `Dual`  | Hyperbolic                           |
+| Method                              | Returns | Description                         |
+| ----------------------------------- | ------- | ----------------------------------- |
+| `add(o)` `sub(o)` `mul(o)` `div(o)` | `Dual`  | Arithmetic (propagates derivatives) |
+| `neg()`                             | `Dual`  | Negation                            |
+| `powConst(k)`                       | `Dual`  | Power with a constant real exponent |
+| `pow(o)`                            | `Dual`  | General power `aᵇ`                  |
+| `sin()` `cos()` `tan()`             | `Dual`  | Trigonometric                       |
+| `exp()` `log()`                     | `Dual`  | Exponential / natural logarithm     |
+| `sqrt()` `square()` `abs()`         | `Dual`  | Roots / square / absolute value     |
+| `sinh()` `cosh()` `tanh()`          | `Dual`  | Hyperbolic                          |
 
 ### Type guard
 
@@ -221,15 +221,15 @@ Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 
 ### Instance methods
 
-| Method                              | Returns   | Description                              |
-| ----------------------------------- | --------- | ---------------------------------------- |
-| `add(o)` `sub(o)`                   | `Unit`    | Same-dimension addition / subtraction    |
-| `mul(o)` `div(o)`                   | `Unit`    | Combine dimensions (or scale by a number) |
-| `pow(n)`                            | `Unit`    | Raise to a power                         |
-| `to(target)`                        | `Unit`    | Convert to another unit of equal dimension |
-| `toBest()`                          | `Unit`    | Auto-select the most readable prefix     |
-| `equals(o)` `dimensionsEqual(o)`    | `boolean` | Equality / dimensional compatibility     |
-| `toString()` `toJSON()`             | —         | Render / serialize                       |
+| Method                           | Returns   | Description                                |
+| -------------------------------- | --------- | ------------------------------------------ |
+| `add(o)` `sub(o)`                | `Unit`    | Same-dimension addition / subtraction      |
+| `mul(o)` `div(o)`                | `Unit`    | Combine dimensions (or scale by a number)  |
+| `pow(n)`                         | `Unit`    | Raise to a power                           |
+| `to(target)`                     | `Unit`    | Convert to another unit of equal dimension |
+| `toBest()`                       | `Unit`    | Auto-select the most readable prefix       |
+| `equals(o)` `dimensionsEqual(o)` | `boolean` | Equality / dimensional compatibility       |
+| `toString()` `toJSON()`          | —         | Render / serialize                         |
 
 ### Type guard
 
@@ -349,15 +349,15 @@ Tensor.einsum(spec, ...tensors); // Einstein summation
 
 ### Instance methods
 
-| Method                                    | Returns          | Description                                |
-| ----------------------------------------- | ---------------- | ------------------------------------------ |
-| `add(o)` `sub(o)` `mul(o)`                | `Tensor`         | Element-wise (broadcasting)                |
-| `scale(k)`                                | `Tensor`         | Multiply by a scalar                       |
-| `matMul(o)` `tensordot(o, …)` `contract(…)` | `Tensor`       | Matrix / tensor products                   |
-| `transpose(…)` `reshape(shape)`           | `Tensor`         | Reshape / permute axes                     |
-| `sum()` `mean()` `max()` `min()` `prod()` | `Tensor`         | Reductions (scalar or along axes)          |
-| `norm()` `normInf()`                      | `number`         | Vector / matrix norms                      |
-| `toNested()` `toDenseMatrix()`            | array / `DenseMatrix` | Convert out                            |
+| Method                                      | Returns               | Description                       |
+| ------------------------------------------- | --------------------- | --------------------------------- |
+| `add(o)` `sub(o)` `mul(o)`                  | `Tensor`              | Element-wise (broadcasting)       |
+| `scale(k)`                                  | `Tensor`              | Multiply by a scalar              |
+| `matMul(o)` `tensordot(o, …)` `contract(…)` | `Tensor`              | Matrix / tensor products          |
+| `transpose(…)` `reshape(shape)`             | `Tensor`              | Reshape / permute axes            |
+| `sum()` `mean()` `max()` `min()` `prod()`   | `Tensor`              | Reductions (scalar or along axes) |
+| `norm()` `normInf()`                        | `number`              | Vector / matrix norms             |
+| `toNested()` `toDenseMatrix()`              | array / `DenseMatrix` | Convert out                       |
 
 For automatic differentiation over tensors, see `@danielsimonjr/mathts-autograd`
 (`TapedTensor`, reverse-mode; `DualTensor`, forward-mode).

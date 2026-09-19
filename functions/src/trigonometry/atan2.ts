@@ -86,8 +86,7 @@ export const createAtan2 = /* #__PURE__ */ factory(
         // the atan only on base of the real part of the numbers and ignored
         // the imaginary.
 
-        'BigNumber, BigNumber': (y: BigNumber, x: BigNumber): BigNumber =>
-          BigNumber.atan2(y, x),
+        'BigNumber, BigNumber': (y: BigNumber, x: BigNumber): BigNumber => BigNumber.atan2(y, x),
       },
       matrixAlgorithmSuite({
         scalar: 'number | BigNumber',

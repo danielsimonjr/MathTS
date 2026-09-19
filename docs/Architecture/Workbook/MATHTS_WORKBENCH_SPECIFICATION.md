@@ -5625,15 +5625,7 @@ export interface RenderedOutput {
 }
 
 export type OutputType =
-  | 'math'
-  | 'graph'
-  | 'chart'
-  | 'scene3d'
-  | 'table'
-  | 'image'
-  | 'text'
-  | 'error'
-  | 'composite';
+  'math' | 'graph' | 'chart' | 'scene3d' | 'table' | 'image' | 'text' | 'error' | 'composite';
 
 export type OutputFormat = 'html' | 'svg' | 'canvas' | 'webgl' | 'text' | 'latex' | 'json';
 

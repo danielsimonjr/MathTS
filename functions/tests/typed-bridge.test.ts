@@ -22,6 +22,8 @@ describe('Typed Bridge', () => {
   it('native BigNumber passes mathjs duck-type check', () => {
     initTypeBridge();
     const b = new BigNumber(42);
-    expect(typeof b === 'object' && (b as { isBigNumber?: boolean }).isBigNumber === true).toBe(true);
+    expect(typeof b === 'object' && (b as { isBigNumber?: boolean }).isBigNumber === true).toBe(
+      true
+    );
   });
 });

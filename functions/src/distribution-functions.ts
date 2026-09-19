@@ -18,7 +18,8 @@ import {
 } from './typed/dist-objects.js';
 
 /** Standard (or general) normal quantile (inverse CDF). */
-export const normalQuantile = (p: number, mu = 0, sigma = 1): number => normal(mu, sigma).quantile(p);
+export const normalQuantile = (p: number, mu = 0, sigma = 1): number =>
+  normal(mu, sigma).quantile(p);
 
 /** Student-t CDF and quantile with `df` degrees of freedom. */
 export const studentTCDF = (x: number, df: number): number => studentT(df).cdf(x);
