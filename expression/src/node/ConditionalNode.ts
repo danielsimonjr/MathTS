@@ -12,8 +12,8 @@ export const createConditionalNode = /* #__PURE__ */ factory(
   ({ Node }: { Node: new (...args: unknown[]) => MathNode }) => {
     /**
      * Test whether a condition is met
-     * @param {*} condition
-     * @returns {boolean} true if condition is true or non-zero, else false
+     * @param condition
+     * @returns true if condition is true or non-zero, else false
      */
     function testCondition(condition: unknown): boolean {
       if (
@@ -53,9 +53,9 @@ export const createConditionalNode = /* #__PURE__ */ factory(
       /**
        * A lazy evaluating conditional operator: 'condition ? trueExpr : falseExpr'
        *
-       * @param {Node} condition   Condition, must result in a boolean
-       * @param {Node} trueExpr    Expression evaluated when condition is true
-       * @param {Node} falseExpr   Expression evaluated when condition is true
+       * @param condition - Condition, must result in a boolean
+       * @param trueExpr - Expression evaluated when condition is true
+       * @param falseExpr - Expression evaluated when condition is true
        *
        * @constructor ConditionalNode
        * @extends {Node}
@@ -88,13 +88,13 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -118,7 +118,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         callback(this.condition, 'condition', this);
@@ -129,8 +129,8 @@ export const createConditionalNode = /* #__PURE__ */ factory(
       /**
        * Create a new ConditionalNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {ConditionalNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(
         callback: (child: MathNode, path: string, parent: MathNode) => MathNode
@@ -144,7 +144,6 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {ConditionalNode}
        */
       clone(): ConditionalNode {
         return new ConditionalNode(this.condition, this.trueExpr, this.falseExpr);
@@ -152,8 +151,8 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -219,7 +218,6 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): { mathjs: string; condition: MathNode; trueExpr: MathNode; falseExpr: MathNode } {
         return {
@@ -232,7 +230,7 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an ConditionalNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     ```
        *     {"mathjs": "ConditionalNode",
@@ -241,7 +239,6 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        *      "falseExpr": ...}
        *     ```
        *     where mathjs is optional
-       * @returns {ConditionalNode}
        */
       static fromJSON(json: {
         condition: MathNode;
@@ -253,8 +250,8 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -335,8 +332,8 @@ export const createConditionalNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         return (

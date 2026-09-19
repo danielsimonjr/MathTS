@@ -165,10 +165,10 @@ export const createParse = /* #__PURE__ */ factory(
      *
      *     evaluate, compile
      *
-     * @param {string | string[] | Matrix} expr          Expression to be parsed
-     * @param {{nodes: Object<string, Node>}} [options]  Available options:
+     * @param expr - Expression to be parsed
+     * @param options - Optional. Available options:
      *                                                   - `nodes` a set of custom nodes
-     * @return {Node | Node[]} node
+     * @returns node
      * @throws {Error}
      */
     const parse = typed(name, {
@@ -295,9 +295,8 @@ export const createParse = /* #__PURE__ */ factory(
     /**
      * View upto `length` characters of the expression starting at the current character.
      *
-     * @param {Object} state
-     * @param {number} [length=1] Number of characters to view
-     * @returns {string}
+     * @param state
+     * @param length - Number of characters to view. Default is `1`.
      * @private
      */
     function currentString(state: ParserState, length: number): string {
@@ -307,8 +306,7 @@ export const createParse = /* #__PURE__ */ factory(
     /**
      * View the current character. Returns '' if end of expression is reached.
      *
-     * @param {Object} state
-     * @returns {string}
+     * @param state
      * @private
      */
     function currentCharacter(state: ParserState): string {
@@ -327,7 +325,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Preview the previous character from the expression.
-     * @return {string} cNext
+     * @returns cNext
      * @private
      */
     function prevCharacter(state: ParserState): string {
@@ -336,7 +334,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Preview the next character from the expression.
-     * @return {string} cNext
+     * @returns cNext
      * @private
      */
     function nextCharacter(state: ParserState): string {
@@ -591,10 +589,9 @@ export const createParse = /* #__PURE__ */ factory(
      * The previous and next characters are needed to determine whether
      * this character is part of a unicode surrogate pair.
      *
-     * @param {string} c      Current character in the expression
-     * @param {string} cPrev  Previous character
-     * @param {string} cNext  Next character
-     * @return {boolean}
+     * @param c - Current character in the expression
+     * @param cPrev - Previous character
+     * @param cNext - Next character
      */
     parse.isAlpha = function isAlpha(c: string, cPrev: string, cNext: string): boolean {
       return (
@@ -606,8 +603,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Test whether a character is a valid latin, greek, or letter-like character
-     * @param {string} c
-     * @return {boolean}
+     * @param c
      */
     parse.isValidLatinOrGreek = function isValidLatinOrGreek(c: string): boolean {
       return /^[a-zA-Z_$\u00C0-\u02AF\u0370-\u03FF\u2100-\u214F]$/.test(c);
@@ -624,9 +620,8 @@ export const createParse = /* #__PURE__ */ factory(
      * https://stackoverflow.com/questions/280712/javascript-unicode-regexes
      * https://mathiasbynens.be/notes/es6-unicode-regex
      *
-     * @param {string} high
-     * @param {string} low
-     * @return {boolean}
+     * @param high
+     * @param low
      */
     parse.isValidMathSymbol = function isValidMathSymbol(high: string, low: string): boolean {
       return (
@@ -640,9 +635,8 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Check whether given character c is a white space character: space, tab, or enter
-     * @param {string} c
-     * @param {number} nestingLevel
-     * @return {boolean}
+     * @param c
+     * @param nestingLevel
      */
     parse.isWhitespace = function isWhitespace(c: string, nestingLevel: number): boolean {
       return (
@@ -656,9 +650,8 @@ export const createParse = /* #__PURE__ */ factory(
     /**
      * Test whether the character c is a decimal mark (dot).
      * This is the case when it's not the start of a delimiter '.*', './', or '.^'
-     * @param {string} c
-     * @param {string} cNext
-     * @return {boolean}
+     * @param c
+     * @param cNext
      */
     parse.isDecimalMark = function isDecimalMark(c: string, cNext: string): boolean {
       return c === '.' && cNext !== '/' && cNext !== '*' && cNext !== '^';
@@ -666,8 +659,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * checks if the given char c is a digit or dot
-     * @param {string} c   a string with one character
-     * @return {boolean}
+     * @param c - a string with one character
      */
     parse.isDigitDot = function isDigitDot(c: string): boolean {
       return (c >= '0' && c <= '9') || c === '.';
@@ -675,8 +667,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * checks if the given char c is a digit
-     * @param {string} c   a string with one character
-     * @return {boolean}
+     * @param c - a string with one character
      */
     parse.isDigit = function isDigit(c: string): boolean {
       return c >= '0' && c <= '9';
@@ -684,7 +675,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Start of the parse levels below, in order of precedence
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseStart(expression: string, extraNodes: Record<string, NodeConstructor>): MathNode {
@@ -714,7 +705,7 @@ export const createParse = /* #__PURE__ */ factory(
      * Parse a block with expressions. Expressions can be separated by a newline
      * character '\n', or by a semicolon ';'. In case of a semicolon, no output
      * of the preceding line is returned.
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseBlock(state: ParserState): MathNode {
@@ -768,7 +759,7 @@ export const createParse = /* #__PURE__ */ factory(
      * - can be a variable like 'a=2.3'
      * - or a updating an existing variable like 'matrix(2,3:5)=[6,7,8]'
      * - defining a function like 'f(x) = x^2'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseAssignment(state: ParserState): MathNode {
@@ -834,7 +825,7 @@ export const createParse = /* #__PURE__ */ factory(
      *
      * Note: conditional operator is right-associative
      *
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseConditional(state: ParserState): MathNode {
@@ -869,7 +860,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * logical or, 'x or y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseLogicalOr(state: ParserState): MathNode {
@@ -885,7 +876,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * logical exclusive or, 'x xor y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseLogicalXor(state: ParserState): MathNode {
@@ -901,7 +892,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * logical and, 'x and y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseLogicalAnd(state: ParserState): MathNode {
@@ -917,7 +908,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * bitwise or, 'x | y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseBitwiseOr(state: ParserState): MathNode {
@@ -933,7 +924,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * bitwise exclusive or (xor), 'x ^| y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseBitwiseXor(state: ParserState): MathNode {
@@ -949,7 +940,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * bitwise and, 'x & y'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseBitwiseAnd(state: ParserState): MathNode {
@@ -965,7 +956,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Parse a chained conditional, like 'a > b >= c'
-     * @return {Node} node
+     * @returns node
      */
     function parseRelational(state: ParserState): MathNode {
       const params: MathNode[] = [parseShift(state)];
@@ -1001,7 +992,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Bitwise left shift, bitwise right arithmetic shift, bitwise right logical shift
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseShift(state: ParserState): MathNode {
@@ -1032,7 +1023,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * conversion operators 'to' and 'in'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseConversion(state: ParserState): MathNode {
@@ -1069,7 +1060,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parse range, "start:end", "start:step:end", ":", "start:", ":end", etc
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseRange(state: ParserState): MathNode {
@@ -1131,7 +1122,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * add or subtract
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseAddSubtract(state: ParserState): MathNode {
@@ -1165,7 +1156,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * multiply, divide, modulus
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseMultiplyDivideModulus(state: ParserState): MathNode {
@@ -1203,7 +1194,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * implicit multiplication
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseImplicitMultiplication(state: ParserState): MathNode {
@@ -1247,7 +1238,7 @@ export const createParse = /* #__PURE__ */ factory(
      * Explicit division gets higher precedence than implicit multiplication
      * when the division matches this pattern:
      *   [unaryPrefixOp]?[number] / [number] [symbol]
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseRule2(state: ParserState): MathNode {
@@ -1301,7 +1292,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Unary percentage operator (treated as `value / 100`)
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseUnaryPercentage(state: ParserState): MathNode {
@@ -1331,7 +1322,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Unary plus and minus, and logical and bitwise not
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseUnary(state: ParserState): MathNode {
@@ -1361,7 +1352,7 @@ export const createParse = /* #__PURE__ */ factory(
     /**
      * power
      * Note: power operator is right associative
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parsePow(state: ParserState): MathNode {
@@ -1386,7 +1377,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * nullish coalescing operator
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseNullishCoalescing(state: ParserState): MathNode {
@@ -1402,7 +1393,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Left hand operators: factorial x!, ctranspose x'
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseLeftHandOperators(state: ParserState): MathNode {
@@ -1457,7 +1448,7 @@ export const createParse = /* #__PURE__ */ factory(
      *
      *     node = math.parse('plot(sin(x), x)', nodes)
      *
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseCustomNodes(state: ParserState): MathNode {
@@ -1502,7 +1493,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parse symbols: functions, variables, constants, units
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseSymbol(state: ParserState): MathNode {
@@ -1540,13 +1531,13 @@ export const createParse = /* #__PURE__ */ factory(
      * - function invocation in round brackets (...), for example sqrt(2) or sqrt?.(2) with optional chaining
      * - index enclosed in square brackets [...], for example A[2,3] or A?.[2,3] with optional chaining
      * - dot notation for properties, like foo.bar or foo?.bar with optional chaining
-     * @param {Object} state
-     * @param {Node} node    Node on which to apply the parameters. If there
+     * @param state
+     * @param node - Node on which to apply the parameters. If there
      *                       are no parameters in the expression, the node
      *                       itself is returned
-     * @param {string[]} [types]  Filter the types of notations
+     * @param types - Optional. Filter the types of notations
      *                            can be ['(', '[', '.']
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseAccessors(state: ParserState, node: MathNode, types?: string[]): MathNode {
@@ -1652,7 +1643,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Parse a single or double quoted string.
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseString(state: ParserState): MathNode {
@@ -1676,9 +1667,8 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Parse a string surrounded by single or double quotes
-     * @param {Object} state
-     * @param {"'" | "\""} quote
-     * @return {string}
+     * @param state
+     * @param quote
      */
     function parseStringToken(state: ParserState, quote: '"' | "'"): string {
       let str = '';
@@ -1724,7 +1714,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parse the matrix
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseMatrix(state: ParserState): MathNode {
@@ -1807,7 +1797,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Parse a single comma-separated row from a matrix, like 'a, b, c'
-     * @return {ArrayNode} node
+     * @returns node
      */
     function parseRow(state: ParserState): MathNode {
       const params: MathNode[] = [parseAssignment(state)];
@@ -1828,7 +1818,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parse an object, enclosed in angle brackets{...}, for example {value: 2}
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseObject(state: ParserState): MathNode {
@@ -1886,7 +1876,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parse a number
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseNumber(state: ParserState): MathNode {
@@ -1908,7 +1898,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * parentheses
-     * @return {Node} node
+     * @returns node
      * @private
      */
     function parseParentheses(state: ParserState): MathNode {
@@ -1938,7 +1928,7 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Evaluated when the expression is not yet ended but expected to end
-     * @return {Node} res
+     * @returns res
      * @private
      */
     function parseEnd(state: ParserState): never {
@@ -1972,9 +1962,9 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Create an error
-     * @param {Object} state
-     * @param {string} message
-     * @return {SyntaxError} instantiated error
+     * @param state
+     * @param message
+     * @returns instantiated error
      * @private
      */
     function createSyntaxError(state: ParserState, message: string): SyntaxError {
@@ -1989,9 +1979,9 @@ export const createParse = /* #__PURE__ */ factory(
 
     /**
      * Create an error
-     * @param {Object} state
-     * @param {string} message
-     * @return {Error} instantiated error
+     * @param state
+     * @param message
+     * @returns instantiated error
      * @private
      */
     function createError(state: ParserState, message: string): Error {

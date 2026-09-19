@@ -54,10 +54,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
   ({ Node }: Dependencies) => {
     /**
      * Returns true if the expression starts with a constant, under
-     * the current parenthesization:
-     * @param {Node} expression
-     * @param {string} parenthesis
-     * @return {boolean}
+     * the current parenthesization.
+     * @param expr - The node to test.
+     * @param parenthesis - The parenthesis option. If the value is `'auto'`, the test skips ParenthesisNode wrappers.
+     * @returns `true` if the node, or the first argument along a chain of OperatorNodes, is a ConstantNode.
      */
     function startsWithConstant(expr: Node, parenthesis: string): boolean {
       let curNode = expr;
@@ -78,11 +78,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
      * (this.args) and returns an array where 'true' means that an argument
      * has to be enclosed in parentheses whereas 'false' means the opposite.
      *
-     * @param {OperatorNode} root
-     * @param {string} parenthesis
-     * @param {Node[]} args
-     * @param {boolean} latex
-     * @return {boolean[]}
+     * @param root
+     * @param parenthesis
+     * @param args
+     * @param latex
      * @private
      */
     function calculateNecessaryParentheses(
@@ -349,11 +348,11 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @extends {Node}
        * An operator with two arguments, like 2+3
        *
-       * @param {string} op           Operator name, for example '+'
-       * @param {string} fn           Function name, for example 'add'
-       * @param {Node[]} args         Operator arguments
-       * @param {boolean} [implicit]  Is this an implicit multiplication?
-       * @param {boolean} [isPercentage] Is this an percentage Operation?
+       * @param op - Operator name, for example '+'
+       * @param fn - Function name, for example 'add'
+       * @param args - Operator arguments
+       * @param implicit - Optional. Is this an implicit multiplication?
+       * @param isPercentage - Optional. Is this an percentage Operation?
        */
       constructor(
         op: string,
@@ -392,13 +391,13 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -466,7 +465,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: OperatorNode) => void): void {
         for (let i = 0; i < this.args.length; i++) {
@@ -477,8 +476,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       /**
        * Create a new OperatorNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {OperatorNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: Node, path: string, parent: OperatorNode) => Node): OperatorNode {
         const args: Node[] = [];
@@ -490,7 +489,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {OperatorNode}
        */
       clone(): OperatorNode {
         return new OperatorNode(
@@ -505,8 +503,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       /**
        * Check whether this is an unary OperatorNode:
        * has exactly one argument, like `-a`.
-       * @return {boolean}
-       *     Returns true when an unary operator node, false otherwise.
+       * @returns `true` when an unary operator node, `false` otherwise.
        */
       isUnary(): boolean {
         return this.args.length === 1;
@@ -515,8 +512,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       /**
        * Check whether this is a binary OperatorNode:
        * has exactly two arguments, like `a + b`.
-       * @return {boolean}
-       *     Returns true when a binary operator node, false otherwise.
+       * @returns `true` when a binary operator node, `false` otherwise.
        */
       isBinary(): boolean {
         return this.args.length === 2;
@@ -524,8 +520,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation.
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toString(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -608,7 +604,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -623,7 +618,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an OperatorNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     ```
        *     {"mathjs": "OperatorNode",
@@ -632,7 +627,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        *      "isPercentage":false}
        *     ```
        *     where mathjs is optional
-       * @returns {OperatorNode}
        */
       static fromJSON(json: {
         op: string;
@@ -646,8 +640,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation.
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toHTML(options?: StringOptions): string {
         const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
@@ -777,9 +771,8 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       }
 
       /**
-       * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * Get the MathML representation of this node.
+       * @returns str
        */
       _toMathML(): string {
         const fn = this.fn;
@@ -792,7 +785,11 @@ export const createOperatorNode = /* #__PURE__ */ factory(
         }
         // Wrap a child operator of lower precedence in visual parens.
         const child = (arg: Node): string =>
-          parenthesizeLower(arg.toMathML(), isOperatorNode(arg) ? (arg as unknown as { fn: string }).fn : undefined, fn);
+          parenthesizeLower(
+            arg.toMathML(),
+            isOperatorNode(arg) ? (arg as unknown as { fn: string }).fn : undefined,
+            fn
+          );
         if (args.length === 1) {
           const op = this.op === '-' || this.op === '+' ? this.op : escapeMathML(this.op);
           const operand = child(args[0]);
@@ -925,7 +922,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
       /**
        * Get identifier.
-       * @return {string}
        */
       // @ts-expect-error - method overrides property from Node base class
       getIdentifier(): string {

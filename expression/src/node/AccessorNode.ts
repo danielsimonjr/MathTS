@@ -68,10 +68,10 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * @extends {Node}
        * Access an object property or get a matrix subset
        *
-       * @param {Node} object                 The object from which to retrieve
+       * @param object - The object from which to retrieve
        *                                      a property or subset.
-       * @param {IndexNode} index             IndexNode containing ranges
-       * @param {boolean} [optionalChaining=false]
+       * @param index - IndexNode containing ranges
+       * @param optionalChaining - Default is `false`.
        *     Optional property, if the accessor was written as optional-chaining
        *     using `a?.b`, or `a?.["b"] with bracket notation.
        *     Forces evaluate to undefined if the given object is undefined or null.
@@ -110,13 +110,13 @@ export const createAccessorNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(
@@ -183,7 +183,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: MathNode, path: string, parent: MathNode) => void): void {
         callback(this.object, 'object', this);
@@ -193,8 +193,8 @@ export const createAccessorNode = /* #__PURE__ */ factory(
       /**
        * Create a new AccessorNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {AccessorNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): AccessorNode {
         return new AccessorNode(
@@ -206,7 +206,6 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {AccessorNode}
        */
       clone(): AccessorNode {
         return new AccessorNode(this.object, this.index, this.optionalChaining);
@@ -214,8 +213,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       _toString(options?: StringOptions): string {
         let object = this.object.toString(options);
@@ -228,8 +226,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       _toHTML(options?: StringOptions): string {
         let object = this.object.toHTML(options);
@@ -245,8 +242,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string}
+       * @param options
        */
       _toTex(options?: StringOptions): string {
         let object = this.object.toTex(options);
@@ -259,7 +255,6 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): {
         mathjs: string;
@@ -277,11 +272,10 @@ export const createAccessorNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an AccessorNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "AccessorNode", object: ..., index: ...}`,
        *     where mathjs is optional
-       * @returns {AccessorNode}
        */
       static fromJSON(json: {
         object: MathNode;

@@ -12,6 +12,10 @@ export function dimToZeroBase(dim: unknown): unknown {
   }
 }
 
+/**
+ * Return `true` if the value is a number or a BigNumber.
+ * @param n - The value to test.
+ */
 export function isNumberOrBigNumber(n: unknown): boolean {
   return isNumber(n) || isBigNumber(n);
 }

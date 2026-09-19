@@ -51,8 +51,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * Cannot be used on its own, needs to be used within an AccessorNode or
        * AssignmentNode.
        *
-       * @param {Node[]} dimensions
-       * @param {boolean} [dotNotation=false]
+       * @param dimensions
+       * @param dotNotation - Default is `false`.
        *     Optional property describing whether this index was written using dot
        *     notation like `a.b`, or using bracket notation like `a["b"]`
        *     (which is the default). This property is used for string conversion.
@@ -82,13 +82,13 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * Compile a node into a JavaScript function.
        * This basically pre-calculates as much as possible and only leaves open
        * calculations which depend on a dynamic scope with variables.
-       * @param {Object} math     Math.js namespace with functions and constants.
-       * @param {Object} argNames An object with argument names as key and `true`
+       * @param math - Math.js namespace with functions and constants.
+       * @param argNames - An object with argument names as key and `true`
        *                          as value. Used in the SymbolNode to optimize
        *                          for arguments from user assigned functions
        *                          (see FunctionAssignmentNode) or special symbols
        *                          like `end` (see IndexNode).
-       * @return {function} Returns a function which can be called like:
+       * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       // @ts-expect-error - method overrides property from Node base class
@@ -161,7 +161,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Execute a callback for each of the child nodes of this node
-       * @param {function(child: Node, path: string, parent: Node)} callback
+       * @param callback
        */
       forEach(callback: (child: Node, path: string, parent: IndexNode) => void): void {
         for (let i = 0; i < this.dimensions.length; i++) {
@@ -172,8 +172,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
       /**
        * Create a new IndexNode whose children are the results of calling
        * the provided callback function for each child of the original node.
-       * @param {function(child: Node, path: string, parent: Node): Node} callback
-       * @returns {IndexNode} Returns a transformed copy of the node
+       * @param callback
+       * @returns Returns a transformed copy of the node
        */
       map(callback: (child: Node, path: string, parent: IndexNode) => Node): IndexNode {
         const dimensions: Node[] = [];
@@ -186,7 +186,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of this node, a shallow copy
-       * @return {IndexNode}
        */
       clone(): IndexNode {
         return new IndexNode(this.dimensions.slice(0), this.dotNotation);
@@ -194,7 +193,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Test whether this IndexNode contains a single property name
-       * @return {boolean}
        */
       isObjectProperty(): boolean {
         return (
@@ -207,7 +205,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
       /**
        * Returns the property name if IndexNode contains a property.
        * If not, returns null.
-       * @return {string | null}
        */
       getObjectProperty(): string | null {
         // isObjectProperty() guarantees dimensions[0].value is a string
@@ -216,8 +213,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Get string representation
-       * @param {Object} options
-       * @return {string} str
+       * @param _options
+       * @returns str
        */
       _toString(_options?: StringOptions): string {
         // format the parameters like "[1, 0:5]"
@@ -228,7 +225,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Get a JSON representation of the node
-       * @returns {Object}
        */
       toJSON(): Record<string, unknown> {
         return {
@@ -240,11 +236,10 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Instantiate an IndexNode from its JSON representation
-       * @param {Object} json
+       * @param json
        *     An object structured like
        *     `{"mathjs": "IndexNode", dimensions: [...], dotNotation: false}`,
        *     where mathjs is optional
-       * @returns {IndexNode}
        */
       static fromJSON(json: { dimensions: Node[]; dotNotation: boolean }): IndexNode {
         return new IndexNode(json.dimensions, json.dotNotation);
@@ -252,8 +247,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Get HTML representation
-       * @param {Object} options
-       * @return {string} str
+       * @param _options
+       * @returns str
        */
       _toHTML(_options?: StringOptions): string {
         // format the parameters like "[1, 0:5]"
@@ -279,8 +274,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
 
       /**
        * Get LaTeX representation
-       * @param {Object} options
-       * @return {string} str
+       * @param options
+       * @returns str
        */
       _toTex(options?: StringOptions): string {
         const dimensions = this.dimensions.map(function (range: Node): string {
