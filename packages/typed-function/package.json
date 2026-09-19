@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
-    "typed-function": "github:danielsimonjr/typed-function"
+    "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
