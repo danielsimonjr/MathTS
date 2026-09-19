@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
+
+- #291 converted the typed `@param {T}` tags in `core` to TSDoc but left 95 typed `@returns {T}` /
+  `@return {T}` / `@throws {T}` tags. code-docs 0.3.6 now reads a typed return tag as JSDoc, so
+  `array.ts`, `is.ts`, `object.ts`, `types/unit/Unit.ts`, `types/matrix/Range.ts` and
+  `bignumber-formatter.ts` were flagged M5 (mixed dialect) and `code_docs check core/src` went red on
+  main. The `{type}` is removed; the TypeScript signature already carries it. `@throws` keeps the
+  error name as text (`@throws {Error} x` -> `@throws Error x`). Doc comments only: every changed line
+  is a comment line. Gate: `PASS -- 253/253`.
+
 ### fix(core): map.d.ts iterator types match TS >= 5.6 Map; consumer typecheck in CI
 
 - `core/src/map.ts`: `ObjectWrappingMap` and `PartitionedMap` declare `keys()`, `values()` and
