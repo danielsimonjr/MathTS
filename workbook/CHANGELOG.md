@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workbook
 
+## 0.4.3
+
+### Patch Changes
+
+- af77618: Security: the HTML, TeX and notebook exporters now make chart markup from the chart settings and data of each cell. A chart cell no longer carries markup, so an export writes no markup that the caller supplies.
+
 ## 0.4.2
 
 ### Patch Changes
