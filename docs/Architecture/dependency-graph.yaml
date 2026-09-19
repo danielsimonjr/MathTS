@@ -3565,6 +3565,10 @@ modules:
           directory: core
           imports:
             - mathTyped
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - TypedFunction
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
@@ -3674,6 +3678,10 @@ modules:
           directory: core
           imports:
             - mathTyped
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - TypedFunction
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -35430,6 +35438,10 @@ modules:
             - LOG10E
             - SQRT2
             - SQRT1_2
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - TypedFunction
         - package: '@danielsimonjr/mathts-functions'
           directory: functions
           imports:
