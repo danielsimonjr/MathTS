@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   but not enabled). It fails on origin/main (the six TS2416) and passes with this fix. Pre-existing
   TS7016 in `matrix` and `compat` (their `.d.ts` import the undeclared `typed-function`) are listed
   as known errors in the script.
-- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 335611.
+- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 335905 and `totalTypeScriptFiles` is 1915.
 
 ### docs(core): doc comments for every exported symbol
 
