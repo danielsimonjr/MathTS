@@ -242,7 +242,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: bunx playwright install chromium --with-deps
+        run: bunx --bun playwright install chromium --with-deps
 
       # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
       # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
