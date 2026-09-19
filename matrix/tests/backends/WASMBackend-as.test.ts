@@ -51,30 +51,30 @@ describe('WASMBackend — live AS kernels', () => {
     if (asAvailable) await wasm.initialize();
   });
 
-  it.runIf(asAvailable)('loads the AS module and reports features', () => {
+  it.skipIf(!asAvailable)('loads the AS module and reports features', () => {
     expect(wasm.getFeatures()).not.toBeNull();
     expect(wasm.getConfig().minElements).toBe(0);
   });
 
-  it.runIf(asAvailable)('add matches the JS backend', () => {
+  it.skipIf(!asAvailable)('add matches the JS backend', () => {
     const a = rand(8, 8);
     const b = rand(8, 8);
     expectClose(wasm.add(a, b), jsBackend.add(a, b));
   });
 
-  it.runIf(asAvailable)('subtract matches the JS backend', () => {
+  it.skipIf(!asAvailable)('subtract matches the JS backend', () => {
     const a = rand(8, 8);
     const b = rand(8, 8);
     expectClose(wasm.subtract(a, b), jsBackend.subtract(a, b));
   });
 
-  it.runIf(asAvailable)('multiplyElementwise matches the JS backend', () => {
+  it.skipIf(!asAvailable)('multiplyElementwise matches the JS backend', () => {
     const a = rand(6, 6);
     const b = rand(6, 6);
     expectClose(wasm.multiplyElementwise(a, b), jsBackend.multiplyElementwise(a, b));
   });
 
-  it.runIf(asAvailable)('divideElementwise matches the JS backend', () => {
+  it.skipIf(!asAvailable)('divideElementwise matches the JS backend', () => {
     const a = rand(6, 6);
     const b = new DenseMatrix(
       6,
@@ -84,33 +84,33 @@ describe('WASMBackend — live AS kernels', () => {
     expectClose(wasm.divideElementwise(a, b), jsBackend.divideElementwise(a, b));
   });
 
-  it.runIf(asAvailable)('scale matches the JS backend', () => {
+  it.skipIf(!asAvailable)('scale matches the JS backend', () => {
     const a = rand(8, 8);
     expectClose(wasm.scale(a, 2.5), jsBackend.scale(a, 2.5));
   });
 
-  it.runIf(asAvailable)('abs matches the JS backend', () => {
+  it.skipIf(!asAvailable)('abs matches the JS backend', () => {
     const a = rand(8, 8);
     expectClose(wasm.abs(a), jsBackend.abs(a));
   });
 
-  it.runIf(asAvailable)('negate matches the JS backend', () => {
+  it.skipIf(!asAvailable)('negate matches the JS backend', () => {
     const a = rand(8, 8);
     expectClose(wasm.negate(a), jsBackend.negate(a));
   });
 
-  it.runIf(asAvailable)('multiply matches the JS backend', () => {
+  it.skipIf(!asAvailable)('multiply matches the JS backend', () => {
     const a = rand(6, 5);
     const b = rand(5, 7);
     expectClose(wasm.multiply(a, b), jsBackend.multiply(a, b));
   });
 
-  it.runIf(asAvailable)('transpose matches the JS backend', () => {
+  it.skipIf(!asAvailable)('transpose matches the JS backend', () => {
     const a = rand(4, 7);
     expectClose(wasm.transpose(a), jsBackend.transpose(a));
   });
 
-  it.runIf(asAvailable)('sum / norm / dot match the JS backend', () => {
+  it.skipIf(!asAvailable)('sum / norm / dot match the JS backend', () => {
     const a = rand(8, 8);
     expect(wasm.sum(a)).toBeCloseTo(jsBackend.sum(a) as number, 6);
     expect(wasm.norm(a)).toBeCloseTo(jsBackend.norm(a), 6);
@@ -119,13 +119,13 @@ describe('WASMBackend — live AS kernels', () => {
     expect(wasm.dot(v1, v2)).toBeCloseTo(jsBackend.dot(v1, v2) as number, 6);
   });
 
-  it.runIf(asAvailable)('sumAxis delegates to the JS backend', () => {
+  it.skipIf(!asAvailable)('sumAxis delegates to the JS backend', () => {
     const a = rand(5, 6);
     expectClose(wasm.sumAxis(a, 0), jsBackend.sumAxis(a, 0));
     expectClose(wasm.sumAxis(a, 1), jsBackend.sumAxis(a, 1));
   });
 
-  it.runIf(asAvailable)('reuses pooled allocations across repeated ops (no OOM)', () => {
+  it.skipIf(!asAvailable)('reuses pooled allocations across repeated ops (no OOM)', () => {
     // Repeated same-size ops drive the AsAllocCache acquire/release reuse path.
     const a = rand(8, 8);
     const b = rand(8, 8);
@@ -142,7 +142,7 @@ describe('WASMBackend — live AS decompositions', () => {
     if (asAvailable) await wasm.initialize();
   });
 
-  it.runIf(asAvailable)('LU decomposition reconstructs P·A via L·U', async () => {
+  it.skipIf(!asAvailable)('LU decomposition reconstructs P·A via L·U', async () => {
     const A = new DenseMatrix(3, 3, [
       [4, 3, 2],
       [2, 1, 3],
@@ -172,7 +172,7 @@ describe('WASMBackend — live AS decompositions', () => {
       }
   });
 
-  it.runIf(asAvailable)('LU flags a singular matrix', async () => {
+  it.skipIf(!asAvailable)('LU flags a singular matrix', async () => {
     const A = new DenseMatrix(2, 2, [
       [1, 2],
       [2, 4],
@@ -181,7 +181,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expect(singular).toBe(true);
   });
 
-  it.runIf(asAvailable)('QR decomposition reconstructs A via Qᵀ·R (tall, m >= n)', async () => {
+  it.skipIf(!asAvailable)('QR decomposition reconstructs A via Qᵀ·R (tall, m >= n)', async () => {
     // The backend documents `q` as Qᵀ (transforms accumulate as Qᵀ), so the
     // reconstruction identity is A = Qᵀ·R for both the WASM and JS paths.
     const A = new DenseMatrix(4, 3, [
@@ -194,7 +194,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expectClose(q.transpose().multiply(r), A, 5);
   });
 
-  it.runIf(asAvailable)('QR falls back to JS for a wide matrix (m < n)', async () => {
+  it.skipIf(!asAvailable)('QR falls back to JS for a wide matrix (m < n)', async () => {
     // The JS Householder fallback returns Q = Hₖ…H₁ and R = Hₖ…H₁·A, so the
     // reconstruction identity is A = Qᵀ·R (Q is orthogonal ⇒ Q⁻¹ = Qᵀ).
     const A = new DenseMatrix(2, 4, [
@@ -205,7 +205,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expectClose(q.transpose().multiply(r), A, 5);
   });
 
-  it.runIf(asAvailable)('inverse satisfies A·A⁻¹ = I', async () => {
+  it.skipIf(!asAvailable)('inverse satisfies A·A⁻¹ = I', async () => {
     const A = new DenseMatrix(3, 3, [
       [2, 0, 1],
       [1, 3, 2],
@@ -218,7 +218,7 @@ describe('WASMBackend — live AS decompositions', () => {
       for (let j = 0; j < 3; j++) expect(I.get(i, j)).toBeCloseTo(i === j ? 1 : 0, 6);
   });
 
-  it.runIf(asAvailable)('inverse flags a singular matrix', async () => {
+  it.skipIf(!asAvailable)('inverse flags a singular matrix', async () => {
     const A = new DenseMatrix(2, 2, [
       [1, 1],
       [1, 1],
@@ -227,7 +227,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expect(singular).toBe(true);
   });
 
-  it.runIf(asAvailable)('determinant matches the cofactor value', async () => {
+  it.skipIf(!asAvailable)('determinant matches the cofactor value', async () => {
     const A = new DenseMatrix(3, 3, [
       [6, 1, 1],
       [4, -2, 5],
@@ -237,7 +237,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expect(det).toBeCloseTo(-306, 4);
   });
 
-  it.runIf(asAvailable)('Cholesky reconstructs an SPD matrix as L·Lᵀ', async () => {
+  it.skipIf(!asAvailable)('Cholesky reconstructs an SPD matrix as L·Lᵀ', async () => {
     const A = new DenseMatrix(3, 3, [
       [4, 2, -2],
       [2, 10, 2],
@@ -249,7 +249,7 @@ describe('WASMBackend — live AS decompositions', () => {
     expectClose(LLt, A, 5);
   });
 
-  it.runIf(asAvailable)('Cholesky flags a non-positive-definite matrix', async () => {
+  it.skipIf(!asAvailable)('Cholesky flags a non-positive-definite matrix', async () => {
     const A = new DenseMatrix(2, 2, [
       [1, 2],
       [2, 1],

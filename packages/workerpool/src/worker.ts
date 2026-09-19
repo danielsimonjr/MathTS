@@ -7,8 +7,9 @@
  * @packageDocumentation
  */
 
-import { worker } from 'workerpool';
 import { fftFrameInPlace } from './fft-core.js';
+import { worker } from 'workerpool';
+import { registerWorkerMethods } from './bun-worker-bridge.js';
 
 // =============================================================================
 // Array Reduction Operations
@@ -291,12 +292,7 @@ function applyKernel2Chunk(
  * `parallel/src/ops/bitwise.ts` in-process driver.
  */
 type BitwiseBinaryOpCode =
-  | 'bitAnd'
-  | 'bitOr'
-  | 'bitXor'
-  | 'leftShift'
-  | 'rightArithShift'
-  | 'rightLogShift';
+  'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift';
 
 /**
  * Element-wise bitwise binary op on two `Int32Array`-backed chunks.
@@ -1121,4 +1117,5 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   integrateChunk,
 };
 
-worker(workerMethods);
+// Registered through the Bun-aware wrapper (see bun-worker-bridge.ts).
+registerWorkerMethods(worker, workerMethods);

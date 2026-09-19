@@ -165,7 +165,9 @@ describe('WASMBackend Fallback', () => {
 
     // Initialize should not throw even if WASM file not found
     // (it should warn and fall back to JS)
-    await expect(backend.initialize()).resolves.not.toThrow();
+    // initialize() is Promise<void>: assert it resolves. (`.resolves.not.toThrow()`
+    // fails under Bun, which treats the resolved `undefined` as a thrown value.)
+    await expect(backend.initialize()).resolves.toBeUndefined();
   });
 });
 

@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1855,
+  "totalFiles": 1857,
   "byDisposition": {
     "reachable": 24,
-    "build-entry": 1150,
+    "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 622,
+    "test": 623,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1174,
-    "tests": 622,
+    "src": 1175,
+    "tests": 623,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -31,10 +31,10 @@
     "@danielsimonjr/mathts-functions": 771,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 98,
+    "@danielsimonjr/mathts-matrix": 99,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
-    "@danielsimonjr/mathts-workerpool": 9,
+    "@danielsimonjr/mathts-workerpool": 10,
     "@danielsimonjr/mathts-parallel": 38,
     "@danielsimonjr/mathts-parser": 3,
     "@danielsimonjr/mathts-plot": 44,
@@ -8409,7 +8409,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 122
     },
     {
       "file": "functions/tests/cov-numeric.test.ts",
@@ -10173,7 +10173,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 137
+      "loc": 139
     },
     {
       "file": "functions/tests/typed-interpolation-wasm.test.ts",
@@ -10852,7 +10852,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 138
+      "loc": 139
     },
     {
       "file": "matrix/tests/config.test.ts",
@@ -10944,6 +10944,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 422
+    },
+    {
+      "file": "matrix/tests/helpers/stub-global.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
     },
     {
       "file": "matrix/tests/JSBackend.test.ts",
@@ -11048,7 +11055,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 167
+      "loc": 172
     },
     {
       "file": "matrix/tests/public-api-smoke.test.ts",
@@ -11062,7 +11069,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 167
+      "loc": 168
     },
     {
       "file": "matrix/tests/sparse/operations.test.ts",
@@ -11146,7 +11153,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 190
+      "loc": 192
     },
     {
       "file": "matrix/tests/wasm/operations.test.ts",
@@ -11219,6 +11226,13 @@
       "loc": 22
     },
     {
+      "file": "packages/workerpool/src/bun-worker-bridge.ts",
+      "package": "@danielsimonjr/mathts-workerpool",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 58
+    },
+    {
       "file": "packages/workerpool/src/fft-core.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
@@ -11237,7 +11251,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1125
+      "loc": 1127
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
@@ -11524,7 +11538,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 242
+      "loc": 248
     },
     {
       "file": "parallel/tests/WorkerPool.timeout.test.ts",

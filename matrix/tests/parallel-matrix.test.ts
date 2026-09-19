@@ -5,12 +5,6 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DenseMatrix } from '../src/types/DenseMatrix.js';
-import {
-  parallelMatrixAbs,
-  parallelMatrixAdd,
-  initializeParallelMatrix,
-  terminateParallelMatrix,
-} from '../src/parallel-matrix.js';
 
 // Mock the parallel worker pool to avoid spinning up real workers
 vi.mock('@danielsimonjr/mathts-parallel', () => {
@@ -36,6 +30,13 @@ vi.mock('@danielsimonjr/mathts-parallel', () => {
     },
   };
 });
+
+// Import the module under test AFTER the mock is registered. vitest hoists
+// vi.mock above static imports; Bun's test runner does not, and
+// src/parallel-matrix.ts copies the imported computePool into a local const at
+// load time, so a static import here would bind the REAL pool.
+const { parallelMatrixAbs, parallelMatrixAdd, initializeParallelMatrix, terminateParallelMatrix } =
+  await import('../src/parallel-matrix.js');
 
 describe('parallel-matrix operations', () => {
   beforeEach(async () => {

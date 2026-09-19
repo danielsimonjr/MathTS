@@ -49,22 +49,22 @@ class FakeWorker {
 
 // Intercept `import('worker_threads')` dynamically to return our FakeWorker
 vi.mock('worker_threads', () => {
-    return { Worker: FakeWorker };
+  return { Worker: FakeWorker };
 });
 
 class TestPool extends WorkerPool {
-    // We get the workers for testing via exposing the private `workers` array.
-    public getWorkers(): FakeWorker[] {
-        return (this as unknown as { workers: FakeWorker[] }).workers;
-    }
+  // We get the workers for testing via exposing the private `workers` array.
+  public getWorkers(): FakeWorker[] {
+    return (this as unknown as { workers: FakeWorker[] }).workers;
+  }
 }
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 50));
 
 interface MockMessage {
-    id: string;
-    type: string;
-    data?: unknown;
+  id: string;
+  type: string;
+  data?: unknown;
 }
 
 describe('WorkerPool', () => {
@@ -107,19 +107,19 @@ describe('WorkerPool', () => {
     expect(msg.data).toEqual({ foo: 'bar' });
 
     if (worker.listeners['message']) {
-        for(const fn of worker.listeners['message']) {
-            fn({
-                id: msg.id,
-                type: 'result',
-                data: 'baz',
-            });
-        }
-    } else {
-        worker.simulateMessage({
-            id: msg.id,
-            type: 'result',
-            data: 'baz',
+      for (const fn of worker.listeners['message']) {
+        fn({
+          id: msg.id,
+          type: 'result',
+          data: 'baz',
         });
+      }
+    } else {
+      worker.simulateMessage({
+        id: msg.id,
+        type: 'result',
+        data: 'baz',
+      });
     }
 
     const result = await execPromise;
@@ -139,19 +139,19 @@ describe('WorkerPool', () => {
     const msg = worker.lastMessage as MockMessage;
 
     if (worker.listeners['message']) {
-        for(const fn of worker.listeners['message']) {
-            fn({
-                id: msg.id,
-                type: 'error',
-                error: 'Simulated task error',
-            });
-        }
-    } else {
-        worker.simulateMessage({
-            id: msg.id,
-            type: 'error',
-            error: 'Simulated task error',
+      for (const fn of worker.listeners['message']) {
+        fn({
+          id: msg.id,
+          type: 'error',
+          error: 'Simulated task error',
         });
+      }
+    } else {
+      worker.simulateMessage({
+        id: msg.id,
+        type: 'error',
+        error: 'Simulated task error',
+      });
     }
 
     await expect(execPromise).rejects.toThrow('Simulated task error');
@@ -185,9 +185,11 @@ describe('WorkerPool', () => {
 
     // Complete the first task
     if (worker.listeners['message']) {
-        for(const fn of worker.listeners['message']) { fn({ id: firstMsg.id, type: 'result', data: 'res1' }); }
+      for (const fn of worker.listeners['message']) {
+        fn({ id: firstMsg.id, type: 'result', data: 'res1' });
+      }
     } else {
-        worker.simulateMessage({ id: firstMsg.id, type: 'result', data: 'res1' });
+      worker.simulateMessage({ id: firstMsg.id, type: 'result', data: 'res1' });
     }
 
     await p1;
@@ -201,9 +203,11 @@ describe('WorkerPool', () => {
 
     // Complete the second task
     if (worker.listeners['message']) {
-        for(const fn of worker.listeners['message']) { fn({ id: secondMsg.id, type: 'result', data: 'res2' }); }
+      for (const fn of worker.listeners['message']) {
+        fn({ id: secondMsg.id, type: 'result', data: 'res2' });
+      }
     } else {
-        worker.simulateMessage({ id: secondMsg.id, type: 'result', data: 'res2' });
+      worker.simulateMessage({ id: secondMsg.id, type: 'result', data: 'res2' });
     }
 
     await p2;
@@ -223,6 +227,12 @@ describe('WorkerPool', () => {
     expect(pool.workerCount).toBe(2);
 
     const workers = pool.getWorkers().slice();
+
+    // Mark the task promises handled BEFORE terminate() rejects them. Bun
+    // reports a rejection with no handler at that moment as an unhandled error;
+    // Node (vitest) tolerates a handler attached later in the same microtask
+    // chain. The assertions below still check each rejection.
+    for (const p of [p1, p2, p3]) p.catch(() => {});
 
     await pool.terminate();
 

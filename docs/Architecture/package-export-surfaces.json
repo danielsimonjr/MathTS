@@ -3932,6 +3932,7 @@
       "MathWorkerPool",
       "pool",
       "Pool",
+      "registerWorkerMethods",
       "terminatePool",
       "Transfer",
       "transferArrayBuffer",

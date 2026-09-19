@@ -57,7 +57,9 @@ describe('Slice 5.10 — sub-interval fan-out (gaussQuad / romberg)', () => {
 
   // 4. Closure referencing outer-scope variable is rejected
   it('gaussQuad: rejects closure that captures an outer-scope variable', async () => {
-    const scale = 2; // outer-scope variable — not available in worker
+    // Not a literal initializer: Bun's runtime transpiler inlines a `const`
+    // literal into the closure, so its source text would no longer name `scale`.
+    const scale = Number('2'); // outer-scope variable — not available in worker
     const f = (x: number) => scale * Math.sin(x); // captures `scale`
 
     // The rejection happens when workerCount > 1 and pool is ready.

@@ -22,7 +22,7 @@
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json && node scripts/copy-wasm.mjs",
     "copy:wasm": "node scripts/copy-wasm.mjs",
     "dev": "tsup src/index.ts --format esm --dts --watch",
-    "test": "vitest run",
+    "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",

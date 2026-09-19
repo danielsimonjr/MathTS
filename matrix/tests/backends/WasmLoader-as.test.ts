@@ -39,18 +39,18 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     loader.reset();
   });
 
-  it.runIf(asAvailable)('loads the AssemblyScript artifact', () => {
+  it.skipIf(!asAvailable)('loads the AssemblyScript artifact', () => {
     expect(loader.isLoaded()).toBe(true);
   });
 
-  it.runIf(asAvailable)('records loading metrics on a real load', () => {
+  it.skipIf(!asAvailable)('records loading metrics on a real load', () => {
     const m = loader.getLoadingMetrics();
     expect(m).not.toBeNull();
     expect(m!.totalMs).toBeGreaterThanOrEqual(0);
     expect(m!.fromCache).toBe(false);
   });
 
-  it.runIf(asAvailable)('allocateFloat64Array copies data into WASM memory', () => {
+  it.skipIf(!asAvailable)('allocateFloat64Array copies data into WASM memory', () => {
     const data = [1.5, 2.5, 3.5, 4.5];
     const alloc = loader.allocateFloat64Array(data);
     expect(alloc.length).toBe(4);
@@ -60,14 +60,14 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     loader.free(alloc.ptr);
   });
 
-  it.runIf(asAvailable)('allocateFloat64ArrayEmpty returns a zeroed buffer', () => {
+  it.skipIf(!asAvailable)('allocateFloat64ArrayEmpty returns a zeroed buffer', () => {
     const alloc = loader.allocateFloat64ArrayEmpty(8);
     expect(alloc.length).toBe(8);
     expect(Array.from(alloc.array).every((x) => x === 0)).toBe(true);
     loader.free(alloc.ptr);
   });
 
-  it.runIf(asAvailable)('allocateInt32Array / Empty work on the AS path', () => {
+  it.skipIf(!asAvailable)('allocateInt32Array / Empty work on the AS path', () => {
     const a = loader.allocateInt32Array([10, 20, 30]);
     expect(Array.from(a.array)).toEqual([10, 20, 30]);
     const b = loader.allocateInt32ArrayEmpty(5);
@@ -76,7 +76,7 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     loader.free(b.ptr);
   });
 
-  it.runIf(asAvailable)('release() returns an allocation for reuse without throwing', () => {
+  it.skipIf(!asAvailable)('release() returns an allocation for reuse without throwing', () => {
     // The AS managed runtime (`--runtime stub`) does not truly free; release()
     // unpins the header via free() when the ptr is not a tracked pool entry.
     const first = loader.allocateFloat64Array([1, 2, 3, 4]);
@@ -87,12 +87,12 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     loader.free(second.ptr);
   });
 
-  it.runIf(asAvailable)('release() on the int32 pool path does not throw', () => {
+  it.skipIf(!asAvailable)('release() on the int32 pool path does not throw', () => {
     const a = loader.allocateInt32Array([7, 8, 9]);
     expect(() => loader.release(a.ptr, false)).not.toThrow();
   });
 
-  it.runIf(asAvailable)('getPoolStats returns a well-formed structure after allocations', () => {
+  it.skipIf(!asAvailable)('getPoolStats returns a well-formed structure after allocations', () => {
     loader.clearPool();
     const a = loader.allocateFloat64Array([1, 2]);
     const stats = loader.getPoolStats();
@@ -101,7 +101,7 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     loader.free(a.ptr);
   });
 
-  it.runIf(asAvailable)('clearPool empties the pools without throwing', () => {
+  it.skipIf(!asAvailable)('clearPool empties the pools without throwing', () => {
     loader.allocateFloat64Array([1, 2, 3]);
     loader.allocateInt32Array([4, 5]);
     expect(() => loader.clearPool()).not.toThrow();
@@ -110,7 +110,7 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
     expect(stats.int32.total).toBe(0);
   });
 
-  it.runIf(asAvailable)('collect() runs the AS GC without throwing', () => {
+  it.skipIf(!asAvailable)('collect() runs the AS GC without throwing', () => {
     expect(() => loader.collect()).not.toThrow();
   });
 });
@@ -151,17 +151,20 @@ describe('WasmLoader — load() short-circuits', () => {
 });
 
 describe('WasmLoader — precompile + cached instantiation', () => {
-  it.runIf(asAvailable)('precompile() then load() instantiates from the cached module', async () => {
-    const loader = WasmLoader.getInstance();
-    loader.reset();
-    await loader.precompile(asWasmPath);
-    expect(loader.isPrecompiled()).toBe(true);
-    expect(loader.getCompiledModule()).not.toBeNull();
+  it.skipIf(!asAvailable)(
+    'precompile() then load() instantiates from the cached module',
+    async () => {
+      const loader = WasmLoader.getInstance();
+      loader.reset();
+      await loader.precompile(asWasmPath);
+      expect(loader.isPrecompiled()).toBe(true);
+      expect(loader.getCompiledModule()).not.toBeNull();
 
-    const mod = await loader.load(asWasmPath);
-    expect(mod.memory).toBeInstanceOf(WebAssembly.Memory);
-    const metrics = loader.getLoadingMetrics();
-    expect(metrics?.fromCache).toBe(true);
-    loader.reset();
-  });
+      const mod = await loader.load(asWasmPath);
+      expect(mod.memory).toBeInstanceOf(WebAssembly.Memory);
+      const metrics = loader.getLoadingMetrics();
+      expect(metrics?.fromCache).toBe(true);
+      loader.reset();
+    }
+  );
 });

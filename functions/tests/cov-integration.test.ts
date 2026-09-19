@@ -88,9 +88,13 @@ describe('integration — worker-dispatch paths (pool initialised)', () => {
   });
 
   it('gaussQuad fan-out rejects an outer-scope-capturing integrand', async () => {
-    const scale = 3;
-    await expect(async () =>
-      gaussQuad((x) => x * scale, 0, 1, 64, 5, { workerCount: 4 })
+    // Not a literal initializer: Bun's runtime transpiler inlines a `const`
+    // literal into the closure, so its source text would no longer name `scale`.
+    const scale = Number('3');
+    // Invoke the async wrapper: Bun's `.rejects` needs a promise (vitest also
+    // accepts a function and calls it).
+    await expect(
+      (async () => gaussQuad((x) => x * scale, 0, 1, 64, 5, { workerCount: 4 }))()
     ).rejects.toThrow(/outer-scope identifier/);
   });
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import { stubGlobal, unstubAllGlobals } from '../helpers/stub-global.js';
 import { tmpdir } from 'os';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
@@ -125,7 +126,7 @@ describe('matrix wasm integrity (SHA-384 manifest)', () => {
  */
 describe('matrix wasm integrity — browser code paths (process spoofed)', () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
+    unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -133,7 +134,7 @@ describe('matrix wasm integrity — browser code paths (process spoofed)', () =>
     const bytes = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
     const nodeDigest = await sha384OfBuffer(bytes);
     // Force the browser arm: process.versions.node must be undefined.
-    vi.stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
+    stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
     const browserDigest = await sha384OfBuffer(bytes);
     expect(browserDigest).toBe(nodeDigest);
     expect(browserDigest).toMatch(/^sha384-/);
@@ -141,8 +142,8 @@ describe('matrix wasm integrity — browser code paths (process spoofed)', () =>
 
   it('loadWasmManifest browser path fetches and parses the manifest JSON', async () => {
     const manifest = { 'x.wasm': 'sha384-abc' };
-    vi.stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
-    vi.stubGlobal(
+    stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
+    stubGlobal(
       'fetch',
       vi.fn(async () => ({ ok: true, json: async () => manifest }) as unknown as Response)
     );
@@ -151,15 +152,18 @@ describe('matrix wasm integrity — browser code paths (process spoofed)', () =>
   });
 
   it('loadWasmManifest browser path returns null on a non-ok fetch', async () => {
-    vi.stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false }) as unknown as Response));
+    stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
+    stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false }) as unknown as Response)
+    );
     const m = await loadWasmManifest('/missing/path/y.wasm');
     expect(m).toBeNull();
   });
 
   it('loadWasmManifest browser path returns null when fetch throws', async () => {
-    vi.stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    stubGlobal('process', { ...process, versions: { ...process.versions, node: undefined } });
+    stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
     const m = await loadWasmManifest('/missing/path/z.wasm');
     expect(m).toBeNull();
   });
