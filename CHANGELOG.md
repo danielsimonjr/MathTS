@@ -24,7 +24,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `_toMathML` comments in 7 node files said "Get LaTeX representation". They now say MathML.
 - Formatter-only reflows (pre-commit prettier, no logic change): `RuntimeIndex` in `node/AssignmentNode.ts`, the `parenthesizeLower` call in `node/OperatorNode.ts`, and the `index` parameter type in `node/utils/assign.ts`.
 - After the merge of `main`: 4 `@throws {Error}` tags (3 in `node/Node.ts`, 1 in `operators.ts`) are now `@throws Error`. code-docs 0.3.6 counts a typed `@throws` as JSDoc, so these files had mixed dialects (M5).
-- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336592 (the new comment lines on top of main, after the pre-commit formatter).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336930 (the new comment lines on top of main, after the pre-commit formatter).
+### fix(core): map.d.ts iterator types match TS >= 5.6 Map; consumer typecheck in CI
+
+- `core/src/map.ts`: `ObjectWrappingMap` and `PartitionedMap` declare `keys()`, `values()` and
+  `entries()` with types derived from `Map` (`ReturnType<Map<K, V>['keys']>` etc.), not
+  `IterableIterator`. Core 0.15.0 was the first release to ship `dist/map.d.ts`, and a consumer with
+  `skipLibCheck: false` and TypeScript >= 5.6 got six TS2416 errors in it. The same six errors were
+  already in 0.14.3 through the `./internal` entry (inlined in `internal.d.ts`).
+- `core/src/map.ts`: both classes add `getOrInsert` and `getOrInsertComputed` (ESNext `Map` upsert).
+  With the TS2416 errors gone, a consumer with `lib: ["ESNext"]` gets TS2420 for these two members.
+  The six unused `@ts-expect-error` directives are removed. New `core/tests/map.test.ts`.
+- New `tools/test/consumer-typecheck.mjs`, run in the CI `Test (22.x)` leg: it packs the 24 public
+  packages, installs the tarballs into a new consumer project and runs `tsc` with `strict`,
+  `skipLibCheck: false` and `moduleResolution: Bundler` (`--module-resolution=NodeNext` is available
+  but not enabled). It fails on origin/main (the six TS2416) and passes with this fix. Pre-existing
+  TS7016 in `matrix` and `compat` (their `.d.ts` import the undeclared `typed-function`) are listed
+  as known errors in the script. The CI step uses npm 11: npm 10 (bundled with Node 20 and 22)
+  cannot install `@danielsimonjr/mathts-core` at all, because it crashes while it prepares the
+  `github:` `typed-function` dependency. The published 0.14.3 and 0.15.0 have the same problem.
+- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 336690 and `totalTypeScriptFiles` is 1915 (after the merge of main).
+
 ### docs(functions): doc comments for every exported symbol
 
 - `functions/src`: TSDoc comments for 264 undocumented exported symbols. The largest groups are

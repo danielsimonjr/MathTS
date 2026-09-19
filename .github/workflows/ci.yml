@@ -146,6 +146,18 @@ jobs:
       - name: Smoke test dist on Node ${{ matrix.node-version }}
         run: node tools/test/smoke-dist-node.mjs
 
+      # Pack every published package, install the tarballs into a fresh consumer project and
+      # type-check every public entry point with skipLibCheck: false. The repo's own typecheck
+      # reads source, so it cannot see errors in the emitted .d.ts (core 0.15.0 shipped six
+      # TS2416 in dist/map.d.ts). Plain `node`: a `bun run` script would run it on Bun.
+      # npm 10 (bundled with Node 20/22) crashes while it prepares the github: typed-function
+      # dependency ("Cannot read properties of null (reading 'edgesOut')"), so this step uses npm 11.
+      - name: Consumer type check of packed packages
+        if: matrix.node-version == '22.x'
+        run: |
+          npm install -g npm@11
+          node tools/test/consumer-typecheck.mjs --skip-build
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest

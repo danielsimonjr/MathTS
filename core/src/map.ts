@@ -49,6 +49,15 @@ import { isMap, isObject } from './is.js';
  */
 type MapEntryIterator<K, V> = ReturnType<Map<K, V>[typeof Symbol.iterator]>;
 
+/** The iterator type `Map.prototype.keys` declares, derived like `MapEntryIterator`. */
+type MapKeyIterator<K, V> = ReturnType<Map<K, V>['keys']>;
+
+/** The iterator type `Map.prototype.values` declares, derived like `MapEntryIterator`. */
+type MapValueIterator<K, V> = ReturnType<Map<K, V>['values']>;
+
+/** The iterator type `Map.prototype.entries` declares, derived like `MapEntryIterator`. */
+type MapEntriesIterator<K, V> = ReturnType<Map<K, V>['entries']>;
+
 /**
  * A Map view of a plain object.
  *
@@ -74,11 +83,10 @@ export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
     return this.entries() as MapEntryIterator<K, V>;
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  keys(): IterableIterator<K> {
+  keys(): MapKeyIterator<K, V> {
     return Object.keys(this.wrappedObject)
       .filter((key) => this.has(key as K))
-      .values() as IterableIterator<K>;
+      .values() as MapKeyIterator<K, V>;
   }
 
   get(key: K): V | undefined {
@@ -96,13 +104,29 @@ export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
     );
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  entries(): IterableIterator<[K, V]> {
-    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as IterableIterator<[K, V]>;
+  /**
+   * Return the value for `key`; when the key is absent, set it to `defaultValue` first.
+   * Declared because the ESNext `Map` (TC39 upsert) has it, and `implements Map` requires it.
+   */
+  getOrInsert(key: K, defaultValue: V): V {
+    if (!this.has(key)) this.set(key, defaultValue);
+    return this.get(key) as V;
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  *values(): IterableIterator<V> {
+  /**
+   * Return the value for `key`; when the key is absent, set it to `callback(key)` first.
+   * Declared because the ESNext `Map` (TC39 upsert) has it, and `implements Map` requires it.
+   */
+  getOrInsertComputed(key: K, callback: (key: K) => V): V {
+    if (!this.has(key)) this.set(key, callback(key));
+    return this.get(key) as V;
+  }
+
+  entries(): MapEntriesIterator<K, V> {
+    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as MapEntriesIterator<K, V>;
+  }
+
+  *values(): MapValueIterator<K, V> {
     for (const key of this.keys()) {
       yield this.get(key)!;
     }
@@ -188,21 +212,36 @@ export class PartitionedMap<K = unknown, V = unknown> implements Map<K, V> {
     return this.b.has(key) || this.a.has(key);
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  keys(): IterableIterator<K> {
+  /**
+   * Return the value for `key`; when the key is absent, set it to `defaultValue` first.
+   * Declared because the ESNext `Map` (TC39 upsert) has it, and `implements Map` requires it.
+   */
+  getOrInsert(key: K, defaultValue: V): V {
+    if (!this.has(key)) this.set(key, defaultValue);
+    return this.get(key) as V;
+  }
+
+  /**
+   * Return the value for `key`; when the key is absent, set it to `callback(key)` first.
+   * Declared because the ESNext `Map` (TC39 upsert) has it, and `implements Map` requires it.
+   */
+  getOrInsertComputed(key: K, callback: (key: K) => V): V {
+    if (!this.has(key)) this.set(key, callback(key));
+    return this.get(key) as V;
+  }
+
+  keys(): MapKeyIterator<K, V> {
     return new Set([...this.a.keys(), ...this.b.keys()])[Symbol.iterator]();
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  *values(): IterableIterator<V> {
+  *values(): MapValueIterator<K, V> {
     for (const key of this.keys()) {
       yield this.get(key)!;
     }
   }
 
-  // @ts-expect-error: Implementation is compatible but TS can't infer it
-  entries(): IterableIterator<[K, V]> {
-    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as IterableIterator<[K, V]>;
+  entries(): MapEntriesIterator<K, V> {
+    return mapIterator(this.keys(), (key) => [key, this.get(key)!]) as MapEntriesIterator<K, V>;
   }
 
   forEach(callback: (value: V, key: K, map: Map<K, V>) => void): void {
