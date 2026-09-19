@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the vitest copy hold different values (it runs under both runners).
 - No package is excluded from the Node run, and no test is skipped or weakened.
 - `docs/roadmap/BUN_MIGRATION.md` describes the two Node scripts.
+- `docs/Architecture` census tables updated for the 5 new files (`repo_map.py check` passes):
+  1913 TypeScript files, 7659 exports, 335224 lines.
 
 ### test(ci): runtime probe for the Node test matrix
 
