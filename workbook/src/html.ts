@@ -12,13 +12,23 @@
 
 import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
 import { markdownToHtml } from './markdown.js';
+import { renderChart, type ChartSpec } from './svg.js';
+
+/**
+ * The chart of a `chart` cell: the chart settings and the raw x and y data.
+ */
+export interface RenderChart {
+  spec: ChartSpec;
+  x: unknown;
+  y: unknown;
+}
 
 /**
  * One cell of a `RenderDoc`.
  *
- * SECURITY: `toHTML()` inserts `chartSvg` as is, and `toTeX()` inserts `chartTikz` as
- * is. Neither function escapes these two fields. The caller must supply trusted markup
- * in them.
+ * SECURITY: a cell does not carry chart markup. `toHTML()`, `toTeX()` and `toIpynb()`
+ * make the chart markup from `chart` with `renderChart()`. The plot package escapes
+ * the title and the axis labels.
  */
 export interface RenderCell {
   type: string; // markdown | equation | code | test | data | chart
@@ -29,10 +39,8 @@ export interface RenderCell {
   error?: string;
   /** For `test` cells: whether the assertion passed. */
   passed?: boolean;
-  /** For `chart` cells: pre-rendered inline SVG. */
-  chartSvg?: string;
-  /** For `chart` cells in a TeX export: pre-rendered embeddable TikZ. */
-  chartTikz?: string;
+  /** For `chart` cells: the chart settings and data. If omitted, the export shows "no chart". */
+  chart?: RenderChart;
   /** Optional diagnostic note (e.g. a chart whose data didn't resolve). */
   note?: string;
 }
@@ -122,7 +130,7 @@ function renderCell(cell: RenderCell, parse?: (expr: string) => unknown): string
     case 'chart': {
       // Note is a <p>, not a second <figcaption> (a <figure> permits only one).
       const note = cell.note ? `<p class="note">⚠ ${esc(cell.note)}</p>` : '';
-      return `<figure class="cell cell-chart">${cap}${cell.chartSvg ?? '<p class="note">no chart</p>'}${note}</figure>`;
+      return `<figure class="cell cell-chart">${cap}${cell.chart ? renderChart(cell.chart.spec, cell.chart.x, cell.chart.y, 'svg') : '<p class="note">no chart</p>'}${note}</figure>`;
     }
     default:
       return `<figure class="cell"><pre><code>${esc(cell.content)}</code></pre></figure>`;

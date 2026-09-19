@@ -32582,9 +32582,6 @@ modules:
         - file: ./timeout-runner
           imports:
             - runWorkbookWithTimeout
-        - file: ./svg
-          imports:
-            - renderChart
         - file: ./html
           imports:
             - RenderDoc
@@ -32801,6 +32798,10 @@ modules:
         - file: ./markdown.js
           imports:
             - markdownToHtml
+        - file: ./svg.js
+          imports:
+            - renderChart
+            - ChartSpec
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
@@ -32811,6 +32812,7 @@ modules:
         - toCSS
         - toHTML
       interfaces:
+        - RenderChart
         - RenderCell
         - RenderDoc
         - ToHtmlOptions
@@ -33031,6 +33033,9 @@ modules:
             - RenderDoc
             - RenderCell
           typeOnly: true
+        - file: ./svg.js
+          imports:
+            - renderChart
       workspaceDependencies: []
       exports:
         - toIpynb
@@ -33262,6 +33267,9 @@ modules:
             - RenderDoc
             - RenderCell
           typeOnly: true
+        - file: ./svg.js
+          imports:
+            - renderChart
         - file: ./markdown.js
           imports:
             - markdownToTex
@@ -37809,10 +37817,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1174
   totalModules: 83
-  totalLinesOfCode: 198547
+  totalLinesOfCode: 198556
   totalExports: 5842
   totalClasses: 55
-  totalInterfaces: 508
+  totalInterfaces: 509
   totalFunctions: 1885
   totalTypeGuards: 158
   totalEnums: 0

@@ -34636,10 +34636,6 @@
             "imports": ["runWorkbookWithTimeout"]
           },
           {
-            "file": "./svg",
-            "imports": ["renderChart"]
-          },
-          {
             "file": "./html",
             "imports": ["RenderDoc", "RenderCell"],
             "typeOnly": true
@@ -34846,6 +34842,10 @@
           {
             "file": "./markdown.js",
             "imports": ["markdownToHtml"]
+          },
+          {
+            "file": "./svg.js",
+            "imports": ["renderChart", "ChartSpec"]
           }
         ],
         "workspaceDependencies": [
@@ -34856,7 +34856,7 @@
           }
         ],
         "exports": ["toCSS", "toHTML"],
-        "interfaces": ["RenderCell", "RenderDoc", "ToHtmlOptions"],
+        "interfaces": ["RenderChart", "RenderCell", "RenderDoc", "ToHtmlOptions"],
         "functions": ["toCSS", "toHTML"]
       },
       "workbook/src/index.ts": {
@@ -35091,6 +35091,10 @@
             "file": "./html.js",
             "imports": ["RenderDoc", "RenderCell"],
             "typeOnly": true
+          },
+          {
+            "file": "./svg.js",
+            "imports": ["renderChart"]
           }
         ],
         "workspaceDependencies": [],
@@ -35325,6 +35329,10 @@
             "file": "./html.js",
             "imports": ["RenderDoc", "RenderCell"],
             "typeOnly": true
+          },
+          {
+            "file": "./svg.js",
+            "imports": ["renderChart"]
           },
           {
             "file": "./markdown.js",
@@ -40119,10 +40127,10 @@
   "statistics": {
     "totalTypeScriptFiles": 1174,
     "totalModules": 83,
-    "totalLinesOfCode": 198547,
+    "totalLinesOfCode": 198556,
     "totalExports": 5842,
     "totalClasses": 55,
-    "totalInterfaces": 508,
+    "totalInterfaces": 509,
     "totalFunctions": 1885,
     "totalTypeGuards": 158,
     "totalEnums": 0,

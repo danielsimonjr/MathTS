@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1862,
+  "totalFiles": 1863,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1150,
     "test-only": 0,
     "orphan": 0,
-    "test": 629,
+    "test": 630,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1174,
-    "tests": 629,
+    "tests": 630,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -43,7 +43,7 @@
     "@danielsimonjr/mathts-tensor": 52,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 63
+    "@danielsimonjr/mathts-workbook": 64
   },
   "files": [
     {
@@ -12644,7 +12644,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1618
+      "loc": 1614
     },
     {
       "file": "workbook/src/contract.ts",
@@ -12700,7 +12700,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 196
+      "loc": 204
     },
     {
       "file": "workbook/src/index.ts",
@@ -12721,7 +12721,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 161
+      "loc": 163
     },
     {
       "file": "workbook/src/markdown.ts",
@@ -12784,7 +12784,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 95
+      "loc": 98
     },
     {
       "file": "workbook/src/timeout-runner.ts",
@@ -12820,6 +12820,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 144
+    },
+    {
+      "file": "workbook/tests/chart-markup.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 114
     },
     {
       "file": "workbook/tests/cli.test.ts",

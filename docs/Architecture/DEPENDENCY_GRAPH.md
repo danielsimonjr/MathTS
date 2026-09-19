@@ -16244,7 +16244,6 @@ graph LR
 | `./pdf`            | `toPDF`                                                            | Import             |
 | `./ipynb`          | `toIpynb`                                                          | Import             |
 | `./timeout-runner` | `runWorkbookWithTimeout`                                           | Import             |
-| `./svg`            | `renderChart`                                                      | Import             |
 | `./html`           | `RenderDoc, RenderCell`                                            | Import (type-only) |
 | `./yaml-safe`      | `parseYamlSafe`                                                    | Import             |
 
@@ -16365,13 +16364,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports          | Type   |
-| --------------- | ---------------- | ------ |
-| `./markdown.js` | `markdownToHtml` | Import |
+| File            | Imports                  | Type   |
+| --------------- | ------------------------ | ------ |
+| `./markdown.js` | `markdownToHtml`         | Import |
+| `./svg.js`      | `renderChart, ChartSpec` | Import |
 
 **Exports:**
 
-- Interfaces: `RenderCell`, `RenderDoc`, `ToHtmlOptions`
+- Interfaces: `RenderChart`, `RenderCell`, `RenderDoc`, `ToHtmlOptions`
 - Functions: `toCSS`, `toHTML`
 
 ---
@@ -16431,6 +16431,7 @@ graph LR
 | File        | Imports                 | Type               |
 | ----------- | ----------------------- | ------------------ |
 | `./html.js` | `RenderDoc, RenderCell` | Import (type-only) |
+| `./svg.js`  | `renderChart`           | Import             |
 
 **Exports:**
 
@@ -16586,6 +16587,7 @@ graph LR
 | File            | Imports                                  | Type               |
 | --------------- | ---------------------------------------- | ------------------ |
 | `./html.js`     | `RenderDoc, RenderCell`                  | Import (type-only) |
+| `./svg.js`      | `renderChart`                            | Import             |
 | `./markdown.js` | `markdownToTex, texEscape, verbatimBody` | Import             |
 
 **Exports:**
@@ -17510,9 +17512,9 @@ graph LR
 | `core/src/internal`                                    | 19 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/Node`                             | 6 files      | 13 files   |
-| `workbook/src/cli`                                     | 19 files     | 0 files    |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
@@ -18358,11 +18360,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1174   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 198547 |
+| Total Lines of Code     | 198556 |
 | Total Exports           | 5842   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |
-| Total Interfaces        | 508    |
+| Total Interfaces        | 509    |
 | Total Functions         | 1885   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |

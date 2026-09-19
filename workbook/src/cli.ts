@@ -32,7 +32,6 @@ import { toTeX } from './tex';
 import { toPDF } from './pdf';
 import { toIpynb } from './ipynb';
 import { runWorkbookWithTimeout } from './timeout-runner';
-import { renderChart } from './svg';
 import type { RenderDoc, RenderCell } from './html';
 import { parseYamlSafe } from './yaml-safe';
 
@@ -705,11 +704,7 @@ export function metaCommand(args: string[]): CommandResult {
 }
 
 /** Map a workbook (+ optional run results) to the generic render document. */
-function buildRenderDoc(
-  workbook: Workbook,
-  byId: Map<string, CellResult> | null,
-  format: 'svg' | 'tikz' = 'svg'
-): RenderDoc {
+function buildRenderDoc(workbook: Workbook, byId: Map<string, CellResult> | null): RenderDoc {
   // Resolve a chart data reference: a cell id -> that cell's output, or an inline array.
   const lookup = (ref: unknown): unknown => {
     if (typeof ref !== 'string') return ref;
@@ -728,14 +723,17 @@ function buildRenderDoc(
           x?: { label?: string; data?: unknown };
           y?: { label?: string; data?: unknown };
         };
-        const rendered = renderChart(
-          { type: spec?.type, title: spec?.title, xLabel: spec?.x?.label, yLabel: spec?.y?.label },
-          lookup(spec?.x?.data),
-          lookup(spec?.y?.data),
-          format
-        );
-        if (format === 'tikz') rc.chartTikz = rendered;
-        else rc.chartSvg = rendered;
+        // The exporter renders the chart from these settings and data.
+        rc.chart = {
+          spec: {
+            type: spec?.type,
+            title: spec?.title,
+            xLabel: spec?.x?.label,
+            yLabel: spec?.y?.label,
+          },
+          x: lookup(spec?.x?.data),
+          y: lookup(spec?.y?.data),
+        };
         // Diagnostic: flag data references that didn't resolve to a value, so an
         // empty chart explains itself instead of silently showing "no data".
         const unresolved: string[] = [];
@@ -752,9 +750,7 @@ function buildRenderDoc(
           rc.note = `chart data did not resolve: ${unresolved.join(', ')}${byId ? '' : ' (try without --no-run)'}`;
         }
       } catch (error) {
-        const placeholder = renderChart({}, [], [], format); // "no data" placeholder
-        if (format === 'tikz') rc.chartTikz = placeholder;
-        else rc.chartSvg = placeholder;
+        rc.chart = { spec: {}, x: [], y: [] }; // "no data" placeholder
         rc.note = `invalid chart spec: ${errMessage(error)}`;
       }
       return rc;
@@ -892,7 +888,7 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
     const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
     if (!outPath) return fail(['--format pdf requires an output path: -o <file.pdf>']);
     try {
-      await toPDF(buildRenderDoc(workbook, byId, 'tikz'), outPath, { parse });
+      await toPDF(buildRenderDoc(workbook, byId), outPath, { parse });
     } catch (error) {
       return fail([`PDF export failed: ${errMessage(error)}`]);
     }
@@ -904,7 +900,7 @@ export async function exportCommand(args: string[]): Promise<CommandResult> {
   const fragment = args.includes('--fragment');
   const rendered =
     format === 'tex'
-      ? toTeX(buildRenderDoc(workbook, byId, 'tikz'), { parse, fragment })
+      ? toTeX(buildRenderDoc(workbook, byId), { parse, fragment })
       : format === 'ipynb'
         ? toIpynb(buildRenderDoc(workbook, byId))
         : toHTML(buildRenderDoc(workbook, byId), { parse });
