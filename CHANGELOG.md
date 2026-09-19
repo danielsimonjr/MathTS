@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### test(ci): runtime probe for the Node test matrix
+
+- New `tests/integration/runtime-probe.test.ts` prints `process.version` and `typeof Bun` at run
+  time. It measures which runtime executes the tests in the `Test (20.x)` and `Test (22.x)` jobs.
+
 ### chore(build): Bun migration Phase 3 - `[run] bun = true`
 
 - `bun run` now executes every package script on the Bun runtime. `node` calls and node-shebang

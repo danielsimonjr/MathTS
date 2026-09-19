@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1857,
+  "totalFiles": 1858,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 623,
+    "test": 624,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1175,
-    "tests": 623,
+    "tests": 624,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 15,
     "@danielsimonjr/mathts-core": 80,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 44,
+    "(root)": 45,
     "@danielsimonjr/mathts-expression": 543,
     "@danielsimonjr/mathts-functions": 771,
     "@danielsimonjr/mathts-gpu": 17,
@@ -12344,6 +12344,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 334
+    },
+    {
+      "file": "tests/integration/runtime-probe.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 15
     },
     {
       "file": "tests/wasm/parallel-processing.test.ts",
