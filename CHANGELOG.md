@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hosted-git, local-path or tarball-URL spec. CI runs it in the `Test` job. The consumer type check
   step no longer installs npm 11, so it runs on the npm 10 of Node 22.
 - Changeset: patch for core, functions, mathts-typed-function and mathts-workerpool.
+- `docs/Architecture`: the file and line counts include the new script (1916 TypeScript/JS files,
+  336764 lines), so `repo_map.py check` passes.
 
 ### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
 

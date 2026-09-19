@@ -33,7 +33,7 @@ const FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
  * @param {string} spec the version spec from package.json.
  * @returns {string | null} the reason the spec is not registry-resolvable, or null when it is.
  */
-export function badSpecReason(spec) {
+function badSpecReason(spec) {
   const s = spec.trim();
   if (/^(github|gitlab|bitbucket|gist):/i.test(s)) return 'hosted-git spec';
   if (/^git(\+[a-z]+)?:/i.test(s)) return 'git URL';
@@ -49,7 +49,7 @@ export function badSpecReason(spec) {
  * Check every published workspace manifest.
  * @returns {string[]} one message per bad spec; empty when all specs are registry specs.
  */
-export function findBadSpecs() {
+function findBadSpecs() {
   const problems = [];
   for (const dir of workspaceDirs()) {
     const pkg = JSON.parse(readFileSync(join(repoRoot, dir, 'package.json'), 'utf8'));
