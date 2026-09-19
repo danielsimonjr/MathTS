@@ -3,3 +3,7 @@
 # tests/diff-*.test.mjs are standalone node scripts (run by `test:diff`) that
 # call process.exit(); vitest never collected them (include: tests/**/*.test.ts).
 pathIgnorePatterns = ["tests/diff-*.test.mjs"]
+
+[run]
+# Run this package's scripts on the Bun runtime (see the root bunfig.toml).
+bun = true

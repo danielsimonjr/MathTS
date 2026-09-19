@@ -1,0 +1,4 @@
+# Bun reads bunfig.toml from the working directory only (not the repo root).
+[run]
+# Run this package's scripts on the Bun runtime (see the root bunfig.toml).
+bun = true

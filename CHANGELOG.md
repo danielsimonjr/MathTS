@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### test(ci): run the full suite and a dist smoke test on real Node in the test matrix
+
+- Measured on this PR before the fix (CI run 35434515205): in both `Test (20.x)` and
+  `Test (22.x)`, `tests/integration/runtime-probe.test.ts` printed
+  `process.version=v26.3.0 typeof Bun=object`. Every test ran on Bun 1.4.2, not on the matrix
+  Node: 22 `bun test` runs (5562 tests), `functions` vitest (4968) and root vitest (122).
+- New `tools/test/run-vitest-node.mjs`. It runs `vitest run` in every package that has a
+  `vitest.config.ts`, then the root config, then the `assembly` `node` test scripts. It spawns
+  each child with `process.execPath` and refuses to run under Bun.
+- New `tools/test/smoke-dist-node.mjs`. It imports each of the 24 published packages by name, so
+  Node resolves the `exports` entry of the built dist, and calls one representative function.
+- `.github/workflows/ci.yml`: the `Test` matrix legs run both scripts with `node` after
+  `bun run test`. The stale comments that said vitest still runs under Node are corrected, in
+  `ci.yml` and in `bunfig.toml`.
+- `plot`: vitest cannot read the Bun snapshot file (`// Bun Snapshot v1`). `plot/vitest.config.ts`
+  now sets `resolveSnapshotPath` to `tests/__snapshots__/vitest/`, which holds the vitest copy of
+  the 15 golden SVG snapshots. New `plot/tests/snapshot-parity.test.ts` fails when the Bun copy
+  and the vitest copy hold different values (it runs under both runners).
+- No package is excluded from the Node run, and no test is skipped or weakened.
+- `docs/roadmap/BUN_MIGRATION.md` describes the two Node scripts.
+- `docs/Architecture` census tables updated for the 5 new files (`repo_map.py check` passes):
+  1913 TypeScript files, 7659 exports, 335224 lines.
+
+### test(ci): runtime probe for the Node test matrix
+
+- New `tests/integration/runtime-probe.test.ts` prints `process.version` and `typeof Bun` at run
+  time. It measures which runtime executes the tests in the `Test (20.x)` and `Test (22.x)` jobs.
+
+### chore(build): Bun migration Phase 3 - `[run] bun = true`
+
+- `bun run` now executes every package script on the Bun runtime. `node` calls and node-shebang
+  bins (`asc`, `tsc`, `tsup`, `vitest`, `turbo`, `prettier`) run on Bun 1.4.2.
+- Bun reads `bunfig.toml` from the working directory only. Measured: with only the root flag set,
+  a script started by turbo in `core/` still ran on Node. So the `[run] bun = true` block is in the
+  root `bunfig.toml` and in the `bunfig.toml` of all 24 workspace packages (new for `assembly`).
+- Verified before the flip, Node vs Bun on the same inputs:
+  - `asc` debug + release: all 10 files in `assembly/build` are byte-identical (wasm, wat, source
+    map, JS/`.d.ts` bindings, manifest). `mathts.wasm` sha256 `6773913c...b04a77f3`.
+  - `bun run build`: all 2333 files in the 23 `dist` directories are byte-identical.
+  - `query-dependency-graph` (`--emit`, query, `--check-browser-safety`), `check-duplicates`,
+    `roadmap-check`, both `copy-wasm.mjs`, `workerpool` `postbuild.mjs`, `gen-wasm-manifest.mjs`:
+    same stdout, exit code and written files.
+- Two tools differed; each is fixed in `package.json`:
+  - `generate-functions-reference.mjs` failed under Bun (`__PKG_VERSION__ is not defined`).
+    Cause: Bun applies the root `tsconfig.json` `paths` at run time, so the tool imported
+    `core/src` instead of `core/dist`. `docs:functions` and `docs:functions:check` now pass
+    `--tsconfig-override=tsconfig.base.json` (no `paths`). The output is then identical to Node.
+    Bun 1.4.2 prints a harmless `Internal error: directory mismatch` line on Windows for this flag.
+  - `node --test` fails under Bun ("Cannot use test outside of the test runner"). A script cannot
+    reach the real Node under this setting. `docs:graph:test` and `docs:roadmap-check:test` now use
+    `bun test`; the counts are the same (6/6 and 4/4).
+- Gate after the flip: install, `build:wasm`, `build`, `typecheck`, `lint`, `docs:functions:check`,
+  `check:browser-safety`, `bun audit`, `test` (48/48 tasks, same counts as Node), `test:coverage`.
+- `docs/roadmap/BUN_MIGRATION.md`: non-goal line and Node-on-PATH paragraph updated; note 4 added.
+
 ### fix(plot): tie-tolerant depth sort with a stable key; `plot` on `bun test`
 
 - Bug: the `surface` painter's sort was `b.depth - a.depth`. Two quads of equal true depth then
