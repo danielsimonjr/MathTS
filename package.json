@@ -131,7 +131,7 @@
   ],
   "dependencies": {
     "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
-    "workerpool": "npm:@danielsimonjr/workerpool@10.2.1"
+    "workerpool": "npm:@danielsimonjr/workerpool@10.2.2"
   },
   "overrides": {
     "esbuild": "^0.28.1",
