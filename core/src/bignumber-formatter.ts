@@ -55,7 +55,7 @@ export interface BigNumberValue {
  * @param n
  * @param base
  * @param size
- * @returns {string}
+ * @returns
  */
 function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): string {
   const BigNumberCtor = n.constructor;
@@ -170,7 +170,7 @@ function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): 
  *
  * @param value
  * @param options - Optional.
- * @return {string} str The formatted value
+ * @return str The formatted value
  */
 export function format(value: unknown, options?: unknown): string {
   const v = value as BigNumberValue;
@@ -300,7 +300,7 @@ export function toEngineering(value: BigNumberValue, precision?: number): string
  * @param precision - Optional. Number of digits in formatted output.
  *                              If not provided, the maximum available digits
  *                              is used.
- * @returns {string} str
+ * @returns str
  */
 export function toExponential(value: BigNumberValue, precision?: number): string {
   if (precision !== undefined) {
