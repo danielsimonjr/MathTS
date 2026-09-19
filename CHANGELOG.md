@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Tape` and `TapedTensor`. The `code-docs` gate (`code_docs.py check autograd/src`) now passes:
   11/11 exported symbols documented, 0 MUST issues (before: 6 MUST issues). Comments only; no
   code changes.
-- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335269 (the new comment lines).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335266 (the new comment lines, after the pre-commit formatter).
 
 ### chore(build): Bun migration Phase 4 - Node out of the dev toolchain
 
