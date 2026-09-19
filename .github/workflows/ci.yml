@@ -51,10 +51,8 @@ jobs:
       - name: Poison node on PATH (probe)
         run: |
           mkdir -p "$RUNNER_TEMP/nonode"
-          printf '#!/bin/sh
-echo "PROBE: node was called: $*" >&2
-exit 97
-' > "$RUNNER_TEMP/nonode/node"
+          echo '#!/bin/sh' > "$RUNNER_TEMP/nonode/node"
+          echo 'echo "PROBE: node was called: $*" >&2; exit 97' >> "$RUNNER_TEMP/nonode/node"
           chmod +x "$RUNNER_TEMP/nonode/node"
           echo "$RUNNER_TEMP/nonode" >> "$GITHUB_PATH"
 
@@ -178,10 +176,8 @@ exit 97
       - name: Poison node on PATH (probe)
         run: |
           mkdir -p "$RUNNER_TEMP/nonode"
-          printf '#!/bin/sh
-echo "PROBE: node was called: $*" >&2
-exit 97
-' > "$RUNNER_TEMP/nonode/node"
+          echo '#!/bin/sh' > "$RUNNER_TEMP/nonode/node"
+          echo 'echo "PROBE: node was called: $*" >&2; exit 97' >> "$RUNNER_TEMP/nonode/node"
           chmod +x "$RUNNER_TEMP/nonode/node"
           echo "$RUNNER_TEMP/nonode" >> "$GITHUB_PATH"
 
@@ -232,10 +228,8 @@ exit 97
       - name: Poison node on PATH (probe)
         run: |
           mkdir -p "$RUNNER_TEMP/nonode"
-          printf '#!/bin/sh
-echo "PROBE: node was called: $*" >&2
-exit 97
-' > "$RUNNER_TEMP/nonode/node"
+          echo '#!/bin/sh' > "$RUNNER_TEMP/nonode/node"
+          echo 'echo "PROBE: node was called: $*" >&2; exit 97' >> "$RUNNER_TEMP/nonode/node"
           chmod +x "$RUNNER_TEMP/nonode/node"
           echo "$RUNNER_TEMP/nonode" >> "$GITHUB_PATH"
 
