@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `polygon`, `text` and `Camera`.
   Comments only: each changed file prints identical to `main` with comments removed.
   `code_docs.py check plot/src` now passes (was 12 MUST issues).
-  Architecture numbers refreshed (`totalLinesOfCode` 337294); `repo_map.py check` passes.
+  Architecture numbers refreshed (`totalLinesOfCode` 337290); `repo_map.py check` passes.
 
 ### docs(parallel): doc comments for every exported symbol
 
