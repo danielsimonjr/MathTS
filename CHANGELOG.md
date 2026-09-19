@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(core): doc comments for every exported symbol
+
+- `core/src`: TSDoc comments for 41 undocumented exported symbols (the `is.ts` type guards and
+  interfaces, `NestedArray`, `IdentifiedValue`, `MathJsConfig`, `createIndexError`, `create`,
+  `ObjectWrappingMap`, `registerNativeTypes`, `RoundingMode` and `Dual`), summary lines for the
+  `DimensionError` and `PartitionedMap` constructors, and a new `Range` constructor comment.
+- `core/src`: the JSDoc `@param {Type} name` form is now the TSDoc `@param name - text` form in
+  `array.ts`, `bignumber-formatter.ts`, `is.ts`, `object.ts`, `shared.ts`, `string.ts`,
+  `types/matrix/Range.ts` and `types/unit/Unit.ts` (one dialect per file). The `concat` and `Range`
+  comments no longer document parameters that are not in the signature. `Unit.divideInto` documents
+  its result with `@returns`, not with a false `@param result`.
+- The `code-docs` gate (`code_docs.py check core/src`) now passes: 253/253 exported symbols
+  documented, 0 MUST issues (before: 52 MUST issues). Comments only; no code changes.
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335572 (the new comment lines).
+
 ### docs(compat): doc comments for every exported symbol
 
 - `compat/src`: TSDoc comments for `createChain`, `asin`, `acos`, `atan`, `atan2`, `variance`, `std`,

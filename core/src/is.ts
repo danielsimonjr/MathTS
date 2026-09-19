@@ -13,6 +13,9 @@
 //   parser.
 
 // Type interfaces for math.js types
+/**
+ * Shape of a BigNumber value that the duck-typing guards in this module read.
+ */
 export interface BigNumber {
   isBigNumber: boolean;
   constructor: {
@@ -21,22 +24,34 @@ export interface BigNumber {
   };
 }
 
+/**
+ * Shape of a complex number: real part `re` and imaginary part `im`.
+ */
 export interface Complex {
   re: number;
   im: number;
 }
 
+/**
+ * Shape of a fraction: numerator `n` and denominator `d`.
+ */
 export interface Fraction {
   n: number;
   d: number;
 }
 
+/**
+ * Shape of a Unit value that the duck-typing guards in this module read.
+ */
 export interface Unit {
   constructor: {
     prototype: { isUnit: boolean };
   };
 }
 
+/**
+ * Shape of a Matrix value that the duck-typing guards in this module read.
+ */
 export interface Matrix {
   isMatrix?: boolean;
   _size?: number[];
@@ -45,14 +60,23 @@ export interface Matrix {
   };
 }
 
+/**
+ * Shape of a Matrix that also has the `isDenseMatrix` flag.
+ */
 export interface DenseMatrix extends Matrix {
   isDenseMatrix: boolean;
 }
 
+/**
+ * Shape of a Matrix that also has the `isSparseMatrix` flag.
+ */
 export interface SparseMatrix extends Matrix {
   isSparseMatrix: boolean;
 }
 
+/**
+ * Shape of a Range value: start, end and step.
+ */
 export interface Range {
   start: number;
   end: number;
@@ -62,6 +86,9 @@ export interface Range {
   };
 }
 
+/**
+ * Shape of one dimension of an Index.
+ */
 export interface IndexDimension {
   _data?: unknown[];
   _size: number[];
@@ -70,6 +97,9 @@ export interface IndexDimension {
   end?: number;
 }
 
+/**
+ * Shape of an Index value: its dimensions and the optional source size.
+ */
 export interface Index {
   _dimensions: (IndexDimension | string)[];
   _sourceSize?: (number | null)[];
@@ -106,10 +136,22 @@ function hasOwnAndPrototypeFlag(x: unknown, ownFlag: string, protoFlag: string):
   );
 }
 
+/**
+ * Test whether a value is a primitive number.
+ *
+ * @param x - The value to test.
+ * @returns True when `typeof x` is `'number'`.
+ */
 export function isNumber(x: unknown): x is number {
   return typeof x === 'number';
 }
 
+/**
+ * Test whether a value is a BigNumber.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` and its constructor prototype both have `isBigNumber === true`, or when `x.constructor.isDecimal(x)` returns true.
+ */
 export function isBigNumber(x: unknown): x is BigNumber {
   if (!x || typeof x !== 'object' || typeof (x as BigNumber).constructor !== 'function') {
     return false;
@@ -132,73 +174,163 @@ export function isBigNumber(x: unknown): x is BigNumber {
   return false;
 }
 
+/**
+ * Test whether a value is a primitive bigint.
+ *
+ * @param x - The value to test.
+ * @returns True when `typeof x` is `'bigint'`.
+ */
 export function isBigInt(x: unknown): x is bigint {
   return typeof x === 'bigint';
 }
 
+/**
+ * Test whether a value is a Complex number.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` is an object whose prototype has `isComplex === true`.
+ */
 export function isComplex(x: unknown): x is Complex {
   return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isComplex === true);
 }
 
+/**
+ * Test whether a value is a Fraction.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` is an object whose prototype has `isFraction === true`.
+ */
 export function isFraction(x: unknown): x is Fraction {
   return !!(x && typeof x === 'object' && Object.getPrototypeOf(x).isFraction === true);
 }
 
+/**
+ * Test whether a value is a Unit.
+ *
+ * @param x - The value to test.
+ * @returns True when the constructor prototype of `x` has `isUnit === true`.
+ */
 export function isUnit(x: unknown): x is Unit {
   return hasPrototypeFlag(x, 'isUnit');
 }
 
+/**
+ * Test whether a value is a primitive string.
+ *
+ * @param x - The value to test.
+ * @returns True when `typeof x` is `'string'`.
+ */
 export function isString(x: unknown): x is string {
   return typeof x === 'string';
 }
 
 export const isArray = Array.isArray;
 
+/**
+ * Test whether a value is a Matrix of any storage type.
+ *
+ * @param x - The value to test.
+ * @returns True when the constructor prototype of `x` has `isMatrix === true`.
+ */
 export function isMatrix(x: unknown): x is Matrix {
   return hasPrototypeFlag(x, 'isMatrix');
 }
 
 /**
  * Test whether a value is a collection: an Array or Matrix
- * @param {*} x
+ * @param x
  * @returns {boolean} isCollection
  */
 export function isCollection(x: unknown): x is unknown[] | Matrix {
   return Array.isArray(x) || isMatrix(x);
 }
 
+/**
+ * Test whether a value is a DenseMatrix.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` has `isDenseMatrix === true` and its constructor prototype has `isMatrix === true`.
+ */
 export function isDenseMatrix(x: unknown): x is DenseMatrix {
   return hasOwnAndPrototypeFlag(x, 'isDenseMatrix', 'isMatrix');
 }
 
+/**
+ * Test whether a value is a SparseMatrix.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` has `isSparseMatrix === true` and its constructor prototype has `isMatrix === true`.
+ */
 export function isSparseMatrix(x: unknown): x is SparseMatrix {
   return hasOwnAndPrototypeFlag(x, 'isSparseMatrix', 'isMatrix');
 }
 
+/**
+ * Test whether a value is a Range.
+ *
+ * @param x - The value to test.
+ * @returns True when the constructor prototype of `x` has `isRange === true`.
+ */
 export function isRange(x: unknown): x is Range {
   return hasPrototypeFlag(x, 'isRange');
 }
 
+/**
+ * Test whether a value is an Index.
+ *
+ * @param x - The value to test.
+ * @returns True when the constructor prototype of `x` has `isIndex === true`.
+ */
 export function isIndex(x: unknown): x is Index {
   return hasPrototypeFlag(x, 'isIndex');
 }
 
+/**
+ * Test whether a value is a primitive boolean.
+ *
+ * @param x - The value to test.
+ * @returns True when `typeof x` is `'boolean'`.
+ */
 export function isBoolean(x: unknown): x is boolean {
   return typeof x === 'boolean';
 }
 
+/**
+ * Test whether a value is a function.
+ *
+ * @param x - The value to test.
+ * @returns True when `typeof x` is `'function'`.
+ */
 export function isFunction(x: unknown): x is (...args: unknown[]) => unknown {
   return typeof x === 'function';
 }
 
+/**
+ * Test whether a value is a Date.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` is an `instanceof Date`.
+ */
 export function isDate(x: unknown): x is Date {
   return x instanceof Date;
 }
 
+/**
+ * Test whether a value is a regular expression.
+ *
+ * @param x - The value to test.
+ * @returns True when `x` is an `instanceof RegExp`.
+ */
 export function isRegExp(x: unknown): x is RegExp {
   return x instanceof RegExp;
 }
 
+/**
+ * Test whether a value is a plain object.
+ *
+ * @param x - The value to test.
+ * @returns True when the constructor of `x` is `Object` and `x` is not a Complex or a Fraction.
+ */
 export function isObject(x: unknown): x is Record<string, unknown> {
   return !!(
     x &&
@@ -214,7 +346,7 @@ export function isObject(x: unknown): x is Record<string, unknown> {
  *
  * Methods looked for are `get`, `set`, `keys` and `has`.
  *
- * @param {Map | object} object
+ * @param object
  * @returns
  */
 export function isMap(object: unknown): object is Map<unknown, unknown> {
@@ -233,14 +365,36 @@ export function isMap(object: unknown): object is Map<unknown, unknown> {
   );
 }
 
+/**
+ * Test whether a value is null.
+ *
+ * @param x - The value to test.
+ * @returns True when `x === null`.
+ */
 export function isNull(x: unknown): x is null {
   return x === null;
 }
 
+/**
+ * Test whether a value is undefined.
+ *
+ * @param x - The value to test.
+ * @returns True when `x === undefined`.
+ */
 export function isUndefined(x: unknown): x is undefined {
   return x === undefined;
 }
 
+/**
+ * Get the type name of a value.
+ *
+ * For an object, the result is `'null'`, `'BigNumber'`, `'Complex'`, `'Fraction'`,
+ * the constructor name, or `'Object'`, in that order of test.
+ * For other values, the result is the `typeof` string.
+ *
+ * @param x - The value to examine.
+ * @returns The type name.
+ */
 export function typeOf(x: unknown): string {
   const t = typeof x;
 

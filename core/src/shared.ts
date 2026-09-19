@@ -6,8 +6,8 @@
 
 /**
  * A safe hasOwnProperty
- * @param {Object} object
- * @param {string} property
+ * @param object
+ * @param property
  */
 export function hasOwnProperty(object: unknown, property: string): boolean {
   return !!object && Object.hasOwnProperty.call(object, property);

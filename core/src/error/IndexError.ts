@@ -70,6 +70,14 @@ export class IndexError extends RangeError {
 
 // Back-compat factory form (originated in functions/src/error/IndexError.ts) —
 // allows constructing an IndexError without `new`.
+/**
+ * Create an IndexError without the `new` operator.
+ *
+ * @param index - The actual index.
+ * @param min - The minimum index (included). When `max` is not given, this value is the maximum and the minimum is 0.
+ * @param max - The maximum index (excluded).
+ * @returns A new IndexError.
+ */
 export function createIndexError(index: number, min?: number, max?: number): IndexError {
   return new IndexError(index, min, max);
 }

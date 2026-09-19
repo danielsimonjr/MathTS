@@ -589,7 +589,7 @@ graph LR
 
 ---
 
-### `core/src/is.ts` - Structural view used by the duck-typing guards below: math.js types are
+### `core/src/is.ts` - Shape of a BigNumber value that the duck-typing guards in this module read.
 
 **Exports:**
 
@@ -18365,7 +18365,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 196350 |
+| Total Lines of Code     | 196566 |
 | Total Exports           | 5841   |
 | Total Re-exports        | 2363   |
 | Total Classes           | 55     |

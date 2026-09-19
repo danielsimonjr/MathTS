@@ -70,8 +70,8 @@ interface FormattableObject {
  *     math.format(new Complex(2, 3))  // '2 + 3i'
  *     math.format('hello')            // '"hello"'
  *
- * @param {*} value             Value to be stringified
- * @param {Object | number | Function} [options]
+ * @param value - Value to be stringified
+ * @param options - Optional.
  *     Formatting options. See src/utils/number.js:format for a
  *     description of the available options controlling number output.
  *     This generic "format" also supports the option property `truncate: NN`
@@ -150,7 +150,7 @@ function _format(value: unknown, options?: unknown): string {
 /**
  * Stringify a value into a string enclosed in double quotes.
  * Unescaped double quotes and backslashes inside the value are escaped.
- * @param {*} value
+ * @param value
  * @return {string}
  */
 export function stringify(value: unknown): string {
@@ -178,7 +178,7 @@ const controlCharacters = {
 
 /**
  * Escape special HTML characters
- * @param {*} value
+ * @param value
  * @return {string}
  */
 export function escape(value: unknown): string {
@@ -196,8 +196,8 @@ export function escape(value: unknown): string {
 /**
  * Recursively format an n-dimensional matrix
  * Example output: "[[1, 2], [3, 4]]"
- * @param {Array} array
- * @param {Object | number | Function} [options]  Formatting options. See
+ * @param array
+ * @param options - Optional. Formatting options. See
  *                                                lib/utils/number:format for a
  *                                                description of the available
  *                                                options.
@@ -222,7 +222,7 @@ function formatArray(array: unknown, options?: unknown): string {
 
 /**
  * Check whether a value looks like a Fraction (unsafe duck-type check)
- * @param {*} value
+ * @param value
  * @return {boolean}
  */
 function looksLikeFraction(value: unknown): value is { s: bigint; n: bigint; d: bigint } {
@@ -239,8 +239,8 @@ function looksLikeFraction(value: unknown): value is { s: bigint; n: bigint; d: 
 
 /**
  * Compare two strings
- * @param {string} x
- * @param {string} y
+ * @param x
+ * @param y
  * @returns {number}
  */
 export function compareText(x: unknown, y: unknown): number {

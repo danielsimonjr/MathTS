@@ -211,6 +211,16 @@ export function sortFactories(
 }
 
 // TODO: comment or cleanup if unused in the end
+/**
+ * Run the factory functions in dependency order on one scope object.
+ *
+ * The function sorts the factories with `sortFactories`. It then calls each
+ * non-legacy factory with the scope. It does not call legacy factories.
+ *
+ * @param factories - The factory functions and legacy factories.
+ * @param scope - The object that the factories receive. The function changes this object.
+ * @returns The same scope object.
+ */
 export function create(
   factories: Array<FactoryFunction | LegacyFactory>,
   scope: Record<string, unknown> = {}

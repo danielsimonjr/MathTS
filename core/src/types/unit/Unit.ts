@@ -101,8 +101,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *
      * @class Unit
      * @constructor Unit
-     * @param {number | BigNumber | Fraction | Complex | boolean} [value]  A value like 5.2
-     * @param {string | Unit} valuelessUnit   A unit without value. Can have prefix, like "cm"
+     * @param value - Optional. A value like 5.2
+     * @param valuelessUnit - A unit without value. Can have prefix, like "cm"
      */
     const Unit = function (
       this: UnitInstance,
@@ -296,7 +296,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Throws an exception if the provided string does not contain a valid unit or
      * cannot be parsed.
      * @memberof Unit
-     * @param {string} str        A string like "5.2 inch", "4e2 cm/s^2"
+     * @param str - A string like "5.2 inch", "4e2 cm/s^2"
      * @return {Unit} unit
      */
     Unit.parse = function (str: string, options?: ParseOptions): UnitInstance {
@@ -551,7 +551,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Normalize a value, based on its currently set unit(s)
      * @memberof Unit
-     * @param {number | BigNumber | Fraction | boolean} value
+     * @param value
      * @return {number | BigNumber | Fraction | boolean} normalized value
      * @private
      */
@@ -578,8 +578,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Denormalize a value, based on its currently set unit(s)
      * @memberof Unit
-     * @param {number} value
-     * @param {number} [prefixValue]    Optional prefix value to be used (ignored if this is a derived unit)
+     * @param value
+     * @param prefixValue - Optional prefix value to be used (ignored if this is a derived unit)
      * @return {number} denormalized value
      * @private
      */
@@ -607,7 +607,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Find a unit from a string
      * @memberof Unit
-     * @param {string} str              A string like 'cm' or 'inch'
+     * @param str - A string like 'cm' or 'inch'
      * @returns {Object | null} result  When found, an object with fields unit and
      *                                  prefix is returned. Else, null is returned.
      * @private
@@ -648,7 +648,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Test if the given expression is a unit.
      * The unit can have a prefix but cannot have a value.
      * @memberof Unit
-     * @param {string} name   A string to be tested whether it is a value less unit.
+     * @param name - A string to be tested whether it is a value less unit.
      *                        The unit can have prefix, like "cm"
      * @return {boolean}      true if the given string is a unit
      */
@@ -660,7 +660,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * check if this unit has given base unit
      * If this unit is a derived unit, this will ALWAYS return false, since by definition base units are not derived.
      * @memberof Unit
-     * @param {BASE_UNIT | string | undefined} base
+     * @param base
      */
     Unit.prototype.hasBase = function (
       this: UnitInstance,
@@ -687,7 +687,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Check if this unit has a base or bases equal to another base or bases
      * For derived units, the exponent on each base also must match
      * @memberof Unit
-     * @param {Unit} other
+     * @param other
      * @return {boolean} true if equal base
      */
     Unit.prototype.equalBase = function (
@@ -706,7 +706,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Check if this unit equals another unit
      * @memberof Unit
-     * @param {Unit} other
+     * @param other
      * @return {boolean} true if both units are equal
      */
     Unit.prototype.equals = function (this: UnitInstance, other: UnitInstance): boolean {
@@ -716,7 +716,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Multiply this unit with another one or with a scalar
      * @memberof Unit
-     * @param {Unit} other
+     * @param other
      * @return {Unit} product of this unit and the other unit
      */
     Unit.prototype.multiply = function (
@@ -768,8 +768,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Divide a number by this unit
      *
      * @memberof Unit
-     * @param {numeric} numerator
-     * @param {unit} result of dividing numerator by this unit
+     * @param numerator
+     * @returns The result of dividing numerator by this unit
      */
     Unit.prototype.divideInto = function (
       this: UnitInstance,
@@ -781,7 +781,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Divide this unit by another one
      * @memberof Unit
-     * @param {Unit | numeric} other
+     * @param other
      * @return {Unit} result of dividing this unit by the other unit
      */
     Unit.prototype.divide = function (
@@ -832,7 +832,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Calculate the power of a unit
      * @memberof Unit
-     * @param {number | Fraction | BigNumber} p
+     * @param p
      * @returns {Unit}      The result: this^p
      */
     Unit.prototype.pow = function (this: UnitInstance, p: number): UnitInstance | Numeric {
@@ -867,7 +867,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * Return the numeric value of this unit if it is dimensionless, has a value, and config.predictable == false; or the original unit otherwise
-     * @param {Unit} unit
+     * @param unit
      * @returns {number | Fraction | BigNumber | Unit}  The numeric value of the unit if conditions are met, or the original unit otherwise
      */
     function getNumericIfUnitless(unit: UnitInstance): UnitInstance | Numeric {
@@ -881,7 +881,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Normalize unit name to handle aliases.
      * Examples: 'meter' → 'm', 'meters' → 'm', 'gram' → 'g'
-     * @param {string} name - Unit name
+     * @param name - Unit name
      * @returns {string} Normalized name
      * @private
      */
@@ -932,7 +932,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Create a unique key for grouping identical units.
      * Combines normalized unit name with prefix name.
-     * @param {Object} unitObj - Unit object with unit and prefix properties
+     * @param unitObj - Unit object with unit and prefix properties
      * @returns {string} Normalized key for grouping
      * @private
      */
@@ -955,7 +955,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *   m / m → dimensionless (complete cancellation)
      *   lbf / (in * in) → lbf / in / in (in units NOT consolidated)
      *
-     * @param {Unit} unit - The unit to simplify
+     * @param unit - The unit to simplify
      * @returns {Unit} The simplified unit
      * @private
      */
@@ -1009,7 +1009,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Create a value one with the numeric type of `typeOfValue`.
      * For example, `one(new BigNumber(3))` returns `BigNumber(1)`
-     * @param {number | Fraction | BigNumber} typeOfValue
+     * @param typeOfValue
      * @returns {number | Fraction | BigNumber}
      */
     function one(typeOfValue: Numeric | null): Numeric {
@@ -1025,7 +1025,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Calculate the absolute value of a unit
      * @memberof Unit
-     * @param {number | Fraction | BigNumber} x
+     * @param x
      * @returns {Unit}      The result: |x|, absolute value of x
      */
     Unit.prototype.abs = function (this: UnitInstance): UnitInstance {
@@ -1058,7 +1058,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Convert the unit to a specific unit name.
      * @memberof Unit
-     * @param {string | Unit} valuelessUnit   A unit without value. Can have prefix, like "cm"
+     * @param valuelessUnit - A unit without value. Can have prefix, like "cm"
      * @returns {Unit} Returns a clone of the unit with a fixed prefix and unit.
      */
     Unit.prototype.to = function (
@@ -1116,7 +1116,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Return the value of the unit when represented with given valueless unit
      * @memberof Unit
-     * @param {string | Unit} valuelessUnit    For example 'cm' or 'inch'
+     * @param valuelessUnit - For example 'cm' or 'inch'
      * @return {number} Returns the unit value as number.
      * @deprecated Use Unit.toNumeric instead.
      */
@@ -1131,7 +1131,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Return the value of the unit in the original numeric type
      * @memberof Unit
-     * @param {string | Unit} valuelessUnit    For example 'cm' or 'inch'
+     * @param valuelessUnit - For example 'cm' or 'inch'
      * @return {number | BigNumber | Fraction} Returns the unit value
      */
     Unit.prototype.toNumeric = function (
@@ -1181,7 +1181,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Instantiate a Unit from a JSON object
      * @memberof Unit
-     * @param {Object} json  A JSON object structured as:
+     * @param json - A JSON object structured as:
      *                       `{"mathjs": "Unit", "value": 2, "unit": "cm", "fixPrefix": false}`
      * @return {Unit}
      */
@@ -1374,8 +1374,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Get a unit, with optional formatting options.
      * @memberof Unit
-     * @param {string[] | Unit[]} [units]  Array of units strings or valueLess Unit objects in wich choose the best one
-     * @param {Object} [options]  Options for parsing the unit. See parseUnit for details.
+     * @param units - Optional. Array of units strings or valueLess Unit objects in wich choose the best one
+     * @param options - Optional. Options for parsing the unit. See parseUnit for details.
      *
      * @return {Unit} Returns a new Unit with the given value and unit.
      */
@@ -1432,7 +1432,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Get a string representation of the Unit, with optional formatting options.
      * @memberof Unit
-     * @param {Object | number | Function} [options]  Formatting options. See
+     * @param options - Optional. Formatting options. See
      *                                                lib/utils/number:format for a
      *                                                description of the available
      *                                                options.
@@ -1454,7 +1454,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * Helper function to normalize a unit for conversion and formatting
-     * @param {Unit} unit The unit to be normalized
+     * @param unit - The unit to be normalized
      * @return {Object} Object with normalized unit and value
      * @private
      */
@@ -1485,7 +1485,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * Helper to handle VA and VAR units
-     * @param {Unit} simp The unit to be normalized
+     * @param simp - The unit to be normalized
      */
     function handleVAandVARUnits(simp: UnitInstance): void {
       let isImaginary = false;
@@ -1509,7 +1509,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * Helper to apply the best prefix if needed
-     * @param {Unit} simp The unit to be normalized
+     * @param simp - The unit to be normalized
      */
     function applyBestPrefixIfNeeded(simp: UnitInstance, offset: number | undefined): void {
       if (simp.units.length === 1 && !simp.fixPrefix) {
@@ -1526,7 +1526,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Calculate the best prefix using current value.
      * @memberof Unit
      * @returns {Object} prefix
-     * @param {number} [offset]  Optional offset for the best prefix calculation (default 1.2)
+     * @param offset - Optional offset for the best prefix calculation (default 1.2)
      * @private
      */
     Unit.prototype._bestPrefix = function (this: UnitInstance, offset: number = 1.2): PrefixDef {
@@ -1588,7 +1588,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Returns an array of units whose sum is equal to this unit
      * @memberof Unit
-     * @param {Array} [parts] An array of strings or valueless units.
+     * @param parts - Optional. An array of strings or valueless units.
      *
      *   Example:
      *
@@ -3341,7 +3341,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Calculate the values for the angle units.
      * Value is calculated as number or BigNumber depending on the configuration
-     * @param {{number: 'number' | 'BigNumber'}} config
+     * @param config
      */
     function calculateAngleValues(config: UnitConfig): void {
       if (config.number === 'BigNumber') {
@@ -3449,7 +3449,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     /**
      * Set a unit system for formatting derived units.
      * @memberof Unit
-     * @param {string} [name] The name of the unit system.
+     * @param name - Optional. The name of the unit system.
      */
     Unit.setUnitSystem = function (name: string): void {
       if (hasOwnProperty(UNIT_SYSTEMS, name)) {
@@ -3529,7 +3529,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Retrieve the right convertor function corresponding with the type
      * of provided exampleValue.
      *
-     * @param {string} type   A string 'number', 'BigNumber', or 'Fraction'
+     * @param type - A string 'number', 'BigNumber', or 'Fraction'
      *                        In case of an unknown type,
      * @return {Function}
      */
@@ -3570,7 +3570,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * Checks if a character is a valid latin letter (upper or lower case).
      * Note that this function can be overridden, for example to allow support of other alphabets.
      * @memberof Unit
-     * @param {string} c Tested character
+     * @param c - Tested character
      * @return {boolean} true if the character is a latin letter
      */
     Unit.isValidAlpha = function isValidAlpha(c: string): boolean {
@@ -3611,8 +3611,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *     override: true
      *   })
      * @memberof Unit
-     * @param {object} obj      Object map. Each key becomes a unit which is defined by its value.
-     * @param {object} options
+     * @param obj - Object map. Each key becomes a unit which is defined by its value.
+     * @param options
      * @return {Unit} the last created unit
      */
     Unit.createUnit = function (
@@ -3654,8 +3654,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *  createUnitSingle('knot', '0.514444444 m/s')
      *
      * @memberof Unit
-     * @param {string} name      The name of the new unit. Must be unique. Example: 'knot'
-     * @param {string | Unit | object} definition      Definition of the unit in terms
+     * @param name - The name of the new unit. Must be unique. Example: 'knot'
+     * @param definition - Definition of the unit in terms
      * of existing units. For example, '0.514444444 m / s'. Can be a Unit, a string,
      * or an Object. If an Object, may have the following properties:
      *   - definition {string | Unit} The definition of this unit.
