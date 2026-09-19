@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### docs(parallel): doc comments for every exported symbol
+
+- Added doc comments to the 4 exported symbols of `@danielsimonjr/mathts-parallel` that had none:
+  `MatrixData`, `ParallelConfig` (and each of its fields), `ParallelMatrix` and `WorkerPool`.
+  Comments only: each changed file prints identical to `main` with comments removed.
+  `code_docs.py check parallel/src` now passes (was 4 MUST issues).
+  Architecture numbers refreshed (`totalLinesOfCode` 337282); `repo_map.py check` passes.
+
 ### docs(matrix): doc comments for every exported symbol
 
 - Added doc comments to the 30 exported symbols of `@danielsimonjr/mathts-matrix` that had none:

@@ -5,17 +5,38 @@
 
 import { WorkerPool } from './WorkerPool.js';
 
+/**
+ * Describes a matrix as a flat row-major buffer and its dimensions.
+ */
 export interface MatrixData {
+  /** Element values, or the shared buffer that holds them. */
   data: Float64Array | SharedArrayBuffer;
   rows: number;
   cols: number;
+  /** True when `data` uses shared memory. */
   isShared: boolean;
 }
 
+/**
+ * Options for `ParallelMatrix.configure`. Each omitted field keeps its current value.
+ */
 export interface ParallelConfig {
+  /**
+   * Smallest element count that uses the worker pool. Smaller inputs use the
+   * sequential path. The default is 1000.
+   */
   minSizeForParallel?: number;
+  /** Path or URL of the worker script. The default is the built `matrix.worker.js`. */
   workerScript?: string;
+  /**
+   * Number of workers in the pool. The value 0 lets `WorkerPool` select the
+   * count. The default is 0.
+   */
   maxWorkers?: number;
+  /**
+   * Copy inputs into a `SharedArrayBuffer` before they go to the workers. The
+   * default is true when `SharedArrayBuffer` is available.
+   */
   useSharedMemory?: boolean;
 }
 
@@ -64,6 +85,13 @@ function resolveMatrixWorkerScript(): string {
   return candidates[0].href;
 }
 
+/**
+ * Static matrix operations that divide work across a shared worker pool.
+ *
+ * Each operation uses the sequential path when the input element count is
+ * less than `minSizeForParallel`. The class creates the pool on first
+ * parallel use. `configure` and `terminate` stop the current pool.
+ */
 export class ParallelMatrix {
   private static workerPool: WorkerPool | null = null;
   private static config: Required<ParallelConfig> = {
