@@ -77,6 +77,7 @@ jobs:
           commit-message: 'chore: release packages'
           # `changeset version` bumps package.json but not bun.lock, so every release left the
           # workspace versions in bun.lock one release behind. This script refreshes the lock too.
-          version: bun run version-packages
+          # v2 name. `version` is a HARD ERROR in v2, like pr-title/commit-message above.
+          version-script: bun run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

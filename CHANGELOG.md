@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ci(release): the version PR refreshes bun.lock
 
 - `changeset version` bumps each released `package.json` but does not touch `bun.lock`, so after every release the workspace versions in `bun.lock` were one release behind (plot and workbook in #313, workerpool after #314).
-- New script `version-packages` = `changeset version && bun install --lockfile-only`; `release.yml` passes it to `changesets/action` as `version:`. `--lockfile-only` rewrites the lock without installing.
+- New script `version-packages` = `changeset version && bun install --lockfile-only`; `release.yml` passes it to `changesets/action` as `version-script:` (the v2 name; `version:` is a hard error, and the first attempt in #317 used it and failed the release run on main). `--lockfile-only` rewrites the lock without installing.
 - Also syncs the lock for `mathts-workerpool` 0.2.4.
 
 ### fix(workbook): exporters make chart markup from the chart settings (security)
