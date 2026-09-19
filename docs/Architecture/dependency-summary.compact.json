@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-19", "f": 1175, "e": 5843, "re": 2363 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-19", "f": 1174, "e": 5842, "re": 2363 },
   "s": {
-    "loc": 198293,
+    "loc": 198250,
     "cls": 55,
     "int": 508,
-    "fn": 1886,
+    "fn": 1885,
     "tg": 158,
     "en": 0,
     "co": 1599,
@@ -40,9 +40,8 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 5,
+      "f": 4,
       "exp": [
-        "registerWorkerMethods",
         "fftBitReverse",
         "fftFrameInPlace",
         "Transfer",
@@ -61,7 +60,8 @@
         "isWorkerWasmAvailable",
         "getWasmFeatures",
         "initializePool",
-        "terminatePool"
+        "terminatePool",
+        "getPoolStats"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [

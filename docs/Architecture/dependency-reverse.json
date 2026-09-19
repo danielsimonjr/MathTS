@@ -5,7 +5,6 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
-    "packages/workerpool/src/bun-worker-bridge.ts": ["packages/workerpool/src/worker.ts"],
     "core/src/config.ts": [
       "core/src/arithmetic/scalar.ts",
       "core/src/internal.ts",

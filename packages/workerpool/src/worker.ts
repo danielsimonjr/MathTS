@@ -9,7 +9,6 @@
 
 import { fftFrameInPlace } from './fft-core.js';
 import { worker } from 'workerpool';
-import { registerWorkerMethods } from './bun-worker-bridge.js';
 
 // =============================================================================
 // Array Reduction Operations
@@ -1117,5 +1116,4 @@ const workerMethods: Record<string, (...args: any[]) => any> = {
   integrateChunk,
 };
 
-// Registered through the Bun-aware wrapper (see bun-worker-bridge.ts).
-registerWorkerMethods(worker, workerMethods);
+worker(workerMethods);

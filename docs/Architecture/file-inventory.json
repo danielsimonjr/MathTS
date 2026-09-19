@@ -1,9 +1,9 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1863,
+  "totalFiles": 1862,
   "byDisposition": {
     "reachable": 24,
-    "build-entry": 1151,
+    "build-entry": 1150,
     "test-only": 0,
     "orphan": 0,
     "test": 629,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1175,
+    "src": 1174,
     "tests": 629,
     "config": 29,
     "examples": 5,
@@ -34,7 +34,7 @@
     "@danielsimonjr/mathts-matrix": 99,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
-    "@danielsimonjr/mathts-workerpool": 10,
+    "@danielsimonjr/mathts-workerpool": 9,
     "@danielsimonjr/mathts-parallel": 38,
     "@danielsimonjr/mathts-parser": 3,
     "@danielsimonjr/mathts-plot": 46,
@@ -11240,13 +11240,6 @@
       "loc": 22
     },
     {
-      "file": "packages/workerpool/src/bun-worker-bridge.ts",
-      "package": "@danielsimonjr/mathts-workerpool",
-      "area": "src",
-      "disposition": "build-entry",
-      "loc": 58
-    },
-    {
       "file": "packages/workerpool/src/fft-core.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
@@ -11265,7 +11258,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1122
+      "loc": 1120
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
@@ -12665,14 +12658,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 54
+      "loc": 56
     },
     {
       "file": "workbook/src/edit.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 306
+      "loc": 310
     },
     {
       "file": "workbook/src/executor.ts",
@@ -12756,7 +12749,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 179
+      "loc": 182
     },
     {
       "file": "workbook/src/run-worker.ts",
@@ -12770,7 +12763,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 195
+      "loc": 203
     },
     {
       "file": "workbook/src/svg-math.ts",

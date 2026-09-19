@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(deps): workerpool 10.2.2 fixes Bun at the source; remove bun-worker-bridge
+
+- `@danielsimonjr/workerpool` 10.2.2 prefers `parentPort` from `node:worker_threads` over the
+  Web Worker globals. Under Bun, the worker now takes its Node path, receives tasks and exits.
+- Pins: root `package.json` and `packages/workerpool/package.json` change from
+  `npm:@danielsimonjr/workerpool@10.2.1` to `npm:@danielsimonjr/workerpool@10.2.2`. The pin
+  stays exact, like #299, so the lock and the published manifest resolve the same fork build.
+  `bun.lock` resolves 10.2.2 with 0 git or GitHub entries.
+- Deleted `packages/workerpool/src/bun-worker-bridge.ts` (added in #284). `worker.ts` calls
+  `worker(workerMethods)` directly. No test existed only for the bridge.
+- Control: with the bridge deleted and 10.2.1 pinned, the Bun worker tests in
+  `packages/workerpool` time out (18 tests at 30 s, then the run hangs).
+- Changeset: patch for mathts-workerpool.
+
 ### docs(workbook): doc comments for every exported symbol
 
 - The `code-docs` gate (`code_docs.py check workbook/src`) failed on `main` with 41 MUST issues

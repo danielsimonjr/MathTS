@@ -6,7 +6,7 @@
       "name": "mathts",
       "dependencies": {
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
-        "workerpool": "npm:@danielsimonjr/workerpool@10.2.1",
+        "workerpool": "npm:@danielsimonjr/workerpool@10.2.2",
       },
       "devDependencies": {
         "@changesets/cli": "^3.0.1",
@@ -247,7 +247,7 @@
       "name": "@danielsimonjr/mathts-workerpool",
       "version": "0.2.3",
       "dependencies": {
-        "workerpool": "npm:@danielsimonjr/workerpool@10.2.1",
+        "workerpool": "npm:@danielsimonjr/workerpool@10.2.2",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -286,7 +286,7 @@
     },
     "plot": {
       "name": "@danielsimonjr/mathts-plot",
-      "version": "0.4.3",
+      "version": "0.4.4",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.15.0",
         "@danielsimonjr/mathts-expression": "^0.8.0",
@@ -372,7 +372,7 @@
     },
     "workbook": {
       "name": "@danielsimonjr/mathts-workbook",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "bin": {
         "mtsw": "dist/cli.js",
       },
@@ -1027,7 +1027,7 @@
 
     "why-is-node-running": ["why-is-node-running@2.3.0", "", { "dependencies": { "siginfo": "^2.0.0", "stackback": "0.0.2" }, "bin": "cli.js" }, "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w=="],
 
-    "workerpool": ["@danielsimonjr/workerpool@10.2.1", "", {}, "sha512-B8dBoj/q4ezO4D8FsjdigShT7iljj2PWDpp1im6puq2FIiBplY+QAA/R2a30w5k2PlDVQQIsk9de1bCZJ9yOOw=="],
+    "workerpool": ["@danielsimonjr/workerpool@10.2.2", "", {}, "sha512-2ku3pC7MzMWuAbLuS5AxUE3Dh2P75gf891Hi4RPoSkGtgo6ta7XlhOra19wtCea1ci6vcBx7MiMCt6oc9V2gBQ=="],
 
     "ws": ["ws@8.21.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="],
 
