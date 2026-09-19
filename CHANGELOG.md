@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(test): Bun migration Phase 2e - root aggregate, coverage; `plot` stays on vitest
+
+- Root `bun run test` is now `turbo run test && vitest run`. Each package runs its own runner
+  (`bun test` for 21 packages, vitest for `functions` and `plot`). The root `vitest.config.ts`
+  now includes only the root suites (`tests/integration`, `tests/wasm`). Its former glob ran every
+  package a second time under vitest, whatever runner the package declares. The root suites were
+  in no CI job before; the CI Test job now runs them (121 tests: 105 pass, 16 skip).
+- Counts: every package is equal to the former root aggregate, except `functions`: its own config
+  runs 4968 tests, and the root glob ran only 4909 of them. Total 10588 -> 10647.
+- `test:coverage` is `bun test ... --coverage` in the 21 `bun test` packages. Each `bunfig.toml`
+  sets `coverageReporter = ["text", "lcov"]` (Codecov reads `coverage/lcov.info`) and
+  `coveragePathIgnorePatterns = ["../**"]`, so that the report counts only the package's own
+  files, as vitest did. There are no coverage thresholds. The numbers are NOT comparable: Bun
+  reports only functions and lines, and only for files the tests load (vitest also listed
+  never-loaded files at 0 %). `functions` and `plot` keep `vitest run --coverage`.
+- `plot` STAYS on vitest. Under Bun 14 of the 15 `golden-svg` snapshots have identical content,
+  but `surface` draws two polygons in the other order. The two quads have equal true depth, and
+  the engines' `Math.sin(Math.PI / 4)` differ by 1 ulp (V8 0.7071067811865475, JavaScriptCore
+  0.7071067811865476), so the painter's sort breaks the tie differently. Moving `plot` needs a
+  tie-tolerant sort in `plot/src/three/surface.ts`, which changes the `surface` golden under
+  Node too: a separate decision.
+
 ### fix(workerpool): real workers answer under Bun; matrix, parallel, workerpool move to bun test
 
 Root cause of the Phase 2c/2d holdouts. Bun exposes the Web Worker globals (`self`,

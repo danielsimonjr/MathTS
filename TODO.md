@@ -56,11 +56,15 @@ Newest/most-actionable first. Detailed history for each area is in its section b
       but about 1 full run in 5 ends in `panic(main thread): Segmentation fault at address 0x8`. It
       also crashes in runs that spawn no worker, and with `--parallel`. Switch the `test` script when
       a Bun release fixes it (re-measure: 10 clean full runs).
-- [ ] **2e — `plot`** (`toMatchSnapshot` in `golden-svg.test.ts`: Bun writes its own snapshot
+- [x] **2e — `plot`** (`toMatchSnapshot` in `golden-svg.test.ts`: Bun writes its own snapshot
 
 >         format, so regenerate and review the goldens) and the **root aggregate**, coverage
 >         (`@vitest/coverage-v8` -> `bun test --coverage`), the `test:bench` config and the browser
 >         config (`@vitest/browser` + Playwright has no `bun test` equivalent: expect it to stay on vitest).
+>         **Done (branch `chore/bun-phase-2e`):** root aggregate runs each package's own runner;
+>         coverage on `bun test --coverage` for 21 packages. `plot` stays on vitest: Bun's
+>         `Math.sin` differs by 1 ulp and reorders two tied quads in the `surface` golden (see
+>         CHANGELOG). `test:bench` and browser stay on vitest.
 >
 > - [ ] **Phase 3 — force Bun as the process runtime** (`[run].bun = true` in `bunfig.toml`). Blocked by
 >       `asc` (AssemblyScript) and every `node tools/*.mjs` script: verify each under the Bun runtime.

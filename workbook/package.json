@@ -26,7 +26,7 @@
     "dev": "tsup --watch",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "bun test --isolate --timeout 30000 --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",

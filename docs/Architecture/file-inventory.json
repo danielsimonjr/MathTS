@@ -10845,7 +10845,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 168
+      "loc": 171
     },
     {
       "file": "matrix/tests/backends/WasmLoader-browser.test.ts",
@@ -11055,7 +11055,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 172
+      "loc": 168
     },
     {
       "file": "matrix/tests/public-api-smoke.test.ts",
@@ -11069,7 +11069,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 168
+      "loc": 171
     },
     {
       "file": "matrix/tests/sparse/operations.test.ts",
@@ -11251,7 +11251,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1127
+      "loc": 1122
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
@@ -11538,7 +11538,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 248
+      "loc": 252
     },
     {
       "file": "parallel/tests/WorkerPool.timeout.test.ts",
@@ -12609,7 +12609,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 104
+      "loc": 96
     },
     {
       "file": "workbook/src/cli.ts",
