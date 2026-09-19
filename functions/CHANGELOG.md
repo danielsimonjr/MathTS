@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.64.2
+
+### Patch Changes
+
+- 8473590: Declare `typed-function` and `workerpool` as registry `npm:` aliases (`npm:@danielsimonjr/typed-function@5.0.0-alpha.4`, `npm:@danielsimonjr/workerpool@10.2.1`) instead of `github:` git dependencies. npm 10 (bundled with Node 20 and 22) failed to install these packages with "git dep preparation failed ... Cannot read properties of null (reading 'edgesOut')". The registry builds are code-identical to the git HEADs that were resolved before, and the import names do not change.
+- Updated dependencies [8473590]
+  - @danielsimonjr/mathts-core@0.15.2
+
 ## 0.64.1
 
 ### Patch Changes
