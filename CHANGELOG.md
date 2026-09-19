@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `code-docs` gate (`code_docs.py check functions/src`) now passes: 1297/1297 exported symbols
   documented, 0 MUST issues (before: 301 MUST issues). Comments only; no code changes. The
   pre-commit formatter also reflowed code lines in 18 of the touched files (layout only).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336352 (the new comment lines, after the
+  pre-commit formatter).
 
 ### docs(core): doc comments for every exported symbol
 
