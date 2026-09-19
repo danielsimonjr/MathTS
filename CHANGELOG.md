@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(core): map.d.ts iterator types match TS >= 5.6 Map; consumer typecheck in CI
+
+- `core/src/map.ts`: `ObjectWrappingMap` and `PartitionedMap` declare `keys()`, `values()` and
+  `entries()` with types derived from `Map` (`ReturnType<Map<K, V>['keys']>` etc.), not
+  `IterableIterator`. Core 0.15.0 was the first release to ship `dist/map.d.ts`, and a consumer with
+  `skipLibCheck: false` and TypeScript >= 5.6 got six TS2416 errors in it. The same six errors were
+  already in 0.14.3 through the `./internal` entry (inlined in `internal.d.ts`).
+- `core/src/map.ts`: both classes add `getOrInsert` and `getOrInsertComputed` (ESNext `Map` upsert).
+  With the TS2416 errors gone, a consumer with `lib: ["ESNext"]` gets TS2420 for these two members.
+  The six unused `@ts-expect-error` directives are removed. New `core/tests/map.test.ts`.
+- New `tools/test/consumer-typecheck.mjs`, run in the CI `Test (22.x)` leg: it packs the 24 public
+  packages, installs the tarballs into a new consumer project and runs `tsc` with `strict`,
+  `skipLibCheck: false` and `moduleResolution: Bundler` (`--module-resolution=NodeNext` is available
+  but not enabled). It fails on origin/main (the six TS2416) and passes with this fix. Pre-existing
+  TS7016 in `matrix` and `compat` (their `.d.ts` import the undeclared `typed-function`) are listed
+  as known errors in the script.
+- `docs/Architecture`: regenerated (`docs:deps`); `OVERVIEW.md` `totalLinesOfCode` is 335611.
+
 ### docs(core): doc comments for every exported symbol
 
 - `core/src`: TSDoc comments for 41 undocumented exported symbols (the `is.ts` type guards and
