@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.20
+
+### Patch Changes
+
+- 57c8ffd: `tensorCholesky` errors now carry the original error as `cause`. The message is unchanged.
+- Updated dependencies [57c8ffd]
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+  - @danielsimonjr/mathts-matrix@0.7.2
+
 ## 0.2.18
 
 ### Patch Changes

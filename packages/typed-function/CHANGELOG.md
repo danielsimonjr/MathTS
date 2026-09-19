@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-typed-function
 
+## 0.2.0
+
+### Minor Changes
+
+- 57c8ffd: Type tests also accept objects that carry the library's Symbol type marker, so values from a second copy of a package are recognised.
+
 ## 0.1.1
 
 ### Patch Changes

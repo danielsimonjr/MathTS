@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.7.2
+
+### Patch Changes
+
+- 57c8ffd: Rebuilt: ships the current WASM binary (same exports, new SHA-384 manifest) and the current bundler helper. No source change.
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+  - @danielsimonjr/mathts-parallel@0.6.5
+
 ## 0.7.0
 
 ### Minor Changes
