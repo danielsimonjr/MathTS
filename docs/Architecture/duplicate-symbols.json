@@ -7050,14 +7050,14 @@
           "package": "@danielsimonjr/mathts-core",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+          "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         },
         {
           "file": "packages/typed-function/src/index.ts",
           "package": "@danielsimonjr/mathts-typed-function",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+          "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -7490,14 +7490,14 @@
           "package": "@danielsimonjr/mathts-core",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+          "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         },
         {
           "file": "packages/typed-function/src/index.ts",
           "package": "@danielsimonjr/mathts-typed-function",
           "public": true,
           "tag": "ALLOWLISTED",
-          "reason": "no valid import path exists: core depends on the external typed-function (github:danielsimonjr/typed-function) fork, NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+          "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

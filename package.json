@@ -130,8 +130,8 @@
     "physics"
   ],
   "dependencies": {
-    "typed-function": "github:danielsimonjr/typed-function",
-    "workerpool": "github:danielsimonjr/workerpool"
+    "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
+    "workerpool": "npm:@danielsimonjr/workerpool@10.2.1"
   },
   "overrides": {
     "esbuild": "^0.28.1",
