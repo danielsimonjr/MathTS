@@ -773,7 +773,7 @@ export function idst(X: number[]): number[] {
  * @param x - Input signal (length >= 2)
  * @param wavelet - Wavelet name; see `SUPPORTED_WAVELETS` in
  *   `../signal/wavelet-filters.ts` for the full list
- * @returns { approx: number[], detail: number[] }
+ * @returns `{ approx: number[], detail: number[] }`
  */
 export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; detail: number[] } {
   const n: i32 = x.length;
@@ -837,7 +837,7 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
  * uninitialized) it falls back to the sequential per-row/per-column loop.
  *
  * @param x - 2D input (rows x cols), each value is real
- * @returns { real: number[][], imag: number[][] }
+ * @returns `{ real: number[][], imag: number[][] }`
  */
 export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: number[][] }> {
   const rows: i32 = x.length;
@@ -939,7 +939,7 @@ export async function fft2d(x: number[][]): Promise<{ real: number[][]; imag: nu
  * @param f - Time-domain function
  * @param t - Time sample points
  * @param omega - Frequency to evaluate at
- * @returns { re: number, im: number }
+ * @returns `{ re: number, im: number }`
  */
 export function fourier(f: (t: f64) => f64, t: number[], omega: f64): { re: f64; im: f64 } {
   let re: f64 = 0;
@@ -1061,7 +1061,7 @@ export function hilbertTransform(x: number[]): number[] {
  *
  * @param x - Input signal
  * @param opts - { windowSize, hopSize, window }
- * @returns { magnitude: number[][], frequencies: number[], times: number[] }
+ * @returns `{ magnitude: number[][], frequencies: number[], times: number[] }`
  */
 export async function spectrogram(
   x: number[],
@@ -1188,7 +1188,7 @@ export async function spectrogram(
  *
  * @param x - Input signal
  * @param opts - { nfft, window }
- * @returns { psd: number[], frequencies: number[] }
+ * @returns `{ psd: number[], frequencies: number[] }`
  */
 export function periodogram(
   x: number[],
@@ -1520,7 +1520,7 @@ export function correlate(a: number[], b: number[]): number[] {
  *
  * @param signal - Input signal samples
  * @param opts - { frameLength, overlap, window }
- * @returns { psd: number[], frequencies: number[], frameLength: number }
+ * @returns `{ psd: number[], frequencies: number[], frameLength: number }`
  */
 export function welchPSD(
   signal: number[] | Float64Array,
@@ -1545,7 +1545,7 @@ export function welchPSD(
  *
  * @param signal - Input signal samples
  * @param opts - { frameLength }
- * @returns { psd: number[], frequencies: number[], frameLength: number }
+ * @returns `{ psd: number[], frequencies: number[], frameLength: number }`
  */
 export function bartlettPSD(
   signal: number[] | Float64Array,
@@ -1573,7 +1573,7 @@ export function bartlettPSD(
  *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
- * @returns { psd: number[], frequencies: number[] }
+ * @returns `{ psd: number[], frequencies: number[] }`
  */
 export function multiTaperPSD(
   signal: number[] | Float64Array,
@@ -1649,7 +1649,7 @@ export function goertzel(signal: number[] | Float64Array, targetFreq: f64, sampl
  * @param m - Number of output points
  * @param phiStart - Start angle in turns (e.g. 0 = DC, 0.5 = Nyquist)
  * @param phiStep - Step angle in turns (negative for standard DFT)
- * @returns { re: Float64Array, im: Float64Array } — M complex output values
+ * @returns `{ re: Float64Array, im: Float64Array }` — M complex output values
  */
 export function chirpZTransform(
   signal: number[] | Float64Array,

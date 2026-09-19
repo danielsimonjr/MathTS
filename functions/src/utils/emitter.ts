@@ -1,5 +1,6 @@
 import Emitter from 'tiny-emitter';
 
+/** Event methods (`on`, `off`, `once`, `emit`) that `mixin` adds to an object. */
 export interface EmitterMixin {
   on: (event: string, callback: (...args: unknown[]) => void, context?: unknown) => void;
   off: (event: string, callback?: (...args: unknown[]) => void) => void;

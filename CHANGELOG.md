@@ -23,7 +23,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `_options`, `expr`, `fn`), or are removed where the method has no parameter (`_toMathML()`).
 - The `_toMathML` comments in 7 node files said "Get LaTeX representation". They now say MathML.
 - Formatter-only reflows (pre-commit prettier, no logic change): `RuntimeIndex` in `node/AssignmentNode.ts`, the `parenthesizeLower` call in `node/OperatorNode.ts`, and the `index` parameter type in `node/utils/assign.ts`.
-- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335596 (the new comment lines, after the pre-commit formatter).
+- After the merge of `main`: 4 `@throws {Error}` tags (3 in `node/Node.ts`, 1 in `operators.ts`) are now `@throws Error`. code-docs 0.3.6 counts a typed `@throws` as JSDoc, so these files had mixed dialects (M5).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336592 (the new comment lines on top of main, after the pre-commit formatter).
+### docs(functions): doc comments for every exported symbol
+
+- `functions/src`: TSDoc comments for 264 undocumented exported symbols. The largest groups are
+  the `utils/is.ts` type guards and structural interfaces (70), the `plain/number/*` scalar
+  functions (65), the `wasm/special` Carlson, elliptic and Bessel scalars (19), and the
+  hypothesis-test, regression and optimizer result and option interfaces. Each behavioural claim
+  (throws, NaN domains, copy or in-place, default configuration) was checked against the code.
+- M2: summary lines for `zetaNumeric`, `zetaComplex`, `zeta`, `product` and `_tryFunctionWithArgs`.
+- M3: 24 documented parameters that were not in the signature now match it. `csDfs` no longer
+  documents a removed `k`. The public `log`, `log10` and `nthRoot` comments no longer attach to an
+  inner helper, because the helper now has its own comment. The `ImmutableDenseMatrix` `set`,
+  `resize` and `swapRows` comments now say that the method throws, not that it changes the matrix.
+  The `Index` parameters moved to a new constructor comment.
+- M5: 8 mixed-dialect files. `@throws {Error}` became `@throws Error`, and a `@returns { a, b }`
+  object shape is now in backticks. `import.ts` uses `@param name - text`; `[options]` became
+  "Optional." (0 of 6 optional or default markers lost).
+- `utils/factory.ts`: the two `eslint-disable-next-line` comments sat between each doc comment and
+  its declaration, so the doc was not attached. The same rule and reason now use a block
+  `eslint-disable` / `eslint-enable` pair around the declaration line. `nearlyEqual`: its doc
+  comment moved from above a private interface to the function.
+- The `code-docs` gate (`code_docs.py check functions/src`) now passes: 1297/1297 exported symbols
+  documented, 0 MUST issues (before: 301 MUST issues). Comments only; no code changes. The
+  pre-commit formatter also reflowed code lines in 18 of the touched files (layout only).
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 336352 (the new comment lines, after the
+  pre-commit formatter).
+
+### docs(core): doc comments for every exported symbol
+
+- `core/src`: TSDoc comments for 41 undocumented exported symbols (the `is.ts` type guards and
+  interfaces, `NestedArray`, `IdentifiedValue`, `MathJsConfig`, `createIndexError`, `create`,
+  `ObjectWrappingMap`, `registerNativeTypes`, `RoundingMode` and `Dual`), summary lines for the
+  `DimensionError` and `PartitionedMap` constructors, and a new `Range` constructor comment.
+- `core/src`: the JSDoc `@param {Type} name` form is now the TSDoc `@param name - text` form in
+  `array.ts`, `bignumber-formatter.ts`, `is.ts`, `object.ts`, `shared.ts`, `string.ts`,
+  `types/matrix/Range.ts` and `types/unit/Unit.ts` (one dialect per file). The `concat` and `Range`
+  comments no longer document parameters that are not in the signature. `Unit.divideInto` documents
+  its result with `@returns`, not with a false `@param result`.
+- The `code-docs` gate (`code_docs.py check core/src`) now passes: 253/253 exported symbols
+  documented, 0 MUST issues (before: 52 MUST issues). Comments only; no code changes.
+- `docs/Architecture/OVERVIEW.md`: `totalLinesOfCode` is 335572 (the new comment lines).
 
 ### docs(compat): doc comments for every exported symbol
 

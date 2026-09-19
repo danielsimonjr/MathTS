@@ -326,7 +326,7 @@ export const createNode = /* #__PURE__ */ factory(
        * Internal function to generate the string output.
        * This has to be implemented by every Node
        *
-       * @throws {Error}
+       * @throws Error
        */
       _toString(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations
@@ -370,7 +370,7 @@ export const createNode = /* #__PURE__ */ factory(
        * Internal function to generate the HTML output.
        * This has to be implemented by every Node
        *
-       * @throws {Error}
+       * @throws Error
        */
       _toHTML(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations
@@ -464,7 +464,7 @@ export const createNode = /* #__PURE__ */ factory(
        * This has to be implemented by every Node
        *
        * @param _options - Optional.
-       * @throws {Error}
+       * @throws Error
        */
       _toTex(_options?: StringOptions): string {
         // must be implemented by each of the Node implementations

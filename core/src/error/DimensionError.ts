@@ -18,6 +18,8 @@ export class DimensionError extends RangeError {
   isDimensionError = true as const;
 
   /**
+   * Create a DimensionError. When `actual` is a string and `expected` is not given, the string is the message.
+   *
    * @param actual - The actual size or custom error message
    * @param expected - The expected size (optional if actual is a custom message)
    * @param relation - Optional relation between actual and expected size: '!=', '<', etc.

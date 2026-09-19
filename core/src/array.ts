@@ -27,9 +27,18 @@ import { IndexError } from './error/IndexError.js';
 import { deepStrictEqual } from './object.js';
 
 // Type definitions
+/**
+ * A value of type T, or an array of such values nested to any depth.
+ */
 export type NestedArray<T> = T | NestedArray<T>[];
 
 // Type for objects with value and identifier properties
+/**
+ * A value paired with a numeric identifier.
+ *
+ * `identify` sets `identifier` to the count of equal values that come
+ * directly before this value in the sorted input. The first value of each run has identifier 0.
+ */
 export interface IdentifiedValue<T> {
   value: T;
   identifier: number;
@@ -39,7 +48,7 @@ export interface IdentifiedValue<T> {
  * Calculate the size of a multi dimensional array.
  * This function checks the size of the first entry, it does not validate
  * whether all dimensions match. (use function `validate` for that)
- * @param {Array} x
+ * @param x
  * @return {number[]} size
  */
 export function arraySize<T>(x: NestedArray<T>): number[] {
@@ -57,9 +66,9 @@ export function arraySize<T>(x: NestedArray<T>): number[] {
 /**
  * Recursively validate whether each element in a multi dimensional array
  * has a size corresponding to the provided size array.
- * @param {Array} array    Array to be validated
- * @param {number[]} size  Array with the size of each dimension
- * @param {number} dim     Current dimension
+ * @param array - Array to be validated
+ * @param size - Array with the size of each dimension
+ * @param dim - Current dimension
  * @throws DimensionError
  * @private
  */
@@ -94,8 +103,8 @@ function _validate<T>(array: T[], size: number[], dim: number): void {
 /**
  * Validate whether each element in a multi dimensional array has
  * a size corresponding to the provided size array.
- * @param {Array} array    Array to be validated
- * @param {number[]} size  Array with the size of each dimension
+ * @param array - Array to be validated
+ * @param size - Array with the size of each dimension
  * @throws DimensionError
  */
 export function validate<T>(array: NestedArray<T>, size: number[]): void {
@@ -113,8 +122,8 @@ export function validate<T>(array: NestedArray<T>, size: number[]): void {
 
 /**
  * Validate whether the source of the index matches the size of the Array
- * @param {Array | Matrix} value    Array to be validated
- * @param {Index} index  Index with the source information to validate
+ * @param value - Array to be validated
+ * @param index - Index with the source information to validate
  * @throws DimensionError
  */
 export function validateIndexSourceSize(value: unknown[] | Matrix, index: Index): void {
@@ -131,8 +140,8 @@ export function validateIndexSourceSize(value: unknown[] | Matrix, index: Index)
 /**
  * Test whether index is an integer number with index >= 0 and index < length
  * when length is provided
- * @param {number} index    Zero-based index
- * @param {number} [length] Length of the array
+ * @param index - Zero-based index
+ * @param length - Optional. Length of the array
  */
 export function validateIndex(index: number | undefined, length?: number): void {
   if (index !== undefined) {
@@ -147,7 +156,7 @@ export function validateIndex(index: number | undefined, length?: number): void 
 
 /**
  * Test if an index has empty values
- * @param {Index} index    Zero-based index
+ * @param index - Zero-based index
  */
 export function isEmptyIndex(index: Index): boolean {
   for (let i = 0; i < index._dimensions.length; ++i) {
@@ -174,9 +183,9 @@ export function isEmptyIndex(index: Index): boolean {
 
 /**
  * Resize a multi dimensional array. The resized array is returned.
- * @param {Array | number} array         Array to be resized
- * @param {number[]} size Array with the size of each dimension
- * @param {*} [defaultValue=0]  Value to be filled in new entries,
+ * @param array - Array to be resized
+ * @param size - Array with the size of each dimension
+ * @param defaultValue - Optional. Default is 0. Value to be filled in new entries,
  *                              zero by default. Specify for example `null`,
  *                              to clearly see entries that are not explicitly
  *                              set.
@@ -219,10 +228,10 @@ export function resize<T = unknown>(
 
 /**
  * Recursively resize a multi dimensional array
- * @param {Array} array         Array to be resized
- * @param {number[]} size       Array with the size of each dimension
- * @param {number} dim          Current dimension
- * @param {*} [defaultValue]    Value to be filled in new entries,
+ * @param array - Array to be resized
+ * @param size - Array with the size of each dimension
+ * @param dim - Current dimension
+ * @param defaultValue - Optional. Value to be filled in new entries,
  *                              undefined by default.
  * @private
  */
@@ -281,8 +290,8 @@ function _resize<T>(array: NestedArray<T>[], size: number[], dim: number, defaul
 
 /**
  * Re-shape a multi dimensional array to fit the specified dimensions
- * @param {Array} array           Array to be reshaped
- * @param {number[]} sizes        List of sizes for each dimension
+ * @param array - Array to be reshaped
+ * @param sizes - List of sizes for each dimension
  * @returns {Array}               Array whose data has been formatted to fit the
  *                                specified dimensions
  *
@@ -321,8 +330,8 @@ export function reshape<T = unknown>(array: NestedArray<T>, sizes: number[]): Ne
 
 /**
  * Replaces the wildcard -1 in the sizes array.
- * @param {number[]} sizes  List of sizes for each dimension. At most one wildcard.
- * @param {number} currentLength  Number of elements in the array.
+ * @param sizes - List of sizes for each dimension. At most one wildcard.
+ * @param currentLength - Number of elements in the array.
  * @throws {Error}                If more than one wildcard or unable to replace it.
  * @returns {number[]}      The sizes array with wildcard replaced.
  */
@@ -354,7 +363,7 @@ export function processSizesWildcard(sizes: number[], currentLength: number): nu
 
 /**
  * Computes the product of all array elements.
- * @param {number[]} array Array of factors
+ * @param array - Array of factors
  * @returns {number}            Product of all elements
  */
 function product(array: number[]): number {
@@ -363,8 +372,8 @@ function product(array: number[]): number {
 
 /**
  * Iteratively re-shape a multi dimensional array to fit the specified dimensions
- * @param {Array} array           Array to be reshaped
- * @param {number[]} sizes  List of sizes for each dimension
+ * @param array - Array to be reshaped
+ * @param sizes - List of sizes for each dimension
  * @returns {Array}               Array whose data has been formatted to fit the
  *                                specified dimensions
  */
@@ -393,8 +402,8 @@ function _reshape<T>(array: T[], sizes: number[]): NestedArray<T> {
 
 /**
  * Squeeze a multi dimensional array
- * @param {Array} array
- * @param {Array} [size]
+ * @param array
+ * @param size - Optional.
  * @returns {Array} returns the array itself
  */
 export function squeeze<T>(array: NestedArray<T>, size?: number[]): T | NestedArray<T> {
@@ -425,9 +434,9 @@ export function squeeze<T>(array: NestedArray<T>, size?: number[]): T | NestedAr
 
 /**
  * Recursively squeeze a multi dimensional array
- * @param {Array} array
- * @param {number} dims Required number of dimensions
- * @param {number} dim  Current dimension
+ * @param array
+ * @param dims - Required number of dimensions
+ * @param dim - Current dimension
  * @returns {Array | *} Returns the squeezed array
  * @private
  */
@@ -453,10 +462,10 @@ function _squeeze<T>(array: NestedArray<T>, dims: number, dim: number): NestedAr
  *
  * Parameter `size` will be mutated to match the new, unsqueezed matrix size.
  *
- * @param {Array} array
- * @param {number} dims       Desired number of dimensions of the array
- * @param {number} [outer]    Number of outer dimensions to be added
- * @param {Array} [size] Current size of array.
+ * @param array
+ * @param dims - Desired number of dimensions of the array
+ * @param outer - Optional. Number of outer dimensions to be added
+ * @param size - Optional. Current size of array.
  * @returns {Array} returns the array itself
  * @private
  */
@@ -489,9 +498,9 @@ export function unsqueeze<T>(
 
 /**
  * Recursively unsqueeze a multi dimensional array
- * @param {Array} array
- * @param {number} dims Required number of dimensions
- * @param {number} dim  Current dimension
+ * @param array
+ * @param dims - Required number of dimensions
+ * @param dim - Current dimension
  * @returns {Array | *} Returns the unsqueezed array
  * @private
  */
@@ -515,8 +524,8 @@ function _unsqueeze<T>(array: NestedArray<T>, dims: number, dim: number): Nested
 /**
  * Flatten a multi dimensional array, put all elements in a one dimensional
  * array
- * @param {Array} array   A multi dimensional array
- * @param {boolean} isRectangular Optional. If the array is rectangular (not jagged)
+ * @param array - A multi dimensional array
+ * @param isRectangular - Optional. If the array is rectangular (not jagged)
  * @return {Array}        The flattened array (1 dimensional)
  */
 export function flatten<T>(array: NestedArray<T>, isRectangular: boolean = false): T[] {
@@ -563,8 +572,8 @@ export function flatten<T>(array: NestedArray<T>, isRectangular: boolean = false
 
 /**
  * A safe map
- * @param {Array} array
- * @param {function} callback
+ * @param array
+ * @param callback
  */
 export function map<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => U): U[] {
   // `Array.prototype.map.call` types its result as `unknown[]`; the callback
@@ -574,8 +583,8 @@ export function map<T, U>(array: T[], callback: (value: T, index: number, array:
 
 /**
  * A safe forEach
- * @param {Array} array
- * @param {function} callback
+ * @param array
+ * @param callback
  */
 export function forEach<T>(
   array: T[],
@@ -586,8 +595,8 @@ export function forEach<T>(
 
 /**
  * A safe filter
- * @param {Array} array
- * @param {function} callback
+ * @param array
+ * @param callback
  */
 export function filter<T>(
   array: T[],
@@ -602,8 +611,8 @@ export function filter<T>(
 
 /**
  * Filter values in an array given a regular expression
- * @param {Array} array
- * @param {RegExp} regexp
+ * @param array
+ * @param regexp
  * @return {Array} Returns the filtered array
  * @private
  */
@@ -617,8 +626,8 @@ export function filterRegExp(array: string[], regexp: RegExp): string[] {
 
 /**
  * A safe join
- * @param {Array} array
- * @param {string} separator
+ * @param array
+ * @param separator
  */
 export function join<T>(array: T[], separator: string): string {
   return Array.prototype.join.call(array, separator);
@@ -626,7 +635,7 @@ export function join<T>(array: T[], separator: string): string {
 
 /**
  * Assign a numeric identifier to every element of a sorted array
- * @param {Array} a  An array
+ * @param a - An array
  * @return {Array} An array of objects containing the original value and its identifier
  */
 export function identify<T>(a: T[]): IdentifiedValue<T>[] {
@@ -654,7 +663,7 @@ export function identify<T>(a: T[]): IdentifiedValue<T>[] {
 
 /**
  * Remove the numeric identifier from the elements
- * @param {array} a  An array
+ * @param a - An array
  * @return {array} An array of values without identifiers
  */
 export function generalize<T>(a: IdentifiedValue<T>[]): T[] {
@@ -678,8 +687,8 @@ export function generalize<T>(a: IdentifiedValue<T>[]): T[] {
  * This is a low level implementation that should only be used by
  * parent Matrix classes such as SparseMatrix or DenseMatrix
  * This method does not validate Array Matrix shape
- * @param {Array} array
- * @param {function} typeOf   Callback function to use to determine the type of a value
+ * @param array
+ * @param typeOf - Callback function to use to determine the type of a value
  * @return {string}
  */
 export function getArrayDataType(
@@ -721,7 +730,7 @@ export function getArrayDataType(
 
 /**
  * Return the last item from an array
- * @param {Array} array
+ * @param array
  * @returns {*}
  */
 export function last<T>(array: T[]): T {
@@ -735,7 +744,7 @@ export function last<T>(array: T[]): T {
  * this; `functions/src/utils/array.ts` never defined it, and it was dead code
  * even in expression (unused outside its own definition). Re-exported from
  * expression's shim only — see the module header.
- * @param {Array} array
+ * @param array
  * @returns {Array}
  */
 export function initial<T>(array: T[]): T[] {
@@ -745,10 +754,10 @@ export function initial<T>(array: T[]): T[] {
 /**
  * Recursively concatenate two matrices.
  * The contents of the matrices are not cloned.
- * @param {Array} a             Multi dimensional array
- * @param {Array} b             Multi dimensional array
- * @param {number} concatDim    The dimension on which to concatenate (zero-based)
- * @param {number} dim          The current dim (zero-based)
+ * @param a - Multi dimensional array
+ * @param b - Multi dimensional array
+ * @param concatDim - The dimension on which to concatenate (zero-based)
+ * @param dim - The current dim (zero-based)
  * @return {Array} c            The concatenated matrix
  * @private
  */
@@ -782,9 +791,12 @@ function concatRecursive<T>(
 
 /**
  * Concatenates many arrays in the specified direction
- * @param {...Array} arrays All the arrays to concatenate
- * @param {number} concatDim The dimension on which to concatenate (zero-based)
+ *
+ * With one array, the function returns that array without a copy.
+ *
+ * @param args - All the arrays to concatenate, then the dimension on which to concatenate (zero-based) as the last element
  * @returns {Array}
+ * @throws Error when `args` contains no array.
  */
 export function concat<T>(...args: [...NestedArray<T>[], number]): NestedArray<T>[] {
   const arrays = Array.prototype.slice.call(args, 0, -1) as NestedArray<T>[][];
@@ -804,7 +816,7 @@ export function concat<T>(...args: [...NestedArray<T>[], number]): NestedArray<T
 
 /**
  * Receives two or more sizes and gets the broadcasted size for both.
- * @param  {...number[]} sizes Sizes to broadcast together
+ * @param  sizes - Sizes to broadcast together
  * @returns {number[]} The broadcasted size
  */
 export function broadcastSizes(...sizes: number[][]): number[] {
@@ -830,8 +842,8 @@ export function broadcastSizes(...sizes: number[][]): number[] {
 
 /**
  * Checks if it's possible to broadcast a size to another size
- * @param {number[]} size The size of the array to check
- * @param {number[]} toSize The size of the array to validate if it can be broadcasted to
+ * @param size - The size of the array to check
+ * @param toSize - The size of the array to validate if it can be broadcasted to
  */
 export function checkBroadcastingRules(size: number[], toSize: number[]): void {
   const N = toSize.length;
@@ -848,8 +860,8 @@ export function checkBroadcastingRules(size: number[], toSize: number[]): void {
 
 /**
  * Broadcasts a single array to a certain size
- * @param {Array} array Array to be broadcasted
- * @param {number[]} toSize Size to broadcast the array
+ * @param array - Array to be broadcasted
+ * @param toSize - Size to broadcast the array
  * @returns {Array} The broadcasted array
  */
 export function broadcastTo<T>(array: NestedArray<T>, toSize: number[]): NestedArray<T> {
@@ -881,7 +893,7 @@ export function broadcastTo<T>(array: NestedArray<T>, toSize: number[]): NestedA
 
 /**
  * Broadcasts arrays and returns the broadcasted arrays in an array
- * @param  {...Array | any} arrays
+ * @param  arrays
  * @returns {Array[]} The broadcasted arrays
  */
 export function broadcastArrays<T>(...arrays: NestedArray<T>[]): NestedArray<T>[] {
@@ -904,9 +916,9 @@ export function broadcastArrays<T>(...arrays: NestedArray<T>[]): NestedArray<T>[
 
 /**
  * Stretches a matrix up to a certain size in a certain dimension
- * @param {Array} arrayToStretch
- * @param {number[]} sizeToStretch
- * @param {number} dimToStretch
+ * @param arrayToStretch
+ * @param sizeToStretch
+ * @param dimToStretch
  * @returns {Array} The stretched array
  */
 export function stretch<T>(
@@ -920,8 +932,8 @@ export function stretch<T>(
 /**
  * Retrieves a single element from an array given an index.
  *
- * @param {Array} array - The array from which to retrieve the value.
- * @param {Array<number>} index - An array of indices specifying the position of the desired element in each dimension.
+ * @param array - The array from which to retrieve the value.
+ * @param index - An array of indices specifying the position of the desired element in each dimension.
  * @returns {*} - The value at the specified position in the array.
  *
  * @example
@@ -946,12 +958,12 @@ export function get<T>(array: NestedArray<T>, index: number[]): T {
 /**
  * Recursively maps over each element of nested array using a provided callback function.
  *
- * @param {Array} array - The array to be mapped.
- * @param {Function} callback - The function to execute on each element, taking three arguments:
+ * @param array - The array to be mapped.
+ * @param callback - The function to execute on each element, taking three arguments:
  *   - `value` (any): The current element being processed in the array.
  *   - `index` (Array<number>): The index of the current element being processed in the array.
  *   - `array` (Array): The array `deepMap` was called upon.
- * @param {boolean} [skipIndex=false] - If true, the callback function is called with only the value.
+ * @param skipIndex - Optional. Default is false. If true, the callback function is called with only the value.
  * @returns {Array} A new array with each element being the result of the callback function.
  */
 export function deepMap<T, U>(
@@ -1005,12 +1017,12 @@ export function deepMap<T, U>(
 /**
  * Recursively iterates over each element in a multi-dimensional array and applies a callback function.
  *
- * @param {Array} array - The multi-dimensional array to iterate over.
- * @param {Function} callback - The function to execute for each element. It receives three arguments:
+ * @param array - The multi-dimensional array to iterate over.
+ * @param callback - The function to execute for each element. It receives three arguments:
  *   - {any} value: The current element being processed in the array.
  *   - {Array<number>} index: The index of the current element in each dimension.
  *   - {Array} array: The original array being processed.
- * @param {boolean} [skipIndex=false] - If true, the callback function is called with only the value.
+ * @param skipIndex - Optional. Default is false. If true, the callback function is called with only the value.
  */
 export function deepForEach<T>(
   array: NestedArray<T>,
@@ -1058,7 +1070,7 @@ export function deepForEach<T>(
 
 /**
  * Deep clones a multidimensional array
- * @param {Array} array
+ * @param array
  * @returns {Array} cloned array
  */
 export function clone<T>(array: T[]): T[] {

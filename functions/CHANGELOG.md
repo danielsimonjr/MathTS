@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-functions
 
+## 0.64.1
+
+### Patch Changes
+
+- 57c8ffd: Ships the current WASM binary: same exports, a differently optimized code section, and a new SHA-384 manifest. No JavaScript change.
+- Updated dependencies [57c8ffd]
+- Updated dependencies [57c8ffd]
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+  - @danielsimonjr/mathts-expression@0.8.0
+  - @danielsimonjr/mathts-matrix@0.7.2
+  - @danielsimonjr/mathts-parallel@0.6.5
+
 ## 0.64.0
 
 ### Minor Changes

@@ -6,20 +6,24 @@ import type { TypedFunction } from '../../core/function/typed.js';
 // Type definitions
 export type { TypedFunction };
 
+/** Structural type of the BigNumber constructor that `createZerosAndOnes` needs. */
 export interface BigNumberConstructor {
   new (value: number | string): BigNumber;
   (value: number | string): BigNumber;
 }
 
+/** Structural type of a BigNumber value, as `createZerosAndOnes` uses it. */
 export interface BigNumber {
   isBigNumber: boolean;
   toNumber(): number;
 }
 
+/** Structural type of the `matrix` function that `createZerosAndOnes` needs. */
 export interface MatrixConstructor {
   (data?: unknown, storage?: string): Matrix;
 }
 
+/** Structural type of a Matrix value, as `createZerosAndOnes` uses it. */
 export interface Matrix {
   _size: number[];
   storage(): 'dense' | 'sparse';
@@ -27,10 +31,12 @@ export interface Matrix {
   resize(size: number[], defaultValue: unknown): Matrix;
 }
 
+/** The part of the configuration that `createZerosAndOnes` reads. */
 export interface Config {
   matrix: 'Array' | 'Matrix';
 }
 
+/** Dependencies of `createZerosAndOnes`. */
 export interface Dependencies {
   typed: TypedFunction;
   config: Config;
@@ -38,6 +44,13 @@ export interface Dependencies {
   BigNumber: BigNumberConstructor;
 }
 
+/**
+ * Create the typed function `name` that returns an array or matrix filled with
+ * `defaultValue`.
+ *
+ * The `zeros` and `ones` functions use this factory. With no arguments, the result is an
+ * empty Array or Matrix, as the `matrix` configuration option sets.
+ */
 export function createZerosAndOnes(
   name: string,
   defaultValue: 0 | 1,
@@ -84,7 +97,10 @@ export function createZerosAndOnes(
    * @return {Array | Matrix}
    * @private
    */
-  function _zerosAndOnes(size: unknown[] | (number | BigNumber)[], format?: string): unknown[] | Matrix {
+  function _zerosAndOnes(
+    size: unknown[] | (number | BigNumber)[],
+    format?: string
+  ): unknown[] | Matrix {
     const hasBigNumbers = _normalize(size as number[]);
     const dflt = hasBigNumbers ? new BigNumber(defaultValue) : defaultValue;
     _validate(size as number[]);

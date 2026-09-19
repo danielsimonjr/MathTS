@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.15.0
+
+### Minor Changes
+
+- 57c8ffd: Range now keeps its caches in four public `_cache*` fields instead of ES-private `#cache*` fields. The TypeScript 7 declaration-emit fix made this change. Results are unchanged, but the fields are now visible, enumerable properties of a Range.
+
 ## 0.14.3
 
 ### Patch Changes

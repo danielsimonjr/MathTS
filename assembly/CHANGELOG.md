@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-wasm
 
+## 0.2.3
+
+### Patch Changes
+
+- 57c8ffd: Rebuilt binary from unchanged AssemblyScript source: same exports, differently optimized code section.
+
 ## 0.2.2
 
 ### Patch Changes

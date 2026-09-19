@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-expression
 
+## 0.8.0
+
+### Minor Changes
+
+- 57c8ffd: The parser treats `
+  ` as a newline, so CRLF input parses. New `setStringSubset` supports index assignment on strings.
+
+### Patch Changes
+
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+
 ## 0.7.1
 
 ### Patch Changes

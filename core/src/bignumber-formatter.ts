@@ -52,9 +52,9 @@ export interface BigNumberValue {
 
 /**
  * Formats a BigNumber in a given base
- * @param {BigNumber} n
- * @param {number} base
- * @param {number} size
+ * @param n
+ * @param base
+ * @param size
  * @returns {string}
  */
 function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): string {
@@ -168,8 +168,8 @@ function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): 
  *    format(52.8,   {notation: 'exponential'})          // returns '5.28e+1'
  *    format(12400,  {notation: 'engineering'})          // returns '12.400e+3'
  *
- * @param {BigNumber} value
- * @param {Object | Function | number | BigNumber} [options]
+ * @param value
+ * @param options - Optional.
  * @return {string} str The formatted value
  */
 export function format(value: unknown, options?: unknown): string {
@@ -274,8 +274,8 @@ export function format(value: unknown, options?: unknown): string {
 
 /**
  * Format a BigNumber in engineering notation. Like '1.23e+6', '2.3e+0', '3.500e-3'
- * @param {BigNumber} value
- * @param {number} [precision]        Optional number of significant figures to return.
+ * @param value
+ * @param precision - Optional number of significant figures to return.
  */
 export function toEngineering(value: BigNumberValue, precision?: number): string {
   // find nearest lower multiple of 3 for exponent
@@ -296,8 +296,8 @@ export function toEngineering(value: BigNumberValue, precision?: number): string
 
 /**
  * Format a number in exponential notation. Like '1.23e+5', '2.3e+0', '3.500e-3'
- * @param {BigNumber} value
- * @param {number} [precision]  Number of digits in formatted output.
+ * @param value
+ * @param precision - Optional. Number of digits in formatted output.
  *                              If not provided, the maximum available digits
  *                              is used.
  * @returns {string} str
@@ -312,8 +312,8 @@ export function toExponential(value: BigNumberValue, precision?: number): string
 
 /**
  * Format a number with fixed notation.
- * @param {BigNumber} value
- * @param {number} [precision=undefined] Optional number of decimals after the
+ * @param value
+ * @param precision - Optional number of decimals after the
  *                                       decimal point. Undefined by default.
  */
 export function toFixed(value: BigNumberValue, precision?: number): string {

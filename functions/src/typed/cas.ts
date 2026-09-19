@@ -535,6 +535,12 @@ export function gradientSymbolic(expr: string, vars: string[], scope: Record<str
  */
 export function jacobian(exprs: VectorField, vars: number[]): f64[][];
 export function jacobian(exprs: string[], vars: string[], scope: Record<string, f64>): f64[][];
+/**
+ * Implementation of the `jacobian` overloads.
+ *
+ * A function input uses numeric central differences at the point `vars`. String
+ * expressions use symbolic partial derivatives, evaluated at `scope`.
+ */
 export function jacobian(
   exprs: string[] | VectorField,
   vars: string[] | number[],
@@ -2700,6 +2706,11 @@ export function casSimplify(expr: string | MathNode): string;
  * await casSimplify(['x + x', '2 * 3']) // => ['2*x', '6']
  */
 export function casSimplify(exprs: Array<string | MathNode>): Promise<string[]>;
+/**
+ * Implementation of the `casSimplify` overloads.
+ *
+ * One expression gives a string. An array gives a Promise of an array of strings.
+ */
 export function casSimplify(
   input: string | MathNode | Array<string | MathNode>
 ): string | Promise<string[]> {
@@ -2745,6 +2756,11 @@ export function casDerivative(expr: string | MathNode, variable: string): string
  * // => ['2*x^1', 'cos(x)', 'exp(x)']
  */
 export function casDerivative(exprs: Array<string | MathNode>, variable: string): Promise<string[]>;
+/**
+ * Implementation of the `casDerivative` overloads.
+ *
+ * One expression gives a string. An array gives a Promise of an array of strings.
+ */
 export function casDerivative(
   input: string | MathNode | Array<string | MathNode>,
   variable: string
@@ -2793,6 +2809,11 @@ export function casExpand(expr: string | MathNode): string;
  * await casExpand(['(x+1)^2', '(a+b)^3'])
  */
 export function casExpand(exprs: Array<string | MathNode>): Promise<string[]>;
+/**
+ * Implementation of the `casExpand` overloads.
+ *
+ * One expression gives a string. An array gives a Promise of an array of strings.
+ */
 export function casExpand(
   input: string | MathNode | Array<string | MathNode>
 ): string | Promise<string[]> {
@@ -2837,6 +2858,11 @@ export function casFactor(expr: string | MathNode): string;
  * await casFactor(['2*x + 4*y', '3*a + 6*b'])
  */
 export function casFactor(exprs: Array<string | MathNode>): Promise<string[]>;
+/**
+ * Implementation of the `casFactor` overloads.
+ *
+ * One expression gives a string. An array gives a Promise of an array of strings.
+ */
 export function casFactor(
   input: string | MathNode | Array<string | MathNode>
 ): string | Promise<string[]> {

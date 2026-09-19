@@ -40,6 +40,9 @@ export interface ConfigOptions {
 }
 
 // Keep MathJsConfig as an alias for backwards compatibility
+/**
+ * Alias of `ConfigOptions`, kept for backward compatibility.
+ */
 export type MathJsConfig = ConfigOptions;
 
 export const DEFAULT_CONFIG: ConfigOptions = {

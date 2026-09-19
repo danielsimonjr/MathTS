@@ -20,7 +20,13 @@
  * The shared `getWasm()` accessor and the scratch-region runners live in
  * `../bridges/common.ts` (dup-audit Opportunity #2).
  */
-import { getWasm, runUnaryPtr, runChainPtr, type PtrUnaryKernel, type RawWasm } from '../bridges/common.js';
+import {
+  getWasm,
+  runUnaryPtr,
+  runChainPtr,
+  type PtrUnaryKernel,
+  type RawWasm,
+} from '../bridges/common.js';
 
 /** Element-count threshold above which the WASM kernel beats JS. */
 export const WASM_ELEMENTWISE_THRESHOLD = 1024;
@@ -31,13 +37,29 @@ export const WASM_ELEMENTWISE_THRESHOLD = 1024;
  * Excluded after measuring (JS wins): sqrt, cbrt, asin, acos, cosh, asinh, acosh.
  */
 export const WASM_ELEMENTWISE_OPS = [
-  'abs', 'sin', 'cos', 'tan', 'exp', 'log',
+  'abs',
+  'sin',
+  'cos',
+  'tan',
+  'exp',
+  'log',
   // extended transcendentals (Tier 1, all win at every benchmarked size)
-  'atan', 'sinh', 'tanh', 'atanh', 'expm1', 'log1p', 'log2', 'log10', 'sec', 'csc', 'cot',
+  'atan',
+  'sinh',
+  'tanh',
+  'atanh',
+  'expm1',
+  'log1p',
+  'log2',
+  'log10',
+  'sec',
+  'csc',
+  'cot',
   // expensive special with an existing libm kernel (Tier 2, ~5–7× — its JS is a
   // continued-fraction scalar, far costlier than Math.*)
   'erfc',
 ] as const;
+/** Name of an element-wise operation that has a WebAssembly kernel. */
 export type WasmElementwiseOp = (typeof WASM_ELEMENTWISE_OPS)[number];
 
 /** AS pointer kernel export name for an op, e.g. `array_sin_ptr`. */

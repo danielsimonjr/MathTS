@@ -33,7 +33,7 @@ function simpson(f: (x: number) => number, a: number, b: number, n = 512): numbe
 function tieTerm(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   let term = 0;
-  for (let i = 0; i < sorted.length; ) {
+  for (let i = 0; i < sorted.length;) {
     let j = i;
     while (j < sorted.length && sorted[j] === sorted[i]) j++;
     const t = j - i;
@@ -43,6 +43,10 @@ function tieTerm(values: number[]): number {
   return term;
 }
 
+/**
+ * Result of `fTest`: the F statistic, the two-sided p-value, and the degrees of freedom
+ * `df1 = n1 - 1` and `df2 = n2 - 1`.
+ */
 export interface FTestResult {
   statistic: number;
   pValue: number;
@@ -69,6 +73,10 @@ export function fTest(x: Vec, y: Vec): FTestResult {
   return { statistic, pValue, df1, df2 };
 }
 
+/**
+ * Result of `jarqueBera`: the JB statistic, its p-value, and the sample skewness and
+ * excess kurtosis.
+ */
 export interface JarqueBeraResult {
   statistic: number;
   pValue: number;
@@ -91,6 +99,10 @@ export function jarqueBera(x: Vec): JarqueBeraResult {
   return { statistic, pValue, skewness: s, kurtosis: k };
 }
 
+/**
+ * Result of `kruskalWallis`: the tie-corrected H statistic, its p-value, and the degrees
+ * of freedom.
+ */
 export interface KruskalResult {
   statistic: number;
   pValue: number;
@@ -122,6 +134,10 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
   return { statistic: H, pValue: 1 - chiSquaredCDF(H, df), df };
 }
 
+/**
+ * Result of `wilcoxon`: the statistic `min(W+, W-)`, the two-sided p-value, and the
+ * normal-approximation z statistic.
+ */
 export interface WilcoxonResult {
   statistic: number;
   pValue: number;
@@ -138,7 +154,9 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   const a = arr(x);
   const yy = y !== undefined ? arr(y) : undefined;
   if (yy !== undefined && yy.length !== a.length)
-    throw new Error(`wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`);
+    throw new Error(
+      `wilcoxon: paired samples must have equal length (${a.length} vs ${yy.length})`
+    );
   const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
@@ -158,6 +176,7 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   return { statistic, pValue: 2 * normalCDF(-Math.abs(zStatistic)), zStatistic };
 }
 
+/** Result of `fisherExact`: the sample odds ratio and the two-sided p-value. */
 export interface FisherExactResult {
   oddsRatio: number;
   pValue: number;
@@ -175,13 +194,16 @@ function logChoose(n: number, k: number): number {
  * observed table's), matching `scipy.stats.fisher_exact`. `oddsRatio` is the sample
  * ratio `ad/bc` (SciPy reports the conditional-MLE estimate; the p-value matches).
  */
-export function fisherExact(table: readonly [readonly number[], readonly number[]]): FisherExactResult {
+export function fisherExact(
+  table: readonly [readonly number[], readonly number[]]
+): FisherExactResult {
   const [[a, b], [c, d]] = table;
   const r1 = a + b;
   const r2 = c + d;
   const c1 = a + c;
   const N = a + b + c + d;
-  const logHyper = (k: number): number => logChoose(r1, k) + logChoose(r2, c1 - k) - logChoose(N, c1);
+  const logHyper = (k: number): number =>
+    logChoose(r1, k) + logChoose(r2, c1 - k) - logChoose(N, c1);
   const logPObs = logHyper(a);
   const lo = Math.max(0, c1 - r2);
   const hi = Math.min(r1, c1);
@@ -223,7 +245,13 @@ export function studentizedRangeCDF(q: number, k: number, df: number): number {
   // fU alone (cheap) — no nested rangeProb — so it does not blow up the hot path.
   let umax = 1 + 12 / Math.sqrt(nu);
   for (let iter = 0; iter < 20 && simpson(fU, 1e-5, umax, 120) < 1 - 1e-6; iter++) umax *= 1.5;
-  return Math.min(1, Math.max(0, simpson((u) => fU(u) * rangeProb(q * u, k), 1e-5, umax, 120)));
+  return Math.min(
+    1,
+    Math.max(
+      0,
+      simpson((u) => fU(u) * rangeProb(q * u, k), 1e-5, umax, 120)
+    )
+  );
 }
 
 /** Quantile (inverse CDF) of the studentized range distribution, via bisection. */
@@ -249,6 +277,12 @@ export function studentizedRangeQuantile(p: number, k: number, df: number): numb
   return (lo + hi) / 2;
 }
 
+/**
+ * One pairwise comparison from `tukeyHSD`.
+ *
+ * `groups` holds the two group indices. `reject` is true if the q statistic is above the
+ * critical value for `alpha`.
+ */
 export interface TukeyComparison {
   groups: [number, number];
   meanDifference: number;
@@ -270,7 +304,9 @@ export function tukeyHSD(groups: Vec[], alpha = 0.05): TukeyComparison[] {
   const N = gs.reduce((s, g) => s + g.length, 0);
   const dfErr = N - k;
   if (dfErr <= 0)
-    throw new Error('tukeyHSD: residual df must be > 0 (groups must hold more observations than groups)');
+    throw new Error(
+      'tukeyHSD: residual df must be > 0 (groups must hold more observations than groups)'
+    );
   // pooled mean square error
   const sse = gs.reduce((s, g) => s + sampleVar(g) * (g.length - 1), 0);
   const mse = sse / dfErr;

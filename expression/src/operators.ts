@@ -388,7 +388,7 @@ export function getPrecedence(
  *
  * @param _node
  * @param parenthesis
- * @throws {Error}
+ * @throws Error
  */
 export function getAssociativity(
   _node: unknown,

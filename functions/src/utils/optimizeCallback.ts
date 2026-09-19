@@ -174,6 +174,8 @@ function _findNumberOfArgumentsTyped<T>(
 }
 
 /**
+ * Call `func` with `args`. If the call throws, throw a detailed TypeError instead.
+ *
  * @param func - The selected function taken from one of the signatures of the callback function
  * @param args - List with arguments to apply to the selected signature
  * @param mappingFnName - the name of the function that is using the callback

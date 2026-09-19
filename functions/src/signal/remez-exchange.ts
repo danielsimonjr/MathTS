@@ -19,6 +19,10 @@
 const PI = Math.PI;
 const TWOPI = 2 * Math.PI;
 
+/**
+ * Filter type for the Remez exchange design: bandpass, differentiator or Hilbert
+ * transformer.
+ */
 export type RemezType = 'bandpass' | 'differentiator' | 'hilbert';
 
 /** Lagrange interpolation coefficient (`d` in the original) for extremal `k`. */

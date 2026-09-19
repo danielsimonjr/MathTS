@@ -49,6 +49,12 @@ import { isMap, isObject } from './is.js';
  */
 type MapEntryIterator<K, V> = ReturnType<Map<K, V>[typeof Symbol.iterator]>;
 
+/**
+ * A Map view of a plain object.
+ *
+ * The map does not copy the object. Reads use `getSafeProperty` and writes use
+ * `setSafeProperty` on the wrapped object.
+ */
 export class ObjectWrappingMap<K = string, V = unknown> implements Map<K, V> {
   wrappedObject: Record<string, V>;
   readonly [Symbol.toStringTag]: string = 'ObjectWrappingMap';
@@ -148,6 +154,8 @@ export class PartitionedMap<K = unknown, V = unknown> implements Map<K, V> {
   readonly [Symbol.toStringTag]: string = 'PartitionedMap';
 
   /**
+   * Create a PartitionedMap over two maps.
+   *
    * @param a - Primary map
    * @param b - Secondary map
    * @param bKeys - Set of keys that should be read/written to map b

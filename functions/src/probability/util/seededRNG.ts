@@ -5,6 +5,12 @@ type RngFunction = () => number;
 
 const singletonRandom: RngFunction = /* #__PURE__ */ seedrandom(Date.now());
 
+/**
+ * Create a random number generator that returns values from `seedrandom`.
+ *
+ * If `randomSeed` is null, the generator uses one shared generator that is seeded from
+ * `Date.now()`. Otherwise it uses a new generator seeded with `String(randomSeed)`.
+ */
 export function createRng(randomSeed: string | number | null): RngFunction {
   let random: RngFunction;
 

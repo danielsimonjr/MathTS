@@ -20,7 +20,6 @@ interface SparseMatrixData {
  * @param {Number}  j               The starting node for the DFS algorithm
  * @param {Matrix}  g               The G matrix to search, ptr array modified, then restored
  * @param {Number}  top             Start index in stack xi[top..n-1]
- * @param {Number}  k               The kth column in B
  * @param {Array}   xi              The nonzero pattern xi[top] .. xi[n - 1], an array of size = 2 * n
  *                                  The first n entries is the nonzero pattern, the last n entries is the stack
  * @param {Array}   pinv            The inverse row permutation vector, must be null for L * x = b
