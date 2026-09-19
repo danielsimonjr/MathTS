@@ -1,3 +1,4 @@
+/** View direction for the orthographic projection. Both angles are in degrees. */
 export interface Camera {
   azim: number; // degrees, rotation about the vertical (z) axis
   elev: number; // degrees, tilt toward the viewer

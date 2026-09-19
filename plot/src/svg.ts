@@ -1,5 +1,6 @@
 import type { Scene, Prim } from './scene.js';
 
+/** Color scheme for SVG chart output: foreground, muted, grid, axis and background colors, and an ordered list of data-series colors. */
 export interface Theme {
   fg: string;
   muted: string;
@@ -39,10 +40,12 @@ export const THEMES: Record<'light' | 'dark', Theme> = {
   },
 };
 
+/** Replace `&`, `<` and `>` in a string with their XML entities. Quote characters stay unchanged, so use the result as element text only. */
 export function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/** Format a number as a tick label. A non-finite value gives an empty string. A non-zero value with magnitude below 1e-3 or at or above 1e6 uses exponential notation with two decimals. Other values are rounded to six decimal places. */
 export function fmt(n: number): string {
   if (!Number.isFinite(n)) return '';
   const a = Math.abs(n);
@@ -52,6 +55,7 @@ export function fmt(n: number): string {
 
 const r2 = (n: number): number => Math.round(n * 100) / 100;
 
+/** Wrap SVG body markup in a complete `<svg>` document of the given size, with a full-size background rectangle and the `img` ARIA role. */
 export function svgDoc(width: number, height: number, body: string, bg: string): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" role="img">` +
@@ -59,6 +63,7 @@ export function svgDoc(width: number, height: number, body: string, bg: string):
   );
 }
 
+/** Make an SVG `<line>` element between two points. Coordinates are rounded to two decimals. The `stroke-opacity` attribute is added only when the opacity is below 1. */
 export function line(
   x1: number,
   y1: number,
@@ -74,6 +79,7 @@ export function line(
       : '';
   return `<line x1="${r2(x1)}" y1="${r2(y1)}" x2="${r2(x2)}" y2="${r2(y2)}" stroke="${stroke}" stroke-width="${w}"${op}/>`;
 }
+/** Make an SVG `<circle>` element. The `fill-opacity` attribute is added only when the opacity is below 1. */
 export function circle(cx: number, cy: number, r: number, fill: string, opacity?: number): string {
   const op =
     opacity !== undefined && opacity < 1
@@ -81,17 +87,21 @@ export function circle(cx: number, cy: number, r: number, fill: string, opacity?
       : '';
   return `<circle cx="${r2(cx)}" cy="${r2(cy)}" r="${r}" fill="${fill}"${op}/>`;
 }
+/** Make a filled SVG `<rect>` element. Position and size are rounded to two decimals. */
 export function rect(x: number, y: number, w: number, h: number, fill: string): string {
   return `<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" fill="${fill}"/>`;
 }
+/** Make an SVG `<polyline>` element with no fill from a list of [x, y] points. */
 export function polyline(pts: Array<[number, number]>, stroke: string, w = 2): string {
   const p = pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join(' ');
   return `<polyline points="${p}" fill="none" stroke="${stroke}" stroke-width="${w}"/>`;
 }
+/** Make an SVG `<polygon>` element from a list of [x, y] vertices. The stroke is `none` by default. */
 export function polygon(pts: Array<[number, number]>, fill: string, stroke = 'none'): string {
   const p = pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join(' ');
   return `<polygon points="${p}" fill="${fill}" stroke="${stroke}"/>`;
 }
+/** Make an SVG `<text>` element. The text content is escaped with `esc`. */
 export function text(
   x: number,
   y: number,

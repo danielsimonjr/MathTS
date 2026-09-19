@@ -21,6 +21,7 @@ export class PlotRenderError extends Error {
   }
 }
 
+/** Options for the file render bridge. `tool` selects one allowed external tool. `timeoutMs` limits each tool run (default 30 s for SVG conversion, 60 s for LaTeX). `density` and `background` apply only to PNG output from rsvg-convert. */
 export interface RenderOptions {
   tool?: string;
   timeoutMs?: number;
@@ -147,11 +148,7 @@ export async function renderToFile(
 
 /** Build the CLI args for a LaTeX engine. Shell-escape (\write18) is OFF
  *  for security (arbitrary command execution during compile). */
-export function latexArgs(
-  engine: string,
-  workDir: string,
-  texPath: string
-): string[] {
+export function latexArgs(engine: string, workDir: string, texPath: string): string[] {
   if (engine === 'tectonic') {
     // tectonic: shell-escape is off by default
     return ['--outdir', workDir, texPath];
