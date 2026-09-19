@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-units
 
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+
 ## 0.1.14
 
 ### Patch Changes

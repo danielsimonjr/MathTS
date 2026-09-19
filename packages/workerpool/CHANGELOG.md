@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.2.2
+
+### Patch Changes
+
+- 57c8ffd: Worker threads now answer under Bun. Bun defines Web Worker globals inside a `node:worker_threads` worker, which sent workerpool down its browser path, where tasks never arrived. Under Node the bridge does nothing.
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-plot
 
+## 0.4.3
+
+### Patch Changes
+
+- 57c8ffd: 3-D surface: quads whose depths differ by at most 1e-9 are drawn in face-index order. Before, the order depended on the last bit of `Math.sin`, which differs between runtimes. SVG output can differ from 0.4.2 for exactly tied quads only.
+- Updated dependencies [57c8ffd]
+- Updated dependencies [57c8ffd]
+- Updated dependencies [57c8ffd]
+  - @danielsimonjr/mathts-core@0.15.0
+  - @danielsimonjr/mathts-expression@0.8.0
+  - @danielsimonjr/mathts-functions@0.64.1
+
 ## 0.4.2
 
 ### Patch Changes
