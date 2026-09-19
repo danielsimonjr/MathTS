@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json",
     "dev": "tsup src/index.ts --format esm --dts --watch",
-    "test": "vitest run",
+    "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
