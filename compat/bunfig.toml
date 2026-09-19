@@ -1,6 +1,5 @@
 # `bun test` reads bunfig.toml from the working directory only (not the repo root).
 [test]
-preload = ["./bun-test-preload.mjs"]
 # Coverage (`bun run test:coverage`): count only this package's own files, as vitest's
 # v8 provider did. Without the ignore pattern, Bun also reports the sibling packages'
 # dist files that the tests load. lcov is the file that Codecov reads.

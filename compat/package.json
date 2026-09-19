@@ -20,7 +20,7 @@
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "bun test --isolate --timeout 30000",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "bun test --isolate --timeout 30000 --coverage",
     "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
   },
   "dependencies": {
