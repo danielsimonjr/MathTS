@@ -18,7 +18,7 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >         `statistics` now run `bun test`. Same tests, same counts (1 -> 1, 6 -> 6); the full CI gate
 >         is green. The `vitest` import specifier is kept: `bun test` resolves it to `bun:test`, so
 >         `vitest.config.ts`, the root aggregate run and `test:coverage` keep working unchanged.
->   - [ ] **2b — the other 8 drop-in facade packages** (`arithmetic`, `ast`, `evaluator`, `linalg`,
+>   - [x] **2b — the other 8 drop-in facade packages** (merged in #281) (`arithmetic`, `ast`, `evaluator`, `linalg`,
 >         `numbers`, `parser`, `signal`, `units`): one-line `test` script change each.
 >   - [x] **2c — the plain-vitest packages** (branch `bun-phase2c`, PR not merged): six of the seven
 >         now run `bun test --isolate --timeout 30000`. Same tests, same counts (autograd 259 -> 259,
@@ -34,14 +34,23 @@ Newest/most-actionable first. Detailed history for each area is in its section b
 >         and `process` both hang; the same probe passes under Node). 20 tests timed out at 30 s each
 >         and none passed. Revisit when Bun's `worker_threads` / `child_process` fixes land, or when
 >         `workerpool` is replaced.
->   - [ ] **2d — the packages that use `vi.*` mocks** (`core`, `functions`, `gpu`, `matrix`,
->         `parallel`): `vi.fn`, `vi.spyOn`, `vi.stubGlobal`, `vi.mock`. Bun covers these, but
->         `vi.stubGlobal`/`vi.unstubAllGlobals` and hoisted `vi.mock` need per-file tests. `core` needs a
->         `__PKG_VERSION__` define (bunfig `[test] preload`) that the vitest configs now supply.
->   - [ ] **2e — `plot`** (`toMatchSnapshot` in `golden-svg.test.ts`: Bun writes its own snapshot
+>   - [x] **2d — the packages that use `vi.*` mocks** (branch `chore/bun-phase-2d`): `core` and `gpu`
+>         now run `bun test --isolate --timeout 30000`. Same counts (core 811 -> 811, gpu 26 -> 26).
+>         `core` has a `bunfig.toml` `[test] preload` for `__PKG_VERSION__`. `gpu` replaces
+>         `vi.stubGlobal`/`vi.unstubAllGlobals` (absent in Bun 1.4.2) with a local helper that has
+>         vitest's semantics. `core` wraps two `Fraction` values in `Number()`, because Bun's
+>         `toBeCloseTo` rejects a non-number and vitest coerces it.
+
+- [ ] **2d follow-up — `functions`, `matrix` and `parallel` stay on vitest.** Their suites dispatch
+      to real workers, which never answer under Bun 1.4.2 (as for `workerpool`): `functions` 16
+      worker tests time out, `matrix` `ParallelBackend` times out and the module mock of
+      `@danielsimonjr/mathts-parallel` does not intercept, `parallel` `ComputePool` hangs.
+- [ ] **2e — `plot`** (`toMatchSnapshot` in `golden-svg.test.ts`: Bun writes its own snapshot
+
 >         format, so regenerate and review the goldens) and the **root aggregate**, coverage
 >         (`@vitest/coverage-v8` -> `bun test --coverage`), the `test:bench` config and the browser
 >         config (`@vitest/browser` + Playwright has no `bun test` equivalent: expect it to stay on vitest).
+>
 > - [ ] **Phase 3 — force Bun as the process runtime** (`[run].bun = true` in `bunfig.toml`). Blocked by
 >       `asc` (AssemblyScript) and every `node tools/*.mjs` script: verify each under the Bun runtime.
 > - [ ] **Phase 4 — drop the Node requirement** (`engines.node`, the CI Node matrix and setup-node)

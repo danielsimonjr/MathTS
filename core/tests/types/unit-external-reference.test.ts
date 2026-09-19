@@ -38,8 +38,8 @@ describe('GC11: unit conversions vs NIST/CODATA reference values', () => {
   it('temperature offsets match the standard anchors', () => {
     expect(new Unit(0, 'degC').to('K').value).toBeCloseTo(273.15, 10);
     expect(new Unit(100, 'degC').to('K').value).toBeCloseTo(373.15, 10);
-    expect(new Unit(32, 'degF').to('K').value).toBeCloseTo(273.15, 6);
-    expect(new Unit(212, 'degF').to('K').value).toBeCloseTo(373.15, 6);
+    expect(Number(new Unit(32, 'degF').to('K').value)).toBeCloseTo(273.15, 6);
+    expect(Number(new Unit(212, 'degF').to('K').value)).toBeCloseTo(373.15, 6);
   });
 });
 

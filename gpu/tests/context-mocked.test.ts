@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GPUContext } from '../src/GPUContext.js';
+import { stubGlobal, unstubAllGlobals } from './helpers/stub-global.js';
 
 describe('GPUContext (mocked WebGPU)', () => {
   let _originalNavigator: any;
@@ -87,7 +88,7 @@ describe('GPUContext (mocked WebGPU)', () => {
     };
 
     // Setup global navigator mock
-    vi.stubGlobal('navigator', {
+    stubGlobal('navigator', {
       gpu: {
         requestAdapter: vi.fn().mockResolvedValue(mockAdapter),
       },
@@ -95,7 +96,7 @@ describe('GPUContext (mocked WebGPU)', () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    unstubAllGlobals();
 
     if (originalGPUBufferUsage !== undefined) {
       (globalThis as any).GPUBufferUsage = originalGPUBufferUsage;
@@ -195,7 +196,7 @@ describe('GPUContext (mocked WebGPU)', () => {
 
   it('handles initialization failure gracefully', async () => {
     // Override adapter mock to return null
-    vi.stubGlobal('navigator', {
+    stubGlobal('navigator', {
       gpu: {
         requestAdapter: vi.fn().mockResolvedValue(null),
       },
@@ -212,7 +213,7 @@ describe('GPUContext (mocked WebGPU)', () => {
 
   it('handles device failure gracefully', async () => {
     // Override adapter mock to return an adapter but fail device creation
-    vi.stubGlobal('navigator', {
+    stubGlobal('navigator', {
       gpu: {
         requestAdapter: vi.fn().mockResolvedValue({
           info: {},
@@ -244,7 +245,7 @@ describe('GPUContext (mocked WebGPU)', () => {
       onuncapturederror: null,
     };
 
-    vi.stubGlobal('navigator', {
+    stubGlobal('navigator', {
       gpu: {
         requestAdapter: vi.fn().mockResolvedValue({
           info: {},
@@ -280,7 +281,7 @@ describe('GPUContext (mocked WebGPU)', () => {
       onuncapturederror: null,
     };
 
-    vi.stubGlobal('navigator', {
+    stubGlobal('navigator', {
       gpu: {
         requestAdapter: vi.fn().mockResolvedValue({
           info: {},

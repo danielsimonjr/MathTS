@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1854
+**Total files**: 1855
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1150 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      621 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      622 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1854** |                                                                                                              |
+| **Total**     | **1855** |                                                                                                              |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1174 |
-| `tests`    |   621 |
+| `tests`    |   622 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -49,7 +49,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
 | `@danielsimonjr/mathts-functions`      |   771 |
-| `@danielsimonjr/mathts-gpu`            |    16 |
+| `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    98 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
@@ -1554,6 +1554,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `gpu/tests/context.test.ts`                                                       | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/detect.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/device.test.ts`                                                        | @danielsimonjr/mathts-gpu            | tests    | test        |
+| `gpu/tests/helpers/stub-global.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/public-api-smoke.test.ts`                                              | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/tests/shader-manager.test.ts`                                                | @danielsimonjr/mathts-gpu            | tests    | test        |
 | `gpu/vitest.config.ts`                                                            | @danielsimonjr/mathts-gpu            | config   | config      |

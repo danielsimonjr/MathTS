@@ -1,0 +1,3 @@
+# `bun test` reads bunfig.toml from the working directory only (not the repo root).
+[test]
+preload = ["./bun-test-preload.mjs"]
