@@ -20,6 +20,15 @@ interface TapeNode {
   readonly outputGradSlot: Float64Array;
 }
 
+/**
+ * Records the operations of a forward pass so that `backward` can replay them in reverse.
+ *
+ * `allocate` gives inputs negative ids. `record` gives operations non-negative ids.
+ * Each id owns a gradient slot. `backward` writes `outputGrad` into the output slot: it replaces the
+ * value in that slot. `backward` adds gradients into the input and intermediate slots.
+ * `backward` does not clear the input and intermediate slots. A second call adds to the gradients of the
+ * first call in those slots.
+ */
 export class Tape {
   private nodes: TapeNode[] = [];
   private inputGradSlots = new Map<number, Float64Array>();
@@ -67,6 +76,13 @@ export class Tape {
   }
 }
 
+/**
+ * Wraps tensor values with a tape id, so that each operation records its backward step on the tape.
+ *
+ * The `data` getter returns the primal values, so tensor ops that read `.data` accept a TapedTensor.
+ * The `id` names the gradient slot of this tensor on the tape.
+ * The optional per-axis Index labels enable `contract`.
+ */
 export class TapedTensor {
   /**
    * Optional per-axis Index labels. When set, enables `contract`.

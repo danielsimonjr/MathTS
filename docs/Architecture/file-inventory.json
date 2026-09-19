@@ -289,7 +289,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 342
+      "loc": 350
     },
     {
       "file": "autograd/src/forward-grad.ts",
@@ -303,7 +303,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 94
+      "loc": 105
     },
     {
       "file": "autograd/src/index.ts",
@@ -317,14 +317,14 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 57
+      "loc": 69
     },
     {
       "file": "autograd/src/tape.ts",
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2418
+      "loc": 2432
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",

@@ -8,6 +8,18 @@
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { Tape, TapedTensor } from './tape.js';
 
+/**
+ * Computes the value of `fn` at `x` and the vector-Jacobian product with reverse-mode AD.
+ *
+ * `fn` receives a TapedTensor in place of `x`. It must return a result of TapedTensor operations on that argument.
+ *
+ * @param fn - Function to differentiate.
+ * @param x - Point at which to evaluate `fn`.
+ * @param cotangent - Seed for the backward pass. Its shape must match the value shape. The default is all ones.
+ * @returns The value of `fn(x)`, and the gradient of `cotangent · value` with respect to `x`, with the shape of `x`.
+ * @throws Error if `fn` does not return a TapedTensor.
+ * @throws Error if the `cotangent` shape does not match the value shape.
+ */
 export function reverseGrad(
   fn: (x: Tensor) => Tensor,
   x: Tensor,

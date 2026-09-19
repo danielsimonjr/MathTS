@@ -16,6 +16,14 @@
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
 
+/**
+ * Holds a tensor value and its tangent for forward-mode automatic differentiation.
+ *
+ * The primal and the tangent are flat arrays of equal length, laid out by `shape`.
+ * The `data` getter returns the primal, so tensor ops that read `.data` accept a DualTensor.
+ *
+ * @throws Error from the constructor if the primal length and the tangent length differ.
+ */
 export class DualTensor {
   readonly shape: ReadonlyArray<number>;
   readonly primal: Float64Array;
