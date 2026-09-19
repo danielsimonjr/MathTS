@@ -3712,6 +3712,11 @@
             "imports": ["mathTyped"]
           },
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["TypedFunction"]
+          },
+          {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
             "imports": ["computePool", "ParallelResult"]
@@ -3825,6 +3830,11 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["TypedFunction"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -37556,6 +37566,11 @@
             ]
           },
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["TypedFunction"]
+          },
+          {
             "package": "@danielsimonjr/mathts-functions",
             "directory": "functions",
             "imports": [
@@ -40116,7 +40131,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 197625,
+    "totalLinesOfCode": 197628,
     "totalExports": 5841,
     "totalClasses": 55,
     "totalInterfaces": 508,

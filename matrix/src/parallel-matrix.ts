@@ -16,6 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import { computePool as importedPool, type ParallelResult } from '@danielsimonjr/mathts-parallel';
 
 // Type assertion to work around TypeScript module resolution issue
@@ -250,7 +251,7 @@ function float64ToMatrix(data: Float64Array, rows: i32, cols: i32): DenseMatrix 
 /**
  * Create a matrix from various input types - parallel-first
  */
-export const parallelMatrix = mathTyped('parallelMatrix', {
+export const parallelMatrix: TypedFunction = mathTyped('parallelMatrix', {
   Array: (arr: number[][]) => DenseMatrix.fromArray(arr),
 
   'number, number': (rows: f64, cols: f64) => DenseMatrix.zeros(rows as i32, cols as i32),
@@ -268,28 +269,28 @@ export const parallelMatrix = mathTyped('parallelMatrix', {
 /**
  * Create an identity matrix
  */
-export const parallelIdentity = mathTyped('parallelIdentity', {
+export const parallelIdentity: TypedFunction = mathTyped('parallelIdentity', {
   number: (n: f64) => DenseMatrix.identity(n as i32),
 } as Signatures);
 
 /**
  * Create a matrix of zeros
  */
-export const parallelZeros = mathTyped('parallelZeros', {
+export const parallelZeros: TypedFunction = mathTyped('parallelZeros', {
   'number, number': (rows: f64, cols: f64) => DenseMatrix.zeros(rows as i32, cols as i32),
 } as Signatures);
 
 /**
  * Create a matrix of ones
  */
-export const parallelOnes = mathTyped('parallelOnes', {
+export const parallelOnes: TypedFunction = mathTyped('parallelOnes', {
   'number, number': (rows: f64, cols: f64) => DenseMatrix.ones(rows as i32, cols as i32),
 } as Signatures);
 
 /**
  * Create a diagonal matrix
  */
-export const parallelDiag = mathTyped('parallelDiag', {
+export const parallelDiag: TypedFunction = mathTyped('parallelDiag', {
   Array: (values: number[]) => DenseMatrix.diag(values),
   Float64Array: (values: Float64Array) => DenseMatrix.diag(Array.from(values)),
 } as Signatures);
@@ -297,7 +298,7 @@ export const parallelDiag = mathTyped('parallelDiag', {
 /**
  * Create a random matrix
  */
-export const parallelRandom = mathTyped('parallelRandom', {
+export const parallelRandom: TypedFunction = mathTyped('parallelRandom', {
   'number, number': (rows: f64, cols: f64) => DenseMatrix.random(rows as i32, cols as i32),
 } as Signatures);
 
@@ -308,7 +309,7 @@ export const parallelRandom = mathTyped('parallelRandom', {
 /**
  * Parallel matrix addition with typed-function dispatch
  */
-export const parallelMatrixAdd = mathTyped('parallelMatrixAdd', {
+export const parallelMatrixAdd: TypedFunction = mathTyped('parallelMatrixAdd', {
   // DenseMatrix + DenseMatrix - parallel execution
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
     if (a.rows !== b.rows || a.cols !== b.cols) {
@@ -348,7 +349,7 @@ export const parallelMatrixAdd = mathTyped('parallelMatrixAdd', {
 /**
  * Parallel matrix subtraction with typed-function dispatch
  */
-export const parallelMatrixSubtract = mathTyped('parallelMatrixSubtract', {
+export const parallelMatrixSubtract: TypedFunction = mathTyped('parallelMatrixSubtract', {
   // DenseMatrix - DenseMatrix - parallel execution
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
     if (a.rows !== b.rows || a.cols !== b.cols) {
@@ -391,7 +392,7 @@ export const parallelMatrixSubtract = mathTyped('parallelMatrixSubtract', {
 /**
  * Parallel matrix multiplication (matmul) with typed-function dispatch
  */
-export const parallelMatrixMultiply = mathTyped('parallelMatrixMultiply', {
+export const parallelMatrixMultiply: TypedFunction = mathTyped('parallelMatrixMultiply', {
   // Matrix * Matrix (matmul) - parallel execution
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
     if (a.cols !== b.rows) {
@@ -424,7 +425,7 @@ export const parallelMatrixMultiply = mathTyped('parallelMatrixMultiply', {
 /**
  * Element-wise multiplication (Hadamard product) - parallel execution
  */
-export const parallelDotMultiply = mathTyped('parallelDotMultiply', {
+export const parallelDotMultiply: TypedFunction = mathTyped('parallelDotMultiply', {
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
     if (a.rows !== b.rows || a.cols !== b.cols) {
       throw new Error(`Matrix dimensions must match for element-wise multiply`);
@@ -448,7 +449,7 @@ export const parallelDotMultiply = mathTyped('parallelDotMultiply', {
 /**
  * Parallel matrix division
  */
-export const parallelMatrixDivide = mathTyped('parallelMatrixDivide', {
+export const parallelMatrixDivide: TypedFunction = mathTyped('parallelMatrixDivide', {
   // Matrix / scalar
   'DenseMatrix, number': async (a: DenseMatrix, scalar: f64): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
@@ -486,7 +487,7 @@ export const parallelMatrixDivide = mathTyped('parallelMatrixDivide', {
 /**
  * Matrix negation - parallel execution
  */
-export const parallelUnaryMinus = mathTyped('parallelUnaryMinus', {
+export const parallelUnaryMinus: TypedFunction = mathTyped('parallelUnaryMinus', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pNegate(dataA);
@@ -504,7 +505,7 @@ export const parallelUnaryMinus = mathTyped('parallelUnaryMinus', {
 /**
  * Matrix transpose - parallel execution
  */
-export const parallelMatrixTranspose = mathTyped('parallelMatrixTranspose', {
+export const parallelMatrixTranspose: TypedFunction = mathTyped('parallelMatrixTranspose', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pTranspose(dataA, a.rows, a.cols);
@@ -519,7 +520,7 @@ export const parallelMatrixTranspose = mathTyped('parallelMatrixTranspose', {
 /**
  * Parallel sum of all elements
  */
-export const parallelMatrixSum = mathTyped('parallelMatrixSum', {
+export const parallelMatrixSum: TypedFunction = mathTyped('parallelMatrixSum', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pSum(dataA);
@@ -543,7 +544,7 @@ export const parallelMatrixSum = mathTyped('parallelMatrixSum', {
 /**
  * Parallel mean of all elements
  */
-export const parallelMatrixMean = mathTyped('parallelMatrixMean', {
+export const parallelMatrixMean: TypedFunction = mathTyped('parallelMatrixMean', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pMean(dataA);
@@ -568,7 +569,7 @@ export const parallelMatrixMean = mathTyped('parallelMatrixMean', {
 /**
  * Parallel minimum element
  */
-export const parallelMatrixMin = mathTyped('parallelMatrixMin', {
+export const parallelMatrixMin: TypedFunction = mathTyped('parallelMatrixMin', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pMin(dataA);
@@ -595,7 +596,7 @@ export const parallelMatrixMin = mathTyped('parallelMatrixMin', {
 /**
  * Parallel maximum element
  */
-export const parallelMatrixMax = mathTyped('parallelMatrixMax', {
+export const parallelMatrixMax: TypedFunction = mathTyped('parallelMatrixMax', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pMax(dataA);
@@ -622,7 +623,7 @@ export const parallelMatrixMax = mathTyped('parallelMatrixMax', {
 /**
  * Parallel variance computation
  */
-export const parallelMatrixVariance = mathTyped('parallelMatrixVariance', {
+export const parallelMatrixVariance: TypedFunction = mathTyped('parallelMatrixVariance', {
   DenseMatrix: async (a: DenseMatrix): Promise<{ mean: f64; variance: f64; std: f64 }> => {
     const dataA = matrixToFloat64(a);
     const result = await pVariance(dataA);
@@ -638,7 +639,7 @@ export const parallelMatrixVariance = mathTyped('parallelMatrixVariance', {
 /**
  * Parallel standard deviation
  */
-export const parallelMatrixStd = mathTyped('parallelMatrixStd', {
+export const parallelMatrixStd: TypedFunction = mathTyped('parallelMatrixStd', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pStd(dataA);
@@ -654,7 +655,7 @@ export const parallelMatrixStd = mathTyped('parallelMatrixStd', {
 /**
  * Parallel Frobenius norm
  */
-export const parallelMatrixNorm = mathTyped('parallelMatrixNorm', {
+export const parallelMatrixNorm: TypedFunction = mathTyped('parallelMatrixNorm', {
   DenseMatrix: async (a: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const result = await pNorm(dataA);
@@ -678,7 +679,7 @@ export const parallelMatrixNorm = mathTyped('parallelMatrixNorm', {
 /**
  * Parallel dot product
  */
-export const parallelMatrixDot = mathTyped('parallelMatrixDot', {
+export const parallelMatrixDot: TypedFunction = mathTyped('parallelMatrixDot', {
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const dataB = matrixToFloat64(b);
@@ -704,14 +705,14 @@ export const parallelMatrixDot = mathTyped('parallelMatrixDot', {
 /**
  * Matrix trace (sum of diagonal elements)
  */
-export const parallelMatrixTrace = mathTyped('parallelMatrixTrace', {
+export const parallelMatrixTrace: TypedFunction = mathTyped('parallelMatrixTrace', {
   DenseMatrix: (a: DenseMatrix) => a.trace(),
 } as Signatures);
 
 /**
  * Parallel Euclidean distance
  */
-export const parallelMatrixDistance = mathTyped('parallelMatrixDistance', {
+export const parallelMatrixDistance: TypedFunction = mathTyped('parallelMatrixDistance', {
   'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<f64> => {
     const dataA = matrixToFloat64(a);
     const dataB = matrixToFloat64(b);
@@ -732,7 +733,7 @@ export const parallelMatrixDistance = mathTyped('parallelMatrixDistance', {
 /**
  * Parallel element-wise absolute value
  */
-export const parallelMatrixAbs = mathTyped('parallelMatrixAbs', {
+export const parallelMatrixAbs: TypedFunction = mathTyped('parallelMatrixAbs', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pAbs(dataA);
@@ -750,7 +751,7 @@ export const parallelMatrixAbs = mathTyped('parallelMatrixAbs', {
 /**
  * Parallel element-wise square root
  */
-export const parallelMatrixSqrt = mathTyped('parallelMatrixSqrt', {
+export const parallelMatrixSqrt: TypedFunction = mathTyped('parallelMatrixSqrt', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pSqrt(dataA);
@@ -768,7 +769,7 @@ export const parallelMatrixSqrt = mathTyped('parallelMatrixSqrt', {
 /**
  * Parallel element-wise square
  */
-export const parallelMatrixSquare = mathTyped('parallelMatrixSquare', {
+export const parallelMatrixSquare: TypedFunction = mathTyped('parallelMatrixSquare', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pSquare(dataA);
@@ -786,7 +787,7 @@ export const parallelMatrixSquare = mathTyped('parallelMatrixSquare', {
 /**
  * Parallel element-wise exponential
  */
-export const parallelMatrixExp = mathTyped('parallelMatrixExp', {
+export const parallelMatrixExp: TypedFunction = mathTyped('parallelMatrixExp', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pExp(dataA);
@@ -804,7 +805,7 @@ export const parallelMatrixExp = mathTyped('parallelMatrixExp', {
 /**
  * Parallel element-wise natural logarithm
  */
-export const parallelMatrixLog = mathTyped('parallelMatrixLog', {
+export const parallelMatrixLog: TypedFunction = mathTyped('parallelMatrixLog', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pLog(dataA);
@@ -822,7 +823,7 @@ export const parallelMatrixLog = mathTyped('parallelMatrixLog', {
 /**
  * Parallel element-wise sine
  */
-export const parallelMatrixSin = mathTyped('parallelMatrixSin', {
+export const parallelMatrixSin: TypedFunction = mathTyped('parallelMatrixSin', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pSin(dataA);
@@ -840,7 +841,7 @@ export const parallelMatrixSin = mathTyped('parallelMatrixSin', {
 /**
  * Parallel element-wise cosine
  */
-export const parallelMatrixCos = mathTyped('parallelMatrixCos', {
+export const parallelMatrixCos: TypedFunction = mathTyped('parallelMatrixCos', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pCos(dataA);
@@ -858,7 +859,7 @@ export const parallelMatrixCos = mathTyped('parallelMatrixCos', {
 /**
  * Parallel element-wise tangent
  */
-export const parallelMatrixTan = mathTyped('parallelMatrixTan', {
+export const parallelMatrixTan: TypedFunction = mathTyped('parallelMatrixTan', {
   DenseMatrix: async (a: DenseMatrix): Promise<DenseMatrix> => {
     const dataA = matrixToFloat64(a);
     const result = await pTan(dataA);
@@ -880,7 +881,7 @@ export const parallelMatrixTan = mathTyped('parallelMatrixTan', {
 /**
  * Get matrix dimensions
  */
-export const parallelMatrixSize = mathTyped('parallelMatrixSize', {
+export const parallelMatrixSize: TypedFunction = mathTyped('parallelMatrixSize', {
   DenseMatrix: (a: DenseMatrix) => [a.rows, a.cols],
 
   Float64Array: (a: Float64Array) => [a.length],
@@ -896,7 +897,7 @@ export const parallelMatrixSize = mathTyped('parallelMatrixSize', {
 /**
  * Get element at position
  */
-export const parallelMatrixSubset = mathTyped('parallelMatrixSubset', {
+export const parallelMatrixSubset: TypedFunction = mathTyped('parallelMatrixSubset', {
   'DenseMatrix, number, number': (a: DenseMatrix, row: f64, col: f64) =>
     a.get(row as i32, col as i32),
 } as Signatures);
@@ -904,21 +905,21 @@ export const parallelMatrixSubset = mathTyped('parallelMatrixSubset', {
 /**
  * Get row from matrix
  */
-export const parallelMatrixRow = mathTyped('parallelMatrixRow', {
+export const parallelMatrixRow: TypedFunction = mathTyped('parallelMatrixRow', {
   'DenseMatrix, number': (a: DenseMatrix, index: f64) => a.row(index as i32),
 } as Signatures);
 
 /**
  * Get column from matrix
  */
-export const parallelMatrixColumn = mathTyped('parallelMatrixColumn', {
+export const parallelMatrixColumn: TypedFunction = mathTyped('parallelMatrixColumn', {
   'DenseMatrix, number': (a: DenseMatrix, index: f64) => a.column(index as i32),
 } as Signatures);
 
 /**
  * Get diagonal from matrix
  */
-export const parallelMatrixDiagonal = mathTyped('parallelMatrixDiagonal', {
+export const parallelMatrixDiagonal: TypedFunction = mathTyped('parallelMatrixDiagonal', {
   DenseMatrix: (a: DenseMatrix) => a.diagonal(),
   'DenseMatrix, number': (a: DenseMatrix, k: f64) => a.diagonal(k as i32),
 } as Signatures);
@@ -930,7 +931,7 @@ export const parallelMatrixDiagonal = mathTyped('parallelMatrixDiagonal', {
 /**
  * Parallel matrix-vector multiplication
  */
-export const parallelMatrixMatvec = mathTyped('parallelMatrixMatvec', {
+export const parallelMatrixMatvec: TypedFunction = mathTyped('parallelMatrixMatvec', {
   'DenseMatrix, DenseMatrix': async (
     matrix: DenseMatrix,
     vector: DenseMatrix
@@ -966,7 +967,7 @@ export const parallelMatrixMatvec = mathTyped('parallelMatrixMatvec', {
 /**
  * Parallel outer product
  */
-export const parallelMatrixOuter = mathTyped('parallelMatrixOuter', {
+export const parallelMatrixOuter: TypedFunction = mathTyped('parallelMatrixOuter', {
   'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<DenseMatrix> => {
     const result = await pOuter(a, b);
     return float64ToMatrix(result.result, a.length, b.length);
@@ -983,7 +984,7 @@ export const parallelMatrixOuter = mathTyped('parallelMatrixOuter', {
 /**
  * Parallel histogram computation
  */
-export const parallelMatrixHistogram = mathTyped('parallelMatrixHistogram', {
+export const parallelMatrixHistogram: TypedFunction = mathTyped('parallelMatrixHistogram', {
   'DenseMatrix, number': async (a: DenseMatrix, bins: f64): Promise<number[]> => {
     const dataA = matrixToFloat64(a);
     const result = await pHistogram(dataA, bins as i32);
