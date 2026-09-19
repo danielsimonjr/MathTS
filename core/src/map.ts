@@ -265,20 +265,16 @@ export class PartitionedMap<K = unknown, V = unknown> implements Map<K, V> {
 }
 
 /**
- * Create a new iterator that maps over the provided iterator, applying a mapping function to each item
+ * Create a new iterator that maps over the provided iterable, applying a mapping function to each item.
+ *
+ * A generator is used so that the result is a real iterable iterator: it has `next()`, its
+ * `[Symbol.iterator]()` returns itself, and it inherits `%IteratorPrototype%` (iterator helpers
+ * and `[Symbol.dispose]` where the runtime provides them), exactly like a native Map iterator.
+ * A plain `{ next }` object made `[...m.entries()]`, `for...of` and `Array.from` throw.
  */
-function mapIterator<T, U>(it: Iterator<T>, callback: (value: T) => U): Iterator<U> {
-  return {
-    next: (): IteratorResult<U> => {
-      const n = it.next();
-      return n.done
-        ? (n as IteratorResult<U>)
-        : {
-            value: callback(n.value),
-            done: false,
-          };
-    },
-  };
+function* mapIterator<T, U>(it: Iterable<T>, callback: (value: T) => U): Generator<U, undefined> {
+  for (const value of it) yield callback(value);
+  return undefined;
 }
 
 /**

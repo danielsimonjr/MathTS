@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(core): map entries() returns a real iterable iterator
+
+- `ObjectWrappingMap.entries()` and `PartitionedMap.entries()` returned a plain `{ next }` object
+  from `mapIterator`, cast to `MapIterator`. `[...m.entries()]`, `for...of` and `Array.from` threw
+  `TypeError: ... is not iterable`; `[...m[Symbol.iterator]()]` threw too. `keys()` and `values()`
+  were already correct. `mapIterator` is now a generator, so the result has `next()`, a
+  `[Symbol.iterator]()` that returns itself, and `%IteratorPrototype%` members, like a native Map
+  iterator. Order and values are unchanged. New tests: `core/tests/map-iterators.test.ts` (34).
+  Architecture numbers refreshed for the new test file (`totalTypeScriptFiles` 1917,
+  `totalLinesOfCode` 337088, after merging main); `repo_map.py check` and `code_docs.py check core/src` pass.
+
 ### fix(deps): no github: dependencies in published manifests - npm 10 can install core
 
 - `npm install @danielsimonjr/mathts-core@0.15.1` fails on npm 10 (the npm of Node 20 and 22) with
