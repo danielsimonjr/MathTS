@@ -19,6 +19,7 @@ import { Tensor } from '../Tensor.js';
 import { svd, svdWasm } from '@danielsimonjr/mathts-matrix';
 import type { SVDResult } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the truncation (maximum dimension and cutoff) for `tensorSvd`. */
 export interface TensorSvdOpts {
   /** If set, keep at most `maxdim` singular values. */
   maxdim?: number;
@@ -35,6 +36,7 @@ export interface TensorSvdOpts {
   joiningIndexName?: string;
 }
 
+/** Contains the U, S, and V factors and the truncation data from `tensorSvd`. */
 export interface TensorSvdResult {
   /** U factor reshaped to [...rowDims, k]. */
   U: Tensor;
@@ -48,17 +50,7 @@ export interface TensorSvdResult {
   truncationError: number;
 }
 
-/**
- * Compute the (optionally truncated) SVD of tensor `t` by partitioning its
- * axes into "row" and "col" groups.
- *
- * @param t        - Input tensor of any rank ≥ 1.
- * @param rowAxes  - Axis indices (integers) whose dimensions form the row
- *                   dimension of the effective 2-D matrix. The remaining axes
- *                   form the column dimension. The order of `rowAxes` controls
- *                   the layout of the U output tensor.
- * @param opts     - Optional truncation / naming settings.
- */
+/** Holds the 2-D matrix and the row and column dimensions that the SVD routines use. */
 interface SvdPrep {
   matrix: number[][];
   rowDims: number[];
@@ -178,6 +170,16 @@ function finishSvd(result: SVDResult, prep: SvdPrep, opts?: TensorSvdOpts): Tens
 
 /**
  * Truncated tensor SVD using the pure-JS DenseMatrix SVD primitive (synchronous).
+ *
+ * Compute the (optionally truncated) SVD of tensor `t` by partitioning its
+ * axes into "row" and "col" groups.
+ *
+ * @param t        - Input tensor of rank ≥ 2 (U and V each need at least one axis).
+ * @param rowAxes  - Axis indices (integers) whose dimensions form the row
+ *                   dimension of the effective 2-D matrix. The remaining axes
+ *                   form the column dimension. The order of `rowAxes` controls
+ *                   the layout of the U output tensor.
+ * @param opts     - Optional truncation / naming settings.
  */
 export function tensorSvd(
   t: Tensor,

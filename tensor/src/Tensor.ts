@@ -22,6 +22,11 @@ import { Index } from './named-index.js';
  */
 export type NestedArray = CoreNestedArray<number>;
 
+/**
+ * Describes an einsum contraction for `Tensor.einsum`: contracted axis pairs and output (free) axes.
+ * Each contraction pair names two operand axes that must have the same size, or `einsum` throws.
+ * Every axis of an operand with rank >= 1 must occur in the spec, or `einsum` throws.
+ */
 export interface EinsumSpec {
   readonly contractions: ReadonlyArray<{
     readonly pair: readonly [readonly [number, number], readonly [number, number]];
@@ -29,6 +34,12 @@ export interface EinsumSpec {
   readonly free: ReadonlyArray<{ readonly operand: number; readonly axis: number }>;
 }
 
+/**
+ * Dense N-dimensional array of float64 values in row-major (C) order.
+ * The constructor keeps a reference to `data` and does not copy it.
+ * The constructor throws when `data.length` is not the product of `shape`,
+ * or when `axisLabels` is given and its length is not the rank.
+ */
 export class Tensor {
   readonly shape: ReadonlyArray<number>;
   readonly data: Float64Array;

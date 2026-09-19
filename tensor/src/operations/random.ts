@@ -22,6 +22,7 @@ import { DenseMatrix, qr as matrixQr } from '@danielsimonjr/mathts-matrix';
 // Public types
 // ---------------------------------------------------------------------------
 
+/** Configures the distribution, the seed, and the axis labels for `randomTensor`. */
 export interface RandomTensorOpts {
   /**
    * Distribution to sample from.
