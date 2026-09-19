@@ -9,6 +9,9 @@
 import type { RenderDoc, RenderCell } from './html.js';
 import { markdownToTex, texEscape, verbatimBody } from './markdown.js';
 
+/**
+ * Options for `toTeX()`.
+ */
 export interface ToTexOptions {
   /** Parser for equation expressions (e.g. the functions package `parse`). */
   parse?: (expr: string) => unknown;

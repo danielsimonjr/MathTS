@@ -26,6 +26,9 @@ export type {
   WorkerMessage,
 } from './worker-protocol.js';
 
+/**
+ * Options for `runWorkbookWithTimeout()`.
+ */
 export interface RunWorkbookWithTimeoutOptions {
   /** Wall-clock budget in milliseconds. Exceeding it terminates the worker. */
   timeoutMs: number;

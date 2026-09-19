@@ -10,6 +10,10 @@ import { describeData } from './doc';
 import type { CellType } from './types';
 import type { CellPosition } from './edit';
 
+/**
+ * A JSON-RPC 2.0 request as received. All fields are optional because the input is not
+ * yet validated. `handleRequest()` rejects a request with no string `method`.
+ */
 export interface JsonRpcRequest {
   jsonrpc?: string;
   id?: string | number | null;
@@ -17,6 +21,9 @@ export interface JsonRpcRequest {
   params?: Record<string, unknown>;
 }
 
+/**
+ * A JSON-RPC 2.0 response. It contains `result` on success or `error` on failure.
+ */
 export interface JsonRpcResponse {
   jsonrpc: '2.0';
   id: string | number | null;
@@ -24,12 +31,19 @@ export interface JsonRpcResponse {
   error?: { code: number; message: string };
 }
 
+/**
+ * A `cell/event` notification. `run` returns one for each executor event.
+ */
 export interface JsonRpcEvent {
   jsonrpc: '2.0';
   method: 'cell/event';
   params: { type: string; cellId?: string; error?: string };
 }
 
+/**
+ * Output of `handleRequest()`: the response, the events to send before it, and a flag
+ * that tells the server to stop.
+ */
 export interface HandleResult {
   response: JsonRpcResponse;
   events: JsonRpcEvent[];
@@ -48,7 +62,24 @@ function str(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-export async function handleRequest(session: Session, request: JsonRpcRequest): Promise<HandleResult> {
+/**
+ * Route one JSON-RPC request to a `Session` method and build the response. The function
+ * does no I/O on stdin or stdout.
+ *
+ * The function does not throw for errors in a request. A request with no string
+ * `method` gives error -32600. An unknown method gives -32601. A missing `path` for
+ * `open` gives -32602. An exception from a session method gives -32603 with the
+ * exception message. The response `id` is `null` if the request has no `id`.
+ *
+ * @param session - The session that holds the open workbook.
+ * @param request - The parsed request.
+ * @returns The response, the events for a `run`, and `shutdown` set to true for the
+ * `shutdown` method.
+ */
+export async function handleRequest(
+  session: Session,
+  request: JsonRpcRequest
+): Promise<HandleResult> {
   const id = request && request.id !== undefined ? request.id : null;
   const ok = (result: unknown, events: JsonRpcEvent[] = [], shutdown = false): HandleResult => ({
     response: { jsonrpc: '2.0', id, result },

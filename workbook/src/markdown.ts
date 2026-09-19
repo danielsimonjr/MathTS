@@ -79,6 +79,19 @@ function isBlockStart(line: string): boolean {
   );
 }
 
+/**
+ * Convert a small Markdown subset to HTML. The subset is headings, paragraphs, bold,
+ * italic, inline code, fenced code, lists, links and horizontal rules.
+ *
+ * The function escapes `&`, `<` and `>` in the text before it applies the inline
+ * markers. A link keeps its `href` only if the target is an `http:`, `https:` or
+ * `mailto:` URL, or a relative link that starts with `/`, `./`, `../` or `#`. The
+ * function rejects a link that starts with `//`. Otherwise the function keeps only the
+ * link text.
+ *
+ * @param src - The Markdown source.
+ * @returns The HTML fragment. An empty string gives an empty string.
+ */
 export function markdownToHtml(src: string): string {
   if (!src) return '';
   const lines = src.replace(/\r\n?/g, '\n').split('\n');

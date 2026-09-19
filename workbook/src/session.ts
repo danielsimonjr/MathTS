@@ -24,6 +24,15 @@ function canonicalCell(cell: Cell): string {
   return JSON.stringify([cell.type, cell.content, cell.dependsOn ?? [], sortedMeta]);
 }
 
+/**
+ * State of one open workbook for `mtsw serve`. The session keeps the cell results
+ * and a set of stale cells.
+ *
+ * An edit replaces the workbook and marks as stale each changed cell and each cell
+ * that depends on it. Each edit calls a function from `edit.ts` first. If that
+ * function throws, the session state does not change. `run()` executes only the stale
+ * cells in its target set. A cell with an error stays stale, so the next run tries it again.
+ */
 export class Session {
   workbook: Workbook | null = null;
   path: string | null = null;
@@ -92,7 +101,10 @@ export class Session {
   }
 
   // --- Edits (each is atomic: the pure op throws before any state change) ---
-  addCell(spec: { id: string; type: CellType; content?: string; dependsOn?: string[] }, position?: edit.CellPosition): void {
+  addCell(
+    spec: { id: string; type: CellType; content?: string; dependsOn?: string[] },
+    position?: edit.CellPosition
+  ): void {
     this.commit(edit.addCell(this.require(), spec, position));
   }
   editCell(id: string, changes: { content?: string; type?: CellType; dependsOn?: string[] }): void {
@@ -109,7 +121,12 @@ export class Session {
   renameCell(oldId: string, newId: string): void {
     this.commit(edit.renameCell(this.require(), oldId, newId));
   }
-  setMetadata(changes: { title?: string; author?: string; description?: string; tags?: string[] }): void {
+  setMetadata(changes: {
+    title?: string;
+    author?: string;
+    description?: string;
+    tags?: string[];
+  }): void {
     this.commit(edit.setMetadata(this.require(), changes));
   }
 

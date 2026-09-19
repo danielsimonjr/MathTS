@@ -45,6 +45,11 @@ import { parseYamlSafe } from './yaml-safe';
  */
 const parse = (mathFunctions as unknown as { parse: (expr: string) => unknown }).parse;
 
+/**
+ * Result of one CLI command handler. `main()` writes `stdout` and `stderr` to the
+ * process streams and exits with `exitCode`. A handler returns this value and does
+ * not write to the console itself.
+ */
 export interface CommandResult {
   stdout: string;
   stderr: string;
@@ -281,6 +286,19 @@ function failureList(cells: CellResult[]): string[] {
     .map((c) => `${c.id}: ${c.error ?? '(failed)'}`);
 }
 
+/**
+ * Run a workbook file (`mtsw run`) and report each cell result.
+ *
+ * The command first checks the optional `--expect-hash` SHA-256, then parses the file.
+ * With `--timeout <ms>`, the run occurs in a worker thread that is terminated when the
+ * budget expires. `--timeout` refuses `-c` and `-v`. Without `--timeout`, the run uses
+ * `runReport()`, so one failed cell does not stop the other cells. `--write` stores the
+ * results back into the file with an atomic write.
+ *
+ * @param args - Command arguments after `run`.
+ * @returns Exit code 0 if every reported cell succeeds or passes. Exit code 1 for a
+ * usage, read, hash, parse, unknown-cell, timeout or write error, or for any failed cell.
+ */
 export async function runCommand(args: string[]): Promise<CommandResult> {
   const json = args.includes('--json');
   const fail = (problems: string[], data: unknown = null): CommandResult =>
@@ -451,6 +469,14 @@ function computeProblems(parsed: ParseResult): string[] {
   return problems;
 }
 
+/**
+ * Parse a workbook file and list its problems (`mtsw validate`). The command does not
+ * run the cells.
+ *
+ * @param args - Command arguments after `validate`.
+ * @returns Exit code 0 if the file has no problems. Exit code 1 for a usage or read
+ * error, or if the file has one or more problems.
+ */
 export function validateCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const file = firstPositional(args);
@@ -489,6 +515,14 @@ export function validateCommand(args: string[]): CommandResult {
   return { stdout: '', stderr: `Invalid workbook:\n${bullets(problems)}`, exitCode: 1 };
 }
 
+/**
+ * Print the structure of a workbook file (`mtsw describe`): cells, types and the
+ * dependency graph. With `--json`, the data is the `DescribeDoc` from `describeData()`.
+ * The command does not run the cells.
+ *
+ * @param args - Command arguments after `describe`.
+ * @returns Exit code 0 if the file parses with no problems, else exit code 1.
+ */
 export function describeCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const file = firstPositional(args);
@@ -538,6 +572,13 @@ export function describeCommand(args: string[]): CommandResult {
   return { stdout: summary, stderr: '', exitCode: ok ? 0 : 1 };
 }
 
+/**
+ * Print the CLI version, the schema version, the supported and deferred cell types,
+ * and the command list (`mtsw capabilities`).
+ *
+ * @param args - Command arguments. Only `--json` has an effect.
+ * @returns Always exit code 0.
+ */
 export function capabilitiesCommand(args: string[]): CommandResult {
   const data = capabilitiesInfo();
   if (args.includes('--json')) {
@@ -552,6 +593,12 @@ export function capabilitiesCommand(args: string[]): CommandResult {
   return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
 }
 
+/**
+ * List the names and descriptions of the templates that `mtsw new` accepts.
+ *
+ * @param args - Command arguments. Only `--json` has an effect.
+ * @returns Always exit code 0.
+ */
 export function templatesCommand(args: string[]): CommandResult {
   const templates = Object.entries(TEMPLATES).map(([name, t]) => ({
     name,
@@ -567,6 +614,13 @@ export function templatesCommand(args: string[]): CommandResult {
   };
 }
 
+/**
+ * List the function names and constant names that expression cells can use
+ * (`mtsw functions`).
+ *
+ * @param args - Command arguments. Only `--json` has an effect.
+ * @returns Always exit code 0.
+ */
 export function functionsCommand(args: string[]): CommandResult {
   const data = listFunctions();
   if (args.includes('--json')) {
@@ -579,6 +633,16 @@ export function functionsCommand(args: string[]): CommandResult {
   return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
 }
 
+/**
+ * Read or change the workbook metadata (`mtsw meta get|set`).
+ *
+ * `set` accepts `--title`, `--author`, `--description` and `--tags` (a comma-separated
+ * list). `set` writes the file with an atomic write.
+ *
+ * @param args - Command arguments after `meta`. The first argument is `get` or `set`.
+ * @returns Exit code 0 on success. Exit code 1 for a usage, read, parse or write
+ * error, or for `set` with no field to change.
+ */
 export function metaCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const fail = (problems: string[]): CommandResult =>
@@ -725,6 +789,18 @@ function buildRenderDoc(
   };
 }
 
+/**
+ * Export a workbook as HTML, TeX, JSON, PDF or ipynb (`mtsw export`).
+ *
+ * The command runs the workbook first, unless `--no-run` is given. If the run fails as a
+ * whole (a result with the id `(workbook)`, for example a dependency cycle), the export
+ * stops with exit code 1. The `json` format needs a run. The `pdf` format needs `-o`.
+ * Without `-o`, the rendered text goes to stdout.
+ *
+ * @param args - Command arguments after `export`.
+ * @returns Exit code 0 on success. Exit code 1 for an unknown format, a usage, read,
+ * parse or write error, a whole-run failure, or a PDF render error.
+ */
 export async function exportCommand(args: string[]): Promise<CommandResult> {
   const json = args.includes('--json');
   const fail = (problems: string[]): CommandResult =>
@@ -934,11 +1010,28 @@ export function runServer(
   });
 }
 
+/**
+ * Start the JSON-RPC server on stdin and stdout (`mtsw serve`). The returned promise
+ * resolves after `runServer()` stops.
+ *
+ * @returns Always exit code 0, with empty `stdout` and `stderr`.
+ */
 export async function serveCommand(): Promise<CommandResult> {
   await runServer();
   return { stdout: '', stderr: '', exitCode: 0 };
 }
 
+/**
+ * Print the dependency graph of a workbook file (`mtsw graph`). The default output is
+ * one line for each cell. `-f mermaid` and `-f dot` select the other formats.
+ *
+ * `graph` has no JSON output. With `--json`, the command returns a JSON error envelope
+ * that tells the user to use `describe --json`.
+ *
+ * @param args - Command arguments after `graph`.
+ * @returns Exit code 0 on success. Exit code 1 for `--json`, or for a usage, read or
+ * parse error.
+ */
 export function graphCommand(args: string[]): CommandResult {
   // graph is human-only; structured graph data lives in `describe --json`.
   // Answer a mistaken `--json` with a parseable envelope, not surprise text.
@@ -979,6 +1072,14 @@ export function graphCommand(args: string[]): CommandResult {
   return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
 }
 
+/**
+ * Remove the stored outputs from a workbook file (`mtsw strip`). The command prints the
+ * result. With `-w` or `--write`, the command writes the result back into the file with
+ * an atomic write.
+ *
+ * @param args - Command arguments after `strip`.
+ * @returns Exit code 0 on success. Exit code 1 for a usage, read, parse or write error.
+ */
 export function stripCommand(args: string[]): CommandResult {
   const file = firstPositional(args);
   if (!file) {
@@ -1060,6 +1161,19 @@ const RESERVED_DEVICE_NAMES = new Set([
   ...Array.from({ length: 9 }, (_unused, i) => `LPT${i + 1}`),
 ]);
 
+/**
+ * Create a new workbook file from a template (`mtsw new`).
+ *
+ * A bare name must match `[A-Za-z0-9._-]+` and must not be `.`, `..` or a reserved
+ * Windows device name. This check stops a bare name from selecting a different
+ * directory. `-o <path>` gives an explicit path, and the name check does not apply to
+ * it. Without `--force`, the command does not overwrite an existing file. With
+ * `--force`, the command still refuses to overwrite a symbolic link.
+ *
+ * @param args - Command arguments after `new`.
+ * @returns Exit code 0 when the file is created. Exit code 1 for an unknown template,
+ * a missing or invalid name, an existing file or symbolic link, or a write error.
+ */
 export function newCommand(args: string[]): CommandResult {
   const outPath = flagValue(args, '-o') ?? flagValue(args, '--output');
   const name = firstPositional(args);
@@ -1147,6 +1261,15 @@ export function newCommand(args: string[]): CommandResult {
   return { stdout: `Created ${target}`, stderr: '', exitCode: 0 };
 }
 
+/**
+ * Convert JSON or YAML input into a workbook (`mtsw import`). The input comes from a
+ * file, or from stdin if the file argument is absent or `-`. With `-o`, the command
+ * writes the result with an atomic write. Otherwise it prints the result.
+ *
+ * @param args - Command arguments after `import`.
+ * @returns Exit code 0 on success. Exit code 1 if no input is available, or for a
+ * read, import or write error.
+ */
 export function importCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const fail = (problems: string[]): CommandResult =>
@@ -1269,6 +1392,17 @@ function resolveContent(args: string[]): { content?: string; error?: string } {
 
 const CELL_VERBS = ['add', 'edit', 'rm', 'move', 'rename'];
 
+/**
+ * Add, edit, remove, move or rename one cell in a workbook file (`mtsw cell`).
+ *
+ * Each verb calls the related function in `edit.ts`. If that function throws, the
+ * command writes nothing and returns exit code 1. `--dry-run` prints the result and
+ * does not write. The command writes the file only if the content changed.
+ *
+ * @param args - Command arguments after `cell`. The first argument is the verb.
+ * @returns Exit code 0 on success, which includes "no change". Exit code 1 for a
+ * usage, read, parse, edit or write error.
+ */
 export function cellCommand(args: string[]): CommandResult {
   const json = args.includes('--json');
   const fail = (problems: string[]): CommandResult =>
