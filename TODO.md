@@ -2378,6 +2378,8 @@ Headless notebook CLI/runtime in the `workbook` package + MathML serialization i
 
 ## ✅ Completed
 
+- [x] **2026-09-18 doc gates green** - architecture-docs and code-docs gates pass, including ast and parser; prettier pinned to 3.9.8 so this file no longer reflows on commit.
+
 ### 2026-07-09 session — Export-formats expansion (published)
 
 - [x] **plot@0.3.0** — Node-only `./render` subpath: `renderToFile` (SVG→PNG/PDF via rsvg-convert/resvg) + `latexToPdf` (LaTeX/TikZ→PDF via pdflatex/tectonic). External-tool bridge, **zero bundled deps**, main entry stays browser-safe. **Security: LaTeX shell-escape OFF by default** (opt-in via unsafe `shellEscape`), caught by automated review and fixed before publish.

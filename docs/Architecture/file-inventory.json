@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08",
+  "generated": "2026-09-19",
   "totalFiles": 1854,
   "byDisposition": {
     "reachable": 24,
@@ -12525,7 +12525,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 5201
+      "loc": 5236
     },
     {
       "file": "trigonometry/src/index.ts",
