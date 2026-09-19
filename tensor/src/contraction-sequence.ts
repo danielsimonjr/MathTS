@@ -56,6 +56,7 @@
 import { Tensor } from './Tensor.js';
 import { Index } from './named-index.js';
 
+/** Configures the size limit and the ordering algorithm for a tensor-network contraction. */
 export interface ContractNetworkOpts {
   /** Cap intermediate-tensor element count to avoid blowups. Default: 2^31. */
   maxIntermediateSize?: number;
@@ -68,6 +69,7 @@ export interface ContractNetworkOpts {
   algorithm?: 'exact' | 'greedy' | 'auto';
 }
 
+/** Contains the contracted tensor, the pairwise contraction order, its FLOP cost, and the intermediate sizes. */
 export interface ContractNetworkResult {
   result: Tensor;
   /** Pairwise contractions in (virtual) input-index space; see file header. */
@@ -448,34 +450,34 @@ function solveExact(
     const rightOnlyLo = rLo & ~lLo;
     const rightOnlyHi = rHi & ~lHi;
     let dShared = 1;
-    for (let m = sharedLo; m !== 0; ) {
+    for (let m = sharedLo; m !== 0;) {
       const lsb = m & -m;
       dShared *= dims[31 - Math.clz32(lsb)];
       m ^= lsb;
     }
-    for (let m = sharedHi; m !== 0; ) {
+    for (let m = sharedHi; m !== 0;) {
       const lsb = m & -m;
       dShared *= dims[30 + 31 - Math.clz32(lsb)];
       m ^= lsb;
     }
     let dFL = 1;
-    for (let m = leftOnlyLo; m !== 0; ) {
+    for (let m = leftOnlyLo; m !== 0;) {
       const lsb = m & -m;
       dFL *= dims[31 - Math.clz32(lsb)];
       m ^= lsb;
     }
-    for (let m = leftOnlyHi; m !== 0; ) {
+    for (let m = leftOnlyHi; m !== 0;) {
       const lsb = m & -m;
       dFL *= dims[30 + 31 - Math.clz32(lsb)];
       m ^= lsb;
     }
     let dFR = 1;
-    for (let m = rightOnlyLo; m !== 0; ) {
+    for (let m = rightOnlyLo; m !== 0;) {
       const lsb = m & -m;
       dFR *= dims[31 - Math.clz32(lsb)];
       m ^= lsb;
     }
-    for (let m = rightOnlyHi; m !== 0; ) {
+    for (let m = rightOnlyHi; m !== 0;) {
       const lsb = m & -m;
       dFR *= dims[30 + 31 - Math.clz32(lsb)];
       m ^= lsb;

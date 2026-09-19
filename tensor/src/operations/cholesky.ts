@@ -25,6 +25,7 @@ import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { cholesky as matrixCholesky } from '@danielsimonjr/mathts-matrix';
 
+/** Configures the factor type (lower or upper) and the joining index name for `tensorCholesky`. */
 export interface TensorCholeskyOpts {
   /** When true (default), return L such that A = L·Lᵀ. When false, return U such that A = Uᵀ·U. */
   lower?: boolean;
@@ -32,6 +33,7 @@ export interface TensorCholeskyOpts {
   joiningIndexName?: string;
 }
 
+/** Contains the Cholesky factor of the tensor reshaped to a square matrix. */
 export interface TensorCholeskyResult {
   /** Cholesky factor (lower or upper depending on `opts.lower`). */
   L: Tensor;

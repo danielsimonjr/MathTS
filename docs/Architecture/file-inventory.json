@@ -11965,7 +11965,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 815
+      "loc": 817
     },
     {
       "file": "tensor/src/index.ts",
@@ -11986,7 +11986,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 153
     },
     {
       "file": "tensor/src/operations/concatenate.ts",
@@ -12000,7 +12000,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 192
+      "loc": 194
     },
     {
       "file": "tensor/src/operations/flip.ts",
@@ -12021,42 +12021,42 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 150
+      "loc": 151
     },
     {
       "file": "tensor/src/operations/lu.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 152
+      "loc": 154
     },
     {
       "file": "tensor/src/operations/pad.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 167
+      "loc": 168
     },
     {
       "file": "tensor/src/operations/pinv.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 145
     },
     {
       "file": "tensor/src/operations/qr.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 131
+      "loc": 133
     },
     {
       "file": "tensor/src/operations/random.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 209
+      "loc": 210
     },
     {
       "file": "tensor/src/operations/roll.ts",
@@ -12070,42 +12070,42 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 150
+      "loc": 151
     },
     {
       "file": "tensor/src/operations/slice.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 121
+      "loc": 122
     },
     {
       "file": "tensor/src/operations/solve.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 284
+      "loc": 286
     },
     {
       "file": "tensor/src/operations/stack.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 140
+      "loc": 141
     },
     {
       "file": "tensor/src/operations/svd.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 205
+      "loc": 207
     },
     {
       "file": "tensor/src/Tensor.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 880
+      "loc": 891
     },
     {
       "file": "tensor/tests/broadcasting.test.ts",

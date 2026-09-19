@@ -24,6 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests: `plot/tests/svg-attr-escape.test.ts` and `workbook/tests/markup-escape.test.ts` parse the
   output with `@xmldom/xmldom` (new dev dependency). They failed on `main` (11 plot, 2 workbook).
 - Output for ordinary inputs is byte-identical: the 15 golden SVG snapshots did not change.
+  Architecture numbers refreshed (`totalLinesOfCode` 337758); `repo_map.py check` passes.
+
+### docs(tensor): doc comments for every exported symbol
+
+- Added doc comments to the 23 exported symbols of `@danielsimonjr/mathts-tensor` that had none:
+  `EinsumSpec`, `Tensor`, `ContractNetworkOpts`, `ContractNetworkResult`, and the option and
+  result interfaces of the cholesky, eig, kron, lu, pad, pinv, qr, random, scatter, slice,
+  solve, stack and svd operations.
+- Moved the orphaned `tensorSvd` parameter block from the private `SvdPrep` interface onto
+  `tensorSvd`, and corrected its rank requirement to rank 2 or more.
+  Comments only: each changed file parses to the same AST as `main` with comments removed.
+  `code_docs.py check tensor/src` now passes (was 26 MUST issues).
+  Architecture numbers refreshed (`totalLinesOfCode` 337322); `repo_map.py check` passes.
 
 ### docs(plot): doc comments for every exported symbol
 
