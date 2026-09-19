@@ -190,7 +190,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * For example str='0:2:11'.
        * @memberof Range
        * @param str
-       * @return {Range | null} range
+       * @return range
        */
       static parse(str: string): Range | null {
         if (typeof str !== 'string') {
@@ -221,7 +221,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
 
       /**
        * Create a clone of the range
-       * @return {Range} clone
+       * @return clone
        */
       clone(): Range {
         return new Range(this.start, this.end, this.step);
@@ -231,7 +231,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * Retrieve the size of the range.
        * Returns an array containing one number, the number of elements in the range.
        * @memberof Range
-       * @returns {number[]} size
+       * @returns size
        */
       size(): number[] {
         let len = 0;
@@ -255,7 +255,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Calculate the minimum value in the range
        * @memberof Range
-       * @return {number | undefined} min
+       * @return min
        */
       min(): number | undefined {
         const size = this.size()[0];
@@ -276,7 +276,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Calculate the maximum value in the range
        * @memberof Range
-       * @return {number | undefined} max
+       * @return max
        */
       max(): number | undefined {
         const size = this.size()[0];
@@ -329,7 +329,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @param callback - The callback method is invoked with three
        *                            parameters: the value of the element, the index
        *                            of the element, and the Matrix being traversed.
-       * @returns {Array} array
+       * @returns array
        */
       map<T>(callback: RangeMapCallback<T>): T[] {
         const array: T[] = [];
@@ -342,7 +342,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Create an Array with a copy of the Ranges data
        * @memberof Range
-       * @returns {Array} array
+       * @returns array
        */
       toArray(): number[] {
         const array: number[] = [];
@@ -355,7 +355,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Get the primitive value of the Range, a one dimensional array
        * @memberof Range
-       * @returns {Array} array
+       * @returns array
        */
       valueOf(): number[] {
         if (
@@ -382,7 +382,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        *                                               lib/utils/number:format for a
        *                                               description of the available
        *                                               options.
-       * @returns {string} str
+       * @returns str
        */
       format(options?: RangeFormatOptions | number | ((value: number) => string)): string {
         let str = format(this.start, options);
@@ -397,7 +397,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Get a string representation of the range.
        * @memberof Range
-       * @returns {string}
+       * @returns
        */
       toString(): string {
         return this.format();
@@ -406,7 +406,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the range
        * @memberof Range
-       * @returns {Object} Returns a JSON object structured as:
+       * @returns Returns a JSON object structured as:
        *                   `{"mathjs": "Range", "start": 2, "end": 4, "step": 1}`
        */
       toJSON(): RangeJSON {
@@ -423,7 +423,7 @@ export const createRangeClass = /* #__PURE__ */ factory(
        * @memberof Range
        * @param json - A JSON object structured as:
        *                      `{"mathjs": "Range", "start": 2, "end": 4, "step": 1}`
-       * @return {Range}
+       * @return
        */
       static fromJSON(json: RangeJSON): Range {
         return new Range(json.start, json.end, json.step);

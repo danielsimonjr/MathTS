@@ -239,7 +239,7 @@ export function isMatrix(x: unknown): x is Matrix {
 /**
  * Test whether a value is a collection: an Array or Matrix
  * @param x
- * @returns {boolean} isCollection
+ * @returns isCollection
  */
 export function isCollection(x: unknown): x is unknown[] | Matrix {
   return Array.isArray(x) || isMatrix(x);

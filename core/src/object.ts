@@ -10,7 +10,7 @@ import { hasOwnProperty } from './shared.js';
  * If x has a function clone, this function will be invoked to clone the object.
  *
  * @param x
- * @return {*} clone
+ * @return clone
  */
 export function clone<T>(x: T): T {
   const type = typeof x;
@@ -58,7 +58,7 @@ export function clone<T>(x: T): T {
  * Apply map to all properties of an object
  * @param object
  * @param callback
- * @return {Object} Returns a copy of the object with mapped properties
+ * @return Returns a copy of the object with mapped properties
  */
 export function mapObject<T, U>(
   object: Record<string, T>,
@@ -79,7 +79,7 @@ export function mapObject<T, U>(
  * Extend object a with the properties of object b
  * @param a
  * @param b
- * @return {Object} a
+ * @return a
  */
 export function extend<T extends Record<string, unknown>, U extends Record<string, unknown>>(
   a: T,
@@ -98,7 +98,7 @@ export function extend<T extends Record<string, unknown>, U extends Record<strin
  * Deep extend an object a with the properties of object b
  * @param a
  * @param b
- * @returns {Object}
+ * @returns
  */
 export function deepExtend<T>(a: T, b: unknown): T {
   if (Array.isArray(b)) {
@@ -169,7 +169,7 @@ export function deepExtend<T>(a: T, b: unknown): T {
  * Compares values and functions strictly (ie. 2 is not the same as '2').
  * @param a
  * @param b
- * @returns {boolean}
+ * @returns
  */
 export function deepStrictEqual(a: unknown, b: unknown): boolean {
   let prop: string;
@@ -221,7 +221,7 @@ export function deepStrictEqual(a: unknown, b: unknown): boolean {
 /**
  * Recursively flatten a nested object.
  * @param nestedObject
- * @return {Object} Returns the flattened object
+ * @return Returns the flattened object
  */
 export function deepFlatten(nestedObject: Record<string, unknown>): Record<string, unknown> {
   const flattenedObject: Record<string, unknown> = {};
@@ -250,7 +250,7 @@ function _deepFlatten(
 
 /**
  * Test whether the current JavaScript engine supports Object.defineProperty
- * @returns {boolean} returns true if supported
+ * @returns returns true if supported
  */
 export function canDefineProperty(): boolean {
   // test needed for broken IE8 implementation
@@ -311,7 +311,7 @@ export function lazy<T>(
  * When a namespace is missing, it will be created
  * @param object
  * @param path - A dot separated string like 'name.space'
- * @return {Object} Returns the object at the end of the path
+ * @return Returns the object at the end of the path
  */
 export function traverse(
   object: Record<string, unknown>,
@@ -349,7 +349,7 @@ export { hasOwnProperty };
  *                   as fifth argument of the factory function
  *
  * @param object
- * @returns {boolean}
+ * @returns
  */
 export function isLegacyFactory(object: unknown): boolean {
   return !!object && typeof (object as { factory?: unknown }).factory === 'function';
@@ -359,7 +359,7 @@ export function isLegacyFactory(object: unknown): boolean {
  * Get a nested property from an object
  * @param object
  * @param path
- * @returns {Object}
+ * @returns
  */
 export function get(object: Record<string, unknown>, path: string | string[]): unknown {
   if (typeof path === 'string') {
@@ -387,7 +387,7 @@ export function get(object: Record<string, unknown>, path: string | string[]): u
  * @param object
  * @param path
  * @param value
- * @returns {Object}
+ * @returns
  */
 export function set<T extends Record<string, unknown>>(
   object: T,
@@ -425,7 +425,7 @@ export function set<T extends Record<string, unknown>>(
  * @param object
  * @param properties
  * @param transform - Optional value to transform a value when picking it
- * @return {Object}
+ * @return
  */
 export function pick(
   object: Record<string, unknown>,
@@ -450,7 +450,7 @@ export function pick(
  * but not for nested properties
  * @param object
  * @param properties
- * @return {Object}
+ * @return
  */
 export function pickShallow(
   object: Record<string, unknown>,
