@@ -35,7 +35,7 @@
     "build:prod": "tsup --minify --treeshake"
   },
   "dependencies": {
-    "typed-function": "github:danielsimonjr/typed-function"
+    "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",

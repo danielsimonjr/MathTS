@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### fix(deps): no github: dependencies in published manifests - npm 10 can install core
+
+- `npm install @danielsimonjr/mathts-core@0.15.1` fails on npm 10 (the npm of Node 20 and 22) with
+  "git dep preparation failed ... Cannot read properties of null (reading 'edgesOut')". The cause is
+  `"typed-function": "github:danielsimonjr/typed-function"` in core. npm 11 installs it.
+- `core`, `functions` and `packages/typed-function` now declare
+  `"typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"`, and `packages/workerpool`
+  declares `"workerpool": "npm:@danielsimonjr/workerpool@10.2.1"`. The root manifest uses the same
+  specs, so `bun.lock` has no git entries. Both registry versions are code-identical to the git HEADs
+  that `bun.lock` resolved before (the differences are lockfiles and CI files only). The `npm:` alias
+  keeps the module name, so no source file and no emitted `.d.ts` changes.
+- `@danielsimonjr/mathts-typed-function` is not a replacement: it is a helper package that itself
+  re-exports `typed-function` and had the same git dependency.
+- New `tools/test/check-published-deps.mjs` fails when a non-private workspace manifest has a git,
+  hosted-git, local-path or tarball-URL spec. CI runs it in the `Test` job. The consumer type check
+  step no longer installs npm 11, so it runs on the npm 10 of Node 22.
+- Changeset: patch for core, functions, mathts-typed-function and mathts-workerpool.
+
 ### docs(core): finish the TSDoc conversion - untyped @returns/@throws in 6 files
 
 - #291 converted the typed `@param {T}` tags in `core` to TSDoc but left 95 typed `@returns {T}` /

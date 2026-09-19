@@ -119,6 +119,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # npm 10 (bundled with Node 20 and 22) cannot install a package that has a git
+      # dependency, so every published manifest must use registry specs only.
+      - name: Published manifests use registry dependencies only
+        run: node tools/test/check-published-deps.mjs
+
       # The AssemblyScript wasm must be COMPILED before `bun run build`, which only
       # copies it (matrix/scripts/copy-wasm.mjs). assembly/build/ is gitignored, so a
       # fresh runner never has the source, and copy-wasm.mjs warns and exits 0 when it is
@@ -150,13 +155,11 @@ jobs:
       # type-check every public entry point with skipLibCheck: false. The repo's own typecheck
       # reads source, so it cannot see errors in the emitted .d.ts (core 0.15.0 shipped six
       # TS2416 in dist/map.d.ts). Plain `node`: a `bun run` script would run it on Bun.
-      # npm 10 (bundled with Node 20/22) crashes while it prepares the github: typed-function
-      # dependency ("Cannot read properties of null (reading 'edgesOut')"), so this step uses npm 11.
+      # This step uses the npm 10 that Node 22 bundles, so it also proves that npm 10 users can
+      # install the packed packages (no git dependencies; see check-published-deps.mjs).
       - name: Consumer type check of packed packages
         if: matrix.node-version == '22.x'
-        run: |
-          npm install -g npm@11
-          node tools/test/consumer-typecheck.mjs --skip-build
+        run: node tools/test/consumer-typecheck.mjs --skip-build
 
   coverage:
     name: Coverage

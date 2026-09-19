@@ -5,8 +5,8 @@
     "": {
       "name": "mathts",
       "dependencies": {
-        "typed-function": "github:danielsimonjr/typed-function",
-        "workerpool": "github:danielsimonjr/workerpool",
+        "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
+        "workerpool": "npm:@danielsimonjr/workerpool@10.2.1",
       },
       "devDependencies": {
         "@changesets/cli": "^3.0.1",
@@ -44,7 +44,7 @@
     },
     "assembly": {
       "name": "@danielsimonjr/mathts-wasm",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "devDependencies": {
         "@assemblyscript/loader": "^0.28.20",
         "assemblyscript": "^0.28.20",
@@ -53,7 +53,7 @@
     },
     "ast": {
       "name": "@danielsimonjr/mathts-ast",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-expression": "^0.7.0",
@@ -68,7 +68,7 @@
     },
     "autograd": {
       "name": "@danielsimonjr/mathts-autograd",
-      "version": "0.3.13",
+      "version": "0.3.14",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-tensor": "^0.2.19",
@@ -82,7 +82,7 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.4.21",
+      "version": "0.4.22",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.1",
         "@danielsimonjr/mathts-functions": "^0.64.0",
@@ -98,9 +98,9 @@
     },
     "core": {
       "name": "@danielsimonjr/mathts-core",
-      "version": "0.14.3",
+      "version": "0.15.1",
       "dependencies": {
-        "typed-function": "github:danielsimonjr/typed-function",
+        "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -111,7 +111,7 @@
     },
     "evaluator": {
       "name": "@danielsimonjr/mathts-evaluator",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-expression": "^0.7.0",
@@ -126,9 +126,9 @@
     },
     "expression": {
       "name": "@danielsimonjr/mathts-expression",
-      "version": "0.7.1",
+      "version": "0.8.0",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.14.1",
+        "@danielsimonjr/mathts-core": "^0.15.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -140,13 +140,13 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.64.0",
+      "version": "0.64.1",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.14.1",
-        "@danielsimonjr/mathts-expression": "^0.7.1",
+        "@danielsimonjr/mathts-core": "^0.15.0",
+        "@danielsimonjr/mathts-expression": "^0.8.0",
         "@danielsimonjr/mathts-gpu": "^0.2.0",
-        "@danielsimonjr/mathts-matrix": "^0.7.1",
-        "@danielsimonjr/mathts-parallel": "^0.6.4",
+        "@danielsimonjr/mathts-matrix": "^0.7.2",
+        "@danielsimonjr/mathts-parallel": "^0.6.5",
         "bignumber.js": "^11.1.5",
         "complex.js": "^2.2.5",
         "decimal.js": "^10.4.3",
@@ -155,7 +155,7 @@
         "javascript-natural-sort": "^0.7.1",
         "seedrandom": "^3.0.5",
         "tiny-emitter": "^2.1.0",
-        "typed-function": "github:danielsimonjr/typed-function",
+        "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -184,7 +184,7 @@
     },
     "linalg": {
       "name": "@danielsimonjr/mathts-linalg",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-matrix": "^0.7.1",
@@ -198,11 +198,11 @@
     },
     "matrix": {
       "name": "@danielsimonjr/mathts-matrix",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.14.0",
+        "@danielsimonjr/mathts-core": "^0.15.0",
         "@danielsimonjr/mathts-gpu": "^0.2.0",
-        "@danielsimonjr/mathts-parallel": "^0.6.4",
+        "@danielsimonjr/mathts-parallel": "^0.6.5",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -220,7 +220,7 @@
     },
     "numbers": {
       "name": "@danielsimonjr/mathts-numbers",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
       },
@@ -233,9 +233,9 @@
     },
     "packages/typed-function": {
       "name": "@danielsimonjr/mathts-typed-function",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "dependencies": {
-        "typed-function": "github:danielsimonjr/typed-function",
+        "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -245,9 +245,9 @@
     },
     "packages/workerpool": {
       "name": "@danielsimonjr/mathts-workerpool",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
-        "workerpool": "github:danielsimonjr/workerpool",
+        "workerpool": "npm:@danielsimonjr/workerpool@10.2.1",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -257,10 +257,10 @@
     },
     "parallel": {
       "name": "@danielsimonjr/mathts-parallel",
-      "version": "0.6.4",
+      "version": "0.6.5",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.14.0",
-        "@danielsimonjr/mathts-workerpool": "^0.2.1",
+        "@danielsimonjr/mathts-core": "^0.15.0",
+        "@danielsimonjr/mathts-workerpool": "^0.2.2",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -271,7 +271,7 @@
     },
     "parser": {
       "name": "@danielsimonjr/mathts-parser",
-      "version": "0.1.19",
+      "version": "0.1.20",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-expression": "^0.7.0",
@@ -286,7 +286,7 @@
     },
     "plot": {
       "name": "@danielsimonjr/mathts-plot",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.1",
         "@danielsimonjr/mathts-expression": "^0.7.1",
@@ -329,7 +329,7 @@
     },
     "tensor": {
       "name": "@danielsimonjr/mathts-tensor",
-      "version": "0.2.19",
+      "version": "0.2.20",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "@danielsimonjr/mathts-matrix": "^0.7.1",
@@ -357,7 +357,7 @@
     },
     "units": {
       "name": "@danielsimonjr/mathts-units",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.14.0",
         "typed-function": "^4.0.0",
@@ -371,7 +371,7 @@
     },
     "workbook": {
       "name": "@danielsimonjr/mathts-workbook",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "bin": {
         "mtsw": "dist/cli.js",
       },
@@ -1009,7 +1009,7 @@
 
     "turbo": ["turbo@2.10.12", "", { "optionalDependencies": { "@turbo/darwin-64": "2.10.12", "@turbo/darwin-arm64": "2.10.12", "@turbo/linux-64": "2.10.12", "@turbo/linux-arm64": "2.10.12", "@turbo/windows-64": "2.10.12", "@turbo/windows-arm64": "2.10.12" }, "bin": "bin/turbo" }, "sha512-AswgMPnpOoaVZHrrSBejETzEbuIA69OVGwfkHwfrY0A23VjWXBANzgq9+OymWOHAIArB7D1+1z498WY8fGg1Jw=="],
 
-    "typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5", {}, "b70664520c3f92d184d4bae1ebcca8d5d8e1e8a5", "sha512-VyGpExyEQ9FP9sLvqqipfZ3onwsA13fPyzTZfwuR+/Ne6qRiHvxD2XK3LMZcTBcdXRiRcjmgF894MIQI4v9hWw=="],
+    "typed-function": ["@danielsimonjr/typed-function@5.0.0-alpha.4", "", {}, "sha512-8frL4OQGbB2v9NnKf4Uc92GBQZ9p9F8HbkfJlceiTEkpgJU7DWCC1x4evdxRdsW/tKyJkEqNQX9z3dueUEea1g=="],
 
     "typescript": ["typescript@7.0.2", "", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
@@ -1023,7 +1023,7 @@
 
     "why-is-node-running": ["why-is-node-running@2.3.0", "", { "dependencies": { "siginfo": "^2.0.0", "stackback": "0.0.2" }, "bin": "cli.js" }, "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w=="],
 
-    "workerpool": ["@danielsimonjr/workerpool@github:danielsimonjr/workerpool#f4fb28c0f8fff4cea396e0834b9259dec170f9c2", {}, "f4fb28c0f8fff4cea396e0834b9259dec170f9c2", "sha512-YkrtDQ6jqwSbvXiQEEne4X9KtfW0aNr3cK1m5m4bRLrAJExA3fL5E/sYV/4/0vlUzX9xv1tAAFEOLGl/+dHXEw=="],
+    "workerpool": ["@danielsimonjr/workerpool@10.2.1", "", {}, "sha512-B8dBoj/q4ezO4D8FsjdigShT7iljj2PWDpp1im6puq2FIiBplY+QAA/R2a30w5k2PlDVQQIsk9de1bCZJ9yOOw=="],
 
     "ws": ["ws@8.21.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="],
 
@@ -1033,13 +1033,9 @@
 
     "@danielsimonjr/mathts-ast/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
 
-    "@danielsimonjr/mathts-core/typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#1c4c1dd", {}, "danielsimonjr-typed-function-1c4c1dd", "sha512-1g5NhHLJXGSGnWzk5J1NR0BJMyYtnbtv5PXaFhwsNiPOwzo2OwBZxfTQXNwmSPWb/bQJcaFXWYIRZ1589v3J8A=="],
-
     "@danielsimonjr/mathts-evaluator/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
 
     "@danielsimonjr/mathts-expression/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
-
-    "@danielsimonjr/mathts-functions/typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#1c4c1dd", {}, "danielsimonjr-typed-function-1c4c1dd", "sha512-1g5NhHLJXGSGnWzk5J1NR0BJMyYtnbtv5PXaFhwsNiPOwzo2OwBZxfTQXNwmSPWb/bQJcaFXWYIRZ1589v3J8A=="],
 
     "@danielsimonjr/mathts-parser/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
 
@@ -1049,11 +1045,7 @@
 
     "@danielsimonjr/mathts-trigonometry/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
 
-    "@danielsimonjr/mathts-typed-function/typed-function": ["@danielsimonjr/typed-function@github:danielsimonjr/typed-function#1c4c1dd", {}, "danielsimonjr-typed-function-1c4c1dd", "sha512-1g5NhHLJXGSGnWzk5J1NR0BJMyYtnbtv5PXaFhwsNiPOwzo2OwBZxfTQXNwmSPWb/bQJcaFXWYIRZ1589v3J8A=="],
-
     "@danielsimonjr/mathts-units/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
-
-    "@danielsimonjr/mathts-workerpool/workerpool": ["@danielsimonjr/workerpool@github:danielsimonjr/workerpool#b873058", {}, "danielsimonjr-workerpool-b873058", "sha512-OBu8O0Kd17clU19F9N3LZ6xv9qaPeRYmn35gTMHLyAy1NmQLZwKcN1xexPEYttwwMeO5vFdKBtVbeZlCUOoAuQ=="],
 
     "fix-dts-default-cjs-exports/magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
