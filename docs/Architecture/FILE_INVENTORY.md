@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1860
+**Total files**: 1861
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1151 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      626 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      627 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1860** |                                                                                                              |
+| **Total**     | **1861** |                                                                                                              |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1175 |
-| `tests`    |   626 |
+| `tests`    |   627 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
 | `@danielsimonjr/mathts-compat`         |    15 |
-| `@danielsimonjr/mathts-core`           |    81 |
+| `@danielsimonjr/mathts-core`           |    82 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
 | `@danielsimonjr/mathts-functions`      |   771 |
@@ -193,6 +193,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/factory-sort.test.ts`                                                 | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/factory/factory.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/helpers/equivalence.ts`                                               | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/map-iterators.test.ts`                                                | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/map.test.ts`                                                          | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/public-api-smoke.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/range-integration.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |

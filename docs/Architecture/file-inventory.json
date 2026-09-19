@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1860,
+  "totalFiles": 1861,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 626,
+    "test": 627,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1175,
-    "tests": 626,
+    "tests": 627,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 81,
+    "@danielsimonjr/mathts-core": 82,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 45,
     "@danielsimonjr/mathts-expression": 543,
@@ -646,7 +646,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 372
+      "loc": 368
     },
     {
       "file": "core/src/number.ts",
@@ -906,6 +906,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 224
+    },
+    {
+      "file": "core/tests/map-iterators.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
     },
     {
       "file": "core/tests/map.test.ts",
