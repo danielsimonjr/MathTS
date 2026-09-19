@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### chore(test): Bun migration Phase 2d - vi.* packages
+
+Third package batch of the vitest -> `bun test` phase (see `TODO.md`).
+
+- `core` and `gpu` now run `"test": "bun test --isolate --timeout 30000"`. Test counts are
+  identical before and after: core 811 tests in 34 files, gpu 26 tests in 7 files. A
+  deliberately broken assertion fails under `bun test`.
+- `core` gains `bunfig.toml` (`[test] preload`) and `bun-test-preload.mjs`, which define
+  `__PKG_VERSION__` the way `vitest.config.ts` and `tsup.config.ts` do.
+- `gpu/tests/helpers/stub-global.ts` replaces `vi.stubGlobal` / `vi.unstubAllGlobals`, which Bun
+  1.4.2 does not have. The helper keeps vitest's semantics (save the first descriptor, restore it).
+- `core/tests/types/unit-external-reference.test.ts` wraps two `Fraction` results in `Number()`.
+  Bun's `toBeCloseTo` rejects a non-number; vitest coerces the value. The tolerance is unchanged.
+- `functions`, `matrix` and `parallel` stay on vitest: their worker-dispatch suites time out or
+  hang under Bun 1.4.2, as for `workerpool` in Phase 2c.
+- `TODO.md`: Phase 2b is ticked (merged in #281).
+
 ### chore(test): Bun migration Phase 2c - plain-vitest packages
 
 Second package batch of the vitest -> `bun test` phase (see `TODO.md`).

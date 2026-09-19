@@ -25,7 +25,7 @@
   "scripts": {
     "build": "tsup && tsc -p tsconfig.dts.json",
     "dev": "tsup --watch",
-    "test": "vitest run",
+    "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",

@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-19",
-  "totalFiles": 1854,
+  "totalFiles": 1855,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1150,
     "test-only": 0,
     "orphan": 0,
-    "test": 621,
+    "test": 622,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1174,
-    "tests": 621,
+    "tests": 622,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -29,7 +29,7 @@
     "(root)": 44,
     "@danielsimonjr/mathts-expression": 543,
     "@danielsimonjr/mathts-functions": 771,
-    "@danielsimonjr/mathts-gpu": 16,
+    "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 98,
     "@danielsimonjr/mathts-numbers": 3,
@@ -10411,7 +10411,7 @@
       "package": "@danielsimonjr/mathts-gpu",
       "area": "tests",
       "disposition": "test",
-      "loc": 307
+      "loc": 308
     },
     {
       "file": "gpu/tests/context.test.ts",
@@ -10433,6 +10433,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 25
+    },
+    {
+      "file": "gpu/tests/helpers/stub-global.ts",
+      "package": "@danielsimonjr/mathts-gpu",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 27
     },
     {
       "file": "gpu/tests/public-api-smoke.test.ts",
