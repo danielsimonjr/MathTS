@@ -104,6 +104,11 @@ try {
   const tsVersion = installedVersion('typescript');
   // plot/render is a Node entry (it uses Buffer), so the consumer is a Node consumer.
   const nodeTypesVersion = installedVersion('@types/node');
+  // npm 10 cannot install the github: typed-function dependency; see the CI step comment.
+  const npmVersion = execFileSync('npm', ['--version'], {
+    encoding: 'utf8',
+    shell: isWindows,
+  }).trim();
 
   // Every public entry point that declares types.
   const specifiers = packages.flatMap(({ pkg }) => {
@@ -160,7 +165,7 @@ try {
 
   console.log(
     `consumer-typecheck: ${packages.length} packages, ${specifiers.length} entry points, ` +
-      `moduleResolution ${resolution}, TypeScript ${tsVersion}`
+      `moduleResolution ${resolution}, TypeScript ${tsVersion}, npm ${npmVersion}`
   );
   let output = '';
   try {
