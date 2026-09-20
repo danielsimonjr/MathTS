@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.21
+
+### Patch Changes
+
+- a13ce7e: The published `.d.ts` files now carry explicit `.js` extensions on relative imports, so a consumer on `moduleResolution` `node16` or `nodenext` can use them.
+  
+  Declaration emit runs under `module`/`moduleResolution` `nodenext` (`tsconfig.dts.base.json`). `tsc` copies a relative specifier into the `.d.ts` verbatim and synthesises one for an inferred type, so the emit mode is what decides whether the extension is there. An extensionless relative import in `src` is now a build error instead of a silent consumer break. A NodeNext consumer type check of the packed tarballs reported 60 errors before this change (53 TS2834, 7 TS2709) and reports 0 after it.
+  
+  `@danielsimonjr/mathts-functions` also imports `Decimal` and `Complex` as named exports of `decimal.js` and `complex.js`. NodeNext resolves those two packages as CommonJS, where the default export is a namespace and not usable as a type (TS2709).
+- Updated dependencies [a13ce7e]
+  - @danielsimonjr/mathts-core@0.15.4
+  - @danielsimonjr/mathts-matrix@0.7.4
+
 ## 0.2.20
 
 ### Patch Changes
