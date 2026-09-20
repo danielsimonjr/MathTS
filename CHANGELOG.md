@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- **The three `tools/*/tsconfig.json` files now typecheck** (`chunking-for-files`,
+  `compress-for-context`, `create-dependency-graph`). They were identical and wrong the same two
+  ways, so this is fixed as a class rather than an instance.
+  - `moduleResolution: "Node"` is node10, which TypeScript 7.0 drops (TS5107). That was the **only**
+    error any of them reported - and a config-level error **aborts the compile before type-checking
+    runs**, so each config showed exactly one error while hiding 80-odd real ones.
+  - With the config error cleared, 81 / 67 / 83 `TS2591 Cannot find name 'fs'` errors surfaced.
+    `types` was unset, which does not reliably resolve `@types/node` from the repo-root
+    `node_modules` here. The root `tsconfig.json` already sets `"types": ["node"]`; the tools now
+    match that convention.
+  - `module: "CommonJS"` with `outDir: "./dist"` described a compilation that never happens, in a
+    package whose root `package.json` declares `"type": "module"`. Nothing builds or references
+    `tools/*/dist`. These tools are ESM and run straight from source, so the configs are now
+    ESM + Bundler resolution + `noEmit` - which is what they actually are.
+  - Verified: 0 errors in all three, and `bun run check:file-census` still passes (1863 files ==
+    maximal repo walk, 0 orphans). No source file changed.
+
 
 ### fix(build): the published .d.ts carries explicit .js extensions (NodeNext consumers)
 
