@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-gpu",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shared WebGPU foundation for MathTS \u2014 device/context lifecycle, buffer pool, and a generic shader manager (no domain kernels)",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
