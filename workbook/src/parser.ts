@@ -3,8 +3,8 @@
  */
 
 import { stringify as stringifyYaml } from 'yaml';
-import { parseYamlHardened, findPollutionKeys } from './yaml-safe';
-import { buildDependencyGraph, detectCycles } from './graph';
+import { parseYamlHardened, findPollutionKeys } from './yaml-safe.js';
+import { buildDependencyGraph, detectCycles } from './graph.js';
 import type {
   Workbook,
   ParseResult,
@@ -12,7 +12,7 @@ import type {
   Cell,
   RuntimeConfig,
   WorkbookMetadata,
-} from './types';
+} from './types.js';
 
 /**
  * Canonical cell-type keys, in detection-precedence order. Shared between the

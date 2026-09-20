@@ -6,7 +6,7 @@ import { clone } from '../utils/object.js';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
-import type Complex from 'complex.js';
+import type { Complex } from 'complex.js';
 
 /** Scalar types supported by pinv */
 type Scalar = number | BigNumber | Complex;

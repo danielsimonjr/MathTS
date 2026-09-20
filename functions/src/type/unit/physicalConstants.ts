@@ -1,6 +1,6 @@
 import { factory } from '../../utils/factory.js';
 import type { MathJsConfig } from '../../core/config.js';
-import type Decimal from 'decimal.js';
+import type { Decimal } from 'decimal.js';
 
 /**
  * Constructor for BigNumber instances

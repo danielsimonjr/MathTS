@@ -1,7 +1,7 @@
 import { clone } from '../../utils/object.js';
 import { wasmLoader } from '../../wasm/WasmLoader.js';
 import type BigNumber from 'bignumber.js';
-import type Complex from 'complex.js';
+import type { Complex } from 'complex.js';
 
 // Minimum matrix size (n*n elements) for WASM to be beneficial
 const WASM_EIGS_THRESHOLD = 16; // 4x4 matrix

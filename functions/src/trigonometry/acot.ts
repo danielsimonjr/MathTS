@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import Decimal from 'decimal.js';
+import { Decimal } from 'decimal.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 import type { Complex } from '../type/complex/Complex.js';

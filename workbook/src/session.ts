@@ -8,12 +8,12 @@
  */
 
 import { readFileSync } from 'node:fs';
-import type { Workbook, Cell, CellResult, RunResult, CellType } from './types';
-import { parseWorkbook, serializeWorkbook } from './parser';
-import { WorkbookExecutor } from './executor';
-import { buildDependencyGraph, getAncestors, getDependents } from './graph';
-import { writeFileAtomic } from './fs-atomic';
-import * as edit from './edit';
+import type { Workbook, Cell, CellResult, RunResult, CellType } from './types.js';
+import { parseWorkbook, serializeWorkbook } from './parser.js';
+import { WorkbookExecutor } from './executor.js';
+import { buildDependencyGraph, getAncestors, getDependents } from './graph.js';
+import { writeFileAtomic } from './fs-atomic.js';
+import * as edit from './edit.js';
 
 /** Canonical, output-independent form of a cell (for stale-diffing). Metadata
  * keys are sorted so a cosmetic key-order change doesn't spuriously invalidate. */

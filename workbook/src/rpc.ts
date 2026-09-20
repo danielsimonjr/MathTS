@@ -4,11 +4,11 @@
  * `cell/event` notifications — no stdio, so the protocol logic is unit-testable.
  */
 
-import type { Session } from './session';
-import { capabilitiesInfo, listFunctions } from './introspect';
-import { describeData } from './doc';
-import type { CellType } from './types';
-import type { CellPosition } from './edit';
+import type { Session } from './session.js';
+import { capabilitiesInfo, listFunctions } from './introspect.js';
+import { describeData } from './doc.js';
+import type { CellType } from './types.js';
+import type { CellPosition } from './edit.js';
 
 /**
  * A JSON-RPC 2.0 request as received. All fields are optional because the input is not

@@ -6,7 +6,7 @@ import { typeOf, isNumber, isBigNumber, isComplex, isFraction } from '../utils/i
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
-import type Complex from 'complex.js';
+import type { Complex } from 'complex.js';
 
 /** Scalar types supported by eigs */
 type Scalar = number | BigNumber | Complex;

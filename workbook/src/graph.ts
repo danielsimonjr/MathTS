@@ -2,7 +2,7 @@
  * Dependency graph management
  */
 
-import type { Cell, DependencyGraph, DependencyNode } from './types';
+import type { Cell, DependencyGraph, DependencyNode } from './types.js';
 
 /**
  * Build dependency graph from cells

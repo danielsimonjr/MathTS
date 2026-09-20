@@ -3,7 +3,7 @@
  * @module @danielsimonjr/mathts-core/types/complex
  */
 
-import type { Scalar, IComplex } from './interfaces';
+import type { Scalar, IComplex } from './interfaces.js';
 
 /**
  * Check if a value is a Complex number

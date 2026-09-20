@@ -6,7 +6,7 @@ import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
-import type Complex from 'complex.js';
+import type { Complex } from 'complex.js';
 
 /** Scalar types supported by det */
 type Scalar = number | BigNumber | Complex;

@@ -166,6 +166,15 @@ jobs:
         if: matrix.node-version == '22.x'
         run: node tools/test/consumer-typecheck.mjs --skip-build
 
+      # The same check under moduleResolution NodeNext, which is what a Node 16+ consumer on
+      # "type": "module" gets. NodeNext rejects an extensionless relative specifier in a .d.ts
+      # (TS2834) and resolves bare dependencies by their CJS/ESM format, so it catches emit
+      # faults that Bundler resolution accepts. Before the tsconfig.dts.base.json nodenext emit
+      # it reported 60 errors (53 TS2834 + 7 TS2709); it must stay at 0.
+      - name: Consumer type check of packed packages (NodeNext)
+        if: matrix.node-version == '22.x'
+        run: node tools/test/consumer-typecheck.mjs --skip-build --module-resolution=NodeNext
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest

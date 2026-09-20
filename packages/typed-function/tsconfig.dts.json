@@ -1,12 +1,8 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": ["./tsconfig.json", "../../tsconfig.dts.base.json"],
   "compilerOptions": {
-    "noEmit": false,
-    "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "paths": {}
+    "rootDir": "./src"
   },
   "include": ["src/index.ts", "types/**/*.d.ts", "src/**/*.d.ts"]
 }
