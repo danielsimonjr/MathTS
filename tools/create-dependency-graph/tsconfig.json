@@ -1,8 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    // EXPLICIT, matching the root tsconfig.json which also sets `"types": ["node"]`. These tools
+    // import fs/path and are run by node or bun, so node's ambient types are required. Leaving
+    // `types` unset does NOT reliably pick @types/node up from the repo-root node_modules here,
+    // and the resulting 80-odd TS2591 "Cannot find name 'fs'" errors were invisible until the
+    // TS5107 config error above was fixed - a config-level error ABORTS the compile before any
+    // type-checking runs, so this tsconfig reported exactly ONE error while hiding 83.
+    "types": ["node"],
+    // ESM, type-checked only. These tools are run straight from source - `bun tools/.../x.ts`
+    // or `#!/usr/bin/env node` - and NOTHING builds or references tools/*/dist, so the previous
+    // CommonJS + outDir settings described a compilation that never happens, in a package whose
+    // root package.json declares "type": "module". `moduleResolution: "Node"` is node10, which
+    // TS 7.0 drops (TS5107), and that deprecation was the only error this config produced.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
     "lib": ["ES2022"],
     "strict": true,
     "esModuleInterop": true,
@@ -13,9 +26,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "outDir": "./dist",
-    "rootDir": "./"
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["./**/*.ts"]
 }
