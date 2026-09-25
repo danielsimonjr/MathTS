@@ -2,7 +2,6 @@ import { isMatrix } from '../utils/is.js';
 import { clone } from '../utils/object.js';
 import { format } from '../utils/string.js';
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
@@ -53,10 +52,6 @@ interface Dependencies {
   unaryMinus: TypedFunction<Scalar>;
 }
 
-// Minimum matrix size (n*n elements) for WASM to be beneficial
-// Explicit formulas handle up to 4x4; WASM kicks in at 5x5
-const WASM_DET_THRESHOLD = 25; // 5x5 matrix
-
 /**
  * Check if a 2D array contains only plain numbers
  */
@@ -70,19 +65,6 @@ function isPlainNumberMatrix(matrix: unknown[][]): boolean {
     }
   }
   return true;
-}
-
-/**
- * Flatten a 2D array to a Float64Array in row-major order
- */
-function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
-  const result = new Float64Array(rows * cols);
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j];
-    }
-  }
-  return result;
 }
 
 const name = 'det';
@@ -193,26 +175,6 @@ export const createDet = /* #__PURE__ */ factory(
      * @private
      */
     function _det(matrix: Scalar[][], rows: number, _cols: number): Scalar {
-      // Try WASM for large matrices with plain numbers
-      const wasm = wasmLoader.getModule();
-      if (wasm && rows * rows >= WASM_DET_THRESHOLD && isPlainNumberMatrix(matrix)) {
-        try {
-          const flat = flattenToFloat64(matrix as number[][], rows, rows);
-          const a = wasmLoader.allocateFloat64Array(flat);
-          // workPtr needs n*n f64 values for LU decomposition
-          const work = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
-          try {
-            const result = wasm.laDet(a.ptr, rows, work.ptr);
-            return result;
-          } finally {
-            wasmLoader.free(a.ptr);
-            wasmLoader.free(work.ptr);
-          }
-        } catch {
-          // Fall back to JS implementation on WASM error
-        }
-      }
-
       if (rows === 1) {
         // this is a 1 x 1 matrix
         return clone(matrix[0][0]) as Scalar;

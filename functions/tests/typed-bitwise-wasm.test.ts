@@ -2,29 +2,27 @@
  * WASM-dispatch-tier tests for the seven typed bitwise ops.
  *
  * Strategy:
- *   1. Force the WASM module to load via `wasmLoader.load(<path>)`
- *      pointing at the built WASM artifact. Skip the whole suite when
- *      that artifact isn't present (so the suite is no-op on dev
- *      machines without the WASM build toolchain).
+ *   1. Load the AS binary (`AS_WASM_PATH` from ./helpers/wasm-spy — the
+ *      co-located `dist/wasm/mathts-as.wasm`) via `wasmLoader.load()`.
  *   2. Construct an Int32Array operand pair of length 64K (the
- *      `WASM_BITWISE_THRESHOLD`) plus 1, so the dispatch tier definitely
- *      hits the WASM path.
- *   3. Compare each typed bitwise op's result against a JS oracle
- *      computed inline — Int32Array semantics match the typed ops
- *      exactly.
+ *      `WASM_BITWISE_THRESHOLD`) plus 1, so the typed function's
+ *      `Int32Array` signature takes the WASM tier.
+ *   3. Prove the typed op actually executed its AS `*_i32_array` kernel
+ *      (`countExportCalls` > 0 — a silent ComputePool fallback would also
+ *      produce the right answer) and bit-matches a JS oracle computed inline
+ *      over the WHOLE array — Int32Array semantics match the typed ops exactly.
  *   4. Negative test: after `wasmLoader.reset()` (no module loaded),
  *      the same call must succeed by falling through to ComputePool.
  *
- * NOTE: The WASM artifact lives outside the repo
- * (`/home/user/lib/wasm/mathts.wasm`) because the build script writes
- * to a path two levels above the build-scripts directory. We walk the same
- * path from this test file so it's robust to wherever vitest sets cwd.
+ * The bridge itself is covered by bitwise-as-wasm.test.ts; this suite is the one
+ * that proves the PUBLIC typed functions route to it above threshold.
+ *
+ * The WASM block is gated on `AS_WASM_PATH` like the other AS suites, but the
+ * build guarantees the binary, so a non-skipping presence test turns its
+ * absence into a failure instead of a silent skip.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 import {
   bitAnd,
@@ -38,19 +36,7 @@ import {
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { WASM_BITWISE_THRESHOLD, resetBitwiseWasm } from '../src/wasm/bitwise/wasm-bridge.js';
-
-// -----------------------------------------------------------------------------
-// Locate the WASM artifact. Skip the suite entirely if we can't find it.
-// -----------------------------------------------------------------------------
-
-const here = dirname(fileURLToPath(import.meta.url));
-const WASM_PATH = (() => {
-  // functions/tests/.. -> functions/.. -> repo root /home/user/MathTS
-  // The build script writes to ../../lib/wasm/mathts.wasm relative to
-  // the build-scripts directory → /home/user/lib/wasm/mathts.wasm.
-  const candidate = resolve(here, '../../../lib/wasm/mathts.wasm');
-  return existsSync(candidate) ? candidate : null;
-})();
+import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
 
 const N = WASM_BITWISE_THRESHOLD + 1;
 const SHIFT_MASK = 31; // JS << / >> / >>> mask shift counts to low 5 bits
@@ -110,13 +96,42 @@ function jsNot(a: Int32Array): Int32Array {
   return out;
 }
 
-const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
+/** Index of the first element where `out` and `oracle` differ (-1 when identical). */
+function firstMismatch(out: Int32Array, oracle: Int32Array): number {
+  if (out.length !== oracle.length) return Math.min(out.length, oracle.length);
+  for (let i = 0; i < out.length; i++) if (out[i] !== oracle[i]) return i;
+  return -1;
+}
 
-describeIfWasm('typed bitwise — WASM dispatch tier (Int32Array, n >= threshold)', () => {
+/**
+ * Run a typed bitwise op and prove it executed the named AS kernel. The typed
+ * `Int32Array` signatures are async, but the WASM tier runs synchronously before
+ * their first `await` (only the ComputePool fallback awaits), so the call counter
+ * observes it while `countExportCalls` has the module swapped in.
+ */
+async function runOnAs(kernel: string, call: () => unknown): Promise<Int32Array> {
+  const { result, counts } = countExportCalls([kernel], call);
+  const out = await result;
+  expect(
+    counts[kernel],
+    `${kernel}: AS kernel invoked (not the ComputePool fallback)`
+  ).toBeGreaterThan(0);
+  expect(out).toBeInstanceOf(Int32Array);
+  if (!(out instanceof Int32Array)) throw new Error(`${kernel}: expected an Int32Array result`);
+  return out;
+}
+
+const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
+
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
+});
+
+describeIfAS('typed bitwise — AS WASM dispatch tier (Int32Array, n >= threshold)', () => {
   beforeAll(async () => {
-    // Drop any earlier-loaded module, then load the WASM artifact.
+    // Drop any earlier-loaded module, then load the AS binary.
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30000);
 
   afterAll(async () => {
@@ -127,64 +142,70 @@ describeIfWasm('typed bitwise — WASM dispatch tier (Int32Array, n >= threshold
 
   const { a, b } = makeOperands();
 
-  it('bitAnd matches the JS oracle', async () => {
-    const out = await bitAnd(a, b);
-    expect(out).toBeInstanceOf(Int32Array);
+  it('bitAnd executes bitAnd_i32_array and matches the JS oracle', async () => {
+    const out = await runOnAs('bitAnd_i32_array', () => bitAnd(a, b));
     expect(out.length).toBe(N);
     expect(Array.from(out.slice(0, 8))).toEqual(Array.from(jsBinary('&', a, b).slice(0, 8)));
-    // Spot-check a handful of positions across the length.
+    // Spot-check a handful of positions across the length, then the whole array.
     const oracle = jsBinary('&', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('bitOr matches the JS oracle', async () => {
-    const out = await bitOr(a, b);
+  it('bitOr executes bitOr_i32_array and matches the JS oracle', async () => {
+    const out = await runOnAs('bitOr_i32_array', () => bitOr(a, b));
     const oracle = jsBinary('|', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('bitXor matches the JS oracle', async () => {
-    const out = await bitXor(a, b);
+  it('bitXor executes bitXor_i32_array and matches the JS oracle', async () => {
+    const out = await runOnAs('bitXor_i32_array', () => bitXor(a, b));
     const oracle = jsBinary('^', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('bitNot matches the JS oracle', async () => {
-    const out = await bitNot(a);
+  it('bitNot executes bitNot_i32_array and matches the JS oracle', async () => {
+    const out = await runOnAs('bitNot_i32_array', () => bitNot(a));
     const oracle = jsNot(a);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('leftShift matches the JS oracle (per-element shift)', async () => {
-    const out = await leftShift(a, b);
+  it('leftShift executes leftShift_i32_array and matches the JS oracle (per-element shift)', async () => {
+    const out = await runOnAs('leftShift_i32_array', () => leftShift(a, b));
     const oracle = jsShift('<<', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('rightArithShift matches the JS oracle (per-element shift)', async () => {
-    const out = await rightArithShift(a, b);
+  it('rightArithShift executes rightArithShift_i32_array and matches the JS oracle (per-element shift)', async () => {
+    const out = await runOnAs('rightArithShift_i32_array', () => rightArithShift(a, b));
     const oracle = jsShift('>>', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 
-  it('rightLogShift matches the JS oracle (per-element shift)', async () => {
-    const out = await rightLogShift(a, b);
+  it('rightLogShift executes rightLogShift_i32_array and matches the JS oracle (per-element shift)', async () => {
+    const out = await runOnAs('rightLogShift_i32_array', () => rightLogShift(a, b));
     const oracle = jsShift('>>>', a, b);
     for (const idx of [0, 1, N - 1, (N / 2) | 0, 12345]) {
       expect(out[idx]).toBe(oracle[idx]);
     }
+    expect(firstMismatch(out, oracle)).toBe(-1);
   });
 });
 

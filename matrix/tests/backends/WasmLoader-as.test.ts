@@ -77,8 +77,8 @@ describe('WasmLoader — AS artifact live load + allocation', () => {
   });
 
   it.skipIf(!asAvailable)('release() returns an allocation for reuse without throwing', () => {
-    // The AS managed runtime (`--runtime stub`) does not truly free; release()
-    // unpins the header via free() when the ptr is not a tracked pool entry.
+    // The AS managed runtime (`--runtime stub`) never frees, so release() returns
+    // the block to the pool; WasmLoader-pool.test.ts pins down the reuse itself.
     const first = loader.allocateFloat64Array([1, 2, 3, 4]);
     expect(() => loader.release(first.ptr, true)).not.toThrow();
     // A subsequent allocation of the same size still produces a usable buffer.

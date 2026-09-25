@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-19",
+  "generated": "2026-09-25",
   "total": 219,
   "parallelizedCount": 113,
   "effectiveCount": 82,
@@ -1354,32 +1354,37 @@
     }
   ],
   "byFile": {
-    "arithmetic.ts": {
-      "effective": 17,
-      "disabled": 15,
-      "none": 14
+    "combinatorics.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 21
+    },
+    "signal.ts": {
+      "effective": 7,
+      "disabled": 0,
+      "none": 0
+    },
+    "trigonometry.ts": {
+      "effective": 9,
+      "disabled": 3,
+      "none": 7
     },
     "bitwise.ts": {
       "effective": 0,
       "disabled": 7,
       "none": 0
     },
-    "combinatorics.ts": {
-      "effective": 0,
-      "disabled": 0,
-      "none": 21
-    },
     "complex.ts": {
       "effective": 0,
       "disabled": 0,
       "none": 4
     },
-    "distributions.ts": {
-      "effective": 8,
+    "probability.ts": {
+      "effective": 0,
       "disabled": 0,
-      "none": 6
+      "none": 8
     },
-    "logical.ts": {
+    "string.ts": {
       "effective": 0,
       "disabled": 0,
       "none": 5
@@ -1389,50 +1394,45 @@
       "disabled": 0,
       "none": 9
     },
-    "probability.ts": {
-      "effective": 0,
-      "disabled": 0,
-      "none": 8
+    "statistics.ts": {
+      "effective": 10,
+      "disabled": 6,
+      "none": 1
     },
-    "relational.ts": {
-      "effective": 0,
-      "disabled": 0,
-      "none": 7
+    "arithmetic.ts": {
+      "effective": 17,
+      "disabled": 15,
+      "none": 14
     },
     "set.ts": {
       "effective": 0,
       "disabled": 0,
       "none": 10
     },
-    "signal.ts": {
-      "effective": 7,
+    "relational.ts": {
+      "effective": 0,
       "disabled": 0,
-      "none": 0
+      "none": 7
     },
     "special.ts": {
       "effective": 31,
       "disabled": 0,
       "none": 7
     },
-    "statistics.ts": {
-      "effective": 10,
-      "disabled": 6,
-      "none": 1
-    },
-    "string.ts": {
-      "effective": 0,
-      "disabled": 0,
-      "none": 5
-    },
-    "trigonometry.ts": {
-      "effective": 9,
-      "disabled": 3,
-      "none": 7
-    },
     "unit.ts": {
       "effective": 0,
       "disabled": 0,
       "none": 2
+    },
+    "logical.ts": {
+      "effective": 0,
+      "disabled": 0,
+      "none": 5
+    },
+    "distributions.ts": {
+      "effective": 8,
+      "disabled": 0,
+      "none": 6
     }
   }
 }

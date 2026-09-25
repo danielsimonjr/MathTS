@@ -20,8 +20,7 @@ cd mathts
 # Install dependencies
 bun install
 
-# Build the AssemblyScript wasm, then all packages
-bun run build:wasm
+# Build all packages (compiles the AssemblyScript wasm first)
 bun run build
 
 # Run tests

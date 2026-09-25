@@ -71,7 +71,7 @@
     "docs:roadmap-check:test": "bun test ./tools/roadmap-check/roadmap-check.test.mjs",
     "docs:functions:check": "bun --tsconfig-override=tsconfig.base.json tools/generate-functions-reference.mjs --check",
     "typecheck": "turbo run typecheck",
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -92,7 +92,7 @@
     "@vitest/coverage-v8": "^5.0.0",
     "fast-check": "^4.9.0",
     "husky": "^9.0.0",
-    "js-yaml": "^5.4.1",
+    "js-yaml": "^4.3.2",
     "lint-staged": "^17.4.1",
     "oxlint": "^1.82.0",
     "playwright": "^1.62.1",
@@ -103,7 +103,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "oxlint --fix",
+      "oxlint --fix --deny-warnings --no-error-on-unmatched-pattern",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [

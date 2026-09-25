@@ -132,11 +132,11 @@ describe('Parser - evaluate', () => {
 
   it('throws a TypeError if expr is not a string or string array', () => {
     const p = new ParserClass();
-    expect(() => p.evaluate(123 as any)).toThrow(TypeError);
-    expect(() => p.evaluate(123 as any)).toThrow(
+    expect(() => p.evaluate(123 as unknown as string)).toThrow(TypeError);
+    expect(() => p.evaluate(123 as unknown as string)).toThrow(
       'String or string array expected for parameter "expr"'
     );
-    expect(() => p.evaluate({} as any)).toThrow(TypeError);
+    expect(() => p.evaluate({} as unknown as string)).toThrow(TypeError);
   });
 });
 
@@ -156,9 +156,9 @@ describe('Parser - get and set', () => {
 
   it('get throws a TypeError if name is not a string', () => {
     const p = new ParserClass();
-    expect(() => p.get(123 as any)).toThrow(TypeError);
-    expect(() => p.get(123 as any)).toThrow('String expected for parameter "name"');
-    expect(() => p.get({} as any)).toThrow(TypeError);
+    expect(() => p.get(123 as unknown as string)).toThrow(TypeError);
+    expect(() => p.get(123 as unknown as string)).toThrow('String expected for parameter "name"');
+    expect(() => p.get({} as unknown as string)).toThrow(TypeError);
   });
 
   it('set returns the value', () => {

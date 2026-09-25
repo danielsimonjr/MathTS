@@ -548,12 +548,15 @@ export interface Allocation<TArray extends Float64Array | Int32Array> {
 /**
  * Memory pool entry for reusable allocations.
  *
- * We pool by length and recycle both the header and the data block.
+ * Every allocation up to `poolSizeThreshold` is recorded here when it is made,
+ * and `release()`/`free()` return it for reuse. Under the binary's
+ * `--runtime stub` (a bump allocator; `__unpin`/`__collect` reclaim nothing)
+ * recycling is the only way WASM linear memory stays bounded.
  */
 interface PoolEntry {
   ptr: number; // header pointer
   dataPtr: number;
-  size: number; // byte length of the data region
+  size: number; // byte capacity of the data region (fixed at allocation)
   inUse: boolean;
 }
 
@@ -881,13 +884,16 @@ export class WasmLoader {
   }
 
   /**
-   * Allocate Float64Array without copying data (for output buffers)
+   * Allocate a zero-filled Float64Array (for output buffers). Zeroed explicitly,
+   * since a recycled pool block still holds its previous contents.
    */
   public allocateFloat64ArrayEmpty(length: number): Allocation<Float64Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
 
-    return this.allocateAsFloat64(module, length);
+    const alloc = this.allocateAsFloat64(module, length);
+    alloc.array.fill(0);
+    return alloc;
   }
 
   /**
@@ -904,13 +910,16 @@ export class WasmLoader {
   }
 
   /**
-   * Allocate Int32Array without copying data (for output buffers)
+   * Allocate a zero-filled Int32Array (for output buffers). Zeroed explicitly,
+   * since a recycled pool block still holds its previous contents.
    */
   public allocateInt32ArrayEmpty(length: number): Allocation<Int32Array> {
     const module = this.wasmModule;
     if (!module) throw new Error('WASM module not loaded');
 
-    return this.allocateAsInt32(module, length);
+    const alloc = this.allocateAsInt32(module, length);
+    alloc.array.fill(0);
+    return alloc;
   }
 
   // ---- AS managed runtime (header pointers) ------------------------------
@@ -918,9 +927,9 @@ export class WasmLoader {
   private allocateAsFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
     const byteLength = length * 8;
 
-    // Try to recycle a pooled allocation of the same data-byte size.
+    // Try to recycle a released pooled block that is large enough.
     if (byteLength <= this.poolSizeThreshold) {
-      const recycled = this.acquireFromAsPool(this.float64Pool, byteLength);
+      const recycled = this.acquireFromAsPool(module, this.float64Pool, byteLength);
       if (recycled) {
         const array = new Float64Array(module.memory.buffer, recycled.dataPtr, length);
         return {
@@ -937,7 +946,7 @@ export class WasmLoader {
   private allocateAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
     const byteLength = length * 4;
     if (byteLength <= this.poolSizeThreshold) {
-      const recycled = this.acquireFromAsPool(this.int32Pool, byteLength);
+      const recycled = this.acquireFromAsPool(module, this.int32Pool, byteLength);
       if (recycled) {
         const array = new Int32Array(module.memory.buffer, recycled.dataPtr, length);
         return {
@@ -962,6 +971,7 @@ export class WasmLoader {
     dv.setUint32(headerPtr + 4, bufferPtr, true);
     dv.setUint32(headerPtr + 8, byteLength, true);
     const array = new Float64Array(module.memory.buffer, bufferPtr, length);
+    this.track(this.float64Pool, headerPtr, bufferPtr, byteLength);
     return { ptr: headerPtr, dataPtr: bufferPtr, array, length };
   }
 
@@ -975,14 +985,29 @@ export class WasmLoader {
     dv.setUint32(headerPtr + 4, bufferPtr, true);
     dv.setUint32(headerPtr + 8, byteLength, true);
     const array = new Int32Array(module.memory.buffer, bufferPtr, length);
+    this.track(this.int32Pool, headerPtr, bufferPtr, byteLength);
     return { ptr: headerPtr, dataPtr: bufferPtr, array, length };
   }
 
+  /** Record a new in-use allocation so it can be recycled once released. */
+  private track(pool: PoolEntry[], ptr: number, dataPtr: number, size: number): void {
+    if (size <= this.poolSizeThreshold) {
+      pool.push({ ptr, dataPtr, size, inUse: true });
+    }
+  }
+
   /**
-   * Find a pool entry whose data region is large enough; returns null when
-   * no suitable entry is available.
+   * Find a released pool entry whose data region is large enough (best fit,
+   * at most 2x the request); returns null when none is available. The entry's
+   * header `byteLength` is rewritten to the requested size, because kernels read
+   * their length from the header: a recycled larger block would otherwise make
+   * them process trailing elements the caller never wrote.
    */
-  private acquireFromAsPool(pool: PoolEntry[], requestedSize: number): PoolEntry | null {
+  private acquireFromAsPool(
+    module: WasmModule,
+    pool: PoolEntry[],
+    requestedSize: number
+  ): PoolEntry | null {
     let bestFit: PoolEntry | null = null;
     let bestFitWaste = Infinity;
     for (const entry of pool) {
@@ -994,44 +1019,58 @@ export class WasmLoader {
         }
       }
     }
-    if (bestFit) bestFit.inUse = true;
+    if (bestFit) {
+      bestFit.inUse = true;
+      new DataView(module.memory.buffer).setUint32(bestFit.ptr + 8, requestedSize, true);
+    }
     return bestFit;
+  }
+
+  /** The pool entry for a header pointer, searching both pools. */
+  private findEntry(ptr: number): PoolEntry | undefined {
+    return this.float64Pool.find((e) => e.ptr === ptr) ?? this.int32Pool.find((e) => e.ptr === ptr);
+  }
+
+  /** Unpin an allocation's header and its separately pinned data buffer. */
+  private unpinAllocation(module: WasmModule, ptr: number, dataPtr: number | undefined): void {
+    if (typeof module.__unpin !== 'function') return;
+    module.__unpin(ptr);
+    if (dataPtr !== undefined) module.__unpin(dataPtr);
+  }
+
+  /** Data pointer recorded in an AS typed-array header (`dataStart`). */
+  private headerDataPtr(module: WasmModule, ptr: number): number {
+    return new DataView(module.memory.buffer).getUint32(ptr + 4, true);
   }
 
   /**
    * Return an allocation to the pool for reuse.
    *
-   * `isFloat64` exists for backwards compatibility — callers can still
-   * pass it positionally to disambiguate the pool to use on the AS path.
-   * Prefer `releaseAllocation` for new code, which discovers the pool
-   * automatically.
+   * Both pools are searched, so `isFloat64` is only a hint kept for backwards
+   * compatibility. An allocation above `poolSizeThreshold` is not pooled; it is
+   * unpinned instead (header and data buffer), which under the stub runtime
+   * leaves it allocated but at least unpinned for a GC runtime.
    */
   public release(ptr: number, isFloat64: boolean = true): void {
-    const pool = isFloat64 ? this.float64Pool : this.int32Pool;
-    const entry = pool.find((e) => e.ptr === ptr);
+    void isFloat64;
+    const entry = this.findEntry(ptr);
     if (entry) {
       entry.inUse = false;
       return;
     }
-    // Not in pool: drop it on the floor (matches prior behaviour — the AS
-    // managed runtime in `--runtime stub` does not really free anyway).
-    this.free(ptr);
+    const module = this.wasmModule;
+    if (!module) return;
+    this.unpinAllocation(module, ptr, this.headerDataPtr(module, ptr));
   }
 
   /**
-   * Free allocated memory (immediate, bypasses pool): unpin the header pointer.
+   * Release an allocation the caller is done with. A pooled block goes back to
+   * the pool, because the stub runtime cannot reclaim it and recycling is the
+   * only way to reuse the memory; a larger block is unpinned. Same as
+   * `release()`.
    */
   public free(ptr: number): void {
-    const module = this.wasmModule;
-    if (!module) return;
-
-    // Remove from pools if present.
-    this.float64Pool = this.float64Pool.filter((e) => e.ptr !== ptr);
-    this.int32Pool = this.int32Pool.filter((e) => e.ptr !== ptr);
-
-    if (typeof module.__unpin === 'function') {
-      module.__unpin(ptr);
-    }
+    this.release(ptr);
   }
 
   /**
@@ -1041,13 +1080,10 @@ export class WasmLoader {
     const module = this.wasmModule;
     if (!module) return;
 
-    if (typeof module.__unpin === 'function') {
-      for (const entry of this.float64Pool) {
-        module.__unpin(entry.ptr);
-      }
-      for (const entry of this.int32Pool) {
-        module.__unpin(entry.ptr);
-      }
+    // Unpin only released blocks. A block still in use belongs to its caller,
+    // whose later release()/free() finds no entry and unpins it then.
+    for (const entry of [...this.float64Pool, ...this.int32Pool]) {
+      if (!entry.inUse) this.unpinAllocation(module, entry.ptr, entry.dataPtr);
     }
 
     this.float64Pool = [];

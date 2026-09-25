@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "dev": "tsup src/index.ts --format esm --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -28,7 +28,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts --format esm --dts --clean --minify --treeshake"
+    "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json"
   },
   "dependencies": {
     "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"

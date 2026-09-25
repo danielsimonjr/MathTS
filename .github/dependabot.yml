@@ -38,17 +38,13 @@ updates:
         patterns:
           - '*'
     ignore:
-      # TypeScript 7 is blocked by typescript-eslint, not by this repo.
-      # @typescript-eslint/eslint-plugin (8.68.0, the current stable) still
-      # declares `peer typescript ">=4.8.4 <6.1.0"`, so installs fail ERESOLVE
-      # the moment the group pulls typescript 7.x -- which made the whole
-      # weekly dev-dependencies PR permanently red and held back the other 19
-      # updates in it (see PR #265).
-      #
-      # Scoped to MAJOR only: 6.x minor/patch updates still flow normally.
-      # REMOVE THIS ENTRY once typescript-eslint raises its peer ceiling, and
-      # bump typescript + typescript-eslint together in ONE PR.
-      - dependency-name: 'typescript'
+      # js-yaml is held on 4.x by the root `overrides` security floor (`js-yaml: ^4.3.0`),
+      # which is also what tools/create-dependency-graph (its only importer) and
+      # @types/js-yaml@4 are written against. A 5.x bump of the root devDependency is
+      # silently clamped back to 4.x by that override, so it changes nothing but the
+      # manifest -- which is how #275 left the root claiming ^5.4.1 while 4.3.2 was
+      # installed. Port the tool to v5 and raise the override in ONE change, then drop this.
+      - dependency-name: 'js-yaml'
         update-types: ['version-update:semver-major']
     commit-message:
       prefix: 'chore(deps)'

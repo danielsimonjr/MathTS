@@ -6,7 +6,7 @@
  *   2. Cube vertices (8 points, all on hull)
  *   3. Cube vertices + interior centroid (9 points, 8 on hull)
  *   4. Random points on a sphere (~50 points, all on hull)
- *   5. Large random cluster (≥ 1024 points → WASM path) — sanity checks
+ *   5. Large random cluster (1024 points) — sanity checks
  *   6. Co-planar input → clean error
  */
 
@@ -250,10 +250,10 @@ describe('convexHull3D — points on unit sphere (50 points)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 5: Large random cluster (≥ 1024 points → WASM path)
+// Test 5: Large random cluster (1024 points)
 // ---------------------------------------------------------------------------
 
-describe('convexHull3D — large random cluster (1024 points, WASM path)', () => {
+describe('convexHull3D — large random cluster (1024 points)', () => {
   function randomPoints3D(n: number, seed: number): number[][] {
     const rng = makeRng(seed);
     return Array.from({ length: n }, () => [rng(), rng(), rng()]);

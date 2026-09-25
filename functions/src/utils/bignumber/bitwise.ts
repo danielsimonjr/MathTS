@@ -18,6 +18,7 @@ interface BigNumberValue {
   plus(other: BigNumberValue): BigNumberValue;
   times(other: BigNumberValue | string): BigNumberValue;
   div(other: BigNumberValue | string): BigNumberValue;
+  mod(other: BigNumberValue): BigNumberValue;
   pow(other: BigNumberValue): BigNumberValue;
   floor(): BigNumberValue;
   toNumber(): number;
@@ -503,7 +504,7 @@ export function rightLogShiftBigNumber(x: BigNumberValue, y: BigNumberValue): Bi
   let val = x;
   if (val.isNegative()) {
     const MASK = new BigNumber(4294967296);
-    val = (val as any).mod(MASK);
+    val = val.mod(MASK);
     if (val.isNegative()) {
       val = val.plus(MASK);
     }

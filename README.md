@@ -222,16 +222,17 @@ resolves per-op thresholds via `thresholdByOp`.
 ### WASM backend
 
 The stack is **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the
-**sole WASM backend** for the whole repo. Both `functions` and `matrix` load
-`mathts-as.wasm` and dispatch is **AS→JS**.
+**sole WASM backend** for the whole repo (`mathts-as.wasm`); dispatch is **AS→JS**.
+`matrix` loads it through `backendManager.initialize()`. `functions` ships the same
+binary and AS bridges for its bitwise, elementwise, interpolation, poly, signal, sort
+and special kernels, but its public API does not load the module yet, so `functions`
+runs its JS paths.
 
 | Backend       | Class | Source          | Binary           | Use                                                                                                     |
 | ------------- | ----- | --------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
 | `WASMBackend` | AS    | `assembly/src/` | `mathts-as.wasm` | SIMD matmul (≥256 elems) + LU/QR/Cholesky/inverse/determinant; element-wise/transpose/eig/svd run on JS |
 
 SHA-384 integrity verification of the AS binary is enforced before instantiation.
-A few `functions` kernels deliberately stay on the JS fallback where their AS
-kernels are still being stabilized (poly fits, Airy Ai/Bi for |x|>5, argsort/rank).
 
 ### WebGPU (opt-in, f32 only)
 

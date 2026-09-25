@@ -15,7 +15,9 @@
 // Core Types
 // =============================================================================
 
-export { Complex, complex, complexFromPolar } from './types/complex';
+// `Complex` itself is not re-exported: WebAssembly can export only functions, globals and
+// enums, so `asc` dropped the class and warned (AS235). Omitting it changes no build output.
+export { complex, complexFromPolar } from './types/complex';
 
 // =============================================================================
 // Scalar Operations

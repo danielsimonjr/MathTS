@@ -29,6 +29,7 @@ bun run format:check        # prettier --check (CI)
 # WASM builds. AssemblyScript is the SOLE WASM backend for the whole repo
 # (functions + matrix).
 bun run build:wasm          # AssemblyScript build (assembly/ package) — the only WASM build
+                            # (`bun run build` also runs it first; turbo orders matrix/functions after it)
 bun run test:wasm           # AssemblyScript WASM tests
 bun run test:wasm:integration  # Cross-package WASM integration tests (tests/wasm/)
 
@@ -124,11 +125,13 @@ functions  ← arithmetic, trigonometry, statistics, signal
 
 ### Package Build Details
 
-All packages use `tsup src/index.ts --format esm --dts --clean` except:
+Every package builds JS with tsup and declarations with tsc: `tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json` (a `.d.ts` tree, emitted under `nodenext` via `tsconfig.dts.base.json` so relative specifiers carry `.js`). **Never pass `--dts` to tsup**: its rollup-plugin-dts drives the TypeScript JS API (`ts.sys`), which TypeScript 7 — the native Go port — does not have, so it crashes with `undefined is not an object (evaluating 'ts2.sys.useCaseSensitiveFileNames')`. Variations:
 
-- **functions**: JS bundle via tsup (no `--dts` — rollup-dts can't bundle the graph), then declarations via `tsc -p tsconfig.dts.json` (a `.d.ts` tree). Build is `tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json`. It DOES ship types (as of 0.2.4).
-- **workbook**: builds two entry points (`src/index.ts` and `src/cli.ts`)
-- **assembly**: AssemblyScript build (`asc src/index.ts`) + TypeScript bindings (`tsc -p tsconfig.bindings.json`)
+- **core / workbook / plot**: config-driven `tsup` (`tsup.config.ts` holds the entries; workbook builds `src/index.ts`, `src/cli.ts`, `src/run-worker.ts`).
+- **matrix / functions**: then `node scripts/copy-wasm.mjs`, which co-locates the AS binary as `dist/wasm/mathts-as.wasm` and FAILS if it is missing.
+- **packages/workerpool**: then `node scripts/postbuild.mjs` (ships the ambient `workerpool` shim).
+- **assembly**: AssemblyScript build (`asc src/index.ts`) + TypeScript bindings (`tsc -p tsconfig.bindings.json`).
+- **`build:prod`** is `build` with `--minify --treeshake` on the tsup step; **`dev`** is the tsup step with `--watch --onSuccess "<the rest of build>"`. Keep all three in step when a build changes.
 
 ## Architecture
 
@@ -224,14 +227,14 @@ Three hard rules from the 2026-05-01 security release. Future edits must preserv
 - Each package extends the base config
 - **All packages compile under `strict: true`** (as of 2026-06-27 — `functions` and `expression` were the last holdouts; no package overrides `strict` to `false`).
 - **No package relaxes `noUnusedLocals` / `noUnusedParameters` / `noImplicitReturns` / `noFallthroughCasesInSwitch`** either (as of 2026-06-27 — `functions` and `expression` were the last holdouts here too); all four inherit base's `true`. Note: TypeScript (unlike ESLint) does **not** honor `// falls through` comments — switch fallthrough is only allowed from an _empty_ case clause.
-- **eslint: repo-wide ZERO** (as of 2026-06-28) — every package's implementation (`src` **and** `tests`) passes `eslint .` with 0 problems, fixed honestly: real types replaced ~3,500 `no-explicit-any` (unions / generics / `unknown`+narrow), no `@ts-nocheck`, no blanket suppressions. Two documented exclusions in `eslint.config.js` (NOT impl code): **(1)** AssemblyScript source under `assembly/src/` (the `algebra`/`ops`/`env`/`types` dirs + top-level `*.ts`) — compiled + type-checked by `asc` (`npm run build:wasm`), exercised by `npm run test:wasm`; typescript-eslint cannot parse its `@inline`/`@operator` decorators or `i32`/`f64`/`usize` value types (the loader bindings under `assembly/src/bindings/` stay linted). **(2)** `**/*.d.ts` ambient declaration files (type-only, tsc-checked). Beware: turbo's lint cache + lint-staged (staged-only) can mask accumulated lint errors — verify with a direct `eslint .` per package, not the cached aggregate.
+- **Lint: oxlint, repo-wide ZERO, warnings included** (`bun run lint` = `oxlint --deny-warnings .`, config `.oxlintrc.json`; ESLint and typescript-eslint are gone from the tree). The 2026-06-28 ESLint campaign replaced ~3,500 `no-explicit-any` with real types (unions / generics / `unknown`+narrow). After the move to oxlint, 38 warnings accumulated unseen because plain `oxlint` exits 0 on warnings; they were fixed 2026-09-25 and `--deny-warnings` now keeps it at zero. No `@ts-nocheck`, no blanket suppressions; a justified one-line exception is `// eslint-disable-next-line <rule> -- <reason>` (oxlint honours it). Two documented ignore groups in `.oxlintrc.json` (NOT impl code): **(1)** AssemblyScript source under `assembly/src/` (the `algebra`/`ops`/`env`/`types` dirs + top-level `*.ts`) — compiled + type-checked by `asc` (`bun run build:wasm`), exercised by `bun run test:wasm`; its `@inline`/`@operator` decorators and `i32`/`f64`/`usize` value types are not TypeScript (the loader bindings under `assembly/src/bindings/` stay linted). **(2)** `**/*.d.ts` ambient declaration files (type-only, tsc-checked). Test files are linted but **not type-checked** (every package's `tsconfig.json` includes only `src/`).
 - Import extensions must be `.js` (ESM resolution) — **exception**: `tensor/src/` uses bare relative imports (`from './Tensor'`); tsup bundles it before runtime so the rule isn't enforced there. Match existing style per package.
 
 ## Code Style
 
 - Files: `kebab-case.ts`, Classes: `PascalCase`, Functions/Variables: `camelCase`, Constants: `UPPER_SNAKE_CASE`
 - Commit messages: Conventional Commits (`feat(matrix):`, `fix(workbook):`, etc.)
-- Pre-commit hook (husky + lint-staged): auto-runs `eslint --fix` + `prettier --write` on staged files, then `check:duplicates:fast` (the cross-package duplicate-symbol gate — fails the commit on any NEW `TRUE_DUPLICATE` beyond `docs/Architecture/duplicate-baseline.json`; see Tools → CDG)
+- Pre-commit hook (husky + lint-staged): auto-runs `oxlint --fix` + `prettier --write` on staged files, then `check:duplicates:fast` (the cross-package duplicate-symbol gate — fails the commit on any NEW `TRUE_DUPLICATE` beyond `docs/Architecture/duplicate-baseline.json`; see Tools → CDG)
 
 ## Syncing from mathjs
 
@@ -243,45 +246,15 @@ What this means for the codebase today:
 - The **dead** synced remnant (unexported AND unreachable AND untested) was **deleted on 2026-06-27**: 455 files / ~58.6k LOC across `functions/` + `core/` (the bulk being the dead `functions/src/expression/` mirror). See "Code in `functions/`" above.
 - Future upstream additions require manual JS→TS porting, not syncing — the porting workspace lives in `tools/mathjs-port/` (one-off scaffolding/drafts; not a workspace member, not part of the build).
 
-The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `npm run typecheck` reports 0 errors (28/28 tasks), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. All packages compile under `strict: true` (see the functions-layer note above for the 2026-06-27 strict-flip root cause).
+The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `bun run typecheck` reports 0 errors (33/33 tasks; the count includes `@danielsimonjr/mathts-wasm#build`, which the `matrix`/`functions` build edges pull into the graph), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. All packages compile under `strict: true` (see the functions-layer note above for the 2026-06-27 strict-flip root cause).
 
 ## Known Issues
 
-- `assembly/` WASM build emits AS235 warnings for exported classes (cosmetic — WASM can only export functions, not classes)
-- **Residual dev-only `esbuild` advisory (GHSA-g7r4-m6w7-qqqr, low).** _"esbuild allows arbitrary
-  file read when running the development server on Windows."_
-
-  > **Corrected 2026-08-30.** This entry previously named **GHSA-gv7w-rqvm-qjhr**, which is a
-  > **WITHDRAWN** advisory, and carried its rationale — that the exploit _"needs a malicious
-  > `NPM_CONFIG_REGISTRY` at install time"_. That describes a different vulnerability. A security
-  > note reasoning about the wrong advisory is worse than none: it reads as a considered acceptance
-  > while covering nothing that is actually open.
-
-  **Why it is accepted:** the vulnerability is in esbuild's **development server**. `tsup` uses
-  esbuild's **build API** and never starts that server, so the vulnerable path is unreachable here.
-  That is the reachability argument; it is not a claim that the advisory is unfixable.
-
-  **State of the dependency tree** (measured, not assumed):
-
-  ```
-  vulnerable range              0.27.3 - 0.28.0
-  tsup 8.5.1 requires           esbuild ^0.27.0   =  >=0.27.0 <0.28.0
-  node_modules/esbuild          0.28.1   <- root `overrides` reaches this copy
-  tsup/node_modules/esbuild     0.27.7   <- the override does NOT reach this one
-  ```
-
-  The root `overrides: { esbuild: ^0.28.1 }` patches the top-level copy only; tsup keeps a nested
-  0.27.7 because 0.28.1 is outside its declared range.
-
-  **A fix inside tsup's range does exist** — `0.27.0`/`0.27.1`/`0.27.2` are all `^0.27.0`-compatible
-  _and_ below the vulnerable floor. Pinning `overrides: { tsup: { esbuild: "0.27.2" } }` is the
-  candidate. **Untested:** a full re-resolve to apply it currently fails on an unrelated
-  pre-existing `ERESOLVE` (`@typescript-eslint/eslint-plugin@^8.67.0` vs peer
-  `@typescript-eslint/parser@8.68.0`), so the experiment is blocked rather than the fix being
-  unavailable. Do **not** run `npm audit fix --force` — it "fixes" this by _downgrading_ tsup to
-  6.5.0, which is still vulnerable.
-
-- **WASM JS-fallback when no AS binary is built.** Both `functions` and `matrix` load the AssemblyScript binary `mathts-as.wasm` (built by `npm run build:wasm`). If that build has not run, the loaders log an `ENOENT … mathts-as.wasm` and fall back to the pure-JS backend (tests stay green). The AssemblyScript `asc` build and all turbo build tasks succeed on Node 26.3.0.
+- **Bun `--tsconfig-override` prints a spurious internal error.** `docs:functions` / `docs:functions:check` run Bun with `--tsconfig-override=tsconfig.base.json` so the tool imports each package's built `dist` instead of the root `paths` (`src`). Bun 1.4.2 honours the override but prints `Internal error: directory mismatch for directory ".../tsconfig.base.json", fd 3. You don't need to do anything, but this indicates a bug.` for ANY file path passed to it (measured: repo file, `./` prefix, absolute path, a `tsconfig.json` elsewhere). Harmless upstream Bun bug; the check's exit code and output are unaffected.
+- **`bun install --frozen-lockfile` does not detect a lock that violates its own `overrides`.** The committed lock resolved `esbuild@0.27.7` under `overrides: { esbuild: ^0.28.1 }` for weeks, keeping GHSA-g7r4-m6w7-qqqr (esbuild dev server, low) open while CI stayed green. Fixed 2026-09-25 with `bun update esbuild` (a 27-line lock change: esbuild + its platform binaries to 0.28.2; tsup declares `^0.27.0`, so the bundles were diffed against 0.27.7 output — identical apart from esbuild's own `__esm`/`__commonJS` error-handling fixes and chunk hashes — and the full suite, dist smoke test and both consumer type checks passed). `bun audit` now reports 0 at every level. After editing `overrides`, re-resolve the affected package with `bun update <pkg>`, and run `bun audit` without `--audit-level`: CI's high+ floor cannot see a low.
+- **The build requires the AS binary; the runtime does not.** `bun run build` compiles `assembly/` first (turbo.json orders `matrix#build` and `functions#build` after `@danielsimonjr/mathts-wasm#build`) and both `copy-wasm.mjs` scripts fail when the binary is missing. Before 2026-09-25 they warned and exited 0 with no ordering edge, so the copy raced `asc` and Turbo cached a wasm-less `dist` that it replayed even after the wasm existed: a cold `bun install && bun run build && bun run test` failed `wasm-resolve.test.ts`. At runtime, consumers still fall back to pure JS when the binary cannot be loaded.
+- **`functions`' WASM tier is unreachable from its public API.** `matrix` loads the AS binary through `backendManager.initialize()`, but nothing in `@danielsimonjr/mathts-functions` calls `wasmLoader.load()` and the loader is not exported (the bundle defines `load()`, nothing invokes it). Every AS bridge (bitwise, elementwise, interpolation, poly incl. fits, signal, sort incl. argsort/rank, special incl. Airy) is proven by a test to run its export once loaded, yet consumers always get the JS path. Wiring it (auto-load, or an exported opt-in) is an open decision: it changes performance for every consumer, so measure per kernel first (see AGENTS.md "Acceleration tiers").
+- **`polynomialGCD` can report a spurious common factor for coprime high-degree inputs.** Floating-point Euclid: `xⁿ mod b` is dominated by `λⁿ·b(x)/(x−λ)` (λ the largest root of `b`), so the first remainder is, to rounding, a scaled exact factor of `b`, the next division is exact, and a linear or quadratic "GCD" comes back. Measured: GCD of a degree-266 polynomial and a random integer cubic is wrong in 53/300 draws (JS path, no WASM). Exact inputs sharing a real factor are fine. A robust fix is an exact integer GCD (primitive PRS / subresultants over BigInt) for integer inputs, which is an API-behaviour decision.
 
 ## Tools
 
@@ -306,7 +279,7 @@ Uses [Changesets](https://github.com/changesets/changesets) for version manageme
 
 ## Turbo Caching
 
-Turbo caches build/test outputs in `node_modules/.cache/turbo/`. `typecheck` depends on `^build` (upstream packages built first). `test` and `test:coverage` depend on **`["^build", "build"]`** — a package's own `build` runs before its tests, so `dist/` artifacts (e.g. the co-located `mathts-as.wasm` that `matrix`/`functions` load) exist; without this, a cold `npm run test` fails the wasm-resolution guards (ENOENT on the un-built binary). Use `--force` to bypass cache when debugging stale results.
+Turbo caches build/test outputs in `.turbo/cache/` (Turbo 2). `matrix#build` and `functions#build` also depend on `@danielsimonjr/mathts-wasm#build`, which orders them after `asc` and folds the wasm build's hash into theirs; a cache hit restores `assembly/build/` too. `typecheck` depends on `^build` (upstream packages built first). `test` and `test:coverage` depend on **`["^build", "build"]`** — a package's own `build` runs before its tests, so `dist/` artifacts (e.g. the co-located `mathts-as.wasm` that `matrix`/`functions` load) exist; without this, a cold `npm run test` fails the wasm-resolution guards (ENOENT on the un-built binary). Use `--force` to bypass cache when debugging stale results.
 
 ## Sprint Planning
 

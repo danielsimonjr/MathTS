@@ -7,7 +7,12 @@
  * Source: <repo>/assembly/build/mathts.wasm  (built by `npm run build:wasm`)
  * Dest:   matrix/dist/wasm/mathts-as.wasm  (+ wasm-manifest.json)
  *
- * If the AS wasm hasn't been built, this is a no-op (consumers fall back to JS).
+ * A missing AS wasm FAILS the build. It used to warn and exit 0, which let Turbo
+ * cache a wasm-less dist and replay it on every later build, even after the wasm
+ * existed (the tests then failed on the absent artifact). turbo.json now orders
+ * this build after @danielsimonjr/mathts-wasm#build, so a missing binary here
+ * means that build did not produce one. The runtime JS fallback for consumers is
+ * unaffected; this only stops a package from being built without its binary.
  */
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -24,11 +29,11 @@ const destWasm = join(outDir, 'mathts-as.wasm');
 const destManifest = join(outDir, 'wasm-manifest.json');
 
 if (!existsSync(srcWasm)) {
-  console.warn(
-    `[copy-wasm] AS wasm not built at ${srcWasm} — run \`npm run build:wasm\` first. ` +
-      `Skipping; consumers will use the JS fallback.`,
+  console.error(
+    `[copy-wasm] AS wasm not built at ${srcWasm}. Build through turbo ` +
+      `(\`bun run build\` from the repo root) or run \`bun run build:wasm\` first.`,
   );
-  process.exit(0);
+  process.exit(1);
 }
 
 mkdirSync(outDir, { recursive: true });

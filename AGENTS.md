@@ -16,17 +16,17 @@ human-facing overview.
 
 ## Build / Test / Verify (run from repo root)
 
-| Task          | Command                                                  | Notes                                                                                          |
-| ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development |
-| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                      |
-| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 32/32, 0 errors**                                                    |
-| Test all      | `bun run test`                                           | vitest via turbo (`bun test` is a different runner — do not use it for CI)                     |
-| Lint / format | `bun run lint` · `bun run format`                        | eslint + prettier                                                                              |
-| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                      |
-| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                |
-| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                |
-| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend (functions + matrix); falls back to JS if not built |
+| Task          | Command                                                  | Notes                                                                                           |
+| ------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development  |
+| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                       |
+| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 33/33, 0 errors** (includes the wasm build)                           |
+| Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest   |
+| Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                          |
+| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                       |
+| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                 |
+| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                 |
+| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend; `bun run build` runs it first, and fails without it |
 
 Bun migration status / next phases: `docs/roadmap/BUN_MIGRATION.md`.
 
@@ -113,13 +113,17 @@ input-position param types). Trust the **export surface in
 Dependency graph and per-package details live in **`CLAUDE.md` → Monorepo
 Structure**. Don't duplicate it here — reference it.
 
-> **✅ WASM backend.** AssemblyScript is the
-> **sole WASM backend** for the whole repo. Both `functions` and `matrix` load
-> the AssemblyScript binary `mathts-as.wasm` (source `assembly/src/`); dispatch is
-> **AS→JS**. The legacy native-WASM path and its toolchain have been removed.
-> SHA-384 integrity verification of the AS binary is
-> retained. A few kernels (poly fits, Airy Ai/Bi, argsort/rank) deliberately stay
-> on JS where their AS kernels are still being stabilized.
+> **✅ WASM backend.** AssemblyScript is the **sole WASM backend** for the whole repo
+> (binary `mathts-as.wasm`, source `assembly/src/`, SHA-384-verified before instantiation);
+> dispatch is **AS→JS**. The legacy native-WASM path and its toolchain have been removed.
+>
+> - **`matrix`** loads it for consumers through `backendManager.initialize()`.
+> - **`functions`** ships the binary and AS bridges (bitwise, elementwise, interpolation,
+>   poly incl. fits, signal, sort incl. argsort/rank, special incl. Airy). A test proves each
+>   bridge runs its AS export once the module is loaded, but **nothing in the public API
+>   loads it**: consumers of `functions` run the JS paths. Only the tests call
+>   `wasmLoader.load()`. Wiring that up is an open decision (it changes performance for every
+>   consumer, so it needs the measured-tier treatment below).
 
 ---
 

@@ -3,17 +3,18 @@
  *
  * Strategy:
  *   1. Below-threshold correctness — pure-JS normal-equation path (no WASM needed).
- *   2. Above-threshold WASM dispatch — when the WASM artifact is present, verify the
- *      WASM path matches the JS path within tight tolerances.
+ *   2. Above-threshold WASM dispatch — with the AS binary loaded (`AS_WASM_PATH` from
+ *      ./helpers/wasm-spy), prove each dispatch executed its AS QR kernel
+ *      (`countExportCalls` > 0 — the JS fallback would produce the same answer) and
+ *      recovers the expected coefficients. The WASM group is gated on `AS_WASM_PATH`
+ *      like the other AS suites, but the build guarantees the binary, so a
+ *      non-skipping presence test turns its absence into a failure, not a silent skip.
  *   3. Edge cases — rank-deficient inputs (all xs equal) must throw or return NaN.
  *   4. Basis recovery — each basis recovers the coefficients of its own basis
  *      polynomials from exact sample data within 1e-10.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 import { polyFit, chebyshevFit, legendreFit } from '../src/typed/interpolation.js';
 import {
@@ -24,15 +25,12 @@ import {
   resetPolyWasm,
 } from '../src/wasm/poly/wasm-bridge.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
-
-// ---------------------------------------------------------------------------
-// WASM artifact location
-// ---------------------------------------------------------------------------
-const here = dirname(fileURLToPath(import.meta.url));
-const WASM_PATH = (() => {
-  const candidate = resolve(here, '../../../lib/wasm/mathts.wasm');
-  return existsSync(candidate) ? candidate : null;
-})();
+import {
+  AS_WASM_PATH,
+  AS_WASM_MISSING_MESSAGE,
+  countExportCalls,
+  maxAbsDiff,
+} from './helpers/wasm-spy.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -269,20 +267,24 @@ describe('polyFit/chebyshevFit/legendreFit — JS fallback (no WASM loaded)', ()
 // Suite 5: WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
-const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
+const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
 
-describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
+});
+
+describeIfAS('polyFit/chebyshevFit/legendreFit — AS WASM dispatch', () => {
   beforeAll(async () => {
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30_000);
 
   afterAll(() => {
     wasmLoader.reset();
   });
 
-  // Test 3 (WASM): polyFit above threshold matches the JS path within 1e-10
-  it('polyFit WASM path matches JS path within 1e-8 for quadratic data', () => {
+  // Test 3 (WASM): polyFit above threshold matches the JS path
+  it('polyFit executes poly_fit_f64 and matches the JS path for quadratic data', () => {
     const N = WASM_POLY_FIT_THRESHOLD + 200;
     const xs = linspace(-3, 3, N);
     const ys = xs.map((x) => 1 - x + 0.5 * x * x);
@@ -293,16 +295,19 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
     const jsRef = polyFit(xs.slice(0, 20), ys.slice(0, 20), 2);
 
     // WASM dispatch
-    const wasmResult = polyFitDispatch(xsF64, ysF64, 2);
+    const { result: wasmResult, counts } = countExportCalls(['poly_fit_f64'], () =>
+      polyFitDispatch(xsF64, ysF64, 2)
+    );
+    expect(counts.poly_fit_f64).toBeGreaterThan(0);
     expect(wasmResult.length).toBe(3);
     expect(Math.abs(wasmResult[0] - 1)).toBeLessThan(1e-6);
     expect(Math.abs(wasmResult[1] - -1)).toBeLessThan(1e-6);
     expect(Math.abs(wasmResult[2] - 0.5)).toBeLessThan(1e-6);
-    void jsRef;
+    expect(maxAbsDiff(wasmResult, jsRef)).toBeLessThan(1e-6);
   });
 
   // Test 5 (WASM): chebyshevFit above threshold matches JS path
-  it('chebyshevFit WASM path recovers T_2 coefficients within 1e-8', () => {
+  it('chebyshevFit executes cheb_fit_f64 and recovers T_2 coefficients within 1e-7', () => {
     const N = WASM_POLY_FIT_THRESHOLD + 100;
     const xs = linspace(-1, 1, N);
     const T2 = (x: number) => 2 * x * x - 1;
@@ -310,7 +315,10 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
     const xsF64 = new Float64Array(xs);
     const ysF64 = new Float64Array(ys);
 
-    const wasmResult = chebFitDispatch(xsF64, ysF64, 2);
+    const { result: wasmResult, counts } = countExportCalls(['cheb_fit_f64'], () =>
+      chebFitDispatch(xsF64, ysF64, 2)
+    );
+    expect(counts.cheb_fit_f64).toBeGreaterThan(0);
     expect(wasmResult.length).toBe(3);
     expect(Math.abs(wasmResult[0])).toBeLessThan(1e-7);
     expect(Math.abs(wasmResult[1])).toBeLessThan(1e-7);
@@ -318,7 +326,7 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
   });
 
   // Test 7 (WASM): legendreFit above threshold matches JS path
-  it('legendreFit WASM path recovers P_2 coefficients within 1e-8', () => {
+  it('legendreFit executes legendre_fit_f64 and recovers P_2 coefficients within 1e-7', () => {
     const N = WASM_POLY_FIT_THRESHOLD + 100;
     const xs = linspace(-1, 1, N);
     const P2 = (x: number) => (3 * x * x - 1) / 2;
@@ -326,19 +334,26 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
     const xsF64 = new Float64Array(xs);
     const ysF64 = new Float64Array(ys);
 
-    const wasmResult = legendreFitDispatch(xsF64, ysF64, 2);
+    const { result: wasmResult, counts } = countExportCalls(['legendre_fit_f64'], () =>
+      legendreFitDispatch(xsF64, ysF64, 2)
+    );
+    expect(counts.legendre_fit_f64).toBeGreaterThan(0);
     expect(wasmResult.length).toBe(3);
     expect(Math.abs(wasmResult[0])).toBeLessThan(1e-7);
     expect(Math.abs(wasmResult[1])).toBeLessThan(1e-7);
     expect(Math.abs(wasmResult[2] - 1)).toBeLessThan(1e-7);
   });
 
-  it('polyFit WASM path and JS path agree within 1e-8 on polynomial evaluation', () => {
+  it('polyFit executes poly_fit_f64 and its fit evaluates to the ground truth within 1e-6', () => {
     const N = WASM_POLY_FIT_THRESHOLD + 300;
     const xs = linspace(-2, 2, N);
     const ys = xs.map((x) => 5 + 3 * x - x * x + 0.25 * x * x * x);
 
-    const wasmCoeffs = Array.from(polyFitDispatch(new Float64Array(xs), new Float64Array(ys), 3));
+    const { result, counts } = countExportCalls(['poly_fit_f64'], () =>
+      polyFitDispatch(new Float64Array(xs), new Float64Array(ys), 3)
+    );
+    expect(counts.poly_fit_f64).toBeGreaterThan(0);
+    const wasmCoeffs = Array.from(result);
 
     // Verify evaluation matches the ground truth
     for (const x of [-2, -1, 0, 1, 2]) {
@@ -348,10 +363,11 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
     }
   });
 
-  it('below-threshold paths still work after WASM load (no regression)', () => {
+  it('below-threshold paths still work after WASM load and stay on JS (no regression)', () => {
     const xs = [0, 1, 2, 3];
     const ys = [0, 1, 4, 9];
-    const coeffs = polyFit(xs, ys, 2);
+    const { result: coeffs, counts } = countExportCalls(['poly_fit_f64'], () => polyFit(xs, ys, 2));
+    expect(counts.poly_fit_f64).toBe(0);
     expect(Math.abs(coeffs[0])).toBeLessThan(1e-9);
     expect(Math.abs(coeffs[1])).toBeLessThan(1e-9);
     expect(Math.abs(coeffs[2] - 1)).toBeLessThan(1e-9);
@@ -362,13 +378,17 @@ describeIfWasm('polyFit/chebyshevFit/legendreFit — WASM dispatch', () => {
     const N = WASM_POLY_FIT_THRESHOLD + 10;
     const xs = new Array(N).fill(1.0);
     const ys = new Array(N).fill(3.0);
-    let threw = false;
-    try {
-      polyFitDispatch(new Float64Array(xs), new Float64Array(ys), 2);
-    } catch {
-      threw = true;
-    }
-    // The dispatch should throw because WASM returns -1 or JS gaussian elimination diverges.
+    const { result: threw, counts } = countExportCalls(['poly_fit_f64'], () => {
+      try {
+        polyFitDispatch(new Float64Array(xs), new Float64Array(ys), 2);
+        return false;
+      } catch {
+        return true;
+      }
+    });
+    // The AS kernel is tried first and rejects the system (its [NaN] sentinel);
+    // the bridge then falls through to the JS solver, which throws.
+    expect(counts.poly_fit_f64).toBeGreaterThan(0);
     expect(threw).toBe(true);
   });
 });

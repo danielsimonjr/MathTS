@@ -21,17 +21,28 @@ import { wasmLoader } from '../../src/wasm/WasmLoader.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Where {@link AS_WASM_PATH} looks for the AS binary, in priority order:
+ * functions' own co-located dist copy first, then matrix's (the same artifact).
+ */
+export const AS_WASM_CANDIDATES: readonly string[] = [
+  '../../dist/wasm/mathts-as.wasm',
+  '../../../matrix/dist/wasm/mathts-as.wasm',
+].map((rel) => resolve(here, rel));
+
 /** Locate the AS binary (functions' own dist copy first, then matrix's). */
-export const AS_WASM_PATH: string | null = (() => {
-  for (const rel of [
-    '../../dist/wasm/mathts-as.wasm',
-    '../../../matrix/dist/wasm/mathts-as.wasm',
-  ]) {
-    const c = resolve(here, rel);
-    if (existsSync(c)) return c;
-  }
-  return null;
-})();
+export const AS_WASM_PATH: string | null = AS_WASM_CANDIDATES.find((c) => existsSync(c)) ?? null;
+
+/**
+ * Failure message for a missing AS binary. The build GUARANTEES the binary —
+ * turbo orders `functions#build` after the wasm build and `scripts/copy-wasm.mjs`
+ * exits non-zero when it is missing — so its absence is a broken build, never an
+ * environmental skip. Suites that gate their WASM tier with `describeIfAS` pair it
+ * with a non-skipping presence test that fails with this message.
+ */
+export const AS_WASM_MISSING_MESSAGE =
+  `AS wasm binary not found (looked in: ${AS_WASM_CANDIDATES.join(', ')}). ` +
+  'The build guarantees it — run `bun run build` from the repo root.';
 
 /**
  * Run `body`, counting how often each export in `names` is invoked through
@@ -55,7 +66,7 @@ export function countExportCalls<T>(
   // counted names with a counter wrapper.
   const clone: Record<string, unknown> = {};
   for (const key of Object.getOwnPropertyNames(real)) {
-    const value = (real as Record<string, unknown>)[key];
+    const value = (real as unknown as Record<string, unknown>)[key];
     if (names.includes(key) && typeof value === 'function') {
       const fn = value as (...a: unknown[]) => unknown;
       clone[key] = (...args: unknown[]) => {
