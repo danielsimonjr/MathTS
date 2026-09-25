@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- **A cold `bun install && bun run build && bun run test` passes; it failed before.** `bun run
+  build` had no edge from `matrix#build` to the AssemblyScript build, so `copy-wasm.mjs` raced
+  `asc`, found no binary, warned and exited 0. Turbo then cached the wasm-less `dist` and kept
+  replaying it after the wasm existed, and `wasm-resolve.test.ts` failed (CI escaped only because
+  it ran `build:wasm` first). `turbo.json` now orders `matrix#build`/`functions#build` (and their
+  `build:prod`) after `@danielsimonjr/mathts-wasm#build`, which also puts the wasm build's hash
+  into theirs; both copy scripts fail when the binary is missing. Closes the TODO.md item
+  "Reconcile the optional-wasm mismatch". The four now-redundant `build:wasm` CI steps, and the
+  comment that misdiagnosed the cause, are gone.
+- **`bun run build:prod` works; it failed at its first task.** Every `build:prod` still used
+  `tsup --dts`, whose rollup-plugin-dts calls the TypeScript JS API (`ts.sys`) that TypeScript 7
+  does not have. `core`/`workbook`/`functions` also emitted no declarations and `functions` no
+  wasm, and `plot` had none. Each is now its package's `build` with `--minify --treeshake`; the
+  minified output passes the dist smoke test and both consumer type checks.
+- **`bun run dev` works; it crashed the same way in 20 packages.** Each `dev` is now its
+  `build`'s tsup step with `--watch --onSuccess "<rest of build>"`, so declarations, the wasm copy
+  and the workerpool postbuild rerun on every rebuild.
+- **Lint is zero including warnings, and a warning now fails.** Plain `oxlint` exits 0 on
+  warnings, so 38 accumulated while the docs said zero. Fixed at the source: typed test mocks
+  (`gpu`'s mocked-WebGPU test now uses its own `stubGlobal` helper, and its uncaptured-error test
+  no longer passes when the handler is still `null`), `mod` added to the structural BigNumber
+  interface instead of an `any` cast, row-major accessors instead of `0 * n` indexing, and one
+  documented `compileFunctionSource` in `workerpool` for its ten `eval` sites (see its changeset).
+  `bun run lint` is `oxlint --deny-warnings .`.
+- **`bun audit` reports 0 at every level.** The lock resolved `esbuild@0.27.7` under the root
+  `overrides: { esbuild: ^0.28.1 }`, leaving GHSA-g7r4-m6w7-qqqr open; `--frozen-lockfile` does not
+  detect a lock that violates its own overrides. `bun update esbuild` moved esbuild and its
+  platform binaries to 0.28.2 (27 lock lines). Bundles were diffed against the 0.27.7 output:
+  identical apart from chunk hashes and esbuild's own `__esm`/`__commonJS` error-handling fixes.
+- **The root `js-yaml` devDependency says what is installed** (`^4.3.2`, not `^5.4.1`). #275's
+  bump was silently clamped by the `js-yaml: ^4.3.0` security override; Dependabot now skips
+  js-yaml majors until the dependency-graph tool is ported to v5. The stale TypeScript-major
+  ignore (typescript-eslint, which is no longer in the tree) is removed.
+- **Nine WASM-tier test suites run; they had skipped on every machine, CI included.** They looked
+  for the wasm at the deleted pre-AS path `lib/wasm/`. They now resolve the real binary, fail loudly
+  when it is missing, and assert that each AS export actually ran, so a silent JS fallback no longer
+  passes (`functions` typed-bitwise/algebra/cas-fit/interpolation and cov-signal, `matrix`
+  decompositions-as and WASMBackend-as, root `tests/wasm`). Previously skipped: 57 tests. Reviving
+  them exposed a test that failed ~18% of the time on the pure-JS path (see Known Issues:
+  `polynomialGCD`).
+- **`matrix`'s WASM allocation pool recycles, so linear memory stays bounded.** Allocations were
+  never recorded in the pool, so nothing was reused, and under the binary's `--runtime stub` nothing
+  is ever freed. 5,000 allocate/release cycles grew memory from 256 KiB to 128 MiB. Reuse now
+  rewrites the AS header `byteLength`, and `allocate*Empty` zero-fills a recycled block. The new
+  tests fail 8/11 against the old loader.
+- **A commit touching only AssemblyScript source passes the pre-commit hook.** lint-staged ran
+  `oxlint --fix` on files `.oxlintrc.json` ignores, and oxlint exits 1 when it selects nothing
+  (`--no-error-on-unmatched-pattern`).
+- **README / AGENTS.md describe the WASM tier as measured.** `functions`' public API never loads the
+  wasm (only its tests do), and poly fits, argsort/rank and Airy all dispatch to AS once loaded. They
+  do not "deliberately stay on JS".
+- **No build warnings.** The AssemblyScript entry no longer re-exports the `Complex` class (AS235;
+  WebAssembly cannot export classes, and all four build outputs are byte-identical without it).
+  The `test` task no longer declares `coverage/**` outputs it never writes (24 Turbo warnings per
+  run), and the dead `build:wasm` Turbo task is gone.
+
 - **The three `tools/*/tsconfig.json` files now typecheck** (`chunking-for-files`,
   `compress-for-context`, `create-dependency-graph`). They were identical and wrong the same two
   ways, so this is fixed as a class rather than an instance.
