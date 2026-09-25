@@ -76,8 +76,8 @@ jobs:
 
       - name: Audit (high+)
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
-        # `npm audit --audit-level=high` gate (accepted residual esbuild low
-        # advisory is documented in CLAUDE.md Known Issues).
+        # `npm audit --audit-level=high` gate. The tree currently audits clean at
+        # every level (`bun audit` with no floor reports 0).
         run: bun audit --audit-level=high
 
   test:
