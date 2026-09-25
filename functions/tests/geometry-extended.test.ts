@@ -297,7 +297,7 @@ describe('kdTreeNearest', () => {
 });
 
 // =============================================================================
-// nearestNeighbor (one-shot convenience, WASM-accelerated)
+// nearestNeighbor (one-shot convenience)
 // =============================================================================
 
 describe('nearestNeighbor', () => {

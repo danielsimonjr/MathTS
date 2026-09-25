@@ -2,14 +2,10 @@ import { isMatrix } from '../utils/is.js';
 import { format } from '../utils/string.js';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
-
-// Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_SQRTM_THRESHOLD = 16; // 4x4 matrix
 
 /** Scalar types supported by sqrtm */
 type Scalar = number | BigNumber | Complex;
@@ -66,83 +62,6 @@ export const createSqrtm = /* #__PURE__ */ factory(
   ({ typed, abs, add, multiply, map, sqrt, subtract, inv, size, max, identity }: Dependencies) => {
     const _maxIterations = 1e3;
     const _tolerance = 1e-6;
-
-    /**
-     * Try WASM-accelerated matrix square root for plain number matrices
-     */
-    function _tryWasmSqrtm(A: Scalar[][] | Matrix, n: number): Scalar[][] | Matrix | null {
-      const wasm = wasmLoader.getModule();
-      if (!wasm || n * n < WASM_SQRTM_THRESHOLD) return null;
-
-      // Extract data
-      const data = isMatrix(A) ? (A as Matrix)._data : A;
-      if (!data || !Array.isArray(data)) return null;
-
-      try {
-        const flat = new Float64Array(n * n);
-        for (let i = 0; i < n; i++) {
-          const row = data[i];
-          if (!Array.isArray(row)) return null;
-          for (let j = 0; j < n; j++) {
-            const val = row[j];
-            if (typeof val !== 'number') return null;
-            flat[i * n + j] = val;
-          }
-        }
-
-        const matrixAlloc = wasmLoader.allocateFloat64Array(flat);
-        const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * n);
-        // workPtr needs 5*n*n f64 values for sqrtm
-        const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(5 * n * n);
-
-        try {
-          const status = wasm.sqrtm(
-            matrixAlloc.ptr,
-            n,
-            resultAlloc.ptr,
-            _tolerance,
-            _maxIterations,
-            workAlloc.ptr
-          );
-
-          if (status > 0) {
-            // AS sqrtm returns iteration count (>0) on success, -1 on failure
-            const result: number[][] = [];
-            for (let i = 0; i < n; i++) {
-              const row: number[] = [];
-              for (let j = 0; j < n; j++) {
-                row[j] = resultAlloc.array[i * n + j];
-              }
-              result[i] = row;
-            }
-
-            if (isMatrix(A)) {
-              const matA = A as Matrix & {
-                createDenseMatrix(opts: {
-                  data: MatrixData;
-                  size: number[];
-                  datatype?: string;
-                }): Scalar[][] | Matrix;
-                _datatype?: string;
-              };
-              return matA.createDenseMatrix({
-                data: result,
-                size: [n, n],
-                datatype: matA._datatype,
-              });
-            }
-            return result;
-          }
-        } finally {
-          wasmLoader.free(matrixAlloc.ptr);
-          wasmLoader.free(resultAlloc.ptr);
-          wasmLoader.free(workAlloc.ptr);
-        }
-      } catch {
-        // Fall through to JS
-      }
-      return null;
-    }
 
     /**
      * Calculate the principal square root matrix using the Denman-Beavers iterative method
@@ -217,9 +136,6 @@ export const createSqrtm = /* #__PURE__ */ factory(
             const rows = sizeArray[0];
             const cols = sizeArray[1];
             if (rows === cols) {
-              // Try WASM for plain number matrices
-              const wasmResult = _tryWasmSqrtm(A as Scalar[][] | Matrix, rows);
-              if (wasmResult !== null) return wasmResult;
               return _denmanBeavers(A as Scalar[][] | Matrix);
             } else {
               throw new RangeError(

@@ -3215,11 +3215,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports           | Type               |
-| ----------------------- | ----------------- | ------------------ |
-| `../utils/factory.js`   | `factory`         | Import             |
-| `../wasm/WasmLoader.js` | `wasmLoader`      | Import             |
-| `../types.js`           | `Matrix, Complex` | Import (type-only) |
+| File                  | Imports           | Type               |
+| --------------------- | ----------------- | ------------------ |
+| `../utils/factory.js` | `factory`         | Import             |
+| `../types.js`         | `Matrix, Complex` | Import (type-only) |
 
 **Exports:**
 
@@ -3528,7 +3527,6 @@ graph LR
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
-| `../wasm/WasmLoader.js`         | `wasmLoader`                                                                                                                               | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
 | `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                         | Import |
 
@@ -3848,7 +3846,6 @@ graph LR
 
 | File                              | Imports                                                                                                                            | Type      |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `../wasm/WasmLoader.js`           | `wasmLoader`                                                                                                                       | Import    |
 | `../numeric/solveODE.js`          | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/adaptive-quad.js`     | `quad`                                                                                                                             | Import    |
 | `../numeric/solveParabolicPDE.js` | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
@@ -3925,7 +3922,6 @@ graph LR
 
 | File                          | Imports                                   | Type   |
 | ----------------------------- | ----------------------------------------- | ------ |
-| `../wasm/WasmLoader.js`       | `wasmLoader`                              | Import |
 | `../wasm/sort/wasm-bridge.js` | `argsortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
 
 **Exports:**
@@ -4394,7 +4390,6 @@ graph LR
 | --------------------------- | ------------------------- | ------------------ |
 | `../plain/number/index.js`  | `lgammaNumber, lnSqrt2PI` | Import             |
 | `../utils/factory.js`       | `factory`                 | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`              | Import             |
 | `../utils/number.js`        | `copysign`                | Import             |
 | `../core/function/typed.js` | `TypedFunction`           | Import (type-only) |
 
@@ -5052,7 +5047,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/mad.ts` - Check if an array contains only plain numbers
+### `functions/src/statistics/mad.ts` - Compute the median absolute deviation of a matrix or a list with values.
 
 **Internal Dependencies:**
 
@@ -5061,7 +5056,6 @@ graph LR
 | `../utils/array.js`              | `flatten`             | Import             |
 | `../utils/factory.js`            | `factory`             | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
-| `../wasm/WasmLoader.js`          | `wasmLoader`          | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
 
 **Exports:**
@@ -5086,7 +5080,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/mean.ts` - Check if an array is a flat array of plain numbers
+### `functions/src/statistics/mean.ts` - Compute the mean value of matrix or a list with values.
 
 **Internal Dependencies:**
 
@@ -5096,7 +5090,6 @@ graph LR
 | `../utils/array.js`              | `arraySize`                                | Import             |
 | `../utils/factory.js`            | `factory`                                  | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`                      | Import             |
-| `../wasm/WasmLoader.js`          | `wasmLoader`                               | Import             |
 | `../core/function/typed.js`      | `TypedFunction`                            | Import (type-only) |
 
 **Exports:**
@@ -5129,7 +5122,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/max.ts` - Check if an array is a flat array of plain numbers
+### `functions/src/statistics/max.ts` - Compute the maximum value of a matrix or a list with values.
 
 **Internal Dependencies:**
 
@@ -5139,7 +5132,6 @@ graph LR
 | `../utils/factory.js`            | `factory`                                  | Import             |
 | `../utils/number.js`             | `safeNumberType`                           | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`                      | Import             |
-| `../wasm/WasmLoader.js`          | `wasmLoader`                               | Import             |
 | `../core/function/typed.js`      | `TypedFunction`                            | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`                            | Import (type-only) |
 
@@ -5167,7 +5159,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/min.ts` - Check if an array is a flat array of plain numbers
+### `functions/src/statistics/min.ts` - Compute the minimum value of a matrix or a list of values.
 
 **Internal Dependencies:**
 
@@ -5177,7 +5169,6 @@ graph LR
 | `../utils/factory.js`            | `factory`                                  | Import             |
 | `../utils/number.js`             | `safeNumberType`                           | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`                      | Import             |
-| `../wasm/WasmLoader.js`          | `wasmLoader`                               | Import             |
 | `../core/function/typed.js`      | `TypedFunction`                            | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`                            | Import (type-only) |
 
@@ -5187,7 +5178,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/prod.ts` - Check if an array is a flat array of plain numbers
+### `functions/src/statistics/prod.ts` - Compute the product of a matrix or a list with values.
 
 **Internal Dependencies:**
 
@@ -5196,7 +5187,6 @@ graph LR
 | `../utils/collection.js`         | `deepForEach, reduce` | Import             |
 | `../utils/factory.js`            | `factory`             | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
-| `../wasm/WasmLoader.js`          | `wasmLoader`          | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`       | Import (type-only) |
 
@@ -5386,7 +5376,6 @@ graph LR
 | `../utils/collection.js`    | `deepMap`       | Import             |
 | `../utils/number.js`        | `sign`          | Import             |
 | `../utils/factory.js`       | `factory`       | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -5762,7 +5751,6 @@ graph LR
 | File                        | Imports           | Type               |
 | --------------------------- | ----------------- | ------------------ |
 | `../utils/factory.js`       | `factory`         | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`      | Import             |
 | `../types.js`               | `MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
 | `../core/config.js`         | `ConfigOptions`   | Import (type-only) |
@@ -5847,7 +5835,6 @@ graph LR
 | --------------------------- | ----------------- | ------------------ |
 | `../utils/is.js`            | `isBigNumber`     | Import             |
 | `../utils/factory.js`       | `factory`         | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`      | Import             |
 | `../types.js`               | `MathNumericType` | Import (type-only) |
 | `../core/function/typed.js` | `TypedFunction`   | Import (type-only) |
 
@@ -6469,7 +6456,6 @@ graph LR
 | `../type/matrix/utils/matAlgo04xSidSid.js`     | `createMatAlgo04xSidSid`     | Import             |
 | `../type/matrix/utils/matAlgo10xSids.js`       | `createMatAlgo10xSids`       | Import             |
 | `../type/matrix/utils/matrixAlgorithmSuite.js` | `createMatrixAlgorithmSuite` | Import             |
-| `../wasm/WasmLoader.js`                        | `wasmLoader`                 | Import             |
 
 **Exports:**
 
@@ -6667,7 +6653,6 @@ graph LR
 | --------------------------- | --------------- | ------------------ |
 | `../utils/factory.js`       | `factory`       | Import             |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 
 **Exports:**
 
@@ -6739,7 +6724,6 @@ graph LR
 | `../types.js`               | `BigNumber`     | Import (type-only) |
 | `../utils/array.js`         | `flatten`       | Import             |
 | `../utils/is.js`            | `isComplex`     | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 
 **Exports:**
 
@@ -7017,7 +7001,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/sqrtm.ts` - Try WASM-accelerated matrix square root for plain number matrices
+### `functions/src/matrix/sqrtm.ts` - Calculate the principal square root matrix using the Denman-Beavers iterative method
 
 **External Dependencies:**
 
@@ -7028,13 +7012,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports      | Type   |
-| ----------------------- | ------------ | ------ |
-| `../utils/is.js`        | `isMatrix`   | Import |
-| `../utils/string.js`    | `format`     | Import |
-| `../utils/array.js`     | `arraySize`  | Import |
-| `../utils/factory.js`   | `factory`    | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                  | Imports     | Type   |
+| --------------------- | ----------- | ------ |
+| `../utils/is.js`      | `isMatrix`  | Import |
+| `../utils/string.js`  | `format`    | Import |
+| `../utils/array.js`   | `arraySize` | Import |
+| `../utils/factory.js` | `factory`   | Import |
 
 **Exports:**
 
@@ -7087,15 +7070,14 @@ graph LR
 
 ---
 
-### `functions/src/matrix/kron.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/matrix/kron.ts` - Calculates the Kronecker product of 2 matrices or vectors.
 
 **Internal Dependencies:**
 
-| File                    | Imports      | Type   |
-| ----------------------- | ------------ | ------ |
-| `../utils/array.js`     | `arraySize`  | Import |
-| `../utils/factory.js`   | `factory`    | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                  | Imports     | Type   |
+| --------------------- | ----------- | ------ |
+| `../utils/array.js`   | `arraySize` | Import |
+| `../utils/factory.js` | `factory`   | Import |
 
 **Exports:**
 
@@ -7194,16 +7176,15 @@ graph LR
 
 ---
 
-### `functions/src/matrix/partitionSelect.ts` - Check if an array is a flat array of plain numbers
+### `functions/src/matrix/partitionSelect.ts` - Partition-based selection of an array or 1D matrix.
 
 **Internal Dependencies:**
 
-| File                    | Imports      | Type   |
-| ----------------------- | ------------ | ------ |
-| `../utils/is.js`        | `isMatrix`   | Import |
-| `../utils/number.js`    | `isInteger`  | Import |
-| `../utils/factory.js`   | `factory`    | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                  | Imports     | Type   |
+| --------------------- | ----------- | ------ |
+| `../utils/is.js`      | `isMatrix`  | Import |
+| `../utils/number.js`  | `isInteger` | Import |
+| `../utils/factory.js` | `factory`   | Import |
 
 **Exports:**
 
@@ -7269,7 +7250,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/transpose.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/matrix/transpose.ts` - Transpose a matrix. All values of the matrix are reflected over its
 
 **Internal Dependencies:**
 
@@ -7278,7 +7259,6 @@ graph LR
 | `../utils/object.js`        | `clone`         | Import             |
 | `../utils/string.js`        | `format`        | Import             |
 | `../utils/factory.js`       | `factory`       | Import             |
-| `../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -7539,13 +7519,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports      | Type   |
-| ----------------------- | ------------ | ------ |
-| `../utils/is.js`        | `isMatrix`   | Import |
-| `../utils/object.js`    | `clone`      | Import |
-| `../utils/string.js`    | `format`     | Import |
-| `../utils/factory.js`   | `factory`    | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                  | Imports    | Type   |
+| --------------------- | ---------- | ------ |
+| `../utils/is.js`      | `isMatrix` | Import |
+| `../utils/object.js`  | `clone`    | Import |
+| `../utils/string.js`  | `format`   | Import |
+| `../utils/factory.js` | `factory`  | Import |
 
 **Exports:**
 
@@ -7553,7 +7532,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs/complexEigs.ts` - Flatten a 2D array to a Float64Array in row-major order
+### `functions/src/matrix/eigs/complexEigs.ts` - Create the `complexEigs` function, which computes the eigenvalues and the optional
 
 **External Dependencies:**
 
@@ -7564,10 +7543,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports      | Type   |
-| -------------------------- | ------------ | ------ |
-| `../../utils/object.js`    | `clone`      | Import |
-| `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                    | Imports | Type   |
+| ----------------------- | ------- | ------ |
+| `../../utils/object.js` | `clone` | Import |
 
 **Exports:**
 
@@ -7575,7 +7553,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs/realSymmetric.ts` - Flatten a 2D array to a Float64Array in row-major order
+### `functions/src/matrix/eigs/realSymmetric.ts` - Create the function that computes the eigenvalues and the optional eigenvectors of a
 
 **External Dependencies:**
 
@@ -7585,10 +7563,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports      | Type   |
-| -------------------------- | ------------ | ------ |
-| `../../utils/object.js`    | `clone`      | Import |
-| `../../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                    | Imports | Type   |
+| ----------------------- | ------- | ------ |
+| `../../utils/object.js` | `clone` | Import |
 
 **Exports:**
 
@@ -7797,7 +7774,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/inv.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/matrix/inv.ts` - Calculate the inverse of a square matrix.
 
 **External Dependencies:**
 
@@ -7808,13 +7785,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports      | Type   |
-| ----------------------- | ------------ | ------ |
-| `../utils/is.js`        | `isMatrix`   | Import |
-| `../utils/array.js`     | `arraySize`  | Import |
-| `../utils/factory.js`   | `factory`    | Import |
-| `../utils/string.js`    | `format`     | Import |
-| `../wasm/WasmLoader.js` | `wasmLoader` | Import |
+| File                  | Imports     | Type   |
+| --------------------- | ----------- | ------ |
+| `../utils/is.js`      | `isMatrix`  | Import |
+| `../utils/array.js`   | `arraySize` | Import |
+| `../utils/factory.js` | `factory`   | Import |
+| `../utils/string.js`  | `format`    | Import |
 
 **Exports:**
 
@@ -8568,7 +8544,6 @@ graph LR
 | `./csFkeep.js`                 | `csFkeep`       | Import             |
 | `./csFlip.js`                  | `csFlip`        | Import             |
 | `./csTdfs.js`                  | `csTdfs`        | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8729,7 +8704,6 @@ graph LR
 | ------------------------------ | --------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`       | Import             |
 | `./csLeaf.js`                  | `csLeaf`        | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8831,14 +8805,13 @@ graph LR
 
 ---
 
-### `functions/src/algebra/decomposition/qr.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/algebra/decomposition/qr.ts` - Calculate the Matrix QR decomposition. Matrix `A` is decomposed in
 
 **Internal Dependencies:**
 
 | File                           | Imports         | Type               |
 | ------------------------------ | --------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`       | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8865,7 +8838,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/decomposition/lup.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/algebra/decomposition/lup.ts` - Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a
 
 **Internal Dependencies:**
 
@@ -8873,7 +8846,6 @@ graph LR
 | ------------------------------ | --------------- | ------------------ |
 | `../../utils/object.js`        | `clone`         | Import             |
 | `../../utils/factory.js`       | `factory`       | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`    | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -8937,7 +8909,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/usolve.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/algebra/solver/usolve.ts` - Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro
 
 **Internal Dependencies:**
 
@@ -8945,7 +8917,6 @@ graph LR
 | ------------------------------ | ----------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`               | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`            | Import             |
 | `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 
 **Exports:**
@@ -8986,7 +8957,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lsolve.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/algebra/solver/lsolve.ts` - Finds one solution of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix. Throw
 
 **Internal Dependencies:**
 
@@ -8994,7 +8965,6 @@ graph LR
 | ------------------------------ | ----------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`               | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`            | Import             |
 | `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 
 **Exports:**
@@ -9003,7 +8973,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/lusolve.ts` - Check if a 2D array contains only plain numbers
+### `functions/src/algebra/solver/lusolve.ts` - Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
 
 **Internal Dependencies:**
 
@@ -9013,7 +8983,6 @@ graph LR
 | `../../utils/factory.js`       | `factory`               | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
 | `../sparse/csIpvec.js`         | `csIpvec`               | Import             |
-| `../../wasm/WasmLoader.js`     | `wasmLoader`            | Import             |
 | `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 
 **Exports:**
@@ -10648,12 +10617,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports                                               | Type               |
-| ----------------------- | ----------------------------------------------------- | ------------------ |
-| `../utils/is.js`        | `isUnit, isNumber, isBigNumber`                       | Import             |
-| `../utils/factory.js`   | `factory`                                             | Import             |
-| `../wasm/WasmLoader.js` | `wasmLoader`                                          | Import             |
-| `../types.js`           | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
+| File                  | Imports                                               | Type               |
+| --------------------- | ----------------------------------------------------- | ------------------ |
+| `../utils/is.js`      | `isUnit, isNumber, isBigNumber`                       | Import             |
+| `../utils/factory.js` | `factory`                                             | Import             |
+| `../types.js`         | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
 
 **Exports:**
 
@@ -17504,7 +17472,6 @@ graph LR
 | `functions/src/utils/array`                            | 0 files      | 48 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
-| `functions/src/wasm/WasmLoader`                        | 2 files      | 37 files   |
 | `functions/src/utils/collection`                       | 0 files      | 38 files   |
 | `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
@@ -17531,6 +17498,7 @@ graph LR
 | `core/src/index`                                       | 15 files     | 0 files    |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
 | `functions/src/bitwise/rightLogShift`                  | 14 files     | 1 file     |
+| `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 
 ---
 
@@ -18371,7 +18339,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 198626 |
+| Total Lines of Code     | 195211 |
 | Total Exports           | 5842   |
 | Total Re-exports        | 2362   |
 | Total Classes           | 55     |

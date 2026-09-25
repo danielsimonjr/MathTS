@@ -3,7 +3,6 @@
 import { deepMap } from '../utils/collection.js';
 import { sign } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for erf
@@ -69,29 +68,8 @@ export const createErf = /* #__PURE__ */ factory(
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
-          (n: unknown[] | Matrix): unknown[] | Matrix => {
-            // WASM-accelerated path for plain number arrays of sufficient size
-            if (Array.isArray(n) && n.length >= 100 && n.every((x) => typeof x === 'number')) {
-              const wasm = wasmLoader.getModule();
-              if (wasm) {
-                try {
-                  const input = new Float64Array(n as number[]);
-                  const inputAlloc = wasmLoader.allocateFloat64Array(input);
-                  const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(n.length);
-                  try {
-                    wasm.erfArray(inputAlloc.ptr, n.length, resultAlloc.ptr);
-                    return Array.from(resultAlloc.array);
-                  } finally {
-                    wasmLoader.free(inputAlloc.ptr);
-                    wasmLoader.free(resultAlloc.ptr);
-                  }
-                } catch {
-                  // Fall through to element-wise JS
-                }
-              }
-            }
-            return deepMap(n as unknown[], self) as unknown[] | Matrix;
-          }
+          (n: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(n as unknown[], self) as unknown[] | Matrix
       ),
 
       // TODO: For complex numbers, use the approximation for the Faddeeva function

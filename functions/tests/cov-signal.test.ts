@@ -14,15 +14,13 @@
  *   - the windowFunction 'bartlett' branch,
  *   - initializeSignal / terminateSignal lifecycle wrappers.
  *
- * The `if (wasm) { ... wasm.<kernel>_wasm(...) ... }` blocks in
- * dct/idct/dst/idst/dwt/hilbertTransform/spectrogram/periodogram/_convolve call
- * legacy pointer-ABI `*_wasm` kernels that NO binary provides any more: they
- * belonged to the deleted native-WASM toolchain, and the AssemblyScript binary —
- * now the sole WASM backend — does not export them. So their success paths are
- * unreachable. The last describe block loads the AS binary anyway: that enters
- * each `if (wasm)` branch and proves it falls through to the JS path with an
- * unchanged result. It also pins that the kernels are absent, so if one is ever
- * added to the AS binary the block fails and must grow real engagement asserts.
+ * dct/idct/dst/idst/dwt/hilbertTransform/spectrogram/periodogram/_convolve are
+ * pure JS: their former `wasm.<kernel>_wasm(...)` branches targeted kernels that
+ * only a legacy native-WASM artifact (lib/wasm/mathts.wasm) exported. The
+ * AssemblyScript binary does not export them, so those branches were dead and
+ * have been removed. The last describe block loads the AS binary anyway and checks
+ * every result is unchanged: loading the module must never change what these
+ * functions return.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -203,33 +201,17 @@ describe('signal — JS reference correctness (non-WASM small inputs)', () => {
   });
 });
 
-// AS binary loaded — the `if (wasm)` branches in
-// dct/idct/dst/idst/dwt/hilbert/spectrogram/periodogram/_convolve are ENTERED, but
-// they call legacy `*_wasm` kernels the AS binary does not export, so each one
-// falls through to its JS path (JS by construction, not a WASM tier). Each
-// function is driven with a length >= WASM_THRESHOLD (64) and validated against
-// its own output with no module loaded (computed by resetting the loader first),
-// so the fall-through is proven not to corrupt the result.
+// AS binary loaded. None of dct/idct/dst/idst/dwt/hilbert/spectrogram/periodogram/
+// _convolve consult WASM, so loading the module must not change any result. Each is
+// driven with a length >= 64 (the old WASM threshold, where the removed branches
+// used to engage) and compared with its own output when no module was loaded.
 const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
-
-/** Legacy pointer-ABI kernels typed/signal.ts probes for; absent from the AS binary. */
-const LEGACY_SIGNAL_KERNELS = [
-  'dct_wasm',
-  'idct_wasm',
-  'dst_wasm',
-  'idst_wasm',
-  'dwt_wasm',
-  'hilbert_wasm',
-  'spectrogram_wasm',
-  'periodogram_wasm',
-  'fir_filter_wasm',
-];
 
 it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
   expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
 });
 
-describeIfAS('signal — AS binary loaded: legacy *_wasm branches fall through to JS', () => {
+describeIfAS('signal — results do not depend on whether the AS binary is loaded', () => {
   const N = 128;
   const sig = Array.from(
     { length: N },
@@ -256,7 +238,7 @@ describeIfAS('signal — AS binary loaded: legacy *_wasm branches fall through t
     jsPeriodogram = periodogram(sig, { window: 'hann' }).psd;
     jsLowpass = lowpassFilter(sig, 0.1, 65); // order 65 keeps N >= threshold for _convolve
     jsDwt = dwt(sig);
-    // Now load the AS binary so subsequent calls enter the `if (wasm)` branch.
+    // Now load the AS binary; every call below must still return the JS result.
     await wasmLoader.load(AS_WASM_PATH!);
   }, 60000);
 
@@ -269,39 +251,35 @@ describeIfAS('signal — AS binary loaded: legacy *_wasm branches fall through t
     for (let i = 0; i < a.length; i++) expect(a[i]).toBeCloseTo(b[i], digits);
   };
 
-  it('the AS binary is loaded but exports none of the legacy *_wasm signal kernels', () => {
-    const mod = wasmLoader.getModule() as unknown as Record<string, unknown>;
-    expect(typeof mod.array_sin_ptr).toBe('function'); // AS sentinel: this IS the AS binary
-    for (const k of LEGACY_SIGNAL_KERNELS) {
-      expect(typeof mod[k], `${k} is not exported by the AS binary`).toBe('undefined');
-    }
+  it('the AS binary is loaded', () => {
+    const mod = wasmLoader.getModule() as unknown as Record<string, unknown> | null;
+    expect(typeof mod?.array_sin_ptr).toBe('function'); // AS sentinel: this IS the AS binary
   });
 
-  it('dct (dct_wasm absent → JS) matches JS DCT-II', () => close(dct(sig), jsDct));
-  it('idct (idct_wasm absent → JS) matches JS IDCT-III', () => close(idct(jsDct), jsIdct));
-  it('dst (dst_wasm absent → JS) matches JS DST-II', () => close(dst(sig), jsDst));
-  it('idst (idst_wasm absent → JS) matches JS IDST-III', () => close(idst(jsDst), jsIdst));
+  it('dct is unchanged with the AS binary loaded', () => close(dct(sig), jsDct));
+  it('idct is unchanged with the AS binary loaded', () => close(idct(jsDct), jsIdct));
+  it('dst is unchanged with the AS binary loaded', () => close(dst(sig), jsDst));
+  it('idst is unchanged with the AS binary loaded', () => close(idst(jsDst), jsIdst));
 
   it('dct/idct round-trip reconstructs the signal with the AS binary loaded', () => {
     close(idct(dct(sig)), sig, 6);
   });
 
-  it('dwt (dwt_wasm absent → JS) matches JS Haar transform', () => {
-    // Module is loaded here -> enters the WASM branch, falls through to JS;
-    // compare to the no-module JS reference from beforeAll.
+  it('dwt is unchanged with the AS binary loaded', () => {
+    // Module is loaded here; compare to the no-module reference from beforeAll.
     const w = dwt(sig);
     close(w.approx, jsDwt.approx, 6);
     close(w.detail, jsDwt.detail, 6);
   });
 
-  it('hilbertTransform (hilbert_wasm absent → JS) matches JS Hilbert transform', () =>
+  it('hilbertTransform is unchanged with the AS binary loaded', () =>
     close(hilbertTransform(sig), jsHilbert, 5));
-  it('periodogram (periodogram_wasm absent → JS) matches JS periodogram', () =>
+  it('periodogram is unchanged with the AS binary loaded', () =>
     close(periodogram(sig, { window: 'hann' }).psd, jsPeriodogram, 5));
-  it('lowpassFilter (fir_filter_wasm absent → JS) matches JS convolution', () =>
+  it('lowpassFilter is unchanged with the AS binary loaded', () =>
     close(lowpassFilter(sig, 0.1, 65), jsLowpass, 6));
 
-  it('spectrogram (spectrogram_wasm absent → JS) produces frames matching frequency-bin count', async () => {
+  it('spectrogram produces frames matching the frequency-bin count with the AS binary loaded', async () => {
     const out = await spectrogram(sig, { windowSize: 64, hopSize: 32, window: 'hann' });
     expect(out.magnitude.length).toBeGreaterThan(0);
     expect(out.magnitude[0].length).toBe(out.frequencies.length);

@@ -3,19 +3,16 @@
  *
  * The existing numeric.test.ts exercises the happy paths of every export;
  * this file targets the remaining uncovered JS branches: secant fallbacks,
- * error/singular paths, the JS fallbacks of WASM-accelerated routines (loess,
- * griddata, rbfInterpolate, leastSquares, rank), basin-hopping
+ * error/singular paths, loess, griddata, rbfInterpolate, leastSquares and
+ * rank, basin-hopping
  * (globalMinimize), the shooting BVP solver, event detection, residue /
  * Durand-Kerner root finding, quadprog, linprog (unbounded + extraction), and
  * the heat-equation PDE solver edge cases.
  *
- * NOTE on coverage ceiling: the WASM-accelerated `if (wasm) { ... }` blocks in
- * leastSquares/bezierCurve/loess/griddata/rbfInterpolate/solveODESystem/
- * rank are dead in this environment because no WASM module is loaded
- * (`wasmLoader.getModule()` returns undefined on Node without the WASM
- * artifact — see CLAUDE.md "WASM JS-fallback on Node"). Those branches are
- * intentionally uncoverable here; all such inputs therefore take the JS path,
- * which we assert below.
+ * leastSquares/bezierCurve/loess/griddata/rbfInterpolate/solveODESystem/rank
+ * are pure JS: their former `if (wasm) { ... }` branches called `*_wasm`
+ * kernels that the AssemblyScript binary never exported, so they were dead and
+ * have been removed.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -401,9 +398,9 @@ describe('ODE solvers', () => {
     close(yEnd, Math.exp(-1), 1e-3);
   });
 
-  it('solveODESystem with n>=4 (WASM path attempts, falls through to JS)', () => {
-    // 4 state variables triggers the `n >= 4` WASM branch; with no module the
-    // try/getModule short-circuits and the JS combination runs.
+  it('solveODESystem with n>=4 (fixed-step RK4 combination)', () => {
+    // 4 state variables: formerly the size that tried a (never-exported) WASM
+    // RK4-combination kernel; the JS combination is the only path.
     const sol = solveODESystem((_t, y) => y.map((v) => -v), [1, 2, 3, 4], [0, 0.5], { dt: 0.05 });
     const last = sol.y[sol.y.length - 1];
     close(last[0], Math.exp(-0.5), 1e-2);

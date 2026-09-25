@@ -3,13 +3,12 @@
  *
  * Pure TypeScript implementations of geometric operations including
  * angles, products, areas, spatial queries, transforms, distances,
- * and intersections. Includes optional WASM acceleration for
- * Delaunay triangulation, Voronoi diagrams, and k-d tree operations.
+ * and intersections. The 2-D convex hull's coordinate sort goes through
+ * the AssemblyScript argsort bridge for large inputs.
  *
  * @packageDocumentation
  */
 
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
@@ -19,12 +18,6 @@ import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridg
 
 type f64 = number;
 type i32 = number;
-
-// WASM dispatch threshold — point sets smaller than this use pure-TS fallback
-const GEOMETRY_WASM_THRESHOLD = 32;
-
-// Threshold for convexHull3D WASM dispatch (≥ 1024 points)
-const HULL3D_WASM_THRESHOLD = 1024;
 
 // =============================================================================
 // Angle Functions
@@ -627,14 +620,14 @@ export function delaunayTriangulation(points: number[][]): number[][] {
   const n: i32 = points.length;
   if (n < 3) return [];
 
-  // NOTE: the `delaunay_wasm` kernel is DISABLED — it returns a bogus triangle
-  // count (e.g. 1363 triangles for a 119-point set whose true count is 197),
-  // reading past its output buffer and yielding garbage indices / triangles
-  // with enormous area. It was never correctness-tested (the WASM dispatch is
-  // unreachable in the unit-test environment for the small inputs those tests
-  // use). Until the AssemblyScript kernel is fixed, always use the correct JS
-  // Bowyer–Watson path below. The public `delaunay`/`voronoi`/`alphaShape`
-  // engine (functions/src/geometry/) depends on this being correct at every n.
+  // NOTE: always the JS Bowyer–Watson path below — there is no WASM kernel.
+  // The legacy native-WASM `delaunay_wasm` kernel was disabled because it
+  // returned a bogus triangle count (e.g. 1363 triangles for a 119-point set
+  // whose true count is 197), reading past its output buffer and yielding
+  // garbage indices / triangles with enormous area; the AssemblyScript binary
+  // (the only WASM backend) exports no Delaunay kernel. The public
+  // `delaunay`/`voronoi`/`alphaShape` engine (functions/src/geometry/) depends
+  // on this being correct at every n.
 
   // Create super-triangle that contains all points
   let minX = Infinity,
@@ -734,57 +727,6 @@ export function voronoiDiagram(
       'voronoiDiagram: bounds must be a [xMin, yMin, xMax, yMax] tuple (the clipping box)'
     );
   }
-  const n: i32 = points.length;
-
-  // WASM-accelerated path
-  if (n >= GEOMETRY_WASM_THRESHOLD) {
-    const wasm = wasmLoader.getModule();
-    if (wasm) {
-      try {
-        const flat = new Float64Array(n * 2);
-        for (let i = 0; i < n; i++) {
-          flat[i * 2] = points[i][0];
-          flat[i * 2 + 1] = points[i][1];
-        }
-        const ptsAlloc = wasmLoader.allocateFloat64Array(flat);
-        const boundsAlloc = wasmLoader.allocateFloat64Array(new Float64Array(bounds));
-        const maxVerts = 2 * n;
-        const maxEdges = 6 * n;
-        const vertsAlloc = wasmLoader.allocateFloat64ArrayEmpty(maxVerts * 2);
-        const edgesAlloc = wasmLoader.allocateInt32ArrayEmpty(maxEdges * 2);
-        try {
-          const packed = wasm.voronoi_wasm(
-            ptsAlloc.ptr,
-            n,
-            boundsAlloc.ptr,
-            vertsAlloc.ptr,
-            edgesAlloc.ptr,
-            maxVerts,
-            maxEdges
-          );
-          const numVerts = packed & 0xffff;
-          const vertices: number[][] = [];
-          for (let i = 0; i < numVerts; i++) {
-            vertices.push([vertsAlloc.array[i * 2], vertsAlloc.array[i * 2 + 1]]);
-          }
-          // Build regions: for each input point, collect associated Voronoi vertex indices
-          // This requires re-running the Delaunay to know which triangles touch which point,
-          // so we fall through to the JS path for full region data.
-          // However, we can return vertices + empty regions and let caller use edges.
-          const regions: number[][] = Array.from({ length: n }, () => []);
-          return { vertices, regions };
-        } finally {
-          wasmLoader.free(ptsAlloc.ptr);
-          wasmLoader.free(boundsAlloc.ptr);
-          wasmLoader.free(vertsAlloc.ptr);
-          wasmLoader.free(edgesAlloc.ptr);
-        }
-      } catch {
-        // Fall through to JS
-      }
-    }
-  }
-
   const triangles = delaunayTriangulation(points);
   const vertices: number[][] = [];
   const triCircumcenters: Map<string, i32> = new Map();
@@ -918,7 +860,6 @@ function distanceNDSq(a: number[], b: number[]): f64 {
 
 /**
  * One-shot nearest-neighbor search: builds a k-d tree and queries it.
- * Uses WASM acceleration for large point sets.
  *
  * @param points - Array of points (each same dimensionality)
  * @param query - Query point
@@ -930,52 +871,7 @@ export function nearestNeighbor(
 ): { point: number[]; index: i32; distance: f64 } | null {
   const n = points.length;
   if (n === 0) return null;
-  const dims = points[0].length;
 
-  // WASM-accelerated path
-  if (n >= GEOMETRY_WASM_THRESHOLD) {
-    const wasm = wasmLoader.getModule();
-    if (wasm) {
-      try {
-        // Flatten points
-        const flat = new Float64Array(n * dims);
-        for (let i = 0; i < n; i++) {
-          for (let d = 0; d < dims; d++) {
-            flat[i * dims + d] = points[i][d];
-          }
-        }
-        const ptsAlloc = wasmLoader.allocateFloat64Array(flat);
-        const stride = 3 + dims;
-        const treeAlloc = wasmLoader.allocateFloat64ArrayEmpty(n * stride);
-        const queryAlloc = wasmLoader.allocateFloat64Array(new Float64Array(query));
-        try {
-          const treeSize = wasm.kdtree_build_wasm(ptsAlloc.ptr, n, dims, treeAlloc.ptr);
-          const nearestIdx = wasm.kdtree_nearest_wasm(
-            treeAlloc.ptr,
-            queryAlloc.ptr,
-            dims,
-            treeSize
-          );
-          if (nearestIdx >= 0 && nearestIdx < n) {
-            const pt = points[nearestIdx];
-            let distSq = 0;
-            for (let d = 0; d < dims; d++) {
-              distSq += (pt[d] - query[d]) ** 2;
-            }
-            return { point: pt, index: nearestIdx, distance: Math.sqrt(distSq) };
-          }
-        } finally {
-          wasmLoader.free(ptsAlloc.ptr);
-          wasmLoader.free(treeAlloc.ptr);
-          wasmLoader.free(queryAlloc.ptr);
-        }
-      } catch {
-        // Fall through to JS
-      }
-    }
-  }
-
-  // Pure JS fallback via kdTree + kdTreeNearest
   const root = kdTree(points);
   return kdTreeNearest(root, query);
 }
@@ -995,9 +891,6 @@ export type HullFace3D = [i32, i32, i32];
  * Compute the 3-D convex hull of a set of points using QuickHull (incremental
  * variant — Barber, Dobkin, Huhdanpaa 1996).
  *
- * Point sets with ≥ 1024 points are dispatched to the WASM kernel;
- * smaller sets use a pure-TypeScript fallback with the same algorithm.
- *
  * @param points - Array of 3-D points, each `[x, y, z]`.
  * @returns Array of triangular faces.  Each face is `[i, j, k]` where i/j/k
  *          are indices into `points`, oriented CCW from outside.
@@ -1009,58 +902,11 @@ export function convexHull3D(points: number[][]): HullFace3D[] {
     throw new Error('convexHull3D: at least 4 non-coplanar points are required');
   }
 
-  if (n >= HULL3D_WASM_THRESHOLD) {
-    const wasm = wasmLoader.getModule();
-    if (wasm) {
-      try {
-        const flat = new Float64Array(n * 3);
-        for (let i = 0; i < n; i++) {
-          flat[i * 3] = points[i][0];
-          flat[i * 3 + 1] = points[i][1];
-          flat[i * 3 + 2] = points[i][2];
-        }
-        const ptsAlloc = wasmLoader.allocateFloat64Array(flat);
-        // Upper bound on hull faces: O(n) — 2n is safe for random inputs.
-        // We use 4*n to be conservative.
-        const maxFaces = 4 * n;
-        // The kernel writes u32 indices; allocate as Int32Array (same byte width).
-        const facesAlloc = wasmLoader.allocateInt32ArrayEmpty(maxFaces * 3);
-        try {
-          const nFaces = wasm.convex_hull_3d_wasm(ptsAlloc.ptr, n, facesAlloc.ptr, maxFaces);
-          if (nFaces === -1) {
-            throw new Error('convexHull3D: WASM output buffer overflow — retrying with JS');
-          }
-          if (nFaces === 0) {
-            throw new Error('convexHull3D: degenerate input (all points co-planar or collinear)');
-          }
-          const result: HullFace3D[] = [];
-          for (let i = 0; i < nFaces; i++) {
-            result.push([
-              facesAlloc.array[i * 3],
-              facesAlloc.array[i * 3 + 1],
-              facesAlloc.array[i * 3 + 2],
-            ]);
-          }
-          return result;
-        } finally {
-          wasmLoader.free(ptsAlloc.ptr);
-          wasmLoader.free(facesAlloc.ptr);
-        }
-      } catch (err) {
-        // Re-throw degenerate-input errors — don't silently fall back.
-        if (err instanceof Error && err.message.includes('degenerate')) throw err;
-        // Otherwise fall through to JS.
-      }
-    }
-  }
-
   return convexHull3DJS(points);
 }
 
 /**
- * Pure-TypeScript QuickHull-3D fallback (same incremental algorithm as the
- * WASM kernel).  Used for n < HULL3D_WASM_THRESHOLD and as a safety net when
- * the WASM module is unavailable.
+ * Pure-TypeScript QuickHull-3D implementation behind {@link convexHull3D}.
  */
 function convexHull3DJS(points: number[][]): HullFace3D[] {
   const n: i32 = points.length;

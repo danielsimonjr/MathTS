@@ -2,24 +2,8 @@ import { containsCollections, deepForEach, reduce } from '../utils/collection.js
 import { factory } from '../utils/factory.js';
 import { safeNumberType } from '../utils/number.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
-
-// Minimum array length for WASM to be beneficial
-const WASM_MIN_THRESHOLD = 100;
-
-/**
- * Check if an array is a flat array of plain numbers
- */
-function isFlatNumberArray(arr: unknown[]): arr is number[] {
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] !== 'number') {
-      return false;
-    }
-  }
-  return true;
-}
 
 // Type definitions for min
 interface MatrixType {
@@ -122,26 +106,6 @@ export const createMin = /* #__PURE__ */ factory(
      * @private
      */
     function _min(array: unknown[] | MatrixType): unknown {
-      // WASM fast path for flat arrays of plain numbers
-      if (Array.isArray(array) && array.length >= WASM_MIN_THRESHOLD) {
-        if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule();
-          if (wasm) {
-            try {
-              const alloc = wasmLoader.allocateFloat64Array(array);
-              try {
-                return wasm.statsMin(alloc.ptr, array.length);
-              } finally {
-                wasmLoader.free(alloc.ptr);
-              }
-            } catch {
-              // Fall back to JS implementation on WASM error
-            }
-          }
-        }
-      }
-
-      // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let min: unknown;
 
       deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {

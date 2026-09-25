@@ -8348,10 +8348,6 @@
             "imports": ["factory"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../types.js",
             "imports": ["Matrix", "Complex"],
             "typeOnly": true
@@ -8799,10 +8795,6 @@
           {
             "file": "../gpu/fft-gpu.js",
             "imports": ["fftGpuDispatch"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../wasm/signal/wasm-bridge.js",
@@ -9827,10 +9819,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../numeric/solveODE.js",
             "imports": ["rosenbrockSolve"]
           },
@@ -10152,10 +10140,6 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
           {
             "file": "../wasm/sort/wasm-bridge.js",
             "imports": ["argsortF64Dispatch", "WASM_SORT_THRESHOLD"]
@@ -11594,10 +11578,6 @@
             "imports": ["factory"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../utils/number.js",
             "imports": ["copysign"]
           },
@@ -12695,7 +12675,7 @@
         "constants": ["createQuantileSeq"]
       },
       "functions/src/statistics/mad.ts": {
-        "description": "Check if an array contains only plain numbers",
+        "description": "Compute the median absolute deviation of a matrix or a list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12710,10 +12690,6 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -12749,7 +12725,7 @@
         "constants": ["createStd"]
       },
       "functions/src/statistics/mean.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Compute the mean value of matrix or a list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12768,10 +12744,6 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -12821,7 +12793,7 @@
         "constants": ["createVariance"]
       },
       "functions/src/statistics/max.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Compute the maximum value of a matrix or a  list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12840,10 +12812,6 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -12892,7 +12860,7 @@
         "constants": ["createMedian"]
       },
       "functions/src/statistics/min.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Compute the minimum value of a matrix or a  list of values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12913,10 +12881,6 @@
             "imports": ["improveErrorMessage"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -12932,7 +12896,7 @@
         "constants": ["createMin"]
       },
       "functions/src/statistics/prod.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Compute the product of a matrix or a list with values.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12947,10 +12911,6 @@
           {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -13216,10 +13176,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -14039,10 +13995,6 @@
             "imports": ["factory"]
           },
           {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../types.js",
             "imports": ["MathNumericType"],
             "typeOnly": true
@@ -14134,10 +14086,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../types.js",
@@ -15277,10 +15225,6 @@
           {
             "file": "../type/matrix/utils/matrixAlgorithmSuite.js",
             "imports": ["createMatrixAlgorithmSuite"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -15622,10 +15566,6 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [
@@ -15755,10 +15695,6 @@
           {
             "file": "../utils/is.js",
             "imports": ["isComplex"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -16219,7 +16155,7 @@
         "constants": ["createRotate"]
       },
       "functions/src/matrix/sqrtm.ts": {
-        "description": "Try WASM-accelerated matrix square root for plain number matrices",
+        "description": "Calculate the principal square root matrix using the Denman-Beavers iterative method",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -16247,10 +16183,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -16335,7 +16267,7 @@
         "constants": ["createDiag"]
       },
       "functions/src/matrix/kron.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Calculates the Kronecker product of 2 matrices or vectors.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -16346,10 +16278,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -16494,7 +16422,7 @@
         "constants": ["createDiff"]
       },
       "functions/src/matrix/partitionSelect.ts": {
-        "description": "Check if an array is a flat array of plain numbers",
+        "description": "Partition-based selection of an array or 1D matrix.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -16509,10 +16437,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -16608,7 +16532,7 @@
         "constants": ["createCtranspose"]
       },
       "functions/src/matrix/transpose.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Transpose a matrix. All values of the matrix are reflected over its",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -16623,10 +16547,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../core/function/typed.js",
@@ -17039,10 +16959,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -17050,7 +16966,7 @@
         "constants": ["createDet"]
       },
       "functions/src/matrix/eigs/complexEigs.ts": {
-        "description": "Flatten a 2D array to a Float64Array in row-major order",
+        "description": "Create the `complexEigs` function, which computes the eigenvalues and the optional",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -17066,10 +16982,6 @@
           {
             "file": "../../utils/object.js",
             "imports": ["clone"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -17077,7 +16989,7 @@
         "functions": ["createComplexEigs"]
       },
       "functions/src/matrix/eigs/realSymmetric.ts": {
-        "description": "Flatten a 2D array to a Float64Array in row-major order",
+        "description": "Create the function that computes the eigenvalues and the optional eigenvectors of a",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -17089,10 +17001,6 @@
           {
             "file": "../../utils/object.js",
             "imports": ["clone"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -17426,7 +17334,7 @@
         "functions": ["createZerosAndOnes"]
       },
       "functions/src/matrix/inv.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Calculate the inverse of a square matrix.",
         "externalDependencies": [
           {
             "package": "bignumber.js",
@@ -17454,10 +17362,6 @@
           {
             "file": "../utils/string.js",
             "imports": ["format"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           }
         ],
         "workspaceDependencies": [],
@@ -19894,10 +19798,6 @@
             "imports": ["csTdfs"]
           },
           {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -20096,10 +19996,6 @@
             "imports": ["csLeaf"]
           },
           {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -20240,17 +20136,13 @@
         "functions": ["csIpvec"]
       },
       "functions/src/algebra/decomposition/qr.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Calculate the Matrix QR decomposition. Matrix `A` is decomposed in",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -20294,7 +20186,7 @@
         "constants": ["createSlu"]
       },
       "functions/src/algebra/decomposition/lup.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20305,10 +20197,6 @@
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -20409,7 +20297,7 @@
         "constants": ["createRationalize"]
       },
       "functions/src/algebra/solver/usolve.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Thro",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20420,10 +20308,6 @@
           {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -20474,7 +20358,7 @@
         "constants": ["createUsolveAll"]
       },
       "functions/src/algebra/solver/lsolve.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Finds one solution of a linear equation system by forwards substitution. Matrix must be a lower triangular matrix. Throw",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20487,10 +20371,6 @@
             "imports": ["createSolveValidation"]
           },
           {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
-          },
-          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -20501,7 +20381,7 @@
         "constants": ["createLsolve"]
       },
       "functions/src/algebra/solver/lusolve.ts": {
-        "description": "Check if a 2D array contains only plain numbers",
+        "description": "Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -20520,10 +20400,6 @@
           {
             "file": "../sparse/csIpvec.js",
             "imports": ["csIpvec"]
-          },
-          {
-            "file": "../../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -23923,10 +23799,6 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../wasm/WasmLoader.js",
-            "imports": ["wasmLoader"]
           },
           {
             "file": "../types.js",
@@ -40143,7 +40015,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 198626,
+    "totalLinesOfCode": 195211,
     "totalExports": 5842,
     "totalClasses": 55,
     "totalInterfaces": 509,

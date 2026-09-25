@@ -2,23 +2,7 @@ import { containsCollections, deepForEach, reduce } from '../utils/collection.js
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Minimum array length for WASM to be beneficial
-const WASM_MEAN_THRESHOLD = 100;
-
-/**
- * Check if an array is a flat array of plain numbers
- */
-function isFlatNumberArray(arr: unknown[]): arr is number[] {
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] !== 'number') {
-      return false;
-    }
-  }
-  return true;
-}
 
 // Type definitions for mean
 interface MatrixType {
@@ -116,26 +100,6 @@ export const createMean = /* #__PURE__ */ factory(
      * @private
      */
     function _mean(array: unknown[] | MatrixType): unknown {
-      // WASM fast path for flat arrays of plain numbers
-      if (Array.isArray(array) && array.length >= WASM_MEAN_THRESHOLD) {
-        if (isFlatNumberArray(array)) {
-          const wasm = wasmLoader.getModule();
-          if (wasm) {
-            try {
-              const alloc = wasmLoader.allocateFloat64Array(array);
-              try {
-                return wasm.statsMean(alloc.ptr, array.length);
-              } finally {
-                wasmLoader.free(alloc.ptr);
-              }
-            } catch {
-              // Fall back to JS implementation on WASM error
-            }
-          }
-        }
-      }
-
-      // JavaScript fallback for mixed types, BigNumber, Complex, etc.
       let sum: unknown;
       let num = 0;
 

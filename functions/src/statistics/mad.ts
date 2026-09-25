@@ -1,7 +1,6 @@
 import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for mad
@@ -15,21 +14,6 @@ interface MadDependencies {
   map: TypedFunction;
   median: TypedFunction;
   subtract: TypedFunction;
-}
-
-// Minimum array length for WASM to be beneficial
-const WASM_MAD_THRESHOLD = 500;
-
-/**
- * Check if an array contains only plain numbers
- */
-function isPlainNumberArray(arr: unknown[]): arr is number[] {
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] !== 'number') {
-      return false;
-    }
-  }
-  return true;
 }
 
 const name = 'mad';
@@ -84,23 +68,6 @@ export const createMad = /* #__PURE__ */ factory(
 
       if (flat.length === 0) {
         throw new Error('Cannot calculate median absolute deviation (mad) of an empty array');
-      }
-
-      // Try WASM for large arrays with plain numbers
-      const wasm = wasmLoader.getModule();
-      if (wasm && flat.length >= WASM_MAD_THRESHOLD && isPlainNumberArray(flat)) {
-        try {
-          const aAlloc = wasmLoader.allocateFloat64Array(flat);
-
-          try {
-            const result = wasm.statsMad(aAlloc.ptr, flat.length);
-            return result;
-          } finally {
-            wasmLoader.free(aAlloc.ptr);
-          }
-        } catch {
-          // Fall back to JS implementation on WASM error
-        }
       }
 
       try {

@@ -3,11 +3,7 @@
 // https://github.com/DrTimothyAldenDavis/SuiteSparse/tree/dev/CSparse/Source
 import { factory } from '../../utils/factory.js';
 import { csLeaf } from './csLeaf.js';
-import { wasmLoader } from '../../wasm/WasmLoader.js';
 import type { TypedFunction } from '../../core/function/typed.js';
-
-// Minimum columns for WASM column counts to be beneficial
-const WASM_COUNTS_THRESHOLD = 50;
 
 // Sparse matrix internal structure
 /**
@@ -42,57 +38,6 @@ export const createCsCounts = /* #__PURE__ */ factory(
      *
      * @return                     An array of size n of the column counts or null on error
      */
-    /**
-     * Try WASM-accelerated column counts
-     */
-    function _tryWasmCounts(
-      a: SparseMatrixData,
-      parent: number[],
-      post: number[],
-      n: number
-    ): number[] | null {
-      const wasm = wasmLoader.getModule();
-      if (!wasm || n < WASM_COUNTS_THRESHOLD || !a._index || !a._ptr) return null;
-
-      try {
-        const indexAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._index));
-        const ptrAlloc = wasmLoader.allocateInt32Array(new Int32Array(a._ptr));
-        const parentAlloc = wasmLoader.allocateInt32Array(new Int32Array(parent));
-        const postAlloc = wasmLoader.allocateInt32Array(new Int32Array(post));
-        const colCountAlloc = wasmLoader.allocateInt32ArrayEmpty(n);
-        // Work buffer: 3*n i32 values
-        const workAlloc = wasmLoader.allocateInt32ArrayEmpty(3 * n);
-
-        try {
-          wasm.symbolicCholesky(
-            indexAlloc.ptr,
-            ptrAlloc.ptr,
-            n,
-            parentAlloc.ptr,
-            postAlloc.ptr,
-            colCountAlloc.ptr,
-            workAlloc.ptr
-          );
-
-          const colcount: number[] = new Array(n);
-          for (let i = 0; i < n; i++) {
-            colcount[i] = colCountAlloc.array[i];
-          }
-          return colcount;
-        } finally {
-          wasmLoader.free(indexAlloc.ptr);
-          wasmLoader.free(ptrAlloc.ptr);
-          wasmLoader.free(parentAlloc.ptr);
-          wasmLoader.free(postAlloc.ptr);
-          wasmLoader.free(colCountAlloc.ptr);
-          wasmLoader.free(workAlloc.ptr);
-        }
-      } catch {
-        // Fall through to JS
-      }
-      return null;
-    }
-
     return function csCounts(
       a: SparseMatrixData | null,
       parent: number[] | null,
@@ -109,11 +54,6 @@ export const createCsCounts = /* #__PURE__ */ factory(
       const m = asize[0];
       const n = asize[1];
 
-      // Try WASM for large matrices (only non-ata case — symbolicCholesky handles both)
-      if (!ata) {
-        const wasmResult = _tryWasmCounts(a, parent, post, n);
-        if (wasmResult !== null) return wasmResult;
-      }
       // variables
       let i: number, j: number, k: number, J: number, p: number, p0: number, p1: number;
 

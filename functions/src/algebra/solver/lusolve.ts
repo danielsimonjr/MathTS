@@ -2,11 +2,7 @@ import { isArray, isMatrix } from '../../utils/is.js';
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
 import { csIpvec } from '../sparse/csIpvec.js';
-import { wasmLoader } from '../../wasm/WasmLoader.js';
 import type { TypedFunction } from '../../core/function/typed.js';
-
-// Minimum matrix size (n*n elements) for WASM to be beneficial
-const WASM_LUSOLVE_THRESHOLD = 16; // 4x4 matrix
 
 interface MatrixConstructor {
   (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
@@ -78,57 +74,6 @@ interface Dependencies {
   DenseMatrix: DenseMatrixConstructor;
 }
 
-/**
- * Check if a 2D array contains only plain numbers
- */
-function isPlainNumberMatrix(matrix: unknown[][]): boolean {
-  for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i];
-    for (let j = 0; j < row.length; j++) {
-      if (typeof row[j] !== 'number') {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
- * Check if a column vector (2D array with 1 column) contains only plain numbers
- */
-function isPlainNumberVector(vec: unknown[][]): boolean {
-  for (let i = 0; i < vec.length; i++) {
-    if (typeof vec[i][0] !== 'number') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Flatten a 2D array to a Float64Array in row-major order
- */
-function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
-  const result = new Float64Array(rows * cols);
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j];
-    }
-  }
-  return result;
-}
-
-/**
- * Extract column vector to Float64Array
- */
-function vectorToFloat64(vec: number[][]): Float64Array {
-  const result = new Float64Array(vec.length);
-  for (let i = 0; i < vec.length; i++) {
-    result[i] = vec[i][0];
-  }
-  return result;
-}
-
 const name = 'lusolve';
 const dependencies = ['typed', 'matrix', 'lup', 'slu', 'usolve', 'lsolve', 'DenseMatrix'];
 
@@ -180,66 +125,6 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: unknown[][],
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        const rows = a.length;
-        const columns = a[0]?.length || 0;
-
-        // WASM fast path for square plain number matrices
-        const wasm = wasmLoader.getModule();
-        if (
-          wasm &&
-          rows === columns &&
-          rows * rows >= WASM_LUSOLVE_THRESHOLD &&
-          isPlainNumberMatrix(a)
-        ) {
-          // Convert b to column vector format
-          const aMatrix = matrix(a) as DenseMatrix;
-          const bMatrix = solveValidation(aMatrix, b, true);
-          const bdata = bMatrix._data;
-
-          if (isPlainNumberVector(bdata) && bdata.length === rows) {
-            try {
-              const aFlat = flattenToFloat64(a as number[][], rows, columns);
-              const bFlat = vectorToFloat64(bdata as number[][]);
-
-              const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
-              const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
-              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows);
-              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
-
-              try {
-                const success = wasm.laSolve(
-                  aAlloc.ptr,
-                  bAlloc.ptr,
-                  rows,
-                  resultAlloc.ptr,
-                  workAlloc.ptr
-                );
-                if (success === 0) {
-                  throw new Error('Linear system cannot be solved since matrix is singular');
-                }
-                // Convert result back to column vector (as plain array)
-                const x: number[][] = [];
-                for (let i = 0; i < rows; i++) {
-                  x[i] = [resultAlloc.array[i]];
-                }
-                return x;
-              } finally {
-                wasmLoader.free(aAlloc.ptr);
-                wasmLoader.free(bAlloc.ptr);
-                wasmLoader.free(resultAlloc.ptr);
-                wasmLoader.free(workAlloc.ptr);
-              }
-            } catch (e) {
-              // If it's a singularity error, rethrow it
-              if (e instanceof Error && e.message.includes('singular')) {
-                throw e;
-              }
-              // Otherwise fall back to JS implementation on WASM error
-            }
-          }
-        }
-
-        // JavaScript fallback
         const aMatrix = matrix(a);
         const d = lup(aMatrix);
         const x = _lusolve(d.L, d.U, d.p, null, b);
@@ -250,69 +135,6 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: DenseMatrix,
         b: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const rows = a._size[0];
-        const columns = a._size[1];
-
-        // WASM fast path for square plain number matrices
-        const wasm = wasmLoader.getModule();
-        if (
-          wasm &&
-          rows === columns &&
-          rows * rows >= WASM_LUSOLVE_THRESHOLD &&
-          isPlainNumberMatrix(a._data)
-        ) {
-          // Get b as a column vector
-          const bMatrix = solveValidation(a, b, true);
-          const bdata = bMatrix._data;
-
-          if (isPlainNumberVector(bdata) && bdata.length === rows) {
-            try {
-              const aFlat = flattenToFloat64(a._data as number[][], rows, columns);
-              const bFlat = vectorToFloat64(bdata as number[][]);
-
-              const aAlloc = wasmLoader.allocateFloat64Array(aFlat);
-              const bAlloc = wasmLoader.allocateFloat64Array(bFlat);
-              const resultAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows);
-              // Work buffer needs at least n*n for LU decomposition
-              const workAlloc = wasmLoader.allocateFloat64ArrayEmpty(rows * rows);
-
-              try {
-                const success = wasm.laSolve(
-                  aAlloc.ptr,
-                  bAlloc.ptr,
-                  rows,
-                  resultAlloc.ptr,
-                  workAlloc.ptr
-                );
-                if (success === 0) {
-                  throw new Error('Linear system cannot be solved since matrix is singular');
-                }
-                // Convert result back to column vector
-                const x: number[][] = [];
-                for (let i = 0; i < rows; i++) {
-                  x[i] = [resultAlloc.array[i]];
-                }
-                return new DenseMatrix({
-                  data: x,
-                  size: [rows, 1],
-                });
-              } finally {
-                wasmLoader.free(aAlloc.ptr);
-                wasmLoader.free(bAlloc.ptr);
-                wasmLoader.free(resultAlloc.ptr);
-                wasmLoader.free(workAlloc.ptr);
-              }
-            } catch (e) {
-              // If it's a singularity error, rethrow it
-              if (e instanceof Error && e.message.includes('singular')) {
-                throw e;
-              }
-              // Otherwise fall back to JS implementation on WASM error
-            }
-          }
-        }
-
-        // JavaScript fallback
         const d = lup(a);
         return _lusolve(d.L, d.U, d.p, null, b);
       },

@@ -9,17 +9,10 @@
  *   - coordinateTransform: the unknown-source / unknown-target throws
  *   - convexHull3D (JS fallback): the all-same-x and all-collinear degenerate throws
  *
- * NOTE ON THE WASM CEILING: a large block of geometry.ts (the WASM
- * dispatch paths inside voronoiDiagram, nearestNeighbor and convexHull3D) is
- * unreachable in EVERY environment, with or without a build. Those branches call
- * legacy pointer-ABI kernels (`voronoi_wasm` / `kdtree_build_wasm` /
- * `kdtree_nearest_wasm` / `convex_hull_3d_wasm`) from the deleted native-WASM
- * toolchain; the AssemblyScript binary — now the sole WASM backend — exports
- * none of them, so even with it loaded every call falls through to the JS path.
- * (`delaunayTriangulation`'s `delaunay_wasm` path is disabled in source.) Those
- * lines can only be covered by porting the kernels to AssemblyScript, not by
- * building anything. This file has no WASM block; the tests below cover the
- * JS-reachable branches.
+ * voronoiDiagram, nearestNeighbor and convexHull3D are pure JS: their former
+ * WASM branches called `voronoi_wasm` / `kdtree_*_wasm` / `convex_hull_3d_wasm`,
+ * kernels only a legacy native-WASM artifact exported (never the AssemblyScript
+ * binary), so they were dead and have been removed.
  */
 
 import { describe, it, expect } from 'vitest';

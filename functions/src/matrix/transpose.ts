@@ -1,11 +1,7 @@
 import { clone } from '../utils/object.js';
 import { format } from '../utils/string.js';
 import { factory } from '../utils/factory.js';
-import { wasmLoader } from '../wasm/WasmLoader.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Minimum matrix size (rows * cols) for WASM to be beneficial
-const WASM_TRANSPOSE_THRESHOLD = 100;
 
 interface MatrixData {
   data?: unknown[] | unknown[][];
@@ -52,34 +48,6 @@ interface MatrixConstructor {
 interface TransposeDependencies {
   typed: TypedFunction;
   matrix: MatrixConstructor;
-}
-
-/**
- * Check if a 2D array contains only plain numbers
- */
-function isPlainNumberMatrix(matrix: unknown[][]): boolean {
-  for (let i = 0; i < matrix.length; i++) {
-    const row = matrix[i];
-    for (let j = 0; j < row.length; j++) {
-      if (typeof row[j] !== 'number') {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
- * Flatten a 2D array to a Float64Array in row-major order
- */
-function flattenToFloat64(matrix: number[][], rows: number, cols: number): Float64Array {
-  const result = new Float64Array(rows * cols);
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      result[i * cols + j] = matrix[i][j];
-    }
-  }
-  return result;
 }
 
 const name = 'transpose';
@@ -182,39 +150,6 @@ export const createTranspose = /* #__PURE__ */ factory(
       // matrix array
       const data = m._data as unknown[][];
 
-      // Try WASM for large matrices with plain numbers
-      const wasm = wasmLoader.getModule();
-      if (wasm && rows * columns >= WASM_TRANSPOSE_THRESHOLD && isPlainNumberMatrix(data)) {
-        try {
-          const flat = flattenToFloat64(data as number[][], rows, columns);
-          const input = wasmLoader.allocateFloat64Array(flat);
-          const output = wasmLoader.allocateFloat64ArrayEmpty(rows * columns);
-          try {
-            wasm.transpose(input.ptr, rows, columns, output.ptr);
-            // Convert flat result back to 2D array
-            const transposed: number[][] = [];
-            for (let j = 0; j < columns; j++) {
-              const row: number[] = [];
-              for (let i = 0; i < rows; i++) {
-                row[i] = output.array[j * rows + i];
-              }
-              transposed[j] = row;
-            }
-            return m.createDenseMatrix({
-              data: transposed,
-              size: [columns, rows],
-              datatype: m._datatype,
-            });
-          } finally {
-            wasmLoader.free(input.ptr);
-            wasmLoader.free(output.ptr);
-          }
-        } catch {
-          // Fall back to JS implementation on WASM error
-        }
-      }
-
-      // JavaScript fallback
       const transposed: unknown[][] = [];
       let transposedRow: unknown[];
       // loop columns

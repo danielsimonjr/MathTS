@@ -3,10 +3,10 @@
  *
  * `qr` is defined in BOTH packages with DIFFERENT contracts, and the dedup
  * campaign KEEPS both (routing the factory `qr` to the matrix layer would drop
- * the mathjs Matrix/Sparse contract AND the `qr_wasm` fast path):
+ * the mathjs Matrix/Sparse contract):
  *
  *  - functions/src/algebra/decomposition/qr.ts — `createQr` factory over the
- *    mathjs `Matrix`/`SparseMatrix` bridge, Householder QR, with a WASM fast path.
+ *    mathjs `Matrix`/`SparseMatrix` bridge, Householder QR.
  *    Array input ⇒ `{Q: number[][], R: number[][]}` (full Q: m×m, R: m×n).
  *  - matrix/src/operations/qr.ts — DenseMatrix primitive, Gram-Schmidt with
  *    re-orthogonalisation, 'reduced' (default) or 'full' mode.
