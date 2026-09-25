@@ -137,6 +137,19 @@ describe('WasmLoader — load() short-circuits', () => {
     loader.reset();
   });
 
+  it('a failed load() does not stop a later load() from succeeding', async () => {
+    if (!asAvailable) return;
+    const loader = WasmLoader.getInstance();
+    loader.reset();
+    const missing = path.join(here, 'no-such-dir', 'mathts.wasm');
+    await expect(loader.load(missing)).rejects.toThrow();
+    // A rejected in-flight promise used to stay cached, so this returned the same
+    // failure forever and WASM stayed off for the rest of the process.
+    await expect(loader.load(asWasmPath)).resolves.toBeDefined();
+    expect(loader.isLoaded()).toBe(true);
+    loader.reset();
+  });
+
   it('free() on the AS path filters pools and unpins without throwing', async () => {
     if (!asAvailable) return;
     const loader = WasmLoader.getInstance();

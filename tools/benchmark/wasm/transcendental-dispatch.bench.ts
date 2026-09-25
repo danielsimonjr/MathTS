@@ -6,7 +6,7 @@
  * `Math.*` loop, which is NOT what production falls back to. This settles whether the
  * transcendental WASM path earns its keep. Run: `npx tsx tools/benchmark/wasm/transcendental-dispatch.bench.ts`
  */
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
+import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   elementwiseUnaryDispatch,
   type WasmElementwiseOp,
@@ -23,7 +23,8 @@ function positive(n: number): Float64Array {
 }
 
 async function main(): Promise<void> {
-  await initWasm();
+  // A missing tier must fail the benchmark, never be timed as a near-zero run.
+  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
 
   console.log(
     'WASM (elementwiseUnaryDispatch) vs computePool.<op> — the real production fallback.'

@@ -1,19 +1,19 @@
 {
   "generated": "2026-09-25",
-  "totalFiles": 1867,
+  "totalFiles": 1866,
   "byDisposition": {
     "reachable": 24,
     "build-entry": 1151,
     "test-only": 0,
     "orphan": 0,
-    "test": 633,
+    "test": 632,
     "tool": 25,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1175,
-    "tests": 633,
+    "tests": 632,
     "config": 29,
     "examples": 5,
     "tools": 25
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 45,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 773,
+    "@danielsimonjr/mathts-functions": 772,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 100,
@@ -5945,7 +5945,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 612
+      "loc": 608
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -9572,13 +9572,6 @@
       "area": "tests",
       "disposition": "test",
       "loc": 36
-    },
-    {
-      "file": "functions/tests/load-wasm.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 84
     },
     {
       "file": "functions/tests/logistic-regression.test.ts",

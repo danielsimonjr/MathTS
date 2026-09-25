@@ -16,7 +16,7 @@
  * Run: `npm run bench:elementwise`
  */
 
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
+import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   elementwiseUnaryDispatch,
   elementwiseChainDispatch,
@@ -102,7 +102,8 @@ const chainCase: WasmCase = {
 };
 
 export async function main(): Promise<void> {
-  await initWasm();
+  // A missing tier must fail the benchmark, never be timed as a near-zero run.
+  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
   const ops: WasmElementwiseOp[] = ['abs', 'sin', 'cos', 'tan', 'exp', 'log', 'sinh', 'tanh'];
   const cases: WasmCase[] = [...ops.map(unaryCase), chainCase];
   await runCases('ELEMENTWISE — AssemblyScript array_<op>_ptr kernels vs Math.* (JS)', cases);

@@ -608,8 +608,15 @@ export class WasmLoader {
       return this.loading;
     }
 
+    // Clear the in-flight promise however it settles. Keeping a rejected one
+    // would hand the same failure to every later call, so one bad path (or a
+    // transient fetch error) would disable WASM for the rest of the process.
     this.loading = this.loadModule(wasmPath);
-    this.wasmModule = await this.loading;
+    try {
+      this.wasmModule = await this.loading;
+    } finally {
+      this.loading = null;
+    }
     return this.wasmModule;
   }
 

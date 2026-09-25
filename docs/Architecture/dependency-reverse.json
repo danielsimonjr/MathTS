@@ -355,14 +355,6 @@
     ],
     "functions/src/typed/cas.ts": ["functions/src/index.ts"],
     "functions/src/config-api.ts": ["functions/src/index.ts"],
-    "functions/src/wasm/WasmLoader.ts": [
-      "functions/src/index.ts",
-      "functions/src/wasm/bitwise/wasm-bridge.ts",
-      "functions/src/wasm/bridges/common.ts",
-      "functions/src/wasm/interpolation/wasm-bridge.ts",
-      "functions/src/wasm/poly/wasm-bridge.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
-    ],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
@@ -1851,6 +1843,13 @@
       "functions/src/wasm/poly/wasm-bridge.ts",
       "functions/src/wasm/signal/wasm-bridge.ts",
       "functions/src/wasm/sort/wasm-bridge.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/wasm/WasmLoader.ts": [
+      "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/bridges/common.ts",
+      "functions/src/wasm/interpolation/wasm-bridge.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],

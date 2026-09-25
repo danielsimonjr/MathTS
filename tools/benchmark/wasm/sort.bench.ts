@@ -18,7 +18,7 @@
  * Run: `npm run bench:sort`
  */
 
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
+import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import { sortF64Dispatch, sortF64JS } from '../../../functions/src/wasm/sort/wasm-bridge.js';
 import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
 
@@ -46,7 +46,8 @@ const cases: WasmCase[] = [
 ];
 
 export async function main(): Promise<void> {
-  await initWasm();
+  // A missing tier must fail the benchmark, never be timed as a near-zero run.
+  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
   await runCases('SORT — AssemblyScript sort_f64 (introsort) vs JS Array.sort', cases);
 }
 

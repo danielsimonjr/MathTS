@@ -5,7 +5,7 @@
     "lastUpdated": "2026-09-25",
     "totalFiles": 1175,
     "totalModules": 83,
-    "totalExports": 5846
+    "totalExports": 5844
   },
   "entryPoints": [
     {
@@ -5545,11 +5545,6 @@
             "reExport": true
           },
           {
-            "file": "./wasm/WasmLoader.js",
-            "imports": ["loadWasm", "isWasmLoaded"],
-            "reExport": true
-          },
-          {
             "file": "./typed/unit.js",
             "imports": ["to", "toBest"],
             "reExport": true
@@ -6398,8 +6393,6 @@
         ],
         "exports": [
           "config",
-          "loadWasm",
-          "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
@@ -6809,8 +6802,6 @@
           "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "config",
-          "loadWasm",
-          "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
@@ -40029,15 +40020,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 195288,
-    "totalExports": 5846,
+    "totalLinesOfCode": 195284,
+    "totalExports": 5844,
     "totalClasses": 55,
     "totalInterfaces": 509,
     "totalFunctions": 1888,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1599,
-    "totalReExports": 2364,
+    "totalReExports": 2362,
     "totalTypeOnlyImports": 582,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

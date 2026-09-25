@@ -17,7 +17,7 @@
  * Run: `npm run bench:special`
  */
 
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
+import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   besselJ0Dispatch,
   besselJ0JS,
@@ -93,7 +93,8 @@ const cases: WasmCase[] = [
 ];
 
 export async function main(): Promise<void> {
-  await initWasm();
+  // A missing tier must fail the benchmark, never be timed as a near-zero run.
+  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
   await runCases('SPECIAL FUNCTIONS — AssemblyScript managed kernels vs JS scalars', cases);
 }
 
