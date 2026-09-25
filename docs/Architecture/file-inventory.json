@@ -4111,7 +4111,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 344
     },
     {
       "file": "expression/src/node/RelationalNode.ts",

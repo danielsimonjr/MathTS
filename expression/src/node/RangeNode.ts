@@ -81,7 +81,8 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @param end - included upper-bound
        * @param step - optional step
        */
-      constructor(start: MathNode, end: MathNode, step?: MathNode) {
+      // `step` may be null: toJSON() emits `step: null` for a range without one.
+      constructor(start: MathNode, end: MathNode, step?: MathNode | null) {
         super();
         // validate inputs
         if (!isNode(start)) throw new TypeError('Node expected');
@@ -232,7 +233,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; start: MathNode; end: MathNode; step: MathNode | null } {
         return {
           mathjs: name,
           start: this.start,
@@ -248,7 +249,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        *     `{"mathjs": "RangeNode", "start": ..., "end": ..., "step": ...}`,
        *     where mathjs is optional
        */
-      static fromJSON(json: { start: MathNode; end: MathNode; step?: MathNode }): RangeNode {
+      static fromJSON(json: { start: MathNode; end: MathNode; step?: MathNode | null }): RangeNode {
         return new RangeNode(json.start, json.end, json.step);
       }
 

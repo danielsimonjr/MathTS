@@ -172,7 +172,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; properties: Record<string, MathNode> } {
         return {
           mathjs: name,
           properties: this.properties,

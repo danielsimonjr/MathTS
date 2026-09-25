@@ -199,7 +199,7 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; conditionals: string[]; params: MathNode[] } {
         return {
           mathjs: name,
           conditionals: this.conditionals,

@@ -194,7 +194,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; name: string } {
         return {
           mathjs: 'SymbolNode',
           name: this.name,

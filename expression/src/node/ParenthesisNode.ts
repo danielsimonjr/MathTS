@@ -127,7 +127,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; content: MathNode } {
         return { mathjs: name, content: this.content };
       }
 
