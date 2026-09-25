@@ -245,7 +245,7 @@
     },
     "packages/workerpool": {
       "name": "@danielsimonjr/mathts-workerpool",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "dependencies": {
         "workerpool": "npm:@danielsimonjr/workerpool@10.2.2",
       },
