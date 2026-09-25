@@ -457,7 +457,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 394
+      "loc": 397
     },
     {
       "file": "compat/tests/coverage-gaps.test.ts",
@@ -485,7 +485,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 59
+      "loc": 63
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -982,7 +982,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 274
+      "loc": 290
     },
     {
       "file": "core/tests/typed/type-bridge.test.ts",
@@ -1073,7 +1073,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 296
+      "loc": 297
     },
     {
       "file": "core/tests/types/unit/core-unit.test.ts",
@@ -12280,7 +12280,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 48
     },
     {
       "file": "tensor/tests/public-api-smoke.test.ts",
@@ -13022,7 +13022,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 67
+      "loc": 70
     },
     {
       "file": "workbook/tests/parser-robustness.test.ts",
@@ -13099,7 +13099,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 93
+      "loc": 98
     },
     {
       "file": "workbook/tsup.config.ts",

@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { toTeX } from '../src/tex.js';
 import type { RenderDoc } from '../src/html.js';
-import { parse } from '@danielsimonjr/mathts-functions';
+import * as mathFunctions from '@danielsimonjr/mathts-functions';
+
+// The wired expression parser. Workbook's ambient declaration of the functions
+// package (src/functions.d.ts) only declares `evaluate`, so reach `parse` through
+// the namespace with its call signature asserted, as src/cli.ts and html.test.ts do.
+const parse = (mathFunctions as unknown as { parse: (expr: string) => unknown }).parse;
 
 const doc = (cells: RenderDoc['cells'], title?: string): RenderDoc => ({ title, cells });
 

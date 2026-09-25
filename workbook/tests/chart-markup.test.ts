@@ -52,7 +52,7 @@ function all(root: Element): Element[] {
 
 function assertNoActiveContent(root: Element): void {
   for (const el of all(root)) {
-    const name = el.localName.toLowerCase();
+    const name = el.localName!.toLowerCase();
     expect(name).not.toBe('script');
     expect(name).not.toBe('foreignobject');
     expect(name).not.toBe('pwn');

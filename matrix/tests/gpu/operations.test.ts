@@ -336,7 +336,7 @@ describe('GPU Matrix Operations', () => {
       const scalar = 2.5;
 
       const cpuResult = cpuOps.scale(a, scalar);
-      const gpuResult = await backend.scale(a, scalar, rows, cols);
+      const gpuResult = await backend.scale(a, scalar);
 
       expect(arraysClose(gpuResult, cpuResult, 1e-6)).toBe(true);
     });

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": [
+    "src/index.ts",
+    "src/config.ts",
+    "src/types/complex.ts",
+    "src/types/fraction.ts",
+    "src/types/bignumber.ts",
+    "src/types/interfaces.ts",
+    "src/types/index.ts",
+    "src/typed/**/*.ts",
+    "src/factory/**/*.ts",
+    "src/typed-function.d.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -18,6 +18,14 @@ import { Complex } from '../../src/types/complex';
 import { Fraction } from '../../src/types/fraction';
 import { BigNumber } from '../../src/types/bignumber';
 
+/**
+ * Narrow a typed function's `unknown` result with a type guard, throwing (and so
+ * failing the test) when the dispatched implementation returned another type.
+ */
+function assertIs<T>(value: unknown, guard: (x: unknown) => x is T): asserts value is T {
+  if (!guard(value)) throw new TypeError('typed dispatch returned an unexpected type');
+}
+
 describe('typed-function integration', () => {
   describe('type test functions', () => {
     it('should identify numbers', () => {
@@ -151,6 +159,7 @@ describe('typed-function integration', () => {
       const c2 = new Complex(3, 4);
       const cResult = add(c1, c2);
       expect(cResult).toBeInstanceOf(Complex);
+      assertIs(cResult, isComplex);
       expect(cResult.re).toBe(4);
       expect(cResult.im).toBe(6);
 
@@ -159,6 +168,7 @@ describe('typed-function integration', () => {
       const f2 = new Fraction(1n, 2n);
       const fResult = add(f1, f2);
       expect(fResult).toBeInstanceOf(Fraction);
+      assertIs(fResult, isFraction);
       expect(fResult.toNumber()).toBe(0.75);
 
       // Test with BigNumber
@@ -166,6 +176,7 @@ describe('typed-function integration', () => {
       const bn2 = BigNumber.fromNumber(200);
       const bnResult = add(bn1, bn2);
       expect(bnResult).toBeInstanceOf(BigNumber);
+      assertIs(bnResult, isBigNumber);
       expect(bnResult.valueOf()).toBe(300);
     });
 
@@ -178,6 +189,7 @@ describe('typed-function integration', () => {
       // Mixed types: number is auto-converted to Complex
       const result = multiply(new Complex(2, 3), 4);
       expect(result).toBeInstanceOf(Complex);
+      assertIs(result, isComplex);
       expect(result.re).toBe(8); // (2+3i) * 4 = 8 + 12i
       expect(result.im).toBe(12);
     });
@@ -263,11 +275,15 @@ describe('typed-function integration', () => {
       // Test all operations with Fraction
       const half = new Fraction(1n, 2n);
       const quarter = new Fraction(1n, 4n);
+      const fractionValue = (x: unknown): number => {
+        assertIs(x, isFraction);
+        return x.toNumber();
+      };
 
-      expect(add(half, quarter).toNumber()).toBe(0.75);
-      expect(subtract(half, quarter).toNumber()).toBe(0.25);
-      expect(multiply(half, quarter).toNumber()).toBe(0.125);
-      expect(divide(half, quarter).toNumber()).toBe(2);
+      expect(fractionValue(add(half, quarter))).toBe(0.75);
+      expect(fractionValue(subtract(half, quarter))).toBe(0.25);
+      expect(fractionValue(multiply(half, quarter))).toBe(0.125);
+      expect(fractionValue(divide(half, quarter))).toBe(2);
     });
   });
 });

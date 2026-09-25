@@ -184,7 +184,7 @@ describe('parallelHistogram', () => {
 
 describe('parallelReduce', () => {
   it('should perform generic reduce', async () => {
-    const data = new Float64Array([1, 2, 3]);
+    const data = [1, 2, 3];
     const result = await parallelReduce(data, (a: number, b: number) => a + b, 0);
     expect(result).toHaveProperty('result');
   });

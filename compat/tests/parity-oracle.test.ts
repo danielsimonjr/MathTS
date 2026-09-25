@@ -105,11 +105,11 @@ describe('compat parity — variance/std vs numpy oracle + functions', () => {
   for (const { data, varUnbiased, stdUnbiased } of VAR_CORPUS) {
     it(`variance([${data}]) matches numpy (unbiased) and functions`, () => {
       expect(cVariance(data)).toBeCloseTo(varUnbiased, 10); // numpy oracle
-      expect(cVariance(data)).toBeCloseTo(fVariance(data), 12); // functions cross-check
+      expect(cVariance(data)).toBeCloseTo(fVariance(data) as number, 12); // functions cross-check
     });
     it(`std([${data}]) matches numpy (unbiased) and functions`, () => {
       expect(cStd(data)).toBeCloseTo(stdUnbiased, 10);
-      expect(cStd(data)).toBeCloseTo(fStd(data), 12);
+      expect(cStd(data)).toBeCloseTo(fStd(data) as number, 12);
     });
   }
 
@@ -173,8 +173,8 @@ describe('compat parity — complex re/im/conj/arg vs functions', () => {
 // These are allowlisted as intentional independent bodies; this guard pins
 // each to an explicit oracle so a future edit can't silently break compat.
 // --------------------------------------------------------------------------
-const toArr = (m: { toArray?: () => unknown; valueOf?: () => unknown }): unknown =>
-  m.toArray ? m.toArray() : m.valueOf ? m.valueOf() : m;
+type ShimMatrixResult = ReturnType<typeof cMatrix> | ReturnType<typeof cZeros>;
+const toArr = (m: ShimMatrixResult): unknown => ('toArray' in m ? m.toArray() : m.valueOf());
 
 describe('compat parity — matrix constructors vs oracle', () => {
   it('zeros(rows,cols) is a rows×cols zero matrix', () => {
@@ -251,7 +251,7 @@ describe('compat parity — matrix constructors vs oracle', () => {
       ])
     ).toEqual(
       (
-        fSize([
+        (fSize as (x: number[][]) => unknown)([
           [1, 2, 3],
           [4, 5, 6],
         ]) as { valueOf: () => unknown }

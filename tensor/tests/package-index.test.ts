@@ -21,8 +21,27 @@ describe('tensor/src/index.ts – package entry smoke test', () => {
   });
 
   it('NestedArray and EinsumSpec types are importable (compile-time check)', () => {
-    type _CheckNestedArray = NestedArray;
-    type _CheckEinsumSpec = EinsumSpec;
-    expect(true).toBe(true);
+    // Annotating real values checks the imported types exist and have the documented shape.
+    const nested: NestedArray = [
+      [1, 2],
+      [3, 4],
+    ];
+    const spec: EinsumSpec = {
+      contractions: [
+        {
+          pair: [
+            [0, 1],
+            [1, 0],
+          ],
+        },
+      ],
+      free: [
+        { operand: 0, axis: 0 },
+        { operand: 1, axis: 1 },
+      ],
+    };
+    expect(nested).toHaveLength(2);
+    expect(spec.contractions).toHaveLength(1);
+    expect(spec.free).toHaveLength(2);
   });
 });
