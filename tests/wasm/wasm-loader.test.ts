@@ -12,16 +12,24 @@
  */
 import assert from 'assert';
 import { describe, it } from 'vitest';
-import { wasmArtifactAvailable, warnWasmArtifactsMissing } from './wasm-artifact-check.js';
+import {
+  WASM_ARTIFACT_MISSING_MESSAGE,
+  wasmArtifactAvailable,
+  warnWasmArtifactsMissing,
+} from './wasm-artifact-check.js';
 
-// `WasmLoader.load()` reads a compiled `.wasm` binary from `lib/wasm/`. That
-// artifact is not committed; on a fresh checkout (no `npm run build:wasm`)
-// every test here would fail with an opaque `ENOENT ... mathts.wasm`. Skip the
-// whole suite — loudly — when the artifact is absent so environmental skips
-// are distinguishable from real failures.
+// `WasmLoader.load()` reads the AssemblyScript binary it resolves by default:
+// the co-located `matrix/dist/wasm/mathts-as.wasm`. The build guarantees it, so
+// its absence is a broken build: the suite below is gated (a missing binary
+// would otherwise surface as a wall of opaque `ENOENT`s), and the presence test
+// right here turns that absence into a failure instead of a silent skip.
 const hasWasm = wasmArtifactAvailable();
 if (!hasWasm) warnWasmArtifactsMissing(1);
 const describeWasm = hasWasm ? describe : describe.skip;
+
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  assert.ok(hasWasm, WASM_ARTIFACT_MISSING_MESSAGE);
+});
 
 describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
   describe('Module Loading', () => {
@@ -32,6 +40,29 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
 
       assert.ok(wasmModule, 'WASM module should be loaded');
       assert.strictEqual(typeof wasmModule, 'object', 'WASM module should be an object');
+      // It must be the AssemblyScript binary: managed runtime + an AS kernel.
+      const exports = wasmModule as unknown as Record<string, unknown>;
+      assert.strictEqual(typeof exports.__new, 'function', 'AS managed runtime (__new) exported');
+      assert.strictEqual(typeof exports.array_dot, 'function', 'AS kernel (array_dot) exported');
+    });
+
+    it('the loaded module executes an AS kernel on loader-allocated memory', async () => {
+      const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js');
+      const loader = WasmLoader.getInstance();
+      const exports = (await loader.load()) as unknown as Record<string, unknown>;
+      const arrayDot = exports.array_dot;
+      assert.strictEqual(typeof arrayDot, 'function', 'AS kernel (array_dot) exported');
+      const dot = arrayDot as (aHeader: number, bHeader: number) => number;
+      // `ptr` is the managed Float64Array header the loader builds — the ABI the
+      // AS kernels take — so this proves allocation + kernel execution end to end.
+      const a = loader.allocateFloat64Array(new Float64Array([1, 2, 3]));
+      const b = loader.allocateFloat64Array(new Float64Array([4, 5, 6]));
+      try {
+        assert.strictEqual(dot(a.ptr, b.ptr), 32, 'array_dot([1,2,3],[4,5,6]) = 32');
+      } finally {
+        loader.release(a.ptr, true);
+        loader.release(b.ptr, true);
+      }
     });
 
     it('should return cached module on subsequent loads', async () => {
@@ -77,103 +108,59 @@ describeWasm('WASM Loader Tests', { timeout: 15000 }, () => {
   });
 
   describe('Memory Pooling', () => {
+    // These used to swallow 'WASM abort' / 'is not a function' as "memory pooling
+    // not available in this build". The AS binary — the only one — always exports
+    // its managed allocator (__new/__pin), so an abort is now a real failure.
     it('should provide memory allocation utilities', async () => {
       const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js');
       const loader = WasmLoader.getInstance();
       await loader.load();
 
-      if (typeof loader.allocateFloat64Array === 'function') {
-        try {
-          const data = new Float64Array(100);
-          const { ptr, array } = loader.allocateFloat64Array(data);
+      const data = new Float64Array(100);
+      const { ptr, array } = loader.allocateFloat64Array(data);
 
-          assert.ok(array instanceof Float64Array, 'Should return Float64Array');
-          assert.strictEqual(array.length, data.length, 'Should have correct size');
-          assert.ok(typeof ptr === 'number', 'Should return pointer');
+      assert.ok(array instanceof Float64Array, 'Should return Float64Array');
+      assert.strictEqual(array.length, data.length, 'Should have correct size');
+      assert.ok(typeof ptr === 'number', 'Should return pointer');
 
-          loader.release(ptr, true);
-        } catch (err) {
-          const msg = (err as Error).message;
-          if (
-            msg.includes('WASM abort') ||
-            // Some builds don't expose the GC allocator (__new); the
-            // allocateFloat64Array hybrid bug is tracked in TODO.md and is
-            // being fixed by the parallel WasmLoader-allocator agent.
-            msg.includes('is not a function')
-          ) {
-            assert.ok(true, 'Memory pooling not available in this build');
-          } else {
-            throw err;
-          }
-        }
-      }
+      loader.release(ptr, true);
     });
 
-    it('should provide Int32Array memory pool', async () => {
+    it('should provide Int32Array allocation', async () => {
       const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js');
       const loader = WasmLoader.getInstance();
       await loader.load();
 
-      if (typeof loader.allocateInt32Array === 'function') {
-        try {
-          const data = new Int32Array(50);
-          const { ptr, array } = loader.allocateInt32Array(data);
+      const data = new Int32Array(50);
+      const { ptr, array } = loader.allocateInt32Array(data);
 
-          assert.ok(array instanceof Int32Array, 'Should return Int32Array');
-          assert.strictEqual(array.length, data.length, 'Should have correct size');
-          assert.ok(typeof ptr === 'number', 'Should return pointer');
+      assert.ok(array instanceof Int32Array, 'Should return Int32Array');
+      assert.strictEqual(array.length, data.length, 'Should have correct size');
+      assert.ok(typeof ptr === 'number', 'Should return pointer');
 
-          loader.release(ptr, false);
-        } catch (err) {
-          const msg = (err as Error).message;
-          if (
-            msg.includes('WASM abort') ||
-            // Some builds don't expose the GC allocator (__new); the
-            // allocateInt32Array hybrid bug is tracked in TODO.md and is
-            // being fixed by the parallel WasmLoader-allocator agent.
-            msg.includes('is not a function')
-          ) {
-            assert.ok(true, 'Memory pooling not available in this build');
-          } else {
-            throw err;
-          }
-        }
-      }
+      loader.release(ptr, false);
     });
 
-    it('should reuse pooled arrays', async () => {
+    // NOTE: this does NOT assert reuse. matrix's WasmLoader never adds anything
+    // to its float64/int32 pools (getPoolStats() stays at 0 entries), so a
+    // released allocation is freed, not recycled; the second allocation just has
+    // to be valid.
+    it('allocate → release → allocate again yields a valid array', async () => {
       const { WasmLoader } = await import('../../matrix/src/backends/WasmLoader.js');
       const loader = WasmLoader.getInstance();
       await loader.load();
 
-      if (typeof loader.allocateFloat64Array === 'function') {
-        try {
-          const data = new Float64Array(100);
+      const data = new Float64Array(100);
 
-          const { ptr: ptr1 } = loader.allocateFloat64Array(data);
-          loader.release(ptr1, true);
+      const { ptr: ptr1 } = loader.allocateFloat64Array(data);
+      loader.release(ptr1, true);
 
-          const { ptr: ptr2, array: arr2 } = loader.allocateFloat64Array(data);
+      const { ptr: ptr2, array: arr2 } = loader.allocateFloat64Array(data);
 
-          assert.ok(arr2 instanceof Float64Array, 'Should return valid array');
-          assert.strictEqual(arr2.length, data.length, 'Should have correct size');
+      assert.ok(arr2 instanceof Float64Array, 'Should return valid array');
+      assert.strictEqual(arr2.length, data.length, 'Should have correct size');
 
-          loader.release(ptr2, true);
-        } catch (err) {
-          const msg = (err as Error).message;
-          if (
-            msg.includes('WASM abort') ||
-            // Some builds don't expose the GC allocator (__new); the
-            // allocateFloat64Array hybrid bug is tracked in TODO.md and is
-            // being fixed by the parallel WasmLoader-allocator agent.
-            msg.includes('is not a function')
-          ) {
-            assert.ok(true, 'Memory pooling not available in this build');
-          } else {
-            throw err;
-          }
-        }
-      }
+      loader.release(ptr2, true);
     });
   });
 

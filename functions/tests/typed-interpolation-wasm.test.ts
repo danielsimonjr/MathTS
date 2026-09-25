@@ -4,10 +4,14 @@
  *
  * Strategy:
  *   1. Below-threshold — pure-JS fallback must be numerically correct for
- *      small inputs (no WASM artifact needed).
- *   2. Above-threshold WASM dispatch — when the WASM artifact is present,
- *      verify the WASM path produces the same result as the JS path within
- *      1e-12.  The suite is skipped when the artifact is absent.
+ *      small inputs (no WASM module needed).
+ *   2. Above-threshold WASM dispatch — with the AS binary loaded (`AS_WASM_PATH`
+ *      from ./helpers/wasm-spy), prove the AS kernel actually executed
+ *      (`countExportCalls` > 0 — the JS fallback would produce the same answer)
+ *      and matches the JS path within 1e-12. The WASM groups are gated on
+ *      `AS_WASM_PATH` like the other AS suites, but the build guarantees the
+ *      binary, so a non-skipping presence test turns its absence into a failure
+ *      instead of a silent skip.
  *   3. Mathematical correctness — solve a small tridiag system by hand and
  *      verify the result.
  *   4. Fallback when module not loaded — results must match JS oracle.
@@ -21,13 +25,12 @@
  *   9. lagrangeInterp above threshold (≥ 256 knots) matches JS path within 1e-12.
  *  10. newtonInterp above threshold matches JS path within 1e-12.
  *  11. Duplicate xs throws / returns degenerate indicator.
- *  12. AS-path test (describeIfASBuilt) for dividedDifferenceDispatch.
+ *  12. AS-path test for dividedDifferenceDispatch (Suite 8). Since AssemblyScript
+ *      became the sole WASM backend, Suites 7 and 8 load the SAME binary; Suite 8
+ *      duplicates interpolation-as-wasm.test.ts's divided-difference case.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 import { cubicSpline, lagrangeInterp, newtonInterp } from '../src/typed/interpolation.js';
 import {
@@ -40,19 +43,7 @@ import {
   WASM_INTERP_THRESHOLD,
 } from '../src/wasm/interpolation/wasm-bridge.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
-
-// ---------------------------------------------------------------------------
-// WASM artifact location
-// ---------------------------------------------------------------------------
-const here = dirname(fileURLToPath(import.meta.url));
-const WASM_PATH = (() => {
-  const candidate = resolve(here, '../../../lib/wasm/mathts.wasm');
-  return existsSync(candidate) ? candidate : null;
-})();
-const AS_WASM_PATH = (() => {
-  const candidate = resolve(here, '../../../lib/wasm/mathts-as.wasm');
-  return existsSync(candidate) ? candidate : null;
-})();
+import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -240,57 +231,74 @@ describe('cubicSpline — JS-path correctness', () => {
 // Suite 3: WASM dispatch — above threshold (requires WASM artifact)
 // ===========================================================================
 
-const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
+const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
 
-describeIfWasm('tridiag-solve — above-threshold WASM dispatch', () => {
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
+});
+
+describeIfAS('tridiag-solve — above-threshold AS WASM dispatch', () => {
   beforeAll(async () => {
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30_000);
 
   afterAll(() => {
     wasmLoader.reset();
   });
 
-  it('WASM result matches JS oracle within 1e-12 at threshold boundary', () => {
+  it('tridiag_solve_f64 executes and matches JS oracle within 1e-12 at threshold boundary', () => {
     const n = WASM_TRIDIAG_THRESHOLD;
     const { diag, lower, upper, rhs, expected } = buildLaplacianSystem(n);
-    const wasmResult = tridiagSolveDispatch(diag, lower, upper, rhs);
+    const { result: wasmResult, counts } = countExportCalls(['tridiag_solve_f64'], () =>
+      tridiagSolveDispatch(diag, lower, upper, rhs)
+    );
+    expect(counts.tridiag_solve_f64).toBeGreaterThan(0);
     const jsResult = tridiagSolveJS(diag, lower, upper, rhs);
     expect(wasmResult.length).toBe(n);
     expect(maxDiff(wasmResult, jsResult)).toBeLessThan(1e-12);
     expect(maxDiff(wasmResult, expected)).toBeLessThan(1e-10);
   });
 
-  it('WASM result matches JS oracle for n = THRESHOLD + 50', () => {
+  it('tridiag_solve_f64 executes and matches JS oracle for n = THRESHOLD + 50', () => {
     const n = WASM_TRIDIAG_THRESHOLD + 50;
     const { diag, lower, upper, rhs } = buildLaplacianSystem(n);
-    const wasmResult = tridiagSolveDispatch(diag, lower, upper, rhs);
+    const { result: wasmResult, counts } = countExportCalls(['tridiag_solve_f64'], () =>
+      tridiagSolveDispatch(diag, lower, upper, rhs)
+    );
+    expect(counts.tridiag_solve_f64).toBeGreaterThan(0);
     const jsResult = tridiagSolveJS(diag, lower, upper, rhs);
     expect(maxDiff(wasmResult, jsResult)).toBeLessThan(1e-12);
   });
 
-  it('WASM round-trip: A·x ≈ rhs for large system', () => {
+  it('tridiag_solve_f64 round-trip: A·x ≈ rhs for large system', () => {
     const n = WASM_TRIDIAG_THRESHOLD + 100;
     const { diag, lower, upper, rhs } = buildLaplacianSystem(n);
-    const x = tridiagSolveDispatch(diag, lower, upper, rhs);
+    const { result: x, counts } = countExportCalls(['tridiag_solve_f64'], () =>
+      tridiagSolveDispatch(diag, lower, upper, rhs)
+    );
+    expect(counts.tridiag_solve_f64).toBeGreaterThan(0);
     const Ax = tridiagMatVec(diag, lower, upper, x);
     expect(maxDiff(Ax, rhs)).toBeLessThan(1e-10);
   });
 
-  it('cubicSpline above threshold matches JS-only result', () => {
-    // Build a large dataset (n+1 > WASM_TRIDIAG_THRESHOLD + 1 knots).
+  it('cubicSpline above threshold executes tridiag_solve_f64 and matches JS-only result', async () => {
+    // WASM_TRIDIAG_THRESHOLD + 2 knots → an interior system of exactly
+    // WASM_TRIDIAG_THRESHOLD unknowns, so the spline solve takes the AS kernel.
     const count = WASM_TRIDIAG_THRESHOLD + 2;
     const xs = Array.from({ length: count }, (_, i) => i);
     const ys = xs.map((x) => Math.sin(x * 0.01));
-    const splineWasm = cubicSpline(xs, ys);
+    const { result: splineWasm, counts } = countExportCalls(['tridiag_solve_f64'], () =>
+      cubicSpline(xs, ys)
+    );
+    expect(counts.tridiag_solve_f64).toBeGreaterThan(0);
 
     // Reset to force JS-only, rebuild reference.
     wasmLoader.reset();
     const splineJS = cubicSpline(xs, ys);
 
-    // Reload WASM for afterAll cleanup.
-    void wasmLoader.load(WASM_PATH!);
+    // Reload the AS binary (awaited) so later tests in this block keep it.
+    await wasmLoader.load(AS_WASM_PATH!);
 
     // Compare at a handful of interior points.
     const testXs = [0.5, 10.5, 50.3, 100.7, 500.1, 1000.0];
@@ -299,9 +307,12 @@ describeIfWasm('tridiag-solve — above-threshold WASM dispatch', () => {
     }
   });
 
-  it('below-threshold path still works after WASM load (no regression)', () => {
+  it('below-threshold path still works after WASM load and stays on JS (no regression)', () => {
     const { diag, lower, upper, rhs, expected } = buildLaplacianSystem(5);
-    const result = tridiagSolveDispatch(diag, lower, upper, rhs);
+    const { result, counts } = countExportCalls(['tridiag_solve_f64'], () =>
+      tridiagSolveDispatch(diag, lower, upper, rhs)
+    );
+    expect(counts.tridiag_solve_f64).toBe(0);
     expect(maxDiff(result, expected)).toBeLessThan(1e-10);
   });
 });
@@ -487,44 +498,51 @@ describe('lagrangeInterp + newtonInterp — divided-difference dispatch (Slice 5
 // Suite 7: Divided-difference WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
-describeIfWasm('dividedDifference — above-threshold WASM dispatch', () => {
+describeIfAS('dividedDifference — above-threshold AS WASM dispatch', () => {
   beforeAll(async () => {
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30_000);
 
   afterAll(() => {
     wasmLoader.reset();
   });
 
-  it('WASM coefficients match JS coefficients within 1e-12 at threshold boundary', () => {
+  it('divided_difference_f64 executes and matches JS coefficients within 1e-10 at threshold boundary', () => {
     const n = WASM_INTERP_THRESHOLD;
     const xs = new Float64Array(Array.from({ length: n }, (_, i) => i / (n - 1)));
     const ys = new Float64Array(xs.map(Math.sin));
-    const wasmCoeffs = dividedDifferenceDispatch(xs, ys);
+    const { result: wasmCoeffs, counts } = countExportCalls(['divided_difference_f64'], () =>
+      dividedDifferenceDispatch(xs, ys)
+    );
+    expect(counts.divided_difference_f64).toBeGreaterThan(0);
     const jsCoeffs = dividedDifferenceJS(xs, ys);
     expect(wasmCoeffs.length).toBe(n);
     expect(maxDiff(wasmCoeffs, jsCoeffs)).toBeLessThan(1e-10);
   });
 
-  it('newtonInterp above threshold via WASM matches JS oracle within 1e-12', () => {
+  it('newtonInterp above threshold executes divided_difference_f64 and matches JS oracle within 1e-10', async () => {
     const n = WASM_INTERP_THRESHOLD + 20;
     const xsArr = Array.from({ length: n }, (_, i) => i / (n - 1));
     const ysArr = xsArr.map((x) => Math.cos(x * Math.PI));
-    const wasmVal = newtonInterp(xsArr, ysArr, 0.5);
+    const { result: wasmVal, counts } = countExportCalls(['divided_difference_f64'], () =>
+      newtonInterp(xsArr, ysArr, 0.5)
+    );
+    expect(counts.divided_difference_f64).toBeGreaterThan(0);
     // Reset WASM and get JS reference.
     wasmLoader.reset();
     const jsVal = newtonInterp(xsArr, ysArr, 0.5);
-    void wasmLoader.load(WASM_PATH!);
+    // Reload the AS binary (awaited) so the module state is settled for afterAll.
+    await wasmLoader.load(AS_WASM_PATH!);
     expect(Math.abs(wasmVal - jsVal)).toBeLessThan(1e-10);
   });
 });
 
 // ===========================================================================
-// Suite 8: AS-path test (describeIfASBuilt) — Slice 5.5 requirement
+// Suite 8: AS-path test — Slice 5.5 requirement. (AS is now the only WASM
+// backend, so this loads the same binary as Suite 7; its case is duplicated by
+// interpolation-as-wasm.test.ts, which asserts the same kernel/input at 1e-12.)
 // ===========================================================================
-
-const describeIfAS = AS_WASM_PATH !== null ? describe : describe.skip;
 
 describeIfAS('dividedDifference — AssemblyScript path (Slice 5.5)', () => {
   beforeAll(async () => {
@@ -536,11 +554,14 @@ describeIfAS('dividedDifference — AssemblyScript path (Slice 5.5)', () => {
     wasmLoader.reset();
   });
 
-  it('AS divided_difference_f64_as produces same result as JS for n=256', () => {
+  it('AS divided_difference_f64 executes and produces same result as JS for n=256', () => {
     const n = WASM_INTERP_THRESHOLD;
     const xs = new Float64Array(Array.from({ length: n }, (_, i) => i / (n - 1)));
     const ys = new Float64Array(xs.map((x) => Math.sin(x * 2)));
-    const dispatched = dividedDifferenceDispatch(xs, ys);
+    const { result: dispatched, counts } = countExportCalls(['divided_difference_f64'], () =>
+      dividedDifferenceDispatch(xs, ys)
+    );
+    expect(counts.divided_difference_f64).toBeGreaterThan(0);
     const jsRef = dividedDifferenceJS(xs, ys);
     expect(dispatched.length).toBe(n);
     expect(maxDiff(dispatched, jsRef)).toBeLessThan(1e-10);

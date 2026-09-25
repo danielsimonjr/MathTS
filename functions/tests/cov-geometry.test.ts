@@ -10,14 +10,16 @@
  *   - convexHull3D (JS fallback): the all-same-x and all-collinear degenerate throws
  *
  * NOTE ON THE WASM CEILING: a large block of geometry.ts (the WASM
- * dispatch paths inside delaunayTriangulation, voronoiDiagram, nearestNeighbor
- * and convexHull3D) is unreachable in this environment. Those branches only run
- * when `wasmLoader.getModule()` returns a compiled WASM kernel exporting
- * `delaunay_wasm` / `voronoi_wasm` / `kdtree_*_wasm` / `convex_hull_3d_wasm`.
- * No `lib/wasm/mathts.wasm` is built here (no WASM artifact present), so
- * every call falls through to the JS path. Those ~86 lines therefore cannot be
- * covered without first building that WASM artifact. The tests below cover
- * the remaining JS-reachable branches.
+ * dispatch paths inside voronoiDiagram, nearestNeighbor and convexHull3D) is
+ * unreachable in EVERY environment, with or without a build. Those branches call
+ * legacy pointer-ABI kernels (`voronoi_wasm` / `kdtree_build_wasm` /
+ * `kdtree_nearest_wasm` / `convex_hull_3d_wasm`) from the deleted native-WASM
+ * toolchain; the AssemblyScript binary — now the sole WASM backend — exports
+ * none of them, so even with it loaded every call falls through to the JS path.
+ * (`delaunayTriangulation`'s `delaunay_wasm` path is disabled in source.) Those
+ * lines can only be covered by porting the kernels to AssemblyScript, not by
+ * building anything. This file has no WASM block; the tests below cover the
+ * JS-reachable branches.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -34,8 +36,8 @@ import {
 describe('convexHull2D — large input uses the argsort dispatch (>= WASM_SORT_THRESHOLD)', () => {
   it('hull of a dense disc with >= 16384 points is the bounding square corners', () => {
     // WASM_SORT_THRESHOLD is 16384; argsortF64Dispatch falls back to pure-JS
-    // argsort here (no WASM), exercising the large-n sort branch and the
-    // stable secondary-key tie-break loop in convexHull2D.
+    // argsort here (this file never loads a WASM module), exercising the large-n
+    // sort branch and the stable secondary-key tie-break loop in convexHull2D.
     const N = 16400;
     const pts: number[][] = [];
     // A grid clustered inside [0,10]^2 with the 4 explicit corners present.

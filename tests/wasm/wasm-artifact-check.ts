@@ -1,44 +1,48 @@
 /**
  * WASM artifact availability check for the cross-package WASM test suites.
  *
- * Several suites under `tests/wasm/` exercise `WasmLoader`, which reads a
- * compiled `.wasm` binary from `lib/wasm/`. That binary is produced by
- * `npm run build:wasm` (AssemblyScript) and is NOT committed to the repo.
- * On a fresh checkout the binary is absent, so those suites would fail with
- * an opaque `ENOENT ... mathts-as.wasm`.
+ * The suites under `tests/wasm/` exercise matrix's `WasmLoader`, whose default
+ * `load()` resolves the AssemblyScript binary package-relative — in this repo
+ * `matrix/dist/wasm/mathts-as.wasm`, the co-located copy of the raw build output
+ * `assembly/build/mathts.wasm` made by matrix's build. The build GUARANTEES that
+ * binary (turbo orders `matrix#build` after the wasm build, and matrix's
+ * copy-wasm step exits non-zero when it is missing), so its absence means a
+ * broken or skipped build — not an environment to tolerate.
  *
- * To keep a fresh checkout's test run honest, suites that genuinely require
- * the artifact use {@link wasmArtifactAvailable} to switch to `describe.skip`
- * and emit a loud, single warning via {@link warnWasmArtifactsMissing} so a
- * contributor can tell an environmental skip from a real failure.
+ * Suites that need it may still gate on {@link wasmArtifactAvailable} (so a
+ * missing binary does not cascade into a wall of opaque `ENOENT`s), but must
+ * pair that with a non-skipping presence test that fails with
+ * {@link WASM_ARTIFACT_MISSING_MESSAGE}, so absence is a failure, never a
+ * silent skip.
  */
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /**
- * Path to the AssemblyScript WASM binary that `WasmLoader` loads by default
- * in Node. Mirrors `getDefaultWasmPath()` in
- * `matrix/src/backends/WasmLoader.ts` — kept relative-to-repo-root so the
- * check is independent of the test runner's current working directory.
+ * Path to the AssemblyScript binary that matrix's `WasmLoader.load()` resolves
+ * by default in Node (`resolvePackagedWasm` → `<matrix>/dist/wasm/`). Kept
+ * relative to this file so the check is independent of the runner's cwd.
  */
-const WASM_BINARY_PATHS = [
-  // AssemblyScript binary (the sole WASM backend).
-  '../../lib/wasm/mathts-as.wasm',
-].map((rel) => fileURLToPath(new URL(rel, import.meta.url)));
+export const WASM_ARTIFACT_PATH = fileURLToPath(
+  new URL('../../matrix/dist/wasm/mathts-as.wasm', import.meta.url)
+);
 
-/**
- * True when at least one compiled `.wasm` artifact is present on disk.
- * When false, WASM-dependent suites should skip rather than fail.
- */
+/** Actionable failure message for a missing binary (see the module doc). */
+export const WASM_ARTIFACT_MISSING_MESSAGE =
+  `AS wasm binary not found at ${WASM_ARTIFACT_PATH}. ` +
+  'The build guarantees it — run `bun run build` from the repo root.';
+
+/** True when the AS binary matrix's `WasmLoader` loads by default is on disk. */
 export function wasmArtifactAvailable(): boolean {
-  return WASM_BINARY_PATHS.some((p) => existsSync(p));
+  return existsSync(WASM_ARTIFACT_PATH);
 }
 
 let warned = false;
 
 /**
  * Emit a single loud warning explaining why WASM suites were skipped.
- * Safe to call from multiple suites — only the first call prints.
+ * Safe to call from multiple suites — only the first call prints. (The skip is
+ * never the whole story: the presence test described above fails the run.)
  *
  * @param skippedSuiteCount - number of suites being skipped by the caller
  */
@@ -46,8 +50,7 @@ export function warnWasmArtifactsMissing(skippedSuiteCount: number): void {
   if (warned) return;
   warned = true;
   console.warn(
-    `\n[WASM] WASM artifacts not built — run \`npm run build:wasm\`. ` +
-      `Skipping ${skippedSuiteCount} WASM-dependent test suite(s) ` +
-      `(lib/wasm/mathts-as.wasm is absent).\n`
+    `\n[WASM] ${WASM_ARTIFACT_MISSING_MESSAGE} ` +
+      `Skipping ${skippedSuiteCount} WASM-dependent test suite(s).\n`
   );
 }

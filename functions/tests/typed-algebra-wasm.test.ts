@@ -4,19 +4,19 @@
  * Strategy:
  *   1. Below-threshold paths — pure-JS fallback must be numerically
  *      correct for small inputs (no WASM module needed).
- *   2. Above-threshold paths — when the WASM artifact is present,
- *      verify the WASM path produces the same result as the JS path.
- *      The suite is skipped (describe.skip) for the WASM-dependent
- *      group when the artifact is absent.
+ *   2. Above-threshold paths — with the AS binary loaded (`AS_WASM_PATH`
+ *      from ./helpers/wasm-spy), prove the typed function actually executed
+ *      its AS kernel (`countExportCalls` > 0 — a silent JS fallback would
+ *      produce the same answer) and matches the JS path. The WASM groups are
+ *      gated on `AS_WASM_PATH` like the other AS suites, but the build
+ *      guarantees the binary, so a non-skipping presence test turns its
+ *      absence into a failure instead of a silent skip.
  *   3. Round-trip invariant: for any num and den with deg(den) > 0,
  *      `num = den · quotient + remainder` and `deg(remainder) < deg(den)`.
  *   4. Edge cases: empty / zero / length-1 polynomials.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 import {
   polymul,
@@ -35,15 +35,7 @@ import {
   resultantDispatch,
 } from '../src/wasm/poly/wasm-bridge.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
-
-// ---------------------------------------------------------------------------
-// WASM artifact location
-// ---------------------------------------------------------------------------
-const here = dirname(fileURLToPath(import.meta.url));
-const WASM_PATH = (() => {
-  const candidate = resolve(here, '../../../lib/wasm/mathts.wasm');
-  return existsSync(candidate) ? candidate : null;
-})();
+import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -208,12 +200,24 @@ describe('polynomial algebra — below-threshold correctness (pure JS)', () => {
 // Suite 2: Above-threshold WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
-const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
+const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
 
-describeIfWasm('polynomial algebra — above-threshold WASM dispatch', () => {
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
+});
+
+/** AS poly kernels the typed algebra functions dispatch to above threshold. */
+const POLY_KERNELS = [
+  'poly_mul_f64',
+  'poly_div_mod_f64',
+  'poly_resultant_f64',
+  'poly_discriminant_f64',
+];
+
+describeIfAS('polynomial algebra — above-threshold AS WASM dispatch', () => {
   beforeAll(async () => {
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30_000);
 
   afterAll(() => {
@@ -236,52 +240,72 @@ describeIfWasm('polynomial algebra — above-threshold WASM dispatch', () => {
 
   const N = WASM_POLY_THRESHOLD + 10; // just above threshold
 
-  it('polymul WASM path matches JS oracle for n >= threshold', () => {
+  it('polymul executes poly_mul_f64 and matches JS oracle for n >= threshold', () => {
     const a = randPoly(N);
     const b = randPoly(N);
     const oracle = jsMul(a, b);
-    const result = polymul(a, b);
+    const { result, counts } = countExportCalls(['poly_mul_f64'], () => polymul(a, b));
+    expect(counts.poly_mul_f64).toBeGreaterThan(0);
     expect(result.length).toBe(oracle.length);
     // For integer coefficients, result should be exact.
     expect(maxDiff(result, oracle)).toBeLessThan(1e-6);
   });
 
-  it('polyDivMod WASM path round-trip for large num', () => {
+  it('polyDivMod executes poly_div_mod_f64 and round-trips for large num', () => {
     // num = den * (x^N + 1), so quotient should be [1,0,...,0,1] and rem = 0
     const den = randPoly(5);
     const scale = randPoly(N);
     const num = polymul(den, scale); // guaranteed exact divisible
-    verifyRoundTrip(num, den, 1e-6);
+    const { counts } = countExportCalls(['poly_div_mod_f64'], () =>
+      verifyRoundTrip(num, den, 1e-6)
+    );
+    expect(counts.poly_div_mod_f64).toBeGreaterThan(0);
   });
 
-  it('polynomialQuotient WASM path matches JS oracle', () => {
+  it('polynomialQuotient executes poly_div_mod_f64 and matches JS oracle', () => {
     const den = [1, 1]; // x + 1
     // Make a polynomial divisible by (x+1): use (x+1)*(x^N + random lower)
     const mult = randPoly(N);
     const num = polymul(den, mult);
     const [jsQuot] = jsDivMod(num, den);
-    const wasmQuot = polynomialQuotient(num, den);
+    const { result: wasmQuot, counts } = countExportCalls(['poly_div_mod_f64'], () =>
+      polynomialQuotient(num, den)
+    );
+    expect(counts.poly_div_mod_f64).toBeGreaterThan(0);
     expect(wasmQuot.length).toBe(jsQuot.length);
     expect(maxDiff(wasmQuot, jsQuot)).toBeLessThan(1e-6);
   });
 
-  it('polynomialGCD large polynomial still computes correctly', () => {
-    // GCD([x-1]*[x+1], [x-1]) = x-1
+  it('polynomialGCD large polynomial executes poly_div_mod_f64 and still computes correctly', () => {
+    // GCD([x-1]*[x+1]*R, [x-1]) = x-1 for an above-threshold (length 266) bigPoly.
+    // The second argument used to be a random cubic, which made this test fail
+    // ~20% of runs on BOTH the WASM and JS paths (identically): floating-point
+    // Euclid of a degree-266 polynomial by a random cubic cancels catastrophically,
+    // yields a spurious non-constant "GCD", and dividing bigPoly by that explodes.
+    // Dividing by x-1 is exact (integer synthetic division), so this is well-posed.
     const xm1 = [-1, 1];
     const xp1 = [1, 1];
-    const bigPoly = polymul(xm1, randPoly(N - 2));
-    const g = polynomialGCD(bigPoly, randPoly(3, 5));
-    // GCD should divide bigPoly
-    const rem = polynomialRemainder(bigPoly, g);
-    const remNorm = Math.max(...rem.map(Math.abs));
-    expect(remNorm).toBeLessThan(1e-6);
-    void xp1; // suppress unused-var lint
+    const bigPoly = polymul(polymul(xm1, xp1), randPoly(N - 3));
+    const { counts } = countExportCalls(['poly_div_mod_f64'], () => {
+      // The first Euclid step divides the above-threshold bigPoly (AS kernel).
+      const g = polynomialGCD(bigPoly, xm1);
+      expect(g).toEqual([-1, 1]);
+      // GCD should divide bigPoly
+      const rem = polynomialRemainder(bigPoly, g);
+      const remNorm = Math.max(...rem.map(Math.abs));
+      expect(remNorm).toBeLessThan(1e-6);
+    });
+    expect(counts.poly_div_mod_f64).toBeGreaterThan(0);
   });
 
-  it('below-threshold path still works after WASM load (no regression)', () => {
-    // Small inputs must still produce correct results when WASM is loaded.
-    expect(polymul([1, 1], [1, 1])).toEqual([1, 2, 1]);
-    expect(polynomialQuotient([-1, 0, 1], [-1, 1])).toEqual([1, 1]);
+  it('below-threshold path still works after WASM load and stays on JS (no regression)', () => {
+    // Small inputs must still produce correct results when WASM is loaded —
+    // and must not reach an AS kernel (the threshold gate still applies).
+    const { counts } = countExportCalls(POLY_KERNELS, () => {
+      expect(polymul([1, 1], [1, 1])).toEqual([1, 2, 1]);
+      expect(polynomialQuotient([-1, 0, 1], [-1, 1])).toEqual([1, 1]);
+    });
+    for (const k of POLY_KERNELS) expect(counts[k], `${k} not invoked below threshold`).toBe(0);
   });
 });
 
@@ -446,33 +470,56 @@ describe('resultant — below-threshold correctness (pure JS)', () => {
 // Suite 6: discriminant + resultant — WASM dispatch (requires WASM artifact)
 // ===========================================================================
 
-describeIfWasm('discriminant + resultant — above-threshold WASM dispatch', () => {
+describeIfAS('discriminant + resultant — above-threshold AS WASM dispatch', () => {
   beforeAll(async () => {
     wasmLoader.reset();
-    await wasmLoader.load(WASM_PATH!);
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 30_000);
 
   afterAll(() => {
     wasmLoader.reset();
   });
 
-  it('discriminant WASM path matches JS reference for small known value', () => {
+  // NOTE: this and 'below-threshold discriminant still works after WASM load'
+  // (below) assert the same thing — small inputs are below threshold, so this is
+  // the JS closed form, not a WASM path.
+  it('discriminant small known values use the JS closed form after WASM load', () => {
     // disc([1,-3,2]) = 1
-    expect(discriminant([1, -3, 2])).toBeCloseTo(1, 10);
-    expect(discriminant([1, 0, -1])).toBeCloseTo(4, 10);
+    const { counts } = countExportCalls(['poly_discriminant_f64'], () => {
+      expect(discriminant([1, -3, 2])).toBeCloseTo(1, 10);
+      expect(discriminant([1, 0, -1])).toBeCloseTo(4, 10);
+    });
+    expect(counts.poly_discriminant_f64).toBe(0);
   });
 
-  it('discriminant WASM path matches JS reference above threshold within 1e-8', () => {
-    // Build a degree-(WASM_POLY_THRESHOLD+2) polynomial by padding with zeros
-    // then test that the typed function and the dispatch agree
+  it('typed discriminant trims zero-padding, so a padded quadratic stays on the JS closed form', () => {
+    // Padding a quadratic with trailing (high-order) zeros does NOT make it an
+    // above-threshold input: `discriminant()` trims them first (t.length = 3), so
+    // this is the JS closed form — the AS kernel is reached via the dispatch below.
     const base = [1, -3, 2]; // disc = 1
     const padded = [...base, ...new Array(WASM_POLY_THRESHOLD).fill(0)];
-    const wasmResult = discriminant(padded);
+    const { result: typedResult, counts } = countExportCalls(['poly_discriminant_f64'], () =>
+      discriminant(padded)
+    );
+    expect(counts.poly_discriminant_f64).toBe(0);
+    const jsRef = discriminant(base);
+    expect(Math.abs(typedResult - jsRef)).toBeLessThan(1e-8);
+  });
+
+  it('discriminantDispatch on the padded array executes poly_discriminant_f64 and matches JS within 1e-8', () => {
+    // The bridge does not trim, so the length-(WASM_POLY_THRESHOLD+3) padded
+    // array reaches the AS kernel, which must still see the quadratic.
+    const base = [1, -3, 2]; // disc = 1
+    const padded = new Float64Array([...base, ...new Array(WASM_POLY_THRESHOLD).fill(0)]);
+    const { result: wasmResult, counts } = countExportCalls(['poly_discriminant_f64'], () =>
+      discriminantDispatch(padded)
+    );
+    expect(counts.poly_discriminant_f64).toBeGreaterThan(0);
     const jsRef = discriminant(base);
     expect(Math.abs(wasmResult - jsRef)).toBeLessThan(1e-8);
   });
 
-  it('resultant WASM path matches JS reference above threshold within 1e-8', () => {
+  it('resultantDispatch executes poly_resultant_f64 and matches JS reference above threshold within 1e-8', () => {
     // Pad p and q to exceed threshold
     const p = new Float64Array(WASM_POLY_THRESHOLD + 2);
     const q = new Float64Array(WASM_POLY_THRESHOLD + 2);
@@ -483,18 +530,27 @@ describeIfWasm('discriminant + resultant — above-threshold WASM dispatch', () 
     const jsP = Array.from(p).slice(0, 2);
     const jsQ = Array.from(q).slice(0, 2);
     const jsRef = resultant(jsP, jsQ);
-    // The dispatch will use WASM for large arrays but the result should match.
-    const wasmResult = resultantDispatch(p, q);
+    // The dispatch uses WASM for large arrays but the result should match.
+    const { result: wasmResult, counts } = countExportCalls(['poly_resultant_f64'], () =>
+      resultantDispatch(p, q)
+    );
+    expect(counts.poly_resultant_f64).toBeGreaterThan(0);
     expect(Math.abs(wasmResult - jsRef)).toBeLessThan(1e-8);
   });
 
-  it('below-threshold discriminant still works after WASM load', () => {
-    expect(discriminant([1, -3, 2])).toBeCloseTo(1, 10);
-    expect(discriminant([1, 0, -1])).toBeCloseTo(4, 10);
+  it('below-threshold discriminant still works after WASM load (JS, no AS call)', () => {
+    const { counts } = countExportCalls(['poly_discriminant_f64'], () => {
+      expect(discriminant([1, -3, 2])).toBeCloseTo(1, 10);
+      expect(discriminant([1, 0, -1])).toBeCloseTo(4, 10);
+    });
+    expect(counts.poly_discriminant_f64).toBe(0);
   });
 
-  it('below-threshold resultant still works after WASM load', () => {
-    expect(resultant([1, 1], [1, -1])).toBeCloseTo(2, 10);
-    expect(resultant([1, 0, 1], [1, 1])).toBeCloseTo(2, 10);
+  it('below-threshold resultant still works after WASM load (JS, no AS call)', () => {
+    const { counts } = countExportCalls(['poly_resultant_f64'], () => {
+      expect(resultant([1, 1], [1, -1])).toBeCloseTo(2, 10);
+      expect(resultant([1, 0, 1], [1, 1])).toBeCloseTo(2, 10);
+    });
+    expect(counts.poly_resultant_f64).toBe(0);
   });
 });

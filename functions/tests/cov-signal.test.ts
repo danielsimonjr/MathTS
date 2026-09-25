@@ -14,22 +14,21 @@
  *   - the windowFunction 'bartlett' branch,
  *   - initializeSignal / terminateSignal lifecycle wrappers.
  *
- * WASM-only branches (the `if (wasm) { ... wasm.<kernel>_wasm(...) ... }` blocks
- * in dct/idct/dst/idst/dwt/hilbertTransform/spectrogram/periodogram/_convolve)
- * are NOT reachable in this Node environment: they require a prebuilt WASM
- * artifact at lib/wasm/mathts.wasm, which exports the *_wasm kernels. The
- * current AssemblyScript module does not
- * export those signal kernels. This mirrors the repo's own typed-*-wasm.test.ts
- * suites, which describe.skip when the artifact is absent. We attempt the load
- * below and skip the WASM-path assertions when it is missing.
+ * The `if (wasm) { ... wasm.<kernel>_wasm(...) ... }` blocks in
+ * dct/idct/dst/idst/dwt/hilbertTransform/spectrogram/periodogram/_convolve call
+ * legacy pointer-ABI `*_wasm` kernels that NO binary provides any more: they
+ * belonged to the deleted native-WASM toolchain, and the AssemblyScript binary —
+ * now the sole WASM backend — does not export them. So their success paths are
+ * unreachable. The last describe block loads the AS binary anyway: that enters
+ * each `if (wasm)` branch and proves it falls through to the JS path with an
+ * unchanged result. It also pins that the kernels are absent, so if one is ever
+ * added to the AS binary the block fails and must grow real engagement asserts.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
+import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE } from './helpers/wasm-spy.js';
 import {
   parallelFFT,
   parallelIFFT,
@@ -50,18 +49,6 @@ import {
   initializeSignal,
   terminateSignal,
 } from '../src/typed/signal.js';
-
-const here = dirname(fileURLToPath(import.meta.url));
-const WASM_PATH = (() => {
-  // The build script writes lib/wasm/mathts.wasm at the repo root. Depending on
-  // checkout layout the root is two or three levels above functions/tests, so
-  // probe both candidates.
-  for (const rel of ['../../lib/wasm/mathts.wasm', '../../../lib/wasm/mathts.wasm']) {
-    const candidate = resolve(here, rel);
-    if (existsSync(candidate)) return candidate;
-  }
-  return null;
-})();
 
 describe('signal — lifecycle wrappers', () => {
   it('initializeSignal then terminateSignal', async () => {
@@ -216,15 +203,33 @@ describe('signal — JS reference correctness (non-WASM small inputs)', () => {
   });
 });
 
-// WASM dispatch tier: only runs when a prebuilt WASM artifact is present at
-// lib/wasm/mathts.wasm exporting the *_wasm kernels. When that artifact
-// is available this exercises the `wasm.*_wasm(...)` success paths in
-// dct/idct/dst/idst/dwt/hilbert/spectrogram/periodogram/_convolve. Each kernel
-// is driven with a length >= WASM_THRESHOLD (64) and validated against the same
-// function's pure-JS output (computed by resetting the loader first), so we
-// assert real DSP correctness rather than just touching the branch.
-const describeIfWasm = WASM_PATH !== null ? describe : describe.skip;
-describeIfWasm('signal — WASM dispatch tier (lib/wasm/mathts.wasm present)', () => {
+// AS binary loaded — the `if (wasm)` branches in
+// dct/idct/dst/idst/dwt/hilbert/spectrogram/periodogram/_convolve are ENTERED, but
+// they call legacy `*_wasm` kernels the AS binary does not export, so each one
+// falls through to its JS path (JS by construction, not a WASM tier). Each
+// function is driven with a length >= WASM_THRESHOLD (64) and validated against
+// its own output with no module loaded (computed by resetting the loader first),
+// so the fall-through is proven not to corrupt the result.
+const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
+
+/** Legacy pointer-ABI kernels typed/signal.ts probes for; absent from the AS binary. */
+const LEGACY_SIGNAL_KERNELS = [
+  'dct_wasm',
+  'idct_wasm',
+  'dst_wasm',
+  'idst_wasm',
+  'dwt_wasm',
+  'hilbert_wasm',
+  'spectrogram_wasm',
+  'periodogram_wasm',
+  'fir_filter_wasm',
+];
+
+it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
+  expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
+});
+
+describeIfAS('signal — AS binary loaded: legacy *_wasm branches fall through to JS', () => {
   const N = 128;
   const sig = Array.from(
     { length: N },
@@ -251,8 +256,8 @@ describeIfWasm('signal — WASM dispatch tier (lib/wasm/mathts.wasm present)', (
     jsPeriodogram = periodogram(sig, { window: 'hann' }).psd;
     jsLowpass = lowpassFilter(sig, 0.1, 65); // order 65 keeps N >= threshold for _convolve
     jsDwt = dwt(sig);
-    // Now load the WASM module so subsequent calls take the WASM branch.
-    await wasmLoader.load(WASM_PATH!);
+    // Now load the AS binary so subsequent calls enter the `if (wasm)` branch.
+    await wasmLoader.load(AS_WASM_PATH!);
   }, 60000);
 
   afterAll(() => {
@@ -264,29 +269,39 @@ describeIfWasm('signal — WASM dispatch tier (lib/wasm/mathts.wasm present)', (
     for (let i = 0; i < a.length; i++) expect(a[i]).toBeCloseTo(b[i], digits);
   };
 
-  it('dct_wasm matches JS DCT-II', () => close(dct(sig), jsDct));
-  it('idct_wasm matches JS IDCT-III', () => close(idct(jsDct), jsIdct));
-  it('dst_wasm matches JS DST-II', () => close(dst(sig), jsDst));
-  it('idst_wasm matches JS IDST-III', () => close(idst(jsDst), jsIdst));
+  it('the AS binary is loaded but exports none of the legacy *_wasm signal kernels', () => {
+    const mod = wasmLoader.getModule() as unknown as Record<string, unknown>;
+    expect(typeof mod.array_sin_ptr).toBe('function'); // AS sentinel: this IS the AS binary
+    for (const k of LEGACY_SIGNAL_KERNELS) {
+      expect(typeof mod[k], `${k} is not exported by the AS binary`).toBe('undefined');
+    }
+  });
 
-  it('dct/idct WASM round-trip reconstructs the signal', () => {
+  it('dct (dct_wasm absent → JS) matches JS DCT-II', () => close(dct(sig), jsDct));
+  it('idct (idct_wasm absent → JS) matches JS IDCT-III', () => close(idct(jsDct), jsIdct));
+  it('dst (dst_wasm absent → JS) matches JS DST-II', () => close(dst(sig), jsDst));
+  it('idst (idst_wasm absent → JS) matches JS IDST-III', () => close(idst(jsDst), jsIdst));
+
+  it('dct/idct round-trip reconstructs the signal with the AS binary loaded', () => {
     close(idct(dct(sig)), sig, 6);
   });
 
-  it('dwt_wasm matches JS Haar transform', () => {
-    // Module is loaded here -> WASM path; compare to JS reference from beforeAll.
+  it('dwt (dwt_wasm absent → JS) matches JS Haar transform', () => {
+    // Module is loaded here -> enters the WASM branch, falls through to JS;
+    // compare to the no-module JS reference from beforeAll.
     const w = dwt(sig);
     close(w.approx, jsDwt.approx, 6);
     close(w.detail, jsDwt.detail, 6);
   });
 
-  it('hilbert_wasm matches JS Hilbert transform', () => close(hilbertTransform(sig), jsHilbert, 5));
-  it('periodogram_wasm matches JS periodogram', () =>
+  it('hilbertTransform (hilbert_wasm absent → JS) matches JS Hilbert transform', () =>
+    close(hilbertTransform(sig), jsHilbert, 5));
+  it('periodogram (periodogram_wasm absent → JS) matches JS periodogram', () =>
     close(periodogram(sig, { window: 'hann' }).psd, jsPeriodogram, 5));
-  it('fir_filter_wasm (lowpassFilter) matches JS convolution', () =>
+  it('lowpassFilter (fir_filter_wasm absent → JS) matches JS convolution', () =>
     close(lowpassFilter(sig, 0.1, 65), jsLowpass, 6));
 
-  it('spectrogram_wasm produces frames matching frequency-bin count', async () => {
+  it('spectrogram (spectrogram_wasm absent → JS) produces frames matching frequency-bin count', async () => {
     const out = await spectrogram(sig, { windowSize: 64, hopSize: 32, window: 'hann' });
     expect(out.magnitude.length).toBeGreaterThan(0);
     expect(out.magnitude[0].length).toBe(out.frequencies.length);
