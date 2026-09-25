@@ -15,8 +15,8 @@
  * Dest:   functions/dist/wasm/  (+ a regenerated SHA-384 wasm-manifest.json
  *         covering the copied binary — verified at load).
  *
- * If the AS wasm hasn't been built, it is skipped (consumers use the JS
- * fallback) with a warning.
+ * A missing AS wasm FAILS the build, for the reason given in
+ * matrix/scripts/copy-wasm.mjs: a warn-and-exit-0 let Turbo cache a wasm-less dist.
  */
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -36,26 +36,18 @@ const asCandidates = [
 ];
 const asSrc = asCandidates.find(existsSync) ?? null;
 
-mkdirSync(outDir, { recursive: true });
-
-const copied = [];
-
-if (asSrc) {
-  const dest = join(outDir, 'mathts-as.wasm');
-  copyFileSync(asSrc, dest);
-  copied.push('mathts-as.wasm');
-} else {
-  console.warn(
-    `[copy-wasm] AS wasm not found (looked in matrix/dist/wasm + assembly/build) — ` +
-      `run \`npm run build:wasm\` first. The functions package defaults to AS; ` +
-      `without it consumers fall back to JS.`,
+if (!asSrc) {
+  console.error(
+    `[copy-wasm] AS wasm not found (looked in matrix/dist/wasm + assembly/build). ` +
+      `Build through turbo (\`bun run build\` from the repo root) or run ` +
+      `\`bun run build:wasm\` first.`,
   );
+  process.exit(1);
 }
 
-if (copied.length === 0) {
-  console.warn('[copy-wasm] no wasm artifacts copied; consumers will use the JS fallback.');
-  process.exit(0);
-}
+mkdirSync(outDir, { recursive: true });
+copyFileSync(asSrc, join(outDir, 'mathts-as.wasm'));
+const copied = ['mathts-as.wasm'];
 
 // Regenerate a SHA-384 manifest covering exactly the binaries we copied, so
 // verifyWasmIntegrity passes for whichever one the loader selects.

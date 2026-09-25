@@ -3322,7 +3322,8 @@ All 46 test files created for src/wasm/ modules:
 - The codebase compiles with zero TypeScript errors
 - Legacy JS files are kept for comparison and benchmarking purposes
 - AssemblyScript is the sole WASM backend
-- WASM distribution: `lib/wasm/mathts-as.wasm` (AssemblyScript)
+- WASM distribution: `assembly/build/mathts.wasm`, co-located by each package build as
+  `<pkg>/dist/wasm/mathts-as.wasm` (AssemblyScript)
 
 ### Publishing / types debt
 
@@ -3332,10 +3333,11 @@ All 46 test files created for src/wasm/ modules:
       Pre-existing, surfaced while verifying the WebGPU `.d.ts` fix; affects the published
       surface of `matrix` + `packages/workerpool`. Add a `declare module 'workerpool'` shim
       or ship real types for the fork.
-- [ ] **Reconcile the optional-wasm mismatch.** `matrix/scripts/copy-wasm.mjs` treats the
-      AssemblyScript wasm as OPTIONAL (missing source -> warn, `exit(0)`, consumers use the JS
-      fallback), while `matrix/tests/wasm-resolve.test.ts` and `functions/tests/wasm-resolve.test.ts`
-      treat it as REQUIRED. That disagreement is what made CI red for two commits on 2026-09-08
-      while `bun run build` reported success. CI now compiles the wasm first, so the symptom is
-      gone — the mismatch is not. Either the build should fail when it cannot produce the
-      artifact, or the tests should skip when it is legitimately absent. Pick one.
+- [x] ✅ **Reconcile the optional-wasm mismatch — FIXED** (2026-09-25). Picked "the build
+      fails": both `matrix/scripts/copy-wasm.mjs` and `functions/scripts/copy-wasm.mjs` now
+      `exit(1)` when the AssemblyScript wasm is missing. The warn-and-`exit(0)` also hid a
+      RACE: `bun run build` had no edge from `matrix#build` to the AS build, so the copy ran
+      before `asc` finished, and Turbo cached the wasm-less `dist` and replayed it even after
+      the wasm existed. `turbo.json` now orders `matrix#build`/`functions#build` after
+      `@danielsimonjr/mathts-wasm#build`, which also puts the wasm build's hash into theirs.
+      A cold `bun install && bun run build && bun run test` now passes; it failed before.
