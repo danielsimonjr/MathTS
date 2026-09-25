@@ -299,7 +299,7 @@ function tsupConfigEntries(rootDir: string, pkgDir: string): string[] {
  * `"./internal": { import: "./dist/internal.js" }` maps to `src/internal.ts`.
  * Returned paths are repo-relative (e.g. "core/src/internal.ts").
  */
-function exportsSubpathEntries(
+export function exportsSubpathEntries(
   rootDir: string,
   pkgDir: string,
   pkg: {
@@ -418,12 +418,17 @@ function seedTsconfigEntries(
 ): void {
   const cfgPath = join(rootDir, pkgDir, cfgRel);
   if (!existsSync(cfgPath)) return;
-  let cfg: { files?: string[]; include?: string[] };
+  let cfg: { files?: string[]; include?: string[]; compilerOptions?: { noEmit?: boolean } };
   try {
     cfg = JSON.parse(readFileSync(cfgPath, 'utf-8'));
   } catch {
     return;
   }
+  // A check-only config (`noEmit`, e.g. `tsc -p tsconfig.test.json` in a `typecheck`
+  // script) builds nothing, so its includes are not build roots. Seeding them marked
+  // every `src/**` file of the package reachable, which hides dormancy, and pulled
+  // an ambient `.d.ts` into the graph as source (a false TRUE_DUPLICATE).
+  if (cfg.compilerOptions?.noEmit === true) return;
   const cfgDir = dirname(join(pkgDir, cfgRel));
   const seedPath = (p: string): void => {
     if (p.includes('*')) {
@@ -433,7 +438,8 @@ function seedTsconfigEntries(
           add(relative(rootDir, f).replace(/\\/g, '/'));
         }
       }
-    } else if (p.endsWith('.ts')) {
+    } else if (p.endsWith('.ts') && !p.endsWith('.d.ts')) {
+      // A `.d.ts` is a declaration, never a build root (the glob branch skips it too).
       add(join(cfgDir, p));
     }
   };

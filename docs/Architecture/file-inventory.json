@@ -12602,7 +12602,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 5236
+      "loc": 5242
     },
     {
       "file": "trigonometry/src/index.ts",
