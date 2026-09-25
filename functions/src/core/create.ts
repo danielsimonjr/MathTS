@@ -360,7 +360,7 @@ export function create(
       if (factory && factory.meta && factory.meta.recreateOnConfigChange) {
         // FIXME: only re-create when the current instance is the same as was initially created
         // delete the functions/constants before importing them again
-        const name = (factory as FactoryFunction).fn || (factory as any).name;
+        const name = ('fn' in factory ? factory.fn : '') || factory.name;
         delete math[name];
         delete math.expression.transform[name];
         delete math.expression.mathWithTransform[name];

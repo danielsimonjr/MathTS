@@ -604,10 +604,11 @@ describe('TapedTensor.eig — forward correctness', () => {
     const { eigvals, eigvecs } = a.eig({ symmetric: true });
     const lam = eigvals.primal;
     const U = eigvecs.primal; // 2×2, columns are eigenvectors
+    const u = (row: number, col: number): number => U[row * 2 + col];
     for (let col = 0; col < 2; col++) {
       // v = U[:, col]
-      const v0 = U[0 * 2 + col];
-      const v1 = U[1 * 2 + col];
+      const v0 = u(0, col);
+      const v1 = u(1, col);
       // A·v = (aData[0]*v0 + aData[1]*v1, aData[2]*v0 + aData[3]*v1)
       const Av0 = aData[0] * v0 + aData[1] * v1;
       const Av1 = aData[2] * v0 + aData[3] * v1;

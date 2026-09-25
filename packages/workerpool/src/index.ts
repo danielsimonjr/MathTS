@@ -17,6 +17,7 @@ import {
   type ExecOptions,
   type PoolStats,
 } from 'workerpool';
+import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
 
 // Try to import WASM feature detection from workerpool/wasm subpath
@@ -1658,7 +1659,7 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      const fn = (0, eval)(`(${fnSource})`) as (x: number) => number;
+      const fn = compileFunctionSource<(x: number) => number>(fnSource);
       const result = new Float64Array(data.length);
       for (let i = 0; i < data.length; i++) {
         result[i] = fn(data[i]);
@@ -1713,7 +1714,7 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
-      const fn = (0, eval)(`(${fnSource})`) as (a: number, b: number) => number;
+      const fn = compileFunctionSource<(a: number, b: number) => number>(fnSource);
       const result = new Float64Array(a.length);
       for (let i = 0; i < a.length; i++) {
         result[i] = fn(a[i], b[i]);

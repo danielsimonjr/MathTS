@@ -220,10 +220,11 @@ describe('ComputePool — parallel paths and helpers', () => {
       const result = await pool.distanceMatrix(points, n, dim);
 
       const d = result.result;
-      expect(d[0 * n + 0]).toBeCloseTo(0);
-      expect(d[0 * n + 1]).toBeCloseTo(3);
-      expect(d[0 * n + 2]).toBeCloseTo(4);
-      expect(d[1 * n + 2]).toBeCloseTo(5); // 3-4-5 triangle
+      const at = (row: number, col: number): number => d[row * n + col];
+      expect(at(0, 0)).toBeCloseTo(0);
+      expect(at(0, 1)).toBeCloseTo(3);
+      expect(at(0, 2)).toBeCloseTo(4);
+      expect(at(1, 2)).toBeCloseTo(5); // 3-4-5 triangle
     });
   });
 

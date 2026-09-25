@@ -2,15 +2,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GPUContext } from '../src/GPUContext.js';
 import { stubGlobal, unstubAllGlobals } from './helpers/stub-global.js';
 
-describe('GPUContext (mocked WebGPU)', () => {
-  let _originalNavigator: any;
-  let originalGPUBufferUsage: any;
-  let originalGPUMapMode: any;
+interface DeviceLostInfo {
+  reason: string;
+  message: string;
+}
 
+describe('GPUContext (mocked WebGPU)', () => {
   beforeEach(() => {
-    // Stub WebGPU constants
-    originalGPUBufferUsage = (globalThis as any).GPUBufferUsage;
-    (globalThis as any).GPUBufferUsage = {
+    // Stub WebGPU constants. unstubAllGlobals() in afterEach restores the
+    // original descriptors (or deletes the names when there were none).
+    stubGlobal('GPUBufferUsage', {
       MAP_READ: 1,
       MAP_WRITE: 2,
       COPY_SRC: 4,
@@ -21,16 +22,11 @@ describe('GPUContext (mocked WebGPU)', () => {
       STORAGE: 128,
       INDIRECT: 256,
       QUERY_RESOLVE: 512,
-    };
-
-    originalGPUMapMode = (globalThis as any).GPUMapMode;
-    (globalThis as any).GPUMapMode = {
+    });
+    stubGlobal('GPUMapMode', {
       READ: 1,
       WRITE: 2,
-    };
-
-    // Save original navigator if exists
-    _originalNavigator = globalThis.navigator;
+    });
 
     // Create a robust mock for navigator.gpu
     const mockDevice = {
@@ -97,18 +93,6 @@ describe('GPUContext (mocked WebGPU)', () => {
 
   afterEach(() => {
     unstubAllGlobals();
-
-    if (originalGPUBufferUsage !== undefined) {
-      (globalThis as any).GPUBufferUsage = originalGPUBufferUsage;
-    } else {
-      delete (globalThis as any).GPUBufferUsage;
-    }
-
-    if (originalGPUMapMode !== undefined) {
-      (globalThis as any).GPUMapMode = originalGPUMapMode;
-    } else {
-      delete (globalThis as any).GPUMapMode;
-    }
   });
 
   it('initializes successfully when WebGPU is available', async () => {
@@ -234,12 +218,12 @@ describe('GPUContext (mocked WebGPU)', () => {
   });
 
   it('handles device lost events', async () => {
-    let lostCallback: any;
+    let lostCallback: (info: DeviceLostInfo) => void = () => {};
 
     // Override the lost promise to be controllable
     const mockDevice = {
       queue: { onSubmittedWorkDone: vi.fn() },
-      lost: new Promise((resolve) => {
+      lost: new Promise<DeviceLostInfo>((resolve) => {
         lostCallback = resolve;
       }),
       onuncapturederror: null,
@@ -275,7 +259,11 @@ describe('GPUContext (mocked WebGPU)', () => {
   });
 
   it('handles uncaptured errors', async () => {
-    const mockDevice: any = {
+    const mockDevice: {
+      queue: { onSubmittedWorkDone: () => void };
+      lost: Promise<never>;
+      onuncapturederror: ((event: { error: Error }) => void) | null;
+    } = {
       queue: { onSubmittedWorkDone: vi.fn() },
       lost: new Promise(() => {}),
       onuncapturederror: null,
@@ -295,11 +283,14 @@ describe('GPUContext (mocked WebGPU)', () => {
     const ctx = new GPUContext();
     await ctx.initialize();
 
-    expect(mockDevice.onuncapturederror).toBeDefined();
+    // initialize() must have replaced the null placeholder with its handler.
+    const handler = mockDevice.onuncapturederror;
+    expect(typeof handler).toBe('function');
+    if (typeof handler !== 'function') return;
 
     // Simulate error
     const testError = new Error('Out of memory');
-    mockDevice.onuncapturederror({ error: testError });
+    handler({ error: testError });
 
     expect(ctx.lastError).toBeDefined();
     expect(ctx.lastError?.message).toContain('Out of memory');

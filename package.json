@@ -71,7 +71,7 @@
     "docs:roadmap-check:test": "bun test ./tools/roadmap-check/roadmap-check.test.mjs",
     "docs:functions:check": "bun --tsconfig-override=tsconfig.base.json tools/generate-functions-reference.mjs --check",
     "typecheck": "turbo run typecheck",
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
