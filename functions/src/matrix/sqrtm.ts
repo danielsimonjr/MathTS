@@ -25,11 +25,13 @@ export interface Matrix {
 interface TypedFunction<R = Scalar | Matrix> {
   // `typed(name, signatures, ...)` creates a typed function; without this overload
   // the factory's result was typed as a value and the public export was uncallable.
+  // It returns `unknown`, like every typed function, not `R`: `R` covers the
+  // dependencies typed here, while `sqrtm` of an array returns a nested array.
   (
     name: string,
     signatures: Record<string, (...args: never[]) => unknown>,
     ...moreSignatures: Record<string, (...args: never[]) => unknown>[]
-  ): (...args: unknown[]) => R;
+  ): (...args: unknown[]) => unknown;
   (...args: unknown[]): R;
 }
 

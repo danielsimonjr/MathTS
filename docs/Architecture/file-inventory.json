@@ -6064,7 +6064,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 485
+      "loc": 487
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -6134,7 +6134,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 274
+      "loc": 276
     },
     {
       "file": "functions/src/matrix/kron.ts",
@@ -6267,7 +6267,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 163
+      "loc": 165
     },
     {
       "file": "functions/src/matrix/squeeze.ts",
@@ -7779,7 +7779,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2226
+      "loc": 2272
     },
     {
       "file": "functions/src/typed/index.ts",

@@ -3994,7 +3994,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `TTestResult`, `ChiSquareResult`, `AnovaResult`, `KSTestResult`, `MannWhitneyResult`, `ShapiroWilkResult`, `PCAResult`, `BootstrapOptions`, `KSBootstrapResult`, `MWBootstrapResult`, `SWBootstrapResult`, `ChiSquareBootstrapResult`, `KS2Options`, `VarianceTestResult`, `ProportionZResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
-- Functions: `studentTTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`
+- Functions: `studentTTest`, `chiSquareTest`, `chiSquareTest`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `kolmogorovSmirnovTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest`, `mannWhitneyTest`, `mannWhitneyTest`, `shapiroWilkTest`, `shapiroWilkTest`, `shapiroWilkTest`, `principalComponentAnalysis`, `kolmogorovSmirnov2Test`, `leveneTest`, `bartlettTest`, `studentTTestPaired`, `proportionZTest`, `binomialTest`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`
 
 ---
 
@@ -18350,12 +18350,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195399 |
+| Total Lines of Code     | 195451 |
 | Total Exports           | 5846   |
 | Total Re-exports        | 2364   |
 | Total Classes           | 55     |
 | Total Interfaces        | 510    |
-| Total Functions         | 1888   |
+| Total Functions         | 1896   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 589    |
