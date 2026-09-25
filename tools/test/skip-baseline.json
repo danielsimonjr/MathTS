@@ -1,0 +1,32 @@
+{
+  "$comment": "Tests NOT RUN (skipped + todo) per suite in `bun run test`, enforced by tools/test/check-skip-budget.mjs. A change in either direction fails CI: regenerate with `node tools/test/check-skip-budget.mjs <log> --update` and explain the change in the commit.",
+  "unsummarized": {
+    "@danielsimonjr/mathts-wasm": "AssemblyScript tests run as plain Node scripts (assembly/tests/*.mjs) that print their own PASS/FAIL lines and exit non-zero on failure; there is no skip mechanism to budget."
+  },
+  "suites": {
+    "(root vitest)": 0,
+    "@danielsimonjr/mathts-arithmetic": 0,
+    "@danielsimonjr/mathts-ast": 0,
+    "@danielsimonjr/mathts-autograd": 0,
+    "@danielsimonjr/mathts-compat": 0,
+    "@danielsimonjr/mathts-core": 0,
+    "@danielsimonjr/mathts-evaluator": 0,
+    "@danielsimonjr/mathts-expression": 0,
+    "@danielsimonjr/mathts-functions": 53,
+    "@danielsimonjr/mathts-gpu": 0,
+    "@danielsimonjr/mathts-linalg": 0,
+    "@danielsimonjr/mathts-matrix": 4,
+    "@danielsimonjr/mathts-numbers": 0,
+    "@danielsimonjr/mathts-parallel": 0,
+    "@danielsimonjr/mathts-parser": 0,
+    "@danielsimonjr/mathts-plot": 0,
+    "@danielsimonjr/mathts-signal": 0,
+    "@danielsimonjr/mathts-statistics": 0,
+    "@danielsimonjr/mathts-tensor": 0,
+    "@danielsimonjr/mathts-trigonometry": 0,
+    "@danielsimonjr/mathts-typed-function": 0,
+    "@danielsimonjr/mathts-units": 0,
+    "@danielsimonjr/mathts-workbook": 0,
+    "@danielsimonjr/mathts-workerpool": 0
+  }
+}
