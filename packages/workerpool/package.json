@@ -24,7 +24,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts src/worker.ts --format esm --clean && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs",
-    "dev": "tsup src/index.ts src/worker.ts --format esm --dts --watch",
+    "dev": "tsup src/index.ts src/worker.ts --format esm --watch --onSuccess \"tsc -p tsconfig.dts.json && node scripts/postbuild.mjs\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -32,7 +32,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts src/worker.ts --format esm --dts --clean --minify --treeshake && node scripts/postbuild.mjs"
+    "build:prod": "tsup src/index.ts src/worker.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json && node scripts/postbuild.mjs"
   },
   "dependencies": {
     "workerpool": "npm:@danielsimonjr/workerpool@10.2.2"
