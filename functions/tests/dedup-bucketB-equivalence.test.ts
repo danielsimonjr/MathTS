@@ -192,9 +192,9 @@ const acyclicGraphArb = fc
   .constantFrom(...NAMES.map((_, i) => i))
   .chain(() => fc.tuple(...NAMES.map((_, i) => fc.subarray(NAMES.slice(0, i)))));
 
-function buildAndSort(
-  factoryFn: (name: string, deps: string[], create: (d: unknown) => unknown) => unknown,
-  sortFn: (factories: unknown[]) => unknown[],
+function buildAndSort<F, S>(
+  factoryFn: (name: string, deps: string[], create: (d: unknown) => unknown) => F,
+  sortFn: (factories: F[]) => S[],
   depsPerName: string[][]
 ): string[] {
   const factories = NAMES.map((n, i) => factoryFn(n, depsPerName[i], () => undefined));

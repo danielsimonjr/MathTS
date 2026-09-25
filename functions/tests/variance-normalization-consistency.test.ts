@@ -40,11 +40,11 @@ describe('GC1: variance/std normalization consistency', () => {
   });
 
   it('plain variance (default) matches parallelStatVariance (default)', async () => {
-    expect(variance(data)).toBeCloseTo(await parallelStatVariance(f64), 10);
+    expect(variance(data)).toBeCloseTo((await parallelStatVariance(f64)) as number, 10);
   });
 
   it('plain std (default) matches parallelStatStd (default)', async () => {
-    expect(std(data)).toBeCloseTo(await parallelStatStd(f64), 10);
+    expect(std(data)).toBeCloseTo((await parallelStatStd(f64)) as number, 10);
   });
 
   it('Array and Float64Array paths agree for every normalization', async () => {

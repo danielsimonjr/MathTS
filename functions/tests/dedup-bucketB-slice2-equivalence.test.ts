@@ -117,6 +117,16 @@ function tryCall<Args extends unknown[], R>(fn: (...args: Args) => R) {
   };
 }
 
+/**
+ * The one deliberate type escape in this file. `filterRegExp` (declared `string[]`) is fed
+ * nested numbers, and `reduce` (declared `T[] | Matrix<T>`, where `T` is the callback's element
+ * type) is fed a 2-D array: both are what these checks mean to pass, and what every copy accepts
+ * at run time, but neither declaration can describe it.
+ */
+function asDeclared<T>(value: unknown): T {
+  return value as T;
+}
+
 // ---------------------------------------------------------------------------
 // Shared arbitraries: rectangular nested numeric arrays
 // ---------------------------------------------------------------------------
@@ -464,10 +474,16 @@ describe('array utils — safe map/forEach/filter/join/filterRegExp', () => {
       [
         {
           name: 'expression',
-          fn: tryCall((a: Nested) => exprArray.filterRegExp(a as string[], /a/)),
+          fn: tryCall((a: Nested) => exprArray.filterRegExp(asDeclared<string[]>(a), /a/)),
         },
-        { name: 'functions', fn: tryCall((a: Nested) => fnArray.filterRegExp(a as string[], /a/)) },
-        { name: 'core', fn: tryCall((a: Nested) => coreFilterRegExp(a as string[], /a/)) },
+        {
+          name: 'functions',
+          fn: tryCall((a: Nested) => fnArray.filterRegExp(asDeclared<string[]>(a), /a/)),
+        },
+        {
+          name: 'core',
+          fn: tryCall((a: Nested) => coreFilterRegExp(asDeclared<string[]>(a), /a/)),
+        },
       ],
       fc.tuple(rectArrayArb)
     );
@@ -526,7 +542,9 @@ describe('array utils — identify / generalize / getArrayDataType / last / init
   });
 
   it('initial — KNOWN DIVERGENCE: expression-only (dead code even there); functions never had it', () => {
-    expect(fnArray.initial).toBeUndefined();
+    // `initial` is absent from the fixture's declared exports, so look it up by name.
+    const fnArrayExports: Record<string, unknown> = fnArray;
+    expect(fnArrayExports.initial).toBeUndefined();
     expect(typeof exprArray.initial).toBe('function');
     fc.assert(
       fc.property(fc.array(fc.double({ noNaN: true }), { maxLength: 8 }), (a) => {
@@ -799,19 +817,31 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
         {
           name: 'expression',
           fn: tryCall((a: number[][], dim: number) =>
-            exprCollection.reduce(a, dim, (acc: number, v: number) => (acc as number) + v)
+            exprCollection.reduce(
+              asDeclared<number[]>(a),
+              dim,
+              (acc: number, v: number) => (acc as number) + v
+            )
           ),
         },
         {
           name: 'functions',
           fn: tryCall((a: number[][], dim: number) =>
-            fnCollection.reduce(a, dim, (acc: number, v: number) => (acc as number) + v)
+            fnCollection.reduce(
+              asDeclared<number[]>(a),
+              dim,
+              (acc: number, v: number) => (acc as number) + v
+            )
           ),
         },
         {
           name: 'core',
           fn: tryCall((a: number[][], dim: number) =>
-            coreReduce(a, dim, (acc: number, v: number) => (acc as number) + v)
+            coreReduce(
+              asDeclared<number[]>(a),
+              dim,
+              (acc: number, v: number) => (acc as number) + v
+            )
           ),
         },
       ],

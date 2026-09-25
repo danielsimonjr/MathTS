@@ -262,7 +262,7 @@ describe('MathJSSparseMatrix', () => {
         [1, 0],
         [0, 2],
       ]);
-      const doubled = s.map((v) => v * 2);
+      const doubled = s.map((v) => (v as number) * 2);
       expect(doubled.valueOf()).toEqual([
         [2, 0],
         [0, 4],
@@ -288,7 +288,7 @@ describe('MathJSSparseMatrix', () => {
       ]);
       const entries: [number, number, number][] = [];
       s.forEach((v, idx) => {
-        entries.push([idx[0], idx[1], v]);
+        entries.push([idx[0], idx[1], v as number]);
       });
       expect(entries).toEqual([
         [0, 0, 1],
@@ -372,7 +372,7 @@ describe('MathJSSparseMatrix', () => {
       const ptr = [0, 2, 4, 6];
       const row0: [number, number][] = [];
       MathJSSparseMatrix._forEachRow(0, values, index, ptr, (col, val) => {
-        row0.push([col, val]);
+        row0.push([col, val as number]);
       });
       expect(row0).toEqual([
         [0, 1],

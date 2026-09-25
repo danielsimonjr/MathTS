@@ -8179,7 +8179,7 @@
           },
           {
             "file": "../types.js",
-            "imports": ["Matrix", "Complex"],
+            "imports": ["Matrix", "Complex", "TypedFunction"],
             "typeOnly": true
           }
         ],
@@ -8352,7 +8352,7 @@
           },
           {
             "file": "../types.js",
-            "imports": ["Matrix", "Complex"],
+            "imports": ["Matrix", "Complex", "TypedFunction"],
             "typeOnly": true
           }
         ],
@@ -22858,7 +22858,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
+          }
+        ],
         "exports": [
           "createSpeedOfLight",
           "createGravitationConstant",
@@ -22914,7 +22920,6 @@
           "createPlanckCharge",
           "createPlanckTemperature"
         ],
-        "interfaces": ["UnitInstance"],
         "constants": [
           "createSpeedOfLight",
           "createGravitationConstant",
@@ -23818,7 +23823,14 @@
           },
           {
             "file": "../types.js",
-            "imports": ["MathNumericType", "MathArray", "Matrix", "Unit", "BigNumber"],
+            "imports": [
+              "MathNumericType",
+              "MathArray",
+              "Matrix",
+              "Unit",
+              "BigNumber",
+              "TypedFunction"
+            ],
             "typeOnly": true
           }
         ],
@@ -40074,10 +40086,10 @@
   "statistics": {
     "totalTypeScriptFiles": 1175,
     "totalModules": 83,
-    "totalLinesOfCode": 195460,
+    "totalLinesOfCode": 195469,
     "totalExports": 5846,
     "totalClasses": 55,
-    "totalInterfaces": 510,
+    "totalInterfaces": 509,
     "totalFunctions": 1896,
     "totalTypeGuards": 159,
     "totalEnums": 0,

@@ -12,6 +12,7 @@ import {
   compare,
 } from '@danielsimonjr/mathts-functions';
 import { Unit } from '@danielsimonjr/mathts-core';
+import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
 /**
  * GC5 — Unit support in arithmetic + comparison operators (mathjs parity). The
@@ -22,18 +23,18 @@ const u = (v: number, n: string) => new Unit(v, n);
 describe('GC5: Unit arithmetic operators', () => {
   it('add / subtract same-dimension units', () => {
     // 5 cm + 3 mm = 5.3 cm = 0.053 m (base)
-    expect((add(u(5, 'cm'), u(3, 'mm')) as Unit).value).toBeCloseTo(0.053, 12);
-    expect((subtract(u(5, 'cm'), u(2, 'cm')) as Unit).value).toBeCloseTo(0.03, 12);
+    expect((add(u(5, 'cm'), u(3, 'mm')) as UnitInstance).value).toBeCloseTo(0.053, 12);
+    expect((subtract(u(5, 'cm'), u(2, 'cm')) as UnitInstance).value).toBeCloseTo(0.03, 12);
   });
 
   it('multiply: unit×unit, unit×scalar, scalar×unit', () => {
-    expect((multiply(u(5, 'cm'), 2) as Unit).value).toBeCloseTo(0.1, 12);
-    expect((multiply(2, u(5, 'cm')) as Unit).value).toBeCloseTo(0.1, 12);
-    expect((multiply(u(2, 'm'), u(3, 'm')) as Unit).value).toBeCloseTo(6, 12); // 6 m²
+    expect((multiply(u(5, 'cm'), 2) as UnitInstance).value).toBeCloseTo(0.1, 12);
+    expect((multiply(2, u(5, 'cm')) as UnitInstance).value).toBeCloseTo(0.1, 12);
+    expect((multiply(u(2, 'm'), u(3, 'm')) as UnitInstance).value).toBeCloseTo(6, 12); // 6 m²
   });
 
   it('divide: unit/unit (dimensionless), unit/scalar', () => {
-    expect((divide(u(5, 'cm'), 2) as Unit).value).toBeCloseTo(0.025, 12);
+    expect((divide(u(5, 'cm'), 2) as UnitInstance).value).toBeCloseTo(0.025, 12);
     // 10 m / 2 m = 5 (fully cancelled → a plain dimensionless number, mathjs parity)
     expect(divide(u(10, 'm'), u(2, 'm')) as number).toBeCloseTo(5, 12);
   });

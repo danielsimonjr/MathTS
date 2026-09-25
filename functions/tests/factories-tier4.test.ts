@@ -27,6 +27,7 @@ import {
   usolve,
   usolveAll,
 } from '../src/factories/index.js';
+import type { Matrix } from '../src/types.js';
 
 // bernoulli moved from factories/ to typed/ — import from the typed layer
 import { bernoulli } from '../src/typed/probability.js';
@@ -78,7 +79,7 @@ describe('factory_round', () => {
 
 describe('factory_xgcd', () => {
   it('xgcd(36, 24) returns gcd=12 with Bezout coefficients', () => {
-    const result = factory_xgcd(36, 24);
+    const result = factory_xgcd(36, 24) as Matrix;
     // Result is [gcd, x, y] where gcd = 36*x + 24*y
     expect(result.valueOf()).toEqual([12, 1, -1]);
   });
@@ -98,7 +99,7 @@ describe('factory_log', () => {
 
 describe('nthRoots', () => {
   it('nthRoots(1) returns complex roots', () => {
-    const result = nthRoots(1);
+    const result = nthRoots(1) as unknown[];
     // nthRoots(1) with default root=2 returns sqrt roots
     expect(result.length).toBeGreaterThanOrEqual(1);
   });
@@ -147,7 +148,7 @@ describe('inv', () => {
     const result = inv([
       [1, 0],
       [0, 1],
-    ]);
+    ]) as number[][];
     // Result should be identity matrix
     expect(result[0][0]).toBeCloseTo(1);
     expect(result[0][1]).toBeCloseTo(0);
@@ -158,7 +159,7 @@ describe('inv', () => {
     const result = inv([
       [2, 0],
       [0, 2],
-    ]);
+    ]) as number[][];
     expect(result[0][0]).toBeCloseTo(0.5);
     expect(result[1][1]).toBeCloseTo(0.5);
   });
@@ -342,7 +343,7 @@ describe('Tier 6 - statistics & probability', () => {
 
 describe('Tier 6 - matrix', () => {
   it('range(1, 5) returns [1,2,3,4]', () => {
-    const r = range(1, 5);
+    const r = range(1, 5) as Matrix;
     // range returns a matrix; convert to array
     const arr = r.valueOf ? r.valueOf() : r;
     expect(arr).toEqual([1, 2, 3, 4]);

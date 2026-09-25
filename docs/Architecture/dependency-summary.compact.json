@@ -1,9 +1,9 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-25", "f": 1175, "e": 5846, "re": 2364 },
   "s": {
-    "loc": 195460,
+    "loc": 195469,
     "cls": 55,
-    "int": 510,
+    "int": 509,
     "fn": 1896,
     "tg": 159,
     "en": 0,
@@ -1141,10 +1141,10 @@
         "BigNumberJSON",
         "BigNumberClass",
         "BigNumberInstance",
-        "UnitInstance",
         "ComplexJSON",
         "PolarCoordinates",
-        "ComplexFormatOptions"
+        "ComplexFormatOptions",
+        "Complex"
       ]
     },
     "functions/numbertheory": {

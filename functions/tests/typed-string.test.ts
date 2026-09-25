@@ -37,7 +37,7 @@ describe('bin', () => {
   });
 
   it('formats Number.MAX_SAFE_INTEGER', () => {
-    const result = bin(Number.MAX_SAFE_INTEGER);
+    const result = bin(Number.MAX_SAFE_INTEGER) as string;
     // Should start with 0b and be a valid binary string
     expect(result).toMatch(/^0b[01]+$/);
     expect(parseInt(result.slice(2), 2)).toBe(Number.MAX_SAFE_INTEGER);

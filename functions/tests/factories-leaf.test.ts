@@ -105,7 +105,7 @@ describe('Leaf factories', () => {
 
     it('conj conjugates', () => {
       const c = new Complex(3, 4);
-      const result = conj(c);
+      const result = conj(c) as Complex;
       expect(result.re).toBe(3);
       expect(result.im).toBe(-4);
     });

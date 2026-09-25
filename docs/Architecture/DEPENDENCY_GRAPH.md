@@ -3107,10 +3107,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports           | Type               |
-| --------------------- | ----------------- | ------------------ |
-| `../utils/factory.js` | `factory`         | Import             |
-| `../types.js`         | `Matrix, Complex` | Import (type-only) |
+| File                  | Imports                          | Type               |
+| --------------------- | -------------------------------- | ------------------ |
+| `../utils/factory.js` | `factory`                        | Import             |
+| `../types.js`         | `Matrix, Complex, TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -3216,10 +3216,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports           | Type               |
-| --------------------- | ----------------- | ------------------ |
-| `../utils/factory.js` | `factory`         | Import             |
-| `../types.js`         | `Matrix, Complex` | Import (type-only) |
+| File                  | Imports                          | Type               |
+| --------------------- | -------------------------------- | ------------------ |
+| `../utils/factory.js` | `factory`                        | Import             |
+| `../types.js`         | `Matrix, Complex, TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -10132,6 +10132,12 @@ graph LR
 | ------------ | --------- |
 | `decimal.js` | `Decimal` |
 
+**Workspace Dependencies:**
+
+| Package                      | Import         |
+| ---------------------------- | -------------- |
+| `@danielsimonjr/mathts-core` | `UnitInstance` |
+
 **Internal Dependencies:**
 
 | File                     | Imports        | Type               |
@@ -10141,7 +10147,6 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `UnitInstance`
 - Constants: `createSpeedOfLight`, `createGravitationConstant`, `createPlanckConstant`, `createReducedPlanckConstant`, `createMagneticConstant`, `createElectricConstant`, `createVacuumImpedance`, `createCoulomb`, `createCoulombConstant`, `createElementaryCharge`, `createBohrMagneton`, `createConductanceQuantum`, `createInverseConductanceQuantum`, `createMagneticFluxQuantum`, `createNuclearMagneton`, `createKlitzing`, `createJosephson`, `createBohrRadius`, `createClassicalElectronRadius`, `createElectronMass`, `createFermiCoupling`, `createFineStructure`, `createHartreeEnergy`, `createProtonMass`, `createDeuteronMass`, `createNeutronMass`, `createQuantumOfCirculation`, `createRydberg`, `createThomsonCrossSection`, `createWeakMixingAngle`, `createEfimovFactor`, `createAtomicMass`, `createAvogadro`, `createBoltzmann`, `createFaraday`, `createFirstRadiation`, `createSpectralRadiance`, `createLoschmidt`, `createGasConstant`, `createMolarPlanckConstant`, `createMolarVolume`, `createSackurTetrode`, `createSecondRadiation`, `createStefanBoltzmann`, `createWienDisplacement`, `createMolarMass`, `createMolarMassC12`, `createGravity`, `createPlanckLength`, `createPlanckMass`, `createPlanckTime`, `createPlanckCharge`, `createPlanckTemperature`
 
 ---
@@ -10620,11 +10625,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                               | Type               |
-| --------------------- | ----------------------------------------------------- | ------------------ |
-| `../utils/is.js`      | `isUnit, isNumber, isBigNumber`                       | Import             |
-| `../utils/factory.js` | `factory`                                             | Import             |
-| `../types.js`         | `MathNumericType, MathArray, Matrix, Unit, BigNumber` | Import (type-only) |
+| File                  | Imports                                                              | Type               |
+| --------------------- | -------------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`      | `isUnit, isNumber, isBigNumber`                                      | Import             |
+| `../utils/factory.js` | `factory`                                                            | Import             |
+| `../types.js`         | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -18350,11 +18355,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195460 |
+| Total Lines of Code     | 195469 |
 | Total Exports           | 5846   |
 | Total Re-exports        | 2364   |
 | Total Classes           | 55     |
-| Total Interfaces        | 510    |
+| Total Interfaces        | 509    |
 | Total Functions         | 1896   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |

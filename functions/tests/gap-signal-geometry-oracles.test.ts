@@ -23,15 +23,20 @@ const re = (c: { re: number }) => c.re;
 
 describe('fft / ifft — known DFTs (not round-trips)', () => {
   it('DFT[1,1,1,1] = [4,0,0,0] (only the DC bin)', () => {
-    const F = fft([1, 1, 1, 1]);
+    const F = fft([1, 1, 1, 1]) as Complex[];
     expect(F.map(re).map((x) => Math.round(x * 1e9) / 1e9)).toEqual([4, 0, 0, 0]);
   });
   it('DFT[1,−1,1,−1] = [0,0,4,0] (energy at the Nyquist bin)', () => {
-    const F = fft([1, -1, 1, -1]);
+    const F = fft([1, -1, 1, -1]) as Complex[];
     expect(F.map(re).map((x) => Math.round(x * 1e9) / 1e9)).toEqual([0, 0, 4, 0]);
   });
   it('IDFT of the hand-written spectrum [4,0,0,0] = [1,1,1,1]', () => {
-    const sig = ifft([new Complex(4, 0), new Complex(0, 0), new Complex(0, 0), new Complex(0, 0)]);
+    const sig = ifft([
+      new Complex(4, 0),
+      new Complex(0, 0),
+      new Complex(0, 0),
+      new Complex(0, 0),
+    ]) as Complex[];
     expect(sig.map((c) => Math.round(c.re * 1e9) / 1e9)).toEqual([1, 1, 1, 1]);
   });
 });

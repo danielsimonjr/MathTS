@@ -7913,6 +7913,7 @@ modules:
           imports:
             - Matrix
             - Complex
+            - TypedFunction
           typeOnly: true
       workspaceDependencies: []
       exports:
@@ -8111,6 +8112,7 @@ modules:
           imports:
             - Matrix
             - Complex
+            - TypedFunction
           typeOnly: true
       workspaceDependencies: []
       exports:
@@ -21274,7 +21276,11 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - UnitInstance
       exports:
         - createSpeedOfLight
         - createGravitationConstant
@@ -21329,8 +21335,6 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
-      interfaces:
-        - UnitInstance
       constants:
         - createSpeedOfLight
         - createGravitationConstant
@@ -22140,6 +22144,7 @@ modules:
             - Matrix
             - Unit
             - BigNumber
+            - TypedFunction
           typeOnly: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
@@ -37794,10 +37799,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 195460
+  totalLinesOfCode: 195469
   totalExports: 5846
   totalClasses: 55
-  totalInterfaces: 510
+  totalInterfaces: 509
   totalFunctions: 1896
   totalTypeGuards: 159
   totalEnums: 0

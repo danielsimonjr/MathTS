@@ -15,7 +15,7 @@ describe('lambertW branches', () => {
     expect(lambertW(-0.1, -1)).toBeCloseTo(-3.577152063957297, 8);
   });
   it('W(x)·e^{W(x)} = x on the lower branch', () => {
-    const w = lambertW(-0.2, -1);
+    const w = lambertW(-0.2, -1) as number;
     expect(w * Math.exp(w)).toBeCloseTo(-0.2, 10);
   });
   it('lower branch NaN outside [-1/e, 0)', () => {

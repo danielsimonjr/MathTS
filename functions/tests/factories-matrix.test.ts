@@ -175,7 +175,7 @@ describe('MathJSDenseMatrix', () => {
       [1, 2],
       [3, 4],
     ]);
-    const arr = m.toArray();
+    const arr = m.toArray() as number[][];
     arr[0][0] = 99;
     expect(m._data[0][0]).toBe(1);
   });
@@ -254,7 +254,7 @@ describe('createMatrixBridge', () => {
   const matrix = createMatrixBridge();
 
   it('creates empty matrix with no args', () => {
-    const m = matrix();
+    const m = matrix() as MathJSDenseMatrix;
     expect(m._data).toEqual([]);
   });
 
@@ -262,7 +262,7 @@ describe('createMatrixBridge', () => {
     const m = matrix([
       [1, 2],
       [3, 4],
-    ]);
+    ]) as MathJSDenseMatrix;
     expect(m._data).toEqual([
       [1, 2],
       [3, 4],
@@ -305,7 +305,7 @@ describe('transpose factory', () => {
       [1, 2],
       [3, 4],
     ]);
-    const result = factory_transpose(m);
+    const result = factory_transpose(m) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 3],
@@ -334,7 +334,7 @@ describe('ctranspose factory', () => {
 describe('identity factory', () => {
   it('creates 3x3 identity (default config returns Matrix)', () => {
     // Default config: matrix='Matrix', so identity(n) returns a Matrix
-    const result = identity(3);
+    const result = identity(3) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 0, 0],
@@ -353,7 +353,7 @@ describe('identity factory', () => {
   });
 
   it('creates identity matrix with explicit dense format', () => {
-    const result = identity([2, 2], 'dense');
+    const result = identity([2, 2], 'dense') as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 0],
@@ -364,7 +364,7 @@ describe('identity factory', () => {
 
 describe('zeros factory', () => {
   it('creates zero matrix (default config returns Matrix)', () => {
-    const result = zeros(2, 3);
+    const result = zeros(2, 3) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [0, 0, 0],
@@ -373,7 +373,7 @@ describe('zeros factory', () => {
   });
 
   it('creates zero vector (default config returns Matrix)', () => {
-    const result = zeros(3);
+    const result = zeros(3) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     // 1D matrix stores flat values
     expect(result.size()).toEqual([3]);
@@ -382,7 +382,7 @@ describe('zeros factory', () => {
 
 describe('ones factory', () => {
   it('creates ones matrix (default config returns Matrix)', () => {
-    const result = ones(2, 2);
+    const result = ones(2, 2) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     expect(result.valueOf()).toEqual([
       [1, 1],
@@ -408,7 +408,7 @@ describe('diag factory', () => {
       [4, 5, 6],
       [7, 8, 9],
     ]);
-    const result = diag(m);
+    const result = diag(m) as MathJSDenseMatrix;
     expect((result as MatrixMarkers).isMatrix).toBe(true);
     const vals = result.valueOf();
     expect(vals).toEqual([1, 5, 9]);

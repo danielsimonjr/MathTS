@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { Complex } from '@danielsimonjr/mathts-core';
 import {
   integrate,
   limit,
@@ -418,7 +419,7 @@ describe('CAS: Solver', () => {
 
     it('should return sorted roots', () => {
       const roots = solve('x^2 - 9', 'x');
-      expect(roots[0]).toBeLessThan(roots[1]);
+      expect(roots[0]).toBeLessThan(roots[1] as number);
     });
   });
 
@@ -738,7 +739,7 @@ describe('CAS: Advanced', () => {
 });
 
 describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
-  const isComplexRoot = (r) => r && typeof r === 'object' && 'im' in r;
+  const isComplexRoot = (r: number | Complex) => r && typeof r === 'object' && 'im' in r;
   it('accepts equation form with = sign', () => {
     const roots = solve('x^2 - 4 = 0', 'x');
     expect(roots).toContain(-2);
@@ -748,13 +749,13 @@ describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
     const roots = solve('x^2 + 1 = 0', 'x');
     expect(roots).toHaveLength(2);
     expect(roots.every(isComplexRoot)).toBe(true);
-    expect(roots[0].im).toBeCloseTo(1, 6);
-    expect(roots[1].im).toBeCloseTo(-1, 6);
+    expect((roots[0] as Complex).im).toBeCloseTo(1, 6);
+    expect((roots[1] as Complex).im).toBeCloseTo(-1, 6);
   });
   it('returns 1 real + 2 complex roots for x^3 - 8 = 0', () => {
     const roots = solve('x^3 - 8 = 0', 'x');
     expect(roots).toContain(2);
-    const complex = roots.filter(isComplexRoot);
+    const complex = roots.filter(isComplexRoot) as Complex[];
     expect(complex).toHaveLength(2);
     expect(complex[0].re).toBeCloseTo(-1, 6);
     expect(Math.abs(complex[0].im)).toBeCloseTo(Math.sqrt(3), 6);
@@ -762,8 +763,8 @@ describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
   it('solves x^2 - 2x + 2 = 0 (complex 1 ± i)', () => {
     const roots = solve('x^2 - 2*x + 2 = 0', 'x');
     expect(roots.every(isComplexRoot)).toBe(true);
-    expect(roots[0].re).toBeCloseTo(1, 6);
-    expect(Math.abs(roots[0].im)).toBeCloseTo(1, 6);
+    expect((roots[0] as Complex).re).toBeCloseTo(1, 6);
+    expect(Math.abs((roots[0] as Complex).im)).toBeCloseTo(1, 6);
   });
   it('falls back to numeric for a quartic (x^4 - 5x^2 + 4)', () => {
     const roots = solve('x^4 - 5*x^2 + 4', 'x');

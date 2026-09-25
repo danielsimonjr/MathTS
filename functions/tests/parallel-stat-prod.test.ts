@@ -66,7 +66,7 @@ describe('parallelStatProd — Float64Array parallel reduction', () => {
 
     let parallelResult: number;
     try {
-      parallelResult = await parallelStatProd(data);
+      parallelResult = (await parallelStatProd(data)) as number;
     } finally {
       // Always restore the original config.
       computePool.updateConfig({ thresholdElements: originalConfig.thresholdElements });
@@ -92,7 +92,7 @@ describe('parallelStatProd — Float64Array parallel reduction', () => {
 
     let parProduct: number;
     try {
-      parProduct = await parallelStatProd(data);
+      parProduct = (await parallelStatProd(data)) as number;
     } finally {
       computePool.updateConfig({
         thresholdElements: originalConfig.thresholdElements,

@@ -430,7 +430,7 @@ describe('cond', () => {
     const c = cond([
       [1, 0],
       [0, 1],
-    ]);
+    ]) as number;
     expectClose(c, 1, 0.5);
   });
 

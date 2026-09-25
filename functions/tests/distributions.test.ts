@@ -39,7 +39,7 @@ describe('Probability Distribution Functions', () => {
     });
 
     it('symmetry: normalPDF(x) = normalPDF(-x)', () => {
-      expect(normalPDF(1.5)).toBeCloseTo(normalPDF(-1.5), 10);
+      expect(normalPDF(1.5)).toBeCloseTo(normalPDF(-1.5) as number, 10);
     });
   });
 
@@ -147,7 +147,7 @@ describe('Probability Distribution Functions', () => {
     it('poissonPMF probabilities sum ~ 1', () => {
       let sum = 0;
       for (let k = 0; k <= 30; k++) {
-        sum += poissonPMF(k, 5);
+        sum += poissonPMF(k, 5) as number;
       }
       expect(sum).toBeCloseTo(1, 8);
     });
@@ -176,7 +176,7 @@ describe('Probability Distribution Functions', () => {
     it('binomialPMF probabilities sum to 1', () => {
       let sum = 0;
       for (let k = 0; k <= 10; k++) {
-        sum += binomialPMF(k, 10, 0.4);
+        sum += binomialPMF(k, 10, 0.4) as number;
       }
       expect(sum).toBeCloseTo(1, 10);
     });
@@ -282,7 +282,7 @@ describe('Probability Distribution Functions', () => {
     it('jsDivergence is symmetric: JSD(P||Q) = JSD(Q||P)', () => {
       const p = [0.1, 0.9];
       const q = [0.4, 0.6];
-      expect(jsDivergence(p, q)).toBeCloseTo(jsDivergence(q, p), 10);
+      expect(jsDivergence(p, q)).toBeCloseTo(jsDivergence(q, p) as number, 10);
     });
 
     it('jsDivergence is non-negative', () => {
@@ -313,8 +313,8 @@ describe('Distribution parallel array overloads', () => {
 
   it('normalPDF over a Float64Array matches the scalar implementation', async () => {
     const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
-    const std = await normalPDF(xs);
-    const params = await normalPDF(xs, 1, 2);
+    const std = (await normalPDF(xs)) as Float64Array;
+    const params = (await normalPDF(xs, 1, 2)) as Float64Array;
     expect(std.length).toBe(1000);
     for (let i = 0; i < xs.length; i += 37) {
       expect(std[i]).toBeCloseTo(normalPDF(xs[i]) as number, 12);
@@ -324,7 +324,7 @@ describe('Distribution parallel array overloads', () => {
 
   it('normalCDF over a Float64Array matches the scalar implementation', async () => {
     const xs = Float64Array.from({ length: 1000 }, (_, i) => (i - 500) / 100);
-    const arr = await normalCDF(xs, 0, 1);
+    const arr = (await normalCDF(xs, 0, 1)) as Float64Array;
     expect(arr[500]).toBeCloseTo(0.5, 12);
     for (let i = 0; i < xs.length; i += 37) {
       expect(arr[i]).toBeCloseTo(normalCDF(xs[i], 0, 1) as number, 12);
@@ -333,8 +333,8 @@ describe('Distribution parallel array overloads', () => {
 
   it('exponential PDF/CDF over a Float64Array match the scalar implementations', async () => {
     const xs = Float64Array.from({ length: 800 }, (_, i) => i / 100);
-    const pdf = await exponentialPDF(xs, 1.5);
-    const cdf = await exponentialCDF(xs, 1.5);
+    const pdf = (await exponentialPDF(xs, 1.5)) as Float64Array;
+    const cdf = (await exponentialCDF(xs, 1.5)) as Float64Array;
     for (let i = 0; i < xs.length; i += 29) {
       expect(pdf[i]).toBeCloseTo(exponentialPDF(xs[i], 1.5) as number, 12);
       expect(cdf[i]).toBeCloseTo(exponentialCDF(xs[i], 1.5) as number, 12);
@@ -343,16 +343,16 @@ describe('Distribution parallel array overloads', () => {
 
   it('discrete PMFs over a Float64Array match the scalar implementations', async () => {
     const ks = Float64Array.from({ length: 600 }, (_, i) => i % 30);
-    const pois = await poissonPMF(ks, 5);
-    const binom = await binomialPMF(ks, 40, 0.3);
-    const geom = await geometricPMF(
+    const pois = (await poissonPMF(ks, 5)) as Float64Array;
+    const binom = (await binomialPMF(ks, 40, 0.3)) as Float64Array;
+    const geom = (await geometricPMF(
       Float64Array.from({ length: 600 }, (_, i) => (i % 20) + 1),
       0.25
-    );
-    const bern = await bernoulliPMF(
+    )) as Float64Array;
+    const bern = (await bernoulliPMF(
       Float64Array.from({ length: 600 }, (_, i) => i % 2),
       0.7
-    );
+    )) as Float64Array;
     for (let i = 0; i < ks.length; i += 17) {
       expect(pois[i]).toBeCloseTo(poissonPMF(ks[i], 5) as number, 12);
       expect(binom[i]).toBeCloseTo(binomialPMF(ks[i], 40, 0.3) as number, 12);

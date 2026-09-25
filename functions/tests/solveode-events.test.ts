@@ -71,7 +71,7 @@ describe('solveODE — event detection (scipy solve_ivp parity)', () => {
     const g = 9.8;
     const proj = (_t: number, y: number[]): number[] => [y[1], -g];
     const sol = solveODE(proj, [0, 10], [0, 20], {
-      events: { event: (_t, y) => y[0], terminal: true, direction: -1 },
+      events: { event: (_t: number, y: number[]) => y[0], terminal: true, direction: -1 },
       tol: 1e-10,
     }) as { tEvents: number[][]; t: number[] };
     expect(sol.tEvents[0][0]).toBeCloseTo(4.081632653061226, 6);
@@ -91,8 +91,8 @@ describe('solveODE — event detection (scipy solve_ivp parity)', () => {
 
   it('scalar ODE events: y′ = 1 from 0, event at y = 3 (state passed as [v])', () => {
     // y(t) = t; event g = y[0] − 3 fires at t = 3. Scalar y0 wraps to a length-1 state.
-    const sol = solveODE((_t, _y) => 1, [0, 10], 0, {
-      events: { event: (_t, y) => y[0] - 3, terminal: true },
+    const sol = solveODE((_t: unknown, _y: unknown) => 1, [0, 10], 0, {
+      events: { event: (_t: number, y: number[]) => y[0] - 3, terminal: true },
       tol: 1e-10,
     }) as { tEvents: number[][]; yEvents: number[][]; t: number[]; y: number[] };
     expect(sol.tEvents[0][0]).toBeCloseTo(3, 8);
@@ -103,9 +103,9 @@ describe('solveODE — event detection (scipy solve_ivp parity)', () => {
 
   it('works with the stiff Rosenbrock method too', () => {
     // y′ = −y from y0 = 1 ⇒ y = e^−t; event at y = 0.5 fires at t = ln 2.
-    const sol = solveODE((_t, y) => -(y as number), [0, 5], 1, {
+    const sol = solveODE((_t: unknown, y: unknown) => -(y as number), [0, 5], 1, {
       method: 'Rosenbrock',
-      events: { event: (_t, y) => y[0] - 0.5, terminal: true },
+      events: { event: (_t: number, y: number[]) => y[0] - 0.5, terminal: true },
       tol: 1e-9,
     }) as { tEvents: number[][]; t: number[] };
     expect(sol.tEvents[0][0]).toBeCloseTo(Math.LN2, 6);

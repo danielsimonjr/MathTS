@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import type { Matrix, Complex } from '../types.js';
+import type { Matrix, Complex, TypedFunction } from '../types.js';
 
 const name = 'zpk2tf';
 
@@ -18,7 +18,9 @@ type ZPKValue = number | Complex | { type: string; re?: number; im?: number };
 export const createZpk2tf = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, multiply, Complex, number }) => {
+  // The deps are untyped (`any`), so the result is declared: without it the export
+  // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
+  ({ typed, add, multiply, Complex, number }): TypedFunction => {
     /**
      * Compute the transfer function of a zero-pole-gain model.
      *

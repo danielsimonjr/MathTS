@@ -21,7 +21,7 @@ describe.each(['BDF', 'Radau'] as const)('solveODE — %s stiff method', (method
     const exact = Math.exp(-10); // 4.5399929762484854e-05
     // BDF (order 1–5 NDF) needs tol≈1e-9 to reach 1e-6 global on this short-horizon decay; Radau
     // (order 5) reaches ~1e-11 here. tol=1e-9 makes both pass the same closed-form pin honestly.
-    const sol = solveODE((_t, y) => -1000 * (y as number), [0, 0.01], 1, {
+    const sol = solveODE((_t: unknown, y: unknown) => -1000 * (y as number), [0, 0.01], 1, {
       method,
       tol: 1e-9,
     }) as { t: number[]; y: number[] };
@@ -101,14 +101,20 @@ describe('solveODE — Van der Pol mu=1000 (very stiff) vs scipy', () => {
 
 describe('solveODE — BDF/Radau scalar convenience + variable order', () => {
   it("BDF solves the non-stiff scalar y'=y to y(1)=e (unwrapped scalar result)", () => {
-    const sol = solveODE((_t, y) => y as number, [0, 1], 1, { method: 'BDF', tol: 1e-8 }) as {
+    const sol = solveODE((_t: unknown, y: unknown) => y as number, [0, 1], 1, {
+      method: 'BDF',
+      tol: 1e-8,
+    }) as {
       y: number[];
     };
     expect(lastScalar(sol)).toBeCloseTo(Math.E, 5);
   });
 
   it("Radau solves the non-stiff scalar y'=y to y(1)=e", () => {
-    const sol = solveODE((_t, y) => y as number, [0, 1], 1, { method: 'Radau', tol: 1e-8 }) as {
+    const sol = solveODE((_t: unknown, y: unknown) => y as number, [0, 1], 1, {
+      method: 'Radau',
+      tol: 1e-8,
+    }) as {
       y: number[];
     };
     expect(lastScalar(sol)).toBeCloseTo(Math.E, 5);

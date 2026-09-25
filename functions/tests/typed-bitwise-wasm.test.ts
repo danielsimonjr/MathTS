@@ -230,7 +230,7 @@ describe('typed bitwise — WASM fallback when module not loaded', () => {
     // which is the actual contract under test.
     const a = Int32Array.from([0xff00, 0x0ff0, 0x00ff, 0x1234]);
     const b = Int32Array.from([0xf0f0, 0x0f0f, 0xaaaa, 0x4321]);
-    const out = await bitAnd(a, b);
+    const out = (await bitAnd(a, b)) as Int32Array;
     expect(Array.from(out)).toEqual([
       0xff00 & 0xf0f0,
       0x0ff0 & 0x0f0f,
@@ -250,7 +250,7 @@ describe('typed bitwise — WASM fallback when module not loaded', () => {
       a[i] = i | 0;
       b[i] = (i ^ 0xdeadbeef) | 0;
     }
-    const out = await bitOr(a, b);
+    const out = (await bitOr(a, b)) as Int32Array;
     expect(out).toBeInstanceOf(Int32Array);
     expect(out.length).toBe(len);
     // Verify the first and last elements match the oracle.

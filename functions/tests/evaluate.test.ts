@@ -133,7 +133,8 @@ describe('parse()', () => {
   });
 
   it('parsed node has correct structure', () => {
-    const node = parse('sin(pi)') as { type: string; fn: { name: string } };
+    // A FunctionNode: the base node type plus its `fn` symbol.
+    const node = parse('sin(pi)') as ReturnType<typeof parse> & { fn: { name: string } };
     expect(node.type).toBe('FunctionNode');
     expect(node.fn.name).toBe('sin');
   });

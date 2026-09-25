@@ -6498,7 +6498,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1849
+      "loc": 1858
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -6918,7 +6918,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 147
+      "loc": 149
     },
     {
       "file": "functions/src/signal/iir-design.ts",
@@ -6960,7 +6960,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 120
+      "loc": 122
     },
     {
       "file": "functions/src/special/erf.ts",
@@ -7625,7 +7625,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 321
+      "loc": 317
     },
     {
       "file": "functions/src/typed/algebra.ts",
@@ -8346,7 +8346,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 780
+      "loc": 781
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
@@ -8444,14 +8444,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 288
+      "loc": 297
     },
     {
       "file": "functions/tests/cov-special.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 312
+      "loc": 375
     },
     {
       "file": "functions/tests/cov-statistics.test.ts",
@@ -8507,7 +8507,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 1111
+      "loc": 1141
     },
     {
       "file": "functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts",
@@ -8521,7 +8521,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 44
+      "loc": 47
     },
     {
       "file": "functions/tests/det-native-accel.test.ts",
@@ -8584,14 +8584,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 93
+      "loc": 94
     },
     {
       "file": "functions/tests/evaluate.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 141
+      "loc": 142
     },
     {
       "file": "functions/tests/exact-mw-ks.test.ts",
@@ -8647,7 +8647,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 375
+      "loc": 376
     },
     {
       "file": "functions/tests/factorization/factor-mod-p.test.ts",
@@ -9088,7 +9088,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 107
+      "loc": 110
     },
     {
       "file": "functions/tests/gap-signal-cas-oracles.test.ts",
@@ -9102,7 +9102,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 110
     },
     {
       "file": "functions/tests/gap-spearman.test.ts",
@@ -9151,7 +9151,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 128
+      "loc": 134
     },
     {
       "file": "functions/tests/gap-stiff-rodas-oracle.test.ts",
@@ -9172,7 +9172,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 120
+      "loc": 121
     },
     {
       "file": "functions/tests/gap-transcendental-richtype-oracle.test.ts",
@@ -9410,7 +9410,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 89
     },
     {
       "file": "functions/tests/helpers/wasm-spy.ts",
@@ -9718,7 +9718,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 478
+      "loc": 496
     },
     {
       "file": "functions/tests/parallel-stat-prod.test.ts",
@@ -9928,7 +9928,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 160
+      "loc": 190
     },
     {
       "file": "functions/tests/sort-as-wasm.test.ts",
@@ -10299,7 +10299,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 107
+      "loc": 108
     },
     {
       "file": "functions/tests/typed-variadic.test.ts",
@@ -10320,7 +10320,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 61
+      "loc": 62
     },
     {
       "file": "functions/tests/utils-factory.test.ts",
