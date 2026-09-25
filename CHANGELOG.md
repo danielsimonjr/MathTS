@@ -27,8 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   extended a local stub, so their types lacked `equals`, `traverse`, `evaluate`, `compile` and
   more, and `parse('x')` was typed `MathNode | MathNode[]`. functions: the four async hypothesis
   tests returned `Result | BootstrapResult` even without a `bootstrap` option. No runtime change.
-- **Tests are type-checked in 21 of 24 packages** (`typecheck` runs `tsc -p tsconfig.test.json`
-  after `tsc --noEmit`); before this round, none were.
+- **Tests are type-checked in every TypeScript package** (23 of 24; `assembly` is AssemblyScript).
+  Each `typecheck` runs `tsc -p tsconfig.test.json` after `tsc --noEmit`; before this round, no
+  package type-checked its tests (expression had 998 errors, functions 396). Further public-type
+  fixes this found: every expression node's `toJSON` declares its shape and `RangeNode` accepts the
+  `step: null` its `toJSON` emits; a string handler may return `undefined` to fall back to the
+  default output; `solveODE`/`freqz`/`zpk2tf` were published as `any` and are now `unknown` like
+  every typed function; the unit-valued physical constants are core `UnitInstance`s, not a
+  one-field stub.
 - **`polynomialGCD` is exact for integer inputs.** Floating-point Euclid reported a spurious
   common factor for coprime high-degree pairs (a degree-266 polynomial and a random integer cubic:
   wrong in 53 of 300 draws). Inputs whose coefficients are all safe integers now take a bigint
