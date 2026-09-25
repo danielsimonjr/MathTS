@@ -7,10 +7,13 @@
  *   2. `npm pack` every non-private workspace package into a temporary directory.
  *   3. Install all tarballs, plus the repository's TypeScript version, into a temporary
  *      consumer project.
- *   4. Import every public entry point (each `exports` subpath that has `types`) and run
+ *   4. Check the AssemblyScript binary each SHIPPED_WASM package must carry: present in
+ *      the installed package, valid WebAssembly, and matching its SHA-384 manifest.
+ *   5. Import every public entry point (each `exports` subpath that has `types`) and run
  *      `tsc --noEmit` with `strict` and `skipLibCheck: false`.
  *
- * Any compiler error fails the run (exit 1), except the pre-existing errors in KNOWN_ERRORS. The monorepo's own `tsc` runs do not find these
+ * Any compiler error or shipped-wasm problem fails the run (exit 1), except the pre-existing
+ * compiler errors in KNOWN_ERRORS. The monorepo's own `tsc` runs do not find these
  * errors: they read source, not the emitted `.d.ts`, and consumers with `skipLibCheck: false`
  * also check the emitted `.d.ts` against their own lib (for example TS2416 in core 0.15.0
  * `dist/map.d.ts`, where `keys()` returned `IterableIterator` but the TS >= 5.6 `Map` declares
@@ -25,9 +28,18 @@
  * Run it with `node` (never `bun run`): `[run] bun = true` would put it on Bun.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
 /**
@@ -35,6 +47,44 @@ import { repoRoot, workspaceDirs } from './workspaces.mjs';
  * Remove an entry when its cause is fixed; the script warns when an entry no longer matches.
  */
 const KNOWN_ERRORS = [];
+
+/**
+ * Packages whose tarball must carry the AssemblyScript binary. `copy-wasm.mjs` fails
+ * the build without it, but a publish from a machine with a stale cache could still
+ * ship a dist that lacks it, and consumers would then silently run the JS fallback.
+ * So the INSTALLED package is checked: the file exists, is valid WebAssembly, and its
+ * SHA-384 matches the manifest beside it, which the loaders verify before instantiating.
+ */
+const SHIPPED_WASM = [
+  { pkg: '@danielsimonjr/mathts-matrix', file: 'dist/wasm/mathts-as.wasm' },
+  { pkg: '@danielsimonjr/mathts-functions', file: 'dist/wasm/mathts-as.wasm' },
+];
+
+/** Problems with the wasm shipped in the installed packages (empty when all are sound). */
+function shippedWasmProblems(consumerDir, selectedNames) {
+  const problems = [];
+  for (const { pkg, file } of SHIPPED_WASM) {
+    if (!selectedNames.has(pkg)) continue;
+    const wasmPath = join(consumerDir, 'node_modules', pkg, file);
+    if (!existsSync(wasmPath)) {
+      problems.push(`${pkg}: ${file} is missing from the packed tarball`);
+      continue;
+    }
+    const bytes = readFileSync(wasmPath);
+    if (!WebAssembly.validate(bytes)) problems.push(`${pkg}: ${file} is not valid WebAssembly`);
+    const manifestPath = join(dirname(wasmPath), 'wasm-manifest.json');
+    if (!existsSync(manifestPath)) {
+      problems.push(`${pkg}: no wasm-manifest.json beside ${file}`);
+      continue;
+    }
+    const expected = JSON.parse(readFileSync(manifestPath, 'utf8'))[basename(file)];
+    const actual = `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
+    if (expected !== actual) {
+      problems.push(`${pkg}: manifest says ${expected ?? '(no entry)'} but ${file} is ${actual}`);
+    }
+  }
+  return problems;
+}
 
 const args = process.argv.slice(2);
 const option = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
@@ -154,6 +204,14 @@ try {
     `consumer-typecheck: ${packages.length} packages, ${specifiers.length} entry points, ` +
       `moduleResolution ${resolution}, TypeScript ${tsVersion}, npm ${npmVersion}`
   );
+  const selectedNames = new Set(packages.map(({ pkg }) => pkg.name));
+  const wasmProblems = shippedWasmProblems(consumer, selectedNames);
+  const wasmChecked = SHIPPED_WASM.filter(({ pkg }) => selectedNames.has(pkg)).length;
+  if (wasmProblems.length > 0) {
+    for (const problem of wasmProblems) console.error(`consumer-typecheck: ${problem}`);
+  } else if (wasmChecked > 0) {
+    console.log(`consumer-typecheck: shipped wasm OK in ${wasmChecked} package(s)`);
+  }
   let output = '';
   try {
     output = execFileSync('npx', ['--no-install', 'tsc', '-p', '.'], {
@@ -182,9 +240,11 @@ try {
         `consumer-typecheck: WARNING known entry ${k.pkg} ${k.code} no longer matches; remove it`
       );
   }
-  if (unexpected.length === 0) {
+  if (unexpected.length === 0 && wasmProblems.length === 0) {
     console.log('consumer-typecheck: PASS (0 unexpected errors)');
     exitCode = 0;
+  } else if (unexpected.length === 0) {
+    console.error(`consumer-typecheck: FAIL (${wasmProblems.length} shipped-wasm problem(s))`);
   } else {
     console.error(unexpected.join('\n'));
     console.error(`consumer-typecheck: FAIL (${unexpected.length} unexpected errors)`);
