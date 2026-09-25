@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1865
+**Total files**: 1867
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1151 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      631 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      633 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1865** |                                                                                                              |
+| **Total**     | **1867** |                                                                                                              |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1175 |
-| `tests`    |   631 |
+| `tests`    |   633 |
 | `tools`    |    25 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    82 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
-| `@danielsimonjr/mathts-functions`      |   771 |
+| `@danielsimonjr/mathts-functions`      |   773 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   100 |
@@ -1431,6 +1431,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/lgamma-complex.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/linprog-feasible.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/linprog-full.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/load-wasm.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/logistic-regression.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-bridge-accel.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-functions.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1457,6 +1458,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/physical-constants.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/poly-as-wasm.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polygamma-orthopoly.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/polynomial-gcd-exact.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/property-invariants.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/public-api-smoke.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/qz-hardening.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |

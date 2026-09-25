@@ -8,7 +8,7 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 228
+      "ALLOWLISTED": 229
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -4672,6 +4672,27 @@
         },
         {
           "file": "functions/src/typed/numeric.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "loadWasm",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/bindings/wasm-loader.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"

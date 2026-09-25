@@ -29,6 +29,7 @@ import {
   cleanUnivariatePoly,
   factorMultivariateString,
 } from './factorization/index.js';
+import { polyGcdZ } from './factorization/integer-poly.js';
 
 // =============================================================================
 // Type Aliases
@@ -282,12 +283,21 @@ export function polyder(coeffs: number[], n: number = 1): number[] {
 }
 
 /**
- * Compute the GCD of two polynomials using the Euclidean algorithm.
- * The result is monic (leading coefficient = 1).
+ * Compute the GCD of two polynomials. The result is monic (leading coefficient = 1).
  *
- * @param a - First polynomial coefficients
- * @param b - Second polynomial coefficients
- * @returns GCD polynomial coefficients (monic)
+ * When every coefficient of both inputs is a safe integer, the GCD is computed
+ * exactly over ℤ[x] (primitive pseudo-remainder sequence in `bigint`) and then
+ * made monic. Otherwise it runs the floating-point Euclidean algorithm.
+ *
+ * The exact path matters: floating-point Euclid cannot decide coprimality for
+ * high-degree inputs. `xⁿ mod b` is dominated by `λⁿ·b(x)/(x−λ)` (λ the largest
+ * root of `b`), so the first remainder is, to rounding, a scaled factor of `b`
+ * and a spurious "GCD" comes back. For a degree-266 polynomial and a random
+ * integer cubic that happened in 53 of 300 draws.
+ *
+ * @param a - First polynomial coefficients (index = power)
+ * @param b - Second polynomial coefficients (index = power)
+ * @returns GCD polynomial coefficients (monic); `[0]` when both inputs are zero
  *
  * @example
  * ```typescript
@@ -296,6 +306,10 @@ export function polyder(coeffs: number[], n: number = 1): number[] {
  * ```
  */
 export function polynomialGCD(a: number[], b: number[]): number[] {
+  if (a.every(Number.isSafeInteger) && b.every(Number.isSafeInteger)) {
+    return integerPolynomialGCD(a, b);
+  }
+
   let r0 = trimPoly([...a]);
   let r1 = trimPoly([...b]);
 
@@ -311,6 +325,15 @@ export function polynomialGCD(a: number[], b: number[]): number[] {
     return r0.map((c) => c / leading);
   }
   return r0;
+}
+
+/** Exact monic GCD of two integer-coefficient polynomials. */
+function integerPolynomialGCD(a: number[], b: number[]): number[] {
+  const g = polyGcdZ(a.map(BigInt), b.map(BigInt));
+  if (g.length === 0) return [0];
+  const lead = Number(g[g.length - 1]);
+  // Each coefficient is the correctly rounded quotient of two exact integers.
+  return g.map((c) => Number(c) / lead);
 }
 
 /**

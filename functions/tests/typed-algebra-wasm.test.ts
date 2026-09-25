@@ -276,25 +276,33 @@ describeIfAS('polynomial algebra — above-threshold AS WASM dispatch', () => {
     expect(maxDiff(wasmQuot, jsQuot)).toBeLessThan(1e-6);
   });
 
-  it('polynomialGCD large polynomial executes poly_div_mod_f64 and still computes correctly', () => {
+  it('polynomialGCD of integer inputs is exact and never reaches the AS kernel', () => {
     // GCD([x-1]*[x+1]*R, [x-1]) = x-1 for an above-threshold (length 266) bigPoly.
-    // The second argument used to be a random cubic, which made this test fail
-    // ~20% of runs on BOTH the WASM and JS paths (identically): floating-point
-    // Euclid of a degree-266 polynomial by a random cubic cancels catastrophically,
-    // yields a spurious non-constant "GCD", and dividing bigPoly by that explodes.
-    // Dividing by x-1 is exact (integer synthetic division), so this is well-posed.
+    // Integer coefficients take the exact bigint path (primitive PRS over Z[x]),
+    // so floating-point Euclid, and its kernel, are not involved at all.
     const xm1 = [-1, 1];
     const xp1 = [1, 1];
     const bigPoly = polymul(polymul(xm1, xp1), randPoly(N - 3));
-    const { counts } = countExportCalls(['poly_div_mod_f64'], () => {
-      // The first Euclid step divides the above-threshold bigPoly (AS kernel).
-      const g = polynomialGCD(bigPoly, xm1);
-      expect(g).toEqual([-1, 1]);
-      // GCD should divide bigPoly
-      const rem = polynomialRemainder(bigPoly, g);
-      const remNorm = Math.max(...rem.map(Math.abs));
-      expect(remNorm).toBeLessThan(1e-6);
-    });
+    const { result: g, counts } = countExportCalls(['poly_div_mod_f64'], () =>
+      polynomialGCD(bigPoly, xm1)
+    );
+    expect(g).toEqual([-1, 1]);
+    expect(counts.poly_div_mod_f64).toBe(0);
+    // GCD should divide bigPoly
+    const rem = polynomialRemainder(bigPoly, g);
+    expect(Math.max(...rem.map(Math.abs))).toBeLessThan(1e-6);
+  });
+
+  it('polynomialGCD of non-integer inputs runs float Euclid on poly_div_mod_f64', () => {
+    // Halving every coefficient is exact in binary and makes the inputs
+    // non-integer, so they take the floating-point path; the first Euclid step
+    // divides the above-threshold polynomial on the AS kernel.
+    const xm1 = [-1, 1];
+    const bigPoly = polymul(polymul(xm1, [1, 1]), randPoly(N - 3)).map((c) => c / 2);
+    const { result: g, counts } = countExportCalls(['poly_div_mod_f64'], () =>
+      polynomialGCD(bigPoly, [-0.5, 0.5])
+    );
+    expect(g).toEqual([-1, 1]);
     expect(counts.poly_div_mod_f64).toBeGreaterThan(0);
   });
 

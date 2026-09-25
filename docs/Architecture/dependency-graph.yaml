@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-09-25'
   totalFiles: 1175
   totalModules: 83
-  totalExports: 5842
+  totalExports: 5846
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -5375,6 +5375,11 @@ modules:
           imports:
             - config
           reExport: true
+        - file: ./wasm/WasmLoader.js
+          imports:
+            - loadWasm
+            - isWasmLoaded
+          reExport: true
         - file: ./typed/unit.js
           imports:
             - to
@@ -6209,6 +6214,8 @@ modules:
             - SVDOptions
       exports:
         - config
+        - loadWasm
+        - isWasmLoaded
         - to
         - toBest
         - evaluate
@@ -6617,6 +6624,8 @@ modules:
         - '* from ./typed/cas.js'
         - '* from ./factories/index.js'
         - config
+        - loadWasm
+        - isWasmLoaded
         - to
         - toBest
         - evaluate
@@ -9936,6 +9945,9 @@ modules:
             - factorPolynomialUnivariate
             - cleanUnivariatePoly
             - factorMultivariateString
+        - file: ./factorization/integer-poly.js
+          imports:
+            - polyGcdZ
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -12703,11 +12715,16 @@ modules:
           subpath: internal
       exports:
         - wasmLoader
+        - loadWasm
+        - isWasmLoaded
         - WasmLoader
       classes:
         - WasmLoader
       interfaces:
         - WasmModule
+      functions:
+        - loadWasm
+        - isWasmLoaded
       constants:
         - wasmLoader
     functions/src/wasm/sort/wasm-bridge.ts:
@@ -37741,15 +37758,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 195211
-  totalExports: 5842
+  totalLinesOfCode: 195288
+  totalExports: 5846
   totalClasses: 55
   totalInterfaces: 509
-  totalFunctions: 1886
-  totalTypeGuards: 158
+  totalFunctions: 1888
+  totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1599
-  totalReExports: 2362
+  totalReExports: 2364
   totalTypeOnlyImports: 582
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

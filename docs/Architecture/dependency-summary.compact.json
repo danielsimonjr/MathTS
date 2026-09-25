@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-25", "f": 1175, "e": 5842, "re": 2362 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-25", "f": 1175, "e": 5846, "re": 2364 },
   "s": {
-    "loc": 195211,
+    "loc": 195288,
     "cls": 55,
     "int": 509,
-    "fn": 1886,
-    "tg": 158,
+    "fn": 1888,
+    "tg": 159,
     "en": 0,
     "co": 1599,
     "toi": 582
@@ -459,6 +459,8 @@
         "kmeans",
         "spectralClustering",
         "config",
+        "loadWasm",
+        "isWasmLoaded",
         "to",
         "toBest",
         "evaluate",
@@ -471,9 +473,7 @@
         "eulerNumbers",
         "stirlingS1",
         "discreteLog",
-        "primitiveRoot",
-        "multiplicativeOrder",
-        "kroneckerSymbol"
+        "primitiveRoot"
       ],
       "int": [
         "KMeansResult",
@@ -1858,7 +1858,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 128, "o": 0 },
+    { "p": "src/index.ts", "i": 129, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
