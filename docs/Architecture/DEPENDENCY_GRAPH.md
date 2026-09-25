@@ -10881,11 +10881,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                | Type   |
-| --------------------- | ---------------------- | ------ |
-| `../utils/is.js`      | `isNode, isSymbolNode` | Import |
-| `../utils/factory.js` | `factory`              | Import |
-| `../operators.js`     | `getPrecedence`        | Import |
+| File                  | Imports                | Type               |
+| --------------------- | ---------------------- | ------------------ |
+| `../utils/is.js`      | `isNode, isSymbolNode` | Import             |
+| `../utils/factory.js` | `factory`              | Import             |
+| `../operators.js`     | `getPrecedence`        | Import             |
+| `./Node.js`           | `MathNode`             | Import (type-only) |
 
 **Exports:**
 
@@ -10935,13 +10936,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports           | Type   |
-| --------------------- | ----------------- | ------ |
-| `../utils/string.js`  | `escape`          | Import |
-| `../utils/customs.js` | `getSafeProperty` | Import |
-| `../utils/factory.js` | `factory`         | Import |
-| `../utils/latex.js`   | `toSymbol`        | Import |
-| `../utils/mathml.js`  | `toMathMLSymbol`  | Import |
+| File                  | Imports           | Type               |
+| --------------------- | ----------------- | ------------------ |
+| `../utils/string.js`  | `escape`          | Import             |
+| `../utils/customs.js` | `getSafeProperty` | Import             |
+| `../utils/factory.js` | `factory`         | Import             |
+| `../utils/latex.js`   | `toSymbol`        | Import             |
+| `../utils/mathml.js`  | `toMathMLSymbol`  | Import             |
+| `./Node.js`           | `MathNode`        | Import (type-only) |
 
 **Exports:**
 
@@ -10975,14 +10977,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                        | Type   |
-| --------------------- | ------------------------------ | ------ |
-| `../operators.js`     | `getPrecedence`                | Import |
-| `../utils/string.js`  | `escape`                       | Import |
-| `../utils/customs.js` | `getSafeProperty`              | Import |
-| `../utils/latex.js`   | `latexOperators`               | Import |
-| `../utils/mathml.js`  | `escapeMathML, inlineOperator` | Import |
-| `../utils/factory.js` | `factory`                      | Import |
+| File                  | Imports                        | Type               |
+| --------------------- | ------------------------------ | ------------------ |
+| `../operators.js`     | `getPrecedence`                | Import             |
+| `../utils/string.js`  | `escape`                       | Import             |
+| `../utils/customs.js` | `getSafeProperty`              | Import             |
+| `../utils/latex.js`   | `latexOperators`               | Import             |
+| `../utils/mathml.js`  | `escapeMathML, inlineOperator` | Import             |
+| `../utils/factory.js` | `factory`                      | Import             |
+| `./Node.js`           | `MathNode`                     | Import (type-only) |
 
 **Exports:**
 
@@ -11031,17 +11034,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                          | Type   |
-| --------------------- | ---------------------------------------------------------------- | ------ |
-| `../utils/is.js`      | `isNode, isConstantNode, isOperatorNode, isParenthesisNode`      | Import |
-| `../utils/array.js`   | `map`                                                            | Import |
-| `../utils/scope.js`   | `createSubScope`                                                 | Import |
-| `../utils/string.js`  | `escape`                                                         | Import |
-| `../utils/customs.js` | `getSafeProperty, isSafeMethod`                                  | Import |
-| `../operators.js`     | `getAssociativity, getPrecedence, isAssociativeWith, properties` | Import |
-| `../utils/latex.js`   | `latexOperators`                                                 | Import |
-| `../utils/mathml.js`  | `escapeMathML, inlineOperator, parenthesizeLower`                | Import |
-| `../utils/factory.js` | `factory`                                                        | Import |
+| File                  | Imports                                                          | Type               |
+| --------------------- | ---------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`      | `isNode, isConstantNode, isOperatorNode, isParenthesisNode`      | Import             |
+| `../utils/array.js`   | `map`                                                            | Import             |
+| `../utils/scope.js`   | `createSubScope`                                                 | Import             |
+| `../utils/string.js`  | `escape`                                                         | Import             |
+| `../utils/customs.js` | `getSafeProperty, isSafeMethod`                                  | Import             |
+| `../operators.js`     | `getAssociativity, getPrecedence, isAssociativeWith, properties` | Import             |
+| `../utils/latex.js`   | `latexOperators`                                                 | Import             |
+| `../utils/mathml.js`  | `escapeMathML, inlineOperator, parenthesizeLower`                | Import             |
+| `../utils/factory.js` | `factory`                                                        | Import             |
+| `./Node.js`           | `MathNode`                                                       | Import (type-only) |
 
 **Exports:**
 
@@ -11053,13 +11057,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                            | Type   |
-| --------------------- | ---------------------------------- | ------ |
-| `../utils/customs.js` | `getSafeProperty, setSafeProperty` | Import |
-| `../utils/factory.js` | `factory`                          | Import |
-| `../utils/is.js`      | `isNode`                           | Import |
-| `../utils/object.js`  | `hasOwnProperty`                   | Import |
-| `../utils/string.js`  | `escape, stringify`                | Import |
+| File                  | Imports                            | Type               |
+| --------------------- | ---------------------------------- | ------------------ |
+| `../utils/customs.js` | `getSafeProperty, setSafeProperty` | Import             |
+| `../utils/factory.js` | `factory`                          | Import             |
+| `../utils/is.js`      | `isNode`                           | Import             |
+| `../utils/object.js`  | `hasOwnProperty`                   | Import             |
+| `../utils/string.js`  | `escape, stringify`                | Import             |
+| `./Node.js`           | `MathNode`                         | Import (type-only) |
 
 **Exports:**
 
@@ -11093,13 +11098,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                       | Type   |
-| --------------------- | ------------------------------------------------------------- | ------ |
-| `../utils/array.js`   | `map`                                                         | Import |
-| `../utils/customs.js` | `getSafeProperty`                                             | Import |
-| `../utils/factory.js` | `factory`                                                     | Import |
-| `../utils/is.js`      | `isArray, isConstantNode, isMatrix, isNode, isString, typeOf` | Import |
-| `../utils/string.js`  | `escape`                                                      | Import |
+| File                  | Imports                                                                     | Type               |
+| --------------------- | --------------------------------------------------------------------------- | ------------------ |
+| `../utils/array.js`   | `map`                                                                       | Import             |
+| `../utils/customs.js` | `getSafeProperty`                                                           | Import             |
+| `../utils/factory.js` | `factory`                                                                   | Import             |
+| `../utils/is.js`      | `isArray, isConstantNode, isMatrix, isNode, isString, isSymbolNode, typeOf` | Import             |
+| `../utils/string.js`  | `escape`                                                                    | Import             |
+| `./Node.js`           | `MathNode`                                                                  | Import (type-only) |
 
 **Exports:**
 
@@ -11145,10 +11151,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports   | Type   |
-| --------------------- | --------- | ------ |
-| `../utils/is.js`      | `isNode`  | Import |
-| `../utils/factory.js` | `factory` | Import |
+| File                  | Imports    | Type               |
+| --------------------- | ---------- | ------------------ |
+| `../utils/is.js`      | `isNode`   | Import             |
+| `../utils/factory.js` | `factory`  | Import             |
+| `./Node.js`           | `MathNode` | Import (type-only) |
 
 **Exports:**
 
@@ -17484,6 +17491,7 @@ graph LR
 | `functions/src/utils/object`                           | 0 files      | 28 files   |
 | `expression/src/index`                                 | 28 files     | 0 files    |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
+| `expression/src/node/Node`                             | 6 files      | 20 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 21 files   |
 | `assembly/src/index`                                   | 24 files     | 0 files    |
@@ -17492,7 +17500,6 @@ graph LR
 | `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `core/src/internal`                                    | 19 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
-| `expression/src/node/Node`                             | 6 files      | 13 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
@@ -18343,7 +18350,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195430 |
+| Total Lines of Code     | 195399 |
 | Total Exports           | 5846   |
 | Total Re-exports        | 2364   |
 | Total Classes           | 55     |
@@ -18351,7 +18358,7 @@ graph TD
 | Total Functions         | 1888   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
-| Type-only Imports       | 582    |
+| Type-only Imports       | 589    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

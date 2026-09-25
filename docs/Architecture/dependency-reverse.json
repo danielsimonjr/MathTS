@@ -2448,14 +2448,6 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts"
     ],
-    "expression/src/utils/array.ts": [
-      "expression/src/node/ArrayNode.ts",
-      "expression/src/node/BlockNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/utils/stringSubset.ts"
-    ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
       "expression/src/evaluator/evaluate.ts",
@@ -2468,8 +2460,23 @@
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
       "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts",
       "expression/src/parse.ts",
       "expression/src/utils/latex.ts"
+    ],
+    "expression/src/utils/array.ts": [
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/utils/stringSubset.ts"
     ],
     "expression/src/utils/string.ts": [
       "expression/src/Help.ts",

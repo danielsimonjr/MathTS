@@ -3,11 +3,9 @@ import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import { toSymbol } from '../utils/latex.js';
 import { toMathMLSymbol } from '../utils/mathml.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  clone: () => Node;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -27,7 +25,7 @@ interface UnitConstructor {
 interface Dependencies {
   math: Record<string, unknown>;
   Unit?: UnitConstructor;
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
 }
 
 const name = 'SymbolNode';
@@ -128,7 +126,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param _callback
        */
-      forEach(_callback: (child: Node, path: string, parent: SymbolNode) => void): void {
+      forEach(_callback: (child: MathNode, path: string, parent: SymbolNode) => void): void {
         // nothing to do, we don't have any children
       }
 
@@ -138,7 +136,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
        * @param _callback
        * @returns Returns a clone of the node
        */
-      map(_callback: (child: Node, path: string, parent: SymbolNode) => Node): SymbolNode {
+      map(_callback: (child: MathNode, path: string, parent: SymbolNode) => MathNode): SymbolNode {
         return this.clone();
       }
 
@@ -153,7 +151,6 @@ export const createSymbolNode = /* #__PURE__ */ factory(
       /**
        * Create a clone of this node, a shallow copy
        */
-      // @ts-expect-error - method overrides property from Node base class
       clone(): SymbolNode {
         return new SymbolNode(this.name);
       }

@@ -1,18 +1,9 @@
 import { isNode, isSymbolNode } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { getPrecedence } from '../operators.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: unknown) => Node;
-  filter: (callback: (node: Node) => boolean) => Node[];
-  toString: (options?: StringOptions) => string;
-  toHTML: (options?: StringOptions) => string;
-  toTex: (options?: StringOptions) => string;
-  isSymbolNode?: boolean;
-  name?: string;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -33,7 +24,7 @@ interface Parens {
 }
 
 interface Dependencies {
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
 }
 
 const name = 'RangeNode';
@@ -78,9 +69,9 @@ export const createRangeNode = /* #__PURE__ */ factory(
     }
 
     class RangeNode extends Node {
-      start: Node;
-      end: Node;
-      step: Node | null;
+      start: MathNode;
+      end: MathNode;
+      step: MathNode | null;
 
       /**
        * @constructor RangeNode
@@ -90,7 +81,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @param end - included upper-bound
        * @param step - optional step
        */
-      constructor(start: Node, end: Node, step?: Node) {
+      constructor(start: MathNode, end: MathNode, step?: MathNode) {
         super();
         // validate inputs
         if (!isNode(start)) throw new TypeError('Node expected');
@@ -116,7 +107,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        */
       needsEnd(): boolean {
         // find all `end` symbols in this RangeNode
-        const endSymbols = this.filter(function (node: Node): boolean {
+        const endSymbols = this.filter(function (node: MathNode): boolean {
           return isSymbolNode(node) && node.name === 'end';
         });
 
@@ -136,7 +127,6 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      // @ts-expect-error - method overrides property from Node base class
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         const range = math.range as (...args: unknown[]) => unknown;
         const evalStart = this.start._compile(math, argNames);
@@ -171,7 +161,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param callback
        */
-      forEach(callback: (child: Node, path: string, parent: RangeNode) => void): void {
+      forEach(callback: (child: MathNode, path: string, parent: RangeNode) => void): void {
         callback(this.start, 'start', this);
         callback(this.end, 'end', this);
         if (this.step) {
@@ -185,7 +175,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @param callback
        * @returns Returns a transformed copy of the node
        */
-      map(callback: (child: Node, path: string, parent: RangeNode) => Node): RangeNode {
+      map(callback: (child: MathNode, path: string, parent: RangeNode) => MathNode): RangeNode {
         return new RangeNode(
           this._ifNode(callback(this.start, 'start', this)),
           this._ifNode(callback(this.end, 'end', this)),
@@ -258,7 +248,7 @@ export const createRangeNode = /* #__PURE__ */ factory(
        *     `{"mathjs": "RangeNode", "start": ..., "end": ..., "step": ...}`,
        *     where mathjs is optional
        */
-      static fromJSON(json: { start: Node; end: Node; step?: Node }): RangeNode {
+      static fromJSON(json: { start: MathNode; end: MathNode; step?: MathNode }): RangeNode {
         return new RangeNode(json.start, json.end, json.step);
       }
 

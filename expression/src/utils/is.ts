@@ -195,6 +195,7 @@ export interface ConditionalNode extends Node {
  */
 export interface ConstantNode extends Node {
   isConstantNode: boolean;
+  value: unknown;
 }
 
 /**
@@ -260,6 +261,7 @@ export interface RelationalNode extends Node {
  */
 export interface SymbolNode extends Node {
   isSymbolNode: boolean;
+  name: string;
 }
 
 // Map types

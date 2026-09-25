@@ -3,15 +3,9 @@ import { factory } from '../utils/factory.js';
 import { isNode } from '../utils/is.js';
 import { hasOwnProperty } from '../utils/object.js';
 import { escape, stringify } from '../utils/string.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: unknown) => Node;
-  toString: (options?: StringOptions) => string;
-  toHTML: (options?: StringOptions) => string;
-  toTex: (options?: StringOptions) => string;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -24,7 +18,7 @@ interface StringOptions {
 }
 
 interface Dependencies {
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
 }
 
 const name = 'ObjectNode';
@@ -35,7 +29,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
   dependencies,
   ({ Node }: Dependencies) => {
     class ObjectNode extends Node {
-      properties: Record<string, Node>;
+      properties: Record<string, MathNode>;
 
       /**
        * @constructor ObjectNode
@@ -43,7 +37,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * Holds an object with keys/values
        * @param properties - Optional. object with key/value pairs
        */
-      constructor(properties?: Record<string, Node>) {
+      constructor(properties?: Record<string, MathNode>) {
         super();
         this.properties = properties || {};
 
@@ -80,7 +74,6 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      // @ts-expect-error - method overrides property from Node base class
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         const evalEntries: Record<string, CompileFunction> = {};
 
@@ -90,7 +83,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
             // so you cannot create a key like {"co\\u006Estructor": null}
             const stringifiedKey = stringify(key);
             const parsedKey = JSON.parse(stringifiedKey);
-            const prop = getSafeProperty(this.properties, key) as Node;
+            const prop = getSafeProperty(this.properties, key) as MathNode;
 
             // Validate the unicode-decoded key at compile time so a payload
             // like {"\\u005f\\u005fproto\\u005f\\u005f": ...} cannot land in
@@ -121,7 +114,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param callback
        */
-      forEach(callback: (child: Node, path: string, parent: ObjectNode) => void): void {
+      forEach(callback: (child: MathNode, path: string, parent: ObjectNode) => void): void {
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             callback(this.properties[key], 'properties[' + stringify(key) + ']', this);
@@ -135,8 +128,8 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @param callback
        * @returns Returns a transformed copy of the node
        */
-      map(callback: (child: Node, path: string, parent: ObjectNode) => Node): ObjectNode {
-        const properties: Record<string, Node> = {};
+      map(callback: (child: MathNode, path: string, parent: ObjectNode) => MathNode): ObjectNode {
+        const properties: Record<string, MathNode> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             properties[key] = this._ifNode(
@@ -151,7 +144,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * Create a clone of this node, a shallow copy
        */
       clone(): ObjectNode {
-        const properties: Record<string, Node> = {};
+        const properties: Record<string, MathNode> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
             properties[key] = this.properties[key];
@@ -192,7 +185,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
        *                       `{"mathjs": "ObjectNode", "properties": {...}}`,
        *                       where mathjs is optional
        */
-      static fromJSON(json: { properties: Record<string, Node> }): ObjectNode {
+      static fromJSON(json: { properties: Record<string, MathNode> }): ObjectNode {
         return new ObjectNode(json.properties);
       }
 

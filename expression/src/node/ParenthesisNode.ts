@@ -1,15 +1,8 @@
 import { isNode } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
-  getContent: () => Node;
-  toString: (options?: StringOptions) => string;
-  toHTML: (options?: StringOptions) => string;
-  toTex: (options?: StringOptions) => string;
-  toMathML: () => string;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -23,7 +16,7 @@ interface StringOptions {
 }
 
 interface Dependencies {
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
 }
 
 const name = 'ParenthesisNode';
@@ -34,7 +27,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
   dependencies,
   ({ Node }: Dependencies) => {
     class ParenthesisNode extends Node {
-      content: Node;
+      content: MathNode;
 
       /**
        * @constructor ParenthesisNode
@@ -43,7 +36,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @param content
        * @extends {Node}
        */
-      constructor(content: Node) {
+      constructor(content: MathNode) {
         super();
         // validate input
         if (!isNode(content)) {
@@ -73,7 +66,6 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      // @ts-expect-error - method overrides property from Node base class
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         return this.content._compile(math, argNames);
       }
@@ -83,8 +75,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @returns content
        * @override
        **/
-      // @ts-expect-error - method overrides property from Node base class
-      getContent(): Node {
+      getContent(): MathNode {
         return this.content.getContent();
       }
 
@@ -92,7 +83,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param callback
        */
-      forEach(callback: (child: Node, path: string, parent: ParenthesisNode) => void): void {
+      forEach(callback: (child: MathNode, path: string, parent: ParenthesisNode) => void): void {
         callback(this.content, 'content', this);
       }
 
@@ -102,7 +93,9 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        * @param callback
        * @returns Returns a clone of the node
        */
-      map(callback: (child: Node, path: string, parent: ParenthesisNode) => Node): ParenthesisNode {
+      map(
+        callback: (child: MathNode, path: string, parent: ParenthesisNode) => MathNode
+      ): ParenthesisNode {
         const content = callback(this.content, 'content', this);
         return new ParenthesisNode(content);
       }
@@ -144,7 +137,7 @@ export const createParenthesisNode = /* #__PURE__ */ factory(
        *                       `{"mathjs": "ParenthesisNode", "content": ...}`,
        *                       where mathjs is optional
        */
-      static fromJSON(json: { content: Node }): ParenthesisNode {
+      static fromJSON(json: { content: MathNode }): ParenthesisNode {
         return new ParenthesisNode(json.content);
       }
 

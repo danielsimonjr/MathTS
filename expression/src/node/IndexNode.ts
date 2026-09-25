@@ -1,21 +1,19 @@
 import { map } from '../utils/array.js';
 import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
-import { isArray, isConstantNode, isMatrix, isNode, isString, typeOf } from '../utils/is.js';
+import {
+  isArray,
+  isConstantNode,
+  isMatrix,
+  isNode,
+  isString,
+  isSymbolNode,
+  typeOf,
+} from '../utils/is.js';
 import { escape } from '../utils/string.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: unknown) => Node;
-  filter: (callback: (node: Node) => boolean) => Node[];
-  isSymbolNode?: boolean;
-  name?: string;
-  value?: unknown;
-  toHTML: (options?: StringOptions) => string;
-  toTex: (options?: StringOptions) => string;
-  toString: (options?: StringOptions) => string;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -28,7 +26,7 @@ interface StringOptions {
 }
 
 interface Dependencies {
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
   size: (value: unknown) => number[];
 }
 
@@ -40,7 +38,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
   dependencies,
   ({ Node, size }: Dependencies) => {
     class IndexNode extends Node {
-      dimensions: Node[];
+      dimensions: MathNode[];
       dotNotation: boolean;
 
       /**
@@ -57,7 +55,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        *     notation like `a.b`, or using bracket notation like `a["b"]`
        *     (which is the default). This property is used for string conversion.
        */
-      constructor(dimensions: Node[], dotNotation?: boolean) {
+      constructor(dimensions: MathNode[], dotNotation?: boolean) {
         super();
         this.dimensions = dimensions;
         this.dotNotation = dotNotation || false;
@@ -91,7 +89,6 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      // @ts-expect-error - method overrides property from Node base class
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         // TODO: implement support for bignumber (currently bignumbers are silently
         //       reduced to numbers when changing the value to zero-based)
@@ -102,9 +99,9 @@ export const createIndexNode = /* #__PURE__ */ factory(
         // optimization for a simple object property
         const evalDimensions = map(
           this.dimensions,
-          function (dimension: Node, i: number): CompileFunction {
+          function (dimension: MathNode, i: number): CompileFunction {
             const needsEnd =
-              dimension.filter((node: Node) => !!(node.isSymbolNode && node.name === 'end'))
+              dimension.filter((node: MathNode) => isSymbolNode(node) && node.name === 'end')
                 .length > 0;
 
             if (needsEnd) {
@@ -163,7 +160,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param callback
        */
-      forEach(callback: (child: Node, path: string, parent: IndexNode) => void): void {
+      forEach(callback: (child: MathNode, path: string, parent: IndexNode) => void): void {
         for (let i = 0; i < this.dimensions.length; i++) {
           callback(this.dimensions[i], 'dimensions[' + i + ']', this);
         }
@@ -175,8 +172,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * @param callback
        * @returns Returns a transformed copy of the node
        */
-      map(callback: (child: Node, path: string, parent: IndexNode) => Node): IndexNode {
-        const dimensions: Node[] = [];
+      map(callback: (child: MathNode, path: string, parent: IndexNode) => MathNode): IndexNode {
+        const dimensions: MathNode[] = [];
         for (let i = 0; i < this.dimensions.length; i++) {
           dimensions[i] = this._ifNode(callback(this.dimensions[i], 'dimensions[' + i + ']', this));
         }
@@ -207,8 +204,9 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * If not, returns null.
        */
       getObjectProperty(): string | null {
-        // isObjectProperty() guarantees dimensions[0].value is a string
-        return this.isObjectProperty() ? (this.dimensions[0].value as string) : null;
+        // isObjectProperty() guarantees dimensions[0] is a ConstantNode holding a string
+        const first = this.dimensions[0];
+        return this.isObjectProperty() && isConstantNode(first) ? (first.value as string) : null;
       }
 
       /**
@@ -241,7 +239,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        *     `{"mathjs": "IndexNode", dimensions: [...], dotNotation: false}`,
        *     where mathjs is optional
        */
-      static fromJSON(json: { dimensions: Node[]; dotNotation: boolean }): IndexNode {
+      static fromJSON(json: { dimensions: MathNode[]; dotNotation: boolean }): IndexNode {
         return new IndexNode(json.dimensions, json.dotNotation);
       }
 
@@ -278,7 +276,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toTex(options?: StringOptions): string {
-        const dimensions = this.dimensions.map(function (range: Node): string {
+        const dimensions = this.dimensions.map(function (range: MathNode): string {
           return range.toTex(options);
         });
 

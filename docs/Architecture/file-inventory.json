@@ -4076,7 +4076,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 295
+      "loc": 293
     },
     {
       "file": "expression/src/node/Node.ts",
@@ -4090,42 +4090,42 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 250
+      "loc": 243
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 936
+      "loc": 928
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 197
+      "loc": 190
     },
     {
       "file": "expression/src/node/RangeNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 353
+      "loc": 343
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 321
+      "loc": 320
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 246
+      "loc": 243
     },
     {
       "file": "expression/src/node/utils/access.ts",
@@ -4160,7 +4160,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2003
+      "loc": 2008
     },
     {
       "file": "expression/src/Parser.ts",
@@ -4426,7 +4426,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 828
+      "loc": 830
     },
     {
       "file": "expression/src/utils/latex.ts",

@@ -22503,6 +22503,10 @@ modules:
         - file: ../operators.js
           imports:
             - getPrecedence
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createRangeNode
@@ -22590,6 +22594,10 @@ modules:
         - file: ../utils/mathml.js
           imports:
             - toMathMLSymbol
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createSymbolNode
@@ -22665,6 +22673,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createRelationalNode
@@ -22776,6 +22788,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createOperatorNode
@@ -22803,6 +22819,10 @@ modules:
           imports:
             - escape
             - stringify
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createObjectNode
@@ -22874,10 +22894,15 @@ modules:
             - isMatrix
             - isNode
             - isString
+            - isSymbolNode
             - typeOf
         - file: ../utils/string.js
           imports:
             - escape
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createIndexNode
@@ -22947,6 +22972,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createParenthesisNode
@@ -37757,7 +37786,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 195430
+  totalLinesOfCode: 195399
   totalExports: 5846
   totalClasses: 55
   totalInterfaces: 510
@@ -37766,7 +37795,7 @@ statistics:
   totalEnums: 0
   totalConstants: 1599
   totalReExports: 2364
-  totalTypeOnlyImports: 582
+  totalTypeOnlyImports: 589
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

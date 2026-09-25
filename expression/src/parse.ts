@@ -24,6 +24,11 @@ type CommentableNode = MathNode & { comment?: string };
 /** The typed-dispatch `parse` function plus the character-class helpers the
  *  tokenizer hangs off it. */
 interface ParseFunction {
+  // One expression gives one node; an array gives one node per element. A single
+  // `string | string[]` signature made even `parse('x + 1')` a `MathNode | MathNode[]`
+  // that every caller had to narrow before calling a node method.
+  (expr: string, options?: ParseOptions): MathNode;
+  (expr: string[], options?: ParseOptions): MathNode[];
   (expr: string | string[], options?: ParseOptions): MathNode | MathNode[];
   isAlpha(c: string, cPrev: string, cNext: string): boolean;
   isValidLatinOrGreek(c: string): boolean;

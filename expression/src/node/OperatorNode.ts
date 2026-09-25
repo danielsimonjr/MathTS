@@ -7,20 +7,9 @@ import { getAssociativity, getPrecedence, isAssociativeWith, properties } from '
 import { latexOperators } from '../utils/latex.js';
 import { escapeMathML, inlineOperator, parenthesizeLower } from '../utils/mathml.js';
 import { factory } from '../utils/factory.js';
+import type { MathNode } from './Node.js';
 
 // Type definitions
-interface Node {
-  _compile: (math: Record<string, unknown>, argNames: Record<string, boolean>) => CompileFunction;
-  _ifNode: (node: unknown) => Node;
-  filter: (callback: (node: Node) => boolean) => Node[];
-  getContent: () => Node;
-  getIdentifier: () => string;
-  toString: (options?: StringOptions) => string;
-  toHTML: (options?: StringOptions) => string;
-  toTex: (options?: StringOptions) => string;
-  toMathML: () => string;
-  type: string;
-}
 
 type CompileFunction = (
   scope: Map<string, unknown>,
@@ -35,7 +24,7 @@ interface StringOptions {
 }
 
 interface Dependencies {
-  Node: new (...args: unknown[]) => Node;
+  Node: new (...args: unknown[]) => MathNode;
 }
 
 // Per-operator LaTeX parenthesization flags stored in `properties` (operators.ts).
@@ -59,15 +48,18 @@ export const createOperatorNode = /* #__PURE__ */ factory(
      * @param parenthesis - The parenthesis option. If the value is `'auto'`, the test skips ParenthesisNode wrappers.
      * @returns `true` if the node, or the first argument along a chain of OperatorNodes, is a ConstantNode.
      */
-    function startsWithConstant(expr: Node, parenthesis: string): boolean {
+    function startsWithConstant(expr: MathNode, parenthesis: string): boolean {
       let curNode = expr;
       if (parenthesis === 'auto') {
         while (isParenthesisNode(curNode))
-          curNode = (curNode as unknown as { content: Node }).content;
+          curNode = (curNode as unknown as { content: MathNode }).content;
       }
       if (isConstantNode(curNode)) return true;
       if (isOperatorNode(curNode)) {
-        return startsWithConstant((curNode as unknown as { args: Node[] }).args[0], parenthesis);
+        return startsWithConstant(
+          (curNode as unknown as { args: MathNode[] }).args[0],
+          parenthesis
+        );
       }
       return false;
     }
@@ -88,7 +80,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       root: OperatorNode,
       parenthesis: string,
       implicit: string,
-      args: Node[],
+      args: MathNode[],
       latex: boolean
     ): boolean[] {
       // precedence of the root OperatorNode. `root` is always an OperatorNode
@@ -104,7 +96,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           root.getIdentifier() !== 'OperatorNode:add' &&
           root.getIdentifier() !== 'OperatorNode:multiply')
       ) {
-        return args.map(function (arg: Node): boolean {
+        return args.map(function (arg: MathNode): boolean {
           switch (
             arg.getContent().type // Nodes that don't need extra parentheses
           ) {
@@ -288,7 +280,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             root.getIdentifier() === 'OperatorNode:add' ||
             root.getIdentifier() === 'OperatorNode:multiply'
           ) {
-            result = args.map(function (arg: Node): boolean {
+            result = args.map(function (arg: MathNode): boolean {
               const argPrecedence = getPrecedence(arg, parenthesis, implicit, root);
               const assocWithArg = isAssociativeWith(root, arg, parenthesis);
               const argAssociativity = getAssociativity(arg, parenthesis);
@@ -339,7 +331,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
     class OperatorNode extends Node {
       op: string;
       fn: string;
-      args: Node[];
+      args: MathNode[];
       implicit: boolean;
       isPercentage: boolean;
 
@@ -357,7 +349,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       constructor(
         op: string,
         fn: string,
-        args: Node[],
+        args: MathNode[],
         implicit?: boolean,
         isPercentage?: boolean
       ) {
@@ -400,7 +392,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @returns Returns a function which can be called like:
        *                        evalNode(scope: Object, args: Object, context: *)
        */
-      // @ts-expect-error - method overrides property from Node base class
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
         // validate fn
         if (typeof this.fn !== 'string' || !isSafeMethod(math, this.fn)) {
@@ -414,7 +405,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
         const fn = getSafeProperty(math, this.fn) as ((...args: unknown[]) => unknown) & {
           rawArgs?: boolean;
         };
-        const evalArgs = map(this.args, function (arg: Node): CompileFunction {
+        const evalArgs = map(this.args, function (arg: MathNode): CompileFunction {
           return arg._compile(math, argNames);
         });
 
@@ -467,7 +458,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * Execute a callback for each of the child nodes of this node
        * @param callback
        */
-      forEach(callback: (child: Node, path: string, parent: OperatorNode) => void): void {
+      forEach(callback: (child: MathNode, path: string, parent: OperatorNode) => void): void {
         for (let i = 0; i < this.args.length; i++) {
           callback(this.args[i], 'args[' + i + ']', this);
         }
@@ -479,8 +470,10 @@ export const createOperatorNode = /* #__PURE__ */ factory(
        * @param callback
        * @returns Returns a transformed copy of the node
        */
-      map(callback: (child: Node, path: string, parent: OperatorNode) => Node): OperatorNode {
-        const args: Node[] = [];
+      map(
+        callback: (child: MathNode, path: string, parent: OperatorNode) => MathNode
+      ): OperatorNode {
+        const args: MathNode[] = [];
         for (let i = 0; i < this.args.length; i++) {
           args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
         }
@@ -577,7 +570,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           (this.getIdentifier() === 'OperatorNode:add' ||
             this.getIdentifier() === 'OperatorNode:multiply')
         ) {
-          const stringifiedArgs = args.map(function (arg: Node, index: number): string {
+          const stringifiedArgs = args.map(function (arg: MathNode, index: number): string {
             let argStr = arg.toString(options);
             if (parens[index]) {
               // put in parenthesis?
@@ -631,7 +624,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       static fromJSON(json: {
         op: string;
         fn: string;
-        args: Node[];
+        args: MathNode[];
         implicit: boolean;
         isPercentage: boolean;
       }): OperatorNode {
@@ -721,7 +714,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             rhs
           );
         } else {
-          const stringifiedArgs = args.map(function (arg: Node, index: number): string {
+          const stringifiedArgs = args.map(function (arg: MathNode, index: number): string {
             let argStr = arg.toHTML(options);
             if (parens[index]) {
               // put in parenthesis?
@@ -784,7 +777,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           return `<msup><mrow>${args[0].toMathML()}</mrow><mrow>${args[1].toMathML()}</mrow></msup>`;
         }
         // Wrap a child operator of lower precedence in visual parens.
-        const child = (arg: Node): string =>
+        const child = (arg: MathNode): string =>
           parenthesizeLower(
             arg.toMathML(),
             isOperatorNode(arg) ? (arg as unknown as { fn: string }).fn : undefined,
@@ -885,7 +878,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           (this.getIdentifier() === 'OperatorNode:add' ||
             this.getIdentifier() === 'OperatorNode:multiply')
         ) {
-          const texifiedArgs = args.map(function (arg: Node, index: number): string {
+          const texifiedArgs = args.map(function (arg: MathNode, index: number): string {
             let argStr = arg.toTex(options);
             if (parens[index]) {
               argStr = `\\left(${argStr}\\right)`;
@@ -911,7 +904,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             this.fn +
             '}\\left(' +
             args
-              .map(function (arg: Node): string {
+              .map(function (arg: MathNode): string {
                 return arg.toTex(options);
               })
               .join(',') +
@@ -923,7 +916,6 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       /**
        * Get identifier.
        */
-      // @ts-expect-error - method overrides property from Node base class
       getIdentifier(): string {
         return this.type + ':' + this.fn;
       }
