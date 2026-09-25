@@ -134,7 +134,7 @@ describe('FunctionAssignmentNode - _compile', () => {
     const node = new FunctionAssignmentNode('f', ['x'], expr);
     const math = {};
     const scope = new Map();
-    const f = node._compile(math, {})(scope, {}, null);
+    const f = node._compile(math, {})(scope, {}, null) as (x: number) => unknown;
     expect(f(5)).toBe(5);
     expect(f(42)).toBe(42);
   });
@@ -144,7 +144,7 @@ describe('FunctionAssignmentNode - _compile', () => {
     const node = new FunctionAssignmentNode('f', ['x'], makeConst(99));
     const math = {};
     const scope = new Map();
-    const f = node._compile(math, {})(scope, {}, null);
+    const f = node._compile(math, {})(scope, {}, null) as (x: number) => unknown;
     expect(f(0)).toBe(99);
     expect(f(100)).toBe(99);
   });

@@ -20,14 +20,6 @@ interface HelpConstructor {
   fromJSON(json: Record<string, unknown>): HelpInstance;
 }
 
-const _mockMathScope: Record<string, unknown> = {
-  sin: Math.sin,
-  cos: Math.cos,
-  sqrt: Math.sqrt,
-  pi: Math.PI,
-  config: () => ({ precision: 14 }),
-};
-
 // Simple mock evaluate: delegates to Function() for safety in tests
 function mockEvaluate(expr: string, _scope?: Record<string, unknown>): unknown {
   if (expr === 'config()') return { precision: 14 };

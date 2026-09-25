@@ -91,7 +91,7 @@ describe('BlockNode - _compile', () => {
       { node: makeConst(20), visible: true },
     ]);
     const fn = node._compile(math, {});
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as ResultSet;
     expect(result).toBeInstanceOf(ResultSet);
     expect(result.entries).toEqual([10, 20]);
   });
@@ -102,7 +102,7 @@ describe('BlockNode - _compile', () => {
       { node: makeConst(42), visible: true },
     ]);
     const fn = node._compile(math, {});
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as ResultSet;
     expect(result.entries).toEqual([42]);
   });
 
@@ -112,14 +112,14 @@ describe('BlockNode - _compile', () => {
       { node: makeConst(2), visible: false },
     ]);
     const fn = node._compile(math, {});
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as ResultSet;
     expect(result.entries).toEqual([]);
   });
 
   it('returns empty ResultSet for empty blocks', () => {
     const node = makeBlock([]);
     const fn = node._compile(math, {});
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as ResultSet;
     expect(result.entries).toEqual([]);
   });
 });

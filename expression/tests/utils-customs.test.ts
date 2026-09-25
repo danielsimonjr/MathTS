@@ -154,7 +154,7 @@ describe('utils/customs - isSafeMethod', () => {
 describe('utils/customs - getSafeMethod', () => {
   it('returns the method when safe', () => {
     const obj = { greet: () => 'hi' };
-    const m = getSafeMethod(obj, 'greet');
+    const m = getSafeMethod(obj, 'greet') as typeof obj.greet;
     expect(typeof m).toBe('function');
     expect(m()).toBe('hi');
   });

@@ -89,7 +89,7 @@ describe('ArrayNode - _compile', () => {
     const node = new ArrayNode([makeConst(10), makeConst(20)]);
     const fn = node._compile(math, {});
     const scope = new Map();
-    const result = fn(scope, {}, null);
+    const result = fn(scope, {}, null) as { isMatrix: boolean; data: unknown[] };
     expect(result.isMatrix).toBe(true);
     expect(result.data).toEqual([10, 20]);
   });

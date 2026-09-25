@@ -429,7 +429,8 @@ describe('compile - FunctionAssignmentNode', () => {
     const expr = operatorNode('*', 'multiply', [symbolNode('x'), constantNode(2)]);
     const node = functionAssignmentNode('f', ['x'], expr);
     const scope: Record<string, unknown> = {};
-    const fn = compile(node, mathScope).evaluate(scope);
+    // A FunctionAssignmentNode evaluates to the callable it defines.
+    const fn = compile(node, mathScope).evaluate(scope) as (x: number) => unknown;
     expect(typeof fn).toBe('function');
     expect(fn(5)).toBe(10);
     expect(fn(21)).toBe(42);
@@ -439,7 +440,7 @@ describe('compile - FunctionAssignmentNode', () => {
     // g(a, b) = a + b
     const expr = operatorNode('+', 'add', [symbolNode('a'), symbolNode('b')]);
     const node = functionAssignmentNode('g', ['a', 'b'], expr);
-    const fn = compile(node, mathScope).evaluate({});
+    const fn = compile(node, mathScope).evaluate({}) as (a: number, b: number) => unknown;
     expect(fn(3, 4)).toBe(7);
   });
 });

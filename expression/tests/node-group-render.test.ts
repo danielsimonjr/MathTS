@@ -45,7 +45,7 @@ const mathScope: Record<string, unknown> = {
   smaller: (a: number, b: number) => a < b,
   pi: Math.PI,
   // a real `index` factory so IndexNode._compile produces something usable
-  index: (...dims: unknown[]) => ({ isIndex: true, dimensions: dims }),
+  index: (...dims: unknown[]): Required<MockIndex> => ({ isIndex: true, dimensions: dims }),
 };
 
 const Node = createNode({ mathWithTransform: mathScope });
@@ -468,7 +468,7 @@ describe('IndexNode — object property vs matrix index', () => {
     const idx = new IndexNode([s('end')]);
     const fn = idx._compile(mathScope, {});
     // context is an array of length 3 → size = [3] → end resolves to 3
-    const result = fn(scopeMap(), {}, [10, 20, 30]);
+    const result = fn(scopeMap(), {}, [10, 20, 30]) as Required<MockIndex>;
     expect(result.isIndex).toBe(true);
     expect(result.dimensions[0]).toBe(3);
   });
@@ -476,7 +476,7 @@ describe('IndexNode — object property vs matrix index', () => {
   it('compiles "end" arithmetic inside an index (A[end - 1])', () => {
     const idx = new IndexNode([op('-', 'subtract', [s('end'), c(1)])]);
     const fn = idx._compile(mathScope, {});
-    const result = fn(scopeMap(), {}, [10, 20, 30]);
+    const result = fn(scopeMap(), {}, [10, 20, 30]) as Required<MockIndex>;
     expect(result.dimensions[0]).toBe(2);
   });
 
@@ -713,7 +713,10 @@ describe('Node base class — wrappers and helpers', () => {
 
   it('filter finds matching nodes', () => {
     const node = op('+', 'add', [op('+', 'add', [s('x'), s('x')]), s('y')]);
-    const xs = node.filter((n: NodeView) => !!(n.isSymbolNode && n.name === 'x'));
+    const xs = node.filter((n: MathNode) => {
+      const nv = n as NodeView;
+      return !!(nv.isSymbolNode && nv.name === 'x');
+    });
     expect(xs.length).toBe(2);
   });
 

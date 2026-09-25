@@ -224,7 +224,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): { mathjs: string; dimensions: MathNode[]; dotNotation: boolean } {
         return {
           mathjs: name,
           dimensions: this.dimensions,

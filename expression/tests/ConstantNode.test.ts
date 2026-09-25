@@ -50,14 +50,14 @@ describe('ConstantNode - _compile', () => {
   it('returns a function that always returns the stored value', () => {
     const node = new ConstantNode(99);
     const fn = node._compile(math, argNames);
-    expect(fn({}, {}, null)).toBe(99);
+    expect(fn(new Map(), {}, null)).toBe(99);
   });
 
   it('compile is scope-independent', () => {
     const node = new ConstantNode('static');
     const fn = node._compile(math, argNames);
-    expect(fn({}, {}, null)).toBe('static');
-    expect(fn({ x: 5 }, {}, null)).toBe('static');
+    expect(fn(new Map(), {}, null)).toBe('static');
+    expect(fn(new Map([['x', 5]]), {}, null)).toBe('static');
   });
 });
 

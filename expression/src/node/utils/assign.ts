@@ -30,7 +30,7 @@ export function assignFactory({ subset }: { subset: (...args: unknown[]) => unkn
     object: unknown,
     index: {
       isObjectProperty: () => boolean;
-      getObjectProperty: () => string;
+      getObjectProperty: () => string | null;
       isIndex?: boolean;
     } & IndexLike,
     value: unknown

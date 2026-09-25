@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js';
+import type { MathNode } from '../src/node/Node.js';
 
 /**
  * Covers the validateAst recursion branches in evaluator/evaluate.ts:
@@ -11,6 +12,12 @@ import { createEvaluate, compileExpression } from '../src/evaluator/evaluate.js'
 function constantNode(value: unknown) {
   return { type: 'ConstantNode', isConstantNode: true, value };
 }
+
+// The mock parsers return deliberately partial structural AST nodes (only the
+// flags/fields validateAst and compile read); this is the single cast to the
+// `(expr) => MathNode` parser type that createEvaluate/compileExpression take.
+const asParser = (parse: (expr: string) => Record<string, unknown>) =>
+  parse as unknown as (expr: string) => MathNode;
 
 const mathScope: Record<string, unknown> = {
   add: (a: number, b: number) => a + b,
@@ -32,7 +39,7 @@ describe('evaluator validateAst - forEach traversal path', () => {
         },
       };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     expect(evaluate('anything')).toBe(5);
   });
 
@@ -48,7 +55,7 @@ describe('evaluator validateAst - forEach traversal path', () => {
         },
       };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     expect(() => evaluate('x = 1')).toThrow(/Security: assignment/);
   });
 
@@ -64,7 +71,7 @@ describe('evaluator validateAst - forEach traversal path', () => {
         },
       };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     // forEach throws a non-Security error -> absorbed; manual recursion over
     // args proceeds and compile/evaluate still works.
     expect(evaluate('add(9,0)')).toBe(9);
@@ -81,7 +88,7 @@ describe('evaluator validateAst - properties recursion (ObjectNode)', () => {
         },
       };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     expect(() => evaluate('{danger: import(1)}')).toThrow(/forbidden function "import"/);
   });
 });
@@ -91,7 +98,7 @@ describe('evaluator - function-assignment & forbidden-function rejections', () =
     function parse(_expr: string) {
       return { isFunctionAssignmentNode: true };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     expect(() => evaluate('f(x)=x')).toThrow(/function definitions/);
   });
 
@@ -99,7 +106,7 @@ describe('evaluator - function-assignment & forbidden-function rejections', () =
     function parse(_expr: string) {
       return { isConstantNode: true, value: 42 };
     }
-    const evaluate = createEvaluate(parse, mathScope);
+    const evaluate = createEvaluate(asParser(parse), mathScope);
     expect(evaluate('42', undefined, { unsafe: true })).toBe(42);
   });
 });
@@ -109,14 +116,16 @@ describe('compileExpression - validation', () => {
     function parse(_expr: string) {
       return { isAssignmentNode: true };
     }
-    expect(() => compileExpression(parse, mathScope, 'x = 1')).toThrow(/Security: assignment/);
+    expect(() => compileExpression(asParser(parse), mathScope, 'x = 1')).toThrow(
+      /Security: assignment/
+    );
   });
 
   it('skips validation when unsafe is set', () => {
     function parse(_expr: string) {
       return { isConstantNode: true, value: 3 };
     }
-    const compiled = compileExpression(parse, mathScope, '3', { unsafe: true });
+    const compiled = compileExpression(asParser(parse), mathScope, '3', { unsafe: true });
     expect(compiled.evaluate()).toBe(3);
   });
 });

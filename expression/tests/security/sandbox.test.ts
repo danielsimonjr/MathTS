@@ -21,9 +21,6 @@ function constantNode(value: unknown) {
 function symbolNode(name: string) {
   return { type: 'SymbolNode', isSymbolNode: true, name };
 }
-function _arrayNode(items: unknown[]) {
-  return { type: 'ArrayNode', isArrayNode: true, items };
-}
 function objectNode(properties: Record<string, unknown>) {
   return { type: 'ObjectNode', isObjectNode: true, properties };
 }

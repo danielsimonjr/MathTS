@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { compile } from '../src/compiler/compile.js';
+import { compile as compileNode } from '../src/compiler/compile.js';
+import type { MathNode } from '../src/node/Node.js';
 
 /**
  * Coverage-focused tests for the standalone tree-walking compiler.
@@ -21,6 +22,11 @@ import { compile } from '../src/compiler/compile.js';
  * dynamic field values are `unknown`.
  */
 type MockNode = Record<string, unknown>;
+
+// The compiler reads only the discriminator + fields above, so these tests feed it
+// deliberately partial structural mocks; this is the single cast to its MathNode param.
+const compile = (node: MockNode, math: Record<string, unknown>) =>
+  compileNode(node as unknown as MathNode, math);
 
 function constantNode(value: unknown) {
   return { type: 'ConstantNode', isConstantNode: true, value };
@@ -390,7 +396,10 @@ describe('compile - FunctionAssignmentNode', () => {
       operatorNode('+', 'add', [symbolNode('a'), symbolNode('b')])
     );
     const scope: Record<string, unknown> = {};
-    const fn = compile(node, mathScope).evaluate(scope);
+    // A FunctionAssignmentNode evaluates to a callable carrying its `syntax` string.
+    const fn = compile(node, mathScope).evaluate(scope) as ((...args: number[]) => unknown) & {
+      syntax: string;
+    };
     expect(typeof fn).toBe('function');
     expect(fn(2, 3)).toBe(5);
     expect(fn.syntax).toBe('f(a, b)');

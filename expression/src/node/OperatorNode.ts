@@ -598,7 +598,14 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       /**
        * Get a JSON representation of the node
        */
-      toJSON(): Record<string, unknown> {
+      toJSON(): {
+        mathjs: string;
+        op: string;
+        fn: string;
+        args: MathNode[];
+        implicit: boolean;
+        isPercentage: boolean;
+      } {
         return {
           mathjs: name,
           op: this.op,

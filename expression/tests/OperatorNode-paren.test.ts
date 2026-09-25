@@ -79,7 +79,7 @@ describe('OperatorNode - unary operators', () => {
 
 describe('OperatorNode - n-ary (>2 args) add/multiply', () => {
   it('renders a 3-term sum', () => {
-    const e = parse('a + b + c');
+    const e = parse('a + b + c') as InstanceType<typeof OperatorNode>;
     // parses left-assoc into nested binaries; build a true n-ary directly:
     const nary = new OperatorNode('+', 'add', [s('a'), s('b'), s('c')]);
     expect(nary.toString()).toBe('a + b + c');

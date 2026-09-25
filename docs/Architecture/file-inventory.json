@@ -4083,7 +4083,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 518
+      "loc": 519
     },
     {
       "file": "expression/src/node/ObjectNode.ts",
@@ -4097,7 +4097,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 928
+      "loc": 935
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
@@ -4531,21 +4531,21 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 629
+      "loc": 638
     },
     {
       "file": "expression/tests/compile.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 501
+      "loc": 502
     },
     {
       "file": "expression/tests/compiler-index.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 28
+      "loc": 29
     },
     {
       "file": "expression/tests/ConditionalNode.test.ts",
@@ -4587,7 +4587,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 123
+      "loc": 132
     },
     {
       "file": "expression/tests/evaluator-index.test.ts",
@@ -4615,7 +4615,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 513
+      "loc": 509
     },
     {
       "file": "expression/tests/FunctionNode.test.ts",
@@ -4636,7 +4636,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 276
+      "loc": 268
     },
     {
       "file": "expression/tests/helpers/bootstrap.ts",
@@ -4657,7 +4657,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 280
+      "loc": 275
     },
     {
       "file": "expression/tests/is-guards-local.test.ts",
@@ -4692,7 +4692,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 776
+      "loc": 779
     },
     {
       "file": "expression/tests/node-markdown.test.ts",
@@ -4706,14 +4706,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 261
+      "loc": 259
     },
     {
       "file": "expression/tests/ObjectNode.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 234
+      "loc": 232
     },
     {
       "file": "expression/tests/OperatorNode-compile.test.ts",
@@ -4748,14 +4748,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 345
+      "loc": 341
     },
     {
       "file": "expression/tests/operators.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 435
+      "loc": 394
     },
     {
       "file": "expression/tests/package-index.test.ts",
@@ -4769,7 +4769,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 224
+      "loc": 222
     },
     {
       "file": "expression/tests/parse-syntax.test.ts",
@@ -4797,7 +4797,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 348
+      "loc": 337
     },
     {
       "file": "expression/tests/public-api-smoke.test.ts",
@@ -4825,7 +4825,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 237
+      "loc": 234
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
@@ -4846,7 +4846,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 32
+      "loc": 33
     },
     {
       "file": "expression/tests/utils-array-extra.test.ts",
@@ -4860,7 +4860,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 690
+      "loc": 692
     },
     {
       "file": "expression/tests/utils-collection-extra.test.ts",
@@ -4874,7 +4874,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 120
+      "loc": 125
     },
     {
       "file": "expression/tests/utils-customs.test.ts",

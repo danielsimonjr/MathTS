@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
-import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createIndexNode } from '../src/node/IndexNode.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
 // Minimal index function: returns a mock index object
-function _makeIndex(...dims: unknown[]) {
-  return { dimensions: dims, isIndex: true, isObjectProperty: () => false };
+interface MockIndex {
+  dimensions: unknown[];
+  isObjectIndex: boolean;
 }
 
 const mathScope: Record<string, unknown> = {
-  index: (...dims: unknown[]) => ({ dimensions: dims, isObjectIndex: true }),
+  index: (...dims: unknown[]): MockIndex => ({ dimensions: dims, isObjectIndex: true }),
 };
 
 const sizeFn = (value: unknown): number[] => {
@@ -23,15 +23,10 @@ const sizeFn = (value: unknown): number[] => {
 const Node = createNode({ mathWithTransform: mathScope });
 const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
-const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const IndexNode = createIndexNode({ Node, size: sizeFn });
 
 function makeConst(v: unknown) {
   return new ConstantNode(v);
-}
-
-function _makeSym(name: string) {
-  return new SymbolNode(name);
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────
@@ -111,7 +106,7 @@ describe('IndexNode - _compile', () => {
   it('compiles numeric index and calls math.index', () => {
     const node = new IndexNode([makeConst(0)]);
     const fn = node._compile(math, argNames);
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as MockIndex;
     expect(result).toHaveProperty('dimensions');
     expect(result.isObjectIndex).toBe(true);
   });
@@ -119,7 +114,7 @@ describe('IndexNode - _compile', () => {
   it('compiles multi-dimensional index', () => {
     const node = new IndexNode([makeConst(1), makeConst(2)]);
     const fn = node._compile(math, argNames);
-    const result = fn(new Map(), {}, null);
+    const result = fn(new Map(), {}, null) as MockIndex;
     expect(result.dimensions).toHaveLength(2);
   });
 });

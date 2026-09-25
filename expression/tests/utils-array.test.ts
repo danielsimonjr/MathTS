@@ -366,7 +366,9 @@ describe('filterRegExp', () => {
   });
 
   it('throws for multi-dimensional arrays', () => {
-    expect(() => filterRegExp([['foo']], /x/)).toThrow('Only one dimensional');
+    // Deliberately invalid 2-D input: exercises the runtime dimension guard.
+    const twoD = [['foo']] as unknown as string[];
+    expect(() => filterRegExp(twoD, /x/)).toThrow('Only one dimensional');
   });
 });
 
@@ -612,7 +614,7 @@ describe('deepMap', () => {
   });
 
   it('returns [] for an empty array', () => {
-    expect(deepMap([], (x) => x)).toEqual([]);
+    expect(deepMap([], (x: unknown) => x)).toEqual([]);
   });
 
   it('passes index when skipIndex=false', () => {

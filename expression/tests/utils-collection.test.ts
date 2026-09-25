@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { containsCollections, deepForEach, deepMap, reduce } from '../src/utils/collection.js';
 
+// These deep helpers recurse into nested arrays and call back on the scalars, but
+// core types their input as `T[] | Matrix<T>` (element type = callback value type).
+// This is the single cast that feeds a nested number array to that signature.
+const nested = (rows: number[][]) => rows as unknown as number[];
+
 // ---------------------------------------------------------------------------
 // containsCollections
 // ---------------------------------------------------------------------------
@@ -39,10 +44,10 @@ describe('deepForEach (collection)', () => {
   it('iterates over all scalar elements in a nested array', () => {
     const collected: number[] = [];
     deepForEach(
-      [
+      nested([
         [1, 2],
         [3, 4],
-      ],
+      ]),
       (v: number) => collected.push(v)
     );
     expect(collected).toEqual([1, 2, 3, 4]);
@@ -60,10 +65,10 @@ describe('deepMap (collection)', () => {
 
   it('maps over a nested array', () => {
     const result = deepMap(
-      [
+      nested([
         [1, 2],
         [3, 4],
-      ],
+      ]),
       (v: number) => v + 1
     );
     expect(result).toEqual([
@@ -99,7 +104,7 @@ describe('reduce (collection)', () => {
       [3, 4],
       [5, 6],
     ];
-    const result = reduce(mat, 0, (acc: number, val: number) => acc + val) as number[];
+    const result = reduce(nested(mat), 0, (acc: number, val: number) => acc + val) as number[];
     expect(result).toEqual([9, 12]);
   });
 
@@ -108,7 +113,7 @@ describe('reduce (collection)', () => {
       [1, 2, 3],
       [4, 5, 6],
     ];
-    const result = reduce(mat, 1, (acc: number, val: number) => acc + val) as number[];
+    const result = reduce(nested(mat), 1, (acc: number, val: number) => acc + val) as number[];
     expect(result).toEqual([6, 15]);
   });
 
