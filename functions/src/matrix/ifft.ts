@@ -63,6 +63,13 @@ type ComplexNumber = { re: number; im: number } | number;
 type ComplexArrayND = ComplexNumber[] | ComplexArrayND[];
 
 interface TypedFunction<T = unknown> {
+  // `typed(name, signatures, ...)` creates a typed function; without this overload
+  // the factory's result was typed as a value and the public export was uncallable.
+  (
+    name: string,
+    signatures: Record<string, (...args: never[]) => unknown>,
+    ...moreSignatures: Record<string, (...args: never[]) => unknown>[]
+  ): (...args: unknown[]) => T;
   (...args: unknown[]): T;
   find(func: unknown, signature: string[]): TypedFunction<T>;
   convert(value: unknown, type: string): unknown;

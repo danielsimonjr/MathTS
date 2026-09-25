@@ -89,9 +89,30 @@ import { digits } from '../../utils/number.js';
 export type TypedSignatures = Record<string, (...args: unknown[]) => unknown>;
 
 /**
+ * The signatures accepted when creating a typed function. Implementations are typed
+ * `(...args: never[]) => unknown`, the top type for "any function" in an input
+ * position (see `referToSelf` below).
+ */
+type TypedSignatureMap = Record<string, (...args: never[]) => unknown>;
+
+/**
  * Type definition for a typed function
  */
 export interface TypedFunction {
+  // Creating a typed function: `typed(name, signatures, ...moreSignatures)`. Without
+  // this overload the call returned `unknown`, so every factory built from `typed(...)`
+  // was typed as a value, and 131 public exports (`det`, `inv`, `zeros`, `median`, ...)
+  // could not be called from TypeScript without a cast. This one interface also types
+  // every created function (`size`, `conj`, ... are dependencies of this type), so the
+  // overload is limited to the named form: a one-argument `typed(signatures)` overload
+  // also matched ordinary calls such as `size(matrix)`, whose argument is an object of
+  // methods. The few internal one-argument creations keep the `unknown` result. A
+  // signature source may also be an existing typed function, whose signatures merge in.
+  (
+    name: string,
+    signatures: TypedSignatureMap | TypedFunction,
+    ...moreSignatures: Array<TypedSignatureMap | TypedFunction>
+  ): TypedFunction;
   (...args: unknown[]): unknown;
   /** The signatures of this typed function (always present on a typed function) */
   signatures: TypedSignatures;
@@ -106,10 +127,14 @@ export interface TypedFunction {
   referToSelf: (
     callback: (self: TypedFunction) => (...args: never[]) => unknown
   ) => (...args: unknown[]) => unknown;
+  // typed-function's `referTo(...signatureNames, callback)`: one variadic call with the
+  // callback last, as the library publishes it. This was typed as a curried
+  // `referTo(...names)(callback)`, which nothing calls, so five factories cast around it.
   referTo: (
-    ...signatureNames: string[]
-  ) => (
-    callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
+    ...args: [
+      ...signatureNames: string[],
+      callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown,
+    ]
   ) => (...args: unknown[]) => unknown;
   create: () => TypedFunction;
   addTypes: (types: TypeDefinition[]) => void;

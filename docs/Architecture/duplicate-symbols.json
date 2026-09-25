@@ -6575,7 +6575,7 @@
     },
     {
       "name": "Chain",
-      "category": "interface",
+      "category": "interface+type",
       "definers": [
         {
           "file": "compat/src/chain.ts",

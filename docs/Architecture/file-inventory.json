@@ -429,14 +429,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 51
+      "loc": 67
     },
     {
       "file": "compat/src/index.ts",
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 333
+      "loc": 342
     },
     {
       "file": "compat/src/shims.ts",
@@ -548,7 +548,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 322
+      "loc": 343
     },
     {
       "file": "core/src/collection.ts",
@@ -611,7 +611,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 264
+      "loc": 255
     },
     {
       "file": "core/src/factory/index.ts",
@@ -702,7 +702,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 629
+      "loc": 635
     },
     {
       "file": "core/src/typed/type-bridge.ts",
@@ -5028,7 +5028,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 200
+      "loc": 197
     },
     {
       "file": "functions/src/algebra/simplify.ts",
@@ -5077,7 +5077,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 309
+      "loc": 311
     },
     {
       "file": "functions/src/algebra/solver/lusolve.ts",
@@ -5098,7 +5098,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 311
+      "loc": 313
     },
     {
       "file": "functions/src/algebra/solver/utils/solveValidation.ts",
@@ -5315,7 +5315,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 193
+      "loc": 200
     },
     {
       "file": "functions/src/arithmetic/divideScalar.ts",
@@ -5455,7 +5455,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 248
+      "loc": 242
     },
     {
       "file": "functions/src/arithmetic/nthRoots.ts",
@@ -5595,7 +5595,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 62
+      "loc": 56
     },
     {
       "file": "functions/src/calculus-extra.ts",
@@ -5735,7 +5735,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 585
+      "loc": 610
     },
     {
       "file": "functions/src/descriptive-stats.ts",
@@ -6001,7 +6001,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 88
+      "loc": 95
     },
     {
       "file": "functions/src/matrix/concat.ts",
@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 281
+      "loc": 288
     },
     {
       "file": "functions/src/matrix/diag.ts",
@@ -6050,7 +6050,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 189
+      "loc": 188
     },
     {
       "file": "functions/src/matrix/dot.ts",
@@ -6064,7 +6064,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 478
+      "loc": 485
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
@@ -6127,21 +6127,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 168
+      "loc": 175
     },
     {
       "file": "functions/src/matrix/inv.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 267
+      "loc": 274
     },
     {
       "file": "functions/src/matrix/kron.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 113
+      "loc": 120
     },
     {
       "file": "functions/src/matrix/map.ts",
@@ -6162,7 +6162,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 245
+      "loc": 252
     },
     {
       "file": "functions/src/matrix/matrixFromFunction.ts",
@@ -6176,7 +6176,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 234
+      "loc": 241
     },
     {
       "file": "functions/src/matrix/native-accel.ts",
@@ -6197,7 +6197,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 172
+      "loc": 179
     },
     {
       "file": "functions/src/matrix/pinv.ts",
@@ -6246,7 +6246,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 88
+      "loc": 95
     },
     {
       "file": "functions/src/matrix/size.ts",
@@ -6267,7 +6267,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 156
+      "loc": 163
     },
     {
       "file": "functions/src/matrix/squeeze.ts",
@@ -6281,7 +6281,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 376
+      "loc": 373
     },
     {
       "file": "functions/src/matrix/trace.ts",
@@ -11237,7 +11237,7 @@
       "package": "@danielsimonjr/mathts-typed-function",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 426
+      "loc": 431
     },
     {
       "file": "packages/typed-function/tests/index.test.ts",

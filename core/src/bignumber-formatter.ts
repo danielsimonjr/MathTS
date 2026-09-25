@@ -21,33 +21,50 @@ import { isInteger, normalizeFormatOptions, type FormatOptions } from './number.
 
 /**
  * Structural contract for the BigNumber values handled by this formatter.
- * Captures exactly the methods/properties used here. The configured BigNumber
- * implementation (e.g. decimal.js) provides these; the project's `BigNumber`
- * type alias points at a minimal local Decimal that does not declare them all,
- * so we model the runtime contract explicitly.
+ * Captures exactly the methods/properties used here, with the argument types this
+ * module actually passes. The configured BigNumber implementation (e.g. decimal.js)
+ * and core's own `BigNumber` both provide these.
+ *
+ * `Self` is the implementation's own type: the formatter only ever combines a value
+ * with numbers and with values of the same class (built through `ctorOf`). Typing an
+ * operand as `BigNumberValue` instead would demand that every implementation accept
+ * every other one, and neither decimal.js nor core's `BigNumber` does, so no real
+ * value was assignable and every export here was uncallable without a cast.
  */
-export interface BigNumberValue {
+export interface BigNumberValue<Self> {
   e: number;
-  constructor: new (value: number | string) => BigNumberValue;
   isFinite(): boolean;
   isNaN(): boolean;
   isZero(): boolean;
   isInteger(): boolean;
-  gt(other: number | BigNumberValue): boolean;
-  greaterThan(other: number | BigNumberValue): boolean;
-  lessThan(other: number | BigNumberValue): boolean;
-  add(other: number | BigNumberValue): BigNumberValue;
-  sub(other: number | BigNumberValue): BigNumberValue;
-  mul(other: number | BigNumberValue): BigNumberValue;
-  pow(exp: number | BigNumberValue): BigNumberValue;
+  gt(other: number): boolean;
+  greaterThan(other: number | Self): boolean;
+  lessThan(other: number | Self): boolean;
+  add(other: Self): Self;
+  sub(other: number): Self;
+  mul(other: number): Self;
+  pow(exp: number): Self;
   toNumber(): number;
   toFixed(places?: number): string;
   toExponential(places?: number): string;
   toPrecision(sd?: number): string;
-  toSignificantDigits(sd?: number): BigNumberValue;
+  toSignificantDigits(sd?: number): Self;
   toBinary(): string;
   toOctal(): string;
   toHexadecimal(): string;
+}
+
+/** A BigNumber of unknown implementation, for the entry point that takes `unknown`. */
+interface AnyBigNumber extends BigNumberValue<AnyBigNumber> {}
+
+/**
+ * The class that built `n`, used to create values of the same implementation.
+ * TypeScript types every instance's `constructor` as plain `Function`, so no class
+ * instance could satisfy an interface member typed as a constructor. The one cast
+ * lives here instead.
+ */
+function ctorOf<T extends BigNumberValue<T>>(n: T): new (value: number | string) => T {
+  return n.constructor as new (value: number | string) => T;
 }
 
 /**
@@ -57,8 +74,12 @@ export interface BigNumberValue {
  * @param size
  * @returns
  */
-function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): string {
-  const BigNumberCtor = n.constructor;
+function formatBigNumberToBase<T extends BigNumberValue<T>>(
+  n: T,
+  base: number,
+  size?: number
+): string {
+  const BigNumberCtor = ctorOf(n);
   const big2 = new BigNumberCtor(2);
   let suffix = '';
   if (size) {
@@ -173,7 +194,7 @@ function formatBigNumberToBase(n: BigNumberValue, base: number, size?: number): 
  * @return str The formatted value
  */
 export function format(value: unknown, options?: unknown): string {
-  const v = value as BigNumberValue;
+  const v = value as AnyBigNumber;
   if (typeof options === 'function') {
     // handle format(value, fn)
     return (options as (value: unknown) => string)(value);
@@ -229,15 +250,15 @@ export function format(value: unknown, options?: unknown): string {
 
       let condition: boolean;
       if (isBigNumber(lowerExp) && isBigNumber(upperExp)) {
-        const lowerExpBn = lowerExp as unknown as BigNumberValue;
-        const upperExpBn = upperExp as unknown as BigNumberValue;
+        const lowerExpBn = lowerExp as unknown as AnyBigNumber;
+        const upperExpBn = upperExp as unknown as AnyBigNumber;
         condition = !lowerExpBn.greaterThan(exp) && upperExpBn.greaterThan(exp);
       } else if (isBigNumber(lowerExp)) {
-        const lowerExpBn = lowerExp as unknown as BigNumberValue;
+        const lowerExpBn = lowerExp as unknown as AnyBigNumber;
         const upperExpNum = upperExp as number;
         condition = !lowerExpBn.greaterThan(exp) && exp < upperExpNum;
       } else if (isBigNumber(upperExp)) {
-        const upperExpBn = upperExp as unknown as BigNumberValue;
+        const upperExpBn = upperExp as unknown as AnyBigNumber;
         const lowerExpNum = lowerExp as number;
         condition = exp >= lowerExpNum && upperExpBn.greaterThan(exp);
       } else {
@@ -277,7 +298,7 @@ export function format(value: unknown, options?: unknown): string {
  * @param value
  * @param precision - Optional number of significant figures to return.
  */
-export function toEngineering(value: BigNumberValue, precision?: number): string {
+export function toEngineering<T extends BigNumberValue<T>>(value: T, precision?: number): string {
   // find nearest lower multiple of 3 for exponent
   const e = value.e;
   const newExp = e % 3 === 0 ? e : e < 0 ? e - 3 - (e % 3) : e - (e % 3);
@@ -287,7 +308,7 @@ export function toEngineering(value: BigNumberValue, precision?: number): string
 
   let valueStr = valueWithoutExp.toPrecision(precision);
   if (valueStr.includes('e')) {
-    const BigNumberCtor = value.constructor;
+    const BigNumberCtor = ctorOf(value);
     valueStr = new BigNumberCtor(valueStr).toFixed();
   }
 
@@ -302,7 +323,7 @@ export function toEngineering(value: BigNumberValue, precision?: number): string
  *                              is used.
  * @returns str
  */
-export function toExponential(value: BigNumberValue, precision?: number): string {
+export function toExponential<T extends BigNumberValue<T>>(value: T, precision?: number): string {
   if (precision !== undefined) {
     return value.toExponential(precision - 1); // Note the offset of one
   } else {
@@ -316,6 +337,6 @@ export function toExponential(value: BigNumberValue, precision?: number): string
  * @param precision - Optional number of decimals after the
  *                                       decimal point. Undefined by default.
  */
-export function toFixed(value: BigNumberValue, precision?: number): string {
+export function toFixed<T extends BigNumberValue<T>>(value: T, precision?: number): string {
   return value.toFixed(precision);
 }

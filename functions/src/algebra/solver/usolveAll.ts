@@ -8,7 +8,9 @@ interface TypedFunction {
   // `never[]` is the correct top-type for "any function" in an input position:
   // every concrete-typed implementation is assignable to it (function params
   // are contravariant under strictFunctionTypes).
-  <T>(name: string, signatures: Record<string, (...args: never[]) => T>): T;
+  // The created typed function returns what its implementations return. (This used
+  // to be typed as returning `T` itself, which made the public export a value.)
+  <T>(name: string, signatures: Record<string, (...args: never[]) => T>): (...args: unknown[]) => T;
 }
 
 interface MatrixConstructor {

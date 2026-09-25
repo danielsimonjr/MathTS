@@ -89,15 +89,14 @@ export const createDiff = /* #__PURE__ */ factory(
           return _recursive(arr, dim);
         }
       },
-      // typed-function's runtime `referTo` is single-call variadic
-      // (`referTo(...signatures, callback)`); the imported TypedFunction interface
-      // models it curried, so narrow to the real contract via `unknown`.
-      'Array, BigNumber': (
-        typed.referTo as unknown as (sig: string, cb: (self: ScalarFn) => ScalarFn) => unknown
-      )('Array,number', (selfAn) => (arr: unknown, dim: unknown) => selfAn(arr, number(dim))),
-      'Matrix, BigNumber': (
-        typed.referTo as unknown as (sig: string, cb: (self: ScalarFn) => ScalarFn) => unknown
-      )('Matrix,number', (selfMn) => (arr: unknown, dim: unknown) => selfMn(arr, number(dim))),
+      'Array, BigNumber': typed.referTo(
+        'Array,number',
+        (selfAn) => (arr: unknown, dim: unknown) => selfAn(arr, number(dim))
+      ),
+      'Matrix, BigNumber': typed.referTo(
+        'Matrix,number',
+        (selfMn) => (arr: unknown, dim: unknown) => selfMn(arr, number(dim))
+      ),
     }) as unknown as TypedFunction;
 
     /**

@@ -59,13 +59,7 @@ export const createNthRoot = /* #__PURE__ */ factory(
       concat,
     });
 
-    // `typed.referTo` is published as `referTo(...names, callback)` but the
-    // local TypedFunction type models it in curried form; bind it to its real
-    // (signature, callback) call signature here.
-    const referTo = typed.referTo as unknown as (
-      signature: string,
-      callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
-    ) => (...args: unknown[]) => unknown;
+    const referTo = typed.referTo;
 
     /**
      * Calculate the nth root of a value.

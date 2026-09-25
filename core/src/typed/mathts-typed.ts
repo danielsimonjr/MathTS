@@ -84,6 +84,10 @@ export type { TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToS
  * parameters — every function is assignable to it because `never` is
  * assignable to every parameter type. This is exactly the set of values
  * typed-function genuinely accepts when declaring signatures.
+ *
+ * Defined here, not imported from `typed-function`: consumers resolve that module
+ * to the published package, whose declarations do not have this name. (The
+ * in-repo ambient declarations for typed-function mirror it for the monorepo build.)
  */
 export type SignatureImpl = (...args: never[]) => unknown;
 
@@ -621,7 +625,9 @@ export class TypeRegistry {
  */
 export function createTypedFunction<T>(
   name: string,
-  signatures: { [signature: string]: (...args: unknown[]) => T },
+  // `never[]` parameters: the input-position top type (see SignatureImpl), so
+  // implementations with concrete parameter types are accepted.
+  signatures: { [signature: string]: (...args: never[]) => T },
   typedInstance: TypedInstance = mathTyped
 ): (...args: unknown[]) => T {
   return typedInstance(name, signatures) as (...args: unknown[]) => T;

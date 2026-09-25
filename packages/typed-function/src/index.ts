@@ -317,12 +317,17 @@ export function createRobustSubtypeTest(
  * ```
  */
 export function createSafeConversion<T>(
-  TargetClass: new (...args: unknown[]) => T,
+  // `never[]`, not `unknown[]`: constructor parameters are contravariant, so an
+  // `unknown[]` signature rejects every class whose constructor has typed
+  // parameters (including this function's own example). The arguments are only
+  // known at runtime: typed-function guarantees `value` has the conversion's
+  // `from` type, and `transform` shapes it into the constructor's arguments.
+  TargetClass: new (...args: never[]) => T,
   transform?: (value: unknown) => unknown[]
 ): (value: unknown) => T {
   return (value: unknown): T => {
     const args = transform ? transform(value) : [value];
-    return new TargetClass(...args);
+    return new TargetClass(...(args as never[]));
   };
 }
 
@@ -338,7 +343,7 @@ export function createSafeConversion<T>(
 export function createSafeConversionDef<T>(
   from: string,
   to: string,
-  TargetClass: new (...args: unknown[]) => T,
+  TargetClass: new (...args: never[]) => T,
   transform?: (value: unknown) => unknown[]
 ): ConversionDef {
   return {

@@ -26,16 +26,25 @@ import * as mathFunctions from '@danielsimonjr/mathts-functions';
 // =============================================================================
 
 /**
- * mathjs-compatible configuration interface
+ * The shared functions runtime config that `config()` forwards to and merges back.
  */
-export interface MathJSConfig {
+type RuntimeConfig = ReturnType<typeof mathFunctions.config>;
+
+/**
+ * mathjs-compatible configuration interface.
+ *
+ * Every runtime key is here (`relTol`, `absTol`, `numberFallback`, `predictable`,
+ * `legacySubset`, ...), because `config()` returns the merged functions config: a
+ * narrower type hid keys the returned object always carries.
+ */
+export interface MathJSConfig extends Partial<RuntimeConfig> {
   /** Numeric precision for BigNumber (default: 64) */
   precision?: number;
   /** Matrix type: 'Matrix' or 'Array' */
   matrix?: 'Matrix' | 'Array';
   /** Number type for parsing */
-  number?: 'number' | 'BigNumber' | 'Fraction';
-  /** Epsilon for floating point comparisons */
+  number?: RuntimeConfig['number'];
+  /** Epsilon for floating point comparisons (mathjs < 13; superseded by `relTol`) */
   epsilon?: number;
   /** Predictable random seed */
   randomSeed?: string | null;

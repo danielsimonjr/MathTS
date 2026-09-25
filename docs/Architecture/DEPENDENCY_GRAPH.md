@@ -1048,10 +1048,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                                                                 | Type               |
-| -------------------------- | ----------------------------------------------------------------------- | ------------------ |
-| `../typed/mathts-typed.js` | `TypedFunction, TypedInstance, SignatureFunction, ReferTo, ReferToSelf` | Import (type-only) |
-| `../typed/mathts-typed.js` | `mathTyped`                                                             | Import             |
+| File                       | Imports                                         | Type               |
+| -------------------------- | ----------------------------------------------- | ------------------ |
+| `../typed/mathts-typed.js` | `TypedFunction, TypedInstance, SignatureRecord` | Import (type-only) |
+| `../typed/mathts-typed.js` | `mathTyped`                                     | Import             |
 
 **Exports:**
 
@@ -16983,7 +16983,8 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `Chain`
+- Interfaces: `ChainMethods`, `ChainUnwrap`
+- Types: `Chain`
 - Functions: `createChain`
 
 ---
@@ -18342,11 +18343,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1175   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195288 |
+| Total Lines of Code     | 195430 |
 | Total Exports           | 5846   |
 | Total Re-exports        | 2364   |
 | Total Classes           | 55     |
-| Total Interfaces        | 509    |
+| Total Interfaces        | 510    |
 | Total Functions         | 1888   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |

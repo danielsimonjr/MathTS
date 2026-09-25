@@ -55,6 +55,18 @@ declare module 'typed-function' {
   export type SignatureFunction = (...args: unknown[]) => unknown;
 
   /**
+   * Any implementation accepted when DECLARING a signature.
+   *
+   * `SignatureFunction` is right where typed-function stores an implementation and
+   * later calls it with validated arguments, but wrong as an input type: under
+   * `strictFunctionTypes` parameters are contravariant, so `(a: number) => number`
+   * is not assignable to `(...args: unknown[]) => unknown`. `never` parameters make
+   * this the top type for "any function": every implementation is assignable to it,
+   * which is exactly what typed-function accepts at runtime.
+   */
+  export type SignatureImpl = (...args: never[]) => unknown;
+
+  /**
    * A compiled signature with test and implementation functions
    */
   export interface Signature {
@@ -166,15 +178,15 @@ declare module 'typed-function' {
     /** Create a typed function with name and signature definitions */
     (
       name: string,
-      signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>
+      signatures: Record<string, SignatureImpl | ReferTo | ReferToSelf>
     ): TypedFunction;
-    (signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>): TypedFunction;
+    (signatures: Record<string, SignatureImpl | ReferTo | ReferToSelf>): TypedFunction;
     (
       ...args: Array<
         | string
-        | Record<string, SignatureFunction | ReferTo | ReferToSelf>
+        | Record<string, SignatureImpl | ReferTo | ReferToSelf>
         | TypedFunction
-        | (SignatureFunction & { signature: string })
+        | (SignatureImpl & { signature: string })
       >
     ): TypedFunction;
 
@@ -226,12 +238,10 @@ declare module 'typed-function' {
     isTypedFunction: (entity: unknown) => entity is TypedFunction;
 
     /** Create a reference to other signatures */
-    referTo: (
-      ...args: [...string[], (...fns: SignatureFunction[]) => SignatureFunction]
-    ) => ReferTo;
+    referTo: (...args: [...string[], (...fns: SignatureFunction[]) => SignatureImpl]) => ReferTo;
 
     /** Create a self-reference */
-    referToSelf: (callback: (self: TypedFunction) => SignatureFunction) => ReferToSelf;
+    referToSelf: (callback: (self: TypedFunction) => SignatureImpl) => ReferToSelf;
 
     /** Create an error for mismatched arguments */
     createError: (name: string, args: ArrayLike<unknown>, signatures: Signature[]) => TypedError;

@@ -10,13 +10,7 @@
  * @packageDocumentation
  */
 
-import type {
-  TypedFunction,
-  TypedInstance,
-  SignatureFunction,
-  ReferTo,
-  ReferToSelf,
-} from '../typed/mathts-typed.js';
+import type { TypedFunction, TypedInstance, SignatureRecord } from '../typed/mathts-typed.js';
 import { mathTyped } from '../typed/mathts-typed.js';
 
 /**
@@ -229,10 +223,7 @@ export function createFactory<T = TypedFunction>(
  * });
  * ```
  */
-export function createTypedFunction(
-  name: string,
-  signatures: Record<string, SignatureFunction | ReferTo | ReferToSelf>
-): TypedFunction {
+export function createTypedFunction(name: string, signatures: SignatureRecord): TypedFunction {
   return mathTyped(name, signatures);
 }
 

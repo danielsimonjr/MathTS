@@ -20,13 +20,7 @@ export const createUseMatrixForArrayScalar = /* #__PURE__ */ factory(
   'useMatrixForArrayScalar',
   ['typed', 'matrix'],
   ({ typed, matrix }: UseMatrixDependencies) => {
-    // `typed.referTo` is published as `referTo(signature, callback)` but the
-    // local TypedFunction type models it in curried form; bind it to its real
-    // (signature, callback) call signature here.
-    const referTo = typed.referTo as unknown as (
-      signature: string,
-      callback: (...refs: Array<(...args: unknown[]) => unknown>) => (...args: never[]) => unknown
-    ) => (...args: unknown[]) => unknown;
+    const referTo = typed.referTo;
 
     return {
       'Array, number': referTo(

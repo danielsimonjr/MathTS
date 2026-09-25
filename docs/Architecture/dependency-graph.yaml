@@ -2533,9 +2533,7 @@ modules:
           imports:
             - TypedFunction
             - TypedInstance
-            - SignatureFunction
-            - ReferTo
-            - ReferToSelf
+            - SignatureRecord
           typeOnly: true
         - file: ../typed/mathts-typed.js
           imports:
@@ -35534,7 +35532,8 @@ modules:
       exports:
         - createChain
       interfaces:
-        - Chain
+        - ChainMethods
+        - ChainUnwrap
       functions:
         - createChain
   gpu:
@@ -37758,10 +37757,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1175
   totalModules: 83
-  totalLinesOfCode: 195288
+  totalLinesOfCode: 195430
   totalExports: 5846
   totalClasses: 55
-  totalInterfaces: 509
+  totalInterfaces: 510
   totalFunctions: 1888
   totalTypeGuards: 159
   totalEnums: 0
