@@ -20,7 +20,7 @@ human-facing overview.
 | ------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development  |
 | Build all     | `bun run build`                                          | turbo, respects dep graph                                                                       |
-| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 32/32, 0 errors**                                                     |
+| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 33/33, 0 errors** (includes the wasm build)                           |
 | Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest   |
 | Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                          |
 | Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                       |

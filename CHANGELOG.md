@@ -52,6 +52,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is ever freed. 5,000 allocate/release cycles grew memory from 256 KiB to 128 MiB. Reuse now
   rewrites the AS header `byteLength`, and `allocate*Empty` zero-fills a recycled block. The new
   tests fail 8/11 against the old loader.
+- **`functions`' dead legacy WASM branches are removed (56 kernel names, 32 files, −3.5k lines).**
+  Each called a pointer-ABI kernel from the deleted native-WASM toolchain (`dct_wasm`, `laDet`,
+  `statsMean`, …) that the AssemblyScript binary does not export. With the module loaded, each branch copied its inputs
+  into WASM memory that the stub runtime never reclaims, hit a `TypeError`, and fell back to JS
+  (`dct` ×2000 at n=4096: 64 KiB → 128 MiB, now 0 growth). Two branches had no `catch`, so with the
+  module loaded **`distance` (pairwise) and `intersect` (2-D lines) threw** `wasm.distanceND is not a
+  function`; they now return the right result. `solveODE` no longer calls the user's `f` twice more
+  when the module is loaded. The export surface is unchanged (1,070 names, diffed). The loader's
+  never-populated allocation pool and 141 `WasmModule` declarations for absent kernels went with
+  them; load, SHA-384 verification and instantiation are unchanged. `cov-signal` now asserts that
+  loading the module changes no result.
 - **A commit touching only AssemblyScript source passes the pre-commit hook.** lint-staged ran
   `oxlint --fix` on files `.oxlintrc.json` ignores, and oxlint exits 1 when it selects nothing
   (`--no-error-on-unmatched-pattern`).
