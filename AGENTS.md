@@ -167,6 +167,12 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
    a published table nothing regenerates will rot.
 7. **Gate on a reproducible row.** The crossover row is by construction the most marginal and the
    most load-sensitive; assert where the margin is robust and print the rest.
+8. **Measure on the engine your users run.** `bun run bench:wasm` runs on Bun, whose engine is
+   JavaScriptCore; Node and Chromium run V8, and the winner can flip between them (on 2026-09-25
+   `sin`/`cos`/`tan` measured faster in JS on Bun but faster in WASM on V8 at large n). Take
+   dispatch decisions from `node tools/benchmark/wasm/run-node.mjs`, which bundles each area with
+   esbuild and runs it as its own Node process, and run it twice: a row that flips between runs is
+   noise, not a threshold.
 
 ---
 

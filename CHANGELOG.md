@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- **131 `functions` exports are callable in the published types; they were not.** `det`, `inv`,
+  `lup`, `qr`, `zeros`, `identity`, `map`, `median`, `subset`, the `factory_*` functions and more
+  were functions at runtime but declared `unknown` (or, for `det`, as its own return value), so
+  every TypeScript call needed a cast. The factories' `typed` dependency type returned `unknown`
+  from `typed(name, signatures)`; it now has a named creation overload (a one-argument overload
+  also matched ordinary calls such as `size(matrix)`, so it is limited to the named form). The
+  shared `referTo` type matches typed-function's variadic `referTo(...names, callback)`, so five
+  factories drop their casts. `consumer-typecheck` now asserts, against the packed tarballs, that
+  every runtime-function export of every entry point is callable (2,310; with the overload
+  removed it fails on 127).
+- **Public types that no real value could satisfy, found by type-checking the tests** (a test is
+  the first caller of an API; the source-only check cannot see these). core: the BigNumber
+  formatter's `BigNumberValue` accepted neither core's `BigNumber` nor decimal.js (it is now
+  generic over the implementation's own type), and `createTypedFunction` rejected implementations
+  with typed parameters. compat: `chain(3).add(4).multiply(2)` did not compile, and `MathJSConfig`
+  omitted `relTol`, `absTol` and the other keys `config()` returns. typed-function:
+  `createSafeConversion` rejected classes with typed constructors. expression: seven node classes
+  extended a local stub, so their types lacked `equals`, `traverse`, `evaluate`, `compile` and
+  more, and `parse('x')` was typed `MathNode | MathNode[]`. functions: the four async hypothesis
+  tests returned `Result | BootstrapResult` even without a `bootstrap` option. No runtime change.
+- **Tests are type-checked in 21 of 24 packages** (`typecheck` runs `tsc -p tsconfig.test.json`
+  after `tsc --noEmit`); before this round, none were.
+- **`polynomialGCD` is exact for integer inputs.** Floating-point Euclid reported a spurious
+  common factor for coprime high-degree pairs (a degree-266 polynomial and a random integer cubic:
+  wrong in 53 of 300 draws). Inputs whose coefficients are all safe integers now take a bigint
+  primitive pseudo-remainder sequence; other inputs keep the float path.
+- **A failed WASM load no longer disables WASM for the rest of the process.** Both loaders kept
+  the rejected promise in `loading`, so every later `load()` rethrew the first error, even after
+  the binary appeared. `loading` is now cleared in a `finally`.
+- **CDG no longer seeds build roots from `noEmit` configs or `.d.ts` files.** The new
+  `typecheck` scripts run `tsc -p tsconfig.test.json`, and CDG treated that as a secondary build:
+  core's ambient `typed-function.d.ts` entered the graph as source (a false `TRUE_DUPLICATE`), and
+  a glob include marks a whole package reachable, which would hide a dormant file.
+- **The WASM benchmarks time what they claim.** The elementwise benchmark fell back to JS when
+  the AS dispatch returned `null` and timed that as WASM; every bench now fails on a `null` or a
+  failed load. `node tools/benchmark/wasm/run-node.mjs` runs the suite on V8: Bun's
+  JavaScriptCore ranks several kernels the other way round.
+
 - **A cold `bun install && bun run build && bun run test` passes; it failed before.** `bun run
   build` had no edge from `matrix#build` to the AssemblyScript build, so `copy-wasm.mjs` raced
   `asc`, found no binary, warned and exited 0. Turbo then cached the wasm-less `dist` and kept
@@ -91,6 +129,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Verified: 0 errors in all three, and `bun run check:file-census` still passes (1863 files ==
     maximal repo walk, 0 orphans). No source file changed.
 
+
+### Added
+- **CI skip budget** (`tools/test/check-skip-budget.mjs`, baseline
+  `tools/test/skip-baseline.json`). It fails when a suite skips more tests than its baseline,
+  skips fewer (lower the baseline in the same change), or prints no summary. Nine WASM-tier suites
+  once skipped silently for months.
+- **The consumer type check verifies the shipped wasm**: `matrix` and `functions` tarballs must
+  carry `dist/wasm/mathts-as.wasm`, valid, and matching its SHA-384 manifest.
 
 ### fix(build): the published .d.ts carries explicit .js extensions (NodeNext consumers)
 
