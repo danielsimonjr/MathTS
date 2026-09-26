@@ -4,7 +4,8 @@
  * Nothing loads the AS binary on its own, so until `loadWasm()` resolves `true`
  * every function runs its JavaScript path. These tests pin the contract:
  * a missing binary resolves `false`, a binary that fails its SHA-384 manifest
- * check rejects, a failed attempt does not stop a later one from succeeding,
+ * check rejects, a failed attempt (before or after compilation) does not stop a
+ * later one from succeeding,
  * and once loaded, public functions execute AS kernels where the measured dispatch
  * policy (src/wasm/policy.ts) allows it, and keep their JS path where it does not.
  */
@@ -17,6 +18,16 @@ import { loadWasm, isWasmLoaded, bitAnd, abs } from '../src/index.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { WASM_BITWISE_THRESHOLD } from '../src/wasm/bitwise/wasm-bridge.js';
 import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
+
+/**
+ * A valid module that imports `m.f`, which the loader does not provide: it compiles, and
+ * instantiate() then throws. Magic and version 1, a type section holding `() -> ()`, and an
+ * import section holding `(import "m" "f" (func (type 0)))`.
+ */
+const UNLINKABLE_WASM = new Uint8Array([
+  0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00, 0x02, 0x07,
+  0x01, 0x01, 0x6d, 0x01, 0x66, 0x00, 0x00,
+]);
 
 it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
   expect(AS_WASM_PATH, AS_WASM_MISSING_MESSAGE).not.toBeNull();
@@ -46,6 +57,21 @@ describe('loadWasm() — opt-in to the AssemblyScript tier', () => {
     await expect(loadWasm(missing)).resolves.toBe(false);
     await expect(loadWasm(AS_WASM_PATH!)).resolves.toBe(true);
     expect(isWasmLoaded()).toBe(true);
+  });
+
+  it('a binary that compiles but fails to instantiate does not stop a later attempt', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'mathts-unlinkable-'));
+    try {
+      const wasm = join(dir, 'mathts-as.wasm');
+      writeFileSync(wasm, UNLINKABLE_WASM);
+      await expect(loadWasm(wasm)).resolves.toBe(false);
+      // The loader used to keep the compiled module, so this instantiated it again
+      // instead of reading the binary it was given, and failed the same way forever.
+      await expect(loadWasm(AS_WASM_PATH!)).resolves.toBe(true);
+      expect(isWasmLoaded()).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('loads the packaged binary by default and is idempotent', async () => {

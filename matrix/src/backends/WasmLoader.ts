@@ -615,6 +615,11 @@ export class WasmLoader {
     this.loading = this.loadModule(wasmPath);
     try {
       this.wasmModule = await this.loading;
+    } catch (error) {
+      // Drop a module that compiled but failed to instantiate, too: the next
+      // load() would reuse it instead of reading (and verifying) its own binary.
+      this.compiledModule = null;
+      throw error;
     } finally {
       this.loading = null;
     }

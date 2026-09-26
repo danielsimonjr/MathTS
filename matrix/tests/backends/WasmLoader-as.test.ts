@@ -16,6 +16,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WasmLoader } from '../../src/backends/WasmLoader.js';
@@ -148,6 +149,30 @@ describe('WasmLoader — load() short-circuits', () => {
     await expect(loader.load(asWasmPath)).resolves.toBeDefined();
     expect(loader.isLoaded()).toBe(true);
     loader.reset();
+  });
+
+  it('a binary that compiles but fails to instantiate does not stick either', async () => {
+    if (!asAvailable) return;
+    const loader = WasmLoader.getInstance();
+    loader.reset();
+    // A valid module importing `m.f`, which the loader does not provide.
+    const unlinkable = new Uint8Array([
+      0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00, 0x02,
+      0x07, 0x01, 0x01, 0x6d, 0x01, 0x66, 0x00, 0x00,
+    ]);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mathts-unlinkable-'));
+    try {
+      const wasm = path.join(dir, 'mathts.wasm');
+      fs.writeFileSync(wasm, unlinkable);
+      await expect(loader.load(wasm)).rejects.toThrow();
+      // The compiled module used to stay cached, so this instantiated it again
+      // instead of reading the binary it was given.
+      await expect(loader.load(asWasmPath)).resolves.toBeDefined();
+      expect(loader.isLoaded()).toBe(true);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+      loader.reset();
+    }
   });
 
   it('free() on the AS path filters pools and unpins without throwing', async () => {

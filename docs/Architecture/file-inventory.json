@@ -8262,7 +8262,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 613
+      "loc": 618
     },
     {
       "file": "functions/tests/acsc-asec-acot-bignumber.test.ts",
@@ -9592,7 +9592,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 95
+      "loc": 121
     },
     {
       "file": "functions/tests/logistic-regression.test.ts",
@@ -10670,7 +10670,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1161
+      "loc": 1166
     },
     {
       "file": "matrix/src/config.ts",
@@ -10908,7 +10908,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 184
+      "loc": 209
     },
     {
       "file": "matrix/tests/backends/WasmLoader-browser.test.ts",
@@ -12574,21 +12574,21 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 121
+      "loc": 119
     },
     {
       "file": "tools/benchmark/wasm/harness.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 284
+      "loc": 303
     },
     {
       "file": "tools/benchmark/wasm/matrix.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 88
+      "loc": 86
     },
     {
       "file": "tools/benchmark/wasm/opt-in.bench.ts",
@@ -12609,21 +12609,21 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 60
+      "loc": 58
     },
     {
       "file": "tools/benchmark/wasm/special.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 107
+      "loc": 105
     },
     {
       "file": "tools/benchmark/wasm/transcendental-dispatch.bench.ts",
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 79
+      "loc": 74
     },
     {
       "file": "tools/chunking-for-files/chunking-for-files.ts",
