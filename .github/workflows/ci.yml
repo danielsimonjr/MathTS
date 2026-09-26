@@ -136,9 +136,12 @@ jobs:
 
       # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
       # every machine for months. Each suite's skip count is pinned in
-      # tools/test/skip-baseline.json and any change, up or down, fails here.
+      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
+      # own tests run first: Turbo formats its output differently here than in a terminal.
       - name: Skip budget
-        run: node tools/test/check-skip-budget.mjs test-output.log
+        run: |
+          node --test tools/test/check-skip-budget.test.mjs
+          node tools/test/check-skip-budget.mjs test-output.log
 
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
