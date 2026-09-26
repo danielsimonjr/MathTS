@@ -27,6 +27,7 @@ import {
   type PtrUnaryKernel,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /** Element-count threshold above which the WASM kernel beats JS. */
 export const WASM_ELEMENTWISE_THRESHOLD = 1024;
@@ -76,7 +77,7 @@ export function elementwiseUnaryDispatch(
   xs: Float64Array
 ): Float64Array | null {
   const n = xs.length;
-  if (n < WASM_ELEMENTWISE_THRESHOLD) return null;
+  if (n < WASM_ELEMENTWISE_THRESHOLD || !wasmPolicyAllows(kernelName(op), n)) return null;
   const wasm = getWasm() as unknown as RawWasm | null;
   if (!wasm) return null;
   const fn = wasm[kernelName(op)] as PtrUnaryKernel | undefined;
@@ -99,6 +100,9 @@ export function elementwiseChainDispatch(
 ): Float64Array | null {
   const n = xs.length;
   if (ops.length === 0 || n < WASM_ELEMENTWISE_THRESHOLD) return null;
+  // A chain keeps its data in WASM memory between kernels, so it is measured and allowed
+  // as a whole (`fused_chain`), not op by op.
+  if (!wasmPolicyAllows('fused_chain', n)) return null;
   const wasm = getWasm() as unknown as RawWasm | null;
   if (!wasm) return null;
   const mem = wasm.memory;

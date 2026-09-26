@@ -498,7 +498,8 @@ export interface WasmModule {
     m: number,
     n: number,
     qOutHdr: number,
-    rOutHdr: number
+    rOutHdr: number,
+    vWorkHdr?: number
   ) => number;
   matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
   matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;

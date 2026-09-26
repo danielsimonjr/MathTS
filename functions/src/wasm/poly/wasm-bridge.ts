@@ -32,6 +32,7 @@ import {
   asReadReturnedF64,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /**
  * Coefficient-count threshold above which we attempt the WASM kernel.
@@ -101,7 +102,7 @@ function polyDivModJS(
  */
 export function polyMulDispatch(a: Float64Array, b: Float64Array): Float64Array {
   const bigEnough = a.length >= WASM_POLY_THRESHOLD || b.length >= WASM_POLY_THRESHOLD;
-  if (bigEnough) {
+  if (bigEnough && wasmPolicyAllows('poly_mul_f64', Math.max(a.length, b.length))) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -131,7 +132,7 @@ export function polyDivModDispatch(
   if (den.length === 0) throw new Error('Division by zero polynomial');
 
   const bigEnough = num.length >= WASM_POLY_THRESHOLD;
-  if (bigEnough) {
+  if (bigEnough && wasmPolicyAllows('poly_div_mod_f64', num.length)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -258,7 +259,7 @@ function discriminantJS(p: Float64Array): number {
  */
 export function resultantDispatch(p: Float64Array, q: Float64Array): number {
   const bigEnough = p.length >= WASM_POLY_THRESHOLD || q.length >= WASM_POLY_THRESHOLD;
-  if (bigEnough) {
+  if (bigEnough && wasmPolicyAllows('poly_resultant_f64', Math.max(p.length, q.length))) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -281,7 +282,7 @@ export function resultantDispatch(p: Float64Array, q: Float64Array): number {
  */
 export function discriminantDispatch(p: Float64Array): number {
   const bigEnough = p.length >= WASM_POLY_THRESHOLD;
-  if (bigEnough) {
+  if (bigEnough && wasmPolicyAllows('poly_discriminant_f64', p.length)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -457,7 +458,7 @@ function fitDispatch(
 ): Float64Array {
   if (xs.length !== ys.length) throw new Error('xs and ys must have the same length');
 
-  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD && wasmPolicyAllows(asName, xs.length)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

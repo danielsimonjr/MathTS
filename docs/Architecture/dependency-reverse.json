@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1846,6 +1846,16 @@
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/wasm/bridges/common.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/elementwise/wasm-bridge.ts",
+      "functions/src/wasm/interpolation/wasm-bridge.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts",
+      "functions/src/wasm/signal/wasm-bridge.ts",
+      "functions/src/wasm/sort/wasm-bridge.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
+    "functions/src/wasm/policy.ts": [
+      "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/bridges/common.ts",
       "functions/src/wasm/elementwise/wasm-bridge.ts",
       "functions/src/wasm/interpolation/wasm-bridge.ts",
       "functions/src/wasm/poly/wasm-bridge.ts",
@@ -3906,6 +3916,7 @@
       "assembly/src/ops/complex-array.ts",
       "assembly/src/ops/complex-ops.ts"
     ],
+    "assembly/src/heap.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/scalar.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/array.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/matrix.ts": ["assembly/src/index.ts"],

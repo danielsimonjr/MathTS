@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-09-25",
-    "totalFiles": 1175,
+    "lastUpdated": "2026-09-26",
+    "totalFiles": 1177,
     "totalModules": 83,
-    "totalExports": 5846
+    "totalExports": 5851
   },
   "entryPoints": [
     {
@@ -13212,6 +13212,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13254,6 +13258,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13280,6 +13288,16 @@
           "resetPolyWasm"
         ],
         "constants": ["WASM_POLY_THRESHOLD", "WASM_POLY_FIT_THRESHOLD"]
+      },
+      "functions/src/wasm/policy.ts": {
+        "description": "Where the AssemblyScript tier runs once a consumer has called `loadWasm()`.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"],
+        "interfaces": ["WasmBand"],
+        "functions": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"]
       },
       "functions/src/wasm/WasmLoader.ts": {
         "description": "WASM Loader - Loads and manages WebAssembly modules",
@@ -13324,6 +13342,10 @@
               "asReadReturnedI32",
               "RawWasm"
             ]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13381,6 +13403,10 @@
               "ellipticKScalar",
               "ellipticECompleteScalar"
             ]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13554,6 +13580,10 @@
           {
             "file": "../WasmLoader.js",
             "imports": ["wasmLoader", "WasmModule"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13595,6 +13625,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsI32", "asReadReturnedI32", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13640,6 +13674,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13686,6 +13724,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "runUnaryPtr", "runChainPtr", "PtrUnaryKernel", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -36098,6 +36140,11 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./heap",
+            "imports": ["heap_reset"],
+            "reExport": true
+          },
+          {
             "file": "./types/complex",
             "imports": ["complex", "complexFromPolar"],
             "reExport": true
@@ -36530,6 +36577,7 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "heap_reset",
           "complex",
           "complexFromPolar",
           "add_f64",
@@ -36852,6 +36900,7 @@
           "complex_array_copy"
         ],
         "reExported": [
+          "heap_reset",
           "complex",
           "complexFromPolar",
           "add_f64",
@@ -37245,6 +37294,15 @@
           "array_cot_ptr",
           "array_erfc_ptr"
         ]
+      },
+      "assembly/src/heap.ts": {
+        "description": "Heap reset for the stub runtime.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["heap_reset"],
+        "functions": ["heap_reset"]
       },
       "assembly/src/tridiag.ts": {
         "description": "Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).",
@@ -38971,6 +39029,7 @@
         "files": [
           "functions/src/wasm/signal/wasm-bridge.ts",
           "functions/src/wasm/poly/wasm-bridge.ts",
+          "functions/src/wasm/policy.ts",
           "functions/src/wasm/WasmLoader.ts",
           "functions/src/wasm/sort/wasm-bridge.ts",
           "functions/src/wasm/special/wasm-bridge.ts",
@@ -40020,6 +40079,7 @@
           "assembly/src/index.ts",
           "assembly/src/poly.ts",
           "assembly/src/elementwise.ts",
+          "assembly/src/heap.ts",
           "assembly/src/tridiag.ts",
           "assembly/src/special.ts",
           "assembly/src/sort.ts"
@@ -40084,17 +40144,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1175,
+    "totalTypeScriptFiles": 1177,
     "totalModules": 83,
-    "totalLinesOfCode": 195469,
-    "totalExports": 5846,
+    "totalLinesOfCode": 195683,
+    "totalExports": 5851,
     "totalClasses": 55,
-    "totalInterfaces": 509,
-    "totalFunctions": 1896,
+    "totalInterfaces": 510,
+    "totalFunctions": 1900,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1599,
-    "totalReExports": 2364,
+    "totalReExports": 2365,
     "totalTypeOnlyImports": 589,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

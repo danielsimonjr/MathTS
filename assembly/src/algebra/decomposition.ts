@@ -35,10 +35,11 @@ export function matrix_lu_decompose(
   u_out: Float64Array,
   perm_out: Int32Array
 ): i32 {
-  // Work copy — the elimination happens in place. After we're done,
-  // L lives below the diagonal and U on/above; we'll split them into
-  // l_out / u_out as a final step.
-  const work = new Float64Array(n * n);
+  // The elimination happens in place in `u_out` (no internal allocation: the stub
+  // runtime never frees, so a scratch array here leaked n*n*8 bytes per call). After
+  // we're done, L lives below the diagonal and U on/above; the final split moves L
+  // into l_out and zeroes it in u_out.
+  const work = u_out;
   for (let i = 0; i < n * n; i++) work[i] = a[i];
 
   for (let i = 0; i < n; i++) perm_out[i] = i;
@@ -86,18 +87,17 @@ export function matrix_lu_decompose(
     return -1;
   }
 
-  // Split the in-place factorization into l_out (unit lower) and u_out (upper).
+  // Split the in-place factorization (held in u_out) into l_out (unit lower) and
+  // u_out (upper).
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       if (i > j) {
-        l_out[i * n + j] = work[i * n + j];
+        l_out[i * n + j] = u_out[i * n + j];
         u_out[i * n + j] = 0.0;
       } else if (i == j) {
         l_out[i * n + j] = 1.0;
-        u_out[i * n + j] = work[i * n + j];
       } else {
         l_out[i * n + j] = 0.0;
-        u_out[i * n + j] = work[i * n + j];
       }
     }
   }
@@ -129,7 +129,11 @@ export function matrix_qr_decompose(
   m: i32,
   n: i32,
   q_out: Float64Array,
-  r_out: Float64Array
+  r_out: Float64Array,
+  // Nullable but deliberately without a default: a defaulted parameter compiles to an
+  // arguments-length trampoline, which can ignore a passed buffer. Hosts calling with
+  // five arguments pass `undefined`, which arrives as null.
+  v_work: Float64Array | null
 ): i32 {
   // R starts as a copy of A; we annihilate the below-diagonal entries.
   for (let i = 0; i < m * n; i++) r_out[i] = a[i];
@@ -147,7 +151,10 @@ export function matrix_qr_decompose(
   // the algorithm degenerates (all subsequent updates skip). Storing the
   // reflector in a fresh buffer matches the JS reference in
   // `WASMBackend.qrDecompositionJS` exactly.
-  const vBuf = new Float64Array(m);
+  // Householder vector scratch (length m). Pass `v_work` to avoid allocating it: the
+  // stub runtime never frees, so the internal fallback leaks m*8 bytes per call.
+  const vBuf: Float64Array =
+    v_work !== null && v_work.length >= m ? v_work : new Float64Array(m);
 
   for (let k = 0; k < minDim; k++) {
     // Column norm below (and including) the diagonal pivot.
@@ -254,14 +261,11 @@ export function matrix_cholesky(a: Float64Array, n: i32, l_out: Float64Array): i
 /**
  * Compute `A^-1` for a square n*n matrix via LU + column-wise back-solve.
  *
- * `work` is a scratch buffer of length >= 2*n*n + 2*n: the first n*n
- * holds the in-place LU factorization, the next n*n is unused (room
- * for callers who pre-size matching the inverse layout), and the
- * trailing 2*n holds the permutation + RHS/solution vectors. To keep
- * the AS API simple the caller passes a single `work` Float64Array
- * sized at least `n * n`; we allocate the small Int32/Float64 helpers
- * internally (AS new is cheap and the GC is a no-op under
- * `--runtime stub`, so this doesn't change leak characteristics).
+ * `work` is a scratch buffer of length >= n*n: it holds the in-place LU
+ * factorization. Size it n*n + n and the row permutation lives in its tail too,
+ * so the call allocates nothing; with exactly n*n the permutation is allocated
+ * internally, which the stub runtime never frees. The solution vectors are
+ * solved in place in `result`.
  *
  * Returns 0 on success, -1 if A is singular (in which case `result`
  * is left zeroed).
@@ -275,8 +279,16 @@ export function matrix_inverse(
   // Copy A into the work buffer; LU will eliminate in place.
   for (let i = 0; i < n * n; i++) work[i] = a[i];
 
-  const perm = new Int32Array(n);
-  for (let i = 0; i < n; i++) perm[i] = i;
+  // The row permutation lives in `work`'s tail when the caller sized it n*n + n (the
+  // stub runtime never frees, so an internal array leaked n*4 bytes per call); a caller
+  // passing exactly n*n still works, with the internal fallback.
+  const permInWork = work.length >= n * n + n;
+  const permFallback: Int32Array | null = permInWork ? null : new Int32Array(n);
+  const permBase = n * n;
+  for (let i = 0; i < n; i++) {
+    if (permInWork) work[permBase + i] = <f64>i;
+    else permFallback![i] = i;
+  }
 
   // Doolittle LU with partial pivoting — same algorithm as
   // matrix_lu_decompose, just inline so we can re-use the factored
@@ -301,9 +313,16 @@ export function matrix_inverse(
         work[k * n + j] = work[pivotRow * n + j];
         work[pivotRow * n + j] = tmp;
       }
-      const tmp = perm[k];
-      perm[k] = perm[pivotRow];
-      perm[pivotRow] = tmp;
+      if (permInWork) {
+        const tmp = work[permBase + k];
+        work[permBase + k] = work[permBase + pivotRow];
+        work[permBase + pivotRow] = tmp;
+      } else {
+        const fb = permFallback!;
+        const tmp = fb[k];
+        fb[k] = fb[pivotRow];
+        fb[pivotRow] = tmp;
+      }
     }
     const pivot = work[k * n + k];
     for (let i = k + 1; i < n; i++) {
@@ -319,29 +338,27 @@ export function matrix_inverse(
     return -1;
   }
 
-  // Solve A * X = I one column at a time.
-  const b = new Float64Array(n);
-  const x = new Float64Array(n);
+  // Solve A * X = I one column at a time, with x held in result's column itself: the
+  // forward pass reads only earlier entries of it and the back pass only later ones, so
+  // no scratch vector is needed. The right-hand side is the unit vector e_col, so
+  // b[perm[i]] is just (perm[i] == col).
   for (let col = 0; col < n; col++) {
-    for (let i = 0; i < n; i++) b[i] = i == col ? 1.0 : 0.0;
-
     // Forward substitution: L * y = P * b. Since L has unit diagonal,
     // y[i] = b[perm[i]] - sum_{j<i} L[i,j] * y[j].
     for (let i = 0; i < n; i++) {
-      let sum: f64 = b[perm[i]];
-      for (let j = 0; j < i; j++) sum -= work[i * n + j] * x[j];
-      x[i] = sum;
+      const p: i32 = permInWork ? <i32>work[permBase + i] : permFallback![i];
+      let sum: f64 = p == col ? 1.0 : 0.0;
+      for (let j = 0; j < i; j++) sum -= work[i * n + j] * result[j * n + col];
+      result[i * n + col] = sum;
     }
 
     // Backward substitution: U * x = y.
     for (let ii = 0; ii < n; ii++) {
       const i = n - 1 - ii;
-      let sum: f64 = x[i];
-      for (let j = i + 1; j < n; j++) sum -= work[i * n + j] * x[j];
-      x[i] = sum / work[i * n + i];
+      let sum: f64 = result[i * n + col];
+      for (let j = i + 1; j < n; j++) sum -= work[i * n + j] * result[j * n + col];
+      result[i * n + col] = sum / work[i * n + i];
     }
-
-    for (let i = 0; i < n; i++) result[i * n + col] = x[i];
   }
 
   return 0;
@@ -360,8 +377,8 @@ export function matrix_inverse(
 export function matrix_determinant(a: Float64Array, n: i32, work: Float64Array): f64 {
   for (let i = 0; i < n * n; i++) work[i] = a[i];
 
-  const perm = new Int32Array(n);
-  for (let i = 0; i < n; i++) perm[i] = i;
+  // Only the parity of the row swaps matters, so no permutation array is kept (one was
+  // allocated and never read, leaking n*4 bytes per call under the stub runtime).
 
   let swaps: i32 = 0;
 

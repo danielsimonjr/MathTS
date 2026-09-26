@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
@@ -862,15 +862,15 @@
   },
   "binary": {
     "path": "assembly/build/mathts.wasm",
-    "total": 326,
-    "functions": 314,
+    "total": 327,
+    "functions": 315,
     "globals": 11,
     "memory": 1,
-    "sourceFiles": 27,
+    "sourceFiles": 28,
     "byCategory": [
       {
         "category": "Scalar & special (f64)",
-        "count": 133
+        "count": 134
       },
       {
         "category": "Array",

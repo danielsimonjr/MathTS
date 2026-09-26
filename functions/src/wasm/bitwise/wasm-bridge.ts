@@ -35,6 +35,7 @@ import {
   asReadReturnedI32,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /**
  * Length threshold above which we attempt the WASM dispatch tier. This is
@@ -80,10 +81,11 @@ export function runBinaryBitwiseWasm(
   b: Int32Array
 ): Int32Array | null {
   if (a.length !== b.length) return null;
+  const names = BINARY_OPS[op];
+  if (!wasmPolicyAllows(names.as, a.length)) return null;
   const wasm = getWasm() as unknown as RawWasm | null;
   if (!wasm || !isAsWasm(wasm)) return null;
   const n = a.length;
-  const names = BINARY_OPS[op];
   try {
     // AS managed ABI: *_i32_array(a, b, result) writes into the `result` header.
     return withAsI32(wasm, [a, b, new Int32Array(n)], (mod, [ha, hb, hr]) => {
@@ -99,10 +101,11 @@ export function runBinaryBitwiseWasm(
  * Unary variant — currently only `bitNot`.
  */
 export function runUnaryBitwiseWasm(op: keyof typeof UNARY_OPS, a: Int32Array): Int32Array | null {
+  const names = UNARY_OPS[op];
+  if (!wasmPolicyAllows(names.as, a.length)) return null;
   const wasm = getWasm() as unknown as RawWasm | null;
   if (!wasm || !isAsWasm(wasm)) return null;
   const n = a.length;
-  const names = UNARY_OPS[op];
   try {
     // AS managed ABI: *_i32_array(a, result) writes into the `result` header.
     return withAsI32(wasm, [a, new Int32Array(n)], (mod, [ha, hr]) => {

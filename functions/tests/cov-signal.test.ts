@@ -47,6 +47,18 @@ import {
   initializeSignal,
   terminateSignal,
 } from '../src/typed/signal.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 /** parallelFFT / parallelIFFT result shape (their typed-function calls return `unknown`). */
 interface Spectrum {

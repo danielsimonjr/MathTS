@@ -24,6 +24,18 @@ import {
   rankF64JS,
 } from '../src/wasm/sort/wasm-bridge.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
 const N = WASM_SORT_THRESHOLD; // 16384

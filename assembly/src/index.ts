@@ -11,6 +11,9 @@
  * - Matrix operations
  */
 
+// Stub-runtime heap reset, called by the functions bridges after each managed call.
+export { heap_reset } from './heap';
+
 // =============================================================================
 // Core Types
 // =============================================================================

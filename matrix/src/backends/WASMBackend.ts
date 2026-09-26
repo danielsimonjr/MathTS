@@ -98,7 +98,8 @@ interface AsModule {
     m: number,
     n: number,
     qOutHdr: number,
-    rOutHdr: number
+    rOutHdr: number,
+    vWorkHdr?: number
   ) => number;
   matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
   matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
@@ -264,9 +265,28 @@ function readAsInt32Array(module: AsModule, alloc: AsInt32Allocation): Int32Arra
  * call `__unpin` for API hygiene — if a future build switches to a
  * real GC runtime this becomes correctness-relevant.
  */
-function releaseAsInt32Array(module: AsModule, alloc: AsInt32Allocation): void {
-  module.__unpin(alloc.headerPtr);
-  module.__unpin(alloc.bufferPtr);
+/**
+ * Reuse pool for Int32 buffers (the LU row permutation), like `AsAllocCache` for f64.
+ * Allocating a fresh one per call leaked about 650 bytes per LU call, because the stub
+ * runtime never frees and `__unpin` does nothing under it.
+ */
+class AsInt32Cache {
+  private free = new Map<number, AsInt32Allocation[]>();
+
+  acquire(module: AsModule, length: number): AsInt32Allocation {
+    const alloc = this.free.get(length)?.pop();
+    if (alloc) {
+      alloc.view = new Int32Array(module.memory.buffer, alloc.bufferPtr, length);
+      return alloc;
+    }
+    return allocAsInt32Array(module, length);
+  }
+
+  release(alloc: AsInt32Allocation): void {
+    const pool = this.free.get(alloc.length);
+    if (pool) pool.push(alloc);
+    else this.free.set(alloc.length, [alloc]);
+  }
 }
 
 /**
@@ -306,6 +326,7 @@ export class WASMBackend implements MatrixBackend {
   private initPromise: Promise<void> | null = null;
   /** Pooled allocations — see `AsAllocCache` for rationale. */
   private allocCache = new AsAllocCache();
+  private int32Cache = new AsInt32Cache();
 
   constructor(config: WASMBackendConfig = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -566,7 +587,7 @@ export class WASMBackend implements MatrixBackend {
     const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
     const lAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
     const uAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
-    const permAlloc = allocAsInt32Array(mod, n);
+    const permAlloc = this.int32Cache.acquire(mod, n);
     try {
       const status = mod.matrix_lu_decompose!(
         aAlloc.headerPtr,
@@ -600,7 +621,7 @@ export class WASMBackend implements MatrixBackend {
       this.allocCache.release(aAlloc);
       this.allocCache.release(lAlloc);
       this.allocCache.release(uAlloc);
-      releaseAsInt32Array(mod, permAlloc);
+      this.int32Cache.release(permAlloc);
     }
   }
 
@@ -672,8 +693,18 @@ export class WASMBackend implements MatrixBackend {
     const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
     const qAlloc = allocAsFloat64Array(this.allocCache, mod, m * m);
     const rAlloc = allocAsFloat64Array(this.allocCache, mod, m * n);
+    // Householder scratch: without it the kernel allocates m values per call, which the
+    // stub runtime never frees.
+    const vAlloc = allocAsFloat64Array(this.allocCache, mod, m);
     try {
-      mod.matrix_qr_decompose!(aAlloc.headerPtr, m, n, qAlloc.headerPtr, rAlloc.headerPtr);
+      mod.matrix_qr_decompose!(
+        aAlloc.headerPtr,
+        m,
+        n,
+        qAlloc.headerPtr,
+        rAlloc.headerPtr,
+        vAlloc.headerPtr
+      );
       const qFlat = readAsFloat64Array(mod, qAlloc);
       const rFlat = readAsFloat64Array(mod, rAlloc);
       return {
@@ -684,6 +715,7 @@ export class WASMBackend implements MatrixBackend {
       this.allocCache.release(aAlloc);
       this.allocCache.release(qAlloc);
       this.allocCache.release(rAlloc);
+      this.allocCache.release(vAlloc);
     }
   }
 
@@ -755,7 +787,9 @@ export class WASMBackend implements MatrixBackend {
 
     const aAlloc = writeAsFloat64Array(this.allocCache, mod, a.toFloat64Array());
     const resultAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
-    const workAlloc = allocAsFloat64Array(this.allocCache, mod, n * n);
+    // n*n for the LU factors plus n for the row permutation, so the kernel allocates
+    // nothing (the stub runtime never frees).
+    const workAlloc = allocAsFloat64Array(this.allocCache, mod, n * n + n);
     try {
       const status = mod.matrix_inverse!(
         aAlloc.headerPtr,

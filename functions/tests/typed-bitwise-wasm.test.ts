@@ -37,6 +37,18 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { WASM_BITWISE_THRESHOLD, resetBitwiseWasm } from '../src/wasm/bitwise/wasm-bridge.js';
 import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 const N = WASM_BITWISE_THRESHOLD + 1;
 const SHIFT_MASK = 31; // JS << / >> / >>> mask shift counts to low 5 bits

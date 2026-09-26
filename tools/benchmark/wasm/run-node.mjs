@@ -15,6 +15,12 @@
  * `import.meta.url`, so every area would start at once and they would time each other.
  * The bundles go to `functions/.bench/` (gitignored) because the loader resolves the
  * packaged `dist/wasm/mathts-as.wasm` from the nearest package root.
+ *
+ * Arguments select areas; any other argument is passed to each area's bench (the opt-in
+ * bench reads them as case names):
+ *   node tools/benchmark/wasm/run-node.mjs                 # the four kernel areas
+ *   node tools/benchmark/wasm/run-node.mjs opt-in          # public API, unloaded vs loaded
+ *   node tools/benchmark/wasm/run-node.mjs opt-in sin exp  # only those opt-in cases
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -25,7 +31,12 @@ import { build } from 'esbuild';
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, '..', '..', '..');
 const outDir = join(repoRoot, 'functions', '.bench');
-const AREAS = ['elementwise', 'special', 'sort', 'matrix'];
+const DEFAULT_AREAS = ['elementwise', 'special', 'sort', 'matrix'];
+const ALL_AREAS = [...DEFAULT_AREAS, 'opt-in'];
+const requested = process.argv.slice(2);
+const areaArgs = requested.filter((a) => ALL_AREAS.includes(a));
+const AREAS = areaArgs.length > 0 ? areaArgs : DEFAULT_AREAS;
+const passThrough = requested.filter((a) => !ALL_AREAS.includes(a));
 
 mkdirSync(outDir, { recursive: true });
 console.log(
@@ -40,8 +51,13 @@ for (const area of AREAS) {
     format: 'esm',
     outfile,
     logLevel: 'warning',
+    // CommonJS dependencies (workerpool) call `require` at run time, which an ESM bundle
+    // does not define.
+    banner: {
+      js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
+    },
   });
-  const run = spawnSync(process.execPath, [outfile], { stdio: 'inherit' });
+  const run = spawnSync(process.execPath, [outfile, ...passThrough], { stdio: 'inherit' });
   if (run.status !== 0) {
     console.error(`run-node: ${area} benchmark failed (exit ${run.status})`);
     process.exit(run.status ?? 1);

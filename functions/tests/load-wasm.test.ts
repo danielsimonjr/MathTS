@@ -5,14 +5,15 @@
  * every function runs its JavaScript path. These tests pin the contract:
  * a missing binary resolves `false`, a binary that fails its SHA-384 manifest
  * check rejects, a failed attempt does not stop a later one from succeeding,
- * and once loaded, public functions really execute AS kernels.
+ * and once loaded, public functions execute AS kernels where the measured dispatch
+ * policy (src/wasm/policy.ts) allows it, and keep their JS path where it does not.
  */
 
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { copyFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadWasm, isWasmLoaded, bitAnd } from '../src/index.js';
+import { loadWasm, isWasmLoaded, bitAnd, abs } from '../src/index.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { WASM_BITWISE_THRESHOLD } from '../src/wasm/bitwise/wasm-bridge.js';
 import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE, countExportCalls } from './helpers/wasm-spy.js';
@@ -70,14 +71,24 @@ describe('loadWasm() — opt-in to the AssemblyScript tier', () => {
     }
   });
 
-  it('after loading, a public function executes its AS kernel', async () => {
+  it('after loading, a public function executes its AS kernel (one the policy allows)', async () => {
+    await expect(loadWasm()).resolves.toBe(true);
+    const n = 4096;
+    const xs = Float64Array.from({ length: n }, (_, i) => (i % 2 ? -1 : 1) * i * 0.25);
+    const { result, counts } = countExportCalls(['array_abs_ptr'], () => abs(xs));
+    const out = (await result) as Float64Array;
+    expect(counts.array_abs_ptr).toBeGreaterThan(0);
+    for (let i = 0; i < n; i += 97) expect(out[i]).toBe(Math.abs(xs[i]));
+  });
+
+  it('after loading, a kernel the policy keeps off is not called', async () => {
     await expect(loadWasm()).resolves.toBe(true);
     const n = WASM_BITWISE_THRESHOLD + 1;
     const a = new Int32Array(n).map((_, i) => i * 7);
     const b = new Int32Array(n).map((_, i) => i * 3);
     const { result, counts } = countExportCalls(['bitAnd_i32_array'], () => bitAnd(a, b));
     const out = (await result) as Int32Array;
-    expect(counts.bitAnd_i32_array).toBeGreaterThan(0);
+    expect(counts.bitAnd_i32_array).toBe(0); // measured 3.0-3.3x slower on WASM
     for (let i = 0; i < n; i += 997) expect(out[i]).toBe(a[i] & b[i]);
   });
 });

@@ -5,11 +5,12 @@
  * (call-counter > 0, via the writable module clone) and (b) matches the JS
  * reference to ≤1e-12 relative, for n ≥ WASM_SPECIAL_THRESHOLD.
  *
- * Airy Ai/Bi are NOT repointed: the AS asymptotic kernels diverge from the JS
- * reference by ~1e-6 (|x|>5). This test pins that the AS Airy kernel is NOT
- * invoked under the AS binary (stays on the validated JS path).
+ * Airy Ai/Bi run on AS too: with the AIRY_U_MAX cap their asymptotic region
+ * (|x| > 5) mirrors the JS truncation, and the Airy test below pins AS vs JS
+ * to 1e-9 there. (An older note here said the Airy kernels were not repointed
+ * because they diverged by ~1e-6; that is no longer true.)
  *
- * Skipped when no AS artifact is present.
+ * Skipped when no AS artifact is present (the CI skip budget fails on that).
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -52,6 +53,18 @@ import {
   airyBiJS,
 } from '../src/wasm/special/wasm-bridge.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 const describeIfAS = AS_WASM_PATH ? describe : describe.skip;
 const N = WASM_SPECIAL_THRESHOLD; // 1024

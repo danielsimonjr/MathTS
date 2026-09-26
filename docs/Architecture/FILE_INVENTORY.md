@@ -4,27 +4,27 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-09-25 (by tools/create-dependency-graph)
+**Generated**: 2026-09-26 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1867
+**Total files**: 1873
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
-| `reachable`   |       24 | A `src/` file in the module graph, reachable from a root.                                                    |
-| `build-entry` |     1151 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
+| `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                    |
+| `build-entry` |     1152 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      633 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
-| `tool`        |       25 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
+| `test`        |      636 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `tool`        |       26 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1867** |                                                                                                              |
+| **Total**     | **1873** |                                                                                                              |
 
 ## Per-area counts
 
@@ -32,15 +32,15 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1175 |
-| `tests`    |   633 |
-| `tools`    |    25 |
+| `src`      |  1177 |
+| `tests`    |   636 |
+| `tools`    |    26 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    45 |
+| `(root)`                               |    46 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
@@ -48,10 +48,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    82 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
-| `@danielsimonjr/mathts-functions`      |   773 |
+| `@danielsimonjr/mathts-functions`      |   776 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   100 |
+| `@danielsimonjr/mathts-matrix`         |   101 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    38 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -62,7 +62,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
-| `@danielsimonjr/mathts-wasm`           |    27 |
+| `@danielsimonjr/mathts-wasm`           |    28 |
 | `@danielsimonjr/mathts-workbook`       |    64 |
 | `@danielsimonjr/mathts-workerpool`     |    10 |
 
@@ -78,6 +78,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `assembly/src/bindings/index.ts`                                                  | @danielsimonjr/mathts-wasm           | src      | build-entry |
 | `assembly/src/bindings/wasm-loader.ts`                                            | @danielsimonjr/mathts-wasm           | src      | build-entry |
 | `assembly/src/elementwise.ts`                                                     | @danielsimonjr/mathts-wasm           | src      | reachable   |
+| `assembly/src/heap.ts`                                                            | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/index.ts`                                                           | @danielsimonjr/mathts-wasm           | src      | build-entry |
 | `assembly/src/ops/approx.ts`                                                      | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/array.ts`                                                       | @danielsimonjr/mathts-wasm           | src      | reachable   |
@@ -1235,6 +1236,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/wasm/elementwise/wasm-bridge.ts`                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/integrity.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/interpolation/wasm-bridge.ts`                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/wasm/policy.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/poly/wasm-bridge.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/resolve.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/signal/wasm-bridge.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1540,6 +1542,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/unit-operators.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/utils-factory.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/variance-normalization-consistency.test.ts`                      | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/wasm-heap-bounded.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/wasm-policy.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wasm-resolve.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wavelets.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/windowfunction-unknown.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1614,6 +1618,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/backends/Backend.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/BackendManager.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/ParallelBackend.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/backends/wasm-memory-bounded.test.ts`                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WASMBackend-as.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WASMBackend.test.ts`                                       | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/backends/WasmLoader-as.test.ts`                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -1857,6 +1862,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tools/benchmark/wasm/elementwise.bench.ts`                                       | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/harness.ts`                                                 | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/matrix.bench.ts`                                            | (root)                               | tools    | tool        |
+| `tools/benchmark/wasm/opt-in.bench.ts`                                            | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/run.ts`                                                     | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/sort.bench.ts`                                              | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/special.bench.ts`                                           | (root)                               | tools    | tool        |

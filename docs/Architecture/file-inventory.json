@@ -1,37 +1,37 @@
 {
-  "generated": "2026-09-25",
-  "totalFiles": 1867,
+  "generated": "2026-09-26",
+  "totalFiles": 1873,
   "byDisposition": {
-    "reachable": 24,
-    "build-entry": 1151,
+    "reachable": 25,
+    "build-entry": 1152,
     "test-only": 0,
     "orphan": 0,
-    "test": 633,
-    "tool": 25,
+    "test": 636,
+    "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1175,
-    "tests": 633,
+    "src": 1177,
+    "tests": 636,
     "config": 29,
     "examples": 5,
-    "tools": 25
+    "tools": 26
   },
   "byPackage": {
     "@danielsimonjr/mathts-arithmetic": 4,
-    "@danielsimonjr/mathts-wasm": 27,
+    "@danielsimonjr/mathts-wasm": 28,
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
     "@danielsimonjr/mathts-core": 82,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 45,
+    "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 773,
+    "@danielsimonjr/mathts-functions": 776,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 100,
+    "@danielsimonjr/mathts-matrix": 101,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 10,
@@ -79,7 +79,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 402
+      "loc": 419
     },
     {
       "file": "assembly/src/bindings/index.ts",
@@ -93,7 +93,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 382
+      "loc": 383
     },
     {
       "file": "assembly/src/elementwise.ts",
@@ -103,11 +103,18 @@
       "loc": 201
     },
     {
+      "file": "assembly/src/heap.ts",
+      "package": "@danielsimonjr/mathts-wasm",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 18
+    },
+    {
       "file": "assembly/src/index.ts",
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 546
+      "loc": 549
     },
     {
       "file": "assembly/src/ops/approx.ts",
@@ -8171,21 +8178,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 126
+      "loc": 129
     },
     {
       "file": "functions/src/wasm/bridges/common.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 311
+      "loc": 337
     },
     {
       "file": "functions/src/wasm/elementwise/wasm-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 114
+      "loc": 118
     },
     {
       "file": "functions/src/wasm/integrity.ts",
@@ -8199,14 +8206,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 228
+      "loc": 229
+    },
+    {
+      "file": "functions/src/wasm/policy.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 97
     },
     {
       "file": "functions/src/wasm/poly/wasm-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 527
+      "loc": 528
     },
     {
       "file": "functions/src/wasm/resolve.ts",
@@ -8220,14 +8234,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 469
+      "loc": 475
     },
     {
       "file": "functions/src/wasm/sort/wasm-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 172
+      "loc": 173
     },
     {
       "file": "functions/src/wasm/special/scalars.ts",
@@ -8241,7 +8255,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 795
+      "loc": 796
     },
     {
       "file": "functions/src/wasm/WasmLoader.ts",
@@ -8311,7 +8325,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 93
+      "loc": 105
     },
     {
       "file": "functions/tests/canonical-aliases.test.ts",
@@ -8444,7 +8458,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 297
+      "loc": 309
     },
     {
       "file": "functions/tests/cov-special.test.ts",
@@ -9473,7 +9487,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 97
     },
     {
       "file": "functions/tests/interpolation.test.ts",
@@ -9578,7 +9592,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 84
+      "loc": 95
     },
     {
       "file": "functions/tests/logistic-regression.test.ts",
@@ -9753,7 +9767,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 241
+      "loc": 253
     },
     {
       "file": "functions/tests/polygamma-orthopoly.test.ts",
@@ -9879,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 111
     },
     {
       "file": "functions/tests/signal-extended.test.ts",
@@ -9935,7 +9949,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 112
+      "loc": 124
     },
     {
       "file": "functions/tests/sparse-bridge.test.ts",
@@ -9956,7 +9970,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 164
+      "loc": 177
     },
     {
       "file": "functions/tests/special-extended.test.ts",
@@ -10075,7 +10089,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 565
+      "loc": 577
     },
     {
       "file": "functions/tests/typed-arithmetic-elementwise.test.ts",
@@ -10096,7 +10110,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 261
+      "loc": 273
     },
     {
       "file": "functions/tests/typed-bitwise.test.ts",
@@ -10124,7 +10138,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 395
+      "loc": 407
     },
     {
       "file": "functions/tests/typed-complex.test.ts",
@@ -10152,7 +10166,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 206
+      "loc": 218
     },
     {
       "file": "functions/tests/typed-geometry-hull-wasm.test.ts",
@@ -10208,7 +10222,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 570
+      "loc": 582
     },
     {
       "file": "functions/tests/typed-logical.test.ts",
@@ -10278,7 +10292,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 927
+      "loc": 940
     },
     {
       "file": "functions/tests/typed-statistics-wasm.test.ts",
@@ -10335,6 +10349,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "functions/tests/wasm-heap-bounded.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 116
+    },
+    {
+      "file": "functions/tests/wasm-policy.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 141
     },
     {
       "file": "functions/tests/wasm-resolve.test.ts",
@@ -10635,14 +10663,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 947
+      "loc": 981
     },
     {
       "file": "matrix/src/backends/WasmLoader.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1160
+      "loc": 1161
     },
     {
       "file": "matrix/src/config.ts",
@@ -10853,6 +10881,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 327
+    },
+    {
+      "file": "matrix/tests/backends/wasm-memory-bounded.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
     },
     {
       "file": "matrix/tests/backends/WASMBackend-as.test.ts",
@@ -12554,6 +12589,13 @@
       "area": "tools",
       "disposition": "tool",
       "loc": 88
+    },
+    {
+      "file": "tools/benchmark/wasm/opt-in.bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 518
     },
     {
       "file": "tools/benchmark/wasm/run.ts",

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -249,6 +249,7 @@
       "floor_f64",
       "goertzel_f64",
       "harmonicNumber",
+      "heap_reset",
       "hermiteH",
       "integerDigits",
       "isFinite_f64",
@@ -2962,6 +2963,7 @@
       "orth",
       "OrthOptions",
       "outer",
+      "overrideWasmPolicy",
       "pacf",
       "padeApproximant",
       "pageRank",
@@ -3479,9 +3481,11 @@
       "WASM_SORT_THRESHOLD",
       "WASM_SPECIAL_THRESHOLD",
       "WASM_TRIDIAG_THRESHOLD",
+      "wasmDispatchPolicy",
       "wasmLoader",
       "WasmLoader",
       "WasmManifest",
+      "wasmPolicyAllows",
       "wavedec",
       "waverec",
       "weakMixingAngle",

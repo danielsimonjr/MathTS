@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-25", "f": 1175, "e": 5846, "re": 2364 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-09-26", "f": 1177, "e": 5851, "re": 2365 },
   "s": {
-    "loc": 195469,
+    "loc": 195683,
     "cls": 55,
-    "int": 509,
-    "fn": 1896,
+    "int": 510,
+    "fn": 1900,
     "tg": 159,
     "en": 0,
     "co": 1599,
@@ -731,7 +731,7 @@
       "int": ["CoulombFG"]
     },
     "functions/wasm": {
-      "f": 12,
+      "f": 13,
       "exp": [
         "WASM_SIGNAL_THRESHOLD",
         "applyWindowJS",
@@ -755,7 +755,7 @@
         "legendreFitDispatch"
       ],
       "cls": ["WasmLoader"],
-      "int": ["WasmModule", "RawWasm"]
+      "int": ["WasmBand", "WasmModule", "RawWasm"]
     },
     "functions/combinatorics": {
       "f": 4,
@@ -1727,13 +1727,14 @@
       ]
     },
     "assembly": {
-      "f": 7,
+      "f": 8,
       "exp": [
         "apply_window_f64",
         "welch_psd_f64",
         "bartlett_psd_f64",
         "goertzel_f64",
         "chirp_z_transform_f64",
+        "heap_reset",
         "complex",
         "complexFromPolar",
         "add_f64",
@@ -1747,8 +1748,7 @@
         "square_f64",
         "cube_f64",
         "cbrt_f64",
-        "nthRoot_f64",
-        "exp_f64"
+        "nthRoot_f64"
       ]
     },
     "assembly/bindings": {
