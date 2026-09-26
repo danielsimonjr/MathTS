@@ -57,6 +57,35 @@ test('GitHub Actions output: turbo wraps each task in a group, without prefixes'
   }
 });
 
+test('GitHub Actions output: bun test nests a group per test file inside the task group', () => {
+  // Only a live run shows this: a turbo cache hit replays the output of the run that
+  // filled the cache, which outside GitHub Actions has no groups of its own.
+  const log = [
+    '::group::@x/b:test',
+    'cache miss, executing 3db56cdc3566f4ff',
+    '$ bun test',
+    '::group::tests/one.test.ts:',
+    '(pass) one',
+    '::endgroup::',
+    '::group::tests/two.test.ts:',
+    '(skip) two',
+    '::endgroup::',
+    ' 1 pass',
+    ' 1 skip',
+    ' 0 fail',
+    'Ran 2 tests across 2 files. [34.00ms]',
+    '::endgroup::',
+    '::group::@x/c:build',
+    '::group::unclosed tool group',
+    '::endgroup::',
+    '::group::@x/c:test',
+    '      Tests  4 passed | 1 todo (5)',
+    '::endgroup::',
+    ...ROOT_RUN,
+  ].join('\n');
+  assert.deepEqual(summarized(log), { '@x/b': 1, '@x/c': 1, [ROOT_SUITE]: 0 });
+});
+
 test('a package that printed no summary is reported unsummarized, not folded into root', () => {
   const log = ['::group::@x/a:test', '$ vitest run', 'Error: boom', '::endgroup::', ...ROOT_RUN];
   const suites = parseSuites(log.join('\n'));

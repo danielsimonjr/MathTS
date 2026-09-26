@@ -11,7 +11,9 @@
  *
  * Turbo labels a task's output in one of two ways. In a terminal it prefixes every line
  * (`@scope/pkg:test: ...`). On GitHub Actions it prints no prefixes and wraps each task's
- * output in `::group::@scope/pkg:test` ... `::endgroup::` instead. Both are read.
+ * output in `::group::@scope/pkg:test` ... `::endgroup::` instead. Both are read. On
+ * GitHub Actions `bun test` also opens a group per test file inside the task's group, so
+ * groups are tracked as a stack; its summary follows the last file's `::endgroup::`.
  *
  * It fails when a suite
  *   - skips MORE than its baseline (something stopped running),
@@ -46,21 +48,27 @@ export function parseSuites(log) {
     return suites.get(name);
   };
 
-  /** The turbo task whose `::group::` is open: { pkg, task }. */
-  let group = null;
+  /**
+   * Open `::group::`s, outermost first. A turbo task's group is `{ pkg, task }`; a group
+   * a tool opened inside it (bun test: one per test file) is `null`.
+   */
+  let groups = [];
   for (const raw of stripAnsi(log).split(/\r?\n/)) {
-    const open = raw.match(/^(?:::group::|##\[group\])(@[^:\s]+):(\S+)\s*$/);
+    const open = raw.match(/^(?:::group::|##\[group\])(.*)$/);
     if (open) {
-      group = { pkg: open[1], task: open[2] };
+      const turboTask = open[1].match(/^(@[^:\s]+):(\S+)\s*$/);
+      // Turbo never nests task groups, so a task's group starts a fresh stack.
+      if (turboTask) groups = [{ pkg: turboTask[1], task: turboTask[2] }];
+      else groups.push(null);
       continue;
     }
     if (/^(?:::endgroup::|##\[endgroup\])\s*$/.test(raw)) {
-      group = null;
+      groups.pop();
       continue;
     }
 
     const prefixed = raw.match(/^(@[^:\s]+):([^:\s]+): ?(.*)$/);
-    const task = prefixed ? { pkg: prefixed[1], task: prefixed[2] } : group;
+    const task = prefixed ? { pkg: prefixed[1], task: prefixed[2] } : (groups[0] ?? null);
     if (task && task.task !== 'test') continue; // a build's output holds no test summary
     const name = task ? task.pkg : ROOT_SUITE;
     const text = prefixed ? prefixed[3] : raw;
