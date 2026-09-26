@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-expression",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Expression parser and evaluator for MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.15.4",
+    "@danielsimonjr/mathts-core": "^0.15.5",
     "typed-function": "^4.0.0"
   },
   "devDependencies": {

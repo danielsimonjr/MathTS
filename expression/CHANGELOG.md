@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-expression
 
+## 0.8.2
+
+### Patch Changes
+
+- 8b0f960: More public type fixes for the expression tree, with no runtime change. Type-checking the package's own tests found them.
+  
+  - **A `toString`/`toTex`/`toHTML` handler can return `undefined`.** `StringOptions.handler` was typed to return `string`, but the nodes already fall back to their default output when a handler returns `undefined`, and mathjs documents that use: a handler customises some nodes and returns nothing for the rest. The return type is now `string | undefined`.
+  - **Every node's `toJSON` returns its exact JSON shape.** `IndexNode`, `OperatorNode`, `ObjectNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode` and `SymbolNode` returned `Record<string, unknown>`, so `IndexNode.fromJSON(node.toJSON())` did not type-check and `json.op` was `unknown`. They now declare their fields, like the other node classes. `RangeNode`'s constructor and `fromJSON` accept `step: null`, which its `toJSON` emits for a range without a step and which the constructor already handled.
+- 8b0f960: Public type fixes for the expression tree, with no runtime change.
+  
+  - **Every node class now has the base `Node` members in its type.** Seven node files (`IndexNode`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`, `SymbolNode`) typed their `Node` dependency with a local stub interface. At runtime each class extends the real `Node`, but its declared type inherited only the stub, so `equals`, `traverse`, `evaluate`, `compile` and more were missing and a `SymbolNode` was not assignable to `Node`. They now extend the real `MathNode` type, like the other node classes, and nine `@ts-expect-error`s that existed only because of the stub are gone.
+  - **`parse` has precise overloads.** `parse(string)` returns a node and `parse(string[])` returns an array of nodes. The single `string | string[]` signature made every result a `MathNode | MathNode[]` that callers had to narrow.
+  - **The `isConstantNode` and `isSymbolNode` guards narrow to shapes that include `value` and `name`.**
+- Updated dependencies [8b0f960]
+  - @danielsimonjr/mathts-core@0.15.5
+
 ## 0.8.1
 
 ### Patch Changes
