@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- **WASM calls no longer grow memory without bound.** The AS binary's stub runtime never
+  frees, and `__unpin` does nothing under it, so every managed-ABI call left its arrays on the
+  heap. Measured before the fix:
+  - `functions`: 200 calls grew memory by 99 MiB (`lgamma`, 16K values), 302 MiB (`bitAnd`,
+    131K) and 403 MiB (`welchPSD`, 65K). A process that opted in was heading for the 4 GiB
+    limit, where every call silently falls back to JS.
+  - `matrix` pools its buffers, but the kernels allocated scratch and LU's permutation buffer
+    was not pooled: 300 64×64 LUs grew memory by 16 MiB.
+
+  The binary exports `heap_reset`, which the `functions` bridges call once each call has
+  copied its results out. The decomposition kernels now work in caller-provided scratch, with
+  bit-identical arithmetic (30/30 diff checks pass). Regression tests require zero growth over
+  200 (`functions`) and 3,000 (`matrix`) calls.
+- **`loadWasm()` enables WASM only where it measured faster.** `tools/benchmark/wasm/opt-in.bench.ts`
+  times every public function that reaches a WASM bridge with the tier off and on (Node,
+  interleaved reps, a control case, two runs). Loading made many calls slower, so the dispatch
+  policy (`functions/src/wasm/policy.ts`) keeps those on JS:
+  - welch/bartlett PSD: 4.0–4.6×
+  - resultant, discriminant, Newton/Lagrange interpolation: about 4×
+  - chirp-Z: 3.3×
+  - bitwise: 2.4–3.3×
+  - polymul: 2.7×
+  - goertzel: 1.7×
+  - `cubicSpline`, `polynomialQuotient`: about 1.4×
+  - most special functions and eight element-wise ops: up to 1.6×
+
+  WASM stays on for:
+  - fused chains (0.36–0.77×) and the least-squares fits (0.34–0.67×)
+  - `abs`/`log10`/`sin`/`log1p`/`cos`/`atanh`/`log`/`sec` in measured size bands
+  - `lgamma` and the median/quantile sort from 1M elements
+
+  A first version of the bench timed every "off" rep before every "on" rep, and JIT warm-up
+  alone made identical paths differ 4.5×. The small-n "wins" it reported were artifacts.
+- **`ComputePool` honours its per-op thresholds, and overrides merge per op.** `unary` (`sin`,
+  `cos`, `exp`, ...), `elementwise`, `scale` and `matmul` forwarded to the worker pool without
+  options, so only the global 50,000 applied. Once a pool was initialized, `sin: 'never'` went
+  to the workers (measured 0.12–0.65× inline), and `matmul: 4_096` never applied. A
+  `thresholdByOp` override also replaced the whole default map, so the documented
+  `{ matmul: 1_024 }` example dropped every other default.
 - **131 `functions` exports are callable in the published types; they were not.** `det`, `inv`,
   `lup`, `qr`, `zeros`, `identity`, `map`, `median`, `subset`, the `factory_*` functions and more
   were functions at runtime but declared `unknown` (or, for `det`, as its own return value), so

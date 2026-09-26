@@ -135,12 +135,35 @@ await computePool.terminate();
 
 ## Performance
 
-The matrix linear-algebra kernels (matmul, dot product, vector add,
-determinant, and the decompositions) are accelerated by the AssemblyScript
-WASM backend above the per-op size thresholds, with SIMD where available.
-Element-wise transcendentals are dispatched to WASM only where benchmarks
-confirm a net win once the JS↔WASM copy is included (see
-`docs/Architecture/WASM_ACCELERATION.md`).
+The matrix linear-algebra kernels (matmul and the dense decompositions) are
+accelerated by the AssemblyScript WASM backend above the per-op size
+thresholds, with SIMD where available.
+
+`@danielsimonjr/mathts-functions` runs pure JavaScript until you opt in:
+
+```ts
+import { loadWasm } from '@danielsimonjr/mathts-functions';
+await loadWasm(); // true once the SHA-384-verified binary is loaded
+```
+
+Loading does not make every function faster: each call copies its inputs into
+WASM memory and back, and V8 compiles the JavaScript paths well. So a loaded
+module is used only where `tools/benchmark/wasm/opt-in.bench.ts` measured the
+public call faster in two runs (the table lives in `functions/src/wasm/policy.ts`):
+
+| Where WASM runs after `loadWasm()`                             | Loaded / JS time |
+| -------------------------------------------------------------- | ---------------- |
+| `fuseUnaryChain` (any chain), from 1K elements                 | 0.36–0.77        |
+| `polyFit`, `chebyshevFit`, `legendreFit`, from 1K points       | 0.34–0.67        |
+| `abs`, `log10` from 1K; `cos`, `atanh`, `log` from 16K         | 0.42–0.89        |
+| `sin` (1K–131K), `sec` (16K–1M), `log1p` (1K–16K)              | 0.72–0.88        |
+| `lgamma`, `parallelStatMedian`/`parallelStatQuantile`, from 1M | 0.77–0.81        |
+
+Everything else keeps its JavaScript path even when loaded, because the WASM
+path measured slower: `welchPSD`/`bartlettPSD` 4.0–4.6×, `resultant`,
+`discriminant`, Newton/Lagrange interpolation about 4×, `chirpZTransform`
+3.3×, bitwise ops 2.4–3.3×, `polymul` 2.7×, and most special functions and
+the remaining element-wise ops by up to 1.6×.
 
 > Acceleration is selective and threshold-gated, not universal — small inputs
 > stay in JS where V8 JITs them faster than WASM plus the marshalling cost.
@@ -163,7 +186,9 @@ The bitwise WASM tier activates at `WASM_BITWISE_THRESHOLD = 65,536` elements
 (source: `functions/src/wasm/bitwise/wasm-bridge.ts`).
 
 Override defaults via `ComputePoolConfig.thresholdByOp` (see
-`parallel/src/ComputePool.ts` for the `OpName` union and `OpThreshold` type).
+`parallel/src/ComputePool.ts` for the `OpName` union and `OpThreshold` type). A `thresholdByOp`
+override is merged over the defaults per op (set an op to `undefined` to send it to
+`thresholdElements`), and every `ComputePool` method applies its op's entry.
 
 ---
 
@@ -224,9 +249,11 @@ resolves per-op thresholds via `thresholdByOp`.
 The stack is **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the
 **sole WASM backend** for the whole repo (`mathts-as.wasm`); dispatch is **AS→JS**.
 `matrix` loads it through `backendManager.initialize()`. `functions` ships the same
-binary and AS bridges for its bitwise, elementwise, interpolation, poly, signal, sort
-and special kernels, but its public API does not load the module yet, so `functions`
-runs its JS paths.
+binary and loads it only when you call `loadWasm()`; its measured dispatch policy
+(see [Performance](#performance)) then decides which calls use it. The binary uses
+the AssemblyScript stub runtime, which never frees: the `functions` bridges reset its
+heap after each call and the matrix kernels work in caller-provided buffers, so
+repeated calls do not grow memory.
 
 | Backend       | Class | Source          | Binary           | Use                                                                                                     |
 | ------------- | ----- | --------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
