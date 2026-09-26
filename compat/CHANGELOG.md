@@ -1,5 +1,30 @@
 # @danielsimonjr/mathts-compat
 
+## 0.4.25
+
+### Patch Changes
+
+- 8b0f960: Two type fixes, with no runtime change.
+  
+  - **`chain()` now type-checks.** `chain(3).add(4).multiply(2).done()` failed to compile: the `Chain` index signature returned `Chain | unknown`, which is `unknown`. `Chain` is now `ChainMethods & ChainUnwrap`, so every function name returns the next `Chain` and `done()`/`valueOf()` still return `unknown`.
+  - **`MathJSConfig` declares every key `config()` returns.** The returned object is the merged functions runtime config, but the type listed only five keys, so reading `relTol`, `absTol`, `numberFallback`, `predictable` or `legacySubset` did not compile. `number` also accepts `'bigint'`, which the runtime config supports.
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+  - @danielsimonjr/mathts-matrix@0.7.5
+  - @danielsimonjr/mathts-functions@0.65.0
+  - @danielsimonjr/mathts-core@0.15.5
+  - @danielsimonjr/mathts-parallel@0.6.7
+
 ## 0.4.24
 
 ### Patch Changes

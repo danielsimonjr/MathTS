@@ -1,5 +1,59 @@
 # @danielsimonjr/mathts-functions
 
+## 0.65.0
+
+### Minor Changes
+
+- 8b0f960: New `loadWasm()` / `isWasmLoaded()` exports: an explicit opt-in to the AssemblyScript tier. Nothing in the package loaded its WASM binary before, so every function always ran its JavaScript path even though the binary and its bridges shipped. `await loadWasm()` loads the packaged `mathts-as.wasm` after checking its SHA-384 manifest. It resolves `false` when the binary cannot be found (a later call may retry) and rejects when the binary fails the integrity check. Nothing changes for code that does not call it.
+
+### Patch Changes
+
+- 8b0f960: 131 public exports were functions at runtime but not callable in the published types. Among them were `det`, `inv`, `lup`, `qr`, `zeros`, `identity`, `map`, `median`, `subset` and the `factory_*` functions. Most were declared `unknown`; `det` was declared as its own return value, `number | BigNumber | Complex`. Every TypeScript call needed a cast.
+  
+  The cause was the factories' `typed` dependency type, whose call signature returned `unknown` (or the local result type) instead of a function. It now has a creation overload, `typed(name, signatures, ...more)`, that returns a typed function, and every export is callable. The shared `referTo` type now matches typed-function's variadic `referTo(...names, callback)`, so five factories no longer cast around a curried form that nothing calls. `tools/test/consumer-typecheck.mjs` now asserts, against the packed packages, that every runtime-function export is callable in its `.d.ts` (2,310 exports across all packages).
+- 8b0f960: Remove the legacy WASM branches that called 56 kernels the AssemblyScript binary does not export (`dct_wasm`, `laDet`, `statsMean`, `distanceND`, …). Whenever the module was loaded, each one copied its inputs into WASM memory that is never reclaimed, failed, and fell back to JavaScript; `distance` (pairwise) and `intersect` (2-D lines) threw `is not a function` instead. Results are unchanged, the exported names are unchanged, and the bundle is about 3,500 lines smaller.
+- 8b0f960: A failed WASM load no longer disables WASM for the rest of the process. Both loaders cached the in-flight load promise and never cleared it, so one bad path or transient fetch error made every later `load()` return the same rejection. It is now cleared however the load settles, and a failed load also drops the compiled module: a binary that compiled but failed to instantiate used to stay cached, so every later `load()` instantiated it again instead of reading the binary it was given.
+- 8b0f960: Type fixes from type-checking the test suite, with no runtime change.
+  
+  - **`solveODE`, `freqz` and `zpk2tf` are declared `TypedFunction`, like every other typed function.** They were published as `any`: their factories' dependencies are untyped, so the result inherited `any` from `typed(...)`, and nothing about a call or its result was checked. Their results are now `unknown`, so narrow them as for any typed function (for example `solveODE(f, [0, 1], y0) as { t: number[]; y: number[][] }`).
+  - **The unit-valued physical constants (`speedOfLight`, `planckConstant`, `electronMass`, ...) are declared as core's `UnitInstance`.** They were declared as a stub `{ fixPrefix: boolean }`, so `speedOfLight.toNumeric('m/s')`, `.to(...)` and `.format()` did not compile. The value was always a core `Unit`.
+- 8b0f960: Type fixes from type-checking the test suite, with no runtime change.
+  
+  - **`chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest` and `shapiroWilkTest` return their plain result type when no `bootstrap` option is given.** Every call returned `Result | BootstrapResult`, so reading `pValue` from `await mannWhitneyTest(a, b)` did not compile. With a `bootstrap` option the result is still the union, because `bootstrap: 0` falls back to the plain result at run time.
+  - **`inv`, `eigs` and `sqrtm` return `unknown`, like every typed function.** The new callable signatures had typed their results as the scalar type their internal dependencies use, which is wrong for a matrix, an `{ values, eigenvectors }` object, or a nested array.
+- 8b0f960: `polynomialGCD` (and so `polynomialLCM`, and the CAS rational simplification that uses it) is exact when every coefficient of both inputs is a safe integer: it runs a primitive pseudo-remainder sequence over ℤ[x] in `bigint` and returns the monic result. Floating-point Euclid, still used for non-integer inputs, cannot decide coprimality for high-degree inputs. It returned a spurious factor for 53 of 300 random coprime degree-266/cubic pairs, and missed a real common quadratic of degree-120 multiples.
+- 8b0f960: After `loadWasm()`, a function runs its AssemblyScript kernel only where that measured faster, and repeated WASM calls no longer grow memory without bound.
+  
+  - **A measured dispatch policy (`src/wasm/policy.ts`).** `tools/benchmark/wasm/opt-in.bench.ts` timed every public function that reaches a WASM bridge with the tier off and on (Node 22, reps interleaved, two runs). Loading made many of them slower, so those keep their JavaScript path even when the module is loaded:
+    - `welchPSD`/`bartlettPSD`: 4.0–4.6× slower
+    - `resultant`, `discriminant`, `newtonInterp`, `lagrangeInterp`: about 4×
+    - `chirpZTransform`: 3.3×
+    - `polymul`: 2.7×
+    - bitwise ops: 2.4–3.3×
+    - `goertzel`: 1.7×
+    - `cubicSpline`, `polynomialQuotient`: about 1.4×
+    - `tan`, `atan`, `cot`, `exp`, `log2`, `expm1`, `sinh`, `tanh`, the Bessel/Airy/elliptic/Carlson functions and `erfc`: no faster, or up to 1.6× slower
+  
+    WASM stays on where both runs measured it faster:
+    - `abs`, `log10` from 1K; `sin` 1K–131K; `log1p` 1K–16K
+    - `cos`, `atanh`, `log` from 16K; `sec` 16K–1M
+    - fused chains (`fuseUnaryChain`, 0.36–0.77×)
+    - `polyFit`/`chebyshevFit`/`legendreFit` (0.34–0.67×)
+    - `lgamma` and the sort behind `parallelStatMedian`/`parallelStatQuantile` from 1M elements
+  
+  - **Bounded WASM memory.** The binary uses the stub runtime, which never frees, so every managed-ABI call left its inputs and result on the heap for good: 200 calls grew memory by 99 MiB (`lgamma`, 16K values) to 403 MiB (`welchPSD`, 65K samples), heading for the 4 GiB limit, where every call would fall back to JS. The bridges now call the binary's new `heap_reset` once each call has copied its results out.
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+  - @danielsimonjr/mathts-matrix@0.7.5
+  - @danielsimonjr/mathts-expression@0.8.2
+  - @danielsimonjr/mathts-core@0.15.5
+  - @danielsimonjr/mathts-parallel@0.6.7
+
 ## 0.64.3
 
 ### Patch Changes

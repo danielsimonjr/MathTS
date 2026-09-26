@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.7.5
+
+### Patch Changes
+
+- 8b0f960: WASM decompositions no longer grow memory on every call. The AS binary's stub runtime never frees, and although the backend pools its input and output buffers, the kernels allocated their own scratch and LU's permutation buffer was not pooled. Over 300 calls on a 64×64 matrix, memory grew by 16 MiB for LU, 0.9 MiB for inverse, 0.4 MiB for QR and 0.1 MiB for the determinant. The backend now passes scratch buffers to the rebuilt kernels (QR's Householder vector, and inverse's permutation in `work`) and pools the permutation buffer. A regression test runs 3,000 calls of each operation and requires zero growth. Results are unchanged.
+- 8b0f960: The WASM allocation pool now recycles released blocks, so WebAssembly linear memory stays bounded. Allocations were never recorded in the pool, so nothing was reused, and the AssemblyScript binary's `--runtime stub` never frees memory: 5,000 allocate/release cycles grew it from 256 KiB to 128 MiB. A recycled block has its header `byteLength` rewritten to the requested size (kernels read their length from it), and `allocateFloat64ArrayEmpty` / `allocateInt32ArrayEmpty` zero-fill a reused block, as documented.
+- 8b0f960: A failed WASM load no longer disables WASM for the rest of the process. Both loaders cached the in-flight load promise and never cleared it, so one bad path or transient fetch error made every later `load()` return the same rejection. It is now cleared however the load settles, and a failed load also drops the compiled module: a binary that compiled but failed to instantiate used to stay cached, so every later `load()` instantiated it again instead of reading the binary it was given.
+- Updated dependencies [8b0f960]
+- Updated dependencies [8b0f960]
+  - @danielsimonjr/mathts-core@0.15.5
+  - @danielsimonjr/mathts-parallel@0.6.7
+
 ## 0.7.4
 
 ### Patch Changes

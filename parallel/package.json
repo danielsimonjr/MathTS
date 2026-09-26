@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-parallel",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "WebWorker parallelization for MathTS computations",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@danielsimonjr/mathts-workerpool": "^0.2.5",
-    "@danielsimonjr/mathts-core": "^0.15.4"
+    "@danielsimonjr/mathts-core": "^0.15.5"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
