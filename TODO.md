@@ -11,6 +11,38 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
+> ## Round-2 follow-ups (open after PR #327, released as functions@0.65.0 / core@0.15.5 in #328)
+>
+> **Decisions for the maintainer** (default in place; say which way to go):
+>
+> - [ ] **`solveODE`, `freqz` and `zpk2tf` return `unknown`.** They were published as `any` and are now
+>       declared `TypedFunction` like every other typed function (functions@0.65.0 CHANGELOG), so code
+>       that reads `solveODE(...).y` needs a cast. Option: give the three precise result types.
+> - [ ] **Upload `test-output.log` as a CI artifact.** It is what `tools/test/check-skip-budget.mjs`
+>       reads; the downloaded job log is not a substitute (every line carries the job, step and a
+>       timestamp, and later steps print their own `Tests` summaries). Needs an `actions/upload-artifact`
+>       step with `if: always()`, pinned by SHA like the other actions: the maintainer picks the pin.
+>
+> **Engineering follow-ups:**
+>
+> - [ ] **core's `deepMap` / `deepForEach` / `reduce` (`/internal`) are typed for flat arrays.** They take
+>       `T[] | Matrix<T>` with `T` tied to the callback's element type but recurse into nested arrays;
+>       `functions`' `sum`/`max` cast around it. The honest signature is `NestedArray<T> | Matrix<T>` with
+>       a nested result type, which changes return types at about 40 import sites (see CLAUDE.md, Known
+>       Issues).
+> - [ ] **Retire (or make reachable) three WASM paths with no public caller:** `applyWindowDispatch`
+>       (`functions/src/wasm/signal/wasm-bridge.ts`), `rankF64Dispatch` (`functions/src/wasm/sort/wasm-bridge.ts`)
+>       and `shapiroWilkTest`'s WASM sort (n is capped at 5,000; the sort threshold is 16,384). The
+>       dispatch policy lists no band for `apply_window_f64` or `rank_f64`.
+> - [ ] **`polynomialGCD` is inexact for non-integer coefficients.** Integer inputs take the exact bigint
+>       primitive PRS (`polyGcdZ`); everything else keeps float Euclid, where a coprime high-degree pair
+>       can return a spurious low-degree factor. Option: scale rational coefficients to integers and reuse
+>       `polyGcdZ`, falling back to float Euclid only for irrational input.
+> - [ ] **The element-wise JS fallback is slow until V8 optimizes it.** It measured about 90 ns per element
+>       before optimization and about 10 ns after (opt-in benchmark, 2026-09-26). A dedicated synchronous
+>       JS path would help every consumer, not only those who call `loadWasm()`. Re-measure with
+>       `node tools/benchmark/wasm/run-node.mjs opt-in` (interleaved tiers, control case) before and after.
+
 > ## Bun migration — later phases (tracked here from 2026-09-18; Phase 1 = PR #274)
 >
 > - [ ] **Phase 2 — replace vitest with `bun test`.**
