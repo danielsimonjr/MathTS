@@ -53,10 +53,7 @@ export const createSubset = /* #__PURE__ */ factory(
     zeros: Fn;
     add: Fn;
   }) => {
-    // typed-function's runtime `referTo` is single-call variadic
-    // (`referTo(...signatures, callback)`); the imported TypedFunction interface
-    // models it curried, so narrow to the real contract via `unknown`.
-    const referTo = typed.referTo as unknown as (sig: string, cb: (ref: Fn) => Fn) => unknown;
+    const referTo = typed.referTo;
     /**
      * Get or set a subset of a matrix or string.
      *

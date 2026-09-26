@@ -21,6 +21,10 @@ export * from './typed/cas.js';
 export * from './factories/index.js';
 export { config } from './config-api.js'; // GC12: runtime config accessor
 
+// Opt-in AssemblyScript tier. Nothing loads the WASM binary on its own; until
+// `await loadWasm()` resolves true, every function runs its JavaScript path.
+export { loadWasm, isWasmLoaded } from './wasm/WasmLoader.js';
+
 // Explicit re-export to resolve `to` / `toBest` ambiguity between the
 // activated mathjs-derived factory layer (factories/index.js) and the new typed Unit
 // implementation (typed/unit.js). The typed-dispatch version supersedes

@@ -18,9 +18,8 @@
  * Run: `npm run bench:sort`
  */
 
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import { sortF64Dispatch, sortF64JS } from '../../../functions/src/wasm/sort/wasm-bridge.js';
-import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
+import { maxdiffF64, runCases, isMainModule, loadKernelTier, type WasmCase } from './harness.js';
 
 // Below the 16,384 AS threshold the dispatch runs JS, so start at the threshold.
 const SIZES = [16384, 131072, 1_000_000];
@@ -46,7 +45,7 @@ const cases: WasmCase[] = [
 ];
 
 export async function main(): Promise<void> {
-  await initWasm();
+  await loadKernelTier();
   await runCases('SORT — AssemblyScript sort_f64 (introsort) vs JS Array.sort', cases);
 }
 

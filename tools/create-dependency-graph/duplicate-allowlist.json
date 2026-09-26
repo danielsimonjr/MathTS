@@ -175,14 +175,6 @@
       "reason": "two coexisting unit-table shapes within core: unit-definitions.ts's legacy multiplier/offset/dimensions/prefixable table vs unit/unit-types.ts's active mathjs-derived name/base/prefixes/value/offset/dimensions/reciprocal table for the merged Unit factory. 2026-07 type-dedup pass; possible follow-up to fully retire the legacy table is out of scope here."
     },
     {
-      "names": ["UnitInstance"],
-      "filesGlob": [
-        "core/src/types/unit/unit-types.ts",
-        "functions/src/type/unit/physicalConstants.ts"
-      ],
-      "reason": "core's is the full ~30-member Unit instance API; functions' is a deliberately narrow 1-field {fixPrefix} local view (only what physicalConstants.ts reads). 2026-07 type-dedup pass."
-    },
-    {
       "names": ["CholeskyResult"],
       "filesGlob": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/cholesky.ts"],
       "reason": "functions' L is a plain number[][]; matrix's L is a DenseMatrix instance — different representations for different consumers. 2026-07 type-dedup pass."

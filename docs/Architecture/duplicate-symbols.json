@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "note": "This report groups names by OWN definition, not by call graph, then classifies each flagged name (see DupEntryTag): TRUE_DUPLICATE (the actionable merge targets), DISPATCH_VARIANT (>=2 mathTyped(...) registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), ALIAS_DELEGATION (a const-alias forward to an imported symbol, not an independent body — excluded once fewer than 2 real bodies remain), and ALLOWLISTED (matches duplicate-allowlist.json: hot-path is* guards, AssemblyScript mirrors, per-package VERSION strings). NOT detected: same-file typed-dispatch overload polymorphism for different argument shapes within one registration — a human still triages TRUE_DUPLICATE entries using the defining files + public flags before merging anything.",
   "summary": {
     "runtimeDuplicates": 0,
@@ -8,13 +8,13 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 228
+      "ALLOWLISTED": 229
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 0,
       "ALIAS_DELEGATION": 0,
-      "ALLOWLISTED": 55
+      "ALLOWLISTED": 54
     }
   },
   "runtime": [
@@ -4681,6 +4681,27 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "loadWasm",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/bindings/wasm-loader.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "functions/src/wasm/WasmLoader.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "log10",
       "category": "constant",
       "definers": [
@@ -6554,7 +6575,7 @@
     },
     {
       "name": "Chain",
-      "category": "interface",
+      "category": "interface+type",
       "definers": [
         {
           "file": "compat/src/chain.ts",
@@ -7542,28 +7563,6 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "two coexisting unit-table shapes within core: unit-definitions.ts's legacy multiplier/offset/dimensions/prefixable table vs unit/unit-types.ts's active mathjs-derived name/base/prefixes/value/offset/dimensions/reciprocal table for the merged Unit factory. 2026-07 type-dedup pass; possible follow-up to fully retire the legacy table is out of scope here."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
-      "name": "UnitInstance",
-      "category": "interface",
-      "definers": [
-        {
-          "file": "core/src/types/unit/unit-types.ts",
-          "package": "@danielsimonjr/mathts-core",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "core's is the full ~30-member Unit instance API; functions' is a deliberately narrow 1-field {fixPrefix} local view (only what physicalConstants.ts reads). 2026-07 type-dedup pass."
-        },
-        {
-          "file": "functions/src/type/unit/physicalConstants.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "core's is the full ~30-member Unit instance API; functions' is a deliberately narrow 1-field {fixPrefix} local view (only what physicalConstants.ts reads). 2026-07 type-dedup pass."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

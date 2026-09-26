@@ -1,7 +1,14 @@
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { DenseMatrix, lu, luSolve } from '@danielsimonjr/mathts-matrix';
-import type { MathNumericType, MathArray, Matrix, Unit, BigNumber } from '../types.js';
+import type {
+  MathNumericType,
+  MathArray,
+  Matrix,
+  Unit,
+  BigNumber,
+  TypedFunction,
+} from '../types.js';
 
 const name = 'solveODE';
 const dependencies = [
@@ -1384,6 +1391,8 @@ export function radauSolve(
 export const createSolveODE = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
+  // The deps are untyped (`any`), so the result is declared: without it the export
+  // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
   ({
     typed,
     add,
@@ -1400,7 +1409,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     matrix,
     bignumber,
     unaryMinus,
-  }) => {
+  }): TypedFunction => {
     /**
      * Numerical Integration of Ordinary Differential Equations
      *

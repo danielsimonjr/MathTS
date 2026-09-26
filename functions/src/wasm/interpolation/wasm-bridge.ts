@@ -33,6 +33,7 @@ import {
   asReadReturnedF64,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /**
  * Knot-count threshold above which we attempt the WASM tridiag kernel.
@@ -120,7 +121,7 @@ export function tridiagSolveDispatch(
   rhs: Float64Array
 ): Float64Array {
   const n = diag.length;
-  if (n >= WASM_TRIDIAG_THRESHOLD) {
+  if (n >= WASM_TRIDIAG_THRESHOLD && wasmPolicyAllows('tridiag_solve_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -204,7 +205,7 @@ export function dividedDifferenceJS(xs: Float64Array, ys: Float64Array): Float64
  */
 export function dividedDifferenceDispatch(xs: Float64Array, ys: Float64Array): Float64Array {
   const n = xs.length;
-  if (n >= WASM_INTERP_THRESHOLD) {
+  if (n >= WASM_INTERP_THRESHOLD && wasmPolicyAllows('divided_difference_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

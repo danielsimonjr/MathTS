@@ -47,7 +47,7 @@ class ProtoMatrix {
     this.data = data;
   }
 }
-(ProtoMatrix.prototype as Record<string, unknown>).isMatrix = true;
+Object.assign(ProtoMatrix.prototype, { isMatrix: true });
 
 /** Class using both symbol AND instance property (recommended pattern) */
 class RobustMatrix {

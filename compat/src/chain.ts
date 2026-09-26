@@ -6,11 +6,27 @@
  * Each math function `f` becomes a chain method that calls `f(value, ...args)`
  * and returns a new chain wrapping the result. `.done()` / `.valueOf()` unwrap.
  */
-export interface Chain {
+export type Chain = ChainMethods & ChainUnwrap;
+
+/**
+ * Every math function name is a chain method that returns the next chain.
+ *
+ * This lives in its own interface because TypeScript requires each declared member of
+ * an interface to be assignable to its index signature, and `done(): unknown` is not
+ * assignable to a method that returns `Chain`. The old single interface typed the
+ * index signature as returning `Chain | unknown`, which is just `unknown`, so
+ * `chain(3).add(4).multiply(2)` did not type-check. In the intersection, the declared
+ * members of `ChainUnwrap` take precedence and every other name is a method that returns the next chain.
+ */
+export interface ChainMethods {
+  [method: string]: (...args: unknown[]) => Chain;
+}
+
+/** The members that end a chain. */
+export interface ChainUnwrap {
   done(): unknown;
   valueOf(): unknown;
   toString(): string;
-  [method: string]: (...args: unknown[]) => Chain | unknown;
 }
 
 /**

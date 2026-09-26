@@ -47,6 +47,24 @@ import {
   initializeSignal,
   terminateSignal,
 } from '../src/typed/signal.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
+
+/** parallelFFT / parallelIFFT result shape (their typed-function calls return `unknown`). */
+interface Spectrum {
+  real: Float64Array;
+  imag: Float64Array;
+}
 
 describe('signal — lifecycle wrappers', () => {
   it('initializeSignal then terminateSignal', async () => {
@@ -111,9 +129,9 @@ describe('signal — parallel paths via lowered threshold', () => {
 
   it('parallelFFT (Float64Array) round-trips through IFFT under parallel dispatch', async () => {
     const signal = new Float64Array([1, 2, 3, 4, 5, 6, 7, 8]);
-    const spec = await parallelFFT(signal);
+    const spec = (await parallelFFT(signal)) as Spectrum;
     expect(spec.real[0]).toBeCloseTo(36, 8); // DC = sum
-    const back = await parallelIFFT(spec.real, spec.imag);
+    const back = (await parallelIFFT(spec.real, spec.imag)) as Spectrum;
     for (let i = 0; i < signal.length; i++) {
       expect(back.real[i]).toBeCloseTo(signal[i], 8);
     }
@@ -121,8 +139,8 @@ describe('signal — parallel paths via lowered threshold', () => {
 
   it('parallelIFFT Object overload under parallel dispatch', async () => {
     const signal = new Float64Array([2, 0, -2, 0]);
-    const spec = await parallelFFT(signal);
-    const back = await parallelIFFT({ real: spec.real, imag: spec.imag });
+    const spec = (await parallelFFT(signal)) as Spectrum;
+    const back = (await parallelIFFT({ real: spec.real, imag: spec.imag })) as Spectrum;
     for (let i = 0; i < signal.length; i++) {
       expect(back.real[i]).toBeCloseTo(signal[i], 8);
     }
@@ -131,7 +149,10 @@ describe('signal — parallel paths via lowered threshold', () => {
   it('fourStepFFT degenerate N<4 guard (tiny array, parallelize=true)', async () => {
     // length 2 -> shouldParallelize(2) true with threshold 1 -> fourStepFFT,
     // which hits the `N < 4` early return delegating to fftCoreFloat64.
-    const back = await parallelIFFT(Float64Array.from([2, 0]), Float64Array.from([0, 0]));
+    const back = (await parallelIFFT(
+      Float64Array.from([2, 0]),
+      Float64Array.from([0, 0])
+    )) as Spectrum;
     expect(back.real.length).toBe(2);
     expect(back.real[0]).toBeCloseTo(1, 8); // ((2+0)/2) DC for IFFT of [2,0]
   });

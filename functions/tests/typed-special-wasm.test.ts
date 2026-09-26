@@ -53,6 +53,19 @@ import {
   ellipticEJS,
   resetEllipticWasm,
 } from '../src/wasm/special/wasm-bridge.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps these kernels on their JS path even after `loadWasm()`;
+// without this, the "WASM vs JS" comparisons below would compare JS with JS.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 // ---------------------------------------------------------------------------
 // Reference values (Abramowitz & Stegun §9.1 tables + DLMF)

@@ -5,7 +5,7 @@
  * time edge so the CDG registers the file as covered. Runtime assertions
  * are trivial sentinels.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, expectTypeOf } from 'vitest';
 import type { TypedFunction, TypedFunctionConstructor } from '../src/types.js';
 
 describe('expression/src/types.ts – type-only smoke test', () => {
@@ -19,7 +19,8 @@ describe('expression/src/types.ts – type-only smoke test', () => {
   });
 
   it('TypedFunctionConstructor type is importable', () => {
-    type _Check = TypedFunctionConstructor;
+    // Compile-time check, enforced by `tsc -p tsconfig.test.json`.
+    expectTypeOf<TypedFunctionConstructor>().toHaveProperty('create');
     expect(true).toBe(true);
   });
 

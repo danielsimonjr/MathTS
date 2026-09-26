@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-09-25",
-    "totalFiles": 1175,
+    "lastUpdated": "2026-09-26",
+    "totalFiles": 1177,
     "totalModules": 83,
-    "totalExports": 5842
+    "totalExports": 5851
   },
   "entryPoints": [
     {
@@ -2618,13 +2618,7 @@
         "internalDependencies": [
           {
             "file": "../typed/mathts-typed.js",
-            "imports": [
-              "TypedFunction",
-              "TypedInstance",
-              "SignatureFunction",
-              "ReferTo",
-              "ReferToSelf"
-            ],
+            "imports": ["TypedFunction", "TypedInstance", "SignatureRecord"],
             "typeOnly": true
           },
           {
@@ -5545,6 +5539,11 @@
             "reExport": true
           },
           {
+            "file": "./wasm/WasmLoader.js",
+            "imports": ["loadWasm", "isWasmLoaded"],
+            "reExport": true
+          },
+          {
             "file": "./typed/unit.js",
             "imports": ["to", "toBest"],
             "reExport": true
@@ -6393,6 +6392,8 @@
         ],
         "exports": [
           "config",
+          "loadWasm",
+          "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
@@ -6802,6 +6803,8 @@
           "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "config",
+          "loadWasm",
+          "isWasmLoaded",
           "to",
           "toBest",
           "evaluate",
@@ -8176,7 +8179,7 @@
           },
           {
             "file": "../types.js",
-            "imports": ["Matrix", "Complex"],
+            "imports": ["Matrix", "Complex", "TypedFunction"],
             "typeOnly": true
           }
         ],
@@ -8349,7 +8352,7 @@
           },
           {
             "file": "../types.js",
-            "imports": ["Matrix", "Complex"],
+            "imports": ["Matrix", "Complex", "TypedFunction"],
             "typeOnly": true
           }
         ],
@@ -10248,6 +10251,10 @@
               "cleanUnivariatePoly",
               "factorMultivariateString"
             ]
+          },
+          {
+            "file": "./factorization/integer-poly.js",
+            "imports": ["polyGcdZ"]
           }
         ],
         "workspaceDependencies": [],
@@ -10491,9 +10498,17 @@
         "functions": [
           "studentTTest",
           "chiSquareTest",
+          "chiSquareTest",
+          "chiSquareTest",
           "anova",
           "kolmogorovSmirnovTest",
+          "kolmogorovSmirnovTest",
+          "kolmogorovSmirnovTest",
           "mannWhitneyTest",
+          "mannWhitneyTest",
+          "mannWhitneyTest",
+          "shapiroWilkTest",
+          "shapiroWilkTest",
           "shapiroWilkTest",
           "principalComponentAnalysis",
           "kolmogorovSmirnov2Test",
@@ -13197,6 +13212,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13239,6 +13258,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13266,6 +13289,16 @@
         ],
         "constants": ["WASM_POLY_THRESHOLD", "WASM_POLY_FIT_THRESHOLD"]
       },
+      "functions/src/wasm/policy.ts": {
+        "description": "Where the AssemblyScript tier runs once a consumer has called `loadWasm()`.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"],
+        "interfaces": ["WasmBand"],
+        "functions": ["wasmPolicyAllows", "overrideWasmPolicy", "wasmDispatchPolicy"]
+      },
       "functions/src/wasm/WasmLoader.ts": {
         "description": "WASM Loader - Loads and manages WebAssembly modules",
         "externalDependencies": [],
@@ -13288,9 +13321,10 @@
             "subpath": "internal"
           }
         ],
-        "exports": ["wasmLoader", "WasmLoader"],
+        "exports": ["wasmLoader", "loadWasm", "isWasmLoaded", "WasmLoader"],
         "classes": ["WasmLoader"],
         "interfaces": ["WasmModule"],
+        "functions": ["loadWasm", "isWasmLoaded"],
         "constants": ["wasmLoader"]
       },
       "functions/src/wasm/sort/wasm-bridge.ts": {
@@ -13308,6 +13342,10 @@
               "asReadReturnedI32",
               "RawWasm"
             ]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13365,6 +13403,10 @@
               "ellipticKScalar",
               "ellipticECompleteScalar"
             ]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13538,6 +13580,10 @@
           {
             "file": "../WasmLoader.js",
             "imports": ["wasmLoader", "WasmModule"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13579,6 +13625,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsI32", "asReadReturnedI32", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13624,6 +13674,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "isAsWasm", "withAsF64", "asReadReturnedF64", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -13670,6 +13724,10 @@
           {
             "file": "../bridges/common.js",
             "imports": ["getWasm", "runUnaryPtr", "runChainPtr", "PtrUnaryKernel", "RawWasm"]
+          },
+          {
+            "file": "../policy.js",
+            "imports": ["wasmPolicyAllows"]
           }
         ],
         "workspaceDependencies": [],
@@ -22842,7 +22900,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["UnitInstance"]
+          }
+        ],
         "exports": [
           "createSpeedOfLight",
           "createGravitationConstant",
@@ -22898,7 +22962,6 @@
           "createPlanckCharge",
           "createPlanckTemperature"
         ],
-        "interfaces": ["UnitInstance"],
         "constants": [
           "createSpeedOfLight",
           "createGravitationConstant",
@@ -23802,7 +23865,14 @@
           },
           {
             "file": "../types.js",
-            "imports": ["MathNumericType", "MathArray", "Matrix", "Unit", "BigNumber"],
+            "imports": [
+              "MathNumericType",
+              "MathArray",
+              "Matrix",
+              "Unit",
+              "BigNumber",
+              "TypedFunction"
+            ],
             "typeOnly": true
           }
         ],
@@ -24108,6 +24178,11 @@
           {
             "file": "../operators.js",
             "imports": ["getPrecedence"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24208,6 +24283,11 @@
           {
             "file": "../utils/mathml.js",
             "imports": ["toMathMLSymbol"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24295,6 +24375,11 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24417,6 +24502,11 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24447,6 +24537,11 @@
           {
             "file": "../utils/string.js",
             "imports": ["escape", "stringify"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24520,11 +24615,24 @@
           },
           {
             "file": "../utils/is.js",
-            "imports": ["isArray", "isConstantNode", "isMatrix", "isNode", "isString", "typeOf"]
+            "imports": [
+              "isArray",
+              "isConstantNode",
+              "isMatrix",
+              "isNode",
+              "isString",
+              "isSymbolNode",
+              "typeOf"
+            ]
           },
           {
             "file": "../utils/string.js",
             "imports": ["escape"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -24597,6 +24705,11 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["MathNode"],
+            "typeOnly": true
           }
         ],
         "workspaceDependencies": [],
@@ -36027,6 +36140,11 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./heap",
+            "imports": ["heap_reset"],
+            "reExport": true
+          },
+          {
             "file": "./types/complex",
             "imports": ["complex", "complexFromPolar"],
             "reExport": true
@@ -36459,6 +36577,7 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "heap_reset",
           "complex",
           "complexFromPolar",
           "add_f64",
@@ -36781,6 +36900,7 @@
           "complex_array_copy"
         ],
         "reExported": [
+          "heap_reset",
           "complex",
           "complexFromPolar",
           "add_f64",
@@ -37174,6 +37294,15 @@
           "array_cot_ptr",
           "array_erfc_ptr"
         ]
+      },
+      "assembly/src/heap.ts": {
+        "description": "Heap reset for the stub runtime.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["heap_reset"],
+        "functions": ["heap_reset"]
       },
       "assembly/src/tridiag.ts": {
         "description": "Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).",
@@ -37611,7 +37740,7 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": ["createChain"],
-        "interfaces": ["Chain"],
+        "interfaces": ["ChainMethods", "ChainUnwrap"],
         "functions": ["createChain"]
       }
     },
@@ -38900,6 +39029,7 @@
         "files": [
           "functions/src/wasm/signal/wasm-bridge.ts",
           "functions/src/wasm/poly/wasm-bridge.ts",
+          "functions/src/wasm/policy.ts",
           "functions/src/wasm/WasmLoader.ts",
           "functions/src/wasm/sort/wasm-bridge.ts",
           "functions/src/wasm/special/wasm-bridge.ts",
@@ -39949,6 +40079,7 @@
           "assembly/src/index.ts",
           "assembly/src/poly.ts",
           "assembly/src/elementwise.ts",
+          "assembly/src/heap.ts",
           "assembly/src/tridiag.ts",
           "assembly/src/special.ts",
           "assembly/src/sort.ts"
@@ -40013,18 +40144,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1175,
+    "totalTypeScriptFiles": 1177,
     "totalModules": 83,
-    "totalLinesOfCode": 195211,
-    "totalExports": 5842,
+    "totalLinesOfCode": 195742,
+    "totalExports": 5851,
     "totalClasses": 55,
-    "totalInterfaces": 509,
-    "totalFunctions": 1886,
-    "totalTypeGuards": 158,
+    "totalInterfaces": 510,
+    "totalFunctions": 1900,
+    "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1599,
-    "totalReExports": 2362,
-    "totalTypeOnlyImports": 582,
+    "totalReExports": 2365,
+    "totalTypeOnlyImports": 589,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

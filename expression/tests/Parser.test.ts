@@ -7,18 +7,7 @@ import { evaluate, parse } from '../../functions/src/factories/evaluate.js';
 // createParserClass needs 'evaluate' (that takes a scope) and 'parse'.
 // We use the fully instantiated versions from functions/factories/evaluate.
 
-// The evaluate function from factories takes (expr, scope?) and we need a
-// scope-aware evaluate for the Parser. Wrap to match signature.
-function _scopedEvaluate(expr: string | string[], scope: Map<string, unknown>): unknown {
-  // Convert Map to plain object for evaluate
-  const plainScope: Record<string, unknown> = {};
-  scope.forEach((v, k) => {
-    plainScope[k] = v;
-  });
-  return evaluate(expr as string, plainScope);
-}
-
-// Actually, Parser.prototype.evaluate calls `evaluate(expr, this.scope)`
+// Parser.prototype.evaluate calls `evaluate(expr, this.scope)`
 // where this.scope is a Map. The createEvaluate wrapping in evaluate.ts
 // uses compile() which uses ObjectWrappingMap internally.
 // Let's use the createParserClass from the functions package directly

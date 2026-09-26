@@ -174,7 +174,7 @@ export const createAccessorNode = /* #__PURE__ */ factory(
             // we pass just object here instead of context:
             const index = evalIndex(scope, args, object) as {
               isObjectProperty: () => boolean;
-              getObjectProperty: () => string;
+              getObjectProperty: () => string | null;
             };
             return access(object, index);
           };

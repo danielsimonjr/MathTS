@@ -95,7 +95,7 @@ describe('OperatorNode - _toString (binary)', () => {
     expect(parse('a * b').toString()).toBe('a * b');
   });
   it('implicit multiply hides operator: 2 x', () => {
-    const n = parse('2 x');
+    const n = parse('2 x') as InstanceType<typeof OperatorNode>;
     expect(n.implicit).toBe(true);
     expect(n.toString()).toBe('2 x');
   });

@@ -9,7 +9,7 @@ import { symbolicIntegral, evaluate } from '@danielsimonjr/mathts-functions';
  * unevaluated `integral(...)` marker rather than a wrong answer.
  */
 const dF = (F: string, x: number, h = 1e-5) =>
-  (evaluate(F, { x: x + h }) - evaluate(F, { x: x - h })) / (2 * h);
+  ((evaluate(F, { x: x + h }) as number) - (evaluate(F, { x: x - h }) as number)) / (2 * h);
 
 describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
   const cases = [
@@ -31,7 +31,7 @@ describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
       const F = symbolicIntegral(f, 'x');
       expect(F.startsWith('integral(')).toBe(false); // supported
       for (const x of [0.7, 1.3, 2.1]) {
-        expect(dF(F, x)).toBeCloseTo(evaluate(f, { x }), 4);
+        expect(dF(F, x)).toBeCloseTo(evaluate(f, { x }) as number, 4);
       }
     });
   }
@@ -106,14 +106,15 @@ describe('symbolicIntegral — d/dx ∫f = f over the supported subset', () => {
     const F = symbolicIntegral('1/(x^3 - 2)', 'x');
     expect(F.startsWith('integral(')).toBe(false);
     for (const x of [0.4, 0.9, -0.7]) {
-      expect(dF(F, x)).toBeCloseTo(evaluate('1/(x^3 - 2)', { x }), 4);
+      expect(dF(F, x)).toBeCloseTo(evaluate('1/(x^3 - 2)', { x }) as number, 4);
     }
   });
 
   it('handles a custom integration variable', () => {
     const F = symbolicIntegral('t^2', 't');
     const dFt = (val: number) =>
-      (evaluate(F, { t: val + 1e-5 }) - evaluate(F, { t: val - 1e-5 })) / 2e-5;
+      ((evaluate(F, { t: val + 1e-5 }) as number) - (evaluate(F, { t: val - 1e-5 }) as number)) /
+      2e-5;
     expect(dFt(2)).toBeCloseTo(4, 4);
   });
 });

@@ -28,13 +28,14 @@ type CompileFunction = (scope: Scope, args: Record<string, unknown>, context: un
 /**
  * Options for `toString`, `toTex` and `toHTML` of a node.
  * `handler` is a custom function, or a map from node type to a custom function.
+ * A handler that returns `undefined` falls back to the default output for that node.
  * `parenthesis` sets the parenthesis rule. `implicit` sets how implicit multiplication shows.
  * The index signature allows other keys.
  */
 export interface StringOptions {
   handler?:
-    | ((node: MathNode, options?: StringOptions) => string)
-    | Record<string, (node: MathNode, options?: StringOptions) => string>;
+    | ((node: MathNode, options?: StringOptions) => string | undefined)
+    | Record<string, (node: MathNode, options?: StringOptions) => string | undefined>;
   parenthesis?: 'keep' | 'auto' | 'all';
   implicit?: 'hide' | 'show';
   [key: string]: unknown;

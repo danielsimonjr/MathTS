@@ -28,6 +28,16 @@
 const SOFTWARE_ADAPTER = /llvmpipe|lavapipe|swiftshader|softwar|basic render|warp/i;
 
 /**
+ * Adapter members that older WebGPU implementations expose and the current `@webgpu/types` no
+ * longer declares (`isFallbackAdapter` moved to `GPUAdapterInfo`; `requestAdapterInfo()` gave way
+ * to the `info` attribute). Both are feature-detected, so both are optional.
+ */
+interface LegacyAdapterMembers {
+  readonly isFallbackAdapter?: boolean;
+  requestAdapterInfo?(): Promise<GPUAdapterInfo>;
+}
+
+/**
  * True only for a physical GPU.
  *
  * `isFallbackAdapter` alone is not enough: a browser backed by a software Vulkan
@@ -36,7 +46,9 @@ const SOFTWARE_ADAPTER = /llvmpipe|lavapipe|swiftshader|softwar|basic render|war
  * false positive costs a flaky CI failure while a false negative only skips a
  * perf check.
  */
-export async function isRealGpu(adapter: GPUAdapter | null): Promise<boolean> {
+export async function isRealGpu(
+  adapter: (GPUAdapter & LegacyAdapterMembers) | null
+): Promise<boolean> {
   if (!adapter) return false;
   if (adapter.isFallbackAdapter) return false;
 

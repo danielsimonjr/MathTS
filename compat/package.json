@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json",
     "dev": "tsup src/index.ts --format esm --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "test": "bun test --isolate --timeout 30000",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
     "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json"

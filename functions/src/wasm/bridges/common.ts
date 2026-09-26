@@ -12,6 +12,7 @@
  */
 
 import { wasmLoader, type WasmModule } from '../WasmLoader.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /**
  * Fetch the loaded WASM module, or `null` if nothing is loaded / the loader
@@ -167,6 +168,21 @@ interface AsRuntime extends RawWasm {
   __new: (size: number, id: number) => number;
   __pin: (ptr: number) => number;
   __unpin: (ptr: number) => void;
+  /** Rolls the stub allocator back to the heap start (`assembly/src/heap.ts`). */
+  heap_reset?: () => void;
+}
+
+/**
+ * Free every managed allocation once a call has copied its results out.
+ *
+ * The binary uses the stub runtime, which never frees: without this, each managed call
+ * grew linear memory for good (16 MiB per `lgamma` of a 1M-element array), until
+ * `memory.grow` failed at 4 GiB and every call fell back to JS. `__unpin` does nothing
+ * under the stub runtime. Calls are synchronous and never nest, and no AS state lives
+ * on the heap, so nothing is live at this point. A binary without the export skips it.
+ */
+function resetAsHeap(mod: AsRuntime): void {
+  if (typeof mod.heap_reset === 'function') mod.heap_reset();
 }
 
 interface AsAlloc {
@@ -246,6 +262,11 @@ export function withAsF64<T>(
         /* ignore */
       }
     }
+    try {
+      resetAsHeap(mod);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -277,6 +298,11 @@ export function withAsI32<T>(
         /* ignore */
       }
     }
+    try {
+      resetAsHeap(mod);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -294,7 +320,7 @@ export function makeUnaryArrayDispatch(cfg: {
   js: (xs: Float64Array) => Float64Array;
 }): (xs: Float64Array) => Float64Array {
   return (xs: Float64Array): Float64Array => {
-    if (xs.length >= cfg.threshold) {
+    if (xs.length >= cfg.threshold && wasmPolicyAllows(cfg.name, xs.length)) {
       const wasm = getWasm() as unknown as RawWasm | null;
       if (wasm && isAsWasm(wasm)) {
         const out = withAsF64(wasm, [xs], (mod, [h]) =>

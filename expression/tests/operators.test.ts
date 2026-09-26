@@ -26,47 +26,6 @@ function opNode(fn: string, args: unknown[] = [], implicit = false) {
   };
 }
 
-function _constantNode(value: unknown) {
-  return {
-    type: 'ConstantNode',
-    isConstantNode: true,
-    value,
-    getIdentifier() {
-      return 'ConstantNode';
-    },
-    getContent() {
-      return this;
-    },
-  };
-}
-
-function _symbolNode(name: string) {
-  return {
-    type: 'SymbolNode',
-    isSymbolNode: true,
-    name,
-    getIdentifier() {
-      return 'SymbolNode';
-    },
-    getContent() {
-      return this;
-    },
-  };
-}
-
-function _relationalNode() {
-  return {
-    type: 'RelationalNode',
-    isRelationalNode: true,
-    getIdentifier() {
-      return 'RelationalNode';
-    },
-    getContent() {
-      return this;
-    },
-  };
-}
-
 function assignmentNode() {
   return {
     type: 'AssignmentNode',

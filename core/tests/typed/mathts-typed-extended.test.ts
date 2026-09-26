@@ -155,8 +155,8 @@ describe('TypeRegistry', () => {
 
   it('should get all type names', () => {
     const registry = new TypeRegistry();
-    registry.registerType('TypeA', () => false);
-    registry.registerType('TypeB', () => false);
+    registry.registerType('TypeA', (_x: unknown): _x is never => false);
+    registry.registerType('TypeB', (_x: unknown): _x is never => false);
     const names = registry.getTypeNames();
     expect(names).toContain('TypeA');
     expect(names).toContain('TypeB');
@@ -171,7 +171,7 @@ describe('TypeRegistry', () => {
 
   it('should clear all registrations', () => {
     const registry = new TypeRegistry();
-    registry.registerType('X', () => false);
+    registry.registerType('X', (_x: unknown): _x is never => false);
     registry.registerConversion('a', 'b', () => {});
     registry.clear();
     expect(registry.hasType('X')).toBe(false);

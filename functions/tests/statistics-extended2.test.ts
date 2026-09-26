@@ -108,7 +108,7 @@ describe('statistics typed functions - extended synchronous paths', () => {
 
   describe('parallelStatHistogram', () => {
     it('should compute histogram with number array', async () => {
-      const result = await parallelStatHistogram([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5);
+      const result = (await parallelStatHistogram([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)) as number[];
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBe(5);
     });

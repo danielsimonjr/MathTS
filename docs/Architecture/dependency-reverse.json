@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-26",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -355,6 +355,14 @@
     ],
     "functions/src/typed/cas.ts": ["functions/src/index.ts"],
     "functions/src/config-api.ts": ["functions/src/index.ts"],
+    "functions/src/wasm/WasmLoader.ts": [
+      "functions/src/index.ts",
+      "functions/src/wasm/bitwise/wasm-bridge.ts",
+      "functions/src/wasm/bridges/common.ts",
+      "functions/src/wasm/interpolation/wasm-bridge.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
@@ -1616,6 +1624,7 @@
       "functions/src/cas/layer3.ts",
       "functions/src/cas/rat.ts",
       "functions/src/cas/rational-integrate.ts",
+      "functions/src/typed/algebra.ts",
       "functions/src/typed/factorization/finite-field.ts",
       "functions/src/typed/factorization/hensel.ts",
       "functions/src/typed/factorization/index.ts",
@@ -1844,11 +1853,14 @@
       "functions/src/wasm/sort/wasm-bridge.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
-    "functions/src/wasm/WasmLoader.ts": [
+    "functions/src/wasm/policy.ts": [
       "functions/src/wasm/bitwise/wasm-bridge.ts",
       "functions/src/wasm/bridges/common.ts",
+      "functions/src/wasm/elementwise/wasm-bridge.ts",
       "functions/src/wasm/interpolation/wasm-bridge.ts",
       "functions/src/wasm/poly/wasm-bridge.ts",
+      "functions/src/wasm/signal/wasm-bridge.ts",
+      "functions/src/wasm/sort/wasm-bridge.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/wasm/integrity.ts": ["functions/src/wasm/WasmLoader.ts"],
@@ -2446,14 +2458,6 @@
       "expression/src/node/RangeNode.ts",
       "expression/src/node/RelationalNode.ts"
     ],
-    "expression/src/utils/array.ts": [
-      "expression/src/node/ArrayNode.ts",
-      "expression/src/node/BlockNode.ts",
-      "expression/src/node/FunctionAssignmentNode.ts",
-      "expression/src/node/IndexNode.ts",
-      "expression/src/node/OperatorNode.ts",
-      "expression/src/node/utils/stringSubset.ts"
-    ],
     "expression/src/node/Node.ts": [
       "expression/src/compiler/compile.ts",
       "expression/src/evaluator/evaluate.ts",
@@ -2466,8 +2470,23 @@
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
       "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/ObjectNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/ParenthesisNode.ts",
+      "expression/src/node/RangeNode.ts",
+      "expression/src/node/RelationalNode.ts",
+      "expression/src/node/SymbolNode.ts",
       "expression/src/parse.ts",
       "expression/src/utils/latex.ts"
+    ],
+    "expression/src/utils/array.ts": [
+      "expression/src/node/ArrayNode.ts",
+      "expression/src/node/BlockNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
+      "expression/src/node/IndexNode.ts",
+      "expression/src/node/OperatorNode.ts",
+      "expression/src/node/utils/stringSubset.ts"
     ],
     "expression/src/utils/string.ts": [
       "expression/src/Help.ts",
@@ -3897,6 +3916,7 @@
       "assembly/src/ops/complex-array.ts",
       "assembly/src/ops/complex-ops.ts"
     ],
+    "assembly/src/heap.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/scalar.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/array.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/matrix.ts": ["assembly/src/index.ts"],

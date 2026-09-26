@@ -32,6 +32,15 @@ interface Matrix {
 
 /** Typed function interface for math.js functions */
 interface TypedFunction<R = Scalar> {
+  // `typed(name, signatures, ...)` creates a typed function; without this overload
+  // the factory's result was typed as a value and the public export was uncallable.
+  // It returns `unknown`, like every typed function, not `R`: `R` is the scalar
+  // result of the dependencies typed here, while this function returns a matrix (or a scalar for scalar input).
+  (
+    name: string,
+    signatures: Record<string, (...args: never[]) => unknown>,
+    ...moreSignatures: Record<string, (...args: never[]) => unknown>[]
+  ): (...args: unknown[]) => unknown;
   (...args: unknown[]): R;
   find(func: TypedFunction, signature: string[]): TypedFunction<R>;
 }

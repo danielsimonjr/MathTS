@@ -4,7 +4,6 @@ import type { MathNode, StringOptions } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createSymbolNode } from '../src/node/SymbolNode.js';
 import { createOperatorNode } from '../src/node/OperatorNode.js';
-import { createParenthesisNode } from '../src/node/ParenthesisNode.js';
 
 /**
  * White-box view of the subtype fields read off base `MathNode` values in these
@@ -32,7 +31,6 @@ const ConstantNode = createConstantNode({
 });
 const SymbolNode = createSymbolNode({ math: mathScope, Node });
 const OperatorNode = createOperatorNode({ Node });
-const _ParenthesisNode = createParenthesisNode({ Node });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -125,13 +123,13 @@ describe('Node - filter', () => {
     const a = makeConst(1);
     const b = makeConst(2);
     const op = makeAdd(a, b);
-    const constants = op.filter((n: NodeView) => n.isConstantNode === true);
+    const constants = op.filter((n: MathNode) => (n as NodeView).isConstantNode === true);
     expect(constants.length).toBe(2);
   });
 
   it('should include root if it matches', () => {
     const c = makeConst(99);
-    const found = c.filter((n: NodeView) => n.isConstantNode === true);
+    const found = c.filter((n: MathNode) => (n as NodeView).isConstantNode === true);
     expect(found.length).toBe(1);
     expect(found[0]).toBe(c);
   });

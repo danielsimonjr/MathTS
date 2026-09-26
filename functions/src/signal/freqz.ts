@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import type { Matrix, Complex } from '../types.js';
+import type { Matrix, Complex, TypedFunction } from '../types.js';
 
 const name = 'freqz';
 
@@ -16,7 +16,9 @@ interface FrequencyResponse {
 export const createFreqz = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, add, multiply, Complex, divide, matrix }) => {
+  // The deps are untyped (`any`), so the result is declared: without it the export
+  // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
+  ({ typed, add, multiply, Complex, divide, matrix }): TypedFunction => {
     /**
      * Calculates the frequency response of a filter given its numerator and denominator coefficients.
      *

@@ -245,7 +245,7 @@ describe('random', () => {
     seedProbabilityRng('sanity-mean');
     let sum = 0;
     const N = 10_000;
-    for (let i = 0; i < N; i++) sum += random();
+    for (let i = 0; i < N; i++) sum += random() as number;
     const mean = sum / N;
     expect(Math.abs(mean - 0.5)).toBeLessThan(0.02);
   });
@@ -254,7 +254,7 @@ describe('random', () => {
     seedProbabilityRng('sanity-var');
     const N = 10_000;
     const samples: number[] = [];
-    for (let i = 0; i < N; i++) samples.push(random());
+    for (let i = 0; i < N; i++) samples.push(random() as number);
     const mean = samples.reduce((a, b) => a + b, 0) / N;
     const variance = samples.reduce((a, x) => a + (x - mean) ** 2, 0) / N;
     expect(Math.abs(variance - 1 / 12)).toBeLessThan(0.005);
@@ -316,7 +316,7 @@ describe('randomInt', () => {
     seedProbabilityRng('int-sanity-mean');
     let sum = 0;
     const N = 10_000;
-    for (let i = 0; i < N; i++) sum += randomInt(10);
+    for (let i = 0; i < N; i++) sum += randomInt(10) as number;
     const mean = sum / N;
     expect(Math.abs(mean - 4.5)).toBeLessThan(0.2);
   });

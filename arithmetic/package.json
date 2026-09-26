@@ -24,7 +24,7 @@
     "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "bun test --coverage",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",

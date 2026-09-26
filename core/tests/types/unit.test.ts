@@ -13,6 +13,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Unit, isUnit, DimensionMismatchError, UnitParseError, dim } from '../../src/types/unit';
+import type { UnitInstance } from '../../src/types/unit';
 
 /** Displayed magnitude of a Unit's `toString()` (the number before the unit). */
 const displayed = (u: { toString(): string }): number => parseFloat(u.toString().split(' ')[0]);
@@ -217,7 +218,7 @@ describe('Unit', () => {
         mathts: 'Unit',
         value: 5,
         notation: 'm',
-      } as unknown as ReturnType<Unit['toJSON']>);
+      } as unknown as ReturnType<UnitInstance['toJSON']>);
       expect(restored.toString()).toBe('5 m');
     });
   });

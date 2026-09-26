@@ -76,7 +76,10 @@ describe('distribution objects — closed-form cdf/quantile (the last SELF-REF d
 
 describe('parallelIFFT — known spectrum, not a round-trip', () => {
   it('IDFT of the hand-written spectrum [4,0,0,0] = [1,1,1,1]', async () => {
-    const r = await parallelIFFT(new Float64Array([4, 0, 0, 0]), new Float64Array([0, 0, 0, 0]));
+    const r = (await parallelIFFT(
+      new Float64Array([4, 0, 0, 0]),
+      new Float64Array([0, 0, 0, 0])
+    )) as { real: Float64Array; imag: Float64Array };
     for (let i = 0; i < 4; i++) {
       expect(r.real[i]).toBeCloseTo(1, 12);
       expect(r.imag[i]).toBeCloseTo(0, 12);

@@ -83,32 +83,32 @@ describe('Extended Arithmetic Functions (Sprint 18)', () => {
 
   describe('Extended GCD (xgcd)', () => {
     it('should return [gcd, x, y] where a*x + b*y = gcd', () => {
-      const [g, x, y] = xgcd(12, 8);
+      const [g, x, y] = xgcd(12, 8) as number[];
       expect(g).toBe(4);
       expect(12 * x + 8 * y).toBe(4);
     });
 
     it('should work with larger numbers', () => {
-      const [g, x, y] = xgcd(48, 18);
+      const [g, x, y] = xgcd(48, 18) as number[];
       expect(g).toBe(6);
       expect(48 * x + 18 * y).toBe(6);
     });
 
     it('should handle coprime numbers', () => {
-      const [g, x, y] = xgcd(13, 17);
+      const [g, x, y] = xgcd(13, 17) as number[];
       expect(g).toBe(1);
       expect(13 * x + 17 * y).toBe(1);
     });
 
     it('should work with bigint', () => {
-      const [g, x, y] = xgcd(12n, 8n);
+      const [g, x, y] = xgcd(12n, 8n) as bigint[];
       expect(g).toBe(4n);
       expect(12n * x + 8n * y).toBe(4n);
     });
 
     it('should handle known values', () => {
       // xgcd(35, 15) = gcd=5, and 35*(-1) + 15*3 = 5
-      const [g, x, y] = xgcd(35, 15);
+      const [g, x, y] = xgcd(35, 15) as number[];
       expect(g).toBe(5);
       expect(35 * x + 15 * y).toBe(5);
     });

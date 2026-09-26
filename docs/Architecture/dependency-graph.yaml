@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-09-25'
-  totalFiles: 1175
+  lastUpdated: '2026-09-26'
+  totalFiles: 1177
   totalModules: 83
-  totalExports: 5842
+  totalExports: 5851
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -2533,9 +2533,7 @@ modules:
           imports:
             - TypedFunction
             - TypedInstance
-            - SignatureFunction
-            - ReferTo
-            - ReferToSelf
+            - SignatureRecord
           typeOnly: true
         - file: ../typed/mathts-typed.js
           imports:
@@ -5375,6 +5373,11 @@ modules:
           imports:
             - config
           reExport: true
+        - file: ./wasm/WasmLoader.js
+          imports:
+            - loadWasm
+            - isWasmLoaded
+          reExport: true
         - file: ./typed/unit.js
           imports:
             - to
@@ -6209,6 +6212,8 @@ modules:
             - SVDOptions
       exports:
         - config
+        - loadWasm
+        - isWasmLoaded
         - to
         - toBest
         - evaluate
@@ -6617,6 +6622,8 @@ modules:
         - '* from ./typed/cas.js'
         - '* from ./factories/index.js'
         - config
+        - loadWasm
+        - isWasmLoaded
         - to
         - toBest
         - evaluate
@@ -7906,6 +7913,7 @@ modules:
           imports:
             - Matrix
             - Complex
+            - TypedFunction
           typeOnly: true
       workspaceDependencies: []
       exports:
@@ -8104,6 +8112,7 @@ modules:
           imports:
             - Matrix
             - Complex
+            - TypedFunction
           typeOnly: true
       workspaceDependencies: []
       exports:
@@ -9936,6 +9945,9 @@ modules:
             - factorPolynomialUnivariate
             - cleanUnivariatePoly
             - factorMultivariateString
+        - file: ./factorization/integer-poly.js
+          imports:
+            - polyGcdZ
       workspaceDependencies: []
       exports:
         - typedAlgebra
@@ -10160,9 +10172,17 @@ modules:
       functions:
         - studentTTest
         - chiSquareTest
+        - chiSquareTest
+        - chiSquareTest
         - anova
         - kolmogorovSmirnovTest
+        - kolmogorovSmirnovTest
+        - kolmogorovSmirnovTest
         - mannWhitneyTest
+        - mannWhitneyTest
+        - mannWhitneyTest
+        - shapiroWilkTest
+        - shapiroWilkTest
         - shapiroWilkTest
         - principalComponentAnalysis
         - kolmogorovSmirnov2Test
@@ -12616,6 +12636,9 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_SIGNAL_THRESHOLD
@@ -12657,6 +12680,9 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_POLY_THRESHOLD
@@ -12681,6 +12707,22 @@ modules:
       constants:
         - WASM_POLY_THRESHOLD
         - WASM_POLY_FIT_THRESHOLD
+    functions/src/wasm/policy.ts:
+      description: Where the AssemblyScript tier runs once a consumer has called `loadWasm()`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - wasmPolicyAllows
+        - overrideWasmPolicy
+        - wasmDispatchPolicy
+      interfaces:
+        - WasmBand
+      functions:
+        - wasmPolicyAllows
+        - overrideWasmPolicy
+        - wasmDispatchPolicy
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
       externalDependencies: []
@@ -12703,11 +12745,16 @@ modules:
           subpath: internal
       exports:
         - wasmLoader
+        - loadWasm
+        - isWasmLoaded
         - WasmLoader
       classes:
         - WasmLoader
       interfaces:
         - WasmModule
+      functions:
+        - loadWasm
+        - isWasmLoaded
       constants:
         - wasmLoader
     functions/src/wasm/sort/wasm-bridge.ts:
@@ -12723,6 +12770,9 @@ modules:
             - asReadReturnedF64
             - asReadReturnedI32
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_SORT_THRESHOLD
@@ -12770,6 +12820,9 @@ modules:
             - airyBiScalar
             - ellipticKScalar
             - ellipticECompleteScalar
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_SPECIAL_THRESHOLD
@@ -12935,6 +12988,9 @@ modules:
           imports:
             - wasmLoader
             - WasmModule
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - getWasm
@@ -12976,6 +13032,9 @@ modules:
             - withAsI32
             - asReadReturnedI32
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_BITWISE_THRESHOLD
@@ -13027,6 +13086,9 @@ modules:
             - withAsF64
             - asReadReturnedF64
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_TRIDIAG_THRESHOLD
@@ -13078,6 +13140,9 @@ modules:
             - runChainPtr
             - PtrUnaryKernel
             - RawWasm
+        - file: ../policy.js
+          imports:
+            - wasmPolicyAllows
       workspaceDependencies: []
       exports:
         - WASM_ELEMENTWISE_THRESHOLD
@@ -21251,7 +21316,11 @@ modules:
           imports:
             - MathJsConfig
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - UnitInstance
       exports:
         - createSpeedOfLight
         - createGravitationConstant
@@ -21306,8 +21375,6 @@ modules:
         - createPlanckTime
         - createPlanckCharge
         - createPlanckTemperature
-      interfaces:
-        - UnitInstance
       constants:
         - createSpeedOfLight
         - createGravitationConstant
@@ -22117,6 +22184,7 @@ modules:
             - Matrix
             - Unit
             - BigNumber
+            - TypedFunction
           typeOnly: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
@@ -22488,6 +22556,10 @@ modules:
         - file: ../operators.js
           imports:
             - getPrecedence
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createRangeNode
@@ -22575,6 +22647,10 @@ modules:
         - file: ../utils/mathml.js
           imports:
             - toMathMLSymbol
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createSymbolNode
@@ -22650,6 +22726,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createRelationalNode
@@ -22761,6 +22841,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createOperatorNode
@@ -22788,6 +22872,10 @@ modules:
           imports:
             - escape
             - stringify
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createObjectNode
@@ -22859,10 +22947,15 @@ modules:
             - isMatrix
             - isNode
             - isString
+            - isSymbolNode
             - typeOf
         - file: ../utils/string.js
           imports:
             - escape
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createIndexNode
@@ -22932,6 +23025,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./Node.js
+          imports:
+            - MathNode
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createParenthesisNode
@@ -33992,6 +34089,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./heap
+          imports:
+            - heap_reset
+          reExport: true
         - file: ./types/complex
           imports:
             - complex
@@ -34386,6 +34487,7 @@ modules:
           reExport: true
       workspaceDependencies: []
       exports:
+        - heap_reset
         - complex
         - complexFromPolar
         - add_f64
@@ -34707,6 +34809,7 @@ modules:
         - complex_array_add_inplace
         - complex_array_copy
       reExported:
+        - heap_reset
         - complex
         - complexFromPolar
         - add_f64
@@ -35093,6 +35196,16 @@ modules:
         - array_csc_ptr
         - array_cot_ptr
         - array_erfc_ptr
+    assembly/src/heap.ts:
+      description: Heap reset for the stub runtime.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - heap_reset
+      functions:
+        - heap_reset
     assembly/src/tridiag.ts:
       description: Tridiagonal-solve kernel — AssemblyScript parity port (Slice 3.10b).
       externalDependencies: []
@@ -35517,7 +35630,8 @@ modules:
       exports:
         - createChain
       interfaces:
-        - Chain
+        - ChainMethods
+        - ChainUnwrap
       functions:
         - createChain
   gpu:
@@ -36738,6 +36852,7 @@ dependencyGraph:
       files:
         - functions/src/wasm/signal/wasm-bridge.ts
         - functions/src/wasm/poly/wasm-bridge.ts
+        - functions/src/wasm/policy.ts
         - functions/src/wasm/WasmLoader.ts
         - functions/src/wasm/sort/wasm-bridge.ts
         - functions/src/wasm/special/wasm-bridge.ts
@@ -37688,6 +37803,7 @@ dependencyGraph:
         - assembly/src/index.ts
         - assembly/src/poly.ts
         - assembly/src/elementwise.ts
+        - assembly/src/heap.ts
         - assembly/src/tridiag.ts
         - assembly/src/special.ts
         - assembly/src/sort.ts
@@ -37739,18 +37855,18 @@ dependencyGraph:
         - plot/src/three/points3d.ts
         - plot/src/three/project.ts
 statistics:
-  totalTypeScriptFiles: 1175
+  totalTypeScriptFiles: 1177
   totalModules: 83
-  totalLinesOfCode: 195211
-  totalExports: 5842
+  totalLinesOfCode: 195742
+  totalExports: 5851
   totalClasses: 55
-  totalInterfaces: 509
-  totalFunctions: 1886
-  totalTypeGuards: 158
+  totalInterfaces: 510
+  totalFunctions: 1900
+  totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1599
-  totalReExports: 2362
-  totalTypeOnlyImports: 582
+  totalReExports: 2365
+  totalTypeOnlyImports: 589
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

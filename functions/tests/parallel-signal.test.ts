@@ -16,6 +16,15 @@ import {
   parallelAutoCorr,
 } from '../src/index.js';
 
+// The typed-function calls return `unknown`; these are the documented result shapes.
+interface Spectrum {
+  real: Float64Array;
+  imag: Float64Array;
+}
+interface FFTResult extends Spectrum {
+  originalLength: number;
+}
+
 describe('Parallel Signal Processing Functions', () => {
   beforeAll(async () => {
     await computePool.initialize();
@@ -28,7 +37,7 @@ describe('Parallel Signal Processing Functions', () => {
   describe('FFT', () => {
     it('should compute FFT of number array', () => {
       const signal = [1, 0, -1, 0];
-      const result = parallelFFT(signal);
+      const result = parallelFFT(signal) as FFTResult;
       expect(result.real).toBeInstanceOf(Float64Array);
       expect(result.imag).toBeInstanceOf(Float64Array);
       expect(result.originalLength).toBe(4);
@@ -38,7 +47,7 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should compute FFT of Float64Array', async () => {
       const signal = new Float64Array([1, 2, 3, 4]);
-      const result = await parallelFFT(signal);
+      const result = (await parallelFFT(signal)) as FFTResult;
       expect(result.real).toBeInstanceOf(Float64Array);
       expect(result.imag).toBeInstanceOf(Float64Array);
       expect(result.originalLength).toBe(4);
@@ -48,26 +57,26 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should handle power-of-2 input', () => {
       const signal = [1, 1, 1, 1, 1, 1, 1, 1]; // 8 elements
-      const result = parallelFFT(signal);
+      const result = parallelFFT(signal) as FFTResult;
       expect(result.real.length).toBe(8);
     });
 
     it('should zero-pad non-power-of-2 input', () => {
       const signal = [1, 2, 3]; // 3 elements -> pads to 4
-      const result = parallelFFT(signal);
+      const result = parallelFFT(signal) as FFTResult;
       expect(result.real.length).toBe(4);
       expect(result.originalLength).toBe(3);
     });
 
     it('should handle empty input', () => {
       const signal: number[] = [];
-      const result = parallelFFT(signal);
+      const result = parallelFFT(signal) as FFTResult;
       expect(result.real.length).toBe(0);
     });
 
     it('should produce correct DC component', () => {
       const signal = [1, 2, 3, 4];
-      const result = parallelFFT(signal);
+      const result = parallelFFT(signal) as FFTResult;
       // DC = sum of all values = 10
       expect(result.real[0]).toBeCloseTo(10, 10);
     });
@@ -76,8 +85,8 @@ describe('Parallel Signal Processing Functions', () => {
   describe('IFFT', () => {
     it('should recover original signal', async () => {
       const signal = [1, 2, 3, 4];
-      const fftResult = parallelFFT(signal);
-      const recovered = await parallelIFFT(fftResult.real, fftResult.imag);
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const recovered = (await parallelIFFT(fftResult.real, fftResult.imag)) as Spectrum;
 
       for (let i = 0; i < signal.length; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
@@ -86,8 +95,11 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should work with object input', async () => {
       const signal = [1, 2, 3, 4];
-      const fftResult = parallelFFT(signal);
-      const recovered = await parallelIFFT({ real: fftResult.real, imag: fftResult.imag });
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const recovered = (await parallelIFFT({
+        real: fftResult.real,
+        imag: fftResult.imag,
+      })) as Spectrum;
 
       for (let i = 0; i < signal.length; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
@@ -101,8 +113,8 @@ describe('Parallel Signal Processing Functions', () => {
         signal[i] = Math.cos((2 * Math.PI * i) / n);
       }
 
-      const fftResult = parallelFFT(signal);
-      const recovered = await parallelIFFT(fftResult.real, fftResult.imag);
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const recovered = (await parallelIFFT(fftResult.real, fftResult.imag)) as Spectrum;
 
       for (let i = 0; i < n; i++) {
         expect(recovered.real[i]).toBeCloseTo(signal[i], 10);
@@ -113,8 +125,11 @@ describe('Parallel Signal Processing Functions', () => {
   describe('FFT Magnitude', () => {
     it('should compute magnitude spectrum', async () => {
       const signal = [1, 0, 1, 0];
-      const fftResult = parallelFFT(signal);
-      const magnitude = await parallelFFTMagnitude(fftResult.real, fftResult.imag);
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const magnitude = (await parallelFFTMagnitude(
+        fftResult.real,
+        fftResult.imag
+      )) as Float64Array;
 
       expect(magnitude).toBeInstanceOf(Float64Array);
       expect(magnitude.length).toBe(fftResult.real.length);
@@ -124,8 +139,11 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should work with object input', async () => {
       const signal = [1, 2, 3, 4];
-      const fftResult = parallelFFT(signal);
-      const magnitude = await parallelFFTMagnitude({ real: fftResult.real, imag: fftResult.imag });
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const magnitude = (await parallelFFTMagnitude({
+        real: fftResult.real,
+        imag: fftResult.imag,
+      })) as Float64Array;
 
       expect(magnitude).toBeInstanceOf(Float64Array);
     });
@@ -134,8 +152,8 @@ describe('Parallel Signal Processing Functions', () => {
   describe('FFT Power', () => {
     it('should compute power spectrum', async () => {
       const signal = [1, 0, 1, 0];
-      const fftResult = parallelFFT(signal);
-      const power = await parallelFFTPower(fftResult.real, fftResult.imag);
+      const fftResult = parallelFFT(signal) as FFTResult;
+      const power = (await parallelFFTPower(fftResult.real, fftResult.imag)) as Float64Array;
 
       expect(power).toBeInstanceOf(Float64Array);
       // DC power should be |sum|^2 = 4
@@ -147,7 +165,7 @@ describe('Parallel Signal Processing Functions', () => {
     it('should convolve two Float64Arrays', async () => {
       const x = new Float64Array([1, 2, 3]);
       const h = new Float64Array([1, 1]);
-      const result = await parallelConv(x, h);
+      const result = (await parallelConv(x, h)) as Float64Array;
 
       // conv([1,2,3], [1,1]) = [1, 3, 5, 3]
       expect(result.length).toBe(4);
@@ -160,7 +178,7 @@ describe('Parallel Signal Processing Functions', () => {
     it('should convolve two number arrays', async () => {
       const x = [1, 2, 3];
       const h = [1, 1];
-      const result = await parallelConv(x, h);
+      const result = (await parallelConv(x, h)) as Float64Array;
 
       expect(result.length).toBe(4);
       expect(result[0]).toBeCloseTo(1, 10);
@@ -170,7 +188,7 @@ describe('Parallel Signal Processing Functions', () => {
     it('should handle convolution with impulse', async () => {
       const x = new Float64Array([1, 2, 3, 4]);
       const impulse = new Float64Array([1]); // Delta function
-      const result = await parallelConv(x, impulse);
+      const result = (await parallelConv(x, impulse)) as Float64Array;
 
       // Convolution with impulse should return original signal
       for (let i = 0; i < x.length; i++) {
@@ -181,14 +199,14 @@ describe('Parallel Signal Processing Functions', () => {
     it('should handle empty inputs', async () => {
       const x = new Float64Array([1, 2, 3]);
       const h = new Float64Array([]);
-      const result = await parallelConv(x, h);
+      const result = (await parallelConv(x, h)) as Float64Array;
       expect(result.length).toBe(0);
     });
 
     it('should produce correct output length', async () => {
       const x = new Float64Array([1, 2, 3, 4, 5]); // length 5
       const h = new Float64Array([1, 1, 1]); // length 3
-      const result = await parallelConv(x, h);
+      const result = (await parallelConv(x, h)) as Float64Array;
 
       // Full convolution length = 5 + 3 - 1 = 7
       expect(result.length).toBe(7);
@@ -199,7 +217,7 @@ describe('Parallel Signal Processing Functions', () => {
     it('should compute cross-correlation', async () => {
       const x = new Float64Array([1, 2, 3]);
       const h = new Float64Array([1, 2]);
-      const result = await parallelXCorr(x, h);
+      const result = (await parallelXCorr(x, h)) as Float64Array;
 
       // xcorr(x, h) = conv(x, reverse(h))
       // reverse([1,2]) = [2,1]
@@ -214,7 +232,7 @@ describe('Parallel Signal Processing Functions', () => {
     it('should work with number arrays', async () => {
       const x = [1, 2, 3];
       const h = [1, 1];
-      const result = await parallelXCorr(x, h);
+      const result = (await parallelXCorr(x, h)) as Float64Array;
       expect(result).toBeInstanceOf(Float64Array);
     });
   });
@@ -222,7 +240,7 @@ describe('Parallel Signal Processing Functions', () => {
   describe('Auto-correlation', () => {
     it('should compute auto-correlation', async () => {
       const x = new Float64Array([1, 2, 1]);
-      const result = await parallelAutoCorr(x);
+      const result = (await parallelAutoCorr(x)) as Float64Array;
 
       // Auto-correlation is symmetric
       expect(result.length).toBe(5);
@@ -234,7 +252,7 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should have peak at zero lag', async () => {
       const x = new Float64Array([1, 2, 3, 2, 1]);
-      const result = await parallelAutoCorr(x);
+      const result = (await parallelAutoCorr(x)) as Float64Array;
 
       // Find maximum
       let maxVal = result[0];
@@ -253,7 +271,7 @@ describe('Parallel Signal Processing Functions', () => {
 
     it('should work with number array', async () => {
       const x = [1, 2, 1];
-      const result = await parallelAutoCorr(x);
+      const result = (await parallelAutoCorr(x)) as Float64Array;
       expect(result).toBeInstanceOf(Float64Array);
     });
   });
@@ -266,14 +284,14 @@ describe('Parallel Signal Processing Functions', () => {
         signal[i] = Math.sin((2 * Math.PI * 10 * i) / size);
       }
 
-      const result = await parallelFFT(signal);
+      const result = (await parallelFFT(signal)) as FFTResult;
       expect(result.real.length).toBe(size);
     });
 
     it('should handle medium-sized convolution', async () => {
       const x = new Float64Array(128).fill(1);
       const h = new Float64Array(32).fill(0.5);
-      const result = await parallelConv(x, h);
+      const result = (await parallelConv(x, h)) as Float64Array;
 
       expect(result.length).toBe(128 + 32 - 1);
     });
@@ -409,11 +427,11 @@ describe('Parallel Signal Processing Functions', () => {
 
         // Sequential reference: threshold above N so fftCoreFloat64 runs.
         computePool.updateConfig({ thresholdElements: 1_000_000 });
-        const seq = await parallelFFT(signal);
+        const seq = (await parallelFFT(signal)) as FFTResult;
 
         // Parallel path: threshold below N so fourStepFFT (fftBatch) runs.
         computePool.updateConfig({ thresholdElements: 4 });
-        const par = await parallelFFT(signal);
+        const par = (await parallelFFT(signal)) as FFTResult;
         computePool.updateConfig({ thresholdElements: 1_000_000 });
 
         expect(par.real.length).toBe(seq.real.length);
@@ -436,10 +454,10 @@ describe('Parallel Signal Processing Functions', () => {
         const im = Float64Array.from({ length: N }, (_, i) => Math.sin((2 * Math.PI * 5 * i) / N));
 
         computePool.updateConfig({ thresholdElements: 1_000_000 });
-        const seq = await parallelIFFT(re, im);
+        const seq = (await parallelIFFT(re, im)) as Spectrum;
 
         computePool.updateConfig({ thresholdElements: 4 });
-        const par = await parallelIFFT(re, im);
+        const par = (await parallelIFFT(re, im)) as Spectrum;
         computePool.updateConfig({ thresholdElements: 1_000_000 });
 
         let maxErr = 0;
@@ -462,8 +480,8 @@ describe('Parallel Signal Processing Functions', () => {
 
         // Force the four-step path for both transforms.
         computePool.updateConfig({ thresholdElements: 4 });
-        const spectrum = await parallelFFT(signal);
-        const recovered = await parallelIFFT(spectrum.real, spectrum.imag);
+        const spectrum = (await parallelFFT(signal)) as FFTResult;
+        const recovered = (await parallelIFFT(spectrum.real, spectrum.imag)) as Spectrum;
         computePool.updateConfig({ thresholdElements: 1_000_000 });
 
         let maxErr = 0;

@@ -131,6 +131,14 @@ export interface BootstrapOptions {
   bootstrapSeed?: number;
 }
 
+/**
+ * Options that request no bootstrap, so a test returns its plain result. The
+ * hypothesis tests below are overloaded on this: without `bootstrap` the result
+ * type is exact, and with it the result stays a union (`bootstrap: 0` falls back
+ * to the plain result at run time).
+ */
+type NoBootstrap = BootstrapOptions & { bootstrap?: undefined };
+
 /** Result of `kolmogorovSmirnovTest` when the `bootstrap` option is set. */
 export interface KSBootstrapResult {
   /** D statistic from the original (un-permuted) samples. */
@@ -521,6 +529,16 @@ export function studentTTest(sample1: f64[], sample2?: f64[]): TTestResult {
 export async function chiSquareTest(
   observed: f64[] | f64[][],
   expected?: f64[],
+  opts?: NoBootstrap
+): Promise<ChiSquareResult>;
+export async function chiSquareTest(
+  observed: f64[] | f64[][],
+  expected?: f64[],
+  opts?: BootstrapOptions
+): Promise<ChiSquareResult | ChiSquareBootstrapResult>;
+export async function chiSquareTest(
+  observed: f64[] | f64[][],
+  expected?: f64[],
   opts?: BootstrapOptions
 ): Promise<ChiSquareResult | ChiSquareBootstrapResult> {
   // 2D contingency table form — stays on main thread
@@ -780,6 +798,16 @@ export function anova(groups: f64[][]): AnovaResult {
 export async function kolmogorovSmirnovTest(
   sample: f64[],
   cdfFn?: (x: f64) => f64,
+  opts?: NoBootstrap
+): Promise<KSTestResult>;
+export async function kolmogorovSmirnovTest(
+  sample: f64[],
+  cdfFn?: (x: f64) => f64,
+  opts?: BootstrapOptions
+): Promise<KSTestResult | KSBootstrapResult>;
+export async function kolmogorovSmirnovTest(
+  sample: f64[],
+  cdfFn?: (x: f64) => f64,
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult> {
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
@@ -979,6 +1007,16 @@ function _mwExactPValue(n1: number, n2: number, U: number): f64 {
 export async function mannWhitneyTest(
   sample1: f64[],
   sample2: f64[],
+  opts?: NoBootstrap
+): Promise<MannWhitneyResult>;
+export async function mannWhitneyTest(
+  sample1: f64[],
+  sample2: f64[],
+  opts?: BootstrapOptions
+): Promise<MannWhitneyResult | MWBootstrapResult>;
+export async function mannWhitneyTest(
+  sample1: f64[],
+  sample2: f64[],
   opts?: BootstrapOptions
 ): Promise<MannWhitneyResult | MWBootstrapResult> {
   if (sample1.length < 1 || sample2.length < 1) {
@@ -1164,6 +1202,14 @@ export async function mannWhitneyTest(
  * shapiroWilkTest([1, 2, 3, 4, 5])
  * shapiroWilkTest(data, { bootstrap: 100, bootstrapSeed: 42 })
  */
+export async function shapiroWilkTest(
+  sample: f64[],
+  opts?: NoBootstrap
+): Promise<ShapiroWilkResult>;
+export async function shapiroWilkTest(
+  sample: f64[],
+  opts?: BootstrapOptions
+): Promise<ShapiroWilkResult | SWBootstrapResult>;
 export async function shapiroWilkTest(
   sample: f64[],
   opts?: BootstrapOptions

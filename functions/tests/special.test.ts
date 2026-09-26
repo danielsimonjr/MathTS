@@ -72,7 +72,7 @@ describe('Special Functions', () => {
     });
 
     it('beta is symmetric: beta(a,b) = beta(b,a)', () => {
-      expect(beta(3, 5)).toBeCloseTo(beta(5, 3), 10);
+      expect(beta(3, 5)).toBeCloseTo(beta(5, 3) as number, 10);
     });
 
     it('beta(1, n) = 1/n', () => {
@@ -155,7 +155,7 @@ describe('Special Functions', () => {
     });
 
     it('J0 is even: J0(-x) = J0(x)', () => {
-      expect(besselJ0(-3)).toBeCloseTo(besselJ0(3), 10);
+      expect(besselJ0(-3)).toBeCloseTo(besselJ0(3) as number, 10);
     });
 
     it('J0(10) ~ -0.2459', () => {
@@ -176,7 +176,7 @@ describe('Special Functions', () => {
     });
 
     it('J1 is odd: J1(-x) = -J1(x)', () => {
-      expect(besselJ1(-3)).toBeCloseTo(-besselJ1(3), 10);
+      expect(besselJ1(-3)).toBeCloseTo(-(besselJ1(3) as number), 10);
     });
 
     it('J1(3.8317) ~ 0 (first zero)', () => {

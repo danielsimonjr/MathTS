@@ -57,7 +57,7 @@ describe('setUnion', () => {
   });
 
   it('union respects multiplicity: [1,2,2] ∪ [2,3] = [1,2,2,3]', () => {
-    const result = setUnion([1, 2, 2], [2, 3]);
+    const result = setUnion([1, 2, 2], [2, 3]) as number[];
     expect(result).toHaveLength(4);
     expect(result.filter((x) => x === 2)).toHaveLength(2);
   });
@@ -121,7 +121,7 @@ describe('setDifference', () => {
   });
 
   it('difference respects multiplicity: [2,2,3] − [2] = [2,3]', () => {
-    const result = setDifference([2, 2, 3], [2]);
+    const result = setDifference([2, 2, 3], [2]) as number[];
     expect(result).toHaveLength(2);
     expect(result.filter((x) => x === 2)).toHaveLength(1);
     expect(result).toContain(3);
@@ -220,13 +220,13 @@ describe('setPowerset', () => {
   });
 
   it('powerset of [1,2,3] contains the empty set', () => {
-    const result = setPowerset([1, 2, 3]);
+    const result = setPowerset([1, 2, 3]) as number[][];
     const hasEmpty = result.some((s) => s.length === 0);
     expect(hasEmpty).toBe(true);
   });
 
   it('powerset of [1,2,3] contains the full set', () => {
-    const result = setPowerset([1, 2, 3]);
+    const result = setPowerset([1, 2, 3]) as number[][];
     const hasFull = result.some(
       (s) => s.length === 3 && s.includes(1) && s.includes(2) && s.includes(3)
     );
@@ -238,14 +238,14 @@ describe('setPowerset', () => {
   });
 
   it('powerset of singleton has 2 subsets (empty + full)', () => {
-    const result = setPowerset([42]);
+    const result = setPowerset([42]) as number[][];
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual([]);
     expect(result[1]).toEqual([42]);
   });
 
   it('powerset is ordered by subset size', () => {
-    const result = setPowerset([1, 2, 3]);
+    const result = setPowerset([1, 2, 3]) as number[][];
     // Subsets should be sorted: 1 empty, 3 singletons, 3 pairs, 1 triple
     expect(result[0]).toHaveLength(0);
     expect(result[1]).toHaveLength(1);
@@ -339,7 +339,7 @@ describe('setCartesian', () => {
   });
 
   it('Cartesian product of singletons is a single pair', () => {
-    const result = setCartesian([5], [10]);
+    const result = setCartesian([5], [10]) as number[][];
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual([5, 10]);
   });

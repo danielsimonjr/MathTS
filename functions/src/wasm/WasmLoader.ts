@@ -316,8 +316,20 @@ export class WasmLoader {
       return this.loading;
     }
 
+    // Clear the in-flight promise however it settles. Keeping a rejected one
+    // would hand the same failure to every later call, so one bad path (or a
+    // transient fetch error) would disable WASM for the rest of the process.
     this.loading = this.loadModule(wasmPath);
-    this.wasmModule = await this.loading;
+    try {
+      this.wasmModule = await this.loading;
+    } catch (error) {
+      // Drop a module that compiled but failed to instantiate, too: the next
+      // load() would reuse it instead of reading (and verifying) its own binary.
+      this.compiledModule = null;
+      throw error;
+    } finally {
+      this.loading = null;
+    }
     return this.wasmModule;
   }
 
@@ -567,3 +579,39 @@ export class WasmLoader {
  * Global WASM loader instance
  */
 export const wasmLoader = WasmLoader.getInstance();
+
+/** Prefix of every error `verifyWasmIntegrity` throws for a binary it rejects. */
+const INTEGRITY_FAILURE = 'WASM integrity check failed';
+
+/**
+ * Opt in to the AssemblyScript WASM tier.
+ *
+ * Nothing loads the binary on its own: until this resolves `true`, every function
+ * runs its JavaScript path. Afterwards each function whose WASM bridge has a
+ * measured win dispatches to AssemblyScript above that bridge's size threshold,
+ * and falls back to JavaScript below it.
+ *
+ * The binary's SHA-384 is checked against the `wasm-manifest.json` beside it
+ * before it is instantiated.
+ *
+ * @param wasmPath Path (Node) or URL (browser) of `mathts-as.wasm`. Defaults to the
+ *   copy shipped in this package.
+ * @returns `true` once the module is loaded (or already was); `false` when the
+ *   binary cannot be found, read or instantiated. A later call may retry.
+ * @throws When the binary fails its integrity check. A tampered binary is never
+ *   ignored silently.
+ */
+export async function loadWasm(wasmPath?: string): Promise<boolean> {
+  try {
+    await wasmLoader.load(wasmPath);
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith(INTEGRITY_FAILURE)) throw error;
+    return false;
+  }
+}
+
+/** Whether `loadWasm()` has loaded the AssemblyScript module. */
+export function isWasmLoaded(): boolean {
+  return wasmLoader.isLoaded();
+}

@@ -498,7 +498,8 @@ export interface WasmModule {
     m: number,
     n: number,
     qOutHdr: number,
-    rOutHdr: number
+    rOutHdr: number,
+    vWorkHdr?: number
   ) => number;
   matrix_cholesky?: (aHdr: number, n: number, lOutHdr: number) => number;
   matrix_inverse?: (aHdr: number, n: number, resultHdr: number, workHdr: number) => number;
@@ -608,8 +609,20 @@ export class WasmLoader {
       return this.loading;
     }
 
+    // Clear the in-flight promise however it settles. Keeping a rejected one
+    // would hand the same failure to every later call, so one bad path (or a
+    // transient fetch error) would disable WASM for the rest of the process.
     this.loading = this.loadModule(wasmPath);
-    this.wasmModule = await this.loading;
+    try {
+      this.wasmModule = await this.loading;
+    } catch (error) {
+      // Drop a module that compiled but failed to instantiate, too: the next
+      // load() would reuse it instead of reading (and verifying) its own binary.
+      this.compiledModule = null;
+      throw error;
+    } finally {
+      this.loading = null;
+    }
     return this.wasmModule;
   }
 

@@ -132,7 +132,8 @@ export interface MathTSWasmExports {
     m: number,
     n: number,
     q_out: Float64Array,
-    r_out: Float64Array
+    r_out: Float64Array,
+    v_work?: Float64Array | null
   ): number;
   matrix_cholesky?(a: Float64Array, n: number, l_out: Float64Array): number;
   matrix_inverse?(a: Float64Array, n: number, result: Float64Array, work: Float64Array): number;

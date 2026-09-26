@@ -180,46 +180,109 @@ describe('special — scalar branches the base suites miss', () => {
 
 describe('special — Float64Array sequential overloads (below threshold)', () => {
   it('single-argument array functions', async () => {
-    expect(Array.from(await erfc(A(0, 1)))[0]).toBeCloseTo(1, 6);
-    expect(Array.from(await erfi(A(0, 1)))[1]).toBeCloseTo(erfi(1) as number, 8);
-    expect(Array.from(await lgamma(A(1, 2, 0.5)))[2]).toBeCloseTo(0.5723649429247001, 6);
-    expect(Array.from(await digamma(A(1, 2)))[0]).toBeCloseTo(-0.5772156649015329, 6);
-    expect(Array.from(await besselJ0(A(0, 1)))[0]).toBeCloseTo(1, 10);
-    expect(Array.from(await besselJ1(A(1, 2)))[0]).toBeCloseTo(besselJ1(1) as number, 8);
-    expect(Array.from(await besselY0(A(1, 2)))[0]).toBeCloseTo(besselY0(1) as number, 8);
-    expect(Array.from(await besselY1(A(1, 2)))[0]).toBeCloseTo(besselY1(1) as number, 8);
-    expect(Array.from(await ellipticK(A(0, 0.5)))[1]).toBeCloseTo(1.8540746773013719, 6);
-    expect(Array.from(await ellipticE(A(0, 1)))[1]).toBeCloseTo(1, 6);
-    expect(Array.from(await lambertW(A(0, 1)))[1]).toBeCloseTo(0.5671432904097838, 6);
-    expect(Array.from(await cosIntegral(A(1, 2)))[0]).toBeCloseTo(cosIntegral(1) as number, 8);
-    expect(Array.from(await sinIntegral(A(1, 2)))[0]).toBeCloseTo(sinIntegral(1) as number, 8);
-    expect(Array.from(await logIntegral(A(2, 3)))[0]).toBeCloseTo(logIntegral(2) as number, 8);
-    expect(Array.from(await expIntegralEi(A(1, 2)))[0]).toBeCloseTo(expIntegralEi(1) as number, 8);
-    expect(Array.from(await fresnelC(A(0.5, 1)))[1]).toBeCloseTo(fresnelC(1) as number, 8);
-    expect(Array.from(await fresnelS(A(0.5, 1)))[1]).toBeCloseTo(fresnelS(1) as number, 8);
-    expect(Array.from(await airyAi(A(0, 1)))[0]).toBeCloseTo(0.3550280538878172, 6);
-    expect(Array.from(await airyBi(A(0, 1)))[0]).toBeCloseTo(0.6149266274460007, 6);
+    expect(Array.from((await erfc(A(0, 1))) as Float64Array)[0]).toBeCloseTo(1, 6);
+    expect(Array.from((await erfi(A(0, 1))) as Float64Array)[1]).toBeCloseTo(erfi(1) as number, 8);
+    expect(Array.from((await lgamma(A(1, 2, 0.5))) as Float64Array)[2]).toBeCloseTo(
+      0.5723649429247001,
+      6
+    );
+    expect(Array.from((await digamma(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      -0.5772156649015329,
+      6
+    );
+    expect(Array.from((await besselJ0(A(0, 1))) as Float64Array)[0]).toBeCloseTo(1, 10);
+    expect(Array.from((await besselJ1(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      besselJ1(1) as number,
+      8
+    );
+    expect(Array.from((await besselY0(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      besselY0(1) as number,
+      8
+    );
+    expect(Array.from((await besselY1(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      besselY1(1) as number,
+      8
+    );
+    expect(Array.from((await ellipticK(A(0, 0.5))) as Float64Array)[1]).toBeCloseTo(
+      1.8540746773013719,
+      6
+    );
+    expect(Array.from((await ellipticE(A(0, 1))) as Float64Array)[1]).toBeCloseTo(1, 6);
+    expect(Array.from((await lambertW(A(0, 1))) as Float64Array)[1]).toBeCloseTo(
+      0.5671432904097838,
+      6
+    );
+    expect(Array.from((await cosIntegral(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      cosIntegral(1) as number,
+      8
+    );
+    expect(Array.from((await sinIntegral(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      sinIntegral(1) as number,
+      8
+    );
+    expect(Array.from((await logIntegral(A(2, 3))) as Float64Array)[0]).toBeCloseTo(
+      logIntegral(2) as number,
+      8
+    );
+    expect(Array.from((await expIntegralEi(A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      expIntegralEi(1) as number,
+      8
+    );
+    expect(Array.from((await fresnelC(A(0.5, 1))) as Float64Array)[1]).toBeCloseTo(
+      fresnelC(1) as number,
+      8
+    );
+    expect(Array.from((await fresnelS(A(0.5, 1))) as Float64Array)[1]).toBeCloseTo(
+      fresnelS(1) as number,
+      8
+    );
+    expect(Array.from((await airyAi(A(0, 1))) as Float64Array)[0]).toBeCloseTo(
+      0.3550280538878172,
+      6
+    );
+    expect(Array.from((await airyBi(A(0, 1))) as Float64Array)[0]).toBeCloseTo(
+      0.6149266274460007,
+      6
+    );
   });
 
   it('multi-argument array functions (varying last/array argument)', async () => {
     // beta(Float64Array, b)
-    expect(Array.from(await beta(A(2, 3), 3))[0]).toBeCloseTo(beta(2, 3) as number, 8);
+    expect(Array.from((await beta(A(2, 3), 3)) as Float64Array)[0]).toBeCloseTo(
+      beta(2, 3) as number,
+      8
+    );
     // gammainc(a, Float64Array)
-    expect(Array.from(await gammainc(1, A(1, 2)))[0]).toBeCloseTo(1 - 1 / Math.E, 6);
+    expect(Array.from((await gammainc(1, A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      1 - 1 / Math.E,
+      6
+    );
     // gammaincp(a, Float64Array)
-    expect(Array.from(await gammaincp(1, A(1, 2)))[0]).toBeCloseTo(1 / Math.E, 6);
+    expect(Array.from((await gammaincp(1, A(1, 2))) as Float64Array)[0]).toBeCloseTo(1 / Math.E, 6);
     // betainc(a, b, Float64Array)
-    expect(Array.from(await betainc(2, 2, A(0.5, 1)))[0]).toBeCloseTo(0.5, 8);
+    expect(Array.from((await betainc(2, 2, A(0.5, 1))) as Float64Array)[0]).toBeCloseTo(0.5, 8);
     // besselJ/Y/I/K with array x
-    expect(Array.from(await besselJ(2, A(5, 6)))[0]).toBeCloseTo(besselJ(2, 5) as number, 6);
-    expect(Array.from(await besselY(2, A(5, 6)))[0]).toBeCloseTo(besselY(2, 5) as number, 6);
-    expect(Array.from(await besselI(2, A(1, 2)))[0]).toBeCloseTo(besselI(2, 1) as number, 6);
-    expect(Array.from(await besselK(2, A(1, 2)))[0]).toBeCloseTo(besselK(2, 1) as number, 5);
+    expect(Array.from((await besselJ(2, A(5, 6))) as Float64Array)[0]).toBeCloseTo(
+      besselJ(2, 5) as number,
+      6
+    );
+    expect(Array.from((await besselY(2, A(5, 6))) as Float64Array)[0]).toBeCloseTo(
+      besselY(2, 5) as number,
+      6
+    );
+    expect(Array.from((await besselI(2, A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      besselI(2, 1) as number,
+      6
+    );
+    expect(Array.from((await besselK(2, A(1, 2))) as Float64Array)[0]).toBeCloseTo(
+      besselK(2, 1) as number,
+      5
+    );
     // orthogonal polynomials with array x
-    expect(Array.from(await chebyshevT(3, A(0.5, 1)))[1]).toBeCloseTo(1, 8);
-    expect(Array.from(await hermiteH(2, A(0, 1)))[0]).toBeCloseTo(-2, 8);
-    expect(Array.from(await laguerreL(2, A(0, 1)))[0]).toBeCloseTo(1, 8);
-    expect(Array.from(await legendreP(2, A(0, 1)))[1]).toBeCloseTo(1, 8);
+    expect(Array.from((await chebyshevT(3, A(0.5, 1))) as Float64Array)[1]).toBeCloseTo(1, 8);
+    expect(Array.from((await hermiteH(2, A(0, 1))) as Float64Array)[0]).toBeCloseTo(-2, 8);
+    expect(Array.from((await laguerreL(2, A(0, 1))) as Float64Array)[0]).toBeCloseTo(1, 8);
+    expect(Array.from((await legendreP(2, A(0, 1))) as Float64Array)[1]).toBeCloseTo(1, 8);
   });
 });
 

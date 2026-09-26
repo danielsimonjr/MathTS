@@ -145,7 +145,7 @@ describe('RangeNode - forEach', () => {
     const step = makeConst(2);
     const node = new RangeNode(start, end, step);
     const paths: string[] = [];
-    node.forEach((child, path) => paths.push(path));
+    node.forEach((_child, path) => paths.push(path));
     expect(paths).toContain('start');
     expect(paths).toContain('end');
     expect(paths).toContain('step');

@@ -390,7 +390,7 @@ describe('solve — bisection refinement for irrational roots', () => {
     // x^3 - 3x + 1 has three real roots, all irrational.
     const roots = solve('x^3 - 3*x + 1', 'x');
     expect(roots.length).toBeGreaterThanOrEqual(2);
-    for (const r of roots) {
+    for (const r of roots as number[]) {
       // f(root) ~ 0
       expect(Math.abs(r * r * r - 3 * r + 1)).toBeLessThan(1e-4);
     }

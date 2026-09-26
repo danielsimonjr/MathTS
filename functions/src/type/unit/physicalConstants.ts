@@ -1,3 +1,4 @@
+import type { UnitInstance } from '@danielsimonjr/mathts-core';
 import { factory } from '../../utils/factory.js';
 import type { MathJsConfig } from '../../core/config.js';
 import type { Decimal } from 'decimal.js';
@@ -10,17 +11,12 @@ interface BigNumberConstructor {
 }
 
 /**
- * Unit class interface for physical constants
+ * Unit class interface for physical constants. The `Unit` dependency is core's Unit class,
+ * so each unit-valued constant is a full core `UnitInstance` (it was declared as a stub
+ * `{ fixPrefix: boolean }`, which hid `toNumeric`, `to`, `format`, ... from callers).
  */
 interface UnitClass {
   new (value: number | Decimal, unit: string): UnitInstance;
-}
-
-/**
- * Unit instance with fixPrefix property
- */
-export interface UnitInstance {
-  fixPrefix: boolean;
 }
 
 /**

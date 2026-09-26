@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createParenthesisNode } from '../src/node/ParenthesisNode.js';
-import { createOperatorNode } from '../src/node/OperatorNode.js';
 import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
@@ -14,7 +13,6 @@ const Node = createNode({ mathWithTransform: mathScope });
 const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ParenthesisNode = createParenthesisNode({ Node });
-const _OperatorNode = createOperatorNode({ Node });
 
 function makeConst(v: unknown) {
   return new ConstantNode(v);

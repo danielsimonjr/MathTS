@@ -4,7 +4,7 @@
  * Asserts that the barrel re-exports `compile` as a function and that
  * the `CompiledExpression` / `Scope` types are importable.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, expectTypeOf } from 'vitest';
 import * as compilerBarrel from '../src/compiler/index.js';
 import type { CompiledExpression, Scope } from '../src/compiler/index.js';
 
@@ -19,9 +19,10 @@ describe('expression/src/compiler/index.ts – barrel smoke test', () => {
   });
 
   it('CompiledExpression and Scope types are importable (compile-time check)', () => {
-    // Type-only check: if these types didn't exist the import above would fail.
-    type _CheckScope = Scope;
-    type _CheckCompiled = CompiledExpression;
+    // Type-only check: if these types didn't exist the import above would fail,
+    // and `tsc -p tsconfig.test.json` checks the members named here.
+    expectTypeOf<Scope>().toHaveProperty('get');
+    expectTypeOf<CompiledExpression>().toHaveProperty('evaluate');
     expect(true).toBe(true);
   });
 });

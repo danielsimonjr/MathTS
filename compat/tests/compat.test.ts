@@ -210,6 +210,7 @@ describe('@danielsimonjr/mathts-compat', () => {
         [4, 5, 6],
       ]);
       const t = transpose(m);
+      if (Array.isArray(t)) throw new TypeError('transpose(Matrix) must return a Matrix');
 
       expect(t.rows).toBe(3);
       expect(t.cols).toBe(2);
@@ -259,6 +260,7 @@ describe('@danielsimonjr/mathts-compat', () => {
 
     it('zeros() should create zero matrix', () => {
       const z = zeros(2, 3);
+      if (!(z instanceof DenseMatrix)) throw new TypeError('zeros(r, c) must return a DenseMatrix');
 
       expect(z.rows).toBe(2);
       expect(z.cols).toBe(3);
@@ -267,6 +269,7 @@ describe('@danielsimonjr/mathts-compat', () => {
 
     it('ones() should create ones matrix', () => {
       const o = ones(2, 2);
+      if (!(o instanceof DenseMatrix)) throw new TypeError('ones(r, c) must return a DenseMatrix');
 
       expect(o.get(0, 0)).toBe(1);
       expect(o.get(1, 1)).toBe(1);

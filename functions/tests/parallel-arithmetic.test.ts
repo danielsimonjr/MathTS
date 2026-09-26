@@ -284,7 +284,7 @@ describe('Parallel Arithmetic Functions', () => {
 
       it('should compute exp of Float64Array in parallel', async () => {
         const a = new Float64Array([0, 1, 2]);
-        const result = await parallelExp(a);
+        const result = (await parallelExp(a)) as Float64Array;
         expect(result[0]).toBeCloseTo(1, 10);
         expect(result[1]).toBeCloseTo(Math.E, 10);
         expect(result[2]).toBeCloseTo(Math.E * Math.E, 10);
@@ -292,7 +292,7 @@ describe('Parallel Arithmetic Functions', () => {
 
       it('should compute log of Float64Array in parallel', async () => {
         const a = new Float64Array([1, Math.E, Math.E * Math.E]);
-        const result = await parallelLog(a);
+        const result = (await parallelLog(a)) as Float64Array;
         expect(result[0]).toBeCloseTo(0, 10);
         expect(result[1]).toBeCloseTo(1, 10);
         expect(result[2]).toBeCloseTo(2, 10);
@@ -302,7 +302,7 @@ describe('Parallel Arithmetic Functions', () => {
     describe('Trigonometric operations', () => {
       it('should compute sin of Float64Array in parallel', async () => {
         const a = new Float64Array([0, Math.PI / 6, Math.PI / 2]);
-        const result = await parallelSin(a);
+        const result = (await parallelSin(a)) as Float64Array;
         expect(result[0]).toBeCloseTo(0, 10);
         expect(result[1]).toBeCloseTo(0.5, 10);
         expect(result[2]).toBeCloseTo(1, 10);
@@ -310,7 +310,7 @@ describe('Parallel Arithmetic Functions', () => {
 
       it('should compute cos of Float64Array in parallel', async () => {
         const a = new Float64Array([0, Math.PI / 3, Math.PI]);
-        const result = await parallelCos(a);
+        const result = (await parallelCos(a)) as Float64Array;
         expect(result[0]).toBeCloseTo(1, 10);
         expect(result[1]).toBeCloseTo(0.5, 10);
         expect(result[2]).toBeCloseTo(-1, 10);
@@ -318,7 +318,7 @@ describe('Parallel Arithmetic Functions', () => {
 
       it('should compute tan of Float64Array in parallel', async () => {
         const a = new Float64Array([0, Math.PI / 4]);
-        const result = await parallelTan(a);
+        const result = (await parallelTan(a)) as Float64Array;
         expect(result[0]).toBeCloseTo(0, 10);
         expect(result[1]).toBeCloseTo(1, 10);
       });
@@ -403,7 +403,7 @@ describe('Parallel Arithmetic Functions', () => {
       const size = 1000;
       const a = new Float64Array(size).fill(1);
       const b = new Float64Array(size).fill(2);
-      const result = await parallelAdd(a, b);
+      const result = (await parallelAdd(a, b)) as Float64Array;
       expect(result.length).toBe(size);
       expect(result[0]).toBe(3);
       expect(result[size - 1]).toBe(3);

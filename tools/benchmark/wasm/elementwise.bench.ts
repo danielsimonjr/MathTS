@@ -16,13 +16,12 @@
  * Run: `npm run bench:elementwise`
  */
 
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   elementwiseUnaryDispatch,
   elementwiseChainDispatch,
   type WasmElementwiseOp,
 } from '../../../functions/src/wasm/elementwise/wasm-bridge.js';
-import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
+import { maxdiffF64, runCases, isMainModule, loadKernelTier, type WasmCase } from './harness.js';
 
 const SIZES = [1024, 16384, 131072, 1_000_000];
 
@@ -69,8 +68,12 @@ function unaryCase(op: WasmElementwiseOp): WasmCase {
     js: (input) => jsUnary(op, input as Float64Array),
     as: (input) => {
       const xs = input as Float64Array;
-      // Real dispatch; null below threshold / no wasm → JS fallback.
-      return elementwiseUnaryDispatch(op, xs) ?? jsUnary(op, xs);
+      // Every size here is >= WASM_ELEMENTWISE_THRESHOLD, so null can only mean a
+      // dead tier. Falling back to JS would time JS as "AS" and report the dead
+      // tier as a tie (AGENTS.md benchmarking rule 5), so fail instead.
+      const r = elementwiseUnaryDispatch(op, xs);
+      if (!r) throw new Error(`AS dispatch returned null for ${op} at n=${xs.length}`);
+      return r;
     },
     maxdiff: (a, b) => maxdiffF64(a as Float64Array, b as Float64Array),
   };
@@ -92,17 +95,15 @@ const chainCase: WasmCase = {
   as: (input) => {
     const xs = input as Float64Array;
     const r = elementwiseChainDispatch(CHAIN, xs);
-    if (r) return r;
-    const out = new Float64Array(xs.length);
-    for (let i = 0; i < xs.length; i++) out[i] = Math.exp(Math.cos(Math.sin(xs[i])));
-    return out;
+    if (!r) throw new Error(`AS chain dispatch returned null at n=${xs.length}`);
+    return r;
   },
   maxdiff: (a, b) => maxdiffF64(a as Float64Array, b as Float64Array),
   note: 'Op-fusion: one copy-in / one copy-out for the whole chain.',
 };
 
 export async function main(): Promise<void> {
-  await initWasm();
+  await loadKernelTier();
   const ops: WasmElementwiseOp[] = ['abs', 'sin', 'cos', 'tan', 'exp', 'log', 'sinh', 'tanh'];
   const cases: WasmCase[] = [...ops.map(unaryCase), chainCase];
   await runCases('ELEMENTWISE — AssemblyScript array_<op>_ptr kernels vs Math.* (JS)', cases);

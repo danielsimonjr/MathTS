@@ -11,7 +11,8 @@ import * as F from '../src/index.js';
  * deleted rather than wired.
  */
 describe('embeddedDocs — wired and truthful', () => {
-  const docs = embeddedDocs as Record<string, { name?: string; description?: string }>;
+  // `description` is a string, or a list of lines (mathjs's `diff` doc uses one).
+  const docs = embeddedDocs as Record<string, { name?: string; description?: string | string[] }>;
 
   it('the formerly-unwired extension docs are present', () => {
     for (const name of [

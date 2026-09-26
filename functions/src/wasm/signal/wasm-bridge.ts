@@ -29,6 +29,7 @@ import {
   asReadReturnedF64,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 // ---------------------------------------------------------------------------
 // Threshold
@@ -303,7 +304,9 @@ export function chirpZTransformJS(
  */
 export function applyWindowDispatch(samples: Float64Array, windowName: string): void {
   const wt = windowTypeCode(windowName);
-  const wasm = getWasm() as unknown as RawWasm | null;
+  const wasm = wasmPolicyAllows('apply_window_f64', samples.length)
+    ? (getWasm() as unknown as RawWasm | null)
+    : null;
   if (wasm && isAsWasm(wasm)) {
     try {
       // AS managed ABI: apply_window_f64(samples, wt) modifies the buffer in
@@ -335,7 +338,7 @@ export function welchPSDDispatch(
   const n = samples.length;
   const wt = windowTypeCode(windowName);
 
-  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength) {
+  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength && wasmPolicyAllows('welch_psd_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -366,7 +369,7 @@ export function welchPSDDispatch(
 export function bartlettPSDDispatch(samples: Float64Array, frameLength: number): Float64Array {
   const n = samples.length;
 
-  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength) {
+  if (n >= WASM_SIGNAL_THRESHOLD && n >= frameLength && wasmPolicyAllows('bartlett_psd_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -396,7 +399,7 @@ export function goertzelDispatch(
 ): number {
   const n = samples.length;
 
-  if (n >= WASM_SIGNAL_THRESHOLD) {
+  if (n >= WASM_SIGNAL_THRESHOLD && wasmPolicyAllows('goertzel_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -430,7 +433,10 @@ export function chirpZTransformDispatch(
 ): { re: Float64Array; im: Float64Array } {
   const n = samples.length;
 
-  if (Math.max(n, m) >= WASM_SIGNAL_THRESHOLD) {
+  if (
+    Math.max(n, m) >= WASM_SIGNAL_THRESHOLD &&
+    wasmPolicyAllows('chirp_z_transform_f64', Math.max(n, m))
+  ) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

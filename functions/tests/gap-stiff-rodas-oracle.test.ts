@@ -15,7 +15,7 @@ const lastScalar = (sol: { y: number[] }): number => sol.y[sol.y.length - 1];
 describe('solveODE — RODAS 4th-order stiff method', () => {
   it("linear stiff y' = -1000 y, y(0)=1  →  y(0.01) = e^-10 (relerr < 1e-6)", () => {
     const exact = Math.exp(-10); // 4.5399929762484854e-05
-    const sol = solveODE((_t, y) => -1000 * (y as number), [0, 0.01], 1, {
+    const sol = solveODE((_t: unknown, y: unknown) => -1000 * (y as number), [0, 0.01], 1, {
       method: 'RODAS',
       tol: 1e-8,
     }) as { t: number[]; y: number[] };

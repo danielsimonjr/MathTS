@@ -13,6 +13,7 @@ __pycache__/
 *.pyc
 
 # WASM build artifacts
+functions/.bench/
 assembly/build/
 *.wasm
 !packages/*/src/**/*.wasm

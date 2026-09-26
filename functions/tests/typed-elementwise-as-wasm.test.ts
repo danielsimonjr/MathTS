@@ -33,6 +33,18 @@ import {
   WASM_ELEMENTWISE_OPS,
   type WasmElementwiseOp,
 } from '../src/wasm/elementwise/wasm-bridge.js';
+import { overrideWasmPolicy } from '../src/wasm/policy.js';
+
+// These tests prove the AS kernels themselves (they run, and they match JS), so they let
+// every bridge reach its kernel. In production the measured dispatch policy
+// (src/wasm/policy.ts) keeps most kernels on their JS path even after `loadWasm()`.
+let restoreWasmPolicy = (): void => {};
+beforeAll(() => {
+  restoreWasmPolicy = overrideWasmPolicy({ '*': { min: 0 } });
+});
+afterAll(() => {
+  restoreWasmPolicy();
+});
 
 const here = dirname(fileURLToPath(import.meta.url));
 

@@ -1,31 +1,34 @@
 import { describe, it, expect } from 'vitest';
 import { derivative, parse } from '../src/index.js';
 
+/** derivative returns an expression node, like parse (its typed-function call returns unknown). */
+type MathNode = ReturnType<typeof parse>;
+
 describe('derivative', () => {
   it('should compute derivative with order 0 (return original expression)', () => {
     const expr = 'x^3 + 2*x';
-    const result = derivative(expr, 'x', { order: 0 });
+    const result = derivative(expr, 'x', { order: 0 }) as MathNode;
     expect(result.toString()).toBe(parse(expr).toString());
   });
 
   it('should compute derivative with order 1 (default)', () => {
     const expr = 'x^3';
-    const result = derivative(expr, 'x');
+    const result = derivative(expr, 'x') as MathNode;
     expect(result.toString()).toBe('3 * x ^ 2');
 
-    const resultOrder1 = derivative(expr, 'x', { order: 1 });
+    const resultOrder1 = derivative(expr, 'x', { order: 1 }) as MathNode;
     expect(resultOrder1.toString()).toBe('3 * x ^ 2');
   });
 
   it('should compute derivative with order 2', () => {
     const expr = 'x^3';
-    const result = derivative(expr, 'x', { order: 2 });
+    const result = derivative(expr, 'x', { order: 2 }) as MathNode;
     expect(result.toString()).toBe('6 * x');
   });
 
   it('should compute derivative with order 3', () => {
     const expr = 'x^3';
-    const result = derivative(expr, 'x', { order: 3 });
+    const result = derivative(expr, 'x', { order: 3 }) as MathNode;
     expect(result.toString()).toBe('6');
   });
 

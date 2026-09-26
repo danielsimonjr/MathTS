@@ -53,6 +53,7 @@ import {
   ellipticKScalar,
   ellipticECompleteScalar,
 } from './scalars.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 /**
  * Element-count threshold above which we attempt the WASM Bessel kernels.
@@ -173,7 +174,7 @@ function besselOrderDispatch(
   js: (n: number, xs: Float64Array) => Float64Array
 ): Float64Array {
   const n = xs.length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
+  if (n >= WASM_SPECIAL_THRESHOLD && wasmPolicyAllows(asName, n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -649,7 +650,7 @@ function multiArrayDispatch(
   js: () => Float64Array
 ): Float64Array {
   const n = inputs[0].length;
-  if (n >= WASM_SPECIAL_THRESHOLD) {
+  if (n >= WASM_SPECIAL_THRESHOLD && wasmPolicyAllows(name, n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

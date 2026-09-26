@@ -23,7 +23,7 @@ export function accessFactory({ subset }: { subset: (...args: unknown[]) => unkn
    */
   return function access(
     object: unknown,
-    index: { isObjectProperty: () => boolean; getObjectProperty: () => string }
+    index: { isObjectProperty: () => boolean; getObjectProperty: () => string | null }
   ) {
     try {
       if (Array.isArray(object)) {

@@ -77,11 +77,8 @@ export const createResolve = /* #__PURE__ */ factory(
     OperatorNode,
     ParenthesisNode,
   }: ResolveDependencies) => {
-    // typed-function's runtime `referTo` is single-call variadic
-    // (`referTo(...signatures, callback)`); the imported TypedFunction interface
-    // models it curried, so narrow to the real contract via `unknown`.
     type Fn = (...args: unknown[]) => unknown;
-    const referTo = typed.referTo as unknown as (sig: string, cb: (ref: Fn) => unknown) => unknown;
+    const referTo = typed.referTo;
     /**
      * resolve(expr, scope) replaces variable nodes with their scoped values
      *

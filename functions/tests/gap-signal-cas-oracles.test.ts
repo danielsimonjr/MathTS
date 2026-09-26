@@ -42,8 +42,8 @@ describe('kmeans — deterministic on well-separated clusters', () => {
         [10, 10],
         [10.1, 10],
       ],
-      2,
-      { seed: 1 }
+      // kmeans takes no seed option (it ignored `{ seed: 1 }`): its maximin seeding is deterministic.
+      2
     );
     // centroid set is deterministic (label order may vary) — sort by x
     const cents = [...r.centroids].sort((a, b) => a[0] - b[0]);

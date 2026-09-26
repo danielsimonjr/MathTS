@@ -43,7 +43,7 @@ describe('expression transforms — 1-based callback indices', () => {
 
   it('forEach passes 1-based indices too', () => {
     const seen: unknown[] = [];
-    const scope = new Map<string, unknown>([['record', (x: number, i: number) => seen.push(i)]]);
+    const scope = new Map<string, unknown>([['record', (_x: number, i: number) => seen.push(i)]]);
     evaluate('forEach([5, 6], record)', scope);
     expect(seen).toEqual([[1], [2]]);
   });

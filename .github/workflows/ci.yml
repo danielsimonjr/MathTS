@@ -129,8 +129,19 @@ jobs:
       - name: Build
         run: bun run build
 
+      # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
       - name: Test (Bun runtime)
-        run: bun run test
+        shell: bash
+        run: bun run test 2>&1 | tee test-output.log
+
+      # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
+      # every machine for months. Each suite's skip count is pinned in
+      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
+      # own tests run first: Turbo formats its output differently here than in a terminal.
+      - name: Skip budget
+        run: |
+          node --test tools/test/check-skip-budget.test.mjs
+          node tools/test/check-skip-budget.mjs test-output.log
 
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.

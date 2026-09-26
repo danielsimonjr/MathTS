@@ -53,14 +53,17 @@ describe('workbook/src/index.ts – package entry smoke test', () => {
   });
 
   it('type-only exports are importable (compile-time check)', () => {
-    type _CheckWorkbook = Workbook;
-    type _CheckCell = Cell;
-    type _CheckCellType = CellType;
-    type _CheckExecutionMode = ExecutionMode;
-    type _CheckWorkbookMetadata = WorkbookMetadata;
-    type _CheckRuntimeConfig = RuntimeConfig;
-    type _CheckParseResult = ParseResult;
-    type _CheckWorkbookEvent = WorkbookEvent;
-    expect(true).toBe(true);
+    // Annotating real values checks the imported types exist and have the documented shape.
+    const cellType: CellType = 'code';
+    const execution: ExecutionMode = 'reactive';
+    const metadata: WorkbookMetadata = { title: 'Smoke' };
+    const runtime: RuntimeConfig = { engine: 'mathts', execution };
+    const cell: Cell = { id: 'a', type: cellType, content: '1 + 1' };
+    const workbook: Workbook = { version: '1.0', metadata, runtime, cells: [cell] };
+    const parsed: ParseResult = { success: true, workbook };
+    const event: WorkbookEvent = { type: 'cell:start', cellId: cell.id, timestamp: 0 };
+    expect(parsed.workbook?.cells[0]?.type).toBe('code');
+    expect(parsed.workbook?.runtime.execution).toBe('reactive');
+    expect(event.cellId).toBe('a');
   });
 });

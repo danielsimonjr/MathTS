@@ -18,16 +18,12 @@ import { createFunctionAssignmentNode } from '../src/node/FunctionAssignmentNode
  * `subset`, `size`, `typed`, and every math function used by `_compile`/`_toTex`).
  */
 /**
- * The math-namespace view the source node constructors depend on: the function
- * deps (`subset`, `size`, `typed`) are named precisely; everything else
- * (math functions/constants captured during compile/toTex) is `unknown`.
+ * The math namespace the source node constructors depend on: it supplies the
+ * deps (`subset`, `size`, `typed`) plus the math functions/constants captured
+ * during compile/toTex. The node factories take an untyped scope record, and
+ * the bootstrap `math` is one, so every entry is `unknown`.
  */
-interface MathScope {
-  subset: (...args: unknown[]) => unknown;
-  size: (value: unknown) => number[];
-  typed: (...args: unknown[]) => unknown;
-  [key: string]: unknown;
-}
+type MathScope = Record<string, unknown>;
 
 /** A rawArgs handler: receives unevaluated arg nodes, flagged via `rawArgs`. */
 type RawArgsHandler = ((nodes: unknown[]) => unknown) & { rawArgs?: boolean };

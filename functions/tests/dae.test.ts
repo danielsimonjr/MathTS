@@ -28,7 +28,7 @@ describe('solveDAE — manufactured / closed-form coupled index-1 DAE', () => {
   // y' = f = z − 2y,  0 = g = z − (t + y)  ⇒ on the manifold z = t + y, so
   // y' = (t + y) − 2y = t − y  ⇒  y = t − 1 + (y0 + 1) e^{−t},  z = t + y.
   // g_z = 1 (index-1). y0 = 1, consistent z0 = t0 + y0 = 1.
-  const f = (t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
+  const f = (_t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
   const g = (t: number, y: number[], z: number[]) => [z[0] - (t + y[0])];
   const yExact = (t: number) => t - 1 + 2 * Math.exp(-t);
   const zExact = (t: number) => t + yExact(t);
@@ -94,7 +94,7 @@ describe('solveDAE — reduce-to-ODE cross-check', () => {
   // Same system reduces to the ODE y' = t − y (closed form above). Cross-check the
   // DAE solution against a direct integration of that ODE by an independent method
   // (classic RK4 fixed-step reference computed in-test — implementation-independent).
-  const f = (t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
+  const f = (_t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
   const g = (t: number, y: number[], z: number[]) => [z[0] - (t + y[0])];
 
   function rk4Ref(tf: number): number {
@@ -128,8 +128,8 @@ describe('solveDAE — reduce-to-ODE cross-check', () => {
 describe('solveDAE — classic RC-circuit index-1 DAE', () => {
   // C·V' = i,  i·R = Vs − V  →  semi-explicit: y = V (differential), z = i (algebraic).
   // C = R = Vs = 1, V(0) = 0  ⇒  V = 1 − e^{−t},  i = e^{−t}.
-  const f = (t: number, y: number[], z: number[]) => [z[0]]; // V' = i
-  const g = (t: number, y: number[], z: number[]) => [z[0] - (1 - y[0])]; // i − (Vs − V) = 0
+  const f = (_t: number, _y: number[], z: number[]) => [z[0]]; // V' = i
+  const g = (_t: number, y: number[], z: number[]) => [z[0] - (1 - y[0])]; // i − (Vs − V) = 0
 
   it('recovers V = 1 − e^{−t}, i = e^{−t}', () => {
     const sol = solveDAE(f, g, [0, 4], 0, 1, { tol: 1e-9 });
@@ -154,8 +154,8 @@ describe('solveDAE — vector system with non-identity ∂g/∂z', () => {
   // y1' = 2 z1, 0 = 2 z1 + y1  → z1 = −y1/2, y1' = −y1 → y1 = e^{−t}, z1 = −e^{−t}/2.
   // y2' =  z2 , 0 =  z2 + 2 y2 → z2 = −2 y2, y2' = −2 y2 → y2 = e^{−2t}, z2 = −2 e^{−2t}.
   // ∂g/∂z = diag(2, 1) (nonsingular, non-identity).
-  const f = (t: number, y: number[], z: number[]) => [2 * z[0], z[1]];
-  const g = (t: number, y: number[], z: number[]) => [2 * z[0] + y[0], z[1] + 2 * y[1]];
+  const f = (_t: number, _y: number[], z: number[]) => [2 * z[0], z[1]];
+  const g = (_t: number, y: number[], z: number[]) => [2 * z[0] + y[0], z[1] + 2 * y[1]];
 
   it('recovers the two decoupled exponentials + constraint residual', () => {
     const sol = solveDAE(f, g, [0, 2], [1, 1], [-0.5, -2], { tol: 1e-9 });
@@ -181,7 +181,7 @@ describe('solveDAE — vector system with non-identity ∂g/∂z', () => {
 });
 
 describe('solveDAE — analytic Jacobian matches finite-difference', () => {
-  const f = (t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
+  const f = (_t: number, y: number[], z: number[]) => [z[0] - 2 * y[0]];
   const g = (t: number, y: number[], z: number[]) => [z[0] - (t + y[0])];
   const jacobian = () => ({ fy: [[-2]], fz: [[1]], gy: [[-1]], gz: [[1]] });
 
@@ -198,15 +198,15 @@ describe('solveDAE — analytic Jacobian matches finite-difference', () => {
 describe('solveDAE — higher-index / singular ∂g/∂z detection', () => {
   it('throws a clear error when ∂g/∂z is singular (not index-1)', () => {
     // g does NOT depend on z (∂g/∂z = 0) → index-2, cannot land a consistent z0.
-    const f = (t: number, y: number[], z: number[]) => [z[0]];
+    const f = (_t: number, _y: number[], z: number[]) => [z[0]];
     const g = (t: number, y: number[]) => [y[0] - Math.sin(t)];
     expect(() => solveDAE(f, g, [0, 1], 0, 0)).toThrow(/index-1|∂g\/∂z|singular/);
   });
 });
 
 describe('solveDAE — input validation', () => {
-  const f = (t: number, y: number[], z: number[]) => [z[0]];
-  const g = (t: number, y: number[], z: number[]) => [z[0] - (1 - y[0])];
+  const f = (_t: number, _y: number[], z: number[]) => [z[0]];
+  const g = (_t: number, y: number[], z: number[]) => [z[0] - (1 - y[0])];
 
   it('requires T > t0', () => {
     expect(() => solveDAE(f, g, [1, 0], 0, 1)).toThrow(/T > t0/);

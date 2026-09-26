@@ -24,7 +24,7 @@ const asWasmPath = path.resolve(here, '../../../assembly/build/mathts.wasm');
 const manifestPath = path.resolve(here, '../../../assembly/build/wasm-manifest.json');
 const asAvailable = fs.existsSync(asWasmPath) && fs.existsSync(manifestPath);
 
-let wasmBytes: Uint8Array;
+let wasmBytes: Uint8Array<ArrayBuffer>;
 let manifestText: string;
 
 /**
@@ -112,8 +112,8 @@ describe('WasmLoader — browser load path (mocked fetch)', () => {
         const module = await WebAssembly.compile(wasmBytes);
         const instance = await WebAssembly.instantiate(module, {
           env: { abort: () => {}, seed: () => Date.now() },
-          Math,
-          Date,
+          Math: Math as unknown as WebAssembly.ModuleImports,
+          Date: Date as unknown as WebAssembly.ModuleImports,
         });
         return { module, instance };
       });

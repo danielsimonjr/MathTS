@@ -27,6 +27,7 @@ import {
   asReadReturnedI32,
   type RawWasm,
 } from '../bridges/common.js';
+import { wasmPolicyAllows } from '../policy.js';
 
 // ---------------------------------------------------------------------------
 // Threshold
@@ -93,7 +94,7 @@ export function rankF64JS(data: Float64Array): Int32Array {
 export function sortF64Dispatch(data: Float64Array): Float64Array {
   const n = data.length;
 
-  if (n >= WASM_SORT_THRESHOLD) {
+  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows('sort_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -126,7 +127,7 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
  */
 export function argsortF64Dispatch(data: Float64Array): Int32Array {
   const n = data.length;
-  if (n >= WASM_SORT_THRESHOLD) {
+  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows('argsort_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
@@ -153,7 +154,7 @@ export function argsortF64Dispatch(data: Float64Array): Int32Array {
  */
 export function rankF64Dispatch(data: Float64Array): Int32Array {
   const n = data.length;
-  if (n >= WASM_SORT_THRESHOLD) {
+  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows('rank_f64', n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {

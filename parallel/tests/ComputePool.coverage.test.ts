@@ -12,19 +12,30 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { ComputePool } from '../src/ComputePool.js';
+import { ComputePool, DEFAULT_THRESHOLD_BY_OP } from '../src/ComputePool.js';
+
+/** Every default per-op entry removed, so the global threshold governs every op. */
+const NO_DEFAULT_THRESHOLDS = Object.fromEntries(
+  Object.keys(DEFAULT_THRESHOLD_BY_OP).map((op) => [op, undefined])
+);
 
 describe('ComputePool — parallel paths and helpers', () => {
   let pool: ComputePool;
 
   beforeAll(async () => {
     // Low global threshold + 'always' overrides so even tiny inputs take the
-    // worker-dispatched branch. Small chunkSize forces multi-chunk fan-out.
+    // worker-dispatched branch. Small chunkSize forces multi-chunk fan-out. A map is
+    // merged over the defaults per op, so the defaults are cleared explicitly.
     pool = new ComputePool({
       maxWorkers: 3,
       thresholdElements: 4,
       chunkSize: 8,
-      thresholdByOp: { pow: 'always', sign: 'always', tensordot: 'always' },
+      thresholdByOp: {
+        ...NO_DEFAULT_THRESHOLDS,
+        pow: 'always',
+        sign: 'always',
+        tensordot: 'always',
+      },
     });
     await pool.initialize();
   }, 60_000);

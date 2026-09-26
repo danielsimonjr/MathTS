@@ -103,3 +103,62 @@ describe("bitwise family — 'never' by default (WS-2 addendum, 2026-07-05)", ()
     expect((await pool.leftShift(new Int32Array(200_000), 1)).parallelized).toBe(false);
   });
 });
+
+describe('unary / elementwise / scale / matmul honour their thresholdByOp entries', () => {
+  // These methods forwarded to the worker pool without options, and the pool checks only
+  // the global 50,000-element threshold: `sin: 'never'` still went to the workers once the
+  // pool was initialized, and `matmul: 4_096` did not parallelize below 50,000.
+  let pool: ComputePool;
+
+  beforeAll(async () => {
+    pool = new ComputePool();
+    await pool.initialize();
+  });
+
+  afterAll(async () => {
+    await pool.terminate();
+  });
+
+  it("the 'never' element-wise ops stay inline above the global threshold", async () => {
+    const big = new Float64Array(200_000).fill(0.5);
+    const unary = ['abs', 'sqrt', 'exp', 'log', 'sin', 'cos', 'tan', 'negate', 'square'] as const;
+    for (const fn of unary) {
+      expect((await pool.unary(big, fn)).parallelized, fn).toBe(false);
+    }
+    const s = await pool.sin(big);
+    expect(s.parallelized).toBe(false);
+    expect(s.result[123]).toBe(Math.sin(0.5));
+    for (const op of ['add', 'subtract', 'multiply', 'divide'] as const) {
+      expect((await pool.elementwise(big, big, op)).parallelized, op).toBe(false);
+    }
+    const scaled = await pool.scale(big, 4);
+    expect(scaled.parallelized).toBe(false);
+    expect(scaled.result[0]).toBe(2);
+  });
+
+  it('matmul parallelizes from its 4,096-element entry, below the global 50,000', async () => {
+    const n = 100; // a 10,000-element result
+    const a = new Float64Array(n * n).fill(1);
+    const b = new Float64Array(n * n).fill(2);
+    const r = await pool.matmul(a, n, n, b, n);
+    expect(r.parallelized).toBe(true);
+    expect(r.result[0]).toBe(2 * n);
+    expect(r.result[n * n - 1]).toBe(2 * n);
+  });
+
+  it('an override of one op keeps every other default (a map is merged per op)', async () => {
+    const tuned = new ComputePool({ thresholdByOp: { sin: 1_000 } });
+    await tuned.initialize();
+    try {
+      const big = new Float64Array(200_000).fill(0.5);
+      const s = await tuned.sin(big);
+      expect(s.parallelized).toBe(true);
+      expect(s.result[199_999]).toBeCloseTo(Math.sin(0.5), 15);
+      // cos kept its 'never' default instead of falling to the global 50,000.
+      expect((await tuned.cos(big)).parallelized).toBe(false);
+      expect(tuned.getConfig().thresholdByOp?.matmul).toBe(4_096);
+    } finally {
+      await tuned.terminate();
+    }
+  });
+});

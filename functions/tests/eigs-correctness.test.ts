@@ -67,7 +67,7 @@ describe('eigs: correctness on non-symmetric matrices (regression)', () => {
     ]) {
       const trace = A.reduce((s, r, i) => s + r[i], 0);
       const sum = (eigs(A) as { values: Array<number | { re: number; im: number }> }).values.reduce(
-        (s, v) => s + (typeof v === 'object' ? v.re : v),
+        (s: number, v) => s + (typeof v === 'object' ? v.re : v),
         0
       );
       expect(sum).toBeCloseTo(trace, 8);

@@ -24,9 +24,8 @@
 import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 import { jsBackend } from '../../../matrix/src/backends/JSBackend.js';
 import { WASMBackend } from '../../../matrix/src/backends/WASMBackend.js';
-import { initWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import { welchPSDDispatch, welchPSDJS } from '../../../functions/src/wasm/signal/wasm-bridge.js';
-import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
+import { maxdiffF64, runCases, isMainModule, loadKernelTier, type WasmCase } from './harness.js';
 
 const wasmBackend = new WASMBackend({ minElements: 0 });
 
@@ -73,7 +72,7 @@ const welchCase: WasmCase = {
 };
 
 export async function main(): Promise<void> {
-  await initWasm();
+  await loadKernelTier();
   await wasmBackend.initialize();
   await runCases('MATRIX HEAVY OPS + FFT — AssemblyScript vs JS', [multiplyCase, welchCase]);
 }

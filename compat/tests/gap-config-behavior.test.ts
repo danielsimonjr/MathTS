@@ -12,6 +12,10 @@ import { create, all } from '../src/index.js';
  */
 const math = create(all);
 
+// `range` comes from the functions namespace, which MathInstance exposes as `unknown`
+// for the caller to narrow (see the MathInstance index signature).
+type RangeFn = (start: number, end: number) => unknown;
+
 afterEach(() => {
   math.config({ matrix: 'Matrix' });
 });
@@ -29,21 +33,21 @@ describe('GC12: math.config() drives behavior', () => {
 
   it("config({ matrix: 'Array' }) makes matrix-returning ops return arrays", () => {
     // default: identity() returns a Matrix
-    expect(isMatrixLike(math.range(1, 4))).toBe(true);
+    expect(isMatrixLike((math.range as RangeFn)(1, 4))).toBe(true);
 
     math.config({ matrix: 'Array' });
     expect(math.config().matrix).toBe('Array');
     // now the same call returns a plain Array
-    const id = math.range(1, 4);
+    const id = (math.range as RangeFn)(1, 4);
     expect(isPlainArray(id)).toBe(true);
     expect((id as unknown[]).length).toBe(3);
   });
 
   it("config({ matrix: 'Matrix' }) restores matrix output", () => {
     math.config({ matrix: 'Array' });
-    expect(isPlainArray(math.range(1, 4))).toBe(true);
+    expect(isPlainArray((math.range as RangeFn)(1, 4))).toBe(true);
     math.config({ matrix: 'Matrix' });
-    expect(isMatrixLike(math.range(1, 4))).toBe(true);
+    expect(isMatrixLike((math.range as RangeFn)(1, 4))).toBe(true);
   });
 
   it('config() merges partial updates without dropping other keys', () => {

@@ -27,7 +27,7 @@ interface AccessorNodeChild extends MathNode {
 // access()/assign().
 type RuntimeIndex = {
   isObjectProperty: () => boolean;
-  getObjectProperty: () => string;
+  getObjectProperty: () => string | null;
   isIndex: boolean;
 } & IndexLike;
 

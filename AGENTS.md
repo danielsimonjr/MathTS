@@ -149,6 +149,21 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 - A **single** element-wise op on the GPU — pure transfer tax. Only a _fused chain_ pays.
 - The **WASM FFT kernel** — 6× SLOWER than the flat JS core (1039 ms vs 170 ms at n=2²⁰).
   Unreachable from any public export. **Do not wire it up assuming "WASM is faster".**
+- Most of **`functions`' WASM bridges, even after `loadWasm()`**. The dispatch policy
+  (`functions/src/wasm/policy.ts`) keeps them on JS because the public call measured slower on
+  WASM, in two runs of `tools/benchmark/wasm/opt-in.bench.ts`:
+  - welch/bartlett PSD 4.0–4.6×
+  - resultant, discriminant, Newton/Lagrange divided differences about 4×
+  - chirp-Z 3.3×
+  - bitwise ops 2.4–3.3×
+  - polymul 2.7×
+  - goertzel 1.7×
+  - the cubic-spline tridiagonal solve and polynomial division about 1.4×
+  - Bessel/Airy/elliptic/Carlson up to 1.3×
+  - eight element-wise ops up to 1.6×
+
+  The copy in and out costs more than the kernel saves. Only fused chains, the least-squares fits,
+  a few element-wise ops in size bands, and `lgamma`/sort at 1M+ elements run on WASM.
 
 ### Benchmarking rules (learned the hard way — the tier order was wrong TWICE)
 
@@ -167,6 +182,22 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
    a published table nothing regenerates will rot.
 7. **Gate on a reproducible row.** The crossover row is by construction the most marginal and the
    most load-sensitive; assert where the margin is robust and print the rest.
+8. **Interleave the tiers and keep a control.** Time the two tiers' reps alternately (ABBA)
+   after warming both. A first version of the opt-in bench timed every "off" rep before every
+   "on" rep, and JIT warm-up alone then made identical JS paths differ by up to 4.5×. That
+   produced fake small-n wins for WASM. Keep a case below every threshold, so both tiers run
+   the same code: its ratio is the harness's own bias and must read about 1.00.
+9. **A per-op threshold must reach the code that decides.** `ComputePool` methods that
+   forwarded to the worker pool without options were governed by the pool's global 50,000, not
+   their `thresholdByOp` entry. `sin: 'never'` still went to the workers, and `matmul: 4_096`
+   never applied. The bitwise family had the same bug before. Check the call path, not the
+   table.
+10. **Measure on the engine your users run.** `bun run bench:wasm` runs on Bun, whose engine is
+    JavaScriptCore; Node and Chromium run V8, and the winner can flip between them (on 2026-09-25
+    `sin`/`cos`/`tan` measured faster in JS on Bun but faster in WASM on V8 at large n). Take
+    dispatch decisions from `node tools/benchmark/wasm/run-node.mjs`, which bundles each area with
+    esbuild and runs it as its own Node process, and run it twice: a row that flips between runs is
+    noise, not a threshold.
 
 ---
 

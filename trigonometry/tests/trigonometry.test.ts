@@ -10,7 +10,7 @@ describe('@danielsimonjr/mathts-trigonometry', () => {
   it('computes trig at known points', () => {
     expect(cos(0)).toBe(1);
     expect(sin(0)).toBe(0);
-    expect(Math.abs(tan(0))).toBeLessThan(1e-12);
-    expect(Math.abs(atan2(0, 1))).toBeLessThan(1e-12);
+    expect(Math.abs(tan(0) as number)).toBeLessThan(1e-12);
+    expect(Math.abs(atan2(0, 1) as number)).toBeLessThan(1e-12);
   });
 });
