@@ -11370,7 +11370,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1641
+      "loc": 1690
     },
     {
       "file": "parallel/src/index.ts",
@@ -11482,14 +11482,14 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 265
+      "loc": 276
     },
     {
       "file": "parallel/tests/ComputePool.test.ts",
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 1379
+      "loc": 1404
     },
     {
       "file": "parallel/tests/operations-index.test.ts",
@@ -11622,7 +11622,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 106
+      "loc": 165
     },
     {
       "file": "parallel/vitest.config.ts",

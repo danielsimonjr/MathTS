@@ -158,7 +158,10 @@ export interface ComputePoolConfig {
    * Values measured on a noisy CI container (2026-05-23) — re-run on target
    * hardware to retune.  Source: tools/benchmark/parallel/run.ts
    *
-   * Ops absent from this map fall back to `thresholdElements`.
+   * Ops absent from this map fall back to `thresholdElements`. A map passed to the
+   * constructor or `updateConfig` is merged over the current one per op, so
+   * `{ matmul: 1_024 }` retunes matmul and keeps every other entry; set an op to
+   * `undefined` to send it to `thresholdElements`.
    */
   thresholdByOp?: Partial<Record<OpName, OpThreshold>>;
   /** Elements per chunk for parallel operations */
@@ -341,6 +344,18 @@ export interface ParallelResult<T> {
 /**
  * Convert WorkerParallelResult to ParallelResult (drops workersUsed)
  */
+/**
+ * Per-op merge of a `thresholdByOp` override. A shallow config spread replaced the whole
+ * map, so the documented `thresholdByOp: { matmul: 1_024 }` silently dropped every other
+ * default: element-wise ops lost their `'never'` and went to the workers at 50,000.
+ */
+function mergeThresholds(
+  base: ComputePoolConfig['thresholdByOp'],
+  override: ComputePoolConfig['thresholdByOp']
+): ComputePoolConfig['thresholdByOp'] {
+  return override === undefined ? base : { ...base, ...override };
+}
+
 function toParallelResult<T>(result: WorkerParallelResult<T>): ParallelResult<T> {
   return {
     result: result.result,
@@ -534,7 +549,11 @@ export class ComputePool {
   private config: ComputePoolConfig;
 
   constructor(config: Partial<ComputePoolConfig> = {}) {
-    this.config = { ...DEFAULT_POOL_CONFIG, ...config };
+    this.config = {
+      ...DEFAULT_POOL_CONFIG,
+      ...config,
+      thresholdByOp: mergeThresholds(DEFAULT_POOL_CONFIG.thresholdByOp, config.thresholdByOp),
+    };
     this.workerPool = new MathWorkerPool(toWorkerConfig(this.config));
   }
 
@@ -635,6 +654,21 @@ export class ComputePool {
   }
 
   /**
+   * Pool options that apply `op`'s `thresholdByOp` entry to a call the pool decides itself.
+   *
+   * The worker pool's methods check only the global `thresholdElements`, so a method that
+   * forwarded without options let its entry govern nothing: `sin: 'never'` still went to the
+   * workers at 50,000 elements once the pool was initialized, and `matmul: 4_096` did not
+   * parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
+   * `shouldParallelize` requires a ready pool, so `forceParallel` never reaches an idle one.
+   */
+  private poolOptions(elementCount: number, op: OpName): TaskOptions {
+    return this.shouldParallelize(elementCount, op)
+      ? { forceParallel: true }
+      : { forceSequential: true };
+  }
+
+  /**
    * Parallel element-wise operation
    */
   async elementwise(
@@ -642,7 +676,7 @@ export class ComputePool {
     b: Float64Array,
     op: 'add' | 'subtract' | 'multiply' | 'divide'
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.elementwise(a, b, op);
+    const result = await this.workerPool.elementwise(a, b, op, this.poolOptions(a.length, op));
     return toParallelResult(result);
   }
 
@@ -650,7 +684,11 @@ export class ComputePool {
    * Parallel scale operation
    */
   async scale(data: Float64Array, scalar: number): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.scale(data, scalar);
+    const result = await this.workerPool.scale(
+      data,
+      scalar,
+      this.poolOptions(data.length, 'scale')
+    );
     return toParallelResult(result);
   }
 
@@ -670,7 +708,14 @@ export class ComputePool {
     b: Float64Array,
     bCols: number
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.matmul(a, aRows, aCols, b, bCols);
+    const result = await this.workerPool.matmul(
+      a,
+      aRows,
+      aCols,
+      b,
+      bCols,
+      this.poolOptions(aRows * bCols, 'matmul')
+    );
     return toParallelResult(result);
   }
 
@@ -845,7 +890,7 @@ export class ComputePool {
     data: Float64Array,
     fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square'
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.unary(data, fn);
+    const result = await this.workerPool.unary(data, fn, this.poolOptions(data.length, fn));
     return toParallelResult(result);
   }
 
@@ -1597,7 +1642,11 @@ export class ComputePool {
    * Update configuration
    */
   updateConfig(config: Partial<ComputePoolConfig>): void {
-    this.config = { ...this.config, ...config };
+    this.config = {
+      ...this.config,
+      ...config,
+      thresholdByOp: mergeThresholds(this.config.thresholdByOp, config.thresholdByOp),
+    };
     this.workerPool.updateConfig(toWorkerConfig(this.config));
   }
 

@@ -201,8 +201,9 @@ describe('ComputePool', () => {
       // (WS-2 completion, 2026-07-04 — 'matvec' was in the last stragglers' class),
       // so create the missing-entry premise explicitly with an empty per-op map
       // on the initialized shared pool, restoring the default map afterwards.
+      // A map is merged per op, so an explicit `undefined` removes one entry.
       const prev = pool.getConfig().thresholdByOp;
-      pool.updateConfig({ thresholdByOp: {} });
+      pool.updateConfig({ thresholdByOp: { matvec: undefined } });
       try {
         expect(pool.shouldParallelize(999, 'matvec')).toBe(false);
         expect(pool.shouldParallelize(1000, 'matvec')).toBe(true);
@@ -252,7 +253,7 @@ describe('ComputePool', () => {
 
       // 'always' → threshold 0 → any positive count triggers parallel
       expect(pool.shouldParallelize(1, 'matmul')).toBe(true);
-      // ops not in the custom map fall back to the high global threshold
+      // the other ops keep their defaults (add is 'never'): a map is merged per op
       expect(pool.shouldParallelize(50_000, 'add')).toBe(false);
 
       await pool.terminate();
@@ -266,8 +267,23 @@ describe('ComputePool', () => {
       await pool.initialize();
 
       expect(pool.shouldParallelize(1_000_000, 'add')).toBe(false);
-      // 'matvec' is not overridden → falls back to 100
-      expect(pool.shouldParallelize(101, 'matvec')).toBe(true);
+      // 'matvec' is not overridden, so it keeps its default ('never'): the map is merged
+      // per op rather than replacing the defaults
+      expect(pool.shouldParallelize(1_000_000, 'matvec')).toBe(false);
+
+      await pool.terminate();
+    });
+
+    it('an op set to undefined falls back to the global threshold', async () => {
+      const pool = new ComputePool({
+        thresholdElements: 100,
+        thresholdByOp: { matvec: undefined },
+      });
+      await pool.initialize();
+
+      expect(pool.shouldParallelize(99, 'matvec')).toBe(false);
+      expect(pool.shouldParallelize(100, 'matvec')).toBe(true);
+      expect(pool.shouldParallelize(1_000_000, 'add')).toBe(false); // default kept
 
       await pool.terminate();
     });
@@ -935,13 +951,22 @@ describe('ComputePool', () => {
       beforeAll(async () => {
         // Force parallel path: low threshold + small chunk so a 100-element
         // input produces multiple chunks (>1). The bitwise ops are 'never' in
-        // DEFAULT_THRESHOLD_BY_OP (WS-2 addendum) — clear the per-op map so the
-        // global threshold governs and the WORKER KERNELS stay exercised.
+        // DEFAULT_THRESHOLD_BY_OP (WS-2 addendum) — clear their entries (a map is
+        // merged per op, so `undefined` removes one) so the global threshold
+        // governs and the WORKER KERNELS stay exercised.
         pool = new ComputePool({
           maxWorkers: 3,
           thresholdElements: 10,
           chunkSize: 7,
-          thresholdByOp: {},
+          thresholdByOp: {
+            bitAnd: undefined,
+            bitOr: undefined,
+            bitXor: undefined,
+            bitNot: undefined,
+            leftShift: undefined,
+            rightArithShift: undefined,
+            rightLogShift: undefined,
+          },
         });
         await pool.initialize();
       }, 60_000);
