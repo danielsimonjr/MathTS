@@ -10,9 +10,10 @@
  *
  * Methodology:
  *  - The AS path calls the real dispatch helper (e.g. `elementwiseUnaryDispatch`,
- *    `sortF64Dispatch`, `svdWasm`) exactly as production code does, after the AS
- *    binary has been loaded with `initWasm()`. The JS path calls the bridge's
- *    own JS fallback (e.g. `sortF64JS`) or the equivalent `Math.*` loop.
+ *    `sortF64Dispatch`) exactly as production code does, after
+ *    {@link loadKernelTier} has loaded the AS binary and let every bridge reach its
+ *    kernel. The JS path calls the bridge's own JS fallback (e.g. `sortF64JS`) or the
+ *    equivalent `Math.*` loop.
  *  - Timing uses `performance.now()` with a warm-up phase and several timed
  *    reps; the **median** is reported (robust against scheduler jitter).
  *  - A correctness pass runs both paths on one identical input and reports the
@@ -26,6 +27,24 @@
  * This module is tsx-runnable and reusable: each *.bench.ts builds an array of
  * {@link WasmCase}s and hands them to {@link runCases}.
  */
+
+import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
+import { overrideWasmPolicy } from '../../../functions/src/wasm/policy.js';
+
+/**
+ * Load the AS tier for a kernel benchmark and let every bridge reach its kernel.
+ *
+ * These benchmarks time each kernel against its JS fallback. After `loadWasm()` the
+ * measured dispatch policy (functions/src/wasm/policy.ts) sends the kernels that measured
+ * slower to JS, so without this a row labelled AS would time JS. What `loadWasm()` gains
+ * the public API is opt-in.bench.ts's question, not these benchmarks'. A missing tier
+ * fails the benchmark instead of being timed as a near-zero run (AGENTS.md benchmarking
+ * rule 5).
+ */
+export async function loadKernelTier(): Promise<void> {
+  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
+  overrideWasmPolicy({ '*': { min: 0 } });
+}
 
 // ---------------------------------------------------------------------------
 // Types

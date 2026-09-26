@@ -24,9 +24,8 @@
 import { DenseMatrix } from '../../../matrix/src/types/DenseMatrix.js';
 import { jsBackend } from '../../../matrix/src/backends/JSBackend.js';
 import { WASMBackend } from '../../../matrix/src/backends/WASMBackend.js';
-import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import { welchPSDDispatch, welchPSDJS } from '../../../functions/src/wasm/signal/wasm-bridge.js';
-import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
+import { maxdiffF64, runCases, isMainModule, loadKernelTier, type WasmCase } from './harness.js';
 
 const wasmBackend = new WASMBackend({ minElements: 0 });
 
@@ -73,8 +72,7 @@ const welchCase: WasmCase = {
 };
 
 export async function main(): Promise<void> {
-  // A missing tier must fail the benchmark, never be timed as a near-zero run.
-  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
+  await loadKernelTier();
   await wasmBackend.initialize();
   await runCases('MATRIX HEAVY OPS + FFT — AssemblyScript vs JS', [multiplyCase, welchCase]);
 }

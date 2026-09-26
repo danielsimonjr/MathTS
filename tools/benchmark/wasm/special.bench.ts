@@ -17,7 +17,6 @@
  * Run: `npm run bench:special`
  */
 
-import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   besselJ0Dispatch,
   besselJ0JS,
@@ -28,7 +27,7 @@ import {
   ellipticKDispatch,
   ellipticKJS,
 } from '../../../functions/src/wasm/special/wasm-bridge.js';
-import { maxdiffF64, runCases, isMainModule, type WasmCase } from './harness.js';
+import { maxdiffF64, runCases, isMainModule, loadKernelTier, type WasmCase } from './harness.js';
 
 const SIZES = [1024, 16384, 131072, 1_000_000];
 
@@ -93,8 +92,7 @@ const cases: WasmCase[] = [
 ];
 
 export async function main(): Promise<void> {
-  // A missing tier must fail the benchmark, never be timed as a near-zero run.
-  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
+  await loadKernelTier();
   await runCases('SPECIAL FUNCTIONS — AssemblyScript managed kernels vs JS scalars', cases);
 }
 

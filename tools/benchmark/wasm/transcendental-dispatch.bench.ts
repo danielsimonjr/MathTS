@@ -6,12 +6,12 @@
  * `Math.*` loop, which is NOT what production falls back to. This settles whether the
  * transcendental WASM path earns its keep. Run: `npx tsx tools/benchmark/wasm/transcendental-dispatch.bench.ts`
  */
-import { loadWasm } from '../../../functions/src/wasm/WasmLoader.js';
 import {
   elementwiseUnaryDispatch,
   type WasmElementwiseOp,
 } from '../../../functions/src/wasm/elementwise/wasm-bridge.js';
 import { computePool } from '../../../parallel/src/index.js';
+import { loadKernelTier } from './harness.js';
 
 const SIZES = [1024, 4096, 16384, 65536, 262144];
 const OPS: WasmElementwiseOp[] = ['exp', 'sin', 'log'];
@@ -23,8 +23,7 @@ function positive(n: number): Float64Array {
 }
 
 async function main(): Promise<void> {
-  // A missing tier must fail the benchmark, never be timed as a near-zero run.
-  if (!(await loadWasm())) throw new Error('AS wasm did not load; run `bun run build` first');
+  await loadKernelTier();
 
   console.log(
     'WASM (elementwiseUnaryDispatch) vs computePool.<op> — the real production fallback.'
@@ -37,9 +36,11 @@ async function main(): Promise<void> {
   for (const op of OPS) {
     for (const n of SIZES) {
       const xs = positive(n);
-      // sanity: dispatch must actually take the WASM path (non-null) at this size
-      const probe = elementwiseUnaryDispatch(op, xs);
-      const onWasm = probe !== null;
+      // Every size is >= WASM_ELEMENTWISE_THRESHOLD, so null can only mean a dead tier;
+      // timing it would report JS as the WASM column.
+      if (elementwiseUnaryDispatch(op, xs) === null) {
+        throw new Error(`AS dispatch returned null for ${op} at n=${n}`);
+      }
 
       // WASM timing (sync)
       const itW = Math.max(50, Math.round(2e7 / n));
@@ -56,13 +57,7 @@ async function main(): Promise<void> {
       const poolMs = Number(process.hrtime.bigint() - s) / 1e6 / itP;
 
       const ratio = poolMs / wasmMs;
-      const verdict = !onWasm
-        ? 'JS(below thresh)'
-        : ratio >= 1.1
-          ? 'WASM wins'
-          : ratio <= 0.91
-            ? 'pool wins'
-            : '~tie';
+      const verdict = ratio >= 1.1 ? 'WASM wins' : ratio <= 0.91 ? 'pool wins' : '~tie';
       console.log(
         `${op.padEnd(4)} ${String(n).padStart(7)} ${wasmMs.toFixed(4).padStart(9)} ${poolMs.toFixed(4).padStart(9)} ${ratio.toFixed(2).padStart(9)}x   ${verdict}`
       );
