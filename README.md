@@ -11,7 +11,8 @@ ESM-only npm workspaces monorepo. It accelerates computation through an Assembly
 WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and an optional
 WebGPU backend for large matrix operations. The acceleration path is
 **TypeScript → AssemblyScript WASM → WebGPU (matrix)**.
-All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
+All 25 packages are independently versioned under the `@danielsimonjr` scope
+(`@danielsimonjr/mathts` plus `@danielsimonjr/mathts-*`).
 
 ## Contents
 
@@ -28,6 +29,26 @@ All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` 
 ---
 
 ## Installation
+
+Node.js `>= 20` or Bun `>= 1.4.2`. Packages are ESM-only (`import`, not `require`).
+
+### One package (parse, evaluate, tensor, autodiff)
+
+```bash
+npm install @danielsimonjr/mathts
+```
+
+```ts
+import { evaluate, parse } from '@danielsimonjr/mathts';
+import { Tensor } from '@danielsimonjr/mathts/tensor';
+
+evaluate('sin(pi / 2)'); // 1
+parse('2pi').evaluate({}); // 2π
+```
+
+The root entry exports `parse`, `evaluate`, and `simplify`.
+`@danielsimonjr/mathts/functions`, `/tensor`, and `/autograd` re-export those
+packages. See `packages/mathts/README.md`.
 
 ### Quickest path: compat shim (drop-in for mathjs users)
 

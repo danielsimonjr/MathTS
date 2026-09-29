@@ -1,8 +1,9 @@
 {
-  "generated": "2026-09-26",
+  "generated": "2026-09-29",
   "browserSafePackages": [
-    "packages/workerpool",
     "packages/typed-function",
+    "packages/workerpool",
+    "packages/mathts",
     "core",
     "matrix",
     "tensor",
@@ -34,8 +35,9 @@
     "workbook/src/timeout-runner.ts"
   ],
   "leaks": {
-    "packages/workerpool": [],
     "packages/typed-function": [],
+    "packages/workerpool": [],
+    "packages/mathts": [],
     "core": [],
     "matrix": [],
     "tensor": [],

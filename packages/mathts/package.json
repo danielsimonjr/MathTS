@@ -1,0 +1,86 @@
+{
+  "name": "@danielsimonjr/mathts",
+  "version": "0.1.0",
+  "description": "Consumer entry for MathTS: parse, evaluate, and simplify, plus tensor and autodiff subpaths. ESM-only.",
+  "author": "Daniel Simon Jr.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./functions": {
+      "types": "./dist/functions.d.ts",
+      "import": "./dist/functions.js"
+    },
+    "./tensor": {
+      "types": "./dist/tensor.d.ts",
+      "import": "./dist/tensor.js"
+    },
+    "./autograd": {
+      "types": "./dist/autograd.d.ts",
+      "import": "./dist/autograd.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20",
+    "bun": ">=1.4.2"
+  },
+  "scripts": {
+    "build": "tsup && tsc -p tsconfig.dts.json",
+    "dev": "tsup --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
+    "test": "bun test --isolate --timeout 30000",
+    "test:watch": "vitest",
+    "test:coverage": "bun test --isolate --timeout 30000 --coverage",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
+    "clean": "rm -rf dist",
+    "build:prod": "tsup --minify --treeshake && tsc -p tsconfig.dts.json"
+  },
+  "dependencies": {
+    "@danielsimonjr/mathts-autograd": "^0.3.15",
+    "@danielsimonjr/mathts-functions": "^0.65.0",
+    "@danielsimonjr/mathts-tensor": "^0.2.21"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "tsup": "^8.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielsimonjr/MathTS.git",
+    "directory": "packages/mathts"
+  },
+  "bugs": {
+    "url": "https://github.com/danielsimonjr/mathts/issues"
+  },
+  "homepage": "https://github.com/danielsimonjr/mathts/tree/main/packages/mathts#readme",
+  "keywords": [
+    "math",
+    "mathjs",
+    "typescript",
+    "parser",
+    "evaluate",
+    "expression",
+    "tensor",
+    "autograd",
+    "scientific-computing"
+  ]
+}

@@ -1,0 +1,70 @@
+name: Publish
+
+# INERT. This workflow does not publish to npm and does not read NPM_TOKEN.
+#
+# release.yml stays version-only: changesets opens a "chore: release packages"
+# pull request, and Daniel publishes from his machine (`npx changeset publish`).
+# Trusted publishing via OIDC was removed from release.yml on 2026-07-28 after
+# it failed ENEEDAUTH on every attempt.
+#
+# This file exists so a tag-triggered publish is visible and stays off.
+# Pushing a tag runs the job, and the job condition is false, so the steps
+# never execute and no token is used.
+#
+# To arm it later, all of the following have to change together:
+#   1. Delete the `if: false` line on the job.
+#   2. Uncomment the publish step.
+#   3. Add a repository secret named NPM_TOKEN (an npm automation token).
+#      Do not commit the token.
+#   4. Keep `id-token: write` unset unless you switch to npm trusted publishing
+#      on purpose. This workflow must not mint an OIDC token.
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '@danielsimonjr/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm (inert)
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.x
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      # Intentionally commented. Uncomment only when the job condition is
+      # removed and NPM_TOKEN exists. `changeset publish` publishes each
+      # workspace package whose version is not already on the registry,
+      # including @danielsimonjr/mathts at 0.1.0.
+      # - name: Publish
+      #   run: npx changeset publish
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Inert
+        run: echo "This workflow does not publish."

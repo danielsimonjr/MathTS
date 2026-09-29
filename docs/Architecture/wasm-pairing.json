@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26",
+  "generated": "2026-09-29",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
@@ -794,34 +794,24 @@
       "parallel": 4,
       "jsOnly": 7
     },
-    "bitwise.ts": {
-      "wasm": 0,
-      "parallel": 7,
-      "jsOnly": 0
-    },
-    "complex.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 4
-    },
-    "probability.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 8
-    },
-    "string.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 5
+    "statistics.ts": {
+      "wasm": 2,
+      "parallel": 13,
+      "jsOnly": 2
     },
     "matrix-ops.ts": {
       "wasm": 0,
       "parallel": 0,
       "jsOnly": 9
     },
-    "statistics.ts": {
-      "wasm": 2,
-      "parallel": 13,
+    "distributions.ts": {
+      "wasm": 1,
+      "parallel": 0,
+      "jsOnly": 13
+    },
+    "unit.ts": {
+      "wasm": 0,
+      "parallel": 0,
       "jsOnly": 2
     },
     "arithmetic.ts": {
@@ -829,35 +819,45 @@
       "parallel": 23,
       "jsOnly": 14
     },
+    "logical.ts": {
+      "wasm": 0,
+      "parallel": 0,
+      "jsOnly": 5
+    },
+    "string.ts": {
+      "wasm": 0,
+      "parallel": 0,
+      "jsOnly": 5
+    },
     "set.ts": {
       "wasm": 0,
       "parallel": 0,
       "jsOnly": 10
     },
-    "relational.ts": {
+    "probability.ts": {
       "wasm": 0,
       "parallel": 0,
-      "jsOnly": 7
+      "jsOnly": 8
+    },
+    "complex.ts": {
+      "wasm": 0,
+      "parallel": 0,
+      "jsOnly": 4
     },
     "special.ts": {
       "wasm": 19,
       "parallel": 0,
       "jsOnly": 19
     },
-    "unit.ts": {
+    "bitwise.ts": {
+      "wasm": 0,
+      "parallel": 7,
+      "jsOnly": 0
+    },
+    "relational.ts": {
       "wasm": 0,
       "parallel": 0,
-      "jsOnly": 2
-    },
-    "logical.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 5
-    },
-    "distributions.ts": {
-      "wasm": 1,
-      "parallel": 0,
-      "jsOnly": 13
+      "jsOnly": 7
     }
   },
   "binary": {

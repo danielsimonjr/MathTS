@@ -72,6 +72,10 @@ const CHECKS = {
   compat: (m) => assert(m.add(2, 3) === 5, 'add(2, 3) === 5'),
   gpu: (m) => assert(m.hasWebGPU() === false, 'hasWebGPU() is false on Node'),
   plot: (m) => assert(m.line([0, 1], [0, 1]).startsWith('<svg'), 'line() renders SVG'),
+  'packages/mathts': (m) => {
+    assert(m.evaluate('1+2*3') === 7, "evaluate('1+2*3') === 7");
+    assert(m.parse('sqrt(4)').evaluate({}) === 2, "parse('sqrt(4)').evaluate() === 2");
+  },
 };
 
 const dirs = workspaceDirs();

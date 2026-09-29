@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26",
+  "generated": "2026-09-29",
   "status": "9 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
   "total": 219,
   "gpuAcceleratedCount": 2,
@@ -250,57 +250,57 @@
       "gpu": 0,
       "none": 19
     },
-    "bitwise.ts": {
+    "statistics.ts": {
       "gpu": 0,
-      "none": 7
-    },
-    "complex.ts": {
-      "gpu": 0,
-      "none": 4
-    },
-    "probability.ts": {
-      "gpu": 0,
-      "none": 8
-    },
-    "string.ts": {
-      "gpu": 0,
-      "none": 5
+      "none": 17
     },
     "matrix-ops.ts": {
       "gpu": 0,
       "none": 9
     },
-    "statistics.ts": {
+    "distributions.ts": {
       "gpu": 0,
-      "none": 17
-    },
-    "arithmetic.ts": {
-      "gpu": 0,
-      "none": 46
-    },
-    "set.ts": {
-      "gpu": 0,
-      "none": 10
-    },
-    "relational.ts": {
-      "gpu": 0,
-      "none": 7
-    },
-    "special.ts": {
-      "gpu": 0,
-      "none": 38
+      "none": 14
     },
     "unit.ts": {
       "gpu": 0,
       "none": 2
     },
+    "arithmetic.ts": {
+      "gpu": 0,
+      "none": 46
+    },
     "logical.ts": {
       "gpu": 0,
       "none": 5
     },
-    "distributions.ts": {
+    "string.ts": {
       "gpu": 0,
-      "none": 14
+      "none": 5
+    },
+    "set.ts": {
+      "gpu": 0,
+      "none": 10
+    },
+    "probability.ts": {
+      "gpu": 0,
+      "none": 8
+    },
+    "complex.ts": {
+      "gpu": 0,
+      "none": 4
+    },
+    "special.ts": {
+      "gpu": 0,
+      "none": 38
+    },
+    "bitwise.ts": {
+      "gpu": 0,
+      "none": 7
+    },
+    "relational.ts": {
+      "gpu": 0,
+      "none": 7
     }
   },
   "standaloneAcceleratedCount": 9,

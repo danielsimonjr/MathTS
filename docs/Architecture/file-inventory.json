@@ -1,20 +1,20 @@
 {
-  "generated": "2026-09-26",
-  "totalFiles": 1873,
+  "generated": "2026-09-29",
+  "totalFiles": 1880,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1152,
+    "build-entry": 1156,
     "test-only": 0,
     "orphan": 0,
-    "test": 636,
+    "test": 637,
     "tool": 26,
-    "config": 29,
+    "config": 31,
     "example": 5
   },
   "byArea": {
-    "src": 1177,
-    "tests": 636,
-    "config": 29,
+    "src": 1181,
+    "tests": 637,
+    "config": 31,
     "examples": 5,
     "tools": 26
   },
@@ -33,6 +33,7 @@
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
     "@danielsimonjr/mathts-numbers": 3,
+    "@danielsimonjr/mathts": 7,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 10,
     "@danielsimonjr/mathts-parallel": 38,
@@ -11266,6 +11267,55 @@
       "area": "config",
       "disposition": "config",
       "loc": 22
+    },
+    {
+      "file": "packages/mathts/src/autograd.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 10
+    },
+    {
+      "file": "packages/mathts/src/functions.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 12
+    },
+    {
+      "file": "packages/mathts/src/index.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 32
+    },
+    {
+      "file": "packages/mathts/src/tensor.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 8
+    },
+    {
+      "file": "packages/mathts/tests/entry.test.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 48
+    },
+    {
+      "file": "packages/mathts/tsup.config.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "config",
+      "disposition": "config",
+      "loc": 22
+    },
+    {
+      "file": "packages/mathts/vitest.config.ts",
+      "package": "@danielsimonjr/mathts",
+      "area": "config",
+      "disposition": "config",
+      "loc": 12
     },
     {
       "file": "packages/typed-function/src/index.ts",

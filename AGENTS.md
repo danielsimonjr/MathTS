@@ -8,7 +8,7 @@
 
 MathTS is a TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker
 acceleration, plus a reactive `.mtsw` Scientific Workbook. npm-workspaces
-monorepo (24 packages) orchestrated by Turborepo. All packages are ESM-only,
+monorepo (25 packages) orchestrated by Turborepo. All packages are ESM-only,
 target ES2022, bundle with `tsup`, test with `vitest`. See `README.md` for the
 human-facing overview.
 
@@ -92,6 +92,7 @@ input-position param types). Trust the **export surface in
 
 | You want…                                                                                  | Look in                                                                         |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| One npm install (`parse` / `evaluate` / `simplify`, `/tensor`, `/autograd`)                | `packages/mathts/` (`@danielsimonjr/mathts`)                                    |
 | Numeric types (Complex/Fraction/BigNumber), typed-function, factory                        | `core/src/`                                                                     |
 | Dense/Sparse matrix, JS/WASM/GPU backends, BackendManager, decompositions                  | `matrix/src/`                                                                   |
 | **Shared WebGPU foundation** (GPUContext, BufferPool, ShaderManager, `serializeGpu`, flag) | `gpu/src/` (`@danielsimonjr/mathts-gpu`)                                        |

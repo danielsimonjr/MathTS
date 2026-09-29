@@ -1,0 +1,11 @@
+# `bun test` reads bunfig.toml from the working directory only (not the repo root).
+[test]
+# Coverage (`bun run test:coverage`): count only this package's own files, as vitest's
+# v8 provider did. Without the ignore pattern, Bun also reports the sibling packages'
+# dist files that the tests load. lcov is the file that Codecov reads.
+coverageReporter = ["text", "lcov"]
+coveragePathIgnorePatterns = ["../**"]
+
+[run]
+# Run this package's scripts on the Bun runtime (see the root bunfig.toml).
+bun = true

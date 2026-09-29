@@ -57,9 +57,10 @@ bun run test:coverage
 
 ### Workspaces (in `package.json`)
 
-24 npm workspace packages:
+25 npm workspace packages:
 
 ```
+packages/mathts/           # @danielsimonjr/mathts - consumer entry (parse/evaluate/simplify, plus /functions /tensor /autograd)
 packages/typed-function/   # @danielsimonjr/mathts-typed-function - forked type dispatch system
 packages/workerpool/       # @danielsimonjr/mathts-workerpool - forked worker pool management
 core/                      # @danielsimonjr/mathts-core - types, typed-function integration, factory

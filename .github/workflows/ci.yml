@@ -57,6 +57,19 @@ jobs:
       - name: Build
         run: bun run build
 
+      # `npm pack` is the npm CLI, so this job installs Node for that command
+      # only. Build, typecheck, and lint above stay on Bun.
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.x
+
+      - name: npm pack --dry-run
+        run: node tools/test/pack-dry-run.mjs --tool=npm
+
+      - name: bun pm pack --dry-run
+        run: bun tools/test/pack-dry-run.mjs --tool=bun
+
       - name: Type check
         run: bun run typecheck
 
@@ -128,6 +141,10 @@ jobs:
       # used to paper over a race between that copy and `asc`.)
       - name: Build
         run: bun run build
+
+      # Same dry-run as the compile job, here on the matrix Node (20.x and 22.x).
+      - name: npm pack --dry-run (Node ${{ matrix.node-version }})
+        run: node tools/test/pack-dry-run.mjs --tool=npm
 
       # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
       - name: Test (Bun runtime)
