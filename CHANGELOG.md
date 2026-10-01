@@ -15,8 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The `npm` setting WAS a working workaround: it updated `package.json` ranges while `bun.lock`
   stayed authoritative. Upstream removed that path between 2026-09-21 and 2026-09-25, and the
   same clean break hit `deepthinking-mcp` and `fzf-mcp` on the same day - this is fleet-wide, not
-  a defect in this repo. The config now carries the evidence, the cost and a checkable revisit
-  condition. `github-actions` updates are unchanged. **Automated dependency remediation for the
+  a defect in this repo. Those three were the reported cases, not the scale: a fleet-wide
+  measurement on 2026-10-01 found **19 dead updater jobs**, and the root entry has since been
+  removed from every affected repo. The config now carries the evidence, the cost and a checkable
+  revisit condition, with two claims corrected that this change had left in the present tense -
+  the sibling configs no longer "say" anything, their comments went with their entries. `github-actions` updates are unchanged. **Automated dependency remediation for the
   root is dead until Dependabot's bun reads lockfileVersion 2**; security alerts are unaffected,
   and a bump is a human action (`bun outdated`, `bun update <pkg>`, commit the new `bun.lock`).
 

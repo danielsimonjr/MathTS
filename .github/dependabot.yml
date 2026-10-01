@@ -27,9 +27,18 @@ updates:
   #     deepthinking-mcp  success      failure
   #     fzf-mcp           success      failure
   #
-  # Each repo's config says "npm, NOT bun, DELIBERATELY -- do not fix this back to bun". That
-  # advice was right when written and is now a trap: it sends the reader to the OTHER failing
-  # option. Dependabot's own error message sends them the same way. Neither works.
+  # THOSE THREE WERE THE REPORTED CASES, NOT THE SCALE. A fleet-wide measurement on 2026-10-01
+  # found 19 dead updater jobs. The root entry has since been removed from every affected repo;
+  # memory-mcp is the one exception worth knowing, because its entry covered "/" AND "/tools/*"
+  # and the npm abort happens during FILE FETCHING FOR THE WHOLE JOB -- so dropping only "/"
+  # there RE-ENABLED four working tools/* updaters instead of removing one. Check for that shape
+  # before deleting an entry.
+  #
+  # Each repo's config USED TO SAY "npm, NOT bun, DELIBERATELY -- do not fix this back to bun",
+  # and those comments are now gone with their entries. The advice was right when written and had
+  # become a trap: it sent the reader to the OTHER failing option, exactly as Dependabot's own
+  # error message does. Neither works. The lesson outlives the comment: a rule that outlives its
+  # premise does not go quiet, it starts pointing the wrong way.
   #
   # ⚠ WHAT THIS COSTS, stated because the dashboard will not state it. Automated dependency
   # REMEDIATION for the root is dead, and removing the entry makes it dead QUIETLY instead of
