@@ -9,6 +9,22 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
+- [ ] **Dependabot cannot update this repo's dependencies in ANY configuration, and the config entry that
+      pretended otherwise was removed (2026-10-01).** Both ecosystems abort: `bun` with "Unsupported bun.lock
+      'lockfileVersion' 2" (Dependabot's bundled bun reads v1; Bun 1.4.2 writes v2), and `npm` with "Dependabot's
+      npm_and_yarn ecosystem cannot update bun.lock". The npm workaround WORKED until upstream added the abort
+      between 2026-09-21 and 2026-09-25; the same clean break hit `deepthinking-mcp` and `fzf-mcp` on the same day,
+      so it is fleet-wide, not a MathTS fault. `.github/dependabot.yml` carries the full evidence and the revisit
+      condition. **Until Dependabot's bun reads lockfileVersion 2, a dependency bump here is a HUMAN action:**
+      `bun outdated`, then `bun update <pkg>`, then commit the regenerated `bun.lock`. Security ALERTS still fire
+      (dependency-graph based), so the repo still reports vulnerabilities - nothing proposes the fix.
+- [ ] **`js-yaml` is pinned to 4.x by the root `overrides` floor, and the Dependabot ignore that recorded this is
+      gone with the npm entry - so the fact is recorded HERE instead.** `overrides.js-yaml: ^4.3.0` silently clamps
+      any 5.x bump of the root devDependency back to 4.x, which is how #275 left the root manifest claiming ^5.4.1
+      while 4.3.2 was installed. `tools/create-dependency-graph` (its only importer) and `@types/js-yaml@4` are both
+      written against 4.x. **The fix is ONE change, not two:** port the tool to js-yaml 5 and raise the override in
+      the same commit. Doing either alone re-creates the manifest/installed mismatch.
+
 Newest/most-actionable first. Detailed history for each area is in its section below.
 
 > ## Round-2 follow-ups (open after PR #327, released as functions@0.65.0 / core@0.15.5 in #328)

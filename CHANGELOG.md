@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- **Dependabot stopped failing weekly on `main`.** The root `npm` update entry was removed from
+  `.github/dependabot.yml`, because it can no longer do anything but fail. Dependabot's
+  `npm_and_yarn` ecosystem now aborts on a bun-managed project ("cannot update `bun.lock`"), and
+  its `bun` ecosystem still cannot read `bun.lock` lockfileVersion 2, which Bun 1.4.2 writes.
+  Both documented options fail, so the entry was producing one red check a week and no updates.
+  The `npm` setting WAS a working workaround: it updated `package.json` ranges while `bun.lock`
+  stayed authoritative. Upstream removed that path between 2026-09-21 and 2026-09-25, and the
+  same clean break hit `deepthinking-mcp` and `fzf-mcp` on the same day - this is fleet-wide, not
+  a defect in this repo. The config now carries the evidence, the cost and a checkable revisit
+  condition. `github-actions` updates are unchanged. **Automated dependency remediation for the
+  root is dead until Dependabot's bun reads lockfileVersion 2**; security alerts are unaffected,
+  and a bump is a human action (`bun outdated`, `bun update <pkg>`, commit the new `bun.lock`).
+
 - **WASM calls no longer grow memory without bound.** The AS binary's stub runtime never
   frees, and `__unpin` does nothing under it, so every managed-ABI call left its arrays on the
   heap. Measured before the fix:
