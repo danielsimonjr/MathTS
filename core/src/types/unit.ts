@@ -35,3 +35,14 @@ export { isUnit } from '../is.js';
 // Dimension helpers — unchanged, sourced from their canonical home.
 export { DIMENSIONLESS, dim } from './unit-definitions.js';
 export type { Dimensions, UnitDef } from './unit-definitions.js';
+
+// Length-10 Unit exponents ↔ the 7 SI base dimensions.
+export {
+  UNIT_DIMENSION_LENGTH,
+  SI_DIMENSION_LENGTH,
+  toSiDimensions,
+  toSiDimensionVector,
+  fromSiDimensions,
+  fromSiDimensionVector,
+} from './si-dimension-vector.js';
+export type { SiDimensionVector, SiDimensionOptions } from './si-dimension-vector.js';

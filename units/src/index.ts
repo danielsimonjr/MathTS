@@ -18,6 +18,12 @@ export {
   UnitParseError,
   DIMENSIONLESS,
   dim,
+  UNIT_DIMENSION_LENGTH,
+  SI_DIMENSION_LENGTH,
+  toSiDimensions,
+  toSiDimensionVector,
+  fromSiDimensions,
+  fromSiDimensionVector,
   BASE_UNITS,
   DERIVED_UNITS,
   ALL_UNITS,
@@ -28,4 +34,9 @@ export {
   getPrefix,
 } from '@danielsimonjr/mathts-core';
 
-export type { Dimensions, UnitDef } from '@danielsimonjr/mathts-core';
+export type {
+  Dimensions,
+  UnitDef,
+  SiDimensionVector,
+  SiDimensionOptions,
+} from '@danielsimonjr/mathts-core';

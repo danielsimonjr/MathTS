@@ -118,7 +118,7 @@ The codebase is organized into the following modules:
 - **core/error**: 3 files
 - **core/numeric**: 1 file
 - **core/arithmetic**: 1 file
-- **core/types**: 16 files
+- **core/types**: 17 files
 - **matrix**: 4 files
 - **matrix/backends**: 19 files
 - **matrix/operations**: 17 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------- |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 5              | 1               |
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
-| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 43             | 1               |
+| `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 44             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
@@ -548,6 +548,7 @@ graph LR
 | `./types/bignumber.js`        | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10`                                                                                                                                                                        | Re-export             |
 | `./arithmetic/scalar.js`      | `addScalar, subtractScalar, multiplyScalar, divideScalar, pow, abs, fix, round, equal, isNumeric, number`                                                                                                                                                                                                                  | Re-export             |
 | `./types/unit.js`             | `Unit, isUnit, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim`                                                                                                                                                                                                                                                 | Re-export             |
+| `./types/unit.js`             | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector`                                                                                                                                                                                                 | Re-export             |
 | `./types/unit-definitions.js` | `BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef`                                                                                                                                                                                                                                                           | Re-export             |
 | `./types/unit-prefixes.js`    | `SI_PREFIXES, BEST_PREFIXES, getPrefix`                                                                                                                                                                                                                                                                                    | Re-export             |
 | `./typed/index.js`            | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes` | Re-export             |
@@ -559,13 +560,14 @@ graph LR
 | `./types/bignumber.js`        | `BigNumberConfig, RoundingMode`                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
 | `./arithmetic/scalar.js`      | `NumericScalar`                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
 | `./types/unit.js`             | `Dimensions, UnitDef, UnitInstance`                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./types/unit.js`             | `SiDimensionVector, SiDimensionOptions`                                                                                                                                                                                                                                                                                    | Re-export (type-only) |
 | `./typed/index.js`            | `TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf`                                                                                                                                                                                                                            | Re-export (type-only) |
 | `./factory/index.js`          | `MathTSConfig, FactoryFunction, FactoryDependencies, FactoryImport`                                                                                                                                                                                                                                                        | Re-export (type-only) |
 
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `SiDimensionVector`, `SiDimensionOptions`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -936,6 +938,23 @@ graph LR
 
 ---
 
+### `core/src/types/si-dimension-vector.ts` - Convert between the length-10 unit exponent vector and the 7 SI base
+
+**Internal Dependencies:**
+
+| File                    | Imports      | Type               |
+| ----------------------- | ------------ | ------------------ |
+| `./unit-definitions.js` | `Dimensions` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `SiDimensionOptions`
+- Types: `SiDimensionVector`
+- Functions: `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`
+- Constants: `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`
+
+---
+
 ### `core/src/types/bignumber.ts` - BigNumber (arbitrary precision decimal) implementation
 
 **Internal Dependencies:**
@@ -958,18 +977,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports                                   | Type                  |
-| ----------------------- | ----------------------------------------- | --------------------- |
-| `./unit/index.js`       | `Unit, createUnitClass, unitDependencies` | Re-export             |
-| `./unit/errors.js`      | `DimensionMismatchError, UnitParseError`  | Re-export             |
-| `../is.js`              | `isUnit`                                  | Re-export             |
-| `./unit-definitions.js` | `DIMENSIONLESS, dim`                      | Re-export             |
-| `./unit/index.js`       | `UnitInstance`                            | Re-export (type-only) |
-| `./unit-definitions.js` | `Dimensions, UnitDef`                     | Re-export (type-only) |
+| File                       | Imports                                                                                                                    | Type                  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./unit/index.js`          | `Unit, createUnitClass, unitDependencies`                                                                                  | Re-export             |
+| `./unit/errors.js`         | `DimensionMismatchError, UnitParseError`                                                                                   | Re-export             |
+| `../is.js`                 | `isUnit`                                                                                                                   | Re-export             |
+| `./unit-definitions.js`    | `DIMENSIONLESS, dim`                                                                                                       | Re-export             |
+| `./si-dimension-vector.js` | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector` | Re-export             |
+| `./unit/index.js`          | `UnitInstance`                                                                                                             | Re-export (type-only) |
+| `./unit-definitions.js`    | `Dimensions, UnitDef`                                                                                                      | Re-export (type-only) |
+| `./si-dimension-vector.js` | `SiDimensionVector, SiDimensionOptions`                                                                                    | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `Unit`, `createUnitClass`, `unitDependencies`, `DimensionMismatchError`, `UnitParseError`, `isUnit`, `DIMENSIONLESS`, `dim`, `UnitInstance`, `Dimensions`, `UnitDef`
+- Re-exports: `Unit`, `createUnitClass`, `unitDependencies`, `DimensionMismatchError`, `UnitParseError`, `isUnit`, `DIMENSIONLESS`, `dim`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `UnitInstance`, `Dimensions`, `UnitDef`, `SiDimensionVector`, `SiDimensionOptions`
 
 ---
 
@@ -15806,14 +15827,14 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                                                                                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `Unit, isUnit, isUnitValue, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim, BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef, SI_PREFIXES, BEST_PREFIXES, getPrefix` |
-| `@danielsimonjr/mathts-core` | `Dimensions, UnitDef`                                                                                                                                                                          |
+| Package                      | Import                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core` | `Unit, isUnit, isUnitValue, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim, UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector, BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef, SI_PREFIXES, BEST_PREFIXES, getPrefix` |
+| `@danielsimonjr/mathts-core` | `Dimensions, UnitDef, SiDimensionVector, SiDimensionOptions`                                                                                                                                                                                                                                                             |
 
 **Exports:**
 
-- Re-exports: `Unit`, `isUnit`, `isUnitValue`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `Dimensions`, `UnitDef`
+- Re-exports: `Unit`, `isUnit`, `isUnitValue`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `Dimensions`, `UnitDef`, `SiDimensionVector`, `SiDimensionOptions`
 
 ---
 
@@ -17618,10 +17639,10 @@ graph TD
         N31[dual]
         N32[unit-definitions]
         N33[Range]
-        N34[bignumber]
-        N35[unit]
-        N36[wasm-loader]
-        N37[...6 more]
+        N34[si-dimension-vector]
+        N35[bignumber]
+        N36[unit]
+        N37[...7 more]
     end
 
     subgraph Matrix
@@ -18318,7 +18339,6 @@ graph TD
     N8 --> N7
     N8 --> N6
     N8 --> N15
-    N8 --> N36
     N9 --> N11
     N10 --> N13
     N17 --> N21
@@ -18328,27 +18348,26 @@ graph TD
     N19 --> N20
     N20 --> N27
     N20 --> N29
-    N20 --> N34
+    N20 --> N35
     N21 --> N27
     N21 --> N31
     N21 --> N29
-    N21 --> N34
+    N21 --> N35
     N14 --> N27
     N14 --> N33
     N14 --> N31
     N14 --> N29
-    N14 --> N34
-    N14 --> N26
     N14 --> N35
+    N14 --> N26
+    N14 --> N36
     N14 --> N32
     N14 --> N28
     N14 --> N19
     N14 --> N18
     N14 --> N25
     N14 --> N30
-    N15 --> N36
     N26 --> N10
-    N26 --> N34
+    N26 --> N35
     N26 --> N27
     N26 --> N29
     N27 --> N30
@@ -18356,9 +18375,11 @@ graph TD
     N33 --> N13
     N33 --> N10
     N33 --> N12
-    N34 --> N30
-    N35 --> N13
-    N35 --> N32
+    N34 --> N32
+    N35 --> N30
+    N36 --> N13
+    N36 --> N32
+    N36 --> N34
     N38 --> N69
     N42 --> N69
     N44 --> N46
@@ -18382,17 +18403,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1177   |
+| Total TypeScript Files  | 1178   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195875 |
-| Total Exports           | 5854   |
-| Total Re-exports        | 2367   |
+| Total Lines of Code     | 196070 |
+| Total Exports           | 5884   |
+| Total Re-exports        | 2391   |
 | Total Classes           | 55     |
-| Total Interfaces        | 511    |
-| Total Functions         | 1904   |
+| Total Interfaces        | 512    |
+| Total Functions         | 1908   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
-| Type-only Imports       | 590    |
+| Type-only Imports       | 593    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

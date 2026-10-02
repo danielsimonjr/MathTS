@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-02",
-    "totalFiles": 1177,
+    "totalFiles": 1178,
     "totalModules": 83,
-    "totalExports": 5854
+    "totalExports": 5884
   },
   "entryPoints": [
     {
@@ -1149,6 +1149,18 @@
             "reExport": true
           },
           {
+            "file": "./types/unit.js",
+            "imports": [
+              "UNIT_DIMENSION_LENGTH",
+              "SI_DIMENSION_LENGTH",
+              "toSiDimensions",
+              "toSiDimensionVector",
+              "fromSiDimensions",
+              "fromSiDimensionVector"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./types/unit-definitions.js",
             "imports": ["BASE_UNITS", "DERIVED_UNITS", "ALL_UNITS", "UNIT_ALIASES", "getUnitDef"],
             "reExport": true
@@ -1259,6 +1271,12 @@
             "typeOnly": true
           },
           {
+            "file": "./types/unit.js",
+            "imports": ["SiDimensionVector", "SiDimensionOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./typed/index.js",
             "imports": [
               "TypedFunction",
@@ -1337,6 +1355,12 @@
           "UnitParseError",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "BASE_UNITS",
           "DERIVED_UNITS",
           "ALL_UNITS",
@@ -1404,6 +1428,8 @@
           "Dimensions",
           "UnitDef",
           "UnitInstance",
+          "SiDimensionVector",
+          "SiDimensionOptions",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -1473,6 +1499,12 @@
           "UnitParseError",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "BASE_UNITS",
           "DERIVED_UNITS",
           "ALL_UNITS",
@@ -1538,6 +1570,8 @@
           "Dimensions",
           "UnitDef",
           "UnitInstance",
+          "SiDimensionVector",
+          "SiDimensionOptions",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -2331,6 +2365,35 @@
         "interfaces": ["RangeFormatOptions", "RangeJSON"],
         "constants": ["createRangeClass", "Range"]
       },
+      "core/src/types/si-dimension-vector.ts": {
+        "description": "Convert between the length-10 unit exponent vector and the 7 SI base",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./unit-definitions.js",
+            "imports": ["Dimensions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector"
+        ],
+        "interfaces": ["SiDimensionOptions"],
+        "functions": [
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector"
+        ],
+        "constants": ["UNIT_DIMENSION_LENGTH", "SI_DIMENSION_LENGTH"]
+      },
       "core/src/types/bignumber.ts": {
         "description": "BigNumber (arbitrary precision decimal) implementation",
         "externalDependencies": [],
@@ -2395,6 +2458,18 @@
             "reExport": true
           },
           {
+            "file": "./si-dimension-vector.js",
+            "imports": [
+              "UNIT_DIMENSION_LENGTH",
+              "SI_DIMENSION_LENGTH",
+              "toSiDimensions",
+              "toSiDimensionVector",
+              "fromSiDimensions",
+              "fromSiDimensionVector"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./unit/index.js",
             "imports": ["UnitInstance"],
             "reExport": true,
@@ -2403,6 +2478,12 @@
           {
             "file": "./unit-definitions.js",
             "imports": ["Dimensions", "UnitDef"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./si-dimension-vector.js",
+            "imports": ["SiDimensionVector", "SiDimensionOptions"],
             "reExport": true,
             "typeOnly": true
           }
@@ -2417,9 +2498,17 @@
           "isUnit",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "UnitInstance",
           "Dimensions",
-          "UnitDef"
+          "UnitDef",
+          "SiDimensionVector",
+          "SiDimensionOptions"
         ],
         "reExported": [
           "Unit",
@@ -2430,9 +2519,17 @@
           "isUnit",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "UnitInstance",
           "Dimensions",
-          "UnitDef"
+          "UnitDef",
+          "SiDimensionVector",
+          "SiDimensionOptions"
         ]
       },
       "core/src/types/wasm-loader.ts": {
@@ -32203,6 +32300,12 @@
               "UnitParseError",
               "DIMENSIONLESS",
               "dim",
+              "UNIT_DIMENSION_LENGTH",
+              "SI_DIMENSION_LENGTH",
+              "toSiDimensions",
+              "toSiDimensionVector",
+              "fromSiDimensions",
+              "fromSiDimensionVector",
               "BASE_UNITS",
               "DERIVED_UNITS",
               "ALL_UNITS",
@@ -32216,7 +32319,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Dimensions", "UnitDef"]
+            "imports": ["Dimensions", "UnitDef", "SiDimensionVector", "SiDimensionOptions"]
           }
         ],
         "exports": [
@@ -32227,6 +32330,12 @@
           "UnitParseError",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "BASE_UNITS",
           "DERIVED_UNITS",
           "ALL_UNITS",
@@ -32236,7 +32345,9 @@
           "BEST_PREFIXES",
           "getPrefix",
           "Dimensions",
-          "UnitDef"
+          "UnitDef",
+          "SiDimensionVector",
+          "SiDimensionOptions"
         ],
         "reExported": [
           "Unit",
@@ -32246,6 +32357,12 @@
           "UnitParseError",
           "DIMENSIONLESS",
           "dim",
+          "UNIT_DIMENSION_LENGTH",
+          "SI_DIMENSION_LENGTH",
+          "toSiDimensions",
+          "toSiDimensionVector",
+          "fromSiDimensions",
+          "fromSiDimensionVector",
           "BASE_UNITS",
           "DERIVED_UNITS",
           "ALL_UNITS",
@@ -32255,7 +32372,9 @@
           "BEST_PREFIXES",
           "getPrefix",
           "Dimensions",
-          "UnitDef"
+          "UnitDef",
+          "SiDimensionVector",
+          "SiDimensionOptions"
         ]
       }
     },
@@ -38724,6 +38843,7 @@
           "core/src/types/dual.ts",
           "core/src/types/unit-definitions.ts",
           "core/src/types/matrix/Range.ts",
+          "core/src/types/si-dimension-vector.ts",
           "core/src/types/bignumber.ts",
           "core/src/types/unit.ts",
           "core/src/types/wasm-loader.ts",
@@ -40182,18 +40302,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1177,
+    "totalTypeScriptFiles": 1178,
     "totalModules": 83,
-    "totalLinesOfCode": 195875,
-    "totalExports": 5854,
+    "totalLinesOfCode": 196070,
+    "totalExports": 5884,
     "totalClasses": 55,
-    "totalInterfaces": 511,
-    "totalFunctions": 1904,
+    "totalInterfaces": 512,
+    "totalFunctions": 1908,
     "totalTypeGuards": 159,
     "totalEnums": 0,
-    "totalConstants": 1598,
-    "totalReExports": 2367,
-    "totalTypeOnlyImports": 590,
+    "totalConstants": 1600,
+    "totalReExports": 2391,
+    "totalTypeOnlyImports": 593,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

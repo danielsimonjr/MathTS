@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1874,
+  "totalFiles": 1876,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1152,
+    "build-entry": 1153,
     "test-only": 0,
     "orphan": 0,
-    "test": 637,
+    "test": 638,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1177,
-    "tests": 637,
+    "src": 1178,
+    "tests": 638,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 82,
+    "@danielsimonjr/mathts-core": 84,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 209
+      "loc": 218
     },
     {
       "file": "core/src/internal.ts",
@@ -768,6 +768,13 @@
       "loc": 444
     },
     {
+      "file": "core/src/types/si-dimension-vector.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 164
+    },
+    {
       "file": "core/src/types/unit-definitions.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
@@ -786,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 38
+      "loc": 49
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -1067,6 +1074,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 64
+    },
+    {
+      "file": "core/tests/types/si-dimension-vector.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -12679,7 +12693,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 32
+      "loc": 43
     },
     {
       "file": "units/tests/units.test.ts",
