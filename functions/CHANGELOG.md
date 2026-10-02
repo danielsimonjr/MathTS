@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-functions
 
+## 0.66.0
+
+### Minor Changes
+
+- 4f6365f: Add `rationalNullspace`, an exact Fraction null space beside the existing numeric `nullspace`. The basis is a primitive integer vector with a positive leading entry, which is the form Buckingham-π dimensional analysis needs.
+- dad40d9: Opt-in physics mode: bare `e` is the elementary charge 1.602176634e-19 C when `evaluate`, `compileExpr`, or `parser` is called with `{ physics: true }`, or when the scope comes from `physicsScope()`. The default stays Euler's number. `E` stays unbound for energy, and Euler's number is `exp(1)`.
+- 07fd902: Add `gaussLegendre4`, a symplectic 2-stage Gauss–Legendre 4th-order implicit Runge–Kutta ODE integrator, together with its Butcher tableau (`GL4_A`, `GL4_B`, `GL4_C`). It is an ODE solver and is distinct from the quadrature function `gaussQuad`.
+- 8b87618: Add `propagateUncertainty`, a first-order (delta-method) uncertainty propagation for scalar expressions. Partials come from the symbolic derivative; independent sigmas or a full covariance may be supplied, but not both.
+
+### Patch Changes
+
+- Updated dependencies [6e751af]
+- Updated dependencies [5b7ca6d]
+  - @danielsimonjr/mathts-expression@0.9.0
+  - @danielsimonjr/mathts-core@0.16.0
+  - @danielsimonjr/mathts-matrix@0.7.6
+  - @danielsimonjr/mathts-parallel@0.6.8
+
 ## 0.65.0
 
 ### Minor Changes

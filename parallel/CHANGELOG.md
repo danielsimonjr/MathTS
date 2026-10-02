@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies [5b7ca6d]
+  - @danielsimonjr/mathts-core@0.16.0
+
 ## 0.6.7
 
 ### Patch Changes

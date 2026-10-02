@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-ast
 
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [6e751af]
+- Updated dependencies [5b7ca6d]
+  - @danielsimonjr/mathts-expression@0.9.0
+  - @danielsimonjr/mathts-core@0.16.0
+
 ## 0.1.20
 
 ### Patch Changes

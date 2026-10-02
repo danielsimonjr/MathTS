@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-expression
 
+## 0.9.0
+
+### Minor Changes
+
+- 6e751af: Resolve valueless unit symbols in the expression compiler, so `evaluate('1 km')` matches `unit(1, 'km')`. Names that are already on the math namespace (such as `min`) are unchanged, and a user-scope binding still wins.
+
+### Patch Changes
+
+- Updated dependencies [5b7ca6d]
+  - @danielsimonjr/mathts-core@0.16.0
+
 ## 0.8.2
 
 ### Patch Changes
