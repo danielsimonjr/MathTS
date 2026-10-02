@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- **npm publish runs in CI.** The Release workflow still opens the changesets version PR. After
+  that PR merges it also tags each bumped package and opens a GitHub Release, then calls the
+  Publish workflow in the same run. Publish (`workflow_dispatch`, a person-created release, or
+  that call) builds and runs `changeset publish` for every workspace version not yet on npm.
+  Auth is the `NPM` repository secret, passed as `NODE_AUTH_TOKEN`. `id-token: write` stays off, and provenance is
+  omitted, because that OIDC permission is what made the old in-CI publish skip an empty token
+  and die `ENEEDAUTH`. Releases created with `GITHUB_TOKEN` do not trigger other workflows, so
+  publish is not waiting on the `release` event.
+
 ### Fixed
 - **Dependabot stopped failing weekly on `main`.** The root `npm` update entry was removed from
   `.github/dependabot.yml`, because it can no longer do anything but fail. Dependabot's

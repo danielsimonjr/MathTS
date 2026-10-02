@@ -93,8 +93,9 @@ which would put them back on Bun):
    `bun install --frozen-lockfile`, never re-migrate from npm's lockfile.
 2. **`bun test` ≠ `bun run test`.** The former is Bun's built-in runner; the
    latter runs the Turbo/vitest graph. CI must call `bun run test`.
-3. **Publish path unchanged.** `npx changeset publish` / `npm publish` from the
-   release machine still ships to the npm registry.
+3. **Publish path is CI.** `.github/workflows/publish.yml` runs `bun run build`
+   and then `changeset publish` (token auth via the `NPM` secret as `NODE_AUTH_TOKEN`, `--access public`,
+   no provenance). Versions already on npm are skipped. It is not a workstation step.
 4. **`[run] bun = true` is per working directory.** Bun reads `bunfig.toml` from the
    working directory only. Turbo starts each package script in the package directory,
    so every workspace package has its own `[run] bun = true`. Under this setting a

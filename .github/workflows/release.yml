@@ -1,31 +1,50 @@
 name: Release
 
-# VERSIONING ONLY — this workflow does NOT publish to npm, by policy.
+# Versions packages, tags them, and opens GitHub Releases. npm publish is the
+# Publish workflow (.github/workflows/publish.yml), called from this run when
+# the push actually changed a package version.
 #
-# It opens/updates the "chore: release packages" PR that applies pending
-# `.changeset/*.md` files (bumping versions + writing CHANGELOGs). Delivery to
-# the registry is a SEPARATE, LOCAL step: `npm publish` is run by hand from the
-# ZBOOK, the only machine holding a valid npm token.
+# What each push does:
+# 1. changesets/action opens or updates the "chore: release packages" PR when
+#    `.changeset/*.md` files are pending. With none pending, that step is a no-op.
+# 2. `changeset git-tag` tags every public workspace package whose current
+#    version has no tag, and this workflow opens a GitHub Release for each tag
+#    it owns (tagger github-actions[bot]). Tags Daniel cut by hand are not
+#    given a new release.
+# 3. If this push changed a package.json "version" field, this run calls
+#    Publish. `changeset publish` then ships every workspace version that is
+#    not on npm yet.
 #
-# Do NOT re-add a `publish:` input or an NPM_TOKEN/NODE_AUTH_TOKEN secret here.
-# It was removed 2026-07-28 after failing every time it had something to do:
-# with `id-token: write` granted, changesets skipped the (empty) NPM_TOKEN,
-# fell back to npm trusted publishing over OIDC, and died `ENEEDAUTH` — while
-# also racing the local publish for the same version numbers.
+# GITHUB_TOKEN-created releases do not fire the `release` event, so other
+# workflows never see them. Publish is therefore invoked here with
+# workflow_call, in the same run, instead of waiting for that event. A person
+# opening a release still triggers Publish via `release: published`, and
+# workflow_dispatch on Publish is the catch-up path for versions already on
+# main (the packages bumped by #334: this PR does not change their versions,
+# so merging it tags and opens releases but does not publish).
+#
+# Do NOT put a `publish:` input back on changesets/action. That input publishes
+# on every push that has no pending changesets, including ordinary commits, and
+# it is what raced a local publish on 2026-07-27. Do NOT grant `id-token: write`.
+# With that permission, changesets skipped an empty NPM_TOKEN, fell back to
+# OIDC trusted publishing, and died ENEEDAUTH. Publish authenticates with the
+# repository secret NPM, as NODE_AUTH_TOKEN. It does not read NPM_TOKEN.
 
 on:
   push:
     branches: [main, master]
-  # Safe to run by hand: this workflow cannot publish, only open a version PR.
+  # Manual dispatch backfills tags and GitHub Releases. It does not publish:
+  # there is no push, so no version diff. Use the Publish workflow's
+  # workflow_dispatch to publish.
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
-# Least privilege: only what opening the version PR needs.
-# `id-token: write` is deliberately absent — it exists solely to mint an OIDC
-# token for npm trusted publishing, which this workflow must never attempt.
+# contents: write pushes tags and opens releases. pull-requests: write opens
+# the version PR. id-token is absent: it exists to mint an OIDC token for npm
+# trusted publishing, which this workflow must never attempt.
 permissions:
   contents: write
   pull-requests: write
@@ -34,6 +53,8 @@ jobs:
   release:
     name: Version
     runs-on: ubuntu-latest
+    outputs:
+      versions_bumped: ${{ steps.tags.outputs.versions_bumped }}
 
     steps:
       - name: Checkout
@@ -53,23 +74,22 @@ jobs:
           # engines.node '^22.11 || ^24 || >=26'. On Node 20 its bin.js dies with
           # `TypeError: enableCompileCache is not a function` before doing any work.
           node-version: 22.x
-          # No `registry-url:` — that only exists to write an .npmrc wired to
-          # NODE_AUTH_TOKEN for publishing, which this workflow does not do.
+          # No `registry-url:` on this job. Publish is a separate workflow and
+          # that is where setup-node writes the npmrc for NODE_AUTH_TOKEN.
           # No `cache: npm` — the lockfile is bun.lock now.
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # No build step: `changeset version` only rewrites package.json +
-      # CHANGELOG.md. Building was for the publish that no longer happens here;
-      # ci.yml is the workflow that actually builds and tests.
+      # No build step here: `changeset version` only rewrites package.json,
+      # CHANGELOG.md, and (via version-packages) bun.lock. Publish builds.
 
       - name: Create Release Pull Request
         id: changesets
         # SHA-pinned (third-party action). `v1` is a MUTABLE BRANCH, not a tag.
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
-        # Omitting `publish:` makes this version-only: with pending changesets
-        # it opens/updates the release PR; with none, it is a no-op.
+        # Omitting `publish:` keeps this step version-only. Publish is the
+        # job below, and only when this push bumped a package version.
         with:
           # v2 renamed these from `title`/`commit`; the v1 names are now a hard
           # error, not a warning, so they must move with the action bump.
@@ -81,3 +101,21 @@ jobs:
           version-script: bun run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag packages and open GitHub releases
+        id: tags
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: bash .github/scripts/ensure-package-releases.sh
+
+  publish:
+    name: Publish
+    needs: release
+    if: needs.release.outputs.versions_bumped == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish.yml
+    secrets:
+      NPM: ${{ secrets.NPM }}
