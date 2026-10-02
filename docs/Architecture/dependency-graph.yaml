@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-02'
-  totalFiles: 1179
+  totalFiles: 1180
   totalModules: 83
-  totalExports: 5861
+  totalExports: 5873
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -10156,6 +10156,16 @@ modules:
             - DDEForcing
             - DDEHistory
           reExport: true
+        - file: ../numeric/gauss-legendre4.js
+          imports:
+            - gaussLegendre4
+            - GL4_A
+            - GL4_B
+            - GL4_C
+            - GL4ConvergenceError
+            - GaussLegendre4Options
+            - GaussLegendre4Solution
+          reExport: true
       workspaceDependencies: []
       exports:
         - rationalNullspace
@@ -10178,6 +10188,13 @@ modules:
         - DDESolution
         - DDEForcing
         - DDEHistory
+        - gaussLegendre4
+        - GL4_A
+        - GL4_B
+        - GL4_C
+        - GL4ConvergenceError
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
         - findRoot
         - linsolve
         - minimize
@@ -10232,6 +10249,13 @@ modules:
         - DDESolution
         - DDEForcing
         - DDEHistory
+        - gaussLegendre4
+        - GL4_A
+        - GL4_B
+        - GL4_C
+        - GL4ConvergenceError
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
       interfaces:
         - FindRootOptions
         - MinimizeOptions
@@ -17967,6 +17991,29 @@ modules:
         - fsolve
       constants:
         - root
+    functions/src/numeric/gauss-legendre4.ts:
+      description: Symplectic Gauss–Legendre 4th-order ODE integrator.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - GL4_C
+        - GL4_A
+        - GL4_B
+        - gaussLegendre4
+        - GL4ConvergenceError
+      classes:
+        - GL4ConvergenceError
+      interfaces:
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
+      functions:
+        - gaussLegendre4
+      constants:
+        - GL4_C
+        - GL4_A
+        - GL4_B
     functions/src/numeric/matrix-functions.ts:
       description: Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.
       externalDependencies: []
@@ -37089,6 +37136,7 @@ dependencyGraph:
         - functions/src/numeric/eigsh.ts
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/fsolve.ts
+        - functions/src/numeric/gauss-legendre4.ts
         - functions/src/numeric/matrix-functions.ts
         - functions/src/numeric/bfgs.ts
         - functions/src/numeric/interval.ts
@@ -37932,17 +37980,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/points3d.ts
 statistics:
-  totalTypeScriptFiles: 1179
+  totalTypeScriptFiles: 1180
   totalModules: 83
-  totalLinesOfCode: 196200
-  totalExports: 5861
-  totalClasses: 55
-  totalInterfaces: 514
-  totalFunctions: 1906
+  totalLinesOfCode: 196421
+  totalExports: 5873
+  totalClasses: 56
+  totalInterfaces: 516
+  totalFunctions: 1907
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1598
-  totalReExports: 2372
+  totalConstants: 1601
+  totalReExports: 2379
   totalTypeOnlyImports: 590
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
