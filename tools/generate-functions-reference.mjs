@@ -95,6 +95,7 @@ const DOMAIN_SUPPLEMENT = {
   'Linear Algebra': [
     'circulant', 'companion', 'generalizedEig', 'laplacianMatrix', 'logdet',
     'lowRankApprox', 'matrixExpm', 'matrixLogm', 'matrixSqrtm', 'norm2', 'normFro',
+    'rationalNullspace',
     'qz', 'singularValues', 'toeplitz', 'tril', 'triu', 'vander',
   ],
   Geometry: [
@@ -105,8 +106,8 @@ const DOMAIN_SUPPLEMENT = {
   'Graph Theory': ['betweennessCentrality', 'eigenvectorCentrality', 'pageRank'],
   'Computer Algebra System (CAS)': ['casDerivative', 'casExpand', 'casFactor', 'casSimplify', 'symbolicIntegral'],
   'Numerical Methods': [
-    'derivativeAt', 'gradient', 'gradientAt', 'gradientDescent', 'hessian',
-    'levenbergMarquardt', 'nelderMead', 'valueAndDerivativeAt',
+    'derivativeAt', 'gaussLegendre4', 'GL4ConvergenceError', 'gradient', 'gradientAt',
+    'gradientDescent', 'hessian', 'levenbergMarquardt', 'nelderMead', 'valueAndDerivativeAt',
   ],
   'Interpolation & Curve Fitting': ['chebyshevFit', 'legendreFit', 'newtonInterp'],
   'Numerical Integration': ['simpsonF64', 'trapzF64'],

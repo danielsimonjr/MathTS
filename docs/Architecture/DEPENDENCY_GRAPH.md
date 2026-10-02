@@ -152,7 +152,7 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/statistics**: 14 files
 - **functions/complex**: 4 files
-- **functions/numeric**: 22 files
+- **functions/numeric**: 24 files
 - **functions/utils**: 34 files
 - **functions/arithmetic**: 38 files
 - **functions/signal**: 12 files
@@ -208,7 +208,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-expression` | 471            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-expression` | 473            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 475            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4264,19 +4264,21 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                              | Imports                                                                                                                            | Type      |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `../numeric/solveODE.js`          | `rosenbrockSolve`                                                                                                                  | Import    |
-| `../numeric/adaptive-quad.js`     | `quad`                                                                                                                             | Import    |
-| `../numeric/solveParabolicPDE.js` | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
-| `../numeric/solveDAE.js`          | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
-| `../numeric/solveDDE.js`          | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
+| File                               | Imports                                                                                                                            | Type      |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
+| `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
+| `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceResult`                                                                                       | Re-export |
+| `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
+| `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
+| `../numeric/solveDDE.js`           | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
+| `../numeric/gauss-legendre4.js`    | `gaussLegendre4, GL4_A, GL4_B, GL4_C, GL4ConvergenceError, GaussLegendre4Options, GaussLegendre4Solution`                          | Re-export |
 
 **Exports:**
 
 - Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `LinprogOptions`, `LinprogResult`
 - Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `linprog`, `linprog`, `solvePDE`
-- Re-exports: `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`, `solveDAE`, `SolveDAEOptions`, `DAESolution`, `DAEDifferential`, `DAEConstraint`, `DAEJacobianBlocks`, `solveDDE`, `SolveDDEOptions`, `DDESolution`, `DDEForcing`, `DDEHistory`
+- Re-exports: `rationalNullspace`, `RationalNullspaceResult`, `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`, `solveDAE`, `SolveDAEOptions`, `DAESolution`, `DAEDifferential`, `DAEConstraint`, `DAEJacobianBlocks`, `solveDDE`, `SolveDDEOptions`, `DDESolution`, `DDEForcing`, `DDEHistory`, `gaussLegendre4`, `GL4_A`, `GL4_B`, `GL4_C`, `GL4ConvergenceError`, `GaussLegendre4Options`, `GaussLegendre4Solution`
 
 ---
 
@@ -8026,6 +8028,17 @@ graph LR
 
 ---
 
+### `functions/src/numeric/gauss-legendre4.ts` - Symplectic Gauss–Legendre 4th-order ODE integrator.
+
+**Exports:**
+
+- Classes: `GL4ConvergenceError`
+- Interfaces: `GaussLegendre4Options`, `GaussLegendre4Solution`
+- Functions: `gaussLegendre4`
+- Constants: `GL4_C`, `GL4_A`, `GL4_B`
+
+---
+
 ### `functions/src/numeric/matrix-functions.ts` - Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.
 
 **Workspace Dependencies:**
@@ -8189,6 +8202,21 @@ graph LR
 
 - Interfaces: `RootsLegendreResult`
 - Functions: `rootsLegendre`
+
+---
+
+### `functions/src/numeric/rational-nullspace.ts` - Exact rational null space.
+
+**Workspace Dependencies:**
+
+| Package                      | Import                 |
+| ---------------------------- | ---------------------- |
+| `@danielsimonjr/mathts-core` | `Fraction, isFraction` |
+
+**Exports:**
+
+- Interfaces: `RationalNullspaceResult`
+- Functions: `rationalNullspace`
 
 ---
 
@@ -17561,9 +17589,9 @@ graph LR
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
+| `functions/src/typed/numeric`                          | 7 files      | 8 files    |
 | `functions/src/bitwise/rightLogShift`                  | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
-| `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 
 ---
 
@@ -17990,10 +18018,10 @@ graph TD
         N280[eigsh]
         N281[nnls]
         N282[fsolve]
-        N283[matrix-functions]
-        N284[bfgs]
-        N285[interval]
-        N286[...12 more]
+        N283[gauss-legendre4]
+        N284[matrix-functions]
+        N285[bfgs]
+        N286[...14 more]
     end
 
     subgraph Functions/utils
@@ -18403,14 +18431,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1178   |
+| Total TypeScript Files  | 1180   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 196070 |
-| Total Exports           | 5884   |
-| Total Re-exports        | 2391   |
-| Total Classes           | 55     |
-| Total Interfaces        | 512    |
-| Total Functions         | 1908   |
+| Total Lines of Code     | 196448 |
+| Total Exports           | 5899   |
+| Total Re-exports        | 2400   |
+| Total Classes           | 56     |
+| Total Interfaces        | 515    |
+| Total Functions         | 1910   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 593    |

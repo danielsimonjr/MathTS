@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1178, "e": 5884, "re": 2391 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1180, "e": 5899, "re": 2400 },
   "s": {
-    "loc": 196070,
-    "cls": 55,
-    "int": 512,
-    "fn": 1908,
+    "loc": 196448,
+    "cls": 56,
+    "int": 515,
+    "fn": 1910,
     "tg": 159,
     "en": 0,
-    "co": 1600,
+    "co": 1603,
     "toi": 593
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -994,7 +994,7 @@
     },
     "functions/complex": { "f": 4, "exp": ["createIm", "createRe", "createConj", "createArg"] },
     "functions/numeric": {
-      "f": 22,
+      "f": 24,
       "exp": [
         "dlyap",
         "care",
@@ -1012,12 +1012,12 @@
         "lsqBounded",
         "root",
         "fsolve",
-        "funm",
-        "complexCos",
-        "complexSin",
-        "cosm"
+        "GL4_C",
+        "GL4_A",
+        "GL4_B",
+        "gaussLegendre4"
       ],
-      "cls": ["Interval"],
+      "cls": ["GL4ConvergenceError", "Interval"],
       "int": [
         "SolveDDEOptions",
         "DDESolution",
