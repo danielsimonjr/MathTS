@@ -1587,6 +1587,7 @@
     "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/numeric/gauss-legendre4.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/wasm/sort/wasm-bridge.ts": [
       "functions/src/typed/geometry.ts",
       "functions/src/typed/hypothesis.ts",

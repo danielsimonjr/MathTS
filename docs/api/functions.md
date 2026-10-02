@@ -480,7 +480,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1074 exports).
+> `@danielsimonjr/mathts-functions` (1079 exports).
 
 ### Functions by category
 
@@ -514,7 +514,7 @@ ceil(2.1); // 3
 
 **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
 
-**Numerical Methods** (40): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveDAE`, `solveDDE`, `solveODE`, `solveODESystem`, `solveParabolicPDE`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+**Numerical Methods** (42): `bfgs`, `cond`, `derivativeAt`, `eventDetection`, `findRoot`, `fsolve`, `gaussLegendre4`, `GL4ConvergenceError`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `quadprog`, `rank`, `residue`, `root`, `secant`, `solveBVP`, `solveDAE`, `solveDDE`, `solveODE`, `solveODESystem`, `solveParabolicPDE`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
 
 **Signal Processing** (73): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirpZTransform`, `coherence`, `convolve`, `correlate`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dwt`, `ellip`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `fourier`, `freqz`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `invFourier`, `irfft`, `istft`, `lfilter`, `lfilterZi`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sosfilt`, `spectrogram`, `stft`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
 
@@ -540,9 +540,9 @@ ceil(2.1); // 3
 
 **Other exports (uncategorized)** (17): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `loadWasm`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
-### Constants & values (65)
+### Constants & values (68)
 
-`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
 ### Classes & types (2)
 

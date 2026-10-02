@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1876
+**Total files**: 1878
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                    |
-| `build-entry` |     1153 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1154 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      638 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      639 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       26 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1876** |                                                                                                              |
+| **Total**     | **1878** |                                                                                                              |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1178 |
-| `tests`    |   638 |
+| `src`      |  1179 |
+| `tests`    |   639 |
 | `tools`    |    26 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    82 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
-| `@danielsimonjr/mathts-functions`      |   779 |
+| `@danielsimonjr/mathts-functions`      |   781 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   101 |
@@ -980,6 +980,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/numeric/control-equations.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/eigsh.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/fsolve.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/gauss-legendre4.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/gauss-nodes.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/interpn.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/interval.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1389,6 +1390,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/gap-wave-d2.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-wavelet-families-oracle.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-zeta-complex-oracle.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/gauss-legendre4.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-consumers-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-delaunay-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-extended.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
