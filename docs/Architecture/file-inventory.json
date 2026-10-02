@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1882,
+  "totalFiles": 1883,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1156,
     "test-only": 0,
     "orphan": 0,
-    "test": 641,
+    "test": 642,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1181,
-    "tests": 641,
+    "tests": 642,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 783,
+    "@danielsimonjr/mathts-functions": 784,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -1185,7 +1185,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 807
+      "loc": 830
     },
     {
       "file": "expression/src/compiler/index.ts",
@@ -4559,7 +4559,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 502
+      "loc": 532
     },
     {
       "file": "expression/tests/compiler-index.test.ts",
@@ -8634,6 +8634,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 94
+    },
+    {
+      "file": "functions/tests/evaluate-units.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 50
     },
     {
       "file": "functions/tests/evaluate.test.ts",
