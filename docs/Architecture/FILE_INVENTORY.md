@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1881
+**Total files**: 1883
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                      |
 | ------------- | -------: | ------------------------------------------------------------------------------------------------------------ |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                    |
-| `build-entry` |     1155 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1156 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      641 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `test`        |      642 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
 | `tool`        |       26 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1881** |                                                                                                              |
+| **Total**     | **1883** |                                                                                                              |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1180 |
-| `tests`    |   641 |
+| `src`      |  1181 |
+| `tests`    |   642 |
 | `tools`    |    26 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
 | `@danielsimonjr/mathts-compat`         |    15 |
-| `@danielsimonjr/mathts-core`           |    82 |
+| `@danielsimonjr/mathts-core`           |    84 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   543 |
 | `@danielsimonjr/mathts-functions`      |   784 |
@@ -173,6 +173,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/src/types/fraction.ts`                                                      | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/types/interfaces.ts`                                                    | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/types/matrix/Range.ts`                                                  | @danielsimonjr/mathts-core           | src      | build-entry |
+| `core/src/types/si-dimension-vector.ts`                                           | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/types/unit-definitions.ts`                                              | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/types/unit-prefixes.ts`                                                 | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/types/unit.ts`                                                          | @danielsimonjr/mathts-core           | src      | build-entry |
@@ -216,6 +217,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/fraction-coverage.test.ts`                                      | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction.test.ts`                                               | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/matrix/Range.test.ts`                                           | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/si-dimension-vector.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit-external-reference.test.ts`                                | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit.test.ts`                                                   | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/core-unit.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |

@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1180, "e": 5873, "re": 2379 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1181, "e": 5903, "re": 2403 },
   "s": {
-    "loc": 196444,
+    "loc": 196631,
     "cls": 56,
-    "int": 516,
-    "fn": 1907,
+    "int": 517,
+    "fn": 1911,
     "tg": 159,
     "en": 0,
-    "co": 1601,
-    "toi": 590
+    "co": 1603,
+    "toi": 593
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -193,7 +193,7 @@
       ]
     },
     "core/types": {
-      "f": 16,
+      "f": 17,
       "exp": [
         "I",
         "COMPLEX_ZERO",
@@ -1380,16 +1380,19 @@
         "UnitParseError",
         "DIMENSIONLESS",
         "dim",
+        "UNIT_DIMENSION_LENGTH",
+        "SI_DIMENSION_LENGTH",
+        "toSiDimensions",
+        "toSiDimensionVector",
+        "fromSiDimensions",
+        "fromSiDimensionVector",
         "BASE_UNITS",
         "DERIVED_UNITS",
         "ALL_UNITS",
         "UNIT_ALIASES",
         "getUnitDef",
         "SI_PREFIXES",
-        "BEST_PREFIXES",
-        "getPrefix",
-        "Dimensions",
-        "UnitDef"
+        "BEST_PREFIXES"
       ]
     },
     "numbers": {

@@ -105,7 +105,11 @@
     ],
     "core/src/arithmetic/scalar.ts": ["core/src/index.ts", "core/src/types/unit/dependencies.ts"],
     "core/src/types/unit.ts": ["core/src/index.ts"],
-    "core/src/types/unit-definitions.ts": ["core/src/index.ts", "core/src/types/unit.ts"],
+    "core/src/types/unit-definitions.ts": [
+      "core/src/index.ts",
+      "core/src/types/si-dimension-vector.ts",
+      "core/src/types/unit.ts"
+    ],
     "core/src/types/unit-prefixes.ts": ["core/src/index.ts"],
     "core/src/typed/index.ts": ["core/src/index.ts"],
     "core/src/factory/index.ts": ["core/src/index.ts"],
@@ -121,6 +125,7 @@
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
+    "core/src/types/si-dimension-vector.ts": ["core/src/types/unit.ts"],
     "core/src/types/unit/Unit.ts": ["core/src/types/unit/index.ts"],
     "core/src/types/unit/dependencies.ts": ["core/src/types/unit/index.ts"],
     "matrix/src/types/DenseMatrix.ts": [

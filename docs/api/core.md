@@ -309,15 +309,15 @@ See [typed-function documentation](https://github.com/josdejong/typed-function) 
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (101 exports).
+> `@danielsimonjr/mathts-core` (107 exports).
 
-### Functions (51)
+### Functions (55)
 
-`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `neumaierCumsum`, `neumaierSum`, `norm2`, `number`, `pairwiseDot`, `pairwiseSum`, `pow`, `registerNativeTypes`, `round`, `scaledDistance`, `subtractScalar`, `sumSquaredDeviations`, `typed`, `UnitParseError`
+`abs`, `addScalar`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `dim`, `DimensionMismatchError`, `divideScalar`, `equal`, `fix`, `fromSiDimensions`, `fromSiDimensionVector`, `getPrefix`, `getUnitDef`, `initTypedWasm`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyScalar`, `neumaierCumsum`, `neumaierSum`, `norm2`, `number`, `pairwiseDot`, `pairwiseSum`, `pow`, `registerNativeTypes`, `round`, `scaledDistance`, `subtractScalar`, `sumSquaredDeviations`, `toSiDimensions`, `toSiDimensionVector`, `typed`, `UnitParseError`
 
-### Constants & values (42)
+### Constants & values (44)
 
-`ALL_UNITS`, `BASE_UNITS`, `BEST_PREFIXES`, `BIGNUMBER_E`, `BIGNUMBER_LN10`, `BIGNUMBER_LN2`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_TEN`, `BIGNUMBER_ZERO`, `COMPLEX_NEG_ONE`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `DEFAULT_CONFIG`, `DERIVED_UNITS`, `DIMENSIONLESS`, `DUAL_UNARY_RULES`, `E`, `FRACTION_HALF`, `FRACTION_NEG_ONE`, `FRACTION_ONE`, `FRACTION_QUARTER`, `FRACTION_THIRD`, `FRACTION_ZERO`, `I`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `math`, `MATHTS_CONVERSIONS`, `MATHTS_TYPES`, `PHI`, `PI`, `registry`, `SI_PREFIXES`, `SQRT1_2`, `SQRT2`, `TAU`, `UNIT_ALIASES`, `VERSION`
+`ALL_UNITS`, `BASE_UNITS`, `BEST_PREFIXES`, `BIGNUMBER_E`, `BIGNUMBER_LN10`, `BIGNUMBER_LN2`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_TEN`, `BIGNUMBER_ZERO`, `COMPLEX_NEG_ONE`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `DEFAULT_CONFIG`, `DERIVED_UNITS`, `DIMENSIONLESS`, `DUAL_UNARY_RULES`, `E`, `FRACTION_HALF`, `FRACTION_NEG_ONE`, `FRACTION_ONE`, `FRACTION_QUARTER`, `FRACTION_THIRD`, `FRACTION_ZERO`, `I`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `math`, `MATHTS_CONVERSIONS`, `MATHTS_TYPES`, `PHI`, `PI`, `registry`, `SI_DIMENSION_LENGTH`, `SI_PREFIXES`, `SQRT1_2`, `SQRT2`, `TAU`, `UNIT_ALIASES`, `UNIT_DIMENSION_LENGTH`, `VERSION`
 
 ### Classes & types (8)
 

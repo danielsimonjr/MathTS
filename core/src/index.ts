@@ -103,6 +103,15 @@ export {
 } from './types/unit.js';
 export type { Dimensions, UnitDef, UnitInstance } from './types/unit.js';
 export {
+  UNIT_DIMENSION_LENGTH,
+  SI_DIMENSION_LENGTH,
+  toSiDimensions,
+  toSiDimensionVector,
+  fromSiDimensions,
+  fromSiDimensionVector,
+} from './types/unit.js';
+export type { SiDimensionVector, SiDimensionOptions } from './types/unit.js';
+export {
   BASE_UNITS,
   DERIVED_UNITS,
   ALL_UNITS,
