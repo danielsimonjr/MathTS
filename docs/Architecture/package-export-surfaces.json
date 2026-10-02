@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26",
+  "generated": "2026-10-02",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2441,6 +2441,9 @@
       "GaussianKDEOptions",
       "GaussianKDEResult",
       "gaussianProcessRegression",
+      "gaussLegendre4",
+      "GaussLegendre4Options",
+      "GaussLegendre4Solution",
       "gaussQuad",
       "gcd",
       "gcdNumber",
@@ -2461,6 +2464,10 @@
       "getSafeProperty",
       "getWasm",
       "getWaveletFilters",
+      "GL4_A",
+      "GL4_B",
+      "GL4_C",
+      "GL4ConvergenceError",
       "glm",
       "GlmFamily",
       "GlmLink",

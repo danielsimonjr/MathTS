@@ -45,6 +45,17 @@ export {
   type DDEHistory,
 } from '../numeric/solveDDE.js';
 
+// Symplectic 2-stage Gauss–Legendre RK (order 4). Not quadrature (`gaussQuad`).
+export {
+  gaussLegendre4,
+  GL4_A,
+  GL4_B,
+  GL4_C,
+  GL4ConvergenceError,
+  type GaussLegendre4Options,
+  type GaussLegendre4Solution,
+} from '../numeric/gauss-legendre4.js';
+
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
 // =============================================================================
