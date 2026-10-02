@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-02'
-  totalFiles: 1177
+  totalFiles: 1179
   totalModules: 83
-  totalExports: 5854
+  totalExports: 5869
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -10112,6 +10112,11 @@ modules:
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
+        - file: ../numeric/rational-nullspace.js
+          imports:
+            - rationalNullspace
+            - RationalNullspaceResult
+          reExport: true
         - file: ../numeric/solveParabolicPDE.js
           imports:
             - solveParabolicPDE
@@ -10139,8 +10144,20 @@ modules:
             - DDEForcing
             - DDEHistory
           reExport: true
+        - file: ../numeric/gauss-legendre4.js
+          imports:
+            - gaussLegendre4
+            - GL4_A
+            - GL4_B
+            - GL4_C
+            - GL4ConvergenceError
+            - GaussLegendre4Options
+            - GaussLegendre4Solution
+          reExport: true
       workspaceDependencies: []
       exports:
+        - rationalNullspace
+        - RationalNullspaceResult
         - solveParabolicPDE
         - SolveParabolicPDEOptions
         - ParabolicPDESolution
@@ -10159,6 +10176,13 @@ modules:
         - DDESolution
         - DDEForcing
         - DDEHistory
+        - gaussLegendre4
+        - GL4_A
+        - GL4_B
+        - GL4_C
+        - GL4ConvergenceError
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
         - findRoot
         - linsolve
         - minimize
@@ -10193,6 +10217,8 @@ modules:
         - linprog
         - solvePDE
       reExported:
+        - rationalNullspace
+        - RationalNullspaceResult
         - solveParabolicPDE
         - SolveParabolicPDEOptions
         - ParabolicPDESolution
@@ -10211,6 +10237,13 @@ modules:
         - DDESolution
         - DDEForcing
         - DDEHistory
+        - gaussLegendre4
+        - GL4_A
+        - GL4_B
+        - GL4_C
+        - GL4ConvergenceError
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
       interfaces:
         - FindRootOptions
         - MinimizeOptions
@@ -17946,6 +17979,29 @@ modules:
         - fsolve
       constants:
         - root
+    functions/src/numeric/gauss-legendre4.ts:
+      description: Symplectic Gauss–Legendre 4th-order ODE integrator.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - GL4_C
+        - GL4_A
+        - GL4_B
+        - gaussLegendre4
+        - GL4ConvergenceError
+      classes:
+        - GL4ConvergenceError
+      interfaces:
+        - GaussLegendre4Options
+        - GaussLegendre4Solution
+      functions:
+        - gaussLegendre4
+      constants:
+        - GL4_C
+        - GL4_A
+        - GL4_B
     functions/src/numeric/matrix-functions.ts:
       description: Complex matrix functions — `funm`/`cosm`/`sinm` for a general real matrix.
       externalDependencies: []
@@ -18184,6 +18240,23 @@ modules:
         - RootsLegendreResult
       functions:
         - rootsLegendre
+    functions/src/numeric/rational-nullspace.ts:
+      description: Exact rational null space.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Fraction
+            - isFraction
+      exports:
+        - rationalNullspace
+      interfaces:
+        - RationalNullspaceResult
+      functions:
+        - rationalNullspace
     functions/src/numeric/structured-solvers.ts:
       description: Structured and indefinite direct linear solvers.
       externalDependencies: []
@@ -37032,6 +37105,7 @@ dependencyGraph:
         - functions/src/numeric/eigsh.ts
         - functions/src/numeric/nnls.ts
         - functions/src/numeric/fsolve.ts
+        - functions/src/numeric/gauss-legendre4.ts
         - functions/src/numeric/matrix-functions.ts
         - functions/src/numeric/bfgs.ts
         - functions/src/numeric/interval.ts
@@ -37045,6 +37119,7 @@ dependencyGraph:
         - functions/src/numeric/minimize-scalar.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/gauss-nodes.ts
+        - functions/src/numeric/rational-nullspace.ts
         - functions/src/numeric/structured-solvers.ts
         - functions/src/numeric/monte-carlo.ts
     - name: Functions/utils
@@ -37873,17 +37948,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/points3d.ts
 statistics:
-  totalTypeScriptFiles: 1177
+  totalTypeScriptFiles: 1179
   totalModules: 83
-  totalLinesOfCode: 195898
-  totalExports: 5854
-  totalClasses: 55
-  totalInterfaces: 511
-  totalFunctions: 1904
+  totalLinesOfCode: 196284
+  totalExports: 5869
+  totalClasses: 56
+  totalInterfaces: 514
+  totalFunctions: 1906
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1598
-  totalReExports: 2367
+  totalConstants: 1601
+  totalReExports: 2376
   totalTypeOnlyImports: 590
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

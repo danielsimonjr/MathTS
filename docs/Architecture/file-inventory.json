@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1875,
+  "totalFiles": 1879,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1152,
+    "build-entry": 1154,
     "test-only": 0,
     "orphan": 0,
-    "test": 638,
+    "test": 640,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1177,
-    "tests": 638,
+    "src": 1179,
+    "tests": 640,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 778,
+    "@danielsimonjr/mathts-functions": 782,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -6417,6 +6417,13 @@
       "loc": 113
     },
     {
+      "file": "functions/src/numeric/gauss-legendre4.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 210
+    },
+    {
       "file": "functions/src/numeric/gauss-nodes.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6485,6 +6492,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 191
+    },
+    {
+      "file": "functions/src/numeric/rational-nullspace.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 164
     },
     {
       "file": "functions/src/numeric/solveDAE.ts",
@@ -7828,7 +7842,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2370
+      "loc": 2382
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9280,6 +9294,13 @@
       "loc": 69
     },
     {
+      "file": "functions/tests/gauss-legendre4.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 132
+    },
+    {
       "file": "functions/tests/geometry-consumers-oracle.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9873,6 +9894,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 29
+    },
+    {
+      "file": "functions/tests/rational-nullspace.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 148
     },
     {
       "file": "functions/tests/rational-surd.test.ts",
