@@ -23,7 +23,16 @@ import {
   LN10,
   LOG2E,
   LOG10E,
+  Unit,
+  type UnitInstance,
 } from '@danielsimonjr/mathts-core';
+
+/** Map-like scope accepted by the expression compiler. */
+interface Scope {
+  has(key: string): boolean;
+  get(key: string): unknown;
+  set(key: string, value: unknown): void;
+}
 
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
@@ -121,21 +130,115 @@ export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
 // Step 3: Create the evaluate function
 // ---------------------------------------------------------------------------
 
+const _evaluate = createEvaluate(parse, mathScope);
+
+/**
+ * Exact elementary charge (CODATA / 2019 SI), in coulombs.
+ * Physics mode binds bare `e` to a Unit of this many coulombs.
+ */
+const ELEMENTARY_CHARGE_COULOMB = 1.602176634e-19;
+
+/** A fresh Unit so a caller cannot mutate the shared constant. */
+function elementaryChargeUnit(): UnitInstance {
+  return new Unit(ELEMENTARY_CHARGE_COULOMB, 'C');
+}
+
+/**
+ * Options for {@link evaluate}, {@link compileExpr}, and {@link parser}.
+ */
+export interface PhysicsEvaluateOptions {
+  /**
+   * When `true`, disables the pre-compile AST validator.
+   * Only opt out when the host is providing trusted, hand-authored input.
+   */
+  unsafe?: boolean;
+  /**
+   * Opt-in physics reading of bare `e`.
+   *
+   * When `true`, `e` is the elementary charge `1.602176634e-19 C` (a Unit).
+   * `E` stays unbound so a formula can use it for energy. Euler's number is
+   * only `exp(x)`, for example `exp(1)`. An explicit scope binding for `e`
+   * still wins. Default `false`: `e` is Euler's number.
+   */
+  physics?: boolean;
+}
+
+function isMapScope(scope: object): scope is Scope {
+  const candidate = scope as Partial<Scope>;
+  return (
+    typeof candidate.has === 'function' &&
+    typeof candidate.get === 'function' &&
+    typeof candidate.set === 'function'
+  );
+}
+
+/**
+ * Scope in which bare `e` is the elementary charge.
+ *
+ * Pass the result as `evaluate`'s scope, or use `{ physics: true }`.
+ * Entries already present on `scope` win, including an explicit `e`.
+ */
+export function physicsScope(
+  scope?: Record<string, unknown> | Scope
+): Record<string, unknown> | Scope {
+  const charge = elementaryChargeUnit();
+  if (scope == null) return { e: charge };
+  if (isMapScope(scope)) {
+    if (scope.has('e')) return scope;
+    return {
+      has(key: string): boolean {
+        return key === 'e' || scope.has(key);
+      },
+      get(key: string): unknown {
+        return key === 'e' ? charge : scope.get(key);
+      },
+      set(key: string, value: unknown): void {
+        scope.set(key, value);
+      },
+    };
+  }
+  if (Object.prototype.hasOwnProperty.call(scope, 'e')) return scope;
+  return { e: charge, ...scope };
+}
+
 /**
  * Evaluate a math expression string against the full activated math scope.
  *
  * @param expr - Expression string (e.g., '2 + 3', 'sin(pi/2)', 'x^2')
  * @param scope - Optional variable bindings (e.g., { x: 3 })
+ * @param options - Optional flags. `{ physics: true }` reads bare `e` as the elementary charge.
  * @returns The result of evaluating the expression
  *
  * @example
  * ```ts
- * evaluate('2 + 3');            // 5
- * evaluate('sin(pi / 2)');      // 1
- * evaluate('x^2 + 1', { x: 3 }) // 10
+ * evaluate('2 + 3');                              // 5
+ * evaluate('sin(pi / 2)');                        // 1
+ * evaluate('x^2 + 1', { x: 3 });                  // 10
+ * evaluate('e');                                  // Euler's number
+ * evaluate('e', undefined, { physics: true });    // 1.602176634e-19 C
+ * evaluate('exp(1)', undefined, { physics: true }); // Euler's number
  * ```
  */
-export const evaluate: ReturnType<typeof createEvaluate> = createEvaluate(parse, mathScope);
+export function evaluate(
+  expr: string,
+  scope?: Record<string, unknown> | Scope,
+  options?: PhysicsEvaluateOptions
+): unknown;
+export function evaluate(
+  exprs: string[],
+  scope?: Record<string, unknown> | Scope,
+  options?: PhysicsEvaluateOptions
+): unknown[];
+export function evaluate(
+  exprOrExprs: string | string[],
+  scope?: Record<string, unknown> | Scope,
+  options?: PhysicsEvaluateOptions
+): unknown | unknown[] {
+  const bound = options?.physics === true ? physicsScope(scope) : scope;
+  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
+  if (Array.isArray(exprOrExprs)) return _evaluate(exprOrExprs, bound, inner);
+  return _evaluate(exprOrExprs, bound, inner);
+}
 
 /**
  * Compile a math expression into a reusable CompiledExpression.
@@ -144,6 +247,7 @@ export const evaluate: ReturnType<typeof createEvaluate> = createEvaluate(parse,
  * many times with different variable bindings.
  *
  * @param expr - Expression string to compile
+ * @param options - Optional flags. `{ physics: true }` reads bare `e` as the elementary charge.
  * @returns CompiledExpression with an evaluate(scope?) method
  *
  * @example
@@ -151,10 +255,22 @@ export const evaluate: ReturnType<typeof createEvaluate> = createEvaluate(parse,
  * const compiled = compileExpr('x^2 + y');
  * compiled.evaluate({ x: 2, y: 1 }); // 5
  * compiled.evaluate({ x: 3, y: 2 }); // 11
+ * compileExpr('e', { physics: true }).evaluate(); // 1.602176634e-19 C
  * ```
  */
-export function compileExpr(expr: string) {
-  return _compileExpression(parse, mathScope, expr);
+export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
+  const compiled = _compileExpression(
+    parse,
+    mathScope,
+    expr,
+    options?.unsafe === true ? { unsafe: true } : undefined
+  );
+  if (options?.physics !== true) return compiled;
+  return {
+    evaluate(scope?: Record<string, unknown> | Scope): unknown {
+      return compiled.evaluate(physicsScope(scope));
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +284,7 @@ export function compileExpr(expr: string) {
  * Assignment expressions (`x = 5`) are rejected by the expression security
  * validator — manage retained state with `set` / `get` instead.
  *
+ * @param options - Optional flags. `{ physics: true }` reads bare `e` as the elementary charge.
  * @example
  * ```ts
  * const p = parser();
@@ -175,16 +292,21 @@ export function compileExpr(expr: string) {
  * p.evaluate('x^2');               // 9
  * p.set('y', p.evaluate('x + 1')); // retain a computed value
  * p.get('y');                      // 4
+ * parser({ physics: true }).evaluate('exp(1)'); // Euler's number
  * ```
  */
-export function parser() {
+export function parser(options?: PhysicsEvaluateOptions) {
   const scope: Record<string, unknown> = {};
+  const callOptions: PhysicsEvaluateOptions | undefined =
+    options?.physics === true || options?.unsafe === true
+      ? { physics: options.physics, unsafe: options.unsafe }
+      : undefined;
   return {
     /** The live scope object — assignments during `evaluate` land here. */
     scope,
     /** Evaluate an expression against the retained scope. */
     evaluate(expr: string): unknown {
-      return evaluate(expr, scope);
+      return evaluate(expr, scope, callOptions);
     },
     /** Read a retained variable. */
     get(name: string): unknown {

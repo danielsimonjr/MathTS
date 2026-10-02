@@ -33,7 +33,16 @@ export { loadWasm, isWasmLoaded } from './wasm/WasmLoader.js';
 export { to, toBest } from './typed/unit.js';
 
 // Expression evaluator (wired to full math scope)
-export { evaluate, compileExpr, parse, parser, reviver, replacer } from './factories/evaluate.js';
+export {
+  evaluate,
+  compileExpr,
+  parse,
+  parser,
+  physicsScope,
+  reviver,
+  replacer,
+} from './factories/evaluate.js';
+export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 
 // GC4 — mathjs canonical `help(search)` export (Help class + embedded docs).
 export { help } from './help.js';
