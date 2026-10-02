@@ -1,0 +1,103 @@
+name: Publish
+
+# Publishes every non-private workspace package whose package.json version is
+# not on npm yet. `changeset publish` skips versions the registry already has,
+# publishes dependencies before dependents, and passes `--access public`
+# (from `.changeset/config.json` `"access": "public"` and each package's
+# `publishConfig.access`). It does not pass `--provenance`.
+#
+# Provenance is omitted on purpose. `npm publish --provenance` needs an OIDC
+# token (`id-token: write`) so npm can ask Sigstore for a statement. That
+# permission is what made the old Release workflow skip an empty NPM_TOKEN,
+# fall back to trusted publishing, and die ENEEDAUTH. This workflow never
+# requests `id-token: write`.
+#
+# Triggers:
+# - workflow_call — the Release workflow calls this in the same run after a
+#   push that changed a package version. GITHUB_TOKEN-created releases do not
+#   fire `release`, so this call is what actually publishes those bumps.
+# - release: published — a GitHub Release created by a person (or any token
+#   that is not GITHUB_TOKEN). One such event publishes every pending version.
+# - workflow_dispatch — catch-up and retry. This is how to publish versions
+#   already on main, including the packages bumped by #334, once NPM_TOKEN
+#   is set.
+#
+# Auth is the repository secret NPM_TOKEN only. Sibling repos (memory-mcp,
+# deepthinking-mcp, Universal-Physics-Tensor) store their npm token as NPM.
+# This repo's historical workflow used NPM_TOKEN, and that is the name read
+# here. A secret named NPM on this repository is not consulted.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+# One publish at a time across release events, manual runs, and the call from
+# Release. Never cancel a run that may already be talking to the registry.
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TURBO_TELEMETRY_DISABLED: '1'
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+      - name: Require NPM_TOKEN
+        run: |
+          if [ -z "${NPM_TOKEN}" ]; then
+            echo "::error title=NPM_TOKEN secret missing::The repository secret NPM_TOKEN is empty or not set. Add an npm granular access token (read and write, Bypass 2FA) as the secret NPM_TOKEN on danielsimonjr/MathTS, then re-run this job. Sibling repositories use a secret named NPM; this workflow does not read that name."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Existing name@version tags, so changeset publish does not try to
+          # recreate a tag that is already on the remote.
+          fetch-tags: true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          # 22.x, not 20.x: @changesets/cli v3 declares
+          # engines.node '^22.11 || ^24 || >=26'. On Node 20 its bin.js dies with
+          # `TypeError: enableCompileCache is not a function` before doing any work.
+          node-version: 22.x
+          registry-url: https://registry.npmjs.org
+          # No `cache: npm` — the lockfile is bun.lock.
+
+      - name: Confirm the npm token
+        run: |
+          echo "npm=$(command -v npm) $(npm --version); node=$(node --version)"
+          npm whoami
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish unpublished versions
+        run: |
+          echo "changeset publish skips versions already on npm and passes --access public. Provenance is not requested."
+          bunx changeset publish

@@ -983,9 +983,12 @@ defects found + fixed:
       SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
       instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
       `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
-- [x] ⚠️ **NEEDS DANIEL — CI still cannot PUBLISH: the `NPM_TOKEN` secret is empty.** Tracked, not
-      agent-closable (moving a secret into a service). Local `npx changeset publish` remains the
-      release path. Original note: The Release
+- [x] ⚠️ **NEEDS DANIEL — set the repository secret `NPM_TOKEN` (this repo does not read `NPM`).**
+      Publish is `.github/workflows/publish.yml` (called from Release when a push bumps a version,
+      and on `workflow_dispatch` / a person-created `release`). It does not use OIDC. Until
+      `NPM_TOKEN` is set, that job fails in its first step and publishes nothing. The 20 versions
+      from #334 are published by running Publish from the Actions tab after the secret exists.
+      Historical note, kept because it is why `id-token: write` stays off: The Release
       workflow now correctly opens the "Version Packages" PR (verified: PR #155, merged), but the
       publish step then fails:
       `No NPM_TOKEN found, but OIDC is available - using npm trusted publishing` → `ENEEDAUTH`.
@@ -994,8 +997,8 @@ defects found + fixed:
       (a) `gh secret set NPM_TOKEN` with an npm automation token, or (b) configure **npm trusted
       publishing (OIDC)** for each `@danielsimonjr/*` package on npmjs.com, which is what changesets
       already tried to use and is the better long-term option (no long-lived token).
-      Until then releases are cut locally (`npx changeset publish`), which is how `functions@0.20.0`
-      shipped. Everything else in the release pipeline is now automated and green.
+      That is how `functions@0.20.0` shipped, from a workstation, while the secret was empty. OIDC
+      trusted publishing is not the path this repo uses.
 - [x] ✅ **`Release` workflow unblocked — green for the first time** (2026-07-13). THREE stacked
       failures, each hidden behind the last: 1. _"GitHub Actions is not permitted to create or approve pull requests"_ — repo setting, flipped
       with the user's authorization (`can_approve_pull_request_reviews: true`).

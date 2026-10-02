@@ -244,11 +244,18 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 - **Re-export packages** (`parser/`, `ast/`, `evaluator/`, `units/`, `numbers/`,
   `linalg/`, `arithmetic/`, `trigonometry/`, `statistics/`, `signal/`) contain
   **no implementation** — edit the source package they re-export, not these.
-- **Carry work to RELEASED.** Versioning is via Changesets. An older revision of this file said
-  "don't `npm publish` (2FA-gated)" — that is **no longer true** and was stranding work
-  undeployed. The flow is: changeset → commit → push → CI opens a "Version Packages" PR → merge
-  it → publish. CI cannot publish today (the repo's `NPM_TOKEN` secret is empty), so the session
-  lead runs `npx changeset publish` locally, then `git push --tags`.
+- **Carry work to RELEASED.** Versioning is via Changesets. The flow is: changeset → commit →
+  push → the Release workflow opens a "chore: release packages" PR → merge it. That merge bumps
+  versions. The same workflow then tags each bumped package (`name@version`), opens a GitHub
+  Release, and calls the Publish workflow in that run. Publish
+  (`.github/workflows/publish.yml`) runs `bun run build` and then `changeset publish`, which
+  skips versions already on npm and passes `--access public`. Auth is the repository secret
+  `NPM_TOKEN` only — no `id-token: write`, and no provenance, because provenance needs that
+  OIDC token. Releases created with `GITHUB_TOKEN` do not fire `release` for other workflows,
+  which is why Publish is called in-process rather than waiting on the event. A release a
+  person creates does trigger Publish, and so does **workflow_dispatch** on Publish. Versions
+  already on `main` (the push did not change a `version` field — the packages bumped by #334)
+  are published that way, after `NPM_TOKEN` is set. Do not `npm publish` from a workstation.
   **Then verify against the registry, not the publish log** — `npm pack` the published tarball
   into a clean dir _outside_ `~` and typecheck a real consumer against it with
   `skipLibCheck: false`. A green repo gate is not a working package.

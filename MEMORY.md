@@ -66,11 +66,13 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 ## Release discipline
 
 Per-phase (or per coherent change): changeset (`functions` minor for additive, patch for fixes) →
-`changeset version` → build → full `functions` suite + monorepo typecheck + eslint green → commit +
-push → `changeset publish` → push tags → **verify the published tarball** (`npm view … version` +
-clean install in a temp dir + probe). `main` is direct-push; verify local==remote after each push.
-npm can lag ~30–60s after publish before `npm view` reflects it. Publishing needs npm auth (Daniel is
-logged in as `danielsimonjr`).
+commit + push → the Release workflow opens the version PR → merge it. That merge tags the bumped
+packages, opens GitHub Releases, and calls the Publish workflow (`bun run build` then
+`changeset publish`) in the same run. Auth is the repository secret `NPM_TOKEN` (not the sibling
+repos' `NPM`). Do not `npm publish` from a workstation. Versions already on `main` are published
+by running Publish via `workflow_dispatch` once the secret is set. **Verify the published tarball**
+(`npm view … version` + clean install in a temp dir + probe). npm can lag ~30–60s after publish
+before `npm view` reflects it.
 
 ## Forked dependencies
 
