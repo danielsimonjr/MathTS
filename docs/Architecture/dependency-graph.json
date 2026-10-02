@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-02",
-    "totalFiles": 1178,
+    "totalFiles": 1179,
     "totalModules": 83,
-    "totalExports": 5863
+    "totalExports": 5869
   },
   "entryPoints": [
     {
@@ -5893,7 +5893,15 @@
           },
           {
             "file": "./factories/evaluate.js",
-            "imports": ["evaluate", "compileExpr", "parse", "parser", "reviver", "replacer"],
+            "imports": [
+              "evaluate",
+              "compileExpr",
+              "parse",
+              "parser",
+              "physicsScope",
+              "reviver",
+              "replacer"
+            ],
             "reExport": true
           },
           {
@@ -6402,6 +6410,12 @@
             "reExport": true
           },
           {
+            "file": "./factories/evaluate.js",
+            "imports": ["PhysicsEvaluateOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -6743,6 +6757,7 @@
           "compileExpr",
           "parse",
           "parser",
+          "physicsScope",
           "reviver",
           "replacer",
           "help",
@@ -7029,6 +7044,7 @@
           "dirichletSample",
           "dirichletPdf",
           "wishartSample",
+          "PhysicsEvaluateOptions",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -7154,6 +7170,7 @@
           "compileExpr",
           "parse",
           "parser",
+          "physicsScope",
           "reviver",
           "replacer",
           "help",
@@ -7440,6 +7457,7 @@
           "dirichletSample",
           "dirichletPdf",
           "wishartSample",
+          "PhysicsEvaluateOptions",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -10385,6 +10403,11 @@
             "imports": ["quad"]
           },
           {
+            "file": "../numeric/rational-nullspace.js",
+            "imports": ["rationalNullspace", "RationalNullspaceResult"],
+            "reExport": true
+          },
+          {
             "file": "../numeric/solveParabolicPDE.js",
             "imports": [
               "solveParabolicPDE",
@@ -10430,6 +10453,8 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "rationalNullspace",
+          "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
           "ParabolicPDESolution",
@@ -10490,6 +10515,8 @@
           "solvePDE"
         ],
         "reExported": [
+          "rationalNullspace",
+          "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
           "ParabolicPDESolution",
@@ -18427,13 +18454,33 @@
               "LN2",
               "LN10",
               "LOG2E",
-              "LOG10E"
+              "LOG10E",
+              "Unit",
+              "UnitInstance"
             ]
           }
         ],
-        "exports": ["parse", "evaluate", "compileExpr", "parser", "replacer", "reviver"],
-        "functions": ["compileExpr", "parser", "replacer", "reviver"],
-        "constants": ["parse", "evaluate"]
+        "exports": [
+          "parse",
+          "physicsScope",
+          "evaluate",
+          "compileExpr",
+          "parser",
+          "replacer",
+          "reviver"
+        ],
+        "interfaces": ["PhysicsEvaluateOptions"],
+        "functions": [
+          "physicsScope",
+          "evaluate",
+          "evaluate",
+          "evaluate",
+          "compileExpr",
+          "parser",
+          "replacer",
+          "reviver"
+        ],
+        "constants": ["parse"]
       }
     },
     "functions/error": {
@@ -19360,6 +19407,22 @@
         "exports": ["rootsLegendre"],
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
+      },
+      "functions/src/numeric/rational-nullspace.ts": {
+        "description": "Exact rational null space.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Fraction", "isFraction"]
+          }
+        ],
+        "exports": ["rationalNullspace"],
+        "interfaces": ["RationalNullspaceResult"],
+        "functions": ["rationalNullspace"]
       },
       "functions/src/numeric/structured-solvers.ts": {
         "description": "Structured and indefinite direct linear solvers.",
@@ -39278,6 +39341,7 @@
           "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/rational-nullspace.ts",
           "functions/src/numeric/structured-solvers.ts",
           "functions/src/numeric/monte-carlo.ts"
         ]
@@ -40184,18 +40248,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1178,
+    "totalTypeScriptFiles": 1179,
     "totalModules": 83,
-    "totalLinesOfCode": 195963,
-    "totalExports": 5863,
+    "totalLinesOfCode": 196261,
+    "totalExports": 5869,
     "totalClasses": 56,
-    "totalInterfaces": 512,
-    "totalFunctions": 1901,
+    "totalInterfaces": 514,
+    "totalFunctions": 1906,
     "totalTypeGuards": 159,
     "totalEnums": 0,
-    "totalConstants": 1602,
-    "totalReExports": 2372,
-    "totalTypeOnlyImports": 589,
+    "totalConstants": 1601,
+    "totalReExports": 2376,
+    "totalTypeOnlyImports": 590,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

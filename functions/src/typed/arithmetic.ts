@@ -551,6 +551,8 @@ export const pow = mathTyped('pow', {
   // Dual numbers (forward-mode AD): constant or variable exponent.
   'Dual, number': (a: Dual, b: f64): Dual => a.powConst(b),
   'Dual, Dual': (a: Dual, b: Dual): Dual => a.pow(b),
+  // Dimensional power, including physics-mode `e^2` (elementary charge squared).
+  'Unit, number': (a: Unit, b: f64): Unit | f64 => a.pow(b) as Unit | f64,
 
   // Matrix power A^n for a square 2-D array and non-negative integer n, via binary
   // exponentiation on the native DenseMatrix backend (accelerated matmul, B2). Element-
