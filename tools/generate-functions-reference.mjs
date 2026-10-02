@@ -107,7 +107,8 @@ const DOMAIN_SUPPLEMENT = {
   'Computer Algebra System (CAS)': ['casDerivative', 'casExpand', 'casFactor', 'casSimplify', 'symbolicIntegral'],
   'Numerical Methods': [
     'derivativeAt', 'gaussLegendre4', 'GL4ConvergenceError', 'gradient', 'gradientAt',
-    'gradientDescent', 'hessian', 'levenbergMarquardt', 'nelderMead', 'valueAndDerivativeAt',
+    'gradientDescent', 'hessian', 'levenbergMarquardt', 'nelderMead', 'propagateUncertainty',
+    'valueAndDerivativeAt',
   ],
   'Interpolation & Curve Fitting': ['chebyshevFit', 'legendreFit', 'newtonInterp'],
   'Numerical Integration': ['simpsonF64', 'trapzF64'],

@@ -44,6 +44,15 @@ export {
 } from './factories/evaluate.js';
 export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 
+// First-order uncertainty propagation. Kept off `typed/index.js` for the same
+// reason as `cas.ts`: this module imports the expression evaluator, and the
+// evaluator imports the typed barrel.
+export {
+  propagateUncertainty,
+  type UncertaintyPropagationOptions,
+  type UncertaintyPropagationResult,
+} from './numeric/propagate-uncertainty.js';
+
 // GC4 — mathjs canonical `help(search)` export (Help class + embedded docs).
 export { help } from './help.js';
 

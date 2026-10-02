@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-02",
-    "totalFiles": 1179,
+    "totalFiles": 1180,
     "totalModules": 83,
-    "totalExports": 5869
+    "totalExports": 5873
   },
   "entryPoints": [
     {
@@ -5905,6 +5905,15 @@
             "reExport": true
           },
           {
+            "file": "./numeric/propagate-uncertainty.js",
+            "imports": [
+              "propagateUncertainty",
+              "UncertaintyPropagationOptions",
+              "UncertaintyPropagationResult"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./help.js",
             "imports": ["help"],
             "reExport": true
@@ -6760,6 +6769,9 @@
           "physicsScope",
           "reviver",
           "replacer",
+          "propagateUncertainty",
+          "UncertaintyPropagationOptions",
+          "UncertaintyPropagationResult",
           "help",
           "continuedFraction",
           "eulerNumbers",
@@ -7173,6 +7185,9 @@
           "physicsScope",
           "reviver",
           "replacer",
+          "propagateUncertainty",
+          "UncertaintyPropagationOptions",
+          "UncertaintyPropagationResult",
           "help",
           "continuedFraction",
           "eulerNumbers",
@@ -19322,6 +19337,25 @@
         "exports": ["quad"],
         "interfaces": ["QuadOptions", "QuadResult"],
         "functions": ["quad"]
+      },
+      "functions/src/numeric/propagate-uncertainty.ts": {
+        "description": "First-order (linear) uncertainty propagation for scalar expressions.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../factories/index.js",
+            "imports": ["derivative"]
+          },
+          {
+            "file": "../factories/evaluate.js",
+            "imports": ["evaluate"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["propagateUncertainty"],
+        "interfaces": ["UncertaintyPropagationResult", "UncertaintyPropagationOptions"],
+        "functions": ["propagateUncertainty"]
       },
       "functions/src/numeric/numeric-jacobian.ts": {
         "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
@@ -39334,6 +39368,7 @@
           "functions/src/numeric/svds.ts",
           "functions/src/numeric/solveODE.ts",
           "functions/src/numeric/adaptive-quad.ts",
+          "functions/src/numeric/propagate-uncertainty.ts",
           "functions/src/numeric/numeric-jacobian.ts",
           "functions/src/numeric/solveDAE.ts",
           "functions/src/numeric/bspline.ts",
@@ -40248,17 +40283,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1179,
+    "totalTypeScriptFiles": 1180,
     "totalModules": 83,
-    "totalLinesOfCode": 196261,
-    "totalExports": 5869,
+    "totalLinesOfCode": 196421,
+    "totalExports": 5873,
     "totalClasses": 56,
-    "totalInterfaces": 514,
-    "totalFunctions": 1906,
+    "totalInterfaces": 516,
+    "totalFunctions": 1907,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1601,
-    "totalReExports": 2376,
+    "totalReExports": 2379,
     "totalTypeOnlyImports": 590,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
