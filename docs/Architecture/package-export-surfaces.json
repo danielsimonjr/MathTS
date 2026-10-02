@@ -3018,6 +3018,8 @@
       "permutationTest",
       "pFq",
       "phi",
+      "PhysicsEvaluateOptions",
+      "physicsScope",
       "pi",
       "pick",
       "pickRandom",

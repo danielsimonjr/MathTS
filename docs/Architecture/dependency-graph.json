@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-02",
     "totalFiles": 1178,
     "totalModules": 83,
-    "totalExports": 5854
+    "totalExports": 5857
   },
   "entryPoints": [
     {
@@ -5893,7 +5893,15 @@
           },
           {
             "file": "./factories/evaluate.js",
-            "imports": ["evaluate", "compileExpr", "parse", "parser", "reviver", "replacer"],
+            "imports": [
+              "evaluate",
+              "compileExpr",
+              "parse",
+              "parser",
+              "physicsScope",
+              "reviver",
+              "replacer"
+            ],
             "reExport": true
           },
           {
@@ -6402,6 +6410,12 @@
             "reExport": true
           },
           {
+            "file": "./factories/evaluate.js",
+            "imports": ["PhysicsEvaluateOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -6743,6 +6757,7 @@
           "compileExpr",
           "parse",
           "parser",
+          "physicsScope",
           "reviver",
           "replacer",
           "help",
@@ -7029,6 +7044,7 @@
           "dirichletSample",
           "dirichletPdf",
           "wishartSample",
+          "PhysicsEvaluateOptions",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -7154,6 +7170,7 @@
           "compileExpr",
           "parse",
           "parser",
+          "physicsScope",
           "reviver",
           "replacer",
           "help",
@@ -7440,6 +7457,7 @@
           "dirichletSample",
           "dirichletPdf",
           "wishartSample",
+          "PhysicsEvaluateOptions",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -18409,13 +18427,33 @@
               "LN2",
               "LN10",
               "LOG2E",
-              "LOG10E"
+              "LOG10E",
+              "Unit",
+              "UnitInstance"
             ]
           }
         ],
-        "exports": ["parse", "evaluate", "compileExpr", "parser", "replacer", "reviver"],
-        "functions": ["compileExpr", "parser", "replacer", "reviver"],
-        "constants": ["parse", "evaluate"]
+        "exports": [
+          "parse",
+          "physicsScope",
+          "evaluate",
+          "compileExpr",
+          "parser",
+          "replacer",
+          "reviver"
+        ],
+        "interfaces": ["PhysicsEvaluateOptions"],
+        "functions": [
+          "physicsScope",
+          "evaluate",
+          "evaluate",
+          "evaluate",
+          "compileExpr",
+          "parser",
+          "replacer",
+          "reviver"
+        ],
+        "constants": ["parse"]
       }
     },
     "functions/error": {
@@ -40172,16 +40210,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1178,
     "totalModules": 83,
-    "totalLinesOfCode": 195910,
-    "totalExports": 5854,
+    "totalLinesOfCode": 196040,
+    "totalExports": 5857,
     "totalClasses": 55,
-    "totalInterfaces": 511,
-    "totalFunctions": 1901,
+    "totalInterfaces": 512,
+    "totalFunctions": 1905,
     "totalTypeGuards": 159,
     "totalEnums": 0,
-    "totalConstants": 1599,
-    "totalReExports": 2367,
-    "totalTypeOnlyImports": 589,
+    "totalConstants": 1598,
+    "totalReExports": 2369,
+    "totalTypeOnlyImports": 590,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

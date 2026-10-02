@@ -2963,7 +2963,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1073 exports).
+> `@danielsimonjr/mathts-functions` (1074 exports).
 
 ### Functions by category
 
@@ -3017,7 +3017,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (5): `compileExpr`, `evaluate`, `parser`, `replacer`, `reviver`
+**Expression Evaluation** (6): `compileExpr`, `evaluate`, `parser`, `physicsScope`, `replacer`, `reviver`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

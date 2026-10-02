@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1178, "e": 5854, "re": 2367 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1178, "e": 5857, "re": 2369 },
   "s": {
-    "loc": 195910,
+    "loc": 196040,
     "cls": 55,
-    "int": 511,
-    "fn": 1901,
+    "int": 512,
+    "fn": 1905,
     "tg": 159,
     "en": 0,
-    "co": 1599,
-    "toi": 589
+    "co": 1598,
+    "toi": 590
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -964,7 +964,8 @@
         "csch",
         "sech"
       ],
-      "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
+      "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"],
+      "int": ["PhysicsEvaluateOptions"]
     },
     "functions/error": {
       "f": 3,
@@ -1858,7 +1859,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 9 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 129, "o": 0 },
+    { "p": "src/index.ts", "i": 130, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

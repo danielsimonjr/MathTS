@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1875,
+  "totalFiles": 1876,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1153,
     "test-only": 0,
     "orphan": 0,
-    "test": 637,
+    "test": 638,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1178,
-    "tests": 637,
+    "tests": 638,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 778,
+    "@danielsimonjr/mathts-functions": 779,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -5791,7 +5791,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 246
+      "loc": 368
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -5952,7 +5952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 612
+      "loc": 621
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7653,7 +7653,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1693
+      "loc": 1695
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -7835,7 +7835,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2374
+      "loc": 2371
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9770,6 +9770,13 @@
       "loc": 41
     },
     {
+      "file": "functions/tests/physics-mode.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 87
+    },
+    {
       "file": "functions/tests/poly-as-wasm.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9872,7 +9879,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 145
+      "loc": 148
     },
     {
       "file": "functions/tests/rational-surd.test.ts",

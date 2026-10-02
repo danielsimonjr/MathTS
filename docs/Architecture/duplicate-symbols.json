@@ -3543,7 +3543,7 @@
     },
     {
       "name": "evaluate",
-      "category": "constant+function",
+      "category": "function",
       "definers": [
         {
           "file": "functions/src/factories/evaluate.ts",
