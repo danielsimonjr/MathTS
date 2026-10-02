@@ -33,7 +33,16 @@ export { loadWasm, isWasmLoaded } from './wasm/WasmLoader.js';
 export { to, toBest } from './typed/unit.js';
 
 // Expression evaluator (wired to full math scope)
-export { evaluate, compileExpr, parse, parser, reviver, replacer } from './factories/evaluate.js';
+export {
+  evaluate,
+  compileExpr,
+  parse,
+  parser,
+  physicsScope,
+  reviver,
+  replacer,
+} from './factories/evaluate.js';
+export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 
 // First-order uncertainty propagation. Kept off `typed/index.js` for the same
 // reason as `cas.ts`: this module imports the expression evaluator, and the
