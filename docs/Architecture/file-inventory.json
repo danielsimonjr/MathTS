@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1879,
+  "totalFiles": 1881,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1154,
+    "build-entry": 1155,
     "test-only": 0,
     "orphan": 0,
-    "test": 640,
+    "test": 641,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1179,
-    "tests": 640,
+    "src": 1180,
+    "tests": 641,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 782,
+    "@danielsimonjr/mathts-functions": 784,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -5952,7 +5952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 621
+      "loc": 630
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6492,6 +6492,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 191
+    },
+    {
+      "file": "functions/src/numeric/propagate-uncertainty.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 151
     },
     {
       "file": "functions/src/numeric/rational-nullspace.ts",
@@ -9817,6 +9824,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 108
+    },
+    {
+      "file": "functions/tests/propagate-uncertainty.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
     },
     {
       "file": "functions/tests/property-invariants.test.ts",

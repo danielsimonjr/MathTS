@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1179, "e": 5869, "re": 2376 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-02", "f": 1180, "e": 5873, "re": 2379 },
   "s": {
-    "loc": 196284,
+    "loc": 196444,
     "cls": 56,
-    "int": 514,
-    "fn": 1906,
+    "int": 516,
+    "fn": 1907,
     "tg": 159,
     "en": 0,
     "co": 1601,
@@ -994,7 +994,7 @@
     },
     "functions/complex": { "f": 4, "exp": ["createIm", "createRe", "createConj", "createArg"] },
     "functions/numeric": {
-      "f": 24,
+      "f": 25,
       "exp": [
         "dlyap",
         "care",
@@ -1857,9 +1857,9 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 244, "o": 9 },
+    { "p": "factories/index.ts", "i": 244, "o": 10 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 130, "o": 0 },
+    { "p": "src/index.ts", "i": 131, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
