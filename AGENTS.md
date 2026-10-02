@@ -249,13 +249,14 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
   versions. The same workflow then tags each bumped package (`name@version`), opens a GitHub
   Release, and calls the Publish workflow in that run. Publish
   (`.github/workflows/publish.yml`) runs `bun run build` and then `changeset publish`, which
-  skips versions already on npm and passes `--access public`. Auth is the repository secret
-  `NPM_TOKEN` only — no `id-token: write`, and no provenance, because provenance needs that
-  OIDC token. Releases created with `GITHUB_TOKEN` do not fire `release` for other workflows,
-  which is why Publish is called in-process rather than waiting on the event. A release a
-  person creates does trigger Publish, and so does **workflow_dispatch** on Publish. Versions
-  already on `main` (the push did not change a `version` field — the packages bumped by #334)
-  are published that way, after `NPM_TOKEN` is set. Do not `npm publish` from a workstation.
+  skips versions already on npm and passes `--access public`. Auth is
+  the repository secret `NPM` (`NODE_AUTH_TOKEN`) — no `id-token: write`, and no provenance,
+  because provenance needs that OIDC token. The secret is not named `NPM_TOKEN`. Releases
+  created with `GITHUB_TOKEN` do not fire `release` for other workflows, which is why Publish
+  is called in-process rather than waiting on the event. A release a person creates does
+  trigger Publish, and so does **workflow_dispatch** on Publish. Versions already on `main`
+  (the push did not change a `version` field — the packages bumped by #334) are published
+  that way. Do not `npm publish` from a workstation.
   **Then verify against the registry, not the publish log** — `npm pack` the published tarball
   into a clean dir _outside_ `~` and typecheck a real consumer against it with
   `skipLibCheck: false`. A green repo gate is not a working package.

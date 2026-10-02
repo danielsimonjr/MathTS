@@ -68,9 +68,9 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 Per-phase (or per coherent change): changeset (`functions` minor for additive, patch for fixes) →
 commit + push → the Release workflow opens the version PR → merge it. That merge tags the bumped
 packages, opens GitHub Releases, and calls the Publish workflow (`bun run build` then
-`changeset publish`) in the same run. Auth is the repository secret `NPM_TOKEN` (not the sibling
-repos' `NPM`). Do not `npm publish` from a workstation. Versions already on `main` are published
-by running Publish via `workflow_dispatch` once the secret is set. **Verify the published tarball**
+`changeset publish`) in the same run. Auth is the repository secret `NPM`, passed as `NODE_AUTH_TOKEN` (not a secret named
+`NPM_TOKEN`). Do not `npm publish` from a workstation. Versions already on `main` are published
+by running Publish via `workflow_dispatch`. **Verify the published tarball**
 (`npm view … version` + clean install in a temp dir + probe). npm can lag ~30–60s after publish
 before `npm view` reflects it.
 

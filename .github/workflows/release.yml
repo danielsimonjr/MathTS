@@ -28,7 +28,7 @@ name: Release
 # it is what raced a local publish on 2026-07-27. Do NOT grant `id-token: write`.
 # With that permission, changesets skipped an empty NPM_TOKEN, fell back to
 # OIDC trusted publishing, and died ENEEDAUTH. Publish authenticates with the
-# NPM_TOKEN secret only.
+# repository secret NPM, as NODE_AUTH_TOKEN. It does not read NPM_TOKEN.
 
 on:
   push:
@@ -118,4 +118,4 @@ jobs:
       contents: read
     uses: ./.github/workflows/publish.yml
     secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NPM: ${{ secrets.NPM }}

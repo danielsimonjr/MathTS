@@ -983,11 +983,11 @@ defects found + fixed:
       SwiftShader spends it where NVIDIA (~6e-8) does not. Our tolerances encoded ONE VENDOR's accuracy
       instead of the STANDARD's — the self-referential-oracle trap again. Now adapter-aware via
       `functions/tests/helpers/gpu-hardware.ts`; on real hardware the bound TIGHTENS back to 1e-4.
-- [x] ⚠️ **NEEDS DANIEL — set the repository secret `NPM_TOKEN` (this repo does not read `NPM`).**
-      Publish is `.github/workflows/publish.yml` (called from Release when a push bumps a version,
-      and on `workflow_dispatch` / a person-created `release`). It does not use OIDC. Until
-      `NPM_TOKEN` is set, that job fails in its first step and publishes nothing. The 20 versions
-      from #334 are published by running Publish from the Actions tab after the secret exists.
+- [x] ⚠️ **The npm token is the repository secret `NPM` (not `NPM_TOKEN`).** Publish is
+      `.github/workflows/publish.yml` (called from Release when a push bumps a version, and on
+      `workflow_dispatch` / a person-created `release`). It sets `NODE_AUTH_TOKEN` from
+      `secrets.NPM` and does not use OIDC. The 20 versions from #334 are published by running
+      Publish from the Actions tab.
       Historical note, kept because it is why `id-token: write` stays off: The Release
       workflow now correctly opens the "Version Packages" PR (verified: PR #155, merged), but the
       publish step then fails:
