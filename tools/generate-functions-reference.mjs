@@ -95,6 +95,7 @@ const DOMAIN_SUPPLEMENT = {
   'Linear Algebra': [
     'circulant', 'companion', 'generalizedEig', 'laplacianMatrix', 'logdet',
     'lowRankApprox', 'matrixExpm', 'matrixLogm', 'matrixSqrtm', 'norm2', 'normFro',
+    'rationalNullspace',
     'qz', 'singularValues', 'toeplitz', 'tril', 'triu', 'vander',
   ],
   Geometry: [
