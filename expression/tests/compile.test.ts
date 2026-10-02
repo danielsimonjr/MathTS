@@ -162,6 +162,36 @@ describe('compile - SymbolNode', () => {
     const node = symbolNode('undefined_var');
     expect(() => compile(node, mathScope).evaluate()).toThrow('Undefined symbol "undefined_var"');
   });
+
+  it('should construct a valueless unit when Unit.isValuelessUnit accepts the name', () => {
+    function Unit(this: { name: string; value: null }, value: null, unitName: string) {
+      this.value = value;
+      this.name = unitName;
+    }
+    Unit.isValuelessUnit = (unitName: string) => unitName === 'km';
+    const scope = { ...mathScope, Unit };
+    const result = compile(symbolNode('km'), scope).evaluate() as { name: string; value: null };
+    expect(result.name).toBe('km');
+    expect(result.value).toBeNull();
+  });
+
+  it('should prefer a user binding over a unit symbol', () => {
+    function Unit(this: { name: string }, _value: null, unitName: string) {
+      this.name = unitName;
+    }
+    Unit.isValuelessUnit = (unitName: string) => unitName === 'km';
+    const scope = { ...mathScope, Unit };
+    expect(compile(symbolNode('km'), scope).evaluate({ km: 5 })).toBe(5);
+  });
+
+  it('should not treat a math-namespace function as a unit', () => {
+    function Unit(this: { name: string }, _value: null, unitName: string) {
+      this.name = unitName;
+    }
+    Unit.isValuelessUnit = () => true;
+    const scope = { ...mathScope, Unit, min: 'the-function' };
+    expect(compile(symbolNode('min'), scope).evaluate()).toBe('the-function');
+  });
 });
 
 describe('compile - OperatorNode', () => {

@@ -207,6 +207,29 @@ function compileSymbolNode(
     };
   }
 
+  // Valueless unit symbols (`km`, `s`, …) are not own properties of the math
+  // namespace. Resolve them through the trusted Unit constructor when the
+  // name is a real unit. A same-named function already on `math` (for
+  // example `min`) keeps the branch above. User scope still wins.
+  const unitCtor = math.Unit as
+    | {
+        isValuelessUnit?: (unitName: string) => boolean;
+        new (value: null, unitName: string): unknown;
+      }
+    | undefined;
+  if (
+    typeof unitCtor === 'function' &&
+    typeof unitCtor.isValuelessUnit === 'function' &&
+    unitCtor.isValuelessUnit(name)
+  ) {
+    return function evalUnitSymbol(scope: Scope) {
+      if (scope.has(name)) {
+        return scope.get(name);
+      }
+      return new unitCtor(null, name);
+    };
+  }
+
   // Unknown symbol - check scope at runtime
   return function evalSymbolNode(scope: Scope) {
     if (scope.has(name)) {
