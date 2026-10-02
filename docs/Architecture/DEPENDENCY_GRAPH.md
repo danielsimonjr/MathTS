@@ -152,7 +152,7 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/statistics**: 14 files
 - **functions/complex**: 4 files
-- **functions/numeric**: 22 files
+- **functions/numeric**: 23 files
 - **functions/utils**: 34 files
 - **functions/arithmetic**: 38 files
 - **functions/signal**: 12 files
@@ -208,7 +208,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`                                                                     | 46             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-expression` | 471            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-expression` | 472            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 475            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4243,19 +4243,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                              | Imports                                                                                                                            | Type      |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `../numeric/solveODE.js`          | `rosenbrockSolve`                                                                                                                  | Import    |
-| `../numeric/adaptive-quad.js`     | `quad`                                                                                                                             | Import    |
-| `../numeric/solveParabolicPDE.js` | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
-| `../numeric/solveDAE.js`          | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
-| `../numeric/solveDDE.js`          | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
+| File                               | Imports                                                                                                                            | Type      |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
+| `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
+| `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceResult`                                                                                       | Re-export |
+| `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
+| `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
+| `../numeric/solveDDE.js`           | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
 
 **Exports:**
 
 - Interfaces: `FindRootOptions`, `MinimizeOptions`, `ODESolution`, `LinprogOptions`, `LinprogResult`
 - Functions: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`, `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`, `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`, `curvefit`, `expfit`, `logfit`, `powerfit`, `solveODESystem`, `stiffODESolver`, `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`, `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `linprog`, `linprog`, `solvePDE`
-- Re-exports: `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`, `solveDAE`, `SolveDAEOptions`, `DAESolution`, `DAEDifferential`, `DAEConstraint`, `DAEJacobianBlocks`, `solveDDE`, `SolveDDEOptions`, `DDESolution`, `DDEForcing`, `DDEHistory`
+- Re-exports: `rationalNullspace`, `RationalNullspaceResult`, `solveParabolicPDE`, `SolveParabolicPDEOptions`, `ParabolicPDESolution`, `ParabolicBC`, `SpaceCoefficient`, `BoundaryDatum`, `ParabolicSource`, `solveDAE`, `SolveDAEOptions`, `DAESolution`, `DAEDifferential`, `DAEConstraint`, `DAEJacobianBlocks`, `solveDDE`, `SolveDDEOptions`, `DDESolution`, `DDEForcing`, `DDEHistory`
 
 ---
 
@@ -8168,6 +8169,21 @@ graph LR
 
 - Interfaces: `RootsLegendreResult`
 - Functions: `rootsLegendre`
+
+---
+
+### `functions/src/numeric/rational-nullspace.ts` - Exact rational null space.
+
+**Workspace Dependencies:**
+
+| Package                      | Import                 |
+| ---------------------------- | ---------------------- |
+| `@danielsimonjr/mathts-core` | `Fraction, isFraction` |
+
+**Exports:**
+
+- Interfaces: `RationalNullspaceResult`
+- Functions: `rationalNullspace`
 
 ---
 
@@ -17972,7 +17988,7 @@ graph TD
         N283[matrix-functions]
         N284[bfgs]
         N285[interval]
-        N286[...12 more]
+        N286[...13 more]
     end
 
     subgraph Functions/utils
@@ -18382,14 +18398,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1177   |
+| Total TypeScript Files  | 1178   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 195875 |
-| Total Exports           | 5854   |
-| Total Re-exports        | 2367   |
+| Total Lines of Code     | 196040 |
+| Total Exports           | 5857   |
+| Total Re-exports        | 2369   |
 | Total Classes           | 55     |
-| Total Interfaces        | 511    |
-| Total Functions         | 1904   |
+| Total Interfaces        | 512    |
+| Total Functions         | 1905   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 590    |

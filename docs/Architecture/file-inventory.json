@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-02",
-  "totalFiles": 1874,
+  "totalFiles": 1876,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1152,
+    "build-entry": 1153,
     "test-only": 0,
     "orphan": 0,
-    "test": 637,
+    "test": 638,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1177,
-    "tests": 637,
+    "src": 1178,
+    "tests": 638,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 777,
+    "@danielsimonjr/mathts-functions": 779,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -6487,6 +6487,13 @@
       "loc": 191
     },
     {
+      "file": "functions/src/numeric/rational-nullspace.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 164
+    },
+    {
       "file": "functions/src/numeric/solveDAE.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7828,7 +7835,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2370
+      "loc": 2371
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9866,6 +9873,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 29
+    },
+    {
+      "file": "functions/tests/rational-nullspace.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 148
     },
     {
       "file": "functions/tests/rational-surd.test.ts",

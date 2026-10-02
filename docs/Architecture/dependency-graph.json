@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-02",
-    "totalFiles": 1177,
+    "totalFiles": 1178,
     "totalModules": 83,
-    "totalExports": 5854
+    "totalExports": 5857
   },
   "entryPoints": [
     {
@@ -10403,6 +10403,11 @@
             "imports": ["quad"]
           },
           {
+            "file": "../numeric/rational-nullspace.js",
+            "imports": ["rationalNullspace", "RationalNullspaceResult"],
+            "reExport": true
+          },
+          {
             "file": "../numeric/solveParabolicPDE.js",
             "imports": [
               "solveParabolicPDE",
@@ -10435,6 +10440,8 @@
         ],
         "workspaceDependencies": [],
         "exports": [
+          "rationalNullspace",
+          "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
           "ParabolicPDESolution",
@@ -10488,6 +10495,8 @@
           "solvePDE"
         ],
         "reExported": [
+          "rationalNullspace",
+          "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
           "ParabolicPDESolution",
@@ -19359,6 +19368,22 @@
         "exports": ["rootsLegendre"],
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
+      },
+      "functions/src/numeric/rational-nullspace.ts": {
+        "description": "Exact rational null space.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Fraction", "isFraction"]
+          }
+        ],
+        "exports": ["rationalNullspace"],
+        "interfaces": ["RationalNullspaceResult"],
+        "functions": ["rationalNullspace"]
       },
       "functions/src/numeric/structured-solvers.ts": {
         "description": "Structured and indefinite direct linear solvers.",
@@ -39276,6 +39301,7 @@
           "functions/src/numeric/minimize-scalar.ts",
           "functions/src/numeric/open-root-finders.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/rational-nullspace.ts",
           "functions/src/numeric/structured-solvers.ts",
           "functions/src/numeric/monte-carlo.ts"
         ]
@@ -40182,17 +40208,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1177,
+    "totalTypeScriptFiles": 1178,
     "totalModules": 83,
-    "totalLinesOfCode": 195875,
-    "totalExports": 5854,
+    "totalLinesOfCode": 196040,
+    "totalExports": 5857,
     "totalClasses": 55,
-    "totalInterfaces": 511,
-    "totalFunctions": 1904,
+    "totalInterfaces": 512,
+    "totalFunctions": 1905,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1598,
-    "totalReExports": 2367,
+    "totalReExports": 2369,
     "totalTypeOnlyImports": 590,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
