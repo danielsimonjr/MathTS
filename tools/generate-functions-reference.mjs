@@ -105,7 +105,7 @@ const DOMAIN_SUPPLEMENT = {
   'Graph Theory': ['betweennessCentrality', 'eigenvectorCentrality', 'pageRank'],
   'Computer Algebra System (CAS)': ['casDerivative', 'casExpand', 'casFactor', 'casSimplify', 'symbolicIntegral'],
   'Numerical Methods': [
-    'derivativeAt', 'gradient', 'gradientAt', 'gradientDescent', 'hessian',
+    'derivativeAt', 'gradient', 'gradientAt', 'gradientDescent', 'hessian', 'propagateUncertainty',
     'levenbergMarquardt', 'nelderMead', 'valueAndDerivativeAt',
   ],
   'Interpolation & Curve Fitting': ['chebyshevFit', 'legendreFit', 'newtonInterp'],
