@@ -75,6 +75,11 @@ export interface GaussLegendre4Options {
 export interface GaussLegendre4Solution {
   t: number[];
   y: number[][];
+  /**
+   * Picard iterations consumed on each completed step. Empty when `tspan`
+   * has no width. One entry per step, in step order.
+   */
+  iterations: number[];
 }
 
 function assertFiniteVector(label: string, v: readonly number[]): void {
@@ -120,7 +125,7 @@ export function gaussLegendre4(
   }
 
   if (t0 === t1) {
-    return { t: [t0], y: [y0.slice()] };
+    return { t: [t0], y: [y0.slice()], iterations: [] };
   }
 
   const span = t1 - t0;
@@ -153,6 +158,7 @@ export function gaussLegendre4(
 
   const t: number[] = [t0];
   const y: number[][] = [y0.slice()];
+  const iterations: number[] = [];
   let tn = t0;
   let yn = y0.slice();
 
@@ -160,9 +166,11 @@ export function gaussLegendre4(
     let Y0 = yn.slice();
     let Y1 = yn.slice();
     let converged = false;
+    let used = 0;
     const next = new Array<number>(n);
 
     for (let iter = 0; iter < picardMaxIter; iter++) {
+      used = iter + 1;
       const k0 = f(tn + c0 * h, Y0);
       const k1 = f(tn + c1 * h, Y1);
       if (k0.length !== n || k1.length !== n) {
@@ -203,7 +211,8 @@ export function gaussLegendre4(
     yn = next;
     t.push(tn);
     y.push(yn.slice());
+    iterations.push(used);
   }
 
-  return { t, y };
+  return { t, y, iterations };
 }

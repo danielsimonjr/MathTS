@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-02",
+  "generated": "2026-10-03",
   "totalFiles": 1883,
   "byDisposition": {
     "reachable": 25,
@@ -5805,7 +5805,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 368
+      "loc": 413
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -5966,7 +5966,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 630
+      "loc": 631
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6435,7 +6435,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 210
+      "loc": 219
     },
     {
       "file": "functions/src/numeric/gauss-nodes.ts",
@@ -6512,14 +6512,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 250
     },
     {
       "file": "functions/src/numeric/rational-nullspace.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 164
+      "loc": 197
     },
     {
       "file": "functions/src/numeric/solveDAE.ts",
@@ -7863,7 +7863,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2382
+      "loc": 2386
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9319,7 +9319,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 132
+      "loc": 139
     },
     {
       "file": "functions/tests/geometry-consumers-oracle.test.ts",
@@ -9816,7 +9816,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 87
+      "loc": 112
     },
     {
       "file": "functions/tests/poly-as-wasm.test.ts",
@@ -9844,7 +9844,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 89
+      "loc": 114
     },
     {
       "file": "functions/tests/property-invariants.test.ts",
@@ -9928,7 +9928,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 148
+      "loc": 160
     },
     {
       "file": "functions/tests/rational-surd.test.ts",

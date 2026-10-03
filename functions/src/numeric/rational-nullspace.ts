@@ -14,6 +14,17 @@
 
 import { Fraction, isFraction } from '@danielsimonjr/mathts-core';
 
+/** Options for {@link rationalNullspace}. */
+export interface RationalNullspaceOptions {
+  /**
+   * Column count of a matrix that has no rows. A `0×n` matrix (every row
+   * was dropped because it was zero) has null-space dimension `n`: the
+   * standard basis. An empty array does not record `n`, so pass `columns`.
+   * When the matrix has a row, `columns` must match that row length.
+   */
+  columns?: number;
+}
+
 /** One exact null-space basis of a rational matrix. */
 export interface RationalNullspaceResult {
   /**
@@ -117,6 +128,10 @@ function rref(matrix: Fraction[][]): number[] {
  *
  * The numeric {@link nullspace} is unchanged. This function does not replace it.
  *
+ * A matrix with no rows is the null space of a `0×n` system only when
+ * `options.columns` is `n`. With no `columns`, an empty array stays
+ * `{ basis: [], rank: 0 }`.
+ *
  * @example
  * ```ts
  * // period, length, gravity — one dimensionless group T² · g / L
@@ -128,11 +143,29 @@ function rref(matrix: Fraction[][]): number[] {
  * ```
  */
 export function rationalNullspace(
-  matrix: ReadonlyArray<ReadonlyArray<number | Fraction>>
+  matrix: ReadonlyArray<ReadonlyArray<number | Fraction>>,
+  options?: RationalNullspaceOptions
 ): RationalNullspaceResult {
-  if (matrix.length === 0) return { basis: [], rank: 0 };
+  if (matrix.length === 0) {
+    const cols = options?.columns ?? 0;
+    if (!Number.isInteger(cols) || cols < 0) {
+      throw new TypeError('rationalNullspace: columns must be a non-negative integer');
+    }
+    const basis: Fraction[][] = [];
+    for (let free = 0; free < cols; free++) {
+      const vec: Fraction[] = [];
+      for (let j = 0; j < cols; j++) vec.push(new Fraction(j === free ? 1n : 0n, 1n));
+      basis.push(vec);
+    }
+    return { basis, rank: 0 };
+  }
 
   const cols = matrix[0].length;
+  if (options?.columns !== undefined && options.columns !== cols) {
+    throw new TypeError(
+      `rationalNullspace: columns ${options.columns} does not match row length ${cols}`
+    );
+  }
   for (let i = 0; i < matrix.length; i++) {
     if (!Array.isArray(matrix[i]) || matrix[i].length !== cols) {
       throw new TypeError(

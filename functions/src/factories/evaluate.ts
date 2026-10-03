@@ -144,6 +144,14 @@ function elementaryChargeUnit(): UnitInstance {
 }
 
 /**
+ * How physics mode binds bare `e`.
+ *
+ * `unit` is a `Unit` of `1.602176634e-19 C`. `scalar` is that same SI
+ * magnitude as a plain number, so `1 - e^2` is ordinary arithmetic.
+ */
+export type PhysicsCharge = 'unit' | 'scalar';
+
+/**
  * Options for {@link evaluate}, {@link compileExpr}, and {@link parser}.
  */
 export interface PhysicsEvaluateOptions {
@@ -155,12 +163,25 @@ export interface PhysicsEvaluateOptions {
   /**
    * Opt-in physics reading of bare `e`.
    *
-   * When `true`, `e` is the elementary charge `1.602176634e-19 C` (a Unit).
+   * When `true`, `e` is the elementary charge. The default binding is the
+   * Unit `1.602176634e-19 C`. Pass `charge: 'scalar'` for the plain SI
+   * magnitude, so a dimensionless formula such as `1 - e^2` can subtract.
    * `E` stays unbound so a formula can use it for energy. Euler's number is
    * only `exp(x)`, for example `exp(1)`. An explicit scope binding for `e`
    * still wins. Default `false`: `e` is Euler's number.
    */
   physics?: boolean;
+  /**
+   * Binding of bare `e` when {@link physics} is `true`. Default `'unit'`.
+   * Setting this without `physics: true` throws.
+   */
+  charge?: PhysicsCharge;
+}
+
+/** Options for {@link physicsScope}. */
+export interface PhysicsScopeOptions {
+  /** Default `'unit'`. `'scalar'` binds the SI magnitude instead of a Unit. */
+  charge?: PhysicsCharge;
 }
 
 function isMapScope(scope: object): scope is Scope {
@@ -172,16 +193,22 @@ function isMapScope(scope: object): scope is Scope {
   );
 }
 
+function physicsBinding(charge: PhysicsCharge | undefined): UnitInstance | number {
+  return charge === 'scalar' ? ELEMENTARY_CHARGE_COULOMB : elementaryChargeUnit();
+}
+
 /**
  * Scope in which bare `e` is the elementary charge.
  *
  * Pass the result as `evaluate`'s scope, or use `{ physics: true }`.
  * Entries already present on `scope` win, including an explicit `e`.
+ * `{ charge: 'scalar' }` binds the SI magnitude instead of a Unit.
  */
 export function physicsScope(
-  scope?: Record<string, unknown> | Scope
+  scope?: Record<string, unknown> | Scope,
+  options?: PhysicsScopeOptions
 ): Record<string, unknown> | Scope {
-  const charge = elementaryChargeUnit();
+  const charge = physicsBinding(options?.charge);
   if (scope == null) return { e: charge };
   if (isMapScope(scope)) {
     if (scope.has('e')) return scope;
@@ -216,9 +243,24 @@ export function physicsScope(
  * evaluate('x^2 + 1', { x: 3 });                  // 10
  * evaluate('e');                                  // Euler's number
  * evaluate('e', undefined, { physics: true });    // 1.602176634e-19 C
+ * evaluate('e', undefined, { physics: true, charge: 'scalar' }); // 1.602176634e-19
+ * evaluate('1 - e^2', undefined, { physics: true, charge: 'scalar' }); // near 1
  * evaluate('exp(1)', undefined, { physics: true }); // Euler's number
  * ```
  */
+function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOptions | undefined {
+  if (options?.charge !== undefined && options.charge !== 'unit' && options.charge !== 'scalar') {
+    throw new TypeError('charge must be "unit" or "scalar"');
+  }
+  if (options?.physics !== true) {
+    if (options?.charge !== undefined) {
+      throw new TypeError('charge requires { physics: true }');
+    }
+    return undefined;
+  }
+  return { charge: options.charge ?? 'unit' };
+}
+
 export function evaluate(
   expr: string,
   scope?: Record<string, unknown> | Scope,
@@ -234,7 +276,8 @@ export function evaluate(
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
 ): unknown | unknown[] {
-  const bound = options?.physics === true ? physicsScope(scope) : scope;
+  const physics = assertPhysicsOptions(options);
+  const bound = physics === undefined ? scope : physicsScope(scope, physics);
   const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
   if (Array.isArray(exprOrExprs)) return _evaluate(exprOrExprs, bound, inner);
   return _evaluate(exprOrExprs, bound, inner);
@@ -256,6 +299,7 @@ export function evaluate(
  * compiled.evaluate({ x: 2, y: 1 }); // 5
  * compiled.evaluate({ x: 3, y: 2 }); // 11
  * compileExpr('e', { physics: true }).evaluate(); // 1.602176634e-19 C
+ * compileExpr('1 - e^2', { physics: true, charge: 'scalar' }).evaluate(); // near 1
  * ```
  */
 export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
@@ -265,10 +309,11 @@ export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
     expr,
     options?.unsafe === true ? { unsafe: true } : undefined
   );
-  if (options?.physics !== true) return compiled;
+  const physics = assertPhysicsOptions(options);
+  if (physics === undefined) return compiled;
   return {
     evaluate(scope?: Record<string, unknown> | Scope): unknown {
-      return compiled.evaluate(physicsScope(scope));
+      return compiled.evaluate(physicsScope(scope, physics));
     },
   };
 }
@@ -298,8 +343,8 @@ export function compileExpr(expr: string, options?: PhysicsEvaluateOptions) {
 export function parser(options?: PhysicsEvaluateOptions) {
   const scope: Record<string, unknown> = {};
   const callOptions: PhysicsEvaluateOptions | undefined =
-    options?.physics === true || options?.unsafe === true
-      ? { physics: options.physics, unsafe: options.unsafe }
+    options?.physics === true || options?.unsafe === true || options?.charge !== undefined
+      ? { physics: options?.physics, unsafe: options?.unsafe, charge: options?.charge }
       : undefined;
   return {
     /** The live scope object — assignments during `evaluate` land here. */

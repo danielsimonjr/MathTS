@@ -49,6 +49,7 @@ export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 // evaluator imports the typed barrel.
 export {
   propagateUncertainty,
+  type UncertaintyExpression,
   type UncertaintyPropagationOptions,
   type UncertaintyPropagationResult,
 } from './numeric/propagate-uncertainty.js';

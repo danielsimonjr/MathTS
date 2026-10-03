@@ -83,4 +83,29 @@ describe('physics mode for e', () => {
     expect(evaluate('2 + 3', undefined, { physics: true })).toBe(5);
     expect(evaluate('sin(pi / 2)', undefined, { physics: true })).toBeCloseTo(1);
   });
+
+  it('binds bare e as the SI magnitude when charge is scalar', () => {
+    const options = { physics: true, charge: 'scalar' as const };
+    expect(evaluate('e', undefined, options)).toBe(ELEMENTARY_CHARGE_C);
+    expect(evaluate('1 - e^2', undefined, options)).toBeCloseTo(1 - ELEMENTARY_CHARGE_C ** 2);
+    expect(evaluate('e^2', undefined, options)).toBeCloseTo(ELEMENTARY_CHARGE_C ** 2);
+    expect(evaluate('exp(1)', undefined, options)).toBeCloseTo(Math.E);
+    expect(() => evaluate('E', undefined, options)).toThrow(/Undefined symbol "E"/);
+    expect(evaluate('e', { e: 3 }, options)).toBe(3);
+    expect(compileExpr('1 - e^2', options).evaluate()).toBeCloseTo(1 - ELEMENTARY_CHARGE_C ** 2);
+    expect(parser(options).evaluate('e')).toBe(ELEMENTARY_CHARGE_C);
+    expect(evaluate('e', physicsScope(undefined, { charge: 'scalar' }))).toBe(ELEMENTARY_CHARGE_C);
+  });
+
+  it('still returns a Unit from physics mode when charge is omitted', () => {
+    expect(() => evaluate('1 - e^2', undefined, { physics: true })).toThrow();
+    expect(asUnit(evaluate('e', undefined, { physics: true, charge: 'unit' })).toNumber('C')).toBe(
+      ELEMENTARY_CHARGE_C
+    );
+  });
+
+  it('rejects charge without physics mode', () => {
+    expect(() => evaluate('e', undefined, { charge: 'scalar' })).toThrow(/physics: true/);
+    expect(() => compileExpr('e', { charge: 'scalar' })).toThrow(/physics: true/);
+  });
 });

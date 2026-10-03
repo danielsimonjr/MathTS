@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-02'
+  lastUpdated: '2026-10-03'
   totalFiles: 1181
   totalModules: 83
-  totalExports: 5903
+  totalExports: 5905
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -5807,6 +5807,7 @@ modules:
         - file: ./numeric/propagate-uncertainty.js
           imports:
             - propagateUncertainty
+            - UncertaintyExpression
             - UncertaintyPropagationOptions
             - UncertaintyPropagationResult
           reExport: true
@@ -6647,6 +6648,7 @@ modules:
         - reviver
         - replacer
         - propagateUncertainty
+        - UncertaintyExpression
         - UncertaintyPropagationOptions
         - UncertaintyPropagationResult
         - help
@@ -7062,6 +7064,7 @@ modules:
         - reviver
         - replacer
         - propagateUncertainty
+        - UncertaintyExpression
         - UncertaintyPropagationOptions
         - UncertaintyPropagationResult
         - help
@@ -10216,6 +10219,7 @@ modules:
         - file: ../numeric/rational-nullspace.js
           imports:
             - rationalNullspace
+            - RationalNullspaceOptions
             - RationalNullspaceResult
           reExport: true
         - file: ../numeric/solveParabolicPDE.js
@@ -10258,6 +10262,7 @@ modules:
       workspaceDependencies: []
       exports:
         - rationalNullspace
+        - RationalNullspaceOptions
         - RationalNullspaceResult
         - solveParabolicPDE
         - SolveParabolicPDEOptions
@@ -10319,6 +10324,7 @@ modules:
         - solvePDE
       reExported:
         - rationalNullspace
+        - RationalNullspaceOptions
         - RationalNullspaceResult
         - solveParabolicPDE
         - SolveParabolicPDEOptions
@@ -17399,6 +17405,7 @@ modules:
         - reviver
       interfaces:
         - PhysicsEvaluateOptions
+        - PhysicsScopeOptions
       functions:
         - physicsScope
         - evaluate
@@ -18374,6 +18381,7 @@ modules:
       exports:
         - rationalNullspace
       interfaces:
+        - RationalNullspaceOptions
         - RationalNullspaceResult
       functions:
         - rationalNullspace
@@ -38096,15 +38104,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1181
   totalModules: 83
-  totalLinesOfCode: 196631
-  totalExports: 5903
+  totalLinesOfCode: 196822
+  totalExports: 5905
   totalClasses: 56
-  totalInterfaces: 517
+  totalInterfaces: 519
   totalFunctions: 1911
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1603
-  totalReExports: 2403
+  totalReExports: 2405
   totalTypeOnlyImports: 593
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
