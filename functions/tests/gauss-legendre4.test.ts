@@ -103,6 +103,13 @@ describe('gaussLegendre4 integration', () => {
     const sol = gaussLegendre4(harmonic, [1, 0], [2, 2]);
     expect(sol.t).toEqual([2]);
     expect(sol.y).toEqual([[1, 0]]);
+    expect(sol.iterations).toEqual([]);
+  });
+
+  it('reports one Picard count per completed step', () => {
+    const sol = gaussLegendre4(harmonic, [1, 0], [0, 1], { steps: 20 });
+    expect(sol.iterations).toHaveLength(20);
+    expect(sol.iterations.every((n) => Number.isInteger(n) && n >= 1)).toBe(true);
   });
 
   it('throws GL4ConvergenceError when Picard does not contract', () => {

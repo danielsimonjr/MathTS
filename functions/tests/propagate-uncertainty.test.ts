@@ -82,6 +82,31 @@ describe('propagateUncertainty', () => {
     );
   });
 
+  it('propagates a function with the same central-difference partials as a linear product', () => {
+    const f = (v: Record<string, number>) => v.x * v.y;
+    const result = propagateUncertainty(f, { x: 2, y: 3 }, { x: 0.1, y: 0.2 });
+    expect(result.value).toBe(6);
+    expect(result.partials.x).toBeCloseTo(3);
+    expect(result.partials.y).toBeCloseTo(2);
+    expect(result.sigma).toBeCloseTo(0.5);
+    expect(result.curvature).toBeUndefined();
+  });
+
+  it('reports a curvature ratio without folding it into sigma', () => {
+    const f = (v: Record<string, number>) => v.x * v.x;
+    const result = propagateUncertainty(f, { x: 3 }, { x: 0.1 }, { curvatureOffsets: { x: 0.1 } });
+    expect(result.partials.x).toBeCloseTo(6);
+    expect(result.sigma).toBeCloseTo(0.6);
+    // f(3.1)+f(2.9)-2f(3) = 0.02; linear term is 6*0.1 = 0.6; ratio = 0.01/0.6
+    expect(result.curvature?.x).toBeCloseTo(0.01 / 0.6);
+  });
+
+  it('rejects relativeStep on a string expression', () => {
+    expect(() => propagateUncertainty('x', { x: 1 }, { x: 0.1 }, { relativeStep: 1e-4 })).toThrow(
+      /relativeStep/
+    );
+  });
+
   it('is the function exported from the package entry', () => {
     expect(exported).toBe(propagateUncertainty);
   });

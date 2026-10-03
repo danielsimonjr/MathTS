@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-02",
+    "lastUpdated": "2026-10-03",
     "totalFiles": 1181,
     "totalModules": 83,
-    "totalExports": 5903
+    "totalExports": 5905
   },
   "entryPoints": [
     {
@@ -6005,6 +6005,7 @@
             "file": "./numeric/propagate-uncertainty.js",
             "imports": [
               "propagateUncertainty",
+              "UncertaintyExpression",
               "UncertaintyPropagationOptions",
               "UncertaintyPropagationResult"
             ],
@@ -6867,6 +6868,7 @@
           "reviver",
           "replacer",
           "propagateUncertainty",
+          "UncertaintyExpression",
           "UncertaintyPropagationOptions",
           "UncertaintyPropagationResult",
           "help",
@@ -7283,6 +7285,7 @@
           "reviver",
           "replacer",
           "propagateUncertainty",
+          "UncertaintyExpression",
           "UncertaintyPropagationOptions",
           "UncertaintyPropagationResult",
           "help",
@@ -10516,7 +10519,7 @@
           },
           {
             "file": "../numeric/rational-nullspace.js",
-            "imports": ["rationalNullspace", "RationalNullspaceResult"],
+            "imports": ["rationalNullspace", "RationalNullspaceOptions", "RationalNullspaceResult"],
             "reExport": true
           },
           {
@@ -10566,6 +10569,7 @@
         "workspaceDependencies": [],
         "exports": [
           "rationalNullspace",
+          "RationalNullspaceOptions",
           "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
@@ -10628,6 +10632,7 @@
         ],
         "reExported": [
           "rationalNullspace",
+          "RationalNullspaceOptions",
           "RationalNullspaceResult",
           "solveParabolicPDE",
           "SolveParabolicPDEOptions",
@@ -18581,7 +18586,7 @@
           "replacer",
           "reviver"
         ],
-        "interfaces": ["PhysicsEvaluateOptions"],
+        "interfaces": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"],
         "functions": [
           "physicsScope",
           "evaluate",
@@ -19552,7 +19557,7 @@
           }
         ],
         "exports": ["rationalNullspace"],
-        "interfaces": ["RationalNullspaceResult"],
+        "interfaces": ["RationalNullspaceOptions", "RationalNullspaceResult"],
         "functions": ["rationalNullspace"]
       },
       "functions/src/numeric/structured-solvers.ts": {
@@ -40405,15 +40410,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1181,
     "totalModules": 83,
-    "totalLinesOfCode": 196631,
-    "totalExports": 5903,
+    "totalLinesOfCode": 196822,
+    "totalExports": 5905,
     "totalClasses": 56,
-    "totalInterfaces": 517,
+    "totalInterfaces": 519,
     "totalFunctions": 1911,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1603,
-    "totalReExports": 2403,
+    "totalReExports": 2405,
     "totalTypeOnlyImports": 593,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

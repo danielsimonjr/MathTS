@@ -13,7 +13,11 @@
 
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
-export { rationalNullspace, type RationalNullspaceResult } from '../numeric/rational-nullspace.js';
+export {
+  rationalNullspace,
+  type RationalNullspaceOptions,
+  type RationalNullspaceResult,
+} from '../numeric/rational-nullspace.js';
 
 // General 1-D parabolic PDE via method-of-lines onto the BDF stiff solver (new
 // public entry, distinct from the legacy explicit-Euler heat-only `solvePDE`).

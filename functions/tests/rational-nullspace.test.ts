@@ -140,6 +140,18 @@ describe('rationalNullspace', () => {
     expect(rationalNullspace([])).toEqual({ basis: [], rank: 0 });
   });
 
+  it('returns the standard basis of a matrix with no rows when columns is set', () => {
+    const { basis, rank } = rationalNullspace([], { columns: 3 });
+    expect(rank).toBe(0);
+    expect(basis.map(ints)).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+    expect(() => rationalNullspace([], { columns: -1 })).toThrow(/columns/);
+    expect(() => rationalNullspace([[1, 2]], { columns: 3 })).toThrow(/does not match/);
+  });
+
   it('rejects a jagged matrix and a non-finite entry', () => {
     expect(() => rationalNullspace([[1, 2], [3]])).toThrow(/row 1/);
     expect(() => rationalNullspace([[Number.NaN]])).toThrow(/finite number/);
