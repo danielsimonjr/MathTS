@@ -3396,14 +3396,17 @@
 
       ## Expression Evaluation
 
-      | Function                  | Description                                                                      |
-      | ------------------------- | -------------------------------------------------------------------------------- |
-      | `evaluate(expr[, scope])` | Evaluate an expression string                                                    |
-      | `compileExpr(expr)`       | Compile once, evaluate many                                                      |
-      | `parse(expr)`             | Parse an expression into an AST node                                             |
-      | `parser()`                | Create a stateful parser with a scope retained across calls                      |
-      | `reviver(key, value)`     | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers        |
-      | `replacer(key, value)`    | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
+      | Function                        | Description                                                                      |
+      | ------------------------------- | -------------------------------------------------------------------------------- |
+      | `evaluate(expr[, scope])`       | Evaluate an expression string                                                    |
+      | `evaluateScalar(node[, scope])` | Evaluate a scalar node from `scalar` (typed tree; a formula string is rejected)  |
+      | `scalar`                        | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                   |
+      | `ScalarEvalError`               | Thrown when a scalar node cannot be evaluated                                    |
+      | `compileExpr(expr)`             | Compile once, evaluate many                                                      |
+      | `parse(expr)`                   | Parse an expression into an AST node                                             |
+      | `parser()`                      | Create a stateful parser with a scope retained across calls                      |
+      | `reviver(key, value)`           | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers        |
+      | `replacer(key, value)`          | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
 
       ### Details
 
@@ -3488,7 +3491,7 @@
 
       > **Generated** — do not edit by hand. Run `npm run docs:functions` after
       > adding or removing a public export. Complete index of every public name in
-      > `@danielsimonjr/mathts-functions` (1080 exports).
+      > `@danielsimonjr/mathts-functions` (1083 exports).
 
       ### Functions by category
 
@@ -3542,15 +3545,15 @@
 
       **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-      **Expression Evaluation** (6): `compileExpr`, `evaluate`, `parser`, `physicsScope`, `replacer`, `reviver`
+      **Expression Evaluation** (8): `compileExpr`, `evaluate`, `evaluateScalar`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`
 
       **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
       **Other exports (uncategorized)** (17): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `loadWasm`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
-      ### Constants & values (68)
+      ### Constants & values (69)
 
-      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
       ### Classes & types (2)
 

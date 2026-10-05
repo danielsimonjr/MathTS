@@ -41,6 +41,21 @@ export { createRangeNode } from './node/RangeNode.js';
 export { createRelationalNode } from './node/RelationalNode.js';
 export { createSymbolNode } from './node/SymbolNode.js';
 
+// Scalar trees for numeric ExprNode lowering (UPT). No formula string is parsed.
+export {
+  createScalarBuilder,
+  SCALAR_FUNCTIONS,
+  SCALAR_FUNCTION_LOWERING,
+  ScalarBuildError,
+} from './scalar-builder.js';
+export type {
+  LoweredScalarFn,
+  ScalarBuilder,
+  ScalarFunctionName,
+  ScalarNode,
+  ScalarOperator,
+} from './scalar-builder.js';
+
 // Expression-language transforms (1-based indices/dims, lazy logical operators).
 // Each factory takes its base function as an injected dependency; hosts assemble
 // them into their expression evaluation scope (see functions/factories/evaluate).

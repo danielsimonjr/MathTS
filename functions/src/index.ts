@@ -44,6 +44,11 @@ export {
 } from './factories/evaluate.js';
 export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 
+// Scalar trees (UPT ExprNode numeric path). `ln` lowers to natural `log`,
+// `log` lowers to `log10`. A formula string is rejected.
+export { evaluateScalar, scalar, ScalarEvalError } from './scalar-eval.js';
+export type { ScalarScope } from './scalar-eval.js';
+
 // First-order uncertainty propagation. Kept off `typed/index.js` for the same
 // reason as `cas.ts`: this module imports the expression evaluator, and the
 // evaluator imports the typed barrel.

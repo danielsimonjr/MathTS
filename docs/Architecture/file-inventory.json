@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-03",
-  "totalFiles": 1883,
+  "generated": "2026-10-05",
+  "totalFiles": 1887,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1156,
+    "build-entry": 1158,
     "test-only": 0,
     "orphan": 0,
-    "test": 642,
+    "test": 644,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1181,
-    "tests": 642,
+    "src": 1183,
+    "tests": 644,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 84,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
-    "@danielsimonjr/mathts-expression": 543,
-    "@danielsimonjr/mathts-functions": 784,
+    "@danielsimonjr/mathts-expression": 545,
+    "@danielsimonjr/mathts-functions": 786,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -4027,7 +4027,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 48
+      "loc": 63
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4189,6 +4189,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 251
+    },
+    {
+      "file": "expression/src/scalar-builder.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 237
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4840,6 +4847,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 311
+    },
+    {
+      "file": "expression/tests/scalar-builder.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 106
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",
@@ -5966,7 +5980,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 631
+      "loc": 636
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6842,6 +6856,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 155
+    },
+    {
+      "file": "functions/src/scalar-eval.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 180
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -9950,6 +9971,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 105
+    },
+    {
+      "file": "functions/tests/scalar-eval.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 131
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

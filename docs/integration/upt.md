@@ -34,6 +34,38 @@ still exists in `<package>/src/index.ts` of the relevant package, since
 the typed-layer expansion has reshaped some surfaces (e.g. `WASMBackend`
 is the AssemblyScript-backed WASM backend).
 
+## Scalar ExprNode evaluation (UPT 6.0.0 phase 6)
+
+`@danielsimonjr/mathts-expression` exports `createScalarBuilder`,
+`SCALAR_FUNCTIONS`, and `SCALAR_FUNCTION_LOWERING`.
+`@danielsimonjr/mathts-functions` exports `scalar` (a builder) and
+`evaluateScalar`. Publish expression `0.10.0` and functions `0.68.0` for
+this surface. The functions dependency range is still `^0.9.0`; the release
+should tighten it to `^0.10.0`.
+
+```ts
+import { scalar, evaluateScalar } from '@danielsimonjr/mathts-functions';
+
+const node = scalar.from({
+  kind: 'op',
+  op: '+',
+  args: [
+    { kind: 'transcendental', fn: 'ln', arg: { kind: 'symbol', name: 'x' } },
+    { kind: 'transcendental', fn: 'log', arg: { kind: 'number', value: 100 } },
+  ],
+});
+// ln stored as natural log; log stored as log10.
+evaluateScalar(node, { x: Math.E }); // 3
+```
+
+`from` accepts builder nodes and the scalar arms `symbol`, `op`,
+`transcendental`, and `abs`. `+ - * /` fold left to right (`^` takes two
+arguments and calls `pow`). A formula string is rejected. `pi`, `e`, `c`,
+and spellings such as `6pi` stay unresolved unless the scope provides them.
+A decimal literal spelling (`'2'`, `'-1'`, `'1e-3'`) resolves when the scope
+has no own property of that name. A non-finite operator or call throws
+`ScalarEvalError`. `integral`, `derivative`, and tensor kinds throw.
+
 ## Open questions from UPT v0.70 §10.2
 
 ### Q1. Does `mathts-expression`'s AST tolerate downstream node extensions?
