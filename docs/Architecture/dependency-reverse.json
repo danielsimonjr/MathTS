@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-03",
+  "generated": "2026-10-05",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -377,6 +377,7 @@
       "functions/src/linalg-extra.ts",
       "functions/src/numeric-extra.ts",
       "functions/src/regression-extra.ts",
+      "functions/src/scalar-eval.ts",
       "functions/src/stats/fit-distribution.ts",
       "functions/src/timeseries-extra.ts",
       "functions/src/typed/index.ts"
@@ -406,6 +407,7 @@
     ],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
+      "functions/src/scalar-eval.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
@@ -686,6 +688,7 @@
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
+    "functions/src/scalar-eval.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
@@ -2590,6 +2593,7 @@
     "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
+    "expression/src/scalar-builder.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/evaluator/evaluate.ts": ["expression/src/evaluator/index.ts"],

@@ -14,6 +14,7 @@ npm install @danielsimonjr/mathts-functions
 
 - Hundreds of typed functions (`add`, `sin`, `svd`-aware ops, `parallelFFT`, …).
 - A wired `parse` / `evaluate` against the full activated math scope.
+- `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected.
 - Per-domain focused entry points are also published: `@danielsimonjr/mathts-{arithmetic,trigonometry,statistics,signal}`.
 
 ## License

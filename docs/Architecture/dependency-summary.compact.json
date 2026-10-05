@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-03", "f": 1181, "e": 5905, "re": 2405 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-05", "f": 1183, "e": 5925, "re": 2418 },
   "s": {
-    "loc": 196822,
-    "cls": 56,
-    "int": 519,
-    "fn": 1911,
+    "loc": 197259,
+    "cls": 58,
+    "int": 520,
+    "fn": 1913,
     "tg": 159,
     "en": 0,
-    "co": 1603,
-    "toi": 593
+    "co": 1606,
+    "toi": 595
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -455,7 +455,7 @@
       "cls": ["Tape", "TapedTensor", "DualTensor"]
     },
     "functions": {
-      "f": 19,
+      "f": 20,
       "exp": [
         "symbolicIntegral",
         "nelderMead",
@@ -478,6 +478,7 @@
         "corrcoef",
         "kendallTau"
       ],
+      "cls": ["ScalarEvalError"],
       "int": [
         "OptimizeResult",
         "LMResult",
@@ -1225,7 +1226,7 @@
       "int": ["CompiledExpression", "StringOptions", "IndexLike"]
     },
     "expression": {
-      "f": 7,
+      "f": 8,
       "exp": [
         "createParser",
         "embeddedDocs",
@@ -1248,7 +1249,8 @@
         "createParenthesisNode",
         "createRangeNode"
       ],
-      "int": ["OperatorProperty"]
+      "cls": ["ScalarBuildError"],
+      "int": ["ScalarBuilder", "OperatorProperty"]
     },
     "expression/evaluator": {
       "f": 2,
@@ -1862,7 +1864,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 10 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 131, "o": 0 },
+    { "p": "src/index.ts", "i": 133, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

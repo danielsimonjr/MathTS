@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-03'
-  totalFiles: 1181
+  lastUpdated: '2026-10-05'
+  totalFiles: 1183
   totalModules: 83
-  totalExports: 5905
+  totalExports: 5925
 entryPoints:
   - file: packages/workerpool/src/index.ts
     type: main
@@ -5804,6 +5804,12 @@ modules:
             - reviver
             - replacer
           reExport: true
+        - file: ./scalar-eval.js
+          imports:
+            - evaluateScalar
+            - scalar
+            - ScalarEvalError
+          reExport: true
         - file: ./numeric/propagate-uncertainty.js
           imports:
             - propagateUncertainty
@@ -6315,6 +6321,11 @@ modules:
             - PhysicsEvaluateOptions
           reExport: true
           typeOnly: true
+        - file: ./scalar-eval.js
+          imports:
+            - ScalarScope
+          reExport: true
+          typeOnly: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -6647,6 +6658,9 @@ modules:
         - physicsScope
         - reviver
         - replacer
+        - evaluateScalar
+        - scalar
+        - ScalarEvalError
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -6936,6 +6950,7 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
+        - ScalarScope
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -7063,6 +7078,9 @@ modules:
         - physicsScope
         - reviver
         - replacer
+        - evaluateScalar
+        - scalar
+        - ScalarEvalError
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -7352,6 +7370,7 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
+        - ScalarScope
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -7617,6 +7636,50 @@ modules:
         - studentizedRangeCDF
         - studentizedRangeQuantile
         - tukeyHSD
+    functions/src/scalar-eval.ts:
+      description: Evaluate a scalar node with MathTS numeric functions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./typed/arithmetic.js
+          imports:
+            - abs
+            - add
+            - cosh
+            - divide
+            - exp
+            - log
+            - log10
+            - log2
+            - multiply
+            - pow
+            - sinh
+            - subtract
+            - tanh
+        - file: ./typed/trigonometry.js
+          imports:
+            - cos
+            - sin
+            - tan
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - ScalarBuildError
+            - createScalarBuilder
+            - LoweredScalarFn
+            - ScalarNode
+            - ScalarOperator
+      exports:
+        - scalar
+        - evaluateScalar
+        - ScalarEvalError
+      classes:
+        - ScalarEvalError
+      functions:
+        - evaluateScalar
+      constants:
+        - scalar
     functions/src/numeric-extra.ts:
       description: Elementwise / cumulative / log-domain primitives (Wave A of the gap analysis).
       externalDependencies: []
@@ -23448,6 +23511,22 @@ modules:
           imports:
             - createSymbolNode
           reExport: true
+        - file: ./scalar-builder.js
+          imports:
+            - createScalarBuilder
+            - SCALAR_FUNCTIONS
+            - SCALAR_FUNCTION_LOWERING
+            - ScalarBuildError
+          reExport: true
+        - file: ./scalar-builder.js
+          imports:
+            - LoweredScalarFn
+            - ScalarBuilder
+            - ScalarFunctionName
+            - ScalarNode
+            - ScalarOperator
+          reExport: true
+          typeOnly: true
       workspaceDependencies: []
       exports:
         - createParser
@@ -23472,6 +23551,15 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - createScalarBuilder
+        - SCALAR_FUNCTIONS
+        - SCALAR_FUNCTION_LOWERING
+        - ScalarBuildError
+        - LoweredScalarFn
+        - ScalarBuilder
+        - ScalarFunctionName
+        - ScalarNode
+        - ScalarOperator
       reExported:
         - '* from ./types.js'
         - '* from ./keywords.js'
@@ -23504,6 +23592,35 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - createScalarBuilder
+        - SCALAR_FUNCTIONS
+        - SCALAR_FUNCTION_LOWERING
+        - ScalarBuildError
+        - LoweredScalarFn
+        - ScalarBuilder
+        - ScalarFunctionName
+        - ScalarNode
+        - ScalarOperator
+    expression/src/scalar-builder.ts:
+      description: Public scalar-expression builder.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - SCALAR_FUNCTION_LOWERING
+        - SCALAR_FUNCTIONS
+        - createScalarBuilder
+        - ScalarBuildError
+      classes:
+        - ScalarBuildError
+      interfaces:
+        - ScalarBuilder
+      functions:
+        - createScalarBuilder
+      constants:
+        - SCALAR_FUNCTION_LOWERING
+        - SCALAR_FUNCTIONS
     expression/src/Parser.ts:
       description: Parser contains methods to evaluate or parse expressions, and has a number
       externalDependencies: []
@@ -36927,6 +37044,7 @@ dependencyGraph:
         - functions/src/timeseries-extra.ts
         - functions/src/config-api.ts
         - functions/src/hypothesis-extra.ts
+        - functions/src/scalar-eval.ts
         - functions/src/numeric-extra.ts
         - functions/src/calculus-extra.ts
         - functions/src/grad-forward.ts
@@ -37476,6 +37594,7 @@ dependencyGraph:
       files:
         - expression/src/types.ts
         - expression/src/index.ts
+        - expression/src/scalar-builder.ts
         - expression/src/Parser.ts
         - expression/src/parse.ts
         - expression/src/keywords.ts
@@ -38102,18 +38221,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/points3d.ts
 statistics:
-  totalTypeScriptFiles: 1181
+  totalTypeScriptFiles: 1183
   totalModules: 83
-  totalLinesOfCode: 196822
-  totalExports: 5905
-  totalClasses: 56
-  totalInterfaces: 519
-  totalFunctions: 1911
+  totalLinesOfCode: 197259
+  totalExports: 5925
+  totalClasses: 58
+  totalInterfaces: 520
+  totalFunctions: 1913
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1603
-  totalReExports: 2405
-  totalTypeOnlyImports: 593
+  totalConstants: 1606
+  totalReExports: 2418
+  totalTypeOnlyImports: 595
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
