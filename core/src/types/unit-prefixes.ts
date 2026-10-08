@@ -2,44 +2,33 @@
  * SI prefixes for the Unit type.
  *
  * Maps single- and double-letter prefixes to their multiplicative factor in
- * base units. The full SI prefix range (from y = 1e-24 to Y = 1e24) is
+ * base units. The full SI prefix range (from q = 1e-30 to Q = 1e30) is
  * supported, plus the binary prefixes used for digital information units.
  *
  * @module @danielsimonjr/mathts-core/types/unit-prefixes
  */
 
+import { exactScaleToNumber } from './unit/exact-scale.js';
+import { UNIT_PREFIX_SETS, unitPrefixExactScale } from './unit/unit-table.js';
+
 /**
- * Standard SI prefixes (mass/length/energy/etc.).
+ * Standard SI prefixes (mass/length/energy/etc.), from quecto (q, 1e-30) to
+ * quetta (Q, 1e30), read from the unit table's `SHORT` prefix set, plus `µ`
+ * as the Unicode spelling of micro beside the ASCII `u`.
  *
  * Note the ambiguity-resolution priority: longer prefixes (e.g. `da`)
  * must be tried before single-letter ones (`d`, `a`) in parsers.
  */
-export const SI_PREFIXES: Record<string, number> = {
-  // Positive powers of ten
-  Y: 1e24, // yotta
-  Z: 1e21, // zetta
-  E: 1e18, // exa
-  P: 1e15, // peta
-  T: 1e12, // tera
-  G: 1e9, // giga
-  M: 1e6, // mega
-  k: 1e3, // kilo
-  h: 1e2, // hecto
-  da: 1e1, // deka (two-letter)
-
-  // Negative powers of ten
-  d: 1e-1, // deci
-  c: 1e-2, // centi
-  m: 1e-3, // milli
-  u: 1e-6, // micro (ASCII fallback)
-  µ: 1e-6, // micro (Unicode)
-  n: 1e-9, // nano
-  p: 1e-12, // pico
-  f: 1e-15, // femto
-  a: 1e-18, // atto
-  z: 1e-21, // zepto
-  y: 1e-24, // yocto
-};
+export const SI_PREFIXES: Record<string, number> = (() => {
+  const prefixes: Record<string, number> = {};
+  const short = UNIT_PREFIX_SETS.SHORT;
+  for (const name of Object.keys(short)) {
+    if (name === '') continue;
+    prefixes[name] = exactScaleToNumber(unitPrefixExactScale(short[name]!));
+  }
+  prefixes['µ'] = prefixes.u!;
+  return prefixes;
+})();
 
 /**
  * Set of "good" prefixes to use in `toBest()` selection.

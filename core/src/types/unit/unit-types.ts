@@ -8,6 +8,7 @@
  *
  * @module @danielsimonjr/mathts-core/types/unit/unit-types
  */
+import type { ExactScale } from './exact-scale.js';
 import type { Complex } from '../../is.js';
 
 /** A complex number value (re/im pair), as produced by the `Complex` type. */
@@ -57,8 +58,8 @@ export interface BaseUnitDef {
 /**
  * A unit definition entry in the UNITS table. `dimensions` and `base.key` are
  * populated after the literal is created (see the module-init loops), hence
- * optional; `value` is `null` for angle units until `calculateAngleValues`
- * runs at module init, before any unit is parsed.
+ * optional. A built-in unit's `value` is its exact scale (`exact`) rounded
+ * once; a unit made with `createUnit` has no `exact` and converts by floats.
  */
 export interface UnitDef {
   name: string;
@@ -68,6 +69,10 @@ export interface UnitDef {
   offset: number;
   dimensions?: number[];
   reciprocal?: boolean;
+  /** The exact scale to SI, from the unit table. Absent for a `createUnit` unit and for VAR. */
+  exact?: ExactScale;
+  /** The exact `offset`, present whenever `exact` is. */
+  exactOffset?: ExactScale;
 }
 
 /** A single component of a Unit's unit list (e.g. the `m` in `m/s^2`). */
@@ -150,7 +155,7 @@ export interface BigNumberConstructor {
 
 /** Constructor for Fraction values. */
 export interface FractionConstructor {
-  new (value: Numeric | string, denominator?: number): FractionValue;
+  new (value: Numeric | string | bigint, denominator?: number | bigint): FractionValue;
 }
 
 /** `subtractScalar` is polymorphic: it also subtracts two Units (in splitUnit). */
@@ -207,6 +212,8 @@ export interface UnitInstance {
   clone(): UnitInstance;
   valueType(): string;
   _isDerived(): boolean;
+  /** The exact SI scale of the unit list, or null when a component has none. */
+  exactScale(): ExactScale | null;
   _normalize(value: Numeric | null | undefined): Numeric | null;
   _denormalize(value: Numeric | null, prefixValue?: Numeric): Numeric | null;
   hasBase(base: BaseUnitDef | string | undefined): boolean;
@@ -246,6 +253,8 @@ export interface UnitConstructor {
   setUnitSystem(name: string): void;
   getUnitSystem(): string | undefined;
   createUnit(obj: Record<string, unknown>, options?: CreateUnitOptions): UnitInstance | undefined;
+  /** The exact SI scale of a valueless unit text, or null when it has none. */
+  exactScale(valuelessUnit: string): ExactScale | null;
   createUnitSingle(name: string, obj?: unknown): UnitInstance;
   deleteUnit(name: string): void;
   _getNumberConverter(type: string): ConverterFn;

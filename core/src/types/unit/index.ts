@@ -13,6 +13,38 @@ import type { UnitConstructor } from './unit-types.js';
 export { createUnitClass } from './Unit.js';
 export { unitDependencies } from './dependencies.js';
 export type * from './unit-types.js';
+export {
+  UNIT_EXACT_SCALE,
+  PI_EXACT_SCALE,
+  decimalExactScale,
+  exactScaleOf,
+  binaryExactScale,
+  ratioExactScale,
+  multiplyExactScales,
+  divideExactScales,
+  powerExactScale,
+  addExactScales,
+  exactScalesEqual,
+  exactScaleToNumber,
+  formatExactScale,
+  readScaleExpression,
+} from './exact-scale.js';
+export type { ExactScale } from './exact-scale.js';
+export {
+  NAMED_SCALES,
+  UNIT_ROWS,
+  UNIT_ROW_ALIASES,
+  namedExactScale,
+  readUnitScale,
+  getUnitRow,
+  unitRowExactScale,
+  unitRowValue,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
+} from './unit-table.js';
+export type { UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix } from './unit-table.js';
 
 /** The core `Unit` class, pre-wired to core's numeric primitives. */
 export const Unit: UnitConstructor = createUnitClass(
