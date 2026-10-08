@@ -27,6 +27,64 @@ import type {
   UnitSystemEntry,
 } from './unit-types.js';
 import { DimensionMismatchError, UnitParseError } from './errors.js';
+import {
+  type ExactScale,
+  addExactScales,
+  binaryExactScale,
+  divideExactScales,
+  exactScaleOf,
+  exactScaleToNumber,
+  multiplyExactScales,
+  powerExactScale,
+  ratioExactScale,
+  UNIT_EXACT_SCALE,
+} from './exact-scale.js';
+import { readUnitScale, UNIT_ROW_ALIASES, UNIT_ROWS } from './unit-table.js';
+
+const UNIT_ZERO_SCALE: ExactScale = ratioExactScale(0);
+
+/**
+ * `scale_from × offset_from − scale_to × offset_to`: what converting between two
+ * affine units adds to the offset-free value. Null unless both have exact scales.
+ */
+function exactOffsetShift(from: UnitDef, to: UnitDef): ExactScale | null {
+  if (from.exact === undefined || to.exact === undefined) return null;
+  return addExactScales(
+    multiplyExactScales(from.exact, from.exactOffset ?? UNIT_ZERO_SCALE),
+    multiplyExactScales(ratioExactScale(-1), to.exact, to.exactOffset ?? UNIT_ZERO_SCALE)
+  );
+}
+
+/**
+ * Give a unit definition its exact scale and offset. They are non-enumerable,
+ * so a definition still copies and serialises as before (the unit systems are
+ * JSON clones; a clone simply takes the float route).
+ */
+function attachExactScale(def: UnitDef, exact: ExactScale, exactOffset: ExactScale): void {
+  Object.defineProperty(def, 'exact', {
+    value: exact,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+  Object.defineProperty(def, 'exactOffset', {
+    value: exactOffset,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+}
+
+/** Exact prefix factors, read once from each prefix's decimal value. */
+const prefixScales = new WeakMap<PrefixDef, ExactScale | null>();
+function prefixExactScale(prefix: PrefixDef): ExactScale | null {
+  let scale = prefixScales.get(prefix);
+  if (scale === undefined) {
+    scale = Number.isFinite(prefix.value) ? exactScaleOf(prefix.value) : null;
+    prefixScales.set(prefix, scale);
+  }
+  return scale;
+}
 
 /**
  * Normalize degree-symbol unit notations to their ASCII spellings before parsing,
@@ -84,6 +142,117 @@ export const createUnitClass = /* #__PURE__ */ factory(
     const toNumber = number;
     const fixPrefixDefault = false;
     const skipAutomaticSimplificationDefault = true;
+
+    /**
+     * A BigNumber from decimal text. A dependency set may hand the raw core class
+     * (private constructor, static `parse`) or a constructor that takes a string.
+     */
+    function bigNumberFromText(text: string): BigNumberValue {
+      const parse = (BigNumber as unknown as { parse?: (t: string) => BigNumberValue }).parse;
+      return typeof parse === 'function'
+        ? parse.call(BigNumber, text)
+        : (new BigNumber(text) as unknown as BigNumberValue);
+    }
+
+    /** An exact scale as a BigNumber at the configured precision (π from BIGNUMBER_PI). */
+    function exactToBigNumber(scale: ExactScale): Numeric {
+      let v = bigNumberFromText(scale.num.toString()).div(bigNumberFromText(scale.den.toString()));
+      const pi = BIGNUMBER_PI as unknown as BigNumberValue;
+      for (let k = 0; k < Math.abs(scale.pi); k++) v = scale.pi > 0 ? v.times(pi) : v.div(pi);
+      return v as unknown as Numeric;
+    }
+
+    /**
+     * The reading a normalized number came from: of the doubles `r` near
+     * `value / scale` whose decimal times `scale` rounds to `value`, the one with
+     * the shortest decimal (nearest to `value / scale` on a tie). 273.15 K in
+     * degR reads back as 491.67, not 491.66999999999996. Undefined when no
+     * neighbour qualifies (then the caller keeps the normalized value as is).
+     */
+    function simplestReading(value: number, scale: ExactScale): number | undefined {
+      if (value === 0) return undefined;
+      const start = applyExactScale(value, scale, true);
+      if (typeof start !== 'number' || !Number.isFinite(start) || start === 0) return undefined;
+      const view = new DataView(new ArrayBuffer(8));
+      view.setFloat64(0, start);
+      const bits = view.getBigInt64(0);
+      let best: number | undefined;
+      let bestLength = Infinity;
+      for (const step of [0n, -1n, 1n, -2n, 2n, -3n, 3n, -4n, 4n]) {
+        view.setBigInt64(0, bits + step);
+        const r = view.getFloat64(0);
+        if (!Number.isFinite(r) || Math.sign(r) !== Math.sign(start)) continue;
+        if (exactScaleToNumber(multiplyExactScales(exactScaleOf(r), scale)) !== value) continue;
+        const length = String(r).length;
+        if (length < bestLength) {
+          best = r;
+          bestLength = length;
+        }
+      }
+      return best;
+    }
+
+    /**
+     * `value + shift` with one rounding, or undefined when the value's type has no
+     * exact route. A number is first taken back to the reading it was normalized
+     * from ({@link simplestReading}: `212` for 212 degF), read as that decimal and
+     * scaled exactly, so the normalization's rounding does not reach the result:
+     * 212 degF is 100 degC.
+     */
+    function addExactShift(
+      unit: UnitInstance,
+      value: Numeric,
+      shift: ExactScale
+    ): Numeric | undefined {
+      if (typeof value === 'number') {
+        if (!Number.isFinite(value)) return undefined;
+        let normalized = binaryExactScale(value);
+        const scale = unit.exactScale();
+        const reading = scale === null ? undefined : simplestReading(value, scale);
+        if (reading !== undefined) normalized = multiplyExactScales(exactScaleOf(reading), scale!);
+        const sum = addExactScales(normalized, shift);
+        return sum === null ? undefined : exactScaleToNumber(sum);
+      }
+      const s = exactAs(shift, typeOf(value));
+      return s === undefined ? undefined : addScalar(value, s);
+    }
+
+    /** An exact scale as a Fraction or a BigNumber, or undefined for another type (or a Fraction times π). */
+    function exactAs(scale: ExactScale, type: string): Numeric | undefined {
+      if (type === 'Fraction') {
+        return scale.pi === 0
+          ? (new Fraction(scale.num, scale.den) as unknown as Numeric)
+          : undefined;
+      }
+      if (type === 'BigNumber') return exactToBigNumber(scale);
+      return undefined;
+    }
+
+    /**
+     * `value × scale` (normalize a reading) or `value / scale` (denormalize a
+     * normalized value) with one rounding, or undefined when the value's type has
+     * no exact route (Complex, a Fraction times π, ±0, a non-finite number); the
+     * caller then takes the float route. A reading is the decimal it prints as, so
+     * `72` in `mN/m` is 0.072 and `1` in `g/cm^3` is 1000. A normalized value is a
+     * computed double, so it is taken at its exact binary value: 0 degC in degF
+     * is 32, not 32.00000000000001.
+     */
+    function applyExactScale(
+      value: Numeric,
+      scale: ExactScale,
+      divide: boolean
+    ): Numeric | undefined {
+      if (typeof value === 'number') {
+        if (!Number.isFinite(value) || value === 0) return undefined;
+        const x = divide ? binaryExactScale(value) : exactScaleOf(value);
+        return exactScaleToNumber(
+          divide ? divideExactScales(x, scale) : multiplyExactScales(x, scale)
+        );
+      }
+      const factor = exactAs(scale, typeOf(value));
+      if (factor === undefined) return undefined;
+      return divide ? divideScalar(value, factor) : multiplyScalar(value, factor);
+    }
 
     /**
      * A unit can be constructed in the following ways:
@@ -549,6 +718,39 @@ export const createUnitClass = /* #__PURE__ */ factory(
     };
 
     /**
+     * The exact SI scale of this unit's unit list: every component's exact unit
+     * scale times its prefix, raised to its power. Null when a component has no
+     * exact scale (a unit made with `createUnit`, VAR) or a non-integer power.
+     * @memberof Unit
+     * @return The exact scale, or null
+     */
+    Unit.prototype.exactScale = function (this: UnitInstance): ExactScale | null {
+      let scale = UNIT_EXACT_SCALE;
+      for (const component of this.units) {
+        const unitScale = component.unit.exact;
+        const prefixScale = prefixExactScale(component.prefix);
+        if (unitScale === undefined || prefixScale === null || !Number.isInteger(component.power)) {
+          return null;
+        }
+        scale = multiplyExactScales(
+          scale,
+          powerExactScale(multiplyExactScales(unitScale, prefixScale), component.power)
+        );
+      }
+      return scale;
+    };
+
+    /**
+     * The exact SI scale of a valueless unit text (`'g/cm^3'` is 1000, `'psi'` is
+     * 0.45359237 × 9.80665 / 0.0254²), or null when it has none (see
+     * {@link Unit.prototype.exactScale}).
+     * @memberof Unit
+     */
+    Unit.exactScale = function (valuelessUnit: string): ExactScale | null {
+      return Unit.parse(valuelessUnit).exactScale();
+    };
+
+    /**
      * Normalize a value, based on its currently set unit(s)
      * @memberof Unit
      * @param value
@@ -561,6 +763,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
     ): Numeric | null {
       if (value === null || value === undefined || this.units.length === 0) {
         return value ?? null;
+      }
+      const scale = this.exactScale();
+      if (scale !== null) {
+        const exact = applyExactScale(value, scale, false);
+        if (exact !== undefined) return exact;
       }
       let res: Numeric = value;
       const convert = Unit._getNumberConverter(typeOf(value)); // convert to Fraction or BigNumber if needed
@@ -590,6 +797,11 @@ export const createUnitClass = /* #__PURE__ */ factory(
     ): Numeric | null {
       if (value === null || value === undefined || this.units.length === 0) {
         return value ?? null;
+      }
+      const scale = this.exactScale();
+      if (scale !== null) {
+        const exact = applyExactScale(value, scale, true);
+        if (exact !== undefined) return exact;
       }
       let res: Numeric = value;
       const convert = Unit._getNumberConverter(typeOf(value)); // convert to Fraction or BigNumber if needed
@@ -1038,9 +1250,19 @@ export const createUnitClass = /* #__PURE__ */ factory(
           // For example, abs(-283.15 degC) = -263.15 degC !!!
           // We must take the offset into consideration here
           const convert = ret._numberConverter(); // convert to Fraction or BigNumber if needed
-          const unitValue = convert(ret.units[0].unit.value!);
-          const nominalOffset = convert(ret.units[0].unit.offset);
-          const unitOffset = multiplyScalar(unitValue, nominalOffset);
+          const def = ret.units[0].unit;
+          const exactOffset =
+            def.exact === undefined
+              ? undefined
+              : multiplyExactScales(def.exact, def.exactOffset ?? UNIT_ZERO_SCALE);
+          const valueType = typeOf(ret.value);
+          const unitOffset =
+            exactOffset === undefined
+              ? multiplyScalar(convert(def.value!), convert(def.offset))
+              : valueType === 'number'
+                ? exactScaleToNumber(exactOffset)
+                : (exactAs(exactOffset, valueType) ??
+                  multiplyScalar(convert(def.value!), convert(def.offset)));
           ret.value = subtractScalar(abs(addScalar(ret.value, unitOffset)), unitOffset);
         }
       }
@@ -1094,6 +1316,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
         other.value = clone(value);
       } else {
         /* Need to adjust value by difference in offset to convert */
+        // With exact scales on both units: value + scale_from × offset_from −
+        // scale_to × offset_to, the shift exact and the sum rounded once.
+        const shift = exactOffsetShift(this.units[0].unit, other.units[0].unit);
+        const shifted = shift === null ? undefined : addExactShift(this, value!, shift);
+        if (shifted !== undefined) {
+          other.value = shifted;
+          other.fixPrefix = true;
+          other.skipAutomaticSimplification = true;
+          return other;
+        }
         const convert = Unit._getNumberConverter(typeOf(value)); // convert to Fraction or BigNumber if needed
 
         const thisUnitValue = this.units[0].unit.value!;
@@ -1971,1405 +2203,56 @@ export const createUnitClass = /* #__PURE__ */ factory(
       dimensions: BASE_DIMENSIONS.map((_x) => 0),
     };
 
-    const UNITS: Record<string, UnitDef> = {
-      // length
-      meter: {
-        name: 'meter',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      inch: {
-        name: 'inch',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.0254,
-        offset: 0,
-      },
-      foot: {
-        name: 'foot',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.3048,
-        offset: 0,
-      },
-      yard: {
-        name: 'yard',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.9144,
-        offset: 0,
-      },
-      mile: {
-        name: 'mile',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1609.344,
-        offset: 0,
-      },
-      link: {
-        name: 'link',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.201168,
-        offset: 0,
-      },
-      rod: {
-        name: 'rod',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 5.0292,
-        offset: 0,
-      },
-      chain: {
-        name: 'chain',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 20.1168,
-        offset: 0,
-      },
-      angstrom: {
-        name: 'angstrom',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1e-10,
-        offset: 0,
-      },
-
-      // Astronomical / nautical / typography length units (ported from
-      // upstream mathjs ece1aab0f + 5f360326b — B-5). `ly` and `pc` are
-      // first-class UNITS with SHORT_UP_ONLY prefixes so kpc/Mpc/Mly/Gly
-      // resolve through the prefix system while sub-multiples throw.
-      astronomicalUnit: {
-        name: 'astronomicalUnit',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1.495978707e11, // IAU 2012 exact definition
-        offset: 0,
-      },
-      lightyear: {
-        name: 'lightyear',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 9.4607304725808e15, // Julian year × c (exact)
-        offset: 0,
-      },
-      ly: {
-        name: 'ly',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.SHORT_UP_ONLY,
-        value: 9.4607304725808e15,
-        offset: 0,
-      },
-      parsec: {
-        name: 'parsec',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.LONG, // kiloparsec, megaparsec, gigaparsec
-        value: 3.08567758149137e16, // IAU 2015 exact definition
-        offset: 0,
-      },
-      pc: {
-        name: 'pc',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.SHORT_UP_ONLY,
-        value: 3.08567758149137e16,
-        offset: 0,
-      },
-      nauticalMile: {
-        name: 'nauticalMile',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1852, // exact
-        offset: 0,
-      },
-      fathom: {
-        name: 'fathom',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1.8288, // 6 ft exactly
-        offset: 0,
-      },
-      furlong: {
-        name: 'furlong',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 201.168, // 1/8 mile exactly
-        offset: 0,
-      },
-      point: {
-        name: 'point',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.0254 / 72, // 1/72 inch (PostScript), exact
-        offset: 0,
-      },
-      pica: {
-        name: 'pica',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.0254 / 6, // 1/6 inch (12 points), exact
-        offset: 0,
-      },
-
-      m: {
-        name: 'm',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      in: {
-        name: 'in',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.0254,
-        offset: 0,
-      },
-      ft: {
-        name: 'ft',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.3048,
-        offset: 0,
-      },
-      yd: {
-        name: 'yd',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.9144,
-        offset: 0,
-      },
-      mi: {
-        name: 'mi',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 1609.344,
-        offset: 0,
-      },
-      li: {
-        name: 'li',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.201168,
-        offset: 0,
-      },
-      rd: {
-        name: 'rd',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 5.02921,
-        offset: 0,
-      },
-      ch: {
-        name: 'ch',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 20.1168,
-        offset: 0,
-      },
-      mil: {
-        name: 'mil',
-        base: BASE_UNITS.LENGTH,
-        prefixes: PREFIXES.NONE,
-        value: 0.0000254,
-        offset: 0,
-      }, // 1/1000 inch
-
-      // Surface
-      m2: {
-        name: 'm2',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.SQUARED,
-        value: 1,
-        offset: 0,
-      },
-      sqin: {
-        name: 'sqin',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 0.00064516,
-        offset: 0,
-      }, // 645.16 mm2
-      sqft: {
-        name: 'sqft',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 0.09290304,
-        offset: 0,
-      }, // 0.09290304 m2
-      sqyd: {
-        name: 'sqyd',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 0.83612736,
-        offset: 0,
-      }, // 0.83612736 m2
-      sqmi: {
-        name: 'sqmi',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 2589988.110336,
-        offset: 0,
-      }, // 2.589988110336 km2
-      sqrd: {
-        name: 'sqrd',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 25.29295,
-        offset: 0,
-      }, // 25.29295 m2
-      sqch: {
-        name: 'sqch',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 404.6873,
-        offset: 0,
-      }, // 404.6873 m2
-      sqmil: {
-        name: 'sqmil',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 6.4516e-10,
-        offset: 0,
-      }, // 6.4516 * 10^-10 m2
-      acre: {
-        name: 'acre',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 4046.86,
-        offset: 0,
-      }, // 4046.86 m2
-      hectare: {
-        name: 'hectare',
-        base: BASE_UNITS.SURFACE,
-        prefixes: PREFIXES.NONE,
-        value: 10000,
-        offset: 0,
-      }, // 10000 m2
-
-      // Volume
-      m3: {
-        name: 'm3',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.CUBIC,
-        value: 1,
-        offset: 0,
-      },
-      L: {
-        name: 'L',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.SHORT,
-        value: 0.001,
-        offset: 0,
-      }, // litre
-      l: {
-        name: 'l',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.SHORT,
-        value: 0.001,
-        offset: 0,
-      }, // litre
-      litre: {
-        name: 'litre',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.LONG,
-        value: 0.001,
-        offset: 0,
-      },
-      cuin: {
-        name: 'cuin',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 1.6387064e-5,
-        offset: 0,
-      }, // 1.6387064e-5 m3
-      cuft: {
-        name: 'cuft',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.028316846592,
-        offset: 0,
-      }, // 28.316 846 592 L
-      cuyd: {
-        name: 'cuyd',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.764554857984,
-        offset: 0,
-      }, // 764.554 857 984 L
-      teaspoon: {
-        name: 'teaspoon',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.000005,
-        offset: 0,
-      }, // 5 mL
-      tablespoon: {
-        name: 'tablespoon',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.000015,
-        offset: 0,
-      }, // 15 mL
-      // {name: 'cup', base: BASE_UNITS.VOLUME, prefixes: PREFIXES.NONE, value: 0.000240, offset: 0}, // 240 mL  // not possible, we have already another cup
-      drop: {
-        name: 'drop',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 5e-8,
-        offset: 0,
-      }, // 0.05 mL = 5e-8 m3
-      gtt: {
-        name: 'gtt',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 5e-8,
-        offset: 0,
-      }, // 0.05 mL = 5e-8 m3
-
-      // Liquid volume
-      minim: {
-        name: 'minim',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.000000061611519921875,
-        offset: 0,
-      }, // 1/61440 gallons
-      fluiddram: {
-        name: 'fluiddram',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.0000036966911953125,
-        offset: 0,
-      }, // 1/1024 gallons
-      fluidounce: {
-        name: 'fluidounce',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.0000295735295625,
-        offset: 0,
-      }, // 1/128 gallons
-      gill: {
-        name: 'gill',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.00011829411825,
-        offset: 0,
-      }, // 1/32 gallons
-      cc: {
-        name: 'cc',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 1e-6,
-        offset: 0,
-      }, // 1e-6 L
-      cup: {
-        name: 'cup',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.0002365882365,
-        offset: 0,
-      }, // 1/16 gallons
-      pint: {
-        name: 'pint',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.000473176473,
-        offset: 0,
-      }, // 1/8 gallons
-      quart: {
-        name: 'quart',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.000946352946,
-        offset: 0,
-      }, // 1/4 gallons
-      gallon: {
-        name: 'gallon',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.003785411784,
-        offset: 0,
-      }, // 3.785411784 L
-      beerbarrel: {
-        name: 'beerbarrel',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.117347765304,
-        offset: 0,
-      }, // 31 gallons
-      oilbarrel: {
-        name: 'oilbarrel',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.158987294928,
-        offset: 0,
-      }, // 42 gallons
-      hogshead: {
-        name: 'hogshead',
-        base: BASE_UNITS.VOLUME,
-        prefixes: PREFIXES.NONE,
-        value: 0.238480942392,
-        offset: 0,
-      }, // 63 gallons
-
-      // Mass
-      g: {
-        name: 'g',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.SHORT,
-        value: 0.001,
-        offset: 0,
-      },
-      gram: {
-        name: 'gram',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.LONG,
-        value: 0.001,
-        offset: 0,
-      },
-
-      ton: {
-        name: 'ton',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.SHORT,
-        value: 907.18474,
-        offset: 0,
-      },
-      t: {
-        name: 't',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.SHORT,
-        value: 1000,
-        offset: 0,
-      },
-      tonne: {
-        name: 'tonne',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.LONG,
-        value: 1000,
-        offset: 0,
-      },
-
-      grain: {
-        name: 'grain',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 64.79891e-6,
-        offset: 0,
-      },
-      dram: {
-        name: 'dram',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 1.7718451953125e-3,
-        offset: 0,
-      },
-      ounce: {
-        name: 'ounce',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 28.349523125e-3,
-        offset: 0,
-      },
-      poundmass: {
-        name: 'poundmass',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 453.59237e-3,
-        offset: 0,
-      },
-      hundredweight: {
-        name: 'hundredweight',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 45.359237,
-        offset: 0,
-      },
-      stick: {
-        name: 'stick',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 115e-3,
-        offset: 0,
-      },
-      stone: {
-        name: 'stone',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 6.35029318,
-        offset: 0,
-      },
-
-      gr: {
-        name: 'gr',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 64.79891e-6,
-        offset: 0,
-      },
-      dr: {
-        name: 'dr',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 1.7718451953125e-3,
-        offset: 0,
-      },
-      oz: {
-        name: 'oz',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 28.349523125e-3,
-        offset: 0,
-      },
-      lbm: {
-        name: 'lbm',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 453.59237e-3,
-        offset: 0,
-      },
-      cwt: {
-        name: 'cwt',
-        base: BASE_UNITS.MASS,
-        prefixes: PREFIXES.NONE,
-        value: 45.359237,
-        offset: 0,
-      },
-
-      // Time
-      s: {
-        name: 's',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      min: {
-        name: 'min',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 60,
-        offset: 0,
-      },
-      h: {
-        name: 'h',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 3600,
-        offset: 0,
-      },
-      second: {
-        name: 'second',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      sec: {
-        name: 'sec',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      minute: {
-        name: 'minute',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 60,
-        offset: 0,
-      },
-      hour: {
-        name: 'hour',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 3600,
-        offset: 0,
-      },
-      day: {
-        name: 'day',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 86400,
-        offset: 0,
-      },
-      week: {
-        name: 'week',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 7 * 86400,
-        offset: 0,
-      },
-      month: {
-        name: 'month',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 2629800, // 1/12th of Julian year
-        offset: 0,
-      },
-      year: {
-        name: 'year',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 31557600, // Julian year
-        offset: 0,
-      },
-      decade: {
-        name: 'decade',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 315576000, // Julian decade
-        offset: 0,
-      },
-      century: {
-        name: 'century',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 3155760000, // Julian century
-        offset: 0,
-      },
-      millennium: {
-        name: 'millennium',
-        base: BASE_UNITS.TIME,
-        prefixes: PREFIXES.NONE,
-        value: 31557600000, // Julian millennium
-        offset: 0,
-      },
-
-      // Frequency
-      hertz: {
-        name: 'Hertz',
-        base: BASE_UNITS.FREQUENCY,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-        reciprocal: true,
-      },
-      Hz: {
-        name: 'Hz',
-        base: BASE_UNITS.FREQUENCY,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-        reciprocal: true,
-      },
-
-      // Angle
-      rad: {
-        name: 'rad',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      radian: {
-        name: 'radian',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      // deg = rad / (2*pi) * 360 = rad / 0.017453292519943295769236907684888
-      deg: {
-        name: 'deg',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.SHORT,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      degree: {
-        name: 'degree',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.LONG,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      // grad = rad / (2*pi) * 400  = rad / 0.015707963267948966192313216916399
-      grad: {
-        name: 'grad',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.SHORT,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      gradian: {
-        name: 'gradian',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.LONG,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      // cycle = rad / (2*pi) = rad / 6.2831853071795864769252867665793
-      cycle: {
-        name: 'cycle',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.NONE,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      // arcsec = rad / (3600 * (360 / 2 * pi)) = rad / 0.0000048481368110953599358991410235795
-      arcsec: {
-        name: 'arcsec',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.NONE,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-      // arcmin = rad / (60 * (360 / 2 * pi)) = rad / 0.00029088820866572159615394846141477
-      arcmin: {
-        name: 'arcmin',
-        base: BASE_UNITS.ANGLE,
-        prefixes: PREFIXES.NONE,
-        value: null, // will be filled in by calculateAngleValues()
-        offset: 0,
-      },
-
-      // Electric current
-      A: {
-        name: 'A',
-        base: BASE_UNITS.CURRENT,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      ampere: {
-        name: 'ampere',
-        base: BASE_UNITS.CURRENT,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-
-      // Temperature
-      // K(C) = °C + 273.15
-      // K(F) = (°F + 459.67) * (5 / 9)
-      // K(R) = °R * (5 / 9)
-      K: {
-        name: 'K',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      degC: {
-        name: 'degC',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 273.15,
-      },
-      degF: {
-        name: 'degF',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.SHORT,
-        value: new Fraction(5, 9),
-        offset: 459.67,
-      },
-      degR: {
-        name: 'degR',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.SHORT,
-        value: new Fraction(5, 9),
-        offset: 0,
-      },
-      kelvin: {
-        name: 'kelvin',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      celsius: {
-        name: 'celsius',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 273.15,
-      },
-      fahrenheit: {
-        name: 'fahrenheit',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.LONG,
-        value: new Fraction(5, 9),
-        offset: 459.67,
-      },
-      rankine: {
-        name: 'rankine',
-        base: BASE_UNITS.TEMPERATURE,
-        prefixes: PREFIXES.LONG,
-        value: new Fraction(5, 9),
-        offset: 0,
-      },
-
-      // amount of substance
-      mol: {
-        name: 'mol',
-        base: BASE_UNITS.AMOUNT_OF_SUBSTANCE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      mole: {
-        name: 'mole',
-        base: BASE_UNITS.AMOUNT_OF_SUBSTANCE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-
-      // luminous intensity
-      cd: {
-        name: 'cd',
-        base: BASE_UNITS.LUMINOUS_INTENSITY,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      candela: {
-        name: 'candela',
-        base: BASE_UNITS.LUMINOUS_INTENSITY,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      // Solid angle
-      sr: {
-        name: 'sr',
-        base: BASE_UNITS.SOLID_ANGLE,
-        prefixes: PREFIXES.NONE,
-        value: 1,
-        offset: 0,
-      },
-      steradian: {
-        name: 'steradian',
-        base: BASE_UNITS.SOLID_ANGLE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-
-      // Force
-      N: {
-        name: 'N',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      newton: {
-        name: 'newton',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      dyn: {
-        name: 'dyn',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.SHORT,
-        value: 0.00001,
-        offset: 0,
-      },
-      dyne: {
-        name: 'dyne',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.LONG,
-        value: 0.00001,
-        offset: 0,
-      },
-      lbf: {
-        name: 'lbf',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.NONE,
-        value: 4.4482216152605,
-        offset: 0,
-      },
-      poundforce: {
-        name: 'poundforce',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.NONE,
-        value: 4.4482216152605,
-        offset: 0,
-      },
-      kip: {
-        name: 'kip',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.LONG,
-        value: 4448.2216,
-        offset: 0,
-      },
-      kilogramforce: {
-        name: 'kilogramforce',
-        base: BASE_UNITS.FORCE,
-        prefixes: PREFIXES.NONE,
-        value: 9.80665,
-        offset: 0,
-      },
-
-      // Energy
-      J: {
-        name: 'J',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      joule: {
-        name: 'joule',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      erg: {
-        name: 'erg',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.SHORTLONG, // Both kiloerg and kerg are acceptable
-        value: 1e-7,
-        offset: 0,
-      },
-      Wh: {
-        name: 'Wh',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.SHORT,
-        value: 3600,
-        offset: 0,
-      },
-      BTU: {
-        name: 'BTU',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.BTU,
-        value: 1055.05585262,
-        offset: 0,
-      },
-      eV: {
-        name: 'eV',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.SHORT,
-        value: 1.602176634e-19,
-        offset: 0,
-      },
-      electronvolt: {
-        name: 'electronvolt',
-        base: BASE_UNITS.ENERGY,
-        prefixes: PREFIXES.LONG,
-        value: 1.602176634e-19,
-        offset: 0,
-      },
-
-      // Power
-      W: {
-        name: 'W',
-        base: BASE_UNITS.POWER,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      watt: {
-        name: 'watt',
-        base: BASE_UNITS.POWER,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      hp: {
-        name: 'hp',
-        base: BASE_UNITS.POWER,
-        prefixes: PREFIXES.NONE,
-        value: 745.6998715386,
-        offset: 0,
-      },
-
-      // Electrical power units
-      VAR: {
-        name: 'VAR',
-        base: BASE_UNITS.POWER,
-        prefixes: PREFIXES.SHORT,
-        value: Complex.I,
-        offset: 0,
-      },
-
-      VA: {
-        name: 'VA',
-        base: BASE_UNITS.POWER,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-
-      // Pressure
-      Pa: {
-        name: 'Pa',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      psi: {
-        name: 'psi',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 6894.75729276459,
-        offset: 0,
-      },
-      atm: {
-        name: 'atm',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 101325,
-        offset: 0,
-      },
-      bar: {
-        name: 'bar',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.SHORTLONG,
-        value: 100000,
-        offset: 0,
-      },
-      torr: {
-        name: 'torr',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 133.322,
-        offset: 0,
-      },
-      mmHg: {
-        name: 'mmHg',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 133.322,
-        offset: 0,
-      },
-      mmH2O: {
-        name: 'mmH2O',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 9.80665,
-        offset: 0,
-      },
-      cmH2O: {
-        name: 'cmH2O',
-        base: BASE_UNITS.PRESSURE,
-        prefixes: PREFIXES.NONE,
-        value: 98.0665,
-        offset: 0,
-      },
-
-      // Electric charge
-      coulomb: {
-        name: 'coulomb',
-        base: BASE_UNITS.ELECTRIC_CHARGE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      C: {
-        name: 'C',
-        base: BASE_UNITS.ELECTRIC_CHARGE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Electric capacitance
-      farad: {
-        name: 'farad',
-        base: BASE_UNITS.ELECTRIC_CAPACITANCE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      F: {
-        name: 'F',
-        base: BASE_UNITS.ELECTRIC_CAPACITANCE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Electric potential
-      volt: {
-        name: 'volt',
-        base: BASE_UNITS.ELECTRIC_POTENTIAL,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      V: {
-        name: 'V',
-        base: BASE_UNITS.ELECTRIC_POTENTIAL,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Electric resistance
-      ohm: {
-        name: 'ohm',
-        base: BASE_UNITS.ELECTRIC_RESISTANCE,
-        prefixes: PREFIXES.SHORTLONG, // Both Mohm and megaohm are acceptable
-        value: 1,
-        offset: 0,
-      },
-      /*
-     * Unicode breaks in browsers if charset is not specified
-    Ω: {
-      name: 'Ω',
-      base: BASE_UNITS.ELECTRIC_RESISTANCE,
-      prefixes: PREFIXES.SHORT,
-      value: 1,
-      offset: 0
-    },
-    */
-      // Electric inductance
-      henry: {
-        name: 'henry',
-        base: BASE_UNITS.ELECTRIC_INDUCTANCE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      H: {
-        name: 'H',
-        base: BASE_UNITS.ELECTRIC_INDUCTANCE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Electric conductance
-      siemens: {
-        name: 'siemens',
-        base: BASE_UNITS.ELECTRIC_CONDUCTANCE,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      S: {
-        name: 'S',
-        base: BASE_UNITS.ELECTRIC_CONDUCTANCE,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Magnetic flux
-      weber: {
-        name: 'weber',
-        base: BASE_UNITS.MAGNETIC_FLUX,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      Wb: {
-        name: 'Wb',
-        base: BASE_UNITS.MAGNETIC_FLUX,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-      // Magnetic flux density
-      tesla: {
-        name: 'tesla',
-        base: BASE_UNITS.MAGNETIC_FLUX_DENSITY,
-        prefixes: PREFIXES.LONG,
-        value: 1,
-        offset: 0,
-      },
-      T: {
-        name: 'T',
-        base: BASE_UNITS.MAGNETIC_FLUX_DENSITY,
-        prefixes: PREFIXES.SHORT,
-        value: 1,
-        offset: 0,
-      },
-
-      // Binary
-      b: {
-        name: 'b',
-        base: BASE_UNITS.BIT,
-        prefixes: PREFIXES.BINARY_SHORT,
-        value: 1,
-        offset: 0,
-      },
-      bits: {
-        name: 'bits',
-        base: BASE_UNITS.BIT,
-        prefixes: PREFIXES.BINARY_LONG,
-        value: 1,
-        offset: 0,
-      },
-      B: {
-        name: 'B',
-        base: BASE_UNITS.BIT,
-        prefixes: PREFIXES.BINARY_SHORT,
-        value: 8,
-        offset: 0,
-      },
-      bytes: {
-        name: 'bytes',
-        base: BASE_UNITS.BIT,
-        prefixes: PREFIXES.BINARY_LONG,
-        value: 8,
-        offset: 0,
-      },
-    };
-
-    // aliases (formerly plurals)
-    // note that ALIASES is only used at creation to create more entries in UNITS by copying the aliased units
-    const ALIASES: Record<string, string> = {
-      meters: 'meter',
-      // Astronomical / nautical / typography aliases (B-5 port). Lowercase
-      // 'au' is deliberately ABSENT: it collides with the atomic unit of
-      // length (Bohr radius, ~5.29e-11 m), 21 orders of magnitude smaller.
-      AU: 'astronomicalUnit',
-      astronomicalUnits: 'astronomicalUnit',
-      lightyears: 'lightyear',
-      parsecs: 'parsec',
-      nmi: 'nauticalMile',
-      nauticalMiles: 'nauticalMile',
-      fathoms: 'fathom',
-      furlongs: 'furlong',
-      points: 'point',
-      picas: 'pica',
-      inches: 'inch',
-      feet: 'foot',
-      yards: 'yard',
-      miles: 'mile',
-      links: 'link',
-      rods: 'rod',
-      chains: 'chain',
-      angstroms: 'angstrom',
-
-      lt: 'l',
-      litres: 'litre',
-      liter: 'litre',
-      liters: 'litre',
-      teaspoons: 'teaspoon',
-      tablespoons: 'tablespoon',
-      minims: 'minim',
-      fldr: 'fluiddram',
-      fluiddrams: 'fluiddram',
-      floz: 'fluidounce',
-      fluidounces: 'fluidounce',
-      gi: 'gill',
-      gills: 'gill',
-      cp: 'cup',
-      cups: 'cup',
-      pt: 'pint',
-      pints: 'pint',
-      qt: 'quart',
-      quarts: 'quart',
-      gal: 'gallon',
-      gallons: 'gallon',
-      bbl: 'beerbarrel',
-      beerbarrels: 'beerbarrel',
-      obl: 'oilbarrel',
-      oilbarrels: 'oilbarrel',
-      hogsheads: 'hogshead',
-      gtts: 'gtt',
-
-      grams: 'gram',
-      tons: 'ton',
-      tonnes: 'tonne',
-      grains: 'grain',
-      drams: 'dram',
-      ounces: 'ounce',
-      poundmasses: 'poundmass',
-      hundredweights: 'hundredweight',
-      sticks: 'stick',
-      lb: 'lbm',
-      lbs: 'lbm',
-
-      kips: 'kip',
-      kgf: 'kilogramforce',
-
-      acres: 'acre',
-      hectares: 'hectare',
-      sqfeet: 'sqft',
-      sqyard: 'sqyd',
-      sqmile: 'sqmi',
-      sqmiles: 'sqmi',
-
-      mmhg: 'mmHg',
-      mmh2o: 'mmH2O',
-      cmh2o: 'cmH2O',
-
-      seconds: 'second',
-      secs: 'second',
-      minutes: 'minute',
-      mins: 'minute',
-      hours: 'hour',
-      hr: 'hour',
-      hrs: 'hour',
-      days: 'day',
-      weeks: 'week',
-      months: 'month',
-      years: 'year',
-      decades: 'decade',
-      centuries: 'century',
-      millennia: 'millennium',
-
-      hertz: 'hertz',
-
-      radians: 'radian',
-      degrees: 'degree',
-      gradians: 'gradian',
-      cycles: 'cycle',
-      arcsecond: 'arcsec',
-      arcseconds: 'arcsec',
-      arcminute: 'arcmin',
-      arcminutes: 'arcmin',
-
-      BTUs: 'BTU',
-      watts: 'watt',
-      joules: 'joule',
-
-      amperes: 'ampere',
-      amps: 'ampere',
-      amp: 'ampere',
-      coulombs: 'coulomb',
-      volts: 'volt',
-      ohms: 'ohm',
-      farads: 'farad',
-      webers: 'weber',
-      teslas: 'tesla',
-      electronvolts: 'electronvolt',
-      moles: 'mole',
-
-      bit: 'bits',
-      byte: 'bytes',
-    };
+    /**
+     * The imaginary unit times `scale`, for a reactive-power row (VAR). The
+     * dependency set's `Complex.I` is used as is when the scale is 1 (it may be
+     * absent in a dependency set without one, as before).
+     */
+    function imaginaryValue(scale: number): Numeric {
+      const i = Complex.I as unknown as Numeric;
+      return scale === 1 || i === undefined ? i : multiplyScalar(i, scale);
+    }
 
     /**
-     * Calculate the values for the angle units.
-     * Value is calculated as number or BigNumber depending on the configuration
+     * The built-in units, built from the one unit table (`unit-table.ts`). Each
+     * row's `value` is its exact scale rounded once; `exact` keeps the exact
+     * scale so conversions multiply exactly and round once at the end. A VAR's
+     * value is imaginary, so it has no real exact scale.
+     */
+    const UNITS: Record<string, UnitDef> = {};
+    for (const key of Object.keys(UNIT_ROWS)) {
+      const row = UNIT_ROWS[key]!;
+      const exact = readUnitScale(row.scale);
+      const scaled = exactScaleToNumber(exact);
+      const exactOffset = row.offset === undefined ? UNIT_ZERO_SCALE : readUnitScale(row.offset);
+      const def: UnitDef = {
+        name: row.name ?? key,
+        base: BASE_UNITS[row.base],
+        prefixes: PREFIXES[row.prefixes],
+        value: row.imaginary ? imaginaryValue(scaled) : scaled,
+        offset: exactScaleToNumber(exactOffset),
+      };
+      if (row.reciprocal) def.reciprocal = true;
+      if (!row.imaginary) attachExactScale(def, exact, exactOffset);
+      UNITS[key] = def;
+    }
+
+    /**
+     * Set the value of every unit whose scale carries a power of π (the angle
+     * units) in the configured number type: a BigNumber computed from the exact
+     * scale under `config.number === 'BigNumber'`, else the exact scale rounded
+     * once to a double. Aliases are included, so `degrees` follows `deg`.
      * @param config
      */
     function calculateAngleValues(config: UnitConfig): void {
-      if (config.number === 'BigNumber') {
-        const pi = BIGNUMBER_PI as unknown as BigNumberValue;
-        UNITS.rad.value = new BigNumber(1);
-        UNITS.deg.value = pi.div(180); // 2 * pi / 360
-        UNITS.grad.value = pi.div(200); // 2 * pi / 400
-        UNITS.cycle.value = pi.times(2); // 2 * pi
-        UNITS.arcsec.value = pi.div(648000); // 2 * pi / 360 / 3600
-        UNITS.arcmin.value = pi.div(10800); // 2 * pi / 360 / 60
-      } else {
-        // number
-        UNITS.rad.value = 1;
-        UNITS.deg.value = Math.PI / 180; // 2 * pi / 360
-        UNITS.grad.value = Math.PI / 200; // 2 * pi / 400
-        UNITS.cycle.value = Math.PI * 2; // 2 * pi
-        UNITS.arcsec.value = Math.PI / 648000; // 2 * pi / 360 / 3600
-        UNITS.arcmin.value = Math.PI / 10800; // 2 * pi / 360 / 60
+      for (const key in UNITS) {
+        if (!hasOwnProperty(UNITS, key)) continue;
+        const exact = UNITS[key].exact;
+        if (exact === undefined || exact.pi === 0) continue;
+        UNITS[key].value =
+          config.number === 'BigNumber' ? exactToBigNumber(exact) : exactScaleToNumber(exact);
       }
-
-      // copy to the full names of the angles
-      UNITS.radian.value = UNITS.rad.value;
-      UNITS.degree.value = UNITS.deg.value;
-      UNITS.gradian.value = UNITS.grad.value;
     }
-
-    // apply the angle values now
-    calculateAngleValues(config);
 
     if (on) {
       // recalculate the values on change of configuration
@@ -3550,9 +2433,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
     }
 
     // Create aliases
-    for (const name in ALIASES) {
-      if (hasOwnProperty(ALIASES, name)) {
-        const unit = UNITS[ALIASES[name]];
+    for (const name in UNIT_ROW_ALIASES) {
+      if (hasOwnProperty(UNIT_ROW_ALIASES, name)) {
+        const unit = UNITS[UNIT_ROW_ALIASES[name]!];
         const alias = {} as UnitDef;
         const aliasRec = alias as unknown as Record<string, unknown>;
         const unitRec = unit as unknown as Record<string, unknown>;
@@ -3562,9 +2445,13 @@ export const createUnitClass = /* #__PURE__ */ factory(
           }
         }
         alias.name = name;
+        if (unit.exact !== undefined) attachExactScale(alias, unit.exact, unit.exactOffset!);
         UNITS[name] = alias;
       }
     }
+
+    // apply the angle values now, to the rows and their aliases
+    calculateAngleValues(config);
 
     /**
      * Checks if a character is a valid latin letter (upper or lower case).

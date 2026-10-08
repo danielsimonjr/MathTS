@@ -26,6 +26,33 @@
 export { Unit, createUnitClass, unitDependencies } from './unit/index.js';
 export type { UnitInstance } from './unit/index.js';
 
+// Exact unit scales and the one built-in unit table.
+export {
+  UNIT_EXACT_SCALE,
+  PI_EXACT_SCALE,
+  decimalExactScale,
+  exactScaleOf,
+  binaryExactScale,
+  ratioExactScale,
+  multiplyExactScales,
+  divideExactScales,
+  powerExactScale,
+  addExactScales,
+  exactScalesEqual,
+  exactScaleToNumber,
+  formatExactScale,
+  readScaleExpression,
+  NAMED_SCALES,
+  UNIT_ROWS,
+  UNIT_ROW_ALIASES,
+  namedExactScale,
+  readUnitScale,
+  getUnitRow,
+  unitRowExactScale,
+  unitRowValue,
+} from './unit/index.js';
+export type { ExactScale, UnitRow, UnitBaseKey, UnitPrefixSetKey } from './unit/index.js';
+
 // Typed error classes — `catch (e) { e instanceof UnitParseError }` still works.
 export { DimensionMismatchError, UnitParseError } from './unit/errors.js';
 

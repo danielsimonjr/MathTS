@@ -6,8 +6,15 @@
  * exponents. Temperatures carry an additive offset for the K↔°C↔°F
  * conversions.
  *
+ * The factors and offsets are not written here: each derived entry reads the
+ * row of the one built-in unit table (`unit/unit-table.ts`) that `Unit` also
+ * builds from, so this flat registry and `Unit` cannot disagree.
+ *
  * @module @danielsimonjr/mathts-core/types/unit-definitions
  */
+
+import { exactScaleToNumber, multiplyExactScales } from './unit/exact-scale.js';
+import { getUnitRow, readUnitScale } from './unit/unit-table.js';
 
 /**
  * The seven SI base dimensions, expressed as a vector of (possibly fractional)
@@ -91,6 +98,23 @@ export const BASE_UNITS: Record<string, UnitDef> = {
 };
 
 /**
+ * A registry entry for the unit-table row `name`: its multiplier is the row's
+ * exact scale rounded once, and an affine row's offset is stated in kelvin
+ * (the row's offset times its scale), as {@link UnitDef.offset} reads.
+ */
+function tableUnit(name: string, dimensions: Dimensions, prefixable?: boolean): UnitDef {
+  const row = getUnitRow(name);
+  if (row === undefined) throw new Error(`unit-definitions: '${name}' is not in the unit table`);
+  const scale = readUnitScale(row.scale);
+  const def: UnitDef = { multiplier: exactScaleToNumber(scale), dimensions };
+  if (row.offset !== undefined) {
+    def.offset = exactScaleToNumber(multiplyExactScales(scale, readUnitScale(row.offset)));
+  }
+  if (prefixable) def.prefixable = true;
+  return def;
+}
+
+/**
  * Common derived units (SI named units, imperial units, and convenience units).
  *
  * This is *not* exhaustive — it covers the most common ~40 units needed for
@@ -99,119 +123,91 @@ export const BASE_UNITS: Record<string, UnitDef> = {
 export const DERIVED_UNITS: Record<string, UnitDef> = {
   // --- Length ---------------------------------------------------------------
   // Note: 'm' is a base unit (above), already prefixable.
-  ft: { multiplier: 0.3048, dimensions: dim({ length: 1 }) },
-  foot: { multiplier: 0.3048, dimensions: dim({ length: 1 }) },
-  in: { multiplier: 0.0254, dimensions: dim({ length: 1 }) },
-  inch: { multiplier: 0.0254, dimensions: dim({ length: 1 }) },
-  yd: { multiplier: 0.9144, dimensions: dim({ length: 1 }) },
-  yard: { multiplier: 0.9144, dimensions: dim({ length: 1 }) },
-  mi: { multiplier: 1609.344, dimensions: dim({ length: 1 }) },
-  mile: { multiplier: 1609.344, dimensions: dim({ length: 1 }) },
+  ft: tableUnit('ft', dim({ length: 1 })),
+  foot: tableUnit('foot', dim({ length: 1 })),
+  in: tableUnit('in', dim({ length: 1 })),
+  inch: tableUnit('inch', dim({ length: 1 })),
+  yd: tableUnit('yd', dim({ length: 1 })),
+  yard: tableUnit('yard', dim({ length: 1 })),
+  mi: tableUnit('mi', dim({ length: 1 })),
+  mile: tableUnit('mile', dim({ length: 1 })),
 
   // --- Mass -----------------------------------------------------------------
   // The "g" entry is gram (0.001 kg). It is prefixable, so kg/mg/µg work via
   // prefix application on this entry rather than the base "kg".
-  g: { multiplier: 0.001, dimensions: dim({ mass: 1 }), prefixable: true },
-  lb: { multiplier: 0.45359237, dimensions: dim({ mass: 1 }) },
-  lbm: { multiplier: 0.45359237, dimensions: dim({ mass: 1 }) },
-  oz: { multiplier: 0.028349523125, dimensions: dim({ mass: 1 }) },
-  ton: { multiplier: 907.18474, dimensions: dim({ mass: 1 }) }, // US short ton
-  tonne: { multiplier: 1000, dimensions: dim({ mass: 1 }) }, // metric ton
+  g: tableUnit('g', dim({ mass: 1 }), true),
+  lb: tableUnit('lb', dim({ mass: 1 })),
+  lbm: tableUnit('lbm', dim({ mass: 1 })),
+  oz: tableUnit('oz', dim({ mass: 1 })),
+  ton: tableUnit('ton', dim({ mass: 1 })), // US short ton
+  tonne: tableUnit('tonne', dim({ mass: 1 })), // metric ton
 
   // --- Time -----------------------------------------------------------------
-  min: { multiplier: 60, dimensions: dim({ time: 1 }) },
-  h: { multiplier: 3600, dimensions: dim({ time: 1 }) },
-  hr: { multiplier: 3600, dimensions: dim({ time: 1 }) },
-  day: { multiplier: 86400, dimensions: dim({ time: 1 }) },
-  week: { multiplier: 604800, dimensions: dim({ time: 1 }) },
-  year: { multiplier: 31557600, dimensions: dim({ time: 1 }) }, // Julian year
+  min: tableUnit('min', dim({ time: 1 })),
+  h: tableUnit('h', dim({ time: 1 })),
+  hr: tableUnit('hr', dim({ time: 1 })),
+  day: tableUnit('day', dim({ time: 1 })),
+  week: tableUnit('week', dim({ time: 1 })),
+  year: tableUnit('year', dim({ time: 1 })), // Julian year
 
   // --- Temperature ----------------------------------------------------------
   // K is the base.
   // °C → K is offset by 273.15 (no multiplicative factor change).
   // °F → K is more complex (offset & scale).
-  degC: { multiplier: 1, offset: 273.15, dimensions: dim({ temperature: 1 }) },
-  degF: { multiplier: 5 / 9, offset: 459.67 * (5 / 9), dimensions: dim({ temperature: 1 }) },
-  degR: { multiplier: 5 / 9, dimensions: dim({ temperature: 1 }) }, // Rankine
+  degC: tableUnit('degC', dim({ temperature: 1 })),
+  degF: tableUnit('degF', dim({ temperature: 1 })),
+  degR: tableUnit('degR', dim({ temperature: 1 })), // Rankine
 
   // --- Plane angle (dimensionless, but often treated as units) --------------
-  rad: { multiplier: 1, dimensions: dim({}), prefixable: true },
-  deg: { multiplier: Math.PI / 180, dimensions: dim({}) },
-  grad: { multiplier: Math.PI / 200, dimensions: dim({}) },
+  rad: tableUnit('rad', dim({}), true),
+  deg: tableUnit('deg', dim({})),
+  grad: tableUnit('grad', dim({})),
 
   // --- Force ----------------------------------------------------------------
   // N = kg·m·s^-2 = 1 kg·m·s^-2; in our base-units representation that's
   // value=1, dim {length: 1, mass: 1, time: -2}.
-  N: { multiplier: 1, dimensions: dim({ length: 1, mass: 1, time: -2 }), prefixable: true },
-  dyn: { multiplier: 1e-5, dimensions: dim({ length: 1, mass: 1, time: -2 }) },
-  lbf: { multiplier: 4.4482216152605, dimensions: dim({ length: 1, mass: 1, time: -2 }) },
+  N: tableUnit('N', dim({ length: 1, mass: 1, time: -2 }), true),
+  dyn: tableUnit('dyn', dim({ length: 1, mass: 1, time: -2 })),
+  lbf: tableUnit('lbf', dim({ length: 1, mass: 1, time: -2 })),
 
   // --- Energy ---------------------------------------------------------------
-  J: { multiplier: 1, dimensions: dim({ length: 2, mass: 1, time: -2 }), prefixable: true },
-  erg: { multiplier: 1e-7, dimensions: dim({ length: 2, mass: 1, time: -2 }) },
-  cal: { multiplier: 4.184, dimensions: dim({ length: 2, mass: 1, time: -2 }) },
-  eV: {
-    multiplier: 1.602176634e-19,
-    dimensions: dim({ length: 2, mass: 1, time: -2 }),
-    prefixable: true,
-  },
-  BTU: { multiplier: 1055.05585262, dimensions: dim({ length: 2, mass: 1, time: -2 }) },
+  J: tableUnit('J', dim({ length: 2, mass: 1, time: -2 }), true),
+  erg: tableUnit('erg', dim({ length: 2, mass: 1, time: -2 })),
+  cal: tableUnit('cal', dim({ length: 2, mass: 1, time: -2 })),
+  eV: tableUnit('eV', dim({ length: 2, mass: 1, time: -2 }), true),
+  BTU: tableUnit('BTU', dim({ length: 2, mass: 1, time: -2 })),
 
   // --- Power ----------------------------------------------------------------
-  W: { multiplier: 1, dimensions: dim({ length: 2, mass: 1, time: -3 }), prefixable: true },
-  hp: { multiplier: 745.6998715822702, dimensions: dim({ length: 2, mass: 1, time: -3 }) },
+  W: tableUnit('W', dim({ length: 2, mass: 1, time: -3 }), true),
+  hp: tableUnit('hp', dim({ length: 2, mass: 1, time: -3 })),
 
   // --- Pressure -------------------------------------------------------------
-  Pa: { multiplier: 1, dimensions: dim({ length: -1, mass: 1, time: -2 }), prefixable: true },
-  bar: { multiplier: 1e5, dimensions: dim({ length: -1, mass: 1, time: -2 }), prefixable: true },
-  atm: { multiplier: 101325, dimensions: dim({ length: -1, mass: 1, time: -2 }) },
-  psi: { multiplier: 6894.757293168361, dimensions: dim({ length: -1, mass: 1, time: -2 }) },
-  torr: { multiplier: 133.322368421, dimensions: dim({ length: -1, mass: 1, time: -2 }) },
-  mmHg: { multiplier: 133.322387415, dimensions: dim({ length: -1, mass: 1, time: -2 }) },
+  Pa: tableUnit('Pa', dim({ length: -1, mass: 1, time: -2 }), true),
+  bar: tableUnit('bar', dim({ length: -1, mass: 1, time: -2 }), true),
+  atm: tableUnit('atm', dim({ length: -1, mass: 1, time: -2 })),
+  psi: tableUnit('psi', dim({ length: -1, mass: 1, time: -2 })),
+  torr: tableUnit('torr', dim({ length: -1, mass: 1, time: -2 })),
+  mmHg: tableUnit('mmHg', dim({ length: -1, mass: 1, time: -2 })),
 
   // --- Electric -------------------------------------------------------------
-  C: {
-    multiplier: 1,
-    dimensions: dim({ time: 1, current: 1 }),
-    prefixable: true,
-  },
-  V: {
-    multiplier: 1,
-    dimensions: dim({ length: 2, mass: 1, time: -3, current: -1 }),
-    prefixable: true,
-  },
-  ohm: {
-    multiplier: 1,
-    dimensions: dim({ length: 2, mass: 1, time: -3, current: -2 }),
-    prefixable: true,
-  },
-  Ω: {
-    multiplier: 1,
-    dimensions: dim({ length: 2, mass: 1, time: -3, current: -2 }),
-    prefixable: true,
-  },
-  F: {
-    multiplier: 1,
-    dimensions: dim({ length: -2, mass: -1, time: 4, current: 2 }),
-    prefixable: true,
-  },
-  H: {
-    multiplier: 1,
-    dimensions: dim({ length: 2, mass: 1, time: -2, current: -2 }),
-    prefixable: true,
-  },
+  C: tableUnit('C', dim({ time: 1, current: 1 }), true),
+  V: tableUnit('V', dim({ length: 2, mass: 1, time: -3, current: -1 }), true),
+  ohm: tableUnit('ohm', dim({ length: 2, mass: 1, time: -3, current: -2 }), true),
+  Ω: tableUnit('ohm', dim({ length: 2, mass: 1, time: -3, current: -2 }), true),
+  F: tableUnit('F', dim({ length: -2, mass: -1, time: 4, current: 2 }), true),
+  H: tableUnit('H', dim({ length: 2, mass: 1, time: -2, current: -2 }), true),
 
   // --- Frequency ------------------------------------------------------------
-  Hz: { multiplier: 1, dimensions: dim({ time: -1 }), prefixable: true },
+  Hz: tableUnit('Hz', dim({ time: -1 }), true),
 
   // --- Volume ---------------------------------------------------------------
-  L: { multiplier: 1e-3, dimensions: dim({ length: 3 }), prefixable: true },
-  l: { multiplier: 1e-3, dimensions: dim({ length: 3 }), prefixable: true },
-  gal: { multiplier: 0.003785411784, dimensions: dim({ length: 3 }) }, // US gallon
+  L: tableUnit('L', dim({ length: 3 }), true),
+  l: tableUnit('l', dim({ length: 3 }), true),
+  gal: tableUnit('gal', dim({ length: 3 })), // US gallon
 
   // --- Area -----------------------------------------------------------------
-  ha: { multiplier: 1e4, dimensions: dim({ length: 2 }) }, // hectare
-  acre: { multiplier: 4046.8564224, dimensions: dim({ length: 2 }) },
+  ha: tableUnit('hectare', dim({ length: 2 })), // hectare
+  acre: tableUnit('acre', dim({ length: 2 })),
 };
 
 /**
