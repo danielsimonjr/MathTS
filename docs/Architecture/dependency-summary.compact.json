@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-08", "f": 1185, "e": 6051, "re": 2522 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-08", "f": 1185, "e": 6075, "re": 2542 },
   "s": {
-    "loc": 196965,
+    "loc": 196967,
     "cls": 58,
-    "int": 522,
-    "fn": 1930,
+    "int": 523,
+    "fn": 1933,
     "tg": 159,
     "en": 0,
-    "co": 1611,
+    "co": 1612,
     "toi": 600
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -172,9 +172,9 @@
         "UnitDef",
         "BigNumberConfig",
         "UnitRow",
+        "UnitPrefix",
         "ExactScale",
-        "BigNumberValue",
-        "FractionValue"
+        "BigNumberValue"
       ]
     },
     "core/arithmetic": {

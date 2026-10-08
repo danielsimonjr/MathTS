@@ -125,6 +125,7 @@
     "core/src/types/si-dimension-vector.ts": ["core/src/types/unit.ts"],
     "core/src/types/unit/exact-scale.ts": [
       "core/src/types/unit-definitions.ts",
+      "core/src/types/unit-prefixes.ts",
       "core/src/types/unit/Unit.ts",
       "core/src/types/unit/index.ts",
       "core/src/types/unit/unit-table.ts",
@@ -132,6 +133,7 @@
     ],
     "core/src/types/unit/unit-table.ts": [
       "core/src/types/unit-definitions.ts",
+      "core/src/types/unit-prefixes.ts",
       "core/src/types/unit/Unit.ts",
       "core/src/types/unit/index.ts"
     ],

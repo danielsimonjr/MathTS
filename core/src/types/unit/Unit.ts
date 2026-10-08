@@ -39,7 +39,15 @@ import {
   ratioExactScale,
   UNIT_EXACT_SCALE,
 } from './exact-scale.js';
-import { readUnitScale, UNIT_ROW_ALIASES, UNIT_ROWS } from './unit-table.js';
+import {
+  type UnitPrefix,
+  type UnitPrefixSetKey,
+  readUnitScale,
+  UNIT_PREFIX_SETS,
+  UNIT_ROW_ALIASES,
+  UNIT_ROWS,
+  unitPrefixExactScale,
+} from './unit-table.js';
 
 const UNIT_ZERO_SCALE: ExactScale = ratioExactScale(0);
 
@@ -1878,199 +1886,39 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return ret;
     };
 
-    const PREFIXES: Record<string, PrefixTable> = {
-      NONE: {
-        '': { name: '', value: 1, scientific: true },
-      },
-      SHORT: {
-        '': { name: '', value: 1, scientific: true },
-
-        da: { name: 'da', value: 1e1, scientific: false },
-        h: { name: 'h', value: 1e2, scientific: false },
-        k: { name: 'k', value: 1e3, scientific: true },
-        M: { name: 'M', value: 1e6, scientific: true },
-        G: { name: 'G', value: 1e9, scientific: true },
-        T: { name: 'T', value: 1e12, scientific: true },
-        P: { name: 'P', value: 1e15, scientific: true },
-        E: { name: 'E', value: 1e18, scientific: true },
-        Z: { name: 'Z', value: 1e21, scientific: true },
-        Y: { name: 'Y', value: 1e24, scientific: true },
-        R: { name: 'R', value: 1e27, scientific: true },
-        Q: { name: 'Q', value: 1e30, scientific: true },
-
-        d: { name: 'd', value: 1e-1, scientific: false },
-        c: { name: 'c', value: 1e-2, scientific: false },
-        m: { name: 'm', value: 1e-3, scientific: true },
-        u: { name: 'u', value: 1e-6, scientific: true },
-        n: { name: 'n', value: 1e-9, scientific: true },
-        p: { name: 'p', value: 1e-12, scientific: true },
-        f: { name: 'f', value: 1e-15, scientific: true },
-        a: { name: 'a', value: 1e-18, scientific: true },
-        z: { name: 'z', value: 1e-21, scientific: true },
-        y: { name: 'y', value: 1e-24, scientific: true },
-        r: { name: 'r', value: 1e-27, scientific: true },
-        q: { name: 'q', value: 1e-30, scientific: true },
-      },
-      LONG: {
-        '': { name: '', value: 1, scientific: true },
-
-        deca: { name: 'deca', value: 1e1, scientific: false },
-        hecto: { name: 'hecto', value: 1e2, scientific: false },
-        kilo: { name: 'kilo', value: 1e3, scientific: true },
-        mega: { name: 'mega', value: 1e6, scientific: true },
-        giga: { name: 'giga', value: 1e9, scientific: true },
-        tera: { name: 'tera', value: 1e12, scientific: true },
-        peta: { name: 'peta', value: 1e15, scientific: true },
-        exa: { name: 'exa', value: 1e18, scientific: true },
-        zetta: { name: 'zetta', value: 1e21, scientific: true },
-        yotta: { name: 'yotta', value: 1e24, scientific: true },
-        ronna: { name: 'ronna', value: 1e27, scientific: true },
-        quetta: { name: 'quetta', value: 1e30, scientific: true },
-
-        deci: { name: 'deci', value: 1e-1, scientific: false },
-        centi: { name: 'centi', value: 1e-2, scientific: false },
-        milli: { name: 'milli', value: 1e-3, scientific: true },
-        micro: { name: 'micro', value: 1e-6, scientific: true },
-        nano: { name: 'nano', value: 1e-9, scientific: true },
-        pico: { name: 'pico', value: 1e-12, scientific: true },
-        femto: { name: 'femto', value: 1e-15, scientific: true },
-        atto: { name: 'atto', value: 1e-18, scientific: true },
-        zepto: { name: 'zepto', value: 1e-21, scientific: true },
-        yocto: { name: 'yocto', value: 1e-24, scientific: true },
-        ronto: { name: 'ronto', value: 1e-27, scientific: true },
-        quecto: { name: 'quecto', value: 1e-30, scientific: true },
-      },
-      SQUARED: {
-        '': { name: '', value: 1, scientific: true },
-
-        da: { name: 'da', value: 1e2, scientific: false },
-        h: { name: 'h', value: 1e4, scientific: false },
-        k: { name: 'k', value: 1e6, scientific: true },
-        M: { name: 'M', value: 1e12, scientific: true },
-        G: { name: 'G', value: 1e18, scientific: true },
-        T: { name: 'T', value: 1e24, scientific: true },
-        P: { name: 'P', value: 1e30, scientific: true },
-        E: { name: 'E', value: 1e36, scientific: true },
-        Z: { name: 'Z', value: 1e42, scientific: true },
-        Y: { name: 'Y', value: 1e48, scientific: true },
-        R: { name: 'R', value: 1e54, scientific: true },
-        Q: { name: 'Q', value: 1e60, scientific: true },
-
-        d: { name: 'd', value: 1e-2, scientific: false },
-        c: { name: 'c', value: 1e-4, scientific: false },
-        m: { name: 'm', value: 1e-6, scientific: true },
-        u: { name: 'u', value: 1e-12, scientific: true },
-        n: { name: 'n', value: 1e-18, scientific: true },
-        p: { name: 'p', value: 1e-24, scientific: true },
-        f: { name: 'f', value: 1e-30, scientific: true },
-        a: { name: 'a', value: 1e-36, scientific: true },
-        z: { name: 'z', value: 1e-42, scientific: true },
-        y: { name: 'y', value: 1e-48, scientific: true },
-        r: { name: 'r', value: 1e-54, scientific: true },
-        q: { name: 'q', value: 1e-60, scientific: true },
-      },
-      CUBIC: {
-        '': { name: '', value: 1, scientific: true },
-
-        da: { name: 'da', value: 1e3, scientific: false },
-        h: { name: 'h', value: 1e6, scientific: false },
-        k: { name: 'k', value: 1e9, scientific: true },
-        M: { name: 'M', value: 1e18, scientific: true },
-        G: { name: 'G', value: 1e27, scientific: true },
-        T: { name: 'T', value: 1e36, scientific: true },
-        P: { name: 'P', value: 1e45, scientific: true },
-        E: { name: 'E', value: 1e54, scientific: true },
-        Z: { name: 'Z', value: 1e63, scientific: true },
-        Y: { name: 'Y', value: 1e72, scientific: true },
-        R: { name: 'R', value: 1e81, scientific: true },
-        Q: { name: 'Q', value: 1e90, scientific: true },
-
-        d: { name: 'd', value: 1e-3, scientific: false },
-        c: { name: 'c', value: 1e-6, scientific: false },
-        m: { name: 'm', value: 1e-9, scientific: true },
-        u: { name: 'u', value: 1e-18, scientific: true },
-        n: { name: 'n', value: 1e-27, scientific: true },
-        p: { name: 'p', value: 1e-36, scientific: true },
-        f: { name: 'f', value: 1e-45, scientific: true },
-        a: { name: 'a', value: 1e-54, scientific: true },
-        z: { name: 'z', value: 1e-63, scientific: true },
-        y: { name: 'y', value: 1e-72, scientific: true },
-        r: { name: 'r', value: 1e-81, scientific: true },
-        q: { name: 'q', value: 1e-90, scientific: true },
-      },
-      BINARY_SHORT_SI: {
-        '': { name: '', value: 1, scientific: true },
-        k: { name: 'k', value: 1e3, scientific: true },
-        M: { name: 'M', value: 1e6, scientific: true },
-        G: { name: 'G', value: 1e9, scientific: true },
-        T: { name: 'T', value: 1e12, scientific: true },
-        P: { name: 'P', value: 1e15, scientific: true },
-        E: { name: 'E', value: 1e18, scientific: true },
-        Z: { name: 'Z', value: 1e21, scientific: true },
-        Y: { name: 'Y', value: 1e24, scientific: true },
-      },
-      BINARY_SHORT_IEC: {
-        '': { name: '', value: 1, scientific: true },
-        Ki: { name: 'Ki', value: 1024, scientific: true },
-        Mi: { name: 'Mi', value: Math.pow(1024, 2), scientific: true },
-        Gi: { name: 'Gi', value: Math.pow(1024, 3), scientific: true },
-        Ti: { name: 'Ti', value: Math.pow(1024, 4), scientific: true },
-        Pi: { name: 'Pi', value: Math.pow(1024, 5), scientific: true },
-        Ei: { name: 'Ei', value: Math.pow(1024, 6), scientific: true },
-        Zi: { name: 'Zi', value: Math.pow(1024, 7), scientific: true },
-        Yi: { name: 'Yi', value: Math.pow(1024, 8), scientific: true },
-      },
-      BINARY_LONG_SI: {
-        '': { name: '', value: 1, scientific: true },
-        kilo: { name: 'kilo', value: 1e3, scientific: true },
-        mega: { name: 'mega', value: 1e6, scientific: true },
-        giga: { name: 'giga', value: 1e9, scientific: true },
-        tera: { name: 'tera', value: 1e12, scientific: true },
-        peta: { name: 'peta', value: 1e15, scientific: true },
-        exa: { name: 'exa', value: 1e18, scientific: true },
-        zetta: { name: 'zetta', value: 1e21, scientific: true },
-        yotta: { name: 'yotta', value: 1e24, scientific: true },
-      },
-      BINARY_LONG_IEC: {
-        '': { name: '', value: 1, scientific: true },
-        kibi: { name: 'kibi', value: 1024, scientific: true },
-        mebi: { name: 'mebi', value: Math.pow(1024, 2), scientific: true },
-        gibi: { name: 'gibi', value: Math.pow(1024, 3), scientific: true },
-        tebi: { name: 'tebi', value: Math.pow(1024, 4), scientific: true },
-        pebi: { name: 'pebi', value: Math.pow(1024, 5), scientific: true },
-        exi: { name: 'exi', value: Math.pow(1024, 6), scientific: true },
-        zebi: { name: 'zebi', value: Math.pow(1024, 7), scientific: true },
-        yobi: { name: 'yobi', value: Math.pow(1024, 8), scientific: true },
-      },
-      BTU: {
-        '': { name: '', value: 1, scientific: true },
-        MM: { name: 'MM', value: 1e6, scientific: true },
-      },
+    /**
+     * The prefix tables, built from the unit table's prefix sets
+     * (`UNIT_PREFIX_SETS`): each prefix's value is its exact factor
+     * (`radix^power`) rounded once. The `_SI` / `_IEC` halves of the binary
+     * sets stay available under their old keys.
+     */
+    const PREFIXES: Record<string, PrefixTable> = {};
+    const prefixTable = (
+      set: Readonly<Record<string, UnitPrefix>>,
+      keep: (prefix: UnitPrefix, name: string) => boolean = () => true
+    ): PrefixTable => {
+      const table: PrefixTable = {};
+      for (const name of Object.keys(set)) {
+        const prefix = set[name]!;
+        if (name !== '' && !keep(prefix, name)) continue;
+        const exact = unitPrefixExactScale(prefix);
+        const def: PrefixDef = {
+          name,
+          value: exactScaleToNumber(exact),
+          scientific: prefix.scientific,
+        };
+        prefixScales.set(def, exact);
+        table[name] = def;
+      }
+      return table;
     };
-
-    PREFIXES.SHORTLONG = Object.assign({}, PREFIXES.SHORT, PREFIXES.LONG);
-    PREFIXES.BINARY_SHORT = Object.assign({}, PREFIXES.BINARY_SHORT_SI, PREFIXES.BINARY_SHORT_IEC);
-    PREFIXES.BINARY_LONG = Object.assign({}, PREFIXES.BINARY_LONG_SI, PREFIXES.BINARY_LONG_IEC);
-
-    // Upward-only short prefix set for cosmological-scale units like
-    // light-year (`ly`) and parsec (`pc`). Cosmologists only multiply these
-    // units up (kpc, Mpc, Gpc; Mly, Gly), never down — `mly` (milli-lightyear)
-    // etc. are not used in physics literature and lead to silent
-    // misinterpretations (e.g. `mly` parsing as 1e-3 ly instead of
-    // mega-lightyear). Ported from upstream mathjs ece1aab0f + 5f360326b (B-5).
-    PREFIXES.SHORT_UP_ONLY = {
-      '': { name: '', value: 1, scientific: true },
-      k: { name: 'k', value: 1e3, scientific: true },
-      M: { name: 'M', value: 1e6, scientific: true },
-      G: { name: 'G', value: 1e9, scientific: true },
-      T: { name: 'T', value: 1e12, scientific: true },
-      P: { name: 'P', value: 1e15, scientific: true },
-      E: { name: 'E', value: 1e18, scientific: true },
-      Z: { name: 'Z', value: 1e21, scientific: true },
-      Y: { name: 'Y', value: 1e24, scientific: true },
-      R: { name: 'R', value: 1e27, scientific: true },
-      Q: { name: 'Q', value: 1e30, scientific: true },
-    };
+    for (const key of Object.keys(UNIT_PREFIX_SETS) as UnitPrefixSetKey[]) {
+      PREFIXES[key] = prefixTable(UNIT_PREFIX_SETS[key]);
+    }
+    PREFIXES.BINARY_SHORT_SI = prefixTable(UNIT_PREFIX_SETS.BINARY_SHORT, (p) => p.radix === 10);
+    PREFIXES.BINARY_SHORT_IEC = prefixTable(UNIT_PREFIX_SETS.BINARY_SHORT, (p) => p.radix === 1024);
+    PREFIXES.BINARY_LONG_SI = prefixTable(UNIT_PREFIX_SETS.BINARY_LONG, (p) => p.radix === 10);
+    PREFIXES.BINARY_LONG_IEC = prefixTable(UNIT_PREFIX_SETS.BINARY_LONG, (p) => p.radix === 1024);
 
     /* Internally, each unit is represented by a value and a dimension array. The elements of the dimensions array have the following meaning:
      * Index  Dimension

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-08'
   totalFiles: 1185
   totalModules: 83
-  totalExports: 6051
+  totalExports: 6075
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -447,6 +447,10 @@ modules:
             - getUnitRow
             - unitRowExactScale
             - unitRowValue
+            - unitRowExactOffset
+            - UNIT_PREFIX_SETS
+            - unitPrefixExactScale
+            - getUnitPrefix
           reExport: true
         - file: ./types/unit.js
           imports:
@@ -568,6 +572,7 @@ modules:
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
+            - UnitPrefix
           reExport: true
           typeOnly: true
         - file: ./types/unit.js
@@ -675,6 +680,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - UNIT_DIMENSION_LENGTH
         - SI_DIMENSION_LENGTH
         - toSiDimensions
@@ -752,6 +761,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
         - SiDimensionVector
         - SiDimensionOptions
         - TypedFunction
@@ -844,6 +854,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - UNIT_DIMENSION_LENGTH
         - SI_DIMENSION_LENGTH
         - toSiDimensions
@@ -919,6 +933,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
         - SiDimensionVector
         - SiDimensionOptions
         - TypedFunction
@@ -1873,6 +1888,10 @@ modules:
             - getUnitRow
             - unitRowExactScale
             - unitRowValue
+            - unitRowExactOffset
+            - UNIT_PREFIX_SETS
+            - unitPrefixExactScale
+            - getUnitPrefix
           reExport: true
         - file: ./unit/errors.js
           imports:
@@ -1908,6 +1927,7 @@ modules:
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
+            - UnitPrefix
           reExport: true
           typeOnly: true
         - file: ./unit-definitions.js
@@ -1949,6 +1969,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - DimensionMismatchError
         - UnitParseError
         - isUnit
@@ -1965,6 +1989,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
         - Dimensions
         - UnitDef
         - SiDimensionVector
@@ -1995,6 +2020,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - DimensionMismatchError
         - UnitParseError
         - isUnit
@@ -2011,6 +2040,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
         - Dimensions
         - UnitDef
         - SiDimensionVector
@@ -2166,26 +2196,37 @@ modules:
           imports:
             - ExactScale
             - exactScaleToNumber
+            - powerExactScale
+            - ratioExactScale
             - readScaleExpression
       workspaceDependencies: []
       exports:
+        - UNIT_PREFIX_SETS
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - unitPrefixExactScale
+        - getUnitPrefix
         - namedExactScale
         - readUnitScale
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
       interfaces:
         - UnitRow
+        - UnitPrefix
       functions:
+        - unitPrefixExactScale
+        - getUnitPrefix
         - namedExactScale
         - readUnitScale
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
       constants:
+        - UNIT_PREFIX_SETS
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
@@ -2239,6 +2280,10 @@ modules:
             - getUnitRow
             - unitRowExactScale
             - unitRowValue
+            - unitRowExactOffset
+            - UNIT_PREFIX_SETS
+            - unitPrefixExactScale
+            - getUnitPrefix
           reExport: true
         - file: ./exact-scale.js
           imports:
@@ -2250,6 +2295,7 @@ modules:
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
+            - UnitPrefix
           reExport: true
           typeOnly: true
         - file: ./unit-types.js
@@ -2283,11 +2329,16 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - Unit
         - ExactScale
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
       reExported:
         - createUnitClass
         - unitDependencies
@@ -2313,10 +2364,15 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - ExactScale
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
         - type * from ./unit-types.js
       constants:
         - Unit
@@ -2494,9 +2550,13 @@ modules:
             - UNIT_EXACT_SCALE
         - file: ./unit-table.js
           imports:
+            - UnitPrefix
+            - UnitPrefixSetKey
             - readUnitScale
+            - UNIT_PREFIX_SETS
             - UNIT_ROW_ALIASES
             - UNIT_ROWS
+            - unitPrefixExactScale
       workspaceDependencies: []
       exports:
         - createUnitClass
@@ -2639,7 +2699,14 @@ modules:
       description: SI prefixes for the Unit type.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./unit/exact-scale.js
+          imports:
+            - exactScaleToNumber
+        - file: ./unit/unit-table.js
+          imports:
+            - UNIT_PREFIX_SETS
+            - unitPrefixExactScale
       workspaceDependencies: []
       exports:
         - SI_PREFIXES
@@ -31042,6 +31109,10 @@ modules:
             - getUnitRow
             - unitRowExactScale
             - unitRowValue
+            - unitRowExactOffset
+            - UNIT_PREFIX_SETS
+            - unitPrefixExactScale
+            - getUnitPrefix
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -31053,6 +31124,7 @@ modules:
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
+            - UnitPrefix
       exports:
         - Unit
         - isUnit
@@ -31097,6 +31169,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - Dimensions
         - UnitDef
         - SiDimensionVector
@@ -31105,6 +31181,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
       reExported:
         - Unit
         - isUnit
@@ -31149,6 +31226,10 @@ modules:
         - getUnitRow
         - unitRowExactScale
         - unitRowValue
+        - unitRowExactOffset
+        - UNIT_PREFIX_SETS
+        - unitPrefixExactScale
+        - getUnitPrefix
         - Dimensions
         - UnitDef
         - SiDimensionVector
@@ -31157,6 +31238,7 @@ modules:
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
+        - UnitPrefix
   numbers:
     numbers/src/index.ts:
       description: Standalone numeric types for MathTS. Re-exports `Complex`, `Fraction`, and
@@ -38665,15 +38747,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1185
   totalModules: 83
-  totalLinesOfCode: 196965
-  totalExports: 6051
+  totalLinesOfCode: 196967
+  totalExports: 6075
   totalClasses: 58
-  totalInterfaces: 522
-  totalFunctions: 1930
+  totalInterfaces: 523
+  totalFunctions: 1933
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1611
-  totalReExports: 2522
+  totalConstants: 1612
+  totalReExports: 2542
   totalTypeOnlyImports: 600
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

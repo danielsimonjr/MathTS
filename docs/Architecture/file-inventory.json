@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 253
     },
     {
       "file": "core/src/internal.ts",
@@ -786,14 +786,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 77
+      "loc": 66
     },
     {
       "file": "core/src/types/unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 86
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -821,14 +821,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 49
+      "loc": 53
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 455
+      "loc": 591
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
@@ -842,7 +842,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2774
+      "loc": 2622
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1101,7 +1101,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 424
+      "loc": 585
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -12791,7 +12791,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 69
+      "loc": 74
     },
     {
       "file": "units/tests/units.test.ts",

@@ -39,8 +39,12 @@ export {
   getUnitRow,
   unitRowExactScale,
   unitRowValue,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
 } from './unit-table.js';
-export type { UnitRow, UnitBaseKey, UnitPrefixSetKey } from './unit-table.js';
+export type { UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix } from './unit-table.js';
 
 /** The core `Unit` class, pre-wired to core's numeric primitives. */
 export const Unit: UnitConstructor = createUnitClass(

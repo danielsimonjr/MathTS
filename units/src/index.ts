@@ -54,6 +54,10 @@ export {
   getUnitRow,
   unitRowExactScale,
   unitRowValue,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
 } from '@danielsimonjr/mathts-core';
 
 export type {
@@ -65,4 +69,5 @@ export type {
   UnitRow,
   UnitBaseKey,
   UnitPrefixSetKey,
+  UnitPrefix,
 } from '@danielsimonjr/mathts-core';
