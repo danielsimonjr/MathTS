@@ -125,8 +125,18 @@ export {
   getUnitRow,
   unitRowExactScale,
   unitRowValue,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
 } from './types/unit.js';
-export type { ExactScale, UnitRow, UnitBaseKey, UnitPrefixSetKey } from './types/unit.js';
+export type {
+  ExactScale,
+  UnitRow,
+  UnitBaseKey,
+  UnitPrefixSetKey,
+  UnitPrefix,
+} from './types/unit.js';
 export {
   UNIT_DIMENSION_LENGTH,
   SI_DIMENSION_LENGTH,

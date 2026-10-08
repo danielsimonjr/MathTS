@@ -23,7 +23,13 @@
  * @module @danielsimonjr/mathts-core/types/unit/unit-table
  */
 
-import { type ExactScale, exactScaleToNumber, readScaleExpression } from './exact-scale.js';
+import {
+  type ExactScale,
+  exactScaleToNumber,
+  powerExactScale,
+  ratioExactScale,
+  readScaleExpression,
+} from './exact-scale.js';
 
 /** The base-dimension keys a row may name (the `BASE_UNITS` of the Unit class). */
 export type UnitBaseKey =
@@ -82,6 +88,125 @@ export interface UnitRow {
   readonly reciprocal?: true;
   /** The value is the imaginary unit times the scale (reactive power, VAR). */
   readonly imaginary?: true;
+}
+
+/** One prefix: the factor `radix^power`, and whether `toBest` may pick it. */
+export interface UnitPrefix {
+  /** 10 for an SI prefix, 1024 for an IEC binary prefix. */
+  readonly radix: 10 | 1024;
+  /** The power of the radix. */
+  readonly power: number;
+  /** Whether automatic prefix selection may use it (false for da, h, d, c). */
+  readonly scientific: boolean;
+}
+
+/**
+ * The SI prefixes (SI Brochure, 9th ed., Table 7; ronna/quetta/ronto/quecto
+ * from the 27th CGPM, 2022): short symbol, long name, power of ten, and
+ * whether automatic prefix selection may use it. `u` is the ASCII micro.
+ */
+const SI_PREFIX_LIST: ReadonlyArray<readonly [string, string, number, boolean]> = [
+  ['da', 'deca', 1, false],
+  ['h', 'hecto', 2, false],
+  ['k', 'kilo', 3, true],
+  ['M', 'mega', 6, true],
+  ['G', 'giga', 9, true],
+  ['T', 'tera', 12, true],
+  ['P', 'peta', 15, true],
+  ['E', 'exa', 18, true],
+  ['Z', 'zetta', 21, true],
+  ['Y', 'yotta', 24, true],
+  ['R', 'ronna', 27, true],
+  ['Q', 'quetta', 30, true],
+  ['d', 'deci', -1, false],
+  ['c', 'centi', -2, false],
+  ['m', 'milli', -3, true],
+  ['u', 'micro', -6, true],
+  ['n', 'nano', -9, true],
+  ['p', 'pico', -12, true],
+  ['f', 'femto', -15, true],
+  ['a', 'atto', -18, true],
+  ['z', 'zepto', -21, true],
+  ['y', 'yocto', -24, true],
+  ['r', 'ronto', -27, true],
+  ['q', 'quecto', -30, true],
+];
+
+/** The IEC binary prefixes (IEC 80000-13): short symbol, long name, power of 1024. */
+const IEC_PREFIX_LIST: ReadonlyArray<readonly [string, string, number]> = [
+  ['Ki', 'kibi', 1],
+  ['Mi', 'mebi', 2],
+  ['Gi', 'gibi', 3],
+  ['Ti', 'tebi', 4],
+  ['Pi', 'pebi', 5],
+  ['Ei', 'exi', 6],
+  ['Zi', 'zebi', 7],
+  ['Yi', 'yobi', 8],
+];
+
+type PrefixSet = Readonly<Record<string, UnitPrefix>>;
+
+function prefixSet(
+  entries: ReadonlyArray<readonly [string, number, boolean, (10 | 1024)?]>
+): PrefixSet {
+  const set: Record<string, UnitPrefix> = { '': { radix: 10, power: 0, scientific: true } };
+  for (const [name, power, scientific, radix] of entries) {
+    set[name] = Object.freeze({ radix: radix ?? 10, power, scientific });
+  }
+  return Object.freeze(set);
+}
+
+const siShort = (scale: number, keep: (power: number) => boolean = () => true) =>
+  prefixSet(
+    SI_PREFIX_LIST.filter(([, , p]) => keep(p)).map(
+      ([short, , p, sci]) => [short, p * scale, sci] as const
+    )
+  );
+const siLong = (keep: (power: number) => boolean = () => true) =>
+  prefixSet(
+    SI_PREFIX_LIST.filter(([, , p]) => keep(p)).map(([, long, p, sci]) => [long, p, sci] as const)
+  );
+const upToYotta = (p: number) => p >= 3 && p <= 24;
+
+/**
+ * The prefix sets a row's `prefixes` names, each prefix stated as `radix^power`.
+ * `SQUARED` and `CUBIC` are the SI prefixes applied to an area or volume unit
+ * (cm² = 10⁻⁴ m²). The binary sets are the SI prefixes from kilo to yotta
+ * plus the IEC prefixes; `SHORT_UP_ONLY` (ly, pc) is the SI prefixes from k up.
+ */
+export const UNIT_PREFIX_SETS: Readonly<Record<UnitPrefixSetKey, PrefixSet>> = Object.freeze({
+  NONE: prefixSet([]),
+  SHORT: siShort(1),
+  LONG: siLong(),
+  SHORTLONG: Object.freeze({ ...siShort(1), ...siLong() }),
+  SQUARED: siShort(2),
+  CUBIC: siShort(3),
+  BINARY_SHORT: Object.freeze({
+    ...siShort(1, upToYotta),
+    ...prefixSet(IEC_PREFIX_LIST.map(([short, , p]) => [short, p, true, 1024] as const)),
+  }),
+  BINARY_LONG: Object.freeze({
+    ...siLong(upToYotta),
+    ...prefixSet(IEC_PREFIX_LIST.map(([, long, p]) => [long, p, true, 1024] as const)),
+  }),
+  BTU: prefixSet([['MM', 6, true]]),
+  SHORT_UP_ONLY: siShort(1, (p) => p >= 3),
+});
+
+/** The exact factor of a prefix (`radix^power`). */
+export function unitPrefixExactScale(prefix: UnitPrefix): ExactScale {
+  return powerExactScale(ratioExactScale(prefix.radix), prefix.power);
+}
+
+/**
+ * The prefix `name` in the set a built-in unit takes, or undefined when the
+ * unit is unknown or does not take that prefix. `''` is the unprefixed unit.
+ */
+export function getUnitPrefix(unit: string, name: string): UnitPrefix | undefined {
+  const row = getUnitRow(unit);
+  if (row === undefined) return undefined;
+  const set = UNIT_PREFIX_SETS[row.prefixes];
+  return Object.prototype.hasOwnProperty.call(set, name) ? set[name] : undefined;
 }
 
 /**
@@ -451,4 +576,15 @@ export function unitRowExactScale(name: string): ExactScale | undefined {
 export function unitRowValue(name: string): number | undefined {
   const scale = unitRowExactScale(name);
   return scale === undefined ? undefined : exactScaleToNumber(scale);
+}
+
+/**
+ * The additive offset of a built-in affine unit, exactly, in the unit's own
+ * degrees: SI = (x + offset) × scale (`degF`: 459.67, `degC`: 273.15). Zero
+ * for a unit with no offset; undefined for an unknown name.
+ */
+export function unitRowExactOffset(name: string): ExactScale | undefined {
+  const row = getUnitRow(name);
+  if (row === undefined) return undefined;
+  return row.offset === undefined ? ratioExactScale(0) : readUnitScale(row.offset);
 }

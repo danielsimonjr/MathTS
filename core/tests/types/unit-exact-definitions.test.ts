@@ -26,6 +26,11 @@ import {
   ratioExactScale,
   readScaleExpression,
   unitRowExactScale,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
+  SI_PREFIXES,
 } from '../../src/index';
 
 // ---------------------------------------------------------------------------
@@ -419,5 +424,161 @@ describe('conversions multiply exact scales and round once', () => {
       toString(): string;
     };
     expect(b.toString().startsWith('6894.757293168361336722')).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Prefixes, written out from the SI Brochure (Table 7, plus the 2022 CGPM
+// additions) and IEC 80000-13, independently of the table's generated sets.
+// ---------------------------------------------------------------------------
+const SI_SHORT: Record<string, number> = {
+  da: 1,
+  h: 2,
+  k: 3,
+  M: 6,
+  G: 9,
+  T: 12,
+  P: 15,
+  E: 18,
+  Z: 21,
+  Y: 24,
+  R: 27,
+  Q: 30,
+  d: -1,
+  c: -2,
+  m: -3,
+  u: -6,
+  n: -9,
+  p: -12,
+  f: -15,
+  a: -18,
+  z: -21,
+  y: -24,
+  r: -27,
+  q: -30,
+};
+const SI_LONG: Record<string, number> = {
+  deca: 1,
+  hecto: 2,
+  kilo: 3,
+  mega: 6,
+  giga: 9,
+  tera: 12,
+  peta: 15,
+  exa: 18,
+  zetta: 21,
+  yotta: 24,
+  ronna: 27,
+  quetta: 30,
+  deci: -1,
+  centi: -2,
+  milli: -3,
+  micro: -6,
+  nano: -9,
+  pico: -12,
+  femto: -15,
+  atto: -18,
+  zepto: -21,
+  yocto: -24,
+  ronto: -27,
+  quecto: -30,
+};
+const IEC_SHORT: Record<string, number> = {
+  Ki: 1,
+  Mi: 2,
+  Gi: 3,
+  Ti: 4,
+  Pi: 5,
+  Ei: 6,
+  Zi: 7,
+  Yi: 8,
+};
+const IEC_LONG: Record<string, number> = {
+  kibi: 1,
+  mebi: 2,
+  gibi: 3,
+  tebi: 4,
+  pebi: 5,
+  exi: 6,
+  zebi: 7,
+  yobi: 8,
+};
+const tenTo = (n: number): Q => (n >= 0 ? q(10n ** BigInt(n)) : q(1n, 10n ** BigInt(-n)));
+const scaled = (set: Record<string, number>, k: number) =>
+  Object.fromEntries(Object.entries(set).map(([name, p]) => [name, tenTo(p * k)]));
+const only = (set: Record<string, number>, keep: (p: number) => boolean) =>
+  Object.fromEntries(Object.entries(set).filter(([, p]) => keep(p)));
+const iec = (set: Record<string, number>) =>
+  Object.fromEntries(Object.entries(set).map(([name, p]) => [name, q(1024n ** BigInt(p))]));
+const upToYotta = (p: number) => p >= 3 && p <= 24;
+
+const PREFIX_DEFINITIONS: Record<string, Record<string, Q>> = {
+  NONE: {},
+  SHORT: scaled(SI_SHORT, 1),
+  LONG: scaled(SI_LONG, 1),
+  SHORTLONG: { ...scaled(SI_SHORT, 1), ...scaled(SI_LONG, 1) },
+  SQUARED: scaled(SI_SHORT, 2),
+  CUBIC: scaled(SI_SHORT, 3),
+  BINARY_SHORT: { ...scaled(only(SI_SHORT, upToYotta), 1), ...iec(IEC_SHORT) },
+  BINARY_LONG: { ...scaled(only(SI_LONG, upToYotta), 1), ...iec(IEC_LONG) },
+  BTU: { MM: tenTo(6) },
+  SHORT_UP_ONLY: scaled(
+    only(SI_SHORT, (p) => p >= 3),
+    1
+  ),
+};
+
+describe('prefix sets', () => {
+  const PREFIXES = (
+    Unit as unknown as {
+      PREFIXES: Record<string, Record<string, { value: number }>>;
+    }
+  ).PREFIXES;
+
+  it('every set has exactly the defined prefixes, each exactly radix^power and rounded once', () => {
+    expect(Object.keys(UNIT_PREFIX_SETS).sort()).toEqual(Object.keys(PREFIX_DEFINITIONS).sort());
+    for (const [key, defs] of Object.entries(PREFIX_DEFINITIONS)) {
+      const set = UNIT_PREFIX_SETS[key as keyof typeof UNIT_PREFIX_SETS];
+      expect(Object.keys(set).sort(), key).toEqual(['', ...Object.keys(defs)].sort());
+      for (const [name, [n, d]] of Object.entries(defs)) {
+        expect(unitPrefixExactScale(set[name]!), `${key}.${name}`).toEqual(ratioExactScale(n, d));
+        expect(PREFIXES[key]![name]!.value, `${key}.${name}`).toBe(binaryRound(n, d));
+      }
+    }
+  });
+
+  it('da, h, d and c are the only SI prefixes automatic selection skips', () => {
+    const skipped = Object.entries(UNIT_PREFIX_SETS.SHORT)
+      .filter(([, p]) => !p.scientific)
+      .map(([name]) => name);
+    expect(skipped.sort()).toEqual(['c', 'd', 'da', 'h']);
+  });
+
+  it('a unit takes the prefixes of its row only', () => {
+    expect(getUnitPrefix('m', 'k')).toEqual({ radix: 10, power: 3, scientific: true });
+    expect(getUnitPrefix('meter', 'kilo')?.power).toBe(3);
+    expect(getUnitPrefix('meter', 'k')).toBeUndefined();
+    expect(getUnitPrefix('pc', 'm')).toBeUndefined(); // upward only
+    expect(getUnitPrefix('pc', 'M')?.power).toBe(6);
+    expect(getUnitPrefix('B', 'Ki')).toEqual({ radix: 1024, power: 1, scientific: true });
+    expect(getUnitPrefix('inch', 'k')).toBeUndefined();
+    expect(getUnitPrefix('nonesuch', '')).toBeUndefined();
+  });
+
+  it('SI_PREFIXES reads the SHORT set, quecto to quetta, with µ beside u', () => {
+    const expectedPrefixes = Object.fromEntries(
+      Object.entries(SI_SHORT).map(([name, p]) => {
+        const [n, d] = tenTo(p);
+        return [name, binaryRound(n, d)];
+      })
+    );
+    expect(SI_PREFIXES).toEqual({ ...expectedPrefixes, µ: 1e-6 });
+  });
+
+  it('affine offsets are exact in the unit’s own degrees', () => {
+    expect(unitRowExactOffset('degF')).toEqual(ratioExactScale(45967n, 100n));
+    expect(unitRowExactOffset('degC')).toEqual(ratioExactScale(27315n, 100n));
+    expect(unitRowExactOffset('K')).toEqual(ratioExactScale(0));
+    expect(unitRowExactOffset('nonesuch')).toBeUndefined();
   });
 });

@@ -50,8 +50,18 @@ export {
   getUnitRow,
   unitRowExactScale,
   unitRowValue,
+  unitRowExactOffset,
+  UNIT_PREFIX_SETS,
+  unitPrefixExactScale,
+  getUnitPrefix,
 } from './unit/index.js';
-export type { ExactScale, UnitRow, UnitBaseKey, UnitPrefixSetKey } from './unit/index.js';
+export type {
+  ExactScale,
+  UnitRow,
+  UnitBaseKey,
+  UnitPrefixSetKey,
+  UnitPrefix,
+} from './unit/index.js';
 
 // Typed error classes — `catch (e) { e instanceof UnitParseError }` still works.
 export { DimensionMismatchError, UnitParseError } from './unit/errors.js';
