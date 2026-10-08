@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-05",
-  "totalFiles": 1887,
+  "generated": "2026-10-08",
+  "totalFiles": 1890,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1158,
+    "build-entry": 1160,
     "test-only": 0,
     "orphan": 0,
-    "test": 644,
+    "test": 645,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1183,
-    "tests": 644,
+    "src": 1185,
+    "tests": 645,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 84,
+    "@danielsimonjr/mathts-core": 87,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 545,
@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 218
+      "loc": 243
     },
     {
       "file": "core/src/internal.ts",
@@ -779,7 +779,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 240
+      "loc": 236
     },
     {
       "file": "core/src/types/unit-prefixes.ts",
@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 49
+      "loc": 76
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -810,25 +810,39 @@
       "loc": 24
     },
     {
+      "file": "core/src/types/unit/exact-scale.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 253
+    },
+    {
       "file": "core/src/types/unit/index.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 21
+      "loc": 49
+    },
+    {
+      "file": "core/src/types/unit/unit-table.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 455
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 260
+      "loc": 269
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3887
+      "loc": 2774
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1083,6 +1097,13 @@
       "loc": 70
     },
     {
+      "file": "core/tests/types/unit-exact-definitions.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 424
+    },
+    {
       "file": "core/tests/types/unit-external-reference.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1101,7 +1122,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 104
     },
     {
       "file": "core/tests/version.test.ts",
@@ -10425,7 +10446,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 72
+      "loc": 73
     },
     {
       "file": "functions/tests/unit-operators.test.ts",
@@ -12770,7 +12791,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 43
+      "loc": 69
     },
     {
       "file": "units/tests/units.test.ts",

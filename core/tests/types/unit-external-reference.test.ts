@@ -50,8 +50,8 @@ describe('B-5 port: astronomical / nautical / typography units (upstream ece1aab
     ['AU', 1.495978707e11],
     ['lightyear', 9.4607304725808e15], // Julian year × c, exact
     ['ly', 9.4607304725808e15],
-    ['parsec', 3.08567758149137e16], // IAU 2015 exact
-    ['pc', 3.08567758149137e16],
+    ['parsec', 3.085677581491367e16], // IAU 2015 B2: 648000/π au
+    ['pc', 3.085677581491367e16],
     ['nauticalMile', 1852],
     ['nmi', 1852],
     ['fathom', 1.8288],

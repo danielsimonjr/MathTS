@@ -103,6 +103,31 @@ export {
 } from './types/unit.js';
 export type { Dimensions, UnitDef, UnitInstance } from './types/unit.js';
 export {
+  UNIT_EXACT_SCALE,
+  PI_EXACT_SCALE,
+  decimalExactScale,
+  exactScaleOf,
+  binaryExactScale,
+  ratioExactScale,
+  multiplyExactScales,
+  divideExactScales,
+  powerExactScale,
+  addExactScales,
+  exactScalesEqual,
+  exactScaleToNumber,
+  formatExactScale,
+  readScaleExpression,
+  NAMED_SCALES,
+  UNIT_ROWS,
+  UNIT_ROW_ALIASES,
+  namedExactScale,
+  readUnitScale,
+  getUnitRow,
+  unitRowExactScale,
+  unitRowValue,
+} from './types/unit.js';
+export type { ExactScale, UnitRow, UnitBaseKey, UnitPrefixSetKey } from './types/unit.js';
+export {
   UNIT_DIMENSION_LENGTH,
   SI_DIMENSION_LENGTH,
   toSiDimensions,

@@ -26,7 +26,8 @@ describe('core Unit — parsing & value', () => {
 
 describe('core Unit — conversion', () => {
   it('converts across units (imperial + temperature + compound)', () => {
-    expect(new Unit(1, 'm').to('ft').toString()).toBe('3.280839895013123 ft');
+    // 1 / 0.3048 rounded once (the float quotient 1 / 0.3048 is 3.280839895013123, one ulp low).
+    expect(new Unit(1, 'm').to('ft').toString()).toBe('3.2808398950131235 ft');
     expect(new Unit(2, 'inch').to('cm').toString()).toBe('5.08 cm');
     expect(Unit.parse('20 degC').to('K').toString()).toBe('293.15 K');
     expect(Unit.parse('36 km/h').to('m/s').toString()).toBe('10 m / s');
