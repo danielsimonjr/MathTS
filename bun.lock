@@ -395,6 +395,8 @@
   "overrides": {
     "esbuild": "^0.28.1",
     "js-yaml": "^4.3.0",
+    "shell-quote": "^1.11.0",
+    "source-map-js": "^1.2.2",
   },
   "packages": {
     "@assemblyscript/loader": ["@assemblyscript/loader@0.28.20", "", {}, "sha512-uBUnqp8AckYaraRFJZi4D+gONE8flqm4hLRI9uH886imTdlIN//5nNJN4ZD7tGt49KOVi/IZgwmsHBDhSKaILw=="],
