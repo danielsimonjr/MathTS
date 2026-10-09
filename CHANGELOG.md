@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   publish is not waiting on the `release` event.
 
 ### Fixed
+- **The nightly `Audit (high+)` check passes again.** `bun.lock` now resolves `shell-quote` 1.11.0
+  (critical command injection, fixed in 1.11.0) and `source-map-js` 1.2.2 (high event-loop denial of
+  service, fixed in 1.2.2). Both are transitive dev dependencies (`@changesets/cli` > `launch-editor`;
+  `vite`/`postcss`/`magicast`), and the parents' ranges already allowed the fixed versions, so only the
+  lockfile moved: no override and no manifest change. The lockfile also now matches the workspace
+  `@danielsimonjr/mathts-expression` ranges (`^0.10.0`).
 - **The Dependabot bun.lock workflow no longer leaves a PR BLOCKED.** GitHub holds the
   `pull_request` runs that the workflow's lockfile push triggers at `action_required`, and a
   `workflow_dispatch` run never reaches the PR's required checks. The workflow now approves the
