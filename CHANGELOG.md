@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- **CI enforces the Bun pin.** Bun does not enforce the `packageManager` field, so every workflow now
+  reads its Bun version from `package.json` (`bun-version-file`) and then runs
+  `tools/test/check-bun-version.mjs`, which fails when `bun --version` differs from the pin
+  (`bun run check:bun-version` runs it locally). The `Dependabot bun.lock` workflow used Bun `latest`; it now
+  regenerates `bun.lock` with the pinned Bun, the same one CI and local installs use.
+
 - **npm publish runs in CI.** The Release workflow still opens the changesets version PR. After
   that PR merges it also tags each bumped package and opens a GitHub Release, then calls the
   Publish workflow in the same run. Publish (`workflow_dispatch`, a person-created release, or

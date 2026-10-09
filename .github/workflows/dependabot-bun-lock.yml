@@ -75,10 +75,15 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Same Bun as CI and local installs (package.json packageManager), so the lockfile is written by
+      # the Bun that will read it under --frozen-lockfile. Bump the pin in package.json, not here.
       - name: Set up Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version-file: package.json
+
+      - name: Check Bun matches the packageManager pin
+        run: node tools/test/check-bun-version.mjs
 
       - name: Regenerate bun.lock
         run: bun install
