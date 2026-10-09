@@ -77,6 +77,12 @@ jobs:
       - name: Browser-safety (no node leaks from browser entries)
         run: bun run check:browser-safety
 
+      # The step above is the development build (`build`: unminified). `build:prod` adds
+      # --minify --treeshake and nothing else built it, so a failure there was invisible until
+      # someone ran it by hand. It runs last because it rewrites dist/ with minified output.
+      - name: Build (production)
+        run: bun run build:prod
+
       - name: Audit (high+)
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
         # `npm audit --audit-level=high` gate. The tree currently audits clean at
