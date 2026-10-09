@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`bun run check:bun-version` runs it locally). The `Dependabot bun.lock` workflow used Bun `latest`; it now
   regenerates `bun.lock` with the pinned Bun, the same one CI and local installs use.
 
+- **CI builds the production bundles too.** The Compile & Lint job ran only `bun run build` (the
+  unminified development build). It now also runs `bun run build:prod` (`--minify --treeshake`), so a
+  break in a production build fails the PR instead of surfacing at release time. The repo defines no
+  `build:dev` script; the development build is `build` (see `CLAUDE.md`).
 - **npm publish runs in CI.** The Release workflow still opens the changesets version PR. After
   that PR merges it also tags each bumped package and opens a GitHub Release, then calls the
   Publish workflow in the same run. Publish (`workflow_dispatch`, a person-created release, or
