@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-05",
+  "generated": "2026-10-10",
   "totalFiles": 1887,
   "byDisposition": {
     "reachable": 25,
@@ -12805,7 +12805,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 96
+      "loc": 100
     },
     {
       "file": "workbook/src/cli.ts",
