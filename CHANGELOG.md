@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- **Root vitest suites run on Bun for Windows.** Vitest's default `forks` pool fails to start a worker there
+  (`undefined is not an object (evaluating 'runner.config')`), so `bun run test` failed its root step on
+  Windows hosts. `vitest.config.ts` now selects the `threads` pool on Bun for win32 only; Linux CI and Node runs
+  keep the default pool. 6 files, 124 tests pass on Bun and on Node.
 - **CI enforces the Bun pin.** Bun does not enforce the `packageManager` field, so every workflow now
   reads its Bun version from `package.json` (`bun-version-file`) and then runs
   `tools/test/check-bun-version.mjs`, which fails when `bun --version` differs from the pin

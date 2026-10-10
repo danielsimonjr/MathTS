@@ -53,6 +53,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Vitest's default `forks` pool cannot start a worker under Bun on Windows
+    // (`TypeError: undefined is not an object (evaluating 'runner.config')`), so the
+    // root suites never ran there. `threads` works on Bun. Other platforms keep the default.
+    ...(process.versions.bun && process.platform === 'win32' ? { pool: 'threads' as const } : {}),
     exclude: ['**/*.browser.test.ts', 'node_modules/**'],
     // ROOT-LEVEL suites only. Each package runs its OWN runner through
     // `turbo run test` (`bun test` for most, vitest for `functions`);
