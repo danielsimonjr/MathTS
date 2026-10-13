@@ -32,7 +32,8 @@ describe('Unit merge characterization — parsing & value', () => {
   });
 
   it('converts across units (incl. imperial + temperature)', () => {
-    expect(U(1, 'm').to('ft').toString()).toBe('3.280839895013123 ft');
+    // 1 / 0.3048 rounded once (the float quotient 1 / 0.3048 is 3.280839895013123, one ulp low).
+    expect(U(1, 'm').to('ft').toString()).toBe('3.2808398950131235 ft');
     expect(U(2, 'inch').to('cm').toString()).toBe('5.08 cm');
     expect(U('20 degC').to('K').toString()).toBe('293.15 K');
     expect(U(36, 'km/h').to('m/s').toString()).toBe('10 m / s');
