@@ -4,8 +4,6 @@
 
 # mathts - Dependency Graph
 
-**Version**: 0.1.0 | **Last Updated**: 2026-10-14
-
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
 ---
@@ -18559,6 +18557,3 @@ graph TD
 | Type-only Circular Deps | 0      |
 
 ---
-
-_Last Updated_: 2026-10-14
-_Version_: 0.1.0
