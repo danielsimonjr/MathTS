@@ -156,9 +156,9 @@ threshold — is a **generated artifact**, not a hand-maintained list: per publi
 it against `DEFAULT_THRESHOLD_BY_OP` (parsed straight from
 `parallel/src/ComputePool.ts`), emitting
 [`parallel-pairing.md` / `parallel-pairing.json`](./parallel-pairing.md) — the
-parallel analog of §6a's `wasm-pairing.md`. As of the last regeneration: **96
-effectively parallelized, 17 threshold-disabled, 105 non-parallel** of 218 typed
-functions. The **effective** set is the compute-bound ops — `matmul` (4,096),
+parallel analog of §6a's `wasm-pairing.md`. The `parallel-pairing.md` report
+gives the counts of effectively parallelized, threshold-disabled and non-parallel
+typed functions. The **effective** set is the compute-bound ops — `matmul` (4,096),
 `tensordot` (8,192), `matrixPower` / `characteristicPolynomial` (9,216), the
 hypothesis tests (4,096), `erfc` (100,000), `besselJ` (1,000,000), `spectrogram`
 (65,536), `sampleChunk` (100,000) — plus every generic per-element kernel above
