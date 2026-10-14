@@ -195,9 +195,9 @@ const LN2_DEN = 10n ** BigInt(LN2_DIGITS.length);
 /**
  * `num / den` (`den > 0`) rounded once to the nearest double, ties to even.
  *
- * Uses integer arithmetic in base 2 (shift the ratio into the 53-bit significand
- * window, then round from the remainder). The previous decimal-sticky path
- * mis-rounded magnitudes above about 1e41.
+ * Uses integer arithmetic in base 2: shift the ratio into the 53-bit significand
+ * window (or onto the fixed 2^-1074 grid below the smallest normal), then round
+ * from the remainder.
  */
 function rationalToNumber(num: bigint, den: bigint): number {
   if (num === 0n) return 0;
@@ -225,24 +225,9 @@ function rationalToNumber(num: bigint, den: bigint): number {
     while (scaled(shift) >= 1n << 53n) shift--;
   }
 
-  // Subnormals: unbiased exponent would be < -1022 ⇒ use fixed 2^-1074 grid.
-  // value = m * 2^-shift with m in [2^52, 2^53) ⇒ unbiased exp = 52 - shift.
-  if (52 - shift < -1022) {
-    shift = 1074;
-    const n = a;
-    const d = den << BigInt(shift);
-    let m = n / d;
-    const twice = 2n * (n % d);
-    if (twice > d || (twice === d && m % 2n === 1n)) m += 1n;
-    if (m === 0n) return negative ? -0 : 0;
-    if (m >= 1n << 52n) {
-      // Rounded up into the smallest normal (2^-1022).
-      const value = Number(1n << 52n) * 2 ** -1074 * 2; // = 2^-1022
-      return negative ? -value : value;
-    }
-    const value = Number(m) * 2 ** -1074;
-    return negative ? -value : value;
-  }
+  // Below the smallest normal double (2^-1022) the grid step is fixed at 2^-1074, so the shift
+  // stops at 1074. A subnormal that rounds up to m = 2^52 is the smallest normal: no special case.
+  if (shift > 1074) shift = 1074;
 
   const n = shift >= 0 ? a << BigInt(shift) : a;
   const d = shift >= 0 ? den : den << BigInt(-shift);

@@ -101,6 +101,106 @@ describe('exactScaleToNumber rounds at any magnitude', () => {
   });
 });
 
+/** The 64-bit pattern of a double: tells +0 from -0 and pins an exact result. */
+function bitsOf(d: number): string {
+  const v = new DataView(new ArrayBuffer(8));
+  v.setFloat64(0, d);
+  return v.getBigUint64(0).toString(16).padStart(16, '0');
+}
+
+describe('exactScaleToNumber below the smallest normal double (subnormals)', () => {
+  // The bit patterns come from Python's correctly rounded int / int true division
+  // (fractions.Fraction.__float__), with pi and ln 2 to 450 digits. They do not come
+  // from this module's own rounding.
+  const cases: Array<[string, bigint, bigint, number, number, string]> = [
+    ['1 / 2^1074, the smallest subnormal', 1n, 1n << 1074n, 0, 0, '0000000000000001'],
+    ['1 / 2^1075, a tie that rounds to even zero', 1n, 1n << 1075n, 0, 0, '0000000000000000'],
+    ['3 / 2^1076, 0.75 ulp rounds up', 3n, 1n << 1076n, 0, 0, '0000000000000001'],
+    ['3 / 2^1075, 1.5 ulp ties to even 2', 3n, 1n << 1075n, 0, 0, '0000000000000002'],
+    ['5 / 2^1075, 2.5 ulp ties to even 2', 5n, 1n << 1075n, 0, 0, '0000000000000002'],
+    [
+      '(2^52 - 1) / 2^1074, the largest subnormal',
+      (1n << 52n) - 1n,
+      1n << 1074n,
+      0,
+      0,
+      '000fffffffffffff',
+    ],
+    [
+      '(2^54 - 1) / 2^1076 rounds up to the smallest normal',
+      (1n << 54n) - 1n,
+      1n << 1076n,
+      0,
+      0,
+      '0010000000000000',
+    ],
+    ['-1 / 2^1075, a negative tie gives negative zero', -1n, 1n << 1075n, 0, 0, '8000000000000000'],
+    ['7 / 10^310', 7n, 10n ** 310n, 0, 0, '000080dbd0164b2d'],
+    ['-3 / 10^320', -3n, 10n ** 320n, 0, 0, '80000000000017b8'],
+    ['pi / 10^320', 1n, 10n ** 320n, 1, 0, '00000000000018d7'],
+    ['1 / (ln2 * 10^320)', 1n, 10n ** 320n, 0, -1, '0000000000000b68'],
+    [
+      'ln2 / (pi * 10^323) is below half the smallest subnormal',
+      1n,
+      10n ** 323n,
+      -1,
+      1,
+      '0000000000000000',
+    ],
+  ];
+
+  it.each(cases)('%s', (_name, num, den, pi, ln2, bits) => {
+    expect(bitsOf(exactScaleToNumber({ num, den, pi, ln2 }))).toBe(bits);
+  });
+
+  it('agrees with the engine parse of a decimal literal across the subnormal range', () => {
+    const failures: string[] = [];
+    const digitsList = [
+      '1',
+      '2.5',
+      '4.9406564584124654',
+      '7',
+      '9.999999999999999',
+      '2.2250738585072011',
+    ];
+    for (let e = -324; e <= -300; e++) {
+      for (const digits of digitsList) {
+        const text = digits + 'e' + e;
+        const got = exactScaleToNumber(readScaleExpression(text));
+        const want = Number(text);
+        if (!Object.is(got, want)) failures.push(text + ': got=' + got + ' want=' + want);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+});
+
+describe('exactScaleToNumber at the top of the range and at the screens', () => {
+  const MAX_MANTISSA = (1n << 53n) - 1n; // Number.MAX_VALUE = MAX_MANTISSA * 2^971
+  const tieAboveMax = ((1n << 54n) - 1n) << 970n; // MAX_VALUE + half an ulp: ties to even, which is 2^1024
+  const at = (num: bigint, den = 1n) => exactScaleToNumber({ num, den, pi: 0, ln2: 0 });
+
+  it('keeps the largest finite double and overflows only at the tie', () => {
+    expect(at(MAX_MANTISSA << 971n)).toBe(Number.MAX_VALUE);
+    expect(at(tieAboveMax - 1n)).toBe(Number.MAX_VALUE);
+    expect(at(tieAboveMax)).toBe(Infinity);
+    expect(at(-tieAboveMax)).toBe(-Infinity);
+    expect(at(-(tieAboveMax - 1n))).toBe(-Number.MAX_VALUE);
+  });
+
+  it('rounds the carry into the next binade', () => {
+    expect(at((1n << 54n) - 1n, 2n)).toBe(2 ** 53); // 2^53 - 1/2 ties to even
+    expect(at((1n << 54n) - 3n, 2n)).toBe(2 ** 53 - 2); // 2^53 - 3/2 ties to even
+  });
+
+  it('answers at both magnitude screens', () => {
+    expect(at(1n << 1024n)).toBe(Infinity);
+    expect(at((1n << 1024n) - 1n)).toBe(Infinity);
+    expect(at(1n, 1n << 1081n)).toBe(0);
+    expect(at(1n, 1n << 1076n)).toBe(0);
+  });
+});
+
 describe('ExactScale named irrationals', () => {
   it('carries ln2 like pi', () => {
     expect(LN2_EXACT_SCALE).toEqual({ num: 1n, den: 1n, pi: 0, ln2: 1 });
