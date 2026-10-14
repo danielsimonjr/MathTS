@@ -562,8 +562,8 @@ count before a GPU dispatch's upload/readback cost pays off).
 ## @danielsimonjr/mathts-functions
 
 `functions/src/index.ts` (545 lines) re-exports three layers plus ~35 explicit
-named-export blocks — roughly 828 exports across 445 source files, all reachable
-from the entry point (one active graph). The build is `tsup` for the JS bundle
+named-export blocks — the `functions/src/` tree has 475 files (per `dependency-graph.json`; regenerate with `npm run docs:deps:full`), all reachable
+from a package `src/index.ts` (one active graph). The build is `tsup` for the JS bundle
 plus a separate `tsc -p tsconfig.dts.json` declaration tree (`dist/index.d.ts` is
 117 lines but re-exports from 340+ sibling `.d.ts` files).
 

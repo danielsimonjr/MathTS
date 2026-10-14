@@ -1,30 +1,24 @@
 # MathTS Architecture
 
-**Generated**: 2026-07-01
-
 ## System Overview
 
-MathTS is an npm workspaces monorepo with **22 packages**, all ESM-only (ES2022).
+MathTS is an npm workspaces monorepo with **24 packages**, all ESM-only (ES2022).
 Turborepo orchestrates builds across the workspace. tsup bundles each package
 (`functions` emits its `.d.ts` tree via `tsc`). AssemblyScript (`assembly/`,
 the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
-- **846 TypeScript files**, all reachable from package entry points (0 unused
-  files) — the dormant synced-from-mathjs mirror (455 files / ~58.6k LOC) was
-  deleted 2026-06-27, so there is now a single active graph, not a
-  reachable-vs-dormant split
-- **158,032 lines of code**
-- **4,088 total exports** (1,204 re-exports) — 50 classes, 358 interfaces, 1,461
-  functions, 135 type guards, 1,417 constants, 0 enums; 431 type-only imports
-- **320 test files** — 201 of 562 source files have direct (structural) test coverage
-  (35.8%); see the generated `TEST_COVERAGE.md`
-- **0 runtime circular dependencies** (2 type-only cycles remain, both in `matrix`)
-- **All 22 packages build, and all 21 TypeScript packages typecheck with 0
-  errors** under `tsc --noEmit`. Every package now compiles under `strict: true`
-  (`functions` and `expression` were the last holdouts, flipped 2026-06-27); no
-  package overrides `strict` to `false`. The 22nd package, `assembly`, is
-  AssemblyScript and is checked by `asc`. `functions` ships TypeScript
-  declarations (emitted via `tsc`); the active graph is clean.
+The figures in this section come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
+
+- **1,185 TypeScript files**, all reachable from package entry points (0 unused files)
+- **197,377 lines of code**
+- **6,121 total exports** (2,578 re-exports) — 58 classes, 523 interfaces, 1,940 functions, 160 type guards, 1,615 constants, 0 enums; 600 type-only imports
+- Test-coverage figures are in the generated `TEST_COVERAGE.md`
+- **0 runtime circular dependencies** and **0 type-only circular dependencies**
+- All 24 packages have a `build` script. 23 packages have a `typecheck` script. Each one runs `tsc --noEmit`, then `tsc -p tsconfig.test.json`. `assembly` has no `typecheck` script.
+- The CI workflow (`.github/workflows/ci.yml`) runs `bun run build` and `bun run typecheck`.
+- `tsconfig.base.json` sets `strict: true`. Thirteen TypeScript packages use `strict: true`. The ten thin re-export packages set `strict: false` in their own `tsconfig.json`.
+- `assembly` is AssemblyScript. Its `asbuild` script runs `asc`.
+- `functions` ships TypeScript declarations (emitted via `tsc`).
 
 ## Package Dependency Graph
 
@@ -72,14 +66,9 @@ complete per-file breakdown.
 
 ### Circular Dependencies
 
-The dependency-graph report detects **0 runtime import cycles**. Two **type-only**
-cycles remain, both inside `matrix` (these are erased at compile time and don't
-affect runtime load order):
+The dependency graph has **0 runtime import cycles** and **0 type-only cycles**.
 
-- `matrix/src/types/DenseMatrix.ts` ↔ `matrix/src/types/dense/arithmetic.ts`
-- `matrix/src/types/DenseMatrix.ts` ↔ `matrix/src/types/dense/reduction.ts`
-
-Seven cycles flagged by the 2026-05-22 report were all eliminated:
+These seven cycles do not occur. Each row names the change that breaks the cycle:
 
 | Former cycle                                                                        | Fix                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,9 +77,6 @@ Seven cycles flagged by the 2026-05-22 report were all eliminated:
 | `functions/src/factories/evaluate.ts → typed/index.ts → typed/cas.ts → evaluate.ts` | the `export * from './cas.js'` re-export moved from `typed/index.ts` to the package entry `functions/src/index.ts`, so the `typed/index.ts → cas.ts` edge is gone   |
 | `matrix/src/types/`: `DenseMatrix ↔ SparseMatrix`                                   | `DenseMatrix` dropped its `import type { SparseMatrix }`; `toSparse()` is typed as the `Matrix` base (the `SparseMatrix` subtype is still loaded lazily at runtime) |
 | `matrix/src/backends/`: `BackendManager ↔ config`                                   | the `OperationType` type moved from `BackendManager.ts` to `config.ts` (the lower-level module); `config.ts` no longer imports `BackendManager`                     |
-
-No package has any remaining **runtime** cycle; the only residual cycles are the
-two type-only ones in `matrix` noted above.
 
 ## Core Systems
 
@@ -104,7 +90,7 @@ Three native numeric types with full method sets:
 | BigNumber | 96      | Arithmetic, comparison, rounding, **22 math methods** (sin, cos, exp, ln, etc. via Taylor series) |
 | Fraction  | 61      | Arithmetic, comparison, rounding, GCD/LCM                                                         |
 
-Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (135 total across codebase).
+Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (160 total in the `src/` tree of every workspace package, per `dependency-graph.json`).
 
 ### 2. Type Dispatch
 
@@ -117,7 +103,7 @@ DenseMatrix, SparseMatrix, Array.
 
 ### 3. Factory Pattern
 
-Two function layers coexist in `functions/`, both now wired into the single
+Two function layers coexist in `functions/`. Both are wired into the single
 active graph reachable from `functions/src/index.ts`:
 
 | Layer                      | Location                    | Status           |
@@ -125,11 +111,8 @@ active graph reachable from `functions/src/index.ts`:
 | Native typed functions     | `functions/src/typed/`      | Active, exported |
 | Activated mathjs factories | `functions/src/<category>/` | Active, exported |
 
-The formerly-synced mathjs factories were **activated** — wired into the live
-graph via `functions/src/factories/index.ts` (2026-06-27) — so they are no longer
-a dormant, unexported layer; they are edited like any other source. The
-`@danielsimonjr/mathts-functions` package (released `functions@0.8.0`) now exports
-**828 names (686 callable functions)**.
+The mathjs-derived factories are wired into the graph via
+`functions/src/factories/index.ts`. They are edited like any other source.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
@@ -163,8 +146,8 @@ names (element-wise, reduction, linear-algebra, signal, geometry, and special
 functions). A `thresholdByOp` map (`Partial<Record<OpName, OpThreshold>>`)
 stored in `ComputePoolConfig` lets callers override the global
 `thresholdElements` for individual ops. Default thresholds in
-`DEFAULT_THRESHOLD_BY_OP` were measured on a CI container (2026-05-23) and
-sourced from `tools/benchmark/parallel/run.ts`. `OpThreshold` accepts a number
+`DEFAULT_THRESHOLD_BY_OP` were measured on a CI container and sourced from
+`tools/benchmark/parallel/run.ts`. `OpThreshold` accepts a number
 or the string aliases `'never'` / `'always'`.
 
 **Which public functions are effectively parallelized** — and each op's
@@ -181,8 +164,8 @@ hypothesis tests (4,096), `erfc` (100,000), `besselJ` (1,000,000), `spectrogram`
 (65,536), `sampleChunk` (100,000) — plus every generic per-element kernel above
 the 50,000 global threshold. The **threshold-disabled** ops (`'never'`) are the
 memory-bound element-wise arithmetic / transcendentals (`add`, `multiply`, `exp`,
-`sin`, …) and small reductions (`sum`, `mean`, `variance`), where the 2026-05
-benchmark found worker overhead dominates at every tested size; their pool wiring
+`sin`, …) and small reductions (`sum`, `mean`, `variance`), where a benchmark found
+worker overhead dominates at every tested size; their pool wiring
 is kept so a future retune can switch them on without code churn.
 
 ### 6. WASM Layer
@@ -273,8 +256,8 @@ The `ComputePool` path is the fallback when WASM is unavailable or returns
 Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package
 builds successfully and is **fully functional end-to-end**: the compiler (a
 16-node-type AST interpreter) and evaluator (`evaluate()`, `compileExpression()`)
-work. A 2026-05-01 security release hardened the evaluator with a sandbox
-(safe-access helpers in `expression/src/utils/customs.ts`).
+work. The evaluator uses a sandbox (safe-access helpers in
+`expression/src/utils/customs.ts`).
 
 ### 8. Workbook Runtime
 
@@ -299,20 +282,18 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 ### Integration Status
 
-| Metric                              | Value                                  |
-| ----------------------------------- | -------------------------------------- |
-| Reachable files (from entry points) | 846                                    |
-| Unused files                        | 0                                      |
-| Synced mathjs factories             | Activated into live graph (2026-06-27) |
-| Synced categories                   | 19                                     |
-| Type bridge                         | In place                               |
-| Factory bridge                      | In place                               |
+| Metric                              | Value                     |
+| ----------------------------------- | ------------------------- |
+| Reachable files (from entry points) | 1,185                     |
+| Unused files                        | 0                         |
+| Synced mathjs factories             | Activated into live graph |
+| Synced categories                   | 19                        |
+| Type bridge                         | In place                  |
+| Factory bridge                      | In place                  |
 
 ### Activation Barriers (historical)
 
-The valuable synced factories have since been activated into the single live
-graph (2026-06-27), so the barriers below are historical context rather than
-open work:
+The barriers below are historical context. The synced factories are part of the single live graph.
 
 1. **Two typed-function instances** -- native (15 types, instanceof) vs. synced (40+ types, duck-typing). Bridge partially resolves this.
 2. **Matrix interface mismatch** -- native DenseMatrix is Float64Array-backed; synced factories expect nested Array with `._data`, `._size`, `.storage()`.
@@ -320,42 +301,45 @@ open work:
 
 ## Build Pipeline
 
-All packages use `tsup src/index.ts --format esm --dts --clean` with exceptions:
+Most packages run `tsup src/index.ts --format esm --clean`, then `tsc -p tsconfig.dts.json` to emit declarations. Exceptions:
 
-| Package   | Build Variation                              |
-| --------- | -------------------------------------------- |
-| functions | No `--dts` flag                              |
-| workbook  | Two entry points (index.ts + cli.ts)         |
-| assembly  | AssemblyScript (`asc`) + TypeScript bindings |
+| Package           | Build Variation                              |
+| ----------------- | -------------------------------------------- |
+| core, plot        | No entry argument for `tsup`                 |
+| functions, matrix | Also runs `scripts/copy-wasm.mjs`            |
+| parallel          | Two entries (`index.ts`, `matrix.worker.ts`) |
+| workerpool        | Two entries, then `scripts/postbuild.mjs`    |
+| workbook          | Two entry points (index.ts + cli.ts)         |
+| assembly          | AssemblyScript (`asc`) + TypeScript bindings |
 
 Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build first).
 
 ## Module Summary
 
-Source-file counts below are the reachable files per package. The report counts
-**846 TypeScript files total** across all packages — all reachable from package
-entry points, **0 unused** — and **4,088 exports**; the dormant
-synced-from-mathjs mirror (455 files / ~58.6k LOC) was deleted 2026-06-27. The
-authoritative, always-current per-package breakdown is the generated
-`dependency-graph.json` / `DEPENDENCY_GRAPH.md` (regenerate with
-`tools/create-dependency-graph`); the table below is a point-in-time snapshot.
+Source-file counts below are the files under `src/` in each workspace package,
+per `dependency-graph.json`. The generated `DEPENDENCY_GRAPH.md` gives the
+per-file breakdown. Regenerate with `npm run docs:deps:full`. The report counts
+**1,185 TypeScript files** in total, all reachable from package entry points,
+with **0 unused** files and **6,121 exports**.
 
 | Package                          | Reachable Files |
 | -------------------------------- | --------------- |
-| core                             | 15              |
-| matrix                           | 43              |
+| core                             | 46              |
+| matrix                           | 46              |
 | tensor                           | 21              |
 | autograd                         | 6               |
-| functions                        | 391             |
-| parallel                         | 11              |
-| expression                       | 302             |
-| workbook                         | 14              |
+| functions                        | 475             |
+| parallel                         | 14              |
+| expression                       | 476             |
+| workbook                         | 25              |
 | compat                           | 3               |
-| assembly (wasm)                  | 27              |
+| assembly (wasm)                  | 28              |
 | typed-function                   | 1               |
-| workerpool                       | 2               |
+| workerpool                       | 5               |
+| gpu                              | 8               |
+| plot                             | 21              |
 | thin re-export packages (10 × 1) | 10              |
-| **Total**                        | **846**         |
+| **Total**                        | **1,185**       |
 
 ## Verification
 
