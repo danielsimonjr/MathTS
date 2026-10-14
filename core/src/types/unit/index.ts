@@ -16,6 +16,7 @@ export type * from './unit-types.js';
 export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
+  LN2_EXACT_SCALE,
   decimalExactScale,
   exactScaleOf,
   binaryExactScale,
@@ -26,6 +27,8 @@ export {
   addExactScales,
   exactScalesEqual,
   exactScaleToNumber,
+  clearExactScaleNumberCache,
+  exactScaleNumberCacheSize,
   formatExactScale,
   readScaleExpression,
 } from './exact-scale.js';

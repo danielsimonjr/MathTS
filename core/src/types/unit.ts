@@ -30,6 +30,7 @@ export type { UnitInstance } from './unit/index.js';
 export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
+  LN2_EXACT_SCALE,
   decimalExactScale,
   exactScaleOf,
   binaryExactScale,
@@ -40,6 +41,8 @@ export {
   addExactScales,
   exactScalesEqual,
   exactScaleToNumber,
+  clearExactScaleNumberCache,
+  exactScaleNumberCacheSize,
   formatExactScale,
   readScaleExpression,
   NAMED_SCALES,

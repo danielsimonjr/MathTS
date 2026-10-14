@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-08",
-  "totalFiles": 1890,
+  "generated": "2026-10-14",
+  "totalFiles": 1891,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1160,
     "test-only": 0,
     "orphan": 0,
-    "test": 645,
+    "test": 646,
     "tool": 26,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1185,
-    "tests": 645,
+    "tests": 646,
     "config": 29,
     "examples": 5,
     "tools": 26
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 87,
+    "@danielsimonjr/mathts-core": 88,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 46,
     "@danielsimonjr/mathts-expression": 545,
@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 256
     },
     {
       "file": "core/src/internal.ts",
@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 86
+      "loc": 89
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -814,14 +814,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 370
     },
     {
       "file": "core/src/types/unit/index.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 53
+      "loc": 57
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
@@ -835,14 +835,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 269
+      "loc": 274
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2622
+      "loc": 2666
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1069,6 +1069,13 @@
       "loc": 442
     },
     {
+      "file": "core/tests/types/exact-scale-review.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 163
+    },
+    {
       "file": "core/tests/types/fraction-coverage.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1101,7 +1108,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 585
+      "loc": 586
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -12791,7 +12798,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 74
+      "loc": 78
     },
     {
       "file": "units/tests/units.test.ts",
@@ -12826,7 +12833,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 96
+      "loc": 100
     },
     {
       "file": "workbook/src/cli.ts",

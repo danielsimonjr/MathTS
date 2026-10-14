@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
+- **Exact unit scales round correctly at large magnitudes and keep A→B single-rounding.** `exactScaleToNumber` now uses base-2 integer rounding (fixes mis-rounds above ~1e41). Number-valued built-in units keep an exact SI reading so `toNumeric` rounds the A→B ratio once. `ExactScale` gains an `ln2` power (and `LN2_EXACT_SCALE`); `exactScaleToNumber` caches repeated lookups (~30× in a local bench).
+
 ### Changed
 - **Root vitest suites run on Bun for Windows.** Vitest's default `forks` pool fails to start a worker there
   (`undefined is not an object (evaluating 'runner.config')`), so `bun run test` failed its root step on

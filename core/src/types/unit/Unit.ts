@@ -324,6 +324,20 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
 
       this.value = this._normalize(value);
+      // Keep the exact SI quantity for number readings so A→B conversions can
+      // round the exact ratio once instead of rounding through an SI double.
+      this._exactSI = undefined;
+      if (
+        typeof value === 'number' &&
+        Number.isFinite(value) &&
+        value !== 0 &&
+        this.units.length > 0
+      ) {
+        const scale = this.exactScale();
+        if (scale !== null) {
+          this._exactSI = multiplyExactScales(exactScaleOf(value), scale);
+        }
+      }
     } as unknown as UnitConstructor;
 
     /**
@@ -686,6 +700,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       unit.skipAutomaticSimplification = this.skipAutomaticSimplification;
 
       unit.value = clone(this.value);
+      unit._exactSI = this._exactSI;
       unit.dimensions = this.dimensions.slice(0);
       unit.units = [];
       for (let i = 0; i < this.units.length; i++) {
@@ -808,6 +823,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
       }
       const scale = this.exactScale();
       if (scale !== null) {
+        // Prefer the exact SI quantity when we still have it: one rounding of
+        // (reading × fromScale / toScale), not a second rounding of a SI double.
+        // Ignore _exactSI when value was mutated (splitUnit, arithmetic, etc.).
+        if (this._exactSI !== undefined && this._exactSI !== null) {
+          const exactSiNumber = exactScaleToNumber(this._exactSI);
+          if (typeof value === 'number' && value === exactSiNumber) {
+            return exactScaleToNumber(divideExactScales(this._exactSI, scale));
+          }
+          this._exactSI = undefined;
+        }
         const exact = applyExactScale(value, scale, true);
         if (exact !== undefined) return exact;
       }
@@ -968,8 +993,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const valOther = other.value === null ? other._normalize(one(this.value)) : other.value;
 
         res.value = multiplyScalar(valThis!, valOther!);
+        res._exactSI = undefined;
       } else {
         res.value = null;
+        res._exactSI = undefined;
       }
 
       if (isUnit(_other)) {
@@ -1033,8 +1060,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const valThis = this.value === null ? this._normalize(one(other.value)) : this.value;
         const valOther = other.value === null ? other._normalize(one(this.value)) : other.value;
         res.value = divideScalar(valThis!, valOther!);
+        res._exactSI = undefined;
       } else {
         res.value = null;
+        res._exactSI = undefined;
       }
 
       if (isUnit(_other)) {
@@ -1070,6 +1099,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
       if (res.value !== null) {
         res.value = pow(res.value, p);
+        res._exactSI = undefined;
 
         // only allow numeric output, we don't want to return a Complex number
         // if (!isNumeric(res.value)) {
@@ -1078,6 +1108,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // Update: Complex supported now
       } else {
         res.value = null;
+        res._exactSI = undefined;
       }
 
       res.skipAutomaticSimplification = false;
@@ -1322,14 +1353,26 @@ export const createUnitClass = /* #__PURE__ */ factory(
         this.units[0].unit.offset === other.units[0].unit.offset
       ) {
         other.value = clone(value);
+        other._exactSI = this._exactSI;
       } else {
         /* Need to adjust value by difference in offset to convert */
         // With exact scales on both units: value + scale_from × offset_from −
         // scale_to × offset_to, the shift exact and the sum rounded once.
         const shift = exactOffsetShift(this.units[0].unit, other.units[0].unit);
+        if (shift !== null && this._exactSI) {
+          const sum = addExactScales(this._exactSI, shift);
+          if (sum !== null) {
+            other._exactSI = sum;
+            other.value = exactScaleToNumber(sum);
+            other.fixPrefix = true;
+            other.skipAutomaticSimplification = true;
+            return other;
+          }
+        }
         const shifted = shift === null ? undefined : addExactShift(this, value!, shift);
         if (shifted !== undefined) {
           other.value = shifted;
+          other._exactSI = undefined;
           other.fixPrefix = true;
           other.skipAutomaticSimplification = true;
           return other;

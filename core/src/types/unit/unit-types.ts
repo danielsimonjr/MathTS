@@ -201,6 +201,11 @@ export interface UnitDependencies {
 /** An instance of Unit (the prototype methods + per-instance fields). */
 export interface UnitInstance {
   value: Numeric | null;
+  /**
+   * Exact SI quantity for a number reading that was normalized through exact
+   * scales. Present so A→B conversions can round once. Cleared on arithmetic.
+   */
+  _exactSI?: ExactScale;
   units: UnitComponent[];
   dimensions: number[];
   fixPrefix: boolean;
