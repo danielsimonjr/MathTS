@@ -276,6 +276,12 @@ function scaleToRational(s: ExactScale): { num: bigint; den: bigint } {
   return { num, den };
 }
 
+/**
+ * The most results {@link exactScaleToNumber} keeps. Unit readings reach it as exact scales,
+ * so one entry per distinct reading would grow without bound.
+ */
+export const EXACT_SCALE_NUMBER_CACHE_LIMIT = 4096;
+
 const numberCache = new Map<string, number>();
 
 function cacheKey(s: ExactScale): string {
@@ -292,14 +298,30 @@ export function exactScaleNumberCacheSize(): number {
   return numberCache.size;
 }
 
-/** The scale as a double, rounded once. Repeated calls reuse a memoized result. */
+/** Whether the scale has a cached double. Reads the memo without changing its order (tests). */
+export function exactScaleNumberCacheHas(s: ExactScale): boolean {
+  return numberCache.has(cacheKey(s));
+}
+
+/**
+ * The scale as a double, rounded once. Repeated calls reuse a memoized result. The memo keeps at
+ * most {@link EXACT_SCALE_NUMBER_CACHE_LIMIT} results; when it is full, the entry that was used
+ * longest ago leaves first (a `Map` iterates in insertion order, and a hit re-inserts its key).
+ */
 export function exactScaleToNumber(s: ExactScale): number {
   const key = cacheKey(s);
   const cached = numberCache.get(key);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    numberCache.delete(key);
+    numberCache.set(key, cached);
+    return cached;
+  }
   const { num, den } = scaleToRational(s);
   const value = rationalToNumber(num, den);
   numberCache.set(key, value);
+  if (numberCache.size > EXACT_SCALE_NUMBER_CACHE_LIMIT) {
+    numberCache.delete(numberCache.keys().next().value as string);
+  }
   return value;
 }
 

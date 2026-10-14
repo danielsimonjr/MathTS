@@ -24,6 +24,8 @@ import {
   readScaleExpression,
   clearExactScaleNumberCache,
   exactScaleNumberCacheSize,
+  exactScaleNumberCacheHas,
+  EXACT_SCALE_NUMBER_CACHE_LIMIT,
 } from '../../src/types/unit/exact-scale';
 import { Unit } from '../../src/types/unit';
 
@@ -172,6 +174,38 @@ describe('exactScaleToNumber below the smallest normal double (subnormals)', () 
       }
     }
     expect(failures).toEqual([]);
+  });
+});
+
+describe('exactScaleToNumber memo bound', () => {
+  const reading = (i: number) => ratioExactScale(BigInt(i), 7n);
+
+  it('stays bounded when many distinct readings are converted', () => {
+    clearExactScaleNumberCache();
+    for (let i = 1; i <= EXACT_SCALE_NUMBER_CACHE_LIMIT * 3; i++) exactScaleToNumber(reading(i));
+    expect(exactScaleNumberCacheSize()).toBe(EXACT_SCALE_NUMBER_CACHE_LIMIT);
+  });
+
+  it('drops the entry used longest ago and keeps one that is read again', () => {
+    clearExactScaleNumberCache();
+    const hot = ratioExactScale(45359237n * 980665n, 254n ** 2n * 10n ** 5n);
+    const hotValue = exactScaleToNumber(hot);
+    for (let i = 1; i <= EXACT_SCALE_NUMBER_CACHE_LIMIT * 3; i++) {
+      exactScaleToNumber(reading(i));
+      if (i % 8 === 0) exactScaleToNumber(hot);
+    }
+    expect(exactScaleNumberCacheHas(hot)).toBe(true);
+    expect(exactScaleNumberCacheHas(reading(1))).toBe(false);
+    expect(exactScaleNumberCacheHas(reading(EXACT_SCALE_NUMBER_CACHE_LIMIT * 3))).toBe(true);
+    expect(exactScaleToNumber(hot)).toBe(hotValue);
+  });
+
+  it('answers the same value for an evicted reading', () => {
+    clearExactScaleNumberCache();
+    const first = exactScaleToNumber(reading(1));
+    for (let i = 2; i <= EXACT_SCALE_NUMBER_CACHE_LIMIT + 2; i++) exactScaleToNumber(reading(i));
+    expect(exactScaleNumberCacheHas(reading(1))).toBe(false);
+    expect(exactScaleToNumber(reading(1))).toBe(first);
   });
 });
 

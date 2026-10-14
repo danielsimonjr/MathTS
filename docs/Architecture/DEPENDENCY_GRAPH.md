@@ -1000,8 +1000,8 @@ graph LR
 **Exports:**
 
 - Interfaces: `ExactScale`
-- Functions: `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `exactScalesEqual`, `addExactScales`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `exactScaleToNumber`, `formatExactScale`, `readScaleExpression`
-- Constants: `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`
+- Functions: `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `exactScalesEqual`, `addExactScales`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `exactScaleNumberCacheHas`, `exactScaleToNumber`, `formatExactScale`, `readScaleExpression`
+- Constants: `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `EXACT_SCALE_NUMBER_CACHE_LIMIT`
 
 ---
 
@@ -18545,12 +18545,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1185   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197125 |
-| Total Exports           | 6090   |
+| Total Lines of Code     | 197147 |
+| Total Exports           | 6092   |
 | Total Re-exports        | 2554   |
 | Total Classes           | 58     |
 | Total Interfaces        | 523    |
-| Total Functions         | 1935   |
+| Total Functions         | 1936   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 600    |

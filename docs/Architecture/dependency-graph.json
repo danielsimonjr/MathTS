@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-14",
     "totalFiles": 1185,
     "totalModules": 83,
-    "totalExports": 6090
+    "totalExports": 6092
   },
   "entryPoints": [
     {
@@ -2607,6 +2607,7 @@
           "UNIT_EXACT_SCALE",
           "PI_EXACT_SCALE",
           "LN2_EXACT_SCALE",
+          "EXACT_SCALE_NUMBER_CACHE_LIMIT",
           "decimalExactScale",
           "exactScaleOf",
           "binaryExactScale",
@@ -2618,6 +2619,7 @@
           "addExactScales",
           "clearExactScaleNumberCache",
           "exactScaleNumberCacheSize",
+          "exactScaleNumberCacheHas",
           "exactScaleToNumber",
           "formatExactScale",
           "readScaleExpression"
@@ -2635,11 +2637,17 @@
           "addExactScales",
           "clearExactScaleNumberCache",
           "exactScaleNumberCacheSize",
+          "exactScaleNumberCacheHas",
           "exactScaleToNumber",
           "formatExactScale",
           "readScaleExpression"
         ],
-        "constants": ["UNIT_EXACT_SCALE", "PI_EXACT_SCALE", "LN2_EXACT_SCALE"]
+        "constants": [
+          "UNIT_EXACT_SCALE",
+          "PI_EXACT_SCALE",
+          "LN2_EXACT_SCALE",
+          "EXACT_SCALE_NUMBER_CACHE_LIMIT"
+        ]
       },
       "core/src/types/unit/index.ts": {
         "description": "The relocated, feature-complete `Unit` — the mathjs-derived unit system now",
@@ -41128,14 +41136,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1185,
     "totalModules": 83,
-    "totalLinesOfCode": 197125,
-    "totalExports": 6090,
+    "totalLinesOfCode": 197147,
+    "totalExports": 6092,
     "totalClasses": 58,
     "totalInterfaces": 523,
-    "totalFunctions": 1935,
+    "totalFunctions": 1936,
     "totalTypeGuards": 159,
     "totalEnums": 0,
-    "totalConstants": 1613,
+    "totalConstants": 1614,
     "totalReExports": 2554,
     "totalTypeOnlyImports": 600,
     "runtimeCircularDeps": 0,
