@@ -5,62 +5,67 @@ MathTS monorepo. Regenerate the per-function data with
 `functions/tests/audit`-style scans (see scratch tooling) or by grepping
 `*Dispatch` usage in `functions/src/typed/`.
 
-Last updated: 2026-07-01.
-
 ## TL;DR
 
-WASM acceleration is **selective and threshold-gated**, not universal:
+WASM acceleration is **selective, opt-in and size-gated**, not universal:
 
 - **AssemblyScript is the sole WASM backend** for the whole repo. The
-  `functions` package bundles `dist/wasm/mathts-as.wasm` (~292 `f64` kernels),
-  resolves it package-relative, and its dispatch is **AS → JS**. The `matrix`
-  package loads the same AssemblyScript binary for the ops where SIMD actually
-  wins: the f64x2 matrix **multiply** kernel plus the dense **LU/QR/Cholesky/
-  inverse/determinant** decompositions. Element-wise ops, transpose, reductions,
-  and `eig`/`svd` were measured slower on WASM and run on JS. The AS binary is numerically verified to <1e-9
-  against mpmath for the special functions, and SHA-384 integrity-verified before
-  instantiation.
-- **Threshold:** the `functions` special bridges engage WASM only for arrays of
-  `length >= WASM_SPECIAL_THRESHOLD` (= **1024**). Scalars and small arrays run
+  `functions` package bundles `dist/wasm/mathts-as.wasm`, resolves it
+  package-relative, and its dispatch is **AS → JS**. The `matrix` package
+  loads the same AssemblyScript binary for the operations where SIMD wins: the
+  f64x2 matrix **multiply** kernel and the dense **LU/QR/Cholesky/inverse/
+  determinant** decompositions. Element-wise operations, transpose, reductions
+  and `eig`/`svd` measured slower on WASM and run on JS. The binary is
+  SHA-384 integrity-verified before instantiation.
+- **Opt-in:** the `functions` package loads no WASM until the consumer calls
+  `await loadWasm()`. `isWasmLoaded()` reports the state.
+- **Size bands:** after `loadWasm()`, each bridge asks `wasmPolicyAllows(kernel, n)`
+  in `functions/src/wasm/policy.ts`. A kernel dispatches only in the size band
+  where `tools/benchmark/wasm/opt-in.bench.ts` measured the public call faster
+  with the tier on. A kernel with no entry never dispatches, and its JS path
+  runs. The measured ratios sit beside each entry. Scalars and small arrays run
   JS.
-- **Runtime caveat:** routing to a `*Dispatch` ≠ running wasm in general. The
-  dep-graph tool probes effectiveness (`bundledBackend` + per-function
-  `effectiveBackend` in `wasm-pairing.{md,json}`): of 41 wasm-routed functions,
-  **39 run wasm, 0 fall back to JS**. The other 2 (`parallelFFT`,
-  `parallelIFFT`) route through `fftGpuDispatch`, for which the runtime probe has
-  no result, so the report lists their effective backend as `unknown`. The
-  `airyAi`/`airyBi` kernels that previously fell back to JS now execute on the AS
-  binary; the poly-fit and argsort/rank kernels still kept on JS are internal
-  helpers, not among the 41 public wasm-routed functions.
+- **What the pairing report counts:** `wasm-pairing.{md,json}` comes from a
+  source scan of `functions/src/wasm/`, not from a run. A dispatch is `wasm`
+  when the bundled binary exports `__new` and the dispatch body, or an in-file
+  dispatch it delegates to, calls an AssemblyScript execution helper. It is
+  `js-fallback` when it has none, and `unknown` when the scan finds no
+  definition of the dispatch. Of 41 wasm-routed functions, **39 are `wasm`, 0 are
+  `js-fallback` and 2 are `unknown`**. The 2 (`parallelFFT`, `parallelIFFT`) route
+  through `fftGpuDispatch`, which `functions/src/gpu/` defines, outside the
+  directory that the scan reads. A `wasm` entry still takes its JS path where
+  the size bands say so.
 
 ## `functions` public typed API — 219 functions
 
-| Routing (static)                                            |   Count | Effective on bundled AS binary                  |
-| ----------------------------------------------------------- | ------: | ----------------------------------------------- |
-| Total public `mathTyped` functions (`functions/src/typed/`) | **219** |                                                 |
-| WASM (route to a `*Dispatch`)                               |  **41** | **39 run wasm · 0 fall back to JS · 2 unknown** |
-| Parallel only (worker pool via `computePool`)               |  **50** | worker pool, not wasm                           |
-| JS-only                                                     | **128** | JS                                              |
+| Routing (static)                                            |   Count | Backend in the pairing report                 |
+| ----------------------------------------------------------- | ------: | --------------------------------------------- |
+| Total public `mathTyped` functions (`functions/src/typed/`) | **219** |                                               |
+| WASM (route to a `*Dispatch`)                               |  **41** | **39 `wasm` · 0 `js-fallback` · 2 `unknown`** |
+| Parallel only (worker pool via `computePool`)               |  **50** | worker pool, not wasm                         |
+| JS-only                                                     | **128** | JS                                            |
 
-> The effective-wasm set now includes the elementwise transcendentals
-> (`abs/sin/cos/tan/exp/log` + `atan/sinh/tanh/atanh/expm1/log1p/log2/log10/
-sec/csc/cot` + `erfc`, each benchmark-confirmed net-faster than JS incl. copy,
-> 1.35–7×) **and** the AS special/poly/sort/signal/interpolation kernels
-> (bessel/elliptic/carlson/lgamma, poly mul/div/resultant/discriminant,
-> `sort_f64`, welch/bartlett/goertzel/chirp-z, tridiag/divided-difference) —
-> these now execute on the AS binary (which has the `__new` allocator the bridges
-> use). The **js-fallback** kernels are the ones still being stabilized on AS:
-> poly fits, argsort/rank. NOT wired (benchmarked, JS wins once the JS↔wasm copy is
-> included): `sqrt`, `cbrt`, `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the
-> reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
-> than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
-> in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
-> chain. The remaining "parallel" routing is intentional. (These figures can be
-> re-measured with the `tools/benchmark/wasm/` AssemblyScript-vs-JS suite — `npm
-run bench:wasm`, or the per-area `bench:elementwise` / `bench:special` /
-> `bench:sort` / `bench:matrix`. The suite times each accelerated path against
-> its JS fallback over a full JS↔wasm round-trip and prints a correctness
-> `maxdiff` column. A dated snapshot lives in `docs/BENCHMARK_RESULTS.md`.)
+> **Which kernels dispatch.** `WASM_DISPATCH_POLICY` in
+> `functions/src/wasm/policy.ts` is the authority, with the measured on/off
+> ratios beside each entry, and `wasmDispatchPolicy()` returns it. A `wasm` entry
+> of the pairing report whose kernel has no band keeps its JS path: the
+> element-wise `tan`, `exp` and `sinh` are examples, because the WASM path
+> did not reach the policy bar (an on/off ratio below 0.9 in both runs) once
+> the copy is counted. Each bridge copies its inputs into WASM memory and its
+> result back out, and V8 already compiles the JS paths well.
+>
+> The functions `sqrt`, `cbrt`, `asin`, `acos`, `cosh`, `asinh` and `acosh`, and
+> the reductions `sum`, `mean` and `variance`, have no WASM route. They are
+> parallel-only. **Op-fusion** (`fuseUnaryChain`, policy key `fused_chain`) keeps
+> an array resident in wasm across a chain of operations, which amortizes the
+> copy. The remaining "parallel" routing is intentional.
+>
+> To re-measure, run the `tools/benchmark/wasm/` AssemblyScript-vs-JS suite:
+> `bun run bench:wasm`, or the per-area `bench:elementwise`, `bench:special`,
+> `bench:sort` and `bench:matrix`. The suite times each accelerated path against
+> its JS fallback over a full JS↔wasm round trip and prints a correctness
+> `maxdiff` column. `opt-in.bench.ts` times the public call with the tier on and
+> off. `docs/BENCHMARK_RESULTS.md` holds a snapshot of one run.
 
 ### The WASM-accelerated typed functions
 
@@ -77,8 +82,8 @@ non-accelerated members of `special` (19: `erf`/`erfi`, `gamma`/`beta`/`digamma`
 `arithmetic` (14), `distributions` (13), `set` (10), `matrix-ops` typed wrappers
 (9 — see note), `probability` (8), `relational` (7), `trigonometry` (7),
 `logical` (5), `string` (5), `complex` (4), `signal` (2), `statistics` (2), and
-`unit` (2). Note that `arithmetic`, `trigonometry`, and `bitwise` are **not**
-whole JS-only families anymore — they also carry WASM and/or parallel paths, and
+`unit` (2). The `arithmetic`, `trigonometry` and `bitwise` modules are **not**
+whole JS-only families: they also carry WASM and/or parallel paths, and
 `bitwise` is fully parallel-routed (0 JS-only).
 
 ## Acceleration outside the typed API
@@ -97,13 +102,15 @@ bitwise}/`) accelerate algebra/numeric/interpolation code paths
   etc.) where used by solvers and numeric routines, even though those public
   functions aren't special-function dispatchers.
 
-## Correctness status (2026-06-26)
+## Correctness status
 
-All AssemblyScript WASM special-function kernels and the JS fallbacks are
-verified to <1e-9 vs mpmath after the special-function fixes:
+The differential suites run with `npm run test:diff`:
 
-- `mathts-wasm` (AS): `npm run test:diff` — 140/140 special, 30/30 decomposition.
-- `mathts-functions` (JS): `npm run test:diff` — 187/187.
+- `mathts-wasm` (AS): the special-function kernels against mpmath goldens, and the
+  dense decompositions against numpy goldens plus a reconstruction check.
+- `mathts-functions` (JS): the special-function surface against mpmath goldens, the
+  elementwise WASM dispatch against `Math.*`, and the fused unary chain against a
+  sequential scalar pass.
 
 ## Verification
 

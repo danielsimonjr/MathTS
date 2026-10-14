@@ -5,7 +5,6 @@
 
 # Test Coverage Policy
 
-**Last updated:** 2026-07-01
 **Machine-readable form:** [`coverage-policy.json`](./coverage-policy.json)
 **Consumed by:** [`tools/create-dependency-graph/`](../../tools/create-dependency-graph/)
 
@@ -14,12 +13,12 @@ numbers in `TEST_COVERAGE.md`:
 
 - **Raw coverage** — the fraction of source files (anywhere under any
   `src/`) that are directly imported by at least one `*.test.ts` file
-  Vitest can discover. As of 2026-06-27 (`TEST_COVERAGE.md`) this is **35.8 % (201 / 562)**.
+  Vitest can discover. `TEST_COVERAGE.md` reports the current figure.
 - **Effective coverage** — the same direct-import metric, but
   computed only over the **active hand-written code**. The denominator
   excludes files in the policy categories below — code that is
   intentionally not direct-tested because it is exercised through
-  another path. As of 2026-06-27 (`TEST_COVERAGE.md`) this is **97.5 % (196 / 201)**.
+  another path. `TEST_COVERAGE.md` reports the current figure.
 
 Both numbers are reported. Neither is hidden. The raw number is the
 true CDG measurement; the effective number is what callers usually
@@ -67,10 +66,9 @@ implementations (`create*` factories) originally synced from upstream
 public `functions/src/typed/` + `functions/src/factories/` surface
 rather than imported directly by a `*.test.ts`. (The `.ts→.ts` mathjs
 sync model is retired, and the dead, unreachable synced remnant that once
-sat alongside them — 455 files / ~58.6k LOC — was deleted 2026-06-27; see
+sat alongside them no longer exists; see
 `CLAUDE.md`'s "Syncing from mathjs" section.) The active public surface
-has direct tests — 3,086 functions tests across 124 test files at the
-time of writing.
+has direct tests.
 
 **What would fail loudly:** every typed/ export has tests that exercise
 the underlying synced helpers transitively. A synced helper that breaks

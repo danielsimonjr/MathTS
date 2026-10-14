@@ -157,10 +157,10 @@ instances like Complex/matrices/BigNumber).
 
 ## Constants
 
-| Constant         | Value                  | Description                                                                                                            |
-| ---------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `SCHEMA_VERSION` | `{major: 1, minor: 0}` | `--json` envelope shape version                                                                                        |
-| `VERSION`        | `"0.1.0"`              | Engine version reported by `--version`/`capabilities`/serve (internal constant, distinct from the npm package version) |
+| Constant         | Value                  | Description                                                                                              |
+| ---------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `SCHEMA_VERSION` | `{major: 1, minor: 0}` | `--json` envelope shape version                                                                          |
+| `VERSION`        | the package version    | Engine version reported by `--version`/`capabilities`/serve (injected from `package.json` at build time) |
 
 ## CLI (`mtsw`)
 

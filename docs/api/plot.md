@@ -88,9 +88,9 @@ All `(x, y, opts?) => string` unless noted:
 
 ## Constants
 
-| Constant  | Value     | Description                                                                                                       |
-| --------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| `VERSION` | `"0.2.0"` | Exported string constant (stale relative to the npm package version — a version-sync gap, not a functional issue) |
+| Constant  | Value               | Description                                                          |
+| --------- | ------------------- | -------------------------------------------------------------------- |
+| `VERSION` | the package version | Exported string constant, injected from `package.json` at build time |
 
 ## `./render` — Node-only File Output
 

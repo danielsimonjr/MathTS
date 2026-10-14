@@ -1,8 +1,5 @@
 # MathTS — Component Reference
 
-**Anchor versions**: core 0.13.0 · functions 0.43.2 · matrix 0.6.3 · expression 0.6.7 · workbook 0.3.3 (24 npm-workspace packages; independently versioned via Changesets)
-**Last Updated**: 2026-07-18
-
 A TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker acceleration, organized as a Turborepo
 monorepo of 24 ESM-only packages. This document is the component-level map: what each package is for, its
 key exported types, and how the packages depend on one another. For the always-current dependency data see
@@ -104,7 +101,7 @@ export function isGPUSuitableForMatrixOps(...): boolean
 ```
 
 Extracted from `matrix` (Spec 1a of the WebGPU epic) so the foundation is reusable and `matrix` re-exports it
-for back-compat. `v0.2.0`.
+for back-compat.
 
 ### @danielsimonjr/mathts-wasm (`assembly/`)
 
@@ -135,7 +132,7 @@ export class Complex        // bigint-free f64 complex
 export class Fraction
 export class BigNumber      // bigint-backed (NOT decimal.js: add/sub/lessThanOrEqual/equals/compareTo)
 export class Dual           // forward-mode autodiff scalar
-// Unit (dimensional analysis) lives here too, deeply integrated (merged 2026-07-04)
+// Unit (dimensional analysis) lives here too, deeply integrated
 
 // typed-function integration
 export const mathTyped
@@ -156,7 +153,7 @@ export class MathjsError, IndexError, DimensionError, DimensionMismatchError, Un
 ```
 
 Hot-path type guards (`is.ts`) are deliberately kept **local** to each package (V8 won't inline across module
-boundaries — a ~40% regression if consolidated); only cold utilities live in `core/internal`. `v0.13.0`.
+boundaries — a ~40% regression if consolidated); only cold utilities live in `core/internal`.
 
 ---
 
@@ -179,7 +176,7 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
 factory layer routes to (the "prefer the accelerated primitive" pattern). Depends on `core`, `parallel`,
-`gpu`. `v0.6.3`.
+`gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -190,7 +187,7 @@ export class Tensor          // rank-N, broadcasting, reshape/transpose/reduce
 export class Index           // multi-axis indexing
 ```
 
-Depends on `core`, `matrix`. Bundled with `tsup` before runtime, so it uses bare relative imports. `v0.2.17`.
+Depends on `core`, `matrix`. Bundled with `tsup` before runtime, so it uses bare relative imports.
 
 ### @danielsimonjr/mathts-autograd (`autograd/`)
 
@@ -202,7 +199,7 @@ export class Tape            // reverse-mode recording
 export class TapedTensor     // reverse-mode leaf/intermediate
 ```
 
-Depends on `core`, `tensor`. Forward-mode `Dual` rules are shared from `core` (`DUAL_UNARY_RULES`). `v0.3.12`.
+Depends on `core`, `tensor`. Forward-mode `Dual` rules are shared from `core` (`DUAL_UNARY_RULES`).
 
 ---
 
@@ -225,7 +222,7 @@ export function chunkArray, calculateOptimalChunks, mergeFloat64Chunks, dispatch
 ```
 
 Depends on `workerpool` and `core` (core only for stable numeric primitives — still **not** `matrix`). The
-`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it. `v0.6.3`.
+`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it.
 
 ---
 
@@ -253,7 +250,7 @@ special functions. The largest package (445 src files).
 ```
 
 Compiles under `strict: true`; ships its `.d.ts` tree via `tsc -p tsconfig.dts.json` (rollup-dts can't bundle
-the graph). Depends on `core`, `matrix`, `parallel`, `expression`. `v0.43.2`.
+the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 
 ---
 
@@ -271,7 +268,7 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`. `v0.43.2`.
 ```
 
 Depends on `core`. The 425-file graph includes the full evaluator; `security/sandbox.test.ts` is the
-regression guard for safe-access. `v0.6.7`.
+regression guard for safe-access.
 
 ### @danielsimonjr/mathts-workbook (`workbook/`)
 
@@ -288,7 +285,7 @@ export interface Workbook, Cell, CellResult, RunResult, RuntimeConfig
 ```
 
 Ships an `mtsw` CLI (`run`/`validate`/`graph`) as a second entry point. Depends on `core`, `functions`,
-`expression`, `plot`. `v0.3.3`.
+`expression`, `plot`.
 
 ---
 
@@ -308,7 +305,7 @@ export interface MathInstance, MathJSConfig
 
 Intentionally reimplements some homonyms to guarantee mathjs behavior (guarded by
 `compat/tests/parity-oracle.test.ts` pinning compat ≡ mathjs/numpy). Single-arg `zeros(n)`/`ones(n)` return a
-length-`n` vector (mathjs parity, `v0.4.0`). Depends on `core`, `matrix`, `parallel`, `functions`.
+length-`n` vector (mathjs parity). Depends on `core`, `matrix`, `parallel`, `functions`.
 
 ### @danielsimonjr/mathts-plot (`plot/`)
 
@@ -322,7 +319,7 @@ export class PlotRenderError
 ```
 
 Its `.` entry is browser-safe (node code gated behind subpaths, verified by `npm run check:browser-safety`).
-Depends on `core`, `functions`, `expression`. `v0.3.29`.
+Depends on `core`, `functions`, `expression`.
 
 ---
 
@@ -381,8 +378,6 @@ at zero by the `check:duplicates` pre-commit gate (see [`ARCHITECTURE.md`](./ARC
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2026-07-18
 **Maintained By**: Daniel Simon Jr.
 
 ## Verification

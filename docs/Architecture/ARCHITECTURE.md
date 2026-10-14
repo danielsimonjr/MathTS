@@ -253,9 +253,9 @@ The `ComputePool` path is the fallback when WASM is unavailable or returns
 
 ### 7. Expression Package
 
-Parser ported from mathjs (16 node types, 1,885-line `parse.ts`). The package
-builds successfully and is **fully functional end-to-end**: the compiler (a
-16-node-type AST interpreter) and evaluator (`evaluate()`, `compileExpression()`)
+Parser ported from mathjs (15 node classes plus the `Node` base, in
+`expression/src/node/`). The package builds successfully and is **fully
+functional end-to-end**: the compiler (an AST interpreter) and evaluator (`evaluate()`, `compileExpression()`)
 work. The evaluator uses a sandbox (safe-access helpers in
 `expression/src/utils/customs.ts`).
 
