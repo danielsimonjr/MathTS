@@ -1012,18 +1012,18 @@ is sourced from `src/index.ts` + `src/bindings/wasm-loader.ts`. AS exports funct
 only, never classes (AS231 constraint). Per project memory this is the production-matured
 "real WASM" tier; the WebGPU/`gpu` tier is experimental scaffolding.
 
-The built binary exports **314 functions** (326 total exports, incl. 11 numeric
-globals such as `PI`/`E` plus the linear memory), compiled from 28 source files:
+The built binary exports **315 functions** (327 total exports, incl. 11 numeric
+globals such as `PI`/`E` plus the linear memory), compiled from 28 source files.
+The generated [`wasm-pairing.md`](./wasm-pairing.md#wasm-binary-exports) report gives the category counts:
 
-| Category                       | Function exports | Examples                                                                                 |
-| ------------------------------ | ---------------- | ---------------------------------------------------------------------------------------- |
-| Scalar f64                     | 79               | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`, `cbrt_f64`, `nthRoot_f64`                    |
-| Array ops                      | 54               | `array_add`, `array_dot`, `array_norm`, `array_sum`, `array_mean`                        |
-| Matrix ops                     | 50               | `matrix_multiply`, `matrix_transpose`, `matrix_gemm`, `matrix_lu*`                       |
-| Complex scalar                 | 46               | `complex_add`, `complex_sin`, `complex_exp`, `complex_sqrt`                              |
-| Complex array                  | 33               | `complex_array_add`, `complex_array_dot`, `complex_array_norm`                           |
-| FFT                            | 2+               | `fft`, `ifft`, `rfft`, `powerSpectrum` (radix-2 Cooley-Tukey)                            |
-| Special/poly/sort/signal/other | 54               | bessel/airy/elliptic/carlson, `poly_mul_f64`, `sort_f64`/`argsort_f64`, window functions |
+| Category (by export-name prefix) | Function exports | Examples                                                                                                                                                                                                                              |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scalar & special (f64)           | 134              | `add_f64`, `sin_f64`, `exp_f64`, `log_f64`, `cbrt_f64`, `nthRoot_f64`, `lgamma_f64`, `bessel_j0_f64`, `airy_ai_f64`, `elliptic_k_f64`, `carlson_rf_f64`, `poly_mul_f64`, `sort_f64`, `argsort_f64`, `powerSpectrum`, `windowFunction` |
+| Array                            | 54               | `array_add`, `array_dot`, `array_norm`, `array_sum`, `array_mean`                                                                                                                                                                     |
+| Matrix                           | 46               | `matrix_multiply`, `matrix_transpose`, `matrix_gemm`, `matrix_lu_decompose`                                                                                                                                                           |
+| Complex scalar                   | 46               | `complex_add`, `complex_sin`, `complex_exp`, `complex_sqrt`                                                                                                                                                                           |
+| Complex array                    | 33               | `complex_array_add`, `complex_array_dot`, `complex_array_norm`                                                                                                                                                                        |
+| FFT                              | 2                | `fft`, `rfft` (radix-2 Cooley-Tukey)                                                                                                                                                                                                  |
 
 Additional grouped surface: dense decompositions (LU/QR/Cholesky/inverse/determinant
 — the kernels `matrix`'s `WASMBackend` calls), special functions

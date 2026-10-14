@@ -184,9 +184,9 @@ and the per-category function breakdown are **generated, not hand-maintained** â
 probed from the built `.wasm` via `WebAssembly.Module.exports()` by
 `npm run docs:deps` and emitted to
 [`wasm-pairing.md` â€º _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports)
-(rebuild the binary first with `npm run build:wasm`). As of the last regeneration
-the binary carried 314 function exports across 326 total exports; that figure lives
-in the generated report so it can no longer silently drift out of this doc.
+(rebuild the binary first with `npm run build:wasm`). The function and total export
+counts of the binary live in the generated report, so they cannot drift out of this
+document.
 
 The binary is SHA-384 integrity-verified before instantiation and numerically
 verified to <1e-9 vs mpmath for the special-function kernels (see
@@ -303,14 +303,14 @@ The barriers below are historical context. The synced factories are part of the 
 
 Most packages run `tsup src/index.ts --format esm --clean`, then `tsc -p tsconfig.dts.json` to emit declarations. Exceptions:
 
-| Package           | Build Variation                              |
-| ----------------- | -------------------------------------------- |
-| core, plot        | No entry argument for `tsup`                 |
-| functions, matrix | Also runs `scripts/copy-wasm.mjs`            |
-| parallel          | Two entries (`index.ts`, `matrix.worker.ts`) |
-| workerpool        | Two entries, then `scripts/postbuild.mjs`    |
-| workbook          | Two entry points (index.ts + cli.ts)         |
-| assembly          | AssemblyScript (`asc`) + TypeScript bindings |
+| Package           | Build Variation                                       |
+| ----------------- | ----------------------------------------------------- |
+| core, plot        | No entry argument for `tsup`                          |
+| functions, matrix | Also runs `scripts/copy-wasm.mjs`                     |
+| parallel          | Two entries (`index.ts`, `matrix.worker.ts`)          |
+| workerpool        | Two entries, then `scripts/postbuild.mjs`             |
+| workbook          | Three entries (`index.ts`, `cli.ts`, `run-worker.ts`) |
+| assembly          | AssemblyScript (`asc`) + TypeScript bindings          |
 
 Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build first).
 
