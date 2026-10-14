@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Exact unit scales round correctly at any magnitude and keep A→B single-rounding.** `exactScaleToNumber` uses base-2 integer rounding (fixes mis-rounds above ~1e41 and rounds subnormals on the 2^-1074 grid). Number-valued built-in units keep an exact SI reading so `toNumeric` rounds the A→B ratio once, and use it only while `value` still matches it. `exactScaleToNumber` caches repeated lookups in a memo bounded at 4096 results; `Unit.prototype.exactScale` is memoized per unit list, bringing number conversions back to roughly 1.3–2.2x their pre-0.17.0 time (they were 5–17x). Scale expressions accept parentheses (`a/(b*c)`) and whitespace.
 
+### Documentation
+- **The Verification tables of the architecture documents carry the current whole-repository parse.** `totalTypeScriptFiles` 1919 -> 1954, `totalLinesOfCode` 338865 -> 342404 and `totalExports` 7661 -> 7978, in the six documents that record them (`API.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`, `OVERVIEW.md`, `WASM_ACCELERATION.md`). `repo-tools check . --docs=docs/Architecture` exits 0. Only the values change: the prose, the column names and the generated reports stay as they were.
+
 ### Changed
 - **Breaking (0.x): `ExactScale` is `{ num, den, irrationals }`.** Irrational powers live in one map keyed by the new `NAMED_IRRATIONALS` registry (`pi`, `ln2`), replacing the `pi` and `ln2` fields. `UNITS.degF.value` / `UNITS.degR.value` became numbers in 0.17.0 (they were `Fraction(5, 9)`).
 - **Root vitest suites run on Bun for Windows.** Vitest's default `forks` pool fails to start a worker there
