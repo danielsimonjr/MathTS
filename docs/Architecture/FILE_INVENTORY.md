@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1891
+**Total files**: 1893
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1160 | A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                           |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                        |
-| `test`        |      646 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
-| `tool`        |       26 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
+| `test`        |      647 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                     |
+| `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                        |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                     |
-| **Total**     | **1891** |                                                                                                              |
+| **Total**     | **1893** |                                                                                                              |
 
 ## Per-area counts
 
@@ -33,19 +33,19 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1185 |
-| `tests`    |   646 |
-| `tools`    |    26 |
+| `tests`    |   647 |
+| `tools`    |    27 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    46 |
+| `(root)`                               |    47 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
 | `@danielsimonjr/mathts-compat`         |    15 |
-| `@danielsimonjr/mathts-core`           |    88 |
+| `@danielsimonjr/mathts-core`           |    89 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   545 |
 | `@danielsimonjr/mathts-functions`      |   786 |
@@ -216,6 +216,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/bignumber.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex-coverage.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex.test.ts`                                                | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/exact-scale-registry-parse.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/exact-scale-review.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction-coverage.test.ts`                                      | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction.test.ts`                                               | @danielsimonjr/mathts-core           | tests    | test        |
@@ -1885,6 +1886,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tools/benchmark/wasm/sort.bench.ts`                                              | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/special.bench.ts`                                           | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/transcendental-dispatch.bench.ts`                           | (root)                               | tools    | tool        |
+| `tools/benchmarks/unit-conversions.ts`                                            | (root)                               | tools    | tool        |
 | `tools/chunking-for-files/chunking-for-files.ts`                                  | (root)                               | tools    | tool        |
 | `tools/compress-for-context/compress-for-context.ts`                              | (root)                               | tools    | tool        |
 | `tools/create-dependency-graph/create-dependency-graph.ts`                        | (root)                               | tools    | tool        |

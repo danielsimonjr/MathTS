@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-14'
   totalFiles: 1185
   totalModules: 83
-  totalExports: 6092
+  totalExports: 6121
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -700,6 +700,10 @@ modules:
             - UNIT_EXACT_SCALE
             - PI_EXACT_SCALE
             - LN2_EXACT_SCALE
+            - NAMED_IRRATIONALS
+            - namedIrrationalScale
+            - irrationalPower
+            - isRationalScale
             - decimalExactScale
             - exactScaleOf
             - binaryExactScale
@@ -844,6 +848,8 @@ modules:
         - file: ./types/unit.js
           imports:
             - ExactScale
+            - IrrationalName
+            - IrrationalPowers
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
@@ -936,6 +942,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -1036,6 +1046,8 @@ modules:
         - UnitDef
         - UnitInstance
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -1113,6 +1125,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -1211,6 +1227,8 @@ modules:
         - UnitDef
         - UnitInstance
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -2514,10 +2532,14 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - NAMED_IRRATIONALS
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
         - EXACT_SCALE_NUMBER_CACHE_LIMIT
+        - irrationalPower
+        - isRationalScale
+        - namedIrrationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -2527,6 +2549,7 @@ modules:
         - powerExactScale
         - exactScalesEqual
         - addExactScales
+        - roundExactScale
         - clearExactScaleNumberCache
         - exactScaleNumberCacheSize
         - exactScaleNumberCacheHas
@@ -2536,6 +2559,9 @@ modules:
       interfaces:
         - ExactScale
       functions:
+        - irrationalPower
+        - isRationalScale
+        - namedIrrationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -2545,6 +2571,7 @@ modules:
         - powerExactScale
         - exactScalesEqual
         - addExactScales
+        - roundExactScale
         - clearExactScaleNumberCache
         - exactScaleNumberCacheSize
         - exactScaleNumberCacheHas
@@ -2552,6 +2579,7 @@ modules:
         - formatExactScale
         - readScaleExpression
       constants:
+        - NAMED_IRRATIONALS
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
@@ -2584,6 +2612,10 @@ modules:
             - UNIT_EXACT_SCALE
             - PI_EXACT_SCALE
             - LN2_EXACT_SCALE
+            - NAMED_IRRATIONALS
+            - namedIrrationalScale
+            - irrationalPower
+            - isRationalScale
             - decimalExactScale
             - exactScaleOf
             - binaryExactScale
@@ -2617,6 +2649,8 @@ modules:
         - file: ./exact-scale.js
           imports:
             - ExactScale
+            - IrrationalName
+            - IrrationalPowers
           reExport: true
           typeOnly: true
         - file: ./unit-table.js
@@ -2639,6 +2673,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -2667,6 +2705,8 @@ modules:
         - getUnitPrefix
         - Unit
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -2677,6 +2717,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -2704,6 +2748,8 @@ modules:
         - unitPrefixExactScale
         - getUnitPrefix
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -2851,7 +2897,9 @@ modules:
             - binaryExactScale
             - divideExactScales
             - exactScaleOf
-            - exactScaleToNumber
+            - irrationalPower
+            - roundExactScale
+            - isRationalScale
             - multiplyExactScales
             - powerExactScale
             - ratioExactScale
@@ -2942,6 +2990,10 @@ modules:
             - UNIT_EXACT_SCALE
             - PI_EXACT_SCALE
             - LN2_EXACT_SCALE
+            - NAMED_IRRATIONALS
+            - namedIrrationalScale
+            - irrationalPower
+            - isRationalScale
             - decimalExactScale
             - exactScaleOf
             - binaryExactScale
@@ -3000,6 +3052,8 @@ modules:
         - file: ./unit/index.js
           imports:
             - ExactScale
+            - IrrationalName
+            - IrrationalPowers
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
@@ -3026,6 +3080,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -3065,6 +3123,8 @@ modules:
         - fromSiDimensionVector
         - UnitInstance
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -3080,6 +3140,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -3119,6 +3183,8 @@ modules:
         - fromSiDimensionVector
         - UnitInstance
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -31127,6 +31193,10 @@ modules:
             - UNIT_EXACT_SCALE
             - PI_EXACT_SCALE
             - LN2_EXACT_SCALE
+            - NAMED_IRRATIONALS
+            - namedIrrationalScale
+            - irrationalPower
+            - isRationalScale
             - decimalExactScale
             - exactScaleOf
             - binaryExactScale
@@ -31161,6 +31231,8 @@ modules:
             - SiDimensionVector
             - SiDimensionOptions
             - ExactScale
+            - IrrationalName
+            - IrrationalPowers
             - UnitRow
             - UnitBaseKey
             - UnitPrefixSetKey
@@ -31190,6 +31262,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -31221,6 +31297,8 @@ modules:
         - SiDimensionVector
         - SiDimensionOptions
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -31250,6 +31328,10 @@ modules:
         - UNIT_EXACT_SCALE
         - PI_EXACT_SCALE
         - LN2_EXACT_SCALE
+        - NAMED_IRRATIONALS
+        - namedIrrationalScale
+        - irrationalPower
+        - isRationalScale
         - decimalExactScale
         - exactScaleOf
         - binaryExactScale
@@ -31281,6 +31363,8 @@ modules:
         - SiDimensionVector
         - SiDimensionOptions
         - ExactScale
+        - IrrationalName
+        - IrrationalPowers
         - UnitRow
         - UnitBaseKey
         - UnitPrefixSetKey
@@ -38793,15 +38877,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1185
   totalModules: 83
-  totalLinesOfCode: 197168
-  totalExports: 6092
+  totalLinesOfCode: 197377
+  totalExports: 6121
   totalClasses: 58
   totalInterfaces: 523
-  totalFunctions: 1936
-  totalTypeGuards: 159
+  totalFunctions: 1940
+  totalTypeGuards: 160
   totalEnums: 0
-  totalConstants: 1614
-  totalReExports: 2554
+  totalConstants: 1615
+  totalReExports: 2578
   totalTypeOnlyImports: 600
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

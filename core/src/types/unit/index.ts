@@ -17,6 +17,10 @@ export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
   LN2_EXACT_SCALE,
+  NAMED_IRRATIONALS,
+  namedIrrationalScale,
+  irrationalPower,
+  isRationalScale,
   decimalExactScale,
   exactScaleOf,
   binaryExactScale,
@@ -32,7 +36,7 @@ export {
   formatExactScale,
   readScaleExpression,
 } from './exact-scale.js';
-export type { ExactScale } from './exact-scale.js';
+export type { ExactScale, IrrationalName, IrrationalPowers } from './exact-scale.js';
 export {
   NAMED_SCALES,
   UNIT_ROWS,

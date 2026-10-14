@@ -106,6 +106,10 @@ export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
   LN2_EXACT_SCALE,
+  NAMED_IRRATIONALS,
+  namedIrrationalScale,
+  irrationalPower,
+  isRationalScale,
   decimalExactScale,
   exactScaleOf,
   binaryExactScale,
@@ -135,6 +139,8 @@ export {
 } from './types/unit.js';
 export type {
   ExactScale,
+  IrrationalName,
+  IrrationalPowers,
   UnitRow,
   UnitBaseKey,
   UnitPrefixSetKey,

@@ -33,7 +33,9 @@ import {
   binaryExactScale,
   divideExactScales,
   exactScaleOf,
-  exactScaleToNumber,
+  irrationalPower,
+  roundExactScale,
+  isRationalScale,
   multiplyExactScales,
   powerExactScale,
   ratioExactScale,
@@ -91,7 +93,7 @@ function attachExactScale(def: UnitDef, exact: ExactScale, exactOffset: ExactSca
 function liveExactSI(unit: UnitInstance): ExactScale | undefined {
   const exact = unit._exactSI;
   if (exact === undefined || typeof unit.value !== 'number') return undefined;
-  return unit.value === exactScaleToNumber(exact) ? exact : undefined;
+  return unit.value === roundExactScale(exact) ? exact : undefined;
 }
 
 /** Exact prefix factors, read once from each prefix's decimal value. */
@@ -104,6 +106,26 @@ function prefixExactScale(prefix: PrefixDef): ExactScale | null {
   }
   return scale;
 }
+
+/**
+ * A stable small id per unit or prefix definition object. Keys the unit-list scale memo by
+ * identity, so a unit redefined under the same name (createUnit override) gets a fresh entry.
+ */
+const definitionIds = new WeakMap<object, number>();
+let nextDefinitionId = 0;
+function identityOf(def: object): number {
+  let id = definitionIds.get(def);
+  if (id === undefined) {
+    id = nextDefinitionId++;
+    definitionIds.set(def, id);
+  }
+  return id;
+}
+
+/** The most unit lists whose exact scale is memoized (oldest entry leaves first). */
+const UNIT_LIST_SCALE_CACHE_LIMIT = 1024;
+/** Exact scale per unit list: (definition, prefix, power) per component. */
+const unitListScales = new Map<string, ExactScale | null>();
 
 /**
  * Normalize degree-symbol unit notations to their ASCII spellings before parsing,
@@ -175,13 +197,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
     /**
      * An exact scale as a BigNumber at the configured precision (π from BIGNUMBER_PI), or
-     * undefined for a factor of ln 2, which has no BigNumber constant here.
+     * undefined for a factor of any other irrational, which has no BigNumber constant here.
      */
     function exactToBigNumber(scale: ExactScale): Numeric | undefined {
-      if (scale.ln2 !== 0) return undefined;
+      const powerOfPi = irrationalPower(scale, 'pi');
+      if (Object.keys(scale.irrationals).length !== (powerOfPi === 0 ? 0 : 1)) return undefined;
       let v = bigNumberFromText(scale.num.toString()).div(bigNumberFromText(scale.den.toString()));
       const pi = BIGNUMBER_PI as unknown as BigNumberValue;
-      for (let k = 0; k < Math.abs(scale.pi); k++) v = scale.pi > 0 ? v.times(pi) : v.div(pi);
+      for (let k = 0; k < Math.abs(powerOfPi); k++) v = powerOfPi > 0 ? v.times(pi) : v.div(pi);
       return v as unknown as Numeric;
     }
 
@@ -205,7 +228,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         view.setBigInt64(0, bits + step);
         const r = view.getFloat64(0);
         if (!Number.isFinite(r) || Math.sign(r) !== Math.sign(start)) continue;
-        if (exactScaleToNumber(multiplyExactScales(exactScaleOf(r), scale)) !== value) continue;
+        if (roundExactScale(multiplyExactScales(exactScaleOf(r), scale)) !== value) continue;
         const length = String(r).length;
         if (length < bestLength) {
           best = r;
@@ -234,7 +257,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const reading = scale === null ? undefined : simplestReading(value, scale);
         if (reading !== undefined) normalized = multiplyExactScales(exactScaleOf(reading), scale!);
         const sum = addExactScales(normalized, shift);
-        return sum === null ? undefined : exactScaleToNumber(sum);
+        return sum === null ? undefined : roundExactScale(sum);
       }
       const s = exactAs(shift, typeOf(value));
       return s === undefined ? undefined : addScalar(value, s);
@@ -246,7 +269,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      */
     function exactAs(scale: ExactScale, type: string): Numeric | undefined {
       if (type === 'Fraction') {
-        return scale.pi === 0 && scale.ln2 === 0
+        return isRationalScale(scale)
           ? (new Fraction(scale.num, scale.den) as unknown as Numeric)
           : undefined;
       }
@@ -271,7 +294,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
       if (typeof value === 'number') {
         if (!Number.isFinite(value) || value === 0) return undefined;
         const x = divide ? binaryExactScale(value) : exactScaleOf(value);
-        return exactScaleToNumber(
+        return roundExactScale(
           divide ? divideExactScales(x, scale) : multiplyExactScales(x, scale)
         );
       }
@@ -341,20 +364,19 @@ export const createUnitClass = /* #__PURE__ */ factory(
         );
       }
 
-      this.value = this._normalize(value);
-      // Keep the exact SI quantity for number readings so A→B conversions can
-      // round the exact ratio once instead of rounding through an SI double.
+      // A number reading keeps its exact SI quantity so A→B conversions can round the exact
+      // ratio once instead of rounding through an SI double. The normalized value is that
+      // quantity rounded once (what _normalize gives), so the scale and product are built once.
       this._exactSI = undefined;
-      if (
-        typeof value === 'number' &&
-        Number.isFinite(value) &&
-        value !== 0 &&
-        this.units.length > 0
-      ) {
-        const scale = this.exactScale();
-        if (scale !== null) {
-          this._exactSI = multiplyExactScales(exactScaleOf(value), scale);
-        }
+      const scale =
+        typeof value === 'number' && Number.isFinite(value) && value !== 0 && this.units.length > 0
+          ? this.exactScale()
+          : null;
+      if (scale !== null) {
+        this._exactSI = multiplyExactScales(exactScaleOf(value as number), scale);
+        this.value = roundExactScale(this._exactSI);
+      } else {
+        this.value = this._normalize(value);
       }
     } as unknown as UnitConstructor;
 
@@ -766,8 +788,24 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * @return The exact scale, or null
      */
     Unit.prototype.exactScale = function (this: UnitInstance): ExactScale | null {
-      let scale = UNIT_EXACT_SCALE;
+      let key = '';
       for (const component of this.units) {
+        key += `${identityOf(component.unit)}:${identityOf(component.prefix)}^${component.power};`;
+      }
+      const cached = unitListScales.get(key);
+      if (cached !== undefined) return cached;
+      const scale = unitListExactScale(this);
+      unitListScales.set(key, scale);
+      if (unitListScales.size > UNIT_LIST_SCALE_CACHE_LIMIT) {
+        unitListScales.delete(unitListScales.keys().next().value as string);
+      }
+      return scale;
+    };
+
+    /** The uncached product behind {@link Unit.prototype.exactScale}. */
+    function unitListExactScale(unit: UnitInstance): ExactScale | null {
+      let scale = UNIT_EXACT_SCALE;
+      for (const component of unit.units) {
         const unitScale = component.unit.exact;
         const prefixScale = prefixExactScale(component.prefix);
         if (unitScale === undefined || prefixScale === null || !Number.isInteger(component.power)) {
@@ -779,7 +817,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         );
       }
       return scale;
-    };
+    }
 
     /**
      * The exact SI scale of a valueless unit text (`'g/cm^3'` is 1000, `'psi'` is
@@ -845,9 +883,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // (reading × fromScale / toScale), not a second rounding of a SI double.
         // Ignore _exactSI when value was mutated (splitUnit, arithmetic, etc.).
         if (this._exactSI !== undefined && this._exactSI !== null) {
-          const exactSiNumber = exactScaleToNumber(this._exactSI);
+          const exactSiNumber = roundExactScale(this._exactSI);
           if (typeof value === 'number' && value === exactSiNumber) {
-            return exactScaleToNumber(divideExactScales(this._exactSI, scale));
+            return roundExactScale(divideExactScales(this._exactSI, scale));
           }
           this._exactSI = undefined;
         }
@@ -1317,7 +1355,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
             exactOffset === undefined
               ? multiplyScalar(convert(def.value!), convert(def.offset))
               : valueType === 'number'
-                ? exactScaleToNumber(exactOffset)
+                ? roundExactScale(exactOffset)
                 : (exactAs(exactOffset, valueType) ??
                   multiplyScalar(convert(def.value!), convert(def.offset)));
           ret.value = subtractScalar(abs(addScalar(ret.value, unitOffset)), unitOffset);
@@ -1382,7 +1420,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
           const sum = addExactScales(exactSI, shift);
           if (sum !== null) {
             other._exactSI = sum;
-            other.value = exactScaleToNumber(sum);
+            other.value = roundExactScale(sum);
             other.fixPrefix = true;
             other.skipAutomaticSimplification = true;
             return other;
@@ -1966,7 +2004,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const exact = unitPrefixExactScale(prefix);
         const def: PrefixDef = {
           name,
-          value: exactScaleToNumber(exact),
+          value: roundExactScale(exact),
           scientific: prefix.scientific,
         };
         prefixScales.set(def, exact);
@@ -2133,14 +2171,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
     for (const key of Object.keys(UNIT_ROWS)) {
       const row = UNIT_ROWS[key]!;
       const exact = readUnitScale(row.scale);
-      const scaled = exactScaleToNumber(exact);
+      const scaled = roundExactScale(exact);
       const exactOffset = row.offset === undefined ? UNIT_ZERO_SCALE : readUnitScale(row.offset);
       const def: UnitDef = {
         name: row.name ?? key,
         base: BASE_UNITS[row.base],
         prefixes: PREFIXES[row.prefixes],
         value: row.imaginary ? imaginaryValue(scaled) : scaled,
-        offset: exactScaleToNumber(exactOffset),
+        offset: roundExactScale(exactOffset),
       };
       if (row.reciprocal) def.reciprocal = true;
       if (!row.imaginary) attachExactScale(def, exact, exactOffset);
@@ -2158,10 +2196,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
       for (const key in UNITS) {
         if (!hasOwnProperty(UNITS, key)) continue;
         const exact = UNITS[key].exact;
-        if (exact === undefined || exact.pi === 0) continue;
+        if (exact === undefined || irrationalPower(exact, 'pi') === 0) continue;
         UNITS[key].value =
           (config.number === 'BigNumber' ? exactToBigNumber(exact) : undefined) ??
-          exactScaleToNumber(exact);
+          roundExactScale(exact);
       }
     }
 

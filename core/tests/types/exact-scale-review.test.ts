@@ -93,7 +93,7 @@ describe('exactScaleToNumber rounds at any magnitude', () => {
       for (const den of [3n, 7n, 381n]) {
         for (const off of [1n, -1n] as const) {
           const num = tie * den + off;
-          const got = exactScaleToNumber({ num, den, pi: 0, ln2: 0 });
+          const got = exactScaleToNumber({ num, den, irrationals: {} });
           const want = off > 0n ? nextUp(D) : D;
           if (got !== want) failures.push(`D=${D} den=${den} off=${off}: got=${got} want=${want}`);
         }
@@ -109,6 +109,9 @@ function bitsOf(d: number): string {
   v.setFloat64(0, d);
   return v.getBigUint64(0).toString(16).padStart(16, '0');
 }
+
+/** `{ pi, ln2 }` with the zero powers left out, the shape ExactScale stores. */
+const powers = (pi: number, ln2: number) => ({ ...(pi ? { pi } : {}), ...(ln2 ? { ln2 } : {}) });
 
 describe('exactScaleToNumber below the smallest normal double (subnormals)', () => {
   // The bit patterns come from Python's correctly rounded int / int true division
@@ -152,7 +155,7 @@ describe('exactScaleToNumber below the smallest normal double (subnormals)', () 
   ];
 
   it.each(cases)('%s', (_name, num, den, pi, ln2, bits) => {
-    expect(bitsOf(exactScaleToNumber({ num, den, pi, ln2 }))).toBe(bits);
+    expect(bitsOf(exactScaleToNumber({ num, den, irrationals: powers(pi, ln2) }))).toBe(bits);
   });
 
   it('agrees with the engine parse of a decimal literal across the subnormal range', () => {
@@ -188,7 +191,7 @@ describe('exactScaleToNumber with ln2 next to a rounding midpoint', () => {
   it('rounds r * ln2 down when it lies about 1e-113 below the midpoint', () => {
     // r = floor(midpoint / ln2) at 112 places, so r * ln2 is just below 1 + 2^-53.
     const r = ((TWO53 + 1n) * 10n ** 252n) / (TWO53 * LN2_REF);
-    const scale: ExactScale = { num: r, den: SCALE, pi: 0, ln2: 1 };
+    const scale: ExactScale = { num: r, den: SCALE, irrationals: { ln2: 1 } };
     expect(exactScaleToNumber(scale)).toBe(1);
   });
 
@@ -197,7 +200,7 @@ describe('exactScaleToNumber with ln2 next to a rounding midpoint', () => {
     const top = (TWO53 + 1n) * LN2_REF * SCALE;
     const bottom = TWO53 * 10n ** 140n;
     const r = (top + bottom - 1n) / bottom;
-    const scale: ExactScale = { num: r, den: SCALE, pi: 0, ln2: -1 };
+    const scale: ExactScale = { num: r, den: SCALE, irrationals: { ln2: -1 } };
     expect(exactScaleToNumber(scale)).toBe(1 + 2 ** -52);
   });
 });
@@ -237,7 +240,7 @@ describe('exactScaleToNumber memo bound', () => {
 describe('exactScaleToNumber at the top of the range and at the screens', () => {
   const MAX_MANTISSA = (1n << 53n) - 1n; // Number.MAX_VALUE = MAX_MANTISSA * 2^971
   const tieAboveMax = ((1n << 54n) - 1n) << 970n; // MAX_VALUE + half an ulp: ties to even, which is 2^1024
-  const at = (num: bigint, den = 1n) => exactScaleToNumber({ num, den, pi: 0, ln2: 0 });
+  const at = (num: bigint, den = 1n) => exactScaleToNumber({ num, den, irrationals: {} });
 
   it('keeps the largest finite double and overflows only at the tie', () => {
     expect(at(MAX_MANTISSA << 971n)).toBe(Number.MAX_VALUE);
@@ -262,19 +265,22 @@ describe('exactScaleToNumber at the top of the range and at the screens', () => 
 
 describe('ExactScale named irrationals', () => {
   it('carries ln2 like pi', () => {
-    expect(LN2_EXACT_SCALE).toEqual({ num: 1n, den: 1n, pi: 0, ln2: 1 });
+    expect(LN2_EXACT_SCALE).toEqual({ num: 1n, den: 1n, irrationals: { ln2: 1 } });
     expect(formatExactScale(LN2_EXACT_SCALE)).toBe('1*ln2');
     expect(readScaleExpression('ln2')).toEqual(LN2_EXACT_SCALE);
-    expect(readScaleExpression('1/ln2')).toEqual({ num: 1n, den: 1n, pi: 0, ln2: -1 });
-    expect(powerExactScale(LN2_EXACT_SCALE, 2)).toEqual({ num: 1n, den: 1n, pi: 0, ln2: 2 });
+    expect(readScaleExpression('1/ln2')).toEqual({ num: 1n, den: 1n, irrationals: { ln2: -1 } });
+    expect(powerExactScale(LN2_EXACT_SCALE, 2)).toEqual({
+      num: 1n,
+      den: 1n,
+      irrationals: { ln2: 2 },
+    });
     expect(multiplyExactScales(PI_EXACT_SCALE, LN2_EXACT_SCALE)).toEqual({
       num: 1n,
       den: 1n,
-      pi: 1,
-      ln2: 1,
+      irrationals: { pi: 1, ln2: 1 },
     });
     expect(addExactScales(PI_EXACT_SCALE, LN2_EXACT_SCALE)).toBeNull();
-    expect(exactScalesEqual(UNIT_EXACT_SCALE, { num: 1n, den: 1n, pi: 0, ln2: 0 })).toBe(true);
+    expect(exactScalesEqual(UNIT_EXACT_SCALE, { num: 1n, den: 1n, irrationals: {} })).toBe(true);
   });
 
   it('rounds scales that include ln2 once', () => {
@@ -296,7 +302,7 @@ describe('exactScaleToNumber cache', () => {
     expect(b).toBe(a);
     expect(exactScaleNumberCacheSize()).toBe(1);
     // equal-by-value different object still hits
-    const s2: ExactScale = { num: s.num, den: s.den, pi: 0, ln2: 0 };
+    const s2: ExactScale = { num: s.num, den: s.den, irrationals: {} };
     expect(exactScaleToNumber(s2)).toBe(a);
     expect(exactScaleNumberCacheSize()).toBe(1);
   });
