@@ -184,11 +184,11 @@ const PI_NUM = BigInt(PI_DIGITS);
 const PI_DEN = 10n ** BigInt(PI_DIGITS.length - 1);
 
 /**
- * ln 2 truncated to 120 decimal places (same relative-error story as π).
- * Source digits: OEIS A002162 / standard high-precision expansion.
+ * ln 2 truncated to 120 decimal places. The rounding error it adds to a result has the same
+ * bound as for π above. The test file pins the digits against an independent computation.
  */
 const LN2_DIGITS =
-  '693147180559945309417232121458176568075500134360255254120680009493393621969694715605863326996418687542001481020805829729';
+  '693147180559945309417232121458176568075500134360255254120680009493393621969694715605863326996418687542001481020570685733';
 const LN2_NUM = BigInt(LN2_DIGITS);
 const LN2_DEN = 10n ** BigInt(LN2_DIGITS.length);
 

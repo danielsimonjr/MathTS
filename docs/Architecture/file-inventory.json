@@ -1073,7 +1073,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 295
+      "loc": 320
     },
     {
       "file": "core/tests/types/fraction-coverage.test.ts",

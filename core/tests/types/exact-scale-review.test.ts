@@ -177,6 +177,31 @@ describe('exactScaleToNumber below the smallest normal double (subnormals)', () 
   });
 });
 
+describe('exactScaleToNumber with ln2 next to a rounding midpoint', () => {
+  // ln 2 to 140 places, from an independent computation (the series sum of 1 / (k 2^k)).
+  const LN2_REF =
+    69314718055994530941723212145817656807550013436025525412068000949339362196969471560586332699641868754200148102057068573368552023575813055703n;
+  const TWO53 = 1n << 53n;
+  // 1 + 2^-53 lies exactly between the doubles 1 and 1 + 2^-52.
+  const SCALE = 10n ** 112n;
+
+  it('rounds r * ln2 down when it lies about 1e-113 below the midpoint', () => {
+    // r = floor(midpoint / ln2) at 112 places, so r * ln2 is just below 1 + 2^-53.
+    const r = ((TWO53 + 1n) * 10n ** 252n) / (TWO53 * LN2_REF);
+    const scale: ExactScale = { num: r, den: SCALE, pi: 0, ln2: 1 };
+    expect(exactScaleToNumber(scale)).toBe(1);
+  });
+
+  it('rounds r / ln2 up when it lies about 1e-112 above the midpoint', () => {
+    // r = ceil(midpoint * ln2) at 112 places, so r / ln2 is just above 1 + 2^-53.
+    const top = (TWO53 + 1n) * LN2_REF * SCALE;
+    const bottom = TWO53 * 10n ** 140n;
+    const r = (top + bottom - 1n) / bottom;
+    const scale: ExactScale = { num: r, den: SCALE, pi: 0, ln2: -1 };
+    expect(exactScaleToNumber(scale)).toBe(1 + 2 ** -52);
+  });
+});
+
 describe('exactScaleToNumber memo bound', () => {
   const reading = (i: number) => ratioExactScale(BigInt(i), 7n);
 
