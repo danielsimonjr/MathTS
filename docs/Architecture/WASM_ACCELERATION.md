@@ -74,7 +74,7 @@ The JS-only functions are the members not doing numeric-kernel array work. By
 module (the JS-only column of `wasm-pairing.md`): `combinatorics` (21), the
 non-accelerated members of `special` (19: `erf`/`erfi`, `gamma`/`beta`/`digamma`,
 `besselI`/`besselK`, orthogonal polynomials, Fresnel, the integral functions),
-`arithmetic` (13), `distributions` (13), `set` (10), `matrix-ops` typed wrappers
+`arithmetic` (14), `distributions` (13), `set` (10), `matrix-ops` typed wrappers
 (9 — see note), `probability` (8), `relational` (7), `trigonometry` (7),
 `logical` (5), `string` (5), `complex` (4), `signal` (2), `statistics` (2), and
 `unit` (2). Note that `arithmetic`, `trigonometry`, and `bitwise` are **not**
