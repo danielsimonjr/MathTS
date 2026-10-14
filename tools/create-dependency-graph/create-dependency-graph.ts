@@ -2093,20 +2093,19 @@ function generateMermaidDiagram(modules: ModuleMap, files: ParsedFile[]): string
 /**
  * Generate Markdown output
  */
-function generateMarkdown(
+export function generateMarkdown(
   files: ParsedFile[],
   modules: ModuleMap,
   stats: Statistics,
   circularDeps: CircularDependencyResult,
   matrix: DependencyMatrix
 ): string {
-  const today = new Date().toISOString().split('T')[0];
   const lines: string[] = [];
   const projectName = packageJson.name || 'Project';
 
+  // No version and no date: both go stale with no change in the code, and a regeneration on a new
+  // day would change this file alone. The package version is in package.json and in the JSON metadata.
   lines.push(`# ${projectName} - Dependency Graph`);
-  lines.push('');
-  lines.push(`**Version**: ${packageJson.version} | **Last Updated**: ${today}`);
   lines.push('');
   lines.push(
     'This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.'
@@ -2362,9 +2361,6 @@ function generateMarkdown(
   lines.push(`| Type-only Circular Deps | ${stats.typeOnlyCircularDeps} |`);
   lines.push('');
   lines.push('---');
-  lines.push('');
-  lines.push(`*Last Updated*: ${today}`);
-  lines.push(`*Version*: ${packageJson.version}`);
   lines.push('');
 
   return lines.join('\n');
