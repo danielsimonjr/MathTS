@@ -348,11 +348,15 @@ describe('every built-in unit equals its exact definition, rounded once', () => 
 
 describe('the exact-scale engine', () => {
   it('reads decimals digit for digit and numbers by their shortest decimal', () => {
-    expect(decimalExactScale('0.0254')).toEqual({ num: 127n, den: 5000n, pi: 0 });
-    expect(exactScaleOf(0.1)).toEqual({ num: 1n, den: 10n, pi: 0 });
-    expect(binaryExactScale(0.1)).toEqual({ num: 3602879701896397n, den: 2n ** 55n, pi: 0 });
-    expect(binaryExactScale(-2.5)).toEqual({ num: -5n, den: 2n, pi: 0 });
-    expect(binaryExactScale(5e-324)).toEqual({ num: 1n, den: 2n ** 1074n, pi: 0 });
+    expect(decimalExactScale('0.0254')).toEqual({ num: 127n, den: 5000n, irrationals: {} });
+    expect(exactScaleOf(0.1)).toEqual({ num: 1n, den: 10n, irrationals: {} });
+    expect(binaryExactScale(0.1)).toEqual({
+      num: 3602879701896397n,
+      den: 2n ** 55n,
+      irrationals: {},
+    });
+    expect(binaryExactScale(-2.5)).toEqual({ num: -5n, den: 2n, irrationals: {} });
+    expect(binaryExactScale(5e-324)).toEqual({ num: 1n, den: 2n ** 1074n, irrationals: {} });
   });
 
   it('rounds a rational once, agreeing with base-2 integer rounding', () => {
@@ -381,7 +385,7 @@ describe('the exact-scale engine', () => {
 
   it('reads a scale expression with one solidus: a/b*c is a/(b·c)', () => {
     expect(readScaleExpression('6/2*3')).toEqual(ratioExactScale(1));
-    expect(readScaleExpression('pi/180')).toEqual({ num: 1n, den: 180n, pi: 1 });
+    expect(readScaleExpression('pi/180')).toEqual({ num: 1n, den: 180n, irrationals: { pi: 1 } });
     expect(readScaleExpression('2^-3')).toEqual(ratioExactScale(1, 8));
     expect(() => readScaleExpression('furlong')).toThrow(/not a known scale/);
   });
@@ -413,7 +417,7 @@ describe('conversions multiply exact scales and round once', () => {
     expect(Unit.exactScale('psi')).toEqual(
       ratioExactScale(45359237n * 980665n * 10n ** 8n, 254n ** 2n * 10n ** 13n)
     );
-    expect(Unit.exactScale('kdeg')).toEqual({ num: 50n, den: 9n, pi: 1 });
+    expect(Unit.exactScale('kdeg')).toEqual({ num: 50n, den: 9n, irrationals: { pi: 1 } });
     expect(Unit.exactScale('VAR')).toBeNull();
   });
 

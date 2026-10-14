@@ -1,22 +1,22 @@
 {
-  "generated": "2026-10-08",
-  "totalFiles": 1890,
+  "generated": "2026-10-14",
+  "totalFiles": 1893,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1160,
     "test-only": 0,
     "orphan": 0,
-    "test": 645,
-    "tool": 26,
+    "test": 647,
+    "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1185,
-    "tests": 645,
+    "tests": 647,
     "config": 29,
     "examples": 5,
-    "tools": 26
+    "tools": 27
   },
   "byPackage": {
     "@danielsimonjr/mathts-arithmetic": 4,
@@ -24,9 +24,9 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 87,
+    "@danielsimonjr/mathts-core": 89,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 46,
+    "(root)": 47,
     "@danielsimonjr/mathts-expression": 545,
     "@danielsimonjr/mathts-functions": 786,
     "@danielsimonjr/mathts-gpu": 17,
@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 262
     },
     {
       "file": "core/src/internal.ts",
@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 86
+      "loc": 95
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -814,14 +814,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 253
+      "loc": 522
     },
     {
       "file": "core/src/types/unit/index.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 53
+      "loc": 60
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
@@ -835,14 +835,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 269
+      "loc": 275
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2622
+      "loc": 2723
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1069,6 +1069,20 @@
       "loc": 442
     },
     {
+      "file": "core/tests/types/exact-scale-registry-parse.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 169
+    },
+    {
+      "file": "core/tests/types/exact-scale-review.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 350
+    },
+    {
       "file": "core/tests/types/fraction-coverage.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1101,7 +1115,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 585
+      "loc": 589
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -12745,6 +12759,13 @@
       "loc": 74
     },
     {
+      "file": "tools/benchmarks/unit-conversions.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 46
+    },
+    {
       "file": "tools/chunking-for-files/chunking-for-files.ts",
       "package": "(root)",
       "area": "tools",
@@ -12791,7 +12812,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 74
+      "loc": 83
     },
     {
       "file": "units/tests/units.test.ts",
@@ -12826,7 +12847,7 @@
       "package": "(root)",
       "area": "config",
       "disposition": "config",
-      "loc": 96
+      "loc": 100
     },
     {
       "file": "workbook/src/cli.ts",

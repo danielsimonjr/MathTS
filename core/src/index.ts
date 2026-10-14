@@ -105,6 +105,11 @@ export type { Dimensions, UnitDef, UnitInstance } from './types/unit.js';
 export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
+  LN2_EXACT_SCALE,
+  NAMED_IRRATIONALS,
+  namedIrrationalScale,
+  irrationalPower,
+  isRationalScale,
   decimalExactScale,
   exactScaleOf,
   binaryExactScale,
@@ -115,6 +120,8 @@ export {
   addExactScales,
   exactScalesEqual,
   exactScaleToNumber,
+  clearExactScaleNumberCache,
+  exactScaleNumberCacheSize,
   formatExactScale,
   readScaleExpression,
   NAMED_SCALES,
@@ -132,6 +139,8 @@ export {
 } from './types/unit.js';
 export type {
   ExactScale,
+  IrrationalName,
+  IrrationalPowers,
   UnitRow,
   UnitBaseKey,
   UnitPrefixSetKey,
