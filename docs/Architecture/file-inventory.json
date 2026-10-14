@@ -835,14 +835,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 274
+      "loc": 275
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2665
+      "loc": 2677
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1073,7 +1073,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 320
+      "loc": 344
     },
     {
       "file": "core/tests/types/fraction-coverage.test.ts",

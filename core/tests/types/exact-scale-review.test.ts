@@ -302,6 +302,30 @@ describe('exactScaleToNumber cache', () => {
   });
 });
 
+describe('a stored exact quantity is used only while the value still matches it', () => {
+  it('converts the absolute value of a negative kelvin reading', () => {
+    expect(new Unit(-5, 'K').abs().toNumeric('degC')).toBeCloseTo(-268.15, 10);
+    expect(new Unit(-5, 'K').abs().to('degC').toNumeric('degC')).toBeCloseTo(-268.15, 10);
+  });
+
+  it('converts the absolute value of a degC reading below the offset', () => {
+    expect(new Unit(-300, 'degC').abs().to('K').toNumeric('K')).toBeCloseTo(26.85, 9);
+  });
+
+  it('converts a clone whose value was assigned afterwards', () => {
+    const copy = new Unit(300, 'K').clone();
+    copy.value = 305;
+    expect(copy.to('degC').toNumeric('degC')).toBeCloseTo(31.85, 10);
+  });
+
+  it('keeps the single rounding for a reading that was not edited', () => {
+    // 0.1 K as degC is exactly -273.05; two roundings through doubles give -273.04999999999995.
+    expect(new Unit(0.1, 'K').to('degC').toNumeric('degC')).toBe(-273.05);
+    expect(new Unit(0.1, 'K').clone().to('degC').toNumeric('degC')).toBe(-273.05);
+    expect(new Unit(0.1, 'K').abs().to('degC').toNumeric('degC')).toBe(-273.05);
+  });
+});
+
 describe('number-valued conversions round the exact A→B ratio once', () => {
   it.each([
     [1, 'psi', 'kPa'],

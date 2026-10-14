@@ -83,6 +83,17 @@ function attachExactScale(def: UnitDef, exact: ExactScale, exactOffset: ExactSca
   });
 }
 
+/**
+ * The exact SI quantity stored on `unit`, or `undefined` once `unit.value` no longer holds the
+ * double that quantity rounds to. An edit to `value`, or an operation that changed it, makes the
+ * stored quantity describe a different reading, so a reader must not use it then.
+ */
+function liveExactSI(unit: UnitInstance): ExactScale | undefined {
+  const exact = unit._exactSI;
+  if (exact === undefined || typeof unit.value !== 'number') return undefined;
+  return unit.value === exactScaleToNumber(exact) ? exact : undefined;
+}
+
 /** Exact prefix factors, read once from each prefix's decimal value. */
 const prefixScales = new WeakMap<PrefixDef, ExactScale | null>();
 function prefixExactScale(prefix: PrefixDef): ExactScale | null {
@@ -1353,14 +1364,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
         this.units[0].unit.offset === other.units[0].unit.offset
       ) {
         other.value = clone(value);
-        other._exactSI = this._exactSI;
+        other._exactSI = liveExactSI(this);
       } else {
         /* Need to adjust value by difference in offset to convert */
         // With exact scales on both units: value + scale_from × offset_from −
         // scale_to × offset_to, the shift exact and the sum rounded once.
         const shift = exactOffsetShift(this.units[0].unit, other.units[0].unit);
-        if (shift !== null && this._exactSI) {
-          const sum = addExactScales(this._exactSI, shift);
+        const exactSI = liveExactSI(this);
+        if (shift !== null && exactSI) {
+          const sum = addExactScales(exactSI, shift);
           if (sum !== null) {
             other._exactSI = sum;
             other.value = exactScaleToNumber(sum);
