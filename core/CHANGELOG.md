@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-core
 
+## 0.18.0
+
+### Minor Changes
+
+- 15adc89: Exact-scale follow-ups after #346:
+  
+  - **Breaking (0.x minor): `ExactScale` holds irrational powers in one map.** `{ num, den, pi, ln2 }` is now `{ num, den, irrationals }`, where `irrationals` maps a name from the new `NAMED_IRRATIONALS` registry (`pi`, `ln2`) to its nonzero integer power (`{}` for a rational scale, `{ pi: 1 }` for `deg`'s π). Parsing, arithmetic, rounding and formatting all read the registry, so a new constant is one entry there. New helpers: `namedIrrationalScale(name)`, `irrationalPower(scale, name)`, `isRationalScale(scale)`; new types `IrrationalName`, `IrrationalPowers`. `PI_EXACT_SCALE` and `LN2_EXACT_SCALE` remain.
+  - **Behavior change from #346 (0.17.0), now documented: `UNITS.degF.value` and `UNITS.degR.value` are numbers.** They were `Fraction(5, 9)` before 0.17.0 and are now the double nearest 5/9, like every other unit value. The exact 5/9 is on the definition's exact scale; conversions of Fraction values stay exact through it.
+  - **Scale expressions accept parentheses and whitespace.** `a/(b*c)` reads as a/(b·c) (the same as the single-solidus `a/b*c`), groups nest and take powers (`(1/2)^-1`), and spaces around tokens are ignored (`lbf / inch ^ 2`). Juxtaposition (`2 3`) and unbalanced groups throw.
+  - **`exactScaleToNumber` rounds correctly at any magnitude.** Rounding is integer base-2 (53-bit significand, ties to even); the normalization shift comes from the operands' bit lengths, not a bit-by-bit loop. Values below the smallest normal double round on the fixed 2^-1074 grid, and values past the largest finite double overflow to Infinity at the tie. Both operands within 2^53 take one IEEE division, which rounds the same way.
+  - **Conversions that still hold their exact SI reading round the AB ratio once.** A number-valued `Unit` built from a built-in exact unit keeps `_exactSI`; `to()` and `toNumeric(other)` use `reading x fromScale / toScale` rounded once. They use the stored quantity only while `value` is still the double it rounds to, so a unit changed by `abs()`, arithmetic, `splitUnit` or an assignment to `value` converts from its current SI double. `createUnit` / non-exact units stay on the float route.
+  - **ln 2 is a registered irrational.** Scale expressions accept `ln2`; its constant holds 120 correct decimal places. The Fraction and BigNumber routes give no exact value for a scale with an ln 2 factor, so those callers use the float route. This lets units such as `nat` and `bit` carry ln 2 without embedding it as a float (see #347).
+  - **Speed.** `Unit.prototype.exactScale` is memoized per unit list (definition, prefix and power of each component; at most 1024 lists). The constructor builds a number reading's exact SI quantity once and rounds it once; each exact scale object remembers its rounded double. `exactScaleToNumber` keeps its string-keyed memo, bounded at 4096 results, least recently used first. `bun tools/benchmarks/unit-conversions.ts [core/src]` measures the hot conversion paths.
+
 ## 0.17.0
 
 ### Minor Changes

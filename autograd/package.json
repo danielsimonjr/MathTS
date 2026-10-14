@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-autograd",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "description": "Forward + reverse-mode automatic differentiation for MathTS rank-N Tensor",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -31,8 +31,8 @@
     "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json"
   },
   "dependencies": {
-    "@danielsimonjr/mathts-core": "^0.17.0",
-    "@danielsimonjr/mathts-tensor": "^0.2.23"
+    "@danielsimonjr/mathts-core": "^0.18.0",
+    "@danielsimonjr/mathts-tensor": "^0.2.24"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
