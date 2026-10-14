@@ -65,14 +65,12 @@ WebGPU device is unavailable.
 > The authoritative, always-current map of which functions are effectively
 > parallelized (vs threshold-disabled) and each op's threshold is the generated
 > report [`docs/Architecture/parallel-pairing.md`](../Architecture/parallel-pairing.md)
-> (`npm run docs:deps`; data in `parallel-pairing.json`). As of the last
-> regeneration: **96 effectively parallelized, 17 threshold-disabled (`parallel†`),
-> 105 non-parallel** of 218 typed functions. Matrix/linear-algebra ops (`matmul`,
-> `matvec`, decompositions) parallelize through the `matrix` package backend
+> (`npm run docs:deps`; data in `parallel-pairing.json`). Matrix/linear-algebra
+> ops (`matmul`, `matvec`, decompositions) parallelize through the `matrix` package backend
 > rather than a direct compute-pool call, so their acceleration is documented in
 > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
 
-> **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 218.** The
+> **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.** The
 > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists **9 standalone
 > functions** that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
 > `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `fftGpuDispatch`, and the

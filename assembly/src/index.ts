@@ -221,7 +221,7 @@ export {
 // CHANGELOG. The compute-dense WASM win is SIMD matmul (matrix_multiply_simd_ptr).
 
 // =============================================================================
-// FFT (radix-2 Cooley-Tukey): fft/ifft, rfft, powerSpectrum (interleaved)
+// FFT (radix-2 Cooley-Tukey, interleaved): fft (inverse=1 for the inverse), rfft, powerSpectrum
 // =============================================================================
 
 export { fft, rfft, powerSpectrum } from './ops/fft';
