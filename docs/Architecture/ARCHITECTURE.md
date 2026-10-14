@@ -291,14 +291,6 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 | Type bridge                         | In place                  |
 | Factory bridge                      | In place                  |
 
-### Activation Barriers (historical)
-
-The barriers below are historical context. The synced factories are part of the single live graph.
-
-1. **Two typed-function instances** -- native (15 types, instanceof) vs. synced (40+ types, duck-typing). Bridge partially resolves this.
-2. **Matrix interface mismatch** -- native DenseMatrix is Float64Array-backed; synced factories expect nested Array with `._data`, `._size`, `.storage()`.
-3. **Missing subsystems** -- Unit, Index, Range, Chain, ResultSet, Help required by 100+ factories.
-
 ## Build Pipeline
 
 Most packages run `tsup src/index.ts --format esm --clean`, then `tsc -p tsconfig.dts.json` to emit declarations. Exceptions:
