@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- **Exact unit scales round correctly at large magnitudes and keep A→B single-rounding.** `exactScaleToNumber` now uses base-2 integer rounding (fixes mis-rounds above ~1e41). Number-valued built-in units keep an exact SI reading so `toNumeric` rounds the A→B ratio once. `ExactScale` gains an `ln2` power (and `LN2_EXACT_SCALE`); `exactScaleToNumber` caches repeated lookups (~30× in a local bench).
+- **Exact unit scales round correctly at any magnitude and keep A→B single-rounding.** `exactScaleToNumber` uses base-2 integer rounding (fixes mis-rounds above ~1e41 and rounds subnormals on the 2^-1074 grid). Number-valued built-in units keep an exact SI reading so `toNumeric` rounds the A→B ratio once, and use it only while `value` still matches it. `ExactScale` gains an `ln2` power (and `LN2_EXACT_SCALE`). `exactScaleToNumber` caches repeated lookups in a memo bounded at 4096 results.
 
 ### Changed
 - **Root vitest suites run on Bun for Windows.** Vitest's default `forks` pool fails to start a worker there

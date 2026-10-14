@@ -1,9 +1,9 @@
 /**
  * Review follow-ups for the exact-scale engine (#346):
- * - exactScaleToNumber must round correctly at any magnitude (incl. >~1e41)
- * - ExactScale carries named irrationals pi and ln2
- * - exactScaleToNumber caches so repeated conversions do not recompute
- * - number-valued A→B conversions round the exact ratio once
+ * - exactScaleToNumber must round correctly at any magnitude (incl. >~1e41 and subnormals)
+ * - ExactScale carries named irrationals pi and ln2, with correct ln2 digits
+ * - exactScaleToNumber caches so repeated conversions do not recompute, within a bound
+ * - number-valued A→B conversions round the exact ratio once, while the reading is unchanged
  */
 import { describe, it, expect } from 'vitest';
 import {
