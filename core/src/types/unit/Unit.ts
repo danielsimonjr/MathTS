@@ -173,8 +173,12 @@ export const createUnitClass = /* #__PURE__ */ factory(
         : (new BigNumber(text) as unknown as BigNumberValue);
     }
 
-    /** An exact scale as a BigNumber at the configured precision (π from BIGNUMBER_PI). */
-    function exactToBigNumber(scale: ExactScale): Numeric {
+    /**
+     * An exact scale as a BigNumber at the configured precision (π from BIGNUMBER_PI), or
+     * undefined for a factor of ln 2, which has no BigNumber constant here.
+     */
+    function exactToBigNumber(scale: ExactScale): Numeric | undefined {
+      if (scale.ln2 !== 0) return undefined;
       let v = bigNumberFromText(scale.num.toString()).div(bigNumberFromText(scale.den.toString()));
       const pi = BIGNUMBER_PI as unknown as BigNumberValue;
       for (let k = 0; k < Math.abs(scale.pi); k++) v = scale.pi > 0 ? v.times(pi) : v.div(pi);
@@ -236,10 +240,13 @@ export const createUnitClass = /* #__PURE__ */ factory(
       return s === undefined ? undefined : addScalar(value, s);
     }
 
-    /** An exact scale as a Fraction or a BigNumber, or undefined for another type (or a Fraction times π). */
+    /**
+     * An exact scale as a Fraction or a BigNumber, or undefined for another type, a Fraction
+     * times π, or a factor of ln 2.
+     */
     function exactAs(scale: ExactScale, type: string): Numeric | undefined {
       if (type === 'Fraction') {
-        return scale.pi === 0
+        return scale.pi === 0 && scale.ln2 === 0
           ? (new Fraction(scale.num, scale.den) as unknown as Numeric)
           : undefined;
       }
@@ -2153,7 +2160,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
         const exact = UNITS[key].exact;
         if (exact === undefined || exact.pi === 0) continue;
         UNITS[key].value =
-          config.number === 'BigNumber' ? exactToBigNumber(exact) : exactScaleToNumber(exact);
+          (config.number === 'BigNumber' ? exactToBigNumber(exact) : undefined) ??
+          exactScaleToNumber(exact);
       }
     }
 

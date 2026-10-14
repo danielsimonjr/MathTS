@@ -842,7 +842,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2677
+      "loc": 2685
     },
     {
       "file": "core/src/types/wasm-loader.ts",
