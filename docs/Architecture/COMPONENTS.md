@@ -387,17 +387,14 @@ at zero by the `check:duplicates` pre-commit gate (see [`ARCHITECTURE.md`](./ARC
 
 ## Verification
 
-Generated 2026-08-07 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+`repo-tools map` generates these values.
+Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=docs/Architecture`
 
-> **Reachability metrics are deliberately absent.** `repo_map` treats this repo as a single
-> package and finds **0 entry-point roots** for the workspace umbrella, so `reachableFiles`,
-> `dormantFiles`, `orphanedFiles` and `testOnlyFiles` would be artifacts of that empty root
-> set rather than measurements — it emits a warning saying so. The repo's own CDG runs in
-> monorepo mode with per-package roots and IS authoritative for reachability; read
-> `FILE_INVENTORY.md` for those figures. The two tools disagree by scope, not correctness.
+> **No table here claims a reachability count.** The tables give size, structure and cycle counts only.
+> `FILE_INVENTORY.md` and `unused-analysis.md` in this directory give the reachability figures. The
+> repository generator writes them (`npm run docs:deps:full`), and the gate does not check them.
 
-| Claim                | Value | Source                                                                                                                                |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| totalTypeScriptFiles | 1954  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
-| totalExports         | 7978  | `repo_map.py map . --out <tmp>` (skills/architecture-docs), metadata of its dependency-graph.json; `repo_map.py check` fails on drift |
+| Claim                | Value | Source                                                                                                       |
+| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
+| totalTypeScriptFiles | 1954  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 7978  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
