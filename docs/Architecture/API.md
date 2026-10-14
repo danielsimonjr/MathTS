@@ -6,10 +6,7 @@ AssemblyScript `assembly/` package, against `src/index.ts` + the loader
 bindings). Per-package deep-dives live in `docs/api/<pkg>.md`; this file is the
 cross-package overview.
 
-Package versions (from each `package.json`, tracked independently): core 0.13.0,
-matrix 0.6.3, tensor 0.2.17, autograd 0.3.12, parallel 0.6.3, gpu 0.2.0,
-functions 0.43.2, expression 0.6.7, workbook 0.3.3, compat 0.4.0, plot 0.3.29,
-typed-function 0.1.2, workerpool 0.2.1, assembly (wasm) 0.2.2.
+Each package is versioned independently, in its own `package.json`.
 
 ---
 
@@ -99,9 +96,8 @@ threshold): `sum`, `prod`, `dot(a,b)`, `elementwise(a,b,op)`
 ## @danielsimonjr/mathts-core
 
 Central numeric-type + typed-dispatch + factory foundation every other package
-builds on. Depends only on `typed-function`. Note: the `VERSION` constant baked
-into `dist` reads `"0.1.0"` and is stale versus `package.json`'s `0.13.0` — do not
-treat `VERSION` as authoritative.
+builds on. Depends only on `typed-function`. The `VERSION` constant is injected from
+`package.json` at build time (the `tsup` `define` of `__PKG_VERSION__`).
 
 ### Numeric Types
 
@@ -879,8 +875,8 @@ JSON-RPC router (`JsonRpcRequest`/`Response`/`Event`). `runWorkbookWithTimeout(s
 {timeoutMs})` runs a `.mtsw` to completion inside a `worker_threads` worker,
 terminating it on timeout (`WorkbookTimeoutError`); outputs pre-formatted via
 `formatResult` before crossing the worker boundary. `formatResult(value)` is
-crash-proof (never throws). Constants `SCHEMA_VERSION = {major:1, minor:0}`,
-`VERSION = "0.1.0"` (internal, distinct from npm 0.3.3).
+crash-proof (never throws). Constants `SCHEMA_VERSION = {major:1, minor:0}` and
+`VERSION` (injected from `package.json` at build time).
 
 ### CLI (`mtsw`)
 
@@ -924,7 +920,7 @@ math.chain(3).add(4).multiply(2).done(); // → 14
 - **Complex/matrix-specific**: `conj`/`re`/`im`/`arg`; `transpose` (array-in→array-out,
   Matrix-in→Matrix-out), `det` (closed-form n≤3, else local LU), `identity(n)`, `size`.
 
-> **`zeros`/`ones` vector-vs-matrix split** (mathjs parity, v0.4.0): single-arg
+> **`zeros`/`ones` vector-vs-matrix split** (mathjs parity): single-arg
 > `zeros(n)`/`ones(n)` return a length-`n` plain `number[]` **vector**
 > (`math.zeros(3).toArray()` → `[0,0,0]`); two-arg `zeros(r,c)`/`ones(r,c)` return
 > an `r×c` `DenseMatrix`. An easy footgun — do not assume `zeros(n)` returns a matrix.
@@ -944,7 +940,7 @@ math.chain(3).add(4).multiply(2).done(); // → 14
 Headless, dependency-light SVG 2D/3D plotting — expression-aware (samples MathTS
 expressions directly), browser-safe by default. Zero runtime dependencies beyond
 `core`/`functions`/`expression`; ships no bundled image/PDF renderer.
-(Internal `VERSION` constant reads `"0.2.0"`, stale versus package.json `0.3.29`.)
+(The `VERSION` constant is injected from `package.json` at build time.)
 
 - **Polymorphic entry points**: `plot(a, b?, c?: PlotOptions): string` — dispatches on
   argument shape (`plot(y)` → line with `x=0..n-1`; `plot(x, y)` → line;

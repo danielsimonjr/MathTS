@@ -51,7 +51,7 @@ sec/csc/cot` + `erfc`, each benchmark-confirmed net-faster than JS incl. copy,
 > poly fits, argsort/rank. NOT wired (benchmarked, JS wins once the JS↔wasm copy is
 > included): `sqrt`, `cbrt`, `asin`, `acos`, `cosh`, `asinh`, `acosh`, and the
 > reductions (`sum`/`mean`/`variance`) — V8 JITs/hardware-accelerates those faster
-> than wasm+copy. **Op-fusion** (`fuseUnaryChain`, 0.2.14) keeps an array resident
+> than wasm+copy. **Op-fusion** (`fuseUnaryChain`) keeps an array resident
 > in wasm across a chain of ops, amortizing the copy — 2.4–3.1× over JS for a 4-op
 > chain. The remaining "parallel" routing is intentional. (These figures can be
 > re-measured with the `tools/benchmark/wasm/` AssemblyScript-vs-JS suite — `npm
