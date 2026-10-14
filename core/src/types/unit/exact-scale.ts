@@ -29,9 +29,9 @@
  * places. Rounding `r × Π c^k` through these rationals is off from rounding the
  * true value only if the true value lies within about 1e-118 (relative) of a
  * midpoint between two doubles. The test files pin each entry's digits against
- * an independent computation. The constants are treated as algebraically
- * independent over Q (true for π and ln 2), so scales with different powers do
- * not add.
+ * an independent computation. The constants are assumed algebraically
+ * independent over Q (not known for π and ln 2; Schanuel's conjecture implies
+ * it), so scales with different irrational powers never compare equal or add.
  */
 export const NAMED_IRRATIONALS = Object.freeze({
   pi: '3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647',
