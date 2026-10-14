@@ -1,7 +1,5 @@
 # MathTS Project Overview
 
-**Generated**: 2026-07-01
-
 ## What is MathTS?
 
 MathTS is a ground-up TypeScript rewrite of [math.js](https://mathjs.org),
@@ -19,66 +17,66 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 
 ## Key Metrics
 
-Metrics below cover the **single active code graph** — every file is reachable
-from a package `src/index.ts` — per the 2026-07-01 dependency-graph report. The
-old dormant synced-from-mathjs mirror (formerly 904 dormant files) was **deleted
-2026-06-27**; there is now one graph, 846 files, all reachable (0 unused, 0
-dormant). Regenerate with `tools/create-dependency-graph` for current figures.
+The figures below come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
+
+There is one active code graph. Every file is reachable from a package `src/index.ts`.
 
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
-| TypeScript Files             | 846 (0 unused, 0 dormant — single active graph)              |
-| Lines of Code                | 158,032                                                      |
-| Total Exports                | 4,088 (1,204 re-exports)                                     |
-| Modules                      | 70                                                           |
-| Circular Dependencies        | 0 runtime (2 type-only)                                      |
-| Classes / Interfaces / Funcs | 50 / 358 / 1,461 (135 type guards, 1,417 constants, 0 enums) |
-| `functions` Package Exports  | 828 names (686 callable functions; `typed/` = 30 files)      |
+| TypeScript Files             | 1,185 (0 unused)                                             |
+| Lines of Code                | 197,377                                                      |
+| Total Exports                | 6,121 (2,578 re-exports)                                     |
+| Modules                      | 83                                                           |
+| Circular Dependencies        | 0 runtime (0 type-only)                                      |
+| Classes / Interfaces / Funcs | 58 / 523 / 1,940 (160 type guards, 1,615 constants, 0 enums) |
 
 ## Packages
 
-The monorepo has **22 npm packages**. The 12 primary packages are listed below;
+The monorepo has **24 npm packages**. The 14 primary packages are listed below;
 the other 10 are thin re-export leaf packages (`parser`, `ast`, `evaluator`,
 `units`, `numbers`, `linalg`, `arithmetic`, `trigonometry`, `statistics`,
 `signal`) — see `ARCHITECTURE.md`. AssemblyScript (`assembly/`) is the sole WASM
-toolchain. File counts are reachable (active) files from the dependency-graph
-report.
+toolchain. The Active Files column counts the `src/` files of each package, per
+`dependency-graph.json`; regenerate with `npm run docs:deps:full`.
 
-| Package                                   | Description                                                  | Active Files | Version |
-| ----------------------------------------- | ------------------------------------------------------------ | ------------ | ------- |
-| `@danielsimonjr/mathts-typed-function`    | Type dispatch system (forked)                                | 1            | 0.1.2   |
-| `@danielsimonjr/mathts-workerpool`        | Worker pool management (forked)                              | 2            | 0.2.0   |
-| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 15           | 0.3.1   |
-| `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 43           | 0.1.12  |
-| `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           | 0.2.2   |
-| `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            | 0.3.2   |
-| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 391          | 0.8.0   |
-| `@danielsimonjr/mathts-parallel`          | ComputePool, WebWorker operations                            | 11           | 0.3.0   |
-| `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 302          | 0.4.2   |
-| `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 14           | 0.1.8   |
-| `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 3            | 0.2.5   |
-| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 27           | 0.1.5   |
+| Package                                   | Description                                                  | Active Files |
+| ----------------------------------------- | ------------------------------------------------------------ | ------------ |
+| `@danielsimonjr/mathts-typed-function`    | Type dispatch system (forked)                                | 1            |
+| `@danielsimonjr/mathts-workerpool`        | Worker pool management (forked)                              | 5            |
+| `@danielsimonjr/mathts-gpu`               | Shared WebGPU device, buffer pool and shader manager         | 8            |
+| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 46           |
+| `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 46           |
+| `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           |
+| `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            |
+| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 475          |
+| `@danielsimonjr/mathts-parallel`          | ComputePool, WebWorker operations                            | 14           |
+| `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 476          |
+| `@danielsimonjr/mathts-plot`              | Headless SVG 2D/3D plotting for MathTS                       | 21           |
+| `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 25           |
+| `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 3            |
+| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 28           |
+
+Versions are not listed here. Each package's `package.json` gives its version.
 
 ## Single Active Code Graph
 
-MathTS is **one active code graph** — every file is reachable from a package
-`src/index.ts` (846 files, 0 unused, 0 dormant). The former synced-from-mathjs
-**dormant mirror (904 files) was deleted 2026-06-27** (455 files / ~58.6k LOC
-purged), and the _valuable_ synced code was **activated** — wired into the live
-graph via `functions/src/factories/index.ts`. There is no longer an
-active/dormant split. Highlights:
+MathTS is **one active code graph**. Every file is reachable from a package
+`src/index.ts`. The `src/` tree of every workspace package has 1,185 files and
+0 unused files, per `dependency-graph.json` (regenerate with `npm run docs:deps:full`).
+The mathjs-derived factories are wired into the graph via
+`functions/src/factories/index.ts`. Highlights:
 
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
-- **`@danielsimonjr/mathts-functions`** exports **828 names (686 callable functions)** at `functions@0.8.0`. The typed-dispatch source dir (`functions/src/typed/`) holds 30 files spanning arithmetic, trigonometry, statistics, signal, special, distributions, combinatorics, geometry, algebra, CAS, hypothesis tests, numeric/optimization, bitwise, relational, and set domains.
-- **Activated mathjs factory layer**: the mathjs-derived factory functions are wired into the live graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`) — first-class active code, not dormant.
+- **`@danielsimonjr/mathts-functions`**: the typed-dispatch source dir (`functions/src/typed/`) holds 40 files, including `factorization/`. They span arithmetic, trigonometry, statistics, signal, special, distributions, combinatorics, geometry, algebra, CAS, hypothesis tests, numeric/optimization, bitwise, relational, and set domains.
+- **mathjs factory layer**: the mathjs-derived factory functions are wired into the graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`).
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: **314 AssemblyScript function exports** — the sole WASM backend
+- **WASM**: **315 AssemblyScript function exports** — the sole WASM backend
 
 ### Beyond the mathjs API surface
 
-Native typed exports go well beyond the mathjs API. The 2026-06 gap-closure
-added descriptive statistics, a distribution CDF/PDF/quantile surface,
+Native typed exports go well beyond the mathjs API. The `functions` package adds
+descriptive statistics, a distribution CDF/PDF/quantile surface,
 hypothesis tests, structured-matrix/decomposition helpers, digital-filter
 design, geometry/quaternions, optimizers, clustering, and symbolic integration.
 Categories (examples, not exhaustive):
@@ -106,7 +104,7 @@ MathTS has three computation backends selected automatically based on operation 
 | Backend             | Source                             | Status                | Description                                      |
 | ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------ |
 | JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                         |
-| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 314 function exports (326 total), SIMD-optimized |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized |
 | WebGPU              | `matrix/src/backends/gpu/`         | >100K elements        | WebGPU compute shaders                           |
 
 The AssemblyScript backend compiles `assembly/src/` (28 source files) to a
@@ -148,28 +146,24 @@ math.add(1, 2);
 
 ## Current Status
 
-| Package    | Status      | Notes                                                                                                                                                                                                                                                                                                                          |
-| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Core       | Stable      | Types with full method sets, factory, typed dispatch                                                                                                                                                                                                                                                                           |
-| Matrix     | Stable      | Dense/Sparse with JS backend; WASM/GPU backends available                                                                                                                                                                                                                                                                      |
-| Tensor     | Active      | Rank-N Float64Array-backed dense Tensor with einsum/contraction                                                                                                                                                                                                                                                                |
-| Autograd   | Active      | Forward + reverse-mode automatic differentiation over Tensor                                                                                                                                                                                                                                                                   |
-| Functions  | Active      | 828 exports (686 callable functions) at `functions@0.8.0`; typed dispatch (`typed/`, 30 files) plus the activated mathjs factory layer, all in one live graph (arithmetic, trig, stats, signal, special, distributions, combinatorics, geometry, algebra, CAS, graph theory, hypothesis tests, numerical/optimizers, and more) |
-| Parallel   | Active      | ComputePool, 40+ operations, 7 threshold categories                                                                                                                                                                                                                                                                            |
-| Workbook   | Active      | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                                                                                            |
-| Expression | Active      | Parser (16 node types), compiler, and evaluator fully functional; sandbox-hardened (2026-05-01 security release)                                                                                                                                                                                                               |
-| Compat     | Active      | 54 shims wired to real implementations, 87 test cases                                                                                                                                                                                                                                                                          |
-| Assembly   | **Primary** | Sole WASM backend — 314 function exports (326 total) in `mathts-as.wasm`; powers `matrix` heavy ops (SIMD matmul + LU/QR/Cholesky/inverse/determinant) and `functions` kernels (AS → JS dispatch)                                                                                                                              |
+| Package    | Status      | Notes                                                                                                                                                                                                                                                     |
+| ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core       | Stable      | Types with full method sets, factory, typed dispatch                                                                                                                                                                                                      |
+| Matrix     | Stable      | Dense/Sparse with JS backend; WASM/GPU backends available                                                                                                                                                                                                 |
+| Tensor     | Active      | Rank-N Float64Array-backed dense Tensor with einsum/contraction                                                                                                                                                                                           |
+| Autograd   | Active      | Forward + reverse-mode automatic differentiation over Tensor                                                                                                                                                                                              |
+| Functions  | Active      | typed dispatch (`typed/`, 40 files) plus the mathjs factory layer, all in one live graph (arithmetic, trig, stats, signal, special, distributions, combinatorics, geometry, algebra, CAS, graph theory, hypothesis tests, numerical/optimizers, and more) |
+| Parallel   | Active      | ComputePool, 40+ operations, 7 threshold categories                                                                                                                                                                                                       |
+| Workbook   | Active      | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                       |
+| Expression | Active      | Parser (16 node types), compiler, and evaluator fully functional; sandbox-hardened                                                                                                                                                                        |
+| Compat     | Active      | 54 shims wired to real implementations, 87 test cases                                                                                                                                                                                                     |
+| Assembly   | **Primary** | Sole WASM backend — 315 function exports (327 total) in `mathts-as.wasm`; powers `matrix` heavy ops (SIMD matmul + LU/QR/Cholesky/inverse/determinant) and `functions` kernels (AS → JS dispatch)                                                         |
 
 ## Integration Status
 
-The mathjs-derived factory layer is **activated** — wired into the live graph
-via `functions/src/factories/index.ts` (reachable from
-`functions/src/index.ts`), so it is first-class active code. The former dormant
-synced mirror (904 files) was deleted 2026-06-27; the codebase is now a **single
-active graph of 846 files** (0 dormant, 0 unused). The pre-activation
-"activation readiness" scoreboard (242 factories / 19 categories / 904 dormant /
-555 reachable) no longer applies.
+The mathjs-derived factory layer is wired into the graph via
+`functions/src/factories/index.ts` (reachable from `functions/src/index.ts`). The
+codebase is one active graph of 1,185 files (0 unused).
 
 ### Bridges in Place
 
