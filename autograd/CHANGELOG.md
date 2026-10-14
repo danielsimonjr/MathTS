@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.3.18
+
+### Patch Changes
+
+- Updated dependencies [15adc89]
+  - @danielsimonjr/mathts-core@0.18.0
+  - @danielsimonjr/mathts-tensor@0.2.24
+
 ## 0.3.17
 
 ### Patch Changes
