@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - **The Verification tables of the architecture documents carry the current whole-repository parse.** `totalTypeScriptFiles` 1919 -> 1954, `totalLinesOfCode` 338865 -> 342404 and `totalExports` 7661 -> 7978, in the six documents that record them (`API.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`, `OVERVIEW.md`, `WASM_ACCELERATION.md`). `repo-tools check . --docs=docs/Architecture` exits 0. Only the values change: the prose, the column names and the generated reports stay as they were.
+- **The Verification sections of the architecture documents name `repo-tools`, the tool that checks them.** The six documents still named the removed `repo_map.py` in the header lines, the Source column and a note. The note said the tool finds 0 entry roots; `repo-tools` finds 1175 here. It now says only that no table claims a reachability count, and where those figures live. The generator comment in `tools/create-dependency-graph` names the same gate. No Verification value changed; `repo-tools check . --docs=docs/Architecture` and `repo-tools docs check tools/create-dependency-graph` pass.
 
 ### Changed
 - **Breaking (0.x): `ExactScale` is `{ num, den, irrationals }`.** Irrational powers live in one map keyed by the new `NAMED_IRRATIONALS` registry (`pi`, `ln2`), replacing the `pi` and `ln2` fields. `UNITS.degF.value` / `UNITS.degR.value` became numbers in 0.17.0 (they were `Fraction(5, 9)`).
