@@ -1,7 +1,5 @@
 # MathTS Data Flow
 
-**Generated**: 2026-06-26
-
 ## Overview
 
 This document describes how data flows through the MathTS system — from user input through type dispatch, backend selection, parallel execution, factory activation, and workbook evaluation.
@@ -272,8 +270,8 @@ math.add(a, b)
 Note: The valuable synced mathjs factories (functions/src/{arithmetic,algebra,
 type,utils,...}/) are **activated** — wired into the live graph via
 functions/src/factories/index.ts (re-exported from index.ts) and registered
-through the factory path. The dormant, unreachable synced remnant was deleted on
-2026-06-27 (see CLAUDE.md's "Syncing from mathjs" history).
+through the factory path. The dormant, unreachable synced remnant is no longer in
+the tree (see CLAUDE.md's "Syncing from mathjs" section).
 ```
 
 ---

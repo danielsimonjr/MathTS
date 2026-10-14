@@ -1,7 +1,5 @@
 # MathTS API Reference
 
-**Last updated**: 2026-07-18
-
 Hand-maintained aggregate API reference for all 24 workspace packages. Signatures
 below are verified against the built `dist/*.d.ts` declarations (or, for the
 AssemblyScript `assembly/` package, against `src/index.ts` + the loader
@@ -113,7 +111,7 @@ treat `VERSION` as authoritative.
 | `Fraction`              | `numerator`/`denominator: bigint` (always reduced) | Exact rational arithmetic + comparison + rounding + continued fractions                                                      |
 | `BigNumber`             | `sign · coefficient · 10^exponent` (bigint coeff)  | Arbitrary-precision decimal; **private constructor** — use `fromNumber`/`parse`/`fromBigInt`/`fromJSON`                      |
 | `Dual`                  | `value`/`deriv: number`                            | Forward-mode dual number for autodiff                                                                                        |
-| `Unit` / `UnitInstance` | merged mathjs-lineage Unit                         | The single Unit class post the 2026-07-04 merge                                                                              |
+| `Unit` / `UnitInstance` | merged mathjs-lineage Unit                         | The single Unit class                                                                                                        |
 | `Range`                 | `start`/`end`/`step: number`                       | Lazy numeric range                                                                                                           |
 
 **`Complex`** — statics `fromPolar`, `fromNumber`, `fromJSON`, `parse` (`"3+4i"`,
@@ -195,7 +193,7 @@ isMatrix    isDenseMatrix  isSparseMatrix   isUnit
 
 `MathTSTyped` accepts concrete-parameter implementations via the
 `SignatureImpl = (...args: never[]) => unknown` top-type — the workaround for
-`strictFunctionTypes` contravariance behind the 2026-06-27 `functions` strict flip.
+`strictFunctionTypes` contravariance behind the `functions` package's strict mode.
 
 ### Factory System
 
@@ -288,7 +286,7 @@ Standalone functions (`DenseMatrix → DenseMatrix`), not methods:
 
 `eigWasm`/`eigvalsWasm`/`spectralRadiusWasm`/`svdWasm` are `Promise`-returning
 compat shims that delegate to the sync JS functions — the AS Jacobi/Hessenberg
-eig+SVD kernels were **retired** 2026-07-01 (measured 0.2–0.7× of JS).
+eig+SVD kernels are not in the binary, because they measured slower than the JS path.
 
 ### Backends
 
@@ -561,11 +559,11 @@ count before a GPU dispatch's upload/readback cost pays off).
 
 ## @danielsimonjr/mathts-functions
 
-`functions/src/index.ts` (545 lines) re-exports three layers plus ~35 explicit
+`functions/src/index.ts` re-exports three layers plus ~35 explicit
 named-export blocks — the `functions/src/` tree has 475 files (per `dependency-graph.json`; regenerate with `npm run docs:deps:full`), all reachable
 from a package `src/index.ts` (one active graph). The build is `tsup` for the JS bundle
 plus a separate `tsc -p tsconfig.dts.json` declaration tree (`dist/index.d.ts` is
-117 lines but re-exports from 340+ sibling `.d.ts` files).
+a thin file that re-exports from its sibling `.d.ts` files).
 
 **The three layers** (per `CLAUDE.md`): `typed/` (parallel-first implementations
 on core's `mathTyped` dispatch), `factories/` (activated mathjs-derived factory
@@ -1036,9 +1034,8 @@ extra linalg (`rowReduce`, `characteristicPolynomial`), curve fitting
 rational approximation (`residue`/`padeApproximant`), `tensorTranspose`, bitwise
 Int32Array elementwise ops, 18-op elementwise transcendental array kernels
 (`array_<op>_ptr`), `tridiag_solve_f64`, `divided_difference_f64`, and complex array
-creation/arithmetic. Note the AS eig/SVD kernels were **retired** 2026-07-01 (measured
-0.2–0.7× of JS); only matmul + the dense factored decompositions remain WASM-accelerated
-for `matrix`.
+creation/arithmetic. Note the AS binary holds no eig/SVD kernels (they measured slower than the JS path); only matmul +
+the dense factored decompositions are WASM-accelerated for `matrix`.
 
 **JS bindings** (`src/bindings/wasm-loader.ts`, TypeScript — this file _is_
 type-checked/linted, unlike the AS `.ts` source): `interface MathTSWasmExports`

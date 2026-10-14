@@ -1,8 +1,5 @@
 # MathTS — Component Reference
 
-**Anchor versions**: core 0.13.0 · functions 0.43.2 · matrix 0.6.3 · expression 0.6.7 · workbook 0.3.3 (24 npm-workspace packages; independently versioned via Changesets)
-**Last Updated**: 2026-07-18
-
 A TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker acceleration, organized as a Turborepo
 monorepo of 24 ESM-only packages. This document is the component-level map: what each package is for, its
 key exported types, and how the packages depend on one another. For the always-current dependency data see
@@ -135,7 +132,7 @@ export class Complex        // bigint-free f64 complex
 export class Fraction
 export class BigNumber      // bigint-backed (NOT decimal.js: add/sub/lessThanOrEqual/equals/compareTo)
 export class Dual           // forward-mode autodiff scalar
-// Unit (dimensional analysis) lives here too, deeply integrated (merged 2026-07-04)
+// Unit (dimensional analysis) lives here too, deeply integrated
 
 // typed-function integration
 export const mathTyped
@@ -381,8 +378,6 @@ at zero by the `check:duplicates` pre-commit gate (see [`ARCHITECTURE.md`](./ARC
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2026-07-18
 **Maintained By**: Daniel Simon Jr.
 
 ## Verification

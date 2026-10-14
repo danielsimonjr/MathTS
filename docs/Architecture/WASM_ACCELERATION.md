@@ -5,8 +5,6 @@ MathTS monorepo. Regenerate the per-function data with
 `functions/tests/audit`-style scans (see scratch tooling) or by grepping
 `*Dispatch` usage in `functions/src/typed/`.
 
-Last updated: 2026-07-01.
-
 ## TL;DR
 
 WASM acceleration is **selective and threshold-gated**, not universal:
@@ -97,13 +95,15 @@ bitwise}/`) accelerate algebra/numeric/interpolation code paths
   etc.) where used by solvers and numeric routines, even though those public
   functions aren't special-function dispatchers.
 
-## Correctness status (2026-06-26)
+## Correctness status
 
-All AssemblyScript WASM special-function kernels and the JS fallbacks are
-verified to <1e-9 vs mpmath after the special-function fixes:
+The differential suites run with `npm run test:diff`:
 
-- `mathts-wasm` (AS): `npm run test:diff` — 140/140 special, 30/30 decomposition.
-- `mathts-functions` (JS): `npm run test:diff` — 187/187.
+- `mathts-wasm` (AS): the special-function kernels against mpmath goldens, and the
+  dense decompositions against numpy goldens plus a reconstruction check.
+- `mathts-functions` (JS): the special-function surface against mpmath goldens, the
+  elementwise WASM dispatch against `Math.*`, and the fused unary chain against a
+  sequential scalar pass.
 
 ## Verification
 
