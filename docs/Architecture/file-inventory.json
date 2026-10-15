@@ -5861,7 +5861,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 413
+      "loc": 421
     },
     {
       "file": "functions/src/factories/index.ts",
@@ -7884,7 +7884,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2272
+      "loc": 2276
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -11482,7 +11482,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 130
+      "loc": 133
     },
     {
       "file": "packages/workerpool/tests/bitwise-dispatch.test.ts",

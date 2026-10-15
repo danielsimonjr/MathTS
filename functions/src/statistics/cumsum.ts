@@ -97,7 +97,7 @@ export const createCumSum = /* #__PURE__ */ factory(
     /**
      * Recursively calculate the cumulative sum of an n-dimensional array
      * @param {Array} array - Input array
-     * @param {string} [datatype] - Optional datatype
+     * @param {string} [_datatype] - Optional datatype (unused)
      * @return {Array} cumsum
      * @private
      */

@@ -166,8 +166,8 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        *     const value = matrix.subset(index, replacement)   // replace subset
        *
        * @param {Index} index
-       * @param {Array | ImmutableDenseMatrix | MatrixValue} [replacement]
-       * @param {MatrixValue} [defaultValue=0] Default value, filled in on new entries when
+       * @param {Array | ImmutableDenseMatrix | MatrixValue} [_replacement]
+       * @param {MatrixValue} [_defaultValue=0] Default value, filled in on new entries when
        *                             the matrix is resized. If not provided,
        *                             new matrix elements will be filled with zeros.
        */

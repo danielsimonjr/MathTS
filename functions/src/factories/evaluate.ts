@@ -229,6 +229,26 @@ export function physicsScope(
 }
 
 /**
+ * Validate `evaluate`'s `physics` and `charge` options.
+ *
+ * @param options - The options that `evaluate` received.
+ * @returns The scope options for the elementary-charge binding, or `undefined` when `physics` is off.
+ * @throws TypeError - When `charge` is not `'unit'` or `'scalar'`, or is set without `physics`.
+ */
+function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOptions | undefined {
+  if (options?.charge !== undefined && options.charge !== 'unit' && options.charge !== 'scalar') {
+    throw new TypeError('charge must be "unit" or "scalar"');
+  }
+  if (options?.physics !== true) {
+    if (options?.charge !== undefined) {
+      throw new TypeError('charge requires { physics: true }');
+    }
+    return undefined;
+  }
+  return { charge: options.charge ?? 'unit' };
+}
+
+/**
  * Evaluate a math expression string against the full activated math scope.
  *
  * @param expr - Expression string (e.g., '2 + 3', 'sin(pi/2)', 'x^2')
@@ -248,19 +268,6 @@ export function physicsScope(
  * evaluate('exp(1)', undefined, { physics: true }); // Euler's number
  * ```
  */
-function assertPhysicsOptions(options?: PhysicsEvaluateOptions): PhysicsScopeOptions | undefined {
-  if (options?.charge !== undefined && options.charge !== 'unit' && options.charge !== 'scalar') {
-    throw new TypeError('charge must be "unit" or "scalar"');
-  }
-  if (options?.physics !== true) {
-    if (options?.charge !== undefined) {
-      throw new TypeError('charge requires { physics: true }');
-    }
-    return undefined;
-  }
-  return { charge: options.charge ?? 'unit' };
-}
-
 export function evaluate(
   expr: string,
   scope?: Record<string, unknown> | Scope,
@@ -271,6 +278,7 @@ export function evaluate(
   scope?: Record<string, unknown> | Scope,
   options?: PhysicsEvaluateOptions
 ): unknown[];
+/** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export function evaluate(
   exprOrExprs: string | string[],
   scope?: Record<string, unknown> | Scope,
