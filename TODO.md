@@ -9,7 +9,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
-- [ ] **`turbo run typecheck` races the builds it reads, and a failed run leaves a cleaned `dist/` behind.** `typecheck` depends on `^build` only, but
+- [x] **`turbo run typecheck` races the builds it reads, and a failed run leaves a cleaned `dist/` behind.** `typecheck` depends on `^build` only, but
       `expression`'s `tsc -p tsconfig.test.json` includes `../functions/src/**`, which imports the built `.d.ts` of `matrix`, `functions` and
       `expression` itself. After any source edit that misses the Turbo cache, `matrix#build` cleans `matrix/dist` while `expression#typecheck`
       runs: `TS7016 Could not find a declaration file for module '@danielsimonjr/mathts-matrix'`, 77 errors on the `tsup` tree and the same on

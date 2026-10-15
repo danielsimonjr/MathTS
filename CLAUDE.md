@@ -252,7 +252,7 @@ What this means for the codebase today:
 - The **dead** synced remnant (unexported AND unreachable AND untested) was **deleted on 2026-06-27**: 455 files / ~58.6k LOC across `functions/` + `core/` (the bulk being the dead `functions/src/expression/` mirror). See "Code in `functions/`" above.
 - Future upstream additions require manual JS→TS porting, not syncing — the porting workspace lives in `tools/mathjs-port/` (one-off scaffolding/drafts; not a workspace member, not part of the build).
 
-The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `bun run typecheck` reports 0 errors (33/33 tasks; the count includes `@danielsimonjr/mathts-wasm#build`, which the `matrix`/`functions` build edges pull into the graph), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. All packages compile under `strict: true` (see the functions-layer note above for the 2026-06-27 strict-flip root cause).
+The **active graph** (everything reachable from each package's `src/index.ts`) is type-clean: `bun run typecheck` reports 0 errors (47/47 tasks: the 23 typecheck tasks that have a script and the 24 builds they wait for, `@danielsimonjr/mathts-wasm#build` among them), and `functions` emits its published `.d.ts` tree via `tsc -p tsconfig.dts.json`. All packages compile under `strict: true` (see the functions-layer note above for the 2026-06-27 strict-flip root cause).
 
 ## Known Issues
 
@@ -290,7 +290,7 @@ Publishing is CI. `.github/workflows/release.yml` opens the version PR. After th
 
 ## Turbo Caching
 
-Turbo caches build/test outputs in `.turbo/cache/` (Turbo 2). `matrix#build` and `functions#build` also depend on `@danielsimonjr/mathts-wasm#build`, which orders them after `asc` and folds the wasm build's hash into theirs; a cache hit restores `assembly/build/` too. `typecheck` depends on `^build` (upstream packages built first). `test` and `test:coverage` depend on **`["^build", "build"]`** — a package's own `build` runs before its tests, so `dist/` artifacts (e.g. the co-located `mathts-as.wasm` that `matrix`/`functions` load) exist; without this, a cold `npm run test` fails the wasm-resolution guards (ENOENT on the un-built binary). Use `--force` to bypass cache when debugging stale results.
+Turbo caches build/test outputs in `.turbo/cache/` (Turbo 2). `matrix#build` and `functions#build` also depend on `@danielsimonjr/mathts-wasm#build`, which orders them after `asc` and folds the wasm build's hash into theirs; a cache hit restores `assembly/build/` too. `typecheck` depends on **`["^build", "build"]`** as well: its tests import the package by name, which resolves to its own `dist/`, so the package's `build` must not clean `dist/` while its `tsc` reads it. `expression#typecheck` also waits for the `matrix` and `functions` builds, because its test tsconfig compiles `../functions/src`, which imports their built declarations. `node tools/test/check-typecheck-graph.mjs` reads the resolved graph and fails on a missing edge (`node --test tools/test/check-typecheck-graph.test.mjs` pins the checker; CI runs both). `test` and `test:coverage` depend on **`["^build", "build"]`** — a package's own `build` runs before its tests, so `dist/` artifacts (e.g. the co-located `mathts-as.wasm` that `matrix`/`functions` load) exist; without this, a cold `npm run test` fails the wasm-resolution guards (ENOENT on the un-built binary). Use `--force` to bypass cache when debugging stale results.
 
 ## Sprint Planning
 
