@@ -1,10 +1,10 @@
 /**
  * Ordinary least-squares regression (Wave D / regression primitives).
- * Bridges statistics ↔ linear algebra; reuses `mean` + the `studentTCDF` connector
+ * Bridges statistics ↔ linear algebra; reuses `mean` + the `studentTTwoSidedP` tail
  * for the slope's significance test. Matches `scipy.stats.linregress`.
  */
 import { mean as _mean } from './typed/arithmetic.js';
-import { studentTCDF } from './distribution-functions.js';
+import { studentTTwoSidedP } from './distribution-functions.js';
 
 type Vec = readonly number[] | Float64Array;
 const arr = (x: Vec): number[] => (Array.isArray(x) ? (x as number[]) : Array.from(x));
@@ -53,6 +53,6 @@ export function linearRegression(x: Vec, y: Vec): LinregressResult {
   // residual mean square → slope standard error; t-test for slope = 0
   const stdErr = Math.sqrt((syy - slope * sxy) / df / sxx);
   const t = slope / stdErr;
-  const pValue = 2 * (1 - studentTCDF(Math.abs(t), df));
+  const pValue = studentTTwoSidedP(t, df);
   return { slope, intercept, rValue, rSquared: rValue * rValue, pValue, stdErr };
 }

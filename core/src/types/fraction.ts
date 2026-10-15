@@ -143,22 +143,30 @@ export class Fraction implements IFraction {
     const sign = n < 0 ? -1n : 1n;
     n = Math.abs(n);
 
+    // Continued-fraction convergents h/k. The next convergent is computed first and
+    // taken only while its denominator is within the cap, so the result is the last
+    // convergent at or below `maxDenominator`, never one above it (the loop once
+    // checked the cap only after stepping, and returned 739/200 for a cap of 64).
     let h1 = 1n,
       h2 = 0n;
     let k1 = 0n,
       k2 = 1n;
     let b = n;
-
-    do {
+    for (let iter = 0; iter < 128; iter++) {
       const a = BigInt(Math.floor(b));
-      let aux = h1;
-      h1 = a * h1 + h2;
-      h2 = aux;
-      aux = k1;
-      k1 = a * k1 + k2;
-      k2 = aux;
-      b = 1 / (b - Number(a));
-    } while (Math.abs(n - Number(h1) / Number(k1)) > Number.EPSILON && k1 < maxDenominator);
+      const hNext = a * h1 + h2;
+      const kNext = a * k1 + k2;
+      if (kNext > maxDenominator) break;
+      h2 = h1;
+      h1 = hNext;
+      k2 = k1;
+      k1 = kNext;
+      if (Math.abs(n - Number(h1) / Number(k1)) <= Number.EPSILON * Math.max(1, n)) break;
+      const rest = b - Number(a);
+      if (rest <= 0) break;
+      b = 1 / rest;
+    }
+    if (k1 === 0n) return new Fraction(sign * BigInt(Math.round(n)), 1n);
 
     return new Fraction(sign * h1, k1);
   }

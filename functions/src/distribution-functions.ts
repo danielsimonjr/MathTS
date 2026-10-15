@@ -16,6 +16,7 @@ import {
   gammaDist as gammaD,
   betaDist as betaD,
 } from './typed/dist-objects.js';
+import { betaincScalar } from './wasm/special/scalars.js';
 
 /** Standard (or general) normal quantile (inverse CDF). */
 export const normalQuantile = (p: number, mu = 0, sigma = 1): number =>
@@ -68,3 +69,17 @@ export const logisticPDF = (x: number, mu = 0, s = 1): number => {
 export const logisticCDF = (x: number, mu = 0, s = 1): number => 1 / (1 + Math.exp(-(x - mu) / s));
 export const logisticQuantile = (p: number, mu = 0, s = 1): number =>
   mu + s * Math.log(p / (1 - p));
+
+/**
+ * Two-sided p-value of a Student-t statistic `t` with `df` degrees of freedom,
+ * computed DIRECTLY in the tail as the regularized incomplete beta
+ * `I_{df/(df+t²)}(df/2, 1/2)`. `2·(1 − studentTCDF(|t|, df))` rounds a far
+ * tail to 0, and a steep regression's slope test IS that tail.
+ */
+export function studentTTwoSidedP(t: number, df: number): number {
+  if (!(df > 0)) return NaN;
+  if (Number.isNaN(t)) return NaN;
+  if (!Number.isFinite(t)) return 0;
+  if (t === 0) return 1;
+  return betaincScalar(df / 2, 0.5, df / (df + t * t));
+}
