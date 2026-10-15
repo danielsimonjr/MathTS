@@ -98,7 +98,7 @@
     },
     "core": {
       "name": "@danielsimonjr/mathts-core",
-      "version": "0.18.0",
+      "version": "0.18.1",
       "dependencies": {
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
@@ -140,7 +140,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.68.3",
+      "version": "0.68.4",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-expression": "^0.10.2",
