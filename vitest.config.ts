@@ -4,7 +4,7 @@ import { defineConfig, type Plugin } from 'vitest/config';
 
 /**
  * Root vitest imports package SOURCE (not dist), but `__PKG_VERSION__` is
- * normally injected at build time via each package's tsup `define`. Per-package
+ * normally injected at build time via each package's tsdown `define`. Per-package
  * vitest configs mirror that define; this plugin does the same for the root
  * suites (`tests/integration`, `tests/wasm`), which import package SOURCE that
  * carries VERSION-bearing modules, so they do not fail with ReferenceError.

@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-14",
+    "lastUpdated": "2026-10-15",
     "totalFiles": 1185,
     "totalModules": 83,
-    "totalExports": 6121
+    "totalExports": 6122
   },
   "entryPoints": [
     {
@@ -126,7 +126,7 @@
     {
       "file": "plot/src/index.ts",
       "type": "main",
-      "description": "Injected at build time by tsup's `define` (see tsup.config.ts) from this"
+      "description": "Injected at build time by tsdown's `define` (see tsdown.config.ts) from this"
     }
   ],
   "modules": {
@@ -9051,6 +9051,10 @@
           {
             "file": "./typed/dist-objects.js",
             "imports": ["normalDist", "tDist", "chiSquaredDist", "fDist", "gammaDist", "betaDist"]
+          },
+          {
+            "file": "./wasm/special/scalars.js",
+            "imports": ["betaincScalar"]
           }
         ],
         "workspaceDependencies": [],
@@ -9074,8 +9078,10 @@
           "laplaceQuantile",
           "logisticPDF",
           "logisticCDF",
-          "logisticQuantile"
+          "logisticQuantile",
+          "studentTTwoSidedP"
         ],
+        "functions": ["studentTTwoSidedP"],
         "constants": [
           "normalQuantile",
           "studentTCDF",
@@ -11100,7 +11106,7 @@
           },
           {
             "file": "./distribution-functions.js",
-            "imports": ["studentTCDF"]
+            "imports": ["studentTTwoSidedP"]
           }
         ],
         "workspaceDependencies": [],
@@ -15549,7 +15555,7 @@
         "internalDependencies": [
           {
             "file": "../distribution-functions.js",
-            "imports": ["studentTCDF"]
+            "imports": ["studentTTwoSidedP"]
           }
         ],
         "workspaceDependencies": [],
@@ -39244,7 +39250,7 @@
         "functions": ["histogram"]
       },
       "plot/src/index.ts": {
-        "description": "Injected at build time by tsup's `define` (see tsup.config.ts) from this",
+        "description": "Injected at build time by tsdown's `define` (see tsdown.config.ts) from this",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -41230,11 +41236,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1185,
     "totalModules": 83,
-    "totalLinesOfCode": 197377,
-    "totalExports": 6121,
+    "totalLinesOfCode": 197481,
+    "totalExports": 6122,
     "totalClasses": 58,
     "totalInterfaces": 523,
-    "totalFunctions": 1940,
+    "totalFunctions": 1941,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1615,

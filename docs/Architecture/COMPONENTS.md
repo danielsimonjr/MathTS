@@ -187,7 +187,7 @@ export class Tensor          // rank-N, broadcasting, reshape/transpose/reduce
 export class Index           // multi-axis indexing
 ```
 
-Depends on `core`, `matrix`. Bundled with `tsup` before runtime, so it uses bare relative imports.
+Depends on `core`, `matrix`. Bundled with `tsdown` before runtime, so it uses bare relative imports.
 
 ### @danielsimonjr/mathts-autograd (`autograd/`)
 
@@ -391,5 +391,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1955  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 7979  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1961  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 7985  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

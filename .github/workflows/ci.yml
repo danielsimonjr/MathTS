@@ -39,7 +39,7 @@ jobs:
           persist-credentials: false
 
       # Bun is the monorepo package manager and, with bunfig [run].bun = true, the
-      # runtime of every `bun run` script (vitest, asc, tsc, tsup, turbo included).
+      # runtime of every `bun run` script (vitest, asc, tsc, tsdown, turbo included).
       # This job needs no Node: every step runs through Bun. Only the Test matrix
       # installs Node, to run the suite and a dist smoke test on real Node (see `test`).
       - name: Setup Bun

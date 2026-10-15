@@ -1,4 +1,4 @@
-// Mirror the build-time `define` from tsup.config.ts for `bun test`, which does
+// Mirror the build-time `define` from tsdown.config.ts for `bun test`, which does
 // not read vitest.config.ts. src/contract.ts reads the injected __PKG_VERSION__
 // global for `export const VERSION`.
 import { readFileSync } from 'node:fs';

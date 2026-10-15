@@ -18,7 +18,7 @@
  * Reachability model. A file is "reachable" if a path of imports leads to it
  * from a seeded ROOT. Roots are each package's `src/index.ts` plus every build
  * entry the tool can discover: `exports` subpath targets, `bin` targets, extra
- * `tsup src/*.ts` entries and secondary `tsc -p <cfg>` includes parsed from the
+ * `tsdown src/*.ts` entries and secondary `tsc -p <cfg>` includes parsed from the
  * package scripts. Edges are followed through four import forms — `import … from`,
  * bare side-effect `import '…'`, inline `import('…')` type expressions, and
  * npm-scoped workspace imports. Files reachable from none of these are DORMANT,
@@ -259,22 +259,28 @@ let workspaceMap: Map<string, WorkspacePackage> = new Map();
  * Returns a Map keyed by npm package name.
  * Returns empty map if no workspaces field (backward compat with single packages).
  */
+/** Bundlers whose config file lists build entries (`<bundler>.config.ts`). */
+const BUNDLERS = ['tsdown', 'tsup'] as const;
+
 /**
- * Bundler entry points declared in a package's config-driven `tsup.config.ts`
+ * Bundler entry points declared in a package's config-driven
+ * `tsdown.config.ts` (or `tsup.config.ts`)
  * (`entry: [ 'src/index.ts', 'src/render-file.ts', … ]`), returned as
  * repo-relative source paths (e.g. "plot/src/render-file.ts").
  *
- * Needed because tsup can take its entries EITHER on the command line
- * (`tsup src/index.ts src/worker.ts`, parsed from the build-script string in
- * `exportsSubpathEntries`) OR from `tsup.config.ts` when the script is a bare
- * `tsup`. plot/workbook moved their multi-entry lists into `tsup.config.ts`,
+ * Needed because the bundler can take its entries EITHER on the command line
+ * (`tsdown src/index.ts src/worker.ts`, parsed from the build-script string in
+ * `exportsSubpathEntries`) OR from its config file when the script is a bare
+ * `tsdown`. plot/workbook moved their multi-entry lists into the config,
  * which the script-string parser can't see — a build-root REGRESSION that
  * silently dropped `plot/src/render-file.ts` and `workbook/src/run-worker.ts`
  * from the module graph (1088 → 1086). This restores them by reading the config.
  */
-function tsupConfigEntries(rootDir: string, pkgDir: string): string[] {
-  const cfgPath = join(rootDir, pkgDir, 'tsup.config.ts');
-  if (!existsSync(cfgPath)) return [];
+function bundlerConfigEntries(rootDir: string, pkgDir: string): string[] {
+  const cfgPath = BUNDLERS.map((b) => join(rootDir, pkgDir, `${b}.config.ts`)).find((f) =>
+    existsSync(f)
+  );
+  if (!cfgPath) return [];
   let code: string;
   try {
     code = readFileSync(cfgPath, 'utf-8');
@@ -331,14 +337,14 @@ export function exportsSubpathEntries(
     if (m) addIfExists(join(pkgDir, 'src', `${m[1]}.ts`));
   }
   // Bundler entry points declared in the `build`/`dev` scripts — e.g.
-  // `tsup src/index.ts src/worker.ts` or `... src/cli.ts`. Each additional
+  // `tsdown src/index.ts src/worker.ts` or `... src/cli.ts`. Each additional
   // `src/*.ts` argument is a BUILD ROOT emitting its own bundle (worker scripts
   // loaded at runtime via `new URL('./worker.js', import.meta.url)`, multi-entry
   // CLIs). Nothing imports them, so they were false-dormant.
   const allScripts = Object.values(pkg.scripts ?? {});
   for (const script of allScripts) {
     if (!script) continue;
-    // Direct tsup/build entry args: `... src/foo.ts src/bar.ts ...`
+    // Direct bundler/build entry args: `... src/foo.ts src/bar.ts ...`
     for (const m of script.matchAll(/(?:^|\s)(src\/[\w./-]+\.ts)\b/g)) {
       addIfExists(join(pkgDir, m[1]));
     }
@@ -349,17 +355,18 @@ export function exportsSubpathEntries(
       seedTsconfigEntries(rootDir, pkgDir, m[1], addIfExists);
     }
   }
-  // Config-driven tsup: a `build`/`dev` script that invokes `tsup` with NO
-  // explicit `src/*.ts` entry arg reads its entries from `tsup.config.ts`
+  // Config-driven bundler: a `build`/`dev` script that invokes `tsdown` (or `tsup`)
+  // with NO explicit `src/*.ts` entry arg reads its entries from `<bundler>.config.ts`
   // instead — the script-string parse above finds none, so also read the config.
   const buildDevScripts = [pkg.scripts?.build, pkg.scripts?.dev].filter((s): s is string =>
     Boolean(s)
   );
-  const hasConfigDrivenTsup = buildDevScripts.some(
-    (s) => /(?:^|\s|&|\|)tsup(?:\s|$|&|\|)/.test(s) && !/(?:^|\s)src\/[\w./-]+\.ts\b/.test(s)
+  const hasConfigDrivenBundler = buildDevScripts.some(
+    (s) =>
+      /(?:^|\s|&|\|)(?:tsdown|tsup)(?:\s|$|&|\|)/.test(s) && !/(?:^|\s)src\/[\w./-]+\.ts\b/.test(s)
   );
-  if (hasConfigDrivenTsup) {
-    for (const entry of tsupConfigEntries(rootDir, pkgDir)) addIfExists(entry);
+  if (hasConfigDrivenBundler) {
+    for (const entry of bundlerConfigEntries(rootDir, pkgDir)) addIfExists(entry);
   }
   return entries;
 }
@@ -385,7 +392,8 @@ function configReferencedEntries(rootDir: string): string[] {
     return [];
   }
   const isConfig = (n: string): boolean =>
-    /\.config(\.[\w-]+)?\.(m?[jt]s)$/.test(n) || /^(vite|vitest|rollup|webpack|tsup)\./.test(n);
+    /\.config(\.[\w-]+)?\.(m?[jt]s)$/.test(n) ||
+    /^(vite|vitest|rollup|webpack|tsdown|tsup)\./.test(n);
   for (const name of names) {
     if (!isConfig(name)) continue;
     let code: string;
@@ -4418,7 +4426,7 @@ function countLoc(rootDir: string, relPath: string): number {
 
 /**
  * Build the complete file inventory over the ENUMERATED census roots. Disposition:
- * for a `src` file — build-entry (a seeded root: index/subpath/bin/config/tsup/worker
+ * for a `src` file — build-entry (a seeded root: index/subpath/bin/config/tsdown/worker
  * entry) > reachable (in the module graph from a root) > test-only (reachable only
  * from a test) > orphan (reachable from nothing). Non-`src` areas map straight to
  * their kind: `tests → test`, `tools → tool`, `config → config`, `examples`/`docs`
@@ -4495,7 +4503,7 @@ const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
   ['reachable', 'A `src/` file in the module graph, reachable from a root.'],
   [
     'build-entry',
-    'A detected build/subpath/`bin`/worker/`tsup.config` root (index, internal, cli, render-file, run-worker, …).',
+    'A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …).',
   ],
   ['test-only', 'A `src/` file not reachable from src roots but imported by a test.'],
   [
@@ -4504,7 +4512,7 @@ const FILE_DISPOSITION_LEGEND: Array<[FileDisposition, string]> = [
   ],
   ['test', 'A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).'],
   ['tool', 'A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).'],
-  ['config', 'A build/test config source (`*.config.ts`: vitest/tsup, per-package or root).'],
+  ['config', 'A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).'],
   ['example', 'An `examples/` or `docs/` reference/illustration source.'],
 ];
 
@@ -4608,7 +4616,7 @@ function verifyFileCensus(rootDir: string, inventory: FileInventory): void {
     if (orphans.length > 0) {
       msg += `  ${orphans.length} ORPHAN file(s) — a src file reachable from no root and no test. Each is a\n`;
       msg += `  build/worker/subpath root the tool did not detect (wire it / seed it — see\n`;
-      msg += `  tools/create-dependency-graph tsup.config / exports / bin root handling), or dead\n`;
+      msg += `  tools/create-dependency-graph tsdown.config / exports / bin root handling), or dead\n`;
       msg += `  code to delete:\n`;
       msg += orphans.map((f) => `    ! ${f}`).join('\n') + '\n';
     }
@@ -4713,7 +4721,7 @@ async function main(): Promise<void> {
   let reachableSet: Set<string> | undefined;
   let dormantSet: Set<string> | undefined;
   let activeParsedFiles = parsedFiles;
-  // Seeded roots (index/subpath/bin/config/tsup/worker entries) — captured for the
+  // Seeded roots (index/subpath/bin/config/tsdown/worker entries) — captured for the
   // file census's `build-entry` disposition.
   let censusRoots = new Set<string>();
 
@@ -4726,7 +4734,7 @@ async function main(): Promise<void> {
       const candidates = [`${ws.srcDir}/index.ts`.replace(/\\/g, '/'), ...ws.extraEntries];
       for (const entryPath of candidates) {
         const found = parsedFiles.find((f) => f.path === entryPath);
-        // Dedupe: a config-driven `tsup.config.ts` entry list re-lists index.ts
+        // Dedupe: a config-driven `tsdown.config.ts` entry list re-lists index.ts
         // (already the package root) / cli.ts (already a `bin` root), so the same
         // path can arrive twice — count it once.
         if (found && !entryPoints.includes(found.path)) {
@@ -4736,7 +4744,7 @@ async function main(): Promise<void> {
     }
 
     // Config-referenced source files are roots too. Build/test config at the repo
-    // root (vitest/vite/tsup/rollup/webpack) can pull a source file into a bundle
+    // root (vitest/vite/tsdown/rollup/webpack) can pull a source file into a bundle
     // via a path reference the module graph never shows — most commonly a bundler
     // ALIAS target (e.g. `vitest.config.browser.ts` aliasing `workerpool` to a
     // browser shim through `new URL('./…/src/shim.ts', import.meta.url)`). Seed

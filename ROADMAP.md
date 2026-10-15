@@ -51,10 +51,8 @@ Open subset of `BUG_AUDIT_2026-05-25.md`:
   boundaries).
 - **B-5** — mathjs upstream drift tracking (the `.ts→.ts` sync model is dead; new upstream
   work needs manual JS→TS porting via `tools/mathjs-port/`).
-- **B-7** — the accepted dev-only `esbuild`/`tsup` advisory (GHSA-gv7w-rqvm-qjhr);
-  re-evaluate when `tsup ≥ 8.6` ships `esbuild ^0.28`.
 
-_(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck` were verified resolved 2026-07-09.)_
+_(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck` were verified resolved 2026-07-09. B-7, the dev-only `esbuild`/`tsup` advisory, closed when the build moved to `tsdown`: `tsup` and its nested `esbuild` copy left the install tree. `esbuild` is back only as a root dev dependency at `^0.28.1`, for the benchmark runner.)_
 
 ## Medium-term
 

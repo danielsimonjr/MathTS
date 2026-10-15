@@ -28,6 +28,7 @@
  * @packageDocumentation
  */
 
+/** Options of the stub `Pool` constructor. They mirror the Node `workerpool` options and are ignored. */
 export interface PoolOptions {
   minWorkers?: number | 'max';
   maxWorkers?: number;
@@ -35,12 +36,14 @@ export interface PoolOptions {
   workerTerminateTimeout?: number;
 }
 
+/** Per-call options of `Pool.exec`: an event listener, transferables and a timeout. The stub ignores them. */
 export interface ExecOptions {
   on?: (payload: unknown) => void;
   transfer?: unknown[];
   timeout?: number;
 }
 
+/** Worker and task counters that `Pool.stats()` reports. The stub reports zero for each. */
 export interface PoolStats {
   totalWorkers: number;
   busyWorkers: number;

@@ -7,11 +7,17 @@
  * It then calls one representative function and checks the result. Any import error, runtime
  * error or wrong result fails the run (exit 1).
  *
+ * It also scans the built `.` entry of every package that is not a Node runtime. A static import
+ * of a Node builtin anywhere in that entry's import graph fails the run, because a browser
+ * bundler stubs the builtin and the stub throws on first use (see dist-node-imports.mjs).
+ *
  * Run it with `node` (never `bun`): it refuses to run when `typeof Bun !== 'undefined'`.
  * CI runs it in the `Test (20.x)` and `Test (22.x)` matrix legs after `bun run build`.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { NODE_RUNTIME_PACKAGES } from '../query-dependency-graph/query-dependency-graph.mjs';
+import { dotEntryFile, staticNodeImports } from './dist-node-imports.mjs';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
 if (typeof globalThis.Bun !== 'undefined') {
@@ -97,6 +103,28 @@ for (const dir of dirs) {
     console.error(`FAIL ${pkg.name}: ${err && err.stack ? err.stack : err}`);
     failed++;
   }
+}
+// A browser loads the same `.` entry. The source-level gate (`check:browser-safety`) cannot see
+// what the bundler adds, such as the `createRequire` import that tsdown writes for a `require`
+// call in an ES module, so this reads the built files.
+console.log('smoke-dist-node: static Node builtin imports in the `.` entry of each package');
+for (const dir of dirs) {
+  const pkg = JSON.parse(readFileSync(join(repoRoot, dir, 'package.json'), 'utf8'));
+  if (pkg.private || NODE_RUNTIME_PACKAGES.has(dir)) continue;
+  try {
+    const leaks = staticNodeImports(dotEntryFile(join(repoRoot, dir)));
+    if (leaks.length === 0) {
+      console.log(`ok   ${pkg.name}: no static Node builtin import`);
+      passed++;
+      continue;
+    }
+    for (const { file, specifier } of leaks) {
+      console.error(`FAIL ${pkg.name}: ${file} imports ${specifier} statically`);
+    }
+  } catch (err) {
+    console.error(`FAIL ${pkg.name}: ${err && err.stack ? err.stack : err}`);
+  }
+  failed++;
 }
 console.log(`smoke-dist-node: ${passed} passed, ${failed} failed (node ${process.version})`);
 // Worker pools and timers in some packages keep the event loop alive; exit explicitly.

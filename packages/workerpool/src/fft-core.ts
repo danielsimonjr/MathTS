@@ -2,9 +2,8 @@
  * Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.
  *
  * Exported only for internal use by `worker.ts` and `index.ts`. Not part of
- * the package's public API. tsup bundles each entry point independently, so
- * each consumer gets its own bundled copy — the goal here is a single source
- * of truth, not a shared runtime module.
+ * the package's public API. The bundler emits it as a chunk that both entry
+ * points import — the goal here is a single source of truth in `src/`.
  *
  * NOTE: `functions/src/typed/signal.ts` has its own copy (`fftCoreFloat64`).
  * Pulling that across the package boundary would violate the layering rules,

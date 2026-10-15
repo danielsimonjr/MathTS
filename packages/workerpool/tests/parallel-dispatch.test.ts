@@ -12,11 +12,13 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { MathWorkerPool } from '../src/index.js';
 
 const pkgRoot = fileURLToPath(new URL('..', import.meta.url));
+const tsdownCli = createRequire(import.meta.url).resolve('tsdown/run');
 const workerScript = fileURLToPath(new URL('../dist/worker.js', import.meta.url));
 
 describe('parallel kernel dispatch (real workers)', () => {
@@ -25,7 +27,13 @@ describe('parallel kernel dispatch (real workers)', () => {
   beforeAll(async () => {
     // Worker threads load the built dist/worker.js; build it if it is missing.
     if (!existsSync(workerScript)) {
-      execSync('npx tsup src/worker.ts --format esm', { cwd: pkgRoot, stdio: 'ignore' });
+      // The package's own tsdown, not `npx`: npm refuses to run in this workspace (EOVERRIDE).
+      // `--no-clean` keeps the rest of dist/ (the tsc declarations, index.js).
+      execFileSync(
+        process.execPath,
+        [tsdownCli, 'src/worker.ts', '--format', 'esm', '--no-clean'],
+        { cwd: pkgRoot, stdio: 'ignore' }
+      );
     }
     pool = new MathWorkerPool({ maxWorkers: 3, parallelThreshold: 10, chunkSize: 7 });
     await pool.initialize();

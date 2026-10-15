@@ -12,7 +12,7 @@
  * `@danielsimonjr/mathts-workerpool`'s own build (via `include` in
  * tsconfig.json) *and* copied into its published `dist/` by
  * `scripts/postbuild.mjs`, which also prepends a triple-slash reference to
- * the built `dist/index.d.ts` pointing at the copy (tsup's dts bundler drops
+ * the built `dist/index.d.ts` pointing at the copy (a bundling declaration emitter such as rollup-plugin-dts drops
  * triple-slash directives written directly in `src/`, so this has to happen
  * post-build). Downstream consumers — internal packages and published npm
  * consumers alike — get real ambient types for `workerpool` without needing

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Mirror the build-time `define` from tsup.config.ts so tests that import the
+// Mirror the build-time `define` from tsdown.config.ts so tests that import the
 // package SOURCE (not dist) still resolve the injected __PKG_VERSION__ global
 // used by src/index.ts's `export const VERSION`.
 const { version } = JSON.parse(

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14",
+  "generated": "2026-10-15",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1651,6 +1651,15 @@
       "functions/src/stats/mvn.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/wasm/special/scalars.ts": [
+      "functions/src/distribution-functions.ts",
+      "functions/src/signal/iir-design.ts",
+      "functions/src/special/niche.ts",
+      "functions/src/special/wave-functions.ts",
+      "functions/src/stats/inference-extra2.ts",
+      "functions/src/typed/special.ts",
+      "functions/src/wasm/special/wasm-bridge.ts"
+    ],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
       "functions/src/scalar-eval.ts",
@@ -2195,14 +2204,6 @@
     "functions/src/signal/conv.ts": [
       "functions/src/signal/fir-smoothing.ts",
       "functions/src/signal/wavelets.ts"
-    ],
-    "functions/src/wasm/special/scalars.ts": [
-      "functions/src/signal/iir-design.ts",
-      "functions/src/special/niche.ts",
-      "functions/src/special/wave-functions.ts",
-      "functions/src/stats/inference-extra2.ts",
-      "functions/src/typed/special.ts",
-      "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/typed/signal.ts": [
       "functions/src/signal/spectral-peaks.ts",

@@ -1,6 +1,6 @@
 // Post-build step for @danielsimonjr/mathts-workerpool.
 //
-// tsup's dts step (rollup-plugin-dts) does NOT preserve triple-slash
+// A bundling declaration step (rollup-plugin-dts) does NOT preserve triple-slash
 // `/// <reference path="..." />` directives from src/index.ts when bundling
 // dist/index.d.ts — it silently drops them, leaving bare `from 'workerpool'`
 // imports with nothing backing them for a published consumer (see
@@ -11,11 +11,10 @@
 // pointing at it. Consumers with `skipLibCheck: false` get real types for
 // `workerpool` without needing a tsconfig `paths` override of their own.
 //
-// IMPORTANT: this must run strictly AFTER tsup's dts step, not via tsup's
-// `--onSuccess` hook — that fires right after the JS (ESM) build, before the
-// separate async DTS build even starts, and the DTS step's own output-folder
-// handling clobbers anything written in between. Invoke this via `&&` after
-// the whole `tsup ... --dts` command in package.json's `build` script.
+// IMPORTANT: this must run strictly AFTER `tsc -p tsconfig.dts.json`, which
+// writes dist/index.d.ts, not via tsdown's `--on-success` hook — that fires
+// right after the JS (ESM) build, before tsc starts. Invoke this via `&&`
+// after the `tsc` step in package.json's `build` script.
 import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -30,7 +29,7 @@ if (!existsSync(srcShim)) {
 }
 if (!existsSync(distIndex)) {
   throw new Error(
-    `postbuild: expected ${distIndex} to already exist (run after tsup's dts step, not via --onSuccess)`
+    `postbuild: expected ${distIndex} to already exist (run after the tsc declaration step, not via --on-success)`
   );
 }
 copyFileSync(srcShim, distShim);

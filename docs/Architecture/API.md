@@ -97,7 +97,7 @@ threshold): `sum`, `prod`, `dot(a,b)`, `elementwise(a,b,op)`
 
 Central numeric-type + typed-dispatch + factory foundation every other package
 builds on. Depends only on `typed-function`. The `VERSION` constant is injected from
-`package.json` at build time (the `tsup` `define` of `__PKG_VERSION__`).
+`package.json` at build time (the `tsdown` `define` of `__PKG_VERSION__`).
 
 ### Numeric Types
 
@@ -557,7 +557,7 @@ count before a GPU dispatch's upload/readback cost pays off).
 
 `functions/src/index.ts` re-exports three layers plus ~35 explicit
 named-export blocks — the `functions/src/` tree has 475 files (per `dependency-graph.json`; regenerate with `npm run docs:deps:full`), all reachable
-from a package `src/index.ts` (one active graph). The build is `tsup` for the JS bundle
+from a package `src/index.ts` (one active graph). The build is `tsdown` for the JS bundle
 plus a separate `tsc -p tsconfig.dts.json` declaration tree (`dist/index.d.ts` is
 a thin file that re-exports from its sibling `.d.ts` files).
 
@@ -1091,5 +1091,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 7979  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 1955  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 7985  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1961  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

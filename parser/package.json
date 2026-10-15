@@ -1,7 +1,7 @@
 {
   "name": "@danielsimonjr/mathts-parser",
   "version": "0.1.25",
-  "description": "Standalone expression parser for MathTS \u2014 the parse function and Parser class, re-exported as a focused package",
+  "description": "Standalone expression parser for MathTS — the parse function and Parser class, re-exported as a focused package",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
   "type": "module",
@@ -19,8 +19,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --clean && tsc -p tsconfig.dts.json",
-    "dev": "tsup src/index.ts --format esm --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json",
+    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json\"",
     "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "bun test --coverage",
@@ -28,7 +28,18 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup src/index.ts --format esm --clean --minify --treeshake && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json"
+  },
+  "tsdown": {
+    "fixedExtension": false,
+    "dts": false,
+    "outputOptions": {
+      "comments": {
+        "legal": true,
+        "annotation": true,
+        "jsdoc": false
+      }
+    }
   },
   "dependencies": {
     "@danielsimonjr/mathts-core": "^0.18.0",
@@ -37,7 +48,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
-    "tsup": "^8.0.0",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },

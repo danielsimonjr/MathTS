@@ -44,7 +44,7 @@ export interface ParallelConfig {
  * Resolve the path to the built matrix worker script (`dist/matrix.worker.js`).
  *
  * The worker thread runs a real JavaScript file — `worker_threads.Worker`
- * cannot execute the uncompiled `src/matrix.worker.ts`. tsup emits the worker
+ * cannot execute the uncompiled `src/matrix.worker.ts`. tsdown emits the worker
  * to `dist/matrix.worker.js` (it is a build entry point), so this module must
  * point the pool at the built artifact regardless of whether `ParallelMatrix`
  * itself is loaded from `src/` (tests) or `dist/`.

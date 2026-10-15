@@ -536,6 +536,7 @@ export async function chiSquareTest(
   expected?: f64[],
   opts?: BootstrapOptions
 ): Promise<ChiSquareResult | ChiSquareBootstrapResult>;
+/** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export async function chiSquareTest(
   observed: f64[] | f64[][],
   expected?: f64[],
@@ -805,6 +806,7 @@ export async function kolmogorovSmirnovTest(
   cdfFn?: (x: f64) => f64,
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult>;
+/** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export async function kolmogorovSmirnovTest(
   sample: f64[],
   cdfFn?: (x: f64) => f64,
@@ -1014,6 +1016,7 @@ export async function mannWhitneyTest(
   sample2: f64[],
   opts?: BootstrapOptions
 ): Promise<MannWhitneyResult | MWBootstrapResult>;
+/** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export async function mannWhitneyTest(
   sample1: f64[],
   sample2: f64[],
@@ -1210,6 +1213,7 @@ export async function shapiroWilkTest(
   sample: f64[],
   opts?: BootstrapOptions
 ): Promise<ShapiroWilkResult | SWBootstrapResult>;
+/** Implementation signature of the overloads above; the documented contract is on the first overload. */
 export async function shapiroWilkTest(
   sample: f64[],
   opts?: BootstrapOptions

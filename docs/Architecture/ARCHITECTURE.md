@@ -3,7 +3,7 @@
 ## System Overview
 
 MathTS is an npm workspaces monorepo with **24 packages**, all ESM-only (ES2022).
-Turborepo orchestrates builds across the workspace. tsup bundles each package
+Turborepo orchestrates builds across the workspace. tsdown bundles each package
 (`functions` emits its `.d.ts` tree via `tsc`). AssemblyScript (`assembly/`,
 the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
@@ -293,11 +293,11 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 ## Build Pipeline
 
-Most packages run `tsup src/index.ts --format esm --clean`, then `tsc -p tsconfig.dts.json` to emit declarations. Exceptions:
+Most packages run `tsdown src/index.ts --format esm`, then `tsc -p tsconfig.dts.json` to emit declarations. Exceptions:
 
 | Package           | Build Variation                                       |
 | ----------------- | ----------------------------------------------------- |
-| core, plot        | No entry argument for `tsup`                          |
+| core, plot        | No entry argument for `tsdown`                        |
 | functions, matrix | Also runs `scripts/copy-wasm.mjs`                     |
 | parallel          | Two entries (`index.ts`, `matrix.worker.ts`)          |
 | workerpool        | Two entries, then `scripts/postbuild.mjs`             |
@@ -344,7 +344,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1955  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1961  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

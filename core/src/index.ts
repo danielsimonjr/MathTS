@@ -241,7 +241,7 @@ export type {
 // Version
 // =============================================================================
 
-// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
 // package's package.json version, so VERSION can never drift from the published
 // version. `declare` keeps tsc/eslint happy; the annotation keeps the emitted
 // .d.ts a plain `string`.
