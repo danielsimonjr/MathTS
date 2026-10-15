@@ -141,7 +141,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.68.4",
+      "version": "0.68.5",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.1",
         "@danielsimonjr/mathts-expression": "^0.10.2",
