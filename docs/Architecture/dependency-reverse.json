@@ -1622,7 +1622,6 @@
       "functions/src/hypothesis-extra.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/numeric-extra.ts",
-      "functions/src/regression-extra.ts",
       "functions/src/scalar-eval.ts",
       "functions/src/stats/fit-distribution.ts",
       "functions/src/timeseries-extra.ts",
@@ -1639,6 +1638,10 @@
       "functions/src/stats/power-analysis.ts",
       "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
+    ],
+    "functions/src/regression-extra.ts": [
+      "functions/src/descriptive-stats.ts",
+      "functions/src/index.ts"
     ],
     "functions/src/typed/distributions.ts": [
       "functions/src/descriptive-stats.ts",
@@ -1731,7 +1734,6 @@
       "functions/src/stats/timeseries.ts"
     ],
     "functions/src/stats/timeseries.ts": ["functions/src/index.ts"],
-    "functions/src/regression-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],

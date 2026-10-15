@@ -2452,6 +2452,7 @@
       "FisherExactResult",
       "fitDistribution",
       "FitDistributionResult",
+      "fitLine",
       "fix",
       "flatten",
       "floor",

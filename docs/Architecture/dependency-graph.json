@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-15",
     "totalFiles": 1185,
     "totalModules": 83,
-    "totalExports": 6122
+    "totalExports": 6123
   },
   "entryPoints": [
     {
@@ -8980,6 +8980,10 @@
             "imports": ["studentTCDF"]
           },
           {
+            "file": "./regression-extra.js",
+            "imports": ["fitLine"]
+          },
+          {
             "file": "./typed/distributions.js",
             "imports": ["normalCDF"]
           }
@@ -11101,18 +11105,20 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./typed/arithmetic.js",
-            "imports": ["mean"]
-          },
-          {
             "file": "./distribution-functions.js",
             "imports": ["studentTTwoSidedP"]
           }
         ],
-        "workspaceDependencies": [],
-        "exports": ["linearRegression"],
-        "interfaces": ["LinregressResult"],
-        "functions": ["linearRegression"]
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseDot", "pairwiseSum", "sumSquaredDeviations"]
+          }
+        ],
+        "exports": ["fitLine", "linearRegression"],
+        "interfaces": ["LineFit", "LinregressResult"],
+        "functions": ["fitLine", "linearRegression"]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -35885,6 +35891,7 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": ["writeFileAtomic"],
+        "interfaces": ["AtomicWriteOptions"],
         "functions": ["writeFileAtomic"]
       },
       "workbook/src/graph.ts": {
@@ -41236,11 +41243,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1185,
     "totalModules": 83,
-    "totalLinesOfCode": 197481,
-    "totalExports": 6122,
+    "totalLinesOfCode": 197544,
+    "totalExports": 6123,
     "totalClasses": 58,
-    "totalInterfaces": 523,
-    "totalFunctions": 1941,
+    "totalInterfaces": 525,
+    "totalFunctions": 1942,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1615,

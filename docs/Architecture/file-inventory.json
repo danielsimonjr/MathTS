@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-15",
-  "totalFiles": 1899,
+  "totalFiles": 1900,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1160,
     "test-only": 0,
     "orphan": 0,
-    "test": 653,
+    "test": 654,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1185,
-    "tests": 653,
+    "tests": 654,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -43,7 +43,7 @@
     "@danielsimonjr/mathts-tensor": 52,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 64
+    "@danielsimonjr/mathts-workbook": 65
   },
   "files": [
     {
@@ -12938,7 +12938,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 29
+      "loc": 62
     },
     {
       "file": "workbook/src/graph.ts",
@@ -13163,6 +13163,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 60
+    },
+    {
+      "file": "workbook/tests/fs-atomic.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
     },
     {
       "file": "workbook/tests/gap-ipynb-export.test.ts",
