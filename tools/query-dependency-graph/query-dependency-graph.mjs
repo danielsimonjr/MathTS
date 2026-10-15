@@ -29,7 +29,7 @@ import { dirname, join, resolve } from 'node:path';
 // Node runtimes by design — their `.` entry may use node: builtins (e.g. the
 // workbook CLI/serve runtime uses node:fs). Every OTHER package's `.` entry must
 // stay browser-safe; new packages are enforced by default.
-const NODE_RUNTIME_PACKAGES = new Set(['workbook']);
+export const NODE_RUNTIME_PACKAGES = new Set(['workbook']);
 
 /** Browser-safe packages = every `.` (main) entry package minus the Node runtimes. */
 export function browserSafePackages(graph) {
