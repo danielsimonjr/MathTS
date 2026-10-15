@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1899
+**Total files**: 1900
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1160 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      653 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      654 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1899** |                                                                                                                |
+| **Total**     | **1900** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1185 |
-| `tests`    |   653 |
+| `tests`    |   654 |
 | `tools`    |    27 |
 
 ## Per-package counts
@@ -63,7 +63,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
 | `@danielsimonjr/mathts-wasm`           |    28 |
-| `@danielsimonjr/mathts-workbook`       |    64 |
+| `@danielsimonjr/mathts-workbook`       |    65 |
 | `@danielsimonjr/mathts-workerpool`     |    11 |
 
 ## All files
@@ -1944,6 +1944,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `workbook/tests/export-tex.test.ts`                                               | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/export.test.ts`                                                   | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/formatter.test.ts`                                                | @danielsimonjr/mathts-workbook       | tests    | test        |
+| `workbook/tests/fs-atomic.test.ts`                                                | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/gap-ipynb-export.test.ts`                                         | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/gap-worker-timeout.test.ts`                                       | @danielsimonjr/mathts-workbook       | tests    | test        |
 | `workbook/tests/graph-ancestors.test.ts`                                          | @danielsimonjr/mathts-workbook       | tests    | test        |

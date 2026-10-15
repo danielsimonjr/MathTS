@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-15'
   totalFiles: 1185
   totalModules: 83
-  totalExports: 6122
+  totalExports: 6123
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8419,6 +8419,9 @@ modules:
         - file: ./distribution-functions.js
           imports:
             - studentTCDF
+        - file: ./regression-extra.js
+          imports:
+            - fitLine
         - file: ./typed/distributions.js
           imports:
             - normalCDF
@@ -10489,18 +10492,24 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./typed/arithmetic.js
-          imports:
-            - mean
         - file: ./distribution-functions.js
           imports:
             - studentTTwoSidedP
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
+            - pairwiseSum
+            - sumSquaredDeviations
       exports:
+        - fitLine
         - linearRegression
       interfaces:
+        - LineFit
         - LinregressResult
       functions:
+        - fitLine
         - linearRegression
     functions/src/scalar-eval.ts:
       description: Evaluate a scalar node with MathTS numeric functions.
@@ -33801,6 +33810,8 @@ modules:
       workspaceDependencies: []
       exports:
         - writeFileAtomic
+      interfaces:
+        - AtomicWriteOptions
       functions:
         - writeFileAtomic
     workbook/src/graph.ts:
@@ -38883,11 +38894,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1185
   totalModules: 83
-  totalLinesOfCode: 197481
-  totalExports: 6122
+  totalLinesOfCode: 197544
+  totalExports: 6123
   totalClasses: 58
-  totalInterfaces: 523
-  totalFunctions: 1941
+  totalInterfaces: 525
+  totalFunctions: 1942
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1615

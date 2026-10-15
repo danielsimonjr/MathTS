@@ -4171,6 +4171,7 @@ graph LR
 | `./typed/arithmetic.js`       | `mean, std, sum` | Import |
 | `./factories/index.js`        | `quantileSeq`    | Import |
 | `./distribution-functions.js` | `studentTCDF`    | Import |
+| `./regression-extra.js`       | `fitLine`        | Import |
 | `./typed/distributions.js`    | `normalCDF`      | Import |
 
 **Exports:**
@@ -4485,17 +4486,22 @@ graph LR
 
 ### `functions/src/regression-extra.ts` - Ordinary least-squares regression (Wave D / regression primitives).
 
+**Workspace Dependencies:**
+
+| Package                      | Import                                           |
+| ---------------------------- | ------------------------------------------------ |
+| `@danielsimonjr/mathts-core` | `pairwiseDot, pairwiseSum, sumSquaredDeviations` |
+
 **Internal Dependencies:**
 
 | File                          | Imports             | Type   |
 | ----------------------------- | ------------------- | ------ |
-| `./typed/arithmetic.js`       | `mean`              | Import |
 | `./distribution-functions.js` | `studentTTwoSidedP` | Import |
 
 **Exports:**
 
-- Interfaces: `LinregressResult`
-- Functions: `linearRegression`
+- Interfaces: `LineFit`, `LinregressResult`
+- Functions: `fitLine`, `linearRegression`
 
 ---
 
@@ -16509,6 +16515,7 @@ graph LR
 
 **Exports:**
 
+- Interfaces: `AtomicWriteOptions`
 - Functions: `writeFileAtomic`
 
 ---
@@ -18546,12 +18553,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1185   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197481 |
-| Total Exports           | 6122   |
+| Total Lines of Code     | 197544 |
+| Total Exports           | 6123   |
 | Total Re-exports        | 2578   |
 | Total Classes           | 58     |
-| Total Interfaces        | 523    |
-| Total Functions         | 1941   |
+| Total Interfaces        | 525    |
+| Total Functions         | 1942   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 600    |
