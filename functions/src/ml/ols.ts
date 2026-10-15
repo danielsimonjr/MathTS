@@ -4,9 +4,9 @@
  * `linearRegression` (`../regression-extra.ts`) only handles a single predictor
  * (`y ≈ slope·x + intercept`, matching `scipy.stats.linregress`). `ols` generalizes
  * to an arbitrary number of predictors via the normal equations, with the same
- * `studentTCDF`-based significance testing.
+ * `studentTTwoSidedP`-based significance testing (the tail computed directly).
  */
-import { studentTCDF } from '../distribution-functions.js';
+import { studentTTwoSidedP } from '../distribution-functions.js';
 
 /** Options for `ols`. */
 export interface OlsOptions {
@@ -67,8 +67,25 @@ function matVec(a: number[][], v: number[]): number[] {
   return a.map((row) => row.reduce((sum, val, j) => sum + val * v[j], 0));
 }
 
-/** Invert a square matrix via Gauss-Jordan elimination with partial pivoting. */
+/**
+ * Invert a symmetric positive matrix via Gauss-Jordan elimination with partial
+ * pivoting, after equilibrating it by its diagonal (`A' = D⁻¹ A D⁻¹`,
+ * `D = diag(√Aᵢᵢ)`), so the singularity test is scale-free: an SI-scaled design
+ * (columns of order 1e-20) is as far from singular as a unit one, and a pivot
+ * below 1e-12 on the equilibrated matrix is a genuinely collinear design.
+ * A zero diagonal entry is an all-zero column and is singular outright.
+ */
 function invert(a: number[][]): number[][] {
+  const scale = a.map((row, i) => Math.sqrt(Math.abs(row[i])));
+  if (scale.some((s) => !(s > 0) || !Number.isFinite(s))) {
+    throw new Error('ols: X^T X is singular (predictors are collinear)');
+  }
+  const equilibrated = a.map((row, i) => row.map((v, j) => v / (scale[i] * scale[j])));
+  const inv = invertUnscaled(equilibrated);
+  return inv.map((row, i) => row.map((v, j) => v / (scale[i] * scale[j])));
+}
+
+function invertUnscaled(a: number[][]): number[][] {
   const n = a.length;
   // Augment [A | I]
   const M = a.map((row, i) => [...row, ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
@@ -82,7 +99,7 @@ function invert(a: number[][]): number[][] {
         pivotRow = row;
       }
     }
-    if (maxVal < 1e-15) throw new Error('ols: X^T X is singular (predictors are collinear)');
+    if (maxVal < 1e-12) throw new Error('ols: X^T X is singular (predictors are collinear)');
     if (pivotRow !== col) [M[col], M[pivotRow]] = [M[pivotRow], M[col]];
 
     const pivot = M[col][col];
@@ -142,7 +159,7 @@ export function ols(X: number[][], y: number[], opts?: OlsOptions): OlsResult {
 
   const stderr = XtXinv.map((row, j) => Math.sqrt(sigma2 * row[j]));
   const tValues = coefficients.map((b, j) => b / stderr[j]);
-  const pValues = tValues.map((t) => 2 * (1 - studentTCDF(Math.abs(t), dfResid)));
+  const pValues = tValues.map((t) => studentTTwoSidedP(t, dfResid));
 
   const r2 = tss === 0 ? 1 : 1 - rss / tss;
   const adjR2 = 1 - ((1 - r2) * (n - 1)) / dfResid;

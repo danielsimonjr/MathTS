@@ -19,7 +19,7 @@ interface SimplifyOptions {
 
 interface SymbolicEqualDependencies {
   parse: (expr: string) => MathNode;
-  simplify: (node: MathNode, rules: unknown[], options: SimplifyOptions) => MathNode;
+  simplify: (node: MathNode, scope: Map<string, unknown>, options: SimplifyOptions) => MathNode;
   typed: TypedFunction;
   OperatorNode: OperatorNodeConstructor;
 }
@@ -71,7 +71,9 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
      */
     function _symbolicEqual(e1: MathNode, e2: MathNode, options: SimplifyOptions = {}): boolean {
       const diff = new OperatorNode('-', 'subtract', [e1, e2]);
-      const simplified = simplify(diff, [], options);
+      // An empty scope with the DEFAULT rules (`simplify`'s `Node, Map, Object` form). An empty
+      // rule ARRAY, which this once passed, applies no rule at all, so every pair compared false.
+      const simplified = simplify(diff, new Map(), options);
       return isConstantNode(simplified) && !(simplified as unknown as ConstantNodeType).value;
     }
 
