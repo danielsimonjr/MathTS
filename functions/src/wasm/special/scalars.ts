@@ -559,9 +559,36 @@ export function gammaincScalar(a: f64, x: f64): f64 {
   }
 }
 
-/** Upper regularized incomplete gamma Q(a, x) = 1 - P(a, x). */
+/**
+ * Upper regularized incomplete gamma Q(a, x).
+ *
+ * Computed DIRECTLY in the upper tail (x >= a + 1) by the modified Lentz
+ * continued fraction, and as 1 − P below it where P is the series. `1 − P`
+ * everywhere rounded a far tail to 0 (Q(5, 80) is 2.5e-28, and 1 − P gave 0);
+ * a p-value of a bad χ² fit is that tail.
+ */
 export function gammaincpScalar(a: f64, x: f64): f64 {
-  return 1 - gammaincScalar(a, x);
+  if (x < 0) return NaN;
+  if (x === 0) return 1;
+  if (x < a + 1) return 1 - gammaincScalar(a, x);
+  const TINY = 1e-30;
+  const b0 = x + 1 - a;
+  let c = 1.0 / TINY;
+  let d = 1.0 / b0;
+  let f = d;
+  for (let n = 1; n < 300; n++) {
+    const an = n * (a - n);
+    const bn = x + 2 * n + 1 - a;
+    d = bn + an * d;
+    if (Math.abs(d) < TINY) d = TINY;
+    c = bn + an / c;
+    if (Math.abs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    const delta = d * c;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-15) break;
+  }
+  return f * Math.exp(-x + a * Math.log(x) - _lgamma(a));
 }
 
 /** Regularized incomplete beta function I_x(a, b). */

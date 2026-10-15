@@ -21,6 +21,12 @@ type i32 = number;
 export interface QuadOptions {
   /** Relative tolerance on each panel's `|K - G|` vs `|K|` (default 1e-10). */
   tol?: f64;
+  /**
+   * Absolute floor on a panel's `|K - G|` below which it is accepted whatever
+   * `tol · |K|` is (default 1e-14). An integrand whose integral is itself below
+   * the floor (an SI-scaled quantity) needs a smaller floor, or 0.
+   */
+  atol?: f64;
   /** Maximum bisection recursion depth per panel (default 50). */
   maxDepth?: i32;
 }
@@ -119,13 +125,14 @@ const ABS_FLOOR = 1e-14;
  */
 export function quad(f: (x: f64) => f64, a: f64, b: f64, opts?: QuadOptions): QuadResult {
   const tol = opts?.tol ?? 1e-10;
+  const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;
 
   function panel(a: f64, b: f64, depth: i32): QuadResult {
     const { k, g } = gaussKronrod15(f, a, b);
     const panelError = Math.abs(k - g);
 
-    if (depth >= maxDepth || panelError <= Math.max(tol * Math.abs(k), ABS_FLOOR)) {
+    if (depth >= maxDepth || panelError <= Math.max(tol * Math.abs(k), atol)) {
       return { value: k, error: panelError };
     }
 

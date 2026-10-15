@@ -76,8 +76,14 @@ type i32 = number;
  * Options for root-finding algorithms.
  */
 export interface FindRootOptions {
-  /** Absolute tolerance for convergence (default 1e-12) */
+  /** Absolute tolerance on the residual |f(x)| (default 1e-12). */
   tol?: f64;
+  /**
+   * Absolute tolerance on the bracket width |b − a| (default: `tol`). Pass 0
+   * to stop on the residual alone, which honours a tolerance stated in the
+   * units of f when x is in other units.
+   */
+  xtol?: f64;
   /** Maximum iterations (default 100) */
   maxIter?: i32;
 }
@@ -99,11 +105,15 @@ export interface FindRootOptions {
  */
 export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOptions): f64 {
   const tol = opts?.tol ?? 1e-12;
+  const xtol = opts?.xtol ?? tol;
   const maxIter = opts?.maxIter ?? 100;
 
   let fa = f(a);
   let fb = f(b);
 
+  if (Number.isNaN(fa) || Number.isNaN(fb)) {
+    throw new Error('findRoot: f(a) or f(b) is not a number (NaN)');
+  }
   if (fa * fb > 0) {
     throw new Error('findRoot: f(a) and f(b) must have opposite signs');
   }
@@ -120,7 +130,7 @@ export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOpti
   let s: f64;
 
   for (let iter = 0; iter < maxIter; iter++) {
-    if (Math.abs(fb) < tol || Math.abs(b - a) < tol) {
+    if (Math.abs(fb) < tol || Math.abs(b - a) < xtol) {
       return b;
     }
 
