@@ -2,7 +2,7 @@
  * Shared radix-2 FFT core for @danielsimonjr/mathts-workerpool.
  *
  * Exported only for internal use by `worker.ts` and `index.ts`. Not part of
- * the package's public API. the bundler emits it as a chunk that both entry
+ * the package's public API. The bundler emits it as a chunk that both entry
  * points import — the goal here is a single source of truth in `src/`.
  *
  * NOTE: `functions/src/typed/signal.ts` has its own copy (`fftCoreFloat64`).
