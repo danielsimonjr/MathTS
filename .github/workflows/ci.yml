@@ -53,6 +53,14 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # `typecheck` reads `dist/` of the package it checks and of the packages its tests
+      # compile. A missing Turbo edge lets that package's `build` clean `dist/` mid-run.
+      # The check reads the resolved task graph, so it needs no build.
+      - name: Typecheck task graph
+        run: |
+          node --test tools/test/check-typecheck-graph.test.mjs
+          node tools/test/check-typecheck-graph.mjs
+
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
       # matrix#build and functions#build after @danielsimonjr/mathts-wasm#build, and their
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step

@@ -38,7 +38,16 @@
       "outputs": ["coverage/**"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "build"],
+      "outputs": []
+    },
+    "@danielsimonjr/mathts-expression#typecheck": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "@danielsimonjr/mathts-matrix#build",
+        "@danielsimonjr/mathts-functions#build"
+      ],
       "outputs": []
     },
     "lint": {
