@@ -23,8 +23,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && tsc -p tsconfig.dts.json",
-    "dev": "tsup --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown && tsc -p tsconfig.dts.json",
+    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -32,14 +32,14 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsup --minify --treeshake && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json"
   },
   "dependencies": {
     "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
-    "tsup": "^8.0.0",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },

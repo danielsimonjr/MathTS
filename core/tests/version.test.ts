@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { VERSION } from '../src/index.js';
 
-// The exported VERSION is injected at build time (tsup `define`) from this
+// The exported VERSION is injected at build time (tsdown `define`) from this
 // package's package.json, so it can never drift. Pin the test to that same
 // source of truth (package.json) rather than a hardcoded literal — a hardcoded
 // literal here is exactly what let the old VERSION silently drift to '0.1.0'

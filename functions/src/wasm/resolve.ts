@@ -19,7 +19,7 @@ export { resolvePackagedWasm, defaultWasmLocation } from '@danielsimonjr/mathts-
  * Root cause (2026-07-13 WASM-dead-in-browser investigation): the browser loader
  * previously took a SINGLE relative-URL guess — `./wasm/<file>` next to the
  * running module. That guess is only correct when the executing module and the
- * wasm binary are literal siblings post-bundling (tsup's single-file
+ * wasm binary are literal siblings post-bundling (tsdown's single-file
  * `dist/index.js` next to `dist/wasm/`). Any other layout — including this repo's
  * own `*.browser.test.ts` harness, which runs directly against unbundled `src/`
  * via Vite — resolves to a URL that 404s, so the whole WASM tier silently fell

@@ -8,7 +8,7 @@ Keep it **terse**: every line costs context on every session. Detail lives in th
 
 ## Current state (2026-07-16)
 
-MathTS is a 24-package npm-workspaces monorepo (Turborepo, ESM-only, ES2022, `tsup`, `vitest`,
+MathTS is a 24-package npm-workspaces monorepo (Turborepo, ESM-only, ES2022, `tsdown`, `vitest`,
 Changesets). Goal: **the best numerical-computing TypeScript library** for students, hobbyists,
 research, and engineering — measured against numpy / scipy / mpmath / sklearn / statsmodels /
 networkx / sympy / MATLAB.

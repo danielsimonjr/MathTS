@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-14'
+  lastUpdated: '2026-10-15'
   totalFiles: 1185
   totalModules: 83
-  totalExports: 6121
+  totalExports: 6122
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -77,7 +77,7 @@ entryPoints:
     description: / <reference types="@webgpu/types" />
   - file: plot/src/index.ts
     type: main
-    description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
+    description: Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
 modules:
   packages/typed-function:
     packages/typed-function/src/index.ts:
@@ -8490,6 +8490,9 @@ modules:
             - fDist
             - gammaDist
             - betaDist
+        - file: ./wasm/special/scalars.js
+          imports:
+            - betaincScalar
       workspaceDependencies: []
       exports:
         - normalQuantile
@@ -8512,6 +8515,9 @@ modules:
         - logisticPDF
         - logisticCDF
         - logisticQuantile
+        - studentTTwoSidedP
+      functions:
+        - studentTTwoSidedP
       constants:
         - normalQuantile
         - studentTCDF
@@ -10488,7 +10494,7 @@ modules:
             - mean
         - file: ./distribution-functions.js
           imports:
-            - studentTCDF
+            - studentTTwoSidedP
       workspaceDependencies: []
       exports:
         - linearRegression
@@ -14440,7 +14446,7 @@ modules:
       internalDependencies:
         - file: ../distribution-functions.js
           imports:
-            - studentTCDF
+            - studentTTwoSidedP
       workspaceDependencies: []
       exports:
         - ols
@@ -37067,7 +37073,7 @@ modules:
       functions:
         - histogram
     plot/src/index.ts:
-      description: Injected at build time by tsup's `define` (see tsup.config.ts) from this
+      description: Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -38877,11 +38883,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1185
   totalModules: 83
-  totalLinesOfCode: 197377
-  totalExports: 6121
+  totalLinesOfCode: 197462
+  totalExports: 6122
   totalClasses: 58
   totalInterfaces: 523
-  totalFunctions: 1940
+  totalFunctions: 1941
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1615

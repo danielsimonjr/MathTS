@@ -9,6 +9,14 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
 
 ## 🔜 Active / Pending (top of queue — reconciled 2026-07-09 against the live tree)
 
+- [ ] **`turbo run typecheck` races the builds it reads, and a failed run leaves a cleaned `dist/` behind.** `typecheck` depends on `^build` only, but
+      `expression`'s `tsc -p tsconfig.test.json` includes `../functions/src/**`, which imports the built `.d.ts` of `matrix`, `functions` and
+      `expression` itself. After any source edit that misses the Turbo cache, `matrix#build` cleans `matrix/dist` while `expression#typecheck`
+      runs: `TS7016 Could not find a declaration file for module '@danielsimonjr/mathts-matrix'`, 77 errors on the `tsup` tree and the same on
+      the `tsdown` tree. Turbo cancels the other tasks on the first failure, so the cleaned `dist/` stays and the next run fails the same way until
+      `bun run build` completes. CI is unaffected (it builds first). **Fix at root cause:** declare the edges that exist (per-package
+      `typecheck` `dependsOn` for `expression` -> `@danielsimonjr/mathts-matrix#build` and `@danielsimonjr/mathts-functions#build`), or give
+      `expression`'s test tsconfig `paths` to the source.
 - [ ] **Dependabot cannot update this repo's dependencies in ANY configuration, and the config entry that
       pretended otherwise was removed (2026-10-01).** Both ecosystems abort: `bun` with "Unsupported bun.lock
       'lockfileVersion' 2" (Dependabot's bundled bun reads v1; Bun 1.4.2 writes v2), and `npm` with "Dependabot's

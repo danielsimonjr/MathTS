@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsdown';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -11,11 +11,15 @@ const { version } = JSON.parse(
 export default defineConfig({
   entry: ['src/index.ts', 'src/internal.ts'],
   format: 'esm',
-  // Declarations come from tsc (tsconfig.dts.json), not tsup: rollup-plugin-dts
+  // Declarations come from tsc (tsconfig.dts.json), not tsdown: rolldown-plugin-dts
 
   // needs TypeScript's programmatic Compiler API, absent in TS 7.0.
 
   dts: false,
+  // Keep `.js` (the package is `type: module`); tsdown's node default is `.mjs`.
+  fixedExtension: false,
+  // tsup (esbuild) dropped JSDoc from the JS output; tsc already carries it into the .d.ts.
+  outputOptions: { comments: { legal: true, annotation: true, jsdoc: false } },
   clean: true,
   define: { __PKG_VERSION__: JSON.stringify(version) },
 });

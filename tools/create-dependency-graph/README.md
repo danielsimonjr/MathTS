@@ -61,7 +61,7 @@ npx tsx tools/create-dependency-graph.ts
 - Parses imports and exports — including bare side-effect `import '…'`, inline
   `import('…')` type expressions, and npm-scoped workspace imports
 - Seeds reachability from every build root it can discover: `src/index.ts`, `exports`
-  subpaths, `bin` targets, extra `tsup src/*.ts` entries, and secondary `tsc -p <cfg>`
+  subpaths, `bin` targets, extra `tsdown src/*.ts` entries, and secondary `tsc -p <cfg>`
   includes parsed from the package scripts
 - Categorizes files into logical modules
 - Detects circular dependencies

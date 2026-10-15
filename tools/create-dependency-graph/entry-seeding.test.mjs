@@ -63,3 +63,39 @@ test('a noEmit type-check config seeds nothing', () => {
     (entries) => assert.deepEqual(entries, [])
   );
 });
+
+// A bare bundler script takes its entries from `<bundler>.config.ts`; the tool must
+// read the config of whichever bundler the package builds with.
+for (const bundler of ['tsdown', 'tsup']) {
+  test(`a bare \`${bundler}\` script seeds the entries of ${bundler}.config.ts`, () => {
+    withPackage(
+      {
+        ...sources,
+        'package.json': JSON.stringify({
+          scripts: { build: `${bundler} && tsc -p tsconfig.dts.json` },
+        }),
+        [`${bundler}.config.ts`]: "export default { entry: ['src/index.ts', 'src/extra.ts'] };\n",
+      },
+      (entries) => {
+        assert.ok(entries.includes('p/src/extra.ts'));
+        assert.ok(!entries.includes('p/src/dormant.ts'), 'an unlisted file is not a build root');
+      }
+    );
+  });
+}
+
+test('a `tsdown` script that names its entries on the command line ignores the config', () => {
+  withPackage(
+    {
+      ...sources,
+      'package.json': JSON.stringify({
+        scripts: { build: 'tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json' },
+      }),
+      'tsdown.config.ts': "export default { entry: ['src/dormant.ts'] };\n",
+    },
+    (entries) => {
+      assert.ok(entries.includes('p/src/index.ts'));
+      assert.ok(!entries.includes('p/src/dormant.ts'));
+    }
+  );
+});

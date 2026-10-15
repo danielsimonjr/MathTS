@@ -123,7 +123,7 @@ automatic JS-vs-WASM selection based on per-operation size thresholds.
 | ----------- | ---------------------------- |
 | Language    | TypeScript (strict, ES2022)  |
 | Modules     | ESM-only                     |
-| Build       | tsup + Turborepo             |
+| Build       | tsdown + Turborepo           |
 | Test        | Vitest                       |
 | WASM        | AssemblyScript (`assembly/`) |
 | GPU         | WebGPU compute shaders       |

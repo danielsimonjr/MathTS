@@ -7,14 +7,14 @@
 
 [install]
 # Match the historical npm hoisted layout so workspace resolution and
-# tooling (vitest, tsup, asc) keep finding packages the way they do today.
+# tooling (vitest, tsdown, asc) keep finding packages the way they do today.
 linker = "hoisted"
 # Never auto-install on the fly — always use the committed bun.lock.
 auto = "disable"
 
 [run]
 # Phase 3 of docs/roadmap/BUN_MIGRATION.md: `bun run` executes every package script on
-# Bun's runtime. A `node` call and every node-shebang bin (asc, tsc, tsup, vitest, turbo,
+# Bun's runtime. A `node` call and every node-shebang bin (asc, tsc, tsdown, vitest, turbo,
 # prettier) run on Bun. Bun reads bunfig.toml from the working directory only, so each
 # workspace package carries the same `[run]` block for the scripts that turbo starts there.
 # `docs:functions` passes `--tsconfig-override=tsconfig.base.json`: at run time Bun applies the

@@ -1,5 +1,5 @@
 /** @danielsimonjr/mathts-plot — headless SVG 2D/3D plotting for MathTS. */
-// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
 // package's package.json version, so VERSION can never drift.
 declare const __PKG_VERSION__: string;
 export const VERSION: string = __PKG_VERSION__;

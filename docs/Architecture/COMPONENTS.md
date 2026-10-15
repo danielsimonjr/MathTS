@@ -187,7 +187,7 @@ export class Tensor          // rank-N, broadcasting, reshape/transpose/reduce
 export class Index           // multi-axis indexing
 ```
 
-Depends on `core`, `matrix`. Bundled with `tsup` before runtime, so it uses bare relative imports.
+Depends on `core`, `matrix`. Bundled with `tsdown` before runtime, so it uses bare relative imports.
 
 ### @danielsimonjr/mathts-autograd (`autograd/`)
 

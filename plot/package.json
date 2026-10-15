@@ -23,9 +23,9 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && tsc -p tsconfig.dts.json",
-    "build:prod": "tsup --minify --treeshake && tsc -p tsconfig.dts.json",
-    "dev": "tsup --watch --onSuccess \"tsc -p tsconfig.dts.json\"",
+    "build": "tsdown && tsc -p tsconfig.dts.json",
+    "build:prod": "tsdown --minify && tsc -p tsconfig.dts.json",
+    "dev": "tsdown --watch --on-success \"tsc -p tsconfig.dts.json\"",
     "test": "bun test --isolate --timeout 30000",
     "test:watch": "vitest",
     "test:coverage": "bun test --isolate --timeout 30000 --coverage",
@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/node": "^26.4.0",
     "@xmldom/xmldom": "^0.9.12",
-    "tsup": "^8.0.0",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },

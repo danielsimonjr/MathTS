@@ -9,7 +9,7 @@
 export const SCHEMA_VERSION = { major: 1, minor: 0 } as const;
 
 /** Package/engine version reported by `--version`, `capabilities`, and serve. */
-// Injected at build time by tsup's `define` (see tsup.config.ts) from this
+// Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
 // package's package.json version, so VERSION can never drift (and `mtsw
 // version` always reports the real published version).
 declare const __PKG_VERSION__: string;

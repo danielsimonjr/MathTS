@@ -4184,12 +4184,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                         | Type   |
-| ------------------------- | --------------------------------------------------------------- | ------ |
-| `./typed/dist-objects.js` | `normalDist, tDist, chiSquaredDist, fDist, gammaDist, betaDist` | Import |
+| File                        | Imports                                                         | Type   |
+| --------------------------- | --------------------------------------------------------------- | ------ |
+| `./typed/dist-objects.js`   | `normalDist, tDist, chiSquaredDist, fDist, gammaDist, betaDist` | Import |
+| `./wasm/special/scalars.js` | `betaincScalar`                                                 | Import |
 
 **Exports:**
 
+- Functions: `studentTTwoSidedP`
 - Constants: `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`
 
 ---
@@ -4485,10 +4487,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports       | Type   |
-| ----------------------------- | ------------- | ------ |
-| `./typed/arithmetic.js`       | `mean`        | Import |
-| `./distribution-functions.js` | `studentTCDF` | Import |
+| File                          | Imports             | Type   |
+| ----------------------------- | ------------------- | ------ |
+| `./typed/arithmetic.js`       | `mean`              | Import |
+| `./distribution-functions.js` | `studentTTwoSidedP` | Import |
 
 **Exports:**
 
@@ -6492,9 +6494,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports       | Type   |
-| ------------------------------ | ------------- | ------ |
-| `../distribution-functions.js` | `studentTCDF` | Import |
+| File                           | Imports             | Type   |
+| ------------------------------ | ------------------- | ------ |
+| `../distribution-functions.js` | `studentTTwoSidedP` | Import |
 
 **Exports:**
 
@@ -17421,7 +17423,7 @@ graph LR
 
 ---
 
-### `plot/src/index.ts` - Injected at build time by tsup's `define` (see tsup.config.ts) from this
+### `plot/src/index.ts` - Injected at build time by tsdown's `define` (see tsdown.config.ts) from this
 
 **Internal Dependencies:**
 
@@ -18544,12 +18546,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1185   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 197377 |
-| Total Exports           | 6121   |
+| Total Lines of Code     | 197462 |
+| Total Exports           | 6122   |
 | Total Re-exports        | 2578   |
 | Total Classes           | 58     |
 | Total Interfaces        | 523    |
-| Total Functions         | 1940   |
+| Total Functions         | 1941   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 600    |

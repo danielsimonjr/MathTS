@@ -9,7 +9,7 @@
 MathTS is a TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker
 acceleration, plus a reactive `.mtsw` Scientific Workbook. npm-workspaces
 monorepo (24 packages) orchestrated by Turborepo. All packages are ESM-only,
-target ES2022, bundle with `tsup`, test with `vitest`. See `README.md` for the
+target ES2022, bundle with `tsdown`, test with `vitest`. See `README.md` for the
 human-facing overview.
 
 ---
@@ -236,7 +236,7 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 ## File boundaries & conventions
 
 - **Import extensions:** use `.js` (ESM resolution). Exception: `tensor/src/`
-  uses bare relative imports (tsup bundles it). Match the existing style per
+  uses bare relative imports (tsdown bundles it). Match the existing style per
   package — check a sibling file before adding imports.
 - **Naming:** files `kebab-case.ts`, classes `PascalCase`, functions/vars
   `camelCase`, constants `UPPER_SNAKE_CASE`.
@@ -294,11 +294,11 @@ From the 2026-05-01 security release. Any change touching these must preserve th
   dependency (e.g. `core`), a direct `npx vitest run` in a downstream package
   (e.g. `autograd`, `functions`) runs against a **stale `dist`** and can report
   false failures — e.g. a new `core` export shows as `undefined`. Fix: rebuild the
-  changed dependency first (`npx turbo build --filter=<pkg>` or its `tsup` build),
+  changed dependency first (`npx turbo build --filter=<pkg>` or its `tsdown` build),
   or run the suite via `npm run test` (turbo `test` depends on `["^build","build"]`,
   so `dist/` is fresh). Don't chase a downstream test failure until the deps are built.
-- **Partial-`tsup` gotcha:** running `tsup src/index.ts --clean` by hand for a quick
-  rebuild wipes `dist/` but skips a package's _other_ build steps (e.g. copying
+- **Partial-`tsdown` gotcha:** running `tsdown src/index.ts` by hand for a quick
+  rebuild wipes `dist/` (tsdown cleans by default) but skips a package's _other_ build steps (e.g. copying
   `mathts-as.wasm` into `functions/dist/wasm/`), leaving an incomplete `dist`. Use the
   package's full `build` script (via turbo) when the wasm binary or `.d.ts` tree matters.
 

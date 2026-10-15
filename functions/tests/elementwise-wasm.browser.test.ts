@@ -7,7 +7,7 @@
  * `TypeError: HTTP status code is not ok` — the browser branch of
  * `WasmLoader#getDefaultWasmPath` (via `defaultWasmLocation(..., { browser:
  * true })`) took a SINGLE relative-URL guess, `./wasm/<file>` next to the
- * running module. That guess is only correct once tsup has bundled
+ * running module. That guess is only correct once tsdown has bundled
  * `WasmLoader.ts` into a single `dist/index.js` sitting next to `dist/wasm/`
  * — it 404s for any other layout, including this very test file, which Vite
  * serves directly from unbundled `src/` (so `import.meta.url` for
