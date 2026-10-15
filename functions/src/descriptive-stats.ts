@@ -18,6 +18,7 @@
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
 import { studentTCDF as _studentTCDF } from './distribution-functions.js';
+import { fitLine } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
@@ -300,25 +301,10 @@ export function linregress(x: Vec, y: Vec): LinRegressResult {
   const n = x.length;
   if (n !== y.length) throw new Error('linregress: x and y must have equal length');
   if (n < 3) throw new Error('linregress: need at least 3 points for inference');
-  const xa = Array.from(x);
-  const ya = Array.from(y);
-  const xbar = mean(xa);
-  const ybar = mean(ya);
-  let sxx = 0;
-  let sxy = 0;
-  let syy = 0;
-  for (let i = 0; i < n; i++) {
-    const dx = xa[i] - xbar;
-    const dy = ya[i] - ybar;
-    sxx += dx * dx;
-    sxy += dx * dy;
-    syy += dy * dy;
-  }
-  const slope = sxy / sxx;
-  const intercept = ybar - slope * xbar;
-  const rValue = sxy / Math.sqrt(sxx * syy);
+  const { slope, intercept, rValue, mx: xbar, sxx, rss } = fitLine(Array.from(x), Array.from(y));
   const df = n - 2;
-  const s2 = (syy - slope * sxy) / df;
+  // Residual mean square from the residuals (see `fitLine`), so a near-exact fit is not NaN.
+  const s2 = rss / df;
   const stdErr = Math.sqrt(s2 / sxx);
   const interceptStdErr = Math.sqrt(s2 * (1 / n + (xbar * xbar) / sxx));
   return {
