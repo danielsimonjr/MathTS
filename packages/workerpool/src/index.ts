@@ -195,6 +195,20 @@ export interface WorkerpoolCapabilities {
 }
 
 /**
+ * Logical CPU count on a runtime that has no `navigator`.
+ *
+ * Reads `os` through `process.getBuiltinModule` (Node 20.16+ and 22.3+, Bun). A `require('os')`
+ * call makes a bundler emit a module-level `createRequire` import of `node:module`; a browser
+ * bundler rejects that import when the package loads, before any runtime guard runs.
+ * A runtime without `getBuiltinModule` reports 4.
+ */
+function nodeCpuCount(): number {
+  const proc = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process;
+  const os = proc?.getBuiltinModule?.('os') as { cpus?: () => unknown[] } | undefined;
+  return os?.cpus?.()?.length ?? 4;
+}
+
+/**
  * Detect runtime capabilities for data transfer optimization.
  *
  * Use this to decide which transfer strategy to employ:
@@ -206,17 +220,7 @@ export interface WorkerpoolCapabilities {
  */
 export function getCapabilities(): WorkerpoolCapabilities {
   const maxWorkers =
-    typeof navigator !== 'undefined'
-      ? navigator.hardwareConcurrency || 4
-      : (() => {
-          try {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const os = require('os');
-            return os.cpus?.()?.length ?? 4;
-          } catch {
-            return 4;
-          }
-        })();
+    typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 4 : nodeCpuCount();
 
   return {
     sharedArrayBuffer: canUseSharedMemory(),
