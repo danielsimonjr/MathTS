@@ -1210,8 +1210,10 @@ export function solveODESystem(
 
   const n = y0.length;
   const dt = opts.dt;
-  const nSteps = Math.ceil((tspan[1] - tspan[0]) / dt);
-  const h = (tspan[1] - tspan[0]) / nSteps;
+  const span = tspan[1] - tspan[0];
+  const whole = _wholeStepCount(span, dt);
+  const nSteps = whole ?? Math.ceil(span / dt);
+  const h = span / nSteps;
 
   const ts: number[] = [tspan[0]];
   const ys: number[][] = [y0.slice()];
@@ -1236,12 +1238,32 @@ export function solveODESystem(
     }
 
     t += h;
+    // n steps of span/n end on tspan[1]; the running sum of h can miss it by ulps. The `ceil`
+    // path keeps its running sum, so its output is unchanged.
+    if (whole !== null && step === nSteps - 1) t = tspan[1];
     y = yNew;
     ts.push(t);
     ys.push(y.slice());
   }
 
   return { t: ts, y: ys };
+}
+
+/**
+ * The step count n when `span/dt` is a positive integer n up to rounding, else `null` (the caller
+ * then takes `ceil(span/dt)`). "Up to rounding" is within `4·ε·n` (relative 4ε, ε = 2⁻⁵²).
+ *
+ * A caller who passes `dt = span/n` gets back a quotient that differs from n by its rounding:
+ * `dt` is rounded once and the division once, at most ε relative together, so
+ * `1e-3 / (1e-3/1000)` is `1000.0000000000001`. Taking `ceil` of that adds a step and shrinks
+ * every step to `span/(n+1)`. The factor 4 leaves room for a `dt` derived through one or two
+ * further operations. A quotient inside the band but not from rounding would have bought, from
+ * `ceil`, one extra step of at most `4·ε·n·dt`, so no requested resolution is lost.
+ */
+function _wholeStepCount(span: f64, dt: f64): f64 | null {
+  const q = span / dt;
+  const nearest = Math.round(q);
+  return nearest >= 1 && Math.abs(q - nearest) <= 4 * Number.EPSILON * nearest ? nearest : null;
 }
 
 /**

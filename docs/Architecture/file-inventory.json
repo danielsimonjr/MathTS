@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-15",
-  "totalFiles": 1897,
+  "totalFiles": 1899,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1160,
     "test-only": 0,
     "orphan": 0,
-    "test": 651,
+    "test": 653,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1185,
-    "tests": 651,
+    "tests": 653,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 47,
     "@danielsimonjr/mathts-expression": 545,
-    "@danielsimonjr/mathts-functions": 788,
+    "@danielsimonjr/mathts-functions": 790,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -5819,7 +5819,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 539
+      "loc": 525
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -6806,7 +6806,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 59
+      "loc": 81
     },
     {
       "file": "functions/src/relational/compare.ts",
@@ -7926,7 +7926,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2396
+      "loc": 2418
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9686,6 +9686,13 @@
       "loc": 37
     },
     {
+      "file": "functions/tests/linear-regression-stderr.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
+    },
+    {
       "file": "functions/tests/linprog-feasible.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10083,6 +10090,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 190
+    },
+    {
+      "file": "functions/tests/solveodesystem-fixed-step-count.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
     },
     {
       "file": "functions/tests/sort-as-wasm.test.ts",
