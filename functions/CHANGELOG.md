@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.69.0
+
+### Minor Changes
+
+- 02984be: Add `massProperties(shape, density?)` and the `MASS_PROPERTY_SHAPES` catalog (#378): volume (area in 2-D), mass, centroid and inertia about the centroid for sphere, box, capsule, convex polyhedra (vertices with optional faces, else their convex hull), circle, rectangle, 2-D capsule and simple polygons. Polyhedra and polygons are exact (covariance method and shoelace sums).
+
 ## 0.68.5
 
 ### Patch Changes
