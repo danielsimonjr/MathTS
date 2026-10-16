@@ -373,7 +373,7 @@
     },
     "workbook": {
       "name": "@danielsimonjr/mathts-workbook",
-      "version": "0.4.10",
+      "version": "0.4.11",
       "bin": {
         "mtsw": "dist/cli.js",
       },
