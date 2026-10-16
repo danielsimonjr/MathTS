@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-15",
-  "totalFiles": 1900,
+  "generated": "2026-10-16",
+  "totalFiles": 1902,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1160,
+    "build-entry": 1161,
     "test-only": 0,
     "orphan": 0,
-    "test": 654,
+    "test": 655,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1185,
-    "tests": 654,
+    "src": 1186,
+    "tests": 655,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 47,
     "@danielsimonjr/mathts-expression": 545,
-    "@danielsimonjr/mathts-functions": 790,
+    "@danielsimonjr/mathts-functions": 792,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -5948,6 +5948,13 @@
       "loc": 174
     },
     {
+      "file": "functions/src/geometry/mass-properties.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 375
+    },
+    {
       "file": "functions/src/geometry/spherical-voronoi.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6022,7 +6029,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 636
+      "loc": 644
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -9418,6 +9425,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 187
+    },
+    {
+      "file": "functions/tests/geometry-mass-properties.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 209
     },
     {
       "file": "functions/tests/geometry-sets.test.ts",
@@ -12938,7 +12952,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 62
+      "loc": 66
     },
     {
       "file": "workbook/src/graph.ts",
@@ -13169,7 +13183,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 73
+      "loc": 75
     },
     {
       "file": "workbook/tests/gap-ipynb-export.test.ts",

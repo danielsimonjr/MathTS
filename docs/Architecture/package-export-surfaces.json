@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15",
+  "generated": "2026-10-16",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2873,6 +2873,12 @@
       "mapArray",
       "mapObject",
       "mapSlices",
+      "MASS_PROPERTY_SHAPES",
+      "massProperties",
+      "MassProperties2D",
+      "MassProperties3D",
+      "MassPropertyShape",
+      "MassPropertyShapeRecord",
       "MathArray",
       "MathCollection",
       "mathieuA",
