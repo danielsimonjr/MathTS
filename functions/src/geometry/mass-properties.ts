@@ -99,7 +99,9 @@ const diag3 = (x: number, y: number, z: number): number[][] => [
 ];
 
 /** Every shape kind, as data. */
-export const MASS_PROPERTY_SHAPES: readonly MassPropertyShapeRecord[] = Object.freeze([
+export const MASS_PROPERTY_SHAPES: readonly MassPropertyShapeRecord[] = Object.freeze<
+  MassPropertyShapeRecord[]
+>([
   {
     type: 'sphere',
     dims: 3,
