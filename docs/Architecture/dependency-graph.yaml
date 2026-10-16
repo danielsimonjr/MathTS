@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-15'
-  totalFiles: 1185
+  lastUpdated: '2026-10-16'
+  totalFiles: 1186
   totalModules: 83
-  totalExports: 6123
+  totalExports: 6131
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9089,6 +9089,11 @@ modules:
           imports:
             - halfspaceIntersection
           reExport: true
+        - file: ./geometry/mass-properties.js
+          imports:
+            - massProperties
+            - MASS_PROPERTY_SHAPES
+          reExport: true
         - file: ./stats/inference-extra2.js
           imports:
             - noncentralChi2CDF
@@ -9466,6 +9471,14 @@ modules:
             - HalfspaceIntersectionResult
           reExport: true
           typeOnly: true
+        - file: ./geometry/mass-properties.js
+          imports:
+            - MassProperties2D
+            - MassProperties3D
+            - MassPropertyShape
+            - MassPropertyShapeRecord
+          reExport: true
+          typeOnly: true
         - file: ./stats/inference-extra2.js
           imports:
             - CircularOptions
@@ -9776,6 +9789,8 @@ modules:
         - alphaShape
         - sphericalVoronoi
         - halfspaceIntersection
+        - massProperties
+        - MASS_PROPERTY_SHAPES
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -9933,6 +9948,10 @@ modules:
         - AlphaShapeResult
         - SphericalVoronoiResult
         - HalfspaceIntersectionResult
+        - MassProperties2D
+        - MassProperties3D
+        - MassPropertyShape
+        - MassPropertyShapeRecord
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -10196,6 +10215,8 @@ modules:
         - alphaShape
         - sphericalVoronoi
         - halfspaceIntersection
+        - massProperties
+        - MASS_PROPERTY_SHAPES
         - noncentralChi2CDF
         - noncentralFCDF
         - noncentralTCDF
@@ -10353,6 +10374,10 @@ modules:
         - AlphaShapeResult
         - SphericalVoronoiResult
         - HalfspaceIntersectionResult
+        - MassProperties2D
+        - MassProperties3D
+        - MassPropertyShape
+        - MassPropertyShapeRecord
         - CircularOptions
         - McNemarOptions
         - McNemarResult
@@ -12986,6 +13011,29 @@ modules:
         - rayTriangleIntersect
         - rayPlaneIntersect
         - segmentSegmentClosest
+    functions/src/geometry/mass-properties.ts:
+      description: 'Mass properties of solids and plane figures: volume (area in 2-D), mass,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./hull.js
+          imports:
+            - convexHull
+      workspaceDependencies: []
+      exports:
+        - MASS_PROPERTY_SHAPES
+        - massProperties
+      interfaces:
+        - MassProperties3D
+        - MassProperties2D
+        - MassPropertyShapeRecord
+      functions:
+        - massProperties
+        - massProperties
+        - massProperties
+        - massProperties
+      constants:
+        - MASS_PROPERTY_SHAPES
     functions/src/geometry/spherical-voronoi.ts:
       description: Spherical Voronoi diagram — a consumer of the 3-D convex hull.
       externalDependencies: []
@@ -37864,6 +37912,7 @@ dependencyGraph:
         - functions/src/geometry/hull.ts
         - functions/src/geometry/intersect.ts
         - functions/src/geometry/intersect3d.ts
+        - functions/src/geometry/mass-properties.ts
         - functions/src/geometry/spherical-voronoi.ts
         - functions/src/geometry/voronoi.ts
     - name: Functions/gpu
@@ -38892,18 +38941,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1185
+  totalTypeScriptFiles: 1186
   totalModules: 83
-  totalLinesOfCode: 197544
-  totalExports: 6123
+  totalLinesOfCode: 197931
+  totalExports: 6131
   totalClasses: 58
-  totalInterfaces: 525
-  totalFunctions: 1942
+  totalInterfaces: 528
+  totalFunctions: 1946
   totalTypeGuards: 160
   totalEnums: 0
-  totalConstants: 1615
-  totalReExports: 2578
-  totalTypeOnlyImports: 600
+  totalConstants: 1616
+  totalReExports: 2584
+  totalTypeOnlyImports: 601
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

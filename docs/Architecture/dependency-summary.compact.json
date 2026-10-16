@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-15", "f": 1185, "e": 6123, "re": 2578 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-16", "f": 1186, "e": 6131, "re": 2584 },
   "s": {
-    "loc": 197544,
+    "loc": 197931,
     "cls": 58,
-    "int": 525,
-    "fn": 1942,
+    "int": 528,
+    "fn": 1946,
     "tg": 160,
     "en": 0,
-    "co": 1615,
-    "toi": 600
+    "co": 1616,
+    "toi": 601
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -639,7 +639,7 @@
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
     },
     "functions/geometry": {
-      "f": 10,
+      "f": 11,
       "exp": [
         "alphaShape",
         "delaunay",
@@ -670,8 +670,9 @@
         "ConvexHullResult",
         "RayHit",
         "SegmentClosestResult",
-        "SphericalVoronoiResult",
-        "VoronoiResult"
+        "MassProperties3D",
+        "MassProperties2D",
+        "MassPropertyShapeRecord"
       ]
     },
     "functions/gpu": {
@@ -1853,7 +1854,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 10 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 133, "o": 0 },
+    { "p": "src/index.ts", "i": 135, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

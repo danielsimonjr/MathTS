@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15",
+  "generated": "2026-10-16",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1768,6 +1768,7 @@
     "functions/src/geometry/intersect3d.ts": ["functions/src/index.ts"],
     "functions/src/geometry/hull.ts": [
       "functions/src/geometry/halfspace-intersection.ts",
+      "functions/src/geometry/mass-properties.ts",
       "functions/src/index.ts"
     ],
     "functions/src/geometry/delaunay.ts": [
@@ -1779,6 +1780,7 @@
     "functions/src/geometry/alpha-shape.ts": ["functions/src/index.ts"],
     "functions/src/geometry/spherical-voronoi.ts": ["functions/src/index.ts"],
     "functions/src/geometry/halfspace-intersection.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/mass-properties.ts": ["functions/src/index.ts"],
     "functions/src/stats/inference-extra2.ts": [
       "functions/src/index.ts",
       "functions/src/stats/power-analysis.ts"

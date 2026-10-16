@@ -486,6 +486,14 @@ export { sphericalVoronoi } from './geometry/spherical-voronoi.js';
 export type { SphericalVoronoiResult } from './geometry/spherical-voronoi.js';
 export { halfspaceIntersection } from './geometry/halfspace-intersection.js';
 export type { HalfspaceIntersectionResult } from './geometry/halfspace-intersection.js';
+// Mass properties (volume, centroid, inertia) of primitives, polygons and convex polyhedra.
+export { massProperties, MASS_PROPERTY_SHAPES } from './geometry/mass-properties.js';
+export type {
+  MassProperties2D,
+  MassProperties3D,
+  MassPropertyShape,
+  MassPropertyShapeRecord,
+} from './geometry/mass-properties.js';
 // Note: the rendering generators (toMathML/toHTML/…) live in and are imported
 // directly from `@danielsimonjr/mathts-expression`; re-exporting them here broke
 // cross-package type resolution (the package-name re-export poisoned this
