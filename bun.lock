@@ -31,7 +31,7 @@
     },
     "arithmetic": {
       "name": "@danielsimonjr/mathts-arithmetic",
-      "version": "0.1.70",
+      "version": "0.1.71",
       "dependencies": {
         "@danielsimonjr/mathts-functions": "^0.68.0",
         "typed-function": "^4.0.0",
@@ -83,7 +83,7 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.4.30",
+      "version": "0.4.31",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-functions": "^0.68.2",
@@ -141,7 +141,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.68.5",
+      "version": "0.69.0",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.1",
         "@danielsimonjr/mathts-expression": "^0.10.2",
@@ -287,7 +287,7 @@
     },
     "plot": {
       "name": "@danielsimonjr/mathts-plot",
-      "version": "0.4.11",
+      "version": "0.4.12",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-expression": "^0.10.2",
@@ -303,7 +303,7 @@
     },
     "signal": {
       "name": "@danielsimonjr/mathts-signal",
-      "version": "0.1.70",
+      "version": "0.1.71",
       "dependencies": {
         "@danielsimonjr/mathts-functions": "^0.68.0",
         "typed-function": "^4.0.0",
@@ -317,7 +317,7 @@
     },
     "statistics": {
       "name": "@danielsimonjr/mathts-statistics",
-      "version": "0.3.53",
+      "version": "0.3.54",
       "dependencies": {
         "@danielsimonjr/mathts-functions": "^0.68.0",
         "typed-function": "^4.0.0",
@@ -345,7 +345,7 @@
     },
     "trigonometry": {
       "name": "@danielsimonjr/mathts-trigonometry",
-      "version": "0.1.70",
+      "version": "0.1.71",
       "dependencies": {
         "@danielsimonjr/mathts-functions": "^0.68.0",
         "typed-function": "^4.0.0",
@@ -373,7 +373,7 @@
     },
     "workbook": {
       "name": "@danielsimonjr/mathts-workbook",
-      "version": "0.4.11",
+      "version": "0.4.12",
       "bin": {
         "mtsw": "dist/cli.js",
       },
