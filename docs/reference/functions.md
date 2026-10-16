@@ -2964,7 +2964,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1083 exports).
+> `@danielsimonjr/mathts-functions` (1085 exports).
 
 ### Functions by category
 
@@ -3022,11 +3022,11 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (17): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `loadWasm`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
+**Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `loadWasm`, `massProperties`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
-### Constants & values (69)
+### Constants & values (70)
 
-`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
 ### Classes & types (2)
 
