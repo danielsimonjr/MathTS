@@ -33,7 +33,7 @@
       "name": "@danielsimonjr/mathts-arithmetic",
       "version": "0.1.71",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.68.0",
+        "@danielsimonjr/mathts-functions": "^0.69.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -54,7 +54,7 @@
     },
     "ast": {
       "name": "@danielsimonjr/mathts-ast",
-      "version": "0.1.24",
+      "version": "0.1.25",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-expression": "^0.10.2",
@@ -69,7 +69,7 @@
     },
     "autograd": {
       "name": "@danielsimonjr/mathts-autograd",
-      "version": "0.3.18",
+      "version": "0.3.19",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-tensor": "^0.2.24",
@@ -83,12 +83,12 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.4.31",
+      "version": "0.4.32",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
-        "@danielsimonjr/mathts-functions": "^0.68.2",
-        "@danielsimonjr/mathts-matrix": "^0.7.8",
-        "@danielsimonjr/mathts-parallel": "^0.6.10",
+        "@danielsimonjr/mathts-core": "^0.19.0",
+        "@danielsimonjr/mathts-functions": "^0.69.1",
+        "@danielsimonjr/mathts-matrix": "^0.7.9",
+        "@danielsimonjr/mathts-parallel": "^0.6.11",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -99,7 +99,7 @@
     },
     "core": {
       "name": "@danielsimonjr/mathts-core",
-      "version": "0.18.1",
+      "version": "0.19.0",
       "dependencies": {
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
@@ -112,7 +112,7 @@
     },
     "evaluator": {
       "name": "@danielsimonjr/mathts-evaluator",
-      "version": "0.1.24",
+      "version": "0.1.25",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-expression": "^0.10.2",
@@ -127,9 +127,9 @@
     },
     "expression": {
       "name": "@danielsimonjr/mathts-expression",
-      "version": "0.10.2",
+      "version": "0.10.3",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
+        "@danielsimonjr/mathts-core": "^0.19.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -141,13 +141,13 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.69.0",
+      "version": "0.69.1",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.1",
-        "@danielsimonjr/mathts-expression": "^0.10.2",
+        "@danielsimonjr/mathts-core": "^0.19.0",
+        "@danielsimonjr/mathts-expression": "^0.10.3",
         "@danielsimonjr/mathts-gpu": "^0.2.1",
-        "@danielsimonjr/mathts-matrix": "^0.7.8",
-        "@danielsimonjr/mathts-parallel": "^0.6.10",
+        "@danielsimonjr/mathts-matrix": "^0.7.9",
+        "@danielsimonjr/mathts-parallel": "^0.6.11",
         "bignumber.js": "^11.1.5",
         "complex.js": "^2.2.5",
         "decimal.js": "^10.4.3",
@@ -185,7 +185,7 @@
     },
     "linalg": {
       "name": "@danielsimonjr/mathts-linalg",
-      "version": "0.1.25",
+      "version": "0.1.26",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-matrix": "^0.7.8",
@@ -199,11 +199,11 @@
     },
     "matrix": {
       "name": "@danielsimonjr/mathts-matrix",
-      "version": "0.7.8",
+      "version": "0.7.9",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
+        "@danielsimonjr/mathts-core": "^0.19.0",
         "@danielsimonjr/mathts-gpu": "^0.2.1",
-        "@danielsimonjr/mathts-parallel": "^0.6.10",
+        "@danielsimonjr/mathts-parallel": "^0.6.11",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -221,7 +221,7 @@
     },
     "numbers": {
       "name": "@danielsimonjr/mathts-numbers",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
       },
@@ -258,9 +258,9 @@
     },
     "parallel": {
       "name": "@danielsimonjr/mathts-parallel",
-      "version": "0.6.10",
+      "version": "0.6.11",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
+        "@danielsimonjr/mathts-core": "^0.19.0",
         "@danielsimonjr/mathts-workerpool": "^0.2.5",
       },
       "devDependencies": {
@@ -272,7 +272,7 @@
     },
     "parser": {
       "name": "@danielsimonjr/mathts-parser",
-      "version": "0.1.25",
+      "version": "0.1.26",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-expression": "^0.10.2",
@@ -287,11 +287,11 @@
     },
     "plot": {
       "name": "@danielsimonjr/mathts-plot",
-      "version": "0.4.12",
+      "version": "0.4.13",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
-        "@danielsimonjr/mathts-expression": "^0.10.2",
-        "@danielsimonjr/mathts-functions": "^0.68.2",
+        "@danielsimonjr/mathts-core": "^0.19.0",
+        "@danielsimonjr/mathts-expression": "^0.10.3",
+        "@danielsimonjr/mathts-functions": "^0.69.1",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -305,7 +305,7 @@
       "name": "@danielsimonjr/mathts-signal",
       "version": "0.1.71",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.68.0",
+        "@danielsimonjr/mathts-functions": "^0.69.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -319,7 +319,7 @@
       "name": "@danielsimonjr/mathts-statistics",
       "version": "0.3.54",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.68.0",
+        "@danielsimonjr/mathts-functions": "^0.69.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -331,7 +331,7 @@
     },
     "tensor": {
       "name": "@danielsimonjr/mathts-tensor",
-      "version": "0.2.24",
+      "version": "0.2.25",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "@danielsimonjr/mathts-matrix": "^0.7.8",
@@ -347,7 +347,7 @@
       "name": "@danielsimonjr/mathts-trigonometry",
       "version": "0.1.71",
       "dependencies": {
-        "@danielsimonjr/mathts-functions": "^0.68.0",
+        "@danielsimonjr/mathts-functions": "^0.69.0",
         "typed-function": "^4.0.0",
       },
       "devDependencies": {
@@ -359,7 +359,7 @@
     },
     "units": {
       "name": "@danielsimonjr/mathts-units",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.18.0",
         "typed-function": "^4.0.0",
@@ -373,15 +373,15 @@
     },
     "workbook": {
       "name": "@danielsimonjr/mathts-workbook",
-      "version": "0.4.12",
+      "version": "0.4.13",
       "bin": {
         "mtsw": "dist/cli.js",
       },
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.18.0",
-        "@danielsimonjr/mathts-expression": "^0.10.2",
-        "@danielsimonjr/mathts-functions": "^0.68.2",
-        "@danielsimonjr/mathts-plot": "^0.4.11",
+        "@danielsimonjr/mathts-core": "^0.19.0",
+        "@danielsimonjr/mathts-expression": "^0.10.3",
+        "@danielsimonjr/mathts-functions": "^0.69.1",
+        "@danielsimonjr/mathts-plot": "^0.4.13",
         "yaml": "^2.3.0",
       },
       "devDependencies": {
