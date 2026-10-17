@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-16",
+  "generated": "2026-10-17",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
@@ -779,65 +779,60 @@
     "xor"
   ],
   "byFile": {
-    "arithmetic.ts": {
-      "wasm": 9,
-      "parallel": 23,
-      "jsOnly": 14
-    },
-    "bitwise.ts": {
-      "wasm": 0,
-      "parallel": 7,
-      "jsOnly": 0
-    },
-    "combinatorics.ts": {
+    "logical.ts": {
       "wasm": 0,
       "parallel": 0,
-      "jsOnly": 21
-    },
-    "complex.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 4
+      "jsOnly": 5
     },
     "distributions.ts": {
       "wasm": 1,
       "parallel": 0,
       "jsOnly": 13
     },
-    "logical.ts": {
+    "complex.ts": {
       "wasm": 0,
       "parallel": 0,
-      "jsOnly": 5
+      "jsOnly": 4
     },
-    "matrix-ops.ts": {
-      "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 9
+    "trigonometry.ts": {
+      "wasm": 8,
+      "parallel": 4,
+      "jsOnly": 7
     },
     "probability.ts": {
       "wasm": 0,
       "parallel": 0,
       "jsOnly": 8
     },
-    "relational.ts": {
+    "bitwise.ts": {
       "wasm": 0,
-      "parallel": 0,
-      "jsOnly": 7
+      "parallel": 7,
+      "jsOnly": 0
     },
     "set.ts": {
       "wasm": 0,
       "parallel": 0,
       "jsOnly": 10
     },
+    "special.ts": {
+      "wasm": 19,
+      "parallel": 0,
+      "jsOnly": 19
+    },
+    "combinatorics.ts": {
+      "wasm": 0,
+      "parallel": 0,
+      "jsOnly": 21
+    },
     "signal.ts": {
       "wasm": 2,
       "parallel": 3,
       "jsOnly": 2
     },
-    "special.ts": {
-      "wasm": 19,
+    "matrix-ops.ts": {
+      "wasm": 0,
       "parallel": 0,
-      "jsOnly": 19
+      "jsOnly": 9
     },
     "statistics.ts": {
       "wasm": 2,
@@ -849,15 +844,20 @@
       "parallel": 0,
       "jsOnly": 5
     },
-    "trigonometry.ts": {
-      "wasm": 8,
-      "parallel": 4,
-      "jsOnly": 7
-    },
     "unit.ts": {
       "wasm": 0,
       "parallel": 0,
       "jsOnly": 2
+    },
+    "arithmetic.ts": {
+      "wasm": 9,
+      "parallel": 23,
+      "jsOnly": 14
+    },
+    "relational.ts": {
+      "wasm": 0,
+      "parallel": 0,
+      "jsOnly": 7
     }
   },
   "binary": {

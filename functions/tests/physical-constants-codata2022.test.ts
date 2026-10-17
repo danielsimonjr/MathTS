@@ -103,4 +103,9 @@ describe('physical constants — CODATA-2022 oracle (scipy.constants)', () => {
       expect(numericOf((F as Record<string, unknown>)[name])).toBe(expected);
     });
   }
+
+  it('vacuumImpedance is μ0·c (Z0) to the 12 digits CODATA publishes', () => {
+    const product = numericOf(F.magneticConstant) * numericOf(F.speedOfLight);
+    expect(Number(product.toPrecision(12))).toBe(numericOf(F.vacuumImpedance));
+  });
 });

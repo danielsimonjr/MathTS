@@ -69,6 +69,8 @@ export interface UnitDef {
   offset: number;
   dimensions?: number[];
   reciprocal?: boolean;
+  /** Turns counted by one of this unit. A cycle-counting unit (Hz, rpm) has 1; absent means 0. */
+  cycles?: number;
   /** The exact scale to SI, from the unit table. Absent for a `createUnit` unit and for VAR. */
   exact?: ExactScale;
   /** The exact `offset`, present whenever `exact` is. */
@@ -135,6 +137,14 @@ export interface CreateUnitDefObject {
   offset?: number;
   baseName?: string;
   aliases?: string[];
+  /**
+   * Exact scale of one of this unit, to SI, as a scale expression (`'0.1'`,
+   * `'ln2'`, `'lbf/inch^2'`, `'1852/3600'`). Same grammar as the built-in unit
+   * table: decimals, `pi`, `ln2`, named scales, and built-in unit names. When
+   * set, this is the unit's exact scale and the double it rounds to; `definition`
+   * still supplies the dimension. Without it a `createUnit` unit has no exact scale.
+   */
+  exact?: string;
 }
 
 /** Config object the Unit factory reads (`config` dep + `on('config')`). */
