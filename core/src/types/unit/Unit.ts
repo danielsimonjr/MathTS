@@ -39,11 +39,14 @@ import {
   multiplyExactScales,
   powerExactScale,
   ratioExactScale,
+  readScaleExpression,
+  PI_EXACT_SCALE,
   UNIT_EXACT_SCALE,
 } from './exact-scale.js';
 import {
   type UnitPrefix,
   type UnitPrefixSetKey,
+  namedExactScale,
   readUnitScale,
   UNIT_PREFIX_SETS,
   UNIT_ROW_ALIASES,
@@ -128,13 +131,21 @@ const UNIT_LIST_SCALE_CACHE_LIMIT = 1024;
 const unitListScales = new Map<string, ExactScale | null>();
 
 /**
- * Normalize degree-symbol unit notations to their ASCII spellings before parsing,
- * so the merged Unit accepts the inputs the old core Unit did (`°C`, `°F`, and a
- * bare `°` for angle). The mathjs parser treats `°` as an invalid character, so
- * this must run before tokenizing. Order matters: `°C`/`°F` before the bare `°`.
+ * Normalize unit spellings the tokenizer would otherwise reject, before parsing.
+ * Degree symbols first (`°C` / `°F` / `°R` before a bare `°`, which is an angle).
+ * `µ` and `μ` are the micro prefix (`u`). `Ω` / `Ω` are the ohm, including a
+ * prefix glued on (`kΩ`). `℃` is degree Celsius and `Å` is the angstrom.
  */
-function normalizeDegreeSymbols(s: string): string {
-  return s.replace(/°C/g, 'degC').replace(/°F/g, 'degF').replace(/°/g, 'deg');
+function normalizeUnitSpellings(s: string): string {
+  return s
+    .replace(/℃/g, 'degC')
+    .replace(/°C/g, 'degC')
+    .replace(/°F/g, 'degF')
+    .replace(/°R/g, 'degR')
+    .replace(/°/g, 'deg')
+    .replace(/[µμ]/g, 'u')
+    .replace(/[ΩΩ]/g, 'ohm')
+    .replace(/Å/g, 'angstrom');
 }
 
 const name = 'Unit';
@@ -494,10 +505,16 @@ export const createUnitClass = /* #__PURE__ */ factory(
     }
 
     function parseUnit(): string | null {
+      // Percent is a unit spelling, not an operator, in a unit text (`%`, `ppm`).
+      if (c === '%') {
+        next();
+        return '%';
+      }
+
       let unitName = '';
 
-      // Alphanumeric characters only; matches [a-zA-Z0-9]
-      while (isDigit(c) || Unit.isValidAlpha(c)) {
+      // Alphanumeric, plus `_` after the first character (`Msun_iau`).
+      while (isDigit(c) || Unit.isValidAlpha(c) || (unitName.length > 0 && c === '_')) {
         unitName += c;
         next();
       }
@@ -537,7 +554,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new TypeError('Invalid argument in Unit.parse, string expected');
       }
 
-      text = normalizeDegreeSymbols(str);
+      text = normalizeUnitSpellings(str);
       index = -1;
       c = '';
 
@@ -546,10 +563,17 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
       let powerMultiplierCurrent: number = 1;
       let expectingUnit = false;
+      // Whether the current group is past its first solidus (ISO 80000 single-solidus).
+      let inDenominator = false;
 
       // A unit should follow this pattern:
       // [number] ...[ [*/] unit[^number] ]
       // unit[^number] ... [ [*/] unit[^number] ]
+      //
+      // One solidus applies to the rest of its group (ISO 80000-1): `W/m*K` and
+      // `W/m K` are W/(m·K), and a second solidus stays in the denominator
+      // (`J/kg/K` is J/(kg·K)). Parentheses close the group, so `(W/m)*K` is
+      // (W/m)·K. This is the same reading as a scale expression.
 
       // Rules:
       // number is any floating point number.
@@ -590,12 +614,14 @@ export const createUnitClass = /* #__PURE__ */ factory(
           expectingUnit = true;
         } else if (parseCharacter('/')) {
           powerMultiplierCurrent = -1;
+          inDenominator = true;
           expectingUnit = true;
         }
       }
 
       // Stack to keep track of powerMultipliers applied to each parentheses group
       const powerMultiplierStack: number[] = [];
+      const denominatorStack: boolean[] = [];
 
       // Running product of all elements in powerMultiplierStack
       let powerMultiplierStackProduct = 1;
@@ -608,6 +634,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
         while (c === '(') {
           powerMultiplierStack.push(powerMultiplierCurrent);
           powerMultiplierStackProduct *= powerMultiplierCurrent;
+          denominatorStack.push(inDenominator);
+          inDenominator = false;
           powerMultiplierCurrent = 1;
           next();
           skipWhitespace();
@@ -672,6 +700,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
             );
           }
           powerMultiplierStackProduct /= powerMultiplierStack.pop()!;
+          inDenominator = denominatorStack.pop()!;
           next();
           skipWhitespace();
         }
@@ -681,16 +710,17 @@ export const createUnitClass = /* #__PURE__ */ factory(
         expectingUnit = false;
 
         if (parseCharacter('*')) {
-          // explicit multiplication
-          powerMultiplierCurrent = 1;
+          // Explicit multiplication. Inside a denominator it stays there: W/m*K = W/(m·K).
+          powerMultiplierCurrent = inDenominator ? -1 : 1;
           expectingUnit = true;
         } else if (parseCharacter('/')) {
-          // division
+          // The first solidus opens the denominator; a further one multiplies in it.
+          inDenominator = true;
           powerMultiplierCurrent = -1;
           expectingUnit = true;
         } else {
-          // implicit multiplication
-          powerMultiplierCurrent = 1;
+          // Implicit multiplication, same side of the solidus as an explicit `*`.
+          powerMultiplierCurrent = inDenominator ? -1 : 1;
         }
 
         // Replace the unit into the auto unit system
@@ -1373,6 +1403,49 @@ export const createUnitClass = /* #__PURE__ */ factory(
     };
 
     /**
+     * `2π` to the integer power `k`: the factor between a cycle count and radians.
+     */
+    function cyclesToRadians(k: number): ExactScale {
+      return multiplyExactScales(
+        powerExactScale(ratioExactScale(2), k),
+        powerExactScale(PI_EXACT_SCALE, k)
+      );
+    }
+
+    /** How many cycles the unit list counts (Hz and rpm count one per power). */
+    function cycleCount(unit: UnitInstance): number {
+      let n = 0;
+      for (let i = 0; i < unit.units.length; i++) {
+        n += (unit.units[i].unit.cycles ?? 0) * unit.units[i].power;
+      }
+      return n;
+    }
+
+    /**
+     * When `from` and `to` differ only by plane angle, and that difference is
+     * exactly the difference in their cycle counts, the conversion is a cycle
+     * ↔ radian bridge: multiply the SI value by `(2π)^k`. Returns `k`, or null
+     * when the units are not convertible this way. `k === 0` is not returned;
+     * a matching dimension (1 Hz = 1/s) takes the ordinary path and does not
+     * multiply by 2π.
+     */
+    function cycleAngleBridge(from: UnitInstance, to: UnitInstance): number | null {
+      const angle = BASE_DIMENSIONS.indexOf('ANGLE');
+      let angleDelta = 0;
+      const n = Math.max(from.dimensions.length, to.dimensions.length, BASE_DIMENSIONS.length);
+      for (let i = 0; i < n; i++) {
+        const d = (to.dimensions[i] || 0) - (from.dimensions[i] || 0);
+        if (i === angle) angleDelta = d;
+        else if (Math.abs(d) > 1e-12) return null;
+      }
+      const cycleDelta = cycleCount(from) - cycleCount(to);
+      if (Math.abs(angleDelta) <= 1e-12) return null;
+      if (Math.abs(angleDelta - cycleDelta) > 1e-12) return null;
+      if (!Number.isInteger(angleDelta)) return null;
+      return angleDelta;
+    }
+
+    /**
      * Convert the unit to a specific unit name.
      * @memberof Unit
      * @param valuelessUnit - A unit without value. Can have prefix, like "cm"
@@ -1392,13 +1465,30 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new Error('String or Unit expected as parameter');
       }
 
-      if (!this.equalBase(other)) {
+      const bridge = this.equalBase(other) ? 0 : cycleAngleBridge(this, other);
+      if (bridge === null) {
         throw new DimensionMismatchError(
           `Units do not match ('${other.toString()}' != '${this.toString()}')`
         );
       }
       if (other.value !== null) {
         throw new Error('Cannot convert to a unit with a value');
+      }
+
+      if (bridge !== 0) {
+        // 1 Hz = 1/s, and 1 Hz = 2π rad/s. The extra angle is one cycle.
+        const factor = cyclesToRadians(bridge);
+        const exact = liveExactSI(this);
+        if (exact) {
+          other._exactSI = multiplyExactScales(exact, factor);
+          other.value = roundExactScale(other._exactSI);
+        } else {
+          other.value = value === null ? null : multiplyScalar(value, roundExactScale(factor));
+          other._exactSI = undefined;
+        }
+        other.fixPrefix = true;
+        other.skipAutomaticSimplification = true;
+        return other;
       }
 
       if (
@@ -2131,6 +2221,32 @@ export const createUnitClass = /* #__PURE__ */ factory(
       SOLID_ANGLE: {
         dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       },
+      // Dimension vectors of the units added for UPT. Each is a product of the
+      // ten base dimensions above, not a new fundamental dimension.
+      VELOCITY: {
+        dimensions: [0, 1, -1, 0, 0, 0, 0, 0, 0, 0],
+      },
+      VISCOSITY: {
+        dimensions: [1, -1, -1, 0, 0, 0, 0, 0, 0, 0], // Pa·s
+      },
+      KINEMATIC_VISCOSITY: {
+        dimensions: [0, 2, -1, 0, 0, 0, 0, 0, 0, 0], // m²/s
+      },
+      ACOUSTIC_IMPEDANCE: {
+        dimensions: [1, -2, -1, 0, 0, 0, 0, 0, 0, 0], // Pa·s/m
+      },
+      SPECTRAL_FLUX_DENSITY: {
+        dimensions: [1, 0, -2, 0, 0, 0, 0, 0, 0, 0], // W/m²/Hz
+      },
+      LUMINOUS_FLUX: {
+        dimensions: [0, 0, 0, 0, 0, 1, 0, 0, 0, 1], // cd·sr
+      },
+      ILLUMINANCE: {
+        dimensions: [0, -2, 0, 0, 0, 1, 0, 0, 0, 1], // cd·sr/m²
+      },
+      MOLAR_CONCENTRATION: {
+        dimensions: [0, -3, 0, 0, 0, 0, 1, 0, 0, 0], // mol/m³
+      },
     };
 
     for (const key in BASE_UNITS) {
@@ -2181,6 +2297,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
         offset: roundExactScale(exactOffset),
       };
       if (row.reciprocal) def.reciprocal = true;
+      if (row.cycles) def.cycles = 1;
       if (!row.imaginary) attachExactScale(def, exact, exactOffset);
       UNITS[key] = def;
     }
@@ -2421,9 +2538,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
           throw new Error('Invalid unit name (must begin with alpha character): "' + name + '"');
         }
 
-        if (i > 0 && !(Unit.isValidAlpha(c) || isDigit(c))) {
+        if (i > 0 && !(Unit.isValidAlpha(c) || isDigit(c) || c === '_')) {
           throw new Error(
-            'Invalid unit name (only alphanumeric characters are allowed): "' + name + '"'
+            'Invalid unit name (only alphanumeric characters and "_" are allowed): "' + name + '"'
           );
         }
       }
@@ -2504,6 +2621,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
      *   - baseName {string} If the unit's dimension does not match that of any other
      *     base unit, the name of the newly create base unit. Otherwise, this property
      *     has no effect.
+     *   - exact {string} Exact scale of one of this unit to SI (`'ln2'`, `'0.1'`,
+     *     `'lbf/inch^2'`). When set, the unit converts exactly. `definition` still
+     *     supplies the dimension.
      *
      * @return
      */
@@ -2680,6 +2800,30 @@ export const createUnitClass = /* #__PURE__ */ factory(
         }
       }
 
+      const exactExpr =
+        typeof obj === 'object' &&
+        obj !== null &&
+        typeof (obj as CreateUnitDefObject).exact === 'string'
+          ? (obj as CreateUnitDefObject).exact
+          : undefined;
+      if (exactExpr !== undefined) {
+        let scale: ExactScale;
+        try {
+          scale = readScaleExpression(exactExpr, (n) => namedExactScale(n) ?? UNITS[n]?.exact);
+        } catch (ex) {
+          throw new Error(
+            'Could not create unit "' +
+              name +
+              '" from exact scale "' +
+              exactExpr +
+              '": ' +
+              (ex as Error).message
+          );
+        }
+        attachExactScale(newUnit, scale, exactScaleOf(offset || 0));
+        newUnit.value = roundExactScale(scale);
+      }
+
       Unit.UNITS[name] = newUnit;
 
       for (let i = 0; i < aliases.length; i++) {
@@ -2693,6 +2837,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
           }
         }
         alias.name = aliasName;
+        if (newUnit.exact !== undefined) {
+          attachExactScale(alias, newUnit.exact, newUnit.exactOffset ?? UNIT_ZERO_SCALE);
+        }
         Unit.UNITS[aliasName] = alias;
       }
 

@@ -77,6 +77,8 @@ export const createElectricConstant = /* #__PURE__ */ unitFactory(
 );
 export const createVacuumImpedance = /* #__PURE__ */ unitFactory(
   'vacuumImpedance',
+  // Characteristic impedance of vacuum, Z0 = μ0·c. This is the CODATA 2022
+  // published value; μ0·c itself is that figure to the 12 digits CODATA prints.
   '376.730313412',
   'ohm'
 );

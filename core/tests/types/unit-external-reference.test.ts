@@ -78,7 +78,8 @@ describe('B-5 port: astronomical / nautical / typography units (upstream ece1aab
     expect(() => new Unit(1, 'mpc')).toThrow();
   });
 
-  it("lowercase 'au' stays undefined (collides with the Bohr-radius atomic unit)", () => {
-    expect(() => new Unit(1, 'au')).toThrow();
+  it("lowercase 'au' is the IAU astronomical unit (Bohr radius stays bohrRadius)", () => {
+    expect(new Unit(1, 'au').toNumeric('m')).toBe(149597870700);
+    expect(new Unit(1, 'au').equals(new Unit(1, 'AU'))).toBe(true);
   });
 });

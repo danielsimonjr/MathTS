@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-16",
-  "totalFiles": 1902,
+  "generated": "2026-10-17",
+  "totalFiles": 1903,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1161,
     "test-only": 0,
     "orphan": 0,
-    "test": 655,
+    "test": 656,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1186,
-    "tests": 655,
+    "tests": 656,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 20,
     "@danielsimonjr/mathts-compat": 15,
-    "@danielsimonjr/mathts-core": 90,
+    "@danielsimonjr/mathts-core": 91,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 47,
     "@danielsimonjr/mathts-expression": 545,
@@ -828,21 +828,21 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 591
+      "loc": 680
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 275
+      "loc": 285
     },
     {
       "file": "core/src/types/unit/Unit.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2723
+      "loc": 2870
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1122,14 +1122,21 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 589
+      "loc": 622
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 86
+    },
+    {
+      "file": "core/tests/types/unit-upt-delegation.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "core/tests/types/unit.test.ts",
@@ -5952,7 +5959,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 375
+      "loc": 377
     },
     {
       "file": "functions/src/geometry/spherical-voronoi.ts",
@@ -7737,7 +7744,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 317
+      "loc": 319
     },
     {
       "file": "functions/src/typed/algebra.ts",
@@ -9886,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 107
+      "loc": 112
     },
     {
       "file": "functions/tests/physical-constants.test.ts",

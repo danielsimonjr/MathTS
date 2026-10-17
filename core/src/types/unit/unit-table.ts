@@ -11,7 +11,7 @@
  *
  * Scale expressions: factors joined by `*`, optionally `/` and the
  * denominator's factors (everything after the first `/` is the denominator);
- * each factor is a decimal literal, `pi`, or a name in {@link NAMED_SCALES},
+ * each factor is a decimal literal, `pi`, `ln2`, or a name in {@link NAMED_SCALES},
  * with an optional integer power `^n`.
  *
  * Sources: the SI Brochure (9th ed., 2019); NIST SP 811 (2008) Appendix B and
@@ -57,7 +57,16 @@ export type UnitBaseKey =
   | 'FREQUENCY'
   | 'ANGLE'
   | 'BIT'
-  | 'SOLID_ANGLE';
+  | 'SOLID_ANGLE'
+  | 'NONE'
+  | 'VELOCITY'
+  | 'VISCOSITY'
+  | 'KINEMATIC_VISCOSITY'
+  | 'ACOUSTIC_IMPEDANCE'
+  | 'SPECTRAL_FLUX_DENSITY'
+  | 'LUMINOUS_FLUX'
+  | 'ILLUMINANCE'
+  | 'MOLAR_CONCENTRATION';
 
 /** The prefix-set keys a row may name (the `PREFIXES` of the Unit class). */
 export type UnitPrefixSetKey =
@@ -88,6 +97,12 @@ export interface UnitRow {
   readonly reciprocal?: true;
   /** The value is the imaginary unit times the scale (reactive power, VAR). */
   readonly imaginary?: true;
+  /**
+   * The unit counts cycles (turns), not radians. `1 Hz` is still `1/s` (the SI
+   * definition); converting it to `rad/s` multiplies by 2π per cycle. Absent
+   * means the unit is not a cycle count (`cycle` is already 2π radians).
+   */
+  readonly cycles?: true;
 }
 
 /** One prefix: the factor `radix^power`, and whether `toBest` may pick it. */
@@ -334,8 +349,15 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   decade: { base: 'TIME', prefixes: 'NONE', scale: '10*julian_year' }, // 10 Julian years
   century: { base: 'TIME', prefixes: 'NONE', scale: '100*julian_year' }, // 100 Julian years
   millennium: { base: 'TIME', prefixes: 'NONE', scale: '1000*julian_year' }, // 1000 Julian years
-  hertz: { base: 'FREQUENCY', prefixes: 'LONG', scale: '1', name: 'Hertz', reciprocal: true },
-  Hz: { base: 'FREQUENCY', prefixes: 'SHORT', scale: '1', reciprocal: true },
+  hertz: {
+    base: 'FREQUENCY',
+    prefixes: 'LONG',
+    scale: '1',
+    name: 'Hertz',
+    reciprocal: true,
+    cycles: true,
+  },
+  Hz: { base: 'FREQUENCY', prefixes: 'SHORT', scale: '1', reciprocal: true, cycles: true },
   rad: { base: 'ANGLE', prefixes: 'SHORT', scale: '1' },
   radian: { base: 'ANGLE', prefixes: 'LONG', scale: '1' },
   deg: { base: 'ANGLE', prefixes: 'SHORT', scale: 'pi/180' },
@@ -410,6 +432,56 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   bits: { base: 'BIT', prefixes: 'BINARY_LONG', scale: '1' },
   B: { base: 'BIT', prefixes: 'BINARY_SHORT', scale: '8' }, // byte, 8 bits
   bytes: { base: 'BIT', prefixes: 'BINARY_LONG', scale: '8' },
+
+  // --- Units UPT delegates (issue #347). Scales match data/units.json there. ---
+  // `bit` stays the storage unit (1 byte = 8 bit). A nat is the coherent
+  // dimensionless unit of information; an information bit is `ln2` nat, registered
+  // with createUnit's `exact` rather than by redefining storage `bit`.
+  nat: { base: 'NONE', prefixes: 'NONE', scale: '1' },
+  percent: { base: 'NONE', prefixes: 'NONE', scale: '1e-2' },
+  ppm: { base: 'NONE', prefixes: 'NONE', scale: '1e-6' },
+  ppb: { base: 'NONE', prefixes: 'NONE', scale: '1e-9' },
+
+  // IAU 2012 B2 astronomical unit, also spelled `au` (alias). The Bohr radius is
+  // the constant bohrRadius, not a unit of this name.
+  c: { base: 'VELOCITY', prefixes: 'NONE', scale: 'speed_of_light' }, // c as a unit, for eV/c
+  yr: { base: 'TIME', prefixes: 'SHORT', scale: 'julian_year' }, // Julian year; myr is a milliyear
+  rpm: { base: 'FREQUENCY', prefixes: 'SHORT', scale: '1/60', cycles: true }, // 1/60 Hz
+  mph: { base: 'VELOCITY', prefixes: 'NONE', scale: 'mile/3600' }, // international mile per hour
+  knot: { base: 'VELOCITY', prefixes: 'NONE', scale: '1852/3600' }, // nautical mile per hour
+
+  Msun: { base: 'MASS', prefixes: 'NONE', scale: '1.989e30' }, // conventional solar mass, not the IAU nominal
+  // GM☉ / G, the double 1.3271244e20 / 6.6743e-11, not the rational quotient.
+  Msun_iau: { base: 'MASS', prefixes: 'NONE', scale: '1.988409870698051e30' },
+  Mearth: { base: 'MASS', prefixes: 'NONE', scale: '5.9722e24' },
+  Mjup: { base: 'MASS', prefixes: 'NONE', scale: '1.89813e27' },
+  // Unified atomic mass unit, CODATA 2022 (the same value as atomicMass). Bare `u`
+  // is this unit; `um` stays a micrometre because the prefix match is not an exact name.
+  u: { base: 'MASS', prefixes: 'NONE', scale: '1.66053906892e-27' },
+  Da: { base: 'MASS', prefixes: 'SHORT', scale: '1.66053906892e-27' }, // dalton; kDa takes the prefix
+
+  Rsun: { base: 'LENGTH', prefixes: 'NONE', scale: '6.957e8' }, // IAU 2015 B3 nominal
+  Rearth: { base: 'LENGTH', prefixes: 'NONE', scale: '6.3781e6' },
+  Rjup: { base: 'LENGTH', prefixes: 'NONE', scale: '7.1492e7' },
+  Lsun: { base: 'POWER', prefixes: 'NONE', scale: '3.828e26' }, // IAU 2015 B3 nominal solar luminosity
+
+  gauss: { base: 'MAGNETIC_FLUX_DENSITY', prefixes: 'SHORT', scale: '1e-4' }, // 10^-4 T. Bare G is the gauss; GPa stays a gigapascal
+  P: { base: 'VISCOSITY', prefixes: 'SHORT', scale: '0.1' }, // poise = 0.1 Pa·s. An exact P wins over peta
+  St: { base: 'KINEMATIC_VISCOSITY', prefixes: 'SHORT', scale: '1e-4' }, // stokes = cm^2/s
+  rayl: { base: 'ACOUSTIC_IMPEDANCE', prefixes: 'SHORT', scale: '1' }, // 1 Pa·s/m
+  Jy: { base: 'SPECTRAL_FLUX_DENSITY', prefixes: 'SHORT', scale: '1e-26' }, // 10^-26 W/m^2/Hz
+
+  lm: { base: 'LUMINOUS_FLUX', prefixes: 'SHORT', scale: '1' }, // lumen = cd·sr
+  lx: { base: 'ILLUMINANCE', prefixes: 'SHORT', scale: '1' }, // lux = lm/m^2
+  // mas would otherwise fail to parse (it is not milli × a unit). Exact angular spellings.
+  mas: { base: 'ANGLE', prefixes: 'NONE', scale: 'pi/648000000' }, // milliarcsecond
+  uas: { base: 'ANGLE', prefixes: 'NONE', scale: 'pi/648000000000' }, // microarcsecond
+
+  M: { base: 'MOLAR_CONCENTRATION', prefixes: 'SHORT', scale: '1000' }, // 1 M = 1 mol/L. Bare M is the molar; MPa stays a megapascal
+  psia: { base: 'PRESSURE', prefixes: 'NONE', scale: 'lbf/inch^2' }, // pounds per square inch, absolute: the same scale as psi
+  ksi: { base: 'PRESSURE', prefixes: 'NONE', scale: '1000*lbf/inch^2' },
+  inHg: { base: 'PRESSURE', prefixes: 'NONE', scale: '25.4*13.5951*standard_gravity' }, // 25.4 mmHg
+  therm: { base: 'ENERGY', prefixes: 'NONE', scale: '105480400' }, // US therm (the EC therm is 1.05506e8 J)
 });
 
 /**
@@ -418,9 +490,9 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
  */
 export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze({
   meters: 'meter',
-  // Astronomical / nautical / typography aliases (B-5 port). Lowercase
-  // 'au' is deliberately ABSENT: it collides with the atomic unit of
-  // length (Bohr radius, ~5.29e-11 m), 21 orders of magnitude smaller.
+  // Astronomical unit, IAU 2012 B2. Lowercase `au` is the same row (issue #347).
+  // The Bohr radius stays the constant bohrRadius, not a unit named `au`.
+  au: 'astronomicalUnit',
   AU: 'astronomicalUnit',
   astronomicalUnits: 'astronomicalUnit',
   lightyears: 'lightyear',
@@ -539,6 +611,23 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   bit: 'bits',
   byte: 'bytes',
   calories: 'calorie',
+
+  // Issue #347 spellings. A symbol that is also a prefix (`G`, `P`, `M`, `u`, `%`)
+  // is an exact name, so the bare symbol is the unit and the prefixed form
+  // (`GPa`, `Pm`, `MPa`, `um`) still parses as prefix + unit.
+  G: 'gauss',
+  Gauss: 'gauss',
+  poise: 'P',
+  stokes: 'St',
+  '%': 'percent',
+  amu: 'u',
+  molar: 'M',
+  knots: 'knot',
+  therms: 'therm',
+  nats: 'nat',
+  Ω: 'ohm',
+  Ohm: 'ohm',
+  Å: 'angstrom',
 });
 
 const namedCache = new Map<string, ExactScale>();
