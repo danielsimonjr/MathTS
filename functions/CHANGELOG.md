@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.69.2
+
+### Patch Changes
+
+- 0b0f0e3: `subtract` accepts plain arrays, Dense matrices and Sparse matrices element-wise, with scalar broadcast in both orders, as `add` does. Before this change `subtract([1, 2, 3], [1, 1, 1])` threw an unexpected-type error.
+
 ## 0.69.1
 
 ### Patch Changes
