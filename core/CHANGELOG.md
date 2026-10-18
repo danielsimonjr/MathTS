@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.19.0
+
+### Minor Changes
+
+- 61426de: Add the units UPT was keeping locally, read a single solidus the ISO 80000 way, accept µ μ Ω ℃ and Å, convert cycle rates such as Hz to rad/s, and let createUnit register an exact scale.
+
 ## 0.18.1
 
 ### Patch Changes
