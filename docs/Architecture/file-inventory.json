@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-17",
+  "generated": "2026-10-18",
   "totalFiles": 1903,
   "byDisposition": {
     "reachable": 25,
@@ -7758,7 +7758,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1695
+      "loc": 1713
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10271,7 +10271,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 134
+      "loc": 237
     },
     {
       "file": "functions/tests/typed-arithmetic.test.ts",

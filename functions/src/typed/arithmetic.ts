@@ -109,8 +109,9 @@ function elementwiseMatrix(
 }
 
 // Leaf operations for the element-wise walks above — deferred closures so they
-// resolve the binary `add` / `multiply` at call time (after both are defined).
+// resolve the binary `add` / `subtract` / `multiply` at call time (after all are defined).
 const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
+const subOp: ScalarOp = (x, y) => (subtract as unknown as ScalarOp)(x, y);
 const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
 
 // =============================================================================
@@ -297,6 +298,23 @@ export const subtract = mathTyped('subtract', {
     const result = await computePool.subtract(a, b);
     return result.result;
   },
+
+  // Element-wise subtraction over plain (possibly nested / N-D) arrays, with scalar
+  // broadcast. Leaves fold through the binary `subtract`, so number / Complex /
+  // Fraction / BigNumber elements all work. Unlike `add`, there is no variadic form:
+  // subtraction is binary (mathjs parity).
+  'Array, Array': (a: unknown[], b: unknown[]): unknown => elementwise(subOp, a, b),
+  'Array, number': (a: unknown[], b: f64): unknown => elementwise(subOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(subOp, a, b),
+
+  // Element-wise matrix subtraction (mathjs parity). Sparse⊖sparse stays sparse so
+  // the CSparse algebra factories get CSC output, as they do for `add`.
+  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
+  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(subOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(subOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
 });
 
 // =============================================================================
