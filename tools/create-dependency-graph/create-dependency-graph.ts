@@ -27,7 +27,15 @@
  * nothing). `.d.ts` ambient declarations are excluded from the dormant count.
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+  type Dirent,
+} from 'fs';
 import yaml from 'js-yaml';
 import { basename, dirname, join, relative } from 'path';
 
@@ -54,6 +62,29 @@ const GENERATED_REPORT_BANNER = `<!-- repo-map:no-verification -->
 /** Write a generated Markdown report with the do-not-edit banner. */
 function writeGeneratedMarkdown(path: string, body: string): void {
   writeFileSync(path, GENERATED_REPORT_BANNER + body);
+}
+
+/**
+ * Order two names by UTF-16 code unit. The comparison does not read the locale, so every machine sorts the same way.
+ */
+function compareNames(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * List a directory in a fixed order.
+ *
+ * The reports list modules, sections and files in the order a walk meets them, so they follow the order in which
+ * `readdirSync` returns the entries. The runtime and the file system decide that order, and the generator does not
+ * control it. Every directory walk in this file goes through this function or through `readDirEntriesSorted`.
+ */
+function readDirSorted(dir: string): string[] {
+  return readdirSync(dir).sort(compareNames);
+}
+
+/** `readDirSorted` for a walk that needs the entry type. */
+function readDirEntriesSorted(dir: string): Dirent[] {
+  return readdirSync(dir, { withFileTypes: true }).sort((a, b) => compareNames(a.name, b.name));
 }
 
 // Types
@@ -387,7 +418,7 @@ function configReferencedEntries(rootDir: string): string[] {
   const out = new Set<string>();
   let names: string[];
   try {
-    names = readdirSync(rootDir);
+    names = readDirSorted(rootDir);
   } catch {
     return [];
   }
@@ -470,7 +501,7 @@ function detectWorkspaces(rootDir: string): Map<string, WorkspacePackage> {
         const fullParent = join(rootDir, parentDir);
         if (!existsSync(fullParent)) continue;
 
-        const entries = readdirSync(fullParent);
+        const entries = readDirSorted(fullParent);
         for (const entry of entries) {
           const pkgDir = join(parentDir, entry);
           const pkgJsonPath = join(rootDir, pkgDir, 'package.json');
@@ -527,7 +558,7 @@ function getAllTsFiles(dir: string, files: string[] = []): string[] {
     return files;
   }
 
-  const entries = readdirSync(dir);
+  const entries = readDirSorted(dir);
 
   for (const entry of entries) {
     // Skip node_modules directories
@@ -558,7 +589,7 @@ function getAllTsFiles(dir: string, files: string[] = []): string[] {
 /** Recursively collect non-test, non-declaration `.ts` source files under `dir`. */
 function getAllSourceTsFiles(dir: string, files: string[] = []): string[] {
   if (!existsSync(dir)) return files;
-  for (const entry of readdirSync(dir)) {
+  for (const entry of readDirSorted(dir)) {
     if (entry === 'node_modules') continue;
     const fullPath = join(dir, entry);
     if (statSync(fullPath).isDirectory()) {
@@ -580,7 +611,7 @@ function getAllTestFiles(dir: string, files: string[] = []): string[] {
     return files;
   }
 
-  const entries = readdirSync(dir);
+  const entries = readDirSorted(dir);
 
   for (const entry of entries) {
     // Skip node_modules directories
@@ -2869,7 +2900,7 @@ function analyzeWasmRuntime(rootDir: string): {
   const asExecRe = /\b(?:withAsF64|withAsI32|runUnaryPtr|runChainPtr|makeUnaryArrayDispatch)\b/;
   const defRe = /\b(?:function|const)\s+(\w+Dispatch)\b/g;
   const walk = (dir: string): void => {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
+    for (const e of readDirEntriesSorted(dir)) {
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
       else if (e.name.endsWith('.ts')) {
@@ -2929,7 +2960,7 @@ function countAssemblySourceFiles(rootDir: string): number {
   if (!existsSync(dir)) return 0;
   let n = 0;
   const walk = (d: string): void => {
-    for (const e of readdirSync(d, { withFileTypes: true })) {
+    for (const e of readDirEntriesSorted(d)) {
       if (e.isDirectory()) walk(join(d, e.name));
       else if (e.name.endsWith('.ts')) n++;
     }
@@ -3011,7 +3042,7 @@ function analyzeWasmPairing(rootDir: string): WasmPairing | null {
   const jsOnly: string[] = [];
   const byFile: Record<string, { wasm: number; parallel: number; jsOnly: number }> = {};
 
-  for (const fname of readdirSync(typedDir)) {
+  for (const fname of readDirSorted(typedDir)) {
     if (!fname.endsWith('.ts')) continue;
     const src = readFileSync(join(typedDir, fname), 'utf-8');
     const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
@@ -3217,7 +3248,7 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
   const gpuDispatchRe = /\b\w+GpuDispatch\b/g;
   const gpuRefRe = /\b(?:gpuPool|getGlobalGPUBackend|GPUBackend|gpuMatrixBackend|getGpuDevice)\b/;
 
-  for (const fname of readdirSync(typedDir)) {
+  for (const fname of readDirSorted(typedDir)) {
     if (!fname.endsWith('.ts')) continue;
     const src = readFileSync(join(typedDir, fname), 'utf-8');
     const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
@@ -3275,7 +3306,7 @@ function analyzeWebGPUPairing(rootDir: string): WebGPUPairing | null {
   const anyFnRe = /(export\s+)?(?:async\s+)?function\s+(\w+)/g;
   for (const dir of standaloneDirs) {
     const rel = relative(join(rootDir, 'functions', 'src'), dir).replace(/\\/g, '/');
-    for (const fname of readdirSync(dir)) {
+    for (const fname of readDirSorted(dir)) {
       if (!fname.endsWith('.ts')) continue;
       const src = readFileSync(join(dir, fname), 'utf-8');
 
@@ -3576,7 +3607,7 @@ function analyzeParallelPairing(rootDir: string): ParallelPairing | null {
   const byFile: Record<string, { effective: number; disabled: number; none: number }> = {};
   const opUsers = new Map<string, Set<string>>();
 
-  for (const fname of readdirSync(typedDir)) {
+  for (const fname of readDirSorted(typedDir)) {
     if (!fname.endsWith('.ts')) continue;
     const src = readFileSync(join(typedDir, fname), 'utf-8');
     const re = /export const (\w+) = mathTyped\(\s*'\w+'\s*,\s*\{/g;
@@ -4351,7 +4382,7 @@ interface FileInventory {
 function walkRepoTsFiles(rootDir: string): string[] {
   const out: string[] = [];
   const walk = (dir: string): void => {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
+    for (const e of readDirEntriesSorted(dir)) {
       if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
@@ -4374,7 +4405,7 @@ function collectCensusFiles(rootDir: string, workspaces: Map<string, WorkspacePa
   const set = new Set<string>();
   const walk = (dir: string): void => {
     if (!existsSync(dir)) return;
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
+    for (const e of readDirEntriesSorted(dir)) {
       if (e.name === 'node_modules' || e.name === 'dist' || e.name.startsWith('.')) continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p);
@@ -4386,7 +4417,7 @@ function collectCensusFiles(rootDir: string, workspaces: Map<string, WorkspacePa
   for (const [, ws] of workspaces) walk(join(rootDir, ws.directory));
   for (const d of ['tests', 'tools', 'examples', 'docs']) walk(join(rootDir, d));
   // Root-level `.ts` files (vitest.config.ts, vitest.config.browser.ts, …).
-  for (const e of readdirSync(rootDir, { withFileTypes: true })) {
+  for (const e of readDirEntriesSorted(rootDir)) {
     if (e.isFile() && e.name.endsWith('.ts') && !e.name.endsWith('.d.ts')) {
       set.add(e.name);
     }
