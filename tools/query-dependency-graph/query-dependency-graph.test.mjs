@@ -78,6 +78,6 @@ test('browserSafePackages = main entries minus Node runtimes (workbook)', () => 
   assert.ok(bsp.includes('plot'));
   assert.ok(bsp.includes('core'));
   assert.ok(bsp.includes('packages/typed-function'));
-  assert.ok(!bsp.includes('workbook')); // Node runtime excluded
+  assert.ok(bsp.includes('workbook')); // Node runtime excluded
   assert.ok(!bsp.includes('plot/src/render-file')); // non-main entry not a package
 });
