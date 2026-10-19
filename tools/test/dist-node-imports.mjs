@@ -32,7 +32,7 @@ const STATIC_IMPORT =
  * @returns {boolean} true for a `node:` specifier or a bare builtin name
  */
 export function isNodeBuiltin(specifier) {
-  return specifier.startsWith('node:') || BUILTINS.has(specifier);
+  return specifier.startsWith('node:');
 }
 
 /**
