@@ -5,12 +5,18 @@ name: Release
 # the push actually changed a package version.
 #
 # What each push does:
-# 1. changesets/action opens or updates the "chore: release packages" PR when
-#    `.changeset/*.md` files are pending. With none pending, that step is a no-op.
-# 2. `changeset git-tag` tags every public workspace package whose current
+# 1. `changeset git-tag` tags every public workspace package whose current
 #    version has no tag, and this workflow opens a GitHub Release for each tag
-#    it owns (tagger github-actions[bot]). Tags Daniel cut by hand are not
-#    given a new release.
+#    it owns (tagger github-actions[bot]). Tags cut by hand are not given a new
+#    release. This step runs FIRST, on the checkout of the pushed commit. The
+#    changesets action rewrites package.json in the working tree, and a tag cut
+#    after it would name the next version on the commit before the version
+#    commit. So a push with a pending changeset never tags the next version,
+#    and the push that merges the version PR tags the version commit. If this
+#    step fails, the version PR step after it does not run; "Re-run failed
+#    jobs" repeats both.
+# 2. changesets/action opens or updates the "chore: release packages" PR when
+#    `.changeset/*.md` files are pending. With none pending, that step is a no-op.
 # 3. If this push changed a package.json "version" field, this run calls
 #    Publish. `changeset publish` then ships every workspace version that is
 #    not on npm yet.
@@ -87,6 +93,19 @@ jobs:
       # No build step here: `changeset version` only rewrites package.json,
       # CHANGELOG.md, and (via version-packages) bun.lock. Publish builds.
 
+      # ORDER MATTERS: this step must stay BEFORE the changesets action below. The action
+      # runs the version script, which leaves the next versions uncommitted in the working
+      # tree, and `changeset git-tag` tags HEAD with the versions it finds there. The script
+      # refuses to tag when a package.json differs from HEAD, and
+      # tools/test/ensure-package-releases.test.mjs pins this order.
+      - name: Tag packages and open GitHub releases
+        id: tags
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: bash .github/scripts/ensure-package-releases.sh
+
       - name: Create Release Pull Request
         id: changesets
         # SHA-pinned (third-party action). `v1` is a MUTABLE BRANCH, not a tag.
@@ -104,14 +123,6 @@ jobs:
           version-script: bun run version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Tag packages and open GitHub releases
-        id: tags
-        env:
-          BEFORE_SHA: ${{ github.event.before }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: bash .github/scripts/ensure-package-releases.sh
 
   publish:
     name: Publish

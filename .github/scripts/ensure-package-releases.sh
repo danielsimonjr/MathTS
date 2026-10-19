@@ -4,8 +4,19 @@
 #
 # `changeset git-tag` (changesets v3; `changeset tag` is a deprecated alias)
 # annotates a tag for each public package whose package.json version has no tag
-# yet. Tags are cut as github-actions[bot]. Releases are opened only for tags
-# with that tagger, so tags Daniel cut locally are left alone.
+# yet. It names the tag from the version in the WORKING TREE and puts it on HEAD.
+# Tags are cut as github-actions[bot]. Releases are opened only for tags with
+# that tagger, so tags cut by hand are left alone.
+#
+# The checkout must hold exactly the commit that was pushed. The changesets
+# action rewrites package.json in the working tree (it commits through the API,
+# so HEAD does not move). A tag cut after that names the NEXT version and lands
+# on the commit before the version commit. So the workflow runs this script
+# BEFORE the action, and the script refuses to tag when a package.json differs
+# from HEAD. A tag it creates goes on the commit that set the version (HEAD, when
+# this run is that commit's own run). It also checks every tag it creates:
+# package.json at the tag target must hold the version in the tag name
+# (check-new-tag-targets.mjs).
 #
 # A release created with GITHUB_TOKEN does not fire `release` for other
 # workflows. Publishing is not this script's job.
@@ -13,6 +24,10 @@ set -euo pipefail
 
 BOT_EMAIL="41898282+github-actions[bot]@users.noreply.github.com"
 BOT_NAME="github-actions[bot]"
+
+# What this step sees, so the log answers "which commit, which files differ".
+echo "HEAD=$(git rev-parse HEAD)"
+git status --short
 
 bumped=false
 if [ -n "${BEFORE_SHA:-}" ] && [[ "${BEFORE_SHA}" =~ ^[0-9a-f]{40}$ ]] && [ "${BEFORE_SHA}" != "0000000000000000000000000000000000000000" ]; then
@@ -68,17 +83,49 @@ if [ "${DRY_RUN:-}" = "1" ]; then
   exit 0
 fi
 
+# A package.json that differs from HEAD holds a version that no commit holds yet.
+# A tag cut now would name that version and sit on the wrong commit.
+if ! git diff --quiet HEAD -- ':(glob)**/package.json'; then
+  echo "::error::A package.json differs from HEAD, so a tag cut now would name a version that no commit holds. Run this script before the changesets action."
+  git diff --stat HEAD -- ':(glob)**/package.json'
+  exit 1
+fi
+
 git config user.name "${BOT_NAME}"
 git config user.email "${BOT_EMAIL}"
 
-bunx changeset git-tag
-
 notes="$(mktemp)"
 packages="$(mktemp)"
-trap 'rm -f "${notes}" "${packages}"' EXIT
+tags_before="$(mktemp)"
+tags_after="$(mktemp)"
+new_tags="$(mktemp)"
+trap 'rm -f "${notes}" "${packages}" "${tags_before}" "${tags_after}" "${new_tags}"' EXIT
 created=0
 
+git for-each-ref --format='%(refname:strip=2)' refs/tags | LC_ALL=C sort > "${tags_before}"
+bunx changeset git-tag
+git for-each-ref --format='%(refname:strip=2)' refs/tags | LC_ALL=C sort > "${tags_after}"
+LC_ALL=C comm -13 "${tags_before}" "${tags_after}" > "${new_tags}"
+
 list_packages > "${packages}"
+
+# A new tag is on HEAD. HEAD is not the version commit when an earlier run never tagged that
+# version (its run was cancelled, for example). These tags are new in this run and not pushed
+# yet, so put each one on the commit that set its version. No existing tag moves. `git log -S`
+# does not match merge commits. With the squash merges this repository uses, the setter is the
+# squash commit. After a true merge commit it would be the version commit on the side branch.
+while IFS=$'\t' read -r name version dir; do
+  tag="${name}@${version}"
+  grep -qxF -- "${tag}" "${new_tags}" || continue
+  setter="$(git log -1 --format=%H -S"\"version\": \"${version}\"" -- "${dir//\\//}/package.json")"
+  if [ -n "${setter}" ] && [ "${setter}" != "$(git rev-parse "${tag}^{commit}")" ]; then
+    echo "Tag ${tag}: moving the new tag from $(git rev-parse --short "${tag}^{commit}") to ${setter:0:8}, the commit that set ${version}."
+    git tag -f -a "${tag}" -m "${tag}" "${setter}"
+  fi
+done < "${packages}"
+
+# Tags that already existed are not examined here: they were cut before this check.
+node "$(dirname "${BASH_SOURCE[0]}")/check-new-tag-targets.mjs" "${packages}" "${new_tags}"
 
 while IFS=$'\t' read -r name version dir; do
   [ -n "${name}" ] || continue
