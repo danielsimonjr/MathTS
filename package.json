@@ -63,6 +63,7 @@
     "check:file-census": "bun tools/create-dependency-graph/create-dependency-graph.ts --check-census --root=.",
     "docs:duplicates": "bun run docs:deps",
     "docs:graph": "node tools/query-dependency-graph/query-dependency-graph.mjs",
+    "docs:deps:test": "bun test ./tools/create-dependency-graph/",
     "docs:graph:test": "bun test ./tools/query-dependency-graph/query-dependency-graph.test.mjs",
     "check:browser-safety": "node tools/query-dependency-graph/query-dependency-graph.mjs --check-browser-safety",
     "check:duplicates": "node tools/create-dependency-graph/check-duplicates.mjs",

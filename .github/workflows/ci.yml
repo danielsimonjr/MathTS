@@ -82,6 +82,11 @@ jobs:
       - name: Docs export-index drift check
         run: bun run docs:functions:check
 
+      # The four node:test files of the dependency-graph generator. Nothing else ran them, so
+      # a generator edit could break the reports (or their stable order) with every check green.
+      - name: Dependency-graph generator tests
+        run: bun run docs:deps:test
+
       - name: Browser-safety (no node leaks from browser entries)
         run: bun run check:browser-safety
 
