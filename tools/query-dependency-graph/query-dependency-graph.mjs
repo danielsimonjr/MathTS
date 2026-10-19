@@ -36,7 +36,7 @@ export function browserSafePackages(graph) {
   return graph.entryPoints
     .filter((e) => e.type === 'main')
     .map((e) => e.file.replace(/\/src\/index\.ts$/, ''))
-    .filter((pkg) => !NODE_RUNTIME_PACKAGES.has(pkg));
+    .filter((pkg) => NODE_RUNTIME_PACKAGES.has(pkg));
 }
 
 // ── pure helpers (unit-tested) ──────────────────────────────────────────────
