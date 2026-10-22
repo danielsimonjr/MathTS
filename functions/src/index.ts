@@ -51,6 +51,9 @@ export type { ScalarScope } from './scalar-eval.js';
 export { compileScalar } from './scalar-compile.js';
 export type { CompileScalarOptions, ScalarBatchResult, CompiledScalar } from './scalar-compile.js';
 
+export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';
+export type { FrontCandidate, ScoredCandidate } from './pareto-front.js';
+
 // First-order uncertainty propagation. Kept off `typed/index.js` for the same
 // reason as `cas.ts`: this module imports the expression evaluator, and the
 // evaluator imports the typed barrel.

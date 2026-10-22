@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-22",
-  "totalFiles": 1908,
+  "totalFiles": 1910,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1163,
+    "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 659,
+    "test": 660,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1188,
-    "tests": 659,
+    "src": 1189,
+    "tests": 660,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 48,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 794,
+    "@danielsimonjr/mathts-functions": 796,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -6050,7 +6050,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 646
+      "loc": 649
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6653,6 +6653,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 226
+    },
+    {
+      "file": "functions/src/pareto-front.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 286
     },
     {
       "file": "functions/src/plain/number/arithmetic.ts",
@@ -9908,6 +9915,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 117
+    },
+    {
+      "file": "functions/tests/pareto-front.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 270
     },
     {
       "file": "functions/tests/physical-constants-codata2022.test.ts",

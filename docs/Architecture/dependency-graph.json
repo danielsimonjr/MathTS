@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-22",
-    "totalFiles": 1188,
+    "totalFiles": 1189,
     "totalModules": 83,
-    "totalExports": 6155
+    "totalExports": 6165
   },
   "entryPoints": [
     {
@@ -9296,6 +9296,11 @@
             "reExport": true
           },
           {
+            "file": "./pareto-front.js",
+            "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/propagate-uncertainty.js",
             "imports": [
               "propagateUncertainty",
@@ -9834,6 +9839,12 @@
             "typeOnly": true
           },
           {
+            "file": "./pareto-front.js",
+            "imports": ["FrontCandidate", "ScoredCandidate"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -10193,6 +10204,10 @@
           "scalar",
           "ScalarEvalError",
           "compileScalar",
+          "paretoFront",
+          "scoreFront",
+          "selectFrontModel",
+          "ParetoFrontError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10488,6 +10503,8 @@
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
+          "FrontCandidate",
+          "ScoredCandidate",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -10624,6 +10641,10 @@
           "scalar",
           "ScalarEvalError",
           "compileScalar",
+          "paretoFront",
+          "scoreFront",
+          "selectFrontModel",
+          "ParetoFrontError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10919,6 +10940,8 @@
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
+          "FrontCandidate",
+          "ScoredCandidate",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11148,6 +11171,17 @@
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
         "interfaces": ["OptimizeResult", "LMResult"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
+      },
+      "functions/src/pareto-front.ts": {
+        "description": "Pareto hall of fame, PySR log-loss scores, and model selection.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
+        "classes": ["ParetoFrontError"],
+        "interfaces": ["FrontCandidate", "ScoredCandidate"],
+        "functions": ["paretoFront", "scoreFront", "selectFrontModel"]
       },
       "functions/src/regression-extra.ts": {
         "description": "Ordinary least-squares regression (Wave D / regression primitives).",
@@ -40190,6 +40224,7 @@
           "functions/src/linalg-svd-extra.ts",
           "functions/src/numeric-extra.ts",
           "functions/src/optimization-extra.ts",
+          "functions/src/pareto-front.ts",
           "functions/src/regression-extra.ts",
           "functions/src/scalar-compile.ts",
           "functions/src/scalar-eval.ts",
@@ -41413,18 +41448,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1188,
+    "totalTypeScriptFiles": 1189,
     "totalModules": 83,
-    "totalLinesOfCode": 199177,
-    "totalExports": 6155,
-    "totalClasses": 58,
-    "totalInterfaces": 532,
-    "totalFunctions": 1956,
+    "totalLinesOfCode": 199466,
+    "totalExports": 6165,
+    "totalClasses": 59,
+    "totalInterfaces": 534,
+    "totalFunctions": 1959,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2598,
-    "totalTypeOnlyImports": 603,
+    "totalReExports": 2604,
+    "totalTypeOnlyImports": 604,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
