@@ -116,7 +116,13 @@ const DOMAIN_SUPPLEMENT = {
   'Matrix Construction & Manipulation': ['apply', 'index'],
   'Type Conversion': ['parseNumberWithConfig'],
   'Type Checking & Utilities': ['config', 'fuseUnaryChain', 'help', 'validateClosureSource'],
-  'Expression Evaluation': ['physicsScope'],
+  'Expression Evaluation': [
+    'physicsScope',
+    'paretoFront',
+    'scoreFront',
+    'selectFrontModel',
+    'ParetoFrontError',
+  ],
   'Parallel Execution Model': [
     'getComputePool', 'initializePool', 'initializeSignal', 'initializeStatistics',
     'shouldParallelize', 'terminatePool', 'terminateSignal', 'terminateStatistics',
