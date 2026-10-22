@@ -2873,12 +2873,9 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 | ------------------------------- | -------------------------------------------------------------------------------- |
 | `evaluate(expr[, scope])`       | Evaluate an expression string                                                    |
 | `evaluateScalar(node[, scope])` | Evaluate a scalar node from `scalar` (typed tree; a formula string is rejected)  |
+| `compileScalar(node, options)`  | Batch-evaluate a scalar node over `Float64Array` columns with per-row validity   |
 | `scalar`                        | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                   |
 | `ScalarEvalError`               | Thrown when a scalar node cannot be evaluated                                    |
-| `paretoFront`                   | Hall of fame: one survivor per complexity, sorted by complexity ascending        |
-| `scoreFront`                    | PySR `calculate_scores` in array order (log or linear loss scale)                |
-| `selectFrontModel`              | PySR `idx_model_selection`: `accuracy`, `score`, or `best`                       |
-| `ParetoFrontError`              | Thrown by `scoreFront` / `selectFrontModel` for invalid input or selection       |
 | `compileExpr(expr)`             | Compile once, evaluate many                                                      |
 | `parse(expr)`                   | Parse an expression into an AST node                                             |
 | `parser()`                      | Create a stateful parser with a scope retained across calls                      |
@@ -2968,7 +2965,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1089 exports).
+> `@danielsimonjr/mathts-functions` (1090 exports).
 
 ### Functions by category
 
@@ -3022,7 +3019,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (12): `compileExpr`, `evaluate`, `evaluateScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scoreFront`, `selectFrontModel`
+**Expression Evaluation** (13): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scoreFront`, `selectFrontModel`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

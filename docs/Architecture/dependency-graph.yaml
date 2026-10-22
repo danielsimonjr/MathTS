@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-22'
-  totalFiles: 1188
+  totalFiles: 1189
   totalModules: 83
-  totalExports: 6160
+  totalExports: 6165
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8709,6 +8709,10 @@ modules:
             - scalar
             - ScalarEvalError
           reExport: true
+        - file: ./scalar-compile.js
+          imports:
+            - compileScalar
+          reExport: true
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -9237,6 +9241,13 @@ modules:
             - ScalarScope
           reExport: true
           typeOnly: true
+        - file: ./scalar-compile.js
+          imports:
+            - CompileScalarOptions
+            - ScalarBatchResult
+            - CompiledScalar
+          reExport: true
+          typeOnly: true
         - file: ./pareto-front.js
           imports:
             - FrontCandidate
@@ -9586,6 +9597,7 @@ modules:
         - evaluateScalar
         - scalar
         - ScalarEvalError
+        - compileScalar
         - paretoFront
         - scoreFront
         - selectFrontModel
@@ -9882,6 +9894,9 @@ modules:
         - wishartSample
         - PhysicsEvaluateOptions
         - ScalarScope
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
         - FrontCandidate
         - ScoredCandidate
         - DualFn
@@ -10018,6 +10033,7 @@ modules:
         - evaluateScalar
         - scalar
         - ScalarEvalError
+        - compileScalar
         - paretoFront
         - scoreFront
         - selectFrontModel
@@ -10314,6 +10330,9 @@ modules:
         - wishartSample
         - PhysicsEvaluateOptions
         - ScalarScope
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
         - FrontCandidate
         - ScoredCandidate
         - DualFn
@@ -10584,6 +10603,29 @@ modules:
       functions:
         - fitLine
         - linearRegression
+    functions/src/scalar-compile.ts:
+      description: Batch evaluation of {@link ScalarNode} trees over `Float64Array` columns.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./scalar-eval.js
+          imports:
+            - ScalarEvalError
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - LoweredScalarFn
+            - ScalarNode
+            - ScalarOperator
+      exports:
+        - compileScalar
+      interfaces:
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
+      functions:
+        - compileScalar
     functions/src/scalar-eval.ts:
       description: Evaluate a scalar node with MathTS numeric functions.
       externalDependencies: []
@@ -37981,6 +38023,7 @@ dependencyGraph:
         - functions/src/optimization-extra.ts
         - functions/src/pareto-front.ts
         - functions/src/regression-extra.ts
+        - functions/src/scalar-compile.ts
         - functions/src/scalar-eval.ts
         - functions/src/signal-filter-extra.ts
         - functions/src/timeseries-extra.ts
@@ -39063,18 +39106,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1188
+  totalTypeScriptFiles: 1189
   totalModules: 83
-  totalLinesOfCode: 199001
-  totalExports: 6160
+  totalLinesOfCode: 199466
+  totalExports: 6165
   totalClasses: 59
-  totalInterfaces: 531
-  totalFunctions: 1958
+  totalInterfaces: 534
+  totalFunctions: 1959
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2600
-  totalTypeOnlyImports: 603
+  totalReExports: 2604
+  totalTypeOnlyImports: 604
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

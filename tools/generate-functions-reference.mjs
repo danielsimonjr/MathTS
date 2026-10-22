@@ -118,6 +118,7 @@ const DOMAIN_SUPPLEMENT = {
   'Type Checking & Utilities': ['config', 'fuseUnaryChain', 'help', 'validateClosureSource'],
   'Expression Evaluation': [
     'physicsScope',
+    'compileScalar',
     'paretoFront',
     'scoreFront',
     'selectFrontModel',
