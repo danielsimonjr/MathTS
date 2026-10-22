@@ -55,6 +55,18 @@ export type {
   ScalarNode,
   ScalarOperator,
 } from './scalar-builder.js';
+export {
+  forEachScalar,
+  mapScalar,
+  scalarSize,
+  scalarDepth,
+  scalarComplexity,
+  scalarSymbols,
+  scalarCanonical,
+  scalarCanonicalKey,
+  scalarEquals,
+} from './scalar-structure.js';
+export type { ScalarComplexityWeights } from './scalar-structure.js';
 
 // Expression-language transforms (1-based indices/dims, lazy logical operators).
 // Each factory takes its base function as an injected dependency; hosts assemble

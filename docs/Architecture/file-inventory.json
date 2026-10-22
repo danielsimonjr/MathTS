@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-18",
-  "totalFiles": 1903,
+  "generated": "2026-10-22",
+  "totalFiles": 1906,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1161,
+    "build-entry": 1162,
     "test-only": 0,
     "orphan": 0,
-    "test": 656,
+    "test": 658,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1186,
-    "tests": 656,
+    "src": 1187,
+    "tests": 658,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -26,8 +26,8 @@
     "@danielsimonjr/mathts-compat": 15,
     "@danielsimonjr/mathts-core": 91,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 47,
-    "@danielsimonjr/mathts-expression": 545,
+    "(root)": 48,
+    "@danielsimonjr/mathts-expression": 547,
     "@danielsimonjr/mathts-functions": 792,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -4076,7 +4076,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 63
+      "loc": 75
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4245,6 +4245,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 237
+    },
+    {
+      "file": "expression/src/scalar-structure.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 501
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4903,6 +4910,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 106
+    },
+    {
+      "file": "expression/tests/scalar-structure.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 488
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",
@@ -12631,6 +12645,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 15
+    },
+    {
+      "file": "tests/integration/scalar-canonical-parity.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 85
     },
     {
       "file": "tests/wasm/parallel-processing.test.ts",

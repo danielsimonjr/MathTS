@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-18'
-  totalFiles: 1186
+  lastUpdated: '2026-10-22'
+  totalFiles: 1187
   totalModules: 83
-  totalExports: 6131
+  totalExports: 6150
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -23555,6 +23555,18 @@ modules:
             - SCALAR_FUNCTION_LOWERING
             - ScalarBuildError
           reExport: true
+        - file: ./scalar-structure.js
+          imports:
+            - forEachScalar
+            - mapScalar
+            - scalarSize
+            - scalarDepth
+            - scalarComplexity
+            - scalarSymbols
+            - scalarCanonical
+            - scalarCanonicalKey
+            - scalarEquals
+          reExport: true
         - file: ./scalar-builder.js
           imports:
             - LoweredScalarFn
@@ -23562,6 +23574,11 @@ modules:
             - ScalarFunctionName
             - ScalarNode
             - ScalarOperator
+          reExport: true
+          typeOnly: true
+        - file: ./scalar-structure.js
+          imports:
+            - ScalarComplexityWeights
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -23592,11 +23609,21 @@ modules:
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
         - ScalarBuildError
+        - forEachScalar
+        - mapScalar
+        - scalarSize
+        - scalarDepth
+        - scalarComplexity
+        - scalarSymbols
+        - scalarCanonical
+        - scalarCanonicalKey
+        - scalarEquals
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
         - ScalarNode
         - ScalarOperator
+        - ScalarComplexityWeights
       reExported:
         - '* from ./types.js'
         - '* from ./keywords.js'
@@ -23633,11 +23660,21 @@ modules:
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
         - ScalarBuildError
+        - forEachScalar
+        - mapScalar
+        - scalarSize
+        - scalarDepth
+        - scalarComplexity
+        - scalarSymbols
+        - scalarCanonical
+        - scalarCanonicalKey
+        - scalarEquals
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
         - ScalarNode
         - ScalarOperator
+        - ScalarComplexityWeights
     expression/src/keywords.ts:
       description: Reserved keywords not allowed to use in the parser
       externalDependencies: []
@@ -23738,6 +23775,41 @@ modules:
       constants:
         - SCALAR_FUNCTION_LOWERING
         - SCALAR_FUNCTIONS
+    expression/src/scalar-structure.ts:
+      description: 'Structural utilities over {@link ScalarNode}: traversal, metrics, and'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./scalar-builder.js
+          imports:
+            - ScalarBuildError
+            - SCALAR_FUNCTION_LOWERING
+            - LoweredScalarFn
+            - ScalarNode
+            - ScalarOperator
+      workspaceDependencies: []
+      exports:
+        - forEachScalar
+        - mapScalar
+        - scalarSize
+        - scalarDepth
+        - scalarComplexity
+        - scalarSymbols
+        - scalarCanonical
+        - scalarCanonicalKey
+        - scalarEquals
+      interfaces:
+        - ScalarComplexityWeights
+      functions:
+        - forEachScalar
+        - mapScalar
+        - scalarSize
+        - scalarDepth
+        - scalarComplexity
+        - scalarSymbols
+        - scalarCanonical
+        - scalarCanonicalKey
+        - scalarEquals
     expression/src/types.ts:
       description: A function that also has a `signatures` record.
       externalDependencies: []
@@ -38301,6 +38373,7 @@ dependencyGraph:
         - expression/src/operators.ts
         - expression/src/parse.ts
         - expression/src/scalar-builder.ts
+        - expression/src/scalar-structure.ts
         - expression/src/types.ts
     - name: Expression/compiler
       files:
@@ -38944,18 +39017,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1186
+  totalTypeScriptFiles: 1187
   totalModules: 83
-  totalLinesOfCode: 198199
-  totalExports: 6131
+  totalLinesOfCode: 198712
+  totalExports: 6150
   totalClasses: 58
-  totalInterfaces: 528
-  totalFunctions: 1946
+  totalInterfaces: 529
+  totalFunctions: 1955
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2584
-  totalTypeOnlyImports: 601
+  totalReExports: 2594
+  totalTypeOnlyImports: 602
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
