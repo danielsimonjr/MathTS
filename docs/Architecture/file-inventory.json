@@ -10054,7 +10054,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 600
+      "loc": 609
     },
     {
       "file": "functions/tests/scalar-eval.test.ts",

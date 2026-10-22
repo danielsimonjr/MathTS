@@ -242,6 +242,15 @@ describe('compileScalar', () => {
     ).toBe(4);
     expect(compileScalar(scalar.op('+', []), { variables: [] }).evaluate([]).values[0]).toBe(0);
     expect(compileScalar(scalar.op('*', []), { variables: [] }).evaluate([]).values[0]).toBe(1);
+    const plusX = scalar.op('+', [scalar.symbol('x')]);
+    const plusXCol = Float64Array.of(3, Number.NaN, Infinity);
+    const plusXBatch = compileScalar(plusX, { variables: ['x'] }).evaluate([plusXCol]);
+    expect(plusXBatch.valid).toEqual(Uint8Array.of(1, 0, 0));
+    expect(plusXBatch.values[0]).toBe(3);
+    expect(Number.isNaN(plusXBatch.values[1])).toBe(true);
+    expect(Number.isNaN(plusXBatch.values[2])).toBe(true);
+    expect(() => evaluateScalar(plusX, { x: Number.NaN })).toThrow(ScalarEvalError);
+    expectBatchMatchesEvaluateScalar(plusX, { variables: ['x'] }, [plusXCol], plusXBatch);
     expectBatchMatchesEvaluateScalar(overflow, { variables: [] }, [], compiledOver.evaluate([]));
     expectBatchMatchesEvaluateScalar(ok, { variables: [] }, [], compiledOk.evaluate([]));
     const unaryMinus = scalar.op('-', [scalar.number(4)]);
