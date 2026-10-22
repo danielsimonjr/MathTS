@@ -426,7 +426,7 @@ describe('scalar-structure', () => {
       kind: 'call',
       fn: 'ln',
       arg: { kind: 'symbol', name: 'x' },
-    } as ScalarNode;
+    } as unknown as ScalarNode;
     expect(() => scalarCanonical(bad)).toThrow(ScalarBuildError);
     expect(() => scalarCanonical(bad)).toThrow(/unknown scalar function 'ln'/);
   });
