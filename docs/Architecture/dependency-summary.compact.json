@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-18", "f": 1186, "e": 6131, "re": 2584 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-22", "f": 1187, "e": 6141, "re": 2590 },
   "s": {
-    "loc": 198199,
-    "cls": 58,
-    "int": 528,
-    "fn": 1946,
+    "loc": 198495,
+    "cls": 59,
+    "int": 530,
+    "fn": 1949,
     "tg": 160,
     "en": 0,
     "co": 1616,
-    "toi": 601
+    "toi": 602
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -525,7 +525,7 @@
       ]
     },
     "functions": {
-      "f": 20,
+      "f": 21,
       "exp": [
         "gradient",
         "hessian",
@@ -548,7 +548,7 @@
         "kendallTau",
         "linregress"
       ],
-      "cls": ["ScalarEvalError"],
+      "cls": ["ParetoFrontError", "ScalarEvalError"],
       "int": [
         "KMeansResult",
         "LinRegressResult",
@@ -1854,7 +1854,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 244, "o": 10 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
-    { "p": "src/index.ts", "i": 135, "o": 0 },
+    { "p": "src/index.ts", "i": 137, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "core/config.ts", "i": 0, "o": 55 },

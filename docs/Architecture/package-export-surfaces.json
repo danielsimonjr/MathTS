@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18",
+  "generated": "2026-10-22",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2471,6 +2471,7 @@
       "friedmanTest",
       "fromAlgebraExpr",
       "fromTerms",
+      "FrontCandidate",
       "fsolve",
       "FsolveOptions",
       "fsum",
@@ -3073,6 +3074,8 @@
       "parallelXCorr",
       "ParenthesisNode",
       "paretoDist",
+      "paretoFront",
+      "ParetoFrontError",
       "parse",
       "parseNumberWithConfig",
       "parser",
@@ -3302,6 +3305,8 @@
       "ScalarScope",
       "scatter",
       "schur",
+      "ScoredCandidate",
+      "scoreFront",
       "sec",
       "secant",
       "SecantOptions",
@@ -3312,6 +3317,7 @@
       "seedProbabilityRng",
       "SegmentClosestResult",
       "segmentSegmentClosest",
+      "selectFrontModel",
       "sem",
       "series",
       "seriesCoefficient",

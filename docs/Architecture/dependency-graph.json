@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-18",
-    "totalFiles": 1186,
+    "lastUpdated": "2026-10-22",
+    "totalFiles": 1187,
     "totalModules": 83,
-    "totalExports": 6131
+    "totalExports": 6141
   },
   "entryPoints": [
     {
@@ -9291,6 +9291,11 @@
             "reExport": true
           },
           {
+            "file": "./pareto-front.js",
+            "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/propagate-uncertainty.js",
             "imports": [
               "propagateUncertainty",
@@ -9823,6 +9828,12 @@
             "typeOnly": true
           },
           {
+            "file": "./pareto-front.js",
+            "imports": ["FrontCandidate", "ScoredCandidate"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -10181,6 +10192,10 @@
           "evaluateScalar",
           "scalar",
           "ScalarEvalError",
+          "paretoFront",
+          "scoreFront",
+          "selectFrontModel",
+          "ParetoFrontError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10473,6 +10488,8 @@
           "wishartSample",
           "PhysicsEvaluateOptions",
           "ScalarScope",
+          "FrontCandidate",
+          "ScoredCandidate",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -10608,6 +10625,10 @@
           "evaluateScalar",
           "scalar",
           "ScalarEvalError",
+          "paretoFront",
+          "scoreFront",
+          "selectFrontModel",
+          "ParetoFrontError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10900,6 +10921,8 @@
           "wishartSample",
           "PhysicsEvaluateOptions",
           "ScalarScope",
+          "FrontCandidate",
+          "ScoredCandidate",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11129,6 +11152,17 @@
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
         "interfaces": ["OptimizeResult", "LMResult"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
+      },
+      "functions/src/pareto-front.ts": {
+        "description": "Pareto hall of fame, PySR log-loss scores, and model selection.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
+        "classes": ["ParetoFrontError"],
+        "interfaces": ["FrontCandidate", "ScoredCandidate"],
+        "functions": ["paretoFront", "scoreFront", "selectFrontModel"]
       },
       "functions/src/regression-extra.ts": {
         "description": "Ordinary least-squares regression (Wave D / regression primitives).",
@@ -40068,6 +40102,7 @@
           "functions/src/linalg-svd-extra.ts",
           "functions/src/numeric-extra.ts",
           "functions/src/optimization-extra.ts",
+          "functions/src/pareto-front.ts",
           "functions/src/regression-extra.ts",
           "functions/src/scalar-eval.ts",
           "functions/src/signal-filter-extra.ts",
@@ -41289,18 +41324,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1186,
+    "totalTypeScriptFiles": 1187,
     "totalModules": 83,
-    "totalLinesOfCode": 198199,
-    "totalExports": 6131,
-    "totalClasses": 58,
-    "totalInterfaces": 528,
-    "totalFunctions": 1946,
+    "totalLinesOfCode": 198495,
+    "totalExports": 6141,
+    "totalClasses": 59,
+    "totalInterfaces": 530,
+    "totalFunctions": 1949,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2584,
-    "totalTypeOnlyImports": 601,
+    "totalReExports": 2590,
+    "totalTypeOnlyImports": 602,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
