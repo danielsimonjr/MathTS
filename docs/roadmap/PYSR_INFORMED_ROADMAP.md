@@ -72,7 +72,7 @@ M1's `scalarSymbols` exists.
 The roadmap is built around one design decision: **`ScalarNode` is the interchange
 IR.** It is already public, it is already what UPT lowers into (`docs/integration/upt.md`
 § "Scalar ExprNode evaluation"), and it is small. Its four arms are `number`, `symbol`,
-`op` (`+ - * / ^`) and `call` (12 lowered unary functions), defined in
+`op` (`+ - * / ^`) and `call` (12 input names that lower to 11 unary functions), defined in
 `expression/src/scalar-builder.ts`. Every Phase 1–3 milestone operates on `ScalarNode`
 and adds **no new node kinds**. Free constants are modelled as **named symbols listed
 as parameters**, so the IR stays unchanged and UPT's lowering keeps working.
@@ -147,7 +147,7 @@ These are the defaults in `pysr/sr.py:1101-1162`, as documented in the docstring
   after summing (docstring for `complexity_of_operators`).
 - **Front and score.** The hall of fame keeps the best expression **per complexity**.
   `calculate_scores` (`pysr/sr.py:3435-3466`) walks the front in complexity order and
-  computes `score_i = −ln(loss_i / loss_{i−1}) / (c_i − c_{i−1})`. The first row scores 0. A row with `loss_i = 0` (and a previous row) scores `+∞`.
+  computes `score_i = −ln(loss_i / loss_{i−1}) / (c_i − c_{i−1})`. The first row scores 0. A later row with `loss_i ≤ 0` scores `+∞` (the Python test is `curMSE > 0.0`).
 - **Selection.** `idx_model_selection` (`pysr/sr.py:3414-3432`) offers three modes.
   `accuracy` takes the row with the minimum loss. `score` takes the row with the
   maximum score. `best` takes the maximum score among rows with
@@ -224,7 +224,7 @@ A constant whose units are left free is printed `[⋅]`.
 
 | PySR method                                                    | Carries over?                                                                                                           | MathTS's role                                                                          |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Expression trees + operator sets by arity                      | **Yes.** `ScalarNode` already exists, with `+ - * / ^` and 12 unary functions.                                          | M1 (structure), M11 (operator-set and grammar descriptor)                              |
+| Expression trees + operator sets by arity                      | **Yes.** `ScalarNode` already exists, with `+ - * / ^` and 11 lowered unary functions (12 input names).                 | M1 (structure), M11 (operator-set and grammar descriptor)                              |
 | Complexity (weighted node count)                               | **Yes.** UPT §8 budgets already count `maxAstDepth` and `maxOperators`.                                                 | M1 `scalarComplexity` with PySR-style weights                                          |
 | Pareto front per complexity + score + `best` selection         | **Yes**, as a reporting and ranking device. It is never a status decision (UPT §1.4).                                   | M4                                                                                     |
 | Constant fitting (BFGS / Nelder–Mead, restarts)                | **Yes.** It generalizes UPT's single-prefactor `ols` fit to several constants.                                          | M6 exact gradients, M7 `fitScalarParameters`                                           |
@@ -341,7 +341,8 @@ export function scalarSize(node: ScalarNode): number; // node count
 export function scalarDepth(node: ScalarNode): number; // leaf = 1
 export function scalarComplexity(node: ScalarNode, weights?: ScalarComplexityWeights): number;
 export function scalarSymbols(node: ScalarNode): readonly string[]; // sorted, unique
-export function scalarCanonicalKey(node: ScalarNode): string; // structural canonical form
+export function scalarCanonical(node: ScalarNode): ScalarNode; // canonical tree; idempotent
+export function scalarCanonicalKey(node: ScalarNode): string; // JSON of the canonical tree
 export function scalarEquals(a: ScalarNode, b: ScalarNode): boolean; // key equality
 ```
 
@@ -359,7 +360,8 @@ export function scalarEquals(a: ScalarNode, b: ScalarNode): boolean; // key equa
   - `a/(b/c)`, `a*c/b` and `(c*a)*b^-1` share one key.
   - `x*x` and `x^2` share one key.
   - `x-y` and `y-x` have different keys.
-  - `log(x)` (natural) and `log10(x)` have different keys.
+  - `ln(x)` (stored as natural `log`) and `log10(x)` have different keys. `log(x)` and
+    `log10(x)` share one key, because the builder lowers `log` to `log10`.
   - `scalarComplexity` with all weights equal to 1 equals `scalarSize`. A PySR-style
     weighted example is pinned by hand.
   - All functions are pure: the input is deep-frozen in the tests and never mutated.
@@ -367,9 +369,12 @@ export function scalarEquals(a: ScalarNode, b: ScalarNode): boolean; // key equa
   - `expression/tests/scalar-structure.test.ts`, with a table of equivalence classes
     and non-equivalences.
   - A seeded random-permutation property test over 200 trees checks key stability.
-  - A parity test checks that `evaluateScalar(a) === evaluateScalar(canonicalTreeOf(a))`
-    on sample scopes, to catch a key rule that changes the value. Because this test
-    imports `functions`, it lives in the root `tests/integration/`.
+  - A parity test checks that `evaluateScalar(a)` and `evaluateScalar(scalarCanonical(a))`
+    agree on sample scopes, to catch a key rule that changes the value. The canonical
+    form reorders operands and rewrites `-` and `/`, so it is not bit-exact for every
+    floating-point expression. The test pins `Object.is` equality on integer-valued
+    fixtures only. Because this test imports `functions`, it lives in the root
+    `tests/integration/`.
 
 #### M2 — `ScalarNode` ↔ expression `Node` bridge
 
@@ -470,7 +475,7 @@ export interface ScoredCandidate<T> extends FrontCandidate<T> {
 }
 /** Non-dominated set on (complexity ↑, loss ↑); one entry per complexity, sorted by complexity. */
 export function paretoFront<T>(candidates: readonly FrontCandidate<T>[]): FrontCandidate<T>[];
-/** PySR calculate_scores: score_i = −ln(loss_i/loss_{i−1})/(c_i − c_{i−1}); first = 0; loss_i = 0 ⇒ +∞. 'linear' ⇒ score null. */
+/** PySR calculate_scores: score_i = −ln(loss_i/loss_{i−1})/(c_i − c_{i−1}); first = 0; loss_i ≤ 0 ⇒ +∞. 'linear' ⇒ score null. */
 export function scoreFront<T>(
   front: readonly FrontCandidate<T>[],
   options?: { lossScale?: 'log' | 'linear' }

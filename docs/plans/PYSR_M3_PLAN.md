@@ -151,7 +151,7 @@ Unary `fn` (the lowered name):
 
 After every binary and unary instruction, if the row is still valid and the result is not a finite number (`typeof !== 'number'` or `!Number.isFinite`), set the row invalid and store `NaN` in that dest. Further instructions on an invalid row store `NaN` and stay invalid. This matches `requireFinite` after each step of a left fold, not only at the root.
 
-Loads (`const`, `column`, `param`) do not apply that check. A root that is only a load returns the stored value and `valid` 1, even for `NaN` or `Infinity`. That is `evaluateScalar` of a number or symbol.
+Loads (`const`, `column`, `param`) do not apply that check. A root that is only a load returns the stored value and `valid` 1, even for `NaN` or `Infinity`. That is `evaluateScalar` of a number or symbol. A one-argument `+ - * /` is **not** a bare load: `evalOp` ends with `requireFinite(acc, op)`, so `+(x)` with `x = NaN` throws, and the tape must mark that row invalid.
 
 Empty and unary folds match `evalOp` in `scalar-eval.ts`:
 
@@ -159,7 +159,7 @@ Empty and unary folds match `evalOp` in `scalar-eval.ts`:
 | ------------------------ | --------------------------------------------------------------------- |
 | `+()` or `-()`           | const `0`                                                             |
 | `*()` or `/()`           | const `1`                                                             |
-| `+ - * /` with one arg   | that arg's register; no extra finite check                            |
+| `+ - * /` with one arg   | that arg's register, then the same finite check as a binary result    |
 | `+ - * /` with n≥2       | left fold. `+(a, b, c)` is `(a + b)` checked, then that `+ c` checked |
 | `^` with 2 args          | one `Math.pow`                                                        |
 | `^` with any other arity | throw at compile time                                                 |
@@ -252,7 +252,7 @@ Build nodes with `scalar` from `scalar-eval.ts`. Compare valid rows to `evaluate
 
 **Bare non-finite values stay valid.** Variables `['x']`, the node is the symbol `x`, column `Float64Array.of(NaN, Infinity, -0)`. `valid` is `[1, 1, 1]`, `allValid` is `true`, and the values are `Object.is` to `NaN`, `Infinity`, and `-0`. A number node `Infinity` with `variables: []` and `columns: []` returns one value `Infinity`, `valid` `[1]`.
 
-**Left fold fails at the first non-finite step.** `+(number(1e308), number(1e308), number(-1e308))` with no variables: `1e308 + 1e308` is `Infinity`, so the row is invalid (`valid` 0, value NaN), not the third addend. `+(number(1), number(2), number(3))` is `6`. `-(number(4))` (one argument) is `4`. `+()` is `0`. `*()` is `1`.
+**Left fold fails at the first non-finite step.** `+(number(1e308), number(1e308), number(-1e308))` with no variables: `1e308 + 1e308` is `Infinity`, so the row is invalid (`valid` 0, value NaN), not the third addend. `+(number(1), number(2), number(3))` is `6`. `-(number(4))` (one argument) is `4`. `+(x)` with a column `Float64Array.of(3, NaN, Infinity)` has `valid` `[1, 0, 0]` (a one-argument operator still finite-checks), unlike the bare symbol `x`, which stays valid. `+()` is `0`. `*()` is `1`.
 
 **Mask is per row, not per batch.** `+(call('ln', x), y)` with
 
