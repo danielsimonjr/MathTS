@@ -4251,7 +4251,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 504
+      "loc": 501
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4916,7 +4916,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 413
+      "loc": 485
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",
@@ -12651,7 +12651,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 77
+      "loc": 85
     },
     {
       "file": "tests/wasm/parallel-processing.test.ts",

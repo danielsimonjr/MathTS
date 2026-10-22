@@ -28,27 +28,31 @@ describe('scalar canonical parity with evaluateScalar', () => {
   ];
 
   const fixtures: {
+    name: string;
     tree: ReturnType<typeof scalar.op>;
     scope: Record<string, number>;
     value: number;
   }[] = [
-    { tree: quotientTrees[0], scope: quotientScope, value: 9 },
-    { tree: quotientTrees[1], scope: quotientScope, value: 9 },
-    { tree: quotientTrees[2], scope: quotientScope, value: 9 },
-    { tree: scalar.op('*', [x, x]), scope: { x: 7 }, value: 49 },
-    { tree: scalar.op('^', [x, scalar.number(2)]), scope: { x: 7 }, value: 49 },
+    { name: 'a/(b/c)', tree: quotientTrees[0], scope: quotientScope, value: 9 },
+    { name: '*(a, c) / b', tree: quotientTrees[1], scope: quotientScope, value: 9 },
+    { name: '*( *(c, a), ^(b, -1) )', tree: quotientTrees[2], scope: quotientScope, value: 9 },
+    { name: '*(x, x)', tree: scalar.op('*', [x, x]), scope: { x: 7 }, value: 49 },
+    { name: 'x^2', tree: scalar.op('^', [x, scalar.number(2)]), scope: { x: 7 }, value: 49 },
     {
+      name: '(x^2)^3',
       tree: scalar.op('^', [scalar.op('^', [x, scalar.number(2)]), scalar.number(3)]),
       scope: { x: 2 },
       value: 64,
     },
-    { tree: scalar.op('^', [x, scalar.number(6)]), scope: { x: 2 }, value: 64 },
+    { name: 'x^6', tree: scalar.op('^', [x, scalar.number(6)]), scope: { x: 2 }, value: 64 },
     {
+      name: '-(x, y)',
       tree: scalar.op('-', [scalar.symbol('x'), scalar.symbol('y')]),
       scope: { x: 5, y: 2 },
       value: 3,
     },
     {
+      name: '+(1, x, 2)',
       tree: scalar.op('+', [scalar.number(1), x, scalar.number(2)]),
       scope: { x: 4 },
       value: 7,
@@ -70,8 +74,8 @@ describe('scalar canonical parity with evaluateScalar', () => {
     ).toBe(scalarCanonicalKey(scalar.op('^', [x, scalar.number(6)])));
   });
 
-  for (const { tree, scope, value } of fixtures) {
-    it(`evaluateScalar agrees for fixture value ${value}`, () => {
+  for (const { name, tree, scope, value } of fixtures) {
+    it(`evaluateScalar agrees for ${name} = ${value}`, () => {
       expect(Object.is(evaluateScalar(tree, scope), value)).toBe(true);
       const canon = scalarCanonical(tree);
       expect(Object.is(evaluateScalar(canon, scope), value)).toBe(true);

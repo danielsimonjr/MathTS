@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createScalarBuilder, ScalarBuildError } from '../src/scalar-builder.js';
+import { createScalarBuilder, ScalarBuildError, type ScalarNode } from '../src/scalar-builder.js';
 import {
   forEachScalar,
   mapScalar,
@@ -35,8 +35,6 @@ function deepFreeze(node: ScalarNode): void {
     }
   }
 }
-
-type ScalarNode = import('../src/scalar-builder.js').ScalarNode;
 
 describe('scalar-structure', () => {
   const scalar = createScalarBuilder();
@@ -295,6 +293,25 @@ describe('scalar-structure', () => {
       key: '{"k":"s","v":"a\\"b"}',
       tree: () => scalar.symbol('a"b'),
     },
+    {
+      // Locked: x+0 is not x. The numeric 0 stays as an addend.
+      key: '{"k":"+","a":[{"k":"n","v":"0"},{"k":"s","v":"x"}]}',
+      tree: () => scalar.op('+', [scalar.symbol('x'), scalar.number(0)]),
+    },
+    {
+      // Coefficient split: 2/2 is 2 * 2^-1, not 1 and not 2^0.
+      key: '{"k":"*","a":[{"k":"^","b":{"k":"n","v":"2"},"e":{"k":"n","v":"-1"}},{"k":"n","v":"2"}]}',
+      tree: () => scalar.op('/', [scalar.number(2), scalar.number(2)]),
+    },
+    {
+      // Non-finite numeric exponent does not distribute over the base.
+      key: '{"k":"^","b":{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},"e":{"k":"n","v":"Infinity"}}',
+      tree: () =>
+        scalar.op('^', [
+          scalar.op('^', [scalar.symbol('x'), scalar.number(2)]),
+          scalar.number(Infinity),
+        ]),
+    },
   ];
 
   it('equivalence classes share keys and scalarEquals', () => {
@@ -342,6 +359,27 @@ describe('scalar-structure', () => {
     expect(
       scalarEquals(scalar.call('ln', scalar.symbol('x')), scalar.call('log', scalar.symbol('x')))
     ).toBe(false);
+    expect(
+      scalarEquals(scalar.op('+', [scalar.symbol('x'), scalar.number(0)]), scalar.symbol('x'))
+    ).toBe(false);
+    expect(
+      scalarEquals(scalar.op('/', [scalar.number(2), scalar.number(2)]), scalar.number(1))
+    ).toBe(false);
+    expect(
+      scalarEquals(
+        scalar.op('/', [scalar.number(2), scalar.number(2)]),
+        scalar.op('^', [scalar.number(2), scalar.number(0)])
+      )
+    ).toBe(false);
+    expect(
+      scalarEquals(
+        scalar.op('^', [
+          scalar.op('^', [scalar.symbol('x'), scalar.number(2)]),
+          scalar.number(Infinity),
+        ]),
+        scalar.op('^', [scalar.symbol('x'), scalar.number(Infinity)])
+      )
+    ).toBe(false);
   });
 
   it('canonicalization is idempotent for equivalence and non-equivalence trees', () => {
@@ -376,9 +414,21 @@ describe('scalar-structure', () => {
   });
 
   it('rejects bad power arity in scalarCanonical', () => {
+    // Builder rejects this arity; one commented cast at this site.
     const bad = { kind: 'op', op: '^', args: [{ kind: 'number', value: 2 }] } as ScalarNode;
     expect(() => scalarCanonical(bad)).toThrow(ScalarBuildError);
     expect(() => scalarCanonical(bad)).toThrow(/exactly 2 args/);
+  });
+
+  it('rejects a call whose fn is not a lowered scalar function', () => {
+    // Stored call.fn must already be a LoweredScalarFn; the builder lowers names.
+    const bad = {
+      kind: 'call',
+      fn: 'ln',
+      arg: { kind: 'symbol', name: 'x' },
+    } as ScalarNode;
+    expect(() => scalarCanonical(bad)).toThrow(ScalarBuildError);
+    expect(() => scalarCanonical(bad)).toThrow(/unknown scalar function 'ln'/);
   });
 
   it('mulberry32 pinned outputs', () => {
