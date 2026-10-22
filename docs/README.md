@@ -148,15 +148,16 @@ items they still track.
 
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                   |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.           |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                     |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.            |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                  |
-| [roadmap/UNIFIED_WEBGPU_PATH.md](roadmap/UNIFIED_WEBGPU_PATH.md)                                         | Unified WebGPU path proposal (decision pending). |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.              |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                  |
+| Doc                                                                                                      | What it covers                                               |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                       |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                 |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                        |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                              |
+| [roadmap/UNIFIED_WEBGPU_PATH.md](roadmap/UNIFIED_WEBGPU_PATH.md)                                         | Unified WebGPU path proposal (decision pending).             |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                          |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                              |
+| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed symbolic-search primitives for UPT (proposed). |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 

@@ -87,6 +87,8 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
+- **PySR-informed symbolic-search primitives (for UPT)**: `ScalarNode` structure and keys, a batch evaluator, Pareto front scoring, constant fitting and numerical equivalence, then an optional search kit. Fifteen one-PR milestones are in [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](docs/roadmap/PYSR_INFORMED_ROADMAP.md).
+
 - **WebGPU acceleration tier (browser flag-gated)** — add WebGPU as a THIRD acceleration
   backend behind the existing WASM/parallel dispatch, selected by size **and** an in-browser
   WebGPU-enabled flag (mirroring how the WASM/parallel tiers are chosen today). `matrix`'s
