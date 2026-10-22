@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-22", "f": 1187, "e": 6136, "re": 2588 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-22", "f": 1188, "e": 6155, "re": 2598 },
   "s": {
-    "loc": 198664,
+    "loc": 199177,
     "cls": 58,
-    "int": 531,
-    "fn": 1947,
+    "int": 532,
+    "fn": 1956,
     "tg": 160,
     "en": 0,
     "co": 1616,
-    "toi": 602
+    "toi": 603
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1206,7 +1206,7 @@
       "int": ["WasmModule", "RawWasm", "WasmBand"]
     },
     "expression": {
-      "f": 8,
+      "f": 9,
       "exp": [
         "createHelpClass",
         "createParserClass",
@@ -1230,7 +1230,7 @@
         "createOperatorNode"
       ],
       "cls": ["ScalarBuildError"],
-      "int": ["OperatorProperty", "ScalarBuilder"]
+      "int": ["OperatorProperty", "ScalarBuilder", "ScalarComplexityWeights"]
     },
     "expression/compiler": {
       "f": 2,

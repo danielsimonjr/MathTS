@@ -2551,7 +2551,11 @@
     "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
-    "expression/src/scalar-builder.ts": ["expression/src/index.ts"],
+    "expression/src/scalar-builder.ts": [
+      "expression/src/index.ts",
+      "expression/src/scalar-structure.ts"
+    ],
+    "expression/src/scalar-structure.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/utils/customs.ts": [
