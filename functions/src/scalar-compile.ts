@@ -149,6 +149,26 @@ function applyBinary(op: Exclude<ScalarOperator, '^'>, left: number, right: numb
   }
 }
 
+/**
+ * `requireFinite` from `scalar-eval.ts`: a still-valid row that is not a
+ * finite number becomes invalid and stores `NaN`. Used after every binary,
+ * unary call, and one-argument `+ - * /` (`evalOp` always ends with
+ * `return requireFinite(acc, op)`, which is the n=1 path).
+ */
+function storeChecked(
+  scratch: Float64Array,
+  dest: number,
+  result: number,
+  valid: boolean
+): boolean {
+  if (!valid || typeof result !== 'number' || !Number.isFinite(result)) {
+    scratch[dest] = Number.NaN;
+    return false;
+  }
+  scratch[dest] = result;
+  return true;
+}
+
 function runRow(
   tape: readonly TapeInstr[],
   scratch: Float64Array,
@@ -170,7 +190,7 @@ function runRow(
         scratch[instr.dest] = params[instr.index] as number;
         break;
       case 'mov':
-        scratch[instr.dest] = scratch[instr.src];
+        valid = storeChecked(scratch, instr.dest, scratch[instr.src], valid);
         break;
       case 'bin': {
         if (!valid) {
@@ -181,12 +201,7 @@ function runRow(
         const right = scratch[instr.right];
         const result =
           instr.op === '^' ? Math.pow(left, right) : applyBinary(instr.op, left, right);
-        if (typeof result !== 'number' || !Number.isFinite(result)) {
-          valid = false;
-          scratch[instr.dest] = Number.NaN;
-        } else {
-          scratch[instr.dest] = result;
-        }
+        valid = storeChecked(scratch, instr.dest, result, valid);
         break;
       }
       case 'unary': {
@@ -194,15 +209,8 @@ function runRow(
           scratch[instr.dest] = Number.NaN;
           break;
         }
-        const arg = scratch[instr.arg];
-        const impl = UNARY_IMPL[instr.fn];
-        const result = impl(arg);
-        if (typeof result !== 'number' || !Number.isFinite(result)) {
-          valid = false;
-          scratch[instr.dest] = Number.NaN;
-        } else {
-          scratch[instr.dest] = result;
-        }
+        const result = UNARY_IMPL[instr.fn](scratch[instr.arg]);
+        valid = storeChecked(scratch, instr.dest, result, valid);
         break;
       }
     }
@@ -260,24 +268,30 @@ function bindSymbol(ctx: CompileCtx, name: string, dest: number): void {
 }
 
 function compileNode(ctx: CompileCtx, node: ScalarNode): number {
+  const canonical = assertScalarNode(node);
   const dest = allocReg(ctx);
-  switch (node.kind) {
+  switch (canonical.kind) {
     case 'number':
-      ctx.tape.push({ tag: 'const', dest, value: node.value });
+      ctx.tape.push({ tag: 'const', dest, value: canonical.value });
       ctx.rootReg = dest;
       return dest;
     case 'symbol':
-      bindSymbol(ctx, node.name, dest);
+      bindSymbol(ctx, canonical.name, dest);
       ctx.rootReg = dest;
       return dest;
     case 'call': {
-      const argReg = compileNode(ctx, node.arg);
-      ctx.tape.push({ tag: 'unary', dest, fn: node.fn, arg: argReg });
+      if (!Object.prototype.hasOwnProperty.call(UNARY_IMPL, canonical.fn)) {
+        throw new ScalarEvalError(
+          `evaluateScalar: unknown scalar function '${String(canonical.fn)}'.`
+        );
+      }
+      const argReg = compileNode(ctx, canonical.arg);
+      ctx.tape.push({ tag: 'unary', dest, fn: canonical.fn, arg: argReg });
       ctx.rootReg = dest;
       return dest;
     }
     case 'op': {
-      const { op, args } = node;
+      const { op, args } = canonical;
       if (op === '^') {
         if (args.length !== 2) {
           throw new ScalarEvalError(

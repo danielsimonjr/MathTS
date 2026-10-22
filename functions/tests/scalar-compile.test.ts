@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
 import { compileScalar } from '../src/scalar-compile.js';
+import type { CompileScalarOptions, ScalarBatchResult } from '../src/scalar-compile.js';
 import { compileScalar as compileFromIndex } from '../src/index.js';
 import { ScalarEvalError, evaluateScalar, scalar } from '../src/scalar-eval.js';
 
@@ -11,6 +12,45 @@ function mulberry32(seed: number): () => number {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function deepFreeze(value: unknown): void {
+  if (value === null || typeof value !== 'object' || Object.isFrozen(value)) return;
+  Object.freeze(value);
+  for (const child of Object.values(value)) {
+    deepFreeze(child);
+  }
+}
+
+function expectBatchMatchesEvaluateScalar(
+  node: ScalarNode,
+  options: CompileScalarOptions,
+  columns: readonly Float64Array[],
+  result: ScalarBatchResult,
+  params?: ArrayLike<number>
+): void {
+  const n = options.variables.length === 0 ? 1 : columns[0]!.length;
+  expect(result.values.length).toBe(n);
+  for (let i = 0; i < n; i++) {
+    const scope: Record<string, number> = { ...(options.constants ?? {}) };
+    for (let v = 0; v < options.variables.length; v++) {
+      scope[options.variables[v]!] = columns[v]![i]!;
+    }
+    if (options.parameters !== undefined && params !== undefined) {
+      for (let p = 0; p < options.parameters.length; p++) {
+        scope[options.parameters[p]!] = params[p] as number;
+      }
+    }
+    try {
+      const expected = evaluateScalar(node, scope);
+      expect(result.valid[i]).toBe(1);
+      expect(Object.is(result.values[i], expected)).toBe(true);
+    } catch (err) {
+      expect(err).toBeInstanceOf(ScalarEvalError);
+      expect(result.valid[i]).toBe(0);
+      expect(Number.isNaN(result.values[i])).toBe(true);
+    }
+  }
 }
 
 describe('compileScalar', () => {
@@ -42,6 +82,11 @@ describe('compileScalar', () => {
       expect(values[3]).toBe(-2);
       expect(Object.is(values[4], -0)).toBe(true);
       expect(values[5]).toBe(3);
+      expectBatchMatchesEvaluateScalar(node, { variables: ['x', 'y'] }, [x, y], {
+        values,
+        valid,
+        allValid,
+      });
     });
 
     it('evaluateRow matches valid rows and throws on invalid', () => {
@@ -74,8 +119,14 @@ describe('compileScalar', () => {
       expect(values[0]).toBe(4);
       expect(Number.isNaN(values[1])).toBe(true);
       expect(Number.isNaN(values[2])).toBe(true);
-      expect(values[3]).toBe(1);
+      expect(Object.is(values[3], 1)).toBe(true);
       expect(Number.isNaN(values[4])).toBe(true);
+      expectBatchMatchesEvaluateScalar(
+        node,
+        { variables: ['x', 'y'] },
+        [x, y],
+        compiled.evaluate([x, y])
+      );
     });
   });
 
@@ -89,10 +140,29 @@ describe('compileScalar', () => {
       expect(callAt('ln', 1).values[0]).toBe(0);
       expect(callAt('ln', Math.E).values[0]).toBe(1);
       expect(callAt('ln', 0).valid[0]).toBe(0);
+      expect(Number.isNaN(callAt('ln', 0).values[0])).toBe(true);
       expect(callAt('ln', -1).valid[0]).toBe(0);
+      expect(Number.isNaN(callAt('ln', -1).values[0])).toBe(true);
       expect(callAt('log', 100).values[0]).toBe(2);
       expect(callAt('log10', 1000).values[0]).toBe(3);
       expect(callAt('log2', 8).values[0]).toBe(3);
+      for (const [fn, xv] of [
+        ['ln', 1],
+        ['ln', Math.E],
+        ['ln', 0],
+        ['ln', -1],
+        ['log', 100],
+        ['log10', 1000],
+        ['log2', 8],
+      ] as const) {
+        const node = scalar.call(fn, scalar.symbol('x'));
+        expectBatchMatchesEvaluateScalar(
+          node,
+          { variables: ['x'] },
+          [Float64Array.of(xv)],
+          compileScalar(node, { variables: ['x'] }).evaluate([Float64Array.of(xv)])
+        );
+      }
     });
 
     it('exp sin abs', () => {
@@ -100,11 +170,32 @@ describe('compileScalar', () => {
       expect(Object.is(callAt('exp', 1).values[0], Math.E)).toBe(true);
       expect(callAt('exp', 709).values[0]).toBe(8.218407461554972e307);
       expect(callAt('exp', 800).valid[0]).toBe(0);
+      expect(Number.isNaN(callAt('exp', 800).values[0])).toBe(true);
       expect(callAt('sin', 0).values[0]).toBe(0);
       expect(callAt('sin', Infinity).valid[0]).toBe(0);
+      expect(Number.isNaN(callAt('sin', Infinity).values[0])).toBe(true);
       expect(callAt('abs', -3).values[0]).toBe(3);
       expect(Object.is(callAt('abs', -0).values[0], 0)).toBe(true);
       expect(callAt('sinh', 0).values[0]).toBe(0);
+      for (const [fn, xv] of [
+        ['exp', 0],
+        ['exp', 1],
+        ['exp', 709],
+        ['exp', 800],
+        ['sin', 0],
+        ['sin', Infinity],
+        ['abs', -3],
+        ['abs', -0],
+        ['sinh', 0],
+      ] as const) {
+        const node = scalar.call(fn, scalar.symbol('x'));
+        expectBatchMatchesEvaluateScalar(
+          node,
+          { variables: ['x'] },
+          [Float64Array.of(xv)],
+          compileScalar(node, { variables: ['x'] }).evaluate([Float64Array.of(xv)])
+        );
+      }
     });
   });
 
@@ -118,13 +209,20 @@ describe('compileScalar', () => {
     expect(Object.is(values[0], Number.NaN)).toBe(true);
     expect(values[1]).toBe(Infinity);
     expect(Object.is(values[2], -0)).toBe(true);
+    expectBatchMatchesEvaluateScalar(node, { variables: ['x'] }, [col], {
+      values,
+      valid,
+      allValid,
+    });
   });
 
   it('bare Infinity number node with no variables', () => {
-    const compiled = compileScalar(scalar.number(Infinity), { variables: [] });
-    const { values, valid } = compiled.evaluate([]);
+    const node = scalar.number(Infinity);
+    const compiled = compileScalar(node, { variables: [] });
+    const { values, valid, allValid } = compiled.evaluate([]);
     expect(valid).toEqual(Uint8Array.of(1));
     expect(values[0]).toBe(Infinity);
+    expectBatchMatchesEvaluateScalar(node, { variables: [] }, [], { values, valid, allValid });
   });
 
   it('left fold non-finite at first step', () => {
@@ -137,12 +235,56 @@ describe('compileScalar', () => {
     const compiledOver = compileScalar(overflow, { variables: [] });
     const compiledOk = compileScalar(ok, { variables: [] });
     expect(compiledOver.evaluate([]).valid[0]).toBe(0);
+    expect(Number.isNaN(compiledOver.evaluate([]).values[0])).toBe(true);
     expect(compiledOk.evaluate([]).values[0]).toBe(6);
     expect(
       compileScalar(scalar.op('-', [scalar.number(4)]), { variables: [] }).evaluate([]).values[0]
     ).toBe(4);
     expect(compileScalar(scalar.op('+', []), { variables: [] }).evaluate([]).values[0]).toBe(0);
     expect(compileScalar(scalar.op('*', []), { variables: [] }).evaluate([]).values[0]).toBe(1);
+    expectBatchMatchesEvaluateScalar(overflow, { variables: [] }, [], compiledOver.evaluate([]));
+    expectBatchMatchesEvaluateScalar(ok, { variables: [] }, [], compiledOk.evaluate([]));
+    const unaryMinus = scalar.op('-', [scalar.number(4)]);
+    expectBatchMatchesEvaluateScalar(
+      unaryMinus,
+      { variables: [] },
+      [],
+      compileScalar(unaryMinus, { variables: [] }).evaluate([])
+    );
+  });
+
+  it('one-argument + - * / apply evalOp requireFinite', () => {
+    const plusNan = scalar.op('+', [scalar.number(Number.NaN)]);
+    const plusInf = scalar.op('+', [scalar.number(Infinity)]);
+    const plusNegZero = scalar.op('+', [scalar.number(-0)]);
+    const plusX = scalar.op('+', [scalar.symbol('x')]);
+    expect(() => evaluateScalar(plusNan)).toThrow(ScalarEvalError);
+    expect(() => evaluateScalar(plusInf)).toThrow(ScalarEvalError);
+    expect(Object.is(evaluateScalar(plusNegZero), -0)).toBe(true);
+
+    const nanRow = compileScalar(plusNan, { variables: [] }).evaluate([]);
+    expect(nanRow.valid[0]).toBe(0);
+    expect(Number.isNaN(nanRow.values[0])).toBe(true);
+    expect(() => compileScalar(plusNan, { variables: [] }).evaluateRow([])).toThrow(/non-finite/);
+
+    const infRow = compileScalar(plusInf, { variables: [] }).evaluate([]);
+    expect(infRow.valid[0]).toBe(0);
+    expect(Number.isNaN(infRow.values[0])).toBe(true);
+
+    const negZeroRow = compileScalar(plusNegZero, { variables: [] }).evaluate([]);
+    expect(negZeroRow.valid[0]).toBe(1);
+    expect(Object.is(negZeroRow.values[0], -0)).toBe(true);
+
+    const col = Float64Array.of(Number.NaN, Infinity, -0);
+    const wrapped = compileScalar(plusX, { variables: ['x'] }).evaluate([col]);
+    expect(wrapped.valid).toEqual(Uint8Array.of(0, 0, 1));
+    expect(Number.isNaN(wrapped.values[0])).toBe(true);
+    expect(Number.isNaN(wrapped.values[1])).toBe(true);
+    expect(Object.is(wrapped.values[2], -0)).toBe(true);
+    expectBatchMatchesEvaluateScalar(plusNan, { variables: [] }, [], nanRow);
+    expectBatchMatchesEvaluateScalar(plusInf, { variables: [] }, [], infRow);
+    expectBatchMatchesEvaluateScalar(plusNegZero, { variables: [] }, [], negZeroRow);
+    expectBatchMatchesEvaluateScalar(plusX, { variables: ['x'] }, [col], wrapped);
   });
 
   it('mask is per row for +(ln(x), y)', () => {
@@ -155,6 +297,11 @@ describe('compileScalar', () => {
     expect(values[0]).toBe(2);
     expect(Number.isNaN(values[1])).toBe(true);
     expect(values[2]).toBe(0);
+    expectBatchMatchesEvaluateScalar(node, { variables: ['x', 'y'] }, [x, y], {
+      values,
+      valid,
+      allValid: false,
+    });
   });
 
   describe('bindings', () => {
@@ -168,22 +315,47 @@ describe('compileScalar', () => {
         parameters: ['a', 'b'],
       });
       const col = Float64Array.of(1, 2, 3);
-      expect(compiled.evaluate([col], [10, 1]).values).toEqual(Float64Array.of(11, 21, 31));
+      const first = compiled.evaluate([col], [10, 1]);
+      expect(first.values).toEqual(Float64Array.of(11, 21, 31));
       expect(compiled.evaluate([col], [3, 0]).values).toEqual(Float64Array.of(3, 6, 9));
+      expectBatchMatchesEvaluateScalar(
+        node,
+        { variables: ['x'], parameters: ['a', 'b'] },
+        [col],
+        first,
+        [10, 1]
+      );
     });
 
     it('constant c and literal symbol 2', () => {
       const cNode = scalar.op('*', [scalar.symbol('c'), scalar.symbol('x')]);
       const cCompiled = compileScalar(cNode, { variables: ['x'], constants: { c: 3 } });
-      expect(cCompiled.evaluate([Float64Array.of(2, 5)]).values).toEqual(Float64Array.of(6, 15));
+      const cCols = Float64Array.of(2, 5);
+      expect(cCompiled.evaluate([cCols]).values).toEqual(Float64Array.of(6, 15));
+      expectBatchMatchesEvaluateScalar(
+        cNode,
+        { variables: ['x'], constants: { c: 3 } },
+        [cCols],
+        cCompiled.evaluate([cCols])
+      );
 
-      const lit = compileScalar(scalar.op('*', [scalar.symbol('2'), scalar.symbol('x')]), {
+      const litNode = scalar.op('*', [scalar.symbol('2'), scalar.symbol('x')]);
+      const lit = compileScalar(litNode, {
         variables: ['x'],
       });
-      expect(lit.evaluate([Float64Array.of(3, 4)]).values).toEqual(Float64Array.of(6, 8));
+      const litCols = Float64Array.of(3, 4);
+      expect(lit.evaluate([litCols]).values).toEqual(Float64Array.of(6, 8));
+      expectBatchMatchesEvaluateScalar(
+        litNode,
+        { variables: ['x'] },
+        [litCols],
+        lit.evaluate([litCols])
+      );
 
-      const alone = compileScalar(scalar.symbol('2'), { variables: [] });
+      const aloneNode = scalar.symbol('2');
+      const alone = compileScalar(aloneNode, { variables: [] });
       expect(alone.evaluate([]).values[0]).toBe(2);
+      expectBatchMatchesEvaluateScalar(aloneNode, { variables: [] }, [], alone.evaluate([]));
     });
 
     it('compile-time symbol errors', () => {
@@ -233,6 +405,41 @@ describe('compileScalar', () => {
           { variables: [] }
         )
       ).toThrow(/not a ScalarNode/);
+      expect(() =>
+        compileScalar(
+          {
+            kind: 'abs',
+            arg: { kind: 'number', value: -3 },
+          } as unknown as ScalarNode,
+          { variables: [] }
+        )
+      ).toThrow(/not a ScalarNode/);
+      expect(() =>
+        compileScalar(
+          {
+            kind: 'op',
+            op: '+',
+            args: [
+              {
+                kind: 'transcendental',
+                fn: 'ln',
+                arg: { kind: 'number', value: 1 },
+              },
+            ],
+          } as unknown as ScalarNode,
+          { variables: [] }
+        )
+      ).toThrow(/not a ScalarNode/);
+      expect(() =>
+        compileScalar(
+          {
+            kind: 'call',
+            fn: 'nope',
+            arg: { kind: 'number', value: 1 },
+          } as unknown as ScalarNode,
+          { variables: [] }
+        )
+      ).toThrow(/unknown scalar function/);
     });
 
     it('copies variables and parameters arrays', () => {
@@ -284,13 +491,18 @@ describe('compileScalar', () => {
 
     it('does not mutate frozen node', () => {
       const node = scalar.op('/', [scalar.symbol('x'), scalar.symbol('y')]);
-      Object.freeze(node);
-      if (node.kind === 'op') {
-        Object.freeze(node.args);
-      }
+      deepFreeze(node);
       const compiled = compileScalar(node, { variables: ['x', 'y'] });
-      const { values } = compiled.evaluate([Float64Array.of(8, 1), Float64Array.of(2, 0)]);
+      const x = Float64Array.of(8, 1);
+      const y = Float64Array.of(2, 0);
+      const { values } = compiled.evaluate([x, y]);
       expect(values[0]).toBe(4);
+      expectBatchMatchesEvaluateScalar(
+        node,
+        { variables: ['x', 'y'] },
+        [x, y],
+        compiled.evaluate([x, y])
+      );
     });
   });
 
@@ -371,7 +583,7 @@ describe('compileScalar', () => {
         if (t === 0) {
           try {
             const expected = evaluateScalar(tree, { x: x[0], y: y[0] });
-            expect(compiled.evaluateRow([x[0], y[0]])).toBe(expected);
+            expect(Object.is(compiled.evaluateRow([x[0], y[0]]), expected)).toBe(true);
           } catch (err) {
             expect(err).toBeInstanceOf(ScalarEvalError);
             expect(() => compiled.evaluateRow([x[0], y[0]])).toThrow(ScalarEvalError);
