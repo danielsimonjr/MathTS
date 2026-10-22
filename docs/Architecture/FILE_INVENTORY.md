@@ -4,27 +4,27 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-10-18 (by tools/create-dependency-graph)
+**Generated**: 2026-10-22 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1903
+**Total files**: 1905
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1161 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1162 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      656 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      657 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1903** |                                                                                                                |
+| **Total**     | **1905** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1186 |
-| `tests`    |   656 |
+| `src`      |  1187 |
+| `tests`    |   657 |
 | `tools`    |    27 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    91 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   545 |
-| `@danielsimonjr/mathts-functions`      |   792 |
+| `@danielsimonjr/mathts-functions`      |   794 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   101 |
@@ -1051,6 +1051,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/relational/smaller.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/relational/smallerEq.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/relational/unequal.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/scalar-compile.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/scalar-eval.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/set/setCartesian.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/set/setDifference.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1498,6 +1499,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/rational-surd.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/regularized-regression.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/remez-pm.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/scalar-compile.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-eval.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-integrity.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-as-wasm.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |

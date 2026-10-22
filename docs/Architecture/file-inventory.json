@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-18",
-  "totalFiles": 1903,
+  "generated": "2026-10-22",
+  "totalFiles": 1905,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1161,
+    "build-entry": 1162,
     "test-only": 0,
     "orphan": 0,
-    "test": 656,
+    "test": 657,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1186,
-    "tests": 656,
+    "src": 1187,
+    "tests": 657,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 47,
     "@danielsimonjr/mathts-expression": 545,
-    "@danielsimonjr/mathts-functions": 792,
+    "@danielsimonjr/mathts-functions": 794,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 101,
@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 644
+      "loc": 646
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6912,6 +6912,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 155
+    },
+    {
+      "file": "functions/src/scalar-compile.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 444
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -10041,6 +10048,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 105
+    },
+    {
+      "file": "functions/tests/scalar-compile.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 383
     },
     {
       "file": "functions/tests/scalar-eval.test.ts",

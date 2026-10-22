@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-18'
-  totalFiles: 1186
+  lastUpdated: '2026-10-22'
+  totalFiles: 1187
   totalModules: 83
-  totalExports: 6131
+  totalExports: 6136
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8709,6 +8709,10 @@ modules:
             - scalar
             - ScalarEvalError
           reExport: true
+        - file: ./scalar-compile.js
+          imports:
+            - compileScalar
+          reExport: true
         - file: ./numeric/propagate-uncertainty.js
           imports:
             - propagateUncertainty
@@ -9230,6 +9234,13 @@ modules:
             - ScalarScope
           reExport: true
           typeOnly: true
+        - file: ./scalar-compile.js
+          imports:
+            - CompileScalarOptions
+            - ScalarBatchResult
+            - CompiledScalar
+          reExport: true
+          typeOnly: true
         - file: ./grad-forward.js
           imports:
             - DualFn
@@ -9573,6 +9584,7 @@ modules:
         - evaluateScalar
         - scalar
         - ScalarEvalError
+        - compileScalar
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -9865,6 +9877,9 @@ modules:
         - wishartSample
         - PhysicsEvaluateOptions
         - ScalarScope
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -9999,6 +10014,7 @@ modules:
         - evaluateScalar
         - scalar
         - ScalarEvalError
+        - compileScalar
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -10291,6 +10307,9 @@ modules:
         - wishartSample
         - PhysicsEvaluateOptions
         - ScalarScope
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -10539,6 +10558,29 @@ modules:
       functions:
         - fitLine
         - linearRegression
+    functions/src/scalar-compile.ts:
+      description: Batch evaluation of {@link ScalarNode} trees over `Float64Array` columns.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./scalar-eval.js
+          imports:
+            - ScalarEvalError
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - LoweredScalarFn
+            - ScalarNode
+            - ScalarOperator
+      exports:
+        - compileScalar
+      interfaces:
+        - CompileScalarOptions
+        - ScalarBatchResult
+        - CompiledScalar
+      functions:
+        - compileScalar
     functions/src/scalar-eval.ts:
       description: Evaluate a scalar node with MathTS numeric functions.
       externalDependencies: []
@@ -37863,6 +37905,7 @@ dependencyGraph:
         - functions/src/numeric-extra.ts
         - functions/src/optimization-extra.ts
         - functions/src/regression-extra.ts
+        - functions/src/scalar-compile.ts
         - functions/src/scalar-eval.ts
         - functions/src/signal-filter-extra.ts
         - functions/src/timeseries-extra.ts
@@ -38944,18 +38987,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1186
+  totalTypeScriptFiles: 1187
   totalModules: 83
-  totalLinesOfCode: 198199
-  totalExports: 6131
+  totalLinesOfCode: 198645
+  totalExports: 6136
   totalClasses: 58
-  totalInterfaces: 528
-  totalFunctions: 1946
+  totalInterfaces: 531
+  totalFunctions: 1947
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2584
-  totalTypeOnlyImports: 601
+  totalReExports: 2588
+  totalTypeOnlyImports: 602
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

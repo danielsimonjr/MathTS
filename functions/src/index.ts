@@ -48,6 +48,8 @@ export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 // `log` lowers to `log10`. A formula string is rejected.
 export { evaluateScalar, scalar, ScalarEvalError } from './scalar-eval.js';
 export type { ScalarScope } from './scalar-eval.js';
+export { compileScalar } from './scalar-compile.js';
+export type { CompileScalarOptions, ScalarBatchResult, CompiledScalar } from './scalar-compile.js';
 
 // First-order uncertainty propagation. Kept off `typed/index.js` for the same
 // reason as `cas.ts`: this module imports the expression evaluator, and the

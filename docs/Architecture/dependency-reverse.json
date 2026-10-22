@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18",
+  "generated": "2026-10-22",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1696,7 +1696,8 @@
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
-    "functions/src/scalar-eval.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-eval.ts": ["functions/src/index.ts", "functions/src/scalar-compile.ts"],
+    "functions/src/scalar-compile.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],

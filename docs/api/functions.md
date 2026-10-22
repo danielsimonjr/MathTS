@@ -480,7 +480,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1085 exports).
+> `@danielsimonjr/mathts-functions` (1086 exports).
 
 ### Functions by category
 
@@ -534,7 +534,7 @@ ceil(2.1); // 3
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (8): `compileExpr`, `evaluate`, `evaluateScalar`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`
+**Expression Evaluation** (9): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
