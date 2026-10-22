@@ -6645,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 293
+      "loc": 286
     },
     {
       "file": "functions/src/plain/number/arithmetic.ts",
@@ -9900,7 +9900,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 291
+      "loc": 270
     },
     {
       "file": "functions/tests/physical-constants-codata2022.test.ts",

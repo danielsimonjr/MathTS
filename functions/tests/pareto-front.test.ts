@@ -30,6 +30,17 @@ function scoredRow<T>(
   return { item, complexity, loss, score };
 }
 
+function expectParetoError(fn: () => unknown, message: string): void {
+  try {
+    fn();
+  } catch (e) {
+    expect(e).toBeInstanceOf(ParetoFrontError);
+    expect((e as Error).message).toBe(message);
+    return;
+  }
+  expect.fail('expected ParetoFrontError');
+}
+
 describe('paretoFront / scoreFront / selectFrontModel', () => {
   const fixtureS: FrontCandidate<string>[] = [
     row('r0', 1, 1),
@@ -48,9 +59,10 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
   it('fixture S: scoreFront log scale', () => {
     const scoresDefault = scoreFront(fixtureS);
     const scoresExplicit = scoreFront(fixtureS, { lossScale: 'log' });
-    expect(scoresDefault.map((r) => r.score)).toEqual([0, 1, 4, 0.5, 0.25]);
-    expect(scoresExplicit.map((r) => r.score)).toEqual([0, 1, 4, 0.5, 0.25]);
-    for (let i = 0; i < fixtureS.length; i++) {
+    const expected = [0, 1, 4, 0.5, 0.25];
+    for (let i = 0; i < expected.length; i++) {
+      expect(scoresDefault[i].score).toBe(expected[i]);
+      expect(scoresExplicit[i].score).toBe(expected[i]);
       expect(scoresDefault[i].item).toBe(fixtureS[i].item);
     }
   });
@@ -68,7 +80,9 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
     expect(selectFrontModel(scored, 'best')).toBe(expectWinner('r3', 0.5));
     expect(selectFrontModel(scored, 'best', { bestLossFactor: 1.5 })).toBe(expectWinner('r3', 0.5));
     expect(selectFrontModel(scored, 'score')).toBe(expectWinner('r2', 4));
-    expect(selectFrontModel(scored, 'accuracy')).toBe(scored.find((r) => r.item === 'r4')!);
+    const accuracy = selectFrontModel(scored, 'accuracy');
+    expect(accuracy).toBe(scored.find((r) => r.item === 'r4')!);
+    expect(accuracy.loss).toBe(0.003182780796509667);
     expect(selectFrontModel(scored, 'best', { bestLossFactor: 3 })).toBe(expectWinner('r2', 4));
   });
 
@@ -143,6 +157,7 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
     expect(front.map((r) => r.complexity)).toEqual([1, 2, 3, 5]);
     expect(front.map((r) => r.loss)).toEqual([1, 0.7, 0.4, 0.2]);
     expect(input[0].item).toBe('a');
+    expect(front[0]).not.toBe(input[1]);
   });
 
   it('paretoFront empty and immutability', () => {
@@ -150,6 +165,8 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
     const one = [row('x', 1, 1)];
     const out = paretoFront(one);
     expect(out).not.toBe(one);
+    expect(out[0]).not.toBe(one[0]);
+    expect(out[0].item).toBe(one[0].item);
   });
 
   it('equal loss at higher complexity dropped', () => {
@@ -178,6 +195,12 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
 
     const infTie = [scoredRow('inf1', 3, 1, Infinity), scoredRow('inf0', 1, 1, Infinity)];
     expect(selectFrontModel(infTie, 'score').item).toBe('inf0');
+
+    const nanTieComplexity = [scoredRow('nanHigh', 5, 1, NaN), scoredRow('nanLow', 1, 1, NaN)];
+    expect(selectFrontModel(nanTieComplexity, 'score').item).toBe('nanLow');
+
+    const nanTieOrder = [scoredRow('nanFirst', 2, 1, NaN), scoredRow('nanSecond', 2, 1, NaN)];
+    expect(selectFrontModel(nanTieOrder, 'score').item).toBe('nanFirst');
   });
 
   it('IEEE complexity gaps in scoreFront', () => {
@@ -192,30 +215,46 @@ describe('paretoFront / scoreFront / selectFrontModel', () => {
   });
 
   it('errors', () => {
-    expect(() => selectFrontModel([])).toThrow(ParetoFrontError);
-    expect(() => selectFrontModel([])).toThrow(/empty front/);
+    expectParetoError(() => selectFrontModel([]), 'selectFrontModel: empty front');
 
     const scored = scoreFront(fixtureS);
-    expect(() => selectFrontModel(scored, 'median' as 'best')).toThrow(
-      /not a valid model selection strategy/
+    expectParetoError(
+      () => selectFrontModel(scored, 'median' as 'best'),
+      "selectFrontModel: 'median' is not a valid model selection strategy."
     );
 
-    expect(() => selectFrontModel(scored, 'best', { bestLossFactor: NaN })).toThrow(
-      /bestLossFactor/
+    expectParetoError(
+      () => selectFrontModel(scored, 'best', { bestLossFactor: NaN }),
+      'selectFrontModel: bestLossFactor must be a finite number'
     );
 
-    expect(() => selectFrontModel([scoredRow('x', NaN, 1, 0)])).toThrow(/must be finite/);
+    expectParetoError(
+      () => selectFrontModel([scoredRow('x', NaN, 1, 0)]),
+      'selectFrontModel: loss and complexity must be finite'
+    );
+    expectParetoError(
+      () => selectFrontModel([scoredRow('x', 1, Infinity, 0)]),
+      'selectFrontModel: loss and complexity must be finite'
+    );
 
-    expect(() =>
-      selectFrontModel([scoredRow('a', 1, 1, null), scoredRow('b', 2, 1, 1)], 'score')
-    ).toThrow(/mixed null/);
+    expectParetoError(
+      () => selectFrontModel([scoredRow('a', 1, 1, null), scoredRow('b', 2, 1, 1)], 'score'),
+      'selectFrontModel: mixed null and numeric scores'
+    );
 
     const negBest = [scoredRow('a', 1, -2, 0), scoredRow('b', 2, -1, 1)];
-    expect(() => selectFrontModel(negBest, 'best')).toThrow(/no row has loss <=/);
+    expectParetoError(
+      () => selectFrontModel(negBest, 'best'),
+      'selectFrontModel: no row has loss <= -3'
+    );
     expect(selectFrontModel(negBest, 'accuracy').item).toBe('a');
 
+    expect(scoreFront([])).toEqual([]);
     expect(scoreFront([], { lossScale: 'linear' })).toEqual([]);
-    expect(() => scoreFront([row('a', 1, 1)], { lossScale: 'nope' as 'log' })).toThrow(/lossScale/);
+    expectParetoError(
+      () => scoreFront([row('a', 1, 1)], { lossScale: 'nope' as 'log' }),
+      "scoreFront: lossScale must be 'log' or 'linear'"
+    );
   });
 
   it('scoreFront does not add score property to inputs', () => {

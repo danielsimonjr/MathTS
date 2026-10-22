@@ -58,20 +58,16 @@ function isFiniteLossAndComplexity(c: FrontCandidate<unknown>): boolean {
  * The input array and objects are not mutated.
  */
 export function paretoFront<T>(candidates: readonly FrontCandidate<T>[]): FrontCandidate<T>[] {
-  const byComplexity = new Map<number, { loss: number; item: T; index: number }>();
+  const byComplexity = new Map<number, { loss: number; item: T }>();
 
-  for (let index = 0; index < candidates.length; index++) {
-    const c = candidates[index];
+  for (const c of candidates) {
     if (!isFiniteLossAndComplexity(c)) continue;
 
     const key = c.complexity;
     const prev = byComplexity.get(key);
-    if (prev === undefined) {
-      byComplexity.set(key, { loss: c.loss, item: c.item, index });
-      continue;
-    }
-    if (c.loss < prev.loss || (c.loss === prev.loss && index < prev.index)) {
-      byComplexity.set(key, { loss: c.loss, item: c.item, index });
+    // Scan is input order, so an equal later loss keeps the earlier survivor.
+    if (prev === undefined || c.loss < prev.loss) {
+      byComplexity.set(key, { loss: c.loss, item: c.item });
     }
   }
 
@@ -166,6 +162,11 @@ function scoreIsBetter(candidate: number, champion: number): boolean {
   return candidate > champion;
 }
 
+/** IEEE `===` is false for NaN; two NaN scores are a tie (both worst). */
+function scoresTie(a: number, b: number): boolean {
+  return a === b || (Number.isNaN(a) && Number.isNaN(b));
+}
+
 function pickChampionIndex<T>(
   rows: readonly ScoredCandidate<T>[],
   mode: 'accuracy' | 'score'
@@ -191,10 +192,8 @@ function pickChampionIndex<T>(
     }
     if (scoreIsBetter(nScore, cScore)) {
       champion = j;
-    } else if (nScore === cScore) {
-      if (n.complexity < c.complexity) {
-        champion = j;
-      }
+    } else if (scoresTie(nScore, cScore) && n.complexity < c.complexity) {
+      champion = j;
     }
   }
   return champion;
@@ -226,7 +225,7 @@ function hasMixedScores<T>(rows: readonly ScoredCandidate<T>[]): boolean {
  *
  * Ties on the chosen metric: lower complexity wins, then the earlier input index.
  * Score order treats `NaN` as worse than every other score, including `-Infinity`.
- * Two `+Infinity` scores tie and use complexity, then input order.
+ * Two `+Infinity` scores, or two `NaN` scores, tie and use complexity, then input order.
  *
  * Returns the **same object reference** as the chosen element of `scored`.
  * Throws `ParetoFrontError` on an empty list, a non-finite loss or complexity,
