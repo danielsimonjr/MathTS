@@ -309,3 +309,38 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           GALLIUM_DRIVER: llvmpipe
+
+  architecture-docs:
+    name: Architecture docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      # The tool version and the documents folder live here and nowhere else in the job. The
+      # version is exact. A new release of repo-tools can change how it counts and turn this job
+      # red with no change to the code, so raise the pin on purpose, after a local run of the check.
+      REPO_TOOLS_VERSION: 2.2.4
+      ARCHITECTURE_DOCS_DIR: docs/Architecture
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # repo-tools needs Node 20 or later. The check parses the source files and reads the
+      # documents, so this job needs no Bun, no install of the workspace and no build.
+      - name: Setup Node.js 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
+      - name: Install repo-tools
+        run: npm install --global "@danielsimonjr/repo-tools@${REPO_TOOLS_VERSION}"
+
+      # Each architecture document ends with a Verification table of counts that the parse of the
+      # source gives. The check exits 1 when a document claims a count that the parse does not
+      # give. Without this job, a change that moves a count leaves the tables stale until a person
+      # runs the command.
+      - name: Architecture documents match the code
+        run: repo-tools check . --docs="${ARCHITECTURE_DOCS_DIR}"
