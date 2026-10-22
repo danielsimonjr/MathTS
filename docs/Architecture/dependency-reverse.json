@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18",
+  "generated": "2026-10-22",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -2550,7 +2550,11 @@
     "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
-    "expression/src/scalar-builder.ts": ["expression/src/index.ts"],
+    "expression/src/scalar-builder.ts": [
+      "expression/src/index.ts",
+      "expression/src/scalar-structure.ts"
+    ],
+    "expression/src/scalar-structure.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/utils/customs.ts": [
