@@ -159,8 +159,8 @@ items they still track.
 | [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                 |
 | [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed symbolic-search primitives for UPT (proposed).    |
 | [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key. |
-| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.  |
 | [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.             |
+| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.  |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
