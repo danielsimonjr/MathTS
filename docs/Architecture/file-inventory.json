@@ -4916,7 +4916,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 485
+      "loc": 488
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",

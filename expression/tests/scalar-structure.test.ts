@@ -357,8 +357,11 @@ describe('scalar-structure', () => {
     ).toBe(false);
     expect(scalarEquals(scalar.number(-0), scalar.number(0))).toBe(false);
     expect(
-      scalarEquals(scalar.call('ln', scalar.symbol('x')), scalar.call('log', scalar.symbol('x')))
+      scalarEquals(scalar.call('ln', scalar.symbol('x')), scalar.call('log10', scalar.symbol('x')))
     ).toBe(false);
+    expect(
+      scalarEquals(scalar.call('log', scalar.symbol('x')), scalar.call('log10', scalar.symbol('x')))
+    ).toBe(true);
     expect(
       scalarEquals(scalar.op('+', [scalar.symbol('x'), scalar.number(0)]), scalar.symbol('x'))
     ).toBe(false);
