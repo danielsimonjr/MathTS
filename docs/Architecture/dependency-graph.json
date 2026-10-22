@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-22",
-    "totalFiles": 1187,
+    "totalFiles": 1188,
     "totalModules": 83,
-    "totalExports": 6141
+    "totalExports": 6160
   },
   "entryPoints": [
     {
@@ -25290,6 +25290,21 @@
             "reExport": true
           },
           {
+            "file": "./scalar-structure.js",
+            "imports": [
+              "forEachScalar",
+              "mapScalar",
+              "scalarSize",
+              "scalarDepth",
+              "scalarComplexity",
+              "scalarSymbols",
+              "scalarCanonical",
+              "scalarCanonicalKey",
+              "scalarEquals"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./scalar-builder.js",
             "imports": [
               "LoweredScalarFn",
@@ -25298,6 +25313,12 @@
               "ScalarNode",
               "ScalarOperator"
             ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./scalar-structure.js",
+            "imports": ["ScalarComplexityWeights"],
             "reExport": true,
             "typeOnly": true
           }
@@ -25330,11 +25351,21 @@
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
           "ScalarBuildError",
+          "forEachScalar",
+          "mapScalar",
+          "scalarSize",
+          "scalarDepth",
+          "scalarComplexity",
+          "scalarSymbols",
+          "scalarCanonical",
+          "scalarCanonicalKey",
+          "scalarEquals",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
           "ScalarNode",
-          "ScalarOperator"
+          "ScalarOperator",
+          "ScalarComplexityWeights"
         ],
         "reExported": [
           "* from ./types.js",
@@ -25372,11 +25403,21 @@
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
           "ScalarBuildError",
+          "forEachScalar",
+          "mapScalar",
+          "scalarSize",
+          "scalarDepth",
+          "scalarComplexity",
+          "scalarSymbols",
+          "scalarCanonical",
+          "scalarCanonicalKey",
+          "scalarEquals",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
           "ScalarNode",
-          "ScalarOperator"
+          "ScalarOperator",
+          "ScalarComplexityWeights"
         ]
       },
       "expression/src/keywords.ts": {
@@ -25481,6 +25522,47 @@
         "interfaces": ["ScalarBuilder"],
         "functions": ["createScalarBuilder"],
         "constants": ["SCALAR_FUNCTION_LOWERING", "SCALAR_FUNCTIONS"]
+      },
+      "expression/src/scalar-structure.ts": {
+        "description": "Structural utilities over {@link ScalarNode}: traversal, metrics, and",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-builder.js",
+            "imports": [
+              "ScalarBuildError",
+              "SCALAR_FUNCTION_LOWERING",
+              "LoweredScalarFn",
+              "ScalarNode",
+              "ScalarOperator"
+            ]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "forEachScalar",
+          "mapScalar",
+          "scalarSize",
+          "scalarDepth",
+          "scalarComplexity",
+          "scalarSymbols",
+          "scalarCanonical",
+          "scalarCanonicalKey",
+          "scalarEquals"
+        ],
+        "interfaces": ["ScalarComplexityWeights"],
+        "functions": [
+          "forEachScalar",
+          "mapScalar",
+          "scalarSize",
+          "scalarDepth",
+          "scalarComplexity",
+          "scalarSymbols",
+          "scalarCanonical",
+          "scalarCanonicalKey",
+          "scalarEquals"
+        ]
       },
       "expression/src/types.ts": {
         "description": "A function that also has a `signatures` record.",
@@ -40625,6 +40707,7 @@
           "expression/src/operators.ts",
           "expression/src/parse.ts",
           "expression/src/scalar-builder.ts",
+          "expression/src/scalar-structure.ts",
           "expression/src/types.ts"
         ]
       },
@@ -41324,18 +41407,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1187,
+    "totalTypeScriptFiles": 1188,
     "totalModules": 83,
-    "totalLinesOfCode": 198488,
-    "totalExports": 6141,
+    "totalLinesOfCode": 199001,
+    "totalExports": 6160,
     "totalClasses": 59,
-    "totalInterfaces": 530,
-    "totalFunctions": 1949,
+    "totalInterfaces": 531,
+    "totalFunctions": 1958,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2590,
-    "totalTypeOnlyImports": 602,
+    "totalReExports": 2600,
+    "totalTypeOnlyImports": 603,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

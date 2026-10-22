@@ -158,7 +158,7 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
-- **expression**: 8 files
+- **expression**: 9 files
 - **expression/compiler**: 2 files
 - **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
@@ -207,7 +207,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 477            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 476            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -11101,42 +11101,44 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                               | Imports                                                                             | Type                  |
-| ---------------------------------- | ----------------------------------------------------------------------------------- | --------------------- |
-| `./types.js`                       | `*`                                                                                 | Re-export             |
-| `./keywords.js`                    | `*`                                                                                 | Re-export             |
-| `./operators.js`                   | `*`                                                                                 | Re-export             |
-| `./parse.js`                       | `*`                                                                                 | Re-export             |
-| `./Parser.js`                      | `*`                                                                                 | Re-export             |
-| `./Help.js`                        | `*`                                                                                 | Re-export             |
-| `./compiler/index.js`              | `*`                                                                                 | Re-export             |
-| `./evaluator/index.js`             | `*`                                                                                 | Re-export             |
-| `./transform/index.js`             | `*`                                                                                 | Re-export             |
-| `./function/parser.js`             | `createParser`                                                                      | Re-export             |
-| `./embeddedDocs/embeddedDocs.js`   | `embeddedDocs`                                                                      | Re-export             |
-| `./utils/mathml.js`                | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol`                         | Re-export             |
-| `./node/Node.js`                   | `createNode`                                                                        | Re-export             |
-| `./node/AccessorNode.js`           | `createAccessorNode`                                                                | Re-export             |
-| `./node/ArrayNode.js`              | `createArrayNode`                                                                   | Re-export             |
-| `./node/AssignmentNode.js`         | `createAssignmentNode`                                                              | Re-export             |
-| `./node/BlockNode.js`              | `createBlockNode`                                                                   | Re-export             |
-| `./node/ConditionalNode.js`        | `createConditionalNode`                                                             | Re-export             |
-| `./node/ConstantNode.js`           | `createConstantNode`                                                                | Re-export             |
-| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode`                                                      | Re-export             |
-| `./node/FunctionNode.js`           | `createFunctionNode`                                                                | Re-export             |
-| `./node/IndexNode.js`              | `createIndexNode`                                                                   | Re-export             |
-| `./node/ObjectNode.js`             | `createObjectNode`                                                                  | Re-export             |
-| `./node/OperatorNode.js`           | `createOperatorNode`                                                                | Re-export             |
-| `./node/ParenthesisNode.js`        | `createParenthesisNode`                                                             | Re-export             |
-| `./node/RangeNode.js`              | `createRangeNode`                                                                   | Re-export             |
-| `./node/RelationalNode.js`         | `createRelationalNode`                                                              | Re-export             |
-| `./node/SymbolNode.js`             | `createSymbolNode`                                                                  | Re-export             |
-| `./scalar-builder.js`              | `createScalarBuilder, SCALAR_FUNCTIONS, SCALAR_FUNCTION_LOWERING, ScalarBuildError` | Re-export             |
-| `./scalar-builder.js`              | `LoweredScalarFn, ScalarBuilder, ScalarFunctionName, ScalarNode, ScalarOperator`    | Re-export (type-only) |
+| File                               | Imports                                                                                                                                 | Type                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./types.js`                       | `*`                                                                                                                                     | Re-export             |
+| `./keywords.js`                    | `*`                                                                                                                                     | Re-export             |
+| `./operators.js`                   | `*`                                                                                                                                     | Re-export             |
+| `./parse.js`                       | `*`                                                                                                                                     | Re-export             |
+| `./Parser.js`                      | `*`                                                                                                                                     | Re-export             |
+| `./Help.js`                        | `*`                                                                                                                                     | Re-export             |
+| `./compiler/index.js`              | `*`                                                                                                                                     | Re-export             |
+| `./evaluator/index.js`             | `*`                                                                                                                                     | Re-export             |
+| `./transform/index.js`             | `*`                                                                                                                                     | Re-export             |
+| `./function/parser.js`             | `createParser`                                                                                                                          | Re-export             |
+| `./embeddedDocs/embeddedDocs.js`   | `embeddedDocs`                                                                                                                          | Re-export             |
+| `./utils/mathml.js`                | `mathMLDocument, mathMLError, escapeMathML, toMathMLSymbol`                                                                             | Re-export             |
+| `./node/Node.js`                   | `createNode`                                                                                                                            | Re-export             |
+| `./node/AccessorNode.js`           | `createAccessorNode`                                                                                                                    | Re-export             |
+| `./node/ArrayNode.js`              | `createArrayNode`                                                                                                                       | Re-export             |
+| `./node/AssignmentNode.js`         | `createAssignmentNode`                                                                                                                  | Re-export             |
+| `./node/BlockNode.js`              | `createBlockNode`                                                                                                                       | Re-export             |
+| `./node/ConditionalNode.js`        | `createConditionalNode`                                                                                                                 | Re-export             |
+| `./node/ConstantNode.js`           | `createConstantNode`                                                                                                                    | Re-export             |
+| `./node/FunctionAssignmentNode.js` | `createFunctionAssignmentNode`                                                                                                          | Re-export             |
+| `./node/FunctionNode.js`           | `createFunctionNode`                                                                                                                    | Re-export             |
+| `./node/IndexNode.js`              | `createIndexNode`                                                                                                                       | Re-export             |
+| `./node/ObjectNode.js`             | `createObjectNode`                                                                                                                      | Re-export             |
+| `./node/OperatorNode.js`           | `createOperatorNode`                                                                                                                    | Re-export             |
+| `./node/ParenthesisNode.js`        | `createParenthesisNode`                                                                                                                 | Re-export             |
+| `./node/RangeNode.js`              | `createRangeNode`                                                                                                                       | Re-export             |
+| `./node/RelationalNode.js`         | `createRelationalNode`                                                                                                                  | Re-export             |
+| `./node/SymbolNode.js`             | `createSymbolNode`                                                                                                                      | Re-export             |
+| `./scalar-builder.js`              | `createScalarBuilder, SCALAR_FUNCTIONS, SCALAR_FUNCTION_LOWERING, ScalarBuildError`                                                     | Re-export             |
+| `./scalar-structure.js`            | `forEachScalar, mapScalar, scalarSize, scalarDepth, scalarComplexity, scalarSymbols, scalarCanonical, scalarCanonicalKey, scalarEquals` | Re-export             |
+| `./scalar-builder.js`              | `LoweredScalarFn, ScalarBuilder, ScalarFunctionName, ScalarNode, ScalarOperator`                                                        | Re-export (type-only) |
+| `./scalar-structure.js`            | `ScalarComplexityWeights`                                                                                                               | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`
+- Re-exports: `* from ./types.js`, `* from ./keywords.js`, `* from ./operators.js`, `* from ./parse.js`, `* from ./Parser.js`, `* from ./Help.js`, `* from ./compiler/index.js`, `* from ./evaluator/index.js`, `* from ./transform/index.js`, `createParser`, `embeddedDocs`, `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `createScalarBuilder`, `SCALAR_FUNCTIONS`, `SCALAR_FUNCTION_LOWERING`, `ScalarBuildError`, `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarFunctionName`, `ScalarNode`, `ScalarOperator`, `ScalarComplexityWeights`
 
 ---
 
@@ -11196,6 +11198,21 @@ graph LR
 - Types: `ScalarOperator`, `ScalarFunctionName`, `LoweredScalarFn`, `ScalarNode`
 - Functions: `createScalarBuilder`
 - Constants: `SCALAR_FUNCTION_LOWERING`, `SCALAR_FUNCTIONS`
+
+---
+
+### `expression/src/scalar-structure.ts` - Structural utilities over {@link ScalarNode}: traversal, metrics, and
+
+**Internal Dependencies:**
+
+| File                  | Imports                                                                                   | Type   |
+| --------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| `./scalar-builder.js` | `ScalarBuildError, SCALAR_FUNCTION_LOWERING, LoweredScalarFn, ScalarNode, ScalarOperator` | Import |
+
+**Exports:**
+
+- Interfaces: `ScalarComplexityWeights`
+- Functions: `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`
 
 ---
 
@@ -17720,7 +17737,7 @@ graph LR
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `functions/src/typed/index`                            | 28 files     | 2 files    |
-| `expression/src/index`                                 | 29 files     | 0 files    |
+| `expression/src/index`                                 | 30 files     | 0 files    |
 | `functions/src/utils/object`                           | 0 files      | 28 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `expression/src/node/Node`                             | 6 files      | 20 files   |
@@ -18265,237 +18282,238 @@ graph TD
         N353[operators]
         N354[parse]
         N355[scalar-builder]
-        N356[types]
+        N356[scalar-structure]
+        N357[types]
     end
 
     subgraph Expression/compiler
-        N357[compile]
-        N358[index]
+        N358[compile]
+        N359[index]
     end
 
     subgraph Expression/embeddedDocs
-        N359[Infinity]
-        N360[LN10]
-        N361[LN2]
-        N362[LOG10E]
-        N363[LOG2E]
-        N364[NaN]
-        N365[SQRT1_2]
-        N366[SQRT2]
-        N367[e]
-        N368[false]
-        N369[...388 more]
+        N360[Infinity]
+        N361[LN10]
+        N362[LN2]
+        N363[LOG10E]
+        N364[LOG2E]
+        N365[NaN]
+        N366[SQRT1_2]
+        N367[SQRT2]
+        N368[e]
+        N369[false]
+        N370[...388 more]
     end
 
     subgraph Expression/error
-        N370[DimensionError]
-        N371[IndexError]
+        N371[DimensionError]
+        N372[IndexError]
     end
 
     subgraph Expression/evaluator
-        N372[evaluate]
-        N373[index]
+        N373[evaluate]
+        N374[index]
     end
 
     subgraph Expression/function
-        N374[parser]
+        N375[parser]
     end
 
     subgraph Expression/node
-        N375[AccessorNode]
-        N376[ArrayNode]
-        N377[AssignmentNode]
-        N378[BlockNode]
-        N379[ConditionalNode]
-        N380[ConstantNode]
-        N381[FunctionAssignmentNode]
-        N382[FunctionNode]
-        N383[IndexNode]
-        N384[Node]
-        N385[...9 more]
+        N376[AccessorNode]
+        N377[ArrayNode]
+        N378[AssignmentNode]
+        N379[BlockNode]
+        N380[ConditionalNode]
+        N381[ConstantNode]
+        N382[FunctionAssignmentNode]
+        N383[FunctionNode]
+        N384[IndexNode]
+        N385[Node]
+        N386[...9 more]
     end
 
     subgraph Expression/transform
-        N386[and.transform]
-        N387[bitAnd.transform]
-        N388[bitOr.transform]
-        N389[column.transform]
-        N390[concat.transform]
-        N391[cumsum.transform]
-        N392[diff.transform]
-        N393[filter.transform]
-        N394[forEach.transform]
-        N395[index.transform]
-        N396[...21 more]
+        N387[and.transform]
+        N388[bitAnd.transform]
+        N389[bitOr.transform]
+        N390[column.transform]
+        N391[concat.transform]
+        N392[cumsum.transform]
+        N393[diff.transform]
+        N394[filter.transform]
+        N395[forEach.transform]
+        N396[index.transform]
+        N397[...21 more]
     end
 
     subgraph Expression/utils
-        N397[array]
-        N398[collection]
-        N399[customs]
-        N400[factory]
-        N401[is]
-        N402[latex]
-        N403[map]
-        N404[mathml]
-        N405[number]
-        N406[object]
-        N407[...3 more]
+        N398[array]
+        N399[collection]
+        N400[customs]
+        N401[factory]
+        N402[is]
+        N403[latex]
+        N404[map]
+        N405[mathml]
+        N406[number]
+        N407[object]
+        N408[...3 more]
     end
 
     subgraph Parser
-        N408[index]
-    end
-
-    subgraph Units
         N409[index]
     end
 
-    subgraph Numbers
+    subgraph Units
         N410[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N411[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N412[index]
     end
 
-    subgraph Linalg
+    subgraph Evaluator
         N413[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N414[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N415[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N416[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N417[index]
     end
 
+    subgraph Signal
+        N418[index]
+    end
+
     subgraph Parallel
-        N418[ComputePool]
-        N419[ParallelMatrix]
-        N420[WorkerPool]
-        N421[index]
-        N422[matrix.worker]
+        N419[ComputePool]
+        N420[ParallelMatrix]
+        N421[WorkerPool]
+        N422[index]
+        N423[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N423[elementwise]
-        N424[index]
-        N425[map]
-        N426[matmul]
-        N427[reduce]
+        N424[elementwise]
+        N425[index]
+        N426[map]
+        N427[matmul]
+        N428[reduce]
     end
 
     subgraph Parallel/ops
-        N428[bitwise]
+        N429[bitwise]
     end
 
     subgraph Parallel/strategies
-        N429[chunk]
-        N430[index]
-        N431[threshold]
+        N430[chunk]
+        N431[index]
+        N432[threshold]
     end
 
     subgraph Workbook
-        N432[cli]
-        N433[contract]
-        N434[doc]
-        N435[edit]
-        N436[executor]
-        N437[formatter]
-        N438[fs-atomic]
-        N439[graph]
-        N440[html]
-        N441[index]
-        N442[...15 more]
+        N433[cli]
+        N434[contract]
+        N435[doc]
+        N436[edit]
+        N437[executor]
+        N438[formatter]
+        N439[fs-atomic]
+        N440[graph]
+        N441[html]
+        N442[index]
+        N443[...15 more]
     end
 
     subgraph Assembly/algebra
-        N443[decomposition]
+        N444[decomposition]
     end
 
     subgraph Assembly/bindings
-        N444[index]
-        N445[wasm-loader]
+        N445[index]
+        N446[wasm-loader]
     end
 
     subgraph Assembly
-        N446[elementwise]
-        N447[heap]
-        N448[index]
-        N449[poly]
-        N450[signal]
-        N451[sort]
-        N452[special]
-        N453[tridiag]
+        N447[elementwise]
+        N448[heap]
+        N449[index]
+        N450[poly]
+        N451[signal]
+        N452[sort]
+        N453[special]
+        N454[tridiag]
     end
 
     subgraph Assembly/ops
-        N454[approx]
-        N455[array]
-        N456[bitwise]
-        N457[complex-array]
-        N458[complex-ops]
-        N459[curvefit]
-        N460[fft]
-        N461[linalg]
-        N462[matrix]
-        N463[number-theory]
-        N464[...6 more]
+        N455[approx]
+        N456[array]
+        N457[bitwise]
+        N458[complex-array]
+        N459[complex-ops]
+        N460[curvefit]
+        N461[fft]
+        N462[linalg]
+        N463[matrix]
+        N464[number-theory]
+        N465[...6 more]
     end
 
     subgraph Assembly/types
-        N465[complex]
+        N466[complex]
     end
 
     subgraph Compat
-        N466[chain]
-        N467[index]
-        N468[shims]
+        N467[chain]
+        N468[index]
+        N469[shims]
     end
 
     subgraph Gpu
-        N469[BufferPool]
-        N470[GPUContext]
-        N471[ShaderManager]
-        N472[detect]
-        N473[device]
-        N474[flag]
-        N475[index]
-        N476[serialize]
+        N470[BufferPool]
+        N471[GPUContext]
+        N472[ShaderManager]
+        N473[detect]
+        N474[device]
+        N475[flag]
+        N476[index]
+        N477[serialize]
     end
 
     subgraph Plot
-        N477[coerce]
-        N478[contour]
-        N479[emit]
-        N480[frame]
-        N481[heatmap]
-        N482[histogram]
-        N483[index]
-        N484[marks2d]
-        N485[overlay]
-        N486[palette]
-        N487[...8 more]
+        N478[coerce]
+        N479[contour]
+        N480[emit]
+        N481[frame]
+        N482[heatmap]
+        N483[histogram]
+        N484[index]
+        N485[marks2d]
+        N486[overlay]
+        N487[palette]
+        N488[...8 more]
     end
 
     subgraph Plot/three
-        N488[points3d]
-        N489[project]
-        N490[surface]
+        N489[points3d]
+        N490[project]
+        N491[surface]
     end
 
     N3 --> N1
@@ -18583,17 +18601,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1187   |
+| Total TypeScript Files  | 1188   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 198488 |
-| Total Exports           | 6141   |
-| Total Re-exports        | 2590   |
+| Total Lines of Code     | 199001 |
+| Total Exports           | 6160   |
+| Total Re-exports        | 2600   |
 | Total Classes           | 59     |
-| Total Interfaces        | 530    |
-| Total Functions         | 1949   |
+| Total Interfaces        | 531    |
+| Total Functions         | 1958   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
-| Type-only Imports       | 602    |
+| Type-only Imports       | 603    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
