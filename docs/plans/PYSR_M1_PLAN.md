@@ -5,7 +5,7 @@
 **Source of truth:** [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md) §6 M1, §5 (cross-cutting rules).
 **Bump:** minor (additive). Do not edit `expression/package.json` `"version"`.
 
-A lighter model should implement this file as written. Where the roadmap sketch and this plan differ, this plan wins. The only intentional API addition is `scalarCanonical`, which the roadmap's parity test needs and the sketch did not name.
+A lighter model should implement this file as written. Where the roadmap sketch and this plan differ, this plan wins. The only intentional API addition is `scalarCanonical`, which the roadmap's parity test needs; the roadmap sketch lists it too.
 
 ## Outcome
 
@@ -309,7 +309,7 @@ The last row is the lock that complexity does not rewrite `-` into `+` and `*` f
 | `-Infinity`             | `{"k":"n","v":"-Infinity"}`                                                              |
 | symbol `a"b`            | `{"k":"s","v":"a\"b"}`                                                                   |
 
-`-(x, y)` and `-(y, x)` differ. `+(x, x)` and `*(number 2, x)` differ. `2^3` and `8` differ. `x/x` and `1` differ. `0*x` and `0` differ. `-0` and `0` differ. Natural `log` and `log10` differ.
+`-(x, y)` and `-(y, x)` differ. `+(x, x)` and `*(number 2, x)` differ. `2^3` and `8` differ. `x/x` and `1` differ. `0*x` and `0` differ. `-0` and `0` differ. `call('ln', x)` and `call('log10', x)` differ; `call('log', x)` equals `call('log10', x)`.
 
 **Idempotence.** For every tree in the two tables, `scalarCanonical(scalarCanonical(t))` deep-equals `scalarCanonical(t)` (`toEqual`), and the key of the canonical tree equals the key of `t`.
 
@@ -376,7 +376,7 @@ One changeset. Do not bump `functions`. Do not add a changelog entry by hand; ch
 
 - [ ] The nine functions and `ScalarComplexityWeights` are exported from `@danielsimonjr/mathts-expression` and from `expression/src/index.ts`.
 - [ ] Keys match the tables, including `-0`, one `NaN` spelling, and the three-way quotient identity.
-- [ ] `x-y` and `y-x` differ; natural `log` and `log10` differ; `x*x` and `x^2` agree; `2^3` and `8` disagree; `x/x` and `1` disagree.
+- [ ] `x-y` and `y-x` differ; `ln` (stored natural `log`) and `log10` differ; `x*x` and `x^2` agree; `2^3` and `8` disagree; `x/x` and `1` disagree.
 - [ ] Default `scalarComplexity` equals `scalarSize`. The weighted `sin` example is 7. `Math.round(2.5) === 3` and `Math.round(-1.5) === -1` are the half-tie rules.
 - [ ] Complexity of `-(x, y)` with `op['-'] = 5` is 7 (stored tree, not the rewrite).
 - [ ] Deep-frozen inputs survive every function.
