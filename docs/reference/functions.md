@@ -38,11 +38,14 @@ reverse-mode / tensor gradients, see `@danielsimonjr/mathts-autograd`.
 
 Function tables in hardware-accelerated categories carry an **Accel** column:
 
-- **`parallel`** — `ComputePool` may dispatch to worker threads when length ≥
-  that op's entry in `DEFAULT_THRESHOLD_BY_OP` (for example `matmul` at 4,096,
-  `spectrogram` at 65,536, `erfc` at 100,000). When the typed path calls
-  `shouldParallelize(n)` **without** an op name and the op is absent from the
-  map, the **50,000-element global fallback** applies (`cube`, `round`, `sec`, …).
+- **`parallel`** — `ComputePool` may dispatch to worker threads when the typed
+  path passes an **op name** and length meets that op's `DEFAULT_THRESHOLD_BY_OP`
+  entry (for example `matmul` at 4,096 via `poolOptions(..., 'matmul')`). When
+  the path calls `shouldParallelize(n)` **without** an op name, only the
+  **50,000-element global fallback** applies — even if the map lists a different
+  threshold for that symbol (`erfc`, `spectrogram`, … are never passed by name).
+  Ops absent from the map also use the 50,000 fallback when called namelessly
+  (`cube`, `round`, `sec`, …).
 - **`parallel†`** — the pool op is `'never'` in `DEFAULT_THRESHOLD_BY_OP`, so
   workers are not used for that named op today (inline JS), even though a
   `Promise` return type may remain for API compatibility.
@@ -458,7 +461,7 @@ leftShift(1, 4); // 16
 | `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                            | —           |
 | `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                                                               | parallel    |
 | `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind (JS; no WASM policy entry)                    | —           |
-| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                                                             | parallel    |
+| `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals (JS; WASM dispatch refused; workers unreachable)            | —           |
 | `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                                                                       | parallel    |
 | `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                                                                 | parallel    |
 | `expIntegralEi(x)`                          | Exponential integral `Ei(x)`                                                            | parallel    |
@@ -695,7 +698,7 @@ most op thresholds in `ComputePool` are `'never'` (inline JS). Scalar overloads
 | `parallelStatCorr(a, b)`                  | Pearson correlation                                       | parallel†   |
 | `parallelStatMAD(a)`                      | Mean absolute deviation from the mean                     | parallel†   |
 | `parallelStatCumsum(a)`                   | Cumulative sum                                            | —           |
-| `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                                       | —           |
+| `parallelStatQuantile(a, q)`              | q-th quantile (0–1); uses `sort_f64` like median          | WASM (≥1 M) |
 | `parallelStatHistogram(a, bins)`          | Histogram bin counts                                      | parallel†   |
 
 ### Selection (O(n), no full sort)
