@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-23",
   "totalFiles": 1910,
   "byDisposition": {
     "reachable": 25,
@@ -1199,14 +1199,14 @@
       "package": "(root)",
       "area": "examples",
       "disposition": "example",
-      "loc": 68
+      "loc": 69
     },
     {
       "file": "examples/basic-matrix.ts",
       "package": "(root)",
       "area": "examples",
       "disposition": "example",
-      "loc": 37
+      "loc": 34
     },
     {
       "file": "examples/mathjs-migration.ts",
@@ -1227,7 +1227,7 @@
       "package": "(root)",
       "area": "examples",
       "disposition": "example",
-      "loc": 123
+      "loc": 116
     },
     {
       "file": "expression/src/compiler/compile.ts",

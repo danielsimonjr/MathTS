@@ -9,6 +9,8 @@ This directory contains example code demonstrating MathTS features.
 - [`basic-arithmetic.ts`](./basic-arithmetic.ts) - Basic arithmetic operations
 - [`basic-matrix.ts`](./basic-matrix.ts) - Basic matrix operations
 - [`basic-workbook.mtsw`](./basic-workbook.mtsw) - Simple workbook example
+- [`lightspeed.mtsw`](./lightspeed.mtsw) - Larger workbook demo
+- [`lightspeed.html`](./lightspeed.html) - Static HTML companion for the lightspeed notebook
 
 ### Advanced Examples
 
@@ -18,29 +20,24 @@ This directory contains example code demonstrating MathTS features.
 
 ## Running Examples
 
-### TypeScript Examples
+Build the monorepo first (`bun install` && `bun run build` from the repo root).
+
+### TypeScript examples
+
+Examples import workspace packages. Use the base tsconfig so resolution hits built `dist/`
+(not `src/`, which lacks tsdown `define` replacements such as `__PKG_VERSION__`):
 
 ```bash
-# Using ts-node
-npx ts-node examples/basic-matrix.ts
-
-# Or compile and run
-npx tsc examples/basic-matrix.ts
-node examples/basic-matrix.js
+bun --tsconfig-override=tsconfig.base.json examples/basic-arithmetic.ts
+bun --tsconfig-override=tsconfig.base.json examples/basic-matrix.ts
+bun --tsconfig-override=tsconfig.base.json examples/parallel-computing.ts
+bun --tsconfig-override=tsconfig.base.json examples/matrix-operations.ts
+bun --tsconfig-override=tsconfig.base.json examples/mathjs-migration.ts
 ```
 
-### Workbook Examples
+### Workbook examples
 
 ```bash
-# Run a workbook
-npx mtsw run examples/basic-workbook.mtsw
-```
-
-## Prerequisites
-
-Make sure you have built the project first:
-
-```bash
-npm install
-npm run build
+bun workbook/dist/cli.js run examples/basic-workbook.mtsw
+bun workbook/dist/cli.js run examples/lightspeed.mtsw
 ```
