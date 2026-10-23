@@ -32,7 +32,7 @@ import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
 
 const node = parse('c = 1 / sqrt(eps0 * mu0)'); // parse from the functions package
 node.toString(); // 'c = 1 / sqrt(eps0 * mu0)'
-node.toTex(); // 'c=\\frac{1}{\\sqrt{ eps0\\cdot mu0}}'
+node.toTex(); // ' c=\\frac{1}{\\sqrt{ eps0\\cdot mu0}}'
 node.toMathML(); // '<mrow><mi>c</mi><mo>=</mo><mfrac>…</mfrac></mrow>'
 mathMLDocument(node); // '<math xmlns="…" display="block">…</math>'  (renderable)
 ```

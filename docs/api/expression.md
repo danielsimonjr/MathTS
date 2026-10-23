@@ -33,20 +33,21 @@ root:
 
 ## Security Sandbox
 
-This is the load-bearing security surface of the package. **Every**
-property / method / index access in the compiler routes through four helpers in
-`expression/src/utils/customs.ts`:
+String property and method access in the compiler routes through helpers in
+`expression/src/utils/customs.ts` (`getSafeProperty`, `setSafeProperty`,
+`getSafeMethod` — internal, not package exports). They block prototype pollution
+and ghosted methods. `isSafeMethod` allows any function value that is not ghosted
+(own property shadowing a prototype method) and whose name is not on
+`Object.prototype` or `Function.prototype`. Inherited `Array.prototype` methods
+(`map`, `concat`, …) are allowed. `toString` / `valueOf` / `toLocaleString` are
+the extra native-method allowlist.
 
-| Function          | Signature                          | Guarantee                                                                                                    |
-| ----------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `getSafeProperty` | `(object, prop) => unknown`        | Reads only when `isSafeProperty` passes; throws on inherited / dangerous props                               |
-| `setSafeProperty` | `(object, prop, value) => unknown` | Same whitelist for writes; blocks `__proto__` / `constructor` pollution                                      |
-| `isSafeProperty`  | `(object, prop) => boolean`        | The whitelist predicate                                                                                      |
-| `getSafeMethod`   | `(object, method) => unknown`      | Rejects "ghosted" (own-property-shadowed) methods; whitelists only `toString` / `valueOf` / `toLocaleString` |
-| `isSafeMethod`    | `(object, method) => boolean`      | Method whitelist predicate                                                                                   |
-| `isPlainObject`   | `(object) => boolean`              | Plain-object check                                                                                           |
+If `math.subset` is present (the functions-wired evaluator), indexing goes through
+`subset` (1-based). Only the no-`subset` fallback in `compileAccessorNode` does
+`object[index]` for a numeric index (0-based JS). String keys still go through
+`getSafeProperty`. Do not add unguarded string `obj[name]` reads elsewhere in
+`expression/src/`.
 
-Direct `obj[name]` access anywhere in `expression/src/` is a sandbox bypass.
 Regression-guarded by `expression/tests/security/sandbox.test.ts`.
 
 A **second, independent** layer is `evaluator/evaluate.ts`'s `validateAst` — an
@@ -163,6 +164,47 @@ forbidden-function blocklist: `import`, `createUnit`, `evaluate`, `parse`,
 
 `mathMLDocument`, `mathMLError`, `escapeMathML`, `toMathMLSymbol` — used
 alongside each node's `.toMathML()` method.
+
+## ScalarNode toolkit (M1)
+
+A plain structural IR for numeric lowering (`ScalarNode` is not an AST `Node`).
+Build trees with `createScalarBuilder()` (`number`, `symbol`, `op`, `call`, `from`).
+Input names `ln` / `log` lower to natural `log` / `log10` per
+`SCALAR_FUNCTION_LOWERING` (`ln → log`, `log → log10`). The allowed call names are
+`SCALAR_FUNCTIONS`.
+
+| Export / type                                                    | Role                                                                                                                |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `forEachScalar`                                                  | Preorder walk over `ScalarNode`                                                                                     |
+| `mapScalar`                                                      | Post-order immutable map (children first; replacement is not re-walked)                                             |
+| `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | PySR-style canonical form and stable dedup key                                                                      |
+| `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols` | Metrics (`scalarComplexity` accepts `ScalarComplexityWeights`)                                                      |
+| `ScalarBuildError`                                               | Invalid builder input                                                                                               |
+| Types                                                            | `ScalarNode`, `ScalarOperator`, `ScalarFunctionName`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarComplexityWeights` |
+
+`op(op, args)` takes a **readonly `ScalarNode[]`** (not rest parameters). Canonical
+form flattens `+` / `*`, rewrites `-` / `/`, maps `a*a` to `a^2`, and does **not**
+constant-fold `2^3` to `8`.
+
+```typescript
+import {
+  createScalarBuilder,
+  scalarCanonicalKey,
+  scalarEquals,
+} from '@danielsimonjr/mathts-expression';
+
+const b = createScalarBuilder();
+const pow23 = b.op('^', [b.number(2), b.number(3)]);
+console.log(scalarCanonicalKey(pow23));
+// {"k":"^","b":{"k":"n","v":"2"},"e":{"k":"n","v":"3"}}
+
+const aa = b.op('*', [b.symbol('a'), b.symbol('a')]);
+const aSquared = b.op('^', [b.symbol('a'), b.number(2)]);
+console.log(scalarEquals(aa, aSquared)); // true
+```
+
+Evaluate built scalars with `evaluateScalar` from `@danielsimonjr/mathts-functions`
+(not from this package).
 
 ## Other Exports
 
