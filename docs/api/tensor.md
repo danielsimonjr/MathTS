@@ -13,9 +13,10 @@ npm install @danielsimonjr/mathts-tensor
 ## Overview
 
 `Tensor` is the compute primitive; element-wise and data-movement ops are plain
-O(n) loops, while heavy ops (`matMul`, all decompositions) delegate to
-`@danielsimonjr/mathts-matrix`'s already-optimized (SIMD-WASM-capable)
-primitives rather than reimplementing them.
+O(n) loops. `matMul` delegates to `backendManager.multiply` (WASM GEMM when
+initialized and gated). Tensor decompositions call the JS `svd` / `eig` / `qr` /
+`lu` / `cholesky` solvers in `@danielsimonjr/mathts-matrix`; `tensorSvdWasm` /
+`tensorEigWasm` are async JS delegates.
 
 ```typescript
 import { Tensor, Index, idx } from '@danielsimonjr/mathts-tensor';

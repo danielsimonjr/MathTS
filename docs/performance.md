@@ -75,13 +75,9 @@ const d = a.multiply(b);
 
 ### 2. Batch GPU work
 
-```typescript
-const executor = new BatchExecutor(context, shaders, pool);
-for (const pair of pairs) {
-  executor.add(pair.a, pair.b, outputs[i], dims);
-}
-await executor.flush();
-```
+`BatchExecutor` queues operations on **`GPUBuffer`** arguments (not matrices).
+Batch multiple dispatches through one `flush()` once inputs are uploaded to GPU
+memory — see `BatchExecutor` in `@danielsimonjr/mathts-matrix`.
 
 ### 3. Reuse allocations
 

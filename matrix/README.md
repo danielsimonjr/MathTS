@@ -25,10 +25,10 @@ const sum = A.add(A);
 const product = A.multiply(A);
 const transposed = A.transpose();
 
-// Decompositions and eigen/SVD take number[][] (or flat arrays where noted)
+// `eig` / `svd` take number[][]; `lu` / `qr` / `cholesky` take DenseMatrix
 const { U, S, V, rank } = svd(A.toArray());
 const { values, vectors } = eig(A.toArray());
-const { L, U: Ulu, P } = lu(A.toArray());
+const { L, U: Ulu, P } = lu(A);
 ```
 
 ### WASM matrix multiply (not `DenseMatrix.multiply`)

@@ -219,14 +219,13 @@ const { U, S, V, rank } = svd(M.toArray());
 Public `lu`, `qr`, `cholesky`, and related helpers use the JS implementations in
 `matrix/src/operations/` (not `WASMBackend` decomposition methods).
 
-| Function                                                                   | Input        | Notes                        |
-| -------------------------------------------------------------------------- | ------------ | ---------------------------- |
-| `lu`, `luSolve`                                                            | `number[][]` | Partial pivoting             |
-| `qr`, `qrPivoted`, `lq`, `ql`, `rq`                                        | `number[][]` | QR variants                  |
-| `cholesky`                                                                 | `number[][]` | SPD                          |
-| `matrixSchur`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`                   | `number[][]` | Matrix functions             |
-| `pinv`, `matrixPinv`, `cond`, `condest`, `singularValues`, `lowRankApprox` | `number[][]` | Via SVD / norms              |
-| `eigvals`, `powerIteration`, `norm2`, `normFro`                            | arrays       | Supporting eigen/SVD tooling |
+| Function                                                                          | Input                           | Notes                                     |
+| --------------------------------------------------------------------------------- | ------------------------------- | ----------------------------------------- |
+| `lu`, `qr`, `qrPivoted`, `lq`, `ql`, `rq`, `cholesky`                             | `DenseMatrix`                   | JS primitives in `matrix/src/operations/` |
+| `luSolve`                                                                         | `(LUResult, ArrayLike<number>)` | Solve using `lu` factors                  |
+| `matrixSchur`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `matrixPinv`, `condest` | `DenseMatrix`                   | Matrix functions                          |
+| `pinv`, `cond`, `lowRankApprox`, `norm2`, `normFro`, `powerIteration`             | `number[][]`                    | Via SVD / norms                           |
+| `singularValues`, `eigvals`                                                       | `number[][] \| Float64Array`    | Supporting eigen/SVD tooling              |
 
 `@danielsimonjr/mathts-linalg` re-exports the decomposition-focused subset; extra
 factorizations such as `luSolve` and `condest` remain on `@danielsimonjr/mathts-matrix`

@@ -102,15 +102,19 @@ const c = backendManager.multiply(a, b);
 ### Manual backend selection
 
 ```typescript
-import { jsBackend, wasmBackend, gpuMatrixBackend } from '@danielsimonjr/mathts-matrix';
+import { jsBackend, wasmBackend, gpuMatrixBackend, hasWebGPU } from '@danielsimonjr/mathts-matrix';
 
 await wasmBackend.initialize();
 
 const jsResult = jsBackend.multiply(a, b);
 const wasmResult = wasmBackend.multiply(a, b);
 
-await gpuMatrixBackend.initialize();
-const gpuResult = await gpuMatrixBackend.multiplyAsync(a, b);
+// Browser / WebGPU only: gpuMatrixBackend.initialize() throws in Node when
+// WebGPU is missing. GPUContext.initialize() returns false instead.
+if (hasWebGPU()) {
+  await gpuMatrixBackend.initialize();
+  const gpuResult = await gpuMatrixBackend.multiplyAsync(a, b);
+}
 ```
 
 ### Override selection for tests
@@ -134,17 +138,10 @@ Adaptive threshold state (`getAdaptiveThresholds`) only updates when
 
 ### Batch Execution
 
-```typescript
-import { BatchExecutor, GPUContext, ShaderManager, BufferPool } from '@danielsimonjr/mathts-matrix';
-
-const executor = new BatchExecutor(context, shaders, bufferPool);
-
-executor.add(a, b, output1, { rows: 100, cols: 100 });
-executor.matmul(c, d, output2, { rows: 100, cols: 100, k: 100 });
-executor.transpose(e, output3, { rows: 100, cols: 100 });
-
-const result = await executor.flush();
-```
+`BatchExecutor.add` / `matmul` / `transpose` take **`GPUBuffer`** handles plus
+dimension metadata (after uploads via `GPUContext` / `BufferPool`). See
+`matrix/src/backends/gpu/BatchExecutor.ts` for signatures; wire buffers from your
+shader pipeline rather than passing `DenseMatrix` instances directly.
 
 ### Sync Strategies
 

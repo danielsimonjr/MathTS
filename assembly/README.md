@@ -51,8 +51,9 @@ From `algebra/decomposition.ts` (used by matrix `WASMBackend` tests, not public
 - `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`,
   `matrix_inverse`, `matrix_determinant`
 
-Call `heap_reset` after managed sequences when using bump-allocated scratch (see
-`heap.ts`); matrix/functions bridges reset the heap per public call.
+Call `heap_reset` after managed sequences when using bump-allocated scratch
+(`heap.ts`). The **functions** WASM bridges call it after each managed call;
+matrix does not — it pools buffers.
 
 ## Module Structure
 
@@ -64,7 +65,6 @@ assembly/
 │   ├── elementwise.ts, heap.ts, poly.ts, signal.ts, sort.ts, special.ts, tridiag.ts
 │   ├── types/complex.ts
 │   ├── ops/                  # scalar, array, matrix, complex-ops, fft, …
-│   ├── env/abort.ts
 │   └── bindings/             # optional TS loader (not package entry)
 ├── build/                    # mathts.wasm, mathts.js, mathts.d.ts
 ├── tests/run.js              # debug wasm smoke tests
@@ -113,7 +113,7 @@ assembly/
 
 ```bash
 npm run asbuild          # release + debug (npm test needs release for test:diff)
-npm test                 # tests/run.js (debug wasm) + test:diff (release wasm)
+npm test                 # tests/run.js (debug wasm) + nine kernel tests + test:diff (release wasm)
 ```
 
 ## License

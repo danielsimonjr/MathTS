@@ -93,8 +93,9 @@ whole JS-only families: they also carry WASM and/or parallel paths, and
   `functions/src/typed/matrix-ops.ts`. **Reachable today:** SIMD GEMM via
   `backendManager.multiply` / `wasmBackend.multiply` / `Tensor.matMul` after
   `initialize()` — manager compares multiply WASM threshold **256** to flop count
-  `rows*cols*k`; `WASMBackend.multiply` also requires ≥100 stored elements per
-  operand side. `DenseMatrix.multiply` and public `lu`/`qr`/`cholesky` stay on JS.
+  `rows*cols*k`; `WASMBackend.multiply` also requires
+  `a.rows*a.cols + b.rows*b.cols >= 100` (sum of stored elements of both operands).
+  `DenseMatrix.multiply` and public `lu`/`qr`/`cholesky` stay on JS.
   `WASMBackend` dense `inverse`/`determinant`/LU/QR/Cholesky exist but are not
   called from public `lu()`/`qr()`/`cholesky()`. Element-wise ops, `transpose`,
   reductions, and `eig`/`svd` run on JS; FFT is not a matrix-backend op (WASM FFT

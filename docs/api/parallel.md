@@ -40,21 +40,27 @@ await computePool.terminate();
 
 ### Lifecycle Methods
 
-| Method       | Signature                     | Description         |
-| ------------ | ----------------------------- | ------------------- |
-| `initialize` | `(options?) => Promise<void>` | Start worker pool   |
-| `terminate`  | `() => Promise<void>`         | Stop all workers    |
-| `stats`      | `() => PoolStats`             | Get pool statistics |
+| Method       | Signature             | Description         |
+| ------------ | --------------------- | ------------------- |
+| `initialize` | `() => Promise<void>` | Start worker pool   |
+| `terminate`  | `() => Promise<void>` | Stop all workers    |
+| `stats`      | `() => PoolStats`     | Get pool statistics |
 
-### Initialization Options
+### Pool configuration
+
+The exported `computePool` is a default singleton. Pass options to `new ComputePool({...})`
+before `initialize()`:
 
 ```typescript
-await computePool.initialize({
+import { ComputePool } from '@danielsimonjr/mathts-parallel';
+
+const pool = new ComputePool({
   minWorkers: 2,
-  maxWorkers: 8, // default maxWorkers is 4 in Node (no navigator)
+  maxWorkers: 8, // default 4 in Node (no navigator)
   workerType: 'auto', // 'auto' | 'web' | 'thread'
   chunkSize: 10000, // chunk width when parallelizing, not the cutoff
 });
+await pool.initialize();
 ```
 
 ---
@@ -260,8 +266,8 @@ interface ParallelResult<T> {
 const result = await computePool.sum(data);
 
 console.log(result.result); // The sum
-console.log(result.duration); // 15.3 (ms)
-console.log(result.chunks); // 8
+console.log(result.duration); // duration in ms (often ~0 on the sequential path)
+console.log(result.chunks); // 1 when not parallelized
 console.log(result.parallelized); // false for many defaults at moderate n
 ```
 
