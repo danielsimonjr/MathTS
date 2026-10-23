@@ -13,8 +13,10 @@ npm install @danielsimonjr/mathts-tensor
 ## What it provides
 
 - `Tensor` construction from nested arrays / flat data + shape.
-- Elementwise ops, reshaping, broadcasting, reductions, and contraction.
-- The substrate for `@danielsimonjr/mathts-autograd`.
+- Elementwise ops, reshaping, broadcasting, reductions, contraction, and `matMul`
+  (routes through `backendManager.multiply` for WASM GEMM when gated).
+- Tensor decompositions and `tensorSvdWasm` / `tensorEigWasm` (async JS delegates).
+- Substrate for `@danielsimonjr/mathts-autograd` (`randomTensor` uses Mulberry32).
 
 ## License
 

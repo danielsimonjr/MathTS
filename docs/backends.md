@@ -1,265 +1,216 @@
 # MathTS Backend System
 
-MathTS provides a three-tier backend system for matrix operations that automatically selects the optimal implementation based on matrix size and operation type.
+MathTS matrix code can run on pure JavaScript, on AssemblyScript WASM for selected
+kernels, or on WebGPU when callers opt in through `@danielsimonjr/mathts-functions`.
+`BackendManager` registers **JavaScript** and **WASM** only; GPU matrix work is a
+separate path (`gpuMatrixBackend` in this package, `enableGpu()` in functions).
 
-> **WASM backend.** The acceleration path is
-> **TS → AssemblyScript → (WebGPU for matrix)**. AssemblyScript is the **sole
-> WASM backend** for the whole repo — both `functions` and `matrix` load
-> `mathts-as.wasm` (source `assembly/src/`) and dispatch is AS→JS. The legacy
-> native-WASM path has since been removed. SHA-384 integrity verification of the
-> AS binary is retained.
+> **WASM backend.** The acceleration path is **TS → AssemblyScript**. AssemblyScript
+> is the **sole WASM backend** for the whole repo — both `functions` and `matrix`
+> load `mathts-as.wasm` (source `assembly/src/`). SHA-384 integrity verification of
+> the AS binary is retained before instantiation.
 
 ## Backend Types
 
 ### 1. JavaScript Backend (JS)
 
-- **Best for:** Small matrices (< 1,000 elements)
+- **Best for:** Default path; small matrices; all `DenseMatrix` instance methods
+  (`add`, `multiply`, `transpose`, …); public `lu` / `qr` / `cholesky` /
+  `eig` / `svd`
 - **Advantages:** No initialization overhead, always available
-- **Implementation:** Pure TypeScript with standard JavaScript operations
+- **Implementation:** Pure TypeScript (`matrix/src/types/dense/arithmetic.ts` and
+  `matrix/src/operations/*`)
 
 ### 2. AssemblyScript WASM Backend (AS)
 
-- **Status**: Active — the **sole WASM backend** for the whole repo (functions + matrix). Serves both element-wise/basic ops and the heavy ops (SVD/eig/FFT and all dense decompositions).
-- **Best for:** Medium-to-large matrices (engages above ~1,000 elements); element-wise ops and decompositions
-- **Binary**: `mathts-as.wasm` (built by `npm run build:wasm`)
-- **Source**: `assembly/src/` (AssemblyScript modules: `ops`, `types`, `bindings`, `env`)
-- **Advantages:** SIMD optimizations, near-native performance
-- **Requirements:** WebAssembly support (available in all modern browsers)
-- **Integrity:** the `.wasm` buffer is SHA-384-verified against `wasm-manifest.json` before instantiation
-- **Features:**
-  - SIMD acceleration when available
-  - Optimized memory management
-  - Low-level arithmetic operations
+- **Status:** Active — sole WASM backend for functions + matrix
+- **Binary:** `mathts-as.wasm` (built by `npm run build:wasm`)
+- **Source:** `assembly/src/`
+- **What actually runs on WASM today (matrix package):**
+  - **Matrix multiply (GEMM)** via `backendManager.multiply`, `wasmBackend.multiply`,
+    or `Tensor.matMul` — after `await backendManager.initialize()` /
+    `wasmBackend.initialize()`, and only when size gates pass (see thresholds below).
+  - **Dense LU / QR / Cholesky / inverse / determinant** exist on `WASMBackend` and
+    are tested, but **public** `lu()`, `qr()`, and `cholesky()` use the JS
+    implementations in `matrix/src/operations/` and do not call those WASM methods.
+- **What stays on JS (measured slower or retired on WASM, 2026-07):** element-wise
+  ops, `transpose`, reductions, `eig`, `svd` (including `eigWasm` / `svdWasm` async
+  wrappers — they delegate to JS). FFT is not a matrix-backend op.
+- **Requirements:** WebAssembly (+ SIMD when available)
 
 ### 3. WebGPU Backend (GPU)
 
-- **Best for:** Large matrices (> 100,000 elements)
-- **Advantages:** Massive parallelism, best for large data
-- **Requirements:** WebGPU support (Chrome 113+, Edge 113+, Firefox Nightly)
-- **Features:**
-  - Compute shaders for parallel operations
-  - Buffer pooling for memory efficiency
-  - Batch execution support
+- **Status:** Implemented — foundation in `@danielsimonjr/mathts-gpu`, matrix WGSL
+  kernels in `@danielsimonjr/mathts-matrix` (`GPUMatrixBackend`), element-wise /
+  FFT GPU paths in `@danielsimonjr/mathts-functions` behind `enableGpu()` (f32).
+- **Not in `BackendManager`:** `register-backends.ts` never registers `'gpu'`, so
+  `getAvailableBackends()` is `['js','wasm']` and `getActiveBackend(...)` never
+  returns `'gpu'`.
+- **Matrix GPU matmul:** `await gpuMatrixBackend.multiplyAsync(a, b)` after
+  `initialize()`; engages when `rows * cols * k >= 65536` (`GPU_MIN_ELEMENTS`).
+  Sync `gpuMatrixBackend.multiply` falls back to JS even above that gate.
+- **Requirements:** WebGPU (browser); Node has no adapter unless you provide one
 
-## Automatic Backend Selection
+## Automatic Backend Selection (`BackendManager`)
 
-The `BackendManager` automatically selects the best backend based on:
+`BackendManager` chooses **js** or **wasm** from hints and availability. GPU hint
+columns in the table below are stored for a future registry hook but are **not read**
+while `'gpu'` is unregistered.
 
-1. **Element count** - Larger matrices benefit from WASM/GPU
-2. **Operation type** - Some operations have different thresholds
-3. **Availability** - Falls back if a backend isn't available
-4. **User preferences** - Can override automatic selection
+Thresholds come from `backendManager.getHints().operationThresholds` (defaults in
+`BackendManager`, not the internal `matrix/src/config.ts` table unless that module
+is wired by a future export).
 
-### Default Thresholds
+| Operation | WASM gate (manager)                | GPU gate (unused until registered) | Notes                                                                     |
+| --------- | ---------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| add/sub   | 1,000 elements                     | 65,536                             | WASM `add` still calls JS                                                 |
+| multiply  | **256** (flop count `rows*cols*k`) | 65,536                             | `WASMBackend.multiply` also checks `a.rows*a.cols + b.rows*b.cols >= 100` |
+| transpose | 2,000                              | 65,536                             | WASM `transpose` calls JS                                                 |
+| decompose | 100                                | 65,536                             | Public `lu`/`qr`/`cholesky` ignore this                                   |
 
-| Operation         | WASM Threshold | GPU Threshold |
-| ----------------- | -------------- | ------------- |
-| Add/Subtract      | 1,000          | 100,000       |
-| Multiply (matmul) | 500            | 50,000        |
-| Transpose         | 2,000          | 200,000       |
-| Decomposition     | 100            | 10,000        |
-
-## Usage
-
-### Basic Usage (Auto-Selection)
+Example (ran on Node after `await backendManager.initialize()`):
 
 ```typescript
 import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-// Initialize all backends
 await backendManager.initialize();
 
-// Operations automatically use the best backend
-const result = backendManager.multiply(matrixA, matrixB);
+console.log(backendManager.getAvailableBackends()); // ['js', 'wasm']
+console.log(backendManager.hasBackend('gpu')); // false
+console.log(backendManager.getActiveBackend(1_000_000, 'multiply')); // 'wasm'
+console.log(backendManager.getHints().operationThresholds.multiply);
+// { wasm: 256, gpu: 65536 }
 ```
 
-### Manual Backend Selection
+`DenseMatrix.multiply` does **not** use `BackendManager`; it runs the JS ikj loop.
+Use `backendManager.multiply(a, b)` or `wasmBackend.multiply(a, b)` for WASM GEMM.
+
+## Usage
+
+### WASM matmul via BackendManager
+
+```typescript
+import { backendManager, DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+await backendManager.initialize();
+
+const a = DenseMatrix.random(64, 64);
+const b = DenseMatrix.random(64, 64);
+const c = backendManager.multiply(a, b);
+```
+
+### Manual backend selection
 
 ```typescript
 import { jsBackend, wasmBackend, gpuMatrixBackend } from '@danielsimonjr/mathts-matrix';
 
-// Force a specific backend
+await wasmBackend.initialize();
+
 const jsResult = jsBackend.multiply(a, b);
 const wasmResult = wasmBackend.multiply(a, b);
 
-// GPU operations are async
 await gpuMatrixBackend.initialize();
 const gpuResult = await gpuMatrixBackend.multiplyAsync(a, b);
 ```
 
-### Configuring Backends
-
-```typescript
-import {
-  setBackendThreshold,
-  setBackendPreference,
-  forceBackend,
-} from '@danielsimonjr/mathts-matrix';
-
-// Adjust thresholds
-setBackendThreshold('wasm', 500); // Use WASM for > 500 elements
-setBackendThreshold('gpu', 50000); // Use GPU for > 50,000 elements
-
-// Set preference level
-setBackendPreference('wasm', 'prefer'); // Prefer WASM when available
-setBackendPreference('gpu', 'require'); // Require GPU (error if unavailable)
-
-// Force a specific backend
-forceBackend('wasm'); // Only use WASM
-forceBackend(null); // Reset to auto-selection
-```
-
-### Checking Availability
+### Override selection for tests
 
 ```typescript
 import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-// Check available backends
-const available = backendManager.getAvailableBackends();
-// Returns: ['js', 'wasm', 'gpu'] (if all available)
-
-// Check specific backend
-if (backendManager.hasBackend('gpu')) {
-  console.log('GPU acceleration available!');
-}
-
-// See which backend would be selected
-const backend = backendManager.getActiveBackend(1000000, 'multiply');
-console.log(`Would use: ${backend}`); // 'gpu'
+backendManager.forceBackend('wasm'); // stick to WASM when possible
+backendManager.forceBackend(null); // restore auto-selection
 ```
 
-## Adaptive Threshold Tuning
+`setBackendThreshold`, `setBackendPreference`, `setConfig`, `getConfig`,
+`enableAdaptiveTuning`, and `configureAdaptiveTuning` live in `matrix/src/config.ts`
+and are **not** exported from `@danielsimonjr/mathts-matrix`. Prefer
+`backendManager.forceBackend` and the documented hints above.
 
-MathTS can automatically adjust thresholds based on runtime profiling:
-
-```typescript
-import { enableAdaptiveTuning, configureAdaptiveTuning } from '@danielsimonjr/mathts-matrix';
-
-// Enable adaptive tuning
-enableAdaptiveTuning();
-
-// Configure tuning parameters
-configureAdaptiveTuning({
-  sampleSize: 10, // Samples before adjusting
-  minSpeedupRatio: 1.2, // Minimum 20% improvement to switch
-  maxAdjustmentPercent: 25, // Max 25% threshold adjustment
-  cooldownMs: 5000, // 5s between adjustments
-});
-
-// View adaptive thresholds
-const thresholds = backendManager.getAdaptiveThresholds();
-console.log('Adjusted multiply threshold:', thresholds.get('multiply'));
-```
+Adaptive threshold state (`getAdaptiveThresholds`) only updates when
+`recordSample` runs; production `multiply` / `add` do not call it today.
 
 ## GPU-Specific Features
 
 ### Batch Execution
-
-For multiple operations, use batch execution to reduce GPU overhead:
 
 ```typescript
 import { BatchExecutor, GPUContext, ShaderManager, BufferPool } from '@danielsimonjr/mathts-matrix';
 
 const executor = new BatchExecutor(context, shaders, bufferPool);
 
-// Queue multiple operations
 executor.add(a, b, output1, { rows: 100, cols: 100 });
 executor.matmul(c, d, output2, { rows: 100, cols: 100, k: 100 });
 executor.transpose(e, output3, { rows: 100, cols: 100 });
 
-// Execute all at once
 const result = await executor.flush();
-console.log(`Executed ${result.operationCount} operations in ${result.duration}ms`);
 ```
 
 ### Sync Strategies
 
-Control CPU-GPU data synchronization:
-
 ```typescript
 import { createSyncManager } from '@danielsimonjr/mathts-matrix';
 
-// Strategies: 'immediate', 'lazy', 'double-buffer', 'streaming'
 const sync = createSyncManager(context, bufferPool, 'streaming');
 
-// Upload with progress
 await sync.uploadStreaming(data, gpuBuffer, (progress) => {
   console.log(`Upload progress: ${(progress * 100).toFixed(1)}%`);
 });
 
-// Download in chunks
 const result = await sync.downloadStreaming(gpuBuffer, totalSize);
 ```
 
 ## Error Handling
 
-All backends support graceful fallback:
-
-```typescript
-import { setConfig } from '@danielsimonjr/mathts-matrix';
-
-// Enable fallback on errors (default: true)
-setConfig({
-  backends: {
-    wasm: { ...getConfig().backends.wasm, fallbackOnError: true },
-    gpu: { ...getConfig().backends.gpu, fallbackOnError: true },
-  },
-});
-
-// Now if WASM/GPU fails, JS backend is used automatically
-const result = backendManager.multiply(a, b); // Never throws
-```
+Backends fall back to JS on many failure paths when WASM is selected. Callers should
+still handle rejected promises from `initialize()` and invalid dimensions. There is
+no public `setConfig({ backends: { wasm: { fallbackOnError }}})` on the package
+entry; `fallbackOnError` is a field on extended backend hints inside the manager.
 
 ## Backend Comparison
 
-| Feature            | JS       | WASM-AS                    | GPU      |
-| ------------------ | -------- | -------------------------- | -------- |
-| Initialization     | Instant  | ~10ms                      | ~100ms   |
-| Small matrices     | Fastest  | Overhead                   | Overhead |
-| Medium matrices    | Slow     | Fast                       | Overhead |
-| Large matrices     | Slowest  | Fast                       | Fastest  |
-| SIMD support       | No       | Yes                        | N/A      |
-| Parallel execution | No       | Limited                    | Yes      |
-| Memory efficiency  | Good     | Good                       | Best     |
-| Browser support    | 100%     | 95%+                       | 60%+     |
-| Status             | Fallback | Active (sole WASM backend) | Planned  |
-| Binary location    | —        | `mathts-as.wasm`           | —        |
+| Feature         | JS      | WASM-AS                       | GPU (opt-in)         |
+| --------------- | ------- | ----------------------------- | -------------------- |
+| Initialization  | Instant | ~10ms                         | ~100ms               |
+| `DenseMatrix.*` | Always  | Not used                      | Not used             |
+| Manager matmul  | Small n | SIMD GEMM when gated          | N/A in manager       |
+| `eig` / `svd`   | Yes     | JS delegates (`*Wasm` names)  | N/A                  |
+| SIMD support    | No      | Yes (matmul / decomp kernels) | N/A                  |
+| Browser support | 100%    | 95%+                          | Chromium-class       |
+| Status          | Default | Active (sole WASM)            | Live, not in manager |
+| Binary location | —       | `mathts-as.wasm`              | WGSL in matrix/gpu   |
 
 ## Troubleshooting
 
-### WASM Not Available
+### WASM features
 
 ```typescript
 import { detectWasmFeatures } from '@danielsimonjr/mathts-matrix';
 
 const features = await detectWasmFeatures();
-console.log('WASM:', features.basic);
-console.log('SIMD:', features.simd);
-console.log('Threads:', features.threads);
+console.log('webAssembly:', features.webAssembly);
+console.log('simd:', features.simd);
+console.log('threads:', features.threads);
 ```
 
-### GPU Not Available
+### GPU capabilities
 
 ```typescript
-import { detectGPUCapabilities } from '@danielsimonjr/mathts-matrix';
+import { detectGPUCapabilities } from '@danielsimonjr/mathts-gpu';
 
 const caps = await detectGPUCapabilities();
-console.log('Supported:', caps.supported);
-console.log('Adapter:', caps.adapterInfo);
-console.log('Limits:', caps.limits);
+console.log('supported:', caps.supported);
+console.log('adapter:', caps.adapterInfo);
+console.log('maxBufferSize:', caps.maxBufferSize);
 ```
 
-### Performance Issues
+### Performance samples
 
 ```typescript
-import { enableProfiling, backendManager } from '@danielsimonjr/mathts-matrix';
-
-enableProfiling();
-
-// Run operations...
+import { backendManager } from '@danielsimonjr/mathts-matrix';
 
 const stats = backendManager.getPerformanceStats();
-for (const [op, data] of stats.operationStats) {
-  console.log(`${op}: ${data.avgDuration.toFixed(2)}ms avg, ${data.samples} samples`);
-}
+console.log('samples recorded:', stats.sampleCount);
 ```
+
+Samples populate only when code calls `recordSample` (tests today).

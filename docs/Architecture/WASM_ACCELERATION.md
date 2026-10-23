@@ -88,14 +88,17 @@ whole JS-only families: they also carry WASM and/or parallel paths, and
 
 ## Acceleration outside the typed API
 
-- **Matrix linear algebra** is WASM-accelerated via the **`matrix` package**
-  backend (`matrix/src/backends/WASMBackend.ts`, bundling
-  `matrix/dist/wasm/mathts-as.wasm`), not via `functions/src/typed/matrix-ops.ts`.
-  Operations: SIMD `multiply`/gemm (engages at ≥256 elements) and the dense
-  `inverse`/`determinant` + `LU`/`QR`/`Cholesky` decompositions. Element-wise
-  ops, `transpose`, reductions (sum/norm/dot), and `eig`/`svd` were benchmarked
-  slower on WASM and run on JS; FFT/IFFT is not a matrix-backend op (its WASM
-  path lives in `functions/src/wasm/signal/`).
+- **Matrix linear algebra** uses the **`matrix` package** WASM backend
+  (`matrix/src/backends/WASMBackend.ts`, `mathts-as.wasm`), not
+  `functions/src/typed/matrix-ops.ts`. **Reachable today:** SIMD GEMM via
+  `backendManager.multiply` / `wasmBackend.multiply` / `Tensor.matMul` after
+  `initialize()` — manager compares multiply WASM threshold **256** to flop count
+  `rows*cols*k`; `WASMBackend.multiply` also requires ≥100 stored elements per
+  operand side. `DenseMatrix.multiply` and public `lu`/`qr`/`cholesky` stay on JS.
+  `WASMBackend` dense `inverse`/`determinant`/LU/QR/Cholesky exist but are not
+  called from public `lu()`/`qr()`/`cholesky()`. Element-wise ops, `transpose`,
+  reductions, and `eig`/`svd` run on JS; FFT is not a matrix-backend op (WASM FFT
+  in `functions/src/wasm/signal/`).
 - **Internal kernels** (`functions/src/wasm/{poly,signal,sort,interpolation,
 bitwise}/`) accelerate algebra/numeric/interpolation code paths
   (`poly_mul`, `welch_psd`, `sort_f64`, `tridiag_solve`, divided differences,

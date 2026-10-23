@@ -11,7 +11,7 @@ npm install @danielsimonjr/mathts-matrix
 ## Usage
 
 ```typescript
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, svd, eig, lu, qr, cholesky } from '@danielsimonjr/mathts-matrix';
 
 // Create a matrix from a 2D array
 const A = DenseMatrix.fromArray([
@@ -20,23 +20,44 @@ const A = DenseMatrix.fromArray([
   [7, 8, 9],
 ]);
 
-// Basic operations
+// DenseMatrix methods use the JS backend (add, multiply, transpose, …)
 const sum = A.add(A);
 const product = A.multiply(A);
 const transposed = A.transpose();
 
-// Decompositions (operate on number[][])
-import { svd, eig } from '@danielsimonjr/mathts-matrix';
-const { U, S, V } = svd(A.toArray());
+// Decompositions and eigen/SVD take number[][] (or flat arrays where noted)
+const { U, S, V, rank } = svd(A.toArray());
+const { values, vectors } = eig(A.toArray());
+const { L, U: Ulu, P } = lu(A.toArray());
+```
+
+### WASM matrix multiply (not `DenseMatrix.multiply`)
+
+After `await backendManager.initialize()`, `backendManager.multiply(a, b)` and
+`wasmBackend.multiply(a, b)` can run the AssemblyScript GEMM kernel when size gates
+pass. `Tensor.matMul` in `@danielsimonjr/mathts-tensor` routes through the same
+manager. Public `lu` / `qr` / `cholesky` / `eig` / `svd` stay on JS; `eigWasm` and
+`svdWasm` are async wrappers that still call those JS solvers.
+
+```typescript
+import { backendManager, DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+await backendManager.initialize();
+const a = DenseMatrix.random(32, 32);
+const c = backendManager.multiply(a, a);
 ```
 
 ## Backends
 
-| Backend  | Trigger        | Performance  |
-| -------- | -------------- | ------------ |
-| **JS**   | Default        | 1x baseline  |
-| **WASM** | >1K elements   | ~10x faster  |
-| **GPU**  | >100K elements | ~100x faster |
+| Backend  | How you reach it                                                                       | Role                                                           |
+| -------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **JS**   | `DenseMatrix` methods; `lu`/`qr`/`cholesky`/`eig`/`svd`                                | Default                                                        |
+| **WASM** | `backendManager.multiply`, `wasmBackend.multiply`, `Tensor.matMul`                     | SIMD GEMM (+ unused-by-public decomp methods on `WASMBackend`) |
+| **GPU**  | `gpuMatrixBackend.multiplyAsync`; `@danielsimonjr/mathts-functions` with `enableGpu()` | f32 opt-in; **not** registered on `BackendManager`             |
+
+Live defaults (`backendManager.getHints().operationThresholds`): multiply WASM **256**
+(flop count), GPU hint **65536** (inactive until GPU registers). Element-wise WASM
+paths were retired as slower than JS (2026-07).
 
 ## Matrix Types
 
@@ -52,10 +73,11 @@ This package is under active development. Currently implemented:
 - [x] Dense matrix structure
 - [x] Sparse matrix (CSR) structure
 - [x] Matrix operations (add, multiply, transpose, etc.)
-- [x] WASM backend (AssemblyScript)
-- [x] GPU backend (WebGPU)
-- [x] SVD decomposition
-- [x] Eigenvalue solvers
+- [x] WASM backend (AssemblyScript) for manager-driven GEMM
+- [x] GPU backend (WebGPU) via `GPUMatrixBackend`
+- [x] SVD decomposition (JS)
+- [x] Eigenvalue solvers (JS)
+- [x] LU / QR / Cholesky and related exports (see API reference)
 
 ## License
 

@@ -1,5 +1,12 @@
 # mathts-wasm — Numerical Correctness Coverage Audit
 
+> **Docs audit banner (2026-10-23):** Export **denominator** below is stale (297 →
+> **321** symbols in `assembly/src/index.ts`). Family rows omit `elementwise`,
+> `heap`, `ops/fft`, and still list removed `ops/svd`. Covered/uncovered counts
+> were **not** re-run; refresh with `python -X utf8 tests/audit/coverage_matrix.py`
+> (also rewrites `tests/audit/coverage_matrix.json`). P0 differential narrative
+> below is unchanged.
+
 Audit of the test coverage and numerical correctness of the
 `@danielsimonjr/mathts-wasm` export surface. This document is the
 re-runnable scorecard; the two scripts under `tests/audit/` and
@@ -20,8 +27,10 @@ Last regenerated: 2026-06-24.
 
 ## 1. Coverage matrix
 
-**297 exported functions · 79 covered · 218 uncovered.** (Before the P0
-differential harness landed this session: 56 covered.)
+**321 exported functions** (2026-10-23 parse of `assembly/src/index.ts`). Table
+below still reflects the 2026-06-24 run: **79 covered · 218 uncovered** at the
+old 297-symbol denominator — re-run the coverage script to update covered counts
+and family rows.
 
 | Family (source module)                          | Total | Covered | Uncovered | Method                                        |
 | ----------------------------------------------- | ----: | ------: | --------: | --------------------------------------------- |

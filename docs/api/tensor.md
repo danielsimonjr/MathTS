@@ -82,15 +82,15 @@ new Tensor(shape: number[], data: Float64Array, axisLabels?: Index[])
 
 #### Shape / Contraction
 
-| Method         | Signature                                      | Description                                              |
-| -------------- | ---------------------------------------------- | -------------------------------------------------------- |
-| `reshape`      | `(shape: number[]) => Tensor`                  | Reshape (same element count)                             |
-| `transpose`    | `(perm?: number[]) => Tensor`                  | Permute axes                                             |
-| `matMul`       | `(other: Tensor) => Tensor`                    | Uses matrix's backend-selected multiply for large inputs |
-| `tensordot`    | `(other: Tensor, axes) => Tensor`              | NumPy `tensordot` semantics (delegates to `einsum`)      |
-| `axisOf`       | `(index: Index) => number`                     | Axis position of a named index                           |
-| `replaceIndex` | `(oldIndex: Index, newIndex: Index) => Tensor` | Swap a named index                                       |
-| `contract`     | `(other: Tensor) => Tensor`                    | Named-index contraction over ALL shared indices          |
+| Method         | Signature                                      | Description                                                          |
+| -------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
+| `reshape`      | `(shape: number[]) => Tensor`                  | Reshape (same element count)                                         |
+| `transpose`    | `(perm?: number[]) => Tensor`                  | Permute axes                                                         |
+| `matMul`       | `(other: Tensor) => Tensor`                    | Calls `backendManager.multiply` (WASM GEMM when initialized + gated) |
+| `tensordot`    | `(other: Tensor, axes) => Tensor`              | NumPy `tensordot` semantics (delegates to `einsum`)                  |
+| `axisOf`       | `(index: Index) => number`                     | Axis position of a named index                                       |
+| `replaceIndex` | `(oldIndex: Index, newIndex: Index) => Tensor` | Swap a named index                                                   |
+| `contract`     | `(other: Tensor) => Tensor`                    | Named-index contraction over ALL shared indices                      |
 
 > `contract` throws if either operand has no `axisLabels`, there are no shared
 > indices, or a shared index has mismatched dimensions.
@@ -141,12 +141,12 @@ reshaped back.
 | Function         | Signature                                         | Result                                                |
 | ---------------- | ------------------------------------------------- | ----------------------------------------------------- |
 | `tensorSvd`      | `(t, rowAxes, opts?) => TensorSvdResult`          | `{U, S, V, truncatedDim, truncationError}`            |
-| `tensorSvdWasm`  | `(t, rowAxes, opts?) => Promise<TensorSvdResult>` | Async variant (via `svdWasm`)                         |
+| `tensorSvdWasm`  | `(t, rowAxes, opts?) => Promise<TensorSvdResult>` | Async wrapper; `svdWasm` runs JS `svd`                |
 | `tensorQr`       | `(t, rowAxes, opts?) => TensorQrResult`           | `{Q, R}` — `mode: 'reduced' \| 'full'`                |
 | `tensorLU`       | `(t, rowAxes, opts?) => TensorLUResult`           | `{L, U, P, parity}` — reshaped matrix must be square  |
 | `tensorCholesky` | `(t, rowAxes, opts?) => TensorCholeskyResult`     | `{L}` — SPD only                                      |
 | `tensorEig`      | `(t, rowAxes, opts?) => TensorEigResult`          | `{eigenvalues, eigenvectors?, eigenvaluesImaginary?}` |
-| `tensorEigWasm`  | `(t, rowAxes, opts?) => Promise<TensorEigResult>` | Async variant                                         |
+| `tensorEigWasm`  | `(t, rowAxes, opts?) => Promise<TensorEigResult>` | Async wrapper; `eigWasm` runs JS `eig`                |
 | `tensorPinv`     | `(t, rowAxes, opts?) => Tensor`                   | Moore-Penrose via full SVD + rcond                    |
 | `tensorSolve`    | `(A, b, opts?) => TensorSolveResult`              | `{x}` — LU-based linear solve                         |
 

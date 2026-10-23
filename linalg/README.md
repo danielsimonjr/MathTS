@@ -15,10 +15,13 @@ npm install @danielsimonjr/mathts-linalg
 ## What it exports
 
 - **Eigen:** `eig`, `eigvals`, `powerIteration` (+ async `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, which now delegate to JS — the WASM eig kernels were retired 2026-07 as a scalar pessimization).
-- **SVD:** `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro` (+ `svdWasm`).
+- **SVD:** `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro` (+ async `svdWasm`, which delegates to JS — the WASM SVD kernel was retired 2026-07).
 - **Factorizations:** `qr`, `lu`, `cholesky`, `matrixSchur`, `matrixPinv`.
 - **Matrix functions:** `matrixExpm`, `matrixLogm`, `matrixSqrtm`.
 - Result/option types: `EigResult`, `SVDResult`, `QRResult`, `LUResult`, `CholeskyResult`, `SchurResult`, etc.
+
+Extra factorizations on `@danielsimonjr/mathts-matrix` (`luSolve`, `qrPivoted`, `lq`,
+`ql`, `rq`, `condest`, …) are intentionally **not** re-exported here.
 
 ## License
 
