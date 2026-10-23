@@ -11230,6 +11230,7 @@ graph LR
 
 | File                  | Imports                                                                                   | Type   |
 | --------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| `./utils/object.js`   | `hasOwnProperty`                                                                          | Import |
 | `./scalar-builder.js` | `ScalarBuildError, SCALAR_FUNCTION_LOWERING, LoweredScalarFn, ScalarNode, ScalarOperator` | Import |
 
 **Exports:**
@@ -18626,7 +18627,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 199466 |
+| Total Lines of Code     | 199471 |
 | Total Exports           | 6165   |
 | Total Re-exports        | 2604   |
 | Total Classes           | 59     |
