@@ -2,7 +2,9 @@
 
 **Author:** MathTS maintenance
 **Date:** 2026-05-23
-**Status:** Proposed
+**Status:** Superseded / Historical as of 2026-10-22 — all six phases landed; see
+`tensor/src/contraction-sequence.ts`, `autograd/src/tape.ts`, and `tensor/src/Tensor.ts`.
+This file is kept as the design record.
 **Target package:** `@danielsimonjr/mathts-tensor` (with auxiliary additions to `@danielsimonjr/mathts-matrix`)
 **Related external project:** [ITensors.jl](https://github.com/ITensor/ITensors.jl) — Julia tensor-network library that pioneered the named-index + automatic-contraction surface this proposal borrows from.
 
@@ -16,14 +18,14 @@ What we are **not** adding: MPS/MPO, DMRG/TEBD/TDVP, fermion anticommutation, qu
 
 The six landings in this proposal, in priority order:
 
-| Phase | Surface                                                         | Effort           | Status / Value                                                                           |
-| ----- | --------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| 1     | `Index` value type + `Tensor.contract(other)`                   | ~150 LOC + tests | ✅ LANDED (`a21a844`) — readable, type-checkable, position-independent tensor algebra    |
-| 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD  | ~80 LOC + tests  | ✅ LANDED (`a21a844`) — low-rank approximation primitive every downstream consumer wants |
-| 3     | `randomTensor(shape, {distribution, seed})`                     | ~40 LOC + tests  | ✅ LANDED (`a21a844`) — uniform / normal / orthogonal with Mulberry32 seeding            |
-| 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order | ~300 LOC + tests | In flight — DP exact for N ≤ 16, Hendrickson–Sundaram greedy beyond                      |
-| 5     | `TapedTensor.contract` + `TapedTensor.matmul` (AD closure)      | ~120 LOC + tests | In flight — closes the AD loop for UPT v0.7 Proposal 8                                   |
-| 6     | Tensor reductions, NumPy broadcasting, `tensordot(other, axes)` | ~300 LOC + tests | In flight — biggest single jump in everyday usability                                    |
+| Phase | Surface                                                         | Effort           | Status / Value                                                                                                          |
+| ----- | --------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 1     | `Index` value type + `Tensor.contract(other)`                   | ~150 LOC + tests | ✅ LANDED (`a21a844`) — readable, type-checkable, position-independent tensor algebra                                   |
+| 2     | `tensorSvd(t, rowAxes, {maxdim, cutoff})` truncated tensor SVD  | ~80 LOC + tests  | ✅ LANDED (`a21a844`) — low-rank approximation primitive every downstream consumer wants                                |
+| 3     | `randomTensor(shape, {distribution, seed})`                     | ~40 LOC + tests  | ✅ LANDED (`a21a844`) — uniform / normal / orthogonal with Mulberry32 seeding                                           |
+| 4     | `contractNetwork(tensors)` — optimal pairwise-contraction order | ~300 LOC + tests | ✅ LANDED — `contractNetwork` in `tensor/src/contraction-sequence.ts`                                                   |
+| 5     | `TapedTensor.contract` + `TapedTensor.matmul` (AD closure)      | ~120 LOC + tests | ✅ LANDED — `TapedTensor.contract` in `autograd/src/tape.ts`                                                            |
+| 6     | Tensor reductions, NumPy broadcasting, `tensordot(other, axes)` | ~300 LOC + tests | ✅ LANDED — `Tensor.sum`, `Tensor.tensordot`, `Tensor.broadcastShape` (broadcast arithmetic uses private `broadcastOp`) |
 
 ---
 

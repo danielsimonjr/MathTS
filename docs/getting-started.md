@@ -133,7 +133,8 @@ async function main() {
   const sumResult = await computePool.sum(data);
   console.log('Sum:', sumResult.result);
   console.log('Duration:', sumResult.duration, 'ms');
-  console.log('Workers used:', sumResult.workersUsed);
+  console.log('Parallelized:', sumResult.parallelized);
+  console.log('Chunks:', sumResult.chunks);
 
   const meanResult = await computePool.mean(data);
   console.log('Mean:', meanResult.result);
@@ -147,7 +148,7 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides over 500 callable functions (672 total exports, including 52 CODATA physical constants) across 17 categories:
+`@danielsimonjr/mathts-functions` provides **1,090** exports (see the generated export index in [reference/functions.md](reference/functions.md)) across 17 categories:
 
 | Category                      | Examples                                                                                   |
 | ----------------------------- | ------------------------------------------------------------------------------------------ |

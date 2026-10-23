@@ -32,21 +32,14 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
 
 **Conclusion:**
 
-- **Element-wise transcendentals (`functions`' `array_<op>_ptr` path) — inconclusive, NOT
-  retired.** ⚠️ Two benchmarks of the _same_ kernel disagree, and the reason is instructive:
-  `bench:elementwise` (`tools/benchmark/wasm/elementwise.bench.ts`) reports AS winning 1.4–2.5× at
-  scale, but its JS baseline calls the op through an **indirect function-pointer lookup**
-  (`const f = MATH_REF[op]; out[i] = f(x)`) that V8 **can't inline** — so it under-times JS by ~2.4×
-  and overstates the AS win. `elementwise-wasm-single.mjs` (B8), whose JS baseline calls
-  `Math.exp` **directly** (inlined), shows a **tie-to-mild-loss** (0.68–1.38× across sizes). Neither
-  is the real comparison: the production JS fallback is `computePool.<op>` (ComputePool, sync for
-  these ops), **not** a bare loop. So "single-op WASM loses" was an over-generalization.
-  **RESOLVED (`tools/benchmark/wasm/transcendental-dispatch.bench.ts`): the WASM path is a net WIN vs
-  the real `computePool` fallback** — sin 1.36–1.93×, log 1.02–1.33×, exp 1.01–1.23×, never losing at
-  any size (computePool wraps the JS loop in Promise + dispatch overhead, which WASM beats). So the
-  path correctly **stays**. Contrast the matrix element-wise **arithmetic** (add/multiply/transpose):
-  memory-bound, cleanly measured 4–6× loss (`backend-audit.mjs`) — correctly retired. Transcendentals
-  are a different (compute-bound) regime.
+- **Element-wise transcendentals — per-kernel, not “all stay on WASM”.** Early 2026-07 benches
+  compared indirect JS loops and `computePool` wrappers; the 2026-09-26 `opt-in.bench.ts` runs (twice,
+  interleaved, on Node/V8) are what **`functions/src/wasm/policy.ts`** implements. Only kernels with
+  measured wins are listed there — today `abs`, `log10`, `sin` (size band), `log1p` (band), `cos`,
+  `atanh`, `log`, `sec` (band), plus `fused_chain` and the least-squares fits. **`tan`, `exp`, `sinh`,
+  and several other transcendentals stay on JS** (ratios 0.94–1.57 in policy comments). Matrix
+  element-wise **arithmetic** (add/multiply/transpose) remains retired on WASM (memory-bound 4–6× loss
+  in `backend-audit.mjs`).
 - **WASM's actual winning surface (after the 2026-07-01 retirements): SIMD matmul + the
   LU/QR/Cholesky decompositions.** The scalar element-wise-arithmetic, eig, and svd WASM paths were
   retired/removed (they lost). `tensor.matMul` dogfoods the SIMD matmul via `matrix`; `tensor`'s
@@ -54,9 +47,9 @@ WASM code path at all?_ — so we don't add a code path that doesn't earn its ke
 - **Maintenance/dogfooding is achieved by the consolidation, not by a WASM code path:**
   `autograd` builds on `core`'s shared `DUAL_UNARY_RULES`, `functions`/`expression` build on
   `core/internal` for number/object utils, `tensor` builds on `matrix`. One implementation each.
-- **Settled:** `tools/benchmark/wasm/transcendental-dispatch.bench.ts` did the definitive comparison —
-  `elementwiseUnaryDispatch` vs the actual `computePool.<op>` fallback (not a bare `Math.*` loop). WASM
-  wins at every size; the path stays, threshold unchanged.
+- **Settled for dispatch:** re-run `node tools/benchmark/wasm/run-node.mjs opt-in` twice before changing
+  `policy.ts`; cite both runs in the policy comment. This README’s July 2026 “wins at every size” line
+  for transcendentals is superseded by the September 2026 policy table.
 
 ## `matmul-wasm.mjs` — should `Tensor.matMul` dogfood matrix's accelerated matmul?
 

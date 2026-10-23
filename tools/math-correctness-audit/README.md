@@ -33,9 +33,8 @@ python audit.py report
 ```
 
 Prereqs: `pip install mpmath scipy numpy`, and a built repo
-(`npm run build` so `functions/dist` and `matrix/dist` exist). The repo path
-in `eval.mjs` is hardcoded to `C:/Users/danie/Github/Mathts` — change it if
-running elsewhere.
+(`bun run build` so `functions/dist` and `matrix/dist` exist). `eval.mjs` resolves
+the repo root from `import.meta.url` (`..` / `..` from the script directory).
 
 ## Extend
 

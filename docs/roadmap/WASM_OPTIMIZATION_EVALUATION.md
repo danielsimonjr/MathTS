@@ -5,14 +5,19 @@
 
 ## Status
 
-**Implementation complete as of 2026-04-10.**
+> **Historical as of 2026-10-22.** The 2026-04 wave completed its targeted kernels, but the
+> live AssemblyScript module exports **315** function exports (327 total) in `mathts-as.wasm`.
+> Public dispatch today is size-gated by `functions/src/wasm/policy.ts` (most bridges stay on
+> JS after measurement). Treat the table below as the April 2026 evaluation snapshot.
 
-| Work Item                 | Status |
-| ------------------------- | ------ |
-| 32 high-value functions   | DONE   |
-| 40 medium-value functions | DONE   |
-| 8 review bugs fixed       | DONE   |
-| Total WASM exports        | ~1,100 |
+**Implementation complete as of 2026-04-10** (snapshot).
+
+| Work Item                 | Status                                                                       |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| 32 high-value functions   | DONE                                                                         |
+| 40 medium-value functions | DONE                                                                         |
+| 8 review bugs fixed       | DONE                                                                         |
+| Total WASM exports        | ~315 function exports in current `mathts-as.wasm` (was ~1,100 in this draft) |
 
 ## Summary
 
