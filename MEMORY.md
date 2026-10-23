@@ -54,10 +54,10 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 - **New public exports must be added to the curated table in `docs/reference/functions.md`** — a
   `docs-reference-completeness.test.ts` gate fails otherwise. Then regenerate with `npm run docs:functions`
   and `npm run docs:deps`. Generated docs are generator-owned; never hand-edit.
-- **Pre-commit is conditional, not always ~9 minutes.** `.husky/pre-commit` runs `build:wasm` only
-  when `assembly/` is staged, `docs:deps` / `docs:functions` only when package `src/` or `assembly/`
-  changed, and always `check:file-census`, `check:duplicates:fast`, and `lint-staged`. Doc-only
-  commits skip the heavy regen steps.
+- **Pre-commit is conditional, not always ~9 minutes.** `build:wasm` if `assembly/` is staged;
+  `docs:deps` and `docs:functions` if package `src/` or `assembly/` changed; `docs:deps` alone
+  (census) if any other staged `.ts` changed (tests/tools/config); always `check:file-census`,
+  `check:duplicates:fast`, and `lint-staged`. Pure markdown commits skip regen.
 - **`matrix.svd` is synchronous** (returns `{U,S,V,rank}`, not a Promise). **`matrix.eig` returns only
   REAL eigenvector columns** — it zeroes complex-conjugate-pair eigenvectors (forced `care` to use the
   matrix-sign-function method; a real fix is a logged follow-up).
@@ -78,8 +78,8 @@ before `npm view` reflects it.
 ## Forked dependencies
 
 `typed-function` and `workerpool` are **standalone forks** published on npm and consumed from the
-workspace via `npm:@danielsimonjr/typed-function@5.0.0-alpha.4` and
-`npm:@danielsimonjr/workerpool@10.2.2` (see root and `core/package.json`). Wrapper sources live under
+workspace via `npm:@danielsimonjr/typed-function@5.0.0-alpha.4` (root and `core/package.json`) and
+`npm:@danielsimonjr/workerpool@10.2.2` (root and `packages/workerpool/package.json`). Wrapper sources live under
 `packages/typed-function` and `packages/workerpool`. See `TODO.md` → "Forked dependency libs".
 
 ## Where to look

@@ -37,13 +37,16 @@ which uses 40+ duck-typed type checks.
 
 ```text
 matrix.multiply(other)   // DenseMatrix or SparseMatrix
-  1. BackendManager.selectBackend(size) called with rows * cols
-  2. Checks registered backends (js + wasm only — no 'gpu' backend is registered):
-       size < 256           -> JSBackend    (always available)
-       size >= 256          -> WASMBackend  (if AS binary loaded), else JS
-  3. GPUBackend thresholds in BackendManager are dormant; GPU matrix work uses
-     explicit opt-in exports (`gpuMatmul`, …) when `enableGpu()` is set and
-     n >= GPU_MIN_ELEMENTS (65,536).
+  1. BackendManager.multiply uses elementCount = a.rows * b.cols * a.cols, then
+     selectBackend(elementCount, 'multiply') — not rows * cols alone.
+  2. Registered backends are js + wasm only (no 'gpu' in backendRegistry):
+       multiply: WASM when elementCount >= 256 (operation threshold), else JS
+       transpose: WASM threshold 2000; default wasm hint 1000 for ops with no
+       per-op entry; WASMBackend minElements 100 for decomposition kernels
+  3. GPUBackend thresholds in BackendManager are dormant. Explicit exports
+     (`gpuMatmul`, `gpuAdd`, `gpuTranspose`, `gpuScale`) call gpuMatrixBackend
+     directly (minElements 65,536) and do not require enableGpu(). enableGpu()
+     gates implicit fused GPU paths in functions/src/gpu/ (element-wise, FFT).
   4. executeWithFallback(op, backend):
        - Tries selected backend
        - On failure or unavailability, falls back to next lower backend
@@ -55,12 +58,12 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
   6. Returns result as DenseMatrix
 ```
 
-| Backend         | Threshold     | Key Ops                                                                    |
-| --------------- | ------------- | -------------------------------------------------------------------------- |
-| `JSBackend`     | Default       | All ops, pure TypeScript, Float64Array                                     |
-| `WASMBackend`   | ≥256 elements | SIMD matmul, LU/QR/Cholesky/inverse/determinant                            |
-| WebGPU (opt-in) | ≥65,536 (f32) | `enableGpu()` paths in functions/gpu — not BackendManager                  |
-| `ComputePool`   | Per-op map    | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000 |
+| Backend         | Threshold                                                                | Key Ops                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JSBackend`     | Default                                                                  | All ops, pure TypeScript, Float64Array                                                                                                                             |
+| `WASMBackend`   | Per-op (e.g. multiply ≥256 op-count; decompositions via minElements 100) | SIMD matmul, LU/QR/Cholesky/inverse/determinant                                                                                                                    |
+| WebGPU (opt-in) | f32, per kernel                                                          | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
+| `ComputePool`   | Per-op map                                                               | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
 
 ---
 
@@ -327,8 +330,8 @@ typed-function (@danielsimonjr/mathts-core)
     |         |
     |         +---> WASMBackend (threshold check)
     |         |         |
-    |         |         +---> [≥256 elements] WasmLoader --> assembly (AS, mathts-as.wasm)
-    |         |         +---> [<256 or fallback] JSBackend
+    |         |         +---> WASM when per-op threshold met --> WasmLoader --> assembly
+    |         |         +---> else JSBackend (fallback always available)
     |         |
     |         +---> (ComputePool is separate — per-op thresholds, not size ≥100K)
     |

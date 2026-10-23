@@ -161,11 +161,11 @@ Three main systems:
 
 ### Matrix Backends
 
-`@danielsimonjr/mathts-matrix` supports three backends with automatic selection via `BackendManager`:
+`@danielsimonjr/mathts-matrix` uses `BackendManager` for **JS and WASM** selection (GPU is not registered there):
 
 - **JSBackend** - Pure TypeScript (default, always available)
 - **WASMBackend** - AssemblyScript (source: `assembly/src/`, binary `mathts-as.wasm`; the repo's one AS binary). **Scoped by the 2026-07 WASM audit to where SIMD actually wins:** matrix **multiply** (SIMD `f64x2` kernel, engages ≥256 elements) and the dense **LU/QR/Cholesky/inverse/determinant** decompositions. Element-wise ops, transpose, reductions, `eig`, and `svd` run on **JS** — they were measured 0.2–6× _slower_ on WASM (memory-bound, or scalar iterative kernels), so their WASM paths were retired and the eig/svd AS kernels deleted (see CHANGELOG / `tools/benchmarks/`). Falls back to JS when no AS binary has been built. (FFT/signal WASM is a separate `functions/src/wasm/signal/` path, not this backend.)
-- **GPUBackend** - WebGPU compute shaders (`GPU_MIN_ELEMENTS` = 65,536 in `gpu/src/flag.ts`). `BackendManager` does not register a `'gpu'` backend today (only JS + WASM); matrix GPU work uses explicit `gpuMatmul` / `gpuMatrixBackend`. The generic foundation (`GPUContext`, `BufferPool`, `detect`, `ShaderManager`) lives in `@danielsimonjr/mathts-gpu`; matrix re-exports it and keeps domain kernels (`BUILTIN_SHADERS`).
+- **GPUBackend** - WebGPU compute shaders. `BackendManager` does not register `'gpu'` (only JS + WASM). Explicit `gpuMatmul` / `gpuMatrixBackend` is its own opt-in (no `enableGpu()`); implicit fused GPU paths use `enableGpu()` and `GPU_MIN_ELEMENTS` (65,536), GPU FFT at 262,144. Foundation (`GPUContext`, `BufferPool`, `detect`, `ShaderManager`) lives in `@danielsimonjr/mathts-gpu`; matrix keeps domain kernels (`BUILTIN_SHADERS`).
 
 ### `@danielsimonjr/mathts-compat` Pattern
 

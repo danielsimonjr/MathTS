@@ -119,16 +119,17 @@ dependencies, and the `math` singleton provides the fully configured instance.
 
 ### 4. Matrix Backends
 
-Three computation backends with automatic selection via BackendManager:
+`BackendManager` selects **JS and WASM** from size and operation type (GPU is not
+registered in `backendRegistry` — only js + wasm in `register-backends.ts`):
 
-| Backend     | Implementation         | Threshold                                                                                                                         |
-| ----------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| JSBackend   | Pure TypeScript        | Always (default)                                                                                                                  |
-| WASMBackend | AssemblyScript + SIMD  | ≥ 256 elements                                                                                                                    |
-| GPUBackend  | WebGPU compute shaders | Dormant in `BackendManager` (no `'gpu'` backend registered); live GPU work uses opt-in `gpuMatmul` at `GPU_MIN_ELEMENTS` (65,536) |
+| Backend     | Implementation         | Threshold                                                                                                                        |
+| ----------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| JSBackend   | Pure TypeScript        | Always (default)                                                                                                                 |
+| WASMBackend | AssemblyScript + SIMD  | Per-op (e.g. `multiply` when `rows*cols*inner >= 256`; decompositions via WASMBackend `minElements` 100; default wasm hint 1000) |
+| GPUBackend  | WebGPU compute shaders | Dormant in `BackendManager`; use explicit `gpuMatmul` / `gpuMatrixBackend` or `enableGpu()` fused paths in functions             |
 
-BackendManager selects based on data size, backend availability, and
-adaptive performance tuning with profiling support.
+BackendManager applies per-operation WASM thresholds, backend availability, and
+optional adaptive tuning — not automatic GPU selection.
 
 Matrix types: DenseMatrix (Float64Array-backed), SparseMatrix (CSC format).
 Decompositions: SVD, LU, QR, Cholesky, eigendecomposition.
@@ -231,13 +232,13 @@ For matrix operations via `BackendManager`:
 
 ```
 JS fallback (always)
-  --> WASM acceleration (≥256 elements for SIMD matmul + dense decompositions)
+  --> WASM acceleration (SIMD matmul at multiply threshold 256; dense decompositions at WASMBackend minElements 100)
 ```
 
 `ComputePool` parallelizes only the ops listed in `parallel-pairing.md` (for example
 `matmul` at 4,096 elements). It is not an automatic third tier on top of WASM matrix
-ops. WebGPU is a separate opt-in f32 path (`enableGpu()`, `GPU_MIN_ELEMENTS` 65,536)
-in `@danielsimonjr/mathts-functions`, not `BackendManager`.
+ops. WebGPU is separate: explicit `gpuMatmul` (no `enableGpu()`), or `enableGpu()` for
+fused paths at `GPU_MIN_ELEMENTS` (65,536) and GPU FFT at 262,144 — not `BackendManager`.
 
 For bitwise operations on `Int32Array` inputs, both `ComputePool` (`bitAnd`, …) and
 `functions/src/wasm/bitwise/` stay on in-process JavaScript: worker thresholds are

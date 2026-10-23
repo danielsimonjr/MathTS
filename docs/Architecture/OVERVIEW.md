@@ -10,7 +10,7 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 ## Design Goals
 
 - **Type Safety**: Full TypeScript with strict mode, leveraging the type system for correctness
-- **Performance**: Automatic backend selection (JS/WASM/GPU) based on data size
+- **Performance**: JS/WASM via `BackendManager` (per-op size thresholds); GPU opt-in (`enableGpu()` / explicit `gpuMatmul`)
 - **Compatibility**: Drop-in replacement for math.js via `@danielsimonjr/mathts-compat`
 - **Modularity**: Tree-shakeable ESM packages -- use only what you need
 - **Parallelism**: First-class Web Worker support for large-scale computation
@@ -102,11 +102,11 @@ Categories (examples, not exhaustive):
 MathTS has JS and WASM matrix backends via `BackendManager`, plus separate opt-in
 WebGPU paths in `@danielsimonjr/mathts-functions` / `@danielsimonjr/mathts-gpu`:
 
-| Backend             | Source                             | Status                | Description                                                                       |
-| ------------------- | ---------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
-| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                                                          |
-| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized                                  |
-| WebGPU (opt-in)     | `gpu/src/`, `functions/src/gpu/`   | `enableGpu()` + size  | f32 tier from `GPU_MIN_ELEMENTS` (65,536); not selected by `BackendManager` today |
+| Backend             | Source                             | Status                | Description                                                                                                                                 |
+| ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                                                                                                                    |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized                                                                                            |
+| WebGPU (opt-in)     | `gpu/src/`, `functions/src/gpu/`   | Per-kernel f32 gates  | Fused ops: `enableGpu()` + `GPU_MIN_ELEMENTS` (65,536); GPU FFT: 262,144; explicit `gpuMatmul` without `enableGpu()` — not `BackendManager` |
 
 The AssemblyScript backend compiles `assembly/src/` (28 source files) to a
 single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and

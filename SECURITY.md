@@ -3,7 +3,7 @@
 ## Supported Versions
 
 MathTS ships **24 independently versioned** `@danielsimonjr/mathts-*` packages (see root
-`package.json` `workspaces`). The private root package (`mathts-monorepo@0.1.0`) is not
+`package.json` `workspaces`). The private root package (`mathts@0.1.0`) is not
 published; security fixes land in the scoped packages consumers install.
 
 We release patches for **currently published** package versions. Each workspace
@@ -11,11 +11,11 @@ We release patches for **currently published** package versions. Each workspace
 the same versions appear on the [npm registry](https://www.npmjs.com/org/danielsimonjr)
 and in the Changesets version PR / git tags (`<name>@<version>`).
 
-| What to check                   | Where                                                   |
-| ------------------------------- | ------------------------------------------------------- |
-| Version on `main` for a package | `<pkg>/package.json` → `"version"`                      |
-| Versions already on npm         | `npm view @danielsimonjr/<pkg> version` or the registry |
-| Pending version bumps           | `.changeset/*.md` and the Release workflow version PR   |
+| What to check                   | Where                                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Version on `main` for a package | `<dir>/package.json` → `"version"` (workspace dir, e.g. `core/`)                                     |
+| Versions already on npm         | `npm view @danielsimonjr/mathts-<name> version` (e.g. `npm view @danielsimonjr/mathts-core version`) |
+| Pending version bumps           | `.changeset/*.md` and the Release workflow version PR                                                |
 
 We do not maintain a single monolithic `0.1.x` support line. Install the latest
 published version of each `@danielsimonjr/mathts-*` package you depend on, and
@@ -45,12 +45,11 @@ Include the following information:
 - Proof-of-concept or exploit code (if possible)
 - Impact of the issue, including how an attacker might exploit it
 
-### 3. What to Expect
+### 3. Response Timeline
 
-- **Acknowledgment**: We will acknowledge receipt of your report within 48 hours
-- **Updates**: We will keep you informed about our progress
-- **Resolution**: We aim to resolve critical issues within 30 days
-- **Credit**: We will credit you in the security advisory (unless you prefer to remain anonymous)
+- **Acknowledgment**: Within 48 hours
+- **Initial Assessment**: Within 1 week
+- **Resolution Timeline**: Depends on severity, typically 30–90 days (critical issues: aim for 30 days)
 
 ### 4. Disclosure Policy
 

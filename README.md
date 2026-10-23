@@ -234,17 +234,18 @@ Zero circular dependencies (verified by `tools/create-dependency-graph`).
 
 Dispatch is **measured per operation**, not a single JS → WASM → worker ladder:
 
-- **Matrix** (`BackendManager`): JS by default; WASM for SIMD matmul (≥256 elements)
-  and dense LU/QR/Cholesky/inverse/determinant when the AS binary is loaded.
-  `BackendManager` does not register a GPU backend today; large GPU matrix work
-  uses opt-in `gpuMatmul` / related exports (see below).
+- **Matrix** (`BackendManager`): JS and WASM only (per-op thresholds — e.g.
+  `multiply` uses `rows * cols * inner >= 256` for WASM; decompositions use
+  WASMBackend `minElements` 100). No GPU backend in the manager; explicit
+  `gpuMatmul` / related exports call `gpuMatrixBackend` directly (see below).
 - **Workers** (`ComputePool`): global fallback threshold 50,000 elements, but most
   element-wise ops and reductions are `'never'`; `matmul` engages at 4,096 elements
   (defaults in `parallel/src/ComputePool.ts`).
 - **Functions WASM**: only after `await loadWasm()`; `functions/src/wasm/policy.ts`
   keeps most kernels on JS even when loaded.
-- **WebGPU** (`enableGpu()`): f32 opt-in from `GPU_MIN_ELEMENTS` (65,536) in
-  `gpu/src/flag.ts` for the fused GPU paths in `@danielsimonjr/mathts-functions`.
+- **WebGPU**: explicit `gpuMatmul` et al. (size gate 65,536, no `enableGpu()`);
+  fused element-wise after `enableGpu()` at `GPU_MIN_ELEMENTS` (65,536); GPU FFT
+  at 262,144 (`FFT_GPU_MIN_ELEMENTS` in `functions/src/gpu/fft-gpu.ts`).
 
 `ComputePool.shouldParallelize(n, op?)` resolves per-op thresholds via `thresholdByOp`.
 
@@ -341,8 +342,9 @@ here (so they can't drift). Regenerate with `bun run docs:deps`:
 
 ### Known open items
 
-See [`TODO.md`](./TODO.md) for the full open-items list. CI runs a headed/browser
-WebGPU smoke job (`bun run test:browser`, Mesa lavapipe on GitHub Actions).
+See [`TODO.md`](./TODO.md) for the full open-items list. CI runs `bun run test:browser`
+in Playwright Chromium new-headless with Mesa lavapipe (`GALLIUM_DRIVER=llvmpipe`);
+local browser tests use headed system Chrome (`vitest.config.browser.ts`).
 
 ---
 
