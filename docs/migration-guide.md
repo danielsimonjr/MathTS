@@ -9,8 +9,9 @@ and want to move to `@danielsimonjr/mathts-*`.
   the most common mathjs patterns work unchanged: `math.add`, `math.complex`,
   `math.matrix`, `math.evaluate`, `math.simplify`, `math.det`, `math.eigs`.
 - The typed-function API (`@danielsimonjr/mathts-functions`) is the recommended
-  long-term surface: better tree-shaking, real TypeScript types, no factory
-  indirection.
+  long-term surface: explicit TypeScript overloads and direct imports (not the
+  `create(all)` / `math.*` style). The package still loads one bundled entry that
+  activates the factory graph — do not expect per-symbol tree-shaking from that entry.
 - `Float64Array` inputs to arithmetic functions are async overloads that may use
   `ComputePool` when `thresholdByOp` allows; most element-wise ops default to `'never'`
   (in-process). They return `Promise<Float64Array>`.
@@ -84,12 +85,15 @@ One confirmed divergence (see `CHANGELOG.md` audit section):
 
 ### Why switch
 
-- **Tree-shaking**: importing `add` alone pulls in only its implementation,
-  not the full factory activation chain.
 - **TypeScript types**: each function has explicit overload signatures rather
   than the compat layer's `any`-heavy surface.
-- **No factory indirection**: functions are plain exports, not factory-pattern
-  closures.
+- **Direct imports**: call `add`, `derivative`, `evaluate`, and the typed
+  dispatch layer without `create(all)` / `math.*` indirection.
+- **Single package entry**: `@danielsimonjr/mathts-functions` still builds one
+  `dist/index.js` that activates the factory graph at load time, so
+  `import { add } from '…/mathts-functions'` does not isolate a smaller
+  runtime than importing the compat shim — choose typed imports for the API
+  shape, not because the module is tree-shakeable today.
 
 ### Install
 
@@ -143,7 +147,7 @@ trigonometry functions. For most element-wise operations the default threshold
 is `'never'` (in-process is faster at tested sizes). The pool will be used when
 `ComputePool.shouldParallelize(n, op)` returns true.
 
-### Int32Array bitwise overloads (async, three-tier)
+### Int32Array bitwise overloads (async, in-process today)
 
 ```ts
 import { bitAnd, bitOr, bitXor, bitNot, leftShift } from '@danielsimonjr/mathts-functions';
@@ -154,11 +158,10 @@ const b = new Int32Array([0b1010, 0b0110]);
 const r = await bitAnd(a, b); // Int32Array([0b1000, 0b0010])
 ```
 
-Dispatch order for `Int32Array` inputs:
-
-1. WASM (AssemblyScript) when `length > 65_536`
-2. Worker pool (`ComputePool`) above the standard elementwise threshold
-3. In-process
+The typed bitwise functions are `async` (they return a `Promise`), but dispatch
+stays on in-process JS: `wasmPolicyAllows` has no bitwise kernels (see
+`functions/src/wasm/policy.ts`), and `ComputePool` bitwise ops are `'never'`.
+The `WASM_BITWISE_THRESHOLD` constant in the bridge is not wired through policy.
 
 ---
 
@@ -240,13 +243,12 @@ yet. The compat shim covers them via the factory activation chain:
 
 - **Units** (`math.unit`, `math.to`) — no dedicated typed layer; available
   through the compat factory scope.
-- **Symbolic differentiation** (`math.derivative`) — the CAS layer in
-  `functions/src/typed/cas.ts` provides `inverseLaplaceTransform`,
-  `integrate`, `simplify`, `taylorSeries`, `groebnerBasis`, etc. but not
-  a generic `derivative` function in the typed export. Use `math.derivative`
-  via the compat shim.
 - **Chaining API** (`math.chain(3).add(4).done()`) — not exposed on the
   typed layer; available via compat.
+
+Symbolic differentiation is on the typed surface: `import { derivative } from
+'@danielsimonjr/mathts-functions'` (`derivative('x^2', 'x').toString()` →
+`'2 * x'`). Same for `integrate`, `simplify`, and the rest of the CAS exports.
 
 If a function you need is missing from the typed layer, the compat shim should
 cover it. If neither covers it, please file an issue.
@@ -296,8 +298,10 @@ const pool = new ComputePool({
 `WASM_BITWISE_THRESHOLD` exists in `functions/src/wasm/bitwise/wasm-bridge.ts`, but
 `wasmPolicyAllows` has no bitwise entries, so those kernels never run on WASM today.
 Worker-pool bitwise ops (`bitAnd`, `bitOr`, …) are `'never'` in `DEFAULT_THRESHOLD_BY_OP`.
-Treat `Int32Array` bitwise calls as in-process JS unless you change dispatch policy after
-re-measuring with `tools/benchmark/wasm/opt-in.bench.ts`.
+Treat `Int32Array` bitwise calls as in-process JS. `overrideWasmPolicy` exists in
+`policy.ts` for tests but is not a public `functions` export; changing production
+dispatch requires editing policy after re-measuring with
+`tools/benchmark/wasm/opt-in.bench.ts`.
 
 ---
 
