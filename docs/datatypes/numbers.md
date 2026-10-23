@@ -43,7 +43,7 @@ sqrt(9); // 3
 sin(Math.PI / 2); // 1
 ```
 
-Note: scalar calls are synchronous. Only array inputs (`Float64Array`) dispatch to worker threads and return `Promise<T>`.
+Note: scalar calls are synchronous and return plain values. `Float64Array` inputs use async signatures and return `Promise<T>`, but element-wise ops such as `add` and `sin` stay on the main thread at typical sizes (parallel thresholds `'never'` for those ops).
 
 ## Choosing the Right Type
 

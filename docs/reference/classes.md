@@ -22,6 +22,8 @@ c.toString(); // '3 + 4i'
 ### Static factories
 
 ```typescript
+import { Complex } from '@danielsimonjr/mathts-core';
+
 Complex.fromPolar(5, Math.PI / 4); // magnitude 5, angle 45°
 Complex.fromNumber(3); // Complex(3, 0)
 Complex.fromJSON({ re: 3, im: 4 }); // deserialize
@@ -38,7 +40,7 @@ Complex.parse('3+4i'); // parse string
 | `div(other)`            | `Complex`    | Division                        |
 | `abs()`                 | `number`     | Magnitude `sqrt(re² + im²)`     |
 | `arg()`                 | `number`     | Phase angle in radians          |
-| `conj()`                | `Complex`    | Conjugate `a - bi`              |
+| `conjugate()`           | `Complex`    | Conjugate `a - bi`              |
 | `neg()`                 | `Complex`    | Negation `-a - bi`              |
 | `sqrt()`                | `Complex`    | Square root                     |
 | `exp()`                 | `Complex`    | `e^z`                           |
@@ -51,7 +53,7 @@ Complex.parse('3+4i'); // parse string
 ### Type guard
 
 ```typescript
-import { isComplex } from '@danielsimonjr/mathts-core';
+import { Complex, isComplex } from '@danielsimonjr/mathts-core';
 isComplex(new Complex(1, 2)); // true
 ```
 
@@ -74,6 +76,8 @@ f.toString(); // '1/3'
 ### Static factories
 
 ```typescript
+import { Fraction } from '@danielsimonjr/mathts-core';
+
 Fraction.fromNumber(0.5); // Fraction(1, 2)
 Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 ```
@@ -86,7 +90,7 @@ Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 | `sub(other)` | `Fraction` | Subtraction                    |
 | `mul(other)` | `Fraction` | Multiplication                 |
 | `div(other)` | `Fraction` | Division                       |
-| `neg()`      | `Fraction` | Negation                       |
+| `negate()`   | `Fraction` | Negation                       |
 | `abs()`      | `Fraction` | Absolute value                 |
 | `toNumber()` | `number`   | Convert to floating-point      |
 | `toJSON()`   | object     | `{ mathjs: 'Fraction', n, d }` |
@@ -94,7 +98,7 @@ Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 ### Type guard
 
 ```typescript
-import { isFraction } from '@danielsimonjr/mathts-core';
+import { Fraction, isFraction } from '@danielsimonjr/mathts-core';
 isFraction(new Fraction(1n, 2n)); // true
 ```
 
@@ -119,6 +123,8 @@ b.toFixed(10); // '3.1415926536'
 ### Static factories
 
 ```typescript
+import { BigNumber } from '@danielsimonjr/mathts-core';
+
 BigNumber.parse('1.5e-10'); // from a string (preserves full precision)
 BigNumber.fromNumber(0.5); // from a JS number
 BigNumber.fromJSON({ mathjs: 'BigNumber', value: '3.14' }); // deserialize
@@ -144,8 +150,8 @@ BigNumber.config({ precision: 128 }); // set global precision
 ### Type guard
 
 ```typescript
-import { isBigNumber } from '@danielsimonjr/mathts-core';
-isBigNumber(new BigNumber('1')); // true
+import { isBigNumber, BigNumber } from '@danielsimonjr/mathts-core';
+isBigNumber(BigNumber.parse('1')); // true
 ```
 
 ---
@@ -168,6 +174,8 @@ x.value; // 2
 ### Static factories
 
 ```typescript
+import { Dual } from '@danielsimonjr/mathts-core';
+
 Dual.constant(5); // value 5, derivative 0 (a constant)
 Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.)
 ```
@@ -185,10 +193,12 @@ Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.
 | `sqrt()` `square()` `abs()`         | `Dual`  | Roots / square / absolute value     |
 | `sinh()` `cosh()` `tanh()`          | `Dual`  | Hyperbolic                          |
 
+Elementary methods such as `sin()` apply `DUAL_UNARY_RULES` internally (`core/src/types/dual-rules.ts`); `unary` is not part of the public API.
+
 ### Type guard
 
 ```typescript
-import { isDual } from '@danielsimonjr/mathts-core';
+import { Dual, isDual } from '@danielsimonjr/mathts-core';
 isDual(Dual.variable(1)); // true
 ```
 
@@ -201,42 +211,65 @@ isDual(Dual.variable(1)); // true
 ## Unit
 
 A physical quantity with dimensional units (e.g. `5 m`, `9.8 m/s^2`). Same-dimension
-units add and subtract; multiplication, division, and powers combine dimensions.
+addition and subtraction use the `add` / `subtract` functions from `@danielsimonjr/mathts-functions`, not methods on `Unit`. Instance methods combine or convert dimensions.
 
 ```typescript
 import { Unit } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const d = new Unit(5, 'm');
 d.to('cm').toString(); // '500 cm'
 Unit.parse('9.8 m/s^2'); // an acceleration
-new Unit(5, 'cm').add(new Unit(3, 'mm')).toString(); // '5.3 cm'
+add(new Unit(5, 'cm'), new Unit(3, 'mm')).toString(); // '5.300000000000001 cm'
+d.toNumeric(); // 5 (value in base units)
+d.equalBase(new Unit(1, 'cm')); // true — same dimension as meters
 ```
 
 ### Static factories
 
 ```typescript
+import { Unit } from '@danielsimonjr/mathts-core';
+
 Unit.parse('9.8 m/s^2'); // parse a unit string
 Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 ```
 
 ### Instance methods
 
-| Method                           | Returns   | Description                                |
-| -------------------------------- | --------- | ------------------------------------------ |
-| `add(o)` `sub(o)`                | `Unit`    | Same-dimension addition / subtraction      |
-| `mul(o)` `div(o)`                | `Unit`    | Combine dimensions (or scale by a number)  |
-| `pow(n)`                         | `Unit`    | Raise to a power                           |
-| `to(target)`                     | `Unit`    | Convert to another unit of equal dimension |
-| `toBest()`                       | `Unit`    | Auto-select the most readable prefix       |
-| `equals(o)` `dimensionsEqual(o)` | `boolean` | Equality / dimensional compatibility       |
-| `toString()` `toJSON()`          | —         | Render / serialize                         |
+| Method                     | Returns           | Description                               |
+| -------------------------- | ----------------- | ----------------------------------------- |
+| `multiply(o)` `divide(o)`  | `Unit`            | Combine dimensions (or scale by a number) |
+| `pow(n)`                   | `Unit`            | Raise to a power                          |
+| `to(target)` `toSI()`      | `Unit`            | Convert units / SI base form              |
+| `toBest()` `simplify()`    | `Unit`            | Readable prefix / simplified notation     |
+| `splitUnit(parts)`         | `Unit[]`          | Split into component units                |
+| `format(opts?)`            | `string`          | Formatted quantity string                 |
+| `toNumeric()`              | `Numeric \| null` | Numeric value in base units               |
+| `equalBase(o)` `equals(o)` | `boolean`         | Same dimension / value equality           |
+| `toString()` `toJSON()`    | —                 | Render / serialize                        |
 
 ### Type guard
 
 ```typescript
-import { isUnit } from '@danielsimonjr/mathts-core';
+import { Unit, isUnit } from '@danielsimonjr/mathts-core';
 isUnit(new Unit(5, 'm')); // true
 ```
+
+---
+
+## Range
+
+Numeric index range (`start`, `end`, `step`) for matrix indexing. Exported from `@danielsimonjr/mathts-core` as `Range` and `createRangeClass`.
+
+```typescript
+import { Range } from '@danielsimonjr/mathts-core';
+
+const r = new Range(0, 10, 2);
+r.toArray(); // [0, 2, 4, 6, 8] — end is exclusive
+r.toJSON(); // { mathjs: 'Range', start: 0, end: 10, step: 2 }
+```
+
+Endpoints may be passed as `bigint` or `BigNumber` but are stored as `number` values inside the range.
 
 ---
 
@@ -247,48 +280,53 @@ Row-major dense matrix. Exported from `@danielsimonjr/mathts-matrix` (and re-exp
 ```typescript
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const m = new DenseMatrix([
+const m = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
 ]);
-m.size(); // [2, 3]
-m.get([0, 1]); // 2
-m.toArray(); // [[1,2,3],[4,5,6]]
+m.size; // { rows: 2, cols: 3 }
+m.get(0, 1); // 2
+m.toArray(); // [[1, 2, 3], [4, 5, 6]]
 ```
 
 ### Matrix operations
 
 ```typescript
-import { multiply, transpose, det, inv } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { multiply, det, inv } from '@danielsimonjr/mathts-functions';
 
-const a = new DenseMatrix([
+const a = DenseMatrix.fromArray([
   [1, 2],
   [3, 4],
 ]);
-const b = new DenseMatrix([
+const b = DenseMatrix.fromArray([
   [5, 6],
   [7, 8],
 ]);
 
-multiply(a, b); // DenseMatrix [[19,22],[43,50]]
-transpose(a); // DenseMatrix [[1,3],[2,4]]
-det(a); // -2
-inv(a); // DenseMatrix [[-2, 1],[1.5, -0.5]]
+multiply(a, b).toArray(); // [[19, 22], [43, 50]]
+a.transpose().toArray(); // [[1, 3], [2, 4]]
+det([
+  [1, 2],
+  [3, 4],
+]); // -2
+inv([
+  [1, 2],
+  [3, 4],
+]); // [[-2, 1], [1.5, -0.5]]
 ```
 
-### Backend selection
-
-Operations automatically use the fastest available backend:
-
-| Threshold          | Backend                             |
-| ------------------ | ----------------------------------- |
-| Default            | JSBackend (pure TypeScript)         |
-| > 1,000 elements   | WASMBackend (SIMD-accelerated)      |
-| > 100,000 elements | GPUBackend (WebGPU compute shaders) |
+`DenseMatrix.prototype.multiply` uses the pure JS path (no `backendManager`). WASM thresholds and decomposition behavior are described in [Matrices — Backends](../datatypes/matrices.md#backends).
 
 ### Serialization
 
 ```typescript
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const m = DenseMatrix.fromArray([
+  [1, 2, 3],
+  [4, 5, 6],
+]);
 m.toArray(); // number[][] — plain nested array
 DenseMatrix.fromArray(m.toArray()); // reconstruct from a nested array
 ```
@@ -300,15 +338,16 @@ DenseMatrix.fromArray(m.toArray()); // reconstruct from a nested array
 Compressed Sparse Row (CSR) format. Efficient for matrices where most elements are zero.
 
 ```typescript
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const s = new SparseMatrix([
+const dense = DenseMatrix.fromArray([
   [1, 0, 0],
   [0, 2, 0],
   [0, 0, 3],
 ]);
-s.size(); // [3, 3]
-s.get([1, 1]); // 2
+const s = SparseMatrix.fromDense(dense);
+s.size; // { rows: 3, cols: 3 }
+s.get(1, 1); // 2
 ```
 
 SparseMatrix implements the same `Matrix` interface as `DenseMatrix`. Prefer it when density is below ~25%.
@@ -341,10 +380,17 @@ new Tensor([2, 3], Float64Array.of(1, 2, 3, 4, 5, 6)).toNested(); // [[1,2,3],[4
 ### Static factories
 
 ```typescript
-Tensor.fromNested(nested, shape); // from nested arrays (shape required)
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { Tensor } from '@danielsimonjr/mathts-tensor';
+
+const nested = [
+  [1, 2],
+  [3, 4],
+];
+Tensor.fromNested(nested, [2, 2]); // from nested arrays (shape required)
 Tensor.identity(3); // [[1,0,0],[0,1,0],[0,0,1]]
+const m = DenseMatrix.fromArray(nested);
 Tensor.fromDenseMatrix(m); // from a DenseMatrix
-Tensor.einsum(spec, ...tensors); // Einstein summation
 ```
 
 ### Instance methods
