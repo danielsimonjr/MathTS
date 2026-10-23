@@ -12,9 +12,13 @@ npm install @danielsimonjr/mathts-compat
 
 ## What it provides
 
-- `create(all)` builds a math instance with the familiar mathjs surface.
-- Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions` operations.
-- Useful as a single dependency that pulls a working MathTS stack together.
+- `create(all)` exposes `math.evaluate`, `math.chain`, `math.config`, and functions
+  names such as `math.createUnit` (spread from `@danielsimonjr/mathts-functions`).
+- Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
+  no `math.import` and no named `import` / `createUnit` / `config` export from this
+  package.
+- Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
+  operations. See `docs/api/compat.md` for the full export index.
 
 ## License
 

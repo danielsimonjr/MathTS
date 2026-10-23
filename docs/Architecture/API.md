@@ -1054,16 +1054,16 @@ loading from a path**; buffer-only callers verify themselves), `loadWasmSync(sou
 
 ## npm Scripts (WASM-related)
 
-| Script                  | Command                                             | Description                                                                            |
-| ----------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `build:wasm`            | `npm run asbuild -w @danielsimonjr/mathts-wasm`     | Build the AssemblyScript WASM backend                                                  |
-| `test:wasm`             | `npm run test -w @danielsimonjr/mathts-wasm`        | AssemblyScript WASM tests (`assembly/tests/run.js`, Node + `--experimental-wasm-simd`) |
-| `test:wasm:integration` | `vitest run tests/wasm/`                            | Cross-package WASM integration tests                                                   |
-| `bench:wasm`            | `npx tsx tools/benchmark/wasm/run.ts`               | Full AssemblyScript-vs-JS benchmark suite                                              |
-| `bench:elementwise`     | `npx tsx tools/benchmark/wasm/elementwise.bench.ts` | Elementwise `array_<op>_ptr` kernels vs `Math.*`                                       |
-| `bench:special`         | `npx tsx tools/benchmark/wasm/special.bench.ts`     | Special-function kernels (bessel/lgamma/elliptic)                                      |
-| `bench:sort`            | `npx tsx tools/benchmark/wasm/sort.bench.ts`        | `sort_f64` introsort vs JS comparator sort                                             |
-| `bench:matrix`          | `npx tsx tools/benchmark/wasm/matrix.bench.ts`      | multiply / svd / eig / Welch-PSD (FFT) vs JS                                           |
+| Script                  | Command                                               | Description                                                  |
+| ----------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| `build:wasm`            | `bun run --filter @danielsimonjr/mathts-wasm asbuild` | Build the AssemblyScript WASM backend                        |
+| `test:wasm`             | `bun run --filter @danielsimonjr/mathts-wasm test`    | AssemblyScript WASM tests (`assembly/tests/run.js` via Node) |
+| `test:wasm:integration` | `vitest run tests/wasm/`                              | Cross-package WASM integration tests                         |
+| `bench:wasm`            | `bun tools/benchmark/wasm/run.ts`                     | Full AssemblyScript-vs-JS benchmark suite                    |
+| `bench:elementwise`     | `bun tools/benchmark/wasm/elementwise.bench.ts`       | Elementwise `array_<op>_ptr` kernels vs `Math.*`             |
+| `bench:special`         | `bun tools/benchmark/wasm/special.bench.ts`           | Special-function kernels (bessel/lgamma/elliptic)            |
+| `bench:sort`            | `bun tools/benchmark/wasm/sort.bench.ts`              | `sort_f64` introsort vs JS comparator sort                   |
+| `bench:matrix`          | `bun tools/benchmark/wasm/matrix.bench.ts`            | multiply / svd / eig / Welch-PSD (FFT) vs JS                 |
 
 The `tools/benchmark/wasm/` suite measures each AssemblyScript-accelerated path
 against its pure-JS fallback over a realistic full JS↔wasm round-trip (median of
@@ -1076,9 +1076,11 @@ native-WASM build was removed when AssemblyScript became the sole WASM toolchain
 ## Environment Variables
 
 There is no WASM backend-selection environment variable. AssemblyScript is the sole
-WASM backend. WASM is loaded automatically when the binary is present and the
-operation is above the size threshold, with transparent fallback to JS. Likewise the
-GPU tier is off by default (`enableGpu()` opt-in) because it is f32-only.
+WASM backend. `matrix` loads it through `backendManager.initialize()` when the binary
+is present. `@danielsimonjr/mathts-functions` loads the same binary only after
+`await loadWasm()`; `functions/src/wasm/policy.ts` then decides per kernel whether
+to dispatch to WASM or stay on JS. The GPU tier is off by default (`enableGpu()`
+opt-in) because it is f32-only.
 
 ## Verification
 

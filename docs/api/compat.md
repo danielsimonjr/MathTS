@@ -305,12 +305,12 @@ async function parallelSum(data) {
 
 ## API Differences from mathjs
 
-| mathjs                         | @danielsimonjr/mathts-compat            |
-| ------------------------------ | --------------------------------------- |
-| `math.bignumber(x).toNumber()` | `math.bignumber(x).valueOf()`           |
-| `m.get([row, col])`            | `m.get(row, col)`                       |
-| `m.size()`                     | `math.size(m)` returns `[rows, cols]`   |
-| `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint) |
+| mathjs                         | @danielsimonjr/mathts-compat                      |
+| ------------------------------ | ------------------------------------------------- |
+| `math.bignumber(x).toNumber()` | `math.bignumber(x).toNumber()` (also `valueOf()`) |
+| `m.get([row, col])`            | `m.get(row, col)`                                 |
+| `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
+| `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
 See [Migration Guide](../migration/guide.md) for complete details.
 

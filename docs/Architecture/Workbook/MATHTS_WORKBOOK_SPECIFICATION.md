@@ -1,5 +1,10 @@
 # MathTS Scientific Workbook Format Specification
 
+> **Status:** Design draft (December 2025). The shipped v1 runtime is the headless
+> `mtsw` CLI and `@danielsimonjr/mathts-workbook` library — YAML notebooks, MathTS
+> expression cells, SVG charts via `@danielsimonjr/mathts-plot`, and no browser/WebGPU
+> GUI, Three.js, or plugin registry in `workbook/src`. See `workbook/README.md`.
+
 ## `.mtsw` — MathTS Scientific Workbook
 
 **Version**: 1.0.0-draft  

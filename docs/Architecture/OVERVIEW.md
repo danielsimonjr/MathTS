@@ -10,7 +10,7 @@ It maintains API compatibility with math.js through a dedicated compatibility la
 ## Design Goals
 
 - **Type Safety**: Full TypeScript with strict mode, leveraging the type system for correctness
-- **Performance**: Automatic backend selection (JS/WASM/GPU) based on data size
+- **Performance**: JS/WASM via `BackendManager` (per-op size thresholds); GPU opt-in (`enableGpu()` / explicit `gpuMatmul`)
 - **Compatibility**: Drop-in replacement for math.js via `@danielsimonjr/mathts-compat`
 - **Modularity**: Tree-shakeable ESM packages -- use only what you need
 - **Parallelism**: First-class Web Worker support for large-scale computation
@@ -23,12 +23,12 @@ There is one active code graph. Every file is reachable from a package `src/inde
 
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
-| TypeScript Files             | 1,185 (0 unused)                                             |
-| Lines of Code                | 197,377                                                      |
-| Total Exports                | 6,121 (2,578 re-exports)                                     |
+| TypeScript Files             | 1,189 (0 unused)                                             |
+| Lines of Code                | 199,466                                                      |
+| Total Exports                | 6,165 (2,604 re-exports)                                     |
 | Modules                      | 83                                                           |
 | Circular Dependencies        | 0 runtime (0 type-only)                                      |
-| Classes / Interfaces / Funcs | 58 / 523 / 1,940 (160 type guards, 1,615 constants, 0 enums) |
+| Classes / Interfaces / Funcs | 59 / 534 / 1,959 (160 type guards, 1,616 constants, 0 enums) |
 
 ## Packages
 
@@ -48,9 +48,9 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 46           |
 | `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           |
 | `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            |
-| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 475          |
+| `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 478          |
 | `@danielsimonjr/mathts-parallel`          | ComputePool, WebWorker operations                            | 14           |
-| `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 476          |
+| `@danielsimonjr/mathts-expression`        | Parser/compiler/evaluator (fully functional)                 | 477          |
 | `@danielsimonjr/mathts-plot`              | Headless SVG 2D/3D plotting for MathTS                       | 21           |
 | `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 25           |
 | `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 3            |
@@ -61,7 +61,7 @@ Versions are not listed here. Each package's `package.json` gives its version.
 ## Single Active Code Graph
 
 MathTS is **one active code graph**. Every file is reachable from a package
-`src/index.ts`. The `src/` tree of every workspace package has 1,185 files and
+`src/index.ts`. The `src/` tree of every workspace package has 1,189 files and
 0 unused files, per `dependency-graph.json` (regenerate with `npm run docs:deps:full`).
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. Highlights:
@@ -99,13 +99,14 @@ Categories (examples, not exhaustive):
 
 ## Computation Backends
 
-MathTS has three computation backends selected automatically based on operation size and availability:
+MathTS has JS and WASM matrix backends via `BackendManager`, plus separate opt-in
+WebGPU paths in `@danielsimonjr/mathts-functions` / `@danielsimonjr/mathts-gpu`:
 
-| Backend             | Source                             | Status                | Description                                      |
-| ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------ |
-| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                         |
-| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized |
-| WebGPU              | `matrix/src/backends/gpu/`         | >100K elements        | WebGPU compute shaders                           |
+| Backend             | Source                             | Status                | Description                                                                                                                                 |
+| ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                                                                                                                    |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized                                                                                            |
+| WebGPU (opt-in)     | `gpu/src/`, `functions/src/gpu/`   | Per-kernel f32 gates  | Fused ops: `enableGpu()` + `GPU_MIN_ELEMENTS` (65,536); GPU FFT: 262,144; explicit `gpuMatmul` without `enableGpu()` — not `BackendManager` |
 
 The AssemblyScript backend compiles `assembly/src/` (28 source files) to a
 single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and
@@ -163,7 +164,7 @@ math.add(1, 2);
 
 The mathjs-derived factory layer is wired into the graph via
 `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`). The
-codebase is one active graph of 1,185 files (0 unused).
+codebase is one active graph of 1,189 files (0 unused).
 
 ### Bridges in Place
 

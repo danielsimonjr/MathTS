@@ -151,10 +151,11 @@ row in `TEST_COVERAGE.md`'s breakdown table:
 
 1. **Adding a new active file?** Write a `*.test.ts` that directly
    imports it. The CDG counts it automatically.
-2. **Adding a new synced category** (running the mathjs sync script
-   on a new mathjs directory)? Add the prefix to
-   `coverage-policy.json` under the matching `synced_*` category. Re-
-   run CDG; the effective number stays accurate.
+2. **Adding a new factory category** (manual JS→TS port under
+   `tools/mathjs-port/`, then wire via `functions/src/factories/`)?
+   Add the prefix to `coverage-policy.json` under the matching category.
+   Re-run CDG; the effective number stays accurate. The old `.ts→.ts`
+   mathjs sync script is dead — do not run it.
 3. **Adding a new type-only file** that genuinely has no runtime?
    Add its path to `type_only_barrels.exactPaths`. Don't use prefixes
    here — type-only files are individual.
