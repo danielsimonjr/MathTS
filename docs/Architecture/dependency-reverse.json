@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-23",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -2409,6 +2409,7 @@
       "expression/src/node/ObjectNode.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
+      "expression/src/scalar-structure.ts",
       "expression/src/utils/customs.ts",
       "expression/src/utils/factory.ts",
       "expression/src/utils/latex.ts"

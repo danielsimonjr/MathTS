@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-23",
   "totalFiles": 1910,
   "byDisposition": {
     "reachable": 25,
@@ -4251,7 +4251,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 501
+      "loc": 506
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4916,7 +4916,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 488
+      "loc": 495
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",

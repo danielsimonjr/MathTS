@@ -149,6 +149,13 @@ describe('scalar-structure', () => {
     expect(scalarComplexity(minus, { symbol: { x: 4 } })).toBe(6);
   });
 
+  it('scalarComplexity ignores inherited weight-record keys', () => {
+    for (const name of ['constructor', 'toString', 'valueOf', '__proto__', 'hasOwnProperty']) {
+      expect(scalarComplexity(scalar.symbol(name), { symbol: { x: 4 } })).toBe(1);
+    }
+    expect(scalarComplexity(scalar.symbol('constructor'), { symbol: { constructor: 3 } })).toBe(3);
+  });
+
   const equivalenceClasses: { trees: () => ScalarNode[]; key: string }[] = [
     {
       key: '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}',

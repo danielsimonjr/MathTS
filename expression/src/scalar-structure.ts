@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 
+import { hasOwnProperty } from './utils/object.js';
 import {
   ScalarBuildError,
   SCALAR_FUNCTION_LOWERING,
@@ -155,6 +156,10 @@ export function scalarDepth(node: ScalarNode): number {
   return 1 + maxChild;
 }
 
+function ownWeight(record: Readonly<Record<string, number>> | undefined, key: string): number {
+  return record !== undefined && hasOwnProperty(record, key) ? (record[key] ?? 1) : 1;
+}
+
 function symbolWeight(name: string, weights: ScalarComplexityWeights): number {
   const w = weights.symbol;
   if (w === undefined) {
@@ -163,7 +168,7 @@ function symbolWeight(name: string, weights: ScalarComplexityWeights): number {
   if (typeof w === 'number') {
     return w;
   }
-  return w[name] ?? 1;
+  return ownWeight(w, name);
 }
 
 function nodeWeight(node: ScalarNode, weights: ScalarComplexityWeights): number {
@@ -173,9 +178,9 @@ function nodeWeight(node: ScalarNode, weights: ScalarComplexityWeights): number 
     case 'symbol':
       return symbolWeight(node.name, weights);
     case 'call':
-      return weights.call?.[node.fn] ?? 1;
+      return ownWeight(weights.call, node.fn);
     case 'op':
-      return weights.op?.[node.op] ?? 1;
+      return ownWeight(weights.op, node.op);
   }
 }
 
