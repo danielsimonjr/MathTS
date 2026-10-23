@@ -151,5 +151,5 @@ const simplified = simplify(expr);
 const d = derivative(simplified, 'x');
 
 d.toString(); // '3 * (x ^ 2 + 1) - 6 * x'
-d.evaluate({ x: 2 }); // 3  (which is (x-1)^2 evaluated at x=2)
+d.evaluate({ x: 2 }); // 3  (3*(x-1)^2 at x=2)
 ```

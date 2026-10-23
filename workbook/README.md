@@ -81,7 +81,8 @@ mtsw export example.mtsw --json              # envelope: { data: { path, bytes }
 mtsw export example.mtsw --format ipynb -o example.ipynb   # Jupyter notebook (nbformat v4)
 
 # Persistent session for a GUI/tooling: JSON-RPC 2.0 over stdio (NDJSON).
-mtsw serve [file.mtsw]
+mtsw serve
+# then JSON-RPC method "open" with params.path — the CLI ignores a file operand
 #   -> {"jsonrpc":"2.0","id":1,"method":"open","params":{"path":"example.mtsw"}}
 #   <- {"jsonrpc":"2.0","id":1,"result":{...describe doc...}}
 #   -> {"jsonrpc":"2.0","id":2,"method":"run"}              # streams cell/event notifications
@@ -228,16 +229,16 @@ A `test` cell's expression must evaluate to a **boolean**: `true` passes, `false
 
 ## Cell types (v1)
 
-| Type            | Status | Description                                                            |
-| --------------- | ------ | ---------------------------------------------------------------------- |
-| `markdown`      | ✅     | Documentation (passed through verbatim)                                |
-| `code`          | ✅     | MathTS expression script; last value is the result                     |
-| `data`          | ✅     | Structured YAML, parsed (hardened) into a value                        |
-| `test`          | ✅     | Boolean assertion (`true` = pass)                                      |
-| `equation`      | ✅     | MathTS expression syntax; display-only (content echoed, not evaluated) |
-| `visualization` | ✅     | Chart/visual spec; display-only (content echoed, not evaluated)        |
-| `tensor`        | ⏳     | Deferred (`Unsupported cell type` if present)                          |
-| `export`        | ⏳     | Deferred (`Unsupported cell type` if present)                          |
+| Type            | Status | Description                                                                                                                                |
+| --------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `markdown`      | ✅     | Documentation (passed through verbatim)                                                                                                    |
+| `code`          | ✅     | MathTS expression script; last value is the result                                                                                         |
+| `data`          | ✅     | Structured YAML, parsed (hardened) into a value                                                                                            |
+| `test`          | ✅     | Boolean assertion (`true` = pass)                                                                                                          |
+| `equation`      | ✅     | MathTS expression syntax; display-only (content echoed, not evaluated)                                                                     |
+| `visualization` | ✅     | Chart/visual spec; display-only (content echoed, not evaluated)                                                                            |
+| `tensor`        | ⏳     | Deferred — parse fails: `type 'tensor' is reserved but not yet supported (supported: code, markdown, data, test, equation, visualization)` |
+| `export`        | ⏳     | Same as `tensor` (`export` is reserved; not in the supported list)                                                                         |
 
 ## Execution modes
 

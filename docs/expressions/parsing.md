@@ -3,11 +3,11 @@
 MathTS provides three levels of API for working with expressions, each trading convenience
 for control:
 
-| API                      | Use when                                                |
-| ------------------------ | ------------------------------------------------------- |
-| `evaluate(expr, scope?)` | One-shot evaluation — simplest                          |
-| `parse(expr)`            | Inspect or transform the AST before evaluating          |
-| `compileExpr(expr)`      | Compile once, evaluate many times with different scopes |
+| API                                | Use when                                                         |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `evaluate(expr, scope?, options?)` | One-shot evaluation — simplest (`options.unsafe` for assignment) |
+| `parse(expr)`                      | Inspect or transform the AST before evaluating                   |
+| `compileExpr(expr)`                | Compile once, evaluate many times with different scopes          |
 
 All three are exported from `@danielsimonjr/mathts-functions`:
 
@@ -22,8 +22,15 @@ import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions';
 The simplest entry point. Parses and evaluates an expression in one call.
 
 ```typescript
-evaluate(expr: string, scope?: Record<string, any>): any
+evaluate(
+  expr: string,
+  scope?: Record<string, unknown>,
+  options?: { unsafe?: boolean }
+): unknown
 ```
+
+The implementation also accepts `string[]` and extended `PhysicsEvaluateOptions`; see
+`functions/src/factories/evaluate.ts`.
 
 All registered math functions are available in expression strings, including the full function library: arithmetic, trigonometry, statistics, signal processing, special functions (`erfc`, `beta`, `gammainc`, `digamma`, Bessel functions), probability distributions (`normalPDF`, `normalCDF`, `poissonPMF`, etc.), combinatorics (`fibonacci`, `lucas`, `subfactorial`, etc.), and geometry functions.
 

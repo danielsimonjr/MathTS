@@ -192,8 +192,8 @@ function countOps(expr: string): number {
   return count;
 }
 
-countOps('2 + 3'); // 1
-countOps('sin(x) + cos(x)'); // 3
+countOps('2 + 3'); // 0
+countOps('sin(x) + cos(x)'); // 2
 ```
 
 ## Substituting variables symbolically
@@ -213,7 +213,7 @@ const substituted = f.transform((node) => {
   return node;
 });
 
-substituted.toString(); // '(y + 1) ^ 2 + (y + 1) + 1'
+substituted.toString(); // '(y + 1) ^ 2 + y + 1 + 1'
 ```
 
 ---

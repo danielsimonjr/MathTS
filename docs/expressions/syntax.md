@@ -11,43 +11,43 @@ mathematical audience and is close to standard calculator notation.
 - `^` is exponentiation, not bitwise XOR.
 - Implicit multiplication: `2 pi` is valid and equals `2 * pi`.
 - Chained relational operators: `5 < x < 10` means `5 < x and x < 10`.
-- Function definition syntax: `f(x) = x^2`.
+- Function definition syntax: `f(x) = x^2` (requires `{ unsafe: true }` on `evaluate`, like `=` assignment).
 - Multi-statement blocks with `;` or newlines produce an array of visible results.
 
 ## Operators
 
-| Operator                         | Name                  | Example              | Result             |
-| -------------------------------- | --------------------- | -------------------- | ------------------ |
-| `()`                             | Grouping              | `(2 + 3) * 4`        | `20`               |
-| `[]`                             | Matrix / index        | `[1, 2, 3]`          | `[1, 2, 3]`        |
-| `{}`                             | Object                | `{a: 1, b: 2}`       | `{a: 1, b: 2}`     |
-| `+`                              | Add / unary plus      | `4 + 5`              | `9`                |
-| `-`                              | Subtract / negate     | `7 - 3`              | `4`                |
-| `*`                              | Multiply              | `2 * 3`              | `6`                |
-| `.*`                             | Element-wise multiply | `[1,2,3] .* [1,2,3]` | `[1,4,9]`          |
-| `/`                              | Divide                | `6 / 2`              | `3`                |
-| `./`                             | Element-wise divide   | `[9,6] ./ [3,2]`     | `[3,3]`            |
-| `%`                              | Modulus               | `8 % 3`              | `2`                |
-| `^`                              | Power                 | `2 ^ 3`              | `8`                |
-| `.^`                             | Element-wise power    | `[2,3] .^ [3,3]`     | `[8,27]`           |
-| `'`                              | Transpose             | `[[1,2],[3,4]]'`     | `[[1,3],[2,4]]`    |
-| `!`                              | Factorial             | `5!`                 | `120`              |
-| `&`                              | Bitwise AND           | `5 & 3`              | `1`                |
-| `~`                              | Bitwise NOT           | `~2`                 | `-3`               |
-| `\|`                             | Bitwise OR            | `5 \| 3`             | `7`                |
-| `^\|`                            | Bitwise XOR           | `5 ^\| 2`            | `7`                |
-| `<<`                             | Left shift            | `4 << 1`             | `8`                |
-| `>>`                             | Right shift           | `8 >> 1`             | `4`                |
-| `and`                            | Logical AND           | `true and false`     | `false`            |
-| `or`                             | Logical OR            | `true or false`      | `true`             |
-| `not`                            | Logical NOT           | `not true`           | `false`            |
-| `xor`                            | Logical XOR           | `true xor true`      | `false`            |
-| `=`                              | Assignment            | `a = 5`              | `5`                |
-| `? :`                            | Conditional           | `x > 0 ? x : -x`     |                    |
-| `??`                             | Nullish coalesce      | `null ?? 2`          | `2`                |
-| `?.`                             | Optional chain        | `obj?.prop`          |                    |
-| `:`                              | Range                 | `1:4`                | matrix `[1,2,3,4]` |
-| `<`, `>`, `<=`, `>=`, `==`, `!=` | Comparison            | `5 < x < 10`         | chained            |
+| Operator                         | Name                  | Example              | Result                                                              |
+| -------------------------------- | --------------------- | -------------------- | ------------------------------------------------------------------- |
+| `()`                             | Grouping              | `(2 + 3) * 4`        | `20`                                                                |
+| `[]`                             | Matrix / index        | `[1, 2, 3]`          | `[1, 2, 3]`                                                         |
+| `{}`                             | Object                | `{a: 1, b: 2}`       | `{a: 1, b: 2}`                                                      |
+| `+`                              | Add / unary plus      | `4 + 5`              | `9`                                                                 |
+| `-`                              | Subtract / negate     | `7 - 3`              | `4`                                                                 |
+| `*`                              | Multiply              | `2 * 3`              | `6`                                                                 |
+| `.*`                             | Element-wise multiply | `[1,2,3] .* [1,2,3]` | `[1,4,9]`                                                           |
+| `/`                              | Divide                | `6 / 2`              | `3`                                                                 |
+| `./`                             | Element-wise divide   | `[9,6] ./ [3,2]`     | `[3,3]`                                                             |
+| `%`                              | Modulus               | `8 % 3`              | `2`                                                                 |
+| `^`                              | Power                 | `2 ^ 3`              | `8`                                                                 |
+| `.^`                             | Element-wise power    | `[2,3] .^ [3,3]`     | `[8,27]`                                                            |
+| `'`                              | Transpose             | `[[1,2],[3,4]]'`     | `[[1,3],[2,4]]`                                                     |
+| `!`                              | Factorial             | `5!`                 | `120`                                                               |
+| `&`                              | Bitwise AND           | `5 & 3`              | `1`                                                                 |
+| `~`                              | Bitwise NOT           | `~2`                 | `-3`                                                                |
+| `\|`                             | Bitwise OR            | `5 \| 3`             | `7`                                                                 |
+| `^\|`                            | Bitwise XOR           | `5 ^\| 2`            | `7`                                                                 |
+| `<<`                             | Left shift            | `4 << 1`             | `8`                                                                 |
+| `>>`                             | Right shift           | `8 >> 1`             | `4`                                                                 |
+| `and`                            | Logical AND           | `true and false`     | `false`                                                             |
+| `or`                             | Logical OR            | `true or false`      | `true`                                                              |
+| `not`                            | Logical NOT           | `not true`           | `false`                                                             |
+| `xor`                            | Logical XOR           | `true xor true`      | `false`                                                             |
+| `=`                              | Assignment            | `a = 5`              | `5` with `{ unsafe: true }`; default throws `Security: assignment…` |
+| `? :`                            | Conditional           | `x > 0 ? x : -x`     |                                                                     |
+| `??`                             | Nullish coalesce      | `null ?? 2`          | `2`                                                                 |
+| `?.`                             | Optional chain        | `obj?.prop`          |                                                                     |
+| `:`                              | Range                 | `1:4`                | matrix `[1,2,3,4]`                                                  |
+| `<`, `>`, `<=`, `>=`, `==`, `!=` | Comparison            | `5 < x < 10`         | chained                                                             |
 
 ## Operator precedence
 

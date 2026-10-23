@@ -36,14 +36,17 @@ root:
 String property and method access in the compiler routes through helpers in
 `expression/src/utils/customs.ts` (`getSafeProperty`, `setSafeProperty`,
 `getSafeMethod` — internal, not package exports). They block prototype pollution
-and ghosted methods. `isSafeMethod` allows any own function that is not ghosted
-and not inherited from `Object.prototype` / `Function.prototype`; `toString`,
-`valueOf`, and `toLocaleString` are listed separately as safe native methods even
-when they appear on those prototypes.
+and ghosted methods. `isSafeMethod` allows any function value that is not ghosted
+(own property shadowing a prototype method) and whose name is not on
+`Object.prototype` or `Function.prototype`. Inherited `Array.prototype` methods
+(`map`, `concat`, …) are allowed. `toString` / `valueOf` / `toLocaleString` are
+the extra native-method allowlist.
 
-Numeric array/matrix indexing uses a direct `object[index]` when the compiled index
-is a `number` (`compileAccessorNode` in `compile.ts`). Do not add unguarded string
-`obj[name]` reads elsewhere in `expression/src/`.
+If `math.subset` is present (the functions-wired evaluator), indexing goes through
+`subset` (1-based). Only the no-`subset` fallback in `compileAccessorNode` does
+`object[index]` for a numeric index (0-based JS). String keys still go through
+`getSafeProperty`. Do not add unguarded string `obj[name]` reads elsewhere in
+`expression/src/`.
 
 Regression-guarded by `expression/tests/security/sandbox.test.ts`.
 
@@ -172,7 +175,8 @@ Input names `ln` / `log` lower to natural `log` / `log10` per
 
 | Export / type                                                    | Role                                                                                                                |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `forEachScalar`, `mapScalar`                                     | Preorder walk / map over `ScalarNode`                                                                               |
+| `forEachScalar`                                                  | Preorder walk over `ScalarNode`                                                                                     |
+| `mapScalar`                                                      | Post-order immutable map (children first; replacement is not re-walked)                                             |
 | `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | PySR-style canonical form and stable dedup key                                                                      |
 | `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols` | Metrics (`scalarComplexity` accepts `ScalarComplexityWeights`)                                                      |
 | `ScalarBuildError`                                               | Invalid builder input                                                                                               |

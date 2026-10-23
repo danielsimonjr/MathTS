@@ -102,7 +102,9 @@ refs, BigInt, unserializable values fall back to safe markers).
 | `mathMLToSVG`    | `(mathml: string, options?) => string`                | Render a MathML fragment to inline SVG |
 | `MathSvgOptions` | `{ display?: 'block' \| 'inline', padding?: number }` | SVG `foreignObject` wrapper options    |
 
-Used by HTML/TeX export paths when a browser cannot render MathML natively.
+Public helper: wrap a MathML fragment (or `<math>` document) in an SVG
+`foreignObject`. Not called by `mtsw export` HTML/TeX paths (those emit MathML /
+TeX).
 
 ## Pure Cell-Mutation Ops
 
