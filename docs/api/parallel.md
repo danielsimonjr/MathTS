@@ -14,7 +14,11 @@ npm install @danielsimonjr/mathts-parallel
 
 ## Overview
 
-MathTS uses a parallel-first architecture. The `computePool` provides parallel execution for large numerical computations using Web Workers.
+`ComputePool` wraps `@danielsimonjr/mathts-workerpool` for chunked work on
+`Float64Array` data. Most element-wise and reduction ops default to **sequential**
+(`DEFAULT_THRESHOLD_BY_OP` → `'never'`); `matmul` parallelizes at **4096** elements.
+Unlisted ops use the global **50,000** element fallback. Standalone `parallel*`
+functions and bitwise ops (`bitAnd`, …) share the same threshold table.
 
 ```typescript
 import { computePool } from '@danielsimonjr/mathts-parallel';
@@ -36,20 +40,27 @@ await computePool.terminate();
 
 ### Lifecycle Methods
 
-| Method       | Signature                     | Description         |
-| ------------ | ----------------------------- | ------------------- |
-| `initialize` | `(options?) => Promise<void>` | Start worker pool   |
-| `terminate`  | `() => Promise<void>`         | Stop all workers    |
-| `stats`      | `() => PoolStats`             | Get pool statistics |
+| Method       | Signature             | Description         |
+| ------------ | --------------------- | ------------------- |
+| `initialize` | `() => Promise<void>` | Start worker pool   |
+| `terminate`  | `() => Promise<void>` | Stop all workers    |
+| `stats`      | `() => PoolStats`     | Get pool statistics |
 
-### Initialization Options
+### Pool configuration
+
+The exported `computePool` is a default singleton. Pass options to `new ComputePool({...})`
+before `initialize()`:
 
 ```typescript
-await computePool.initialize({
-  minWorkers: 2, // Minimum workers
-  maxWorkers: 8, // Maximum workers (default: CPU cores)
-  workerType: 'auto', // 'auto' | 'web' | 'node'
+import { ComputePool } from '@danielsimonjr/mathts-parallel';
+
+const pool = new ComputePool({
+  minWorkers: 2,
+  maxWorkers: 8, // default 4 in Node (no navigator)
+  workerType: 'auto', // 'auto' | 'web' | 'thread'
+  chunkSize: 10000, // chunk width when parallelizing, not the cutoff
 });
+await pool.initialize();
 ```
 
 ---
@@ -101,7 +112,7 @@ for (let i = 0; i < data.length; i++) {
 const sumResult = await computePool.sum(data);
 console.log('Sum:', sumResult.result);
 console.log('Duration:', sumResult.duration, 'ms');
-console.log('Workers used:', sumResult.workersUsed);
+console.log('Parallelized:', sumResult.parallelized);
 
 const stats = await computePool.variance(data);
 console.log('Mean:', stats.result.mean);
@@ -117,33 +128,33 @@ await computePool.terminate();
 
 ### Binary Operations
 
-| Method        | Signature                             | Description                 |
-| ------------- | ------------------------------------- | --------------------------- |
-| `add`         | `(a, b) => Promise<Float64Array>`     | Element-wise addition       |
-| `subtract`    | `(a, b) => Promise<Float64Array>`     | Element-wise subtraction    |
-| `multiply`    | `(a, b) => Promise<Float64Array>`     | Element-wise multiplication |
-| `divide`      | `(a, b) => Promise<Float64Array>`     | Element-wise division       |
-| `elementwise` | `(a, b, op) => Promise<Float64Array>` | Generic operation           |
+| Method        | Signature                                             | Description                 |
+| ------------- | ----------------------------------------------------- | --------------------------- |
+| `add`         | `(a, b) => Promise<ParallelResult<Float64Array>>`     | Element-wise addition       |
+| `subtract`    | `(a, b) => Promise<ParallelResult<Float64Array>>`     | Element-wise subtraction    |
+| `multiply`    | `(a, b) => Promise<ParallelResult<Float64Array>>`     | Element-wise multiplication |
+| `divide`      | `(a, b) => Promise<ParallelResult<Float64Array>>`     | Element-wise division       |
+| `elementwise` | `(a, b, op) => Promise<ParallelResult<Float64Array>>` | Generic operation           |
 
 ### Scalar Operations
 
-| Method  | Signature                                 | Description        |
-| ------- | ----------------------------------------- | ------------------ |
-| `scale` | `(data, scalar) => Promise<Float64Array>` | Multiply by scalar |
+| Method  | Signature                                                 | Description        |
+| ------- | --------------------------------------------------------- | ------------------ |
+| `scale` | `(data, scalar) => Promise<ParallelResult<Float64Array>>` | Multiply by scalar |
 
 ### Unary Operations
 
-| Method   | Signature                         | Description    |
-| -------- | --------------------------------- | -------------- |
-| `abs`    | `(data) => Promise<Float64Array>` | Absolute value |
-| `sqrt`   | `(data) => Promise<Float64Array>` | Square root    |
-| `exp`    | `(data) => Promise<Float64Array>` | Exponential    |
-| `log`    | `(data) => Promise<Float64Array>` | Natural log    |
-| `sin`    | `(data) => Promise<Float64Array>` | Sine           |
-| `cos`    | `(data) => Promise<Float64Array>` | Cosine         |
-| `tan`    | `(data) => Promise<Float64Array>` | Tangent        |
-| `negate` | `(data) => Promise<Float64Array>` | Negation       |
-| `square` | `(data) => Promise<Float64Array>` | Square         |
+| Method   | Signature                                         | Description    |
+| -------- | ------------------------------------------------- | -------------- |
+| `abs`    | `(data) => Promise<ParallelResult<Float64Array>>` | Absolute value |
+| `sqrt`   | `(data) => Promise<ParallelResult<Float64Array>>` | Square root    |
+| `exp`    | `(data) => Promise<ParallelResult<Float64Array>>` | Exponential    |
+| `log`    | `(data) => Promise<ParallelResult<Float64Array>>` | Natural log    |
+| `sin`    | `(data) => Promise<ParallelResult<Float64Array>>` | Sine           |
+| `cos`    | `(data) => Promise<ParallelResult<Float64Array>>` | Cosine         |
+| `tan`    | `(data) => Promise<ParallelResult<Float64Array>>` | Tangent        |
+| `negate` | `(data) => Promise<ParallelResult<Float64Array>>` | Negation       |
+| `square` | `(data) => Promise<ParallelResult<Float64Array>>` | Square         |
 
 ### Example
 
@@ -151,9 +162,10 @@ await computePool.terminate();
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([5, 6, 7, 8]);
 
-const sum = await computePool.add(a, b); // [6, 8, 10, 12]
-const scaled = await computePool.scale(a, 2); // [2, 4, 6, 8]
-const sqrts = await computePool.sqrt(a); // [1, 1.41, 1.73, 2]
+const sum = await computePool.add(a, b);
+console.log(sum.result); // Float64Array [6, 8, 10, 12]; parallelized often false at n=4
+const scaled = (await computePool.scale(a, 2)).result;
+const sqrts = (await computePool.sqrt(a)).result;
 ```
 
 ---
@@ -166,22 +178,22 @@ const sqrts = await computePool.sqrt(a); // [1, 1.41, 1.73, 2]
 const A = new Float64Array([1, 2, 3, 4]); // 2×2 row-major
 const B = new Float64Array([5, 6, 7, 8]); // 2×2 row-major
 
-const C = await computePool.matmul(A, 2, 2, B, 2);
-// C = [[19, 22], [43, 50]] as flat array
+const C = (await computePool.matmul(A, 2, 2, B, 2)).result;
+// C = Float64Array [19, 22, 43, 50] for 2×2 × 2×2
 ```
 
-| Method      | Signature                                               | Description            |
-| ----------- | ------------------------------------------------------- | ---------------------- |
-| `matmul`    | `(A, aRows, aCols, B, bCols) => Promise<Float64Array>`  | Matrix multiplication  |
-| `matvec`    | `(matrix, rows, cols, vector) => Promise<Float64Array>` | Matrix-vector multiply |
-| `transpose` | `(data, rows, cols) => Promise<Float64Array>`           | Matrix transpose       |
+| Method      | Signature                                                               | Description            |
+| ----------- | ----------------------------------------------------------------------- | ---------------------- |
+| `matmul`    | `(A, aRows, aCols, B, bCols) => Promise<ParallelResult<Float64Array>>`  | Matrix multiplication  |
+| `matvec`    | `(matrix, rows, cols, vector) => Promise<ParallelResult<Float64Array>>` | Matrix-vector multiply |
+| `transpose` | `(data, rows, cols) => Promise<ParallelResult<Float64Array>>`           | Matrix transpose       |
 
 ### Vector Operations
 
-| Method  | Signature                         | Description   |
-| ------- | --------------------------------- | ------------- |
-| `dot`   | `(a, b) => Promise<number>`       | Dot product   |
-| `outer` | `(a, b) => Promise<Float64Array>` | Outer product |
+| Method  | Signature                                         | Description   |
+| ------- | ------------------------------------------------- | ------------- |
+| `dot`   | `(a, b) => Promise<ParallelResult<number>>`       | Dot product   |
+| `outer` | `(a, b) => Promise<ParallelResult<Float64Array>>` | Outer product |
 
 ### Example
 
@@ -205,18 +217,18 @@ const result = await computePool.matvec(matrix, 2, 3, vector);
 
 ### Map, Reduce, Filter
 
-| Method   | Signature                                             | Description     |
-| -------- | ----------------------------------------------------- | --------------- |
-| `map`    | `(data, fn) => Promise<Float64Array>`                 | Parallel map    |
-| `reduce` | `(data, fn, initial) => Promise<number>`              | Parallel reduce |
-| `filter` | `(data, predicate) => Promise<Float64Array>`          | Parallel filter |
-| `find`   | `(data, predicate) => Promise<{found, value, index}>` | Parallel find   |
+| Method   | Signature                                                                  | Description     |
+| -------- | -------------------------------------------------------------------------- | --------------- |
+| `map`    | `(data: T[], fn) => Promise<ParallelResult<T[]>>`                          | Parallel map    |
+| `reduce` | `(data: T[], fn, initial) => Promise<ParallelResult<T>>`                   | Parallel reduce |
+| `filter` | `(data: T[], predicate) => Promise<ParallelResult<T[]>>`                   | Parallel filter |
+| `find`   | `(data: T[], predicate) => Promise<ParallelResult<{found, value, index}>>` | Parallel find   |
 
 ### Sort
 
-| Method | Signature                                     | Description         |
-| ------ | --------------------------------------------- | ------------------- |
-| `sort` | `(data, compareFn?) => Promise<Float64Array>` | Parallel merge sort |
+| Method | Signature                                                 | Description         |
+| ------ | --------------------------------------------------------- | ------------------- |
+| `sort` | `(data: T[], compareFn?) => Promise<ParallelResult<T[]>>` | Parallel merge sort |
 
 ### Example
 
@@ -224,16 +236,13 @@ const result = await computePool.matvec(matrix, 2, 3, vector);
 const data = new Float64Array([1, 2, 3, 4, 5]);
 
 // Parallel map
-const doubled = await computePool.map(data, (x) => x * 2);
+const doubled = (await computePool.map([...data], (x) => x * 2)).result;
 
-// Parallel reduce
-const sum = await computePool.reduce(data, (acc, x) => acc + x, 0);
+const sum = (await computePool.reduce([...data], (acc, x) => acc + x, 0)).result;
 
-// Parallel filter
-const evens = await computePool.filter(data, (x) => x % 2 === 0);
+const evens = (await computePool.filter([...data], (x) => x % 2 === 0)).result;
 
-// Parallel sort
-const sorted = await computePool.sort(data, (a, b) => b - a);
+const sorted = (await computePool.sort([...data], (a, b) => b - a)).result;
 ```
 
 ---
@@ -244,11 +253,10 @@ All operations return a `ParallelResult<T>`:
 
 ```typescript
 interface ParallelResult<T> {
-  result: T; // The computed result
-  duration: number; // Execution time in ms
-  chunks: number; // Number of chunks processed
-  parallelized: boolean; // Whether parallel execution was used
-  workersUsed: number; // Number of workers used
+  result: T;
+  duration: number;
+  chunks: number;
+  parallelized: boolean;
 }
 ```
 
@@ -258,11 +266,26 @@ interface ParallelResult<T> {
 const result = await computePool.sum(data);
 
 console.log(result.result); // The sum
-console.log(result.duration); // 15.3 (ms)
-console.log(result.chunks); // 8
-console.log(result.parallelized); // true
-console.log(result.workersUsed); // 4
+console.log(result.duration); // duration in ms (often ~0 on the sequential path)
+console.log(result.chunks); // 1 when not parallelized
+console.log(result.parallelized); // false for many defaults at moderate n
 ```
+
+### Thresholds and fan-out
+
+- `DEFAULT_THRESHOLD_BY_OP` / `resolveOpThreshold` — per-op cutoffs; most element-wise
+  names are `'never'`.
+- `integrateFanOut` / `distributionSampleFanOut` — worker fan-out patterns for
+  integration and sampling (see `ComputePool`).
+
+### Bitwise (parallel)
+
+`bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`,
+`rightLogShift` are exported as standalone functions with the same pool thresholds.
+
+### `stats()`
+
+`computePool.stats()` returns workerpool `PoolStats`, not `ParallelResult`.
 
 ---
 
@@ -271,18 +294,20 @@ console.log(result.workersUsed); // 4
 1. **Use Float64Array**: Always use typed arrays for best performance
 2. **Initialize once**: Call `initialize()` once at app startup
 3. **Batch operations**: Use `Promise.all()` for independent operations
-4. **Large data**: Parallel execution shines with >10,000 elements
+4. **Large data**: Only ops above their threshold parallelize (`matmul` at 4096
+   elements; most element-wise ops default to sequential)
 
 ```typescript
+// Good: Use typed arrays
+const array = [1, 2, 3, 4, 5];
+const data = new Float64Array(array); // Convert regular array
+
 // Good: Batch independent operations
 const [sum, mean, std] = await Promise.all([
   computePool.sum(data),
   computePool.mean(data),
   computePool.std(data),
 ]);
-
-// Good: Use typed arrays
-const data = new Float64Array(array); // Convert regular array
 
 // Bad: Small data (overhead > benefit)
 const tiny = new Float64Array([1, 2, 3]);

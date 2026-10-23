@@ -84,7 +84,7 @@ import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 | ---------------- | ------------------------------------------ | ----------------------- |
 | `toArray`        | `() => number[][]`                         | Convert to nested array |
 | `toFlatArray`    | `() => number[]`                           | Convert to flat array   |
-| `toFloat64Array` | `() => Float64Array`                       | Get underlying data     |
+| `toFloat64Array` | `() => Float64Array`                       | Copy of internal buffer |
 | `toSparse`       | `(dropTolerance?: number) => SparseMatrix` | Convert to sparse       |
 | `clone`          | `() => DenseMatrix`                        | Deep copy               |
 
@@ -183,25 +183,66 @@ const coo = SparseMatrix.fromCOO(3, 3, [
 
 ### Eigenvalue Decomposition
 
+`eig` takes `number[][]` or `Float64Array` (not `DenseMatrix`). Eigenvalues are
+`{ re, im }` objects. The solver runs on JS; `eigWasm` is an async delegate to the
+same implementation.
+
 ```typescript
 import { eig } from '@danielsimonjr/mathts-matrix';
 
-const A = DenseMatrix.fromArray([
+const A = [
   [4, -2],
   [1, 1],
-]);
+];
 const { values, vectors } = eig(A);
-// values: eigenvalues
-// vectors: eigenvector matrix
+// values[0] e.g. { re: 3, im: 0 }
 ```
 
 ### SVD (Singular Value Decomposition)
 
-```typescript
-import { svd } from '@danielsimonjr/mathts-matrix';
+`svd` also expects `number[][]` or `Float64Array`. Result fields: `U`, `S`, `V`,
+`rank`. JS solver; `svdWasm` async wrapper delegates to JS.
 
-const { U, S, V } = svd(A);
-// A ≈ U * diag(S) * V^T
+```typescript
+import { svd, DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const M = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
+const { U, S, V, rank } = svd(M.toArray());
+// S singular values; rank numeric rank
+```
+
+### Factorizations and matrix functions
+
+Public `lu`, `qr`, `cholesky`, and related helpers use the JS implementations in
+`matrix/src/operations/` (not `WASMBackend` decomposition methods).
+
+| Function                                                                          | Input                           | Notes                                     |
+| --------------------------------------------------------------------------------- | ------------------------------- | ----------------------------------------- |
+| `lu`, `qr`, `qrPivoted`, `lq`, `ql`, `rq`, `cholesky`                             | `DenseMatrix`                   | JS primitives in `matrix/src/operations/` |
+| `luSolve`                                                                         | `(LUResult, ArrayLike<number>)` | Solve using `lu` factors                  |
+| `matrixSchur`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `matrixPinv`, `condest` | `DenseMatrix`                   | Matrix functions                          |
+| `pinv`, `cond`, `lowRankApprox`, `norm2`, `normFro`, `powerIteration`             | `number[][]`                    | Via SVD / norms                           |
+| `singularValues`, `eigvals`                                                       | `number[][] \| Float64Array`    | Supporting eigen/SVD tooling              |
+
+`@danielsimonjr/mathts-linalg` re-exports the decomposition-focused subset; extra
+factorizations such as `luSolve` and `condest` remain on `@danielsimonjr/mathts-matrix`
+only.
+
+### WASM GEMM entry points
+
+`DenseMatrix.multiply` always uses JS. For AssemblyScript GEMM after
+`await backendManager.initialize()`:
+
+```typescript
+import { backendManager, wasmBackend, DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+await backendManager.initialize();
+const a = DenseMatrix.random(32, 32);
+const c = backendManager.multiply(a, a);
+// equivalent: wasmBackend.multiply(a, a) after wasmBackend.initialize()
 ```
 
 ---

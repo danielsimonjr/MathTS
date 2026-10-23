@@ -1,5 +1,15 @@
 # mathts-wasm — Numerical Correctness Coverage Audit
 
+> **Family `Total` column (2026-10-23):** Re-derived from `assembly/src/index.ts`
+> by counting names in each `export { … } from './…'` line (same rule as
+> `tests/audit/coverage_matrix.py`). Verified with:
+> `node -e "…"` on `assembly/src/index.ts` → **321** symbols, 25 families (see
+> table). **`Covered` / `Uncovered` are point-in-time from 2026-06-24** (old
+> 297-symbol run). Do not treat **79 covered · 218 uncovered** as covering the
+> current surface — run `python -X utf8 tests/audit/coverage_matrix.py` (rewrites
+> `tests/audit/coverage_matrix.json`) to refresh hits. P0 differential narrative
+> below is unchanged.
+
 Audit of the test coverage and numerical correctness of the
 `@danielsimonjr/mathts-wasm` export surface. This document is the
 re-runnable scorecard; the two scripts under `tests/audit/` and
@@ -20,36 +30,40 @@ Last regenerated: 2026-06-24.
 
 ## 1. Coverage matrix
 
-**297 exported functions · 79 covered · 218 uncovered.** (Before the P0
-differential harness landed this session: 56 covered.)
+**321 exported functions** (export-family parse, 2026-10-23). **Covered / uncovered
+counts in the last two columns are legacy (2026-06-24)** unless you re-run the
+coverage script.
 
-| Family (source module)                          | Total | Covered | Uncovered | Method                                        |
-| ----------------------------------------------- | ----: | ------: | --------: | --------------------------------------------- |
-| `ops/complex-ops`                               |    44 |       0 |    **44** | —                                             |
-| `ops/matrix`                                    |    41 |       0 |    **41** | — (`matrix_zeros` is alloc-helper only)       |
-| `ops/scalar`                                    |    52 |      13 |    **39** | hardcoded KAT (2 inputs each)                 |
-| `ops/array`                                     |    36 |       0 |    **36** | —                                             |
-| `ops/complex-array`                             |    33 |       0 |    **33** | —                                             |
-| `ops/bitwise`                                   |     7 |       0 |     **7** | —                                             |
-| `poly`                                          |     5 |       0 |     **5** | —                                             |
-| `signal` (Welch/Bartlett/Goertzel/CZT)          |     5 |       0 |     **5** | —                                             |
-| `sort`                                          |     3 |       0 |     **3** | —                                             |
-| `types/complex`                                 |     3 |       0 |     **3** | —                                             |
-| `tridiag`                                       |     2 |       0 |     **2** | —                                             |
-| `special` (Bessel/Airy/elliptic/Carlson/lgamma) |    18 |      18 |         0 | **differential vs mpmath** (P0, this session) |
-| `algebra/decomposition` (LU/QR/Chol/inv/det)    |     5 |       5 |         0 | **numpy + reconstruction** (P0, this session) |
-| `ops/number-theory`                             |    11 |      11 |         0 | KAT (exact integers)                          |
-| `ops/special` (orthogonal polys + integral fns) |     9 |       9 |         0 | KAT, single point                             |
-| `ops/polynomial`                                |     7 |       7 |         0 | KAT arrays + identities                       |
-| `ops/curvefit`                                  |     3 |       3 |         0 | parameter recovery                            |
-| `ops/optimization`                              |     3 |       3 |         0 | known optimum + null-space property           |
-| `ops/signal` (window/medfilt/resample)          |     3 |       3 |         0 | KAT                                           |
-| `ops/svd`                                       |     2 |       2 |         0 | reconstruction `A=UΣVᵀ`                       |
-| `ops/linalg` (RREF/charpoly)                    |     2 |       2 |         0 | KAT                                           |
-| `ops/approx`                                    |     2 |       2 |         0 | property + KAT                                |
-| `ops/tensor`                                    |     1 |       1 |         0 | KAT + permutation property                    |
+| Family (source module)                          | Total | Covered (legacy) | Uncovered (legacy) | Method                                      |
+| ----------------------------------------------- | ----: | ---------------: | -----------------: | ------------------------------------------- |
+| `ops/scalar`                                    |    52 |               13 |             **39** | hardcoded KAT (2 inputs each)               |
+| `ops/complex-ops`                               |    44 |                0 |             **44** | —                                           |
+| `ops/matrix`                                    |    42 |                0 |             **42** | — (`matrix_zeros` is alloc-helper only)     |
+| `ops/array`                                     |    36 |                0 |             **36** | —                                           |
+| `ops/complex-array`                             |    33 |                0 |             **33** | —                                           |
+| `special` (Bessel/Airy/elliptic/Carlson/lgamma) |    20 |               18 |                  — | **differential vs mpmath** (P0; total grew) |
+| `elementwise`                                   |    18 |                — |                  — | — (family added after 2026-06-24 audit)     |
+| `ops/number-theory`                             |    11 |               11 |                  0 | KAT (exact integers)                        |
+| `ops/special` (orthogonal polys + integral fns) |     9 |                9 |                  0 | KAT, single point                           |
+| `ops/polynomial`                                |     7 |                7 |                  0 | KAT arrays + identities                     |
+| `ops/bitwise`                                   |     7 |                0 |              **7** | —                                           |
+| `poly`                                          |     7 |                0 |              **7** | —                                           |
+| `algebra/decomposition` (LU/QR/Chol/inv/det)    |     5 |                5 |                  0 | **numpy + reconstruction** (P0)             |
+| `signal` (Welch/Bartlett/Goertzel/CZT)          |     5 |                0 |              **5** | —                                           |
+| `ops/fft`                                       |     3 |                — |                  — | — (family added after 2026-06-24 audit)     |
+| `ops/signal` (window/medfilt/resample)          |     3 |                3 |                  0 | KAT                                         |
+| `ops/curvefit`                                  |     3 |                3 |                  0 | parameter recovery                          |
+| `ops/optimization`                              |     3 |                3 |                  0 | known optimum + null-space property         |
+| `sort`                                          |     3 |                0 |              **3** | —                                           |
+| `types/complex`                                 |     2 |                0 |              **2** | —                                           |
+| `ops/linalg` (RREF/charpoly)                    |     2 |                2 |                  0 | KAT                                         |
+| `ops/approx`                                    |     2 |                2 |                  0 | property + KAT                              |
+| `tridiag`                                       |     2 |                0 |              **2** | —                                           |
+| `heap`                                          |     1 |                — |                  — | — (family added after 2026-06-24 audit)     |
+| `ops/tensor`                                    |     1 |                1 |                  0 | KAT + permutation property                  |
 
-Full per-symbol detail in `tests/audit/coverage_matrix.json`.
+Full per-symbol detail in `tests/audit/coverage_matrix.json` (stale until the script
+is re-run).
 
 ---
 
@@ -128,11 +142,11 @@ The original 15 FAIL / 22 WEAK were all resolved in 0.1.5:
 
 **Coverage gaps to extend the harness to next (by risk):**
 
-- **P1:** `ops/matrix` (41 — incl. `matrix_multiply`/`gemm`/`gemv`, the BLAS
+- **P1:** `ops/matrix` (42 — incl. `matrix_multiply`/`gemm`/`gemv`, the BLAS
   hot path) → numpy oracle; `ops/complex-ops` + `ops/complex-array` (77 —
   branch-cut functions) → mathjs complex oracle.
-- **P2:** `poly` (5), `signal` spectral (5), `tridiag` (2), `sort` (3); the
+- **P2:** `poly` (7), `signal` spectral (5), `tridiag` (2), `sort` (3); the
   precision-sensitive `ops/scalar` gaps (`expm1`, `log1p`, `cbrt`,
   `nthRoot`, `atan2`).
-- **P3:** `ops/array` (36), `ops/bitwise` (7), `types/complex` (3), trivial
+- **P3:** `ops/array` (36), `ops/bitwise` (7), `types/complex` (2), trivial
   Math.* scalar wrappers.

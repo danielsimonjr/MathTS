@@ -27,57 +27,47 @@ npm run asbuild
 
 ## Usage
 
-### Browser
+The published entry is AssemblyScript-generated glue in `build/mathts.js` (see
+`package.json` `exports["."]`). Import named functions directly:
 
 ```typescript
-import { MathTSWasm } from '@danielsimonjr/mathts-wasm';
+import { add_f64, sqrt_f64, sin_f64 } from '@danielsimonjr/mathts-wasm';
 
-const wasm = await MathTSWasm.create('/path/to/mathts.wasm');
-
-// Scalar operations
-const sum = wasm.add(2, 3); // 5
-const sqrt = wasm.sqrt(16); // 4
-const sin = wasm.sin(Math.PI / 2); // 1
-
-// For array/matrix operations, use the raw exports
-const exports = wasm.raw;
-// ... work with typed arrays and pointers
+console.log(add_f64(2, 3)); // 5
+console.log(sqrt_f64(16)); // 4
+console.log(sin_f64(Math.PI / 2)); // 1
 ```
 
-### Node.js
+Matrix packages load the same binary as `mathts-as.wasm` with their own loaders
+and SHA-384 verification. TypeScript class bindings (`MathTSWasm`, `loadWasmSync`)
+live under `assembly/src/bindings/` and compile to `build/bindings/` — they are
+**not** the package entry.
 
-```typescript
-import { loadWasmSync } from '@danielsimonjr/mathts-wasm';
-import fs from 'fs';
+### Dense decompositions (AS exports)
 
-const buffer = fs.readFileSync('./build/mathts.wasm');
-const { exports } = loadWasmSync(buffer);
+From `algebra/decomposition.ts` (used by matrix `WASMBackend` tests, not public
+`lu()`/`qr()` in JS):
 
-console.log(exports.add_f64(2, 3)); // 5
-```
+- `matrix_lu_decompose`, `matrix_qr_decompose`, `matrix_cholesky`,
+  `matrix_inverse`, `matrix_determinant`
+
+Call `heap_reset` after managed sequences when using bump-allocated scratch
+(`heap.ts`). The **functions** WASM bridges call it after each managed call;
+matrix does not — it pools buffers.
 
 ## Module Structure
 
 ```
 assembly/
 ├── src/
-│   ├── index.ts          # Main entry point
-│   ├── types/
-│   │   └── complex.ts    # Complex number type
-│   ├── ops/              # scalar, array, matrix, complex-ops,
-│   │   │                 # complex-array, linalg, svd, signal,
-│   │   │                 # special, polynomial, number-theory,
-│   │   └── ...           # optimization, curvefit, approx, tensor
-│   ├── env/
-│   │   └── abort.ts      # Error handling
-│   └── bindings/
-│       ├── index.ts        # Bindings entry point
-│       └── wasm-loader.ts  # JS/TS bindings (SHA-384 verified)
-├── build/                # WASM output
-├── tests/
-│   └── run.js           # Test runner
-├── asconfig.json          # AssemblyScript config
-├── tsconfig.bindings.json # TypeScript bindings config
+│   ├── index.ts              # AS export surface
+│   ├── algebra/decomposition.ts
+│   ├── elementwise.ts, heap.ts, poly.ts, signal.ts, sort.ts, special.ts, tridiag.ts
+│   ├── types/complex.ts
+│   ├── ops/                  # scalar, array, matrix, complex-ops, fft, …
+│   └── bindings/             # optional TS loader (not package entry)
+├── build/                    # mathts.wasm, mathts.js, mathts.d.ts
+├── tests/run.js              # debug wasm smoke tests
 └── package.json
 ```
 
@@ -122,9 +112,8 @@ assembly/
 ## Testing
 
 ```bash
-# Run tests (requires build first)
-npm run asbuild:debug
-npm test
+npm run asbuild          # release + debug (npm test needs release for test:diff)
+npm test                 # tests/run.js (debug wasm) + nine kernel tests + test:diff (release wasm)
 ```
 
 ## License

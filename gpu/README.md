@@ -12,5 +12,6 @@ WebGPU is browser-only (`navigator.gpu`); in Node every entry point degrades
 gracefully — `getGpuDevice()` resolves to `null` and `GPUContext.initialize()`
 resolves `false` without throwing.
 
-Tracked by CDG/DGT (`create-dependency-graph`) as a leaf: `matrix → gpu`,
-`functions → gpu` (functions edge lands in a later spec), with no back-edge.
+Tracked by CDG/DGT (`create-dependency-graph`) as a leaf: `matrix → gpu` and
+`functions → gpu` (functions re-exports `enableGpu` / `GPU_MIN_ELEMENTS` and hosts
+domain WGSL in `functions/src/gpu/`), with no back-edge from `gpu` to those packages.

@@ -1,301 +1,178 @@
 # MathTS Performance Guide
 
-This guide covers performance characteristics, optimization strategies, and tuning guidelines for MathTS matrix operations.
+This guide describes how MathTS chooses execution tiers, where to measure real
+speedups, and practical habits for matrix-heavy code.
 
 ## Performance Overview
 
-MathTS achieves high performance through:
+MathTS uses several acceleration layers:
 
-1. **Automatic backend selection** based on data size
-2. **SIMD acceleration** in WebAssembly
-3. **GPU compute shaders** for massive parallelism
-4. **Adaptive threshold tuning** based on runtime profiling
-5. **Memory pooling** to reduce allocations
+1. **JavaScript** — default for `DenseMatrix` methods and public decompositions
+2. **AssemblyScript WASM** — SIMD matrix multiply via `backendManager` /
+   `wasmBackend` / `Tensor.matMul` when initialized and over size gates; separate
+   opt-in WASM in `@danielsimonjr/mathts-functions` after `loadWasm()` and
+   `wasmPolicyAllows` (`functions/src/wasm/policy.ts`)
+3. **Web Workers** — `@danielsimonjr/mathts-parallel` (`ComputePool`); most
+   element-wise ops default to **sequential** (`'never'` in `DEFAULT_THRESHOLD_BY_OP`)
+4. **WebGPU** — f32, opt-in via `enableGpu()` in functions; matrix
+   `gpuMatrixBackend.multiplyAsync` is separate and not wired into `BackendManager`
 
-## Performance Tiers
+Do not assume every tier runs for every API entry point — read the dispatch branch.
 
-### Small Matrices (< 1,000 elements)
+## Choosing a Tier (matrix package)
 
-- **Best backend:** JavaScript
-- **Why:** Initialization overhead of WASM/GPU exceeds computation time
-- **Typical operations:** 3x3 rotations, 4x4 transforms, small vectors
+| Workload                                 | Typical path                                   |
+| ---------------------------------------- | ---------------------------------------------- |
+| `A.multiply(B)` on `DenseMatrix`         | JS ikj multiply                                |
+| Large GEMM                               | `backendManager.multiply` after `initialize()` |
+| `lu` / `qr` / `cholesky` / `eig` / `svd` | JS solvers in `matrix/src/operations`          |
+| Tensor contractions                      | JS unless `matMul` hits WASM gates             |
 
-### Medium Matrices (1,000 - 100,000 elements)
+WASM element-wise and transpose on the matrix backend were **retired** (4–6× slower
+than JS, 2026-07). A single GPU element-wise op is transfer-bound; functions only
+fuses chains on GPU when opted in.
 
-- **Best backend:** WebAssembly with SIMD
-- **Why:** SIMD processes 2-4 elements per instruction
-- **Typical speedup:** 2-4x over JavaScript
-- **Typical operations:** Image processing, physics simulations
+## Measuring WASM (functions + matrix kernels)
 
-### Large Matrices (> 100,000 elements)
+Dispatch decisions for `functions` WASM bridges come from **Node**, not Bun:
 
-- **Best backend:** WebGPU
-- **Why:** Thousands of parallel threads
-- **Typical speedup:** 10-100x over JavaScript
-- **Typical operations:** Machine learning, large-scale simulations
+```bash
+node tools/benchmark/wasm/run-node.mjs opt-in
+```
 
-## Operation Performance Characteristics
+Run twice; a row that flips between runs is noise. A dated functions snapshot is in
+`docs/BENCHMARK_RESULTS.md` (2026-06-27); it predates the 2026-09-26 `policy.ts`
+bands.
 
-### Element-wise Operations (add, subtract, scale)
+Root scripts (Bun/JSC — useful for smoke, not dispatch policy):
 
-- Memory-bound operations
-- Linear scaling with element count
-- GPU provides parallelism benefit at large scales
+```bash
+npm run bench:wasm
+npm run bench:elementwise
+npm run bench:special
+npm run bench:sort
+npm run bench:matrix
+```
 
-| Size      | JS (ms) | WASM (ms) | GPU (ms) | Best |
-| --------- | ------- | --------- | -------- | ---- |
-| 64x64     | 0.1     | 0.15      | 5.0      | JS   |
-| 256x256   | 1.5     | 0.8       | 5.2      | WASM |
-| 1024x1024 | 25      | 12        | 6.0      | GPU  |
-
-### Matrix Multiplication
-
-- Compute-bound operation (O(n³) complexity)
-- Benefits most from GPU acceleration
-- WASM tiled algorithms effective for medium sizes
-
-| Size      | JS (ms) | WASM (ms) | GPU (ms) | GFLOPS |
-| --------- | ------- | --------- | -------- | ------ |
-| 64x64     | 1.0     | 0.5       | 10       | 0.5    |
-| 256x256   | 50      | 15        | 12       | 2.8    |
-| 512x512   | 400     | 100       | 25       | 10.7   |
-| 1024x1024 | 3200    | 600       | 50       | 42.9   |
-
-### Transpose
-
-- Memory-bound operation
-- Cache-friendly algorithms critical
-- GPU shared memory optimization effective
-
-| Size      | JS (ms) | WASM (ms) | GPU (ms) |
-| --------- | ------- | --------- | -------- |
-| 256x256   | 0.5     | 0.3       | 5.0      |
-| 1024x1024 | 8.0     | 4.0       | 5.5      |
-| 4096x4096 | 150     | 70        | 15       |
-
-### Decompositions (LU, QR, Cholesky)
-
-- Mixed compute/memory operations
-- Sequential dependencies limit parallelism
-- Blocked algorithms improve cache usage
+There is **no** `findCrossoverPoints` export on `@danielsimonjr/mathts-matrix` and
+no `@danielsimonjr/mathts-matrix/benchmark` subpath.
 
 ## Optimization Strategies
 
-### 1. Let Auto-Selection Work
+### 1. Pick the API that matches the backend
 
-The default thresholds are optimized for typical hardware. Trust them unless profiling shows issues:
+```typescript
+import { backendManager, DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+await backendManager.initialize();
+
+// WASM GEMM (when gated)
+const c = backendManager.multiply(a, b);
+
+// JS multiply (always)
+const d = a.multiply(b);
+```
+
+### 2. Batch GPU work
+
+`BatchExecutor` queues operations on **`GPUBuffer`** arguments (not matrices).
+Batch multiple dispatches through one `flush()` once inputs are uploaded to GPU
+memory — see `BatchExecutor` in `@danielsimonjr/mathts-matrix`.
+
+### 3. Reuse allocations
+
+Pre-allocate result buffers where your algorithm allows instead of allocating every
+iteration.
+
+### 4. Typed array construction
+
+`DenseMatrix` stores a `Float64Array`. Passing an existing buffer avoids extra
+copies:
+
+```typescript
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const data = new Float64Array(1_000_000);
+// ... fill data
+const matrix = new DenseMatrix(1000, 1000, data);
+```
+
+`DenseMatrix.fromFlat(rows, cols, data)` expects a `number[]`. Do **not** use
+`Array.from(float64Array)` for large buffers — it is the slow per-element path.
+
+### 5. Data layout
+
+Row-major storage favors row-wise loops (sequential access).
+
+## Thresholds and tuning
+
+Public package exports do **not** include `setBackendThreshold`, `enableAdaptiveTuning`,
+or `setConfig`. Inspect or override via:
 
 ```typescript
 import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-// Just use the operations - backend is selected automatically
-const result = backendManager.multiply(a, b);
+const thresholds = backendManager.getHints().operationThresholds;
+backendManager.forceBackend('wasm'); // or null to reset
 ```
 
-### 2. Batch Operations
-
-For multiple operations, batch them to reduce overhead:
-
-```typescript
-// Bad: Many small GPU dispatches
-for (const pair of pairs) {
-  await gpuBackend.add(pair.a, pair.b);
-}
-
-// Good: Batch operations
-const executor = new BatchExecutor(context, shaders, pool);
-for (const pair of pairs) {
-  executor.add(pair.a, pair.b, outputs[i], dims);
-}
-await executor.flush();
-```
-
-### 3. Reuse Matrices
-
-Avoid creating new matrices when possible:
-
-```typescript
-// Bad: Creates new matrix each iteration
-for (let i = 0; i < 1000; i++) {
-  const result = backendManager.add(a, b);
-}
-
-// Good: Pre-allocate result (if your use case allows)
-const result = DenseMatrix.zeros(a.rows, a.cols);
-// ... use in-place operations when available
-```
-
-### 4. Use Typed Arrays
-
-For large data, use typed arrays directly:
-
-```typescript
-// Efficient: Direct typed array
-const data = new Float64Array(1000000);
-// ... fill data
-const matrix = DenseMatrix.fromFlat(1000, 1000, Array.from(data));
-```
-
-### 5. Consider Data Layout
-
-Row-major layout is more cache-friendly for row operations:
-
-```typescript
-// Good for row operations
-for (let i = 0; i < rows; i++) {
-  for (let j = 0; j < cols; j++) {
-    // Sequential memory access
-  }
-}
-
-// Bad for row-major (strided access)
-for (let j = 0; j < cols; j++) {
-  for (let i = 0; i < rows; i++) {
-    // Non-sequential memory access
-  }
-}
-```
-
-## Tuning Guidelines
-
-### Finding Your Optimal Thresholds
-
-Use the benchmark tool to find optimal thresholds for your hardware:
-
-```typescript
-import { findCrossoverPoints } from '@danielsimonjr/mathts-matrix/benchmark';
-
-// Find where WASM becomes faster than JS
-await findCrossoverPoints();
-// Output shows the optimal threshold for your system
-```
-
-### Adjusting Thresholds
-
-Based on profiling, adjust thresholds:
-
-```typescript
-import { setBackendThreshold } from '@danielsimonjr/mathts-matrix';
-
-// If your GPU is very fast, lower the threshold
-setBackendThreshold('gpu', 50000);
-
-// If WASM startup is slow, raise the threshold
-setBackendThreshold('wasm', 2000);
-```
-
-### Enabling Adaptive Tuning
-
-Let MathTS learn optimal thresholds:
-
-```typescript
-import { enableAdaptiveTuning, configureAdaptiveTuning } from '@danielsimonjr/mathts-matrix';
-
-enableAdaptiveTuning();
-configureAdaptiveTuning({
-  sampleSize: 20, // More samples = more accurate
-  minSpeedupRatio: 1.1, // Smaller ratio = more aggressive switching
-  cooldownMs: 10000, // Longer cooldown = more stable
-});
-```
+Internal `matrix/src/config.ts` holds another threshold table used only if that
+module is subscribed — it is not on the public barrel.
 
 ## Memory Management
 
-### GPU Memory
-
-GPU memory is managed through buffer pooling:
+### GPU buffer pool
 
 ```typescript
-import { BufferPool } from '@danielsimonjr/mathts-matrix';
+import { BufferPool } from '@danielsimonjr/mathts-gpu';
 
 const pool = new BufferPool(context, {
-  maxCacheSize: 256 * 1024 * 1024, // 256MB max cache
-  evictionTimeout: 30000, // 30s before eviction
+  maxCacheSize: 512 * 1024 * 1024, // default 512 MiB
+  evictionTimeout: 30000,
 });
 
-// Get pool statistics
 const stats = pool.getStats();
-console.log(`Cached: ${stats.cachedBuffers} buffers`);
-console.log(`In use: ${stats.inUseBuffers} buffers`);
 ```
 
-### WASM Memory
-
-WASM uses a linear memory model:
+### Teardown
 
 ```typescript
-import { wasmLoader } from '@danielsimonjr/mathts-matrix';
+import { destroyGlobalGPU } from '@danielsimonjr/mathts-gpu';
 
-// Allocate memory
-const alloc = wasmLoader.allocateFloat64Array(data);
-
-try {
-  // Use allocation
-} finally {
-  // Always free
-  wasmLoader.free(alloc.ptr);
-}
+destroyGlobalGPU();
 ```
+
+(`destroyGlobalGPU` is re-exported from `@danielsimonjr/mathts-matrix`.)
+
+WASM allocation helpers on `WasmLoader` are internal to the matrix package and not
+exported from the public entry.
 
 ## Profiling
 
-### Enable Performance Tracking
-
 ```typescript
-import { enableProfiling, backendManager } from '@danielsimonjr/mathts-matrix';
+import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-enableProfiling(true); // true = collect stats
-
-// Run your operations...
-
-// View statistics
 const stats = backendManager.getPerformanceStats();
-console.log(`Total samples: ${stats.sampleCount}`);
-
-for (const [op, data] of stats.operationStats) {
-  console.log(`\n${op}:`);
-  console.log(`  Average: ${data.avgDuration.toFixed(2)}ms`);
-  console.log(`  Samples: ${data.samples}`);
-  console.log(`  Backend usage:`);
-  for (const [backend, count] of Object.entries(data.backendUsage)) {
-    if (count > 0) {
-      console.log(`    ${backend}: ${count} times`);
-    }
-  }
-}
+console.log('recorded samples:', stats.sampleCount);
 ```
 
-### Benchmarking
+`enableProfiling` is not exported from `@danielsimonjr/mathts-matrix`. Samples are
+only stored when `recordSample` runs (tests today).
 
-Run the AssemblyScript-vs-JS WASM benchmark suite (full round-trip, median of
-several reps, with a correctness `maxdiff` column):
+## Parallel pool (`@danielsimonjr/mathts-parallel`)
 
-```bash
-npm run bench:wasm            # full suite
-npm run bench:elementwise     # array_<op>_ptr kernels vs Math.*
-npm run bench:special         # bessel / lgamma / elliptic kernels
-npm run bench:sort            # sort_f64 introsort vs JS comparator sort
-npm run bench:matrix          # multiply / svd / eig / Welch-PSD (FFT) vs JS
-```
+- `DEFAULT_THRESHOLD_BY_OP` sets most element-wise and reduction ops to `'never'`
+  (sequential). `matmul` parallelizes at **4096** elements (64×64). Unlisted ops
+  fall through to **50,000** elements.
+- `computePool.initialize()` default `maxWorkers` is **4** in Node (no `navigator`).
+- `workerType`: `'auto' | 'web' | 'thread'` (not `'node'`).
+- Operations return `ParallelResult<T>` (`result`, `duration`, `chunks`,
+  `parallelized`) — no `workersUsed` field.
 
-The numbers are AS-vs-JS only and hardware-specific; re-run on your target
-hardware. A dated snapshot lives in `docs/BENCHMARK_RESULTS.md`.
+See `docs/api/parallel.md` for `integrateFanOut`, bitwise ops, and standalone
+`parallel*` functions.
 
-## Hardware Considerations
-
-### CPU
-
-- More cores benefit parallel WASM operations (when threads available)
-- Larger L3 cache improves matrix operations
-- AVX2 support enables better SIMD
-
-### GPU
-
-- Higher compute unit count = better parallelism
-- More VRAM = larger matrices without paging
-- PCIe bandwidth affects data transfer speed
-
-### Browser
+## Hardware / browser notes
 
 | Browser      | WASM SIMD | WebGPU  |
 | ------------ | --------- | ------- |
@@ -304,100 +181,27 @@ hardware. A dated snapshot lives in `docs/BENCHMARK_RESULTS.md`.
 | Firefox 89+  | Yes       | Nightly |
 | Safari 16.4+ | Yes       | Preview |
 
-## Common Performance Issues
+## Historical benchmark tables (pre-2026-07 matrix backend)
 
-### 1. GPU Overhead for Small Matrices
+Older docs listed JS/WASM/GPU millisecond tables and Ryzen 9 / Node 22 speedups for
+matrix element-wise and auto GPU selection. Those paths are **not** current:
 
-**Symptom:** GPU operations slower than expected for small data
+- Matrix element-wise WASM was retired as slower than JS.
+- `BackendManager` does not register GPU; `DenseMatrix.multiply` is JS-only.
+- The Ryzen figures are not in `docs/BENCHMARK_RESULTS.md` or `tools/`.
 
-**Solution:** Raise GPU threshold or use WASM
-
-```typescript
-setBackendThreshold('gpu', 200000); // Only use GPU for very large matrices
-```
-
-### 2. Memory Allocation Overhead
-
-**Symptom:** Operations get slower over time
-
-**Solution:** Clear caches periodically
-
-```typescript
-import { destroyGlobalGPU } from '@danielsimonjr/mathts-matrix';
-
-// Clear all GPU resources
-destroyGlobalGPU();
-```
-
-### 3. Data Transfer Bottleneck
-
-**Symptom:** GPU operations slow despite large matrices
-
-**Solution:** Use streaming for very large data
-
-```typescript
-const sync = createSyncManager(context, pool, 'streaming');
-await sync.uploadStreaming(hugeData, buffer, console.log);
-```
-
-### 4. Incorrect Thresholds
-
-**Symptom:** Always using wrong backend
-
-**Solution:** Profile and adjust
-
-```typescript
-// Find the actual crossover point
-await findCrossoverPoints();
-
-// Then set appropriate thresholds
-setBackendThreshold('wasm', actualCrossover);
-```
-
-## WASM Benchmark Results
-
-The following measurements were recorded with the AssemblyScript WASM backend compared against the JavaScript fallback. All timings are median over 50 runs, Node.js 22 on AMD Ryzen 9 5900X. (These are kept as a historical record. The standalone WASM benchmark suite has since been recreated as an AssemblyScript-vs-JS suite under `tools/benchmark/wasm/` — run `npm run bench:wasm` to reproduce on your hardware; current measured numbers are in `docs/BENCHMARK_RESULTS.md`.)
-
-### Matrix Multiplication
-
-| Size        | JS (ms)  | WASM-AS (ms) | WASM Speedup |
-| ----------- | -------- | ------------ | ------------ |
-| 50×50       | 1.2      | 0.4          | 3.0x         |
-| 100×100     | 5.8      | 1.2          | 4.8x         |
-| **200×200** | **20.0** | **4.1**      | **4.9x**     |
-| 500×500     | 310      | 52           | 6.0x         |
-
-### Dot Product
-
-| Size     | JS (ms)   | WASM-AS (ms) | WASM Speedup |
-| -------- | --------- | ------------ | ------------ |
-| 100      | 0.008     | 0.003        | 2.7x         |
-| 500      | 0.025     | 0.006        | 4.2x         |
-| **1000** | **0.050** | **0.008**    | **6.3x**     |
-| 5000     | 0.240     | 0.035        | 6.9x         |
-
-### Determinant
-
-| Size        | JS (ms)  | WASM-AS (ms) | WASM Speedup |
-| ----------- | -------- | ------------ | ------------ |
-| 20×20       | 0.12     | 0.04         | 3.0x         |
-| 50×50       | 0.55     | 0.15         | 3.7x         |
-| **100×100** | **1.50** | **0.45**     | **3.3x**     |
-
-### Notes
-
-- AssemblyScript WASM consistently outperforms the JS fallback for the same operations
-- The largest speedups are observed in vectorized operations (dot product, elementwise)
-- WASM overhead dominates for very small inputs (<50 elements); JS fallback is faster in that regime
-
----
+For reproducible WASM **functions** measurements, use `node tools/benchmark/wasm/run-node.mjs`
+and `docs/BENCHMARK_RESULTS.md`. For matrix GEMM, re-benchmark
+`backendManager.multiply` vs `DenseMatrix.multiply` on your hardware before trusting
+any fixed table.
 
 ## Best Practices Summary
 
-1. **Trust auto-selection** for most cases
-2. **Profile before optimizing** - measure, don't guess
-3. **Batch GPU operations** to amortize overhead
-4. **Use adaptive tuning** for production workloads
-5. **Monitor memory usage** in long-running applications
-6. **Test on target hardware** - performance varies significantly
-7. **Consider fallback** - not all users have GPU support
+1. **Call the API that matches the backend** (`backendManager.multiply` vs
+   `DenseMatrix.multiply`).
+2. **Measure on Node** for WASM dispatch policy in functions.
+3. **Batch GPU** dispatches when using WebGPU.
+4. **Assume parallel defaults are mostly sequential** unless you raise thresholds or
+   use fan-out helpers.
+5. **Opt in to GPU** explicitly (`enableGpu`, `gpuMatrixBackend.multiplyAsync`).
+6. **Test on target hardware** — crossover points vary.

@@ -13,9 +13,10 @@ npm install @danielsimonjr/mathts-tensor
 ## Overview
 
 `Tensor` is the compute primitive; element-wise and data-movement ops are plain
-O(n) loops, while heavy ops (`matMul`, all decompositions) delegate to
-`@danielsimonjr/mathts-matrix`'s already-optimized (SIMD-WASM-capable)
-primitives rather than reimplementing them.
+O(n) loops. `matMul` delegates to `backendManager.multiply` (WASM GEMM when
+initialized and gated). Tensor decompositions call the JS `svd` / `eig` / `qr` /
+`lu` / `cholesky` solvers in `@danielsimonjr/mathts-matrix`; `tensorSvdWasm` /
+`tensorEigWasm` are async JS delegates.
 
 ```typescript
 import { Tensor, Index, idx } from '@danielsimonjr/mathts-tensor';
@@ -82,15 +83,15 @@ new Tensor(shape: number[], data: Float64Array, axisLabels?: Index[])
 
 #### Shape / Contraction
 
-| Method         | Signature                                      | Description                                              |
-| -------------- | ---------------------------------------------- | -------------------------------------------------------- |
-| `reshape`      | `(shape: number[]) => Tensor`                  | Reshape (same element count)                             |
-| `transpose`    | `(perm?: number[]) => Tensor`                  | Permute axes                                             |
-| `matMul`       | `(other: Tensor) => Tensor`                    | Uses matrix's backend-selected multiply for large inputs |
-| `tensordot`    | `(other: Tensor, axes) => Tensor`              | NumPy `tensordot` semantics (delegates to `einsum`)      |
-| `axisOf`       | `(index: Index) => number`                     | Axis position of a named index                           |
-| `replaceIndex` | `(oldIndex: Index, newIndex: Index) => Tensor` | Swap a named index                                       |
-| `contract`     | `(other: Tensor) => Tensor`                    | Named-index contraction over ALL shared indices          |
+| Method         | Signature                                      | Description                                                          |
+| -------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
+| `reshape`      | `(shape: number[]) => Tensor`                  | Reshape (same element count)                                         |
+| `transpose`    | `(perm?: number[]) => Tensor`                  | Permute axes                                                         |
+| `matMul`       | `(other: Tensor) => Tensor`                    | Calls `backendManager.multiply` (WASM GEMM when initialized + gated) |
+| `tensordot`    | `(other: Tensor, axes) => Tensor`              | NumPy `tensordot` semantics (delegates to `einsum`)                  |
+| `axisOf`       | `(index: Index) => number`                     | Axis position of a named index                                       |
+| `replaceIndex` | `(oldIndex: Index, newIndex: Index) => Tensor` | Swap a named index                                                   |
+| `contract`     | `(other: Tensor) => Tensor`                    | Named-index contraction over ALL shared indices                      |
 
 > `contract` throws if either operand has no `axisLabels`, there are no shared
 > indices, or a shared index has mismatched dimensions.
@@ -141,12 +142,12 @@ reshaped back.
 | Function         | Signature                                         | Result                                                |
 | ---------------- | ------------------------------------------------- | ----------------------------------------------------- |
 | `tensorSvd`      | `(t, rowAxes, opts?) => TensorSvdResult`          | `{U, S, V, truncatedDim, truncationError}`            |
-| `tensorSvdWasm`  | `(t, rowAxes, opts?) => Promise<TensorSvdResult>` | Async variant (via `svdWasm`)                         |
+| `tensorSvdWasm`  | `(t, rowAxes, opts?) => Promise<TensorSvdResult>` | Async wrapper; `svdWasm` runs JS `svd`                |
 | `tensorQr`       | `(t, rowAxes, opts?) => TensorQrResult`           | `{Q, R}` — `mode: 'reduced' \| 'full'`                |
 | `tensorLU`       | `(t, rowAxes, opts?) => TensorLUResult`           | `{L, U, P, parity}` — reshaped matrix must be square  |
 | `tensorCholesky` | `(t, rowAxes, opts?) => TensorCholeskyResult`     | `{L}` — SPD only                                      |
 | `tensorEig`      | `(t, rowAxes, opts?) => TensorEigResult`          | `{eigenvalues, eigenvectors?, eigenvaluesImaginary?}` |
-| `tensorEigWasm`  | `(t, rowAxes, opts?) => Promise<TensorEigResult>` | Async variant                                         |
+| `tensorEigWasm`  | `(t, rowAxes, opts?) => Promise<TensorEigResult>` | Async wrapper; `eigWasm` runs JS `eig`                |
 | `tensorPinv`     | `(t, rowAxes, opts?) => Tensor`                   | Moore-Penrose via full SVD + rcond                    |
 | `tensorSolve`    | `(A, b, opts?) => TensorSolveResult`              | `{x}` — LU-based linear solve                         |
 
@@ -193,10 +194,33 @@ const A = Tensor.fromNested(
   ],
   [2, 3]
 );
-// attach labels, contract over the shared index j...
-
 // einsum matrix multiply
-const C = Tensor.einsum('ij,jk->ik', A /* [2,3] */ /* B [3,4] */);
+const B = Tensor.fromNested(
+  [
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+  ],
+  [3, 4]
+);
+const C = Tensor.einsum(
+  {
+    contractions: [
+      {
+        pair: [
+          [0, 1],
+          [1, 0],
+        ],
+      },
+    ],
+    free: [
+      { operand: 0, axis: 0 },
+      { operand: 1, axis: 1 },
+    ],
+  },
+  A,
+  B
+);
 console.log(C.shape); // [2, 4]
 
 // reductions with keepDims

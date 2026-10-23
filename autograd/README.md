@@ -12,8 +12,9 @@ npm install @danielsimonjr/mathts-autograd
 
 ## What it provides
 
-- Forward mode via `DualTensor` (dual numbers).
-- Reverse mode via a `Tape` / `TapedTensor` (backprop).
+- Forward mode via `DualTensor` (dual numbers, `core` dual rules).
+- Reverse mode via `Tape`, `TapedTensor`, `grad`, `valueAndGrad`, `jacobian`,
+  `derivative`, `reverseGrad` (see `docs/api/autograd.md`).
 - Gradients of tensor-valued expressions for optimization / ML workloads.
 
 ## License
