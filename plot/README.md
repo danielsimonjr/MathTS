@@ -129,11 +129,23 @@ Per-type mark functions, each `(x, y, opts?) => string` unless noted:
 - **`viridis(t)`** — the perceptually-uniform colormap used by `heatmap`/`contour`/`surface`,
   exposed for reuse.
 
+### `./render` — PNG/PDF from SVG (Node only)
+
+The main `.` entry returns SVG/TikZ strings only. For file output, import the isolated
+Node subpath (shells out to `rsvg-convert` / `resvg` or `pdflatex` / `tectonic` on PATH):
+
+```ts
+import { renderToFile, latexToPdf } from '@danielsimonjr/mathts-plot/render';
+
+await renderToFile(svgString, 'plot.png', { density: 144 });
+```
+
+See `docs/api/plot.md` for `RenderOptions`, `PlotRenderError`, and `hasTool`.
+
 Notes:
 
 - Pure ESM, `strict` TypeScript, no runtime dependencies beyond the MathTS bedrock
-  (`core`/`functions`/`expression`).
-- SVG-only in v1 — no PNG/canvas rendering.
+  (`core`/`functions`/`expression`) on the browser-safe `.` entry.
 - `workbook` renders its charts through this package (its former private `svg.ts` plotter was
   removed).
 

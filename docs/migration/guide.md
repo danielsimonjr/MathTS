@@ -163,11 +163,11 @@ const num = bn.toNumber();
 // MathTS native
 import { BigNumber } from '@danielsimonjr/mathts-core';
 const bn = BigNumber.parse('123.456');
-const num = bn.valueOf();
+const num = bn.toNumber(); // or bn.valueOf()
 
 // MathTS compat
 const bn = math.bignumber('123.456');
-const num = bn.valueOf(); // Use valueOf(), not toNumber()
+const num = bn.toNumber(); // same as valueOf()
 ```
 
 ### Matrices
@@ -237,12 +237,12 @@ await computePool.terminate();
 
 ### 2. Method Names
 
-| mathjs              | MathTS                       |
-| ------------------- | ---------------------------- |
-| `bn.toNumber()`     | `bn.valueOf()`               |
-| `m.get([row, col])` | `m.get(row, col)`            |
-| `m.size()`          | `m.rows, m.cols`             |
-| `f.n, f.d`          | `f.numerator, f.denominator` |
+| mathjs              | MathTS                            |
+| ------------------- | --------------------------------- |
+| `bn.toNumber()`     | `bn.toNumber()` or `bn.valueOf()` |
+| `m.get([row, col])` | `m.get(row, col)`                 |
+| `m.size()`          | `m.rows, m.cols`                  |
+| `f.n, f.d`          | `f.numerator, f.denominator`      |
 
 ### 3. Fraction Internals
 

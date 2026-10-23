@@ -37,28 +37,33 @@ which uses 40+ duck-typed type checks.
 
 ```text
 matrix.multiply(other)   // DenseMatrix or SparseMatrix
-  1. BackendManager.selectBackend(size) called with rows * cols
-  2. Checks registered backends in preference order:
-       size < 256           -> JSBackend    (always available)
-       256 <= size < 100K   -> WASMBackend  (if available)
-       size >= 100,000      -> GPUBackend   (if available)
-  3. executeWithFallback(op, backend):
+  1. BackendManager.multiply uses elementCount = a.rows * b.cols * a.cols, then
+     selectBackend(elementCount, 'multiply') — not rows * cols alone.
+  2. Registered backends are js + wasm only (no 'gpu' in backendRegistry):
+       multiply: WASM when elementCount >= 256 (operation threshold), else JS
+       transpose: WASM threshold 2000; default wasm hint 1000 for ops with no
+       per-op entry; WASMBackend minElements 100 for decomposition kernels
+  3. GPUBackend thresholds in BackendManager are dormant. Explicit exports
+     (`gpuMatmul`, `gpuAdd`, `gpuTranspose`, `gpuScale`) call gpuMatrixBackend
+     directly (minElements 65,536) and do not require enableGpu(). enableGpu()
+     gates implicit fused GPU paths in functions/src/gpu/ (element-wise, FFT).
+  4. executeWithFallback(op, backend):
        - Tries selected backend
        - On failure or unavailability, falls back to next lower backend
        - Final fallback: JSBackend (always succeeds)
-  4. Adaptive tuning (if enabled):
+  5. Adaptive tuning (if enabled):
        - maybeAdjustThresholds() samples execution time per operation
        - recordSample() updates rolling performance stats
        - getAdaptiveThresholds() returns current dynamic cutoffs
-  5. Returns result as DenseMatrix
+  6. Returns result as DenseMatrix
 ```
 
-| Backend           | Threshold      | Key Ops                                         |
-| ----------------- | -------------- | ----------------------------------------------- |
-| `JSBackend`       | Default        | All ops, pure TypeScript, Float64Array          |
-| `WASMBackend`     | ≥256 elements  | SIMD matmul, LU/QR/Cholesky/inverse/determinant |
-| `GPUBackend`      | >100K elements | WebGPU matmul, transpose, scale, elementwise    |
-| `ParallelBackend` | Configurable   | WebWorker-backed elementwise + matmul           |
+| Backend         | Threshold                                                                | Key Ops                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JSBackend`     | Default                                                                  | All ops, pure TypeScript, Float64Array                                                                                                                             |
+| `WASMBackend`   | Per-op (e.g. multiply ≥256 op-count; decompositions via minElements 100) | SIMD matmul, LU/QR/Cholesky/inverse/determinant                                                                                                                    |
+| WebGPU (opt-in) | f32, per kernel                                                          | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
+| `ComputePool`   | Per-op map                                                               | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
 
 ---
 
@@ -72,10 +77,11 @@ parallelAdd(a, b)   // Float64Array inputs
   2. calculateOptimalChunks(data, workerCount):
        - Splits data into N chunks based on pool size and data size
        - 7 threshold categories with adaptive minimums
-  3. ComputePool.run(workerFn, chunks):
-       - Distributes chunks to Web Workers via postMessage
-       - Transfers ownership of TypedArrays (zero-copy)
-       - Each worker processes its chunk independently
+  3. ComputePool dispatches via the op-specific method (`elementwise`, `matmul`, …):
+       - `shouldParallelize(n, op)` consults `thresholdByOp` (defaults in
+         `DEFAULT_THRESHOLD_BY_OP`)
+       - Distributes chunks to Web Workers via postMessage when parallel
+       - Transfers ownership of TypedArrays (zero-copy) where supported
   4. Collect and merge results:
        - mergeFloat64Chunks(results) reassembles output array
   5. Returns ParallelResult<Float64Array>:
@@ -324,10 +330,10 @@ typed-function (@danielsimonjr/mathts-core)
     |         |
     |         +---> WASMBackend (threshold check)
     |         |         |
-    |         |         +---> [≥256 elements] WasmLoader --> assembly (AS, mathts-as.wasm)
-    |         |         +---> [<256 or fallback] JSBackend
+    |         |         +---> WASM when per-op threshold met --> WasmLoader --> assembly
+    |         |         +---> else JSBackend (fallback always available)
     |         |
-    |         +---> [>100K elements] ComputePool (@danielsimonjr/mathts-parallel)
+    |         +---> (ComputePool is separate — per-op thresholds, not size ≥100K)
     |
     +---> Parallel Functions (@danielsimonjr/mathts-functions)
     |         |

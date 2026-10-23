@@ -5,7 +5,9 @@ Standalone AST node constructors for [MathTS](https://github.com/danielsimonjr/m
 A focused entry point over the AST nodes in
 [`@danielsimonjr/mathts-expression`](https://www.npmjs.com/package/@danielsimonjr/mathts-expression).
 The implementation is re-exported, not duplicated. Useful for tooling that builds,
-walks, transforms, or pretty-prints expression trees without pulling in the evaluator.
+walks, transforms, or pretty-prints expression trees via the node constructors only (this
+package does not re-export `compile` / `evaluate`; it still depends on
+`@danielsimonjr/mathts-expression`, which ships the full engine).
 
 ## Install
 
