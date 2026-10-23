@@ -20,7 +20,7 @@ Algebraically simplifies an expression:
 ```typescript
 import { simplify, parse } from '@danielsimonjr/mathts-functions';
 
-simplify('3 + 2 / 4').toString(); // '7 / 2'
+simplify('3 + 2 / 4').toString(); // '3.5'
 simplify('2x + 3x').toString(); // '5 * x'
 simplify('x^2 + x + 3 + x^2').toString(); // '2 * x ^ 2 + x + 3'
 simplify('x * y * -x / (x ^ 2)').toString(); // '-y'
@@ -51,10 +51,10 @@ simplify(f, { x: parse('y + z') }).toString(); // '3 * (y + z)'
 
 `simplify(expr, scope?, options?)` accepts an options object:
 
-| Option           | Type    | Default    | Description                                                  |
-| ---------------- | ------- | ---------- | ------------------------------------------------------------ |
-| `exactFractions` | boolean | `true`     | Simplify decimals to fractions when possible                 |
-| `context`        | object  | permissive | Algebraic properties controlling which simplifications apply |
+| Option           | Type    | Default    | Description                                                                                                         |
+| ---------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| `exactFractions` | boolean | `true`     | Prefer exact rationals when a `fraction` helper is wired in simplification (does not rewrite every decimal literal) |
+| `context`        | object  | permissive | Algebraic properties controlling which simplifications apply                                                        |
 
 **Context example** — prevent commutative simplification:
 
@@ -120,7 +120,7 @@ Converts an expression to a rational form (ratio of two polynomials):
 ```typescript
 import { rationalize } from '@danielsimonjr/mathts-functions';
 
-rationalize('1/x + 1/y').toString(); // '(x + y) / (x * y)'
+rationalize('1/x + 1/y').toString(); // '(y + x) / (x * y)'
 rationalize('(2x + 1) / (x^2 - 1)').toString(); // rational form
 ```
 
@@ -150,6 +150,6 @@ const expr = parse('x^3 - 3*x^2 + 3*x - 1');
 const simplified = simplify(expr);
 const d = derivative(simplified, 'x');
 
-d.toString(); // '3 * x ^ 2 - 6 * x + 3'
-d.evaluate({ x: 2 }); // 3  (which is (x-1)^2 evaluated at x=2)
+d.toString(); // '3 * (x ^ 2 + 1) - 6 * x'
+d.evaluate({ x: 2 }); // 3  (3*(x-1)^2 at x=2)
 ```

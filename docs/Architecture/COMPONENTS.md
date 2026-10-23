@@ -361,7 +361,7 @@ core
     │     ├── tensor
     │     │     └── autograd ── (also → core)
     │     └── compat ── parallel · functions ── (also → core)
-    ├── functions ── matrix · parallel · expression
+    ├── functions ── matrix · parallel · expression · gpu
     │     ├── workbook ── expression · plot ── (also → core)
     │     └── plot ── expression ── (also → core)
     ├── numbers · units          (re-export core)
@@ -372,7 +372,7 @@ assembly     → mathts-as.wasm         (built artifact loaded by functions + ma
 ```
 
 Read the arrows as "depends on / is built on": `core → typed-function`; `functions → core · matrix ·
-parallel · expression`; `workbook → core · functions · expression · plot`. Cross-package duplication is held
+parallel · expression · gpu`; `workbook → core · functions · expression · plot`. Cross-package duplication is held
 at zero by the `check:duplicates` pre-commit gate (see [`ARCHITECTURE.md`](./ARCHITECTURE.md) and the
 `duplicate-symbols` report).
 
