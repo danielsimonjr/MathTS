@@ -20,14 +20,14 @@ here first.
 
 ## Consumed MathTS APIs (UPT v0.7+)
 
-| UPT proposal              | MathTS package                             | Status  | Key surfaces                                                                                   |
-| ------------------------- | ------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------- |
-| 1 (LabeledTensor)         | `@danielsimonjr/mathts-tensor` v0.2.25     | shipped | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`                 |
-| 4 (Bridge AST)            | `@danielsimonjr/mathts-expression` v0.10.3 | shipped | `parse`, `compileExpr`, 15 AST node classes + `Node` base, `getSafeProperty` sandbox helpers   |
-| 7 (.mtsw bridges)         | `@danielsimonjr/mathts-workbook` v0.4.13   | shipped | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)                   |
-| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.3.19   | shipped | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                              |
-| (implicit, all)           | `@danielsimonjr/mathts-functions` v0.69.2  | shipped | `evaluate` sandbox, 686 callable exports (see `docs/reference/functions.md`), CODATA constants |
-| (implicit, heavy)         | `@danielsimonjr/mathts-parallel`           | shipped | `ComputePool` + `thresholdByOp` map, three-tier WASM/worker/in-process dispatch                |
+| UPT proposal              | MathTS package                             | Status  | Key surfaces                                                                                                                                                                                          |
+| ------------------------- | ------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 (LabeledTensor)         | `@danielsimonjr/mathts-tensor` v0.2.25     | shipped | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`                                                                                                                        |
+| 4 (Bridge AST)            | `@danielsimonjr/mathts-expression` v0.10.3 | shipped | `createParse`, `compileExpression`, 15 AST node classes + `Node` base; `parse` / `compileExpr` on `mathts-functions`; sandbox helpers internal to expression (`customs.ts`, not package-root exports) |
+| 7 (.mtsw bridges)         | `@danielsimonjr/mathts-workbook` v0.4.13   | shipped | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)                                                                                                                          |
+| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.3.19   | shipped | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                                                                                                                                     |
+| (implicit, all)           | `@danielsimonjr/mathts-functions` v0.69.2  | shipped | `evaluate` sandbox, 686 callable exports (see `docs/reference/functions.md`), CODATA constants                                                                                                        |
+| (implicit, heavy)         | `@danielsimonjr/mathts-parallel`           | shipped | `ComputePool` + `thresholdByOp` (worker vs in-process; most element-wise/reduction ops `'never'`)                                                                                                     |
 
 Reading order before any UPT PR lands: confirm each consumed export
 still exists in `<package>/src/index.ts` of the relevant package, since

@@ -29,7 +29,7 @@
 - [x] `bunfig.toml` (hoisted linker; Node shebangs preserved)
 - [x] Root scripts: `npx tsx` → `bun`; `npm run -w` → `bun run --filter`
 - [x] `js-yaml` at root so `tools/create-dependency-graph` resolves under Bun
-- [x] CI / Release / Dependabot on Bun
+- [x] CI / Release on Bun; Dependabot is github-actions only (no bun/npm ecosystem — see Why Bun)
 - [x] `package-lock.json` retired (gitignored)
 - [x] Verified locally: `bun run build` (24/24), `typecheck` (47/47 graph), `test`, `build:wasm`
 

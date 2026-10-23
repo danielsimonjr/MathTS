@@ -148,7 +148,7 @@ main();
 
 ## Function Categories
 
-`@danielsimonjr/mathts-functions` provides over 500 callable functions (672 total exports, including 52 CODATA physical constants) across 17 categories:
+`@danielsimonjr/mathts-functions` provides **686** callable functions (**878** total exports, including 52 CODATA physical constants) across 17 categories:
 
 | Category                      | Examples                                                                                   |
 | ----------------------------- | ------------------------------------------------------------------------------------------ |

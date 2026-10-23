@@ -123,7 +123,7 @@ Worker-route is the right tier when the function's loop is **embarrassingly para
 - **`typed/combinatorics.ts`** — small result, large input integer-only. The integer work either fits in `bigint` (which workers can't speed up — single-thread bigint engine) or is small enough that marshal cost wins.
 - **`typed/logical.ts`** — boolean ops; the predicate-aware short-circuit pattern (and JIT-friendly tight loops) already runs at JS native speed.
 - **`typed/cas.ts` (symbolic core)** — tree rewriting; pointer-chasing in WASM costs more than it saves.
-- **`typed/bitwise.ts`** — WASM tier already exists at the bridge level (`functions/src/wasm/bitwise/wasm-bridge.ts`, `WASM_BITWISE_THRESHOLD = 65_536`). The `typed/` layer dispatches through `ComputePool`, which routes to WASM where applicable.
+- **`typed/bitwise.ts`** — A bitwise WASM bridge exists (`WASM_BITWISE_THRESHOLD = 64*1024`) but `wasmPolicyAllows` has no bitwise band, and ComputePool bitwise ops are `'never'`. Public `Int32Array` bitwise calls stay in-process JS.
 - **`typed/gpu.ts`** — already on the WebGPU tier (separate dispatch).
 
 ### B.4 How to land a B.1 / B.2 entry
@@ -135,7 +135,7 @@ The pattern (lifted from the bitwise port that's already shipped):
 3. Regenerate the manifest with `node tools/generate-wasm-manifest.mjs`.
 4. Add a bridge in `functions/src/wasm/<area>/wasm-bridge.ts` that gates on `minElements`.
 5. Wire `typed/<file>.ts` to call the bridge for the relevant types; keep the pure-JS implementation for small inputs and the fallback.
-6. Measure and re-tune the threshold with a benchmark. _(The original `tools/benchmark/wasm/` micro-benchmark suite was removed in the Rust scrub; this step needs a replacement harness.)_
+6. Measure and re-tune the threshold with a benchmark. Use `node tools/benchmark/wasm/run-node.mjs` / `bun run bench:wasm` (and the area benches). Re-run twice on Node/V8 before changing `policy.ts`.
 7. Update `docs/Architecture/dependency-summary.compact.json` via `bun run docs:deps` so this audit's class B table reflects the new acceleration coverage.
 
 For a B.2 (worker-only) entry, steps 1–4 are skipped — only the `typed/<file>.ts` and the `tools/benchmark/parallel/<op>.bench.ts` change.

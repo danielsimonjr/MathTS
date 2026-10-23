@@ -6,10 +6,10 @@ remains a research proposal; phased WebGPU work landed via
 (Spec 1a + `enableGpu()` / fused chains in `functions`). This document is kept for the
 original “single GPU-resident router” design.
 **Author**: design brainstorm (acceleration roadmap, high-effort tier).
-**Goal**: Extend WebGPU acceleration from the four isolated matrix kernels it
-covers today into a coherent, GPU-resident compute path spanning the
-compute-bound operations across MathTS — element-wise math, reductions, linear
-algebra, FFT, and distance matrices — without silently degrading the f64 API.
+**Goal**: Extend today’s opt-in WebGPU (`enableGpu()`, matrix `GPUBackend` kernels,
+fused element-wise chains, FFT at 262,144) from per-call CPU→GPU→CPU into a
+GPU-resident path spanning compute-bound work — element-wise math, reductions,
+linear algebra, FFT, and distance matrices — without silently degrading the f64 API.
 
 > This is a **design document**, not a committed plan. It exists so the work can
 > be scoped honestly. Read the _Constraints_ and _Recommendation_ sections

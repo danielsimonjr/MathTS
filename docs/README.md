@@ -38,7 +38,7 @@ reference). Looking for something? Skim the group headers, then the table.
 | [Architecture/COVERAGE_POLICY.md](Architecture/COVERAGE_POLICY.md)     | Test-coverage policy (data: `coverage-policy.json`).                                                                                                                                                                                                               |
 | [Architecture/TEST_COVERAGE.md](Architecture/TEST_COVERAGE.md)         | Coverage report (data: `test-coverage.json`).                                                                                                                                                                                                                      |
 | [Architecture/unused-analysis.md](Architecture/unused-analysis.md)     | Unused-export analysis.                                                                                                                                                                                                                                            |
-| [Architecture/FILE_INVENTORY.md](Architecture/FILE_INVENTORY.md)       | Complete file census — every tracked repo `.ts` (src/tests/tools/config/examples/docs) tagged reachable/build-entry/test-only/orphan/test/tool/config/example (data: `file-inventory.json`; maximal-walk self-check in `docs:deps` + `npm run check:file-census`). |
+| [Architecture/FILE_INVENTORY.md](Architecture/FILE_INVENTORY.md)       | Complete file census — every tracked repo `.ts` (src/tests/tools/config/examples/docs) tagged reachable/build-entry/test-only/orphan/test/tool/config/example (data: `file-inventory.json`; maximal-walk self-check in `docs:deps` + `bun run check:file-census`). |
 | [Architecture/webgpu-pairing.md](Architecture/webgpu-pairing.md)       | WebGPU-effective function pairing (data: `webgpu-pairing.json`).                                                                                                                                                                                                   |
 | [Architecture/duplicate-symbols.md](Architecture/duplicate-symbols.md) | Cross-package duplicate-symbol report (data: `duplicate-symbols.json`).                                                                                                                                                                                            |
 | [Architecture/duplicate-backlog.md](Architecture/duplicate-backlog.md) | Duplicate-symbol backlog notes.                                                                                                                                                                                                                                    |
@@ -159,26 +159,26 @@ items they still track.
 
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                                              |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                      |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                       |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                             |
-| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).             |
-| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                  |
-| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                      |
-| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                     |
-| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                          |
-| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                    |
-| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                          |
-| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                            |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                         |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                             |
-| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed primitives — M1/M3/M4 in tree; later milestones tracked here. |
-| [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key.             |
-| [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.                         |
-| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.              |
+| Doc                                                                                                      | What it covers                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                                                                                    |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                                                                              |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                                                                                     |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                                                                           |
+| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                                                                           |
+| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                                                                                |
+| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                                                                                    |
+| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                                                                                   |
+| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                                                                        |
+| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                                                                                  |
+| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                                                                        |
+| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                                                                          |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                                                                                       |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                                                                           |
+| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | ⚠️ Banner still says proposed / no feature code; M1/M3/M4 **are in tree** (see [integration/upt.md](integration/upt.md), [../ROADMAP.md](../ROADMAP.md)). |
+| [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key.                                                                                           |
+| [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.                                                                                                       |
+| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.                                                                                            |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
@@ -236,7 +236,55 @@ Completed refactoring reports were moved to [`archive/refactoring/`](archive/ref
 | [../MATH_CORRECTNESS_AUDIT_2026-06-29.md](../MATH_CORRECTNESS_AUDIT_2026-06-29.md) | ✅ Math correctness audit (2026-06-29); harness in `tools/math-correctness-audit/`.      |
 | [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)                                       | 🗄️ Predates the WASM backend — see [performance.md](performance.md) for current numbers. |
 
-## 15. Archive (historical) 🗄️
+## 15. Superpowers (historical design records) 🗄️
+
+Agent-authored execution plans and design specs (2026-06/07). Kept for traceability;
+most work is landed or superseded by `docs/roadmap/` and package changelogs.
+
+### Plans (`superpowers/plans/`, 19 files)
+
+| Doc                                                                                                                                                        | Topic                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| [superpowers/plans/2026-07-03-unit-merge.md](superpowers/plans/2026-07-03-unit-merge.md)                                                                   | Unit merge into core           |
+| [superpowers/plans/2026-07-07-plotting.md](superpowers/plans/2026-07-07-plotting.md)                                                                       | Plot package                   |
+| [superpowers/plans/2026-07-08-plot-tikz-backend.md](superpowers/plans/2026-07-08-plot-tikz-backend.md)                                                     | TikZ backend                   |
+| [superpowers/plans/2026-07-08-workbook-tex-export.md](superpowers/plans/2026-07-08-workbook-tex-export.md)                                                 | Workbook TeX export            |
+| [superpowers/plans/2026-07-09-export-formats-expansion.md](superpowers/plans/2026-07-09-export-formats-expansion.md)                                       | Export formats expansion       |
+| [superpowers/plans/2026-07-10-extract-mathts-gpu-foundation.md](superpowers/plans/2026-07-10-extract-mathts-gpu-foundation.md)                             | GPU foundation extraction      |
+| [superpowers/plans/2026-07-10-webgpu-spec1a-extract-gpu.md](superpowers/plans/2026-07-10-webgpu-spec1a-extract-gpu.md)                                     | WebGPU Spec 1a                 |
+| [superpowers/plans/2026-07-15-phase0-correctness-fixes.md](superpowers/plans/2026-07-15-phase0-correctness-fixes.md)                                       | Phase 0 correctness            |
+| [superpowers/plans/2026-07-15-phase1-foundational-primitives.md](superpowers/plans/2026-07-15-phase1-foundational-primitives.md)                           | Phase 1 primitives             |
+| [superpowers/plans/2026-07-15-phase2-optimization-core.md](superpowers/plans/2026-07-15-phase2-optimization-core.md)                                       | Phase 2 optimization           |
+| [superpowers/plans/2026-07-16-phase3-regression-ml.md](superpowers/plans/2026-07-16-phase3-regression-ml.md)                                               | Phase 3 regression / ML        |
+| [superpowers/plans/2026-07-16-phase4-statistics-inference.md](superpowers/plans/2026-07-16-phase4-statistics-inference.md)                                 | Phase 4 statistics             |
+| [superpowers/plans/2026-07-16-phase5-special-functions.md](superpowers/plans/2026-07-16-phase5-special-functions.md)                                       | Phase 5 special functions      |
+| [superpowers/plans/2026-07-16-phase6-signal-breadth.md](superpowers/plans/2026-07-16-phase6-signal-breadth.md)                                             | Phase 6 signal                 |
+| [superpowers/plans/2026-07-16-phase7-advanced-linalg.md](superpowers/plans/2026-07-16-phase7-advanced-linalg.md)                                           | Phase 7 linalg                 |
+| [superpowers/plans/2026-07-16-phase8-graph-geometry-cas-intervals.md](superpowers/plans/2026-07-16-phase8-graph-geometry-cas-intervals.md)                 | Phase 8 graph / geometry / CAS |
+| [superpowers/plans/2026-07-20-factorization-layer1-univariate.md](superpowers/plans/2026-07-20-factorization-layer1-univariate.md)                         | Factorization layer 1          |
+| [superpowers/plans/2026-07-20-factorization-layer2-multivariate-kronecker.md](superpowers/plans/2026-07-20-factorization-layer2-multivariate-kronecker.md) | Factorization layer 2          |
+| [superpowers/plans/2026-07-20-risch-layer1-rational-integration.md](superpowers/plans/2026-07-20-risch-layer1-rational-integration.md)                     | Risch layer 1                  |
+
+### Specs (`superpowers/specs/`, 14 files)
+
+| Doc                                                                                                                                      | Topic                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| [superpowers/specs/2026-06-27-workbook-cell-mutation-design.md](superpowers/specs/2026-06-27-workbook-cell-mutation-design.md)           | Workbook cell mutation       |
+| [superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md](superpowers/specs/2026-06-27-workbook-gui-read-contract-design.md)   | Workbook GUI read contract   |
+| [superpowers/specs/2026-06-27-workbook-headless-v1-design.md](superpowers/specs/2026-06-27-workbook-headless-v1-design.md)               | Workbook headless v1         |
+| [superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md](superpowers/specs/2026-06-27-workbook-roundtrip-cli-design.md)           | Workbook CLI round-trip      |
+| [superpowers/specs/2026-06-27-workbook-serve-design.md](superpowers/specs/2026-06-27-workbook-serve-design.md)                           | Workbook serve               |
+| [superpowers/specs/2026-06-28-workbook-render-export-design.md](superpowers/specs/2026-06-28-workbook-render-export-design.md)           | Workbook render / export     |
+| [superpowers/specs/2026-07-07-plotting-design.md](superpowers/specs/2026-07-07-plotting-design.md)                                       | Plotting design              |
+| [superpowers/specs/2026-07-08-latex-output-design.md](superpowers/specs/2026-07-08-latex-output-design.md)                               | LaTeX output                 |
+| [superpowers/specs/2026-07-09-export-formats-expansion-design.md](superpowers/specs/2026-07-09-export-formats-expansion-design.md)       | Export formats design        |
+| [superpowers/specs/2026-07-10-webgpu-acceleration-design.md](superpowers/specs/2026-07-10-webgpu-acceleration-design.md)                 | WebGPU acceleration (phased) |
+| [superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md](superpowers/specs/2026-07-10-webgpu-spec1b-flag-matmul.md)                   | WebGPU Spec 1b flag / matmul |
+| [superpowers/specs/2026-07-20-multivariate-factorization-design.md](superpowers/specs/2026-07-20-multivariate-factorization-design.md)   | Multivariate factorization   |
+| [superpowers/specs/2026-07-20-risch-integration-design.md](superpowers/specs/2026-07-20-risch-integration-design.md)                     | Risch integration            |
+| [superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md](superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md) | Risch layer 2 quadratic surd |
+
+## 16. Archive (historical) 🗄️
 
 Completed/superseded work, moved out of the active tree. See
 [archive/README.md](archive/README.md).

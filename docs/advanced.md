@@ -41,27 +41,33 @@ For fine-grained control:
 ```typescript
 import { DenseMatrix, JSBackend, WASMBackend, GPUBackend } from '@danielsimonjr/mathts-matrix';
 
-// Force specific backend
-const matrix = DenseMatrix.fromArray([
+const a = DenseMatrix.fromArray([
   [1, 2],
   [3, 4],
 ]);
+const b = DenseMatrix.fromArray([
+  [5, 6],
+  [7, 8],
+]);
 
-// Use JS backend explicitly
-const jsResult = await JSBackend.multiply(matrix.data, matrix.data, 2, 2, 2);
+const js = new JSBackend();
+const jsResult = js.multiply(a, b); // DenseMatrix → DenseMatrix (sync)
 
-// Use WASM backend (if available)
 const wasmBackend = new WASMBackend();
 await wasmBackend.initialize();
-if (wasmBackend.isReady()) {
-  const wasmResult = await wasmBackend.multiply(matrix.data, matrix.data, 2, 2, 2);
+if (wasmBackend.isAvailable()) {
+  const wasmResult = wasmBackend.multiply(a, b);
 }
 
-// Use GPU backend (browser with WebGPU only)
 const gpuBackend = new GPUBackend();
-const gpuAvailable = await gpuBackend.initialize();
-if (gpuAvailable) {
-  const gpuResult = await gpuBackend.multiply(matrix.data, matrix.data, 2, 2, 2);
+if (await gpuBackend.initialize()) {
+  const gpuResult = await gpuBackend.matmul(
+    new Float32Array(a.toArray().flat()),
+    new Float32Array(b.toArray().flat()),
+    2,
+    2,
+    2
+  );
 }
 ```
 
@@ -100,7 +106,7 @@ const largeData = new Float64Array(100000);
 const result2 = await computePool.sum(largeData);
 // result2.parallelized === false
 
-// matmul parallelizes above its per-op threshold (4096 elements by default)
+// matmul parallelizes at or above 4096 elements (64×64); threshold is inclusive
 const big = await computePool.matmul(
   new Float64Array(64 * 64),
   64,
@@ -108,7 +114,7 @@ const big = await computePool.matmul(
   new Float64Array(64 * 64),
   64
 );
-// big.parallelized may be true when n is large enough
+// big.parallelized === true when the pool is initialized (exactly 4096 elements)
 ```
 
 ### Batch Operations

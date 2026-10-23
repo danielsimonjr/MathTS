@@ -1,7 +1,7 @@
 # WASM↔Function Pairing — Gap-Closure Plan
 
 **Status:** executed 2026-06-25 · **Drafted:** 2026-06-25 · **Source of truth for
-the pairing:** `docs/Architecture/wasm-pairing.md` (regenerate: `npm run docs:deps`)
+the pairing:** `docs/Architecture/wasm-pairing.md` (regenerate: `bun run docs:deps`)
 
 > **Historical note (2026-10-22):** several script names cited below (`bench:reduction`,
 > `bench:special-array`, `bench:transcendental`, `bench:fusion`) were never added to root
