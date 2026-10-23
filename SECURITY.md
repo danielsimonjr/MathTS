@@ -2,11 +2,24 @@
 
 ## Supported Versions
 
-We release patches for security vulnerabilities in the following versions:
+MathTS ships **24 independently versioned** `@danielsimonjr/mathts-*` packages (see root
+`package.json` `workspaces`). The private root package (`mathts-monorepo@0.1.0`) is not
+published; security fixes land in the scoped packages consumers install.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+We release patches for **currently published** package versions. Each workspace
+`package.json` `"version"` field is the source of truth on `main`; after a release,
+the same versions appear on the [npm registry](https://www.npmjs.com/org/danielsimonjr)
+and in the Changesets version PR / git tags (`<name>@<version>`).
+
+| What to check                   | Where                                                   |
+| ------------------------------- | ------------------------------------------------------- |
+| Version on `main` for a package | `<pkg>/package.json` → `"version"`                      |
+| Versions already on npm         | `npm view @danielsimonjr/<pkg> version` or the registry |
+| Pending version bumps           | `.changeset/*.md` and the Release workflow version PR   |
+
+We do not maintain a single monolithic `0.1.x` support line. Install the latest
+published version of each `@danielsimonjr/mathts-*` package you depend on, and
+upgrade when a security advisory names a fixed version.
 
 ## Reporting a Vulnerability
 
@@ -32,26 +45,37 @@ Include the following information:
 - Proof-of-concept or exploit code (if possible)
 - Impact of the issue, including how an attacker might exploit it
 
-### 3. Response Timeline
+### 3. What to Expect
 
-- **Acknowledgment**: Within 48 hours
-- **Initial Assessment**: Within 1 week
-- **Resolution Timeline**: Depends on severity, typically 30-90 days
+- **Acknowledgment**: We will acknowledge receipt of your report within 48 hours
+- **Updates**: We will keep you informed about our progress
+- **Resolution**: We aim to resolve critical issues within 30 days
+- **Credit**: We will credit you in the security advisory (unless you prefer to remain anonymous)
 
 ### 4. Disclosure Policy
 
-- We follow responsible disclosure practices
-- We will coordinate with you on timing of public disclosure
-- We will credit you in the security advisory (unless you prefer anonymity)
+- We ask that you give us reasonable time to address the issue before public disclosure
+- We will coordinate with you on the disclosure timeline
+- Once fixed, we will publish a security advisory and credit you (if desired)
 
-## Security Best Practices for Users
+## Security Best Practices
 
 When using MathTS:
 
-1. **Keep dependencies updated**: Regularly update to the latest version
-2. **Validate inputs**: Always validate user inputs before passing to math functions
-3. **Limit resource usage**: Set appropriate limits for matrix sizes and computation time
-4. **Sandbox WebWorkers**: If using parallel execution, ensure proper isolation
+1. **Keep dependencies updated** - Regularly update to the latest published versions of the `@danielsimonjr/mathts-*` packages you use
+2. **Validate inputs** - Especially when evaluating user-provided expressions
+3. **Use the sandbox** - Expression evaluation uses sandbox helpers; don't bypass them
+4. **Verify WASM integrity** - The WASM loader verifies SHA-384 hashes before instantiation
+
+## Known Security Features
+
+MathTS includes several security measures:
+
+- **Expression Sandbox**: Property/method access in the expression evaluator routes through safe-access helpers
+- **WASM Integrity**: SHA-384 manifest verification before WASM instantiation
+- **Worker Timeout**: Worker pool supports timeout and hung-worker replacement
+
+See `CLAUDE.md` / `AGENTS.md` for the full security invariants.
 
 ## Known Security Considerations
 
@@ -73,7 +97,8 @@ When using MathTS:
 
 ## Security Updates
 
-Security updates will be released as patch versions (e.g., 0.1.x) and announced via:
+Security fixes ship as patch (or minor) releases of the affected
+`@danielsimonjr/mathts-*` packages and are announced via:
 
 - GitHub Security Advisories
 - Release notes

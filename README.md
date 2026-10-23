@@ -2,15 +2,15 @@
 
 [![npm version](https://img.shields.io/npm/v/@danielsimonjr/mathts-core.svg)](https://www.npmjs.com/package/@danielsimonjr/mathts-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.2-fbf0df.svg)](https://bun.sh/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.x-blue.svg)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.4.2-fbf0df.svg)](https://bun.sh/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-green.svg)](https://nodejs.org/)
 
 MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) packaged as an
 ESM-only npm workspaces monorepo. It accelerates computation through an AssemblyScript
-WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and an optional
-WebGPU backend for large matrix operations. The acceleration path is
-**TypeScript → AssemblyScript WASM → WebGPU (matrix)**.
+WASM backend, a WebWorker parallel-execution layer (`ComputePool`), and optional
+WebGPU paths (caller opt-in, f32). Each kernel picks JS, workers, WASM, or GPU
+from measured thresholds — not one fixed cascade.
 All 24 packages are independently versioned under the `@danielsimonjr/mathts-*` scope.
 
 ## Contents
@@ -110,16 +110,16 @@ evaluate('2^10'); // 1024
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { add } from '@danielsimonjr/mathts-functions';
 
-// add(Float64Array, Float64Array) routes through the worker pool
+// Typed add on Float64Array stays sequential (ComputePool threshold is 'never' for add)
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([5, 6, 7, 8]);
 const result = await add(a, b); // Float64Array([6, 8, 10, 12])
 
-// Direct pool access for larger operations
+// Direct pool access — matmul parallelizes at 4,096+ elements; sum stays sequential
 await computePool.initialize();
 
 const data = new Float64Array(100_000).map(() => Math.random());
-const sum = await computePool.sum(data);
+const { result: sum } = await computePool.sum(data);
 const { result: matC } = await computePool.matmul(
   new Float64Array([1, 2, 3, 4]),
   2,
@@ -182,8 +182,8 @@ default values in `parallel/src/ComputePool.ts`):
 | `besselJ`                  | 1,000,000 elements | Special-function compute cost               |
 | Most element-wise ops      | `'never'`          | Transfer overhead dominates at tested sizes |
 
-The bitwise WASM tier activates at `WASM_BITWISE_THRESHOLD = 65,536` elements
-(source: `functions/src/wasm/bitwise/wasm-bridge.ts`).
+Bitwise WASM bridges exist in source but `wasmPolicyAllows` keeps them on JavaScript
+(see the table above). `ComputePool` bitwise ops are also `'never'`.
 
 Override defaults via `ComputePoolConfig.thresholdByOp` (see
 `parallel/src/ComputePool.ts` for the `OpName` union and `OpThreshold` type). A `thresholdByOp`
@@ -205,9 +205,9 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 | `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels) |
 | `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                  |
 | `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                               |
-| `@danielsimonjr/mathts-functions`      | 374+ math functions via typed dispatch; `evaluate()`                                                         |
+| `@danielsimonjr/mathts-functions`      | 686 callable exports (878 total); typed dispatch + `evaluate()` — see `docs/reference/functions.md`          |
 | `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                   |
-| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (16 AST nodes)                                              |
+| `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (15 node classes + `Node` base)                             |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                 |
 | `@danielsimonjr/mathts-compat`         | mathjs API compatibility shim (`create(all)`)                                                                |
 | `@danielsimonjr/mathts-wasm`           | AssemblyScript WASM kernels — the sole WASM backend (functions + matrix)                                     |
@@ -219,7 +219,7 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 typed-function <- core <- matrix <- functions
                     ^         ^          ^
 workerpool <- parallel ------+          |
-                    ^                   |
+                    ^         gpu <-----+
                     +-------------------+
 matrix <- tensor <- autograd
 gpu <- matrix
@@ -230,19 +230,23 @@ core, matrix, functions, parallel <- compat
 
 Zero circular dependencies (verified by `tools/create-dependency-graph`).
 
-### Three-tier dispatch
+### Acceleration tiers (per kernel, not one cascade)
 
-For each operation, the runtime selects the fastest available tier:
+Dispatch is **measured per operation**, not a single JS → WASM → worker ladder:
 
-```
-WASM (AssemblyScript, above size threshold)
-  -> WebWorker / ComputePool (above per-op threshold)
-    -> In-process JavaScript (always available)
-```
+- **Matrix** (`BackendManager`): JS by default; WASM for SIMD matmul (≥256 elements)
+  and dense LU/QR/Cholesky/inverse/determinant when the AS binary is loaded.
+  `BackendManager` does not register a GPU backend today; large GPU matrix work
+  uses opt-in `gpuMatmul` / related exports (see below).
+- **Workers** (`ComputePool`): global fallback threshold 50,000 elements, but most
+  element-wise ops and reductions are `'never'`; `matmul` engages at 4,096 elements
+  (defaults in `parallel/src/ComputePool.ts`).
+- **Functions WASM**: only after `await loadWasm()`; `functions/src/wasm/policy.ts`
+  keeps most kernels on JS even when loaded.
+- **WebGPU** (`enableGpu()`): f32 opt-in from `GPU_MIN_ELEMENTS` (65,536) in
+  `gpu/src/flag.ts` for the fused GPU paths in `@danielsimonjr/mathts-functions`.
 
-The `BackendManager` in `@danielsimonjr/mathts-matrix` handles backend
-selection for matrix operations. `ComputePool.shouldParallelize(n, op?)`
-resolves per-op thresholds via `thresholdByOp`.
+`ComputePool.shouldParallelize(n, op?)` resolves per-op thresholds via `thresholdByOp`.
 
 ### WASM backend
 
@@ -280,7 +284,7 @@ included) runs on Bun. Node is needed only to reproduce the CI Node test matrix
 (`node tools/test/run-vitest-node.mjs`, `node tools/test/smoke-dist-node.mjs`).
 
 ```bash
-# Install Bun once: https://bun.sh  (needs ≥1.2; repo pins 1.4.2)
+# Install Bun once: https://bun.sh  (engines.bun >=1.4.2; packageManager pins bun@1.4.2)
 bun install
 
 # Build all packages
@@ -337,10 +341,8 @@ here (so they can't drift). Regenerate with `bun run docs:deps`:
 
 ### Known open items
 
-- No browser smoke test for WebGPU paths (WebGPU is not available in headless
-  Node; needs a CI runner with a software WebGPU backend such as Mesa lavapipe).
-
-See [`TODO.md`](./TODO.md) for the full open-items list.
+See [`TODO.md`](./TODO.md) for the full open-items list. CI runs a headed/browser
+WebGPU smoke job (`bun run test:browser`, Mesa lavapipe on GitHub Actions).
 
 ---
 

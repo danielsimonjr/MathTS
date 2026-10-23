@@ -1,36 +1,26 @@
-# Parked changesets — release notes for a package that is not published yet
+# Parked changesets — historical workbook release notes
 
-These are real, unreleased changesets for **`@danielsimonjr/mathts-workbook`**, which is
-listed in `ignore` in `.changeset/config.json` (the package is not published to npm yet).
+These are **archived** changesets for `@danielsimonjr/mathts-workbook` from the period
+when the package was listed in `.changeset/config.json` `ignore` and not yet on npm.
+That is no longer true: `ignore` is `[]`, workbook is public (`publishConfig.access`
+follows the root Changesets config), and the package ships on the registry (see
+`workbook/package.json` `"version"`).
 
-## Why they are not in `.changeset/`
+## Why they stay outside `.changeset/`
 
-A changeset whose only package is an **ignored** one is a contradiction: changesets reads
-it, plans **zero** version bumps from it, and produces an empty diff. The
-`changesets/action` release workflow then tries to open its "Version Packages" PR anyway
-and GitHub rejects it:
+While workbook was ignored, changesets that only touched it produced empty version PRs
+and broke the Release workflow (`No commits between main and changeset-release/main`).
+Those files were moved here so real release notes were not deleted.
 
-    Validation Failed: No commits between main and changeset-release/main
-
-which failed the `Release` workflow on **every push to main**, permanently. Eleven such
-changesets had accumulated here.
-
-Deleting them would throw away genuine release notes for real workbook work, so they are
-parked instead.
+Keeping them **out of** `.changeset/` still avoids feeding stale, already-shipped
+workbook bumps back into Changesets. They are reference-only.
 
 > A subdirectory _inside_ `.changeset/` does **not** work — changesets descends into it and
 > tries to read `.changeset/<dir>/changes.md`. Verified, not assumed. They must live
 > outside the directory, which is why this folder is a sibling.
 
-## Restoring them
+## Do not "restore" into `.changeset/`
 
-When `@danielsimonjr/mathts-workbook` is ready to publish, drop it from the `ignore` list in
-`.changeset/config.json` and move these files back:
-
-```bash
-mv .changeset-parked/workbook-*.md .changeset/
-npx changeset status   # workbook should now appear under "packages to be bumped"
-```
-
-Their contents are unmodified, so the generated changelog will be exactly what it would
-have been.
+Do **not** move these files back into `.changeset/` unless you are deliberately
+replaying historical changelog text. For new workbook work, add a fresh changeset
+under `.changeset/` like any other package.

@@ -121,11 +121,11 @@ dependencies, and the `math` singleton provides the fully configured instance.
 
 Three computation backends with automatic selection via BackendManager:
 
-| Backend     | Implementation         | Threshold          |
-| ----------- | ---------------------- | ------------------ |
-| JSBackend   | Pure TypeScript        | Always (default)   |
-| WASMBackend | AssemblyScript + SIMD  | ≥ 256 elements     |
-| GPUBackend  | WebGPU compute shaders | > 100,000 elements |
+| Backend     | Implementation         | Threshold                                                                                                                         |
+| ----------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| JSBackend   | Pure TypeScript        | Always (default)                                                                                                                  |
+| WASMBackend | AssemblyScript + SIMD  | ≥ 256 elements                                                                                                                    |
+| GPUBackend  | WebGPU compute shaders | Dormant in `BackendManager` (no `'gpu'` backend registered); live GPU work uses opt-in `gpuMatmul` at `GPU_MIN_ELEMENTS` (65,536) |
 
 BackendManager selects based on data size, backend availability, and
 adaptive performance tuning with profiling support.
@@ -161,8 +161,7 @@ gives the counts of effectively parallelized, threshold-disabled and non-paralle
 typed functions. The **effective** set is the compute-bound ops — `matmul` (4,096),
 `tensordot` (8,192), `matrixPower` / `characteristicPolynomial` (9,216), the
 hypothesis tests (4,096), `erfc` (100,000), `besselJ` (1,000,000), `spectrogram`
-(65,536), `sampleChunk` (100,000) — plus every generic per-element kernel above
-the 50,000 global threshold. The **threshold-disabled** ops (`'never'`) are the
+(65,536), `sampleChunk` (100,000). The **threshold-disabled** ops (`'never'`) are the
 memory-bound element-wise arithmetic / transcendentals (`add`, `multiply`, `exp`,
 `sin`, …) and small reductions (`sum`, `mean`, `variance`), where a benchmark found
 worker overhead dominates at every tested size; their pool wiring
@@ -232,24 +231,18 @@ For matrix operations via `BackendManager`:
 
 ```
 JS fallback (always)
-  --> WASM acceleration (≥256 elements, 2-10x faster)
-        --> Parallel/multi-core (>100K elements, additional 2-4x)
+  --> WASM acceleration (≥256 elements for SIMD matmul + dense decompositions)
 ```
 
-For bitwise operations on `Int32Array` inputs (`functions/src/typed/bitwise.ts` +
-`functions/src/wasm/bitwise/wasm-bridge.ts`), a separate three-tier model applies:
+`ComputePool` parallelizes only the ops listed in `parallel-pairing.md` (for example
+`matmul` at 4,096 elements). It is not an automatic third tier on top of WASM matrix
+ops. WebGPU is a separate opt-in f32 path (`enableGpu()`, `GPU_MIN_ELEMENTS` 65,536)
+in `@danielsimonjr/mathts-functions`, not `BackendManager`.
 
-```
-in-process JS (small arrays)
-  --> ComputePool worker (per-op threshold from thresholdByOp in ComputePool)
-        --> WASM kernel (>65,536 elements; SIMD/native path dominates marshal cost)
-```
-
-The WASM tier is the outermost check: if `WASM_BITWISE_THRESHOLD` (64 × 1,024
-elements) is met and the module is loaded, `runBinaryBitwiseWasm` /
-`runUnaryBitwiseWasm` are called directly and bypass the worker pool entirely.
-The `ComputePool` path is the fallback when WASM is unavailable or returns
-`null`; in-process JS is the innermost fallback.
+For bitwise operations on `Int32Array` inputs, both `ComputePool` (`bitAnd`, …) and
+`functions/src/wasm/bitwise/` stay on in-process JavaScript: worker thresholds are
+`'never'` and `wasmPolicyAllows` has no bitwise band, so the WASM bridge returns
+`null` in production.
 
 ### 7. Expression Package
 
@@ -304,15 +297,17 @@ Most packages run `tsdown src/index.ts --format esm`, then `tsc -p tsconfig.dts.
 | workbook          | Three entries (`index.ts`, `cli.ts`, `run-worker.ts`) |
 | assembly          | AssemblyScript (`asc`) + TypeScript bindings          |
 
-Turbo tasks: `test` and `typecheck` depend on `^build` (upstream packages build first).
+Turbo tasks: `test` and `typecheck` depend on `["^build", "build"]` (upstream packages
+and each package's own `build` — tests import built `dist/`). `expression#typecheck`
+also waits on `matrix` and `functions` builds.
 
 ## Module Summary
 
 Source-file counts below are the files under `src/` in each workspace package,
 per `dependency-graph.json`. The generated `DEPENDENCY_GRAPH.md` gives the
 per-file breakdown. Regenerate with `npm run docs:deps:full`. The report counts
-**1,185 TypeScript files** in total, all reachable from package entry points,
-with **0 unused** files and **6,121 exports**.
+**1,189 TypeScript files** in total, all reachable from package entry points,
+with **0 unused** files and **6,165 exports**.
 
 | Package                          | Reachable Files |
 | -------------------------------- | --------------- |
@@ -320,9 +315,9 @@ with **0 unused** files and **6,121 exports**.
 | matrix                           | 46              |
 | tensor                           | 21              |
 | autograd                         | 6               |
-| functions                        | 475             |
+| functions                        | 478             |
 | parallel                         | 14              |
-| expression                       | 476             |
+| expression                       | 477             |
 | workbook                         | 25              |
 | compat                           | 3               |
 | assembly (wasm)                  | 28              |
@@ -331,7 +326,7 @@ with **0 unused** files and **6,121 exports**.
 | gpu                              | 8               |
 | plot                             | 21              |
 | thin re-export packages (10 × 1) | 10              |
-| **Total**                        | **1,185**       |
+| **Total**                        | **1,189**       |
 
 ## Verification
 
