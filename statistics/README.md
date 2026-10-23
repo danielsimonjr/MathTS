@@ -23,14 +23,14 @@ npm install @danielsimonjr/mathts-statistics
   (median absolute deviation), `iqr`, `sem`, `zscore`, `moment`, `skewness`, `kurtosis`, `gmean`,
   `hmean`, `cov`, `corr`, `corrcoef`, `rankdata`, `ptp`, `trimmedMean`, `variation`, `describe`,
   `logsumexp`, `softmax`, `detrend`, `movingAverage`, `ewma`, `acf`, and the correlation helpers
-  `pearsonr`, `spearmanr`, `kendalltau` / `kendallTau`.
+  `pearsonr`, `spearman`, `spearmanr`, `kendalltau` / `kendallTau`.
 - **Parallel reductions** — `parallelStat*` helpers mirror the typed reductions on `Float64Array`;
   most op thresholds in `ComputePool` are `'never'` today (inline JS), but the API stays
   `async`-friendly where the typed layer returns a `Promise`. `quickSelect` / `medianSelect` /
   `minSelect` / `maxSelect` are synchronous selection utilities.
-- **Regression & resampling** — `linearRegression`, `linregress`, `pearsonr`, `spearmanr`,
-  `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`,
-  `hotellingT2`, `kmeans`, `spectralClustering`.
+- **Regression & resampling** — `linearRegression`, `polyFit`, `linregress`, `pearsonr`,
+  `spearman`, `spearmanr`, `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`,
+  `permutationTest`, `mahalanobis`, `hotellingT2`, `kmeans`, `spectralClustering`.
 - **Probability distributions** — distribution objects with `.pdf/.cdf/.quantile/.mean/.variance/.sample`
   (`normalDist`, `gammaDist`, `betaDist`, `binomialDist`, `poissonDist`, `exponentialDist`,
   `chiSquaredDist`, `fDist`, `tDist`, `logNormalDist`, `uniformDist`, `weibullDist`,

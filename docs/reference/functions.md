@@ -38,18 +38,17 @@ reverse-mode / tensor gradients, see `@danielsimonjr/mathts-autograd`.
 
 Function tables in hardware-accelerated categories carry an **Accel** column:
 
-- **`parallel`** — the function's `Float64Array` (or large-matrix) path is
-  dispatched across worker threads by the compute pool **above a per-op element
-  threshold** (`DEFAULT_THRESHOLD_BY_OP`; the default global fallback is 50,000
-  elements).
-- **`parallel†`** — a worker-pool path exists but its op threshold is currently
-  `'never'`, so it **always runs inline JS** today: the 2026-05 parallel
-  benchmark found worker overhead dominates at every tested size for these
-  memory-bound element-wise / reduction ops (`add`, `subtract`, `multiply`,
-  `divide`, `abs`, `exp`, `log`, `sin`/`cos`/`tan`, `parallelStatSum`/`Mean`, …).
-  The path is kept wired so a future threshold retune switches it on without code
-  churn.
-- **`WASM`** — the function has a WebAssembly fast path for large inputs.
+- **`parallel`** — `ComputePool` may dispatch to worker threads when length ≥
+  that op's entry in `DEFAULT_THRESHOLD_BY_OP` (for example `matmul` at 4,096,
+  `spectrogram` at 65,536, `erfc` at 100,000). When the typed path calls
+  `shouldParallelize(n)` **without** an op name and the op is absent from the
+  map, the **50,000-element global fallback** applies (`cube`, `round`, `sec`, …).
+- **`parallel†`** — the pool op is `'never'` in `DEFAULT_THRESHOLD_BY_OP`, so
+  workers are not used for that named op today (inline JS), even though a
+  `Promise` return type may remain for API compatibility.
+- **`WASM (band)`** — after `loadWasm()`, `wasmPolicyAllows` may route a
+  `Float64Array` path to AssemblyScript in the band listed (see
+  `functions/src/wasm/policy.ts`; missing kernel ⇒ JS only).
 - **`GPU‡`** — optional WebGPU FFT path for `parallelFFT` / `parallelIFFT` only
   (`enableGpu()`, power-of-two n ≥ 262 144); falls back to JS otherwise.
 - **`WebGPU`** — the function runs on the GPU via WebGPU compute shaders for
@@ -163,41 +162,41 @@ The primitives are exported from `@danielsimonjr/mathts-core` (`pairwiseSum`, `n
 
 ## Arithmetic
 
-| Function         | Description                                                                                                                          | Types                                             | Accel     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | --------- |
-| `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —         |
-| `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —         |
-| `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel† |
-| `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel† |
-| `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —         |
-| `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | parallel† |
-| `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | parallel† |
-| `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel† |
-| `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | parallel† |
-| `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | parallel† |
-| `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | parallel† |
-| `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | parallel† |
-| `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | parallel† |
-| `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | parallel† |
-| `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | parallel† |
-| `mod(a, b)`      | Modulo `a % b`                                                                                                                       | number, bigint                                    | —         |
-| `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —         |
-| `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —         |
-| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —         |
-| `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | parallel† |
-| `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | parallel† |
-| `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | parallel† |
-| `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | parallel† |
-| `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | parallel† |
+| Function         | Description                                                                                                                          | Types                                             | Accel                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------ |
+| `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                              |
+| `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel†, WASM (≥1024)        |
+| `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —                              |
+| `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel†                      |
+| `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+| `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
+| `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel                       |
+| `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —                              |
+| `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | parallel†                      |
+| `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | parallel                       |
+| `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel†, WASM (≥16384)       |
+| `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | parallel                       |
+| `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | parallel, WASM (≥1024)         |
+| `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | parallel, WASM ([1024, 16384)) |
+| `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
+| `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | parallel                       |
+| `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | parallel                       |
+| `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | parallel                       |
+| `mod(a, b)`      | Modulo `a % b`                                                                                                                       | number, bigint                                    | —                              |
+| `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —                              |
+| `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —                              |
+| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —                              |
+| `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | parallel†                      |
+| `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | parallel†                      |
+| `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | parallel†                      |
+| `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | parallel                       |
+| `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | parallel†                      |
 
 The factory layer additionally provides scalar variants used internally and by
 the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -312,20 +311,24 @@ deepEqual([1, 2, 3], [1, 2, 3]); // true
 
 Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
-| Function                         | Description                                      | Accel     |
-| -------------------------------- | ------------------------------------------------ | --------- |
-| `sin(x)` `cos(x)` `tan(x)`       | Sine, cosine, tangent                            | parallel† |
-| `csc(x)` `sec(x)` `cot(x)`       | Cosecant, secant, cotangent                      | parallel  |
-| `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel  |
-| `atan2(y, x)`                    | Two-argument arctangent                          | —         |
-| `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —         |
-| `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel  |
-| `asinh(x)` `acosh(x)` `atanh(x)` | Inverse hyperbolic sine, cosine, tangent         | parallel  |
-| `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —         |
-| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —         |
-| `toRadians(deg)`                 | Convert degrees to radians                       | —         |
-| `toDegrees(rad)`                 | Convert radians to degrees                       | —         |
-| `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —         |
+| Function                         | Description                                      | Accel                             |
+| -------------------------------- | ------------------------------------------------ | --------------------------------- |
+| `sin(x)`                         | Sine                                             | parallel†, WASM ([1024, 131072))  |
+| `cos(x)`                         | Cosine                                           | parallel†, WASM (≥16384)          |
+| `tan(x)`                         | Tangent                                          | parallel†                         |
+| `csc(x)` `cot(x)`                | Cosecant, cotangent                              | parallel                          |
+| `sec(x)`                         | Secant                                           | parallel, WASM ([16384, 1048576)) |
+| `asin(x)` `acos(x)` `atan(x)`    | Inverse sine, cosine, tangent                    | parallel                          |
+| `atan2(y, x)`                    | Two-argument arctangent                          | —                                 |
+| `acsc(x)` `asec(x)` `acot(x)`    | Inverse cosecant, secant, cotangent              | —                                 |
+| `sinh(x)` `cosh(x)` `tanh(x)`    | Hyperbolic sine, cosine, tangent                 | parallel                          |
+| `asinh(x)` `acosh(x)`            | Inverse hyperbolic sine, cosine                  | parallel                          |
+| `atanh(x)`                       | Inverse hyperbolic tangent                       | parallel, WASM (≥16384)           |
+| `csch(x)` `sech(x)` `coth(x)`    | Hyperbolic cosecant, secant, cotangent (factory) | —                                 |
+| `acsch(x)` `asech(x)` `acoth(x)` | Inverse hyperbolic csc/sec/cot (factory)         | —                                 |
+| `toRadians(deg)`                 | Convert degrees to radians                       | —                                 |
+| `toDegrees(rad)`                 | Convert radians to degrees                       | —                                 |
+| `hypot(a, b, …)`                 | Hypotenuse `sqrt(Σ xᵢ²)`                         | —                                 |
 
 ### Details
 
@@ -451,10 +454,10 @@ leftShift(1, 4); // 16
 | `digamma(x)`                                | Digamma `d/dx ln Γ(x)`                                                                  | parallel    |
 | `gamma(x)`                                  | Gamma function (factory layer)                                                          | —           |
 | `lgamma(x)`                                 | Log-gamma (`typed` + factory); WASM only after `loadWasm()` at n ≥ 1 048 576            | WASM (≥1 M) |
-| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind                                                                       | parallel†   |
-| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                            | parallel†   |
+| `besselJ0(x)` `besselJ1(x)` `besselJ(n, x)` | Bessel first kind (JS `Float64Array`; no WASM policy entry)                             | —           |
+| `besselY0(x)` `besselY1(x)` `besselY(n, x)` | Bessel second kind (`x > 0`)                                                            | —           |
 | `besselI(n, x)` `besselK(n, x)`             | Modified Bessel functions                                                               | parallel    |
-| `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind                                               | parallel†   |
+| `airyAi(x)` `airyBi(x)`                     | Airy functions of the first / second kind (JS; no WASM policy entry)                    | —           |
 | `ellipticK(m)` `ellipticE(m)`               | Complete elliptic integrals                                                             | parallel    |
 | `fresnelC(x)` `fresnelS(x)`                 | Fresnel integrals                                                                       | parallel    |
 | `sinIntegral(x)` `cosIntegral(x)`           | Sine / cosine integrals                                                                 | parallel    |
@@ -676,24 +679,24 @@ For `Float64Array` data, the `parallelStat*` family may return a `Promise`, but
 most op thresholds in `ComputePool` are `'never'` (inline JS). Scalar overloads
 (2–4 numbers) are synchronous.
 
-| Function                                  | Description                                  | Accel     |
-| ----------------------------------------- | -------------------------------------------- | --------- |
-| `parallelStatSum(a)`                      | Sum of all elements                          | parallel† |
-| `parallelStatMean(a)`                     | Arithmetic mean                              | parallel† |
-| `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`) | parallel† |
-| `parallelStatStd(a[, type])`              | Standard deviation                           | parallel† |
-| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                    | parallel† |
-| `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                   | parallel† |
-| `parallelStatMedian(a)`                   | Median                                       | parallel† |
-| `parallelStatMode(a)`                     | Mode                                         | —         |
-| `parallelStatProd(a)`                     | Product                                      | parallel† |
-| `parallelStatNorm(a[, p])`                | p-norm                                       | parallel† |
-| `parallelStatDistance(a, b)`              | Euclidean distance                           | parallel† |
-| `parallelStatCorr(a, b)`                  | Pearson correlation                          | parallel† |
-| `parallelStatMAD(a)`                      | Mean absolute deviation from the mean        | parallel† |
-| `parallelStatCumsum(a)`                   | Cumulative sum                               | —         |
-| `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                          | —         |
-| `parallelStatHistogram(a, bins)`          | Histogram bin counts                         | parallel† |
+| Function                                  | Description                                               | Accel       |
+| ----------------------------------------- | --------------------------------------------------------- | ----------- |
+| `parallelStatSum(a)`                      | Sum of all elements                                       | parallel†   |
+| `parallelStatMean(a)`                     | Arithmetic mean                                           | parallel†   |
+| `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`)              | parallel†   |
+| `parallelStatStd(a[, type])`              | Standard deviation                                        | parallel†   |
+| `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                                 | parallel†   |
+| `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                                | parallel†   |
+| `parallelStatMedian(a)`                   | Median (`sort_f64` when n ≥ 1 048 576 after `loadWasm()`) | WASM (≥1 M) |
+| `parallelStatMode(a)`                     | Mode                                                      | —           |
+| `parallelStatProd(a)`                     | Product                                                   | parallel†   |
+| `parallelStatNorm(a[, p])`                | p-norm                                                    | parallel†   |
+| `parallelStatDistance(a, b)`              | Euclidean distance                                        | parallel†   |
+| `parallelStatCorr(a, b)`                  | Pearson correlation                                       | parallel†   |
+| `parallelStatMAD(a)`                      | Mean absolute deviation from the mean                     | parallel†   |
+| `parallelStatCumsum(a)`                   | Cumulative sum                                            | —           |
+| `parallelStatQuantile(a, q)`              | q-th quantile (0–1)                                       | —           |
+| `parallelStatHistogram(a, bins)`          | Histogram bin counts                                      | parallel†   |
 
 ### Selection (O(n), no full sort)
 
@@ -1854,7 +1857,7 @@ const xs = [0, 1, 2, 3],
 const spline = cubicSpline(xs, ys);
 spline(1.5); // 2.2
 polyFit(xs, ys, 2); // [0, 0, 1]  (low-degree-first; y ≈ x²)
-lagrangeInterp(xs, ys, 2.5); // ~6.25
+lagrangeInterp(xs, ys, 2.5); // 6.25
 ```
 
 ---
@@ -2067,7 +2070,7 @@ n ≥ 262 144) is separate from the worker pool.
 | Function                                        | Description                                                                                                                            | Accel           |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | `parallelFFT(x)`                                | FFT → `{ real, imag, originalLength }`                                                                                                 | parallel†, GPU‡ |
-| `parallelIFFT(X)`                               | Inverse FFT → `{ real, imag, originalLength }`                                                                                         | parallel†, GPU‡ |
+| `parallelIFFT(X)`                               | Inverse FFT → `{ real, imag }`                                                                                                         | parallel†, GPU‡ |
 | `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                 | parallel†       |
 | `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                     | parallel†       |
 | `parallelConv(a, b)`                            | Convolution → `Promise<Float64Array>`                                                                                                  | parallel†       |
@@ -2095,7 +2098,7 @@ n ≥ 262 144) is separate from the worker pool.
 | `decimate(x, q)`                                | Anti-aliased downsampling by integer factor `q` (Butterworth lowpass + `filtfilt`, then every `q`-th sample) — `scipy.signal.decimate` | —               |
 | `stft(x[, opts])`                               | Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — `scipy.signal.stft`                                       | —               |
 | `istft(S[, opts])`                              | Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — `scipy.signal.istft`                     | —               |
-| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel†       |
+| `spectrogram(x[, opts])`                        | Spectrogram                                                                                                                            | parallel        |
 | `periodogram(x)`                                | Power spectral density estimate (JS)                                                                                                   | —               |
 | `groupDelay(b, a, w)`                           | Filter group delay                                                                                                                     | —               |
 | `unwrapPhase(phase)`                            | Remove 2π phase discontinuities                                                                                                        | —               |
@@ -2706,9 +2709,9 @@ physical artefacts.
 ```typescript
 import { speedOfLight, planckConstant, boltzmann } from '@danielsimonjr/mathts-functions';
 
-speedOfLight; // 299792458       (m/s, exact since the 2019 SI redefinition)
-planckConstant; // 6.62607015e-34  (J·s, exact since 2019)
-boltzmann; // 1.380649e-23    (J/K, exact since 2019)
+speedOfLight.toNumeric(); // 299792458       (m/s, exact since the 2019 SI redefinition)
+planckConstant.toNumeric(); // 6.62607015e-34  (J·s, exact since 2019)
+boltzmann.toNumeric(); // 1.380649e-23    (J/K, exact since 2019)
 ```
 
 ---

@@ -225,8 +225,8 @@ max(data); // 5
 | ---------------------- | --------------------------------- | ---------------------- |
 | `parallelFFT`          | `(x) => Promise<{real, imag, …}>` | Fast Fourier Transform |
 | `parallelIFFT`         | `(X) => Promise<{real, imag, …}>` | Inverse FFT            |
-| `parallelFFTMagnitude` | `(x) => Promise<number[]>`        | FFT magnitude spectrum |
-| `parallelFFTPower`     | `(x) => Promise<number[]>`        | FFT power spectrum     |
+| `parallelFFTMagnitude` | `(x) => Promise<Float64Array>`    | FFT magnitude spectrum |
+| `parallelFFTPower`     | `(x) => Promise<Float64Array>`    | FFT power spectrum     |
 
 ### Convolution & Correlation
 
@@ -468,7 +468,7 @@ PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expres
 | `evaluateScalar`       | `(node, scope?) => number`                                                   | Interpret one scalar tree row          |
 | `compileScalar`        | `(node, options: CompileScalarOptions) => CompiledScalar`                    | Batch tape over `Float64Array` columns |
 | `paretoFront`          | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)  |
-| `scoreFront`           | `(front, { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`            | PySR log-loss scores                   |
+| `scoreFront`           | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                   |
 | `selectFrontModel`     | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                    |
 | `ParetoFrontError`     | `class`                                                                      | Bad mode / empty front / mixed scores  |
 | `CompileScalarOptions` | `{ variables, parameters?, constants? }`                                     | Column order and bindings              |
