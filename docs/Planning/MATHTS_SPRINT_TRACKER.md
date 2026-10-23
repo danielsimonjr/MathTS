@@ -1,6 +1,10 @@
 # MathTS Sprint Tracker
 
-## Current Status: Phase 1 - Core Foundation
+> **Status: Superseded / Historical as of 2026-10-22.** All 166/166 sprint tasks completed
+> (phases 1–6). Canonical JSON archives live in [`../archive/sprints/`](../archive/sprints/).
+> [`PRIORITY_STATUS.md`](PRIORITY_STATUS.md) records the same completion table.
+
+## Current Status: Phase 1 - Core Foundation (snapshot — see banner)
 
 ### Prerequisites (COMPLETE ✅)
 

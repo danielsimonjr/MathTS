@@ -133,7 +133,8 @@ async function main() {
   const sumResult = await computePool.sum(data);
   console.log('Sum:', sumResult.result);
   console.log('Duration:', sumResult.duration, 'ms');
-  console.log('Workers used:', sumResult.workersUsed);
+  console.log('Parallelized:', sumResult.parallelized);
+  console.log('Chunks:', sumResult.chunks);
 
   const meanResult = await computePool.mean(data);
   console.log('Mean:', meanResult.result);

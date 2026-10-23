@@ -39,6 +39,11 @@ reference). Looking for something? Skim the group headers, then the table.
 | [Architecture/TEST_COVERAGE.md](Architecture/TEST_COVERAGE.md)         | Coverage report (data: `test-coverage.json`).                                                                                                                                                                                                                      |
 | [Architecture/unused-analysis.md](Architecture/unused-analysis.md)     | Unused-export analysis.                                                                                                                                                                                                                                            |
 | [Architecture/FILE_INVENTORY.md](Architecture/FILE_INVENTORY.md)       | Complete file census — every tracked repo `.ts` (src/tests/tools/config/examples/docs) tagged reachable/build-entry/test-only/orphan/test/tool/config/example (data: `file-inventory.json`; maximal-walk self-check in `docs:deps` + `npm run check:file-census`). |
+| [Architecture/webgpu-pairing.md](Architecture/webgpu-pairing.md)       | WebGPU-effective function pairing (data: `webgpu-pairing.json`).                                                                                                                                                                                                   |
+| [Architecture/duplicate-symbols.md](Architecture/duplicate-symbols.md) | Cross-package duplicate-symbol report (data: `duplicate-symbols.json`).                                                                                                                                                                                            |
+| [Architecture/duplicate-backlog.md](Architecture/duplicate-backlog.md) | Duplicate-symbol backlog notes.                                                                                                                                                                                                                                    |
+| [Architecture/Workbook/README.md](Architecture/Workbook/README.md)     | Workbook architecture folder index.                                                                                                                                                                                                                                |
+| [FEATURE_WORKFLOW.md](FEATURE_WORKFLOW.md)                             | Feature lifecycle (idea → ROADMAP → spec → plan → `TODO.md`).                                                                                                                                                                                                      |
 
 ### Reference (API symbols)
 
@@ -51,14 +56,20 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ## 3. API (per package) ✅
 
-| Doc                                  | Package                            |
-| ------------------------------------ | ---------------------------------- |
-| [api/README.md](api/README.md)       | API docs landing.                  |
-| [api/core.md](api/core.md)           | `@danielsimonjr/mathts-core`.      |
-| [api/matrix.md](api/matrix.md)       | `@danielsimonjr/mathts-matrix`.    |
-| [api/functions.md](api/functions.md) | `@danielsimonjr/mathts-functions`. |
-| [api/parallel.md](api/parallel.md)   | `@danielsimonjr/mathts-parallel`.  |
-| [api/compat.md](api/compat.md)       | `@danielsimonjr/mathts-compat`.    |
+| Doc                                    | Package                             |
+| -------------------------------------- | ----------------------------------- |
+| [api/README.md](api/README.md)         | API docs landing.                   |
+| [api/core.md](api/core.md)             | `@danielsimonjr/mathts-core`.       |
+| [api/matrix.md](api/matrix.md)         | `@danielsimonjr/mathts-matrix`.     |
+| [api/functions.md](api/functions.md)   | `@danielsimonjr/mathts-functions`.  |
+| [api/parallel.md](api/parallel.md)     | `@danielsimonjr/mathts-parallel`.   |
+| [api/compat.md](api/compat.md)         | `@danielsimonjr/mathts-compat`.     |
+| [api/autograd.md](api/autograd.md)     | `@danielsimonjr/mathts-autograd`.   |
+| [api/expression.md](api/expression.md) | `@danielsimonjr/mathts-expression`. |
+| [api/gpu.md](api/gpu.md)               | `@danielsimonjr/mathts-gpu`.        |
+| [api/plot.md](api/plot.md)             | `@danielsimonjr/mathts-plot`.       |
+| [api/tensor.md](api/tensor.md)         | `@danielsimonjr/mathts-tensor`.     |
+| [api/workbook.md](api/workbook.md)     | `@danielsimonjr/mathts-workbook`.   |
 
 > Per-package usage docs live next to the code as `<pkg>/README.md` and
 > `<pkg>/CHANGELOG.md` (core, matrix, functions, tensor, autograd, parallel,
@@ -148,46 +159,54 @@ items they still track.
 
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                                  |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                          |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                    |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                           |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                 |
-| [roadmap/UNIFIED_WEBGPU_PATH.md](roadmap/UNIFIED_WEBGPU_PATH.md)                                         | Unified WebGPU path proposal (decision pending).                |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                             |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                 |
-| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed symbolic-search primitives for UPT (proposed).    |
-| [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key. |
-| [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.             |
-| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.  |
+| Doc                                                                                                      | What it covers                                                              |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                      |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                       |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                             |
+| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).             |
+| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                  |
+| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                      |
+| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                     |
+| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                          |
+| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                    |
+| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                          |
+| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                            |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                         |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                             |
+| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed primitives — M1/M3/M4 in tree; later milestones tracked here. |
+| [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key.             |
+| [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.                         |
+| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.              |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
-| Doc                                                                                | Status                                                       |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| [roadmap/FUNCTION_GAPS.md](roadmap/FUNCTION_GAPS.md)                               | Slices promoted; referenced by TODO/CHANGELOG.               |
-| [roadmap/FUNCTION_GAPS_AUDIT.md](roadmap/FUNCTION_GAPS_AUDIT.md)                   | Audit roadmap closed (Waves 1–6); still tracks B.1 playbook. |
-| [roadmap/GAP_CLOSURE_PROPOSAL.md](roadmap/GAP_CLOSURE_PROPOSAL.md)                 | Tier-1 landed; still tracks deferred slices.                 |
-| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md)     | Wave 4 landed.                                               |
-| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md)     | Wave 5 landed.                                               |
-| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md)     | Wave 6 complete (all 5 slices).                              |
-| [roadmap/ITENSOR_PARITY.md](roadmap/ITENSOR_PARITY.md)                             | ITensor parity — six phases, all green.                      |
-| [roadmap/EXPANSION_PLAN.md](roadmap/EXPANSION_PLAN.md)                             | v3 — executed (all workstreams complete).                    |
-| [roadmap/MATHJS_SYNC_ROADMAP.md](roadmap/MATHJS_SYNC_ROADMAP.md)                   | Superseded by GAP_ANALYSIS_BRIDGES.                          |
-| [roadmap/WASM_OPTIMIZATION_EVALUATION.md](roadmap/WASM_OPTIMIZATION_EVALUATION.md) | Implementation complete (2026-04-10).                        |
-| [roadmap/WASM_PAIRING_GAP_PLAN.md](roadmap/WASM_PAIRING_GAP_PLAN.md)               | Executed 2026-06-25.                                         |
+| Doc                                                                                | Status                                                         |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [roadmap/FUNCTION_GAPS.md](roadmap/FUNCTION_GAPS.md)                               | Slices promoted; referenced by TODO/CHANGELOG.                 |
+| [roadmap/FUNCTION_GAPS_AUDIT.md](roadmap/FUNCTION_GAPS_AUDIT.md)                   | Audit roadmap closed (Waves 1–6); still tracks B.1 playbook.   |
+| [roadmap/GAP_CLOSURE_PROPOSAL.md](roadmap/GAP_CLOSURE_PROPOSAL.md)                 | Tier-1 landed; still tracks deferred slices.                   |
+| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE4.md)     | Wave 4 landed.                                                 |
+| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE5.md)     | Wave 5 landed.                                                 |
+| [roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md](roadmap/GAP_CLOSURE_PROPOSAL_WAVE6.md)     | Wave 6 complete (all 5 slices).                                |
+| [roadmap/ITENSOR_PARITY.md](roadmap/ITENSOR_PARITY.md)                             | ITensor parity — six phases, all green (historical design).    |
+| [roadmap/UNIFIED_WEBGPU_PATH.md](roadmap/UNIFIED_WEBGPU_PATH.md)                   | Unified GPU-resident path — superseded by phased WebGPU specs. |
+| [roadmap/EXPANSION_PLAN.md](roadmap/EXPANSION_PLAN.md)                             | v3 — executed (all workstreams complete).                      |
+| [roadmap/MATHJS_SYNC_ROADMAP.md](roadmap/MATHJS_SYNC_ROADMAP.md)                   | Superseded by GAP_ANALYSIS_BRIDGES.                            |
+| [roadmap/WASM_OPTIMIZATION_EVALUATION.md](roadmap/WASM_OPTIMIZATION_EVALUATION.md) | Implementation complete (2026-04-10).                          |
+| [roadmap/WASM_PAIRING_GAP_PLAN.md](roadmap/WASM_PAIRING_GAP_PLAN.md)               | Executed 2026-06-25.                                           |
 
 ## 12. Planning ✅/🗄️
 
 | Doc                                                                                                              | Status                                               |
 | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| [Planning/MASTER_ROADMAP.md](Planning/MASTER_ROADMAP.md)                                                         | ✅ Master index of plans (updated 2026-04-10).       |
-| [Planning/PRIORITY_STATUS.md](Planning/PRIORITY_STATUS.md)                                                       | ✅ Sprint completion status (166/166).               |
-| [Planning/MATHTS_SPRINT_TRACKER.md](Planning/MATHTS_SPRINT_TRACKER.md)                                           | ✅ Sprint tracker.                                   |
+| [Planning/MASTER_ROADMAP.md](Planning/MASTER_ROADMAP.md)                                                         | 🗄️ April 2026 master index snapshot.                 |
+| [Planning/PRIORITY_STATUS.md](Planning/PRIORITY_STATUS.md)                                                       | 🗄️ April 2026 sprint status snapshot (166/166).      |
+| [Planning/MATHTS_SPRINT_TRACKER.md](Planning/MATHTS_SPRINT_TRACKER.md)                                           | 🗄️ Sprint tracker snapshot (phases 1–6 complete).    |
 | [Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md](Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md)             | ✅ Implementation-pattern guide.                     |
 | [Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE_PART2.md](Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE_PART2.md) | ✅ Guide, part 2.                                    |
-| [Planning/CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md](Planning/CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md)               | ✅ Canonical corrective-action plan (v2).            |
+| [Planning/CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md](Planning/CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md)               | 🗄️ Dec-2025 pre-monorepo corrective plan (v2).       |
 | [Planning/CORRECTIVE_ACTION_PLAN.md](Planning/CORRECTIVE_ACTION_PLAN.md)                                         | 🗄️ Superseded by the consolidated v2 above.          |
 | [Planning/MATHTS_BUILDING_PLAN.md](Planning/MATHTS_BUILDING_PLAN.md)                                             | 🗄️ Original Dec-2025 building plan (planning phase). |
 
@@ -207,14 +226,15 @@ Completed refactoring reports were moved to [`archive/refactoring/`](archive/ref
 
 ## 14. Repo-root operational docs
 
-| Doc                                                      | Status                                                                                   |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [../CHANGELOG.md](../CHANGELOG.md)                       | ✅ Release history.                                                                      |
-| [../TODO.md](../TODO.md)                                 | ✅ Live TODO.                                                                            |
-| [../AGENTS.md](../AGENTS.md)                             | ✅ Agent / repo orientation.                                                             |
-| [../CLAUDE.md](../CLAUDE.md)                             | ✅ Claude Code project guide.                                                            |
-| [../BUG_AUDIT_2026-05-25.md](../BUG_AUDIT_2026-05-25.md) | ✅ Bug audit (2026-05-25).                                                               |
-| [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)             | 🗄️ Predates the WASM backend — see [performance.md](performance.md) for current numbers. |
+| Doc                                                                                | Status                                                                                   |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [../CHANGELOG.md](../CHANGELOG.md)                                                 | ✅ Release history.                                                                      |
+| [../TODO.md](../TODO.md)                                                           | ✅ Live TODO.                                                                            |
+| [../AGENTS.md](../AGENTS.md)                                                       | ✅ Agent / repo orientation.                                                             |
+| [../CLAUDE.md](../CLAUDE.md)                                                       | ✅ Claude Code project guide.                                                            |
+| [../BUG_AUDIT_2026-05-25.md](../BUG_AUDIT_2026-05-25.md)                           | ✅ Bug audit (2026-05-25).                                                               |
+| [../MATH_CORRECTNESS_AUDIT_2026-06-29.md](../MATH_CORRECTNESS_AUDIT_2026-06-29.md) | ✅ Math correctness audit (2026-06-29); harness in `tools/math-correctness-audit/`.      |
+| [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)                                       | 🗄️ Predates the WASM backend — see [performance.md](performance.md) for current numbers. |
 
 ## 15. Archive (historical) 🗄️
 
@@ -223,7 +243,7 @@ Completed/superseded work, moved out of the active tree. See
 
 | Folder                                                   | Contents                                                      |
 | -------------------------------------------------------- | ------------------------------------------------------------- |
-| [archive/plans/](archive/plans/)                         | 14 dated one-off design/plan docs (`2026-03-*`, `2026-04-*`). |
-| [archive/superpowers-plans/](archive/superpowers-plans/) | 5 agent execution-note plans (2026-04).                       |
+| [archive/plans/](archive/plans/)                         | 12 dated one-off design/plan docs (`2026-03-*`, `2026-04-*`). |
+| [archive/superpowers-plans/](archive/superpowers-plans/) | 4 agent execution-note plans (2026-04).                       |
 | [archive/refactoring/](archive/refactoring/)             | 6 completed refactoring status/plan/summary reports.          |
 | [archive/sprints/](archive/sprints/)                     | 50 sprint TODO JSON files (Phases 1–10, all complete).        |

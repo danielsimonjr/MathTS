@@ -1,5 +1,11 @@
 # MathJS → MathTS Sync Roadmap
 
+> **Status: Superseded / Historical as of 2026-10-22.** The `.ts→.ts` sync model and
+> `sync_mathjs_to_mathts.py` are dead (upstream mathjs removed its TypeScript sources).
+> User-facing function gaps from this era are closed per
+> [`GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md`](GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md)
+> (Revision 3, 2026-06-29). New upstream work is manual JS→TS porting under `tools/mathjs-port/`.
+
 **Generated**: 2026-04-10
 **Source**: mathjs fork v15.4.0–v15.6.0 (216 new functions, 207 not yet in MathTS)
 

@@ -14,19 +14,24 @@ MathTS supports multiple computation backends:
 
 ### Automatic Backend Selection
 
-By default, MathTS automatically selects the best backend based on operation size:
+`DenseMatrix.zeros` allocates a JS-backed matrix. Backend selection happens on
+**operations** (for example `multiply` above the WASM threshold, currently 256 elements
+for dense matmul), not at construction time:
 
 ```typescript
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-// Small matrix - uses JS backend
-const small = DenseMatrix.fromArray([
+const a = DenseMatrix.fromArray([
   [1, 2],
   [3, 4],
 ]);
+const b = DenseMatrix.fromArray([
+  [5, 6],
+  [7, 8],
+]);
 
-// Large matrix - automatically uses WASM if available
-const large = DenseMatrix.zeros(1000, 1000);
+// multiply() routes through BackendManager (WASM when built binary is loaded and n is large enough)
+const product = a.multiply(b);
 ```
 
 ### Manual Backend Selection
@@ -65,20 +70,19 @@ if (gpuAvailable) {
 ### ComputePool Configuration
 
 ```typescript
-import { computePool } from '@danielsimonjr/mathts-parallel';
+import { ComputePool, computePool } from '@danielsimonjr/mathts-parallel';
 
-// Initialize with options
-await computePool.initialize({
-  minWorkers: 2,
-  maxWorkers: 8, // Default: number of CPU cores
-  workerType: 'auto', // 'auto' | 'thread' | 'process'
-});
+// Pool sizing is set on the constructor (the exported singleton uses defaults)
+const pool = new ComputePool({ maxWorkers: 8 });
+await pool.initialize();
 
-// Check status
+// The default export has no initialize() arguments
+await computePool.initialize();
+
 const stats = computePool.stats();
 console.log('Total workers:', stats.totalWorkers);
 console.log('Active tasks:', stats.activeTasks);
-console.log('Queued tasks:', stats.queuedTasks);
+console.log('Pending tasks:', stats.pendingTasks);
 ```
 
 ### Parallelization Threshold
@@ -91,10 +95,20 @@ const smallData = new Float64Array(100);
 const result1 = await computePool.sum(smallData);
 // result1.parallelized === false (below threshold)
 
-// Large operations are parallelized
+// sum uses threshold 'never' — stays in-process at every size today
 const largeData = new Float64Array(100000);
 const result2 = await computePool.sum(largeData);
-// result2.parallelized === true
+// result2.parallelized === false
+
+// matmul parallelizes above its per-op threshold (4096 elements by default)
+const big = await computePool.matmul(
+  new Float64Array(64 * 64),
+  64,
+  64,
+  new Float64Array(64 * 64),
+  64
+);
+// big.parallelized may be true when n is large enough
 ```
 
 ### Batch Operations

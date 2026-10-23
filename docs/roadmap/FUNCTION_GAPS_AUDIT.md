@@ -136,7 +136,7 @@ The pattern (lifted from the bitwise port that's already shipped):
 4. Add a bridge in `functions/src/wasm/<area>/wasm-bridge.ts` that gates on `minElements`.
 5. Wire `typed/<file>.ts` to call the bridge for the relevant types; keep the pure-JS implementation for small inputs and the fallback.
 6. Measure and re-tune the threshold with a benchmark. _(The original `tools/benchmark/wasm/` micro-benchmark suite was removed in the Rust scrub; this step needs a replacement harness.)_
-7. Update `docs/Architecture/dependency-summary.compact.json` via `npm run cdg` so this audit's class B table reflects the new acceleration coverage.
+7. Update `docs/Architecture/dependency-summary.compact.json` via `bun run docs:deps` so this audit's class B table reflects the new acceleration coverage.
 
 For a B.2 (worker-only) entry, steps 1–4 are skipped — only the `typed/<file>.ts` and the `tools/benchmark/parallel/<op>.bench.ts` change.
 

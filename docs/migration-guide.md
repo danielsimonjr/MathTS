@@ -11,11 +11,12 @@ and want to move to `@danielsimonjr/mathts-*`.
 - The typed-function API (`@danielsimonjr/mathts-functions`) is the recommended
   long-term surface: better tree-shaking, real TypeScript types, no factory
   indirection.
-- `Float64Array` inputs to arithmetic functions are new accelerated paths that
-  route through the worker pool; they return `Promise<Float64Array>`.
-- `Int32Array` inputs to bitwise functions (`bitAnd`, `bitOr`, etc.) follow a
-  three-tier dispatch: WASM above 65,536 elements, worker pool in between,
-  in-process otherwise.
+- `Float64Array` inputs to arithmetic functions are async overloads that may use
+  `ComputePool` when `thresholdByOp` allows; most element-wise ops default to `'never'`
+  (in-process). They return `Promise<Float64Array>`.
+- `Int32Array` bitwise inputs are async, but bitwise WASM kernels are not enabled in
+  `functions/src/wasm/policy.ts` and worker bitwise ops are also `'never'` — they run
+  in-process after the Promise wrapper.
 - `bigint` is a first-class scalar type for arithmetic and bitwise ops.
 
 ---
@@ -292,11 +293,11 @@ const pool = new ComputePool({
 
 ### Bitwise WASM threshold
 
-For `Int32Array` bitwise operations, WASM activates at
-`WASM_BITWISE_THRESHOLD = 65_536` elements. Below that, the worker pool is
-used above the standard elementwise threshold, and in-process below it. You
-cannot currently override the WASM threshold from userland without modifying
-`functions/src/wasm/bitwise/wasm-bridge.ts`.
+`WASM_BITWISE_THRESHOLD` exists in `functions/src/wasm/bitwise/wasm-bridge.ts`, but
+`wasmPolicyAllows` has no bitwise entries, so those kernels never run on WASM today.
+Worker-pool bitwise ops (`bitAnd`, `bitOr`, …) are `'never'` in `DEFAULT_THRESHOLD_BY_OP`.
+Treat `Int32Array` bitwise calls as in-process JS unless you change dispatch policy after
+re-measuring with `tools/benchmark/wasm/opt-in.bench.ts`.
 
 ---
 
