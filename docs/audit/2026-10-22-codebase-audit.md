@@ -100,13 +100,13 @@ already depends on; `workerpool` depends on neither `core` nor `functions`.
 | Cluster                           | Where                                                                                                                                                                                     | Verdict                                                                         | Consolidation target                                                  |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | Mulberry32, five identical copies | `tensor/src/operations/random.ts` (`makeMulberry32`), `functions/src/typed/{hypothesis,dist-objects,graph}.ts`, `packages/workerpool/src/worker.ts`                                       | true duplicate (the roadmap counts four)                                        | `core` (PySR M5); `workerpool` may take a `core` dependency, no cycle |
-| Lanczos log-gamma                 | canonical `functions/src/wasm/special/scalars.ts` `_lgamma` (uses `abs(sin)`); bare-`sin` copies in `typed/hypothesis.ts`, `typed/dist-objects.ts`, `workerpool/src/worker.ts`            | true duplicate with **numeric drift** (negative non-integers)                   | `functions` canonical; update the worker copy in place                |
+| Lanczos log-gamma                 | canonical `functions/src/wasm/special/scalars.ts` `_lgamma` (uses `abs(sin)`); bare-`sin` copies in `typed/hypothesis.ts`, `typed/dist-objects.ts`, `packages/workerpool/src/worker.ts`   | true duplicate with **numeric drift** (negative non-integers)                   | `functions` canonical; update the worker copy in place                |
 | log-gamma, second algorithm       | `functions/src/plain/number/probability.ts` `lgammaNumber` (g=5, NaN for negatives) behind the factory `lgamma` and Dirichlet sampling                                                    | two live algorithms                                                             | decide the negative-domain contract, then delegate                    |
 | erf                               | `typed/hypothesis.ts` `_erf` (Abramowitz, about 7 digits) and its KS kernel string vs `typed/special.ts` `erfcScalar` / `distributions.ts` `_erfc`                                        | retired approximation still in use                                              | `functions` accurate scalar                                           |
-| Radix-2 FFT                       | `functions/src/signal/fft-core-f64.ts` (canonical), `workerpool/src/fft-core.ts`, `matrix/src/backends/wasm/fft-wasm.ts` `fftJS`                                                          | workerpool copy is layering; `fftJS` is a publicly unreachable duplicate        | keep the first; retire `fftJS`                                        |
+| Radix-2 FFT                       | `functions/src/signal/fft-core-f64.ts` (canonical), `packages/workerpool/src/fft-core.ts`, `matrix/src/backends/wasm/fft-wasm.ts` `fftJS`                                                 | workerpool copy is layering; `fftJS` is a publicly unreachable duplicate        | keep the first; retire `fftJS`                                        |
 | Matrix product                    | `matrix/src/operations/common.ts` `matMul` vs `functions/src/ml/ols.ts` `matmul`                                                                                                          | true duplicate                                                                  | export `matMul` from matrix, call it from `ols`                       |
-| Polynomial product                | `functions/src/typed/algebra.ts` `polymul` small path vs `wasm/poly/wasm-bridge.ts` `polyMulJS`                                                                                           | true duplicate                                                                  | one JS convolution                                                    |
-| Row-major strides                 | `Tensor.rowMajorStrides`, `parallel/src/ComputePool.ts` `_rowMajorStrides`, `workerpool/src/worker.ts`                                                                                    | true duplicate; the comment saying `parallel` has no `core` dependency is wrong | free function in `core`                                               |
+| Polynomial product                | `functions/src/typed/algebra.ts` `polymul` small path vs `functions/src/wasm/poly/wasm-bridge.ts` `polyMulJS`                                                                             | true duplicate                                                                  | one JS convolution                                                    |
+| Row-major strides                 | `Tensor.rowMajorStrides`, `parallel/src/ComputePool.ts` `_rowMajorStrides`, `packages/workerpool/src/worker.ts`                                                                           | true duplicate; the comment saying `parallel` has no `core` dependency is wrong | free function in `core`                                               |
 | Linear regression wrappers        | `descriptive-stats.ts` `linregress` vs `regression-extra.ts` `linearRegression` (both over `fitLine`)                                                                                     | near-duplicate public API                                                       | wrap one in the other after a parity pin                              |
 | Numeric Jacobian and norms        | `levenbergMarquardt` private forward-difference Jacobian (`h = 1e-7`) and sum-of-squares `norm2`, `svds` `norm2`, BFGS/Newton central differences vs `numericJacobian` and `core` `norm2` | LM and `svds` bypass the shared primitives                                      | `numericJacobian`; `core` `norm2`                                     |
 | Root finding                      | `typed/cas.ts` `numericRealRoots` own bisection vs `findRoot`                                                                                                                             | bypass                                                                          | `findRoot`                                                            |
@@ -133,8 +133,8 @@ items below are things the census cannot see.
   `backendManager` uses (256 / 65,536) until `setConfig`, which is not exported.
 - `eigWasm`/`svdWasm`/`tensorEigWasm`/`tensorSvdWasm`: async JS delegates kept for call-site
   compatibility; the names now mislead.
-- `units` (and `parser`, `ast`, `evaluator`, `expression`, `arithmetic`, `trigonometry`,
-  `statistics`, `signal`) depend on `typed-function ^4.0.0` and never import it; the lockfile
+- `units` (and `parser`, `ast`, `evaluator`, `arithmetic`, `trigonometry`, `statistics`, `signal`,
+  plus the full package `expression`) depend on `typed-function ^4.0.0` and never import it; the lockfile
   resolves the upstream 4.2.2, not the fork core and functions use.
 - `packages/typed-function` (`@danielsimonjr/mathts-typed-function`) has no workspace dependent.
 - `tools/mathjs-port/drafts/`: unreferenced scaffolding, documented as the port workspace; left.
@@ -200,12 +200,14 @@ the issues below are drafted here, each with enough detail to file as is.
   branches; until then the docs describe the JS reality.
 - **I-9. `create(all, config)` mutates the process-wide internal `DEFAULT_CONFIG`**: a later
   `evaluate('e ^ 2')` returned a `BigNumber`.
-- **I-10. Dead `typed-function ^4.0.0` dependency on nine re-export packages**, resolving the
+- **I-10. Unused `typed-function ^4.0.0` dependency on nine packages** (eight thin re-export packages plus `expression`, a full package), resolving the
   upstream 4.2.2; and `packages/typed-function` has no dependents (release decision).
 - **I-11. `mtsw capabilities --json` prints `schemaVersion` as `"[Circular]"`**
   (`workbook/src/cli.ts` `jsonEnvelope` replacer vs the shared `SCHEMA_VERSION` object).
-- **I-12. `simplify` with `exactFractions` does not convert `0.4 * x`** (`simplifyConstant` needs an
-  injected `fraction` factory).
+- **I-12. `simplify` with `exactFractions` does not convert `0.4 * x`**: the `fraction` factory is
+  already injected (`functions/src/factories/scope.ts`), but `FractionLike` and `_exactFraction` read
+  mathjs-style `f.n` / `f.d` / `f.s`, while core `Fraction` exposes `numerator` / `denominator`, so the
+  `fractionsLimit` comparison is `undefined < limit` and the decimal is left unchanged.
 - **I-13. The export-index gate skips expression, workbook and plot**, so M1's exports never forced
   an API-page update. Extend `TARGETS` in `tools/generate-functions-reference.mjs`.
 - **I-14. Stale WASM thresholds in `functions/src/typed/*` comments**, and `bun test`-reachable
