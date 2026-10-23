@@ -298,15 +298,16 @@ console.log(result.parallelized); // false for many defaults at moderate n
    elements; most element-wise ops default to sequential)
 
 ```typescript
+// Good: Use typed arrays
+const array = [1, 2, 3, 4, 5];
+const data = new Float64Array(array); // Convert regular array
+
 // Good: Batch independent operations
 const [sum, mean, std] = await Promise.all([
   computePool.sum(data),
   computePool.mean(data),
   computePool.std(data),
 ]);
-
-// Good: Use typed arrays
-const data = new Float64Array(array); // Convert regular array
 
 // Bad: Small data (overhead > benefit)
 const tiny = new Float64Array([1, 2, 3]);

@@ -142,11 +142,11 @@ The original 15 FAIL / 22 WEAK were all resolved in 0.1.5:
 
 **Coverage gaps to extend the harness to next (by risk):**
 
-- **P1:** `ops/matrix` (41 — incl. `matrix_multiply`/`gemm`/`gemv`, the BLAS
+- **P1:** `ops/matrix` (42 — incl. `matrix_multiply`/`gemm`/`gemv`, the BLAS
   hot path) → numpy oracle; `ops/complex-ops` + `ops/complex-array` (77 —
   branch-cut functions) → mathjs complex oracle.
-- **P2:** `poly` (5), `signal` spectral (5), `tridiag` (2), `sort` (3); the
+- **P2:** `poly` (7), `signal` spectral (5), `tridiag` (2), `sort` (3); the
   precision-sensitive `ops/scalar` gaps (`expm1`, `log1p`, `cbrt`,
   `nthRoot`, `atan2`).
-- **P3:** `ops/array` (36), `ops/bitwise` (7), `types/complex` (3), trivial
+- **P3:** `ops/array` (36), `ops/bitwise` (7), `types/complex` (2), trivial
   Math.* scalar wrappers.

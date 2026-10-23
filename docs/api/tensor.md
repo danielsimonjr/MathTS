@@ -194,10 +194,33 @@ const A = Tensor.fromNested(
   ],
   [2, 3]
 );
-// attach labels, contract over the shared index j...
-
 // einsum matrix multiply
-const C = Tensor.einsum('ij,jk->ik', A /* [2,3] */ /* B [3,4] */);
+const B = Tensor.fromNested(
+  [
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+  ],
+  [3, 4]
+);
+const C = Tensor.einsum(
+  {
+    contractions: [
+      {
+        pair: [
+          [0, 1],
+          [1, 0],
+        ],
+      },
+    ],
+    free: [
+      { operand: 0, axis: 0 },
+      { operand: 1, axis: 1 },
+    ],
+  },
+  A,
+  B
+);
 console.log(C.shape); // [2, 4]
 
 // reductions with keepDims
