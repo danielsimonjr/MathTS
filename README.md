@@ -205,7 +205,7 @@ override is merged over the defaults per op (set an op to `undefined` to send it
 | `@danielsimonjr/mathts-gpu`            | Shared WebGPU foundation — `GPUContext`, `BufferPool`, `detect`, generic `ShaderManager` (no domain kernels) |
 | `@danielsimonjr/mathts-tensor`         | Rank-N Float64Array-backed dense Tensor; einsum/contraction                                                  |
 | `@danielsimonjr/mathts-autograd`       | Forward-mode (DualTensor) + reverse-mode (Tape) AD over Tensor                                               |
-| `@danielsimonjr/mathts-functions`      | 686 callable exports (878 total); typed dispatch + `evaluate()` — see `docs/reference/functions.md`          |
+| `@danielsimonjr/mathts-functions`      | 1,090 exports; typed dispatch + `evaluate()` — see `docs/reference/functions.md`                             |
 | `@danielsimonjr/mathts-parallel`       | ComputePool; 40+ parallel ops; Int32Array bitwise dispatch                                                   |
 | `@danielsimonjr/mathts-expression`     | Expression parser, compiler, sandboxed evaluator (15 node classes + `Node` base)                             |
 | `@danielsimonjr/mathts-workbook`       | `.mtsw` reactive YAML notebook runtime + CLI                                                                 |
