@@ -2,11 +2,24 @@
 
 ## Supported Versions
 
-We release patches for security vulnerabilities in the following versions:
+MathTS ships **24 independently versioned** `@danielsimonjr/mathts-*` packages (see root
+`package.json` `workspaces`). The private root package (`mathts@0.1.0`) is not
+published; security fixes land in the scoped packages consumers install.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+We release patches for **currently published** package versions. Each workspace
+`package.json` `"version"` field is the source of truth on `main`; after a release,
+the same versions appear on the npm registry
+and in the Changesets version PR / git tags (`<name>@<version>`).
+
+| What to check                   | Where                                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Version on `main` for a package | `<dir>/package.json` → `"version"` (workspace dir, e.g. `core/`)                                     |
+| Versions already on npm         | `npm view @danielsimonjr/mathts-<name> version` (e.g. `npm view @danielsimonjr/mathts-core version`) |
+| Pending version bumps           | `.changeset/*.md` and the Release workflow version PR                                                |
+
+We do not maintain a single monolithic `0.1.x` support line. Install the latest
+published version of each `@danielsimonjr/mathts-*` package you depend on, and
+upgrade when a security advisory names a fixed version.
 
 ## Reporting a Vulnerability
 
@@ -73,7 +86,8 @@ When using MathTS:
 
 ## Security Updates
 
-Security updates will be released as patch versions (e.g., 0.1.x) and announced via:
+Security fixes ship as patch (or minor) releases of the affected
+`@danielsimonjr/mathts-*` packages and are announced via:
 
 - GitHub Security Advisories
 - Release notes

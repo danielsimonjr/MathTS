@@ -6,7 +6,7 @@ Thank you for using MathTS! Here are some resources to help you get started and 
 
 - [README](./README.md) - Quick start guide and overview
 - [Architecture Guide](./docs/Architecture/) - Technical architecture documentation
-- [Workbook Specification](./docs/Architecture/MATHTS_WORKBOOK_SPECIFICATION.md) - `.mtsw` file format
+- [Workbook Specification](./docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md) - `.mtsw` file format
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute to MathTS
 
 ## Getting Help
