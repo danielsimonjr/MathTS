@@ -16,7 +16,8 @@ M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). M2 and M5, Phases 2–5, and
 the integration sprints 1R–5R are open. Nothing is released until every item is done (§7).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
-`@danielsimonjr/mathts-core`. No new package is planned. A package for the Phase 4 search kit is
+`@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
+`matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. No new package is planned. A package for the Phase 4 search kit is
 open decision D-1, and the default is no new package (§8, Phase 4).
 **Related external projects:** [PySR](https://github.com/danielsimonjr/pysr) (fork of MilesCranmer/PySR, studied read-only at commit `72a9ab9`, backend pin `SymbolicRegression ~2.7.2` in `pysr/juliapkg.json`); [Universal Physics Tensor (UPT)](https://github.com/danielsimonjr/universal-physics-tensor) (studied read-only at its default-branch HEAD).
 **Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md).
@@ -62,9 +63,10 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
 
 1. **M2** (`ScalarNode` ↔ `Node` bridge) and **M5** (seeded RNG in `core`). Neither has a
    dependency.
-2. **Sprint 1R**, which needs M5: move the five Mulberry32 copies onto M5, share the
-   row-major strides helper, export the scalar literal regex once, and extend the
-   export-index gate to `expression`, `workbook` and `plot`.
+2. **Sprint 1R**, which needs M5. M5 moves the `tensor` Mulberry32 body into `core`;
+   Sprint 1R moves the remaining four copies onto it, shares the row-major strides
+   helper, exports the scalar literal regex once, extends the export-index gate to
+   `expression`, `workbook` and `plot`, and commits the M3 benchmark.
 3. Phase 2 (M6–M8), then Sprint 2R.
 
 ---
@@ -263,16 +265,16 @@ Line numbers drift; the symbol names are the stable reference.
 | `evaluateScalar` / `scalar`                                                            | `functions/src/scalar-eval.ts`, exported at `functions/src/index.ts:49`                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Recursive interpreter for **one scope at a time**. It dispatches each operation through typed `add` / `pow` / … and throws `ScalarEvalError` on a non-finite operator or call result. It accepts formula strings and `transcendental` / `abs` nodes through `scalar.from`.                                                                                                                                                                                                                                             |
 | Batch evaluator `compileScalar` (**M3, merged**)                                       | `functions/src/scalar-compile.ts`, exported at `functions/src/index.ts:51` (types `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`)                                                                                                                                                                                                                                                                                                                                                                                                 | Register tape over `Float64Array` columns with a per-row validity mask. No `eval` or `new Function`. It calls the same `Math.*` operations as the typed `number` signatures, without per-row typed dispatch. It takes a `ScalarNode` only (normalize with `scalar.from` first). It copies the `NUMERIC_LITERAL` regex from `scalar-eval.ts:76` (`scalar-compile.ts:14`; Sprint 1R). No benchmark exists, so no speed claim is made.                                                                                    |
 | Pareto front and PySR scoring (**M4, merged**)                                         | `functions/src/pareto-front.ts`, exported at `functions/src/index.ts:54`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`; types `FrontCandidate`, `ScoredCandidate`. Unrelated to the Pareto _distribution_ `paretoDist` (`functions/src/typed/dist-objects.ts:1219`).                                                                                                                                                                                                                                                                                                      |
-| Expression `Node` AST, `toTex`, `simplify`, `derivative`, `symbolicEqual`, `leafCount` | `expression/src/node/*` (`Node.toTex` at `expression/src/node/Node.ts:395`), `functions/src/algebra/{simplify,derivative,symbolicEqual,leafCount}.ts`                                                                                                                                                                                                                                                                                                                                                                                            | All operate on `Node`, not on `ScalarNode`. The node classes are built from the expression `create*Node` factories in `functions/src/factories/index.ts` (`_OperatorNode`, `_ParenthesisNode`, `_ConstantNode`, `_SymbolNode`, `_FunctionNode`, lines 977-1035) and are not on the `functions` barrel. `symbolicEqual` simplifies `e1 − e2` and is one-sided ("`false` does not absolutely rule this out"). `leafCount` counts leaves only.                                                                            |
-| Optimizers                                                                             | `functions/src/numeric/bfgs.ts` (`bfgs`, optional analytic `grad`, projected box bounds), `functions/src/optimization-extra.ts` (`nelderMead`, `gradientDescent`, `levenbergMarquardt`)                                                                                                                                                                                                                                                                                                                                                          | All take `number[]` closures. `levenbergMarquardt` has no analytic-Jacobian option. It builds a private forward-difference Jacobian with a fixed `h = 1e-7` (`optimization-extra.ts:158-168`), keeps a private sum-of-squares `norm2` (`:159`) and solves through `_inv`.                                                                                                                                                                                                                                              |
+| Expression `Node` AST, `toTex`, `simplify`, `derivative`, `symbolicEqual`, `leafCount` | `expression/src/node/*` (`Node.toTex` at `expression/src/node/Node.ts:395`), `functions/src/algebra/{simplify,derivative,symbolicEqual,leafCount}.ts`                                                                                                                                                                                                                                                                                                                                                                                            | All operate on `Node`, not on `ScalarNode`. The node classes are built from the expression `create*Node` factories in `functions/src/factories/index.ts` (`_OperatorNode`, `_ParenthesisNode`, `_ConstantNode`, `_SymbolNode`, `_FunctionNode`, lines 977-1037) and are not on the `functions` barrel. `symbolicEqual` simplifies `e1 − e2` and is one-sided ("`false` does not absolutely rule this out"). `leafCount` counts leaves only.                                                                            |
+| Optimizers                                                                             | `functions/src/numeric/bfgs.ts` (`bfgs`, optional analytic `grad`, projected box bounds), `functions/src/optimization-extra.ts` (`nelderMead`, `gradientDescent`, `levenbergMarquardt`)                                                                                                                                                                                                                                                                                                                                                          | All take `number[]` closures. `levenbergMarquardt` has no analytic-Jacobian option. Its options are `{ maxIter?, tol? }` (`optimization-extra.ts:152`). It builds a private forward-difference Jacobian (`h = 1e-7` at `:158`, `jacobian` at `:160-170`), keeps a private sum-of-squares `norm2` (`:159`) and solves through `_inv`. `minimize` (`functions/src/typed/numeric.ts:264`) is a second public Nelder–Mead.                                                                                                 |
 | Shared numeric Jacobian                                                                | `numericJacobian` (`functions/src/numeric/numeric-jacobian.ts:31`, on the `functions` barrel)                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Central differences with step `max(1, \|x\|)·cbrt(eps)`. `levenbergMarquardt` bypasses it (Sprint 2R).                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Stable reductions and tolerance                                                        | `pairwiseSum`, `pairwiseDot`, `norm2` (`core/src/numeric/stable.ts`, on the `core` barrel); `nearlyEqual` (`core/src/number.ts:710`, through `@danielsimonjr/mathts-core/internal`)                                                                                                                                                                                                                                                                                                                                                              | New losses, residual sums and tolerance checks use these. `functions/src/numeric/svds.ts:65` still has the overflowing `sqrt(sum of squares)` that `core` `norm2` replaces (Sprint 2R).                                                                                                                                                                                                                                                                                                                                |
 | Forward-mode duals                                                                     | `core/src/types/dual.ts`, `core/src/types/dual-rules.ts` (`DUAL_UNARY_RULES`), `functions/src/grad-forward.ts` (`derivativeAt`, `valueAndDerivativeAt`, `gradientAt`)                                                                                                                                                                                                                                                                                                                                                                            | The dual rules cover every lowered `ScalarNode` function (exp, log, log2, log10, sin, cos, tan, sinh, cosh, tanh, abs), so exact constant gradients need no new calculus. They are unary only; `^` needs its two partials (M6).                                                                                                                                                                                                                                                                                        |
 | Reverse-mode AD                                                                        | `autograd/src/{tape,reverse-grad,grad}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Tensor-level. It is not needed for the scalar constant counts PySR uses.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Units and dimension vectors                                                            | `core/src/types/unit/Unit.ts` (10-slot `dimensions`, `equalBase`, `multiply` / `divide` / `pow`), `core/src/types/si-dimension-vector.ts` (`SiDimensionVector` `[L,M,T,I,Θ,N,J]`, "the order UPT's Buckingham routine uses"; `toSiDimensionVector`, `fromSiDimensions`)                                                                                                                                                                                                                                                                          | `SiDimensionVector` exponents are `number`, not `Fraction` (`si-dimension-vector.ts:36`; decision D-2). Unit-string parsing was hardened for UPT delegation (issue #347, `core/tests/types/unit-upt-delegation.test.ts`). `docs/integration/upt.md` Q2 keeps dimensional analysis **on `Tensor`** UPT-only.                                                                                                                                                                                                            |
+| Units and dimension vectors                                                            | `core/src/types/unit/Unit.ts` (10-slot `dimensions`, `equalBase`, `multiply` / `divide` / `pow`), `core/src/types/si-dimension-vector.ts` (`SiDimensionVector` `[L,M,T,I,Θ,N,J]`, "the order UPT's Buckingham routine uses"; `toSiDimensionVector` and its inverse `fromSiDimensionVector`, plus the record form `fromSiDimensions`)                                                                                                                                                                                                             | `SiDimensionVector` exponents are `number`, not `Fraction` (`si-dimension-vector.ts:36`; decision D-2). Unit-string parsing was hardened for UPT delegation (issue #347, `core/tests/types/unit-upt-delegation.test.ts`). `docs/integration/upt.md` Q2 keeps dimensional analysis **on `Tensor`** UPT-only.                                                                                                                                                                                                            |
 | Physical constants                                                                     | `functions/src/type/unit/physicalConstants.ts` (CODATA-2022, each one a core `UnitInstance`)                                                                                                                                                                                                                                                                                                                                                                                                                                                     | They carry no uncertainty field (no `uncertainty` occurrences in the file), which matters if constants become "data" (open question, §10).                                                                                                                                                                                                                                                                                                                                                                             |
 | Exact rational nullspace                                                               | `rationalNullspace` (`functions/src/numeric/rational-nullspace.ts:145`, re-exported through `functions/src/typed/numeric.ts`; used by UPT `src/dimensional/buckingham.ts`)                                                                                                                                                                                                                                                                                                                                                                       | It is the core of constant-unit solving (M10).                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Seeded RNG                                                                             | `seedProbabilityRng` (global, seedrandom, `functions/src/typed/probability.ts:300`) and `createRng` (seedrandom, `functions/src/probability/util/seededRNG.ts:14`). **Five** private, byte-identical Mulberry32 copies: `tensor/src/operations/random.ts:64` `makeMulberry32` (with `boxMuller` at `:84`), `functions/src/typed/hypothesis.ts:217` `_makeMulberry32`, `functions/src/typed/dist-objects.ts:289` `_makeMulberry32`, `functions/src/typed/graph.ts:467` `_mulberry32`, `packages/workerpool/src/worker.ts:878` `_workerMulberry32` | There is no instance-scoped, splittable stream for reproducible multi-island search. M5 lifts the tensor body into `core`; Sprint 1R moves the copies onto it. No string-to-seed hash exists in the repo.                                                                                                                                                                                                                                                                                                              |
+| Seeded RNG                                                                             | `seedProbabilityRng` (global, seedrandom, `functions/src/typed/probability.ts:300`) and `createRng` (seedrandom, `functions/src/probability/util/seededRNG.ts:14`). **Five** private, byte-identical Mulberry32 copies: `tensor/src/operations/random.ts:64` `makeMulberry32` (with `boxMuller` at `:84`), `functions/src/typed/hypothesis.ts:217` `_makeMulberry32`, `functions/src/typed/dist-objects.ts:289` `_makeMulberry32`, `functions/src/typed/graph.ts:467` `_mulberry32`, `packages/workerpool/src/worker.ts:878` `_workerMulberry32` | `seedProbabilityRng` reseeds one module-level stream. `createRng` returns a per-seed seedrandom closure but has no `fork`, and it is not Mulberry32, so it cannot reproduce the existing seeded streams. There is no splittable Mulberry32 stream for reproducible multi-island search. M5 moves the tensor body into `core`; Sprint 1R moves the other four copies onto it. No string-to-seed hash exists in the repo.                                                                                                |
 | Parallel execution                                                                     | `parallel/src/{ComputePool,WorkerPool}.ts`; `kernelSource` (`functions/src/typed/parallel-map.ts:24`)                                                                                                                                                                                                                                                                                                                                                                                                                                            | `WorkerPool#execute` `timeoutMs` and hung-worker replacement are a security invariant (`AGENTS.md`). A closure cannot be posted to a worker. `kernelSource` serializes self-contained functions plus their dependencies into worker source. `workerpool` cannot import `functions` (it would cycle through `parallel`).                                                                                                                                                                                                |
 | Search kit (grammar, enumerator, mutations, evolution loop)                            | None. A grep for `enumerateScalars`, `fitScalarParameters`, `numericallyEquivalent`, `inferScalarDimension`, `scalarToNode`, `compileScalarGradient`, `frontToLatexTable`, `createSeededRng` and `solveParameterDimensions` over the `.ts` sources finds nothing.                                                                                                                                                                                                                                                                                | Greenfield, built on the M1, M3 and M4 exports above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
@@ -288,7 +290,7 @@ Line numbers drift; the symbol names are the stable reference.
 | G4  | No columnar batch evaluator. Per-row interpretation goes through typed dispatch, with a throw on failure      | `functions/src/scalar-eval.ts`; UPT `probe/fit.ts` `predictions()`             | M3        | **Closed** by #397 (`compileScalar`)                                 |
 | G5  | No Pareto front, front score or model-selection utility                                                       | §3, Pareto row                                                                 | M4        | **Closed** by #395 (`paretoFront`, `scoreFront`, `selectFrontModel`) |
 | G6  | No instance-scoped, splittable seeded RNG; Mulberry32 is duplicated privately **five** times                  | §3 RNG row; UPT `witness-symbolic.ts` reseeds the global stream                | M5, 1R    | Open                                                                 |
-| G7  | No exact parameter gradient of a `ScalarNode`; `levenbergMarquardt` has no analytic-Jacobian hook             | `functions/src/optimization-extra.ts:158-168`                                  | M6        | Open                                                                 |
+| G7  | No exact parameter gradient of a `ScalarNode`; `levenbergMarquardt` has no analytic-Jacobian hook             | `levenbergMarquardt` options type, `functions/src/optimization-extra.ts:152`   | M6        | Open                                                                 |
 | G8  | No multi-constant fit of an expression to data (PySR §2.5)                                                    | UPT `probe/fit.ts` fits one prefactor with `ols`                               | M7        | Open                                                                 |
 | G9  | No guarded numerical-equivalence check (UPT §9 level 5)                                                       | `symbolicEqual` is symbolic and one-sided                                      | M8        | Open                                                                 |
 | G10 | No dimension inference over `ScalarNode` with rational exponents, and no constant-unit solving (PySR's `[⋅]`) | UPT owns `ExprNode` validation; `ScalarNode` has none                          | M9, M10   | Open (conditional on UPT delegation)                                 |
@@ -529,10 +531,16 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   `functions` and `parallel` already depend on it, and `workerpool` may (no cycle).
 - **Reuse (do not rebuild):** **move** the Mulberry32 body of `makeMulberry32`
   (`tensor/src/operations/random.ts:64`) and the `boxMuller` transform (`:84`) into the
-  new module; do not write a sixth generator. Do not build on `seedProbabilityRng` or
-  `createRng`: they are seedrandom with global or module state, which is the UPT bug M5
-  exists to stop. The only new code is the `fork` derivation and the string-to-seed
-  hash (no string hash exists in the repo).
+  new module; do not write a sixth generator. Do not build on `seedProbabilityRng`: it
+  replaces the module-level `_rng` of the typed `random` family
+  (`functions/src/typed/probability.ts:300-301`), which is the global reseed UPT trips
+  over. Do not build on `createRng` (`functions/src/probability/util/seededRNG.ts:14`)
+  either, although a seeded call already returns its own closure over a new
+  `seedrandom(String(seed))` (only `null` falls back to the shared `singletonRandom`):
+  it is seedrandom, not Mulberry32, so it cannot reproduce the existing
+  `makeMulberry32` streams that `randomTensor`, the hypothesis bootstrap and the
+  `dist-objects` / `graph` samplers emit, and it has no `fork`. The only new code is the
+  `fork` derivation and the string-to-seed hash (no string hash exists in the repo).
 - **API sketch:**
 
 ```ts
@@ -565,9 +573,10 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
 #### Sprint 1R — Phase 1 integration
 
 - **Scope:**
-  1. **Mulberry32 x5 → one generator** (audit I-4). Move
+  1. **The remaining four Mulberry32 copies → M5** (audit I-4). M5 already moved the
+     first of the five, `makeMulberry32` in `tensor/src/operations/random.ts`. Move
      `functions/src/typed/hypothesis.ts:217`, `functions/src/typed/dist-objects.ts:289` and
-     `functions/src/typed/graph.ts:467` onto M5. For the fifth copy,
+     `functions/src/typed/graph.ts:467` onto M5. For the fourth,
      `packages/workerpool/src/worker.ts:878` `_workerMulberry32`, either add a
      `workerpool` → `core` dependency (legal, no cycle) or keep the copy with a header
      naming `core` as the canonical body and a parity test. Record the choice in the PR.
@@ -603,11 +612,17 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
     missing from its API page.
   - The §6 audit table for M1, M3 and M4 has every box ticked except B9 for the merged
     PRs.
+  - The M3 benchmark (`evaluateScalar` per row vs `compileScalar`) is committed under
+    `tools/benchmark/` and has been run twice on Node per the `AGENTS.md` rules. This
+    closes M3's open benchmark box and is the input M14 depends on. No speed number is
+    in any doc unless that committed benchmark produced it.
 - **DoD:** base checklist + the following specifics:
   - [ ] B1 lists each removed copy and the symbol that replaced it.
   - [ ] Oracle: pre-change output fixtures for every migrated seeded function.
-  - [ ] B3: no public export added or removed except `createSeededRng` (M5) and the
-        `core` strides helper; consumer type check passes.
+  - [ ] B3: no public export added or removed except the `core` strides helper; consumer
+        type check passes.
+  - [ ] M3 benchmark committed, with the output of both Node runs in the PR; it
+        interleaves the two variants and keeps a control case.
 
 ### Phase 2 — Constant fitting and equivalence
 
@@ -663,7 +678,11 @@ export function compileScalarGradient(
   `nelderMead` as the optimizers; M6 for the analytic Jacobian and gradient; M3 for
   residuals; `core` `pairwiseSum` / `pairwiseDot` for loss sums (not `Array.reduce`);
   M5 for restart perturbations; `ols` (`functions/src/ml/ols.ts`) for standard-error
-  conventions. Do not write a fourth optimizer or a third numeric Jacobian.
+  conventions. Do not write another optimizer: `bfgs`, `nelderMead`, `gradientDescent`,
+  `levenbergMarquardt` and `minimize` (a second Nelder–Mead, `functions/src/typed/numeric.ts:264`)
+  already exist. Do not write another numeric Jacobian: `numericJacobian` exists, and
+  LM's private forward difference and BFGS's private `numericGradient`
+  (`functions/src/numeric/bfgs.ts:66`) are already extra copies.
 - **API sketch:**
 
 ```ts
@@ -775,19 +794,27 @@ export function numericallyEquivalent(
 - **Scope:** M7 and M8 fit and compare numbers, so the numerics under them must have
   one correct implementation each.
   1. **Levenberg–Marquardt Jacobian and norm** (I-5). Replace the private forward
-     difference (`functions/src/optimization-extra.ts:158-168`) with `numericJacobian`
-     as the default, and the private sum-of-squares `norm2` (`:159`) with
-     `core` `pairwiseDot(r, r)`. This changes LM's numeric default from a one-sided to
-     a central difference: the existing LM tests must pass unedited, and the changeset
-     says so.
+     difference (`h = 1e-7` at `functions/src/optimization-extra.ts:158`, `jacobian` at
+     `:160-170`) with `numericJacobian` as the default, and the private sum-of-squares
+     `norm2` (`:159`) with `core` `pairwiseDot(r, r)`. This changes LM's default from a
+     one-sided to a central difference, so iterates and iteration counts may change.
+     The changeset records the numeric-default change. LM's tests follow the sprint's
+     test-expectation rule (exit criteria), not "unchanged iterates".
   2. **`svds` vector norm** (I-5). Replace `functions/src/numeric/svds.ts:65` `norm2`
      with `core` `norm2` (overflow-safe).
   3. **Dense matrix product** (I-7). Export `matMul` from the `matrix` barrel
-     (`matrix/src/operations/common.ts:62`) and call it from the private copies:
-     `functions/src/ml/ols.ts:49` `matmul`, and two copies the audit did not list,
-     `functions/src/geometry/geometry-extra.ts:217` `matMul` and
-     `functions/src/numeric/control-equations.ts:85` `matmul`. Replace the naive
-     `reduce` sums in `ols` (RSS, mean, TSS) with `core` `pairwiseSum`.
+     (`matrix/src/operations/common.ts:62`; not on `matrix/src/index.ts` today) and call
+     it from every private nested-array copy of the same zero-skipping ikj loop in
+     `functions/src`: `functions/src/ml/ols.ts:49` `matmul` (the one the audit lists),
+     and four the audit did not list, `functions/src/geometry/geometry-extra.ts:217`
+     `matMul`, `functions/src/numeric/control-equations.ts:85` `matmul`,
+     `functions/src/numeric/solveODE.ts:819` `_matMul`, and the sequential path of
+     `functions/src/typed/matrix-ops.ts:88-108` `matMul` (keep its
+     `computePool.matmul` branch). Leave `functions/src/typed/arithmetic.ts:1557`
+     `matmul` alone: it is the public `Float64Array` entry over `computePool.matmul`.
+     `sylvesterOperator` in `control-equations.ts` builds a Kronecker operator and is
+     not a product. Replace the naive `reduce` sums in `ols` (RSS, mean, TSS) with
+     `core` `pairwiseSum`.
   4. **Log-gamma drift** (I-2). Point `functions/src/typed/hypothesis.ts:295` and
      `functions/src/typed/dist-objects.ts:153` `_lgamma` at the canonical
      `functions/src/wasm/special/scalars.ts:39` `_lgamma` (`abs(sin)` reflection). Fix
@@ -802,22 +829,35 @@ export function numericallyEquivalent(
   6. **Regression wrappers and root finding** (I-7). Make `linearRegression` a wrapper
      around `linregress` (or the reverse) after a p-value parity pin; route
      `numericRealRoots` (`functions/src/typed/cas.ts:1117`) through `findRoot`.
+  7. **Two public Nelder–Mead implementations** (found while reviewing this roadmap; not
+     in the audit). `nelderMead` (`functions/src/optimization-extra.ts:26`) and
+     `minimize` (`functions/src/typed/numeric.ts:264`) both implement the downhill
+     simplex. Keep both public names and make one call the other after a parity pin on
+     their existing fixtures.
 - **Reuse:** `numericJacobian`, `core` `norm2` / `pairwiseSum` / `pairwiseDot`,
   `matrix` `matMul`, `scalars.ts` `_lgamma`, `erfcScalar` / `_erfc`, `findRoot`, `fitLine`.
 - **Exit criteria:**
   - No private Jacobian loop or sum-of-squares norm in `optimization-extra.ts` or
     `svds.ts`.
-  - One dense ikj `matMul` body in `matrix`; the three `functions` copies are gone.
+  - Every nested-array dense ikj product in `functions/src` calls `matrix` `matMul`; the
+    five private copies listed in item 3 are gone.
+  - One Nelder–Mead body behind `nelderMead` and `minimize`.
   - Every `functions` Lanczos log-gamma copy uses the `abs(sin)` reflection; a test
     checks `lgamma(-0.5)` against the closed form `ln(2√π)` on each public path, except
     any path whose NaN contract the PR keeps and documents.
   - The `0.3275911` Abramowitz coefficient no longer occurs in `functions/src`.
-  - Existing tests pass unedited, or each edited expectation cites the independent
-    oracle that shows the old value was wrong.
+  - **Test-expectation rule** (one rule for the whole sprint, LM included). An existing
+    test passes unedited, or its expectation is changed in the same PR together with
+    the independent oracle (a closed form or published reference value, cited in the
+    test) that shows the new value is the correct one. The changeset lists every
+    changed expectation. Iteration counts and intermediate iterates are not
+    expectations and may change.
 - **DoD:** base checklist + the following specifics:
   - [ ] Oracles: `lgamma` and `erfc` against published reference values (for example
-        DLMF or SciPy at fixed arguments); `ols` coefficients unchanged on its existing
-        fixtures; LM convergence unchanged on its existing fixtures.
+        DLMF or SciPy at fixed arguments); `ols` coefficients and LM solutions checked
+        against the oracle values of their existing fixtures (for LM, the closed-form
+        minimizer in `functions/tests/gap-optimization-clustering.test.ts`), under the
+        test-expectation rule.
   - [ ] B3: `matMul` added to the `matrix` barrel and `docs/api/matrix.md`; no other
         public export changes.
 
@@ -835,8 +875,8 @@ exponents) must be recorded before M9 starts.
   depends only on `typed-function`), and M10 needs `rationalNullspace`, which lives in
   `functions`. The dimension vector type itself stays in `core`. **Size:** M.
 - **Reuse (do not rebuild):** `SiDimensionVector`, `toSiDimensionVector` and
-  `fromSiDimensions` (`core/src/types/si-dimension-vector.ts`) for the vector and its
-  order; `Fraction` (`core`) if D-2 chooses rational exponents; `Unit` and the physical
+  `fromSiDimensionVector` (its inverse; both in `core/src/types/si-dimension-vector.ts`)
+  for the `[L,M,T,I,Θ,N,J]` vector and its order; `Fraction` (`core`) if D-2 chooses rational exponents; `Unit` and the physical
   constants for the fixtures; `forEachScalar` for the walk. Do not add a second
   dimension vector type: if D-2 keeps `number`, `RationalDimension` below is
   `SiDimensionVector`.
@@ -894,14 +934,16 @@ export function inferScalarDimension(
   (`functions/src/numeric/rational-nullspace.ts:145`) for the linear exponent system;
   M9's rules to generate it. Do not write another nullspace or linear solver.
 - **API sketch:**
-  `solveParameterDimensions(node, dims, target, parameters) → { solved: Record<string, RationalDimension> } | { underdetermined: string[] } | { inconsistent: true }`.
+  `solveParameterDimensions(node, dims, target, parameters, options?: { dimensionlessOnly?: boolean }) → { solved: Record<string, RationalDimension> } | { underdetermined: string[] } | { inconsistent: true }`.
+  `dimensionlessOnly` (default `false`) requires every parameter to be dimensionless,
+  mirroring PySR's `dimensionless_constants_only`.
   It treats each parameter's dimension as an unknown in the linear exponent system
   that M9's rules generate, for trees where the parameters appear multiplicatively.
   Other placements report `underdetermined`.
 - **Acceptance:**
   - For `y[m s⁻² kg] = M[kg]·c`, it solves `c = m s⁻²`, which is PySR's
     `docs/src/examples/physics.md:71-75` example.
-  - With `dimensionlessOnly`, the same case is `inconsistent`, mirroring
+  - With `{ dimensionlessOnly: true }`, the same case is `inconsistent`, mirroring
     `dimensionless_constants_only`.
 - **DoD:** base checklist + the following specifics:
   - [ ] B1: the system is solved by `rationalNullspace`.
@@ -999,7 +1041,7 @@ export function enumerateScalars(
 
 #### M12 — Mutation and crossover operators
 
-- **Size:** M. **Depends on:** M1, M2, M5 and M11.
+- **Size:** M. **Depends on:** M1, M2, M3, M5 and M11.
 - **Reuse (do not rebuild):** M5 for every random choice; `mapScalar` and
   `scalarCanonical` for tree rewriting; M2 `simplifyScalar` and constant folding through
   `compileScalar` / `evaluateScalar` for `simplifyConstants` (what PySR's simplify
@@ -1099,8 +1141,8 @@ export function enumerateScalars(
   `workerpool` layering copy; one dense JS polynomial convolution; one matrix threshold
   table that the code reads; no threshold in a comment that `policy.ts` contradicts.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracles: existing FFT and `polymul` fixtures unchanged; any new threshold backed
-        by two committed Node runs.
+  - [ ] Oracles: existing FFT and `polymul` fixtures pass under Sprint 2R's
+        test-expectation rule; any new threshold backed by two committed Node runs.
 
 ### Phase 5 — Reporting
 
