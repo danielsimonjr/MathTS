@@ -89,12 +89,14 @@ Larger workloads use measured per-op thresholds in `@danielsimonjr/mathts-parall
 MathTS uses typed-function for runtime dispatch. The same function name handles all numeric types:
 
 ```typescript
-// One function, four numeric types
-add(1, 2)                         // number → number
-add(1n, 2n)                       // bigint → bigint
-add(new Complex(1,2), ...)        // Complex → Complex
-add(new Fraction(1,2), ...)       // Fraction → Fraction
-await add(Float64Array, Float64Array) // async; Promise<Float64Array>
+import { add } from '@danielsimonjr/mathts-functions';
+import { Complex, Fraction } from '@danielsimonjr/mathts-core';
+
+add(1, 2); // number → number
+add(1n, 2n); // bigint → bigint
+add(new Complex(1, 2), new Complex(0, 0)); // Complex → Complex
+add(new Fraction(1, 2), new Fraction(1, 2)); // Fraction → Fraction
+await add(new Float64Array(1), new Float64Array(1)); // async; Promise<Float64Array>
 ```
 
 See the [Reference](../reference/index.md) for a full list of classes, constants, and functions.

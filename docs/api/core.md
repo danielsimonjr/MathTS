@@ -289,7 +289,7 @@ import { isComplex, isFraction, isBigNumber, isNumber } from '@danielsimonjr/mat
 The typed-function system for polymorphic dispatch.
 
 ```typescript
-import { mathTyped } from '@danielsimonjr/mathts-core';
+import { Complex, mathTyped } from '@danielsimonjr/mathts-core';
 
 const myAdd = mathTyped('myAdd', {
   'number, number': (a, b) => a + b,
@@ -320,7 +320,7 @@ Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimens
 
 ## Dual unary rules
 
-`DUAL_UNARY_RULES` and type `DualUnaryRule` describe elementary unary ops for forward-mode `Dual` (`core/src/types/dual-rules.ts`). `Dual.unary(rule)` applies a rule entry.
+`DUAL_UNARY_RULES` and type `DualUnaryRule` describe elementary unary ops used internally when you call public `Dual` methods such as `sin()` (`core/src/types/dual-rules.ts`). The `unary` helper is private and not part of the published API.
 
 ## Complete export index
 

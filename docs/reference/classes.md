@@ -22,6 +22,8 @@ c.toString(); // '3 + 4i'
 ### Static factories
 
 ```typescript
+import { Complex } from '@danielsimonjr/mathts-core';
+
 Complex.fromPolar(5, Math.PI / 4); // magnitude 5, angle 45°
 Complex.fromNumber(3); // Complex(3, 0)
 Complex.fromJSON({ re: 3, im: 4 }); // deserialize
@@ -51,7 +53,7 @@ Complex.parse('3+4i'); // parse string
 ### Type guard
 
 ```typescript
-import { isComplex } from '@danielsimonjr/mathts-core';
+import { Complex, isComplex } from '@danielsimonjr/mathts-core';
 isComplex(new Complex(1, 2)); // true
 ```
 
@@ -74,6 +76,8 @@ f.toString(); // '1/3'
 ### Static factories
 
 ```typescript
+import { Fraction } from '@danielsimonjr/mathts-core';
+
 Fraction.fromNumber(0.5); // Fraction(1, 2)
 Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 ```
@@ -94,7 +98,7 @@ Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 ### Type guard
 
 ```typescript
-import { isFraction } from '@danielsimonjr/mathts-core';
+import { Fraction, isFraction } from '@danielsimonjr/mathts-core';
 isFraction(new Fraction(1n, 2n)); // true
 ```
 
@@ -119,6 +123,8 @@ b.toFixed(10); // '3.1415926536'
 ### Static factories
 
 ```typescript
+import { BigNumber } from '@danielsimonjr/mathts-core';
+
 BigNumber.parse('1.5e-10'); // from a string (preserves full precision)
 BigNumber.fromNumber(0.5); // from a JS number
 BigNumber.fromJSON({ mathjs: 'BigNumber', value: '3.14' }); // deserialize
@@ -168,6 +174,8 @@ x.value; // 2
 ### Static factories
 
 ```typescript
+import { Dual } from '@danielsimonjr/mathts-core';
+
 Dual.constant(5); // value 5, derivative 0 (a constant)
 Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.)
 ```
@@ -184,12 +192,13 @@ Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.
 | `exp()` `log()`                     | `Dual`  | Exponential / natural logarithm     |
 | `sqrt()` `square()` `abs()`         | `Dual`  | Roots / square / absolute value     |
 | `sinh()` `cosh()` `tanh()`          | `Dual`  | Hyperbolic                          |
-| `unary(rule)`                       | `Dual`  | Apply a `DUAL_UNARY_RULES` entry    |
+
+Elementary methods such as `sin()` apply `DUAL_UNARY_RULES` internally (`core/src/types/dual-rules.ts`); `unary` is not part of the public API.
 
 ### Type guard
 
 ```typescript
-import { isDual } from '@danielsimonjr/mathts-core';
+import { Dual, isDual } from '@danielsimonjr/mathts-core';
 isDual(Dual.variable(1)); // true
 ```
 
@@ -219,6 +228,8 @@ d.equalBase(new Unit(1, 'cm')); // true — same dimension as meters
 ### Static factories
 
 ```typescript
+import { Unit } from '@danielsimonjr/mathts-core';
+
 Unit.parse('9.8 m/s^2'); // parse a unit string
 Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 ```
@@ -240,7 +251,7 @@ Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 ### Type guard
 
 ```typescript
-import { isUnit } from '@danielsimonjr/mathts-core';
+import { Unit, isUnit } from '@danielsimonjr/mathts-core';
 isUnit(new Unit(5, 'm')); // true
 ```
 
@@ -310,6 +321,12 @@ inv([
 ### Serialization
 
 ```typescript
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const m = DenseMatrix.fromArray([
+  [1, 2, 3],
+  [4, 5, 6],
+]);
 m.toArray(); // number[][] — plain nested array
 DenseMatrix.fromArray(m.toArray()); // reconstruct from a nested array
 ```
@@ -363,10 +380,17 @@ new Tensor([2, 3], Float64Array.of(1, 2, 3, 4, 5, 6)).toNested(); // [[1,2,3],[4
 ### Static factories
 
 ```typescript
-Tensor.fromNested(nested, shape); // from nested arrays (shape required)
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { Tensor } from '@danielsimonjr/mathts-tensor';
+
+const nested = [
+  [1, 2],
+  [3, 4],
+];
+Tensor.fromNested(nested, [2, 2]); // from nested arrays (shape required)
 Tensor.identity(3); // [[1,0,0],[0,1,0],[0,0,1]]
+const m = DenseMatrix.fromArray(nested);
 Tensor.fromDenseMatrix(m); // from a DenseMatrix
-Tensor.einsum(spec, ...tensors); // Einstein summation
 ```
 
 ### Instance methods

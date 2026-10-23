@@ -84,8 +84,7 @@ const pi50 = BigNumber.parse('3.14159265358979323846264338327950288419716939937'
 ## Examples
 
 ```typescript
-import { PI, E, PHI, I } from '@danielsimonjr/mathts-core';
-import { Complex } from '@danielsimonjr/mathts-core';
+import { PI, E, PHI, I, TAU, Complex } from '@danielsimonjr/mathts-core';
 import { sin, cos, multiply, add } from '@danielsimonjr/mathts-functions';
 
 // Euler's identity: e^(i*pi) + 1 = 0

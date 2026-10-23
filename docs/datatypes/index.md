@@ -58,7 +58,14 @@ const m = DenseMatrix.identity(3); // 3×3 identity
 MathTS exports type guard functions for each type:
 
 ```ts
-import { isComplex, isFraction, isBigNumber } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber,
+  Complex,
+  Fraction,
+  isBigNumber,
+  isComplex,
+  isFraction,
+} from '@danielsimonjr/mathts-core';
 
 isComplex(new Complex(1, 2)); // true
 isFraction(new Fraction(1n)); // true

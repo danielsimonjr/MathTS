@@ -1,6 +1,6 @@
 # Matrices
 
-MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. A key differentiator from mathjs is the **multi-backend architecture**: matrix operations are automatically dispatched to JS, WASM, or GPU compute depending on matrix size.
+MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. Some decomposition paths can use WASM via `backendManager` when size thresholds are met; `DenseMatrix.prototype.multiply` stays on a pure JS loop, and no `'gpu'` backend is registered on the manager today (see [Backends](#backends) below).
 
 Import from `@danielsimonjr/mathts-matrix`:
 
@@ -15,6 +15,8 @@ import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 ### Creation
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
 // From a 2D array
 const m = DenseMatrix.fromArray([
   [1, 2],
@@ -49,6 +51,8 @@ new DenseMatrix(2, 2, [1, 2, 3, 4]);
 ### Access and Dimensions
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
 const m = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
@@ -67,6 +71,12 @@ All operations return **new** matrix instances. No method mutates in place.
 ### Conversion
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const m = DenseMatrix.fromArray([
+  [1, 2, 3],
+  [4, 5, 6],
+]);
 m.toArray(); // number[][]
 m.toFlatArray(); // number[] (row-major)
 m.toSparse(); // SparseMatrix
@@ -79,7 +89,12 @@ m.toSparse(); // SparseMatrix
 ### Creation
 
 ```ts
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
 
 // From a dense matrix (zeros are dropped)
 const sparse = SparseMatrix.fromDense(dense);
@@ -95,13 +110,18 @@ SparseMatrix.zeros(100, 100);
 SparseMatrix.identity(1000);
 SparseMatrix.diag([1, 2, 3, 4]);
 
-// Direct CSR constructor
-new SparseMatrix(rows, cols, values, colIndices, rowPointers);
+// Direct CSR constructor: new SparseMatrix(rows, cols, values, colIndices, rowPointers)
 ```
 
 ### Sparsity Information
 
 ```ts
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
 const s = SparseMatrix.fromDense(dense);
 
 s.nnz; // number of non-zero elements
@@ -112,6 +132,14 @@ s.density; // 1 - sparsity
 ### Conversion
 
 ```ts
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
+const sparse = SparseMatrix.fromDense(dense);
+
 sparse.toDense(); // DenseMatrix
 sparse.toArray(); // number[][]
 sparse.toFlatArray(); // number[]
@@ -153,8 +181,12 @@ The matrix WASM bridge provides interoperability between the TypeScript matrix l
 Dense LU/QR/Cholesky/inverse/determinant can use WASM via `backendManager` when matrix size exceeds the decomposition WASM threshold. Public `eig` and `svd` run synchronously in JavaScript (WASM kernels were removed after measuring slower performance):
 
 ```ts
-import { eig, svd } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, eig, svd } from '@danielsimonjr/mathts-matrix';
 
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
 const { values, vectors } = eig(m.toArray());
 const { U, S, V, rank } = svd(m.toArray());
 ```
