@@ -1,8 +1,12 @@
 # @danielsimonjr/mathts-typed-function
 
-Typed-function (mathts fork) for [MathTS](https://github.com/danielsimonjr/mathts).
+Utility helpers around [typed-function](https://github.com/josdejong/typed-function) for MathTS.
 
-MathTS's fork of [typed-function](https://github.com/josdejong/typed-function) — the runtime type-dispatch engine that powers polymorphic functions across MathTS's numeric types (number, Complex, Fraction, BigNumber, Matrix, Unit).
+## Relationship to the dispatch fork
+
+Runtime polymorphic dispatch in `@danielsimonjr/mathts-core` and `@danielsimonjr/mathts-functions` uses the published npm alias `typed-function` → `npm:@danielsimonjr/typed-function@5.0.0-alpha.4`. No workspace package depends on `@danielsimonjr/mathts-typed-function` by name.
+
+This workspace package re-exports `typed` and `create` from that fork and adds MathTS-specific helpers (signature parsing, safe conversions, robust type tests, and shared guards).
 
 ## Install
 
@@ -10,11 +14,17 @@ MathTS's fork of [typed-function](https://github.com/josdejong/typed-function) �
 npm install @danielsimonjr/mathts-typed-function
 ```
 
-## What it provides
+For application code, prefer `mathTyped` from `@danielsimonjr/mathts-core` unless you need the helpers below directly.
 
-- Create typed functions with multiple signatures and automatic argument-type dispatch.
-- Conversions between types, signature resolution, and clear type-error messages.
-- Used internally by `@danielsimonjr/mathts-core` and `@danielsimonjr/mathts-functions`.
+## Exports
+
+| Category            | Names                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fork re-exports     | `typed`, `create`, type `TypedFunction`                                                                                                                                    |
+| Symbol / signatures | `TYPED_FUNCTION_TYPE`, `parseSignature`, `buildSignature`                                                                                                                  |
+| Type tests          | `isNumber`, `isInteger`, `isTypedArray`, `isFloat64Array`, `isFloat32Array`, …                                                                                             |
+| Def builders        | `createSymbolTypeTest`, `createRobustTypeTest`, `createRobustSubtypeTest`, `createSafeConversion`, `createSafeConversionDef`, `createSymbolTypeDef`, `createRobustTypeDef` |
+| Errors              | `NoMatchingSignatureError`, `TypeConversionError`                                                                                                                          |
 
 ## License
 

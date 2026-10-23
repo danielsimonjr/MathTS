@@ -5,12 +5,12 @@ WebWorker acceleration, plus a reactive YAML-based **Scientific Workbook** (`.mt
 system. This document is **forward-looking**: what's planned and why. Shipped history
 lives in per-package `CHANGELOG.md` files and in `TODO.md` (the working tracker).
 
-_Last updated: 2026-07-09._
+_Last updated: 2026-10-22._
 
 > **Process:** features follow the lifecycle in [`docs/FEATURE_WORKFLOW.md`](docs/FEATURE_WORKFLOW.md)
 > — idea → (lightweight brainstorm + CDG placement probe) → ROADMAP entry →
 > (Definition of Ready) → SPEC → PLAN → `TODO.md` → dev-workflow. Run
-> `npm run docs:roadmap-check` when reconciling this file.
+> `bun run docs:roadmap-check` when reconciling this file.
 
 ## Guiding principles
 
@@ -21,8 +21,8 @@ _Last updated: 2026-07-09._
   tools, never bundled into the browser-facing surface.
 - **Oracle-pinned correctness** — tests pin to implementation-independent references
   (closed forms, tables, scipy/mpmath), never round-trips against the implementation itself.
-- **Repo invariants** — strict TypeScript, ESLint-zero, and **0 dependency-graph cycles**
-  (enforced by `npm run docs:deps`) on every change.
+- **Repo invariants** — strict TypeScript, `oxlint --deny-warnings`, and **0 dependency-graph cycles**
+  (enforced by `bun run docs:deps`) on every change.
 
 ## Near-term (active)
 
@@ -31,26 +31,21 @@ _Last updated: 2026-07-09._
 The `.mtsw` runtime is headless (CLI + JSON-RPC serve); the GUI will sit on top of it.
 Remaining deferred capabilities, most-actionable first:
 
-- **Worker-thread run timeout** — sandboxed cell execution is currently synchronous with
-  **no hard timeout**; a runaway cell can hang a run. Add a worker-thread execution path
-  with a kill-able timeout. _Highest-value robustness gap._
-- **`ipynb` export** — Jupyter-notebook export, completing the export matrix
-  (`html` · `tex` · `json` · `pdf` · `ipynb`).
-- **SVG math typesetting** — render equations as SVG (vs the current MathML) for
-  self-contained, font-independent output.
 - **Interactive (JS) charts** — client-side interactive chart cells alongside the static
   SVG/TikZ output.
-- **Serve enhancements** — multi-doc serve · mid-run event streaming · `--expect-hash`
-  optimistic-lock writes.
+- **Multi-doc serve** — today `mtsw serve [<file>]` serves one workbook; serving several
+  documents from one process is still open. (Mid-run event streaming and `--expect-hash`
+  optimistic-lock writes shipped in the workbook CLI.)
 
 ### Package hardening (audit follow-ups)
 
 Open subset of `BUG_AUDIT_2026-05-25.md`:
 
-- **B-3** — cross-package WASM dist-hop (the built `.wasm` resolution across package
-  boundaries).
 - **B-5** — mathjs upstream drift tracking (the `.ts→.ts` sync model is dead; new upstream
   work needs manual JS→TS porting via `tools/mathjs-port/`).
+
+_(B-3 cross-package WASM dist-hop — resolved: `defaultWasmLocation()` in
+`functions/src/wasm/resolve.ts` and `matrix/src/backends/wasm/resolve.ts`.)_
 
 _(B-4 SVD skips, B-8 AssignmentNode FIXME, B-9 `@ts-nocheck` were verified resolved 2026-07-09. B-7, the dev-only `esbuild`/`tsup` advisory, closed when the build moved to `tsdown`: `tsup` and its nested `esbuild` copy left the install tree. `esbuild` is back only as a root dev dependency at `^0.28.1`, for the benchmark runner.)_
 
@@ -64,9 +59,8 @@ runtime stays headless and independently testable. On hold pending workbook rele
 
 ### Workbook release-readiness
 
-`@danielsimonjr/mathts-workbook` is currently **changeset-ignored** — it versions
-internally but does not publish to npm — per the explicit 2026-06-29 hold. Publishing is
-gated on the CLI/serve contract stabilizing (so external consumers get a stable surface).
+`@danielsimonjr/mathts-workbook` publishes to npm (currently **0.4.13**; `.changeset/config.json`
+`ignore` is empty). Further hardening focuses on the CLI/serve contract for external consumers.
 
 ## Explicitly out of scope (documented non-decisions)
 
@@ -75,7 +69,9 @@ These are **not** backlog; each has a written rationale and was deliberately not
 - **`eigs` / SVD acceleration** — the correct path is the factory implementation; the
   fast symmetric path was **removed** after it was found to return wrong eigenvalues.
   There is no correct sync speedup left to capture.
-- **`polyFit` / `leastSquares`** — deferral re-validated (2026-05-23).
+- **General `polyFit` / `leastSquares` API** — broader least-squares surface beyond the
+  measured WASM `poly_fit_f64` / `cheb_fit_f64` / `legendre_fit_f64` dispatch (see
+  `functions/src/wasm/policy.ts`) remains a product decision, not a missing kernel.
 - **Unified f32 WebGPU path** — design spec written; not pursued as a standalone
   effort. Superseded by the phased WebGPU acceleration design
   (`docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`); its first
@@ -87,7 +83,13 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
-- **PySR-informed symbolic-search primitives (for UPT)**: `ScalarNode` structure and keys, a batch evaluator, Pareto front scoring, constant fitting and numerical equivalence, then an optional search kit. Fifteen one-PR milestones are in [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](docs/roadmap/PYSR_INFORMED_ROADMAP.md).
+- **PySR-informed symbolic-search primitives (for UPT)**: M1 (`expression/src/scalar-structure.ts`),
+  M3 (`functions/src/scalar-compile.ts` / `compileScalar`), and M4 (`functions/src/pareto-front.ts`)
+  are in tree; later milestones and the optional search kit remain in
+  [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](docs/roadmap/PYSR_INFORMED_ROADMAP.md) with plans under
+  [`docs/plans/PYSR_M1_PLAN.md`](docs/plans/PYSR_M1_PLAN.md),
+  [`docs/plans/PYSR_M3_PLAN.md`](docs/plans/PYSR_M3_PLAN.md), and
+  [`docs/plans/PYSR_M4_PLAN.md`](docs/plans/PYSR_M4_PLAN.md).
 
 - **WebGPU acceleration tier (browser flag-gated)** — add WebGPU as a THIRD acceleration
   backend behind the existing WASM/parallel dispatch, selected by size **and** an in-browser
@@ -101,9 +103,10 @@ the Definition of Ready (see the process doc). Add here so ideas aren't lost.
     `@danielsimonjr/mathts-gpu`; `matrix`'s `GPUBackend` registers its own
     matmul/transpose/reduce WGSL onto the shared `ShaderManager` at init, and re-exports
     the whole foundation for back-compat. Pure refactor, no routing/behavior change.
-  - **Spec 1b — next.** `enableGpu()` flag + Float32 matmul routing through
-    `BackendManager` (still opt-in; validated in-browser via `claude-in-chrome` before
-    the size threshold is lowered).
+  - **Spec 1b — partial.** `enableGpu()` and `GPU_MIN_ELEMENTS` (65,536) ship in
+    `@danielsimonjr/mathts-gpu` and are re-exported from `functions`; fused GPU chains and
+    FFT dispatch exist behind the flag. Routing through `BackendManager` remains dormant
+    (no `'gpu'` backend registered there).
   - **Spec 2+** — `functions` package `*GpuDispatch` bridges for the data-parallel ops
     below, mirroring the existing `*Dispatch` WASM-bridge pattern.
   - **Baseline coverage** (CDG `wasm-pairing`/`parallel-pairing`, 218 functions): **39 WASM ·

@@ -11,10 +11,11 @@ npm install @danielsimonjr/mathts-core
 ## Usage
 
 ```typescript
-import { DEFAULT_CONFIG, isNumber, isMatrix, VERSION } from '@danielsimonjr/mathts-core';
+import { DEFAULT_CONFIG, isNumber, isMatrix } from '@danielsimonjr/mathts-core';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-// Default configuration
-const config = { ...DEFAULT_CONFIG, backend: 'wasm' };
+// Factory default configuration (MathTSConfig)
+const config = { ...DEFAULT_CONFIG, preferredBackend: 'wasm' };
 
 // Type guards
 console.log(isNumber(42)); // true
@@ -23,7 +24,12 @@ console.log(
     [1, 2],
     [3, 4],
   ])
-); // true
+); // false — nested arrays are not matrices
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
+console.log(isMatrix(m)); // true
 ```
 
 ## API
@@ -39,7 +45,7 @@ console.log(
 - `DEFAULT_CONFIG` - Default configuration object
 - `isNumber(value)` - Type guard for numbers
 - `isComplex(value)` - Type guard for complex numbers
-- `isMatrix(value)` - Type guard for matrices
+- `isMatrix(value)` - Type guard for matrix-like objects (`rows`, `cols`, `get`, `type`)
 
 ## License
 
