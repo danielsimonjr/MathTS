@@ -92,7 +92,7 @@ signal/                    # @danielsimonjr/mathts-signal - signal-processing do
 
 ```
 # Per-package dependencies (verified from each package.json — source of truth):
-core        → typed-function
+core        → typed-function (npm:@danielsimonjr/typed-function; not the workspace leaf @danielsimonjr/mathts-typed-function)
 parallel    → workerpool, core                    # core ONLY for the stable numeric
 #                                                  primitives (pairwiseSum/norm2); still NOT matrix
 expression  → core
