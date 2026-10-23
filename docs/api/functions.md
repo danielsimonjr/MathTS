@@ -181,24 +181,25 @@ sin(new Complex(0, 1)); // i * sinh(1)
 
 ### Variance & Deviation
 
-| Function   | Signature                         | Description             |
-| ---------- | --------------------------------- | ----------------------- |
-| `variance` | `(arr, normalization?) => number` | Variance                |
-| `std`      | `(arr, normalization?) => number` | Standard deviation      |
-| `mad`      | `(arr) => number`                 | Mean absolute deviation |
+| Function   | Signature                         | Description               |
+| ---------- | --------------------------------- | ------------------------- |
+| `variance` | `(arr, normalization?) => number` | Variance                  |
+| `std`      | `(arr, normalization?) => number` | Standard deviation        |
+| `mad`      | `(arr) => number`                 | Median absolute deviation |
 
 ### Advanced
 
-| Function    | Signature                 | Description          |
-| ----------- | ------------------------- | -------------------- |
-| `prod`      | `(arr) => number`         | Product of array     |
-| `quantile`  | `(arr, q) => number`      | Quantile (0–1)       |
-| `histogram` | `(arr, bins) => number[]` | Histogram bin counts |
-| `cumsum`    | `(arr) => number[]`       | Cumulative sum       |
-| `corr`      | `(a, b) => number`        | Pearson correlation  |
-| `distance`  | `(a, b, type?) => number` | Statistical distance |
+| Function      | Signature                 | Description          |
+| ------------- | ------------------------- | -------------------- |
+| `prod`        | `(arr) => number`         | Product of array     |
+| `quantileSeq` | `(arr, q) => number`      | Quantile (0–1)       |
+| `histogram`   | `(arr, bins) => number[]` | Histogram bin counts |
+| `cumsum`      | `(arr) => number[]`       | Cumulative sum       |
+| `corr`        | `(a, b) => number`        | Pearson correlation  |
+| `distance`    | `(a, b, type?) => number` | Statistical distance |
 
-All statistics functions use parallel-first execution for arrays.
+Plain `number[]` inputs run synchronously. `Float64Array` paths may return a `Promise`; worker
+dispatch depends on per-op thresholds in `ComputePool` (many reductions are `'never'` today).
 
 ### Example
 
@@ -220,22 +221,22 @@ max(data); // 5
 
 ### FFT
 
-| Function               | Signature          | Description            |
-| ---------------------- | ------------------ | ---------------------- |
-| `parallelFFT`          | `(x) => Complex[]` | Fast Fourier Transform |
-| `parallelIFFT`         | `(X) => Complex[]` | Inverse FFT            |
-| `parallelFFTMagnitude` | `(x) => number[]`  | FFT magnitude spectrum |
-| `parallelFFTPower`     | `(x) => number[]`  | FFT power spectrum     |
+| Function               | Signature                         | Description            |
+| ---------------------- | --------------------------------- | ---------------------- |
+| `parallelFFT`          | `(x) => Promise<{real, imag, …}>` | Fast Fourier Transform |
+| `parallelIFFT`         | `(X) => Promise<{real, imag, …}>` | Inverse FFT            |
+| `parallelFFTMagnitude` | `(x) => Promise<Float64Array>`    | FFT magnitude spectrum |
+| `parallelFFTPower`     | `(x) => Promise<Float64Array>`    | FFT power spectrum     |
 
 ### Convolution & Correlation
 
-| Function           | Signature            | Description               |
-| ------------------ | -------------------- | ------------------------- |
-| `parallelConv`     | `(a, b) => number[]` | Convolution               |
-| `parallelXCorr`    | `(a, b) => number[]` | Cross-correlation         |
-| `parallelAutoCorr` | `(a) => number[]`    | Auto-correlation          |
-| `crossCorrelation` | `(a, b) => number[]` | Cross-correlation (alias) |
-| `autoCorrelation`  | `(a) => number[]`    | Auto-correlation (alias)  |
+| Function           | Signature                         | Description                                    |
+| ------------------ | --------------------------------- | ---------------------------------------------- |
+| `parallelConv`     | `(a, b) => Promise<Float64Array>` | FFT convolution                                |
+| `parallelXCorr`    | `(a, b) => Promise<Float64Array>` | Cross-correlation (async, reversed kernel)     |
+| `parallelAutoCorr` | `(a) => Promise<Float64Array>`    | Auto-correlation                               |
+| `crossCorrelation` | `(a, b) => number[]`              | Sync sliding dot product (not `parallelXCorr`) |
+| `autoCorrelation`  | `(a) => number[]`                 | Sync autocorrelation (not `parallelAutoCorr`)  |
 
 ### Analysis
 
@@ -243,6 +244,9 @@ max(data); // 5
 | ------------- | --------------------- | ---------------------------- |
 | `groupDelay`  | `(h) => number[]`     | Group delay of filter        |
 | `unwrapPhase` | `(phase) => number[]` | Unwrap phase discontinuities |
+
+The barrel also exports factory-layer and scipy-style helpers (`fft`, `rfft`, `firwin`, `butter`,
+`welchPSD`, …) — see the [complete export index](#complete-export-index).
 
 ### Example
 
@@ -382,22 +386,23 @@ halfspaceIntersection(
 
 ## Interpolation
 
-| Function         | Signature                   | Description             |
-| ---------------- | --------------------------- | ----------------------- |
-| `linearInterp`   | `(x, xs, ys) => number`     | Linear interpolation    |
-| `lagrangeInterp` | `(x, xs, ys) => number`     | Lagrange polynomial     |
-| `cubicSpline`    | `(x, xs, ys) => number`     | Natural cubic spline    |
-| `hermiteInterp`  | `(x, xs, ys, ds) => number` | Hermite interpolation   |
-| `pchipInterp`    | `(x, xs, ys) => number`     | Piecewise cubic Hermite |
-| `polyFit`        | `(xs, ys, deg) => number[]` | Polynomial regression   |
+| Function         | Signature                    | Description                     |
+| ---------------- | ---------------------------- | ------------------------------- |
+| `linearInterp`   | `(xs, ys, x) => number`      | Linear interpolation            |
+| `lagrangeInterp` | `(xs, ys, x) => number`      | Lagrange polynomial             |
+| `cubicSpline`    | `(xs, ys) => (x) => number`  | Natural cubic spline evaluator  |
+| `hermiteInterp`  | `(xs, ys, dys, x) => number` | Hermite interpolation           |
+| `pchipInterp`    | `(xs, ys, x) => number`      | Piecewise cubic Hermite (PCHIP) |
+| `polyFit`        | `(xs, ys, deg) => number[]`  | Polynomial regression           |
 
 ```typescript
-import { cubicSpline, polyFit } from '@danielsimonjr/mathts-functions';
+import { cubicSpline, polyFit, lagrangeInterp } from '@danielsimonjr/mathts-functions';
 
 const xs = [0, 1, 2, 3];
 const ys = [0, 1, 4, 9];
-cubicSpline(1.5, xs, ys); // ~2.25 (smooth interpolation)
-const coeffs = polyFit(xs, ys, 2); // quadratic fit
+cubicSpline(xs, ys)(1.5); // 2.2
+lagrangeInterp(xs, ys, 2.5); // 6.25
+polyFit(xs, ys, 2); // [0, 0, 1]  (low-degree-first; y ≈ x²)
 ```
 
 ---
@@ -415,7 +420,7 @@ const coeffs = polyFit(xs, ys, 2); // quadratic fit
 import { trapz, gaussQuad } from '@danielsimonjr/mathts-functions';
 
 const ys = [0, 0.25, 1, 2.25, 4];
-trapz(ys); // ~2.0 (approx. integral of x²)
+trapz(ys); // 5.5 (unit spacing h = 1 when x is omitted)
 gaussQuad((x) => x * x, 0, 2); // ~2.6667 (exact)
 ```
 
@@ -443,14 +448,54 @@ subfactorial(4); // 9 (derangements of 4 items)
 
 ## Comparison Functions
 
-| Function | Signature | Description |
-| ----------- | ------------------- | --------------------- | --- | -------------------- |
-| `equal` | `(a, b) => boolean` | Equality |
-| `smaller` | `(a, b) => boolean` | Less than |
-| `larger` | `(a, b) => boolean` | Greater than |
-| `smallerEq` | `(a, b) => boolean` | Less than or equal |
-| `largerEq` | `(a, b) => boolean` | Greater than or equal |
-| `compare` | `(a, b) => -1       | 0                     | 1` | Three-way comparison |
+| Function    | Signature                | Description           |
+| ----------- | ------------------------ | --------------------- |
+| `equal`     | `(a, b) => boolean`      | Equality              |
+| `smaller`   | `(a, b) => boolean`      | Less than             |
+| `larger`    | `(a, b) => boolean`      | Greater than          |
+| `smallerEq` | `(a, b) => boolean`      | Less than or equal    |
+| `largerEq`  | `(a, b) => boolean`      | Greater than or equal |
+| `compare`   | `(a, b) => -1 \| 0 \| 1` | Three-way comparison  |
+
+---
+
+## Scalar evaluation & Pareto selection
+
+PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expression`.
+
+| Function / type        | Signature / role                                                             | Description                            |
+| ---------------------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+| `evaluateScalar`       | `(node, scope?) => number`                                                   | Interpret one scalar tree row          |
+| `compileScalar`        | `(node, options: CompileScalarOptions) => CompiledScalar`                    | Batch tape over `Float64Array` columns |
+| `paretoFront`          | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)  |
+| `scoreFront`           | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                   |
+| `selectFrontModel`     | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                    |
+| `ParetoFrontError`     | `class`                                                                      | Bad mode / empty front / mixed scores  |
+| `CompileScalarOptions` | `{ variables, parameters?, constants? }`                                     | Column order and bindings              |
+| `CompiledScalar`       | `.evaluate(columns, params?, out?) => ScalarBatchResult`                     | Per-row validity mask                  |
+| `ScalarBatchResult`    | `{ values, valid, allValid }`                                                | Batch output                           |
+| `FrontCandidate`       | `{ loss, complexity, item }`                                                 | One Pareto row                         |
+| `ScoredCandidate`      | `FrontCandidate & { score: number \| null }`                                 | Row plus PySR score                    |
+
+```typescript
+import {
+  compileScalar,
+  paretoFront,
+  scoreFront,
+  selectFrontModel,
+  scalar,
+} from '@danielsimonjr/mathts-functions';
+
+const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const compiled = compileScalar(node, { variables: ['x'] });
+compiled.evaluate([new Float64Array([2, 3])]).values; // Float64Array [4, 9]
+
+const front = paretoFront([
+  { loss: 0.5, complexity: 1, item: 'x' },
+  { loss: 0.1, complexity: 3, item: 'x^3' },
+]);
+selectFrontModel(scoreFront(front), 'best').item; // 'x^3'
+```
 
 ---
 
@@ -494,7 +539,7 @@ ceil(2.1); // 3
 
 **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
 
-**Special Functions** (70): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `coulombF`, `coulombFG`, `coulombG`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `logIntegral`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
+**Special Functions** (71): `airyAi`, `airyBi`, `barnesG`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `cosIntegral`, `coulombF`, `coulombFG`, `coulombG`, `digamma`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcScalar`, `erfi`, `expIntegralEi`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hermiteH`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `loadWasm`, `logIntegral`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinIntegral`, `struveH`, `struveL`, `trigamma`, `zeta`
 
 **Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 
@@ -538,7 +583,7 @@ ceil(2.1); // 3
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `loadWasm`, `massProperties`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
+**Other exports (uncategorized)** (17): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
 ### Constants & values (70)
 
