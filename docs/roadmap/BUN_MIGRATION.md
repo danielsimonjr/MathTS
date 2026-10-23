@@ -8,13 +8,15 @@
 
 - Native TypeScript execution (`bun tools/….ts`) replaces `npx tsx`.
 - Fast workspace installs (`bun install` ~100ms warm / sub-second cold here).
-- One toolchain for install + script running; Turbo/tsup/vitest keep working.
-- Dependabot supports the text `bun.lock` (`package-ecosystem: bun`).
+- One toolchain for install + script running; Turbo/tsdown/vitest keep working.
+- Dependabot does **not** currently bump `bun.lock` — `.github/dependabot.yml` documents that
+  both `bun` and `npm` ecosystems fail on this repo (lockfileVersion 2 vs npm-on-Bun-repo).
+  Only `github-actions` updates run.
 
 ## Non-goals (this phase)
 
 - Replacing **vitest** with `bun test` (26 configs + Playwright browser suite).
-- Replacing **tsup** with Bun's bundler (`.d.ts` emission + multi-entry workers).
+- Replacing **tsdown** with Bun's bundler (`.d.ts` emission + multi-entry workers).
 - Requiring Bun at **consume** time — npm packages stay Node/browser compatible.
 - ~~Forcing `[run].bun = true`~~ — done in the TODO.md Phase 3 (2026-09-19): every `bun run` script
   now runs on Bun. See note 4 below.
@@ -27,16 +29,15 @@
 - [x] `bunfig.toml` (hoisted linker; Node shebangs preserved)
 - [x] Root scripts: `npx tsx` → `bun`; `npm run -w` → `bun run --filter`
 - [x] `js-yaml` at root so `tools/create-dependency-graph` resolves under Bun
-- [x] CI / Release / Dependabot on Bun
+- [x] CI / Release on Bun; Dependabot is github-actions only (no bun/npm ecosystem — see Why Bun)
 - [x] `package-lock.json` retired (gitignored)
-- [x] Verified locally: `bun run build` (24/24), `typecheck` (32/32), `test` (48/48), `build:wasm`
+- [x] Verified locally: `bun run build` (24/24), `typecheck` (47/47 graph), `test`, `build:wasm`
 
-### Phase 2 — Tooling depth (next)
+### Phase 2 — Tooling depth (in progress)
 
 - [ ] Migrate remaining nested `npm run` / `node` script strings in package
       `package.json` files where Bun is a drop-in (leave `asc` / Playwright alone)
-- [ ] Add a Bun-runtime smoke job (`bun --bun` on a small unit subset) without
-      flipping `[run].bun`
+- [x] `[run] bun = true` in workspace `bunfig.toml` files (see note 4 below)
 - [ ] Document contributor install as Bun-first in onboarding templates
 - [ ] Evaluate moving `tools/*` into workspaces so tool deps are not root-only
 
@@ -49,7 +50,7 @@
 ### Phase 4 — Bundler (optional, high risk)
 
 - [ ] Prototype Bun build for a thin re-export package (no `.d.ts` complexity)
-- [ ] Compare emitted ESM + declaration story vs tsup; do not cut over matrix /
+- [ ] Compare emitted ESM + declaration story vs tsdown; do not cut over matrix /
       functions / workbook until dts + worker-entry parity is green
 
 ## Developer commands
@@ -67,7 +68,7 @@ bun run docs:deps           # runs the CDG TypeScript entry via Bun
 ```
 
 `bun run` executes every package script on the Bun runtime (`[run] bun = true`),
-including `node …` calls and node-shebang bins (vitest, `asc`, tsc, tsup, turbo). Consumers of published `@danielsimonjr/mathts-*`
+including `node …` calls and node-shebang bins (vitest, `asc`, tsc, tsdown, turbo). Consumers of published `@danielsimonjr/mathts-*`
 packages do **not** need Bun.
 
 Because `bun run test` runs on Bun, it proves nothing about Node. The CI `Test (20.x)` and

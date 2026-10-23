@@ -2,7 +2,8 @@
 
 **Date:** December 14, 2025
 **Branch:** `claude/fix-mathjs-build-system-d2DXI`
-**Status:** Critical - Build System Non-Functional
+**Status:** Superseded / Historical as of 2026-10-22 — the monorepo builds with
+`bun run build` / `bun run typecheck`. See [`CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md`](CONSOLIDATED_CORRECTIVE_ACTION_PLAN.md) (also historical).
 
 ---
 

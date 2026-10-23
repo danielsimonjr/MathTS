@@ -1,6 +1,6 @@
 # Matrices
 
-MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. A key differentiator from mathjs is the **multi-backend architecture**: matrix operations are automatically dispatched to JS, WASM, or GPU compute depending on matrix size.
+MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. Some decomposition paths can use WASM via `backendManager` when size thresholds are met; `DenseMatrix.prototype.multiply` stays on a pure JS loop, and no `'gpu'` backend is registered on the manager today (see [Backends](#backends) below).
 
 Import from `@danielsimonjr/mathts-matrix`:
 
@@ -15,6 +15,8 @@ import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 ### Creation
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
 // From a 2D array
 const m = DenseMatrix.fromArray([
   [1, 2],
@@ -49,6 +51,8 @@ new DenseMatrix(2, 2, [1, 2, 3, 4]);
 ### Access and Dimensions
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
 const m = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
@@ -67,6 +71,12 @@ All operations return **new** matrix instances. No method mutates in place.
 ### Conversion
 
 ```ts
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const m = DenseMatrix.fromArray([
+  [1, 2, 3],
+  [4, 5, 6],
+]);
 m.toArray(); // number[][]
 m.toFlatArray(); // number[] (row-major)
 m.toSparse(); // SparseMatrix
@@ -79,7 +89,12 @@ m.toSparse(); // SparseMatrix
 ### Creation
 
 ```ts
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
 
 // From a dense matrix (zeros are dropped)
 const sparse = SparseMatrix.fromDense(dense);
@@ -95,13 +110,18 @@ SparseMatrix.zeros(100, 100);
 SparseMatrix.identity(1000);
 SparseMatrix.diag([1, 2, 3, 4]);
 
-// Direct CSR constructor
-new SparseMatrix(rows, cols, values, colIndices, rowPointers);
+// Direct CSR constructor: new SparseMatrix(rows, cols, values, colIndices, rowPointers)
 ```
 
 ### Sparsity Information
 
 ```ts
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
 const s = SparseMatrix.fromDense(dense);
 
 s.nnz; // number of non-zero elements
@@ -112,6 +132,14 @@ s.density; // 1 - sparsity
 ### Conversion
 
 ```ts
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+
+const dense = DenseMatrix.fromArray([
+  [1, 0],
+  [0, 2],
+]);
+const sparse = SparseMatrix.fromDense(dense);
+
 sparse.toDense(); // DenseMatrix
 sparse.toArray(); // number[][]
 sparse.toFlatArray(); // number[]
@@ -119,53 +147,30 @@ sparse.toFlatArray(); // number[]
 
 ## Backends
 
-MathTS dispatches matrix operations to one of three backends based on matrix size:
+`@danielsimonjr/mathts-matrix` registers **JS** and **WASM** backends on `backendManager`. A `'gpu'` backend is not registered on that manager today; GPU matrix work that exists uses separate `gpuMatmul` paths in functions/matrix, not `backendManager` selection.
 
-| Backend         | Threshold (elements)       | Technology                       |
-| --------------- | -------------------------- | -------------------------------- |
-| **JSBackend**   | Always available (default) | Pure TypeScript / `Float64Array` |
-| **WASMBackend** | > 1,000 elements           | AssemblyScript WASM with SIMD    |
-| **GPUBackend**  | > 100,000 elements         | WebGPU compute shaders           |
+`DenseMatrix.prototype.multiply` calls the pure TypeScript `arithmetic.multiply` loop — it does **not** consult `backendManager`. Use `backendManager`-aware APIs (for example decompositions routed through the manager) when you need WASM acceleration.
 
-Operation-specific thresholds override the general rule:
+When the manager does select a backend, operation thresholds include:
 
-| Operation       | WASM threshold | GPU threshold |
-| --------------- | -------------- | ------------- |
-| `multiply`      | 500            | 50,000        |
-| `decomposition` | 100            | 10,000        |
-| `transpose`     | 2,000          | 200,000       |
+| Operation       | WASM threshold (elements) | Notes                              |
+| --------------- | ------------------------- | ---------------------------------- |
+| `multiply`      | 256                       | SIMD WASM matmul                   |
+| `decomposition` | 100                       | LU/QR/Cholesky-style paths         |
+| `transpose`     | 2,000 (gate only)         | WASM transpose retired; JS is used |
 
-### Automatic Selection
+GPU threshold fields in the manager align to `GPU_MIN_ELEMENTS` (65,536) but are dormant until a GPU backend is registered.
 
-Backend selection is transparent — you write the same code regardless:
-
-```ts
-import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-
-const a = DenseMatrix.random(512, 512); // 262,144 elements
-const b = DenseMatrix.random(512, 512);
-
-// Automatically dispatched to GPU if available, then WASM, then JS
-const result = a.multiply(b);
-```
-
-### Manual Backend Control
-
-You can override the automatic selection via the `backendManager` singleton:
+### `backendManager` hints
 
 ```ts
 import { backendManager } from '@danielsimonjr/mathts-matrix';
 
-// Force WASM for all operations
 backendManager.setHints({ preferredBackend: 'wasm' });
-
-// Adjust thresholds
-backendManager.setHints({ wasmThreshold: 500, gpuThreshold: 50000 });
+backendManager.setHints({ wasmThreshold: 1000, gpuThreshold: 65536 });
 ```
 
-### Fallback Behavior
-
-If a higher-tier backend is unavailable or fails to initialize, MathTS falls back to the next tier automatically. JS is always available and never fails.
+JS is always available as fallback when WASM cannot run.
 
 ## Matrix Bridge (SparseMatrix CSC)
 
@@ -173,13 +178,17 @@ The matrix WASM bridge provides interoperability between the TypeScript matrix l
 
 ## Decompositions
 
-`@danielsimonjr/mathts-matrix` includes WASM-accelerated decompositions:
+Dense LU/QR/Cholesky/inverse/determinant can use WASM via `backendManager` when matrix size exceeds the decomposition WASM threshold. Public `eig` and `svd` run synchronously in JavaScript (WASM kernels were removed after measuring slower performance):
 
 ```ts
-import { eig, svd } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, eig, svd } from '@danielsimonjr/mathts-matrix';
 
-const { values, vectors } = eig(m.toArray()); // eigenvalues and eigenvectors
-const { U, S, V, rank } = svd(m.toArray()); // singular value decomposition
+const m = DenseMatrix.fromArray([
+  [1, 2],
+  [3, 4],
+]);
+const { values, vectors } = eig(m.toArray());
+const { U, S, V, rank } = svd(m.toArray());
 ```
 
 ## Related

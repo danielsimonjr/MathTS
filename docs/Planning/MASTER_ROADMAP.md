@@ -1,6 +1,10 @@
 # MathTS Master Roadmap
 
-**Updated**: 2026-04-10
+> **Status: Superseded / Historical as of 2026-10-22.** April 2026 index only. Workbook
+> cells evaluate through the expression engine today; `@danielsimonjr/mathts-functions` is
+> **0.69.2**. See [`../../ROADMAP.md`](../../ROADMAP.md) and [`../README.md`](../README.md).
+
+**Updated**: 2026-04-10 (snapshot)
 **Current State**: v0.1.2 published, 90 test files, 2916 tests, ~492 functions
 
 ---

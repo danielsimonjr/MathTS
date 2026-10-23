@@ -1,6 +1,6 @@
 # create-dependency-graph (CDG)
 
-The MathTS dependency-graph **generator** — a heavy TypeScript parse (run via `tsx`) that
+The MathTS dependency-graph **generator** — a heavy TypeScript parse (run via `bun`) that
 scans the whole codebase and emits the `docs/Architecture/*` documentation. Its read-only
 consumer counterpart is `tools/query-dependency-graph` (QDG), which reads the JSON this
 tool produces without re-parsing.
@@ -15,10 +15,10 @@ Scans the codebase and generates comprehensive dependency documentation.
 
 ```bash
 # Run via npm script (recommended)
-npm run docs:deps
+bun run docs:deps
 
-# Or run directly with tsx
-npx tsx tools/create-dependency-graph.ts
+# Or run the entry directly
+bun tools/create-dependency-graph/create-dependency-graph.ts --root=.
 ```
 
 **Output:**

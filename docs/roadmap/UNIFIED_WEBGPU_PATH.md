@@ -1,11 +1,15 @@
 # Unified WebGPU Path — Design Spec
 
-**Status**: Proposal / not scheduled — research effort, decision pending.
+**Status**: Superseded / Historical as of 2026-10-22 — the unified f32 GPU-resident path
+remains a research proposal; phased WebGPU work landed via
+[`docs/superpowers/specs/2026-07-10-webgpu-acceleration-design.md`](../superpowers/specs/2026-07-10-webgpu-acceleration-design.md)
+(Spec 1a + `enableGpu()` / fused chains in `functions`). This document is kept for the
+original “single GPU-resident router” design.
 **Author**: design brainstorm (acceleration roadmap, high-effort tier).
-**Goal**: Extend WebGPU acceleration from the four isolated matrix kernels it
-covers today into a coherent, GPU-resident compute path spanning the
-compute-bound operations across MathTS — element-wise math, reductions, linear
-algebra, FFT, and distance matrices — without silently degrading the f64 API.
+**Goal**: Extend today’s opt-in WebGPU (`enableGpu()`, matrix `GPUBackend` kernels,
+fused element-wise chains, FFT at 262,144) from per-call CPU→GPU→CPU into a
+GPU-resident path spanning compute-bound work — element-wise math, reductions,
+linear algebra, FFT, and distance matrices — without silently degrading the f64 API.
 
 > This is a **design document**, not a committed plan. It exists so the work can
 > be scoped honestly. Read the _Constraints_ and _Recommendation_ sections
@@ -19,9 +23,10 @@ algebra, FFT, and distance matrices — without silently degrading the f64 API.
 WebGPU compute shaders can deliver large speedups for sustained, compute-bound
 work, but only if (a) data stays **resident on the GPU** across a chain of
 operations rather than round-tripping to CPU memory per call, and (b) the caller
-accepts **32-bit float** precision (WGSL has no f64). Today MathTS has WebGPU
-for `add` / `matmul` / `transpose` / `scale` only, each a one-shot CPU→GPU→CPU
-call. A "unified path" means: a shared WGSL **shader library**, a **GPU-resident
+accepts **32-bit float** precision (WGSL has no f64). Today MathTS ships opt-in WebGPU
+behind `enableGpu()` — matrix `GPUBackend` kernels plus `functions` fused element-wise
+chains and FFT at measured thresholds (`GPU_MIN_ELEMENTS` 65,536; FFT 262,144), each
+typically a CPU→GPU→CPU call unless chained. A "unified path" means: a shared WGSL **shader library**, a **GPU-resident
 array handle** so ops compose without transfer overhead, and a **router** that
 picks JS / worker-pool / WASM / WebGPU per operation. It is a multi-phase effort
 and should be built only if MathTS is targeting browser-hosted, large-scale

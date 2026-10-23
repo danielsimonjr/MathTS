@@ -1,8 +1,12 @@
 # @danielsimonjr/mathts-workerpool
 
-Workerpool (mathts fork) for [MathTS](https://github.com/danielsimonjr/mathts).
+`MathWorkerPool` wrapper for MathTS parallel workloads.
 
-MathTS's fork of [workerpool](https://github.com/josdejong/workerpool) — worker-pool management for offloading computations to Web Workers / worker threads. Underpins `@danielsimonjr/mathts-parallel`.
+## Relationship to the workerpool fork
+
+Task queueing and worker threads come from the npm alias `workerpool` → `npm:@danielsimonjr/workerpool@10.2.2` (`@danielsimonjr/workerpool` on npm). This package adds `MathWorkerPool`, transfer helpers, capability detection, and the `./worker` entry (`dist/worker.js`).
+
+`MathWorkerPool.exec` forwards to `pool.exec(...).timeout(ms)`, which rejects on timeout but does **not** terminate workers. Hung-worker termination and replacement live in `@danielsimonjr/mathts-parallel` (`WorkerPool.execute(data, transferables?, timeoutMs?)` — third positional argument, used by `parallel/src/ParallelMatrix.ts`).
 
 ## Install
 
@@ -10,11 +14,19 @@ MathTS's fork of [workerpool](https://github.com/josdejong/workerpool) — worke
 npm install @danielsimonjr/mathts-workerpool
 ```
 
-## What it provides
+## Main exports (`.`)
 
-- Pool of reusable workers with task queueing and load balancing.
-- Per-task timeout with worker termination + replacement (used by the parallel matrix ops).
-- Browser (Web Worker) and Node (worker_threads) support.
+| Name                                                                                       | Role                                                                    |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `MathWorkerPool`                                                                           | Pool class                                                              |
+| `mathWorkerPool`                                                                           | Default singleton                                                       |
+| `initializePool` / `terminatePool`                                                         | Lifecycle                                                               |
+| `DEFAULT_WORKER_CONFIG`                                                                    | `{ parallelThreshold: 10000, chunkSize: 5000, taskTimeout: 300000, … }` |
+| `getCapabilities`, `canUseWasm`, `canUseSharedMemory`                                      | Environment probes                                                      |
+| `transferFloat64`, `transferTypedArray`, `transferArrayBuffer`, `createSharedFloat64Array` | Zero-copy transfers                                                     |
+| `getPoolStats`                                                                             | Pool statistics                                                         |
+
+Subpath `@danielsimonjr/mathts-workerpool/worker` exposes the worker script bundle.
 
 ## License
 
