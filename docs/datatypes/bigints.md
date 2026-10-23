@@ -56,13 +56,13 @@ BigNumber.fromNumber(Number(42n)); // BigNumber 42
 
 ## Limitations
 
-`bigint` only holds integers — it cannot represent fractions or decimal values. Functions that require fractional results (such as `sqrt`, `sin`, `log`) will convert the input to a regular `number` first:
+`bigint` only holds integers — it cannot represent fractions or decimal values. Transcendental and root functions promote integer `bigint` inputs to `BigNumber` (not JavaScript `number`):
 
 ```ts
 import { sqrt, sin } from '@danielsimonjr/mathts-functions';
 
-sqrt(4n); // 2 (number, not bigint)
-sin(2n); // 0.9092974268256817 (number)
+sqrt(4n).toString(); // '2' (BigNumber)
+sin(2n).toString(); // '0.909297426825681695…' (BigNumber)
 ```
 
 Basic arithmetic (`add`, `subtract`, `multiply`, `mod`, `gcd`, `pow` with positive integer exponents) supports `bigint` input and returns `bigint` output.

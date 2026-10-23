@@ -5,7 +5,7 @@
 **Version**: 1.0.0  
 **Author**: Daniel Simon Jr. (@danielsimonjr)  
 **Date**: December 2025  
-**Status**: Architecture & Planning Phase
+**Status**: Superseded / Historical as of 2026-10-22 — planning-phase document; 24 packages ship today.
 
 ---
 

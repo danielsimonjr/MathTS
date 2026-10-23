@@ -1,6 +1,11 @@
 # MathTS Priority Status
 
-**Updated**: 2026-04-10
+> **Status: Superseded / Historical as of 2026-10-22.** This file is a April 2026 sprint
+> snapshot. For live status use `bun run build` / `bun run typecheck` (47-task graph),
+> `docs/reference/functions.md` (**1,090** exports — generated export index), and package versions on
+> `main`. See [`../README.md`](../README.md) for the documentation index.
+
+**Updated**: 2026-04-10 (snapshot)
 **Build**: 10/10 | **Typecheck**: 14/14 | **Tests**: 90 files, 2,869 pass
 **Typed Functions**: 374 exports across 17 modules (~492 math functions total)
 **Factories**: 242/273 active (89%) — remaining 31 are infrastructure types in @danielsimonjr/mathts-core

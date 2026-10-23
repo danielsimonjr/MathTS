@@ -1,5 +1,9 @@
 # MathJS Dual Build System: Consolidated Corrective Action Plan
 
+> **Status: Superseded / Historical as of 2026-10-22.** Describes the pre-monorepo root `src/`
+> layout and `npm run compile:ts`, which no longer exist. Live gates: `bun run lint`,
+> `bun run typecheck`, `bun run docs:deps` (CDG). Metrics below are the December 2025 snapshot only.
+
 **Version:** 2.0 (Consolidated)  
 **Date:** December 14, 2025  
 **Target:** Claude Code Implementation  

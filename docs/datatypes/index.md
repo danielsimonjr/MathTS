@@ -25,7 +25,7 @@ Matrix types are in `@danielsimonjr/mathts-matrix`:
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 ```
 
-Math functions (arithmetic, trig, statistics, FFT, special functions, probability distributions, numerical integration, interpolation, geometry, and more — 302+ total) are in `@danielsimonjr/mathts-functions`:
+Math functions (arithmetic, trig, statistics, FFT, special functions, probability distributions, numerical integration, interpolation, geometry, and more) are in `@danielsimonjr/mathts-functions`:
 
 ```ts
 import { add, multiply, sin, fft } from '@danielsimonjr/mathts-functions';
@@ -58,7 +58,14 @@ const m = DenseMatrix.identity(3); // 3×3 identity
 MathTS exports type guard functions for each type:
 
 ```ts
-import { isComplex, isFraction, isBigNumber } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber,
+  Complex,
+  Fraction,
+  isBigNumber,
+  isComplex,
+  isFraction,
+} from '@danielsimonjr/mathts-core';
 
 isComplex(new Complex(1, 2)); // true
 isFraction(new Fraction(1n)); // true

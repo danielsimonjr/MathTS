@@ -3,7 +3,8 @@
  *
  * Demonstrates basic arithmetic operations with different numeric types.
  *
- * Run: npx tsx examples/basic-arithmetic.ts
+ * Run from repo root:
+ *   bun --tsconfig-override=tsconfig.base.json examples/basic-arithmetic.ts
  */
 
 import { Complex, Fraction, BigNumber, I } from '@danielsimonjr/mathts-core';

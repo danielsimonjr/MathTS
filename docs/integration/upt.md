@@ -20,14 +20,14 @@ here first.
 
 ## Consumed MathTS APIs (UPT v0.7+)
 
-| UPT proposal              | MathTS package                            | Status  | Key surfaces                                                                             |
-| ------------------------- | ----------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| 1 (LabeledTensor)         | `@danielsimonjr/mathts-tensor` v0.1.0     | shipped | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`           |
-| 4 (Bridge AST)            | `@danielsimonjr/mathts-expression` v0.2.0 | shipped | `parse`, `compileExpr`, the 16-node AST + `Node` base, `getSafeProperty` sandbox helpers |
-| 7 (.mtsw bridges)         | `@danielsimonjr/mathts-workbook` v0.1.2   | shipped | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)             |
-| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.1.0   | shipped | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                        |
-| (implicit, all)           | `@danielsimonjr/mathts-functions`         | shipped | `evaluate` sandbox, 500+ typed functions, 52 CODATA constants                            |
-| (implicit, heavy)         | `@danielsimonjr/mathts-parallel`          | shipped | `ComputePool` + `thresholdByOp` map, three-tier WASM/worker/in-process dispatch          |
+| UPT proposal              | MathTS package                             | Status  | Key surfaces                                                                                                                                                                                          |
+| ------------------------- | ------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 (LabeledTensor)         | `@danielsimonjr/mathts-tensor` v0.2.25     | shipped | `Tensor`, `einsum`, `transpose`, `reshape`, `fromDenseMatrix`, `toDenseMatrix`                                                                                                                        |
+| 4 (Bridge AST)            | `@danielsimonjr/mathts-expression` v0.10.3 | shipped | `createParse`, `compileExpression`, 15 AST node classes + `Node` base; `parse` / `compileExpr` on `mathts-functions`; sandbox helpers internal to expression (`customs.ts`, not package-root exports) |
+| 7 (.mtsw bridges)         | `@danielsimonjr/mathts-workbook` v0.4.13   | shipped | `.mtsw` reactive notebook, `mtsw` CLI (`run` / `validate` / `graph` / `new`)                                                                                                                          |
+| 8 (Differentiable bridge) | `@danielsimonjr/mathts-autograd` v0.3.19   | shipped | `forwardGrad`, `reverseGrad`, `DualTensor`, `Tape`, `TapedTensor`                                                                                                                                     |
+| (implicit, all)           | `@danielsimonjr/mathts-functions` v0.69.2  | shipped | `evaluate` sandbox, **1,090** exports (see the generated export index in `docs/reference/functions.md`)                                                                                               |
+| (implicit, heavy)         | `@danielsimonjr/mathts-parallel`           | shipped | `ComputePool` + `thresholdByOp` (worker vs in-process; most element-wise/reduction ops `'never'`)                                                                                                     |
 
 Reading order before any UPT PR lands: confirm each consumed export
 still exists in `<package>/src/index.ts` of the relevant package, since
@@ -37,11 +37,15 @@ is the AssemblyScript-backed WASM backend).
 ## Scalar ExprNode evaluation (UPT 6.0.0 phase 6)
 
 `@danielsimonjr/mathts-expression` exports `createScalarBuilder`,
-`SCALAR_FUNCTIONS`, and `SCALAR_FUNCTION_LOWERING`.
-`@danielsimonjr/mathts-functions` exports `scalar` (a builder) and
-`evaluateScalar`. Publish expression `0.10.0` and functions `0.68.0` for
-this surface. The functions dependency range is still `^0.9.0`; the release
-should tighten it to `^0.10.0`.
+`SCALAR_FUNCTIONS`, and `SCALAR_FUNCTION_LOWERING`, plus M1 scalar structure helpers
+(`scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey` in `expression/src/scalar-structure.ts`).
+`@danielsimonjr/mathts-functions` exports `scalar` (a builder), `evaluateScalar`, M3
+`compileScalar` (`functions/src/scalar-compile.ts`), and M4 `paretoFront` /
+`scoreFront` / `selectFrontModel` (`functions/src/pareto-front.ts`). Roadmap and plans:
+[`../roadmap/PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md),
+[`../plans/PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md),
+[`../plans/PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md),
+[`../plans/PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md).
 
 ```ts
 import { scalar, evaluateScalar } from '@danielsimonjr/mathts-functions';
