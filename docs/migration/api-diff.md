@@ -58,7 +58,7 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 | ----------- | -------------------------------- | ------------------------------------- |
 | Creation    | `math.bignumber('123.456')`      | `BigNumber.parse('123.456')`          |
 | From number | `math.bignumber(123)`            | `BigNumber.fromNumber(123)`           |
-| To number   | `bn.toNumber()`                  | `bn.valueOf()`                        |
+| To number   | `bn.toNumber()`                  | `bn.toNumber()` or `bn.valueOf()`     |
 | Config      | `math.config({ precision: 64 })` | `BigNumber.config({ precision: 64 })` |
 
 ### Matrices
