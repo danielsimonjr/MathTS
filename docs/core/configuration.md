@@ -1,11 +1,58 @@
 # Configuration
 
-MathTS configuration is managed through the `DEFAULT_CONFIG` object exported from `@danielsimonjr/mathts-core`. Unlike mathjs, there is no runtime `math.config()` call — configuration is applied at import time or passed explicitly to factory functions.
+MathTS exposes **two** configuration objects with the same export name `DEFAULT_CONFIG` on different entry points. They are intentionally not merged.
 
-## Reading the Defaults
+| Entry                                 | Type                                   | Role                                                                      |
+| ------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`          | `MathTSConfig`                         | Factory / backend / parallel defaults for direct MathTS use               |
+| `@danielsimonjr/mathts-core/internal` | `ConfigOptions` (alias `MathJsConfig`) | mathjs-shaped settings for expression evaluation, comparisons, and compat |
+
+## Factory defaults (`MathTSConfig`)
+
+Imported from the main package:
 
 ```typescript
 import { DEFAULT_CONFIG } from '@danielsimonjr/mathts-core';
+import type { MathTSConfig } from '@danielsimonjr/mathts-core';
+
+console.log(DEFAULT_CONFIG);
+// {
+//   precision: 64,
+//   matrix: 'Matrix',
+//   number: 'number',
+//   randomSeed: null,
+//   epsilon: 1e-12,
+//   preferredBackend: 'auto',
+//   wasmThreshold: 1000,
+//   gpuThreshold: 100000,
+//   parallelEnabled: true,
+//   parallelThreshold: 50000
+// }
+```
+
+### Fields
+
+| Field                            | Description                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `precision`                      | Default significant digits for `BigNumber` (default `64`)                                                    |
+| `matrix`                         | Default matrix output: `'Matrix'` (DenseMatrix) or `'Array'`                                                 |
+| `number`                         | Default numeric type for factories: `'number'`, `'BigNumber'`, or `'Fraction'` (not `'bigint'` on this type) |
+| `randomSeed`                     | RNG seed string, or `null` for non-deterministic seeding                                                     |
+| `epsilon`                        | Tolerance on this config object (separate from comparison tolerances below)                                  |
+| `preferredBackend`               | Matrix backend hint: `'auto'`, `'js'`, `'wasm'`, or `'gpu'`                                                  |
+| `wasmThreshold` / `gpuThreshold` | Element-count hints for backend selection                                                                    |
+| `parallelEnabled`                | Whether parallel infrastructure may run                                                                      |
+| `parallelThreshold`              | Default element count before parallel dispatch is considered                                                 |
+
+`BigNumber.config({ precision: n })` still adjusts global `BigNumber` precision independently.
+
+## Internal / mathjs-shaped defaults (`ConfigOptions`)
+
+Expression parsing, `evaluate`, and comparison helpers such as `equal` read **`relTol` / `absTol`** from the internal config:
+
+```typescript
+import { DEFAULT_CONFIG } from '@danielsimonjr/mathts-core/internal';
+import type { ConfigOptions } from '@danielsimonjr/mathts-core/internal';
 
 console.log(DEFAULT_CONFIG);
 // {
@@ -21,92 +68,64 @@ console.log(DEFAULT_CONFIG);
 // }
 ```
 
-## Configuration Options
-
 ### `number`
 
-The default numeric type used when parsing string expressions.
-
-| Value         | Description                               |
-| ------------- | ----------------------------------------- |
-| `'number'`    | JavaScript `number` (default)             |
-| `'BigNumber'` | Arbitrary-precision via `BigNumber` class |
-| `'bigint'`    | Native JavaScript `bigint`                |
-| `'Fraction'`  | Exact rational via `Fraction` class       |
-
-For most functions, the output type is inferred from the input type — `add(1, 2)` always returns a `number`. The `number` setting affects expression evaluation and factory-created instances.
+| Value         | Description                            |
+| ------------- | -------------------------------------- |
+| `'number'`    | JavaScript `number` (default)          |
+| `'BigNumber'` | Arbitrary-precision decimal            |
+| `'bigint'`    | Native `bigint` (internal config only) |
+| `'Fraction'`  | Exact rational                         |
 
 ### `numberFallback`
 
-When `number` is `'bigint'` and a value cannot be represented (e.g. `2.3`), fall back to this type.
-
-- `'number'` (default)
-- `'BigNumber'`
-
-### `matrix`
-
-Default matrix output type when no matrix input is present.
-
-- `'Matrix'` (default) — returns a `DenseMatrix`
-- `'Array'` — returns a plain JavaScript array
-
-### `precision`
-
-Number of significant digits for `BigNumber` operations. Default: `64`.
-
-```typescript
-import { BigNumber } from '@danielsimonjr/mathts-core';
-
-BigNumber.config({ precision: 128 }); // configure globally
-const x = BigNumber.parse('1.23456789012345678901234567890');
-```
+When `number` is `'bigint'` and a value is not an integer, fall back to `'number'` or `'BigNumber'`.
 
 ### `relTol` / `absTol`
 
-Tolerances used by comparison functions (`equal`, `smallerEq`, etc.).
-
-- `relTol` — minimum relative difference. Default: `1e-12`.
-- `absTol` — minimum absolute difference. Default: `1e-15`.
+Used by `equal` and related comparisons in `@danielsimonjr/mathts-core` (reads this internal object, not `MathTSConfig.epsilon`).
 
 ### `predictable`
 
-When `true`, output types depend only on input types (never on values). When `false` (default), `sqrt(-4)` returns `Complex(0, 2)` rather than `NaN`.
-
-### `randomSeed`
-
-Seed for pseudo-random number generation. `null` = randomly seeded each run.
+When `true`, output types depend only on input types. When `false` (default), `sqrt(-4)` via the functions/compat stack can return a `Complex` (e.g. `"2i"`) instead of `NaN`.
 
 ### `legacySubset`
 
 Legacy matrix subset behavior (mathjs v11 and earlier). Default: `false`.
 
-## Applying Custom Configuration
+## Applying configuration
 
-There is no global setter. Pass a config object to the compat factory:
+### Compat `create` / `math.config`
+
+The mathjs-compatible instance exposes `math.config` and applies options to the **shared internal** `DEFAULT_CONFIG`:
 
 ```typescript
 import { create, all } from '@danielsimonjr/mathts-compat';
 
 const math = create(all, {
   number: 'BigNumber',
-  precision: 128,
+  precision: 20,
   predictable: true,
 });
+
+math.config(); // reflects the updated internal config
 ```
 
-For direct imports, configure per-type:
+`create(all, …)` mutates the process-wide internal defaults (`number`, `precision`, `predictable`, etc.). A later `evaluate('e ^ 2')` in the same process may return `BigNumber` if `number` was set to `'BigNumber'`.
+
+### Direct imports
+
+Override `MathTSConfig` at startup by spreading `DEFAULT_CONFIG` from the main entry, or set per-type options (`BigNumber.config`, and so on).
+
+## `./internal` subpath
+
+`@danielsimonjr/mathts-core/internal` also exports tree helpers (`deepMap`, `deepForEach`, `reduce`), formatting (`format`, `formatGeneric`, `formatBigNumber`), factory utilities (`factory`, `sortFactories`), error types (`DimensionError`, `IndexError`, `MathjsError`), safe property accessors, and WASM manifest helpers. Prefer the main entry for public types and `mathTyped`; use `./internal` only when you need these mathjs-compat or tooling surfaces.
+
+## TypeScript types
 
 ```typescript
-import { BigNumber } from '@danielsimonjr/mathts-core';
-
-// Configure BigNumber precision globally
-BigNumber.config({ precision: 128 });
+import type { MathTSConfig } from '@danielsimonjr/mathts-core';
+import type { ConfigOptions, MathJsConfig } from '@danielsimonjr/mathts-core/internal';
 ```
 
-## TypeScript Type
-
-```typescript
-import type { ConfigOptions } from '@danielsimonjr/mathts-core';
-```
-
-`ConfigOptions` (also exported as `MathJsConfig` for compatibility) contains all fields above as required properties.
+`ConfigOptions` and `MathJsConfig` are not exported from the main `.` entry.

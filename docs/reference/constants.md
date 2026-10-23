@@ -7,8 +7,8 @@ Mathematical constants are available as named exports from `@danielsimonjr/matht
 ```typescript
 import { PI, E, PHI, TAU } from '@danielsimonjr/mathts-core';
 
-Math.sin(PI / 4); // 0.7071067811865476
-E ** 2; // 7.38905609893065
+Math.sin(PI / 4); // 0.7071067811865475
+E ** 2; // 7.3890560989306495
 ```
 
 For use inside expression strings, the constants are also in the expression
@@ -18,8 +18,8 @@ imaginary unit `i`, and `SQRT2` / `SQRT1_2` / `LN2` / `LN10` / `LOG2E` / `LOG10E
 ```typescript
 import { evaluate } from '@danielsimonjr/mathts-functions';
 
-evaluate('sin(pi / 4)'); // 0.7071067811865476
-evaluate('e ^ 2'); // 7.38905609893065
+evaluate('sin(pi / 4)'); // 0.7071067811865475
+evaluate('e ^ 2'); // 7.3890560989306495
 evaluate('phi'); // 1.618033988749895
 evaluate('2 + 3 * i'); // Complex(2, 3)
 ```

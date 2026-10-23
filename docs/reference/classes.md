@@ -38,7 +38,7 @@ Complex.parse('3+4i'); // parse string
 | `div(other)`            | `Complex`    | Division                        |
 | `abs()`                 | `number`     | Magnitude `sqrt(re² + im²)`     |
 | `arg()`                 | `number`     | Phase angle in radians          |
-| `conj()`                | `Complex`    | Conjugate `a - bi`              |
+| `conjugate()`           | `Complex`    | Conjugate `a - bi`              |
 | `neg()`                 | `Complex`    | Negation `-a - bi`              |
 | `sqrt()`                | `Complex`    | Square root                     |
 | `exp()`                 | `Complex`    | `e^z`                           |
@@ -86,7 +86,7 @@ Fraction.fromJSON({ n: '1', d: '3' }); // Fraction(1, 3)
 | `sub(other)` | `Fraction` | Subtraction                    |
 | `mul(other)` | `Fraction` | Multiplication                 |
 | `div(other)` | `Fraction` | Division                       |
-| `neg()`      | `Fraction` | Negation                       |
+| `negate()`   | `Fraction` | Negation                       |
 | `abs()`      | `Fraction` | Absolute value                 |
 | `toNumber()` | `number`   | Convert to floating-point      |
 | `toJSON()`   | object     | `{ mathjs: 'Fraction', n, d }` |
@@ -144,8 +144,8 @@ BigNumber.config({ precision: 128 }); // set global precision
 ### Type guard
 
 ```typescript
-import { isBigNumber } from '@danielsimonjr/mathts-core';
-isBigNumber(new BigNumber('1')); // true
+import { isBigNumber, BigNumber } from '@danielsimonjr/mathts-core';
+isBigNumber(BigNumber.parse('1')); // true
 ```
 
 ---
@@ -184,6 +184,7 @@ Dual.variable(2); // value 2, derivative 1 (the variable to differentiate w.r.t.
 | `exp()` `log()`                     | `Dual`  | Exponential / natural logarithm     |
 | `sqrt()` `square()` `abs()`         | `Dual`  | Roots / square / absolute value     |
 | `sinh()` `cosh()` `tanh()`          | `Dual`  | Hyperbolic                          |
+| `unary(rule)`                       | `Dual`  | Apply a `DUAL_UNARY_RULES` entry    |
 
 ### Type guard
 
@@ -201,15 +202,18 @@ isDual(Dual.variable(1)); // true
 ## Unit
 
 A physical quantity with dimensional units (e.g. `5 m`, `9.8 m/s^2`). Same-dimension
-units add and subtract; multiplication, division, and powers combine dimensions.
+addition and subtraction use the `add` / `subtract` functions from `@danielsimonjr/mathts-functions`, not methods on `Unit`. Instance methods combine or convert dimensions.
 
 ```typescript
 import { Unit } from '@danielsimonjr/mathts-core';
+import { add } from '@danielsimonjr/mathts-functions';
 
 const d = new Unit(5, 'm');
 d.to('cm').toString(); // '500 cm'
 Unit.parse('9.8 m/s^2'); // an acceleration
-new Unit(5, 'cm').add(new Unit(3, 'mm')).toString(); // '5.3 cm'
+add(new Unit(5, 'cm'), new Unit(3, 'mm')).toString(); // '5.300000000000001 cm'
+d.toNumeric(); // 5 (value in base units)
+d.equalBase(new Unit(1, 'cm')); // true — same dimension as meters
 ```
 
 ### Static factories
@@ -221,15 +225,16 @@ Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 
 ### Instance methods
 
-| Method                           | Returns   | Description                                |
-| -------------------------------- | --------- | ------------------------------------------ |
-| `add(o)` `sub(o)`                | `Unit`    | Same-dimension addition / subtraction      |
-| `mul(o)` `div(o)`                | `Unit`    | Combine dimensions (or scale by a number)  |
-| `pow(n)`                         | `Unit`    | Raise to a power                           |
-| `to(target)`                     | `Unit`    | Convert to another unit of equal dimension |
-| `toBest()`                       | `Unit`    | Auto-select the most readable prefix       |
-| `equals(o)` `dimensionsEqual(o)` | `boolean` | Equality / dimensional compatibility       |
-| `toString()` `toJSON()`          | —         | Render / serialize                         |
+| Method                        | Returns   | Description                               |
+| ----------------------------- | --------- | ----------------------------------------- |
+| `multiply(o)` `divide(o)`     | `Unit`    | Combine dimensions (or scale by a number) |
+| `pow(n)`                      | `Unit`    | Raise to a power                          |
+| `to(target)` `toSI()`         | `Unit`    | Convert units / SI base form              |
+| `toBest()` `simplify()`       | `Unit`    | Readable prefix / simplified notation     |
+| `splitUnit()` `format(opts?)` | `Unit`    | Decompose / custom formatting             |
+| `toNumeric()`                 | `number`  | Numeric value in base units               |
+| `equalBase(o)` `equals(o)`    | `boolean` | Same dimension / value equality           |
+| `toString()` `toJSON()`       | —         | Render / serialize                        |
 
 ### Type guard
 
@@ -237,6 +242,22 @@ Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 import { isUnit } from '@danielsimonjr/mathts-core';
 isUnit(new Unit(5, 'm')); // true
 ```
+
+---
+
+## Range
+
+Numeric index range (`start`, `end`, `step`) for matrix indexing. Exported from `@danielsimonjr/mathts-core` as `Range` and `createRangeClass`.
+
+```typescript
+import { Range } from '@danielsimonjr/mathts-core';
+
+const r = new Range(0, 10, 2);
+r.toArray(); // [0, 2, 4, 6, 8, 10]
+r.toJSON(); // { mathjs: 'Range', start, end, step }
+```
+
+Endpoints may be passed as `bigint` or `BigNumber` but are stored as `number` values inside the range.
 
 ---
 

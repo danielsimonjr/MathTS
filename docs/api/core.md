@@ -43,7 +43,7 @@ new Complex(re: number, im: number)
 | `re`     | `number` | Real part      |
 | `im`     | `number` | Imaginary part |
 
-Complex has **83 methods** including full trig, hyperbolic, and transcendental operations.
+Complex exposes dozens of instance methods (trig, hyperbolic, and transcendental operations) plus static helpers such as `compare`, `fromJSON`, `fromNumber`, `fromPolar`, and `parse`.
 
 #### Instance Methods
 
@@ -110,10 +110,10 @@ new Fraction(numerator: number | bigint, denominator: number | bigint)
 
 #### Static Methods
 
-| Method       | Signature                                     | Description              |
-| ------------ | --------------------------------------------- | ------------------------ |
-| `fromNumber` | `(n: number, tolerance?: number) => Fraction` | Approximate from decimal |
-| `parse`      | `(str: string) => Fraction`                   | Parse "1/2" or "0.5"     |
+| Method       | Signature                                          | Description                                                   |
+| ------------ | -------------------------------------------------- | ------------------------------------------------------------- |
+| `fromNumber` | `(n: number, maxDenominator?: bigint) => Fraction` | Approximate from decimal (default max denominator `1000000n`) |
+| `parse`      | `(str: string) => Fraction`                        | Parse "1/2" or "0.5"                                          |
 
 #### Instance Properties
 
@@ -124,21 +124,21 @@ new Fraction(numerator: number | bigint, denominator: number | bigint)
 
 #### Instance Methods
 
-| Method            | Signature                       | Description           |
-| ----------------- | ------------------------------- | --------------------- |
-| `add`             | `(other: Fraction) => Fraction` | Addition              |
-| `subtract`        | `(other: Fraction) => Fraction` | Subtraction           |
-| `multiply`        | `(other: Fraction) => Fraction` | Multiplication        |
-| `divide`          | `(other: Fraction) => Fraction` | Division              |
-| `negate`          | `() => Fraction`                | Negation              |
-| `inverse`         | `() => Fraction`                | Reciprocal            |
-| `abs`             | `() => Fraction`                | Absolute value        |
-| `pow`             | `(n: number) => Fraction`       | Integer power         |
-| `valueOf`         | `() => number`                  | Convert to number     |
-| `equals`          | `(other: Fraction) => boolean`  | Equality check        |
-| `compareTo`       | `(other: Fraction) => number`   | Comparison (-1, 0, 1) |
-| `toString`        | `() => string`                  | String "n/d"          |
-| `toDecimalString` | `(decimals?: number) => string` | Decimal string        |
+| Method      | Signature                       | Description                |
+| ----------- | ------------------------------- | -------------------------- |
+| `add`       | `(other: Fraction) => Fraction` | Addition                   |
+| `subtract`  | `(other: Fraction) => Fraction` | Subtraction                |
+| `multiply`  | `(other: Fraction) => Fraction` | Multiplication             |
+| `divide`    | `(other: Fraction) => Fraction` | Division                   |
+| `negate`    | `() => Fraction`                | Negation                   |
+| `inverse`   | `() => Fraction`                | Reciprocal                 |
+| `abs`       | `() => Fraction`                | Absolute value             |
+| `pow`       | `(n: number) => Fraction`       | Integer power              |
+| `valueOf`   | `() => number`                  | Convert to number          |
+| `equals`    | `(other: Fraction) => boolean`  | Equality check             |
+| `compareTo` | `(other: Fraction) => number`   | Comparison (-1, 0, 1)      |
+| `toString`  | `() => string`                  | String "n/d"               |
+| `toDecimal` | `(decimals?: number) => string` | Fixed-point decimal string |
 
 #### Constants
 
@@ -187,7 +187,7 @@ import {
 | `parse`      | `(str: string) => BigNumber`             | Parse decimal string |
 | `config`     | `(opts: { precision?: number }) => void` | Configure precision  |
 
-BigNumber has **96 methods** including full trig and transcendental support via decimal.js.
+BigNumber is implemented in pure TypeScript (`sign`, `bigint` coefficient, decimal exponent) with full trig and transcendental instance methods (see `docs/datatypes/bignumbers.md`).
 
 #### Instance Methods — Arithmetic
 
@@ -244,17 +244,17 @@ BigNumber has **96 methods** including full trig and transcendental support via 
 
 #### Constants
 
-| Constant         | Description                  |
-| ---------------- | ---------------------------- |
-| `BIGNUMBER_ZERO` | Zero                         |
-| `BIGNUMBER_ONE`  | One                          |
-| `BIGNUMBER_PI`   | Pi (to configured precision) |
-| `BIGNUMBER_E`    | Euler's number               |
+| Constant         | Description                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| `BIGNUMBER_ZERO` | Zero                                                                      |
+| `BIGNUMBER_ONE`  | One                                                                       |
+| `BIGNUMBER_PI`   | Pre-parsed π literal (fixed string; not recomputed when `config` changes) |
+| `BIGNUMBER_E`    | Euler's number                                                            |
 
 #### Example
 
 ```typescript
-import { BigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber, BIGNUMBER_PI } from '@danielsimonjr/mathts-core';
 
 // No floating point errors
 const a = BigNumber.parse('0.1');
@@ -262,10 +262,9 @@ const b = BigNumber.parse('0.2');
 const sum = a.add(b);
 console.log(sum.toString()); // "0.3" (exact)
 
-// High precision
+// Configure precision (does not rebuild named constants)
 BigNumber.config({ precision: 100 });
-const pi = BIGNUMBER_PI;
-console.log(pi.toString()); // Pi to 100 digits
+console.log(BIGNUMBER_PI.toString()); // same fixed literal as before config()
 ```
 
 ---
@@ -302,6 +301,26 @@ myAdd(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
 ```
 
 See [typed-function documentation](https://github.com/josdejong/typed-function) for advanced usage.
+
+## Scalar arithmetic
+
+Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, and type `NumericScalar`. Use `equal(a, b, relTol?, absTol?)` for tolerant comparisons; default tolerances come from `@danielsimonjr/mathts-core/internal` `DEFAULT_CONFIG`, not `MathTSConfig.epsilon`.
+
+## Stable reductions
+
+`pairwiseSum`, `neumaierSum`, `neumaierCumsum`, `norm2`, `pairwiseDot`, `scaledDistance`, and `sumSquaredDeviations` (`core/src/numeric/stable.ts`) provide numerically stable accumulations for large arrays.
+
+## Range
+
+`Range` / `createRangeClass` model `start` / `end` / `step` index ranges with `toArray`, `map`, `forEach`, and `toJSON` (`RangeJSON`). See [Class reference — Range](../reference/classes.md#range).
+
+## Units and exact scales
+
+Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimension vectors: `ExactScale`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `NAMED_IRRATIONALS`, `NAMED_SCALES`, `UNIT_ROWS`, `getUnitRow`, `toSiDimensionVector` / `fromSiDimensionVector`, `SI_DIMENSION_LENGTH` (7), `UNIT_DIMENSION_LENGTH` (10), prefix helpers, and related `*ExactScale` combinators. Re-exported from `@danielsimonjr/mathts-units`.
+
+## Dual unary rules
+
+`DUAL_UNARY_RULES` and type `DualUnaryRule` describe elementary unary ops for forward-mode `Dual` (`core/src/types/dual-rules.ts`). `Dual.unary(rule)` applies a rule entry.
 
 ## Complete export index
 

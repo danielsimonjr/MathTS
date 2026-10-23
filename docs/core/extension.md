@@ -68,19 +68,22 @@ export const addQ = myTyped('addQ', {
 
 ## Extending an Existing Function
 
-Add new signatures to an existing typed function by wrapping it:
+A typed function such as `add` is a callable with an internal dispatch table — not a plain signature map. Object spread (`{ ...add, 'Quaternion, Quaternion': … }`) throws (`Unknown type "signatures"`) and does not copy existing signatures.
+
+Define a **new** typed function (new name) with the signatures you need, and delegate to the original for built-in types when appropriate:
 
 ```typescript
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { add } from '@danielsimonjr/mathts-functions';
 import type { Quaternion } from './quaternion.js';
 
-// Extend add() with Quaternion support
-export const addExtended = mathTyped('add', {
-  ...add, // carry over existing signatures
+export const addWithQuaternion = mathTyped('addWithQuaternion', {
   'Quaternion, Quaternion': (a: Quaternion, b: Quaternion) => a.add(b),
+  'number, number': (a: number, b: number) => add(a, b) as number,
 });
 ```
+
+Alternatively, register only your custom type on a fresh `TypeRegistry.build()` and define operations for that type alone (see `addQ` above), leaving the published `add` unchanged.
 
 ## Using `createMathTSTyped`
 

@@ -4,7 +4,7 @@ MathTS is a parallel-first TypeScript math library. It exposes numeric types, ty
 
 ## Packages
 
-MathTS ships as 12 npm packages. The most commonly used:
+The monorepo publishes **24** npm workspace packages. Commonly used entry points:
 
 | Package                            | Description                                         |
 | ---------------------------------- | --------------------------------------------------- |
@@ -17,21 +17,24 @@ MathTS ships as 12 npm packages. The most commonly used:
 | `@danielsimonjr/mathts-parallel`   | ComputePool, parallel array operations              |
 | `@danielsimonjr/mathts-workbook`   | `.mtsw` reactive notebook runtime + CLI             |
 | `@danielsimonjr/mathts-compat`     | mathjs-compatible `create(all)` shim                |
+| `@danielsimonjr/mathts-numbers`    | Re-export of core numeric types                     |
+| `@danielsimonjr/mathts-units`      | Re-export of core `Unit` and unit registry          |
 
-The remaining packages — `@danielsimonjr/mathts-wasm`, `@danielsimonjr/mathts-typed-function`, and `@danielsimonjr/mathts-workerpool` — are lower-level building blocks consumed by the packages above.
+Focused re-export packages (`parser`, `ast`, `evaluator`, `linalg`, `arithmetic`, `trigonometry`, `statistics`, `signal`) wrap a single implementation package. Lower-level pieces include `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-plot`, `@danielsimonjr/mathts-wasm` (AssemblyScript build), `@danielsimonjr/mathts-typed-function` (helper utilities), and `@danielsimonjr/mathts-workerpool` (`MathWorkerPool` wrapper). Core and functions depend on the published `typed-function` and `workerpool` forks via npm aliases, not via those workspace helper packages.
 
 ## Usage Patterns
 
 ### Direct imports (recommended)
 
 ```typescript
-import { add, multiply } from '@danielsimonjr/mathts-functions';
+import { add, multiply, chain } from '@danielsimonjr/mathts-functions';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
 add(1, 2); // 3
 add(new Complex(1, 2), new Complex(3, 4)); // Complex(4, 6)
 multiply(new Fraction(1, 2), new Fraction(2, 3)); // Fraction(1, 3)
+chain(3).add(4).multiply(2).done(); // 14
 ```
 
 ### mathjs-compatible API
@@ -40,15 +43,18 @@ For projects migrating from mathjs, use the compat shim:
 
 ```typescript
 import { create, all } from '@danielsimonjr/mathts-compat';
+import { Complex } from '@danielsimonjr/mathts-core';
 
 const math = create(all);
 math.add(1, 2); // 3
-math.sqrt(new math.Complex(-1, 0)); // Complex(0, 1)
+math.sqrt(math.complex(-1)).toString(); // 'i'
+math.sqrt(new Complex(-1, 0)).toString(); // 'i' — use core Complex, not math.Complex
+math.chain(3).add(4).multiply(2).done(); // 14
 ```
 
-### Parallel operations
+### Typed arrays and workers
 
-All array-typed inputs dispatch automatically to worker threads:
+`Float64Array` inputs use async typed-function signatures and return a `Promise`. Element-wise ops such as `add` and `sin` are pinned to **sequential** execution at practical sizes (`ComputePool` thresholds `'never'` for those ops), so small arrays still run on the main thread:
 
 ```typescript
 import { add, sin } from '@danielsimonjr/mathts-functions';
@@ -56,9 +62,11 @@ import { add, sin } from '@danielsimonjr/mathts-functions';
 const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([10, 20, 30, 40]);
 
-const result = await add(a, b); // runs in parallel workers
-const sines = await sin(a); // parallel sin over array
+const result = await add(a, b); // Float64Array [11, 22, 33, 44]
+const sines = await sin(a); // Promise; sequential for this size
 ```
+
+Larger workloads use measured per-op thresholds in `@danielsimonjr/mathts-parallel` (not automatic for every array op).
 
 ## Core Concepts
 
@@ -68,13 +76,13 @@ const sines = await sin(a); // parallel sin over array
 
 ## Key Differences from mathjs
 
-| mathjs                                 | MathTS                                          |
-| -------------------------------------- | ----------------------------------------------- |
-| `math.config({ number: 'BigNumber' })` | Import `DEFAULT_CONFIG` and override at startup |
-| `math.import(myFn)`                    | Direct ESM import; register with `mathTyped`    |
-| `math.chain(x).add(1).done()`          | Not yet available — use direct calls            |
-| Single-package install                 | Monorepo — install only what you need           |
-| CommonJS + ESM                         | ESM-only (`"type": "module"`)                   |
+| mathjs                                 | MathTS                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------ |
+| `math.config({ number: 'BigNumber' })` | `create(all, config)` or internal `DEFAULT_CONFIG` via `./internal`      |
+| `math.import(myFn)`                    | Direct ESM import; register with `mathTyped`                             |
+| `math.chain(x).add(1).done()`          | `chain` from `@danielsimonjr/mathts-functions` or `math.chain` on compat |
+| Single-package install                 | Monorepo — install only what you need                                    |
+| CommonJS + ESM                         | ESM-only (`"type": "module"`)                                            |
 
 ## Type System
 
@@ -86,7 +94,7 @@ add(1, 2)                         // number → number
 add(1n, 2n)                       // bigint → bigint
 add(new Complex(1,2), ...)        // Complex → Complex
 add(new Fraction(1,2), ...)       // Fraction → Fraction
-await add(Float64Array, ...)      // async parallel array
+await add(Float64Array, Float64Array) // async; Promise<Float64Array>
 ```
 
 See the [Reference](../reference/index.md) for a full list of classes, constants, and functions.
