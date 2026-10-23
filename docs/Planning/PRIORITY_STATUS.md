@@ -2,7 +2,7 @@
 
 > **Status: Superseded / Historical as of 2026-10-22.** This file is a April 2026 sprint
 > snapshot. For live status use `bun run build` / `bun run typecheck` (47-task graph),
-> `docs/reference/functions.md` (**686** callable / **878** exports), and package versions on
+> `docs/reference/functions.md` (**1,090** exports — generated export index), and package versions on
 > `main`. See [`../README.md`](../README.md) for the documentation index.
 
 **Updated**: 2026-04-10 (snapshot)
