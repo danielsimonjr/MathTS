@@ -316,7 +316,7 @@ Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `sub
 
 ## Units and exact scales
 
-Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimension vectors: `ExactScale`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `NAMED_IRRATIONALS`, `NAMED_SCALES`, `UNIT_ROWS`, `getUnitRow`, `toSiDimensionVector` / `fromSiDimensionVector`, `SI_DIMENSION_LENGTH` (7), `UNIT_DIMENSION_LENGTH` (10), prefix helpers, and related `*ExactScale` combinators. Re-exported from `@danielsimonjr/mathts-units`.
+Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimension vectors: type `ExactScale`, plus value exports such as `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `NAMED_IRRATIONALS`, `NAMED_SCALES`, `UNIT_ROWS`, `getUnitRow`, `toSiDimensionVector` / `fromSiDimensionVector`, `SI_DIMENSION_LENGTH` (7), `UNIT_DIMENSION_LENGTH` (10), prefix helpers, and related `*ExactScale` combinators. Re-exported from `@danielsimonjr/mathts-units`.
 
 ## Dual unary rules
 

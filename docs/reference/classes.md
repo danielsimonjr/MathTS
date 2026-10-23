@@ -225,16 +225,17 @@ Unit.fromJSON({ mathts: 'Unit', value: 5, notation: 'm' }); // deserialize
 
 ### Instance methods
 
-| Method                        | Returns   | Description                               |
-| ----------------------------- | --------- | ----------------------------------------- |
-| `multiply(o)` `divide(o)`     | `Unit`    | Combine dimensions (or scale by a number) |
-| `pow(n)`                      | `Unit`    | Raise to a power                          |
-| `to(target)` `toSI()`         | `Unit`    | Convert units / SI base form              |
-| `toBest()` `simplify()`       | `Unit`    | Readable prefix / simplified notation     |
-| `splitUnit()` `format(opts?)` | `Unit`    | Decompose / custom formatting             |
-| `toNumeric()`                 | `number`  | Numeric value in base units               |
-| `equalBase(o)` `equals(o)`    | `boolean` | Same dimension / value equality           |
-| `toString()` `toJSON()`       | —         | Render / serialize                        |
+| Method                     | Returns           | Description                               |
+| -------------------------- | ----------------- | ----------------------------------------- |
+| `multiply(o)` `divide(o)`  | `Unit`            | Combine dimensions (or scale by a number) |
+| `pow(n)`                   | `Unit`            | Raise to a power                          |
+| `to(target)` `toSI()`      | `Unit`            | Convert units / SI base form              |
+| `toBest()` `simplify()`    | `Unit`            | Readable prefix / simplified notation     |
+| `splitUnit(parts)`         | `Unit[]`          | Split into component units                |
+| `format(opts?)`            | `string`          | Formatted quantity string                 |
+| `toNumeric()`              | `Numeric \| null` | Numeric value in base units               |
+| `equalBase(o)` `equals(o)` | `boolean`         | Same dimension / value equality           |
+| `toString()` `toJSON()`    | —                 | Render / serialize                        |
 
 ### Type guard
 
@@ -253,8 +254,8 @@ Numeric index range (`start`, `end`, `step`) for matrix indexing. Exported from 
 import { Range } from '@danielsimonjr/mathts-core';
 
 const r = new Range(0, 10, 2);
-r.toArray(); // [0, 2, 4, 6, 8, 10]
-r.toJSON(); // { mathjs: 'Range', start, end, step }
+r.toArray(); // [0, 2, 4, 6, 8] — end is exclusive
+r.toJSON(); // { mathjs: 'Range', start: 0, end: 10, step: 2 }
 ```
 
 Endpoints may be passed as `bigint` or `BigNumber` but are stored as `number` values inside the range.
@@ -268,44 +269,43 @@ Row-major dense matrix. Exported from `@danielsimonjr/mathts-matrix` (and re-exp
 ```typescript
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const m = new DenseMatrix([
+const m = DenseMatrix.fromArray([
   [1, 2, 3],
   [4, 5, 6],
 ]);
-m.size(); // [2, 3]
-m.get([0, 1]); // 2
-m.toArray(); // [[1,2,3],[4,5,6]]
+m.size; // { rows: 2, cols: 3 }
+m.get(0, 1); // 2
+m.toArray(); // [[1, 2, 3], [4, 5, 6]]
 ```
 
 ### Matrix operations
 
 ```typescript
-import { multiply, transpose, det, inv } from '@danielsimonjr/mathts-functions';
+import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
+import { multiply, det, inv } from '@danielsimonjr/mathts-functions';
 
-const a = new DenseMatrix([
+const a = DenseMatrix.fromArray([
   [1, 2],
   [3, 4],
 ]);
-const b = new DenseMatrix([
+const b = DenseMatrix.fromArray([
   [5, 6],
   [7, 8],
 ]);
 
-multiply(a, b); // DenseMatrix [[19,22],[43,50]]
-transpose(a); // DenseMatrix [[1,3],[2,4]]
-det(a); // -2
-inv(a); // DenseMatrix [[-2, 1],[1.5, -0.5]]
+multiply(a, b).toArray(); // [[19, 22], [43, 50]]
+a.transpose().toArray(); // [[1, 3], [2, 4]]
+det([
+  [1, 2],
+  [3, 4],
+]); // -2
+inv([
+  [1, 2],
+  [3, 4],
+]); // [[-2, 1], [1.5, -0.5]]
 ```
 
-### Backend selection
-
-Operations automatically use the fastest available backend:
-
-| Threshold          | Backend                             |
-| ------------------ | ----------------------------------- |
-| Default            | JSBackend (pure TypeScript)         |
-| > 1,000 elements   | WASMBackend (SIMD-accelerated)      |
-| > 100,000 elements | GPUBackend (WebGPU compute shaders) |
+`DenseMatrix.prototype.multiply` uses the pure JS path (no `backendManager`). WASM thresholds and decomposition behavior are described in [Matrices — Backends](../datatypes/matrices.md#backends).
 
 ### Serialization
 
@@ -321,15 +321,16 @@ DenseMatrix.fromArray(m.toArray()); // reconstruct from a nested array
 Compressed Sparse Row (CSR) format. Efficient for matrices where most elements are zero.
 
 ```typescript
-import { SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
-const s = new SparseMatrix([
+const dense = DenseMatrix.fromArray([
   [1, 0, 0],
   [0, 2, 0],
   [0, 0, 3],
 ]);
-s.size(); // [3, 3]
-s.get([1, 1]); // 2
+const s = SparseMatrix.fromDense(dense);
+s.size; // { rows: 3, cols: 3 }
+s.get(1, 1); // 2
 ```
 
 SparseMatrix implements the same `Matrix` interface as `DenseMatrix`. Prefer it when density is below ~25%.

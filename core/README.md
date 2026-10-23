@@ -25,7 +25,7 @@ console.log(
     [3, 4],
   ])
 ); // false — nested arrays are not matrices
-const m = new DenseMatrix([
+const m = DenseMatrix.fromArray([
   [1, 2],
   [3, 4],
 ]);

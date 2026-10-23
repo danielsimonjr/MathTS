@@ -63,7 +63,7 @@ const a = new Float64Array([1, 2, 3, 4]);
 const b = new Float64Array([10, 20, 30, 40]);
 
 const result = await add(a, b); // Float64Array [11, 22, 33, 44]
-const sines = await sin(a); // Promise; sequential for this size
+const sines = await sin(a); // Float64Array; sequential (ComputePool sin: 'never')
 ```
 
 Larger workloads use measured per-op thresholds in `@danielsimonjr/mathts-parallel` (not automatic for every array op).
