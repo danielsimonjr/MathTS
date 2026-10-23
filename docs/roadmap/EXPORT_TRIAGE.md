@@ -1,5 +1,7 @@
 # Export Triage (WS-3 Phase 1 — classification only)
 
+> **Stale snapshot (2026-10-23):** This triage was built from `unused-analysis.md` on **2026-07-02** (452 flagged exports). The current generated [`docs/Architecture/unused-analysis.md`](../Architecture/unused-analysis.md) reports **0** potentially unused exports and **0** dormant files. Use this document as classification history only, not a live deletion list.
+
 **Date:** 2026-07-02
 **Source:** `docs/Architecture/unused-analysis.md` — 452 "potentially unused exports"
 (exports not _imported_ by any other file in the codebase).

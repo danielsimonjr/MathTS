@@ -1,5 +1,7 @@
 # Proposal: Function & Auxiliary-Function Gaps
 
+> **Stale snapshot (2026-10-23):** §7 headline counts and the G2 alias table below reflect a **2026-06-29** export surface (~869 names). The live `@danielsimonjr/mathts-functions` barrel now has **1090** exports; bare `cumsum`, `ctranspose`, `createUnit`, `apply`, `index`, and `help` are present. Treat §7 as historical context; verify against `functions/dist` before acting on a row.
+
 **Author:** MathTS maintenance
 **Date:** 2026-05-24 · **Refreshed:** 2026-06-29 (see [§7 — Deep re-analysis](#7-deep-re-analysis-2026-06-29--new-gaps-post-wave-6))
 **Status:** Original three slices ✅ landed (commit `1bfad1e`); §7 tracks a fresh batch of gaps surfaced by the 2026-06-29 re-analysis.

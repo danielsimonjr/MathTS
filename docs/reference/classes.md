@@ -280,11 +280,14 @@ inv(a); // DenseMatrix [[-2, 1],[1.5, -0.5]]
 
 Operations automatically use the fastest available backend:
 
-| Threshold          | Backend                             |
-| ------------------ | ----------------------------------- |
-| Default            | JSBackend (pure TypeScript)         |
-| > 1,000 elements   | WASMBackend (SIMD-accelerated)      |
-| > 100,000 elements | GPUBackend (WebGPU compute shaders) |
+| Operation / size                           | Backend                                           |
+| ------------------------------------------ | ------------------------------------------------- |
+| Default                                    | JSBackend (pure TypeScript)                       |
+| Dense multiply (≥ 256 elements)            | WASMBackend (SIMD matmul)                         |
+| LU / QR / Cholesky / inverse / det (≥ 100) | WASMBackend                                       |
+| Dense multiply (≥ 65,536 elements, GPU on) | GPUBackend (WebGPU f32; opt-in via `enableGpu()`) |
+
+Element-wise matrix ops and transpose stay on JS; decomposition thresholds are per-op in `BackendManager`, not the legacy `wasmThreshold: 1000` default.
 
 ### Serialization
 

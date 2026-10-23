@@ -1,5 +1,7 @@
 # MathTS Function & Auxiliary-Function Gap Audit
 
+> **Stale snapshot (2026-10-23):** Companion [`FUNCTION_GAPS.md`](./FUNCTION_GAPS.md) §7 and export-count claims here predate the current **1090**-export `functions` barrel. Re-verify any “missing function” or alias row against built `functions/dist` before implementation.
+
 **Date:** 2026-05-24
 **Source:** Cross-reference of `docs/Architecture/dependency-summary.compact.json` (2026-05-24 CDG run) against the per-package `typed/`, `factories/`, and synced-mathjs surface. Companion to the slice proposal in [`FUNCTION_GAPS.md`](./FUNCTION_GAPS.md).
 **Method:**
