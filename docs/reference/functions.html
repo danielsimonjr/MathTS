@@ -572,8 +572,10 @@
         Ops absent from the map also use the 50,000 fallback when called namelessly
         (`cube`, `round`, `sec`, …).
       - **`parallel†`** — the pool op is `'never'` in `DEFAULT_THRESHOLD_BY_OP`, so
-        workers are not used for that named op today (inline JS), even though a
-        `Promise` return type may remain for API compatibility.
+        workers are not used when that **op name** is passed to `shouldParallelize`
+        (inline JS). Some rows still show `parallel†` while a nameless
+        `shouldParallelize(n)` path can engage workers at the 50k fallback — check the
+        call path; when only the nameless path exists, the cell uses `parallel`.
       - **`WASM (band)`** — after `loadWasm()`, `wasmPolicyAllows` may route a
         `Float64Array` path to AssemblyScript in the band listed (see
         `functions/src/wasm/policy.ts`; missing kernel ⇒ JS only).
@@ -595,10 +597,11 @@
       > The authoritative, always-current map of which functions are effectively
       > parallelized (vs threshold-disabled) and each op's threshold is the generated
       > report [`docs/Architecture/parallel-pairing.md`](../Architecture/parallel-pairing.md)
-      > (`npm run docs:deps`; data in `parallel-pairing.json`). Matrix/linear-algebra
-      > ops (`matmul`, `matvec`, decompositions) parallelize through the `matrix` package backend
-      > rather than a direct compute-pool call, so their acceleration is documented in
-      > [`wasm-pairing.md`](../Architecture/wasm-pairing.md) / [`backends.md`](../backends.md).
+      > (`npm run docs:deps`; data in `parallel-pairing.json`). Typed `matmul` /
+      > `matvec` call `ComputePool` directly (see Accel on those rows). Factory
+      > `DenseMatrix` linear algebra (`det`, `inv`, LU/QR/Cholesky, …) routes through
+      > the `matrix` package backends — [`wasm-pairing.md`](../Architecture/wasm-pairing.md)
+      > / [`backends.md`](../backends.md).
 
       > **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.** The
       > generated report [`webgpu-pairing.md`](../Architecture/webgpu-pairing.md) lists **9 standalone
@@ -699,7 +702,7 @@
       | `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
       | `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                              |
       | `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel†, WASM (≥1024)        |
-      | `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
+      | `sign(x)`        | Sign of x: -1, 0, or 1 (nameless `shouldParallelize` at 50k; map `sign` is `'never'`)                                                | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
       | `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —                              |
       | `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel†                      |
       | `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
@@ -1540,8 +1543,9 @@
       | `polarDecomposition(A)`       | Polar decomposition        | parallel |
       | `rowReduce(A)`                | Reduced row echelon form   | —        |
 
-      The `parallel`-marked decompositions route their O(n³) matrix products through
-      the worker pool and therefore return a `Promise`.
+      The `parallel`-marked decompositions use internal `matMul`, which may call
+      `computePool.matmul` when `shouldParallelize(m·n)` passes the 50k fallback;
+      they therefore return a `Promise`.
 
       ### Iterative Solvers
 
@@ -2605,7 +2609,7 @@
       | `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                            | parallel†       |
       | `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                             | parallel†       |
       | `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                   | —               |
-      | `fft2d(matrix)`                                 | 2D FFT                                                                                                                                 | parallel†       |
+      | `fft2d(matrix)`                                 | 2D FFT (nameless `shouldParallelize` on batch size; map `fft2d` is `'never'`)                                                          | parallel        |
       | `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                           | —               |
       | `dct(x)` / `idct(X)`                            | Discrete cosine transform / inverse (JS loops)                                                                                         | —               |
       | `dst(x)` / `idst(X)`                            | Discrete sine transform / inverse (JS loops)                                                                                           | —               |
@@ -2743,35 +2747,35 @@
 
       Geometric operations on 2D/3D/nD coordinate arrays.
 
-      | Function                                                      | Description                               | Accel     |
-      | ------------------------------------------------------------- | ----------------------------------------- | --------- |
-      | `angle2D(v1, v2)` / `angle3D(v1, v2)`                         | Angle between vectors                     | —         |
-      | `cross3D(a, b)` / `dot3D(a, b)`                               | 3D cross / dot product                    | —         |
-      | `triangleArea(a, b, c)`                                       | Triangle area                             | —         |
-      | `polygonArea(vertices)`                                       | Polygon area (shoelace)                   | —         |
-      | `polygonPerimeter(vertices)`                                  | Polygon perimeter                         | —         |
-      | `area(shape)`                                                 | Area of a shape                           | —         |
-      | `centroid(polygon)`                                           | Centroid of a polygon                     | —         |
-      | `convexHull(points)`                                          | Convex hull, 2-D/3-D, structured result   | —         |
-      | `pointInPolygon(point, polygon)`                              | Ray-casting containment test              | —         |
-      | `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation                           | —         |
-      | `reflectVector(v, normal)`                                    | Reflection across a plane                 | —         |
-      | `projectVector(v, onto)`                                      | Vector projection                         | —         |
-      | `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)`  | Euclidean distance                        | —         |
-      | `distancePointToLine2D(point, lineA, lineB)`                  | Point-to-line distance                    | —         |
-      | `manhattanDistance(a, b)`                                     | L1 distance                               | —         |
-      | `chebyshevDistance(a, b)`                                     | L∞ distance                               | —         |
-      | `minkowskiDistance(a, b, p)`                                  | Lp distance                               | —         |
-      | `distance(...)`                                               | mathjs-style distance (factory layer)     | —         |
-      | `intersectLines2D(p1, d1, p2, d2)`                            | Line intersection                         | —         |
-      | `intersectSegments2D(a1, a2, b1, b2)`                         | Segment intersection                      | —         |
-      | `intersect(...)`                                              | mathjs-style intersection (factory layer) | —         |
-      | `coordinateTransform(point, from, to)`                        | Coordinate-system conversion              | —         |
-      | `delaunayTriangulation(points)`                               | Delaunay triangulation (JS)               | —         |
-      | `voronoiDiagram(points, bounds)`                              | Voronoi diagram inside `bounds`           | —         |
-      | `kdTree(points)` / `kdTreeNearest(tree, query)`               | k-d tree + nearest query                  | —         |
-      | `nearestNeighbor(points, query)`                              | Nearest-neighbour search (k-d tree, JS)   | —         |
-      | `distanceMatrix(points)`                                      | All-pairs Euclidean distance matrix       | parallel† |
+      | Function                                                      | Description                                                               | Accel    |
+      | ------------------------------------------------------------- | ------------------------------------------------------------------------- | -------- |
+      | `angle2D(v1, v2)` / `angle3D(v1, v2)`                         | Angle between vectors                                                     | —        |
+      | `cross3D(a, b)` / `dot3D(a, b)`                               | 3D cross / dot product                                                    | —        |
+      | `triangleArea(a, b, c)`                                       | Triangle area                                                             | —        |
+      | `polygonArea(vertices)`                                       | Polygon area (shoelace)                                                   | —        |
+      | `polygonPerimeter(vertices)`                                  | Polygon perimeter                                                         | —        |
+      | `area(shape)`                                                 | Area of a shape                                                           | —        |
+      | `centroid(polygon)`                                           | Centroid of a polygon                                                     | —        |
+      | `convexHull(points)`                                          | Convex hull, 2-D/3-D, structured result                                   | —        |
+      | `pointInPolygon(point, polygon)`                              | Ray-casting containment test                                              | —        |
+      | `rotateVector2D(v, angle)` / `rotateVector3D(v, axis, angle)` | Vector rotation                                                           | —        |
+      | `reflectVector(v, normal)`                                    | Reflection across a plane                                                 | —        |
+      | `projectVector(v, onto)`                                      | Vector projection                                                         | —        |
+      | `distance2D(a, b)` / `distance3D(a, b)` / `distanceND(a, b)`  | Euclidean distance                                                        | —        |
+      | `distancePointToLine2D(point, lineA, lineB)`                  | Point-to-line distance                                                    | —        |
+      | `manhattanDistance(a, b)`                                     | L1 distance                                                               | —        |
+      | `chebyshevDistance(a, b)`                                     | L∞ distance                                                               | —        |
+      | `minkowskiDistance(a, b, p)`                                  | Lp distance                                                               | —        |
+      | `distance(...)`                                               | mathjs-style distance (factory layer)                                     | —        |
+      | `intersectLines2D(p1, d1, p2, d2)`                            | Line intersection                                                         | —        |
+      | `intersectSegments2D(a1, a2, b1, b2)`                         | Segment intersection                                                      | —        |
+      | `intersect(...)`                                              | mathjs-style intersection (factory layer)                                 | —        |
+      | `coordinateTransform(point, from, to)`                        | Coordinate-system conversion                                              | —        |
+      | `delaunayTriangulation(points)`                               | Delaunay triangulation (JS)                                               | —        |
+      | `voronoiDiagram(points, bounds)`                              | Voronoi diagram inside `bounds`                                           | —        |
+      | `kdTree(points)` / `kdTreeNearest(tree, query)`               | k-d tree + nearest query                                                  | —        |
+      | `nearestNeighbor(points, query)`                              | Nearest-neighbour search (k-d tree, JS)                                   | —        |
+      | `distanceMatrix(points)`                                      | All-pairs Euclidean distance matrix (always `computePool.distanceMatrix`) | parallel |
 
       ### Geodesy & interpolation
 
