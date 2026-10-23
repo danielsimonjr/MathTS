@@ -68,22 +68,19 @@ a MathML _fragment_ (like `toTex()` returns a LaTeX fragment). Wrap it in a
 natively by modern browsers.
 
 ```typescript
-import {
-  mathMLDocument, // wrap a node's fragment in a <math> element
-  mathMLError, // a <math><merror> for a parse/render failure
-  markdownToHtml, // minimal, XSS-safe Markdown -> HTML
-  renderChart, // numeric data series -> inline SVG (line | scatter | bar)
-  toHTML,
-  toCSS, // assemble a { cells, metadata } document -> self-contained HTML5
-} from '@danielsimonjr/mathts-expression';
+import { mathMLDocument, mathMLError } from '@danielsimonjr/mathts-expression';
+import { parse } from '@danielsimonjr/mathts-functions';
 
 const node = parse('c = 1 / sqrt(eps0 * mu0)');
 node.toMathML(); // '<mrow><mi>c</mi><mo>=</mo><mfrac>...</mfrac></mrow>'
 mathMLDocument(node); // '<math xmlns="..." display="block">...</math>'
-
-renderChart({ type: 'line', title: 'f(x)' }, [1, 2, 3], [1, 4, 9]); // '<svg ...>...</svg>'
-markdownToHtml('# Title\n\n**bold**'); // '<h1>Title</h1>...'
 ```
+
+Notebook HTML export (`mtsw export`) and the workbook runtime assemble full documents
+with `markdownToHtml`, `toHTML`, `toCSS`, and `renderChart` from
+`@danielsimonjr/mathts-workbook` (CLI/internal modules — not re-exported from the
+workbook package entry). Charts delegate to `@danielsimonjr/mathts-plot` (`line` /
+`scatter` / `bar`).
 
 ### Traversal
 

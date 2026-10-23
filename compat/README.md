@@ -12,9 +12,12 @@ npm install @danielsimonjr/mathts-compat
 
 ## What it provides
 
-- `create(all)` builds a math instance with the familiar mathjs surface.
-- Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions` operations.
-- Useful as a single dependency that pulls a working MathTS stack together.
+- `create(all)` builds a math instance with the familiar mathjs surface (`math.evaluate`,
+  `math.chain`, matrices, units, …).
+- `config` / `import` / `createUnit` shims and direct named imports (`add`, `matrix`, …)
+  mirror mathjs entry points over `@danielsimonjr/mathts-functions`.
+- Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
+  operations. See `docs/api/compat.md` for the full export index.
 
 ## License
 

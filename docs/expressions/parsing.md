@@ -42,25 +42,28 @@ evaluate('beta(2, 3)'); // ~0.0833
 
 ### Scope
 
-The optional scope is a plain object with variable bindings. Variables assigned inside
-the expression are written back to the scope:
+The optional scope is a plain object with variable bindings. **Assignment is disabled by
+default** (sandbox). Pass `{ unsafe: true }` as the third argument to allow `=` and
+write-back to the scope:
 
 ```typescript
 const scope = { a: 3, b: 4 };
-evaluate('c = a + b', scope); // 7
+evaluate('c = a + b', scope, { unsafe: true }); // 7
 scope.c; // 7
 ```
+
+Without `{ unsafe: true }`, `evaluate('c = a + b', scope)` throws
+`Security: assignment expressions are disabled…`.
 
 ### Multi-statement expressions
 
 Separate statements with `;` or newlines. Statements ending with `;` are suppressed from
-the result; statements on their own line are included:
+the result; statements on their own line are included. Assignments require
+`{ unsafe: true }`:
 
 ```typescript
-evaluate('a = 3; b = 4; a + b');    // 7  (assignments suppressed)
-evaluate('a = 3
-b = 4
-a + b');    // [3, 4, 7]  (all visible)
+evaluate('a = 3; b = 4; a + b', {}, { unsafe: true }); // 7  (assignments suppressed)
+evaluate('1\n2\n1+2'); // [1, 2, 3]  (newline-separated values, no assignment)
 ```
 
 ---
@@ -79,7 +82,7 @@ Example:
 ```typescript
 const node = parse('2 + x');
 node.toString(); // '2 + x'
-node.toTex(); // '2+x'
+node.toTex(); // '2+ x'
 node.type; // 'OperatorNode'
 ```
 
@@ -141,13 +144,13 @@ All three functions throw descriptive errors on invalid input:
 try {
   evaluate('2 +');
 } catch (err) {
-  console.error(err.message); // 'Unexpected end of expression'
+  console.error(err.message); // 'Unexpected end of expression (char 4)'
 }
 
 try {
   evaluate('unknownFn(3)');
 } catch (err) {
-  console.error(err.message); // 'Undefined symbol unknownFn'
+  console.error(err.message); // 'Undefined function "unknownFn"'
 }
 ```
 
@@ -155,17 +158,20 @@ try {
 
 ## Evaluating multiple expressions with a shared scope
 
-Use a shared scope object to maintain state across multiple `evaluate` calls:
+Use a shared scope object to maintain state across multiple `evaluate` calls. Assignments
+need `{ unsafe: true }` on each call (or use `parser({ unsafe: true })`):
 
 ```typescript
-const scope: Record<string, any> = {};
+const scope: Record<string, unknown> = {};
+const opts = { unsafe: true as const };
 
-evaluate('a = 5', scope);
-evaluate('b = a * 2', scope); // 10
+evaluate('a = 5', scope, opts);
+evaluate('b = a * 2', scope, opts); // 10
 evaluate('a + b', scope); // 15
 
 scope.a; // 5
 scope.b; // 10
 ```
 
-This is the equivalent of mathjs's `math.parser()` — without requiring a class instance.
+`parser({ unsafe: true })` from `@danielsimonjr/mathts-functions` is the mathjs-style
+stateful scope (`.evaluate`, `.get`, `.set`, `.clear`).

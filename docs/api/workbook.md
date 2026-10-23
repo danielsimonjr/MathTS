@@ -37,8 +37,9 @@ import { parseWorkbook, WorkbookExecutor, createExecutor } from '@danielsimonjr/
 | `WorkbookEvent`    | `{ type: 'cell:start' \| 'cell:success' \| 'cell:error' \| 'cell:stale' \| 'workbook:complete', cellId?, output?, error?, timestamp }` |
 | `CellResult`       | `{ id, type, status: 'success' \| 'error' \| 'pass' \| 'fail', output?, error? }`                                                      |
 | `RunResult`        | `{ cells: CellResult[], ok: boolean }`                                                                                                 |
-| `DependencyNode`   | `{ id, dependencies: string[], dependents: string[] }`                                                                                 |
-| `DependencyGraph`  | `{ nodes: Map<string, DependencyNode>, executionOrder: string[] }`                                                                     |
+
+`DependencyNode` / `DependencyGraph` are defined in `workbook/src/types.ts` for graph
+helpers but are **not** re-exported from the package entry (`src/index.ts`).
 
 ## Parser
 
@@ -57,8 +58,8 @@ parser and `data`-cell evaluation.
 
 | Function               | Signature                                          | Description                                       |
 | ---------------------- | -------------------------------------------------- | ------------------------------------------------- |
-| `buildDependencyGraph` | `(cells: Cell[]) => DependencyGraph`               | Build the reactive graph                          |
-| `topologicalSort`      | `(nodes: Map<string, DependencyNode>) => string[]` | Execution order                                   |
+| `buildDependencyGraph` | `(cells: Cell[]) => { nodes, executionOrder }`     | Build the reactive graph                          |
+| `topologicalSort`      | `(nodes: Map<string, DependencyNode>) => string[]` | Execution order (internal `DependencyNode` shape) |
 | `getDependents`        | `(graph, cellId) => string[]`                      | Direct dependents                                 |
 | `getAncestors`         | `(graph, id) => string[]`                          | Transitive dependency closure + `id` (cycle-safe) |
 | `toMermaid`            | `(graph) => string`                                | Render `graph TD` (ids validated, no injection)   |
@@ -93,6 +94,15 @@ constructor.
 `formatResult(value: unknown): string` — crash-proof rendering for terminal
 output. Called inside the continue-on-error loop, so it never throws (circular
 refs, BigInt, unserializable values fall back to safe markers).
+
+## MathML → SVG
+
+| Export           | Signature                                             | Description                            |
+| ---------------- | ----------------------------------------------------- | -------------------------------------- |
+| `mathMLToSVG`    | `(mathml: string, options?) => string`                | Render a MathML fragment to inline SVG |
+| `MathSvgOptions` | `{ display?: 'block' \| 'inline', padding?: number }` | SVG `foreignObject` wrapper options    |
+
+Used by HTML/TeX export paths when a browser cannot render MathML natively.
 
 ## Pure Cell-Mutation Ops
 
@@ -167,24 +177,24 @@ instances like Complex/matrices/BigNumber).
 Command handlers are pure functions returning `{stdout, stderr, exitCode}` — no
 direct console/`process.exit` — wired to real streams only in `main()`.
 
-| Handler               | Signature                                    | Command                                     |
-| --------------------- | -------------------------------------------- | ------------------------------------------- |
-| `runCommand`          | `(args) => Promise<CommandResult>`           | `run` — run a workbook                      |
-| `validateCommand`     | `(args) => CommandResult`                    | `validate` — validate a `.mtsw`             |
-| `graphCommand`        | `(args) => CommandResult`                    | `graph` — emit the Mermaid dependency graph |
-| `describeCommand`     | `(args) => CommandResult`                    | `describe`                                  |
-| `capabilitiesCommand` | `(args) => CommandResult`                    | `capabilities`                              |
-| `templatesCommand`    | `(args) => CommandResult`                    | `templates`                                 |
-| `functionsCommand`    | `(args) => CommandResult`                    | `functions`                                 |
-| `metaCommand`         | `(args) => CommandResult`                    | `meta`                                      |
-| `exportCommand`       | `(args) => Promise<CommandResult>`           | `export`                                    |
-| `stripCommand`        | `(args) => CommandResult`                    | `strip` — remove cell outputs               |
-| `newCommand`          | `(args) => CommandResult`                    | `new`                                       |
-| `importCommand`       | `(args) => CommandResult`                    | `import`                                    |
-| `cellCommand`         | `(args) => CommandResult`                    | `cell` — cell mutation ops                  |
-| `serveCommand`        | `() => Promise<CommandResult>`               | `serve`                                     |
-| `runServer`           | `(input?, output?) => Promise<void>`         | JSON-RPC-over-stdio server loop (NDJSON)    |
-| `dispatch`            | `(argv: string[]) => Promise<CommandResult>` | Route argv to a handler                     |
+| Handler               | Signature                                    | Command                                                      |
+| --------------------- | -------------------------------------------- | ------------------------------------------------------------ |
+| `runCommand`          | `(args) => Promise<CommandResult>`           | `run` — run a workbook                                       |
+| `validateCommand`     | `(args) => CommandResult`                    | `validate` — validate a `.mtsw`                              |
+| `graphCommand`        | `(args) => CommandResult`                    | `graph` — text adjacency (default); `-f mermaid` or `-f dot` |
+| `describeCommand`     | `(args) => CommandResult`                    | `describe`                                                   |
+| `capabilitiesCommand` | `(args) => CommandResult`                    | `capabilities`                                               |
+| `templatesCommand`    | `(args) => CommandResult`                    | `templates`                                                  |
+| `functionsCommand`    | `(args) => CommandResult`                    | `functions`                                                  |
+| `metaCommand`         | `(args) => CommandResult`                    | `meta`                                                       |
+| `exportCommand`       | `(args) => Promise<CommandResult>`           | `export`                                                     |
+| `stripCommand`        | `(args) => CommandResult`                    | `strip` — remove cell outputs                                |
+| `newCommand`          | `(args) => CommandResult`                    | `new`                                                        |
+| `importCommand`       | `(args) => CommandResult`                    | `import`                                                     |
+| `cellCommand`         | `(args) => CommandResult`                    | `cell` — cell mutation ops                                   |
+| `serveCommand`        | `() => Promise<CommandResult>`               | `serve`                                                      |
+| `runServer`           | `(input?, output?) => Promise<void>`         | JSON-RPC-over-stdio server loop (NDJSON)                     |
+| `dispatch`            | `(argv: string[]) => Promise<CommandResult>` | Route argv to a handler                                      |
 
 `interface CommandResult {stdout: string, stderr: string, exitCode: number}`.
 

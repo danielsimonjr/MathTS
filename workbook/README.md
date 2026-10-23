@@ -20,6 +20,7 @@ mtsw run example.mtsw -v        # also print the execution event stream
 mtsw run example.mtsw --json    # machine-readable envelope on stdout
 mtsw run example.mtsw -c gauss  # run one cell + its transitive deps (stateless)
 mtsw run example.mtsw --timeout 5000   # run in a worker; killed (exit 1) if it exceeds 5s
+mtsw run example.mtsw --expect-hash <sha256>  # refuse unless file SHA-256 matches
 
 # Describe the structured document model (cells, outputs, dependency graph).
 mtsw describe example.mtsw --json
@@ -30,6 +31,7 @@ mtsw validate example.mtsw [--json]
 # Print the dependency graph (human only; use `describe --json` for structured data).
 mtsw graph example.mtsw                 # text adjacency
 mtsw graph example.mtsw -f mermaid      # Mermaid `graph TD`
+mtsw graph example.mtsw -f dot          # Graphviz `digraph deps { ... }`
 
 # Engine introspection (for tooling / GUIs).
 mtsw capabilities --json                # version, supported cell types, feature flags
@@ -72,13 +74,14 @@ mtsw import doc.json --json               # validates (ids/deps/cycles); stdout 
 # Render to a self-contained HTML document (runs first, then renders).
 mtsw export example.mtsw -o example.html     # one offline file; stdout if no -o
 mtsw export example.mtsw --no-run            # render cached outputs without executing
+mtsw export example.mtsw --format tex --fragment -o body.tex  # TeX body only (no preamble)
 mtsw export example.mtsw --json              # envelope: { data: { path, bytes } }
 
 # Other export formats: --format tex|pdf|json|ipynb (html is the default).
 mtsw export example.mtsw --format ipynb -o example.ipynb   # Jupyter notebook (nbformat v4)
 
 # Persistent session for a GUI/tooling: JSON-RPC 2.0 over stdio (NDJSON).
-mtsw serve
+mtsw serve [file.mtsw]
 #   -> {"jsonrpc":"2.0","id":1,"method":"open","params":{"path":"example.mtsw"}}
 #   <- {"jsonrpc":"2.0","id":1,"result":{...describe doc...}}
 #   -> {"jsonrpc":"2.0","id":2,"method":"run"}              # streams cell/event notifications
@@ -89,10 +92,11 @@ mtsw serve
 notebook to a single offline `.html` with **no external requests**: markdown prose,
 **equations typeset as MathML** (rendered natively by modern browsers — Chromium ≥109,
 Firefox, Safari), code cells with their embedded outputs, ✓/✗ test badges, and (as of
-the chart slice) inline SVG plots. All rendering is MathTS-native — the generators
-(`toMathML`/`toHTML`/`toCSS`, plus `markdownToHtml`) live in the `expression` package
-alongside the node `.toTex()`/`.toHTML()` serializers, with **zero external
-dependencies**. Equation cells contain MathTS expression syntax (e.g.
+the chart slice) inline SVG plots. Per-node `.toMathML()` / `.toTex()` / `.toHTML()`
+and `mathMLDocument` come from `@danielsimonjr/mathts-expression`; the workbook
+runtime assembles full HTML with `toHTML` / `toCSS` / `markdownToHtml` / `renderChart`
+(workbook modules used by the CLI — not on the workbook package entry except
+`mathMLToSVG`). Equation cells contain MathTS expression syntax (e.g.
 `c = 1 / sqrt(eps0 * mu0)`), not raw LaTeX; they are display-only and rendered via
 `toMathML`. By default `export` runs the workbook first (use `--no-run` for cached
 outputs); a whole-run failure such as a dependency cycle fails loudly rather than
@@ -121,7 +125,7 @@ matrices, …) don't survive the worker's `postMessage`.
 
 **`serve` (persistent session).** One long-lived process holds the workbook in memory with a per-cell result cache and a **stale set**: a `cell.*` edit marks that cell and its transitive dependents stale, and a `run` re-executes **only** the stale cells (reusing cached outputs for the rest) — the incremental latency win a GUI needs. Requests are processed strictly in order; `run` streams `cell/event` notifications (flushed before that run's response in v1, not mid-run). Edits stay in memory until `save`. Single-document per process; concurrent writers are last-write-wins.
 
-**Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell _content_, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins (an optimistic-lock guard arrives with the `serve` session).
+**Editing notes.** Cell edits are validity-preserving: an op that would create a duplicate/invalid id, a missing dependency, or a **dependency cycle** is rejected and the file is left byte-for-byte unchanged. Editing a cell clears its (now-stale) persisted output; `--at N` is the cell's final 0-based index; `--force` detaches dependents (clearing their outputs) but does not rewrite cell _content_, so a dependent that still references the removed id by name will error at run. Concurrent editors are last-write-wins in `serve` (last accepted `cell.*` op wins; use `save` to persist).
 
 Diagnostics and errors are written to stderr; results (including `--json`) go to stdout, so the exit code can be used in scripts independently of the output.
 
@@ -133,8 +137,8 @@ should read `ok` and treat a missing/unparseable envelope as the only transport
 error. Compatibility rule: ignore unknown fields when `major` matches; refuse on
 a `major` mismatch. `run --cell <id>` is stateless (it recomputes the target's
 transitive deps each call; `run --cell --write` persists only the executed
-cells). This is the contract a GUI binds to; a persistent `serve` mode (streaming
-events, incremental re-execution) is planned.
+cells). Stateful editing and incremental re-execution live in `mtsw serve` (see
+above); one-shot commands use this envelope only.
 
 **Saving / round-trip.** `serializeWorkbook` (and the write commands above) round-trips a workbook through the parser: structure is preserved exactly, and persisted `output` values round-trip best-effort (plain numbers/strings/arrays/objects exactly; exotic types to their plain shape). All writes are **atomic** (temp file + rename). Note that any write path is parse→serialize and therefore **drops YAML comments and re-orders keys** — a CST-preserving in-place rewrite is a future enhancement.
 
@@ -224,19 +228,23 @@ A `test` cell's expression must evaluate to a **boolean**: `true` passes, `false
 
 ## Cell types (v1)
 
-| Type                                               | Status | Description                                            |
-| -------------------------------------------------- | ------ | ------------------------------------------------------ |
-| `markdown`                                         | ✅     | Documentation (passed through verbatim)                |
-| `code`                                             | ✅     | MathTS expression script; last value is the result     |
-| `data`                                             | ✅     | Structured YAML, parsed (hardened) into a value        |
-| `test`                                             | ✅     | Boolean assertion (`true` = pass)                      |
-| `tensor` / `equation` / `visualization` / `export` | ⏳     | Reserved; not executed in v1 (reported as unsupported) |
+| Type            | Status | Description                                                            |
+| --------------- | ------ | ---------------------------------------------------------------------- |
+| `markdown`      | ✅     | Documentation (passed through verbatim)                                |
+| `code`          | ✅     | MathTS expression script; last value is the result                     |
+| `data`          | ✅     | Structured YAML, parsed (hardened) into a value                        |
+| `test`          | ✅     | Boolean assertion (`true` = pass)                                      |
+| `equation`      | ✅     | MathTS expression syntax; display-only (content echoed, not evaluated) |
+| `visualization` | ✅     | Chart/visual spec; display-only (content echoed, not evaluated)        |
+| `tensor`        | ⏳     | Deferred (`Unsupported cell type` if present)                          |
+| `export`        | ⏳     | Deferred (`Unsupported cell type` if present)                          |
 
 ## Execution modes
 
-- **reactive** — emits stale events for dependents when a cell re-runs
-- **sequential** — top-to-bottom (dependency) order
-- **manual** — explicit trigger only
+All modes execute cells in dependency order (`graph.executionOrder`). The only
+runtime difference is **reactive**, which emits `cell:stale` for dependents when a
+cell is edited or re-run. **Sequential** and **manual** use the same execution order
+without stale events (both still run the full graph on `run` / `runReport`).
 
 ## Security
 
