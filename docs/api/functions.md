@@ -426,6 +426,12 @@ gaussQuad((x) => x * x, 0, 2); // ~2.6667 (exact)
 
 ---
 
+## Nonlinear least squares
+
+`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual; `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver.
+
+---
+
 ## Combinatorics
 
 | Function           | Signature          | Description           |

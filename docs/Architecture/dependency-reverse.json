@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-23",
+  "generated": "2026-10-24",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1710,6 +1710,7 @@
     "functions/src/numeric/numeric-jacobian.ts": [
       "functions/src/index.ts",
       "functions/src/numeric/fsolve.ts",
+      "functions/src/optimization-extra.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/numeric/open-root-finders.ts": [
@@ -1739,7 +1740,10 @@
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
+    "functions/src/optimization-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
     "functions/src/ml/kde.ts": ["functions/src/index.ts"],

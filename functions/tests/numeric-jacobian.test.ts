@@ -9,6 +9,20 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     expect(J[1][0]).toBeCloseTo(2, 6);
     expect(J[1][1]).toBeCloseTo(1, 6);
   });
+  it('forward scheme with fixed h matches (f(x+h)−f(x))/h', () => {
+    const h = 1e-7;
+    const x0 = 1;
+    const f = (v: number[]) => [v[0] ** 2];
+    const f0 = f([x0])[0];
+    const fPlus = f([x0 + h])[0];
+    const expected = (fPlus - f0) / h;
+    const J = numericJacobian(f, [x0], { h, scheme: 'forward' });
+    expect(J[0][0]).toBeCloseTo(expected, 10);
+    const Jcentral = numericJacobian(f, [x0], { h });
+    expect(Jcentral[0][0]).toBeCloseTo(2, 9);
+    expect(J[0][0]).not.toBe(Jcentral[0][0]);
+  });
+
   it('non-square: F: R^3 -> R^2', () => {
     const J = numericJacobian((v) => [v[0] + v[1] + v[2], v[0] * v[2]], [1, 2, 3]);
     expect(J.length).toBe(2);

@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-23'
+  lastUpdated: '2026-10-24'
   totalFiles: 1189
   totalModules: 83
   totalExports: 6165
@@ -10547,7 +10547,14 @@ modules:
         - file: ./factories/index.js
           imports:
             - inv
-      workspaceDependencies: []
+        - file: ./numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
       exports:
         - nelderMead
         - gradientDescent
@@ -15092,7 +15099,11 @@ modules:
         - file: ./eigsh.js
           imports:
             - eigsh
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - svds
       interfaces:
@@ -21033,6 +21044,9 @@ modules:
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
+        - file: ../optimization-extra.js
+          imports:
+            - levenbergMarquardt
         - file: ../numeric/rational-nullspace.js
           imports:
             - rationalNullspace
@@ -39111,7 +39125,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 83
-  totalLinesOfCode: 199471
+  totalLinesOfCode: 199393
   totalExports: 6165
   totalClasses: 59
   totalInterfaces: 534

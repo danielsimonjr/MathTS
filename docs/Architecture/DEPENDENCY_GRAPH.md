@@ -4477,11 +4477,18 @@ graph LR
 
 ### `functions/src/optimization-extra.ts` - Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
 
+**Workspace Dependencies:**
+
+| Package                      | Import        |
+| ---------------------------- | ------------- |
+| `@danielsimonjr/mathts-core` | `pairwiseDot` |
+
 **Internal Dependencies:**
 
-| File                   | Imports | Type   |
-| ---------------------- | ------- | ------ |
-| `./factories/index.js` | `inv`   | Import |
+| File                            | Imports           | Type   |
+| ------------------------------- | ----------------- | ------ |
+| `./factories/index.js`          | `inv`             | Import |
+| `./numeric/numeric-jacobian.js` | `numericJacobian` | Import |
 
 **Exports:**
 
@@ -6902,6 +6909,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/svds.ts` - Sparse / partial SVD — the top-`k` singular triplets via Lanczos.
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Internal Dependencies:**
 
@@ -10101,6 +10114,7 @@ graph LR
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
+| `../optimization-extra.js`         | `levenbergMarquardt`                                                                                                               | Import    |
 | `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
 | `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
 | `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
@@ -17778,11 +17792,11 @@ graph LR
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `matrix/src/operations/index`                          | 15 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 8 files      | 8 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
-| `functions/src/bitwise/rightLogShift`                  | 14 files     | 1 file     |
 
 ---
 
@@ -18627,7 +18641,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 199471 |
+| Total Lines of Code     | 199393 |
 | Total Exports           | 6165   |
 | Total Re-exports        | 2604   |
 | Total Classes           | 59     |

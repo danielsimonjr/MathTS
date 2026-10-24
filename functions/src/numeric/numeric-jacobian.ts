@@ -13,6 +13,8 @@ export type VectorField = (x: number[]) => number[];
 export interface NumericJacobianOptions {
   /** Absolute step override. Default: per-coordinate relative step (see below). */
   h?: number;
+  /** `'central'` (default) or forward difference `(f(x+h·e_j) − f(x)) / h`. */
+  scheme?: 'central' | 'forward';
 }
 
 /**
@@ -40,6 +42,7 @@ export function numericJacobian(
   const cbrtEps = Math.cbrt(2.22e-16);
 
   const J: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
+  const forward = opts.scheme === 'forward';
 
   for (let j = 0; j < n; j++) {
     const h = opts.h ?? Math.max(1, Math.abs(base[j])) * cbrtEps;
@@ -48,12 +51,18 @@ export function numericJacobian(
     xPlus[j] += h;
     const fPlus = f(xPlus);
 
-    const xMinus = base.slice();
-    xMinus[j] -= h;
-    const fMinus = f(xMinus);
+    if (forward) {
+      for (let i = 0; i < m; i++) {
+        J[i][j] = (fPlus[i] - f0[i]) / h;
+      }
+    } else {
+      const xMinus = base.slice();
+      xMinus[j] -= h;
+      const fMinus = f(xMinus);
 
-    for (let i = 0; i < m; i++) {
-      J[i][j] = (fPlus[i] - fMinus[i]) / (2 * h);
+      for (let i = 0; i < m; i++) {
+        J[i][j] = (fPlus[i] - fMinus[i]) / (2 * h);
+      }
     }
   }
 
