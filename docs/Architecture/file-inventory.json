@@ -667,7 +667,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 47
+      "loc": 61
     },
     {
       "file": "core/src/numeric/stable.ts",
@@ -11573,7 +11573,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 41
+      "loc": 53
     },
     {
       "file": "packages/workerpool/src/worker.ts",
@@ -11629,7 +11629,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 31
     },
     {
       "file": "packages/workerpool/vitest.config.ts",
@@ -12434,7 +12434,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 886
+      "loc": 887
     },
     {
       "file": "tensor/tests/broadcasting.test.ts",

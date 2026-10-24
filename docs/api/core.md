@@ -312,7 +312,7 @@ Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `sub
 
 ## Seeded RNG and strides
 
-`mulberry32` is the canonical seeded Mulberry32 PRNG for reproducible U[0, 1) streams (not cryptographically secure). `rowMajorStrides` returns the row-major stride vector for a dense tensor shape (last axis stride 1).
+`mulberry32` is the canonical seeded Mulberry32 PRNG for reproducible U[0, 1) streams (not cryptographically secure). `boxMuller` maps two uniforms to a pair of N(0, 1) samples. `rowMajorStrides` returns the row-major stride vector for a dense tensor shape (last axis stride 1).
 
 ## Range
 

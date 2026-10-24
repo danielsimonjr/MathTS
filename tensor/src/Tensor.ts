@@ -69,6 +69,7 @@ export class Tensor {
     return shape.reduce((a, b) => a * b, 1);
   }
 
+  /** Row-major stride vector; forwards to `rowMajorStrides` in `@danielsimonjr/mathts-core`. */
   static rowMajorStrides(shape: ReadonlyArray<number>): number[] {
     return rowMajorStrides(shape);
   }

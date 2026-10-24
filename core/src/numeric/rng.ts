@@ -12,10 +12,17 @@
  * Create a Mulberry32 PRNG seeded with `seed`.
  *
  * Returns a closure that yields uniformly distributed floats in [0, 1) on
- * each call. The seed is coerced with `seed | 0`.
+ * each call. The seed is coerced with `seed | 0`. Separate calls with the
+ * same seed do not share state.
  *
  * @param seed - Integer seed (coerced with `| 0`).
  * @returns A function that returns the next U[0, 1) sample.
+ *
+ * @example
+ * ```ts
+ * const rng = mulberry32(42);
+ * rng(); // 0.6011037519201636
+ * ```
  */
 export function mulberry32(seed: number): () => number {
   let s = seed | 0;
@@ -36,6 +43,13 @@ export function mulberry32(seed: number): () => number {
  * @param u1 - First uniform in [0, 1); clamped away from 0 internally.
  * @param u2 - Second uniform in [0, 1).
  * @returns Two independent standard normal samples.
+ *
+ * @example
+ * ```ts
+ * const [z0, z1] = boxMuller(0.3, 0.7);
+ * Number.isFinite(z0); // true
+ * boxMuller(0, 0.5); // u1 === 0 is clamped; result is not NaN
+ * ```
  */
 export function boxMuller(u1: number, u2: number): [number, number] {
   // Clamp u1 away from 0 to avoid log(0).

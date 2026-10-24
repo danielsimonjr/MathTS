@@ -1,5 +1,3 @@
-import { mulberry32 } from '@danielsimonjr/mathts-core';
-
 /**
  * Graph Theory Functions
  *
@@ -32,6 +30,8 @@ import { mulberry32 } from '@danielsimonjr/mathts-core';
  *
  * @packageDocumentation
  */
+
+import { mulberry32 } from '@danielsimonjr/mathts-core';
 
 // =============================================================================
 // adjacencyMatrix - Create adjacency matrix from edge list

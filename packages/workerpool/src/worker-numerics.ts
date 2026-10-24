@@ -2,9 +2,21 @@
  * Worker-bundle copies of core numeric helpers.
  *
  * Canonical implementations: `mulberry32` and `rowMajorStrides` in
- * `@danielsimonjr/mathts-core`. This file is duplicated here because the worker
- * entry (`dist/worker.js`) must not import `core` (tsdown externalizes deps and
- * the worker bundle would not resolve core in the browser).
+ * `@danielsimonjr/mathts-core`. This file is a copy because the worker entry
+ * (`dist/worker.js`) cannot import core:
+ *
+ * - tsdown externalizes package deps, so a bare `@danielsimonjr/mathts-core`
+ *   import in the worker would not resolve in a browser worker.
+ * - `deps.alwaysBundle` / `noExternal` on the core barrel inlines core's
+ *   pre-bundled `dist/index.js` (typed-function, Unit, factory, …), not the
+ *   two numeric functions.
+ * - This package exports `./worker` types from `dist/worker.d.ts`. A source
+ *   import of core would make those types depend on core without a published
+ *   dependency.
+ *
+ * `@danielsimonjr/mathts-core` is a **devDependency** only (parity test).
+ * Keep the bodies in lockstep with core; `tests/worker-numerics.test.ts` pins
+ * that.
  */
 
 /**
