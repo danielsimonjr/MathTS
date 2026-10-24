@@ -318,7 +318,7 @@ Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `sub
 
 Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimension vectors: type `ExactScale`, plus value exports such as `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `NAMED_IRRATIONALS`, `NAMED_SCALES`, `UNIT_ROWS`, `getUnitRow`, `toSiDimensionVector` / `fromSiDimensionVector`, `SI_DIMENSION_LENGTH` (7), `UNIT_DIMENSION_LENGTH` (10), prefix helpers, and related `*ExactScale` combinators. Re-exported from `@danielsimonjr/mathts-units`.
 
-`SiDimensionVector` is a readonly 7-tuple of `Fraction` exponents in BIPM order `[L, M, T, I, Θ, N, J]`. `toSiDimensionVector` builds exact rationals (`new Fraction(n, 1n)` for integers, `Fraction.fromNumber` otherwise with default `maxDenominator` `1000000n`). `Unit.dimensions` stays `number[]`; pass a 7-vector through `fromSiDimensionVector`, or read numeric components with `vec.map((f) => f.toNumber())` after `toSiDimensionVector` (there is no `toSiDimensionNumbers` helper).
+`SiDimensionVector` is a readonly 7-tuple of `Fraction` exponents in BIPM order `[L, M, T, I, Θ, N, J]`. `toSiDimensionVector` builds exact rationals (`new Fraction(n, 1n)` for integers, `Fraction.fromNumber` otherwise with default `maxDenominator` `1000000n`; `1e-7` is therefore `0/1`). `Unit.dimensions` stays `number[]`. `fromSiDimensionVector` accepts `SiDimensionExponent` (`number | Fraction`) so existing number tuples still run, and returns the length-10 `number[]`. Read numeric components with `vec.map((f) => f.toNumber())` after `toSiDimensionVector` (there is no `toSiDimensionNumbers` helper).
 
 ```ts
 import { Unit, toSiDimensionVector, fromSiDimensionVector } from '@danielsimonjr/mathts-core';

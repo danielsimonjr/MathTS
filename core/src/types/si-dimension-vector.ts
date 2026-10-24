@@ -51,7 +51,18 @@ export type SiDimensionVector = readonly [
   Fraction,
 ];
 
-/** A single exponent accepted by {@link fromSiDimensionVector}. */
+/**
+ * One component of the 7-vector accepted by {@link fromSiDimensionVector}.
+ *
+ * Callers that still pass number tuples (`[1, 1, -2, 0, 0, 0, 0]`) keep working:
+ * a finite `number` is converted with {@link Fraction.fromNumber} (integers as
+ * `n/1`). A {@link Fraction} is used as-is. Either is then reduced with
+ * {@link Fraction.toNumber} for `Unit.dimensions` (`number[]`).
+ *
+ * This alias is the public input type of that converter. {@link SiDimensionVector}
+ * itself is always seven {@link Fraction}s; there is no `toSiDimensionNumbers`
+ * helper — use `vec.map((f) => f.toNumber())`.
+ */
 export type SiDimensionExponent = number | Fraction;
 
 /** Options for {@link toSiDimensions} and {@link toSiDimensionVector}. */
@@ -78,8 +89,8 @@ function assertFinite(label: string, value: number): void {
  * {@link Fraction.fromNumber} (continued-fraction convergents, default
  * `maxDenominator` `1000000n`).
  */
-function numberToFractionExponent(value: number): Fraction {
-  assertFinite('exponent', value);
+function numberToFractionExponent(value: number, label = 'exponent'): Fraction {
+  assertFinite(label, value);
   if (Number.isInteger(value)) {
     return new Fraction(BigInt(value), 1n);
   }
@@ -89,11 +100,11 @@ function numberToFractionExponent(value: number): Fraction {
 /**
  * Normalize a {@link SiDimensionExponent} to a {@link Fraction} for conversion.
  */
-function siExponentToFraction(value: SiDimensionExponent): Fraction {
+function siExponentToFraction(value: SiDimensionExponent, label = 'exponent'): Fraction {
   if (isFraction(value)) {
     return value;
   }
-  return numberToFractionExponent(value);
+  return numberToFractionExponent(value, label);
 }
 
 function assertUnitVector(vector: readonly number[]): void {
@@ -141,8 +152,10 @@ export function toSiDimensions(
  *
  * Non-integer components use {@link Fraction.fromNumber} with default
  * `maxDenominator` `1000000n` (last continued-fraction convergent at or below
- * that denominator). `NaN` and `Infinity` throw (same contract as
- * `Fraction.fromNumber`).
+ * that denominator). Values whose simplest denominator exceeds that cap become
+ * the last in-cap convergent: `1e-7` (= 1/10_000_000) is `0/1`. `NaN` and
+ * `Infinity` throw (same contract as `Fraction.fromNumber`). `-0` normalizes
+ * to `0/1`.
  *
  * @example
  * ```ts
@@ -221,18 +234,11 @@ export function fromSiDimensionVector(vector: readonly SiDimensionExponent[]): n
     );
   }
   const nums = vector.map((component, i) => {
-    try {
-      return siExponentToFraction(component).toNumber();
-    } catch (err) {
-      if (err instanceof Error && err.message.includes('non-finite')) {
-        throw new TypeError(`SI dimension vector[${i}] must be a finite number`);
-      }
-      throw err;
-    }
+    const label = `SI dimension vector[${i}]`;
+    const n = siExponentToFraction(component, label).toNumber();
+    assertFinite(label, n);
+    return n;
   });
-  for (let i = 0; i < nums.length; i++) {
-    assertFinite(`SI dimension vector[${i}]`, nums[i]);
-  }
   return fromSiDimensions({
     length: nums[0],
     mass: nums[1],

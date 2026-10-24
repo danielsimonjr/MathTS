@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { Unit } from '../../src/types/unit';
 import { Fraction, FRACTION_ZERO } from '../../src/types/fraction';
+import * as siDim from '../../src/types/si-dimension-vector';
 import {
   UNIT_DIMENSION_LENGTH,
   fromSiDimensionVector,
@@ -81,29 +82,49 @@ describe('si dimension vector', () => {
     bad[1] = Number.NaN;
     expect(() => toSiDimensions(bad)).toThrow(TypeError);
     expect(() => toSiDimensionVector(bad)).toThrow(TypeError);
+    const inf = [...ZERO];
+    inf[1] = Number.POSITIVE_INFINITY;
+    expect(() => toSiDimensionVector(inf)).toThrow(TypeError);
+    const ninf = [...ZERO];
+    ninf[1] = Number.NEGATIVE_INFINITY;
+    expect(() => toSiDimensionVector(ninf)).toThrow(TypeError);
     expect(() => fromSiDimensionVector([Number.NaN, 0, 0, 0, 0, 0, 0])).toThrow(TypeError);
     expect(() => fromSiDimensionVector([Number.POSITIVE_INFINITY, 0, 0, 0, 0, 0, 0])).toThrow(
       TypeError
     );
+    expect(() => fromSiDimensionVector([Number.NEGATIVE_INFINITY, 0, 0, 0, 0, 0, 0])).toThrow(
+      TypeError
+    );
   });
 
-  it('converts non-integer exponents with Fraction.fromNumber (default max denominator 1_000_000)', () => {
-    const half = new Fraction(1n, 2n);
-    expect(half.equals(Fraction.fromNumber(0.5))).toBe(true);
+  it('does not export toSiDimensionNumbers (owner override: map via toNumber)', () => {
+    expect(Object.hasOwn(siDim, 'toSiDimensionNumbers')).toBe(false);
+  });
 
-    const third = new Fraction(1n, 3n);
-    expect(third.equals(Fraction.fromNumber(1 / 3))).toBe(true);
-
-    const vec = [...ZERO];
-    vec[2] = 0.5;
-    const [, , T] = toSiDimensionVector(vec);
-    expect(T.equals(half)).toBe(true);
-
-    const negThreeHalves = new Fraction(-3n, 2n);
-    expect(negThreeHalves.equals(Fraction.fromNumber(-1.5))).toBe(true);
-
-    const nineQuarters = new Fraction(9n, 4n);
-    expect(nineQuarters.equals(Fraction.fromNumber(2.25))).toBe(true);
+  it('converts exponents via continued fractions against independent Fraction literals', () => {
+    // Oracles are `new Fraction(n, d)` literals, not Fraction.fromNumber(x).
+    // 1e-7 = 1/10_000_000 exceeds the default maxDenominator 1_000_000, so the
+    // last in-cap convergent is 0/1 (same rule as Fraction.fromNumber).
+    const cases: readonly { n: number; num: bigint; den: bigint }[] = [
+      { n: 0.5, num: 1n, den: 2n },
+      { n: 1 / 3, num: 1n, den: 3n },
+      { n: 0.1, num: 1n, den: 10n },
+      { n: -1.5, num: -3n, den: 2n },
+      { n: 2.25, num: 9n, den: 4n },
+      { n: 1e-7, num: 0n, den: 1n },
+      { n: 123456.25, num: 493825n, den: 4n },
+      { n: 1e20, num: 100000000000000000000n, den: 1n },
+    ];
+    for (const { n, num, den } of cases) {
+      const oracle = new Fraction(num, den);
+      const vec = [...ZERO];
+      vec[1] = n;
+      const [L] = toSiDimensionVector(vec);
+      expect(L.equals(oracle)).toBe(true);
+      expect(L.numerator).toBe(num);
+      expect(L.denominator).toBe(den);
+      expect(fromSiDimensionVector([n, 0, 0, 0, 0, 0, 0])[1]).toBe(oracle.toNumber());
+    }
   });
 
   it('accepts Fraction components in fromSiDimensionVector', () => {
@@ -130,6 +151,9 @@ describe('si dimension vector', () => {
     expect(L.denominator).toBe(1n);
     expect(Object.is(L.toNumber(), -0)).toBe(false);
     expect(L.equals(new Fraction(0n, 1n))).toBe(true);
+    const ten = fromSiDimensionVector([-0, 0, 0, 0, 0, 0, 0]);
+    expect(ten[1]).toBe(0);
+    expect(Object.is(ten[1], -0)).toBe(false);
   });
 
   it('compares derived-unit dimensions via Fraction.equals', () => {

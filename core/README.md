@@ -43,8 +43,9 @@ console.log(isMatrix(m)); // true
 ### SI dimension vectors
 
 `toSiDimensionVector` returns exact `Fraction` exponents `[L, M, T, I, Θ, N, J]`; use
-`vec.map((f) => f.toNumber())` when you need plain numbers. `fromSiDimensionVector` accepts
-`number` or `Fraction` components and produces the length-10 `Unit` exponent array.
+`vec.map((f) => f.toNumber())` when you need plain numbers (there is no
+`toSiDimensionNumbers` helper). `fromSiDimensionVector` accepts `SiDimensionExponent`
+(`number | Fraction`) and produces the length-10 `Unit` exponent array.
 
 ### Functions
 

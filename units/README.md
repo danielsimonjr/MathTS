@@ -20,7 +20,7 @@ npm install @danielsimonjr/mathts-units
 - Registry: `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`.
 - Prefixes: `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`.
 - `DIMENSIONLESS`, `dim`, and the `Dimensions` / `UnitDef` types.
-- `toSiDimensionVector` / `fromSiDimensionVector` — `SiDimensionVector` exponents are core `Fraction`s; `Unit.dimensions` remains `number[]`.
+- `toSiDimensionVector` / `fromSiDimensionVector` — `SiDimensionVector` exponents are core `Fraction`s (`SiDimensionExponent` is `number | Fraction` on the way in); `Unit.dimensions` remains `number[]`. Import `Fraction` from `@danielsimonjr/mathts-core` when comparing components.
 
 ```ts
 import { Unit } from '@danielsimonjr/mathts-units';
