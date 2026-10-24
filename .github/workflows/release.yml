@@ -1,8 +1,13 @@
 name: Release
 
-# Versions packages, tags them, and opens GitHub Releases. npm publish is the
+# Tagging, GitHub Releases, and the in-workflow Publish call are OFF unless the
+# repository variable RELEASES_ENABLED is exactly the string `true` (unset is off).
+# Releases stay disabled while the PySR roadmap is incomplete; re-enable by setting
+# RELEASES_ENABLED=true in Actions → Variables. The version PR step still runs.
+#
+# Versions packages, tags them, and opens GitHub Releases when enabled. npm publish is the
 # Publish workflow (.github/workflows/publish.yml), called from this run when
-# the push actually changed a package version.
+# the push actually changed a package version and releases are enabled.
 #
 # What each push does:
 # 1. `changeset git-tag` tags every public workspace package whose current
@@ -26,8 +31,7 @@ name: Release
 # workflow_call, in the same run, instead of waiting for that event. A person
 # opening a release still triggers Publish via `release: published`, and
 # workflow_dispatch on Publish is the catch-up path for versions already on
-# main (the packages bumped by #334: this PR does not change their versions,
-# so merging it tags and opens releases but does not publish).
+# main when RELEASES_ENABLED is true.
 #
 # Do NOT put a `publish:` input back on changesets/action. That input publishes
 # on every push that has no pending changesets, including ordinary commits, and
@@ -99,8 +103,10 @@ jobs:
       # refuses to tag when a package.json differs from HEAD, and
       # tools/test/ensure-package-releases.test.mjs pins this order.
       - name: Tag packages and open GitHub releases
+        if: vars.RELEASES_ENABLED == 'true'
         id: tags
         env:
+          RELEASES_ENABLED: ${{ vars.RELEASES_ENABLED }}
           BEFORE_SHA: ${{ github.event.before }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
@@ -127,7 +133,7 @@ jobs:
   publish:
     name: Publish
     needs: release
-    if: needs.release.outputs.versions_bumped == 'true'
+    if: vars.RELEASES_ENABLED == 'true' && needs.release.outputs.versions_bumped == 'true'
     permissions:
       contents: read
     uses: ./.github/workflows/publish.yml

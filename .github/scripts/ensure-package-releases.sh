@@ -91,6 +91,14 @@ if ! git diff --quiet HEAD -- ':(glob)**/package.json'; then
   exit 1
 fi
 
+if [ "${RELEASES_ENABLED:-}" != "true" ]; then
+  echo "RELEASES_ENABLED is not 'true'; not tagging, pushing tags, or opening GitHub releases."
+  if [ -n "${GITHUB_OUTPUT:-}" ]; then
+    echo "versions_bumped=false" >> "${GITHUB_OUTPUT}"
+  fi
+  exit 0
+fi
+
 git config user.name "${BOT_NAME}"
 git config user.email "${BOT_EMAIL}"
 

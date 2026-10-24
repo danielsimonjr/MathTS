@@ -405,6 +405,10 @@ its rationale.
 
 - **Nothing is released per milestone or per sprint.** No version PR merge, no tag, no
   GitHub Release, no npm publish.
+- **CI guard:** set the repository Actions variable `RELEASES_ENABLED` to `true` only when
+  this section’s criteria are met. Until then it stays unset (off). Tagging, GitHub Releases,
+  and npm publish are disabled; the version PR still opens. Re-enable with
+  `RELEASES_ENABLED=true` — do not delete the Release or Publish workflows.
 - Each PR adds a changeset (B7). Changesets accumulate on `main`, including the ones
   M1, M3 and M4 already merged. The "chore: release packages" version PR that the
   Release workflow keeps open stays **unmerged** until the whole roadmap is done.
