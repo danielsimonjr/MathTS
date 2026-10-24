@@ -582,6 +582,14 @@ export-index gate, architecture prose, M3 benchmark) stay open. Sprint 2R's ODE/
 Jacobians, Nelder–Mead merge, `linearRegression`/`linregress`, and `numericRealRoots`
 stay open.
 
+**Status (2026-10-24).** Merged: PR-POLY (#412), PR-SIDIM (#414, D-2: `SiDimensionVector`
+exponents are `core` `Fraction`s), PR-RNG (#415: `mulberry32`, `boxMuller` and
+`rowMajorStrides` now live in `core`; `workerpool` keeps one parity-pinned copy because its
+worker bundle cannot import `core`), PR-LM (#416), PR-MATMUL (#417) and PR-SPECIAL (#418).
+M5's `createSeededRng`/`fork` is **not** started: only the existing generator body moved.
+The D-3 deletions are PR #413. The release guard (#411) keeps tags, GitHub Releases and
+publish off until the repository variable `RELEASES_ENABLED` is set to `true`.
+
 - **Scope:**
   1. **The remaining four Mulberry32 copies → M5** (audit I-4). M5 already moved the
      first of the five, `makeMulberry32` in `tensor/src/operations/random.ts`. Move
