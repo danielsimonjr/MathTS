@@ -402,10 +402,18 @@ test('release.yml runs the tag step before the changesets action', () => {
   const tagStepName = job.search(/^ {6}- name: Tag packages and open GitHub releases\s*$/m);
   const tagStep = job.search(/^ {8}id: tags\s*$/m);
   const actionStep = job.search(/^ {8}id: changesets\s*$/m);
+  const stepsAt = job.search(/^ {4}steps:\s*$/m);
+  assert.ok(tagStepName >= 0, 'the tag step name is missing from the release job');
   assert.ok(tagStep > 0, 'the tag step (id: tags) is missing from the release job');
   assert.ok(
     actionStep > 0,
     'the changesets action step (id: changesets) is missing from the release job'
+  );
+  assert.ok(stepsAt > 0, 'the release job has no steps');
+  assert.doesNotMatch(
+    job.slice(0, stepsAt),
+    /^ {4}if:/m,
+    'the Version job must not be gated: the version PR step has to run while releases are off'
   );
   assert.ok(
     tagStep < actionStep,
@@ -418,13 +426,20 @@ test('release.yml runs the tag step before the changesets action', () => {
     'the step before the action must be the release script'
   );
   assert.match(tagBlock, /if: vars\.RELEASES_ENABLED == 'true'/);
+  assert.match(
+    tagBlock,
+    /RELEASES_ENABLED: \$\{[{] vars\.RELEASES_ENABLED [}]\}/,
+    'the tag step must pass vars.RELEASES_ENABLED into the script; without it the script guard stays off even when the variable is true'
+  );
   const changesetsBlock = job.slice(actionStep);
   assert.doesNotMatch(changesetsBlock, /RELEASES_ENABLED/);
 
   const publishJob = workflow.match(/^ {2}publish:\n(?:(?! {2}\S).*\n?)*/m)?.[0];
   assert.ok(publishJob, 'the publish job is missing');
-  assert.match(publishJob, /if: vars\.RELEASES_ENABLED == 'true'/);
-  assert.match(publishJob, /versions_bumped/);
+  assert.match(
+    publishJob,
+    /if: vars\.RELEASES_ENABLED == 'true' && needs\.release\.outputs\.versions_bumped == 'true'/
+  );
 
   const publishYaml = readFileSync(publishWorkflow, 'utf8');
   const publishJobDef = publishYaml.match(/^ {2}publish:\n(?:(?! {2}\S).*\n?)*/m)?.[0];
