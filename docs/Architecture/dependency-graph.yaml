@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-24'
   totalFiles: 1189
   totalModules: 82
-  totalExports: 6143
+  totalExports: 6144
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4576,6 +4576,10 @@ modules:
           imports:
             - condest
           reExport: true
+        - file: ./common.js
+          imports:
+            - matMul
+          reExport: true
       workspaceDependencies: []
       exports:
         - eig
@@ -4625,6 +4629,7 @@ modules:
         - RQResult
         - QLResult
         - condest
+        - matMul
       reExported:
         - eig
         - eigvals
@@ -4672,6 +4677,7 @@ modules:
         - RQResult
         - QLResult
         - condest
+        - matMul
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -10529,7 +10535,14 @@ modules:
         - file: ./factories/index.js
           imports:
             - inv
-      workspaceDependencies: []
+        - file: ./numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
       exports:
         - nelderMead
         - gradientDescent
@@ -12980,6 +12993,7 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
+            - matMul
             - svd
       exports:
         - quaternionInverse
@@ -14576,7 +14590,11 @@ modules:
         - file: ../distribution-functions.js
           imports:
             - studentTTwoSidedP
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - matMul
       exports:
         - ols
       interfaces:
@@ -14688,7 +14706,11 @@ modules:
         - file: ../typed/numeric.js
           imports:
             - linsolve
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - matMul
       exports:
         - dlyap
         - care
@@ -14891,7 +14913,7 @@ modules:
         - nnls
         - lsqBounded
     functions/src/numeric/numeric-jacobian.ts:
-      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central'
+      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -15016,6 +15038,7 @@ modules:
             - DenseMatrix
             - lu
             - luSolve
+            - matMul
       exports:
         - createSolveODE
         - _factorSolver
@@ -15074,7 +15097,11 @@ modules:
         - file: ./eigsh.js
           imports:
             - eigsh
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - svds
       interfaces:
@@ -20980,6 +21007,7 @@ modules:
             - LogmOptions
             - SqrtmOptions
             - DenseMatrix
+            - matMul
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -21043,6 +21071,9 @@ modules:
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
+        - file: ../optimization-extra.js
+          imports:
+            - levenbergMarquardt
         - file: ../numeric/rational-nullspace.js
           imports:
             - rationalNullspace
@@ -39082,15 +39113,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198527
-  totalExports: 6143
+  totalLinesOfCode: 198415
+  totalExports: 6144
   totalClasses: 58
   totalInterfaces: 530
   totalFunctions: 1954
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2591
+  totalReExports: 2592
   totalTypeOnlyImports: 602
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

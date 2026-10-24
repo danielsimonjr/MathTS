@@ -1719,10 +1719,11 @@ graph LR
 | `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions`                                          | Re-export |
 | `./qr-family.js`  | `lq, rq, ql, LQResult, RQResult, QLResult`                                              | Re-export |
 | `./condest.js`    | `condest`                                                                               | Re-export |
+| `./common.js`     | `matMul`                                                                                | Re-export |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`
 
 ---
 
@@ -4487,11 +4488,18 @@ graph LR
 
 ### `functions/src/optimization-extra.ts` - Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
 
+**Workspace Dependencies:**
+
+| Package                      | Import        |
+| ---------------------------- | ------------- |
+| `@danielsimonjr/mathts-core` | `pairwiseDot` |
+
 **Internal Dependencies:**
 
-| File                   | Imports | Type   |
-| ---------------------- | ------- | ------ |
-| `./factories/index.js` | `inv`   | Import |
+| File                            | Imports           | Type   |
+| ------------------------------- | ----------------- | ------ |
+| `./factories/index.js`          | `inv`             | Import |
+| `./numeric/numeric-jacobian.js` | `numericJacobian` | Import |
 
 **Exports:**
 
@@ -5400,9 +5408,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import |
-| ------------------------------ | ------ |
-| `@danielsimonjr/mathts-matrix` | `svd`  |
+| Package                        | Import        |
+| ------------------------------ | ------------- |
+| `@danielsimonjr/mathts-matrix` | `matMul, svd` |
 
 **Internal Dependencies:**
 
@@ -6562,6 +6570,12 @@ graph LR
 
 ### `functions/src/ml/ols.ts` - Ordinary least-squares regression for a general design matrix (Wave — ML primitives).
 
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-matrix` | `matMul` |
+
 **Internal Dependencies:**
 
 | File                           | Imports             | Type   |
@@ -6640,6 +6654,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/control-equations.ts` - Control-theory matrix equations — `dlyap`/`care`/`dare`.
+
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-matrix` | `matMul` |
 
 **Internal Dependencies:**
 
@@ -6786,7 +6806,7 @@ graph LR
 
 ---
 
-### `functions/src/numeric/numeric-jacobian.ts` - Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central
+### `functions/src/numeric/numeric-jacobian.ts` - Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite
 
 **Exports:**
 
@@ -6867,9 +6887,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                     |
-| ------------------------------ | -------------------------- |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, luSolve` |
+| Package                        | Import                             |
+| ------------------------------ | ---------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, luSolve, matMul` |
 
 **Internal Dependencies:**
 
@@ -6912,6 +6932,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/svds.ts` - Sparse / partial SVD — the top-`k` singular triplets via Lanczos.
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Internal Dependencies:**
 
@@ -10101,11 +10127,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                                                                                                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix` |
-| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                  |
-| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                |
+| Package                          | Import                                                                                                                                                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul` |
+| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                          |
+| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                        |
 
 **Exports:**
 
@@ -10123,6 +10149,7 @@ graph LR
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
+| `../optimization-extra.js`         | `levenbergMarquardt`                                                                                                               | Import    |
 | `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
 | `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
 | `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
@@ -17768,12 +17795,12 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `core/src/index`                                       | 17 files     | 0 files    |
-| `matrix/src/operations/index`                          | 15 files     | 1 file     |
+| `matrix/src/operations/index`                          | 16 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 8 files      | 8 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
-| `functions/src/bitwise/rightLogShift`                  | 14 files     | 1 file     |
 
 ---
 
@@ -18616,9 +18643,9 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 198527 |
-| Total Exports           | 6143   |
-| Total Re-exports        | 2591   |
+| Total Lines of Code     | 198415 |
+| Total Exports           | 6144   |
+| Total Re-exports        | 2592   |
 | Total Classes           | 58     |
 | Total Interfaces        | 530    |
 | Total Functions         | 1954   |

@@ -59,3 +59,6 @@ export { lq, rq, ql, type LQResult, type RQResult, type QLResult } from './qr-fa
 
 // Condition-number estimate (DenseMatrix primitive — Hager/Higham 1-norm power iteration)
 export { condest } from './condest.js';
+
+// Dense nested-array matrix product (shared by decompositions and @danielsimonjr/mathts-functions)
+export { matMul } from './common.js';

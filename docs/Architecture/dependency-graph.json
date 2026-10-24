@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-24",
     "totalFiles": 1189,
     "totalModules": 82,
-    "totalExports": 6143
+    "totalExports": 6144
   },
   "entryPoints": [
     {
@@ -4746,6 +4746,11 @@
             "file": "./condest.js",
             "imports": ["condest"],
             "reExport": true
+          },
+          {
+            "file": "./common.js",
+            "imports": ["matMul"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -4796,7 +4801,8 @@
           "LQResult",
           "RQResult",
           "QLResult",
-          "condest"
+          "condest",
+          "matMul"
         ],
         "reExported": [
           "eig",
@@ -4844,7 +4850,8 @@
           "LQResult",
           "RQResult",
           "QLResult",
-          "condest"
+          "condest",
+          "matMul"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -11136,9 +11143,19 @@
           {
             "file": "./factories/index.js",
             "imports": ["inv"]
+          },
+          {
+            "file": "./numeric/numeric-jacobian.js",
+            "imports": ["numericJacobian"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseDot"]
+          }
+        ],
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
         "interfaces": ["OptimizeResult", "LMResult"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
@@ -13878,7 +13895,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["svd"]
+            "imports": ["matMul", "svd"]
           }
         ],
         "exports": [
@@ -15656,7 +15673,13 @@
             "imports": ["studentTTwoSidedP"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["matMul"]
+          }
+        ],
         "exports": ["ols"],
         "interfaces": ["OlsOptions", "OlsResult"],
         "functions": ["ols"]
@@ -15754,7 +15777,13 @@
             "imports": ["linsolve"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["matMul"]
+          }
+        ],
         "exports": ["dlyap", "care", "dare"],
         "functions": ["dlyap", "care", "dare"]
       },
@@ -15902,7 +15931,7 @@
         "functions": ["nnls", "lsqBounded"]
       },
       "functions/src/numeric/numeric-jacobian.ts": {
-        "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central",
+        "description": "Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -16011,7 +16040,7 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "lu", "luSolve"]
+            "imports": ["DenseMatrix", "lu", "luSolve", "matMul"]
           }
         ],
         "exports": [
@@ -16060,7 +16089,13 @@
             "imports": ["eigsh"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
         "exports": ["svds"],
         "interfaces": ["SvdsOptions", "SvdsResult"],
         "functions": ["svds"]
@@ -22471,7 +22506,8 @@
               "ExpmOptions",
               "LogmOptions",
               "SqrtmOptions",
-              "DenseMatrix"
+              "DenseMatrix",
+              "matMul"
             ]
           },
           {
@@ -22541,6 +22577,10 @@
           {
             "file": "../numeric/adaptive-quad.js",
             "imports": ["quad"]
+          },
+          {
+            "file": "../optimization-extra.js",
+            "imports": ["levenbergMarquardt"]
           },
           {
             "file": "../numeric/rational-nullspace.js",
@@ -41425,15 +41465,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1189,
     "totalModules": 82,
-    "totalLinesOfCode": 198527,
-    "totalExports": 6143,
+    "totalLinesOfCode": 198415,
+    "totalExports": 6144,
     "totalClasses": 58,
     "totalInterfaces": 530,
     "totalFunctions": 1954,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2591,
+    "totalReExports": 2592,
     "totalTypeOnlyImports": 602,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

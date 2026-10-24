@@ -257,6 +257,8 @@ if (isDenseMatrix(m)) {
 }
 ```
 
+`matMul` is the dense `number[][]` matrix product (i–k–j accumulation with zero-skip).
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->

@@ -240,6 +240,7 @@
     "matrix/src/operations/common.ts": [
       "matrix/src/operations/eig.ts",
       "matrix/src/operations/expm.ts",
+      "matrix/src/operations/index.ts",
       "matrix/src/operations/logm.ts",
       "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/schur.ts",
@@ -1715,6 +1716,7 @@
     "functions/src/numeric/numeric-jacobian.ts": [
       "functions/src/index.ts",
       "functions/src/numeric/fsolve.ts",
+      "functions/src/optimization-extra.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/numeric/open-root-finders.ts": [
@@ -1744,7 +1746,10 @@
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/optimization-extra.ts": ["functions/src/index.ts"],
+    "functions/src/optimization-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
     "functions/src/ml/kde.ts": ["functions/src/index.ts"],

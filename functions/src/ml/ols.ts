@@ -6,6 +6,7 @@
  * to an arbitrary number of predictors via the normal equations, with the same
  * `studentTTwoSidedP`-based significance testing (the tail computed directly).
  */
+import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
 import { studentTTwoSidedP } from '../distribution-functions.js';
 
 /** Options for `ols`. */
@@ -41,23 +42,6 @@ function transpose(m: number[][]): number[][] {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       out[j][i] = m[i][j];
-    }
-  }
-  return out;
-}
-
-function matmul(a: number[][], b: number[][]): number[][] {
-  const n = a.length;
-  const k = b.length;
-  const m = b[0].length;
-  const out: number[][] = Array.from({ length: n }, () => new Array(m).fill(0));
-  for (let i = 0; i < n; i++) {
-    for (let c = 0; c < k; c++) {
-      const aic = a[i][c];
-      if (aic === 0) continue;
-      for (let j = 0; j < m; j++) {
-        out[i][j] += aic * b[c][j];
-      }
     }
   }
   return out;

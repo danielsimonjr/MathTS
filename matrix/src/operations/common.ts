@@ -58,7 +58,25 @@ export function isSymmetric(matrix: number[][], tolerance: number = 1e-10): bool
 // Dense algebra
 // ---------------------------------------------------------------------------
 
-/** Matrix multiply C = A × B. */
+/**
+ * Dense matrix product **C = A × B** for nested `number[][]` arrays (row-major).
+ *
+ * Uses an i–k–j accumulation loop and skips multiplications when `A[i][k] === 0`.
+ * Dimensions are `(m × p) · (p × n) → (m × n)`; `A` must be non-empty (`A[0]` is read
+ * for the inner dimension). `B` must have at least one row so `B[0].length` is defined.
+ *
+ * @param A - Left factor, `m` rows × `p` columns
+ * @param B - Right factor, `p` rows × `n` columns
+ * @returns Product `C` with shape `m × n`
+ *
+ * @example
+ * ```ts
+ * import { matMul } from '@danielsimonjr/mathts-matrix';
+ *
+ * const C = matMul([[1, 2], [3, 4]], [[5, 6], [7, 8]]);
+ * // C[0] === [19, 22], C[1] === [43, 50]
+ * ```
+ */
 export function matMul(A: number[][], B: number[][]): number[][] {
   const m = A.length;
   const p = A[0].length;
