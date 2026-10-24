@@ -1,11 +1,10 @@
 # Proposal: PySR-informed symbolic-search primitives in MathTS
 
-> **Guiding principle (Daniel):** Reuse and expand the existing libraries and packages; add new functionality, files or packages only when necessary or truly missing from the codebase.
+> **Guiding principle (Daniel):** Reuse and expand the existing libraries and packages; add new functionality, files or packages only when necessary or truly missing from the codebase. Reviewers must reject PRs that duplicate or bypass existing code.
 
 Every milestone and every integration sprint in this roadmap is judged against that
-principle. Reviewers reject a change that duplicates existing code, or that bypasses an
-existing implementation by writing its own copy. A new file needs a stated reason that no
-existing module fits. D-1 is decided: no new package for this roadmap (§10).
+principle. A new file needs a stated reason that no existing module fits. D-1 is decided:
+no new package for this roadmap (§10).
 
 **Author:** MathTS maintenance
 **Date:** 2026-10-22 (refreshed 2026-10-23 against the
@@ -14,7 +13,8 @@ existing module fits. D-1 is decided: no new package for this roadmap (§10).
 M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 ([#395](https://github.com/danielsimonjr/MathTS/pull/395)) are merged; M1's weight lookup was
 fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). M2 and M5, Phases 2–5, and
-the integration sprints 1R–5R are open. Nothing is released until every item is done (§7).
+the integration sprints 1R–5R are open. D-1, D-2 and D-3 are decided (§10). Nothing is
+released until every item is done (§7).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
 `@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
 `matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 lives in `functions`, and M11 may sit in `expression` next to `scalar-structure.ts` only if it imports `expression` and `core` alone. A package is not an option in this roadmap (§8, Phase 4; §10).
@@ -270,7 +270,7 @@ Line numbers drift; the symbol names are the stable reference.
 | Stable reductions and tolerance                                                        | `pairwiseSum`, `pairwiseDot`, `norm2` (`core/src/numeric/stable.ts`, on the `core` barrel); `nearlyEqual` (`core/src/number.ts:710`, through `@danielsimonjr/mathts-core/internal`)                                                                                                                                                                                                                                                                                                                                                              | New losses, residual sums and tolerance checks use these. `functions/src/numeric/svds.ts:65` still has the overflowing `sqrt(sum of squares)` that `core` `norm2` replaces (Sprint 2R).                                                                                                                                                                                                                                                                                                                                                           |
 | Forward-mode duals                                                                     | `core/src/types/dual.ts`, `core/src/types/dual-rules.ts` (`DUAL_UNARY_RULES`), `functions/src/grad-forward.ts` (`derivativeAt`, `valueAndDerivativeAt`, `gradientAt`)                                                                                                                                                                                                                                                                                                                                                                            | The dual rules cover every lowered `ScalarNode` function (exp, log, log2, log10, sin, cos, tan, sinh, cosh, tanh, abs), so exact constant gradients need no new calculus. They are unary only; `^` needs its two partials (M6).                                                                                                                                                                                                                                                                                                                   |
 | Reverse-mode AD                                                                        | `autograd/src/{tape,reverse-grad,grad}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Tensor-level. It is not needed for the scalar constant counts PySR uses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Units and dimension vectors                                                            | `core/src/types/unit/Unit.ts` (10-slot `dimensions`, `equalBase`, `multiply` / `divide` / `pow`), `core/src/types/si-dimension-vector.ts` (`SiDimensionVector` `[L,M,T,I,Θ,N,J]`, "the order UPT's Buckingham routine uses"; `toSiDimensionVector` and its inverse `fromSiDimensionVector`, plus the record form `fromSiDimensions`)                                                                                                                                                                                                             | `SiDimensionVector` exponents are `number`, not `Fraction` (`si-dimension-vector.ts:36`; decision D-2). Unit-string parsing was hardened for UPT delegation (issue #347, `core/tests/types/unit-upt-delegation.test.ts`). `docs/integration/upt.md` Q2 keeps dimensional analysis **on `Tensor`** UPT-only.                                                                                                                                                                                                                                       |
+| Units and dimension vectors                                                            | `core/src/types/unit/Unit.ts` (10-slot `dimensions`, `equalBase`, `multiply` / `divide` / `pow`), `core/src/types/si-dimension-vector.ts` (`SiDimensionVector` `[L,M,T,I,Θ,N,J]`, "the order UPT's Buckingham routine uses"; `toSiDimensionVector` and its inverse `fromSiDimensionVector`, plus the record form `fromSiDimensions`)                                                                                                                                                                                                             | `SiDimensionVector` exponents are `number` today (`si-dimension-vector.ts:36`). D-2 is decided: Sprint 1R item 7 (**PR-SIDIM**) widens them to `core` `Fraction`s; `Unit.dimensions` stays `number[]`. Unit-string parsing was hardened for UPT delegation (issue #347, `core/tests/types/unit-upt-delegation.test.ts`). `docs/integration/upt.md` Q2 keeps dimensional analysis **on `Tensor`** UPT-only.                                                                                                                                        |
 | Physical constants                                                                     | `functions/src/type/unit/physicalConstants.ts` (CODATA-2022, each one a core `UnitInstance`)                                                                                                                                                                                                                                                                                                                                                                                                                                                     | They carry no uncertainty field (no `uncertainty` occurrences in the file), which matters if constants become "data" (open question, §10).                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Exact rational nullspace                                                               | `rationalNullspace` (`functions/src/numeric/rational-nullspace.ts:145`, re-exported through `functions/src/typed/numeric.ts`; used by UPT `src/dimensional/buckingham.ts`)                                                                                                                                                                                                                                                                                                                                                                       | It is the core of constant-unit solving (M10).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Seeded RNG                                                                             | `seedProbabilityRng` (global, seedrandom, `functions/src/typed/probability.ts:300`) and `createRng` (seedrandom, `functions/src/probability/util/seededRNG.ts:14`). **Five** private, byte-identical Mulberry32 copies: `tensor/src/operations/random.ts:64` `makeMulberry32` (with `boxMuller` at `:84`), `functions/src/typed/hypothesis.ts:217` `_makeMulberry32`, `functions/src/typed/dist-objects.ts:289` `_makeMulberry32`, `functions/src/typed/graph.ts:467` `_mulberry32`, `packages/workerpool/src/worker.ts:878` `_workerMulberry32` | `seedProbabilityRng` reseeds one module-level stream. `createRng` returns a per-seed seedrandom closure but has no `fork`, and it is not Mulberry32, so it cannot reproduce the existing seeded streams. There is no splittable Mulberry32 stream for reproducible multi-island search. M5 moves the tensor body into `core`; Sprint 1R moves the other four copies onto it. No string-to-seed hash exists in the repo.                                                                                                                           |
@@ -309,10 +309,10 @@ Line numbers drift; the symbol names are the stable reference.
 - **No IR change in Phases 1–3.** Milestones consume `ScalarNode` exactly as
   `createScalarBuilder` produces it. Free constants are `symbol`s named in a
   `parameters` list.
-- **No new package.** Code goes into the package that already owns the surrounding
-  code and already has the needed dependency edges. A new dependency edge between
-  existing packages (for example `workerpool` → `core`) is allowed when it creates no
-  cycle (`bun run docs:graph -- cycles`).
+- **No new package.** D-1 is decided: out of scope for this roadmap. Code goes into the
+  package that already owns the surrounding code and already has the needed dependency
+  edges. A new dependency edge between existing packages (for example `workerpool` →
+  `core`) is allowed when it creates no cycle (`bun run docs:graph -- cycles`).
 - **Oracle-pinned tests** (`ROADMAP.md` guiding principles). Pin against hand-computed
   closed forms, PySR's published formulas (§2.3), or parity with an existing,
   independent implementation (`evaluateScalar`, `simplify`, `numericJacobian`).
@@ -615,17 +615,21 @@ stay open.
      `0.5` must be `1/2` (`numerator === 1n`, `denominator === 2n`), not a continued-fraction
      accident. **`fromSiDimensionVector`:** accept `readonly (number | Fraction)[]` so today's
      number tuples still run; return `number[]` via `Fraction.toNumber()` for the length-10
-     `Unit` vector. No new accessor export: consumers that need numbers use
-     `v.map((f) => f.toNumber())`. **Changeset:** `minor` on `@danielsimonjr/mathts-core` and
+     `Unit` vector. An integral `Fraction` converts back to that integer.
+     **Back-compat accessor** (new export, the migration path for `vec[0] === 1`):
+     `toSiDimensionNumbers(v: SiDimensionVector): readonly [number, number, number, number, number, number, number]`
+     using `toNumber()`. Do not keep the old return type of `toSiDimensionVector`.
+     **Changeset:** `minor` on `@danielsimonjr/mathts-core` and
      `@danielsimonjr/mathts-units`, body starting with `BREAKING:` (not `major`). **Tests:**
      rewrite `core/tests/types/si-dimension-vector.test.ts` to compare `Fraction` components
-     (`1/1`, `1/1`, `-2/1` for a newton) and `0.5 → 1/2`; `fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])`
+     (`1/1`, `1/1`, `-2/1` for a newton) and to round-trip through
+     `toSiDimensionNumbers`. Add `0.5 → 1/2`. `fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])`
      still returns the length-10 `number[]`. **Docs:** `docs/api/core.md` (run
      `bun run docs:functions`), `units/README.md` one sentence, M9 below. M9 does not start
      until PR-SIDIM has merged.
 - **Reuse:** M5 `createSeededRng`; `Tensor.rowMajorStrides` as the body to lift;
   the existing `TARGETS` mechanism and generator; the existing `tools/benchmark/`
-  harness.
+  harness; `core` `Fraction` for PR-SIDIM (no second dimension type).
 - **Exit criteria:**
   - Outside `core`, a grep for the Mulberry32 constant `0x6d2b79f5` in production `.ts`
     files finds at most the documented `workerpool` copy.
@@ -641,11 +645,14 @@ stay open.
     `tools/benchmark/` and has been run twice on Node per the `AGENTS.md` rules. This
     closes M3's open benchmark box and is the input M14 depends on. No speed number is
     in any doc unless that committed benchmark produced it.
+  - `SiDimensionVector` exponents are `core` `Fraction`s; `toSiDimensionNumbers`
+    round-trips; `Unit.dimensions` is still `number[]`.
 - **DoD:** base checklist + the following specifics:
   - [ ] B1 lists each removed copy and the symbol that replaced it.
   - [ ] Oracle: pre-change output fixtures for every migrated seeded function.
-  - [ ] B3: no public export added or removed except the `core` strides helper; consumer
-        type check passes.
+  - [ ] B3: no public export added or removed except the `core` strides helper and
+        PR-SIDIM (`SiDimensionVector` exponents become `Fraction`; new export
+        `toSiDimensionNumbers`); consumer type check passes.
   - [ ] M3 benchmark committed, with the output of both Node runs in the PR; it
         interleaves the two variants and keeps a control case.
 
@@ -818,6 +825,11 @@ export function numericallyEquivalent(
 
 #### Sprint 2R — Phase 2 integration
 
+The two Levenberg–Marquardt bodies, `svds` `norm2`, nested-array `matMul` copies,
+log-gamma, and the retired erf are pulled forward into **PR-LM**, **PR-MATMUL**, and
+**PR-SPECIAL**. Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead
+merge, `linearRegression`/`linregress`, and `numericRealRoots`.
+
 - **Scope:** M7 and M8 fit and compare numbers, so the numerics under them must have
   one correct implementation each.
   1. **Levenberg–Marquardt and finite-difference Jacobians** (I-5, extended). There are
@@ -941,7 +953,8 @@ merged.**
   for the `[L,M,T,I,Θ,N,J]` vector and its order; `Fraction` (`core`) exponents on that
   vector after PR-SIDIM; `Unit` and the physical constants for the fixtures;
   `forEachScalar` for the walk. `RationalDimension` **is** `SiDimensionVector`; do not add
-  a second dimension vector type.
+  a second dimension vector type. Exponents come from the `Fraction` vector, not from
+  `toNumber()`.
 - **API sketch:**
 
 ```ts
@@ -1169,6 +1182,9 @@ export function enumerateScalars(
   - [ ] A measured `ScalarNode` batch threshold, from two Node runs, cited in the code.
 
 #### Sprint 4R — Phase 4 integration
+
+`polymul`/`polyMulJS` is pulled forward into **PR-POLY**. Item 3 records that work; do not
+re-decide it here if PR-POLY has already merged.
 
 - **Scope:** acceleration-tier and layering hygiene in the code M14 touches.
   1. **D-1 placement record.** Write the `functions` vs `expression` placement and the
