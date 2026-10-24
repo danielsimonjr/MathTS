@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-24",
     "totalFiles": 1186,
     "totalModules": 82,
-    "totalExports": 6128
+    "totalExports": 6129
   },
   "entryPoints": [
     {
@@ -20595,6 +20595,7 @@
             "file": "../wasm/poly/wasm-bridge.js",
             "imports": [
               "polyMulDispatch",
+              "polyMulJS",
               "polyDivModDispatch",
               "resultantDispatch",
               "discriminantDispatch",
@@ -24705,6 +24706,7 @@
         "exports": [
           "WASM_POLY_THRESHOLD",
           "WASM_POLY_FIT_THRESHOLD",
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -24715,6 +24717,7 @@
           "resetPolyWasm"
         ],
         "functions": [
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -41309,11 +41312,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1186,
     "totalModules": 82,
-    "totalLinesOfCode": 198582,
-    "totalExports": 6128,
+    "totalLinesOfCode": 198586,
+    "totalExports": 6129,
     "totalClasses": 58,
     "totalInterfaces": 530,
-    "totalFunctions": 1946,
+    "totalFunctions": 1947,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,

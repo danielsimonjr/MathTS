@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-24'
   totalFiles: 1186
   totalModules: 82
-  totalExports: 6128
+  totalExports: 6129
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -19194,6 +19194,7 @@ modules:
         - file: ../wasm/poly/wasm-bridge.js
           imports:
             - polyMulDispatch
+            - polyMulJS
             - polyDivModDispatch
             - resultantDispatch
             - discriminantDispatch
@@ -23078,6 +23079,7 @@ modules:
       exports:
         - WASM_POLY_THRESHOLD
         - WASM_POLY_FIT_THRESHOLD
+        - polyMulJS
         - polyMulDispatch
         - polyDivModDispatch
         - resultantDispatch
@@ -23087,6 +23089,7 @@ modules:
         - legendreFitDispatch
         - resetPolyWasm
       functions:
+        - polyMulJS
         - polyMulDispatch
         - polyDivModDispatch
         - resultantDispatch
@@ -38967,11 +38970,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1186
   totalModules: 82
-  totalLinesOfCode: 198582
-  totalExports: 6128
+  totalLinesOfCode: 198586
+  totalExports: 6129
   totalClasses: 58
   totalInterfaces: 530
-  totalFunctions: 1946
+  totalFunctions: 1947
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1616
