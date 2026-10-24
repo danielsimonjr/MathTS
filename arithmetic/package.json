@@ -42,8 +42,7 @@
     }
   },
   "dependencies": {
-    "@danielsimonjr/mathts-functions": "^0.69.0",
-    "typed-function": "^4.0.0"
+    "@danielsimonjr/mathts-functions": "^0.69.0"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",

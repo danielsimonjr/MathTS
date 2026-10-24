@@ -273,10 +273,12 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 From the 2026-05-01 security release. Any change touching these must preserve them
 (regression tests guard each):
 
-1. **WASM SHA-384 verification.** `functions/src/wasm/WasmLoader.ts` and
-   `assembly/src/bindings/wasm-loader.ts` hash the `.wasm` buffer against
-   `wasm-manifest.json` before instantiate. Never weaken/skip — even on streaming
-   compile. Test: `functions/tests/security/wasm-integrity.test.ts`.
+1. **WASM SHA-384 verification.** Canonical logic is `core/src/wasm-loader.ts`
+   (`sha384OfBuffer` / `verifyWasmIntegrity`). `functions/src/wasm/WasmLoader.ts`
+   and `matrix/src/backends/WasmLoader.ts` invoke it against `wasm-manifest.json`
+   before instantiate. Never weaken/skip — even on streaming compile. Tests:
+   `functions/tests/security/wasm-integrity.test.ts`,
+   `matrix/tests/security/wasm-integrity.test.ts`.
 2. **Expression sandbox.** All property/method access in `expression/src/` must
    go through `getSafeProperty`/`setSafeProperty`/`getSafeMethod`
    (`expression/src/utils/customs.ts`). No direct `obj[name]`. Test:
