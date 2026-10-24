@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-24'
   totalFiles: 1189
   totalModules: 82
-  totalExports: 6140
+  totalExports: 6141
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4576,6 +4576,10 @@ modules:
           imports:
             - condest
           reExport: true
+        - file: ./common.js
+          imports:
+            - matMul
+          reExport: true
       workspaceDependencies: []
       exports:
         - eig
@@ -4625,6 +4629,7 @@ modules:
         - RQResult
         - QLResult
         - condest
+        - matMul
       reExported:
         - eig
         - eigvals
@@ -4672,6 +4677,7 @@ modules:
         - RQResult
         - QLResult
         - condest
+        - matMul
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -12987,6 +12993,7 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
+            - matMul
             - svd
       exports:
         - quaternionInverse
@@ -14583,7 +14590,11 @@ modules:
         - file: ../distribution-functions.js
           imports:
             - studentTTwoSidedP
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - matMul
       exports:
         - ols
       interfaces:
@@ -14695,7 +14706,11 @@ modules:
         - file: ../typed/numeric.js
           imports:
             - linsolve
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - matMul
       exports:
         - dlyap
         - care
@@ -15023,6 +15038,7 @@ modules:
             - DenseMatrix
             - lu
             - luSolve
+            - matMul
       exports:
         - createSolveODE
         - _factorSolver
@@ -20976,6 +20992,7 @@ modules:
             - LogmOptions
             - SqrtmOptions
             - DenseMatrix
+            - matMul
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -39075,15 +39092,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198609
-  totalExports: 6140
+  totalLinesOfCode: 198561
+  totalExports: 6141
   totalClasses: 58
   totalInterfaces: 530
   totalFunctions: 1952
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2591
+  totalReExports: 2592
   totalTypeOnlyImports: 602
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

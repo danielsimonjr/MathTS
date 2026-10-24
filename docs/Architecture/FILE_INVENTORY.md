@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1911
+**Total files**: 1912
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1164 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      661 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      662 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1911** |                                                                                                                |
+| **Total**     | **1912** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1189 |
-| `tests`    |   661 |
+| `tests`    |   662 |
 | `tools`    |    27 |
 
 ## Per-package counts
@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |   797 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |    98 |
+| `@danielsimonjr/mathts-matrix`         |    99 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    38 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -1680,6 +1680,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/operations/lu-qr-oracle.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/lu-solve.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/lu.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/operations/mat-mul.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/pinv.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/qr-family.test.ts`                                       | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/qr.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |

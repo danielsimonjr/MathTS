@@ -240,6 +240,7 @@
     "matrix/src/operations/common.ts": [
       "matrix/src/operations/eig.ts",
       "matrix/src/operations/expm.ts",
+      "matrix/src/operations/index.ts",
       "matrix/src/operations/logm.ts",
       "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/schur.ts",

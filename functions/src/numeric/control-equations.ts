@@ -1,3 +1,5 @@
+import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
+
 /**
  * Control-theory matrix equations — `dlyap`/`care`/`dare`.
  *
@@ -80,21 +82,6 @@ function transpose(A: number[][]): number[][] {
   const T = zeros(m, n);
   for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) T[j][i] = A[i][j];
   return T;
-}
-
-function matmul(A: number[][], B: number[][]): number[][] {
-  const n = A.length;
-  const k = B.length;
-  const m = B[0].length;
-  const C = zeros(n, m);
-  for (let i = 0; i < n; i++) {
-    for (let p = 0; p < k; p++) {
-      const a = A[i][p];
-      if (a === 0) continue;
-      for (let j = 0; j < m; j++) C[i][j] += a * B[p][j];
-    }
-  }
-  return C;
 }
 
 function matadd(A: number[][], B: number[][], s = 1): number[][] {
