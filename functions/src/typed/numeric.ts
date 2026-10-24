@@ -13,6 +13,7 @@
 
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
+import { levenbergMarquardt } from '../optimization-extra.js';
 export {
   rationalNullspace,
   type RationalNullspaceOptions,
@@ -897,7 +898,7 @@ export function rbfInterpolate(
 // =============================================================================
 
 /**
- * Nonlinear curve fitting using Levenberg-Marquardt algorithm.
+ * Nonlinear curve fitting via {@link levenbergMarquardt} on `ys[i] − f(xᵢ, p)`.
  *
  * @param f - Model function f(x, params) => y
  * @param xs - x data
@@ -911,84 +912,11 @@ export function curvefit(
   ys: number[],
   p0: number[]
 ): number[] {
-  const m = xs.length;
-  const n = p0.length;
-  let params = p0.slice();
-  let lambda = 0.001;
-  const maxIter = 200;
-  const delta = 1e-8;
-
-  function residuals(p: number[]): number[] {
-    return xs.map((x, i) => ys[i] - f(x, p));
-  }
-
-  function jacobian(p: number[]): number[][] {
-    const J: number[][] = [];
-    const r0 = residuals(p);
-    for (let i = 0; i < m; i++) {
-      J[i] = [];
-      for (let j = 0; j < n; j++) {
-        const pj = p.slice();
-        pj[j] += delta;
-        const rj = ys[i] - f(xs[i], pj);
-        J[i][j] = (rj - r0[i]) / delta;
-      }
-    }
-    return J;
-  }
-
-  function sumSqResiduals(p: number[]): f64 {
-    return residuals(p).reduce((s, r) => s + r * r, 0);
-  }
-
-  let prevCost = sumSqResiduals(params);
-
-  for (let iter = 0; iter < maxIter; iter++) {
-    const r = residuals(params);
-    const J = jacobian(params);
-
-    // J^T J
-    const JtJ: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-    const Jtr: number[] = new Array(n).fill(0);
-
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        let s = 0;
-        for (let k = 0; k < m; k++) s += J[k][i] * J[k][j];
-        JtJ[i][j] = s;
-      }
-      let s = 0;
-      for (let k = 0; k < m; k++) s += J[k][i] * r[k];
-      Jtr[i] = -s;
-    }
-
-    // (J^T J + lambda * diag(J^T J)) dp = -J^T r
-    const A: number[][] = JtJ.map((row) => row.slice());
-    for (let i = 0; i < n; i++) {
-      A[i][i] += lambda * (JtJ[i][i] || 1);
-    }
-
-    try {
-      const dp = linsolve(A, Jtr);
-      const newParams = params.map((p, i) => p + dp[i]);
-      const newCost = sumSqResiduals(newParams);
-
-      const costChange = Math.abs(newCost - prevCost);
-      if (newCost < prevCost) {
-        params = newParams;
-        prevCost = newCost;
-        lambda *= 0.1;
-      } else {
-        lambda *= 10;
-      }
-
-      if (costChange < 1e-15) break;
-    } catch {
-      lambda *= 10;
-    }
-  }
-
-  return params;
+  const { x } = levenbergMarquardt((p) => xs.map((xi, i) => ys[i] - f(xi, p)), p0, {
+    maxIter: 200,
+    tol: 1e-12,
+  });
+  return x;
 }
 
 /**
