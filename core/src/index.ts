@@ -259,3 +259,5 @@ export {
   neumaierCumsum,
   sumSquaredDeviations,
 } from './numeric/stable.js';
+export { mulberry32, boxMuller } from './numeric/rng.js';
+export { rowMajorStrides } from './numeric/strides.js';
