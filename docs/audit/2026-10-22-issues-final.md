@@ -1,6 +1,6 @@
 # Audit issues I-1 .. I-18: final texts (2026-10-24)
 
-The automation that ran the audit and this follow-up is restricted to read-only GitHub access for issues and did not file them, so the final issue texts are recorded here, ready to file. Status is relative to `origin/main` after the 2026-10-24 wave: #411 (release guard), #412 (polymul), #413 (D-3 deletions), #414 (D-2), #415 (RNG, strides), #416 (Levenberg-Marquardt, svds), #417 (matMul) are merged; #418 (lgamma, erf) is approved and treated as merged for status. Do not file an issue marked resolved as still open.
+The automation that ran the audit and this follow-up is restricted to read-only GitHub access for issues and did not file them, so the final issue texts are recorded here, ready to file. Status is relative to `origin/main` after the 2026-10-24 wave: #411 (release guard), #412 (polymul), #413 (D-3 deletions), #414 (D-2), #415 (RNG, strides), #416 (Levenberg-Marquardt, svds), #417 (matMul), #418 (lgamma, erf) are merged. Do not file an issue marked resolved as still open.
 
 ---
 

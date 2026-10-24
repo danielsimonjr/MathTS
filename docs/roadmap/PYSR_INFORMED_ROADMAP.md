@@ -13,7 +13,7 @@ no new package for this roadmap (§10).
 M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 ([#395](https://github.com/danielsimonjr/MathTS/pull/395)) are merged; M1's weight lookup was
 fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). Sprint 1R is **partial**
-(2026-10-24: #412–#417 merged; #418 approved and treated as merged for status; items 3–6
+(2026-10-24: #412–#418 merged; items 3–6
 still open). M2 and M5 (`createSeededRng`/`fork`), Phases 2–5, and sprints 2R–5R are open.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
@@ -592,7 +592,7 @@ exponents are `core` `Fraction`s), PR-RNG (#415: `mulberry32`, `boxMuller` and
 `rowMajorStrides` now live in `core`; `workerpool` keeps one parity-pinned copy of
 `mulberry32` and `rowMajorStrides` because its worker bundle cannot import `core`;
 there is no worker `boxMuller`), PR-LM (#416) and PR-MATMUL (#417). PR-SPECIAL (#418)
-is approved and treated as merged for status. M5's `createSeededRng`/`fork` is **not**
+is merged. M5's `createSeededRng`/`fork` is **not**
 started: only the existing generator body moved. The D-3 deletions are #413. The
 release guard (#411) keeps tags, GitHub Releases and publish off until the repository
 variable `RELEASES_ENABLED` is set to `true`.
@@ -842,8 +842,7 @@ export function numericallyEquivalent(
 
 The two Levenberg–Marquardt bodies, `svds` `norm2`, nested-array `matMul` copies,
 log-gamma, and the retired erf were pulled forward into **PR-LM (#416)**, **PR-MATMUL
-(#417)**, and **PR-SPECIAL (#418)** and are done ( #418 approved, treated as merged for
-status). Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead
+(#417)**, and **PR-SPECIAL (#418)** and are done. Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead
 merge, `linearRegression`/`linregress`, and `numericRealRoots`.
 
 - **Scope:** M7 and M8 fit and compare numbers, so the numerics under them must have
