@@ -195,11 +195,6 @@
       "reason": "unrelated domains sharing a name: parallel dispatch mode ('parallel' | 'sequential') vs workbook cell-execution mode ('reactive' | 'sequential' | 'manual'). 2026-07 type-dedup pass."
     },
     {
-      "names": ["FFTResult"],
-      "filesGlob": ["functions/src/signal/fft.ts", "matrix/src/backends/wasm/fft-wasm.ts"],
-      "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
-    },
-    {
       "names": ["WasmModule"],
       "filesGlob": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
       "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions declares the AS kernels its bridges dispatch — signal/special-function/polynomial/interpolation/sort/bitwise; matrix only needs matrix-relevant exports) — a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) — core/internal is reachable from both packages without creating the functions<->matrix cycle."
@@ -440,11 +435,6 @@
       "reason": "same name, different function: workbook/src/cli.ts's dispatch(argv) is the CLI command router; parallel/src/strategies/threshold.ts's dispatch (left canonical) selects a parallel execution strategy. Distinct-by-domain. 2026-07 dedup campaign, closing tail slice."
     },
     {
-      "names": ["convolve"],
-      "filesGlob": ["matrix/src/backends/wasm/fft-wasm.ts"],
-      "reason": "distinct representation: matrix/src/backends/wasm/fft-wasm.ts's convolve is the (coherent, currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays; functions/src/typed/signal.ts's convolve (left canonical) is the public number[] convolution. Kept as coherent accelerator scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
-    },
-    {
       "names": ["shouldParallelize"],
       "filesGlob": ["functions/src/typed/arithmetic.ts", "parallel/src/strategies/chunk.ts"],
       "reason": "parallelization threshold heuristic: functions/src/typed/arithmetic.ts inlines the i32 hot-path check; parallel/src/strategies/chunk.ts and .../threshold.ts (threshold.ts left canonical) are the strategy-layer copies. Kept local per project-all-libraries-build-on-core. 2026-07 dedup campaign, closing tail slice."
@@ -527,17 +517,12 @@
       "filesGlob": ["compat/src/shims.ts"],
       "reason": "trivial mathematical constants (Math.PI / Math.E / 2π / golden ratio): compat/src/shims.ts's public copies vs functions/src/plain/number/constants.ts's plain-number internal copies (left canonical; not re-exported from the functions index). Pinned to closed-form oracles in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
     },
-
     {
       "names": ["fft", "ifft"],
-      "filesGlob": ["functions/src/factories/index.ts", "matrix/src/backends/wasm/fft-wasm.ts"],
-      "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
+      "filesGlob": ["functions/src/factories/index.ts", "functions/src/signal/fft.ts"],
+      "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
     },
-    {
-      "names": ["rfft"],
-      "filesGlob": ["matrix/src/backends/wasm/fft-wasm.ts"],
-      "reason": "the matrix WASM-FFT accelerator bridge's real-FFT entry (split Float64Array); functions/src/signal/fft-helpers.ts (left canonical) is the public number[] rFFT (assembly/src/ops/fft.ts already allowlisted). Distinct representation, coherent scaffolding. 2026-07 dedup campaign, closing tail slice."
-    },
+
     {
       "names": ["to", "toBest"],
       "filesGlob": ["functions/src/factories/index.ts"],

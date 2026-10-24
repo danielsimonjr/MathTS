@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-24",
   "total": 219,
   "acceleratedCount": 41,
   "parallelOnlyCount": 50,
@@ -866,7 +866,7 @@
     "functions": 315,
     "globals": 11,
     "memory": 1,
-    "sourceFiles": 28,
+    "sourceFiles": 26,
     "byCategory": [
       {
         "category": "Scalar & special (f64)",

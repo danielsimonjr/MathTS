@@ -26,6 +26,7 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const releaseScript = join(repoRoot, '.github', 'scripts', 'ensure-package-releases.sh');
 const targetCheck = join(repoRoot, '.github', 'scripts', 'check-new-tag-targets.mjs');
 const releaseWorkflow = join(repoRoot, '.github', 'workflows', 'release.yml');
+const publishWorkflow = join(repoRoot, '.github', 'workflows', 'publish.yml');
 const changesetBin = join(repoRoot, 'node_modules', '@changesets', 'cli', 'bin.js');
 
 const BOT = {
@@ -178,7 +179,6 @@ function makeFixture(t) {
       cwd: fixture.work,
       env: {
         ...fixture.env,
-        ...extraEnv,
         PATH: `${fixture.shims}${delimiter}${process.env.PATH}`,
         CHANGESET_BIN: changesetBin,
         GH_STATE: fixture.ghState,
@@ -187,6 +187,8 @@ function makeFixture(t) {
         BEFORE_SHA: beforeSha,
         GITHUB_OUTPUT: output,
         GITHUB_STEP_SUMMARY: join(root, 'summary.md'),
+        RELEASES_ENABLED: 'true',
+        ...extraEnv,
       },
     });
     return { ...result, githubOutput: readFileSync(output, 'utf8') };
@@ -375,25 +377,72 @@ test('check-new-tag-targets: a tag on the commit that holds its version passes, 
   assert.match(unknown.stderr, /names no public workspace package/);
 });
 
+test('RELEASES_ENABLED off or empty skips tagging on a version commit', (t) => {
+  const fixture = makeFixture(t);
+  const feature = pushWithPendingChangeset(fixture);
+  fixture.changesetVersion();
+  fixture.commit('chore: release packages');
+
+  for (const value of ['false', '']) {
+    const result = fixture.runRelease(feature, { RELEASES_ENABLED: value });
+
+    assert.equal(result.status, 0, failure(result));
+    assert.deepEqual(fixture.remoteTags(), BASELINE_TAGS.slice().sort());
+    assert.deepEqual(fixture.releases(), []);
+    assert.match(result.githubOutput, /^versions_bumped=false$/m);
+    assert.match(result.stdout, /RELEASES_ENABLED is not 'true'/);
+  }
+});
+
 test('release.yml runs the tag step before the changesets action', () => {
   const workflow = readFileSync(releaseWorkflow, 'utf8');
   // Only step keys of the `release` job count: a comment or another job that names an id does not.
   const job = workflow.match(/^ {2}release:\n(?:(?! {2}\S).*\n?)*/m)?.[0];
   assert.ok(job, 'the release job is missing');
+  const tagStepName = job.search(/^ {6}- name: Tag packages and open GitHub releases\s*$/m);
   const tagStep = job.search(/^ {8}id: tags\s*$/m);
   const actionStep = job.search(/^ {8}id: changesets\s*$/m);
+  const stepsAt = job.search(/^ {4}steps:\s*$/m);
+  assert.ok(tagStepName >= 0, 'the tag step name is missing from the release job');
   assert.ok(tagStep > 0, 'the tag step (id: tags) is missing from the release job');
   assert.ok(
     actionStep > 0,
     'the changesets action step (id: changesets) is missing from the release job'
   );
+  assert.ok(stepsAt > 0, 'the release job has no steps');
+  assert.doesNotMatch(
+    job.slice(0, stepsAt),
+    /^ {4}if:/m,
+    'the Version job must not be gated: the version PR step has to run while releases are off'
+  );
   assert.ok(
     tagStep < actionStep,
     'the tag step must come first: the action leaves uncommitted versions in the working tree'
   );
+  const tagBlock = job.slice(tagStepName, actionStep);
   assert.match(
-    job.slice(tagStep, actionStep),
+    tagBlock,
     /run: bash \.github\/scripts\/ensure-package-releases\.sh/,
     'the step before the action must be the release script'
   );
+  assert.match(tagBlock, /if: vars\.RELEASES_ENABLED == 'true'/);
+  assert.match(
+    tagBlock,
+    /RELEASES_ENABLED: \$\{[{] vars\.RELEASES_ENABLED [}]\}/,
+    'the tag step must pass vars.RELEASES_ENABLED into the script; without it the script guard stays off even when the variable is true'
+  );
+  const changesetsBlock = job.slice(actionStep);
+  assert.doesNotMatch(changesetsBlock, /RELEASES_ENABLED/);
+
+  const publishJob = workflow.match(/^ {2}publish:\n(?:(?! {2}\S).*\n?)*/m)?.[0];
+  assert.ok(publishJob, 'the publish job is missing');
+  assert.match(
+    publishJob,
+    /if: vars\.RELEASES_ENABLED == 'true' && needs\.release\.outputs\.versions_bumped == 'true'/
+  );
+
+  const publishYaml = readFileSync(publishWorkflow, 'utf8');
+  const publishJobDef = publishYaml.match(/^ {2}publish:\n(?:(?! {2}\S).*\n?)*/m)?.[0];
+  assert.ok(publishJobDef, 'the publish job is missing from publish.yml');
+  assert.match(publishJobDef, /if: vars\.RELEASES_ENABLED == 'true'/);
 });
