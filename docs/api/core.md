@@ -310,6 +310,10 @@ Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `sub
 
 `pairwiseSum`, `neumaierSum`, `neumaierCumsum`, `norm2`, `pairwiseDot`, `scaledDistance`, and `sumSquaredDeviations` (`core/src/numeric/stable.ts`) provide numerically stable accumulations for large arrays.
 
+## Seeded RNG and strides
+
+`mulberry32` is the canonical seeded Mulberry32 PRNG for reproducible U[0, 1) streams (not cryptographically secure). `boxMuller` maps two uniforms to a pair of N(0, 1) samples. `rowMajorStrides` returns the row-major stride vector for a dense tensor shape (last axis stride 1).
+
 ## Range
 
 `Range` / `createRangeClass` model `start` / `end` / `step` index ranges with `toArray`, `map`, `forEach`, and `toJSON` (`RangeJSON`). See [Class reference — Range](../reference/classes.md#range).
@@ -337,11 +341,11 @@ fromSiDimensionVector(nums); // length-10 Unit exponent vector
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (140 exports).
+> `@danielsimonjr/mathts-core` (143 exports).
 
-### Functions (80)
+### Functions (83)
 
-`abs`, `addExactScales`, `addScalar`, `binaryExactScale`, `clearExactScaleNumberCache`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `decimalExactScale`, `dim`, `DimensionMismatchError`, `divideExactScales`, `divideScalar`, `equal`, `exactScaleNumberCacheSize`, `exactScaleOf`, `exactScalesEqual`, `exactScaleToNumber`, `fix`, `formatExactScale`, `fromSiDimensions`, `fromSiDimensionVector`, `getPrefix`, `getUnitDef`, `getUnitPrefix`, `getUnitRow`, `initTypedWasm`, `irrationalPower`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isRationalScale`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `multiplyExactScales`, `multiplyScalar`, `namedExactScale`, `namedIrrationalScale`, `neumaierCumsum`, `neumaierSum`, `norm2`, `number`, `pairwiseDot`, `pairwiseSum`, `pow`, `powerExactScale`, `ratioExactScale`, `readScaleExpression`, `readUnitScale`, `registerNativeTypes`, `round`, `scaledDistance`, `subtractScalar`, `sumSquaredDeviations`, `toSiDimensions`, `toSiDimensionVector`, `typed`, `UnitParseError`, `unitPrefixExactScale`, `unitRowExactOffset`, `unitRowExactScale`, `unitRowValue`
+`abs`, `addExactScales`, `addScalar`, `binaryExactScale`, `boxMuller`, `clearExactScaleNumberCache`, `create`, `createFactory`, `createMathTSTyped`, `createRangeClass`, `createTypedFunction`, `decimalExactScale`, `dim`, `DimensionMismatchError`, `divideExactScales`, `divideScalar`, `equal`, `exactScaleNumberCacheSize`, `exactScaleOf`, `exactScalesEqual`, `exactScaleToNumber`, `fix`, `formatExactScale`, `fromSiDimensions`, `fromSiDimensionVector`, `getPrefix`, `getUnitDef`, `getUnitPrefix`, `getUnitRow`, `initTypedWasm`, `irrationalPower`, `isArray`, `isBigInt`, `isBigNumber`, `isBoolean`, `isComplex`, `isDenseMatrix`, `isDual`, `isFraction`, `isFunction`, `isMatrix`, `isNull`, `isNumber`, `isNumeric`, `isObject`, `isRationalScale`, `isSparseMatrix`, `isString`, `isTypedWasmAvailable`, `isUndefined`, `isUnit`, `isUnitValue`, `mathTyped`, `mulberry32`, `multiplyExactScales`, `multiplyScalar`, `namedExactScale`, `namedIrrationalScale`, `neumaierCumsum`, `neumaierSum`, `norm2`, `number`, `pairwiseDot`, `pairwiseSum`, `pow`, `powerExactScale`, `ratioExactScale`, `readScaleExpression`, `readUnitScale`, `registerNativeTypes`, `round`, `rowMajorStrides`, `scaledDistance`, `subtractScalar`, `sumSquaredDeviations`, `toSiDimensions`, `toSiDimensionVector`, `typed`, `UnitParseError`, `unitPrefixExactScale`, `unitRowExactOffset`, `unitRowExactScale`, `unitRowValue`
 
 ### Constants & values (52)
 

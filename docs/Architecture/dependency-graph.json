@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-24",
-    "totalFiles": 1186,
+    "totalFiles": 1189,
     "totalModules": 82,
-    "totalExports": 6132
+    "totalExports": 6140
   },
   "entryPoints": [
     {
@@ -317,6 +317,15 @@
         ],
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
+      "packages/workerpool/src/worker-numerics.ts": {
+        "description": "Worker-bundle copies of core numeric helpers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["_tdRowMajorStrides", "_workerMulberry32"],
+        "functions": ["_tdRowMajorStrides", "_workerMulberry32"]
+      },
       "packages/workerpool/src/worker.ts": {
         "description": "Worker functions for parallel MathTS computations.",
         "externalDependencies": [
@@ -334,6 +343,10 @@
           {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./worker-numerics.js",
+            "imports": ["_tdRowMajorStrides", "_workerMulberry32"]
           }
         ],
         "workspaceDependencies": [],
@@ -857,6 +870,16 @@
             "reExport": true
           },
           {
+            "file": "./numeric/rng.js",
+            "imports": ["mulberry32", "boxMuller"],
+            "reExport": true
+          },
+          {
+            "file": "./numeric/strides.js",
+            "imports": ["rowMajorStrides"],
+            "reExport": true
+          },
+          {
             "file": "./types/interfaces.js",
             "imports": [
               "MathTSValue",
@@ -1090,6 +1113,9 @@
           "scaledDistance",
           "neumaierCumsum",
           "sumSquaredDeviations",
+          "mulberry32",
+          "boxMuller",
+          "rowMajorStrides",
           "VERSION",
           "MathTSValue",
           "Scalar",
@@ -1274,6 +1300,9 @@
           "scaledDistance",
           "neumaierCumsum",
           "sumSquaredDeviations",
+          "mulberry32",
+          "boxMuller",
+          "rowMajorStrides",
           "MathTSValue",
           "Scalar",
           "BackendType",
@@ -2062,6 +2091,15 @@
       }
     },
     "core/numeric": {
+      "core/src/numeric/rng.ts": {
+        "description": "Seeded pseudo-random number generation (Mulberry32) and Box–Muller normal pairs.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["mulberry32", "boxMuller"],
+        "functions": ["mulberry32", "boxMuller"]
+      },
       "core/src/numeric/stable.ts": {
         "description": "Numerically stable reduction primitives.",
         "externalDependencies": [],
@@ -2086,6 +2124,15 @@
           "sumSquaredDeviations",
           "neumaierCumsum"
         ]
+      },
+      "core/src/numeric/strides.ts": {
+        "description": "Row-major stride vectors for dense tensor layouts.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["rowMajorStrides"],
+        "functions": ["rowMajorStrides"]
       }
     },
     "core/typed": {
@@ -5166,6 +5213,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["rowMajorStrides"]
+          },
+          {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["DenseMatrix", "backendManager"]
@@ -5758,6 +5810,11 @@
           }
         ],
         "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mulberry32", "boxMuller"]
+          },
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
@@ -21129,6 +21186,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mulberry32"]
+          },
+          {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
             "imports": ["computePool"]
@@ -21709,7 +21771,13 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mulberry32"]
+          }
+        ],
         "exports": [
           "CENTRALITY_WORKER_THRESHOLD",
           "adjacencyMatrix",
@@ -21774,6 +21842,11 @@
           }
         ],
         "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["mulberry32"]
+          },
           {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
@@ -34856,7 +34929,8 @@
               "norm2",
               "pairwiseDot",
               "scaledDistance",
-              "sumSquaredDeviations"
+              "sumSquaredDeviations",
+              "rowMajorStrides"
             ]
           },
           {
@@ -39792,6 +39866,7 @@
           "packages/workerpool/src/compile-function-source.ts",
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
+          "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
           "packages/workerpool/src/workerpool-browser-shim.ts"
         ]
@@ -39836,7 +39911,11 @@
       },
       {
         "name": "Core/numeric",
-        "files": ["core/src/numeric/stable.ts"]
+        "files": [
+          "core/src/numeric/rng.ts",
+          "core/src/numeric/stable.ts",
+          "core/src/numeric/strides.ts"
+        ]
       },
       {
         "name": "Core/typed",
@@ -41321,17 +41400,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1186,
+    "totalTypeScriptFiles": 1189,
     "totalModules": 82,
-    "totalLinesOfCode": 198687,
-    "totalExports": 6132,
+    "totalLinesOfCode": 198673,
+    "totalExports": 6140,
     "totalClasses": 58,
     "totalInterfaces": 530,
-    "totalFunctions": 1947,
+    "totalFunctions": 1952,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2588,
+    "totalReExports": 2591,
     "totalTypeOnlyImports": 602,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

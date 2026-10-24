@@ -9,6 +9,7 @@
 
 import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
+import { _tdRowMajorStrides, _workerMulberry32 } from './worker-numerics.js';
 import { worker } from 'workerpool';
 
 // =============================================================================
@@ -749,20 +750,6 @@ function quantileChunk(
 // =============================================================================
 
 /**
- * Row-major strides for a shape array (worker-local copy; cannot import from
- * parallel/ since workerpool sits below it in the dependency graph).
- */
-function _tdRowMajorStrides(shape: readonly number[]): number[] {
-  const strides = new Array<number>(shape.length);
-  let stride = 1;
-  for (let i = shape.length - 1; i >= 0; i--) {
-    strides[i] = stride;
-    stride *= shape[i];
-  }
-  return strides;
-}
-
-/**
  * Multi-index to flat index.
  */
 function _tdFlatIndex(idx: readonly number[], strides: readonly number[]): number {
@@ -867,25 +854,6 @@ function tensordotChunk(
 // =============================================================================
 // Distribution Batch Sampling Kernel (Slice 5.12)
 // =============================================================================
-
-/**
- * Mulberry32 seeded PRNG (worker-local copy; cannot import from functions/).
- *
- * Reference: Tommy Ettinger,
- * https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
- * Period: 2^32.
- */
-function _workerMulberry32(seed: number): () => number {
-  let s = seed | 0;
-  return (): number => {
-    s = (s + 0x6d2b79f5) | 0;
-    let z = s;
-    z = Math.imul(z ^ (z >>> 15), z | 1);
-    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
-    z = (z ^ (z >>> 14)) >>> 0;
-    return z / 0x100000000;
-  };
-}
 
 /**
  * Lanczos log-gamma (g=7, n=9) — worker-local copy.
