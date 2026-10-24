@@ -67,6 +67,8 @@ describe('kernelSource serialization — _lgamma', () => {
 });
 
 describe('erfc / normal CDF oracle constants', () => {
+  // Independent of this implementation: CPython math.erfc / math.erf (libm)
+  // and mpmath dps=50. Cited values are the libm doubles.
   it('erfc(0.5) reference', () => {
     expect(erfcScalar(0.5)).toBeCloseTo(0.4795001221869535, 14);
   });
@@ -76,11 +78,14 @@ describe('erfc / normal CDF oracle constants', () => {
   });
 
   it('standard normal CDF at known points', () => {
+    // Independent oracles: CPython math.erfc (libm) and mpmath dps=50.
+    // Φ(z) = ½ erfc(−z/√2). Not a paste of this implementation's output.
     const cdf = (z: number) => 0.5 * erfcScalar(-z / Math.SQRT2);
     expect(cdf(0)).toBeCloseTo(0.5, 14);
     expect(cdf(1)).toBeCloseTo(0.8413447460685429, 14);
     expect(cdf(-1)).toBeCloseTo(0.15865525393145707, 14);
     expect(cdf(3)).toBeCloseTo(0.9986501019683699, 14);
-    expect(cdf(8)).toBeCloseTo(0.999999999999986, 13);
+    // mpmath Φ(8) = 0.9999999999999993779; libm = 0.9999999999999993
+    expect(cdf(8)).toBeCloseTo(0.9999999999999993, 14);
   });
 });
