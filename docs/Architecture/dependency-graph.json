@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-24",
     "totalFiles": 1186,
     "totalModules": 82,
-    "totalExports": 6129
+    "totalExports": 6132
   },
   "entryPoints": [
     {
@@ -924,7 +924,7 @@
           },
           {
             "file": "./types/unit.js",
-            "imports": ["SiDimensionVector", "SiDimensionOptions"],
+            "imports": ["SiDimensionVector", "SiDimensionOptions", "SiDimensionExponent"],
             "reExport": true,
             "typeOnly": true
           },
@@ -1122,6 +1122,7 @@
           "UnitPrefix",
           "SiDimensionVector",
           "SiDimensionOptions",
+          "SiDimensionExponent",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -1304,6 +1305,7 @@
           "UnitPrefix",
           "SiDimensionVector",
           "SiDimensionOptions",
+          "SiDimensionExponent",
           "TypedFunction",
           "TypedInstance",
           "TypeDef",
@@ -2526,6 +2528,10 @@
             "file": "./unit-definitions.js",
             "imports": ["Dimensions"],
             "typeOnly": true
+          },
+          {
+            "file": "./fraction.js",
+            "imports": ["Fraction", "isFraction"]
           }
         ],
         "workspaceDependencies": [],
@@ -3198,7 +3204,7 @@
           },
           {
             "file": "./si-dimension-vector.js",
-            "imports": ["SiDimensionVector", "SiDimensionOptions"],
+            "imports": ["SiDimensionVector", "SiDimensionOptions", "SiDimensionExponent"],
             "reExport": true,
             "typeOnly": true
           }
@@ -3263,7 +3269,8 @@
           "Dimensions",
           "UnitDef",
           "SiDimensionVector",
-          "SiDimensionOptions"
+          "SiDimensionOptions",
+          "SiDimensionExponent"
         ],
         "reExported": [
           "Unit",
@@ -3324,7 +3331,8 @@
           "Dimensions",
           "UnitDef",
           "SiDimensionVector",
-          "SiDimensionOptions"
+          "SiDimensionOptions",
+          "SiDimensionExponent"
         ]
       },
       "core/src/types/wasm-loader.ts": {
@@ -33279,6 +33287,7 @@
               "UnitDef",
               "SiDimensionVector",
               "SiDimensionOptions",
+              "SiDimensionExponent",
               "ExactScale",
               "IrrationalName",
               "IrrationalPowers",
@@ -33348,6 +33357,7 @@
           "UnitDef",
           "SiDimensionVector",
           "SiDimensionOptions",
+          "SiDimensionExponent",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -33415,6 +33425,7 @@
           "UnitDef",
           "SiDimensionVector",
           "SiDimensionOptions",
+          "SiDimensionExponent",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -41312,15 +41323,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1186,
     "totalModules": 82,
-    "totalLinesOfCode": 198586,
-    "totalExports": 6129,
+    "totalLinesOfCode": 198687,
+    "totalExports": 6132,
     "totalClasses": 58,
     "totalInterfaces": 530,
     "totalFunctions": 1947,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2585,
+    "totalReExports": 2588,
     "totalTypeOnlyImports": 602,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

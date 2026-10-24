@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { Fraction } from '@danielsimonjr/mathts-core';
 import {
   Unit,
   isUnit,
@@ -9,6 +10,8 @@ import {
   getUnitDef,
   SI_PREFIXES,
   getPrefix,
+  toSiDimensionVector,
+  fromSiDimensionVector,
 } from '../src/index.js';
 
 /**
@@ -34,5 +37,14 @@ describe('@danielsimonjr/mathts-units re-export surface', () => {
     expect(typeof ALL_UNITS).toBe('object');
     expect(typeof SI_PREFIXES).toBe('object');
     expect(DIMENSIONLESS).toBeDefined();
+  });
+
+  it('re-exports SI dimension converters with Fraction exponents', () => {
+    const newton = new Unit(1, 'N');
+    const si = toSiDimensionVector(newton.dimensions);
+    expect(si[0].equals(new Fraction(1n, 1n))).toBe(true);
+    expect(si[1].equals(new Fraction(1n, 1n))).toBe(true);
+    expect(si[2].equals(new Fraction(-2n, 1n))).toBe(true);
+    expect(fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])).toEqual(newton.dimensions);
   });
 });
