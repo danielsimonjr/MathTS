@@ -1,11 +1,11 @@
 # Proposal: PySR-informed symbolic-search primitives in MathTS
 
-> **Guiding principle (Daniel):** "reuse and expand the existing libraries and packages; add new functionality, files or packages only when necessary or truly missing from the codebase."
+> **Guiding principle (Daniel):** Reuse and expand the existing libraries and packages; add new functionality, files or packages only when necessary or truly missing from the codebase.
 
 Every milestone and every integration sprint in this roadmap is judged against that
 principle. Reviewers reject a change that duplicates existing code, or that bypasses an
 existing implementation by writing its own copy. A new file needs a stated reason that no
-existing module fits. A new package needs a recorded owner decision (§10, D-1).
+existing module fits. D-1 is decided: no new package for this roadmap (§10).
 
 **Author:** MathTS maintenance
 **Date:** 2026-10-22 (refreshed 2026-10-23 against the
@@ -17,8 +17,7 @@ fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). M2 and M5, Ph
 the integration sprints 1R–5R are open. Nothing is released until every item is done (§7).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
 `@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
-`matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. No new package is planned. A package for the Phase 4 search kit is
-open decision D-1, and the default is no new package (§8, Phase 4).
+`matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 lives in `functions`, and M11 may sit in `expression` next to `scalar-structure.ts` only if it imports `expression` and `core` alone. A package is not an option in this roadmap (§8, Phase 4; §10).
 **Related external projects:** [PySR](https://github.com/danielsimonjr/pysr) (fork of MilesCranmer/PySR, studied read-only at commit `72a9ab9`, backend pin `SymbolicRegression ~2.7.2` in `pysr/juliapkg.json`); [Universal Physics Tensor (UPT)](https://github.com/danielsimonjr/universal-physics-tensor) (studied read-only at its default-branch HEAD).
 **Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md).
 
@@ -79,7 +78,7 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
 | UPT's physics AST (`ExprNode`), its dimensional validator, `normalForm`, `CanonicalEquation`     | **UPT** (`src/dimensional/ast-types.ts`, `src/dimensional/validator.ts`, `src/canonical/normal-form.ts`)                                                                                                                                                |
 | Scalar IR that UPT lowers into (`ScalarNode`), its evaluation, simplification, LaTeX             | **MathTS** (`expression/src/scalar-builder.ts`, `expression/src/scalar-structure.ts`, `functions/src/scalar-eval.ts`, `functions/src/scalar-compile.ts`; UPT lowers into it in `src/composition/expr-eval.ts`)                                          |
 | Numerics: optimizers, statistics, seeded RNG, units/dimension vectors, constants                 | **MathTS** (`functions/src/numeric/bfgs.ts`, `functions/src/optimization-extra.ts`, `functions/src/numeric/numeric-jacobian.ts`, `core/src/numeric/stable.ts`, `core/src/types/si-dimension-vector.ts`, `functions/src/type/unit/physicalConstants.ts`) |
-| Generic search kit (mutations, enumerator, evolution loop)                                       | **MathTS, Phase 4, optional.** UPT may wrap it as a `CandidateGenerator` (UPT §7.1) or keep its own enumerator. Home: an existing package (`functions` by default). A new package is open decision D-1 and defaults to no (§10).                        |
+| Generic search kit (mutations, enumerator, evolution loop)                                       | **MathTS, Phase 4, optional.** UPT may wrap it as a `CandidateGenerator` (UPT §7.1) or keep its own enumerator. Home: `functions` by default; M11 may sit in `expression` if the placement probe allows. D-1 is decided: no new package (§10).          |
 
 The roadmap is built around one design decision: **`ScalarNode` is the interchange
 IR.** It is already public, it is already what UPT lowers into (`docs/integration/upt.md`
@@ -572,6 +571,13 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
 
 #### Sprint 1R — Phase 1 integration
 
+Items 1–2 are **PR-RNG**; log-gamma, the retired erf, the nested-array `matMul` copies,
+the two Levenberg–Marquardt bodies, and `polymul`/`polyMulJS` are pulled forward into
+**PR-SPECIAL**, **PR-MATMUL**, **PR-LM**, and **PR-POLY**. Items 3–6 (regex,
+export-index gate, architecture prose, M3 benchmark) stay open. Sprint 2R's ODE/BVP/DAE
+Jacobians, Nelder–Mead merge, `linearRegression`/`linregress`, and `numericRealRoots`
+stay open.
+
 - **Scope:**
   1. **The remaining four Mulberry32 copies → M5** (audit I-4). M5 already moved the
      first of the five, `makeMulberry32` in `tensor/src/operations/random.ts`. Move
@@ -598,6 +604,25 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
   6. **M3 benchmark.** A committed `evaluateScalar`-per-row vs `compileScalar` case under
      `tools/benchmark/`, run twice on Node per the `AGENTS.md` rules. It gives M14 its
      measured threshold. No number goes into docs before it is committed.
+  7. **SiDimensionVector exact Fraction exponents (PR-SIDIM).** D-2 is decided (§10).
+     Exponents become `core` `Fraction`s; `Unit`'s length-10 `dimensions: number[]` stays
+     `number[]`. **Package:** `core`, `core/src/types/si-dimension-vector.ts`, re-exported
+     unchanged through `core/src/types/unit.ts` and `units/src/index.ts`. **Size:** S. No
+     new dependency. **Type:** `SiDimensionVector` becomes
+     `readonly [Fraction, Fraction, Fraction, Fraction, Fraction, Fraction, Fraction]` in
+     BIPM order `[L, M, T, I, Θ, N, J]`. **`toSiDimensionVector`:** build each component
+     with `new Fraction(n, 1n)` when `Number.isInteger(n)`, otherwise `Fraction.fromNumber(n)`;
+     `0.5` must be `1/2` (`numerator === 1n`, `denominator === 2n`), not a continued-fraction
+     accident. **`fromSiDimensionVector`:** accept `readonly (number | Fraction)[]` so today's
+     number tuples still run; return `number[]` via `Fraction.toNumber()` for the length-10
+     `Unit` vector. No new accessor export: consumers that need numbers use
+     `v.map((f) => f.toNumber())`. **Changeset:** `minor` on `@danielsimonjr/mathts-core` and
+     `@danielsimonjr/mathts-units`, body starting with `BREAKING:` (not `major`). **Tests:**
+     rewrite `core/tests/types/si-dimension-vector.test.ts` to compare `Fraction` components
+     (`1/1`, `1/1`, `-2/1` for a newton) and `0.5 → 1/2`; `fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])`
+     still returns the length-10 `number[]`. **Docs:** `docs/api/core.md` (run
+     `bun run docs:functions`), `units/README.md` one sentence, M9 below. M9 does not start
+     until PR-SIDIM has merged.
 - **Reuse:** M5 `createSeededRng`; `Tensor.rowMajorStrides` as the body to lift;
   the existing `TARGETS` mechanism and generator; the existing `tools/benchmark/`
   harness.
@@ -902,8 +927,9 @@ export function numericallyEquivalent(
 UPT owns `ExprNode` dimensional validation. `docs/integration/upt.md` Q2 keeps
 dimensional analysis on `Tensor` UPT-only. These milestones cover a different object,
 dimension inference over **`ScalarNode`**, and are built **only if UPT files an issue
-asking to delegate**, as it did for units in #347. Decision D-2 (number or `Fraction`
-exponents) must be recorded before M9 starts.
+asking to delegate**, as it did for units in #347. D-2 is decided (§10) and is
+implemented by Sprint 1R item 7 (**PR-SIDIM**). **M9 does not start until PR-SIDIM has
+merged.**
 
 #### M9 — `inferScalarDimension`
 
@@ -912,22 +938,14 @@ exponents) must be recorded before M9 starts.
   `functions`. The dimension vector type itself stays in `core`. **Size:** M.
 - **Reuse (do not rebuild):** `SiDimensionVector`, `toSiDimensionVector` and
   `fromSiDimensionVector` (its inverse; both in `core/src/types/si-dimension-vector.ts`)
-  for the `[L,M,T,I,Θ,N,J]` vector and its order; `Fraction` (`core`) if D-2 chooses rational exponents; `Unit` and the physical
-  constants for the fixtures; `forEachScalar` for the walk. Do not add a second
-  dimension vector type: if D-2 keeps `number`, `RationalDimension` below is
-  `SiDimensionVector`.
+  for the `[L,M,T,I,Θ,N,J]` vector and its order; `Fraction` (`core`) exponents on that
+  vector after PR-SIDIM; `Unit` and the physical constants for the fixtures;
+  `forEachScalar` for the walk. `RationalDimension` **is** `SiDimensionVector`; do not add
+  a second dimension vector type.
 - **API sketch:**
 
 ```ts
-export type RationalDimension = readonly [
-  Fraction,
-  Fraction,
-  Fraction,
-  Fraction,
-  Fraction,
-  Fraction,
-  Fraction,
-]; // [L,M,T,I,Θ,N,J], the toSiDimensionVector order; SiDimensionVector if D-2 keeps number
+export type RationalDimension = SiDimensionVector; // [L,M,T,I,Θ,N,J] Fraction exponents
 export type DimensionInference =
   | { readonly ok: true; readonly dimension: RationalDimension }
   | {
@@ -956,12 +974,13 @@ export function inferScalarDimension(
 - **Tests:** a cross-check against UPT's validator is out of repo, so the tests pin
   physics closed forms instead.
 - **DoD:** base checklist + the following specifics:
-  - [ ] D-2 recorded in §10 before the PR opens.
-  - [ ] B1: vectors come from `toSiDimensionVector`; no new dimension-order constant.
+  - [ ] PR-SIDIM merged (Sprint 1R item 7); D-2 recorded in §10.
+  - [ ] B1: vectors come from `toSiDimensionVector` with `Fraction` exponents; no new
+        dimension-order constant.
   - [ ] Oracles: physics closed forms (gravitation, kinetic energy, a pendulum period
         with `x^0.5`) and the four violations.
   - [ ] Exports on the `functions` barrel: `inferScalarDimension`, types
-        `RationalDimension` (or reuse of `SiDimensionVector`), `DimensionInference`.
+        `RationalDimension` (`SiDimensionVector`), `DimensionInference`.
 
 #### M10 — Constant-unit solving (PySR's `[⋅]`)
 
@@ -992,9 +1011,9 @@ export function inferScalarDimension(
 This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on them.
 
 - **Scope:**
-  1. **D-2 and the units docs.** Record the exponent decision; if it is `Fraction`,
-     widen `SiDimensionVector` in `core` rather than adding a parallel type. Update
-     `docs/integration/upt.md` with what UPT may now delegate.
+  1. **D-2 and the units docs.** D-2 is recorded in §10 and implemented by Sprint 1R
+     item 7 (PR-SIDIM); do not re-decide here. Update `docs/integration/upt.md` with what
+     UPT may now delegate after PR-SIDIM.
   2. **`simplify` with `exactFractions`** (I-12). `_exactFraction`
      (`functions/src/algebra/simplifyConstant.ts:244`) reads mathjs-style `f.n` / `f.d`,
      while `core` `Fraction` exposes `numerator` / `denominator`, so `0.4 * x` is never
@@ -1010,19 +1029,17 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   - [ ] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
 
-### Phase 4 — Search kit (optional; no new package by default)
+### Phase 4 — Search kit (optional; no new package)
 
 Phase 4 only proceeds if UPT, or another consumer, wants a generic in-process
 stochastic generator (UPT §8.1 step 6).
 
-**Home: open decision D-1, default no new package.** The original draft proposed a
-25th package (`@danielsimonjr/mathts-symbolic-search`). The audit found every reuse point
-inside `core`, `expression` and `functions`, and `functions` already depends on `core`,
-`expression` and `parallel`. So the default home is a module family in `functions`
-(M11 may sit in `expression` next to `scalar-structure.ts` if the CDG placement probe
-shows it imports only `expression` and `core`). A new package is proposed only if
-`bun run docs:graph -- cycles` shows that the default placement creates a cycle, and only
-with the owner's recorded D-1 decision.
+**Home: D-1 decided — no new package.** All Phase 4 work stays in `core`, `functions`,
+and `expression`. There is no `@danielsimonjr/mathts-symbolic-search`. The default home
+is a module family in `functions` (M11 may sit in `expression` next to `scalar-structure.ts`
+if the placement probe shows it imports only `expression` and `core`). Before M11 merges,
+run `bun run docs:graph -- cycles` as a placement check **between `functions` and
+`expression`**: a cycle means move the module, not create a package.
 
 #### M11 — Grammar descriptor + deterministic bounded enumerator
 
@@ -1069,7 +1086,7 @@ export function enumerateScalars(
   - Pruning by `admit` happens before children are expanded, when the predicate is
     monotone. The predicate declares whether it is monotone.
 - **DoD:** base checklist + the following specifics:
-  - [ ] D-1 recorded in §10; the CDG placement probe output is in the PR.
+  - [ ] Placement (`functions` or `expression`) recorded; the cycle probe is in the PR.
   - [ ] B1: dedup is `scalarCanonicalKey`; budgets are `scalarSize` / `scalarDepth`.
   - [ ] Oracle: hand-counted enumeration for the tiny grammar.
   - [ ] Exports on the chosen barrel: `enumerateScalars`, types `ScalarGrammar`,
@@ -1154,11 +1171,11 @@ export function enumerateScalars(
 #### Sprint 4R — Phase 4 integration
 
 - **Scope:** acceleration-tier and layering hygiene in the code M14 touches.
-  1. **D-1 record.** Write the placement decision and the `docs:graph -- cycles`
-     output into §10.
-  2. **Unreachable matrix FFT** (I-6, D-3). Retire `matrix/src/backends/wasm/fft-wasm.ts`
-     `fftJS` and its `wasmFFT` family (not on the `matrix` barrel, no production caller,
-     measured slower per `AGENTS.md`), or keep it with a banner if the owner decides so.
+  1. **D-1 placement record.** Write the `functions` vs `expression` placement and the
+     `docs:graph -- cycles` output into the M11 PR (not a package decision).
+  2. **Unreachable matrix FFT** (I-6, D-3). **Decided: delete** (not a banner).
+     PR-DELETE removes `matrix/src/backends/wasm/fft-wasm.ts` and its tests; the public
+     FFT is `functions`. Until PR-DELETE merges, the file may still exist in the tree.
      Fix the stale header of `packages/workerpool/src/fft-core.ts`, which still names
      `typed/signal.ts` as the original; the shared core is
      `functions/src/signal/fft-core-f64.ts`.
@@ -1213,9 +1230,9 @@ export function enumerateScalars(
      process-wide `DEFAULT_CONFIG` (I-9); the unused `typed-function ^4.0.0` dependency on
      nine packages and the dependent-less `packages/typed-function` (I-10); the
      `mad` / `parallelStatMAD` naming (I-16).
-  5. **Dead artefacts** (D-3, I-6, I-18). `write_factories_index.py` and the
-     `MathTSWasm` bindings (`assembly/src/bindings/wasm-loader.ts`): delete or banner,
-     as the owner decides.
+  5. **Dead artefacts** (D-3, I-6, I-18). **Decided: delete.** PR-DELETE removes
+     `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
+     (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).
   6. **CI audit step** (I-1). Retry `bun audit` on a registry outage, keep
      `--audit-level=high`, fail on a real advisory.
   7. **Roadmap close-out.** Every milestone and sprint box in this file ticked or the
@@ -1237,7 +1254,7 @@ export function enumerateScalars(
 
 - **Vendoring or wrapping PySR / Julia / Python.** UPT §0.2 row 9 and §10.3 rule this
   out. An external PySR worker is UPT's protocol concern (UPT §11), not MathTS's.
-- **A new package for this roadmap**, unless D-1 records a cycle that forces one.
+- **A new package for this roadmap.** D-1 is decided: out of scope; no 25th package.
 - **WASM / WebGPU `ScalarNode` evaluation.** Not planned until the M3 benchmark exists
   and shows memory-bound batch evaluation losing to a kernel. `AGENTS.md` records
   several "WASM is faster" assumptions that measured slower.
@@ -1256,18 +1273,19 @@ export function enumerateScalars(
 1. **Phase 3 delegation.** Does UPT want MathTS to own `ScalarNode` dimension inference
    (M9/M10), or should UPT keep its validator as the sole authority? The default is
    that UPT keeps it.
-2. **D-1, Phase 4 home.** Is a 25th package acceptable for the search kit? The audit finds
-   every reuse point inside `core`, `expression` and `functions`. The default is **no
-   new package**: the search kit goes into `functions` (M11 possibly into `expression`).
-3. **D-2, dimension exponents.** `SiDimensionVector` exponents are `number`; M9 sketches
-   `Fraction`. Widen the existing type, or accept `number` with a tolerance.
+2. **D-1, Phase 4 home.** **Decided:** no 25th package. Phase 4 lives in `functions`;
+   M11 may sit in `expression` if the placement probe allows. A package is not an option.
+3. **D-2, dimension exponents.** **Decided:** widen `SiDimensionVector` to `core`
+   `Fraction` exponents. `Unit.dimensions` stays `number[]`. Implementation is Sprint 1R
+   item 7 (**PR-SIDIM**), not a parallel dimension type and not `number` with tolerance.
 4. **Constant uncertainty.** If constants are "data", should
    `functions/src/type/unit/physicalConstants.ts` carry CODATA standard uncertainties?
    This would feed `propagateUncertainty` and M7's weights.
 5. **Front statistic for likelihood losses.** PySR leaves the score undefined for
    linear loss scales (§2.3). Should M4 offer an AIC- or BIC-style alternative?
-6. **D-3, dead artefacts.** Delete `write_factories_index.py`, the matrix JS FFT and the
-   `MathTSWasm` bindings, or keep them with a banner (Sprints 4R and 5R).
+6. **D-3, dead artefacts.** **Decided: delete** (not a banner). PR-DELETE performs the
+   removal of `write_factories_index.py`, `matrix/src/backends/wasm/fft-wasm.ts`, and the
+   `MathTSWasm` bindings under `assembly/src/bindings/`.
 7. **M14 worker evaluator.** Serialize the M3 tape through `kernelSource`, or another
    route that adds no copy (M14 open question).
 
