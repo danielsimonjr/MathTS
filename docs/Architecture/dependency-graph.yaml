@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-24'
-  totalFiles: 1186
+  totalFiles: 1189
   totalModules: 82
-  totalExports: 6133
+  totalExports: 6141
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -270,6 +270,18 @@ modules:
       constants:
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
+    packages/workerpool/src/worker-numerics.ts:
+      description: Worker-bundle copies of core numeric helpers.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - _tdRowMajorStrides
+        - _workerMulberry32
+      functions:
+        - _tdRowMajorStrides
+        - _workerMulberry32
     packages/workerpool/src/worker.ts:
       description: Worker functions for parallel MathTS computations.
       externalDependencies:
@@ -284,6 +296,10 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./worker-numerics.js
+          imports:
+            - _tdRowMajorStrides
+            - _workerMulberry32
       workspaceDependencies: []
       exports: []
     packages/workerpool/src/workerpool-browser-shim.ts:
@@ -799,6 +815,15 @@ modules:
             - neumaierCumsum
             - sumSquaredDeviations
           reExport: true
+        - file: ./numeric/rng.js
+          imports:
+            - mulberry32
+            - boxMuller
+          reExport: true
+        - file: ./numeric/strides.js
+          imports:
+            - rowMajorStrides
+          reExport: true
         - file: ./types/interfaces.js
           imports:
             - MathTSValue
@@ -1023,6 +1048,9 @@ modules:
         - scaledDistance
         - neumaierCumsum
         - sumSquaredDeviations
+        - mulberry32
+        - boxMuller
+        - rowMajorStrides
         - VERSION
         - MathTSValue
         - Scalar
@@ -1206,6 +1234,9 @@ modules:
         - scaledDistance
         - neumaierCumsum
         - sumSquaredDeviations
+        - mulberry32
+        - boxMuller
+        - rowMajorStrides
         - MathTSValue
         - Scalar
         - BackendType
@@ -1987,6 +2018,18 @@ modules:
         - FactoryDependencies
         - FactoryImport
   core/numeric:
+    core/src/numeric/rng.ts:
+      description: Seeded pseudo-random number generation (Mulberry32) and Box–Muller normal pairs.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - mulberry32
+        - boxMuller
+      functions:
+        - mulberry32
+        - boxMuller
     core/src/numeric/stable.ts:
       description: Numerically stable reduction primitives.
       externalDependencies: []
@@ -2009,6 +2052,16 @@ modules:
         - scaledDistance
         - sumSquaredDeviations
         - neumaierCumsum
+    core/src/numeric/strides.ts:
+      description: Row-major stride vectors for dense tensor layouts.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rowMajorStrides
+      functions:
+        - rowMajorStrides
   core/typed:
     core/src/typed/index.ts:
       description: typed-function integration exports
@@ -5027,6 +5080,10 @@ modules:
           imports:
             - Index
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - rowMajorStrides
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -5574,6 +5631,11 @@ modules:
           imports:
             - Index
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mulberry32
+            - boxMuller
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -19726,6 +19788,10 @@ modules:
             - gammaSampleRng
             - normalSampleRng
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mulberry32
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
@@ -20298,7 +20364,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mulberry32
       exports:
         - CENTRALITY_WORKER_THRESHOLD
         - adjacencyMatrix
@@ -20357,6 +20427,10 @@ modules:
           imports:
             - multipleTest
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - mulberry32
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
           imports:
@@ -32862,6 +32936,7 @@ modules:
             - pairwiseDot
             - scaledDistance
             - sumSquaredDeviations
+            - rowMajorStrides
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
@@ -37655,6 +37730,7 @@ dependencyGraph:
         - packages/workerpool/src/compile-function-source.ts
         - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
+        - packages/workerpool/src/worker-numerics.ts
         - packages/workerpool/src/worker.ts
         - packages/workerpool/src/workerpool-browser-shim.ts
     - name: Core/arithmetic
@@ -37690,7 +37766,9 @@ dependencyGraph:
         - core/src/factory/index.ts
     - name: Core/numeric
       files:
+        - core/src/numeric/rng.ts
         - core/src/numeric/stable.ts
+        - core/src/numeric/strides.ts
     - name: Core/typed
       files:
         - core/src/typed/index.ts
@@ -38998,17 +39076,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1186
+  totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198639
-  totalExports: 6133
+  totalLinesOfCode: 198625
+  totalExports: 6141
   totalClasses: 58
   totalInterfaces: 530
-  totalFunctions: 1947
+  totalFunctions: 1952
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2589
+  totalReExports: 2592
   totalTypeOnlyImports: 602
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

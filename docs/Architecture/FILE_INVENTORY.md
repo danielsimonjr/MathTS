@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1906
+**Total files**: 1911
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1161 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1164 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      659 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      661 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1906** |                                                                                                                |
+| **Total**     | **1911** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1186 |
-| `tests`    |   659 |
+| `src`      |  1189 |
+| `tests`    |   661 |
 | `tools`    |    27 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
 | `@danielsimonjr/mathts-compat`         |    15 |
-| `@danielsimonjr/mathts-core`           |    91 |
+| `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   547 |
 | `@danielsimonjr/mathts-functions`      |   796 |
@@ -64,7 +64,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-units`          |     3 |
 | `@danielsimonjr/mathts-wasm`           |    26 |
 | `@danielsimonjr/mathts-workbook`       |    65 |
-| `@danielsimonjr/mathts-workerpool`     |    11 |
+| `@danielsimonjr/mathts-workerpool`     |    13 |
 
 ## All files
 
@@ -156,7 +156,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/src/is.ts`                                                                  | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/map.ts`                                                                 | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/number.ts`                                                              | @danielsimonjr/mathts-core           | src      | build-entry |
+| `core/src/numeric/rng.ts`                                                         | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/numeric/stable.ts`                                                      | @danielsimonjr/mathts-core           | src      | build-entry |
+| `core/src/numeric/strides.ts`                                                     | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/object.ts`                                                              | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/shared.ts`                                                              | @danielsimonjr/mathts-core           | src      | build-entry |
 | `core/src/string.ts`                                                              | @danielsimonjr/mathts-core           | src      | build-entry |
@@ -197,6 +199,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/helpers/equivalence.ts`                                               | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/map-iterators.test.ts`                                                | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/map.test.ts`                                                          | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/numeric/rng.test.ts`                                                  | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/public-api-smoke.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/range-integration.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/shared.test.ts`                                                       | @danielsimonjr/mathts-core           | tests    | test        |
@@ -1709,6 +1712,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/src/compile-function-source.ts`                              | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/fft-core.ts`                                             | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/index.ts`                                                | @danielsimonjr/mathts-workerpool     | src      | build-entry |
+| `packages/workerpool/src/worker-numerics.ts`                                      | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/worker.ts`                                               | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/workerpool-browser-shim.ts`                              | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/tests/bitwise-dispatch.test.ts`                              | @danielsimonjr/mathts-workerpool     | tests    | test        |
@@ -1716,6 +1720,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/tests/fft-core.test.ts`                                      | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/index.test.ts`                                         | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/parallel-dispatch.test.ts`                             | @danielsimonjr/mathts-workerpool     | tests    | test        |
+| `packages/workerpool/tests/worker-numerics.test.ts`                               | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/vitest.config.ts`                                            | @danielsimonjr/mathts-workerpool     | config   | config      |
 | `parallel/src/ComputePool.ts`                                                     | @danielsimonjr/mathts-parallel       | src      | build-entry |
 | `parallel/src/index.ts`                                                           | @danielsimonjr/mathts-parallel       | src      | build-entry |

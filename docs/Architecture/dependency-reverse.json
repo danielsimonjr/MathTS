@@ -9,6 +9,7 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
+    "packages/workerpool/src/worker-numerics.ts": ["packages/workerpool/src/worker.ts"],
     "core/src/config.ts": [
       "core/src/arithmetic/scalar.ts",
       "core/src/internal.ts",
@@ -98,6 +99,8 @@
     "core/src/typed/index.ts": ["core/src/index.ts"],
     "core/src/factory/index.ts": ["core/src/index.ts"],
     "core/src/numeric/stable.ts": ["core/src/index.ts"],
+    "core/src/numeric/rng.ts": ["core/src/index.ts"],
+    "core/src/numeric/strides.ts": ["core/src/index.ts"],
     "core/src/types/interfaces.ts": [
       "core/src/index.ts",
       "core/src/types/bignumber.ts",
