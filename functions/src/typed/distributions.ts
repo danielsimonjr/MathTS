@@ -13,7 +13,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS } from '../wasm/special/wasm-bridge.js';
-import { _lgamma, erfcSelfContained } from '../wasm/special/scalars.js';
+import { _lgamma, erfcSelfContained, normalCDFScalar } from '../wasm/special/scalars.js';
 import { mapArray, kernelSource } from './parallel-map.js';
 
 // =============================================================================
@@ -74,13 +74,6 @@ function normalPDFScalar(x: f64, mu: f64, sigma: f64): f64 {
   if (sigma <= 0) return NaN;
   const z = (x - mu) / sigma;
   return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
-}
-
-/** Normal CDF at x with mean mu and standard deviation sigma. */
-function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
-  if (sigma <= 0) return NaN;
-  // Φ(z) = ½·erfc(−z/√2); erfc form keeps the deep tails precise.
-  return 0.5 * erfcSelfContained((mu - x) / (sigma * Math.SQRT2));
 }
 
 /** Exponential PDF at x with rate lambda. */

@@ -3011,6 +3011,7 @@
       "norm",
       "norm2",
       "normalCDF",
+      "normalCDFScalar",
       "normalDist",
       "normalForm",
       "normalize",

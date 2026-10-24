@@ -7835,7 +7835,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 725
+      "loc": 720
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -8395,7 +8395,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 694
+      "loc": 700
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -9711,7 +9711,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 86
+      "loc": 87
     },
     {
       "file": "functions/tests/krylov-preconditioners.test.ts",

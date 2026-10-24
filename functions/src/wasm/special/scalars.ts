@@ -104,6 +104,12 @@ export function erfcScalar(x: f64): f64 {
   return erfcSelfContained(x);
 }
 
+/** Normal CDF Φ(x; μ, σ) = ½·erfc((μ−x)/(σ√2)); same-module for worker kernels. */
+export function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
+  if (sigma <= 0) return NaN;
+  return 0.5 * erfcSelfContained((mu - x) / (sigma * Math.SQRT2));
+}
+
 // =============================================================================
 // Bessel J0/J1/Y0/Y1: ascending series (|x| <= 13) + Hankel asymptotic (above),
 // both with in-loop-generated coefficients. Validated to <1e-9 vs mpmath

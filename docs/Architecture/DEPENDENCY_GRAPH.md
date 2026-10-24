@@ -9734,7 +9734,7 @@ graph LR
 | File                             | Imports                                            | Type   |
 | -------------------------------- | -------------------------------------------------- | ------ |
 | `../wasm/special/wasm-bridge.js` | `WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS` | Import |
-| `../wasm/special/scalars.js`     | `_lgamma, erfcSelfContained`                       | Import |
+| `../wasm/special/scalars.js`     | `_lgamma, erfcSelfContained, normalCDFScalar`      | Import |
 | `./parallel-map.js`              | `mapArray, kernelSource`                           | Import |
 
 **Exports:**
@@ -11082,7 +11082,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -18616,12 +18616,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 198526 |
-| Total Exports           | 6142   |
+| Total Lines of Code     | 198527 |
+| Total Exports           | 6143   |
 | Total Re-exports        | 2591   |
 | Total Classes           | 58     |
 | Total Interfaces        | 530    |
-| Total Functions         | 1953   |
+| Total Functions         | 1954   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 602    |

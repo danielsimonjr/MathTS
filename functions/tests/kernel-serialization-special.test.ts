@@ -1,8 +1,7 @@
-import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { normalCDF } from '../src/index.js';
 import { erfcScalar } from '../src/typed/special.js';
-import { erfcSelfContained, _lgamma } from '../src/wasm/special/scalars.js';
+import { erfcSelfContained, _lgamma, normalCDFScalar } from '../src/wasm/special/scalars.js';
 import { kernelSource } from '../src/typed/parallel-map.js';
 
 /** Evaluate a `kernelSource` bundle the same way workers do. */
@@ -32,10 +31,15 @@ describe('kernelSource serialization — erfc / normal CDF', () => {
     }
   });
 
-  it('distributions normalCDFScalar source uses erfcSelfContained in dep list', () => {
-    const src = readFileSync(new URL('../src/typed/distributions.ts', import.meta.url), 'utf8');
-    expect(src).toContain('erfcSelfContained((mu - x)');
-    expect(src).toContain('kernelSource([erfcSelfContained, normalCDFScalar]');
+  it('normalCDFScalar kernel stringifies with erfcSelfContained', () => {
+    const src = kernelSource(
+      [erfcSelfContained, normalCDFScalar],
+      '(x) => normalCDFScalar(x, 0, 1)'
+    );
+    expect(src).toContain('erfcSelfContained');
+    expect(normalCDFScalar.toString()).toContain('erfcSelfContained');
+    const fn = evalKernel(src);
+    expect(fn(1)).toBeCloseTo(normalCDF(1, 0, 1) as number, 14);
   });
 
   it('KS normal-CDF worker kernel matches sequential erfcScalar path', () => {

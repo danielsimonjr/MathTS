@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-24",
     "totalFiles": 1189,
     "totalModules": 82,
-    "totalExports": 6142
+    "totalExports": 6143
   },
   "entryPoints": [
     {
@@ -21261,7 +21261,7 @@
           },
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma", "erfcSelfContained"]
+            "imports": ["_lgamma", "erfcSelfContained", "normalCDFScalar"]
           },
           {
             "file": "./parallel-map.js",
@@ -24937,6 +24937,7 @@
           "_lgamma",
           "erfcSelfContained",
           "erfcScalar",
+          "normalCDFScalar",
           "besselHankel",
           "besselJ0Series",
           "besselJ1Series",
@@ -24965,6 +24966,7 @@
           "_lgamma",
           "erfcSelfContained",
           "erfcScalar",
+          "normalCDFScalar",
           "besselHankel",
           "besselJ0Series",
           "besselJ1Series",
@@ -41423,11 +41425,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1189,
     "totalModules": 82,
-    "totalLinesOfCode": 198526,
-    "totalExports": 6142,
+    "totalLinesOfCode": 198527,
+    "totalExports": 6143,
     "totalClasses": 58,
     "totalInterfaces": 530,
-    "totalFunctions": 1953,
+    "totalFunctions": 1954,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,
