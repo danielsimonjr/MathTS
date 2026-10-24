@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-23",
+  "generated": "2026-10-24",
   "totalFiles": 1910,
   "byDisposition": {
     "reachable": 25,
@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 156
+      "loc": 246
     },
     {
       "file": "core/src/types/unit-definitions.ts",
@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 95
+      "loc": 99
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -1115,7 +1115,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 70
+      "loc": 151
     },
     {
       "file": "core/tests/types/unit-exact-definitions.test.ts",
@@ -12924,7 +12924,7 @@
       "package": "@danielsimonjr/mathts-units",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 83
+      "loc": 84
     },
     {
       "file": "units/tests/units.test.ts",

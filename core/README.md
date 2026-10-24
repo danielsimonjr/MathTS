@@ -40,6 +40,12 @@ console.log(isMatrix(m)); // true
 - `NumericType` - Numeric precision types
 - `MathTSConfig` - Configuration interface
 
+### SI dimension vectors
+
+`toSiDimensionVector` returns exact `Fraction` exponents `[L, M, T, I, Θ, N, J]`; use
+`vec.map((f) => f.toNumber())` when you need plain numbers. `fromSiDimensionVector` accepts
+`number` or `Fraction` components and produces the length-10 `Unit` exponent array.
+
 ### Functions
 
 - `DEFAULT_CONFIG` - Default configuration object

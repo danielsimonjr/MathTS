@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-24",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -756,6 +756,7 @@
       "sha384OfBuffer",
       "SI_DIMENSION_LENGTH",
       "SI_PREFIXES",
+      "SiDimensionExponent",
       "SiDimensionOptions",
       "SiDimensionVector",
       "sign",
@@ -4579,6 +4580,7 @@
       "readUnitScale",
       "SI_DIMENSION_LENGTH",
       "SI_PREFIXES",
+      "SiDimensionExponent",
       "SiDimensionOptions",
       "SiDimensionVector",
       "toSiDimensions",

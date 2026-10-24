@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-23'
+  lastUpdated: '2026-10-24'
   totalFiles: 1189
   totalModules: 83
-  totalExports: 6165
+  totalExports: 6168
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -860,6 +860,7 @@ modules:
           imports:
             - SiDimensionVector
             - SiDimensionOptions
+            - SiDimensionExponent
           reExport: true
           typeOnly: true
         - file: ./typed/index.js
@@ -1054,6 +1055,7 @@ modules:
         - UnitPrefix
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
         - TypedFunction
         - TypedInstance
         - TypeDef
@@ -1235,6 +1237,7 @@ modules:
         - UnitPrefix
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
         - TypedFunction
         - TypedInstance
         - TypeDef
@@ -2439,6 +2442,10 @@ modules:
           imports:
             - Dimensions
           typeOnly: true
+        - file: ./fraction.js
+          imports:
+            - Fraction
+            - isFraction
       workspaceDependencies: []
       exports:
         - UNIT_DIMENSION_LENGTH
@@ -3073,6 +3080,7 @@ modules:
           imports:
             - SiDimensionVector
             - SiDimensionOptions
+            - SiDimensionExponent
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -3136,6 +3144,7 @@ modules:
         - UnitDef
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
       reExported:
         - Unit
         - createUnitClass
@@ -3196,6 +3205,7 @@ modules:
         - UnitDef
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
     core/src/types/wasm-loader.ts:
       description: Shared type-only shapes for the two independent WASM loader implementations
       externalDependencies: []
@@ -31458,6 +31468,7 @@ modules:
             - UnitDef
             - SiDimensionVector
             - SiDimensionOptions
+            - SiDimensionExponent
             - ExactScale
             - IrrationalName
             - IrrationalPowers
@@ -31524,6 +31535,7 @@ modules:
         - UnitDef
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -31590,6 +31602,7 @@ modules:
         - UnitDef
         - SiDimensionVector
         - SiDimensionOptions
+        - SiDimensionExponent
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -39111,15 +39124,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 83
-  totalLinesOfCode: 199471
-  totalExports: 6165
+  totalLinesOfCode: 199566
+  totalExports: 6168
   totalClasses: 59
   totalInterfaces: 534
   totalFunctions: 1959
   totalTypeGuards: 160
   totalEnums: 0
   totalConstants: 1616
-  totalReExports: 2604
+  totalReExports: 2607
   totalTypeOnlyImports: 604
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

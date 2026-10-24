@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-23",
+  "generated": "2026-10-24",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -43,6 +43,7 @@
       "core/src/index.ts",
       "core/src/typed/mathts-typed.ts",
       "core/src/typed/type-bridge.ts",
+      "core/src/types/si-dimension-vector.ts",
       "core/src/types/unit/dependencies.ts"
     ],
     "core/src/is.ts": [
