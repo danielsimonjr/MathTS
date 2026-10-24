@@ -159,7 +159,7 @@ describe('WasmLoader — AS allocation pool recycles released blocks', () => {
     expect(memoryBytes(loader)).toBe(before);
   });
 
-  it('allocate/free cycles keep linear memory bounded too (fft-wasm uses free)', () => {
+  it('allocate/free cycles keep linear memory bounded too', () => {
     loader.clearPool();
     const data = new Float64Array(2048).fill(2);
     const warm = loader.allocateFloat64Array(data);

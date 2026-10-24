@@ -266,11 +266,11 @@ Excluded from both gaps; documented so they are not re-surveyed:
 
 ## 10. Constraints & risks for any follow-up work
 
-- **SHA-384 manifest invariant** — `functions/src/wasm/WasmLoader.ts` and
-  `assembly/src/bindings/wasm-loader.ts` hash the `.wasm` buffer against
-  `wasm-manifest.json` before instantiate. Any new build **must** regenerate
-  the manifest (`tools/generate-wasm-manifest.mjs`); the check must not be
-  bypassed. (Security invariant — see CLAUDE.md.)
+- **SHA-384 manifest invariant** — `core/src/wasm-loader.ts` (`verifyWasmIntegrity`)
+  is invoked by `functions/src/wasm/WasmLoader.ts` and
+  `matrix/src/backends/WasmLoader.ts` before instantiate. Any new build **must**
+  regenerate the manifest (`tools/generate-wasm-manifest.mjs`); the check must not
+  be bypassed. (Security invariant — see CLAUDE.md.)
 - **Naming convention** — the WASM module uses `snake_case` exports
   (`array_sum`). New functions must follow this; watch for name collisions
   (the module already disambiguates with prefixes like `scalar_`, `matrix_`,

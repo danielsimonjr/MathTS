@@ -237,9 +237,9 @@ function matmul(a: Matrix, b: Matrix): Matrix {
 
 ## Releasing
 
-Version bumps go through Changesets. Add a changeset with the change, and the Release workflow opens a "chore: release packages" pull request. Merging that PR bumps the package versions, tags each bumped package (`@scope/name@version`), and opens a GitHub Release.
+Version bumps go through Changesets. Add a changeset with the change, and the Release workflow opens a "chore: release packages" pull request. Tagging, GitHub Releases, and npm publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is off). Leave that version PR unmerged until the PySR roadmap is done (`docs/roadmap/PYSR_INFORMED_ROADMAP.md` §7). When releases are enabled, merging the PR bumps the package versions, tags each bumped package (`@scope/name@version`), and opens a GitHub Release.
 
-npm publish runs in the Publish workflow after `bun run build`. `changeset publish` ships every workspace version that is not on npm yet, with public access. It uses the repository secret `NPM` (`NODE_AUTH_TOKEN`) and does not use OIDC or provenance. Merging a version PR publishes those new versions in the same workflow run. Versions that are already on `main` without having been published are shipped by running the Publish workflow from the Actions tab (`workflow_dispatch`).
+npm publish runs in the Publish workflow after `bun run build`. `changeset publish` ships every workspace version that is not on npm yet, with public access. It uses the repository secret `NPM` (`NODE_AUTH_TOKEN`) and does not use OIDC or provenance. Merging a version PR publishes those new versions in the same workflow run when releases are enabled. `publish.yml` checks the same variable on `workflow_call`, `workflow_dispatch`, and `release: published`. Versions that are already on `main` without having been published are shipped by running the Publish workflow from the Actions tab (`workflow_dispatch`) after setting `RELEASES_ENABLED=true`.
 
 ## Questions?
 

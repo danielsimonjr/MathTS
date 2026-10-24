@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-24",
-    "totalFiles": 1189,
-    "totalModules": 83,
-    "totalExports": 6168
+    "totalFiles": 1186,
+    "totalModules": 82,
+    "totalExports": 6132
   },
   "entryPoints": [
     {
@@ -4104,45 +4104,6 @@
           "getCachedFeatures"
         ]
       },
-      "matrix/src/backends/wasm/fft-wasm.ts": {
-        "description": "WASM-Accelerated FFT Operations",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../WasmLoader.js",
-            "imports": ["wasmLoader", "WasmModule"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": [
-          "isPowerOf2",
-          "nextPowerOf2",
-          "fftJS",
-          "isWasmFFTAvailable",
-          "fft",
-          "ifft",
-          "rfft",
-          "powerSpectrum",
-          "magnitudeSpectrum",
-          "phaseSpectrum",
-          "convolve"
-        ],
-        "interfaces": ["FFTResult", "FFTConfig"],
-        "functions": [
-          "isPowerOf2",
-          "nextPowerOf2",
-          "fftJS",
-          "isWasmFFTAvailable",
-          "fft",
-          "ifft",
-          "rfft",
-          "powerSpectrum",
-          "magnitudeSpectrum",
-          "phaseSpectrum",
-          "convolve"
-        ]
-      },
       "matrix/src/backends/wasm/index.ts": {
         "description": "WASM Utilities Index",
         "externalDependencies": [],
@@ -4161,31 +4122,8 @@
             "reExport": true
           },
           {
-            "file": "./fft-wasm.js",
-            "imports": [
-              "fft",
-              "ifft",
-              "rfft",
-              "fftJS",
-              "convolve",
-              "powerSpectrum",
-              "magnitudeSpectrum",
-              "phaseSpectrum",
-              "isPowerOf2",
-              "nextPowerOf2",
-              "isWasmFFTAvailable"
-            ],
-            "reExport": true
-          },
-          {
             "file": "./detect.js",
             "imports": ["WasmFeatures"],
-            "reExport": true,
-            "typeOnly": true
-          },
-          {
-            "file": "./fft-wasm.js",
-            "imports": ["FFTResult", "FFTBackend", "FFTConfig"],
             "reExport": true,
             "typeOnly": true
           }
@@ -4198,25 +4136,7 @@
           "isAtomicsAvailable",
           "clearFeatureCache",
           "getCachedFeatures",
-          "wasmFFT",
-          "wasmIFFT",
-          "wasmRFFT",
-          "fftJS",
-          "wasmConvolve",
-          "powerSpectrum",
-          "magnitudeSpectrum",
-          "phaseSpectrum",
-          "isPowerOf2",
-          "nextPowerOf2",
-          "isWasmFFTAvailable",
-          "fft",
-          "ifft",
-          "rfft",
-          "convolve",
-          "WasmFeatures",
-          "FFTResult",
-          "FFTBackend",
-          "FFTConfig"
+          "WasmFeatures"
         ],
         "reExported": [
           "detectWasmFeatures",
@@ -4225,21 +4145,7 @@
           "isAtomicsAvailable",
           "clearFeatureCache",
           "getCachedFeatures",
-          "fft",
-          "ifft",
-          "rfft",
-          "fftJS",
-          "convolve",
-          "powerSpectrum",
-          "magnitudeSpectrum",
-          "phaseSpectrum",
-          "isPowerOf2",
-          "nextPowerOf2",
-          "isWasmFFTAvailable",
-          "WasmFeatures",
-          "FFTResult",
-          "FFTBackend",
-          "FFTConfig"
+          "WasmFeatures"
         ]
       },
       "matrix/src/backends/wasm/integrity.ts": {
@@ -20697,6 +20603,7 @@
             "file": "../wasm/poly/wasm-bridge.js",
             "imports": [
               "polyMulDispatch",
+              "polyMulJS",
               "polyDivModDispatch",
               "resultantDispatch",
               "discriminantDispatch",
@@ -24807,6 +24714,7 @@
         "exports": [
           "WASM_POLY_THRESHOLD",
           "WASM_POLY_FIT_THRESHOLD",
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -24817,6 +24725,7 @@
           "resetPolyWasm"
         ],
         "functions": [
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -36772,52 +36681,6 @@
         ]
       }
     },
-    "assembly/bindings": {
-      "assembly/src/bindings/index.ts": {
-        "description": "MathTS WASM Bindings",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./wasm-loader.js",
-            "imports": ["MathTSWasm", "loadWasm", "loadWasmSync"],
-            "reExport": true
-          },
-          {
-            "file": "./wasm-loader.js",
-            "imports": ["MathTSWasmExports", "MathTSWasmInstance"],
-            "reExport": true,
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": [
-          "MathTSWasm",
-          "loadWasm",
-          "loadWasmSync",
-          "MathTSWasmExports",
-          "MathTSWasmInstance"
-        ],
-        "reExported": [
-          "MathTSWasm",
-          "loadWasm",
-          "loadWasmSync",
-          "MathTSWasmExports",
-          "MathTSWasmInstance"
-        ]
-      },
-      "assembly/src/bindings/wasm-loader.ts": {
-        "description": "WASM Module Loader",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "workspaceDependencies": [],
-        "exports": ["loadWasm", "loadWasmSync", "MathTSWasm"],
-        "classes": ["MathTSWasm"],
-        "interfaces": ["MathTSWasmExports", "MathTSWasmInstance"],
-        "functions": ["loadWasm", "loadWasmSync"]
-      }
-    },
     "assembly": {
       "assembly/src/elementwise.ts": {
         "description": "Unary elementwise transcendental array kernels — POINTER-ABI AssemblyScript.",
@@ -40025,7 +39888,6 @@
           "matrix/src/backends/index.ts",
           "matrix/src/backends/register-backends.ts",
           "matrix/src/backends/wasm/detect.ts",
-          "matrix/src/backends/wasm/fft-wasm.ts",
           "matrix/src/backends/wasm/index.ts",
           "matrix/src/backends/wasm/integrity.ts",
           "matrix/src/backends/wasm/resolve.ts"
@@ -41371,10 +41233,6 @@
         "files": ["assembly/src/algebra/decomposition.ts"]
       },
       {
-        "name": "Assembly/bindings",
-        "files": ["assembly/src/bindings/index.ts", "assembly/src/bindings/wasm-loader.ts"]
-      },
-      {
         "name": "Assembly",
         "files": [
           "assembly/src/elementwise.ts",
@@ -41463,18 +41321,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1189,
-    "totalModules": 83,
-    "totalLinesOfCode": 199572,
-    "totalExports": 6168,
-    "totalClasses": 59,
-    "totalInterfaces": 534,
-    "totalFunctions": 1959,
-    "totalTypeGuards": 160,
+    "totalTypeScriptFiles": 1186,
+    "totalModules": 82,
+    "totalLinesOfCode": 198687,
+    "totalExports": 6132,
+    "totalClasses": 58,
+    "totalInterfaces": 530,
+    "totalFunctions": 1947,
+    "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1616,
-    "totalReExports": 2607,
-    "totalTypeOnlyImports": 604,
+    "totalReExports": 2588,
+    "totalTypeOnlyImports": 602,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

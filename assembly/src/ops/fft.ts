@@ -2,19 +2,18 @@
  * Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
  * complex data `[re0, im0, re1, im1, ...]`.
  *
- * AssemblyScript `fft` / `rfft` / `powerSpectrum` kernels — a line-for-
- * line match of the JS fallback `fftJS` in
- * `matrix/src/backends/wasm/fft-wasm.ts` (same bit-reversal, twiddle
- * recurrence, direction sign, and 1/n inverse scaling — so AS↔JS agreement is
- * at round-off level).
+ * AssemblyScript `fft` / `rfft` / `powerSpectrum` kernels — same radix-2
+ * Cooley-Tukey structure as the JS core in
+ * `functions/src/signal/fft-core-f64.ts` (bit-reversal, twiddle recurrence,
+ * direction sign, 1/n inverse scaling). This AS FFT is not exposed through a
+ * public JS export in `matrix` or `functions`.
  *
  * ABI matches the existing matrix WASM consumer call shapes exactly:
  *   - `fft(dataPtr, n, inverse)`            in-place, `data` holds `2*n` f64
  *   - `rfft(dataPtr, n, resultPtr)`         real `n` in -> interleaved `2*n` out
  *   - `powerSpectrum(dataPtr, n, resultPtr)` interleaved `2*n` in -> `n` out
  *
- * **Size constraint: `n` must be a power of two** (same as `fftJS`; the matrix
- * JS layer rejects non-power-of-2 before reaching WASM). For a non-power-of-2
+ * **Size constraint: `n` must be a power of two.** For a non-power-of-2
  * `n > 1` the data is left unchanged rather than corrupted. There is no
  * separate `ifft` export: the inverse transform is `fft(..., inverse=1)`.
  */
@@ -30,7 +29,7 @@ function isPow2(n: i32): bool {
  */
 export function fft(data: Float64Array, n: i32, inverse: i32): void {
   if (n <= 1) return;
-  if (!isPow2(n)) return; // power-of-2 only (matches fftJS / JS-layer guard)
+  if (!isPow2(n)) return; // power-of-2 only
 
   // Number of bits in the index (log2 n).
   let bits: i32 = 0;

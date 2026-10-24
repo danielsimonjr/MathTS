@@ -38,10 +38,8 @@ console.log(sqrt_f64(16)); // 4
 console.log(sin_f64(Math.PI / 2)); // 1
 ```
 
-Matrix packages load the same binary as `mathts-as.wasm` with their own loaders
-and SHA-384 verification. TypeScript class bindings (`MathTSWasm`, `loadWasmSync`)
-live under `assembly/src/bindings/` and compile to `build/bindings/` — they are
-**not** the package entry.
+`matrix` and `functions` load the same binary as `mathts-as.wasm` via their own
+loaders and SHA-384 verification (`core/src/wasm-loader.ts`).
 
 ### Dense decompositions (AS exports)
 
@@ -64,8 +62,7 @@ assembly/
 │   ├── algebra/decomposition.ts
 │   ├── elementwise.ts, heap.ts, poly.ts, signal.ts, sort.ts, special.ts, tridiag.ts
 │   ├── types/complex.ts
-│   ├── ops/                  # scalar, array, matrix, complex-ops, fft, …
-│   └── bindings/             # optional TS loader (not package entry)
+│   └── ops/                  # scalar, array, matrix, complex-ops, fft, …
 ├── build/                    # mathts.wasm, mathts.js, mathts.d.ts
 ├── tests/run.js              # debug wasm smoke tests
 └── package.json
