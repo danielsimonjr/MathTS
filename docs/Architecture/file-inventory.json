@@ -9711,7 +9711,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 87
+      "loc": 92
     },
     {
       "file": "functions/tests/krylov-preconditioners.test.ts",
@@ -10446,7 +10446,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 303
+      "loc": 328
     },
     {
       "file": "functions/tests/typed-hypothesis-wasm.test.ts",
