@@ -10535,7 +10535,14 @@ modules:
         - file: ./factories/index.js
           imports:
             - inv
-      workspaceDependencies: []
+        - file: ./numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
       exports:
         - nelderMead
         - gradientDescent
@@ -14906,7 +14913,7 @@ modules:
         - nnls
         - lsqBounded
     functions/src/numeric/numeric-jacobian.ts:
-      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central'
+      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -15090,7 +15097,11 @@ modules:
         - file: ./eigsh.js
           imports:
             - eigsh
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - svds
       interfaces:
@@ -21045,6 +21056,9 @@ modules:
         - file: ../numeric/adaptive-quad.js
           imports:
             - quad
+        - file: ../optimization-extra.js
+          imports:
+            - levenbergMarquardt
         - file: ../numeric/rational-nullspace.js
           imports:
             - rationalNullspace
@@ -39078,7 +39092,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198625
+  totalLinesOfCode: 198561
   totalExports: 6141
   totalClasses: 58
   totalInterfaces: 530

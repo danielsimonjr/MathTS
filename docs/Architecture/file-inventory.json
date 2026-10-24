@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-24",
-  "totalFiles": 1911,
+  "totalFiles": 1912,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 661,
+    "test": 662,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1189,
-    "tests": 661,
+    "tests": 662,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 48,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 796,
+    "@danielsimonjr/mathts-functions": 797,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -6057,7 +6057,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 649
+      "loc": 650
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6589,7 +6589,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 62
+      "loc": 85
     },
     {
       "file": "functions/src/numeric/open-root-finders.ts",
@@ -6652,14 +6652,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 129
+      "loc": 124
     },
     {
       "file": "functions/src/optimization-extra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 226
+      "loc": 215
     },
     {
       "file": "functions/src/pareto-front.ts",
@@ -7975,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2418
+      "loc": 2346
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9735,6 +9735,13 @@
       "loc": 85
     },
     {
+      "file": "functions/tests/levenberg-marquardt.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 116
+    },
+    {
       "file": "functions/tests/lgamma-complex.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9851,7 +9858,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 43
     },
     {
       "file": "functions/tests/numeric.test.ts",

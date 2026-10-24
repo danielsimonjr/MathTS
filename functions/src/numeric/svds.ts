@@ -17,6 +17,7 @@
  *
  * @packageDocumentation
  */
+import { norm2 } from '@danielsimonjr/mathts-core';
 import { eigsh } from './eigsh.js';
 
 /** Options accepted by {@link svds}. */
@@ -60,12 +61,6 @@ function matvecAt(A: number[][], y: number[], n: number): number[] {
     for (let j = 0; j < n; j++) out[j] += row[j] * yi;
   }
   return out;
-}
-
-function norm2(v: number[]): number {
-  let s = 0;
-  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-  return Math.sqrt(s);
 }
 
 /**

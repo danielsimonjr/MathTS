@@ -4,7 +4,9 @@
  * analysis flagged (today only a generic `minimize` exists). LM reuses the matrix
  * `inv` for the normal-equations solve rather than re-implementing elimination.
  */
+import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
+import { numericJacobian } from './numeric/numeric-jacobian.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
@@ -155,24 +157,11 @@ export function levenbergMarquardt(
   const n = x0.length;
   let x = Array.from(x0);
   let lambda = 1e-3;
-  const h = 1e-7;
-  const norm2 = (v: number[]): number => v.reduce((s, c) => s + c * c, 0);
-  const jacobian = (xc: number[], r0: number[]): number[][] => {
-    const m = r0.length;
-    const J: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
-    for (let j = 0; j < n; j++) {
-      const xp = xc.slice();
-      xp[j] += h;
-      const rp = residual(xp);
-      for (let i = 0; i < m; i++) J[i][j] = (rp[i] - r0[i]) / h;
-    }
-    return J;
-  };
   let r = residual(x);
-  let cost = norm2(r);
+  let cost = pairwiseDot(r, r);
   let iter = 0;
   for (; iter < maxIter; iter++) {
-    const J = jacobian(x, r);
+    const J = numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' });
     const m = r.length;
     // JᵀJ and Jᵀr
     const JtJ: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
@@ -207,7 +196,7 @@ export function levenbergMarquardt(
     }
     const xNew = x.map((v, i) => v + delta[i]);
     const rNew = residual(xNew);
-    const costNew = norm2(rNew);
+    const costNew = pairwiseDot(rNew, rNew);
     if (costNew < cost) {
       x = xNew;
       r = rNew;
