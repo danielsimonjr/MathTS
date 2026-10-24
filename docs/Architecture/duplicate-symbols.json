@@ -8,13 +8,13 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 229
+      "ALLOWLISTED": 226
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 0,
       "ALIAS_DELEGATION": 0,
-      "ALLOWLISTED": 54
+      "ALLOWLISTED": 53
     }
   },
   "runtime": [
@@ -1372,41 +1372,6 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "fft",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "assembly/src/ops/fft.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
-        },
-        {
-          "file": "functions/src/signal/fft.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
       "name": "format",
       "category": "constant+function",
       "definers": [
@@ -1683,6 +1648,35 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "fft",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/fft.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "identity",
       "category": "constant+function",
       "definers": [
@@ -1705,34 +1699,6 @@
           "package": "@danielsimonjr/mathts-matrix",
           "public": true,
           "tag": "DISPATCH_VARIANT"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
-      "name": "ifft",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
-        },
-        {
-          "file": "functions/src/signal/fft.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper; matrix/src/backends/wasm/fft-wasm.ts is the coherent (currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays (assembly/src/ops/fft.ts already allowlisted; FFTResult already allowlisted as a distinct representation). Kept as coherent scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -2183,34 +2149,6 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
-      "name": "rfft",
-      "category": "function",
-      "definers": [
-        {
-          "file": "assembly/src/ops/fft.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "functions/src/signal/fft-helpers.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "the matrix WASM-FFT accelerator bridge's real-FFT entry (split Float64Array); functions/src/signal/fft-helpers.ts (left canonical) is the public number[] rFFT (assembly/src/ops/fft.ts already allowlisted). Distinct representation, coherent scaffolding. 2026-07 dedup campaign, closing tail slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -3059,27 +2997,6 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "convolve",
-      "category": "function",
-      "definers": [
-        {
-          "file": "functions/src/typed/signal.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "distinct representation: matrix/src/backends/wasm/fft-wasm.ts's convolve is the (coherent, currently-unreferenced) WASM-FFT accelerator bridge over split Float64Arrays; functions/src/typed/signal.ts's convolve (left canonical) is the public number[] convolution. Kept as coherent accelerator scaffolding (feedback-dont-auto-delete-coherent-api). 2026-07 dedup campaign, closing tail slice."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
       "name": "cosh",
       "category": "constant",
       "definers": [
@@ -3873,6 +3790,28 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "same name, different function: plot/src/histogram.ts renders an SVG histogram; functions/src/descriptive-stats.ts's histogram (left canonical) computes bin counts/edges (HistogramResult). Distinct-by-domain. 2026-07 dedup campaign, closing tail slice."
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "ifft",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
+        },
+        {
+          "file": "functions/src/signal/fft.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
         }
       ],
       "canonicalHint": "AMBIGUOUS",
@@ -4681,27 +4620,6 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "loadWasm",
-      "category": "function",
-      "definers": [
-        {
-          "file": "assembly/src/bindings/wasm-loader.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "functions/src/wasm/WasmLoader.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
       "name": "log10",
       "category": "constant",
       "definers": [
@@ -5311,27 +5229,6 @@
       "tag": "ALLOWLISTED"
     },
     {
-      "name": "powerSpectrum",
-      "category": "function",
-      "definers": [
-        {
-          "file": "assembly/src/ops/fft.ts",
-          "package": "@danielsimonjr/mathts-wasm",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "AssemblyScript separate compilation target, cannot import core"
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "PLAIN"
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
       "name": "primeFactors",
       "category": "constant+function",
       "definers": [
@@ -5576,6 +5473,27 @@
         },
         {
           "file": "functions/src/typed/algebra.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "rfft",
+      "category": "function",
+      "definers": [
+        {
+          "file": "assembly/src/ops/fft.ts",
+          "package": "@danielsimonjr/mathts-wasm",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "AssemblyScript separate compilation target, cannot import core"
+        },
+        {
+          "file": "functions/src/signal/fft-helpers.ts",
           "package": "@danielsimonjr/mathts-functions",
           "public": true,
           "tag": "PLAIN"
@@ -7101,28 +7019,6 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "unrelated domains sharing a name: parallel dispatch mode ('parallel' | 'sequential') vs workbook cell-execution mode ('reactive' | 'sequential' | 'manual'). 2026-07 type-dedup pass."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
-      "name": "FFTResult",
-      "category": "interface",
-      "definers": [
-        {
-          "file": "functions/src/signal/fft.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
-        },
-        {
-          "file": "matrix/src/backends/wasm/fft-wasm.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "functions' is a Complex-object-array representation (spectrum/originalLength/paddedLength); matrix's WASM bridge uses raw split real/imag Float64Arrays for performance — different representations by design. 2026-07 type-dedup pass."
         }
       ],
       "canonicalHint": "AMBIGUOUS",

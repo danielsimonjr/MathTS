@@ -91,4 +91,8 @@ export {
   fromSiDimensions,
   fromSiDimensionVector,
 } from './si-dimension-vector.js';
-export type { SiDimensionVector, SiDimensionOptions } from './si-dimension-vector.js';
+export type {
+  SiDimensionVector,
+  SiDimensionOptions,
+  SiDimensionExponent,
+} from './si-dimension-vector.js';

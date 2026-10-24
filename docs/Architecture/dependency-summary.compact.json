@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-24", "f": 1192, "e": 6173, "re": 2607 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-24", "f": 1189, "e": 6140, "re": 2591 },
   "s": {
-    "loc": 199457,
-    "cls": 59,
-    "int": 534,
-    "fn": 1964,
-    "tg": 160,
+    "loc": 198673,
+    "cls": 58,
+    "int": 530,
+    "fn": 1952,
+    "tg": 158,
     "en": 0,
     "co": 1616,
-    "toi": 604
+    "toi": 602
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -241,7 +241,7 @@
       ]
     },
     "matrix/backends": {
-      "f": 19,
+      "f": 18,
       "exp": [
         "DEFAULT_BACKEND_HINTS",
         "backendRegistry",
@@ -1701,12 +1701,6 @@
         "matrix_inverse",
         "matrix_determinant"
       ]
-    },
-    "assembly/bindings": {
-      "f": 2,
-      "exp": ["MathTSWasm", "loadWasm", "loadWasmSync", "MathTSWasmExports", "MathTSWasmInstance"],
-      "cls": ["MathTSWasm"],
-      "int": ["MathTSWasmExports", "MathTSWasmInstance"]
     },
     "assembly": {
       "f": 8,

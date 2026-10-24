@@ -40,6 +40,13 @@ console.log(isMatrix(m)); // true
 - `NumericType` - Numeric precision types
 - `MathTSConfig` - Configuration interface
 
+### SI dimension vectors
+
+`toSiDimensionVector` returns exact `Fraction` exponents `[L, M, T, I, Θ, N, J]`; use
+`vec.map((f) => f.toNumber())` when you need plain numbers (there is no
+`toSiDimensionNumbers` helper). `fromSiDimensionVector` accepts `SiDimensionExponent`
+(`number | Fraction`) and produces the length-10 `Unit` exponent array.
+
 ### Functions
 
 - `mulberry32(seed)` — seeded Mulberry32 PRNG returning U[0, 1) samples (not cryptographically secure)
