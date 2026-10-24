@@ -8,7 +8,7 @@
  *
  * @packageDocumentation
  */
-import { svd } from '@danielsimonjr/mathts-matrix';
+import { matMul, svd } from '@danielsimonjr/mathts-matrix';
 import { quaternionConjugate } from '../geometry-extra.js';
 import { setIsSubset, setMultiplicity } from '../typed/set.js';
 
@@ -212,21 +212,6 @@ function matTranspose(A: number[][]): number[][] {
   const T: number[][] = Array.from({ length: cols }, () => new Array<number>(rows).fill(0));
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) T[j][i] = A[i][j];
   return T;
-}
-
-function matMul(A: number[][], B: number[][]): number[][] {
-  const rows = A.length;
-  const inner = B.length;
-  const cols = B[0]?.length ?? 0;
-  const C: number[][] = Array.from({ length: rows }, () => new Array<number>(cols).fill(0));
-  for (let i = 0; i < rows; i++) {
-    for (let k = 0; k < inner; k++) {
-      const a = A[i][k];
-      if (a === 0) continue;
-      for (let j = 0; j < cols; j++) C[i][j] += a * B[k][j];
-    }
-  }
-  return C;
 }
 
 /**

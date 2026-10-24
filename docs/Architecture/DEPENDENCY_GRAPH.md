@@ -1711,10 +1711,11 @@ graph LR
 | `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions`                                          | Re-export |
 | `./qr-family.js`  | `lq, rq, ql, LQResult, RQResult, QLResult`                                              | Re-export |
 | `./condest.js`    | `condest`                                                                               | Re-export |
+| `./common.js`     | `matMul`                                                                                | Re-export |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`
 
 ---
 
@@ -5390,9 +5391,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import |
-| ------------------------------ | ------ |
-| `@danielsimonjr/mathts-matrix` | `svd`  |
+| Package                        | Import        |
+| ------------------------------ | ------------- |
+| `@danielsimonjr/mathts-matrix` | `matMul, svd` |
 
 **Internal Dependencies:**
 
@@ -6552,6 +6553,12 @@ graph LR
 
 ### `functions/src/ml/ols.ts` - Ordinary least-squares regression for a general design matrix (Wave — ML primitives).
 
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-matrix` | `matMul` |
+
 **Internal Dependencies:**
 
 | File                           | Imports             | Type   |
@@ -6630,6 +6637,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/control-equations.ts` - Control-theory matrix equations — `dlyap`/`care`/`dare`.
+
+**Workspace Dependencies:**
+
+| Package                        | Import   |
+| ------------------------------ | -------- |
+| `@danielsimonjr/mathts-matrix` | `matMul` |
 
 **Internal Dependencies:**
 
@@ -6857,9 +6870,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                     |
-| ------------------------------ | -------------------------- |
-| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, luSolve` |
+| Package                        | Import                             |
+| ------------------------------ | ---------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, lu, luSolve, matMul` |
 
 **Internal Dependencies:**
 
@@ -10079,11 +10092,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                                                                                                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix` |
-| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                  |
-| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                |
+| Package                          | Import                                                                                                                                                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul` |
+| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                          |
+| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                        |
 
 **Exports:**
 
@@ -17776,7 +17789,7 @@ graph LR
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
-| `matrix/src/operations/index`                          | 15 files     | 1 file     |
+| `matrix/src/operations/index`                          | 16 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `core/src/index`                                       | 15 files     | 0 files    |
@@ -18627,9 +18640,9 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 199471 |
-| Total Exports           | 6165   |
-| Total Re-exports        | 2604   |
+| Total Lines of Code     | 199423 |
+| Total Exports           | 6166   |
+| Total Re-exports        | 2605   |
 | Total Classes           | 59     |
 | Total Interfaces        | 534    |
 | Total Functions         | 1959   |

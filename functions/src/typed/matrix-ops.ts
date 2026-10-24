@@ -30,6 +30,7 @@ import {
   type LogmOptions,
   type SqrtmOptions,
   DenseMatrix,
+  matMul as denseMatMul,
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
@@ -95,17 +96,7 @@ async function matMul(A: number[][], B: number[][]): Promise<number[][]> {
     return unflatten(r.result, m, n);
   }
 
-  const C: number[][] = Array.from({ length: m }, () => new Array(n).fill(0));
-  for (let i = 0; i < m; i++) {
-    for (let k = 0; k < p; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < n; j++) {
-        C[i][j] += aik * B[k][j];
-      }
-    }
-  }
-  return C;
+  return denseMatMul(A, B);
 }
 
 /** Transpose a matrix. */

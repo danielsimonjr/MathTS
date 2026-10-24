@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-23",
-  "totalFiles": 1910,
+  "generated": "2026-10-24",
+  "totalFiles": 1911,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 660,
+    "test": 661,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1189,
-    "tests": 660,
+    "tests": 661,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 796,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 101,
+    "@danielsimonjr/mathts-matrix": 102,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 11,
@@ -5938,7 +5938,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 371
+      "loc": 356
     },
     {
       "file": "functions/src/geometry/halfspace-intersection.ts",
@@ -6449,7 +6449,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 170
+      "loc": 154
     },
     {
       "file": "functions/src/ml/regularized-regression.ts",
@@ -6498,7 +6498,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 361
+      "loc": 348
     },
     {
       "file": "functions/src/numeric/eigsh.ts",
@@ -6624,7 +6624,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1858
+      "loc": 1842
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -7961,7 +7961,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1271
+      "loc": 1262
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -10929,7 +10929,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 216
+      "loc": 234
     },
     {
       "file": "matrix/src/operations/condest.ts",
@@ -10964,7 +10964,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 62
+      "loc": 65
     },
     {
       "file": "matrix/src/operations/logm.ts",
@@ -11308,6 +11308,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 276
+    },
+    {
+      "file": "matrix/tests/operations/mat-mul.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 79
     },
     {
       "file": "matrix/tests/operations/pinv.test.ts",

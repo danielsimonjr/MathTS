@@ -1,6 +1,6 @@
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
-import { DenseMatrix, lu, luSolve } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, lu, luSolve, matMul as _matMul } from '@danielsimonjr/mathts-matrix';
 import type {
   MathNumericType,
   MathArray,
@@ -813,22 +813,6 @@ function _newtonTol(rtol: number): number {
 /** Minimum step magnitude guard (scipy uses `10·ulp(t)`; this is the same order of magnitude). */
 function _minStep(t: number): number {
   return 10 * _EPS * Math.max(1, Math.abs(t));
-}
-
-/** Dense (m×m)·(m×m) matrix product for the small BDF difference-array transforms. */
-function _matMul(A: number[][], B: number[][]): number[][] {
-  const m = A.length;
-  const p = B[0].length;
-  const q = B.length;
-  const out: number[][] = Array.from({ length: m }, () => new Array<number>(p).fill(0));
-  for (let i = 0; i < m; i++) {
-    for (let k = 0; k < q; k++) {
-      const aik = A[i][k];
-      if (aik === 0) continue;
-      for (let j = 0; j < p; j++) out[i][j] += aik * B[k][j];
-    }
-  }
-  return out;
 }
 
 // ---------------------------------------------------------------------------------------------
