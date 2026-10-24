@@ -1,5 +1,31 @@
 # @danielsimonjr/mathts-functions
 
+## 0.70.0
+
+### Minor Changes
+
+- a01adf3: Add a Pareto hall of fame with PySR log-loss scores and accuracy, score, and best model selection.
+- b1da434: Add compileScalar, a batch ScalarNode evaluator with per-row validity that matches evaluateScalar.
+
+### Patch Changes
+
+- 4f8bceb: `polymul`'s below-threshold path delegates to the shared `polyMulJS` convolution kernel (same arithmetic, same `trimPoly`).
+- 81b76ea: `curvefit` now calls `levenbergMarquardt` and still returns `number[]` (same signature; it does not throw on the previous fixtures). Its λ schedule, Jacobian step (`1e-8` → `1e-7`), solver (`linsolve` → `inv`), and singular-only catch follow LM. Noise-free linear/exponential fixtures still recover the planted parameters; on a linear `y=2x+1` fit the new path is exact where the old path had a 1-ulp error. `levenbergMarquardt` itself keeps the same iterates (forward Jacobian `h=1e-7`, `pairwiseDot` cost). `svds` uses core `norm2` for overflow-safe normalization. No existing test expectation changed.
+- fc6c32b: Export `matMul` for dense `number[][]` matrix products and route internal `functions` call sites through it instead of local copies.
+- e59fe83: Consolidate log-gamma and accurate erfc/normal-CDF scalars for hypothesis, distributions, and worker kernels; remove duplicate worker log-gamma.
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- Updated dependencies [45d691e]
+- Updated dependencies [fc6c32b]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [45d691e]
+- Updated dependencies [4594b6c]
+- Updated dependencies [49a347a]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-matrix@0.8.0
+  - @danielsimonjr/mathts-core@0.20.0
+  - @danielsimonjr/mathts-expression@0.11.0
+  - @danielsimonjr/mathts-parallel@0.6.12
+
 ## 0.69.2
 
 ### Patch Changes

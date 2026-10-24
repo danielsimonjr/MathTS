@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-signal
 
+## 0.1.72
+
+### Patch Changes
+
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- Updated dependencies [a01adf3]
+- Updated dependencies [4f8bceb]
+- Updated dependencies [81b76ea]
+- Updated dependencies [fc6c32b]
+- Updated dependencies [e59fe83]
+- Updated dependencies [b1da434]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-functions@0.70.0
+
 ## 0.1.71
 
 ### Patch Changes

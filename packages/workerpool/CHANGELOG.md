@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.2.7
+
+### Patch Changes
+
+- e59fe83: Consolidate log-gamma and accurate erfc/normal-CDF scalars for hypothesis, distributions, and worker kernels; remove duplicate worker log-gamma.
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+
 ## 0.2.6
 
 ### Patch Changes

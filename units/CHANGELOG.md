@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-units
 
+## 0.6.0
+
+### Minor Changes
+
+- a6cf17a: BREAKING: `SiDimensionVector` is now a readonly 7-tuple of `Fraction` exponents; use `vec.map((f) => f.toNumber())` instead of comparing tuple elements with `===` on numbers. `fromSiDimensionVector` accepts `SiDimensionExponent` (`number | Fraction`) and still returns the length-10 `number[]` for `Unit`. There is no `toSiDimensionNumbers` helper.
+
+### Patch Changes
+
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- Updated dependencies [a6cf17a]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.5.0
 
 ### Minor Changes
