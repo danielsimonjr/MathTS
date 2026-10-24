@@ -244,10 +244,15 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 - **Re-export packages** (`parser/`, `ast/`, `evaluator/`, `units/`, `numbers/`,
   `linalg/`, `arithmetic/`, `trigonometry/`, `statistics/`, `signal/`) contain
   **no implementation** — edit the source package they re-export, not these.
-- **Carry work to RELEASED.** Versioning is via Changesets. The flow is: changeset → commit →
-  push → the Release workflow opens a "chore: release packages" PR → merge it. That merge bumps
-  versions. The same workflow then tags each bumped package (`name@version`), opens a GitHub
-  Release, and calls the Publish workflow in that run. Publish
+- **Carry work to RELEASED.** Versioning is via Changesets. Tagging, GitHub Releases, and npm
+  publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is
+  off). The version PR still opens on each push; leave it unmerged until the PySR roadmap is
+  done (`docs/roadmap/PYSR_INFORMED_ROADMAP.md` §7). Set `RELEASES_ENABLED=true` to re-enable;
+  do not delete the workflows. `publish.yml` gates the same variable on all three triggers.
+  The flow when releases are on: changeset → commit → push → the Release workflow opens a
+  "chore: release packages" PR → merge it. That merge bumps versions. The same workflow then
+  tags each bumped package (`name@version`), opens a GitHub Release, and calls the Publish
+  workflow in that run. Publish
   (`.github/workflows/publish.yml`) runs `bun run build` and then `changeset publish`, which
   skips versions already on npm and passes `--access public`. Auth is
   the repository secret `NPM` (`NODE_AUTH_TOKEN`) — no `id-token: write`, and no provenance,
@@ -268,10 +273,12 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 From the 2026-05-01 security release. Any change touching these must preserve them
 (regression tests guard each):
 
-1. **WASM SHA-384 verification.** `functions/src/wasm/WasmLoader.ts` and
-   `assembly/src/bindings/wasm-loader.ts` hash the `.wasm` buffer against
-   `wasm-manifest.json` before instantiate. Never weaken/skip — even on streaming
-   compile. Test: `functions/tests/security/wasm-integrity.test.ts`.
+1. **WASM SHA-384 verification.** Canonical logic is `core/src/wasm-loader.ts`
+   (`sha384OfBuffer` / `verifyWasmIntegrity`). `functions/src/wasm/WasmLoader.ts`
+   and `matrix/src/backends/WasmLoader.ts` invoke it against `wasm-manifest.json`
+   before instantiate. Never weaken/skip — even on streaming compile. Tests:
+   `functions/tests/security/wasm-integrity.test.ts`,
+   `matrix/tests/security/wasm-integrity.test.ts`.
 2. **Expression sandbox.** All property/method access in `expression/src/` must
    go through `getSafeProperty`/`setSafeProperty`/`getSafeMethod`
    (`expression/src/utils/customs.ts`). No direct `obj[name]`. Test:

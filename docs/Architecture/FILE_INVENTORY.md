@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1911
+**Total files**: 1906
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1164 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1161 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      661 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      659 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1911** |                                                                                                                |
+| **Total**     | **1906** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1189 |
-| `tests`    |   661 |
+| `src`      |  1186 |
+| `tests`    |   659 |
 | `tools`    |    27 |
 
 ## Per-package counts
@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |   796 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   102 |
+| `@danielsimonjr/mathts-matrix`         |    99 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    38 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -62,7 +62,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
-| `@danielsimonjr/mathts-wasm`           |    28 |
+| `@danielsimonjr/mathts-wasm`           |    26 |
 | `@danielsimonjr/mathts-workbook`       |    65 |
 | `@danielsimonjr/mathts-workerpool`     |    11 |
 
@@ -75,8 +75,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `arithmetic/tests/index.test.ts`                                                  | @danielsimonjr/mathts-arithmetic     | tests    | test        |
 | `arithmetic/vitest.config.ts`                                                     | @danielsimonjr/mathts-arithmetic     | config   | config      |
 | `assembly/src/algebra/decomposition.ts`                                           | @danielsimonjr/mathts-wasm           | src      | reachable   |
-| `assembly/src/bindings/index.ts`                                                  | @danielsimonjr/mathts-wasm           | src      | build-entry |
-| `assembly/src/bindings/wasm-loader.ts`                                            | @danielsimonjr/mathts-wasm           | src      | build-entry |
 | `assembly/src/elementwise.ts`                                                     | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/heap.ts`                                                            | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/index.ts`                                                           | @danielsimonjr/mathts-wasm           | src      | build-entry |
@@ -1615,7 +1613,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/backends/ParallelBackend.ts`                                          | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/register-backends.ts`                                        | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/wasm/detect.ts`                                              | @danielsimonjr/mathts-matrix         | src      | build-entry |
-| `matrix/src/backends/wasm/fft-wasm.ts`                                            | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/wasm/index.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/wasm/integrity.ts`                                           | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/wasm/resolve.ts`                                             | @danielsimonjr/mathts-matrix         | src      | build-entry |
@@ -1697,8 +1694,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/wasm-resolve.test.ts`                                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/accuracy.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/decompositions-as.test.ts`                                     | @danielsimonjr/mathts-matrix         | tests    | test        |
-| `matrix/tests/wasm/fft-wasm-mock.test.ts`                                         | @danielsimonjr/mathts-matrix         | tests    | test        |
-| `matrix/tests/wasm/fft-wasm.test.ts`                                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/gap-wasm-inv-svd-oracles.test.ts`                              | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/loading.test.ts`                                               | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/wasm/operations.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |

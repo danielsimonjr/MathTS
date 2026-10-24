@@ -318,6 +318,15 @@ Polymorphic scalar helpers in `core/src/arithmetic/scalar.ts`: `addScalar`, `sub
 
 Beyond `Unit` and `BASE_UNITS`, core exports exact rational scales and SI dimension vectors: type `ExactScale`, plus value exports such as `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `NAMED_IRRATIONALS`, `NAMED_SCALES`, `UNIT_ROWS`, `getUnitRow`, `toSiDimensionVector` / `fromSiDimensionVector`, `SI_DIMENSION_LENGTH` (7), `UNIT_DIMENSION_LENGTH` (10), prefix helpers, and related `*ExactScale` combinators. Re-exported from `@danielsimonjr/mathts-units`.
 
+`SiDimensionVector` is a readonly 7-tuple of `Fraction` exponents in BIPM order `[L, M, T, I, Θ, N, J]`. `toSiDimensionVector` builds exact rationals (`new Fraction(n, 1n)` for integers, `Fraction.fromNumber` otherwise with default `maxDenominator` `1000000n`; `1e-7` is therefore `0/1`). `Unit.dimensions` stays `number[]`. `fromSiDimensionVector` accepts `SiDimensionExponent` (`number | Fraction`) so existing number tuples still run, and returns the length-10 `number[]`. Read numeric components with `vec.map((f) => f.toNumber())` after `toSiDimensionVector` (there is no `toSiDimensionNumbers` helper).
+
+```ts
+import { Unit, toSiDimensionVector, fromSiDimensionVector } from '@danielsimonjr/mathts-core';
+const si = toSiDimensionVector(new Unit(1, 'N').dimensions);
+const nums = si.map((f) => f.toNumber()); // [1, 1, -2, 0, 0, 0, 0]
+fromSiDimensionVector(nums); // length-10 Unit exponent vector
+```
+
 ## Dual unary rules
 
 `DUAL_UNARY_RULES` and type `DualUnaryRule` describe elementary unary ops used internally when you call public `Dual` methods such as `sin()` (`core/src/types/dual-rules.ts`). The `unary` helper is private and not part of the published API.

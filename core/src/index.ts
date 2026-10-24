@@ -154,7 +154,7 @@ export {
   fromSiDimensions,
   fromSiDimensionVector,
 } from './types/unit.js';
-export type { SiDimensionVector, SiDimensionOptions } from './types/unit.js';
+export type { SiDimensionVector, SiDimensionOptions, SiDimensionExponent } from './types/unit.js';
 export {
   BASE_UNITS,
   DERIVED_UNITS,

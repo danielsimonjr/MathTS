@@ -25,15 +25,10 @@ import { join } from 'path';
 const ROOT_DIR = process.cwd();
 const SKIP_REGEN = process.argv.includes('--no-regen');
 
-// Fixed literal command — no user input is ever interpolated into it, so
-// there is no shell-injection surface here. `shell` is required regardless
-// because `npx` is a `.cmd` shim on Windows (Node cannot exec `.cmd`/`.bat`
-// files without a shell — see Node docs on child_process on Windows); passing
-// an argv ARRAY through `shell: true` instead (execFileSync) triggers Node's
-// DEP0190 (args aren't escaped when a shell is involved), so this uses a
-// single pre-built string with execSync instead, which is the documented-safe
-// shape for that combination.
-const REGEN_COMMAND = 'npx tsx tools/create-dependency-graph/create-dependency-graph.ts --root=.';
+// Same generator `docs:deps` runs (`bun tools/….ts`). Do not use `npx tsx`:
+// this repo has no `tsx` dependency (Bun executes TypeScript), and `npx`
+// walks npm overrides (`js-yaml`) and dies with EOVERRIDE.
+const REGEN_COMMAND = 'bun tools/create-dependency-graph/create-dependency-graph.ts --root=.';
 
 function regenerateDuplicateSymbols() {
   execSync(REGEN_COMMAND, { cwd: ROOT_DIR, stdio: 'pipe' });

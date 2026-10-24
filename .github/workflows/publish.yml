@@ -12,14 +12,18 @@ name: Publish
 # fall back to trusted publishing, and die ENEEDAUTH. This workflow never
 # requests `id-token: write`.
 #
-# Triggers:
+# All three triggers no-op unless the repository variable RELEASES_ENABLED is
+# exactly the string `true` (unset is off). Re-enable releases when the PySR
+# roadmap is complete by setting RELEASES_ENABLED=true in Actions → Variables.
+#
+# Triggers (each gated by RELEASES_ENABLED):
 # - workflow_call — the Release workflow calls this in the same run after a
 #   push that changed a package version. GITHUB_TOKEN-created releases do not
 #   fire `release`, so this call is what actually publishes those bumps.
 # - release: published — a GitHub Release created by a person (or any token
 #   that is not GITHUB_TOKEN). One such event publishes every pending version.
 # - workflow_dispatch — catch-up and retry. This is how to publish versions
-#   already on main, including the packages bumped by #334.
+#   already on main when releases are enabled.
 #
 # Auth is the repository secret NPM, passed to npm as NODE_AUTH_TOKEN.
 # The old workflow read NPM_TOKEN; that name is not used.
@@ -45,6 +49,7 @@ permissions:
 jobs:
   publish:
     name: Publish to npm
+    if: vars.RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:

@@ -43,6 +43,7 @@
       "core/src/index.ts",
       "core/src/typed/mathts-typed.ts",
       "core/src/typed/type-bridge.ts",
+      "core/src/types/si-dimension-vector.ts",
       "core/src/types/unit/dependencies.ts"
     ],
     "core/src/is.ts": [
@@ -218,8 +219,6 @@
     "matrix/src/backends/BackendManager.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/wasm/index.ts": ["matrix/src/backends/index.ts"],
     "matrix/src/backends/gpu/index.ts": ["matrix/src/backends/index.ts"],
-    "matrix/src/backends/WasmLoader.ts": ["matrix/src/backends/wasm/fft-wasm.ts"],
-    "matrix/src/backends/wasm/fft-wasm.ts": ["matrix/src/backends/wasm/index.ts"],
     "matrix/src/types/index.ts": ["matrix/src/index.ts"],
     "matrix/src/backends/index.ts": ["matrix/src/index.ts"],
     "matrix/src/operations/index.ts": ["matrix/src/index.ts"],
@@ -3952,7 +3951,6 @@
       "workbook/src/run-worker.ts",
       "workbook/src/timeout-runner.ts"
     ],
-    "assembly/src/bindings/wasm-loader.ts": ["assembly/src/bindings/index.ts"],
     "assembly/src/heap.ts": ["assembly/src/index.ts"],
     "assembly/src/types/complex.ts": [
       "assembly/src/index.ts",

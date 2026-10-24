@@ -72,6 +72,7 @@ export type {
   UnitDef,
   SiDimensionVector,
   SiDimensionOptions,
+  SiDimensionExponent,
   ExactScale,
   IrrationalName,
   IrrationalPowers,
