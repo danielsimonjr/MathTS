@@ -1,3 +1,5 @@
+import { mulberry32 } from '@danielsimonjr/mathts-core';
+
 /**
  * Graph Theory Functions
  *
@@ -461,22 +463,6 @@ export interface CentralityRestartOptions {
 }
 
 /**
- * Mulberry32 seeded PRNG.  Period 2^32.
- * @internal
- */
-function _mulberry32(seed: number): () => number {
-  let s = seed | 0;
-  return (): number => {
-    s = (s + 0x6d2b79f5) | 0;
-    let z = s;
-    z = Math.imul(z ^ (z >>> 15), z | 1);
-    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
-    z = (z ^ (z >>> 14)) >>> 0;
-    return z / 0x100000000;
-  };
-}
-
-/**
  * Derive a per-restart seed from a base seed and restart index using the
  * SplitMix64-style Fibonacci-hash multiplier.
  *
@@ -598,7 +584,7 @@ function _pageRankOnce(
   // Initialise rank vector (random when seed != 0, uniform otherwise)
   let rank = new Float64Array(n);
   if (seed !== 0) {
-    const rng = _mulberry32(seed);
+    const rng = mulberry32(seed);
     let total = 0;
     for (let i = 0; i < n; i++) {
       rank[i] = rng();
@@ -777,7 +763,7 @@ function _betweennessOnce(
     sources = Array.from({ length: n }, (_, i) => i);
   } else {
     // Approximate: random sample of n source nodes with replacement
-    const rng = _mulberry32(seed);
+    const rng = mulberry32(seed);
     sources = Array.from({ length: n }, () => Math.floor(rng() * n));
   }
 
@@ -982,7 +968,7 @@ function _eigenvectorOnce(
 
   let x = new Float64Array(n);
   if (seed !== 0) {
-    const rng = _mulberry32(seed);
+    const rng = mulberry32(seed);
     for (let i = 0; i < n; i++) x[i] = rng();
   } else {
     x.fill(1);

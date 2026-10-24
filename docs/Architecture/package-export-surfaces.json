@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-22",
+  "generated": "2026-10-24",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -518,6 +518,7 @@
       "BigNumberConfig",
       "BigNumberValue",
       "binaryExactScale",
+      "boxMuller",
       "broadcastArrays",
       "broadcastSizes",
       "broadcastTo",
@@ -700,6 +701,7 @@
       "MatrixDimensions",
       "memoize",
       "MemoizedFunction",
+      "mulberry32",
       "multiplyExactScales",
       "multiplyScalar",
       "NAMED_IRRATIONALS",
@@ -747,6 +749,7 @@
       "roundDigits",
       "roundExactScale",
       "RoundingMode",
+      "rowMajorStrides",
       "safeNumberType",
       "Scalar",
       "scaledDistance",
@@ -4028,6 +4031,8 @@
       "TypedFunction"
     ],
     "packages/workerpool": [
+      "_tdRowMajorStrides",
+      "_workerMulberry32",
       "canUseSharedMemory",
       "canUseWasm",
       "compileFunctionSource",

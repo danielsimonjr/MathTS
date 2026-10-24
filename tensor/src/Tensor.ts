@@ -11,6 +11,7 @@
  * DenseMatrix (Float64Array, row-major), generalised to arbitrary rank.
  */
 
+import { rowMajorStrides } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 import type { NestedArray as CoreNestedArray } from '@danielsimonjr/mathts-core/internal';
 import { Index } from './named-index.js';
@@ -69,13 +70,7 @@ export class Tensor {
   }
 
   static rowMajorStrides(shape: ReadonlyArray<number>): number[] {
-    const strides = new Array<number>(shape.length);
-    let acc = 1;
-    for (let k = shape.length - 1; k >= 0; k--) {
-      strides[k] = acc;
-      acc *= shape[k];
-    }
-    return strides;
+    return rowMajorStrides(shape);
   }
 
   static fromNested(data: NestedArray, shape: ReadonlyArray<number>): Tensor {

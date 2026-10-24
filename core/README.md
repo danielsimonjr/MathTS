@@ -42,6 +42,9 @@ console.log(isMatrix(m)); // true
 
 ### Functions
 
+- `mulberry32(seed)` — seeded Mulberry32 PRNG returning U[0, 1) samples (not cryptographically secure)
+- `boxMuller(u1, u2)` — Box–Muller pair of N(0, 1) samples from two uniforms
+- `rowMajorStrides(shape)` — row-major stride vector for a dense tensor shape
 - `DEFAULT_CONFIG` - Default configuration object
 - `isNumber(value)` - Type guard for numbers
 - `isComplex(value)` - Type guard for complex numbers

@@ -14,6 +14,7 @@
  * security-sensitive purposes (key generation, nonces, etc.).
  */
 
+import { mulberry32, boxMuller } from '@danielsimonjr/mathts-core';
 import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { DenseMatrix, qr as matrixQr } from '@danielsimonjr/mathts-matrix';
@@ -47,46 +48,6 @@ export interface RandomTensorOpts {
    * (constructor signature: `Tensor(shape, data, axisLabels?)`).
    */
   axisLabels?: ReadonlyArray<Index>;
-}
-
-// ---------------------------------------------------------------------------
-// Mulberry32 — seeded 32-bit PRNG
-// ---------------------------------------------------------------------------
-
-/**
- * Create a Mulberry32 PRNG seeded with `seed`.
- *
- * Returns a closure that yields uniformly distributed floats in [0, 1) on
- * each call. Mulberry32 has a period of 2^32 and passes PractRand at ≥ 16 GB.
- *
- * NOT cryptographically secure.
- */
-function makeMulberry32(seed: number): () => number {
-  let s = seed | 0;
-  return (): number => {
-    s = (s + 0x6d2b79f5) | 0;
-    let z = s;
-    z = Math.imul(z ^ (z >>> 15), z | 1);
-    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
-    z = (z ^ (z >>> 14)) >>> 0;
-    return z / 0x100000000;
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Box-Muller transform
-// ---------------------------------------------------------------------------
-
-/**
- * Generate a pair of independent N(0,1) samples from two U(0,1) inputs via
- * the Box-Muller transform.
- */
-function boxMuller(u1: number, u2: number): [number, number] {
-  // Clamp u1 away from 0 to avoid log(0).
-  const clamped = u1 === 0 ? Number.EPSILON : u1;
-  const r = Math.sqrt(-2 * Math.log(clamped));
-  const theta = 2 * Math.PI * u2;
-  return [r * Math.cos(theta), r * Math.sin(theta)];
 }
 
 // ---------------------------------------------------------------------------
@@ -142,8 +103,7 @@ export function randomTensor(shape: ReadonlyArray<number>, opts?: RandomTensorOp
   const size = shape.reduce((acc, d) => acc * d, 1);
 
   // Build the raw RNG - either seeded Mulberry32 or Math.random.
-  const rng: () => number =
-    opts?.seed !== undefined ? makeMulberry32(opts.seed) : () => Math.random();
+  const rng: () => number = opts?.seed !== undefined ? mulberry32(opts.seed) : () => Math.random();
 
   // ----- 'orthogonal' distribution -----
   if (distribution === 'orthogonal') {

@@ -23,6 +23,7 @@
  * @packageDocumentation
  */
 
+import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { erfcScalar } from './special.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
@@ -276,27 +277,6 @@ function _logFactorial(n: number): f64 {
 // =============================================================================
 // Batch Sampling Helpers (Slice 5.12)
 // =============================================================================
-
-/**
- * Create a Mulberry32 PRNG seeded with `seed`.
- *
- * Returns a closure yielding U[0,1) floats.  Period: 2^32.
- * NOT cryptographically secure.
- *
- * Reference: Tommy Ettinger, https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
- * Canonical copy also in tensor/src/operations/random.ts and hypothesis.ts.
- */
-function _makeMulberry32(seed: number): () => number {
-  let s = seed | 0;
-  return (): number => {
-    s = (s + 0x6d2b79f5) | 0;
-    let z = s;
-    z = Math.imul(z ^ (z >>> 15), z | 1);
-    z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
-    z = (z ^ (z >>> 14)) >>> 0;
-    return z / 0x100000000;
-  };
-}
 
 /**
  * Fan out distribution sampling to workers or fall back to JS loop.
