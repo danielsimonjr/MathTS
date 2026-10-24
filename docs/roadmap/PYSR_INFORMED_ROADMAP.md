@@ -616,14 +616,14 @@ stay open.
      accident. **`fromSiDimensionVector`:** accept `readonly (number | Fraction)[]` so today's
      number tuples still run; return `number[]` via `Fraction.toNumber()` for the length-10
      `Unit` vector. An integral `Fraction` converts back to that integer.
-     **Back-compat accessor** (new export, the migration path for `vec[0] === 1`):
-     `toSiDimensionNumbers(v: SiDimensionVector): readonly [number, number, number, number, number, number, number]`
-     using `toNumber()`. Do not keep the old return type of `toSiDimensionVector`.
+     **Migration path** for `vec[0] === 1`: `vec.map((f) => f.toNumber())`; no new accessor
+     export is added (reuse `Fraction.toNumber`). Do not keep the old return type of
+     `toSiDimensionVector`.
      **Changeset:** `minor` on `@danielsimonjr/mathts-core` and
      `@danielsimonjr/mathts-units`, body starting with `BREAKING:` (not `major`). **Tests:**
      rewrite `core/tests/types/si-dimension-vector.test.ts` to compare `Fraction` components
      (`1/1`, `1/1`, `-2/1` for a newton) and to round-trip through
-     `toSiDimensionNumbers`. Add `0.5 → 1/2`. `fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])`
+     `fromSiDimensionVector`. Add `0.5 → 1/2`. `fromSiDimensionVector([1, 1, -2, 0, 0, 0, 0])`
      still returns the length-10 `number[]`. **Docs:** `docs/api/core.md` (run
      `bun run docs:functions`), `units/README.md` one sentence, M9 below. M9 does not start
      until PR-SIDIM has merged.
@@ -645,14 +645,14 @@ stay open.
     `tools/benchmark/` and has been run twice on Node per the `AGENTS.md` rules. This
     closes M3's open benchmark box and is the input M14 depends on. No speed number is
     in any doc unless that committed benchmark produced it.
-  - `SiDimensionVector` exponents are `core` `Fraction`s; `toSiDimensionNumbers`
+  - `SiDimensionVector` exponents are `core` `Fraction`s; `fromSiDimensionVector`
     round-trips; `Unit.dimensions` is still `number[]`.
 - **DoD:** base checklist + the following specifics:
   - [ ] B1 lists each removed copy and the symbol that replaced it.
   - [ ] Oracle: pre-change output fixtures for every migrated seeded function.
   - [ ] B3: no public export added or removed except the `core` strides helper and
-        PR-SIDIM (`SiDimensionVector` exponents become `Fraction`; new export
-        `toSiDimensionNumbers`); consumer type check passes.
+        PR-SIDIM (`SiDimensionVector` exponents become `Fraction`, plus its
+        `SiDimensionExponent` input type); consumer type check passes.
   - [ ] M3 benchmark committed, with the output of both Node runs in the PR; it
         interleaves the two variants and keeps a control case.
 
