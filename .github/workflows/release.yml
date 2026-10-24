@@ -10,21 +10,22 @@ name: Release
 # the push actually changed a package version and releases are enabled.
 #
 # What each push does:
-# 1. `changeset git-tag` tags every public workspace package whose current
-#    version has no tag, and this workflow opens a GitHub Release for each tag
-#    it owns (tagger github-actions[bot]). Tags cut by hand are not given a new
-#    release. This step runs FIRST, on the checkout of the pushed commit. The
-#    changesets action rewrites package.json in the working tree, and a tag cut
-#    after it would name the next version on the commit before the version
-#    commit. So a push with a pending changeset never tags the next version,
-#    and the push that merges the version PR tags the version commit. If this
-#    step fails, the version PR step after it does not run; "Re-run failed
-#    jobs" repeats both.
+# 1. When RELEASES_ENABLED is true, `changeset git-tag` tags every public
+#    workspace package whose current version has no tag, and this workflow
+#    opens a GitHub Release for each tag it owns (tagger github-actions[bot]).
+#    Tags cut by hand are not given a new release. This step runs FIRST, on the
+#    checkout of the pushed commit. The changesets action rewrites package.json
+#    in the working tree, and a tag cut after it would name the next version on
+#    the commit before the version commit. So a push with a pending changeset
+#    never tags the next version, and the push that merges the version PR tags
+#    the version commit. If this step fails, the version PR step after it does
+#    not run; "Re-run failed jobs" repeats both. A skipped tag step (variable
+#    unset) is not a failure: the version PR step still runs.
 # 2. changesets/action opens or updates the "chore: release packages" PR when
 #    `.changeset/*.md` files are pending. With none pending, that step is a no-op.
-# 3. If this push changed a package.json "version" field, this run calls
-#    Publish. `changeset publish` then ships every workspace version that is
-#    not on npm yet.
+# 3. If RELEASES_ENABLED is true and this push changed a package.json
+#    "version" field, this run calls Publish. `changeset publish` then ships
+#    every workspace version that is not on npm yet.
 #
 # GITHUB_TOKEN-created releases do not fire the `release` event, so other
 # workflows never see them. Publish is therefore invoked here with
@@ -43,9 +44,10 @@ name: Release
 on:
   push:
     branches: [main, master]
-  # Manual dispatch backfills tags and GitHub Releases. It does not publish:
-  # there is no push, so no version diff. Use the Publish workflow's
-  # workflow_dispatch to publish.
+  # Manual dispatch backfills tags and GitHub Releases only when
+  # RELEASES_ENABLED is true. It does not publish: there is no push, so no
+  # version diff. Use the Publish workflow's workflow_dispatch to publish
+  # (that job is gated by the same variable).
   workflow_dispatch:
 
 concurrency:

@@ -67,7 +67,9 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 ## Release discipline
 
 Per-phase (or per coherent change): changeset (`functions` minor for additive, patch for fixes) →
-commit + push → the Release workflow opens the version PR → merge it. That merge tags the bumped
+commit + push → the Release workflow opens the version PR → merge it. Tagging, GitHub Releases, and
+npm publish run only when `RELEASES_ENABLED` is exactly `true` (unset is off); leave the version PR
+unmerged until the PySR roadmap is done. When releases are on, that merge tags the bumped
 packages, opens GitHub Releases, and calls the Publish workflow (`bun run build` then
 `changeset publish`) in the same run. Auth is the repository secret `NPM`, passed as `NODE_AUTH_TOKEN` (not a secret named
 `NPM_TOKEN`). Do not `npm publish` from a workstation. Versions already on `main` are published
