@@ -11293,7 +11293,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 113
+      "loc": 156
     },
     {
       "file": "matrix/tests/operations/pinv.test.ts",
