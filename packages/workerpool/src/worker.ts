@@ -856,29 +856,6 @@ function tensordotChunk(
 // =============================================================================
 
 /**
- * Lanczos log-gamma (g=7, n=9) — worker-local copy.
- */
-function _workerLgamma(x: number): number {
-  if (x <= 0 && x === Math.floor(x)) return Infinity;
-  if (x < 0.5) {
-    return Math.log(Math.PI / Math.sin(Math.PI * x)) - _workerLgamma(1 - x);
-  }
-  x -= 1;
-  const g = 7;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7,
-  ];
-  let sum = c[0];
-  for (let i = 1; i < g + 2; i++) {
-    sum += c[i] / (x + i);
-  }
-  const t = x + g + 0.5;
-  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
-}
-
-/**
  * Box-Muller normal variate using a provided PRNG.
  */
 function _workerNormalRandom(rng: () => number): number {

@@ -21,6 +21,8 @@ import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { mapArray, kernelSource } from './parallel-map.js';
 import {
   _lgamma,
+  erfcSelfContained,
+  erfcScalar,
   factorial,
   betaScalar,
   gammaincScalar,
@@ -92,50 +94,6 @@ type f64 = number;
 // Internal Helpers
 // =============================================================================
 
-/**
- * Error function erf(x).
- *
- * Hybrid approximation:
- * - For |x| <= 0.5: Maclaurin series, converges to machine precision (~1e-15).
- * - For |x| > 0.5:  Numerical Recipes' `erfcc` rational form (NR in C, 2nd ed.,
- *                   §6.2), max relative error ~1.2e-7.
- */
-// erf(|a|) by Maclaurin series; machine-accurate for a <~ 2.
-function _erfSeries(a: f64): f64 {
-  const c = 2 / Math.sqrt(Math.PI);
-  let sum: f64 = a;
-  let term: f64 = a;
-  for (let n = 1; n < 80; n++) {
-    term *= (-a * a) / n;
-    const inc = term / (2 * n + 1);
-    sum += inc;
-    if (Math.abs(inc) < Math.abs(sum) * 1e-17) break;
-  }
-  return c * sum;
-}
-
-// erfc(a) for a > 0 via the Abramowitz & Stegun 7.1.14 continued fraction
-// (modified Lentz). Computes the small tail value DIRECTLY — no 1 - erf
-// cancellation. Converges well for a >~ 1.
-function _erfcCF(a: f64): f64 {
-  const tiny = 1e-300;
-  let f = a < tiny ? tiny : a; // b_0 = a
-  let C = f;
-  let D = 0;
-  for (let i = 1; i <= 300; i++) {
-    const ai = i / 2; // partial numerator a_i = i/2
-    D = a + ai * D;
-    if (D === 0) D = tiny;
-    D = 1 / D;
-    C = a + ai / C;
-    if (C === 0) C = tiny;
-    const delta = C * D;
-    f *= delta;
-    if (Math.abs(delta - 1) < 1e-16) break;
-  }
-  return Math.exp(-a * a) / Math.sqrt(Math.PI) / f;
-}
-
 // =============================================================================
 // Scalar Implementations
 //
@@ -144,13 +102,7 @@ function _erfcCF(a: f64): f64 {
 // module-level state.
 // =============================================================================
 
-/** Complementary error function erfc(x) = 1 - erf(x). */
-export function erfcScalar(x: f64): f64 {
-  if (!isFinite(x)) return x > 0 ? 0 : 2;
-  if (x < 0) return 2 - erfcScalar(-x); // erfc(-x) = 2 - erfc(x)
-  // x small: 1 - erf (erfc ~ O(1), no cancellation). x large: direct CF tail.
-  return x < 1.5 ? 1 - _erfSeries(x) : _erfcCF(x);
-}
+export { erfcScalar };
 
 /** Imaginary error function erfi(x). */
 function erfiScalar(x: f64): f64 {
@@ -589,7 +541,7 @@ export const erfc = mathTyped('erfc', {
     const wasm = elementwiseUnaryDispatch('erfc', x);
     if (wasm) return Promise.resolve(wasm);
     return mapArray(x, erfcScalar, () =>
-      kernelSource([_erfSeries, _erfcCF, erfcScalar], '(x) => erfcScalar(x)')
+      kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')
     );
   },
 });

@@ -265,16 +265,17 @@ const filtered = await parallelConv(signal, kernel);
 
 ## Special Functions
 
-| Function   | Signature          | Description                  |
-| ---------- | ------------------ | ---------------------------- |
-| `erfc`     | `(x) => number`    | Complementary error function |
-| `beta`     | `(a, b) => number` | Beta function B(a,b)         |
-| `gammainc` | `(x, a) => number` | Incomplete gamma function    |
-| `digamma`  | `(x) => number`    | Digamma function ψ(x)        |
-| `besselJ0` | `(x) => number`    | Bessel J₀(x)                 |
-| `besselJ1` | `(x) => number`    | Bessel J₁(x)                 |
-| `besselY0` | `(x) => number`    | Bessel Y₀(x)                 |
-| `besselY1` | `(x) => number`    | Bessel Y₁(x)                 |
+| Function   | Signature          | Description                                                                                                                            |
+| ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `lgamma`   | `(x) => number`    | Natural log of \|Γ(x)\|; negative non-integers are finite; the mathjs factory `lgammaNumber` returns `NaN` for every negative argument |
+| `erfc`     | `(x) => number`    | Complementary error function                                                                                                           |
+| `beta`     | `(a, b) => number` | Beta function B(a,b)                                                                                                                   |
+| `gammainc` | `(x, a) => number` | Incomplete gamma function                                                                                                              |
+| `digamma`  | `(x) => number`    | Digamma function ψ(x)                                                                                                                  |
+| `besselJ0` | `(x) => number`    | Bessel J₀(x)                                                                                                                           |
+| `besselJ1` | `(x) => number`    | Bessel J₁(x)                                                                                                                           |
+| `besselY0` | `(x) => number`    | Bessel Y₀(x)                                                                                                                           |
+| `besselY1` | `(x) => number`    | Bessel Y₁(x)                                                                                                                           |
 
 ```typescript
 import { erfc, beta, besselJ0 } from '@danielsimonjr/mathts-functions';

@@ -62,6 +62,54 @@ export function _lgamma(x: f64): f64 {
   return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
 }
 
+/**
+ * Complementary error function erfc(x), accurate to ~1e-16 and tail-safe.
+ * Self-contained (`Math` only, recursive by name) for worker `kernelSource` serialization.
+ */
+export function erfcSelfContained(x: f64): f64 {
+  if (!isFinite(x)) return x > 0 ? 0 : 2;
+  if (x < 0) return 2 - erfcSelfContained(-x);
+  if (x < 1.5) {
+    const c = 2 / Math.sqrt(Math.PI);
+    let sum: f64 = x;
+    let term: f64 = x;
+    for (let n = 1; n < 80; n++) {
+      term *= (-x * x) / n;
+      const inc = term / (2 * n + 1);
+      sum += inc;
+      if (Math.abs(inc) < Math.abs(sum) * 1e-17) break;
+    }
+    return 1 - c * sum;
+  }
+  const tiny = 1e-300;
+  let f: f64 = x;
+  let C: f64 = f;
+  let D: f64 = 0;
+  for (let i = 1; i <= 300; i++) {
+    const ai = i / 2;
+    D = x + ai * D;
+    if (D === 0) D = tiny;
+    D = 1 / D;
+    C = x + ai / C;
+    if (C === 0) C = tiny;
+    const delta = C * D;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-16) break;
+  }
+  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f;
+}
+
+/** Complementary error function erfc(x) = 1 - erf(x); thin wrapper for typed dispatch. */
+export function erfcScalar(x: f64): f64 {
+  return erfcSelfContained(x);
+}
+
+/** Normal CDF Φ(x; μ, σ) = ½·erfc((μ−x)/(σ√2)); same-module for worker kernels. */
+export function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
+  if (sigma <= 0) return NaN;
+  return 0.5 * erfcSelfContained((mu - x) / (sigma * Math.SQRT2));
+}
+
 // =============================================================================
 // Bessel J0/J1/Y0/Y1: ascending series (|x| <= 13) + Hankel asymptotic (above),
 // both with in-loop-generated coefficients. Validated to <1e-9 vs mpmath

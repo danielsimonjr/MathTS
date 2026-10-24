@@ -13,6 +13,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS } from '../wasm/special/wasm-bridge.js';
+import { _lgamma, erfcSelfContained, normalCDFScalar } from '../wasm/special/scalars.js';
 import { mapArray, kernelSource } from './parallel-map.js';
 
 // =============================================================================
@@ -30,71 +31,6 @@ type i32 = number;
 // =============================================================================
 
 const LN2 = Math.log(2);
-
-/**
- * Log-gamma function (Lanczos g=7).  Mirrors _lgamma in special.ts.
- * Inline so distribution scalars remain self-contained for worker serialization.
- */
-function _lgammaD(x: f64): f64 {
-  if (x <= 0 && x === Math.floor(x)) return Infinity;
-  if (x < 0.5) {
-    const sinPiX = Math.abs(Math.sin(Math.PI * x));
-    if (sinPiX === 0) return Infinity;
-    return Math.log(Math.PI / sinPiX) - _lgammaD(1 - x);
-  }
-  const g = 7;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7,
-  ];
-  const xm1 = x - 1;
-  let a = c[0];
-  for (let i = 1; i < g + 2; i++) a += c[i] / (xm1 + i);
-  const t = xm1 + g + 0.5;
-  return 0.5 * Math.log(2 * Math.PI) + (xm1 + 0.5) * Math.log(t) - t + Math.log(a);
-}
-
-/**
- * Complementary error function erfc(x), accurate to ~1e-16 and tail-safe.
- * Self-contained (only `Math`) so it serializes into worker kernels: Taylor
- * series for |x| < 1.5 (where erfc ≈ O(1), no cancellation), Abramowitz-&-Stegun
- * 7.1.14 continued fraction for larger x (computes the small tail DIRECTLY,
- * avoiding the 1−erf cancellation that made the old rational `_erf` collapse to
- * 0 in the tail). Mirrors `erfcScalar` in special.ts.
- */
-function _erfc(x: f64): f64 {
-  if (!isFinite(x)) return x > 0 ? 0 : 2;
-  if (x < 0) return 2 - _erfc(-x); // erfc(-x) = 2 - erfc(x)
-  if (x < 1.5) {
-    const c = 2 / Math.sqrt(Math.PI);
-    let sum: f64 = x;
-    let term: f64 = x;
-    for (let n = 1; n < 80; n++) {
-      term *= (-x * x) / n;
-      const inc = term / (2 * n + 1);
-      sum += inc;
-      if (Math.abs(inc) < Math.abs(sum) * 1e-17) break;
-    }
-    return 1 - c * sum;
-  }
-  const tiny = 1e-300;
-  let f: f64 = x;
-  let C: f64 = f;
-  let D: f64 = 0;
-  for (let i = 1; i <= 300; i++) {
-    const ai = i / 2;
-    D = x + ai * D;
-    if (D === 0) D = tiny;
-    D = 1 / D;
-    C = x + ai / C;
-    if (C === 0) C = tiny;
-    const delta = C * D;
-    f *= delta;
-    if (Math.abs(delta - 1) < 1e-16) break;
-  }
-  return Math.exp(-x * x) / Math.sqrt(Math.PI) / f;
-}
 
 /**
  * Log-factorial using Stirling's approximation for large n,
@@ -138,13 +74,6 @@ function normalPDFScalar(x: f64, mu: f64, sigma: f64): f64 {
   if (sigma <= 0) return NaN;
   const z = (x - mu) / sigma;
   return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
-}
-
-/** Normal CDF at x with mean mu and standard deviation sigma. */
-function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
-  if (sigma <= 0) return NaN;
-  // Φ(z) = ½·erfc(−z/√2); erfc form keeps the deep tails precise.
-  return 0.5 * _erfc((mu - x) / (sigma * Math.SQRT2));
 }
 
 /** Exponential PDF at x with rate lambda. */
@@ -248,13 +177,17 @@ export const normalCDF = mathTyped('normalCDF', {
     mapArray(
       x,
       (v) => normalCDFScalar(v, 0, 1),
-      () => kernelSource([_erfc, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
+      () => kernelSource([erfcSelfContained, normalCDFScalar], '(x) => normalCDFScalar(x, 0, 1)')
     ),
   'Float64Array, number, number': (x: Float64Array, mu: f64, sigma: f64): Promise<Float64Array> =>
     mapArray(
       x,
       (v) => normalCDFScalar(v, mu, sigma),
-      () => kernelSource([_erfc, normalCDFScalar], `(x) => normalCDFScalar(x, ${mu}, ${sigma})`)
+      () =>
+        kernelSource(
+          [erfcSelfContained, normalCDFScalar],
+          `(x) => normalCDFScalar(x, ${mu}, ${sigma})`
+        )
     ),
 });
 
@@ -496,7 +429,7 @@ export const jsDivergence = mathTyped('jsDivergence', {
 function betaPDFScalar(x: f64, alpha: f64, beta_: f64): f64 {
   if (alpha <= 0 || beta_ <= 0) return NaN;
   if (x <= 0 || x >= 1) return 0;
-  const logB = _lgammaD(alpha) + _lgammaD(beta_) - _lgammaD(alpha + beta_);
+  const logB = _lgamma(alpha) + _lgamma(beta_) - _lgamma(alpha + beta_);
   return Math.exp((alpha - 1) * Math.log(x) + (beta_ - 1) * Math.log(1 - x) - logB);
 }
 
@@ -526,9 +459,9 @@ export const betaPDF = mathTyped('betaPDF', {
   ): Promise<Float64Array> => {
     const out = new Float64Array(x.length);
     // Scalar lgamma values for the shape parameters (computed once)
-    const lgAlpha = _lgammaD(alpha);
-    const lgBeta = _lgammaD(beta_);
-    const lgAlphaBeta = _lgammaD(alpha + beta_);
+    const lgAlpha = _lgamma(alpha);
+    const lgBeta = _lgamma(beta_);
+    const lgAlphaBeta = _lgamma(alpha + beta_);
     const logB = lgAlpha + lgBeta - lgAlphaBeta;
 
     if (x.length >= WASM_SPECIAL_THRESHOLD) {
@@ -565,9 +498,7 @@ export const betaPDF = mathTyped('betaPDF', {
 function gammaPDFScalar(x: f64, shape: f64, scale: f64): f64 {
   if (shape <= 0 || scale <= 0) return NaN;
   if (x <= 0) return 0;
-  return Math.exp(
-    (shape - 1) * Math.log(x) - x / scale - _lgammaD(shape) - shape * Math.log(scale)
-  );
+  return Math.exp((shape - 1) * Math.log(x) - x / scale - _lgamma(shape) - shape * Math.log(scale));
 }
 
 /**
@@ -596,7 +527,7 @@ export const gammaPDF = mathTyped('gammaPDF', {
   ): Promise<Float64Array> => {
     const out = new Float64Array(x.length);
     // lgamma(shape) is constant — compute once
-    const lgShape = _lgammaD(shape);
+    const lgShape = _lgamma(shape);
     const logScale = Math.log(scale);
     const logConstant = lgShape + shape * logScale; // lgamma(k) + k·ln(θ)
 
@@ -622,8 +553,8 @@ export const gammaPDF = mathTyped('gammaPDF', {
  */
 function studentTPDFScalar(x: f64, df: f64): f64 {
   if (df <= 0) return NaN;
-  const lgHalfNu1 = _lgammaD((df + 1) / 2);
-  const lgHalfNu = _lgammaD(df / 2);
+  const lgHalfNu1 = _lgamma((df + 1) / 2);
+  const lgHalfNu = _lgamma(df / 2);
   const logNorm = lgHalfNu1 - lgHalfNu - 0.5 * Math.log(df * Math.PI);
   return Math.exp(logNorm - ((df + 1) / 2) * Math.log(1 + (x * x) / df));
 }
@@ -649,7 +580,7 @@ export const studentTPDF = mathTyped('studentTPDF', {
   'Float64Array, number': (x: Float64Array, df: f64): Promise<Float64Array> => {
     const out = new Float64Array(x.length);
     // Normalisation constant — computed once
-    const logNorm = _lgammaD((df + 1) / 2) - _lgammaD(df / 2) - 0.5 * Math.log(df * Math.PI);
+    const logNorm = _lgamma((df + 1) / 2) - _lgamma(df / 2) - 0.5 * Math.log(df * Math.PI);
     const halfDf1 = (df + 1) / 2;
 
     for (let i = 0; i < x.length; i++) {
@@ -688,7 +619,7 @@ function noncentralChi2PDFScalar(x: f64, df: f64, ncp: f64): f64 {
     const m = df + 2 * j; // effective df for chi2 component
     const halfM = m / 2;
     // log chi2_m(x) = (halfM − 1)·log(x/2) − x/2 − log(2) − lgamma(halfM)
-    const logChi2 = (halfM - 1) * logHalfX - halfX - Math.log(2) - _lgammaD(halfM);
+    const logChi2 = (halfM - 1) * logHalfX - halfX - Math.log(2) - _lgamma(halfM);
     const term = Math.exp(logPoissonWeight + logChi2);
     sum += term;
     if (j > 0 && term < sum * 1e-12) break;
