@@ -235,9 +235,9 @@ export function polyadd(a: number[], b: number[]): number[] {
  * @param b - Second polynomial coefficients
  * @returns Product polynomial coefficients
  *
- * Below {@link WASM_POLY_THRESHOLD} coefficients, multiplies via the shared
- * {@link polyMulJS} kernel then strips high-end zeros with `trimPoly`. At or
- * above the threshold, uses {@link polyMulDispatch} (WASM when policy allows).
+ * Below `WASM_POLY_THRESHOLD` coefficients, multiplies via the shared
+ * `polyMulJS` kernel then strips high-end zeros with `trimPoly`. At or
+ * above the threshold, uses `polyMulDispatch` (WASM when policy allows).
  *
  * @example
  * ```typescript

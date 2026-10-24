@@ -164,6 +164,27 @@ describe('polymul — oracle and edge cases', () => {
     expect(Object.is(out[0], -0)).toBe(false);
   });
 
+  it('returns a dense Array (not Float64Array), including the empty-input [0]', () => {
+    const cases: Array<[number[], number[]]> = [
+      [
+        [1, 1],
+        [1, 1],
+      ],
+      [[], [1, 2]],
+      [[], []],
+      [[1, 0], [1]],
+    ];
+    for (const [a, b] of cases) {
+      const out = polymul(a, b);
+      expect(Array.isArray(out)).toBe(true);
+      expect(out).not.toBeInstanceOf(Float64Array);
+    }
+  });
+
+  it('both empty inputs return [0]', () => {
+    expect(polymul([], [])).toEqual([0]);
+  });
+
   it('length 255 vs 256 agree with naive reference (threshold boundary)', () => {
     const mk = (n: number) => {
       const c = new Array(n).fill(0);
