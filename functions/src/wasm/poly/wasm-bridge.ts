@@ -45,8 +45,13 @@ export const WASM_POLY_THRESHOLD = 256;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/** Inline JS multiply — used as the below-threshold / no-WASM fallback. */
-function polyMulJS(a: Float64Array, b: Float64Array): Float64Array {
+/**
+ * Canonical O(n·m) coefficient convolution on `Float64Array` operands.
+ *
+ * Not public API — consumed by {@link polyMulDispatch} and `polymul`'s small path
+ * in `typed/algebra.ts`. Returns untrimmed coefficients (high-end zeros retained).
+ */
+export function polyMulJS(a: Float64Array, b: Float64Array): Float64Array {
   if (a.length === 0 || b.length === 0) return new Float64Array([0]);
   const out = new Float64Array(a.length + b.length - 1);
   for (let i = 0; i < a.length; i++) {

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { WASM_POLY_THRESHOLD } from '../src/wasm/poly/wasm-bridge.js';
 import {
   polyval,
   polyadd,
@@ -100,6 +101,81 @@ describe('polymul', () => {
 
   it('should handle empty arrays', () => {
     expect(polymul([], [1, 2])).toEqual([0]);
+  });
+
+  it('should trim high-end zero coefficients', () => {
+    expect(polymul([1, 0], [1])).toEqual([1]);
+  });
+});
+
+/** Mirrors `trimPoly` in algebra.ts — strips high-end zeros, keeps one coeff. */
+function trimPolyOracle(coeffs: number[]): number[] {
+  let end = coeffs.length - 1;
+  while (end > 0 && coeffs[end] === 0) end--;
+  return coeffs.slice(0, end + 1);
+}
+
+/** Independent naive convolution + trim (not `polyMulJS`). */
+function naivePolymulRef(a: number[], b: number[]): number[] {
+  if (a.length === 0 || b.length === 0) return [0];
+  const out = new Array(a.length + b.length - 1).fill(0);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      out[i + j] += a[i] * b[j];
+    }
+  }
+  return trimPolyOracle(out);
+}
+
+describe('polymul — oracle and edge cases', () => {
+  it('matches naive double-loop reference on random small inputs', () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const rng = (() => {
+        let s = seed + 1;
+        return () => {
+          s = (s * 1103515245 + 12345) & 0x7fffffff;
+          return s / 0x7fffffff;
+        };
+      })();
+      const na = 1 + Math.floor(rng() * 12);
+      const nb = 1 + Math.floor(rng() * 12);
+      const a = Array.from({ length: na }, () => Math.round((rng() - 0.5) * 20));
+      const b = Array.from({ length: nb }, () => Math.round((rng() - 0.5) * 20));
+      const expected = naivePolymulRef(a, b);
+      expect(polymul(a, b)).toEqual(expected);
+    }
+  });
+
+  it('hand-computed literals', () => {
+    expect(polymul([2], [3, 4])).toEqual([6, 8]);
+    expect(polymul([1, 2], [0, 1])).toEqual([0, 1, 2]);
+    expect(polymul([0, 0, 1], [1, 1])).toEqual([0, 0, 1, 1]);
+  });
+
+  it('propagates NaN and Infinity like the convolution loop', () => {
+    expect(polymul([NaN], [1])).toEqual([NaN]);
+    expect(polymul([1], [Infinity])).toEqual([Infinity]);
+    expect(polymul([Infinity], [0])).toEqual([NaN]);
+  });
+
+  it('negative zero operands accumulate like the pre-change loop (+0)', () => {
+    const out = polymul([-0], [1]);
+    expect(out).toEqual([0]);
+    expect(Object.is(out[0], -0)).toBe(false);
+  });
+
+  it('length 255 vs 256 agree with naive reference (threshold boundary)', () => {
+    const mk = (n: number) => {
+      const c = new Array(n).fill(0);
+      c[0] = 1;
+      c[n - 1] = 1;
+      return c;
+    };
+    for (const len of [WASM_POLY_THRESHOLD - 1, WASM_POLY_THRESHOLD]) {
+      const a = mk(len);
+      const b = [1, -1];
+      expect(polymul(a, b)).toEqual(naivePolymulRef(a, b));
+    }
   });
 });
 

@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-23",
+    "lastUpdated": "2026-10-24",
     "totalFiles": 1189,
     "totalModules": 83,
-    "totalExports": 6165
+    "totalExports": 6166
   },
   "entryPoints": [
     {
@@ -20689,6 +20689,7 @@
             "file": "../wasm/poly/wasm-bridge.js",
             "imports": [
               "polyMulDispatch",
+              "polyMulJS",
               "polyDivModDispatch",
               "resultantDispatch",
               "discriminantDispatch",
@@ -24799,6 +24800,7 @@
         "exports": [
           "WASM_POLY_THRESHOLD",
           "WASM_POLY_FIT_THRESHOLD",
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -24809,6 +24811,7 @@
           "resetPolyWasm"
         ],
         "functions": [
+          "polyMulJS",
           "polyMulDispatch",
           "polyDivModDispatch",
           "resultantDispatch",
@@ -41454,11 +41457,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1189,
     "totalModules": 83,
-    "totalLinesOfCode": 199471,
-    "totalExports": 6165,
+    "totalLinesOfCode": 199475,
+    "totalExports": 6166,
     "totalClasses": 59,
     "totalInterfaces": 534,
-    "totalFunctions": 1959,
+    "totalFunctions": 1960,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1616,

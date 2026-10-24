@@ -9570,12 +9570,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                              | Imports                                                                                             | Type   |
-| --------------------------------- | --------------------------------------------------------------------------------------------------- | ------ |
-| `../wasm/poly/wasm-bridge.js`     | `polyMulDispatch, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
-| `./polynomial-ideal.js`           | `polyFromExpression, buchberger, normalize, polyToString, Poly`                                     | Import |
-| `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                         | Import |
-| `./factorization/integer-poly.js` | `polyGcdZ`                                                                                          | Import |
+| File                              | Imports                                                                                                        | Type   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------ |
+| `../wasm/poly/wasm-bridge.js`     | `polyMulDispatch, polyMulJS, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
+| `./polynomial-ideal.js`           | `polyFromExpression, buchberger, normalize, polyToString, Poly`                                                | Import |
+| `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                                    | Import |
+| `./factorization/integer-poly.js` | `polyGcdZ`                                                                                                     | Import |
 
 **Exports:**
 
@@ -11005,7 +11005,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
+- Functions: `polyMulJS`, `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
 - Constants: `WASM_POLY_THRESHOLD`, `WASM_POLY_FIT_THRESHOLD`
 
 ---
@@ -18627,12 +18627,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 83     |
-| Total Lines of Code     | 199471 |
-| Total Exports           | 6165   |
+| Total Lines of Code     | 199475 |
+| Total Exports           | 6166   |
 | Total Re-exports        | 2604   |
 | Total Classes           | 59     |
 | Total Interfaces        | 534    |
-| Total Functions         | 1959   |
+| Total Functions         | 1960   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 604    |

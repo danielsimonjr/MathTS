@@ -12,6 +12,7 @@
 
 import {
   polyMulDispatch,
+  polyMulJS,
   polyDivModDispatch,
   resultantDispatch,
   discriminantDispatch,
@@ -234,6 +235,10 @@ export function polyadd(a: number[], b: number[]): number[] {
  * @param b - Second polynomial coefficients
  * @returns Product polynomial coefficients
  *
+ * Below {@link WASM_POLY_THRESHOLD} coefficients, multiplies via the shared
+ * {@link polyMulJS} kernel then strips high-end zeros with `trimPoly`. At or
+ * above the threshold, uses {@link polyMulDispatch} (WASM when policy allows).
+ *
  * @example
  * ```typescript
  * polymul([1, 1], [1, 1]); // [1, 2, 1] => (1+x)^2
@@ -248,13 +253,7 @@ export function polymul(a: number[], b: number[]): number[] {
     const out = polyMulDispatch(fa, fb);
     return trimPoly(Array.from(out));
   }
-  const result: number[] = new Array(a.length + b.length - 1).fill(0);
-  for (let i = 0; i < a.length; i++) {
-    for (let j = 0; j < b.length; j++) {
-      result[i + j] += a[i] * b[j];
-    }
-  }
-  return trimPoly(result);
+  return trimPoly(Array.from(polyMulJS(new Float64Array(a), new Float64Array(b))));
 }
 
 /**

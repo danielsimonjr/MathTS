@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-23",
+  "generated": "2026-10-24",
   "totalFiles": 1910,
   "byDisposition": {
     "reachable": 25,
@@ -7779,7 +7779,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1832
+      "loc": 1831
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -8360,7 +8360,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 528
+      "loc": 533
     },
     {
       "file": "functions/src/wasm/resolve.ts",
@@ -8423,7 +8423,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 592
+      "loc": 668
     },
     {
       "file": "functions/tests/arithmetic-extended.test.ts",
