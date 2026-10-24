@@ -14836,7 +14836,7 @@ modules:
         - nnls
         - lsqBounded
     functions/src/numeric/numeric-jacobian.ts:
-      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central'
+      description: 'Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -38997,7 +38997,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1186
   totalModules: 82
-  totalLinesOfCode: 198608
+  totalLinesOfCode: 198623
   totalExports: 6132
   totalClasses: 58
   totalInterfaces: 530

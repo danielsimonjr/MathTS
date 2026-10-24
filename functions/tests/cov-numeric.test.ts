@@ -372,10 +372,10 @@ describe('curvefit', () => {
   });
 
   it('rejects overshooting steps then converges (lambda-increase branch)', () => {
-    // A stiff sinusoidal model fit from a far, wrong frequency guess causes the
-    // first Levenberg-Marquardt steps to INCREASE the cost; those steps are
-    // rejected and lambda is multiplied by 10 (the else branch) until the
-    // trust region shrinks enough to make progress.
+    // A stiff sinusoidal model fit from a far, wrong frequency guess causes
+    // some Levenberg–Marquardt steps to increase the cost; those steps are
+    // rejected and λ is multiplied by 3 (the shared LM body) until the trust
+    // region shrinks enough to make progress.
     const xs = Array.from({ length: 20 }, (_, i) => i * 0.25);
     const ys = xs.map((x) => 3 * Math.sin(1.5 * x + 0.5));
     const model = (x: number, p: number[]) => p[0] * Math.sin(p[1] * x + p[2]);

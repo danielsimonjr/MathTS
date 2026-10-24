@@ -17,7 +17,7 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     const fPlus = f([x0 + h])[0];
     const expected = (fPlus - f0) / h;
     const J = numericJacobian(f, [x0], { h, scheme: 'forward' });
-    expect(J[0][0]).toBeCloseTo(expected, 10);
+    expect(J[0][0]).toBe(expected);
     const Jcentral = numericJacobian(f, [x0], { h });
     expect(Jcentral[0][0]).toBeCloseTo(2, 9);
     expect(J[0][0]).not.toBe(Jcentral[0][0]);

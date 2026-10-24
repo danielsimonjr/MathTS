@@ -6036,7 +6036,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 649
+      "loc": 650
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6568,7 +6568,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 71
+      "loc": 85
     },
     {
       "file": "functions/src/numeric/open-root-finders.ts",
@@ -9718,7 +9718,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 100
+      "loc": 116
     },
     {
       "file": "functions/tests/lgamma-complex.test.ts",

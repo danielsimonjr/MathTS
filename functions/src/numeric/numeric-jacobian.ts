@@ -1,9 +1,11 @@
 /**
- * Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central
- * differences. Complements the symbolic `jacobian(exprs, vars, scope)` in
- * `typed/cas.ts` — that path requires expression strings and throws on a
- * plain numeric function (`exprs.map is not a function`). This is the
- * foundation for numeric root-finding (`fsolve`, Phase 1 Task 3).
+ * Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite
+ * differences. Default `scheme` is `'central'`; `'forward'` is
+ * `(f(x + h·e_j) − f(x)) / h` and reuses the `f(x)` value already computed.
+ * Complements the symbolic `jacobian(exprs, vars, scope)` in `typed/cas.ts` —
+ * that path requires expression strings and throws on a plain numeric function
+ * (`exprs.map is not a function`). This is the foundation for numeric
+ * root-finding (`fsolve`, Phase 1 Task 3).
  */
 
 /** A vector field ℝⁿ → ℝᵐ. */
@@ -18,13 +20,25 @@ export interface NumericJacobianOptions {
 }
 
 /**
- * Central-difference Jacobian: `J[i][j] = ∂f_i/∂x_j = (f_i(x0 + h·e_j) − f_i(x0 − h·e_j)) / (2h)`.
+ * Numeric Jacobian `J[i][j] = ∂f_i/∂x_j`.
+ *
+ * Default `scheme` is `'central'`:
+ * `(f_i(x0 + h·e_j) − f_i(x0 − h·e_j)) / (2h)`.
+ * `scheme: 'forward'` uses the already-computed `f(x0)`:
+ * `(f_i(x0 + h·e_j) − f_i(x0)) / h`.
  *
  * `f` need not be square (`m = f(x0).length` rows, `n = x0.length` columns).
  * The per-coordinate step defaults to `h = max(1, |x0[j]|) * cbrt(eps)`
  * (eps = 2.22e-16, i.e. Number.EPSILON), the standard relative step for
  * central differences (~6e-6 relative) that balances truncation error
- * (O(h^2)) against floating-point round-off (O(eps/h)).
+ * (O(h^2)) against floating-point round-off (O(eps/h)). Passing `h` uses
+ * that absolute step for every column (both schemes).
+ *
+ * @param f - Vector field ℝⁿ → ℝᵐ.
+ * @param x0 - Point at which to evaluate the Jacobian.
+ * @param opts.h - Absolute step override. Default: per-coordinate relative step.
+ * @param opts.scheme - `'central'` (default) or `'forward'`. Existing callers
+ *   that omit `scheme` keep central differences.
  *
  * @example
  * numericJacobian((v) => [v[0] ** 2 + v[1], v[0] * v[1]], [1, 2])

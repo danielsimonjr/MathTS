@@ -6764,7 +6764,7 @@ graph LR
 
 ---
 
-### `functions/src/numeric/numeric-jacobian.ts` - Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via central
+### `functions/src/numeric/numeric-jacobian.ts` - Numeric Jacobian of a vector-valued function `f: R^n -> R^m` via finite
 
 **Exports:**
 
@@ -18587,7 +18587,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1186   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 198608 |
+| Total Lines of Code     | 198623 |
 | Total Exports           | 6132   |
 | Total Re-exports        | 2588   |
 | Total Classes           | 58     |

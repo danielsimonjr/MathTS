@@ -203,8 +203,9 @@ export type { SVDResult, SVDOptions } from '@danielsimonjr/mathts-matrix';
 export { orth } from './linalg-svd-extra.js';
 export type { OrthOptions } from './linalg-svd-extra.js';
 
-// Numeric Jacobian (F: R^n -> R^m, central differences) — foundation for
-// fsolve (Phase 1 Task 3). Complements the symbolic `jacobian` (typed/cas.ts).
+// Numeric Jacobian (F: R^n -> R^m; central differences by default, optional
+// forward scheme) — foundation for fsolve (Phase 1 Task 3). Complements the
+// symbolic `jacobian` (typed/cas.ts).
 export { numericJacobian } from './numeric/numeric-jacobian.js';
 export type { VectorField, NumericJacobianOptions } from './numeric/numeric-jacobian.js';
 

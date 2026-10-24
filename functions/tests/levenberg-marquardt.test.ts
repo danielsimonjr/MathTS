@@ -33,6 +33,14 @@ describe('levenbergMarquardt — oracle fits', () => {
     expect(r.x[2]).toBeCloseTo(sigma, 4);
   });
 
+  it('recovers the Rosenbrock residual root (1, 1)', () => {
+    // r = [1 − x, 10(y − x²)]; unique zero at the planted (1, 1).
+    const r = levenbergMarquardt((v) => [1 - v[0], 10 * (v[1] - v[0] ** 2)], [-1.2, 1]);
+    expect(r.x[0]).toBe(1);
+    expect(r.x[1]).toBe(1);
+    expect(r.residualNorm).toBe(0);
+  });
+
   it('starts at zero residual (already at the root)', () => {
     const r = levenbergMarquardt((x) => [x[0] - 5, x[1] + 2], [5, -2]);
     expect(r.x[0]).toBeCloseTo(5, 12);
@@ -45,6 +53,11 @@ describe('levenbergMarquardt — oracle fits', () => {
     const mean = ys.reduce((s, v) => s + v, 0) / ys.length;
     const r = levenbergMarquardt((p) => ys.map((y) => p[0] - y), [0]);
     expect(r.x[0]).toBeCloseTo(mean, 9);
+    // Recorded from origin/main (iterate pin: parameters, cost, iteration count).
+    expect(r.x[0]).toBe(2.499999999907543);
+    expect(r.residualNorm).toBe(2.23606797749979);
+    expect(r.iterations).toBe(2);
+    expect(r.converged).toBe(true);
   });
 });
 
@@ -53,6 +66,9 @@ describe('levenbergMarquardt — edge behaviour', () => {
     const r = levenbergMarquardt((x) => [Math.sin(x[0])], [10], { maxIter: 1, tol: 1e-20 });
     expect(r.iterations).toBe(1);
     expect(r.converged).toBe(false);
+    // Recorded from origin/main's private forward Jacobian + reduce cost (iterate pin).
+    expect(r.x[0]).toBe(9.35228686068394);
+    expect(r.residualNorm).toBe(0.0724276271315095);
   });
 
   it('does not throw when residuals become NaN (returns a finite or NaN state)', () => {
