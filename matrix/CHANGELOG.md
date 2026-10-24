@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.8.0
+
+### Minor Changes
+
+- fc6c32b: Export `matMul` for dense `number[][]` matrix products and route internal `functions` call sites through it instead of local copies.
+
+### Patch Changes
+
+- 45d691e: Remove the unreachable matrix WASM FFT JS bridge (`fft-wasm.ts`); public FFT remains in `@danielsimonjr/mathts-functions`.
+- Updated dependencies [a6cf17a]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-core@0.20.0
+  - @danielsimonjr/mathts-parallel@0.6.12
+
 ## 0.7.9
 
 ### Patch Changes

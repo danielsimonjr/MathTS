@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-expression
 
+## 0.11.0
+
+### Minor Changes
+
+- 4594b6c: Add a ScalarNode structural toolkit: traversal, size, depth, weighted complexity, symbol collection, and a canonical structural key.
+
+### Patch Changes
+
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- 49a347a: Fix `scalarComplexity` reading inherited keys of the weight records: a symbol named `constructor` or `toString` returned a function weight and the sum became `NaN`. Weights are now read with the existing own-property helper, so an absent name weighs 1.
+- Updated dependencies [a6cf17a]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.10.3
 
 ### Patch Changes

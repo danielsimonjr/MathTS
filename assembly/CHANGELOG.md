@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-wasm
 
+## 0.3.1
+
+### Patch Changes
+
+- 45d691e: Stop shipping unused TypeScript `MathTSWasm` bindings; consumers load the binary via `functions` and `matrix` loaders with SHA-384 verification.
+
 ## 0.3.0
 
 ### Minor Changes

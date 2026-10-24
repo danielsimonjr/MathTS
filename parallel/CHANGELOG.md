@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.6.12
+
+### Patch Changes
+
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- Updated dependencies [a6cf17a]
+- Updated dependencies [e59fe83]
+- Updated dependencies [19c4ba7]
+  - @danielsimonjr/mathts-core@0.20.0
+  - @danielsimonjr/mathts-workerpool@0.2.7
+
 ## 0.6.11
 
 ### Patch Changes
