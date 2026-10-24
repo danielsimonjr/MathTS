@@ -2334,6 +2334,7 @@
       "erf",
       "erfc",
       "erfcScalar",
+      "erfcSelfContained",
       "erfi",
       "EUCLID",
       "eulerNumbers",

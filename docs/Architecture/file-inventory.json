@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-24",
-  "totalFiles": 1910,
+  "totalFiles": 1912,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 660,
+    "test": 662,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1189,
-    "tests": 660,
+    "tests": 662,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 48,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 796,
+    "@danielsimonjr/mathts-functions": 798,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 98,
@@ -6715,7 +6715,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 123
+      "loc": 129
     },
     {
       "file": "functions/src/plain/number/relational.ts",
@@ -7828,14 +7828,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1462
+      "loc": 1440
     },
     {
       "file": "functions/src/typed/distributions.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 789
+      "loc": 725
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -7933,7 +7933,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2252
+      "loc": 2214
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -8024,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1497
+      "loc": 1449
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -8395,7 +8395,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 652
+      "loc": 694
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -9707,6 +9707,13 @@
       "loc": 22
     },
     {
+      "file": "functions/tests/kernel-serialization-special.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 86
+    },
+    {
       "file": "functions/tests/krylov-preconditioners.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9740,6 +9747,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 37
+    },
+    {
+      "file": "functions/tests/lgamma-contracts.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "functions/tests/linear-regression-stderr.test.ts",
@@ -11545,7 +11559,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1089
+      "loc": 1066
     },
     {
       "file": "packages/workerpool/src/workerpool-browser-shim.ts",
