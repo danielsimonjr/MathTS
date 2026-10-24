@@ -12,9 +12,9 @@
  *   node tools/generate-wasm-manifest.mjs assembly/build functions/lib/wasm
  *
  * The runtime loaders in functions/src/wasm/WasmLoader.ts and
- * assembly/src/bindings/wasm-loader.ts will automatically discover the
- * resulting `wasm-manifest.json` in the same directory as the .wasm
- * payload and reject any tampered binary before instantiation.
+ * matrix/src/backends/WasmLoader.ts discover the resulting
+ * `wasm-manifest.json` beside the .wasm payload (via core's
+ * verifyWasmIntegrity) and reject any tampered binary before instantiation.
  */
 
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
