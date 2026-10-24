@@ -90,10 +90,16 @@ export const lgammaSeries: number[] = [
 ];
 
 /**
- * Return the natural logarithm of the gamma function of `n`.
+ * Return the natural logarithm of the gamma function of `n` (mathjs real-only contract).
  *
- * A negative `n` gives NaN, and 0 gives Infinity. A non-finite `n` is returned unchanged.
- * Values below 0.5 use the reflection formula. Other values use the Lanczos method.
+ * Every negative `n` returns `NaN` (including non-positive integers — not `+Infinity`).
+ * `0` returns `Infinity`. Non-finite `n` is returned unchanged. Values in `(0, 0.5)` use
+ * Euler's reflection with bare `sin(πn)` (positive on that interval). Lanczos `g = 5`
+ * applies for `n ≥ 0.5`. This is **not** `log|Γ(n)|`.
+ *
+ * For `log|Γ(x)|` with `+Infinity` at non-positive integer poles and finite values at
+ * negative non-integers (e.g. `lgamma(-0.5) = ln(2√π)`), use the typed `lgamma` export
+ * (`_lgamma` in `wasm/special/scalars.ts`).
  */
 export function lgammaNumber(n: number): number {
   if (n < 0) return NaN;

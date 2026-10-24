@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-24'
   totalFiles: 1189
   totalModules: 82
-  totalExports: 6141
+  totalExports: 6144
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -19791,6 +19791,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
         - file: ./special.js
           imports:
             - erfcScalar
@@ -19868,6 +19871,11 @@ modules:
             - WASM_SPECIAL_THRESHOLD
             - lgammaDispatch
             - lgammaJS
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+            - erfcSelfContained
+            - normalCDFScalar
         - file: ./parallel-map.js
           imports:
             - mapArray
@@ -20427,9 +20435,16 @@ modules:
           imports:
             - sortF64Dispatch
             - WASM_SORT_THRESHOLD
+        - file: ../wasm/special/scalars.js
+          imports:
+            - _lgamma
+            - erfcSelfContained
         - file: ./special.js
           imports:
             - erfcScalar
+        - file: ./parallel-map.js
+          imports:
+            - kernelSource
         - file: ../distribution-functions.js
           imports:
             - studentTQuantile
@@ -21520,6 +21535,8 @@ modules:
         - file: ../wasm/special/scalars.js
           imports:
             - _lgamma
+            - erfcSelfContained
+            - erfcScalar
             - factorial
             - betaScalar
             - gammaincScalar
@@ -21585,6 +21602,7 @@ modules:
             - mathTyped
             - Complex
       exports:
+        - erfcScalar
         - erfc
         - erfi
         - lgamma
@@ -21624,9 +21642,6 @@ modules:
         - ellipticEIncomplete
         - ellipticPi
         - typedSpecial
-        - erfcScalar
-      functions:
-        - erfcScalar
       constants:
         - erfc
         - erfi
@@ -23320,6 +23335,9 @@ modules:
       workspaceDependencies: []
       exports:
         - _lgamma
+        - erfcSelfContained
+        - erfcScalar
+        - normalCDFScalar
         - besselHankel
         - besselJ0Series
         - besselJ1Series
@@ -23345,6 +23363,9 @@ modules:
         - besselIScalar
       functions:
         - _lgamma
+        - erfcSelfContained
+        - erfcScalar
+        - normalCDFScalar
         - besselHankel
         - besselJ0Series
         - besselJ1Series
@@ -39092,11 +39113,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198561
-  totalExports: 6141
+  totalLinesOfCode: 198415
+  totalExports: 6144
   totalClasses: 58
   totalInterfaces: 530
-  totalFunctions: 1952
+  totalFunctions: 1954
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1616

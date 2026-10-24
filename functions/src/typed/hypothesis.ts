@@ -33,7 +33,9 @@
 import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
+import { _lgamma, erfcSelfContained } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
+import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
 
@@ -250,42 +252,6 @@ function _variance(arr: f64[], ddof: number = 1): f64 {
 }
 
 /**
- * Error function erf(x).
- */
-function _erf(x: f64): f64 {
-  if (x === 0) return 0;
-  const sign = x < 0 ? -1 : 1;
-  const a = Math.abs(x);
-  const t = 1.0 / (1.0 + 0.3275911 * a);
-  const y =
-    1.0 -
-    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) *
-      t *
-      Math.exp(-a * a);
-  return sign * y;
-}
-
-/**
- * Log-gamma function using Lanczos approximation.
- */
-function _lgamma(x: f64): f64 {
-  if (x <= 0 && x === Math.floor(x)) return Infinity;
-  if (x < 0.5) {
-    return Math.log(Math.PI / Math.sin(Math.PI * x)) - _lgamma(1 - x);
-  }
-  x -= 1;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7,
-  ];
-  let sum = c[0];
-  for (let i = 1; i < 9; i++) sum += c[i] / (x + i);
-  const t = x + 7.5;
-  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
-}
-
-/**
  * Regularized lower incomplete gamma function P(a, x).
  */
 function _gammainc(a: f64, x: f64): f64 {
@@ -380,7 +346,7 @@ function _tPValue(t: f64, df: f64): f64 {
  * Standard normal CDF.
  */
 function _normalCDF(x: f64): f64 {
-  return 0.5 * (1 + _erf(x / Math.SQRT2));
+  return 0.5 * erfcScalar(-x / Math.SQRT2);
 }
 
 /**
@@ -811,14 +777,10 @@ export async function kolmogorovSmirnovTest(
     n >= HYPOTHESIS_THRESHOLD &&
     computePool.shouldParallelize(n, 'kolmogorovSmirnovTest')
   ) {
-    // Serialize the normal CDF into a worker-safe kernel (no free variables).
-    const kernelSrc =
-      '(x) => { ' +
-      'const sign = x < 0 ? -1 : 1; ' +
-      'const a = Math.abs(x / 1.4142135623730951); ' +
-      'const t = 1.0 / (1.0 + 0.3275911 * a); ' +
-      'const y = 1.0 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a); ' +
-      'return 0.5 * (1 + sign * y); }';
+    const kernelSrc = kernelSource(
+      [erfcSelfContained],
+      '(x) => 0.5 * erfcSelfContained(-x / Math.SQRT2)'
+    );
     const result = await computePool.applyKernel(sorted, kernelSrc);
     cdfValues = result.result;
   } else {

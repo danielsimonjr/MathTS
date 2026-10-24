@@ -25,6 +25,7 @@
 
 import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { _lgamma } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
@@ -146,29 +147,6 @@ function _normalQuantileStd(p: f64): f64 {
   const e = _normalCdfStd(x) - p;
   const u = e * Math.sqrt(2 * Math.PI) * Math.exp((x * x) / 2);
   return x - u / (1 + (x * u) / 2);
-}
-
-/**
- * Log-gamma function using Lanczos approximation (g=7, n=9).
- */
-function _lgamma(x: f64): f64 {
-  if (x <= 0 && x === Math.floor(x)) return Infinity;
-  if (x < 0.5) {
-    return Math.log(Math.PI / Math.sin(Math.PI * x)) - _lgamma(1 - x);
-  }
-  x -= 1;
-  const g = 7;
-  const c = [
-    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7,
-  ];
-  let sum = c[0];
-  for (let i = 1; i < g + 2; i++) {
-    sum += c[i] / (x + i);
-  }
-  const t = x + g + 0.5;
-  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
 }
 
 function _gamma(x: f64): f64 {

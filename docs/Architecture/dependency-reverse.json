@@ -1663,6 +1663,9 @@
       "functions/src/special/niche.ts",
       "functions/src/special/wave-functions.ts",
       "functions/src/stats/inference-extra2.ts",
+      "functions/src/typed/dist-objects.ts",
+      "functions/src/typed/distributions.ts",
+      "functions/src/typed/hypothesis.ts",
       "functions/src/typed/special.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
@@ -2293,6 +2296,7 @@
     ],
     "functions/src/typed/parallel-map.ts": [
       "functions/src/typed/distributions.ts",
+      "functions/src/typed/hypothesis.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [

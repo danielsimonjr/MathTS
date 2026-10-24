@@ -53,6 +53,30 @@ function normalSample(n: number, seed = 42): number[] {
   return out.slice(0, n);
 }
 
+/**
+ * Hypothesis tests pass their op name to `shouldParallelize`, so the per-op map
+ * (4096) governs and `thresholdElements` is ignored. Sequential vs worker
+ * comparisons must flip `thresholdByOp`, not the global fallback.
+ */
+type HypothesisOp =
+  'chiSquareTest' | 'kolmogorovSmirnovTest' | 'mannWhitneyTest' | 'shapiroWilkTest';
+
+function setHypothesisOp(op: HypothesisOp, threshold: number | 'never' | 'always'): void {
+  computePool.updateConfig({ thresholdByOp: { [op]: threshold } });
+}
+
+function restoreHypothesisOps(): void {
+  computePool.updateConfig({
+    thresholdElements: 50000,
+    thresholdByOp: {
+      chiSquareTest: 4_096,
+      kolmogorovSmirnovTest: 4_096,
+      mannWhitneyTest: 4_096,
+      shapiroWilkTest: 4_096,
+    },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Pool lifecycle
 // ---------------------------------------------------------------------------
@@ -62,6 +86,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  restoreHypothesisOps();
   await computePool.terminate();
 });
 
@@ -86,16 +111,13 @@ describe('chiSquareTest – parallel dispatch correctness', () => {
     const observed = Array.from({ length: n }, () => Math.floor(rand() * 100) + 1);
     const expected = new Array(n).fill(50);
 
-    // Force sequential by using a pool with threshold MAX_SAFE_INTEGER
-    computePool.updateConfig({ thresholdElements: Number.MAX_SAFE_INTEGER });
+    setHypothesisOp('chiSquareTest', 'never');
     const seqResult = await chiSquareTest(observed, expected);
 
-    // Force parallel
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('chiSquareTest', 1);
     const parResult = await chiSquareTest(observed, expected);
 
-    // Restore default
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(Math.abs(parResult.statistic - seqResult.statistic)).toBeLessThan(1e-9);
     expect(Math.abs(parResult.pValue - seqResult.pValue)).toBeLessThan(1e-9);
@@ -107,9 +129,9 @@ describe('chiSquareTest – parallel dispatch correctness', () => {
     const observed = new Array(n).fill(5);
     const expected = new Array(n).fill(5);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('chiSquareTest', 1);
     const result = await chiSquareTest(observed, expected);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(result.statistic).toBeCloseTo(0, 9);
   });
@@ -130,9 +152,9 @@ describe('chiSquareTest – parallel dispatch correctness', () => {
     const obs = new Array(n).fill(1);
     const exp = new Array(n).fill(0); // invalid: zero expected
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('chiSquareTest', 1);
     await expect(chiSquareTest(obs, exp)).rejects.toThrow('positive');
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
   });
 });
 
@@ -151,13 +173,13 @@ describe('kolmogorovSmirnovTest – parallel dispatch correctness', () => {
     const n = 5000;
     const sample = normalSample(n, 13);
 
-    computePool.updateConfig({ thresholdElements: Number.MAX_SAFE_INTEGER });
+    setHypothesisOp('kolmogorovSmirnovTest', 'never');
     const seqResult = await kolmogorovSmirnovTest(sample);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('kolmogorovSmirnovTest', 1);
     const parResult = await kolmogorovSmirnovTest(sample);
 
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(Math.abs(parResult.statistic - seqResult.statistic)).toBeLessThan(1e-9);
     expect(Math.abs(parResult.pValue - seqResult.pValue)).toBeLessThan(1e-9);
@@ -167,9 +189,9 @@ describe('kolmogorovSmirnovTest – parallel dispatch correctness', () => {
     const n = 5000;
     const sample = normalSample(n, 99);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('kolmogorovSmirnovTest', 1);
     const result = await kolmogorovSmirnovTest(sample);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     // A large normal sample should not be rejected against the normal CDF
     expect(result.pValue).toBeGreaterThan(0.01);
@@ -179,10 +201,10 @@ describe('kolmogorovSmirnovTest – parallel dispatch correctness', () => {
 
   it('custom CDF bypasses parallel path — result still correct', async () => {
     // Custom CDF always uses sequential regardless of pool config
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('kolmogorovSmirnovTest', 1);
     const sample = uniformSample(5000, 7);
     const result = await kolmogorovSmirnovTest(sample, (x) => x);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     // Uniform [0,1] sample against uniform CDF → not rejected
     expect(result.pValue).toBeGreaterThan(0.01);
@@ -211,13 +233,13 @@ describe('mannWhitneyTest – parallel dispatch correctness', () => {
     const s1 = uniformSample(n, 17);
     const s2 = uniformSample(n, 23);
 
-    computePool.updateConfig({ thresholdElements: Number.MAX_SAFE_INTEGER });
+    setHypothesisOp('mannWhitneyTest', 'never');
     const seqResult = await mannWhitneyTest(s1, s2);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('mannWhitneyTest', 1);
     const parResult = await mannWhitneyTest(s1, s2);
 
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(Math.abs(parResult.uStatistic - seqResult.uStatistic)).toBeLessThan(1e-9);
     expect(Math.abs(parResult.pValue - seqResult.pValue)).toBeLessThan(1e-9);
@@ -228,9 +250,9 @@ describe('mannWhitneyTest – parallel dispatch correctness', () => {
     const s1 = uniformSample(n, 41);
     const s2 = uniformSample(n, 43);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('mannWhitneyTest', 1);
     const result = await mannWhitneyTest(s1, s2);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     // Two uniform samples from the same distribution should not be rejected
     expect(result.pValue).toBeGreaterThan(0.01);
@@ -257,13 +279,13 @@ describe('shapiroWilkTest – parallel dispatch correctness', () => {
     const n = 4096;
     const sample = normalSample(n, 55);
 
-    computePool.updateConfig({ thresholdElements: Number.MAX_SAFE_INTEGER });
+    setHypothesisOp('shapiroWilkTest', 'never');
     const seqResult = await shapiroWilkTest(sample);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('shapiroWilkTest', 1);
     const parResult = await shapiroWilkTest(sample);
 
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(Math.abs(parResult.statistic - seqResult.statistic)).toBeLessThan(1e-9);
     expect(Math.abs(parResult.pValue - seqResult.pValue)).toBeLessThan(1e-9);
@@ -273,9 +295,9 @@ describe('shapiroWilkTest – parallel dispatch correctness', () => {
     const n = 4096;
     const sample = normalSample(n, 77);
 
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('shapiroWilkTest', 1);
     const result = await shapiroWilkTest(sample);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(result.statistic).toBeGreaterThan(0.9);
     expect(result.statistic).toBeLessThanOrEqual(1);
@@ -283,9 +305,9 @@ describe('shapiroWilkTest – parallel dispatch correctness', () => {
   });
 
   it('identical values → W = 1 (short-circuit, not dispatched)', async () => {
-    computePool.updateConfig({ thresholdElements: 1 });
+    setHypothesisOp('shapiroWilkTest', 1);
     const result = await shapiroWilkTest([7, 7, 7, 7, 7]);
-    computePool.updateConfig({ thresholdElements: 50000 });
+    restoreHypothesisOps();
 
     expect(result.statistic).toBe(1);
     expect(result.pValue).toBe(1);
