@@ -44,7 +44,7 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-typed-function`    | Type dispatch system (forked)                                | 1            |
 | `@danielsimonjr/mathts-workerpool`        | Worker pool management (forked)                              | 6            |
 | `@danielsimonjr/mathts-gpu`               | Shared WebGPU device, buffer pool and shader manager         | 8            |
-| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 48           |
+| `@danielsimonjr/mathts-core`              | Types, typed-function, factory, seeded RNG                   | 48           |
 | `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 45           |
 | `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           |
 | `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            |
@@ -198,8 +198,8 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
 | totalTypeScriptFiles | 1991   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 349558 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8045   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 349946 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8049   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

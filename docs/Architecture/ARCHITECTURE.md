@@ -92,6 +92,12 @@ Three native numeric types with full method sets:
 
 Type guards: `isNumber`, `isComplex`, `isFraction`, `isBigNumber`, `isMatrix`, etc. (160 total in the `src/` tree of every workspace package, per `dependency-graph.json`).
 
+**Seeded RNG (`core/src/numeric/rng.ts`).** `createSeededRng` wraps Mulberry32 with
+`next`, `nextInt`, Box–Muller `normal` (pair cached per instance), and `fork(label)` for
+splittable child streams (FNV-1a over parent seed bytes and label). Number seeds use
+`| 0` like `mulberry32`; string seeds hash UTF-8. Existing tensor/functions samplers still
+call `mulberry32` directly.
+
 ### 2. Type Dispatch
 
 The `typed-function` package provides runtime type checking and multiple dispatch.

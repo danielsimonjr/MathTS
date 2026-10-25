@@ -58,3 +58,130 @@ export function boxMuller(u1: number, u2: number): [number, number] {
   const theta = 2 * Math.PI * u2;
   return [r * Math.cos(theta), r * Math.sin(theta)];
 }
+
+const FNV_OFFSET = 0x811c9dc5; // 2166136261 — FNV-1a 32 empty string → 0x811c9dc5
+const FNV_PRIME = 0x01000193; // 16777619 — ASCII "a" → 0xe40c292c
+
+/**
+ * FNV-1a 32 over raw bytes. Published vectors: `""` → `0x811c9dc5`, `"a"` → `0xe40c292c`.
+ *
+ * `fork` payload for parent seed 42 and string label `'a'`:
+ * little-endian `42,0,0,0`, tag byte `1`, then UTF-8 `97` → child seed `1619994241`.
+ */
+function fnv1a32(bytes: Uint8Array): number {
+  let h = FNV_OFFSET;
+  for (let i = 0; i < bytes.length; i++) {
+    h ^= bytes[i];
+    h = Math.imul(h, FNV_PRIME) >>> 0;
+  }
+  return h >>> 0;
+}
+
+const textEncoder = new TextEncoder();
+
+function coerceSeedInt(seed: number | string): number {
+  if (typeof seed === 'number') {
+    return seed | 0;
+  }
+  if (typeof seed === 'string') {
+    return fnv1a32(textEncoder.encode(seed)) | 0;
+  }
+  throw new TypeError('seed must be a number or a string');
+}
+
+function mixFork(parentSeed: number, label: string | number): number {
+  const payload: number[] = [
+    (parentSeed >>> 0) & 0xff,
+    (parentSeed >>> 8) & 0xff,
+    (parentSeed >>> 16) & 0xff,
+    (parentSeed >>> 24) & 0xff,
+  ];
+  if (typeof label === 'number') {
+    const n = label | 0;
+    payload.push(0, (n >>> 0) & 0xff, (n >>> 8) & 0xff, (n >>> 16) & 0xff, (n >>> 24) & 0xff);
+  } else if (typeof label === 'string') {
+    payload.push(1);
+    for (const b of textEncoder.encode(label)) payload.push(b);
+  } else {
+    throw new TypeError('fork label must be a string or a number');
+  }
+  return fnv1a32(new Uint8Array(payload)) | 0;
+}
+
+/**
+ * Instance-scoped Mulberry32 stream with optional string seeds, Box–Muller normals,
+ * integer draws, and splittable child streams.
+ */
+export interface SeededRng {
+  /** Next U[0, 1) from this stream. Does not touch the normal spare. */
+  next(): number;
+  /**
+   * Integer in `[0, maxExclusive)`.
+   *
+   * @throws {RangeError} When `maxExclusive` is not an integer in `[1, 4294967296]`.
+   */
+  nextInt(maxExclusive: number): number;
+  /**
+   * N(0, 1) via {@link boxMuller}. The second sample of the pair is cached on this
+   * instance only. `next`, `nextInt`, and `fork` do not read or clear that cache.
+   */
+  normal(): number;
+  /**
+   * Child stream fixed by this instance's coerced seed and `label`.
+   * Does not advance this stream and does not read this stream's normal spare.
+   */
+  fork(label: string | number): SeededRng;
+  /** Int32 seed actually used. Not the evolving PRNG state. */
+  readonly seed: number;
+}
+
+function makeSeededRng(seedInt: number): SeededRng {
+  const uniform = mulberry32(seedInt);
+  let spare: number | null = null;
+  const rng: SeededRng = {
+    seed: seedInt,
+    next: () => uniform(),
+    nextInt(maxExclusive: number): number {
+      if (!Number.isInteger(maxExclusive) || maxExclusive < 1 || maxExclusive > 0x100000000) {
+        throw new RangeError('maxExclusive must be an integer in [1, 4294967296]');
+      }
+      return Math.floor(uniform() * maxExclusive);
+    },
+    normal(): number {
+      if (spare !== null) {
+        const z = spare;
+        spare = null;
+        return z;
+      }
+      const pair = boxMuller(uniform(), uniform());
+      spare = pair[1];
+      return pair[0];
+    },
+    fork(label: string | number): SeededRng {
+      return makeSeededRng(mixFork(seedInt, label));
+    },
+  };
+  return Object.freeze(rng);
+}
+
+/**
+ * Create a forkable Mulberry32 stream. Number seeds use `seed | 0` (same as {@link mulberry32}).
+ * String seeds are FNV-1a 32 over UTF-8. Not cryptographically secure.
+ *
+ * @param seed - Integer (coerced with `| 0`) or string (hashed to int32).
+ * @returns A frozen {@link SeededRng} instance.
+ * @throws {TypeError} When `seed` is neither a number nor a string.
+ *
+ * @example
+ * ```ts
+ * import { createSeededRng } from '@danielsimonjr/mathts-core';
+ *
+ * const rng = createSeededRng(42);
+ * rng.next(); // 0.6011037519201636
+ * rng.fork('a').next(); // 0.668102843221277
+ * createSeededRng('a').seed; // -468965076
+ * ```
+ */
+export function createSeededRng(seed: number | string): SeededRng {
+  return makeSeededRng(coerceSeedInt(seed));
+}

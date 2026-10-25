@@ -215,8 +215,8 @@ Added to fix a measured ~46,000× accuracy gap vs NumPy: `pairwiseSum` (NumPy
 `np.sum` cascade), `neumaierSum` (Python `math.fsum` equivalent, opt-in),
 `norm2` (BLAS `dnrm2` overflow-safe Euclidean norm), `pairwiseDot`,
 `scaledDistance`, `sumSquaredDeviations` (corrected two-pass variance numerator),
-`neumaierCumsum(xs, out)` (in-place compensated cumsum). `mulberry32` and
-`boxMuller` live in `core/src/numeric/rng.ts`; `rowMajorStrides` in
+`neumaierCumsum(xs, out)` (in-place compensated cumsum). `createSeededRng`,
+`mulberry32` and `boxMuller` live in `core/src/numeric/rng.ts`; `rowMajorStrides` in
 `core/src/numeric/strides.ts` (re-exported from `core/src/index.ts`).
 `Tensor.rowMajorStrides` forwards to core; `randomTensor` uses core `mulberry32`
 (`tensor/src/operations/random.ts`). The worker bundle keeps copies as
@@ -1120,5 +1120,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8045  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8049  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalTypeScriptFiles | 1991  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

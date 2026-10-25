@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-25", "f": 1190, "e": 6155, "re": 2597 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-25", "f": 1190, "e": 6158, "re": 2599 },
   "s": {
-    "loc": 199045,
+    "loc": 199172,
     "cls": 58,
-    "int": 531,
-    "fn": 1955,
+    "int": 532,
+    "fn": 1956,
     "tg": 158,
     "en": 0,
     "co": 1617,
@@ -158,6 +158,7 @@
       "exp": [
         "mulberry32",
         "boxMuller",
+        "createSeededRng",
         "pairwiseSum",
         "neumaierSum",
         "norm2",
@@ -166,7 +167,8 @@
         "sumSquaredDeviations",
         "neumaierCumsum",
         "rowMajorStrides"
-      ]
+      ],
+      "int": ["SeededRng"]
     },
     "core/typed": {
       "f": 3,
