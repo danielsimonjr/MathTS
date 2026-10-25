@@ -250,6 +250,21 @@ describe('scalar-node-bridge unary minus and parentheses', () => {
     expect(evaluateScalar(s, { x: 3 })).toBe(3);
   });
 
+  it('unwraps parentheses under ^ so parse((-2)^2) evaluates to 4', () => {
+    expect(evaluateScalar(nodeToScalar(parse('(-2)^2')))).toBe(4);
+    expect(evaluateScalar(nodeToScalar(parse('-2^2')))).toBe(-4);
+    const right = nodeToScalar(parse('a^b^c'));
+    expect(right).toMatchObject({
+      op: '^',
+      args: [{ name: 'a' }, { op: '^', args: [{ name: 'b' }, { name: 'c' }] }],
+    });
+    const left = nodeToScalar(parse('(a^b)^c'));
+    expect(left).toMatchObject({
+      op: '^',
+      args: [{ op: '^', args: [{ name: 'a' }, { name: 'b' }] }, { name: 'c' }],
+    });
+  });
+
   it('parenthesizes a negative ConstantNode pow base so toString keeps (-2)^2', () => {
     const t = scalar.op('^', [scalar.number(-2), scalar.number(2)]);
     const node = scalarToNode(t);
