@@ -16,6 +16,27 @@ npm install @danielsimonjr/mathts-functions
 - A wired `parse` / `evaluate` against the full activated math scope.
 - `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
+
+```ts
+import {
+  compileScalar,
+  paretoFront,
+  scoreFront,
+  selectFrontModel,
+  scalar,
+} from '@danielsimonjr/mathts-functions';
+
+const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const compiled = compileScalar(node, { variables: ['x'] });
+compiled.evaluate([new Float64Array([2, 3])]).values; // Float64Array [4, 9]
+
+const front = paretoFront([
+  { loss: 0.5, complexity: 1, item: 'x' },
+  { loss: 0.1, complexity: 3, item: 'x^3' },
+]);
+selectFrontModel(scoreFront(front), 'best').item; // 'x^3'
+```
+
 - Per-domain focused entry points are also published: `@danielsimonjr/mathts-{arithmetic,trigonometry,statistics,signal}`.
 
 ## License

@@ -29,6 +29,15 @@ function isLoweredScalarFn(fn: string): fn is LoweredScalarFn {
  * the record still weighs 1. Weights are summed across the stored tree and
  * then rounded with `Math.round` (PySR rounds to the nearest integer after
  * the sum; the half-tie rule here is JavaScript's, not Julia's half-to-even).
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarComplexity } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * scalarComplexity(tree, { symbol: { x: 2 } }); // 7
+ * scalarComplexity(b.symbol('constructor')); // 1 (no own key → weight 1)
+ * ```
  */
 export interface ScalarComplexityWeights {
   /** Weight of one operator node. Default 1 for every {@link ScalarOperator}. */
@@ -77,6 +86,16 @@ function assertCallFn(fn: string): LoweredScalarFn {
  * left to right. `depth` here is not {@link scalarDepth}: a leaf visited by
  * this function has depth 0 when it is the root, while `scalarDepth` of any
  * leaf is 1.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, forEachScalar } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * const depths: number[] = [];
+ * forEachScalar(tree, (_n, depth) => depths.push(depth));
+ * depths.join(','); // '0,1,1,2,2'
+ * ```
  */
 export function forEachScalar(
   node: ScalarNode,
@@ -103,6 +122,17 @@ export function forEachScalar(
  * When a child result is the same reference and `fn` returns the rebuilt
  * node, the original node reference is kept. The input tree is never mutated,
  * including a deep-frozen input.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, mapScalar, scalarSize } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * const mapped = mapScalar(tree, (n) =>
+ *   n.kind === 'symbol' && n.name === 'x' ? { kind: 'number', value: 9 } : n
+ * );
+ * scalarSize(mapped); // 5 — replacement is not walked again
+ * ```
  */
 export function mapScalar(node: ScalarNode, fn: (n: ScalarNode) => ScalarNode): ScalarNode {
   let rebuilt: ScalarNode;
@@ -123,7 +153,17 @@ export function mapScalar(node: ScalarNode, fn: (n: ScalarNode) => ScalarNode): 
   return result;
 }
 
-/** Number of nodes in the stored tree. An empty `+` is one node. */
+/**
+ * Number of nodes in the stored tree. An empty `+` is one node.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarSize } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * scalarSize(tree); // 5
+ * ```
+ */
 export function scalarSize(node: ScalarNode): number {
   let count = 0;
   forEachScalar(node, () => {
@@ -135,6 +175,14 @@ export function scalarSize(node: ScalarNode): number {
 /**
  * Stored-tree depth. A number or symbol is 1. A call is `1 + scalarDepth(arg)`.
  * An operator is `1 + max(child depths)`, or 1 when it has no children.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarDepth } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * scalarDepth(tree); // 3
+ * ```
  */
 export function scalarDepth(node: ScalarNode): number {
   if (node.kind === 'number' || node.kind === 'symbol') {
@@ -188,6 +236,15 @@ function nodeWeight(node: ScalarNode, weights: ScalarComplexityWeights): number 
  * Weighted node count of the stored tree. See {@link ScalarComplexityWeights}.
  * The return value is `Math.round` of the sum, so default weights make this
  * equal `scalarSize`. Walks `-` and `/` as stored; it does not rewrite them first.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarComplexity } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * scalarComplexity(tree); // 5
+ * scalarComplexity(tree, { symbol: { x: 2 } }); // 7
+ * ```
  */
 export function scalarComplexity(node: ScalarNode, weights: ScalarComplexityWeights = {}): number {
   let sum = 0;
@@ -200,6 +257,14 @@ export function scalarComplexity(node: ScalarNode, weights: ScalarComplexityWeig
 /**
  * Sorted unique `symbol` names in the stored tree. Function names and number
  * literals are not included. Sort is UTF-16 code-unit order (`<` on strings).
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarSymbols } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const tree = b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('x')])]);
+ * scalarSymbols(tree).join(','); // 'x,y'
+ * ```
  */
 export function scalarSymbols(node: ScalarNode): readonly string[] {
   const names = new Set<string>();
@@ -486,6 +551,16 @@ function canon(node: ScalarNode): ScalarNode {
  * Canonical tree. Idempotent: `scalarCanonical(scalarCanonical(n))` is deeply
  * equal to `scalarCanonical(n)`. Does not mutate `n`. The result uses only
  * `number`, `symbol`, `call`, `+`, `*`, and `^`. See the algorithm below.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarCanonical, scalarEquals } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const aa = b.op('*', [b.symbol('a'), b.symbol('a')]);
+ * const aSquared = b.op('^', [b.symbol('a'), b.number(2)]);
+ * scalarEquals(aa, aSquared); // true — canonical uses only +, *, ^
+ * scalarCanonical(b.op('^', [b.number(2), b.number(3)])); // does not fold 2^3 to 8
+ * ```
  */
 export function scalarCanonical(node: ScalarNode): ScalarNode {
   return canon(node);
@@ -494,12 +569,31 @@ export function scalarCanonical(node: ScalarNode): ScalarNode {
 /**
  * `JSON.stringify` of {@link scalarCanonical}, with the key order fixed in
  * "Key encoding". Equal keys are the definition of structural equality.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarCanonicalKey } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * scalarCanonicalKey(b.op('^', [b.number(2), b.number(3)]));
+ * // {"k":"^","b":{"k":"n","v":"2"},"e":{"k":"n","v":"3"}}
+ * ```
  */
 export function scalarCanonicalKey(node: ScalarNode): string {
   return encodeCanonicalKey(scalarCanonical(node));
 }
 
-/** `scalarCanonicalKey(a) === scalarCanonicalKey(b)`. */
+/**
+ * `scalarCanonicalKey(a) === scalarCanonicalKey(b)`.
+ *
+ * @example
+ * ```ts
+ * import { createScalarBuilder, scalarEquals } from '@danielsimonjr/mathts-expression';
+ * const b = createScalarBuilder();
+ * const aa = b.op('*', [b.symbol('a'), b.symbol('a')]);
+ * const aSquared = b.op('^', [b.symbol('a'), b.number(2)]);
+ * scalarEquals(aa, aSquared); // true
+ * ```
+ */
 export function scalarEquals(a: ScalarNode, b: ScalarNode): boolean {
   return scalarCanonicalKey(a) === scalarCanonicalKey(b);
 }

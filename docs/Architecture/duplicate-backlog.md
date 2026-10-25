@@ -5,6 +5,9 @@
 
 # Duplicate-symbol consolidation backlog
 
+Issue #413 removed `matrix/src/backends/wasm/fft-wasm.ts` and
+`assembly/src/bindings/`; Bucket-D rows below describe the pre-deletion tree.
+
 > **✅ CAMPAIGN COMPLETE (2026-07-18) — `TRUE_DUPLICATE` 253 → 0.** Every cross-package duplicate is now
 > eliminated, allowlisted-with-reason (dispatch-variant or parity-guarded intentional reimplementation), or
 > resolved via an executed keep-decision. Nothing is outstanding — the four former HUMAN-DECISION clusters

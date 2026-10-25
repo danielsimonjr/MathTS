@@ -9,9 +9,9 @@ the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
 The figures in this section come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
 
-- **1,185 TypeScript files**, all reachable from package entry points (0 unused files)
-- **197,377 lines of code**
-- **6,121 total exports** (2,578 re-exports) — 58 classes, 523 interfaces, 1,940 functions, 160 type guards, 1,615 constants, 0 enums; 600 type-only imports
+- **1,189 TypeScript files**, all reachable from package entry points (0 unused files)
+- **198,415 lines of code**
+- **6,144 total exports** (2,592 re-exports) — 58 classes, 530 interfaces, 1,954 functions, 158 type guards, 1,616 constants, 0 enums; 602 type-only imports
 - Test-coverage figures are in the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** and **0 type-only circular dependencies**
 - All 24 packages have a `build` script. 23 packages have a `typecheck` script. Each one runs `tsc --noEmit`, then `tsc -p tsconfig.test.json`. `assembly` has no `typecheck` script.
@@ -131,7 +131,7 @@ registered in `backendRegistry` — only js + wasm in `register-backends.ts`):
 BackendManager applies per-operation WASM thresholds, backend availability, and
 optional adaptive tuning — not automatic GPU selection.
 
-Matrix types: DenseMatrix (Float64Array-backed), SparseMatrix (CSC format).
+Matrix types: DenseMatrix (Float64Array-backed), SparseMatrix (CSR format).
 Decompositions: SVD, LU, QR, Cholesky, eigendecomposition.
 
 ### 5. Parallel Execution
@@ -253,6 +253,20 @@ functional end-to-end**: the compiler (an AST interpreter) and evaluator (`evalu
 work. The evaluator uses a sandbox (safe-access helpers in
 `expression/src/utils/customs.ts`).
 
+**ScalarNode toolkit** (`expression/src/scalar-structure.ts`, barrel
+`expression/src/index.ts`): `forEachScalar`, `mapScalar`, `scalarSize`,
+`scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`,
+`scalarCanonicalKey`, `scalarEquals`, and `ScalarComplexityWeights`.
+Canonical keys flatten `+` and `*`, rewrite `a-b` to `a+(-1)*b` and `a/b` to
+`a*b^-1`, and do not constant-fold `^` (for example `2^3` stays a power node).
+
+**Batch scalar compile** (`functions/src/scalar-compile.ts`): `compileScalar`
+lowers a `ScalarNode` to a register tape over column `Float64Array`s with a
+per-row validity mask; no `eval` / `new Function` and no WASM load.
+
+**Pareto front** (`functions/src/pareto-front.ts`): `paretoFront`, `scoreFront`,
+`selectFrontModel` — not `paretoDist`.
+
 ### 8. Workbook Runtime
 
 YAML-based reactive notebooks (.mtsw files):
@@ -278,7 +292,7 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric                              | Value                     |
 | ----------------------------------- | ------------------------- |
-| Reachable files (from entry points) | 1,185                     |
+| Reachable files (from entry points) | 1,189                     |
 | Unused files                        | 0                         |
 | Synced mathjs factories             | Activated into live graph |
 | Synced categories                   | 19                        |
@@ -296,7 +310,7 @@ Most packages run `tsdown src/index.ts --format esm`, then `tsc -p tsconfig.dts.
 | parallel          | Two entries (`index.ts`, `matrix.worker.ts`)          |
 | workerpool        | Two entries, then `scripts/postbuild.mjs`             |
 | workbook          | Three entries (`index.ts`, `cli.ts`, `run-worker.ts`) |
-| assembly          | AssemblyScript (`asc`) + TypeScript bindings          |
+| assembly          | AssemblyScript (`asc`) only                           |
 
 Turbo tasks: `test` and `typecheck` depend on `["^build", "build"]` (upstream packages
 and each package's own `build` — tests import built `dist/`). `expression#typecheck`
@@ -308,12 +322,12 @@ Source-file counts below are the files under `src/` in each workspace package,
 per `dependency-graph.json`. The generated `DEPENDENCY_GRAPH.md` gives the
 per-file breakdown. Regenerate with `npm run docs:deps:full`. The report counts
 **1,189 TypeScript files** in total, all reachable from package entry points,
-with **0 unused** files and **6,165 exports**.
+with **0 unused** files and **6,144 exports**.
 
 | Package                          | Reachable Files |
 | -------------------------------- | --------------- |
-| core                             | 46              |
-| matrix                           | 46              |
+| core                             | 48              |
+| matrix                           | 45              |
 | tensor                           | 21              |
 | autograd                         | 6               |
 | functions                        | 478             |
@@ -321,7 +335,7 @@ with **0 unused** files and **6,165 exports**.
 | expression                       | 477             |
 | workbook                         | 25              |
 | compat                           | 3               |
-| assembly (wasm)                  | 28              |
+| assembly (wasm)                  | 26              |
 | typed-function                   | 1               |
 | workerpool                       | 5               |
 | gpu                              | 8               |

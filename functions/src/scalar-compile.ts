@@ -61,6 +61,13 @@ type TapeInstr =
  * The node must already be a `ScalarNode`. A formula string, a
  * `transcendental` node, or an `abs` node is rejected; normalize with
  * `scalar.from` first.
+ *
+ * @example
+ * ```ts
+ * import { compileScalar, scalar } from '@danielsimonjr/mathts-functions';
+ * const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+ * compileScalar(node, { variables: ['x'], parameters: ['a'] }).parameters; // ['a']
+ * ```
  */
 export interface CompileScalarOptions {
   readonly variables: readonly string[];
@@ -74,6 +81,15 @@ export interface CompileScalarOptions {
  * symbol. `values[i]` is `NaN` when `valid[i]` is 0, which is exactly when
  * `evaluateScalar` throws. `allValid` is true when every `valid` byte is 1,
  * including when there are zero rows.
+ *
+ * @example
+ * ```ts
+ * import { compileScalar, scalar } from '@danielsimonjr/mathts-functions';
+ * const compiled = compileScalar(scalar.call('ln', scalar.symbol('x')), { variables: ['x'] });
+ * const { values, valid } = compiled.evaluate([new Float64Array([1, -1])]);
+ * [...valid]; // [1, 0]
+ * values[1]; // NaN
+ * ```
  */
 export interface ScalarBatchResult {
   readonly values: Float64Array;
@@ -81,7 +97,20 @@ export interface ScalarBatchResult {
   readonly allValid: boolean;
 }
 
-/** A compiled scalar. `variables` and `parameters` are copies made at compile time. */
+/**
+ * A compiled scalar. `variables` and `parameters` are copies made at compile time.
+ *
+ * @example
+ * ```ts
+ * import { compileScalar, scalar } from '@danielsimonjr/mathts-functions';
+ * const compiled = compileScalar(
+ *   scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
+ *   { variables: ['x'] }
+ * );
+ * [...compiled.evaluate([new Float64Array([2, 3])]).values]; // [4, 9]
+ * compiled.evaluateRow([2]); // 4
+ * ```
+ */
 export interface CompiledScalar {
   readonly variables: readonly string[];
   readonly parameters: readonly string[];
@@ -92,6 +121,16 @@ export interface CompiledScalar {
    * `Float64Array` column.
    * When `out.length ===` the row count, `values` is `out` and no second value
    * buffer is allocated.
+   *
+   * @example
+   * ```ts
+   * import { compileScalar, scalar } from '@danielsimonjr/mathts-functions';
+   * const compiled = compileScalar(
+   *   scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
+   *   { variables: ['x'] }
+   * );
+   * [...compiled.evaluate([new Float64Array([2, 3])]).values].join(','); // '4,9'
+   * ```
    */
   evaluate(
     columns: readonly Float64Array[],
@@ -102,6 +141,17 @@ export interface CompiledScalar {
    * One row, in `variables` order. Returns the same number `evaluateScalar`
    * would, including non-finite bare values. Throws {@link ScalarEvalError}
    * when the row is invalid or the binding is the wrong shape.
+   *
+   * @example
+   * ```ts
+   * import { compileScalar, scalar, ScalarEvalError } from '@danielsimonjr/mathts-functions';
+   * const compiled = compileScalar(scalar.call('ln', scalar.symbol('x')), { variables: ['x'] });
+   * try {
+   *   compiled.evaluateRow([-1]);
+   * } catch (e) {
+   *   e instanceof ScalarEvalError; // true — 'compileScalar: row produced a non-finite value.'
+   * }
+   * ```
    */
   evaluateRow(row: ArrayLike<number>, params?: ArrayLike<number>): number;
 }
@@ -336,6 +386,14 @@ function compileNode(ctx: CompileCtx, node: ScalarNode): number {
  * arguments throw {@link ScalarEvalError} here, not per row.
  * The compiled object is synchronous and not reentrant: one `evaluate` must
  * finish before the next starts on that object (the scratch tape is reused).
+ *
+ * @example
+ * ```ts
+ * import { compileScalar, scalar } from '@danielsimonjr/mathts-functions';
+ * const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+ * const compiled = compileScalar(node, { variables: ['x'] });
+ * [...compiled.evaluate([new Float64Array([2, 3])]).values]; // [4, 9]
+ * ```
  */
 export function compileScalar(node: ScalarNode, options: CompileScalarOptions): CompiledScalar {
   const canonical = assertScalarNode(node);

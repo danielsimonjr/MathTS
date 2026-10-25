@@ -24,11 +24,11 @@ There is one active code graph. Every file is reachable from a package `src/inde
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
 | TypeScript Files             | 1,189 (0 unused)                                             |
-| Lines of Code                | 199,466                                                      |
-| Total Exports                | 6,165 (2,604 re-exports)                                     |
-| Modules                      | 83                                                           |
+| Lines of Code                | 198,415                                                      |
+| Total Exports                | 6,144 (2,592 re-exports)                                     |
+| Modules                      | 82                                                           |
 | Circular Dependencies        | 0 runtime (0 type-only)                                      |
-| Classes / Interfaces / Funcs | 59 / 534 / 1,959 (160 type guards, 1,616 constants, 0 enums) |
+| Classes / Interfaces / Funcs | 58 / 530 / 1,954 (158 type guards, 1,616 constants, 0 enums) |
 
 ## Packages
 
@@ -44,8 +44,8 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-typed-function`    | Type dispatch system (forked)                                | 1            |
 | `@danielsimonjr/mathts-workerpool`        | Worker pool management (forked)                              | 5            |
 | `@danielsimonjr/mathts-gpu`               | Shared WebGPU device, buffer pool and shader manager         | 8            |
-| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 46           |
-| `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 46           |
+| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 48           |
+| `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 45           |
 | `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           |
 | `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            |
 | `@danielsimonjr/mathts-functions`         | Math functions via typed dispatch                            | 478          |
@@ -54,7 +54,7 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-plot`              | Headless SVG 2D/3D plotting for MathTS                       | 21           |
 | `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 25           |
 | `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 3            |
-| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 28           |
+| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 26           |
 
 Versions are not listed here. Each package's `package.json` gives its version.
 
@@ -71,7 +71,13 @@ The mathjs-derived factories are wired into the graph via
 - **mathjs factory layer**: the mathjs-derived factory functions are wired into the graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`).
 - **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM/GPU backends
 - **Parallel**: ComputePool with 40+ parallel operations
-- **WASM**: **315 AssemblyScript function exports** — the sole WASM backend
+- **WASM**: see [`wasm-pairing.md` › _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports) for function and total export counts (315 / 327 at last regen)
+
+### ScalarNode toolkit, batch compile, and Pareto front (Sprint 1R)
+
+- **`expression/src/scalar-structure.ts`**: `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, and `ScalarComplexityWeights` — PySR-style canonical keys (`+`/`*` flattening; `a-b` → `a+(-1)*b`; `a/b` → `a*b^-1`; no constant-fold of `^`).
+- **`functions/src/scalar-compile.ts`**: `compileScalar` builds a register tape over column `Float64Array`s with a per-row `valid` mask; no `eval` / `new Function`; does not load WASM.
+- **`functions/src/pareto-front.ts`**: `paretoFront`, `scoreFront`, `selectFrontModel` (not `paretoDist`).
 
 ### Beyond the mathjs API surface
 
@@ -105,13 +111,13 @@ WebGPU paths in `@danielsimonjr/mathts-functions` / `@danielsimonjr/mathts-gpu`:
 | Backend             | Source                             | Status                | Description                                                                                                                                 |
 | ------------------- | ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | JavaScript          | `matrix/src/backends/JSBackend.ts` | Always available      | Pure TypeScript fallback                                                                                                                    |
-| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | 315 function exports (327 total), SIMD-optimized                                                                                            |
+| AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | counts in [`wasm-pairing.md`](./wasm-pairing.md); SIMD where measured                                                                       |
 | WebGPU (opt-in)     | `gpu/src/`, `functions/src/gpu/`   | Per-kernel f32 gates  | Fused ops: `enableGpu()` + `GPU_MIN_ELEMENTS` (65,536); GPU FFT: 262,144; explicit `gpuMatmul` without `enableGpu()` — not `BackendManager` |
 
-The AssemblyScript backend compiles `assembly/src/` (28 source files) to a
-single `mathts-as.wasm` binary, bundled into both `matrix/dist/wasm/` and
-`functions/dist/wasm/`. There is no backend-selection step — AssemblyScript is
-the sole WASM toolchain.
+The AssemblyScript backend compiles `assembly/src/` (26 `.ts` sources per
+[`wasm-pairing.md`](./wasm-pairing.md)) to a single `mathts-as.wasm` binary,
+bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. There is no
+backend-selection step — AssemblyScript is the sole WASM toolchain.
 
 `matrix/src/backends/WASMBackend.ts` is the sole WASM matrix backend and handles
 automatic JS-vs-WASM selection based on per-operation size thresholds.
@@ -150,7 +156,7 @@ math.add(1, 2);
 | Package    | Status      | Notes                                                                                                                                                                                                                                                     |
 | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Core       | Stable      | Types with full method sets, factory, typed dispatch                                                                                                                                                                                                      |
-| Matrix     | Stable      | Dense/Sparse with JS backend; WASM/GPU backends available                                                                                                                                                                                                 |
+| Matrix     | Stable      | Dense/Sparse; `BackendManager` registers JS + WASM only (`register-backends.ts`); GPU via explicit opt-in paths                                                                                                                                           |
 | Tensor     | Active      | Rank-N Float64Array-backed dense Tensor with einsum/contraction                                                                                                                                                                                           |
 | Autograd   | Active      | Forward + reverse-mode automatic differentiation over Tensor                                                                                                                                                                                              |
 | Functions  | Active      | typed dispatch (`typed/`, 40 files) plus the mathjs factory layer, all in one live graph (arithmetic, trig, stats, signal, special, distributions, combinatorics, geometry, algebra, CAS, graph theory, hypothesis tests, numerical/optimizers, and more) |
