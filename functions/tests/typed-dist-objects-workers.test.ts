@@ -175,4 +175,17 @@ describe('Slice 5.12 — distribution batch sampling (sampleN)', () => {
     const b = await d.sampleN(1_000, { seed: 77 });
     expect(arraysEqual(a, b)).toBe(true);
   });
+
+  // Pre-#415 oracle (a6cf17af): normalDist(0,1).sampleN(1000, { seed: 42 }) JS path prefix
+  it('Normal.sampleN(1_000, {seed:42}) first 8 match pre-#415 fixture (a6cf17af)', async () => {
+    const d = normalDist(0, 1);
+    const samples = await d.sampleN(1_000, { seed: 42 });
+    const fixture = [
+      -0.956162229384149, -0.2730261048826104, -1.8416271847835968, -1.1408820709540242,
+      -0.5294337937164153, 1.2285906730631042, -0.26851772662724444, -1.8017934176870904,
+    ];
+    for (let i = 0; i < fixture.length; i++) {
+      expect(samples[i]).toBe(fixture[i]);
+    }
+  });
 });

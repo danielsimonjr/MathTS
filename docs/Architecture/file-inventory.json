@@ -10404,7 +10404,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 179
+      "loc": 192
     },
     {
       "file": "functions/tests/typed-distributions-wasm.test.ts",
@@ -10439,14 +10439,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 368
+      "loc": 381
     },
     {
       "file": "functions/tests/typed-hypothesis-bootstrap.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 323
+      "loc": 348
     },
     {
       "file": "functions/tests/typed-hypothesis-parallel.test.ts",
@@ -12539,7 +12539,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 215
+      "loc": 257
     },
     {
       "file": "tensor/tests/operations/roll.test.ts",

@@ -15,9 +15,28 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { mulberry32 } from '@danielsimonjr/mathts-core';
 import { Tensor } from '../../src/Tensor';
 import { randomTensor } from '../../src/operations/random';
 import { idx } from '../../src/named-index';
+
+/** Same values as `MULBERRY32_42_FIRST_8` in `core/tests/numeric/rng.test.ts` (pre-#415 oracle). */
+const MULBERRY32_42_FIRST_8 = [
+  0.6011037519201636, 0.44829055899754167, 0.8524657934904099, 0.6697340414393693,
+  0.17481389874592423, 0.5265925421845168, 0.2732279943302274, 0.6247446539346129,
+];
+
+/** Recorded at commit a6cf17af (pre-#415); recipe: `randomTensor([8], { distribution: 'normal', seed: 42 })`. */
+const PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42 = [
+  -0.956162229384149, 0.3220702493215296, -0.2730261048826104, -0.4946727576767142,
+  -1.8416271847835968, -0.310605739735128, -1.1408820709540242, -1.1372270998855114,
+];
+
+/** Recorded at commit a6cf17af (pre-#415); recipe: `randomTensor([2, 3], { seed: 99 })`. */
+const PRE_415_RANDOM_TENSOR_UNIFORM_2_3_SEED_99 = [
+  0.2604658124037087, 0.8048227655235678, 0.5408715349622071, 0.6902434257790446,
+  0.001138708321377635, 0.8175430877599865,
+];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -162,6 +181,29 @@ describe('randomTensor', () => {
     const a = randomTensor([50], { distribution: 'normal', seed: 7 });
     const b = randomTensor([50], { distribution: 'normal', seed: 7 });
     expect(a.data).toEqual(b.data);
+  });
+
+  it('uniform [8] seed 42 matches core mulberry32 oracle (pre-#415 commit a6cf17af)', () => {
+    const t = randomTensor([8], { distribution: 'uniform', seed: 42 });
+    expect(Array.from(t.data)).toEqual(MULBERRY32_42_FIRST_8);
+    const rng = mulberry32(42);
+    for (let i = 0; i < 8; i++) {
+      expect(t.data[i]).toBe(rng());
+    }
+  });
+
+  it('normal [8] seed 42 matches pre-#415 fixture (a6cf17af)', () => {
+    const t = randomTensor([8], { distribution: 'normal', seed: 42 });
+    for (let i = 0; i < PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42.length; i++) {
+      expect(t.data[i]).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[i]);
+    }
+  });
+
+  it('uniform [2,3] seed 99 matches pre-#415 fixture (a6cf17af)', () => {
+    const t = randomTensor([2, 3], { seed: 99 });
+    for (let i = 0; i < PRE_415_RANDOM_TENSOR_UNIFORM_2_3_SEED_99.length; i++) {
+      expect(t.data[i]).toBe(PRE_415_RANDOM_TENSOR_UNIFORM_2_3_SEED_99[i]);
+    }
   });
 
   // --- 6b. Orthogonal: Qᵀ·Q ≈ I (delegates to matrix.qr) ----------------------
