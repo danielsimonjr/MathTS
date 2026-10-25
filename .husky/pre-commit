@@ -9,9 +9,9 @@
 #     and its wasm-pairing report.
 #   - DGT (docs:deps): only when any package `src/` (or `assembly/`) changed — imports/exports are
 #     what drive the dependency graph. Regenerated reports are staged into the commit.
-#   - FNREF (docs:functions): same gate — the function/export reference (docs/api/*.md,
-#     docs/reference/functions.md[.html]) is a pure function of the exported surface, so a `src/`
-#     change can leave it stale (GC2). Regenerate + stage so it never drifts (~8s, build-free).
+#   - FNREF (docs:functions): same gate — the generator refuses a missing/stale dist and exits
+#     before rewriting docs/api or docs/reference; `sh -e` aborts the commit. Rebuild that package
+#     and commit again. Still ~8s and build-free when dist is fresh.
 # A commit touching only docs/tests/config skips all and just runs lint-staged.
 
 staged=$(git diff --cached --name-only)

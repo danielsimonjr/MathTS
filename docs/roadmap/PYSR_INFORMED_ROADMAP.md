@@ -335,7 +335,8 @@ against #412–#418. Line numbers drift; the symbol names are the stable referen
   so through the existing constructors.
 - **Repo gates.** The Definition of Done base checklist (§6) lists them. For a new
   `functions` export, rebuild before committing, because the pre-commit
-  `docs:functions` step reads `dist` (`CLAUDE.md` known issues).
+  `docs:functions` step reads `dist` and **refuses** to rewrite the API docs until that
+  dist is fresh (`CLAUDE.md` known issues). Rebuild-before-commit stays the remedy.
 
 ---
 
