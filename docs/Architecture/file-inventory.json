@@ -12686,7 +12686,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 83
+      "loc": 78
     },
     {
       "file": "tests/integration/functions.test.ts",

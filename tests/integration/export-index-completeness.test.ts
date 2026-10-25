@@ -11,25 +11,13 @@ const END = '<!-- END GENERATED EXPORT INDEX -->';
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
+/** Node-only names that must never appear between the generated markers. */
+const FORBIDDEN_IN_INDEX = ['renderToFile', 'runCommand'] as const;
+
 const CASES = [
-  {
-    pkg: 'expression',
-    mod: expression,
-    apiDoc: 'docs/api/expression.md',
-    forbiddenInIndex: [] as string[],
-  },
-  {
-    pkg: 'workbook',
-    mod: workbook,
-    apiDoc: 'docs/api/workbook.md',
-    forbiddenInIndex: ['runCommand'],
-  },
-  {
-    pkg: 'plot',
-    mod: plot,
-    apiDoc: 'docs/api/plot.md',
-    forbiddenInIndex: ['renderToFile'],
-  },
+  { pkg: 'expression', mod: expression, apiDoc: 'docs/api/expression.md' },
+  { pkg: 'workbook', mod: workbook, apiDoc: 'docs/api/workbook.md' },
+  { pkg: 'plot', mod: plot, apiDoc: 'docs/api/plot.md' },
 ] as const;
 
 function indexSlice(doc: string): string {
@@ -51,12 +39,19 @@ function bannerTotal(slice: string, pkg: string): number {
 }
 
 describe('export-index completeness (expression, workbook, plot)', () => {
-  for (const { pkg, mod, apiDoc, forbiddenInIndex } of CASES) {
+  for (const { pkg, mod, apiDoc } of CASES) {
     const docPath = resolve(REPO, apiDoc);
     const doc = readFileSync(docPath, 'utf8');
     const slice = indexSlice(doc);
     const names = backtickedNames(slice);
     const exportKeys = Object.keys(mod);
+
+    it(`${pkg}: source barrel Object.keys is non-empty`, () => {
+      expect(
+        exportKeys.length,
+        `${pkg} source barrel produced no runtime exports — import of src/index.ts is empty or failed`
+      ).toBeGreaterThan(0);
+    });
 
     it(`${pkg}: generated index lists every public export between markers`, () => {
       const missing = exportKeys.filter((name) => !names.has(name));
@@ -71,7 +66,7 @@ describe('export-index completeness (expression, workbook, plot)', () => {
     });
 
     it(`${pkg}: non-dot entry points stay out of the generated index`, () => {
-      for (const forbidden of forbiddenInIndex) {
+      for (const forbidden of FORBIDDEN_IN_INDEX) {
         expect(
           names.has(forbidden),
           `\`${forbidden}\` must not appear in the \`.\` export index`
