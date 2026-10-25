@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-25'
-  totalFiles: 1189
+  totalFiles: 1190
   totalModules: 82
-  totalExports: 6145
+  totalExports: 6155
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -10668,6 +10668,40 @@ modules:
       constants:
         - scalar
         - NUMERIC_LITERAL
+    functions/src/scalar-node-bridge.ts:
+      description: Convert between {@link ScalarNode} trees and wired expression {@link MathNode}s.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/index.js
+          imports:
+            - SimplifyOptions
+          typeOnly: true
+        - file: ./utils/is.js
+          imports:
+            - isConstantNode
+            - isFunctionNode
+            - isOperatorNode
+            - isParenthesisNode
+            - isSymbolNode
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - LoweredScalarFn
+            - MathNode
+            - ScalarNode
+            - StringOptions
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - ScalarBuildError
+      exports:
+        - createScalarNodeBridge
+      interfaces:
+        - ScalarNodeBridgeDeps
+      functions:
+        - createScalarNodeBridge
     functions/src/signal-filter-extra.ts:
       description: Digital filter design + application (Wave D / remaining). FIR window design
       externalDependencies: []
@@ -12220,6 +12254,9 @@ modules:
         - file: ../algebra/simplify.js
           imports:
             - createSimplify
+        - file: ../scalar-node-bridge.js
+          imports:
+            - createScalarNodeBridge
         - file: ../algebra/derivative.js
           imports:
             - createDerivative
@@ -12307,6 +12344,13 @@ modules:
             - createWeakMixingAngle
             - createEfimovFactor
             - createFermiCoupling
+        - file: ../scalar-node-bridge.js
+          imports:
+            - MathNode
+            - StringOptions
+            - SimplifyOptions
+          reExport: true
+          typeOnly: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
@@ -12362,6 +12406,10 @@ modules:
             - createSumTransform
             - createVarianceTransform
       exports:
+        - scalarToNode
+        - nodeToScalar
+        - simplifyScalar
+        - scalarToTex
         - apply
         - index
         - addScalar
@@ -12616,6 +12664,13 @@ modules:
         - cumsum
         - ctranspose
         - createUnit
+        - MathNode
+        - StringOptions
+        - SimplifyOptions
+      reExported:
+        - MathNode
+        - StringOptions
+        - SimplifyOptions
       constants:
         - addScalar
         - multiplyScalar
@@ -23706,6 +23761,12 @@ modules:
             - scalarCanonicalKey
             - scalarEquals
           reExport: true
+        - file: ./node/Node.js
+          imports:
+            - MathNode
+            - StringOptions
+          reExport: true
+          typeOnly: true
         - file: ./scalar-builder.js
           imports:
             - LoweredScalarFn
@@ -23757,6 +23818,8 @@ modules:
         - scalarCanonical
         - scalarCanonicalKey
         - scalarEquals
+        - MathNode
+        - StringOptions
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -23808,6 +23871,8 @@ modules:
         - scalarCanonical
         - scalarCanonicalKey
         - scalarEquals
+        - MathNode
+        - StringOptions
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -38037,6 +38102,7 @@ dependencyGraph:
         - functions/src/regression-extra.ts
         - functions/src/scalar-compile.ts
         - functions/src/scalar-eval.ts
+        - functions/src/scalar-node-bridge.ts
         - functions/src/signal-filter-extra.ts
         - functions/src/timeseries-extra.ts
         - functions/src/types.ts
@@ -39114,18 +39180,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1189
+  totalTypeScriptFiles: 1190
   totalModules: 82
-  totalLinesOfCode: 198637
-  totalExports: 6145
+  totalLinesOfCode: 198966
+  totalExports: 6155
   totalClasses: 58
-  totalInterfaces: 530
-  totalFunctions: 1954
+  totalInterfaces: 531
+  totalFunctions: 1955
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1617
-  totalReExports: 2592
-  totalTypeOnlyImports: 602
+  totalReExports: 2597
+  totalTypeOnlyImports: 605
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

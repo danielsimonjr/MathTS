@@ -15,6 +15,7 @@ npm install @danielsimonjr/mathts-functions
 - Hundreds of typed functions (`add`, `sin`, `svd`-aware ops, `parallelFFT`, …).
 - A wired `parse` / `evaluate` against the full activated math scope.
 - `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw.
+- `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` — convert between scalar trees and wired expression nodes (no formula string); `simplifyScalar` uses the same `simplify` as the expression language.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
 
 ```ts
@@ -24,9 +25,17 @@ import {
   scoreFront,
   selectFrontModel,
   scalar,
+  simplifyScalar,
+  scalarToTex,
 } from '@danielsimonjr/mathts-functions';
 
 const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const quotient = scalar.op('/', [
+  scalar.symbol('a'),
+  scalar.op('/', [scalar.symbol('b'), scalar.symbol('c')]),
+]);
+scalarToTex(simplifyScalar(quotient)); // \frac{ a\cdot c}{ b}
+
 const compiled = compileScalar(node, { variables: ['x'] });
 compiled.evaluate([new Float64Array([2, 3])]).values; // Float64Array [4, 9]
 

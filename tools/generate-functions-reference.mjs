@@ -123,6 +123,10 @@ const DOMAIN_SUPPLEMENT = {
   'Expression Evaluation': [
     'physicsScope',
     'compileScalar',
+    'scalarToNode',
+    'nodeToScalar',
+    'simplifyScalar',
+    'scalarToTex',
     'paretoFront',
     'scoreFront',
     'selectFrontModel',

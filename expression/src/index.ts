@@ -7,6 +7,7 @@
  */
 
 export * from './types.js';
+export type { MathNode, StringOptions } from './node/Node.js';
 export * from './keywords.js';
 export * from './operators.js';
 export * from './parse.js';

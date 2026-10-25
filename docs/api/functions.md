@@ -470,30 +470,45 @@ subfactorial(4); // 9 (derangements of 4 items)
 
 PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expression`.
 
-| Function / type        | Signature / role                                                             | Description                            |
-| ---------------------- | ---------------------------------------------------------------------------- | -------------------------------------- |
-| `evaluateScalar`       | `(node, scope?) => number`                                                   | Interpret one scalar tree row          |
-| `compileScalar`        | `(node, options: CompileScalarOptions) => CompiledScalar`                    | Batch tape over `Float64Array` columns |
-| `paretoFront`          | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)  |
-| `scoreFront`           | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                   |
-| `selectFrontModel`     | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                    |
-| `ParetoFrontError`     | `class`                                                                      | Bad mode / empty front / mixed scores  |
-| `CompileScalarOptions` | `{ variables, parameters?, constants? }`                                     | Column order and bindings              |
-| `CompiledScalar`       | `.evaluate(columns, params?, out?) => ScalarBatchResult`                     | Per-row validity mask                  |
-| `ScalarBatchResult`    | `{ values, valid, allValid }`                                                | Batch output                           |
-| `FrontCandidate`       | `{ loss, complexity, item }`                                                 | One Pareto row                         |
-| `ScoredCandidate`      | `FrontCandidate & { score: number \| null }`                                 | Row plus PySR score                    |
+| Function / type        | Signature / role                                                             | Description                                       |
+| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------- |
+| `evaluateScalar`       | `(node, scope?) => number`                                                   | Interpret one scalar tree row                     |
+| `scalarToNode`         | `(node: ScalarNode) => MathNode`                                             | Wired expression AST (no string parse)            |
+| `nodeToScalar`         | `(node: MathNode) => ScalarNode`                                             | Inverse; throws `ScalarBuildError` outside subset |
+| `simplifyScalar`       | `(node, options?: SimplifyOptions) => ScalarNode`                            | `simplify` on `scalarToNode`, then `nodeToScalar` |
+| `scalarToTex`          | `(node, options?: StringOptions) => string`                                  | `scalarToNode(node).toTex(options)`               |
+| `compileScalar`        | `(node, options: CompileScalarOptions) => CompiledScalar`                    | Batch tape over `Float64Array` columns            |
+| `paretoFront`          | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)             |
+| `scoreFront`           | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                              |
+| `selectFrontModel`     | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                               |
+| `ParetoFrontError`     | `class`                                                                      | Bad mode / empty front / mixed scores             |
+| `CompileScalarOptions` | `{ variables, parameters?, constants? }`                                     | Column order and bindings                         |
+| `CompiledScalar`       | `.evaluate(columns, params?, out?) => ScalarBatchResult`                     | Per-row validity mask                             |
+| `ScalarBatchResult`    | `{ values, valid, allValid }`                                                | Batch output                                      |
+| `FrontCandidate`       | `{ loss, complexity, item }`                                                 | One Pareto row                                    |
+| `ScoredCandidate`      | `FrontCandidate & { score: number \| null }`                                 | Row plus PySR score                               |
 
 ```typescript
 import {
   compileScalar,
+  nodeToScalar,
   paretoFront,
   scoreFront,
+  scalarToNode,
   selectFrontModel,
   scalar,
+  simplifyScalar,
+  scalarToTex,
 } from '@danielsimonjr/mathts-functions';
 
 const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const quotient = scalar.op('/', [
+  scalar.symbol('a'),
+  scalar.op('/', [scalar.symbol('b'), scalar.symbol('c')]),
+]);
+scalarToTex(simplifyScalar(quotient)); // \frac{ a\cdot c}{ b}
+nodeToScalar(scalarToNode(node)); // round-trip scalar tree
+
 const compiled = compileScalar(node, { variables: ['x'] });
 compiled.evaluate([new Float64Array([2, 3])]).values; // Float64Array [4, 9]
 
@@ -532,7 +547,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1090 exports).
+> `@danielsimonjr/mathts-functions` (1094 exports).
 
 ### Functions by category
 
@@ -586,7 +601,7 @@ ceil(2.1); // 3
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (13): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scoreFront`, `selectFrontModel`
+**Expression Evaluation** (17): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
