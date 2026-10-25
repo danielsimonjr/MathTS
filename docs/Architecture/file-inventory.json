@@ -4258,7 +4258,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 506
+      "loc": 600
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -6666,7 +6666,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 354
     },
     {
       "file": "functions/src/plain/number/arithmetic.ts",
@@ -6946,7 +6946,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 460
+      "loc": 518
     },
     {
       "file": "functions/src/scalar-eval.ts",

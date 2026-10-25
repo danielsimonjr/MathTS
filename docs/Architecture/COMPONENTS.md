@@ -32,15 +32,15 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ┌────────────────────────────────────────────────────────────────────────────┐
 │  App / adapters   │  workbook (25) · compat (3) · plot (21)                  │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Function graph   │  functions (445)          expression (425)              │
+│  Function graph   │  functions (478)          expression (477)              │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Numeric / accel  │  matrix (46) · tensor (21) · autograd (6) · parallel(14) │
+│  Numeric / accel  │  matrix (45) · tensor (21) · autograd (6) · parallel(14) │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Core             │  core (44)  — types · typed-function · factory           │
+│  Core             │  core (48)  — types · typed-function · factory           │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Shared leaves    │  gpu (8, WebGPU foundation) · assembly (27, AS/WASM)     │
+│  Shared leaves    │  gpu (8, WebGPU foundation) · assembly (26, AS/WASM)     │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Forked runtime   │  typed-function (2) · workerpool (5)                     │
+│  Forked runtime   │  typed-function (1) · workerpool (6)                     │
 └────────────────────────────────────────────────────────────────────────────┘
    (parenthesised numbers are src/*.ts file counts)
 
@@ -161,13 +161,13 @@ boundaries — a ~40% regression if consolidated); only cold utilities live in `
 
 ### @danielsimonjr/mathts-matrix (`matrix/`)
 
-**Purpose**: Dense & sparse matrices with automatic backend selection across JS / WASM / GPU.
+**Purpose**: Dense & sparse matrices with `BackendManager` JS/WASM selection (GPU is not registered in `register-backends.ts`; use explicit GPU exports or `enableGpu()` fused paths).
 
 ```typescript
 export abstract class Matrix
 export class DenseMatrix          // Float64Array-backed
-export class SparseMatrix         // CSC
-export class BackendManager       // per-op JS/WASM/GPU selection
+export class SparseMatrix         // CSR
+export class BackendManager       // per-op JS/WASM selection
 export class JSBackend            // pure TS, always available
 export class WASMBackend          // AssemblyScript (SIMD multiply + LU/QR/Cholesky/inverse/det)
 export class GPUBackend           // experimental WebGPU compute (re-exports the gpu foundation)
@@ -232,7 +232,7 @@ Depends on `workerpool` and `core` (core only for stable numeric primitives — 
 
 **Purpose**: The math-function library — hundreds of functions via typed dispatch, spanning arithmetic,
 trigonometry, statistics, signal processing, linear algebra, calculus, optimization, ML, graph algorithms, and
-special functions. The largest package (445 src files).
+special functions. The largest package (478 src files).
 
 ```typescript
 // Single active graph reachable from src/index.ts, in three layers:
@@ -242,7 +242,8 @@ special functions. The largest package (445 src files).
 
 // Representative domains (each a src subtree under functions/src/):
 //   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte …
-//   signal/      fft · fir · iir · spectral · wavelets
+//   signal/      internal fft (conv) · fir · iir · spectral · wavelets
+// Public fft: factory matrix/fft.ts; parallelFFT in typed/signal.ts; shared fft-core-f64.ts; AS kernel assembly/src/ops/fft.ts
 //   stats/       fit · inference · mvn · power · timeseries
 //   ml/          ols · glm · logistic · kde · dbscan · regularized
 //   graph/       traversal · community · optimization
@@ -267,7 +268,13 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 //           (expression/src/utils/customs.ts) — direct obj[name] is a sandbox bypass.
 ```
 
-Depends on `core`. The 425-file graph includes the full evaluator; `security/sandbox.test.ts` is the
+**Scalar toolkit** (`scalar-structure.ts`): `forEachScalar`, `mapScalar`, `scalarSize`,
+`scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`,
+`scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights`.
+
+**Batch compile / Pareto** live in `functions` (`scalar-compile.ts`, `pareto-front.ts`).
+
+Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
 regression guard for safe-access.
 
 ### @danielsimonjr/mathts-workbook (`workbook/`)

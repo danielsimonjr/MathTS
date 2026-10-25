@@ -2,8 +2,9 @@
 
 Hand-maintained aggregate API reference for all 24 workspace packages. Signatures
 below are verified against the built `dist/*.d.ts` declarations (or, for the
-AssemblyScript `assembly/` package, against `src/index.ts` + the loader
-bindings). Per-package deep-dives live in `docs/api/<pkg>.md`; this file is the
+AssemblyScript `assembly/` package, against `src/index.ts`). WASM loads go through
+`functions`/`matrix` `WasmLoader` plus `core/src/wasm-loader.ts` (SHA-384 verify).
+Per-package deep-dives live in `docs/api/<pkg>.md`; this file is the
 cross-package overview.
 
 Each package is versioned independently, in its own `package.json`.
@@ -150,9 +151,14 @@ This is a bigint-backed BigNumber, **not** decimal.js-named — use `add`/`sub`/
 (the single source of truth shared by `Dual` and autograd's `DualTensor`, so
 neither reimplements derivatives). Types `DualUnaryRule`, `DualUnaryRuleName`.
 
+**`SiDimensionVector`** — seven exact `Fraction` exponents
+(`si-dimension-vector.ts`); distinct from `Unit.dimensions`, which stays a
+`number[]` over `BASE_DIMENSIONS` (10 slots: MASS, LENGTH, TIME, CURRENT,
+TEMPERATURE, LUMINOUS_INTENSITY, AMOUNT_OF_SUBSTANCE, ANGLE, BIT, SOLID_ANGLE).
+
 **`Unit` / `UnitInstance`** — arithmetic is **operator-level, not method-chained**
 (`u1/u2` same-dimension → a plain number); use `equalBase` (not `dimensionsEqual`);
-`dimensions` is a flat 9-element number array; temperature offsets apply in `.to()`
+`dimensions` is a `number[]` of length `BASE_DIMENSIONS.length` (currently 10); temperature offsets apply in `.to()`
 (`.value` stays raw). Instance methods: `clone`, `hasBase`, `equalBase`, `equals`,
 `multiply`, `divide`, `divideInto`, `pow`, `abs`, `to`, `toNumber`/`toNumeric`,
 `simplify`, `toSI`, `formatUnits`, `toBest(unitList?, options?)`, `format`,
@@ -209,7 +215,13 @@ Added to fix a measured ~46,000× accuracy gap vs NumPy: `pairwiseSum` (NumPy
 `np.sum` cascade), `neumaierSum` (Python `math.fsum` equivalent, opt-in),
 `norm2` (BLAS `dnrm2` overflow-safe Euclidean norm), `pairwiseDot`,
 `scaledDistance`, `sumSquaredDeviations` (corrected two-pass variance numerator),
-`neumaierCumsum(xs, out)` (in-place compensated cumsum).
+`neumaierCumsum(xs, out)` (in-place compensated cumsum). `mulberry32` and
+`boxMuller` live in `core/src/numeric/rng.ts`; `rowMajorStrides` in
+`core/src/numeric/strides.ts` (re-exported from `core/src/index.ts`).
+`Tensor.rowMajorStrides` forwards to core; `randomTensor` uses core `mulberry32`
+(`tensor/src/operations/random.ts`). The worker bundle keeps copies as
+`_workerMulberry32` and `_tdRowMajorStrides` in
+`packages/workerpool/src/worker-numerics.ts` (no worker `boxMuller`).
 
 ### Scalar dispatch helpers & constants
 
@@ -241,9 +253,11 @@ in `core/src/wasm-loader.ts` and surfaced via `core/internal`:
 
 ## @danielsimonjr/mathts-matrix
 
-DenseMatrix/SparseMatrix implementations with a pluggable JS/WASM/GPU/Parallel
-backend system plus the standalone dense-matrix decomposition primitives the rest
-of the monorepo routes through. Depends on `core`, `parallel`, and `gpu`.
+DenseMatrix/SparseMatrix implementations with `BackendManager` JS/WASM selection
+(GPU is not registered there; use explicit GPU exports or `enableGpu()` fused
+paths) plus Parallel helpers and the standalone dense-matrix decomposition
+primitives the rest of the monorepo routes through. Depends on `core`,
+`parallel`, and `gpu`.
 
 ### Matrix Types
 
@@ -266,6 +280,7 @@ Standalone functions (`DenseMatrix → DenseMatrix`), not methods:
 
 | Function                | Result / Notes                                                                                                      |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `matMul(A, B)`          | `number[][]` — dense multiply without a `DenseMatrix` wrapper (`matrix/src/operations/index.ts`)                    |
 | `lu(A)`                 | `LUResult{L,U,P}` — Doolittle w/ partial pivoting                                                                   |
 | `qr(A, opts?)`          | `QRResult{Q,R}` — Gram-Schmidt w/ re-orthogonalization; `mode: 'reduced'\|'full'`                                   |
 | `cholesky(A)`           | `CholeskyResult{L}` — right-looking, SPD only                                                                       |
@@ -634,6 +649,14 @@ Standalone CDF/quantile: `normalQuantile`, `studentTCDF`/`Quantile`,
 `betaCDF`/`Quantile`, and the Cauchy/Laplace/logistic families.
 
 ### Signal Processing
+
+Three different `fft` symbols: the public factory export
+(`functions/src/matrix/fft.ts` via `factories/index.ts`), `parallelFFT` in
+`functions/src/typed/signal.ts`, and an internal `functions/src/signal/fft.ts`
+(not on the barrel; imported by `conv.ts`, `fft-helpers.ts`, and
+`spectral-peaks.ts`) — all share `functions/src/signal/fft-core-f64.ts`; the AS
+kernel is `assembly/src/ops/fft.ts` (`matrix/src/backends/wasm/fft-wasm.ts` was
+removed in #413).
 
 Parallel-first: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`,
 `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`. Plain:
@@ -1006,9 +1029,10 @@ is sourced from `src/index.ts`. AS exports functions
 only, never classes (AS231 constraint). Per project memory this is the production-matured
 "real WASM" tier; the WebGPU/`gpu` tier is experimental scaffolding.
 
-The built binary exports **315 functions** (327 total exports, incl. 11 numeric
-globals such as `PI`/`E` plus the linear memory), compiled from 28 source files.
-The generated [`wasm-pairing.md`](./wasm-pairing.md#wasm-binary-exports) report gives the category counts:
+The built binary export counts (functions, totals, category breakdown, and
+AssemblyScript source-file count) are in the generated
+[`wasm-pairing.md`](./wasm-pairing.md#wasm-binary-exports) report — not
+hand-maintained here:
 
 | Category (by export-name prefix) | Function exports | Examples                                                                                                                                                                                                                              |
 | -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

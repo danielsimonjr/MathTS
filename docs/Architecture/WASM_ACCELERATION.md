@@ -100,11 +100,11 @@ whole JS-only families: they also carry WASM and/or parallel paths, and
   called from public `lu()`/`qr()`/`cholesky()`. Element-wise ops, `transpose`,
   reductions, and `eig`/`svd` run on JS; FFT is not a matrix-backend op (WASM FFT
   in `functions/src/wasm/signal/`).
-- **Internal kernels** (`functions/src/wasm/{poly,signal,sort,interpolation,
-bitwise}/`) accelerate algebra/numeric/interpolation code paths
-  (`poly_mul`, `welch_psd`, `sort_f64`, `tridiag_solve`, divided differences,
-  etc.) where used by solvers and numeric routines, even though those public
-  functions aren't special-function dispatchers.
+- **Internal bridges** (`functions/src/wasm/{poly,signal,sort,interpolation,
+bitwise}/`) exist, but `poly_mul`, Welch/Bartlett PSD, tridiagonal solves,
+  divided differences, and bitwise ops have **no** `policy.ts` band — they stay
+  on JS even after `loadWasm()`. Only measured winners in `policy.ts` dispatch
+  to AS from the public call path.
 
 ## Correctness status
 

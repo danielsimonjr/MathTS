@@ -8,7 +8,19 @@
  * @packageDocumentation
  */
 
-/** One hall-of-fame row. `item` is opaque and is not inspected. */
+/**
+ * One hall-of-fame row. `item` is opaque and is not inspected.
+ *
+ * @example
+ * ```ts
+ * import { paretoFront } from '@danielsimonjr/mathts-functions';
+ * const front = paretoFront([
+ *   { loss: 0.5, complexity: 1, item: 'A' },
+ *   { loss: 0.1, complexity: 3, item: 'D-front' },
+ * ]);
+ * front.map((r) => r.item).join(','); // 'A,D-front'
+ * ```
+ */
 export interface FrontCandidate<T = unknown> {
   readonly loss: number;
   readonly complexity: number;
@@ -19,6 +31,14 @@ export interface FrontCandidate<T = unknown> {
  * A {@link FrontCandidate} plus a PySR score.
  * `null` means the linear loss scale, where PySR stores no score column.
  * A numeric score may be `+Infinity`, `-Infinity`, or `NaN` (a zero complexity gap).
+ *
+ * @example
+ * ```ts
+ * import { paretoFront, scoreFront } from '@danielsimonjr/mathts-functions';
+ * const front = paretoFront([{ loss: 0.5, complexity: 1, item: 'A' }]);
+ * scoreFront(front)[0]!.score; // 0 (log scale)
+ * scoreFront(front, { lossScale: 'linear' })[0]!.score; // null
+ * ```
  */
 export interface ScoredCandidate<T = unknown> extends FrontCandidate<T> {
   readonly score: number | null;
@@ -28,6 +48,16 @@ export interface ScoredCandidate<T = unknown> extends FrontCandidate<T> {
  * Thrown by {@link scoreFront} and {@link selectFrontModel} for an empty
  * selection, a bad mode, a bad loss scale, or a mixed score column.
  * `paretoFront` does not throw.
+ *
+ * @example
+ * ```ts
+ * import { selectFrontModel, ParetoFrontError } from '@danielsimonjr/mathts-functions';
+ * try {
+ *   selectFrontModel([]);
+ * } catch (e) {
+ *   e instanceof ParetoFrontError && e.message; // 'selectFrontModel: empty front'
+ * }
+ * ```
  */
 export class ParetoFrontError extends Error {
   constructor(message: string) {
@@ -56,6 +86,20 @@ function isFiniteLossAndComplexity(c: FrontCandidate<unknown>): boolean {
  *
  * Returns a new array of new wrapper objects. `item` is the input reference.
  * The input array and objects are not mutated.
+ *
+ * @example
+ * ```ts
+ * import { paretoFront } from '@danielsimonjr/mathts-functions';
+ * const front = paretoFront([
+ *   { loss: 0.5, complexity: 1, item: 'A' },
+ *   { loss: 0.5, complexity: 2, item: 'B-tie' },
+ *   { loss: 0.2, complexity: 4, item: 'C-dominated' },
+ *   { loss: 0.1, complexity: 3, item: 'D-front' },
+ *   { loss: Number.NaN, complexity: 1, item: 'drop' },
+ * ]);
+ * front.length; // 2 — non-finite row dropped; paretoFront never throws
+ * paretoFront([]).length; // 0
+ * ```
  */
 export function paretoFront<T>(candidates: readonly FrontCandidate<T>[]): FrontCandidate<T>[] {
   const byComplexity = new Map<number, { loss: number; item: T }>();
@@ -108,6 +152,17 @@ export function paretoFront<T>(candidates: readonly FrontCandidate<T>[]): FrontC
  *
  * Any other `lossScale` throws `ParetoFrontError`
  * (`scoreFront: lossScale must be 'log' or 'linear'`).
+ *
+ * @example
+ * ```ts
+ * import { paretoFront, scoreFront } from '@danielsimonjr/mathts-functions';
+ * const front = paretoFront([
+ *   { loss: 0.5, complexity: 1, item: 'A' },
+ *   { loss: 0.1, complexity: 3, item: 'D-front' },
+ * ]);
+ * scoreFront(front)[0]!.score; // 0
+ * scoreFront(front, { lossScale: 'linear' })[0]!.score; // null
+ * ```
  */
 export function scoreFront<T>(
   front: readonly FrontCandidate<T>[],
@@ -231,6 +286,19 @@ function hasMixedScores<T>(rows: readonly ScoredCandidate<T>[]): boolean {
  * Throws `ParetoFrontError` on an empty list, a non-finite loss or complexity,
  * a non-finite `bestLossFactor`, a mode other than the three names, a mix of
  * `null` and numeric scores, or a `'best'` filter that keeps no row.
+ *
+ * @example
+ * ```ts
+ * import { paretoFront, scoreFront, selectFrontModel } from '@danielsimonjr/mathts-functions';
+ * const front = paretoFront([
+ *   { loss: 0.5, complexity: 1, item: 'A' },
+ *   { loss: 0.1, complexity: 3, item: 'D-front' },
+ * ]);
+ * const scored = scoreFront(front);
+ * selectFrontModel(scored, 'accuracy').item; // 'D-front'
+ * selectFrontModel(scored, 'best').item; // 'D-front'
+ * selectFrontModel(scoreFront(front, { lossScale: 'linear' }), 'score').item; // null-score → accuracy fallback
+ * ```
  */
 export function selectFrontModel<T>(
   scored: readonly ScoredCandidate<T>[],

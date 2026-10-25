@@ -33,6 +33,19 @@ which uses 40+ duck-typed type checks.
 
 ---
 
+## 1b. ScalarNode compile and Pareto selection (PySR)
+
+```text
+ScalarNode tree (expression scalar-structure toolkit)
+  → compileScalar (functions/scalar-compile.ts): one register tape, column Float64Array bindings
+  → CompiledScalar.evaluate(rows): per-row valid mask (no typed dispatch per row)
+  → optional paretoFront / scoreFront / selectFrontModel on { loss, complexity, item } rows
+```
+
+`compileScalar` does not use `eval` / `new Function` and does not load WASM.
+
+---
+
 ## 2. Matrix Backend Selection Flow
 
 ```text
@@ -41,8 +54,10 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
      selectBackend(elementCount, 'multiply') — not rows * cols alone.
   2. Registered backends are js + wasm only (no 'gpu' in backendRegistry):
        multiply: WASM when elementCount >= 256 (operation threshold), else JS
-       transpose: WASM threshold 2000; default wasm hint 1000 for ops with no
-       per-op entry; WASMBackend minElements 100 for decomposition kernels
+       transpose: BackendManager still stores transpose: { wasm: 2000 }, but
+       WASMBackend.transpose always delegates to JS (WASMBackend.ts)
+       default wasm hint 1000 for ops with no per-op entry; WASMBackend
+       minElements 100 for decomposition kernels
   3. GPUBackend thresholds in BackendManager are dormant. Explicit exports
      (`gpuMatmul`, `gpuAdd`, `gpuTranspose`, `gpuScale`) call gpuMatrixBackend
      directly (minElements 65,536) and do not require enableGpu(). enableGpu()
@@ -198,28 +213,13 @@ They are suitable as building blocks for Monte Carlo sampling loops.
 ### Special Functions
 
 Special functions (`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`,
-`airyAi/Bi`, `ellipticK/E/F/Pi`, `carlsonR*`, `lgamma`) have a synchronous
-**scalar** path and a **`Float64Array` array** path that routes to WASM above
-the element threshold:
-
-```text
-besselJ0(x: number)                     // scalar — synchronous, number -> number
-  1. |x| <= 13: ascending power series   (J0 = sum (-1)^k (x^2/4)^k/(k!)^2)
-  2. |x| > 13:  Hankel asymptotic expansion (coefficients generated in-loop)
-  3. Returns number  (validated <1e-9 vs mpmath)
-
-besselJ0(xs: Float64Array)               // array overload
-  1. xs.length < 1024 (WASM_SPECIAL_THRESHOLD): map the scalar over the array (JS)
-  2. xs.length >= 1024: dispatch to the WASM kernel
-       AssemblyScript (bessel_j0_f64) -> JS fallback
-     The `functions` package bundles the AS wasm (dist/wasm/mathts-as.wasm) and
-     resolves it package-relative, so this path is live (not a JS fallback).
-```
-
-The scalar path has no side effects, no shared state, no async dispatch. The
-array path returns a `Promise`. All WASM and JS paths agree to <1e-9 (the
-kernels share the same series + Hankel / generated-asymptotic algorithms; see
-`docs/Architecture/WASM_ACCELERATION.md`).
+`airyAi/Bi`, `ellipticK/E/F/Pi`, `carlsonR*`, `lgamma`) are synchronous scalars
+on the public surface. Nothing in `functions` loads WASM until `loadWasm()`;
+`functions/src/wasm/policy.ts` keeps most bridges on JS (no Bessel band — Bessel
+stays JS; `lgamma_f64` only for `n >= 1048576`). `normalCDF` still uses `erfc`
+(`normalCDFScalar` in `functions/src/wasm/special/scalars.ts`). Canonical
+log-gamma is `_lgamma` in that file (reflection uses `abs(sin)`). See
+`docs/Architecture/WASM_ACCELERATION.md` for measured dispatch tiers.
 
 ### Combinatorics Functions
 

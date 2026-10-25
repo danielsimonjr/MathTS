@@ -17,6 +17,16 @@ npm install @danielsimonjr/mathts-expression
 - `compile` / `createEvaluate` / `compileExpression` — evaluate expressions.
 - `createScalarBuilder` — build a scalar node tree (`number`, `symbol`, `op`, `call`, `from`). `ln` lowers to natural `log` and `log` lowers to `log10`. A formula string is rejected. Evaluate with `evaluateScalar` from `@danielsimonjr/mathts-functions`.
 - `scalarCanonical` / `scalarCanonicalKey` / `scalarSize` / `scalarDepth` / `scalarComplexity` / `scalarSymbols` — structural toolkit for an existing `ScalarNode`. The canonical key flattens `+` and `*`, rewrites `-` and `/`, and does not fold `2^3` to `8`.
+
+```ts
+import { createScalarBuilder, scalarEquals } from '@danielsimonjr/mathts-expression';
+
+const b = createScalarBuilder();
+const aa = b.op('*', [b.symbol('a'), b.symbol('a')]);
+const aSquared = b.op('^', [b.symbol('a'), b.number(2)]);
+console.log(scalarEquals(aa, aSquared)); // true
+```
+
 - AST serializers on every node: `toString()`, `toTex()` (LaTeX), `toHTML()`, and `toMathML()` (MathML).
 - Focused re-exports are also published: `@danielsimonjr/mathts-{parser,ast,evaluator}`.
 
