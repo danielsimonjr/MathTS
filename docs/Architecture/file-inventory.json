@@ -4174,7 +4174,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 935
+      "loc": 954
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
@@ -4825,7 +4825,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 136
+      "loc": 143
     },
     {
       "file": "expression/tests/OperatorNode-render.test.ts",
@@ -6960,7 +6960,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 300
+      "loc": 371
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -10138,7 +10138,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 497
+      "loc": 604
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

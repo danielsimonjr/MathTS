@@ -46,6 +46,15 @@ const OP_TO_FN: Record<string, string> = {
   '^': 'pow',
 };
 
+/** FunctionNode names that are operator equivalents (`subtract(a,b,c)` is how n-ary `-` prints). */
+const FN_TO_OP: Record<string, '+' | '-' | '*' | '/' | '^'> = {
+  add: '+',
+  subtract: '-',
+  multiply: '*',
+  divide: '/',
+  pow: '^',
+};
+
 type ConstantCtor = new (value: number) => MathNode;
 type SymbolCtor = new (name: string) => MathNode;
 type OperatorCtor = new (
@@ -123,6 +132,33 @@ function scalarToNodeImpl(node: ScalarNode, deps: ScalarNodeBridgeDeps): MathNod
   }
 }
 
+/**
+ * Left-fold n-ary `-` and `/` into binary spines. `evaluateScalar` already
+ * left-folds those operators; `simplify` only rewrites the binary form
+ * (parse never emits n-ary subtract/divide). Feeding the n-ary node through
+ * unchanged lets binary rules such as `n-n1 -> n+-n1` drop later minuses.
+ */
+function leftFoldNonAssoc(node: ScalarNode): ScalarNode {
+  switch (node.kind) {
+    case 'number':
+    case 'symbol':
+      return node;
+    case 'call':
+      return { kind: 'call', fn: node.fn, arg: leftFoldNonAssoc(node.arg) };
+    case 'op': {
+      const args = node.args.map(leftFoldNonAssoc);
+      if ((node.op === '-' || node.op === '/') && args.length > 2) {
+        let acc = args[0];
+        for (let i = 1; i < args.length; i++) {
+          acc = { kind: 'op', op: node.op, args: [acc, args[i]] };
+        }
+        return acc;
+      }
+      return { kind: 'op', op: node.op, args };
+    }
+  }
+}
+
 function nodeToScalarImpl(node: MathNode): ScalarNode {
   if (isParenthesisNode(node)) {
     const { content } = node as unknown as ParenthesisFields;
@@ -152,21 +188,47 @@ function nodeToScalarImpl(node: MathNode): ScalarNode {
       );
     }
     const fnName = (fnNode.fn as unknown as SymbolFields).name;
-    if (fnNode.args.length !== 1) {
-      throw new ScalarBuildError(
-        `${PREFIX}function '${fnName}' needs exactly 1 arg, got ${fnNode.args.length}`
-      );
+    if (fnName === 'unaryMinus') {
+      if (fnNode.args.length !== 1) {
+        throw new ScalarBuildError(
+          `${PREFIX}unaryMinus needs exactly 1 arg, got ${fnNode.args.length}`
+        );
+      }
+      return {
+        kind: 'op',
+        op: '*',
+        args: [{ kind: 'number', value: -1 }, nodeToScalarImpl(fnNode.args[0])],
+      };
     }
-    let stored: string;
-    if (fnName === 'ln') {
-      stored = 'log';
-    } else if (LOWERED_CALL_NAMES.has(fnName)) {
-      stored = fnName;
-    } else {
-      throw new ScalarBuildError(`${PREFIX}function '${fnName}' is outside the scalar subset`);
+    if (fnName === 'unaryPlus') {
+      if (fnNode.args.length !== 1) {
+        throw new ScalarBuildError(
+          `${PREFIX}unaryPlus needs exactly 1 arg, got ${fnNode.args.length}`
+        );
+      }
+      return nodeToScalarImpl(fnNode.args[0]);
     }
-    const arg = nodeToScalarImpl(fnNode.args[0]);
-    return { kind: 'call', fn: stored as LoweredScalarFn, arg };
+    const asOp = FN_TO_OP[fnName];
+    if (asOp !== undefined) {
+      if (asOp === '^' && fnNode.args.length !== 2) {
+        throw new ScalarBuildError(`${PREFIX}'^' needs exactly 2 args, got ${fnNode.args.length}`);
+      }
+      return { kind: 'op', op: asOp, args: fnNode.args.map((child) => nodeToScalarImpl(child)) };
+    }
+    if (fnName === 'ln' || LOWERED_CALL_NAMES.has(fnName)) {
+      if (fnNode.args.length !== 1) {
+        throw new ScalarBuildError(
+          `${PREFIX}function '${fnName}' needs exactly 1 arg, got ${fnNode.args.length}`
+        );
+      }
+      const stored = fnName === 'ln' ? 'log' : fnName;
+      return {
+        kind: 'call',
+        fn: stored as LoweredScalarFn,
+        arg: nodeToScalarImpl(fnNode.args[0]),
+      };
+    }
+    throw new ScalarBuildError(`${PREFIX}function '${fnName}' is outside the scalar subset`);
   }
   if (isOperatorNode(node)) {
     const { fn, op, args } = node as unknown as OperatorFields;
@@ -269,10 +331,19 @@ export function createScalarNodeBridge(deps: ScalarNodeBridgeDeps) {
    * ```
    */
   function simplifyScalar(node: ScalarNode, options?: SimplifyOptions): ScalarNode {
-    const mathNode = scalarToNode(node);
-    const simplified = (
-      options === undefined ? deps.simplify(mathNode) : deps.simplify(mathNode, new Map(), options)
-    ) as MathNode;
+    const mathNode = scalarToNode(leftFoldNonAssoc(node));
+    let simplified: MathNode;
+    try {
+      simplified = (
+        options === undefined
+          ? deps.simplify(mathNode)
+          : deps.simplify(mathNode, new Map(), options)
+      ) as MathNode;
+    } catch (err) {
+      if (err instanceof ScalarBuildError) throw err;
+      const message = err instanceof Error ? err.message : String(err);
+      throw new ScalarBuildError(`${PREFIX}simplify failed: ${message}`);
+    }
     return nodeToScalarImpl(simplified);
   }
 

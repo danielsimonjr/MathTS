@@ -229,6 +229,36 @@ describe('scalar-node-bridge unary minus and parentheses', () => {
     expect(n.type).toBe('ConstantNode');
     expect((n as unknown as { value: number }).value).toBe(-5);
   });
+
+  it('does not cancel --x', () => {
+    const s = nodeToScalar(parse('--x'));
+    expect(s).toMatchObject({
+      kind: 'op',
+      op: '*',
+      args: [
+        { kind: 'number', value: -1 },
+        {
+          kind: 'op',
+          op: '*',
+          args: [
+            { kind: 'number', value: -1 },
+            { kind: 'symbol', name: 'x' },
+          ],
+        },
+      ],
+    });
+    expect(evaluateScalar(s, { x: 3 })).toBe(3);
+  });
+
+  it('parenthesizes a negative ConstantNode pow base so toString keeps (-2)^2', () => {
+    const t = scalar.op('^', [scalar.number(-2), scalar.number(2)]);
+    const node = scalarToNode(t);
+    expect(node.evaluate()).toBe(4);
+    expect(evaluateScalar(t)).toBe(4);
+    expect(node.toString()).toContain('(-2)');
+    expect(evaluate(node.toString())).toBe(4);
+    expect(evaluate(node.toString())).not.toBe(-4);
+  });
 });
 
 describe('scalar-node-bridge rejects unsupported nodes', () => {
@@ -239,6 +269,8 @@ describe('scalar-node-bridge rejects unsupported nodes', () => {
     '[1, 2]',
     '1:3',
     'a[1]',
+    'a.b',
+    'a.b(x)',
     'x > 1',
     '2!',
     'not x',
@@ -246,6 +278,9 @@ describe('scalar-node-bridge rejects unsupported nodes', () => {
     'a .* b',
     'sqrt(x)',
     'sign(x)',
+    'nthRoot(x, 3)',
+    'true',
+    'false',
     '"hi"',
   ];
 
@@ -260,7 +295,64 @@ describe('scalar-node-bridge rejects unsupported nodes', () => {
     const twoArg = parse('log(x, 10)');
     if ((twoArg as { args?: unknown[] }).args?.length === 2) {
       expect(() => nodeToScalar(twoArg)).toThrow(ScalarBuildError);
+      expect(() => nodeToScalar(twoArg)).toThrow(/needs exactly 1 arg/);
     }
+  });
+
+  it('rejects unknown functions by name even when arity is not 1', () => {
+    expect(() => nodeToScalar(parse('nthRoot(x, 3)'))).toThrow(/function 'nthRoot' is outside/);
+    expect(() => nodeToScalar(parse('sqrt(x)'))).toThrow(/function 'sqrt' is outside/);
+  });
+
+  it('rejects boolean and non-symbol callees', () => {
+    expect(() => nodeToScalar(parse('true'))).toThrow(/constant value type 'boolean'/);
+    expect(() => nodeToScalar(parse('a.b(x)'))).toThrow(/function callee is not a symbol/);
+  });
+});
+
+describe('scalar-node-bridge operator FunctionNodes', () => {
+  it('accepts add/multiply/subtract/divide/pow FunctionNodes', () => {
+    expect(nodeToScalar(parse('add(x, y, z)'))).toMatchObject({
+      kind: 'op',
+      op: '+',
+    });
+    expect(nodeToScalar(parse('multiply(x, y, z)'))).toMatchObject({
+      kind: 'op',
+      op: '*',
+    });
+    const sub = nodeToScalar(parse('subtract(x, y, z)'));
+    expect(sub).toMatchObject({
+      kind: 'op',
+      op: '-',
+      args: [{ name: 'x' }, { name: 'y' }, { name: 'z' }],
+    });
+    const div = nodeToScalar(parse('divide(x, y, z)'));
+    expect(div).toMatchObject({ kind: 'op', op: '/' });
+    expect(nodeToScalar(parse('pow(x, y)'))).toMatchObject({
+      kind: 'op',
+      op: '^',
+    });
+  });
+
+  it('maps FunctionNode unaryMinus/unaryPlus like the operator forms', () => {
+    expect(nodeToScalar(parse('unaryMinus(x)'))).toMatchObject({
+      op: '*',
+      args: [{ value: -1 }, { name: 'x' }],
+    });
+    expect(nodeToScalar(parse('unaryPlus(x)'))).toMatchObject({ kind: 'symbol', name: 'x' });
+  });
+
+  it('round-trips n-ary subtract/divide through toString → parse', () => {
+    const sub = scalar.op('-', [scalar.symbol('x'), scalar.symbol('y'), scalar.symbol('z')]);
+    const div = scalar.op('/', [scalar.symbol('x'), scalar.symbol('y'), scalar.symbol('z')]);
+    const scope = { x: 3, y: 1, z: 0.5 };
+    expect(scalarToNode(sub).toString()).toBe('subtract(x, y, z)');
+    expect(evaluateScalar(nodeToScalar(parse(scalarToNode(sub).toString())), scope)).toBe(
+      evaluateScalar(sub, scope)
+    );
+    expect(evaluateScalar(nodeToScalar(parse(scalarToNode(div).toString())), scope)).toBe(
+      evaluateScalar(div, scope)
+    );
   });
 });
 
@@ -394,6 +486,21 @@ describe('scalar-node-bridge simplifyScalar', () => {
       )
     ).toMatchObject({ kind: 'number', value: 64 });
     expect(scalarCanonicalKey(scalar.op('^', [scalar.number(2), scalar.number(3)]))).toContain('^');
+  });
+
+  it('n-ary subtract and divide keep evaluateScalar left-fold meaning', () => {
+    const sub = scalar.op('-', [scalar.symbol('x'), scalar.symbol('y'), scalar.symbol('z')]);
+    const div = scalar.op('/', [scalar.symbol('x'), scalar.symbol('y'), scalar.symbol('z')]);
+    const scope = { x: 8, y: 2, z: 2, a: 1, b: 1, c: 1 };
+    expect(evaluateScalar(simplifyScalar(sub), scope)).toBe(evaluateScalar(sub, scope));
+    expect(evaluateScalar(simplifyScalar(div), scope)).toBe(evaluateScalar(div, scope));
+    expect(evaluateScalar(sub, scope)).toBe(4);
+    expect(evaluateScalar(div, scope)).toBe(2);
+  });
+
+  it('wraps simplify Complex folding as ScalarBuildError', () => {
+    expect(() => simplifyScalar(scalar.call('log', scalar.number(-1)))).toThrow(ScalarBuildError);
+    expect(() => simplifyScalar(scalar.call('log', scalar.number(-1)))).toThrow(/scalar bridge:/);
   });
 
   it('identities x^-1, 1*x, x+0, x/x', () => {
