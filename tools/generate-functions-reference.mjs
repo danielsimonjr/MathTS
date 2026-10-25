@@ -17,6 +17,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { packageDotEntry } from './package-dot-entry.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
@@ -284,25 +285,9 @@ function embedMarkdown(htmlRaw, md) {
   return `${h.slice(0, bodyStart)}\n${indented}\n    ${h.slice(close)}`;
 }
 
-/** Pick the file that a package.json `exports` condition names. */
-function pickCondition(value) {
-  if (typeof value === 'string') return value;
-  if (value === null || typeof value !== 'object') return null;
-  for (const key of ['import', 'module', 'default']) {
-    const picked = pickCondition(value[key]);
-    if (picked !== null) return picked;
-  }
-  return null;
-}
-
-/** Resolve the `.` entry file for a package directory. */
+/** Resolve the `.` entry file for a package directory (`import`-first). */
 function distEntryPath(pkgDir) {
-  const pkg = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'));
-  const target = pickCondition(pkg.exports?.['.']) ?? pkg.module ?? pkg.main;
-  if (typeof target !== 'string') {
-    throw new Error(`${pkgDir}: package.json has no "." entry`);
-  }
-  return { pkgName: pkg.name, distPath: resolve(pkgDir, target) };
+  return packageDotEntry(pkgDir);
 }
 
 /** Walk up from a resolved module file to the package root. */
@@ -322,7 +307,16 @@ function packageDirForTarget(pkg) {
 
 const SRC_EXT = /\.(ts|tsx|mts|js|mjs)$/;
 
-/** Non-declaration source files under `src/` newer than the dist entry (`mtimeMs >`). */
+/**
+ * Non-declaration source files under `src/` newer than the dist entry (`mtimeMs >`).
+ *
+ * Safe in CI after `bun run build`: `actions/checkout` stamps src at checkout time,
+ * and turbo 2.10 restores cached outputs with mtime = restore time (measured: tar
+ * headers are epoch 0; the restored file's mtime is the restore instant, not the
+ * archived `mtime_nanos`). Checkout runs first, so src cannot be newer than a
+ * just-restored dist. Test/Coverage do not run `docs:functions:check`; the Compile
+ * job runs it after Build. Equal mtimes do not fail (`>`).
+ */
 function srcFilesNewerThanDist(pkgDir, distPath) {
   const srcRoot = join(pkgDir, 'src');
   if (!existsSync(srcRoot)) return [];
@@ -400,13 +394,16 @@ export function runtimeExportNames(source) {
   }
   for (const m of text.matchAll(/export\s*\{([^}]+)\}/g)) {
     for (const part of m[1].split(',')) {
-      let spec = part.trim();
+      const spec = part.trim();
       if (!spec) continue;
       if (/^type\s+/i.test(spec)) continue;
-      spec = spec.replace(/^type\s+/i, '').trim();
-      const asIdx = spec.lastIndexOf(' as ');
-      const exported = asIdx === -1 ? spec.trim() : spec.slice(asIdx + 4).trim();
-      if (exported && /^[A-Za-z_$][\w$]*$/.test(exported)) names.add(exported);
+      // `export { foo as type Bar }` is type-only (TS 4.5+). Skip it.
+      if (/\sas\s+type\s+/i.test(spec)) continue;
+      const asMatch = spec.match(/\sas\s+([A-Za-z_$][\w$]*)\s*$/);
+      const exported = asMatch ? asMatch[1] : spec;
+      // `export { x as default }` is a default export; Object.keys omits `default`.
+      if (exported === 'default') continue;
+      if (/^[A-Za-z_$][\w$]*$/.test(exported)) names.add(exported);
     }
   }
   return [...names];
@@ -571,10 +568,10 @@ async function runMain() {
   }
 
   // --- Cross-validate the shipped functions surface against the dep-graph's
-// independent static-source inventory. A name in the runtime `dist` with no source
-// origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
-// accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
-// absent the reconciliation is skipped (not failed) so this check stays self-contained.
+  // independent static-source inventory. A name in the runtime `dist` with no source
+  // origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
+  // accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
+  // absent the reconciliation is skipped (not failed) so this check stays self-contained.
   const SURFACES = resolve(REPO, 'docs', 'Architecture', 'package-export-surfaces.json');
   let reconcile = { skipped: true, orphans: [] };
   if (functionsSurface && existsSync(SURFACES)) {

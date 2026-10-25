@@ -15,7 +15,8 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { builtinModules } from 'node:module';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { BROWSER_EXPORT_KEYS, packageDotEntry } from '../package-dot-entry.mjs';
 
 const BUILTINS = new Set(builtinModules.map((name) => name.replace(/^node:/, '')));
 
@@ -73,27 +74,11 @@ export function staticNodeImports(entry) {
   return found;
 }
 
-/** Pick the file that a condition value names, in the order that a browser bundler tries. */
-function pickCondition(value) {
-  if (typeof value === 'string') return value;
-  if (value === null || typeof value !== 'object') return null;
-  for (const key of ['browser', 'import', 'module', 'default']) {
-    const picked = pickCondition(value[key]);
-    if (picked !== null) return picked;
-  }
-  return null;
-}
-
 /**
- * Resolve the file of a package's `.` entry.
+ * Resolve the file of a package's `.` entry (browser condition first).
  * @param {string} packageDir directory that holds the package.json
  * @returns {string} absolute path of the entry file
  */
 export function dotEntryFile(packageDir) {
-  const pkg = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
-  const target = pickCondition(pkg.exports?.['.']) ?? pkg.module ?? pkg.main;
-  if (typeof target !== 'string') {
-    throw new Error(`${packageDir}: package.json has no "." entry`);
-  }
-  return resolve(packageDir, target);
+  return packageDotEntry(packageDir, BROWSER_EXPORT_KEYS).distPath;
 }
