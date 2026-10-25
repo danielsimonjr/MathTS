@@ -12,9 +12,14 @@ no new package for this roadmap (§10).
 **Status:** Active. Phase 1: M1 ([#396](https://github.com/danielsimonjr/MathTS/pull/396)),
 M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 ([#395](https://github.com/danielsimonjr/MathTS/pull/395)) are merged; M1's weight lookup was
-fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). Sprint 1R is **partial**
-(2026-10-24: #412–#418 merged; Sprint 1R items 3, 4, 5 and 6 merged: #435, #437, #438, #434;
-sprint-level DoD boxes still to be closed out). M2 and M5 (`createSeededRng`/`fork`), Phases 2–5, and sprints 2R–5R are open.
+fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). Sprint 1R items 1–7 are
+merged ([#412](https://github.com/danielsimonjr/MathTS/pull/412)–[#418](https://github.com/danielsimonjr/MathTS/pull/418),
+[#434](https://github.com/danielsimonjr/MathTS/pull/434)–[#438](https://github.com/danielsimonjr/MathTS/pull/438)); **exit
+criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af`, pre-#415, pinned in
+`tensor/tests/operations/random.test.ts`, `functions/tests/typed-hypothesis-bootstrap.test.ts`,
+`functions/tests/typed-dist-objects-workers.test.ts`, `functions/tests/typed-graph-workers.test.ts`). §6 B9 for M1, M3 and M4
+stays **Partly** (the review recorded on each merged PR; no separate sprint-level B9 sign-off). M2 and M5
+(`createSeededRng`/`fork`), Phases 2–5, and sprints 2R–5R are open.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
@@ -65,8 +70,8 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
 1. **M2** (`ScalarNode` ↔ `Node` bridge) and the rest of **M5** (`createSeededRng` /
    `fork` in `core`). The Mulberry32 _body_ already lives in `core` (#415); M5's public
    seeded-RNG API is not started. Neither remaining item has a dependency.
-2. **Close out Sprint 1R** (items 1–7 are merged): tick the sprint-level DoD boxes and
-   B9 for the merged PRs after a final check of the exit criteria.
+2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
+   ticked below). Do not tick §6 B9 for M1, M3 or M4.
 3. Phase 2 (M6–M8), then Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge,
    `linearRegression`/`linregress`, `numericRealRoots`; LM/`svds`/`matMul` already moved
    into Sprint 1R).
@@ -384,7 +389,8 @@ of the base checklist and every specific box is ticked in its pull request, with
 ### DoD audit of the merged milestones
 
 M1, M3 and M4 merged before this checklist existed. The 2026-10-22 audit checked them
-against it. Open boxes are carried into Sprint 1R; none of them needs new feature code.
+against it. B1–B8 are Yes. B9 stays Partly: no review was recorded on #396, #397, or #395, and the
+later audit was after merge. Do not tick B9.
 
 | Box | M1 (#396, #407)                                                                                                                       | M3 (#397)                                                                                     | M4 (#395)                                                              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -541,9 +547,9 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
 - **Package:** `core` (`core/src/numeric/rng.ts`, exported from the `core` barrel).
   **Size:** S–M. **Depends on:** nothing. `core` is the right home: `tensor`,
   `functions` and `parallel` already depend on it, and `workerpool` may (no cycle).
-- **Reuse (do not rebuild):** **move** the Mulberry32 body of `makeMulberry32`
-  (`tensor/src/operations/random.ts:64`) and the `boxMuller` transform (`:84`) into the
-  new module; do not write a sixth generator. Do not build on `seedProbabilityRng`: it
+- **Reuse (do not rebuild):** Call core `mulberry32` and `boxMuller` ([#415](https://github.com/danielsimonjr/MathTS/pull/415)).
+  Do not add another generator. The new code is `createSeededRng`, `fork`, and the string-to-seed hash.
+  Do not build on `seedProbabilityRng`: it
   replaces the module-level `_rng` of the typed `random` family
   (`functions/src/typed/probability.ts:300-301`), which is the global reseed UPT trips
   over. Do not build on `createRng` (`functions/src/probability/util/seededRNG.ts:14`)
@@ -567,15 +573,11 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
 ```
 
 - **Acceptance:**
-  - The first 8 outputs of `createSeededRng(42)` are pinned, and equal the outputs of the
-    existing `makeMulberry32(42)` recorded before the move.
-  - A forked stream is reproducible, and sibling forks are not identical.
-  - This PR adds the module and points `tensor` at it. The other four copies move in
-    Sprint 1R.
+  - `createSeededRng(42)` matches `MULBERRY32_42_FIRST_8` in `core/tests/numeric/rng.test.ts`.
+    Forks are reproducible and siblings differ. The body move and the other copies are #415, not this PR.
 - **Tests:** `core/tests/numeric/rng.test.ts`.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: `makeMulberry32` and `boxMuller` are moved, not copied; `tensor` imports them
-        from `core`.
+  - [x] B1: moved in #415 (`tensor` imports `mulberry32` / `boxMuller` from `core`).
   - [ ] Oracles: the reference Mulberry32 sequence for seed 42, worked independently of
         the module; `randomTensor` output for a fixed seed is byte-identical before and
         after.
@@ -654,9 +656,11 @@ variable `RELEASES_ENABLED` is set to `true`.
 - **Exit criteria:**
   - Outside `core`, a grep for the Mulberry32 constant `0x6d2b79f5` in production `.ts`
     files finds at most the documented `workerpool` copy.
-  - Every seeded output that existed before the sprint is byte-identical after it
-    (`randomTensor`, `bootstrapSeed` in the hypothesis tests, the `dist-objects` and
-    `graph` samplers), pinned by fixtures recorded before the change.
+  - **Met (2026-10-25):** Every seeded output that existed before the sprint is byte-identical
+    after it (`randomTensor`, `bootstrapSeed` in the hypothesis tests, the `dist-objects` and
+    `graph` samplers), pinned by fixtures recorded at commit `a6cf17af` (pre-#415) in
+    `tensor/tests/operations/random.test.ts`, `functions/tests/typed-hypothesis-bootstrap.test.ts`,
+    `functions/tests/typed-dist-objects-workers.test.ts`, and `functions/tests/typed-graph-workers.test.ts`.
   - One `rowMajorStrides` body outside `workerpool`; one `NUMERIC_LITERAL`.
   - `docs:functions:check` fails when an `expression`, `workbook` or `plot` export is
     missing from its API page.
@@ -670,11 +674,17 @@ variable `RELEASES_ENABLED` is set to `true`.
   - `SiDimensionVector` exponents are `core` `Fraction`s; `fromSiDimensionVector`
     round-trips; `Unit.dimensions` is still `number[]`.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1 lists each removed copy and the symbol that replaced it.
-  - [ ] Oracle: pre-change output fixtures for every migrated seeded function.
-  - [ ] B3: no public export added or removed except the `core` strides helper and
-        PR-SIDIM (`SiDimensionVector` exponents become `Fraction`, plus its
-        `SiDimensionExponent` input type); consumer type check passes.
+  - [x] B1 lists each removed copy and the symbol that replaced it: tensor `makeMulberry32` /
+        `boxMuller` and `Tensor.rowMajorStrides` → core `mulberry32` / `boxMuller` /
+        `rowMajorStrides`; `hypothesis`, `dist-objects`, `graph` import `mulberry32`;
+        `ComputePool` calls `rowMajorStrides`; worker keeps `_workerMulberry32` and
+        `_tdRowMajorStrides`.
+  - [x] Oracle: pre-change output fixtures for every migrated seeded function (commit
+        `a6cf17af`, tests listed under exit criteria above).
+  - [x] B3: no public export added or removed except `mulberry32`, `boxMuller`,
+        `rowMajorStrides` (`.changeset/core-mulberry32-strides.md`), `SiDimensionExponent`
+        (`.changeset/si-dimension-fraction-exponents.md`), and `matMul` (`.changeset/dense-matmul-export.md`);
+        `NUMERIC_LITERAL` stayed off the functions barrel; consumer type check passes on PR heads.
   - [x] M3 benchmark committed, with the output of both Node runs in the PR; it
         interleaves the two variants and keeps a control case (control ratios 0.9853 and
         1.0400 on `n = 1e4`).
