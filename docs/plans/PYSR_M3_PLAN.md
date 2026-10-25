@@ -33,6 +33,8 @@ The observable contract is bit-for-bit agreement with `evaluateScalar` on rows w
 | `.changeset/scalar-compile-m3.md`        | **Add.** Contents in [Changeset](#changeset).                                                                                                                                                                                                                                                                                                                                                    |
 | Generated docs and `docs/Architecture/*` | Same rule as M4: build `functions` before commit so the hook's `docs:functions` reads a fresh `dist`.                                                                                                                                                                                                                                                                                            |
 
+**Status (Sprint 1R item 3):** superseded — `scalar-compile.ts` imports `NUMERIC_LITERAL` from `scalar-eval.ts` (not on the functions barrel). The block below was the M3 PR contract.
+
 Copy this regex into `scalar-compile.ts`. It is the one in `scalar-eval.ts` (`NUMERIC_LITERAL`). Do not export it from `scalar-eval.ts` just to share it; a one-line comment points at that constant.
 
 ```ts
