@@ -163,6 +163,19 @@ describe('pageRank', () => {
     expect(l1(r1.ranks, r2.ranks)).toBe(0);
   });
 
+  // Pre-#415 oracle (a6cf17af): pageRank(path5, { restarts: 8, restartSeed: 123 }).ranks
+  it('path5 pageRank ranks match pre-#415 fixture for restartSeed 123 (a6cf17af)', async () => {
+    const adj = makePath5();
+    const result = await pageRank(adj, { restarts: 8, restartSeed: 123 });
+    const fixture = [
+      0.1345270405510197, 0.24594591889796064, 0.23905408110203938, 0.24594591889796066,
+      0.1345270405510197,
+    ];
+    for (let i = 0; i < fixture.length; i++) {
+      expect(result.ranks[i]).toBe(fixture[i]);
+    }
+  });
+
   // Different seeds → (likely) different rank vectors
   it('different restartSeeds produce different averaged ranks on a non-uniform graph', async () => {
     const adj = makePath5(); // path graph has asymmetric PageRank

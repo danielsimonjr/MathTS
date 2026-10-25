@@ -125,6 +125,30 @@ describe('chiSquareTest – bootstrap', () => {
     expect(r1.bootstrapStatistics).toEqual(r2.bootstrapStatistics);
   });
 
+  // Pre-#415 oracle (commit a6cf17af): chiSquareTest(..., { bootstrap: 50, bootstrapSeed: 42 })
+  it('bootstrapSeed 42 matches pre-#415 bootstrapStatistics fixture (a6cf17af)', async () => {
+    const observed = [12, 22, 18, 28, 20];
+    const expected = [20, 20, 20, 20, 20];
+    const r = (await chiSquareTest(observed, expected, {
+      bootstrap: 50,
+      bootstrapSeed: 42,
+    })) as ChiSquareBootstrapResult;
+    const fixture = [
+      0.8, 3.2, 1.2, 2.4, 7.699999999999999, 6.5, 1.7, 3.4000000000000004, 1.6, 5.9,
+      1.5999999999999999, 4.1, 1.2, 4.8, 3.8, 4.3, 2.1, 4.1000000000000005, 0.3, 0.8, 4.7,
+      2.3000000000000003, 0.2, 1.5, 3.8, 12.100000000000001, 6.7, 2.5000000000000004, 1,
+      0.8999999999999999, 2.8000000000000003, 5.8, 3.9, 0.7000000000000001, 3.4000000000000004, 4.6,
+      2.9000000000000004, 6.7, 1.4000000000000001, 0.3, 3.1000000000000005, 2.5, 5.8999999999999995,
+      1.2, 3.9000000000000004, 4.5, 10.600000000000001, 2.5, 6.5, 2.9000000000000004,
+    ];
+    expect(r.bootstrapStatistics.length).toBe(fixture.length);
+    for (let i = 0; i < fixture.length; i++) {
+      expect(r.bootstrapStatistics[i]).toBe(fixture[i]);
+    }
+    expect(r.pValueEmpirical).toBe(0.06);
+    expect(r.statistic).toBe(6.800000000000001);
+  });
+
   // 4. Different seeds give different distributions
   it('different bootstrapSeeds give different bootstrapStatistics', async () => {
     const observed = [12, 22, 18, 28, 20];
