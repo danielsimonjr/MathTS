@@ -516,7 +516,7 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   - [x] `out` reuse: the returned `values` is `out` itself.
   - [x] A committed benchmark (`evaluateScalar` per row vs `compileScalar`) before any
         speed claim. `node tools/benchmark/wasm/run-node.mjs scalar` (twice on Node V8);
-        control ratios 0.985 and 1.040; gated row large tree `n = 1e6` ratios 0.27 and 0.31;
+        control ratios 0.9853 and 1.0400; gated row large tree `n = 1e6` ratios 0.27 and 0.31;
         compiled always wins on the grid — **M14 threshold = 100 rows**
         ([`docs/BENCHMARK_RESULTS.md`](../BENCHMARK_RESULTS.md#evaluatescalar-vs-compilescalar-m3-batch-evaluator--2026-10-25)).
 
@@ -674,8 +674,8 @@ variable `RELEASES_ENABLED` is set to `true`.
         PR-SIDIM (`SiDimensionVector` exponents become `Fraction`, plus its
         `SiDimensionExponent` input type); consumer type check passes.
   - [x] M3 benchmark committed, with the output of both Node runs in the PR; it
-        interleaves the two variants and keeps a control case (control ratios 0.985 and
-        1.040 on `n = 1e4`).
+        interleaves the two variants and keeps a control case (control ratios 0.9853 and
+        1.0400 on `n = 1e4`).
 
 ### Phase 2 — Constant fitting and equivalence
 

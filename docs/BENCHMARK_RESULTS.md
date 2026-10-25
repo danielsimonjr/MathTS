@@ -255,12 +255,12 @@ node tools/benchmark/wasm/run-node.mjs scalar
 
 **Environment:** Node v22.23.4, linux x64, 2026-10-25. Median wall time after ≥5 warmup rounds
 and ABBA-interleaved reps (`ratio = batchMs / interpMs`; `< 1` means `compileScalar` batch wins).
-Trees: **small** (5 nodes, `(x*x)+3`), **mid** (11 nodes, `sin(x)*exp(x)+ln(x+1)`), **large** (28
+Trees: **small** (5 nodes, `(x*x)+3`), **mid** (10 nodes, `sin(x)*exp(x)+ln(x+1)`), **large** (28
 nodes, left-fold `+` of eight unary/binary terms). Column `x` is mulberry32 seed 1 on `(0.15,
 0.85)`. Correctness: bit-for-bit `Object.is` on every row before timing (`maxDiff` 0).
 
 **Control** (identical thunks: `compiled.evaluate([col])` twice, small tree, `n = 1e4`): run 1
-ratio **0.985**; run 2 ratio **1.040** (harness order bias ≈ 1.00).
+ratio **0.9853**; run 2 ratio **1.0400** (harness order bias ≈ 1.00).
 
 ### Run 1
 
@@ -280,5 +280,7 @@ ratio **0.985**; run 2 ratio **1.040** (harness order bias ≈ 1.00).
 
 **Verdict (both runs):** `compileScalar` batch evaluation is faster than per-row
 `evaluateScalar` at every size on this grid for all three trees. No crossover inside
-`[100, 1e6]`; **M14 population-eval threshold = 100 rows** (use batch at `n ≥ 100`). Gated
-claim row: **large tree, `n = 1e6`** — ratios **0.27** (run 1) and **0.31** (run 2).
+`[100, 1e6]`. At `n = 100` both runs have ratio 0.04–0.27 (all trees; outside the
+`[0.8, 1.25]` noise band), so **M14 population-eval threshold = 100 rows** (use batch at
+`n ≥ 100`). Gated claim row: **large tree, `n = 1e6`** — ratios **0.27** (run 1) and
+**0.31** (run 2).

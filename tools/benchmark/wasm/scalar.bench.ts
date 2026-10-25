@@ -6,8 +6,11 @@
  * Run on V8, twice (AGENTS.md benchmarking rules 7, 8 and 10):
  *   node tools/benchmark/wasm/run-node.mjs scalar
  */
-import { scalarSize, type ScalarNode } from '../../../expression/src/scalar-structure.js';
-import { compileScalar, evaluateScalar, scalar } from '../../../functions/src/index.js';
+import { scalarSize, type ScalarNode } from '@danielsimonjr/mathts-expression';
+// Published `.` entries — the names a consumer of the packages imports.
+// esbuild resolves them from this tree (opt-in.bench.ts uses functions/src
+// because it also reaches WASM loader internals; this area does not).
+import { compileScalar, evaluateScalar, scalar } from '@danielsimonjr/mathts-functions';
 import { defaultIterations, isMainModule, median, sciLabel } from './harness.js';
 
 function rng(seed: number): () => number {
@@ -27,32 +30,51 @@ function uniform(n: number, lo: number, hi: number, seed = 1): Float64Array {
   return xs;
 }
 
-function timeOnce(fn: () => void): number {
+function timeOnce(fn: () => unknown): number {
   const t0 = performance.now();
-  fn();
-  return performance.now() - t0;
+  const out = fn();
+  const dt = performance.now() - t0;
+  if (out == null) throw new Error('scalar bench: timed thunk returned null');
+  return dt;
+}
+
+function assertNodeCount(node: ScalarNode, expected: number, name: string): ScalarNode {
+  const nodeCount = scalarSize(node);
+  if (nodeCount !== expected) {
+    throw new Error(`scalar bench: ${name} tree nodeCount ${nodeCount}, expected ${expected}`);
+  }
+  return node;
 }
 
 function buildSmall(): ScalarNode {
-  return scalar.op('+', [
-    scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
-    scalar.number(3),
-  ]);
+  return assertNodeCount(
+    scalar.op('+', [scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]), scalar.number(3)]),
+    5,
+    'small'
+  );
 }
 
 /** sin(x) * exp(x) + natural_log(x + 1) — natural log is `ln` in the scalar builder. */
 function buildMid(): ScalarNode {
-  return scalar.op('+', [
-    scalar.op('*', [
-      scalar.call('sin', scalar.symbol('x')),
-      scalar.call('exp', scalar.symbol('x')),
+  return assertNodeCount(
+    scalar.op('+', [
+      scalar.op('*', [
+        scalar.call('sin', scalar.symbol('x')),
+        scalar.call('exp', scalar.symbol('x')),
+      ]),
+      scalar.call('ln', scalar.op('+', [scalar.symbol('x'), scalar.number(1)])),
     ]),
-    scalar.call('ln', scalar.op('+', [scalar.symbol('x'), scalar.number(1)])),
-  ]);
+    10,
+    'mid'
+  );
 }
 
 function leftFoldPlus(terms: readonly ScalarNode[]): ScalarNode {
-  let acc = terms[0];
+  const first = terms[0];
+  if (first === undefined) {
+    throw new Error('scalar bench: leftFoldPlus needs at least one term');
+  }
+  let acc = first;
   for (let i = 1; i < terms.length; i++) {
     acc = scalar.op('+', [acc, terms[i]]);
   }
@@ -61,21 +83,20 @@ function leftFoldPlus(terms: readonly ScalarNode[]): ScalarNode {
 
 function buildLarge(): ScalarNode {
   const x = scalar.symbol('x');
-  const node = leftFoldPlus([
-    x,
-    scalar.call('sin', x),
-    scalar.call('cos', x),
-    scalar.call('exp', scalar.op('*', [x, scalar.number(0.25)])),
-    scalar.call('ln', scalar.op('+', [x, scalar.number(1)])),
-    scalar.call('tanh', x),
-    scalar.call('abs', x),
-    scalar.call('log10', scalar.op('+', [x, scalar.number(0.5)])),
-  ]);
-  const nodeCount = scalarSize(node);
-  if (nodeCount !== 28) {
-    throw new Error(`scalar bench: large tree nodeCount ${nodeCount}, expected 28`);
-  }
-  return node;
+  return assertNodeCount(
+    leftFoldPlus([
+      x,
+      scalar.call('sin', x),
+      scalar.call('cos', x),
+      scalar.call('exp', scalar.op('*', [x, scalar.number(0.25)])),
+      scalar.call('ln', scalar.op('+', [x, scalar.number(1)])),
+      scalar.call('tanh', x),
+      scalar.call('abs', x),
+      scalar.call('log10', scalar.op('+', [x, scalar.number(0.5)])),
+    ]),
+    28,
+    'large'
+  );
 }
 
 const TREES: ReadonlyArray<{ name: string; node: ScalarNode }> = [
@@ -104,6 +125,9 @@ function assertBitwiseMatch(
   if (values.length !== interp.length) {
     throw new Error(`scalar bench: length mismatch ${interp.length} vs ${values.length}`);
   }
+  if (valid.length !== interp.length) {
+    throw new Error(`scalar bench: valid length ${valid.length} vs ${interp.length}`);
+  }
   for (let i = 0; i < valid.length; i++) {
     if (valid[i] !== 1) throw new Error(`scalar bench: valid[${i}] = ${valid[i]}`);
   }
@@ -123,6 +147,11 @@ function runInterp(node: ScalarNode, col: Float64Array): Float64Array {
   return out;
 }
 
+function runBatch(compiled: ReturnType<typeof compileScalar>, col: Float64Array): Float64Array {
+  // Read `.values` (the consumer result). A null evaluate() throws here and fails the run.
+  return compiled.evaluate([col]).values;
+}
+
 function validateOnce(
   node: ScalarNode,
   col: Float64Array,
@@ -133,12 +162,15 @@ function validateOnce(
     throw new Error('scalar bench: interp did not return Float64Array of length n');
   }
   const batch = compiled.evaluate([col]);
+  if (batch == null || batch.values == null) {
+    throw new Error('scalar bench: compiled.evaluate returned null');
+  }
   assertBitwiseMatch(interp, batch);
 }
 
 async function timeBoth(
-  interp: () => void,
-  batch: () => void,
+  interp: () => unknown,
+  batch: () => unknown,
   n: number
 ): Promise<{ interpMs: number; batchMs: number }> {
   const reps = Math.max(8, defaultIterations(n));
@@ -191,9 +223,7 @@ function printCrossoverHint(rows: BenchRow[]): void {
 async function runControl(compiledSmall: ReturnType<typeof compileScalar>): Promise<number> {
   const n = 10_000;
   const col = uniform(n, 0.15, 0.85, 1);
-  const a = () => {
-    compiledSmall.evaluate([col]);
-  };
+  const a = () => runBatch(compiledSmall, col);
   const t = await timeBoth(a, a, n);
   const ratio = t.batchMs / t.interpMs;
   console.log('\ncontrol (small tree, n=1e4, both thunks = compiled.evaluate)');
@@ -225,12 +255,8 @@ export async function main(): Promise<void> {
       const col = uniform(n, 0.15, 0.85, 1);
       validateOnce(node, col, compiled);
 
-      const interp = () => {
-        runInterp(node, col);
-      };
-      const batch = () => {
-        compiled.evaluate([col]);
-      };
+      const interp = () => runInterp(node, col);
+      const batch = () => runBatch(compiled, col);
 
       const t = await timeBoth(interp, batch, n);
       const ratio = t.batchMs / t.interpMs;
