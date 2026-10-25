@@ -17,8 +17,9 @@ merged ([#412](https://github.com/danielsimonjr/MathTS/pull/412)–[#418](https:
 [#434](https://github.com/danielsimonjr/MathTS/pull/434)–[#438](https://github.com/danielsimonjr/MathTS/pull/438)); **exit
 criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af`, pre-#415, pinned in
 `tensor/tests/operations/random.test.ts`, `functions/tests/typed-hypothesis-bootstrap.test.ts`,
-`functions/tests/typed-dist-objects-workers.test.ts`, `functions/tests/typed-graph-workers.test.ts`). §6 B9 for M1, M3 and M4
-stays **Partly** (the review recorded on each merged PR; no separate sprint-level B9 sign-off). M2 and M5
+`functions/tests/typed-dist-objects-workers.test.ts`, `functions/tests/typed-graph-workers.test.ts`). §6 B9 for M1, M3 and M4 stays **Partly** (no review was recorded on
+[#396](https://github.com/danielsimonjr/MathTS/pull/396), [#397](https://github.com/danielsimonjr/MathTS/pull/397),
+or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and the later audit was after merge). M2 and M5
 (`createSeededRng`/`fork`), Phases 2–5, and sprints 2R–5R are open.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
@@ -556,7 +557,7 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   either, although a seeded call already returns its own closure over a new
   `seedrandom(String(seed))` (only `null` falls back to the shared `singletonRandom`):
   it is seedrandom, not Mulberry32, so it cannot reproduce the existing
-  `makeMulberry32` streams that `randomTensor`, the hypothesis bootstrap and the
+  `mulberry32` streams that `randomTensor`, the hypothesis bootstrap and the
   `dist-objects` / `graph` samplers emit, and it has no `fork`. The only new code is the
   `fork` derivation and the string-to-seed hash (no string hash exists in the repo).
 - **API sketch:**
