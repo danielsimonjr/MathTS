@@ -4,13 +4,13 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-10-24 (by tools/create-dependency-graph)
+**Generated**: 2026-10-25 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1914
+**Total files**: 1917
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1164 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      664 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
-| `tool`        |       27 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
+| `test`        |      666 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1914** |                                                                                                                |
+| **Total**     | **1917** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,14 +33,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1189 |
-| `tests`    |   664 |
-| `tools`    |    27 |
+| `tests`    |   666 |
+| `tools`    |    28 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    48 |
+| `(root)`                               |    50 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   547 |
-| `@danielsimonjr/mathts-functions`      |   799 |
+| `@danielsimonjr/mathts-functions`      |   800 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    99 |
@@ -1474,6 +1474,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/numbertheory-extra.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric-accuracy.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric-jacobian.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/numeric-literal.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/ols.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/open-root-finders.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1875,6 +1876,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tests/benchmark/parallel-report.test.ts`                                         | (root)                               | tests    | test        |
 | `tests/benchmark/performance.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/benchmark/wasm-comparison.test.ts`                                         | (root)                               | tests    | test        |
+| `tests/integration/export-index-completeness.test.ts`                             | (root)                               | tests    | test        |
 | `tests/integration/functions.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/integration/instance.test.ts`                                              | (root)                               | tests    | test        |
 | `tests/integration/runtime-probe.test.ts`                                         | (root)                               | tests    | test        |
@@ -1903,6 +1905,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tools/benchmark/wasm/matrix.bench.ts`                                            | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/opt-in.bench.ts`                                            | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/run.ts`                                                     | (root)                               | tools    | tool        |
+| `tools/benchmark/wasm/scalar.bench.ts`                                            | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/sort.bench.ts`                                              | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/special.bench.ts`                                           | (root)                               | tools    | tool        |
 | `tools/benchmark/wasm/transcendental-dispatch.bench.ts`                           | (root)                               | tools    | tool        |

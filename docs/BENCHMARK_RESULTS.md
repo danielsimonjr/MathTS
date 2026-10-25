@@ -242,3 +242,45 @@ npm run test:wasm
 # Run cross-package WASM integration tests
 npm run test:wasm:integration
 ```
+
+---
+
+## `evaluateScalar` vs `compileScalar` (M3 batch evaluator) — 2026-10-25
+
+Command (V8, not Bun):
+
+```bash
+node tools/benchmark/wasm/run-node.mjs scalar
+```
+
+**Environment:** Node v22.23.4, linux x64, 2026-10-25. Median wall time after ≥5 warmup rounds
+and ABBA-interleaved reps (`ratio = batchMs / interpMs`; `< 1` means `compileScalar` batch wins).
+Trees: **small** (5 nodes, `(x*x)+3`), **mid** (10 nodes, `sin(x)*exp(x)+ln(x+1)`), **large** (28
+nodes, left-fold `+` of eight unary/binary terms). Column `x` is mulberry32 seed 1 on `(0.15,
+0.85)`. Correctness: bit-for-bit `Object.is` on every row before timing (`maxDiff` 0).
+
+**Control** (identical thunks: `compiled.evaluate([col])` twice, small tree, `n = 1e4`): run 1
+ratio **0.9853**; run 2 ratio **1.0400** (harness order bias ≈ 1.00).
+
+### Run 1
+
+| tree  | n=100 | n=1e3 | n=1e4 | n=1e5 | n=1e6 |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| small | 0.06  | 0.22  | 0.19  | 0.22  | 0.25  |
+| mid   | 0.11  | 0.33  | 0.31  | 0.32  | 0.32  |
+| large | 0.27  | 0.28  | 0.29  | 0.29  | 0.27  |
+
+### Run 2
+
+| tree  | n=100 | n=1e3 | n=1e4 | n=1e5 | n=1e6 |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| small | 0.04  | 0.20  | 0.18  | 0.21  | 0.31  |
+| mid   | 0.15  | 0.32  | 0.25  | 0.35  | 0.38  |
+| large | 0.27  | 0.26  | 0.23  | 0.25  | 0.31  |
+
+**Verdict (both runs):** `compileScalar` batch evaluation is faster than per-row
+`evaluateScalar` at every size on this grid for all three trees. No crossover inside
+`[100, 1e6]`. At `n = 100` both runs have ratio 0.04–0.27 (all trees; outside the
+`[0.8, 1.25]` noise band), so **M14 population-eval threshold = 100 rows** (use batch at
+`n ≥ 100`). Gated claim row: **large tree, `n = 1e6`** — ratios **0.27** (run 1) and
+**0.31** (run 2).

@@ -10,7 +10,7 @@
  * between the BEGIN/END markers is generated — the curated prose/tables above it are
  * left untouched):
  *   - functions: docs/reference/functions.md (+ functions.html mirror) AND docs/api/functions.md
- *   - compat / core / matrix / parallel: docs/api/<pkg>.md
+ *   - compat / core / matrix / parallel / expression / workbook / plot: docs/api/<pkg>.md
  *
  * To cover a new package, add a row to TARGETS.
  */
@@ -44,6 +44,9 @@ const TARGETS = [
   { pkg: 'core', apiDoc: 'docs/api/core.md' },
   { pkg: 'matrix', apiDoc: 'docs/api/matrix.md' },
   { pkg: 'parallel', apiDoc: 'docs/api/parallel.md' },
+  { pkg: 'expression', apiDoc: 'docs/api/expression.md' },
+  { pkg: 'workbook', apiDoc: 'docs/api/workbook.md' },
+  { pkg: 'plot', apiDoc: 'docs/api/plot.md' },
 ];
 
 const norm = (s) => s.replace(/\r\n/g, '\n');

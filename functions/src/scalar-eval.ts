@@ -72,8 +72,13 @@ const UNARY: Record<LoweredScalarFn, (value: number) => unknown> = {
   abs,
 };
 
-/** Decimal literal spellings. Hex, blank, and `Infinity` are not literals. */
-const NUMERIC_LITERAL = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+/**
+ * Decimal spellings both evaluators bind as symbol names (`'2'`, `'1e-3'`).
+ * Hex, blank, `Infinity`, `NaN`, and underscores do not match. A match is
+ * bound only when `Number(name)` is finite (`'1e309'` matches and is rejected).
+ * Internal: not re-exported from `index.ts`.
+ */
+export const NUMERIC_LITERAL = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
 
 function requireFinite(value: unknown, label: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
