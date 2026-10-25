@@ -47,6 +47,19 @@ ScalarNode tree (expression scalar-structure toolkit)
 
 ---
 
+## 1c. Seeded RNG streams (M5)
+
+```text
+createSeededRng(seed) → private Mulberry32 state (mulberry32)
+  next / nextInt / normal (boxMuller + per-instance spare)
+  fork(label) → child createSeededRng(FNV-1a(parent seed bytes + label)); parent unchanged
+```
+
+`randomTensor`, hypothesis bootstrap, `sampleN`, and graph restarts still call `mulberry32`
+directly (pinned fixtures). `seedProbabilityRng` / `createRng` remain seedrandom.
+
+---
+
 ## 2. Matrix Backend Selection Flow
 
 ```text

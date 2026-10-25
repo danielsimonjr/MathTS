@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-25'
   totalFiles: 1190
   totalModules: 82
-  totalExports: 6155
+  totalExports: 6158
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -819,6 +819,8 @@ modules:
           imports:
             - mulberry32
             - boxMuller
+            - createSeededRng
+            - SeededRng
           reExport: true
         - file: ./numeric/strides.js
           imports:
@@ -1050,6 +1052,8 @@ modules:
         - sumSquaredDeviations
         - mulberry32
         - boxMuller
+        - createSeededRng
+        - SeededRng
         - rowMajorStrides
         - VERSION
         - MathTSValue
@@ -1236,6 +1240,8 @@ modules:
         - sumSquaredDeviations
         - mulberry32
         - boxMuller
+        - createSeededRng
+        - SeededRng
         - rowMajorStrides
         - MathTSValue
         - Scalar
@@ -2027,9 +2033,13 @@ modules:
       exports:
         - mulberry32
         - boxMuller
+        - createSeededRng
+      interfaces:
+        - SeededRng
       functions:
         - mulberry32
         - boxMuller
+        - createSeededRng
     core/src/numeric/stable.ts:
       description: Numerically stable reduction primitives.
       externalDependencies: []
@@ -39182,15 +39192,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1190
   totalModules: 82
-  totalLinesOfCode: 199045
-  totalExports: 6155
+  totalLinesOfCode: 199176
+  totalExports: 6158
   totalClasses: 58
-  totalInterfaces: 531
-  totalFunctions: 1955
+  totalInterfaces: 532
+  totalFunctions: 1956
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1617
-  totalReExports: 2597
+  totalReExports: 2599
   totalTypeOnlyImports: 605
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

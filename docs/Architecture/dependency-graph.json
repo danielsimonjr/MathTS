@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-25",
     "totalFiles": 1190,
     "totalModules": 82,
-    "totalExports": 6155
+    "totalExports": 6158
   },
   "entryPoints": [
     {
@@ -871,7 +871,7 @@
           },
           {
             "file": "./numeric/rng.js",
-            "imports": ["mulberry32", "boxMuller"],
+            "imports": ["mulberry32", "boxMuller", "createSeededRng", "SeededRng"],
             "reExport": true
           },
           {
@@ -1115,6 +1115,8 @@
           "sumSquaredDeviations",
           "mulberry32",
           "boxMuller",
+          "createSeededRng",
+          "SeededRng",
           "rowMajorStrides",
           "VERSION",
           "MathTSValue",
@@ -1302,6 +1304,8 @@
           "sumSquaredDeviations",
           "mulberry32",
           "boxMuller",
+          "createSeededRng",
+          "SeededRng",
           "rowMajorStrides",
           "MathTSValue",
           "Scalar",
@@ -2097,8 +2101,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["mulberry32", "boxMuller"],
-        "functions": ["mulberry32", "boxMuller"]
+        "exports": ["mulberry32", "boxMuller", "createSeededRng"],
+        "interfaces": ["SeededRng"],
+        "functions": ["mulberry32", "boxMuller", "createSeededRng"]
       },
       "core/src/numeric/stable.ts": {
         "description": "Numerically stable reduction primitives.",
@@ -41531,15 +41536,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1190,
     "totalModules": 82,
-    "totalLinesOfCode": 199045,
-    "totalExports": 6155,
+    "totalLinesOfCode": 199176,
+    "totalExports": 6158,
     "totalClasses": 58,
-    "totalInterfaces": 531,
-    "totalFunctions": 1955,
+    "totalInterfaces": 532,
+    "totalFunctions": 1956,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1617,
-    "totalReExports": 2597,
+    "totalReExports": 2599,
     "totalTypeOnlyImports": 605,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

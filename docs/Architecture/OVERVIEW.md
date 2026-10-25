@@ -44,7 +44,7 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-typed-function`    | Type dispatch system (forked)                                | 1            |
 | `@danielsimonjr/mathts-workerpool`        | Worker pool management (forked)                              | 6            |
 | `@danielsimonjr/mathts-gpu`               | Shared WebGPU device, buffer pool and shader manager         | 8            |
-| `@danielsimonjr/mathts-core`              | Types, typed-function, factory                               | 48           |
+| `@danielsimonjr/mathts-core`              | Types, typed-function, factory, seeded RNG                   | 48           |
 | `@danielsimonjr/mathts-matrix`            | DenseMatrix, SparseMatrix, backends                          | 45           |
 | `@danielsimonjr/mathts-tensor`            | Rank-N Float64Array-backed dense Tensor (einsum/contraction) | 21           |
 | `@danielsimonjr/mathts-autograd`          | Forward + reverse-mode automatic differentiation over Tensor | 6            |

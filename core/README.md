@@ -49,6 +49,15 @@ console.log(isMatrix(m)); // true
 
 ### Functions
 
+- `createSeededRng(seed)` / `SeededRng` — forkable Mulberry32 stream (`next`, `nextInt`, `normal`, `fork`); number seeds match `mulberry32`, strings are FNV-1a UTF-8 (not cryptographically secure)
+
+  ```ts
+  const rng = createSeededRng(42);
+  rng.next(); // 0.6011037519201636
+  rng.fork('a').next(); // 0.668102843221277
+  createSeededRng('a').seed; // -468965076
+  ```
+
 - `mulberry32(seed)` — seeded Mulberry32 PRNG returning U[0, 1) samples (not cryptographically secure)
 - `boxMuller(u1, u2)` — Box–Muller pair of N(0, 1) samples from two uniforms
 - `rowMajorStrides(shape)` — row-major stride vector for a dense tensor shape

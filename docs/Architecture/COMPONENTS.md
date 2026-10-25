@@ -124,7 +124,8 @@ The JS-side loaders live in `functions`/`matrix`; the shared SHA-384 integrity +
 ### @danielsimonjr/mathts-core (`core/`)
 
 **Purpose**: The foundation every other package builds on — numeric types, the typed-function integration, and
-the factory/registry system. "All libraries build on core."
+the factory/registry system. "All libraries build on core." Seeded streams:
+`createSeededRng`, `mulberry32`, and `boxMuller` in `core/src/numeric/rng.ts`.
 
 ```typescript
 // Numeric types (with type guards + constants)
