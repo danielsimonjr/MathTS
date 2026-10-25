@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-24",
-  "totalFiles": 1914,
+  "generated": "2026-10-25",
+  "totalFiles": 1915,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 664,
+    "test": 665,
     "tool": 27,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1189,
-    "tests": 664,
+    "tests": 665,
     "config": 29,
     "examples": 5,
     "tools": 27
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 48,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 799,
+    "@danielsimonjr/mathts-functions": 800,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -6946,14 +6946,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 463
+      "loc": 460
     },
     {
       "file": "functions/src/scalar-eval.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 180
+      "loc": 185
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -9873,6 +9873,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 43
+    },
+    {
+      "file": "functions/tests/numeric-literal.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 74
     },
     {
       "file": "functions/tests/numeric.test.ts",
