@@ -5896,7 +5896,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1758
+      "loc": 1756
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -6960,7 +6960,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 309
+      "loc": 300
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -10138,7 +10138,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 491
+      "loc": 497
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

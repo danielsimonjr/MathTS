@@ -173,16 +173,18 @@ describe('scalar-node-bridge log lowering', () => {
 
   it('preserves ln vs log10 on scalarToNode', () => {
     const lnNode = scalar.call('ln', x);
-    expect(lnNode.fn).toBe('log');
+    expect(lnNode.kind).toBe('call');
+    if (lnNode.kind === 'call') expect(lnNode.fn).toBe('log');
     const lnExpr = scalarToNode(lnNode);
     expect(lnExpr.type).toBe('FunctionNode');
-    expect((lnExpr as { name: string }).name).toBe('log');
+    expect((lnExpr as unknown as { name: string }).name).toBe('log');
     expect(lnExpr.toTex()).toBe('\\ln\\left( x\\right)');
 
     const log10Node = scalar.call('log', x);
-    expect(log10Node.fn).toBe('log10');
+    expect(log10Node.kind).toBe('call');
+    if (log10Node.kind === 'call') expect(log10Node.fn).toBe('log10');
     const log10Expr = scalarToNode(log10Node);
-    expect((log10Expr as { name: string }).name).toBe('log10');
+    expect((log10Expr as unknown as { name: string }).name).toBe('log10');
     expect(log10Expr.toTex()).toBe('\\log_{10}\\left( x\\right)');
   });
 
@@ -225,7 +227,7 @@ describe('scalar-node-bridge unary minus and parentheses', () => {
   it('scalar number -5 is ConstantNode not unaryMinus', () => {
     const n = scalarToNode(scalar.number(-5));
     expect(n.type).toBe('ConstantNode');
-    expect((n as { value: number }).value).toBe(-5);
+    expect((n as unknown as { value: number }).value).toBe(-5);
   });
 });
 
@@ -412,15 +414,17 @@ describe('scalar-node-bridge simplifyScalar', () => {
 
   it('scalarToTex matches simplify(parse).toTex for sample formulas', () => {
     expect(scalarToTex(simplifyScalar(divBc))).toBe('\\frac{ a\\cdot c}{ b}');
-    expect(simplify(parse('a/(b/c)')).toTex()).toBe('\\frac{ a\\cdot c}{ b}');
+    expect((simplify(parse('a/(b/c)')) as { toTex(): string }).toTex()).toBe(
+      '\\frac{ a\\cdot c}{ b}'
+    );
 
     const aa = scalar.op('*', [a, a]);
     expect(scalarToTex(simplifyScalar(aa))).toBe('{ a}^{2}');
-    expect(simplify(parse('a*a')).toTex()).toBe('{ a}^{2}');
+    expect((simplify(parse('a*a')) as { toTex(): string }).toTex()).toBe('{ a}^{2}');
 
     const pow23 = scalar.op('^', [scalar.number(2), scalar.number(3)]);
     expect(scalarToTex(simplifyScalar(pow23))).toBe('8');
-    expect(simplify(parse('2^3')).toTex()).toBe('8');
+    expect((simplify(parse('2^3')) as { toTex(): string }).toTex()).toBe('8');
   });
 });
 
@@ -479,7 +483,7 @@ describe('scalar-node-bridge -0 and NaN round-trip', () => {
 describe('scalar-node-bridge mutation sanity', () => {
   it('changing subtract fn to add would break one-arg minus identity', () => {
     const t = scalar.op('-', [scalar.symbol('x')]);
-    const node = scalarToNode(t) as { fn: string };
+    const node = scalarToNode(t) as unknown as { fn: string };
     expect(node.fn).toBe('subtract');
     expect(evaluateScalar(t, { x: 3 })).toBe(3);
   });
@@ -487,6 +491,6 @@ describe('scalar-node-bridge mutation sanity', () => {
   it('double SCALAR_FUNCTION_LOWERING would mis-name log', () => {
     const natural = scalar.call('ln', scalar.symbol('x'));
     expect(scalarToNode(natural).toTex()).toContain('\\ln');
-    expect((scalarToNode(natural) as { name: string }).name).toBe('log');
+    expect((scalarToNode(natural) as unknown as { name: string }).name).toBe('log');
   });
 });
