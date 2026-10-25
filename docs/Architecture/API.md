@@ -153,11 +153,12 @@ neither reimplements derivatives). Types `DualUnaryRule`, `DualUnaryRuleName`.
 
 **`SiDimensionVector`** — seven exact `Fraction` exponents
 (`si-dimension-vector.ts`); distinct from `Unit.dimensions`, which stays a
-`number[]` length-9 flat vector for the legacy unit table.
+`number[]` over `BASE_DIMENSIONS` (10 slots: MASS, LENGTH, TIME, CURRENT,
+TEMPERATURE, LUMINOUS_INTENSITY, AMOUNT_OF_SUBSTANCE, ANGLE, BIT, SOLID_ANGLE).
 
 **`Unit` / `UnitInstance`** — arithmetic is **operator-level, not method-chained**
 (`u1/u2` same-dimension → a plain number); use `equalBase` (not `dimensionsEqual`);
-`dimensions` is a flat 9-element number array; temperature offsets apply in `.to()`
+`dimensions` is a `number[]` of length `BASE_DIMENSIONS.length` (currently 10); temperature offsets apply in `.to()`
 (`.value` stays raw). Instance methods: `clone`, `hasBase`, `equalBase`, `equals`,
 `multiply`, `divide`, `divideInto`, `pow`, `abs`, `to`, `toNumber`/`toNumeric`,
 `simplify`, `toSI`, `formatUnits`, `toBest(unitList?, options?)`, `format`,
@@ -218,9 +219,9 @@ Added to fix a measured ~46,000× accuracy gap vs NumPy: `pairwiseSum` (NumPy
 `boxMuller` live in `core/src/numeric/rng.ts`; `rowMajorStrides` in
 `core/src/numeric/strides.ts` (re-exported from `core/src/index.ts`).
 `Tensor.rowMajorStrides` forwards to core; `randomTensor` uses core `mulberry32`
-(`tensor/src/operations/random.ts`). The worker bundle keeps one copy of
-`mulberry32` and `rowMajorStrides` in `packages/workerpool/src/worker-numerics.ts`
-(no worker `boxMuller`).
+(`tensor/src/operations/random.ts`). The worker bundle keeps copies as
+`_workerMulberry32` and `_tdRowMajorStrides` in
+`packages/workerpool/src/worker-numerics.ts` (no worker `boxMuller`).
 
 ### Scalar dispatch helpers & constants
 
@@ -252,9 +253,11 @@ in `core/src/wasm-loader.ts` and surfaced via `core/internal`:
 
 ## @danielsimonjr/mathts-matrix
 
-DenseMatrix/SparseMatrix implementations with a pluggable JS/WASM/GPU/Parallel
-backend system plus the standalone dense-matrix decomposition primitives the rest
-of the monorepo routes through. Depends on `core`, `parallel`, and `gpu`.
+DenseMatrix/SparseMatrix implementations with `BackendManager` JS/WASM selection
+(GPU is not registered there; use explicit GPU exports or `enableGpu()` fused
+paths) plus Parallel helpers and the standalone dense-matrix decomposition
+primitives the rest of the monorepo routes through. Depends on `core`,
+`parallel`, and `gpu`.
 
 ### Matrix Types
 
@@ -650,9 +653,10 @@ Standalone CDF/quantile: `normalQuantile`, `studentTCDF`/`Quantile`,
 Three different `fft` symbols: the public factory export
 (`functions/src/matrix/fft.ts` via `factories/index.ts`), `parallelFFT` in
 `functions/src/typed/signal.ts`, and an internal `functions/src/signal/fft.ts`
-(not on the barrel; used by `conv.ts` and helpers) — all share
-`functions/src/signal/fft-core-f64.ts`; the AS kernel is `assembly/src/ops/fft.ts`
-(`matrix/src/backends/wasm/fft-wasm.ts` was removed in #413).
+(not on the barrel; imported by `conv.ts`, `fft-helpers.ts`, and
+`spectral-peaks.ts`) — all share `functions/src/signal/fft-core-f64.ts`; the AS
+kernel is `assembly/src/ops/fft.ts` (`matrix/src/backends/wasm/fft-wasm.ts` was
+removed in #413).
 
 Parallel-first: `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`,
 `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`. Plain:

@@ -10,7 +10,7 @@ the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 The figures in this section come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
 
 - **1,189 TypeScript files**, all reachable from package entry points (0 unused files)
-- **198,415 lines of code**
+- **198,635 lines of code**
 - **6,144 total exports** (2,592 re-exports) — 58 classes, 530 interfaces, 1,954 functions, 158 type guards, 1,616 constants, 0 enums; 602 type-only imports
 - Test-coverage figures are in the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** and **0 type-only circular dependencies**
@@ -337,7 +337,7 @@ with **0 unused** files and **6,144 exports**.
 | compat                           | 3               |
 | assembly (wasm)                  | 26              |
 | typed-function                   | 1               |
-| workerpool                       | 5               |
+| workerpool                       | 6               |
 | gpu                              | 8               |
 | plot                             | 21              |
 | thin re-export packages (10 × 1) | 10              |

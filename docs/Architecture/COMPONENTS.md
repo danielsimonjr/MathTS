@@ -40,7 +40,7 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Shared leaves    │  gpu (8, WebGPU foundation) · assembly (26, AS/WASM)     │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Forked runtime   │  typed-function (2) · workerpool (5)                     │
+│  Forked runtime   │  typed-function (1) · workerpool (6)                     │
 └────────────────────────────────────────────────────────────────────────────┘
    (parenthesised numbers are src/*.ts file counts)
 
