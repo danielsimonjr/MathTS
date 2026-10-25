@@ -17,11 +17,11 @@ CDG generates; QDG queries. Deliberately kept separate (heavy parse vs instant r
 
 ## Doc / manifest generators
 
-| Tool                               | What                                                                                        | Run                                                                                                         |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `generate-functions-reference.mjs` | Regenerate the "Complete export index" blocks so API docs can't drift from export surfaces. | `bun run docs:functions` · `bun run docs:functions:check`                                                   |
-| `generate-wasm-manifest.mjs`       | SHA-384-hash every `.wasm` → `wasm-manifest.json` (feeds the WASM integrity invariant).     | `node tools/generate-wasm-manifest.mjs <dir>` (no `--check`; CI hashes via consumer-typecheck / wasm tests) |
-| `roadmap-check/`                   | ROADMAP/TODO consistency (npm-version claims + stale-TODO).                                 | `bun run docs:roadmap-check`                                                                                |
+| Tool                               | What                                                                                                                                                                                                       | Run                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `generate-functions-reference.mjs` | Regenerate the "Complete export index" blocks so API docs can't drift from export surfaces. Exits 1 instead of writing when a target dist is missing, older than `src/`, or missing a barrel value export. | `bun run docs:functions` · `bun run docs:functions:check`                                                   |
+| `generate-wasm-manifest.mjs`       | SHA-384-hash every `.wasm` → `wasm-manifest.json` (feeds the WASM integrity invariant).                                                                                                                    | `node tools/generate-wasm-manifest.mjs <dir>` (no `--check`; CI hashes via consumer-typecheck / wasm tests) |
+| `roadmap-check/`                   | ROADMAP/TODO consistency (npm-version claims + stale-TODO).                                                                                                                                                | `bun run docs:roadmap-check`                                                                                |
 
 ## Benchmarks — **two separate trees** (mind the singular/plural)
 

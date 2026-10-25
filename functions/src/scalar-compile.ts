@@ -8,10 +8,7 @@
  */
 
 import type { LoweredScalarFn, ScalarNode, ScalarOperator } from '@danielsimonjr/mathts-expression';
-import { ScalarEvalError } from './scalar-eval.js';
-
-/** Decimal literal spellings — same as `NUMERIC_LITERAL` in `scalar-eval.ts`. */
-const NUMERIC_LITERAL = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+import { NUMERIC_LITERAL, ScalarEvalError } from './scalar-eval.js';
 
 const UNARY_IMPL: Record<LoweredScalarFn, (value: number) => number> = {
   exp: Math.exp,

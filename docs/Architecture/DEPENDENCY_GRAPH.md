@@ -4549,9 +4549,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports           | Type   |
-| ------------------ | ----------------- | ------ |
-| `./scalar-eval.js` | `ScalarEvalError` | Import |
+| File               | Imports                            | Type   |
+| ------------------ | ---------------------------------- | ------ |
+| `./scalar-eval.js` | `NUMERIC_LITERAL, ScalarEvalError` | Import |
 
 **Exports:**
 
@@ -4580,7 +4580,7 @@ graph LR
 - Classes: `ScalarEvalError`
 - Types: `ScalarScope`
 - Functions: `evaluateScalar`
-- Constants: `scalar`
+- Constants: `scalar`, `NUMERIC_LITERAL`
 
 ---
 
@@ -18643,8 +18643,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1189   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 198635 |
-| Total Exports           | 6144   |
+| Total Lines of Code     | 198637 |
+| Total Exports           | 6145   |
 | Total Re-exports        | 2592   |
 | Total Classes           | 58     |
 | Total Interfaces        | 530    |

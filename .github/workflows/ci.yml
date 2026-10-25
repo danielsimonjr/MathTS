@@ -103,12 +103,13 @@ jobs:
         # every level (`bun audit` with no floor reports 0).
         run: bun audit --audit-level=high
 
-      # Three more node:test files that no workflow ran. `check:browser-safety` is the query
-      # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker, and
+      # Tool tests that no workflow used to run. `check:browser-safety` is the query
+      # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker,
       # the scanner that `smoke-dist-node.mjs` uses to find a Node builtin in a built browser
-      # entry is tested here without a build. The first two run under `bun test` through their
-      # root scripts. The third is a direct `node --test`, as the other `tools/test` files are.
-      # They sit just before the Node 22 setup below, so none of them sees that Node.
+      # entry is tested without a build, and the docs dist-freshness preflight uses its own
+      # fixtures. The first two run under `bun test` through their root scripts. The last two
+      # are direct `node --test`, as the other `tools/test` files are. They sit just before
+      # the Node 22 setup below, so none of them sees that Node.
       - name: Dependency-graph query tests
         run: bun run docs:graph:test
 
@@ -117,6 +118,9 @@ jobs:
 
       - name: Dist builtin scanner tests
         run: node --test tools/test/dist-node-imports.test.mjs
+
+      - name: Docs dist-freshness tests
+        run: node --test tools/test/dist-freshness.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release

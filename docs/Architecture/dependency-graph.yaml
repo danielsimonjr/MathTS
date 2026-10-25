@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-25'
   totalFiles: 1189
   totalModules: 82
-  totalExports: 6144
+  totalExports: 6145
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -10605,6 +10605,7 @@ modules:
       internalDependencies:
         - file: ./scalar-eval.js
           imports:
+            - NUMERIC_LITERAL
             - ScalarEvalError
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-expression'
@@ -10657,6 +10658,7 @@ modules:
             - ScalarOperator
       exports:
         - scalar
+        - NUMERIC_LITERAL
         - evaluateScalar
         - ScalarEvalError
       classes:
@@ -10665,6 +10667,7 @@ modules:
         - evaluateScalar
       constants:
         - scalar
+        - NUMERIC_LITERAL
     functions/src/signal-filter-extra.ts:
       description: Digital filter design + application (Wave D / remaining). FIR window design
       externalDependencies: []
@@ -39113,14 +39116,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1189
   totalModules: 82
-  totalLinesOfCode: 198635
-  totalExports: 6144
+  totalLinesOfCode: 198637
+  totalExports: 6145
   totalClasses: 58
   totalInterfaces: 530
   totalFunctions: 1954
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1616
+  totalConstants: 1617
   totalReExports: 2592
   totalTypeOnlyImports: 602
   runtimeCircularDeps: 0

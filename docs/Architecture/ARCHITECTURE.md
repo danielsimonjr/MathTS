@@ -10,8 +10,8 @@ the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 The figures in this section come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
 
 - **1,189 TypeScript files**, all reachable from package entry points (0 unused files)
-- **198,635 lines of code**
-- **6,144 total exports** (2,592 re-exports) — 58 classes, 530 interfaces, 1,954 functions, 158 type guards, 1,616 constants, 0 enums; 602 type-only imports
+- **198,637 lines of code**
+- **6,145 total exports** (2,592 re-exports) — 58 classes, 530 interfaces, 1,954 functions, 158 type guards, 1,617 constants, 0 enums; 602 type-only imports
 - Test-coverage figures are in the generated `TEST_COVERAGE.md`
 - **0 runtime circular dependencies** and **0 type-only circular dependencies**
 - All 24 packages have a `build` script. 23 packages have a `typecheck` script. Each one runs `tsc --noEmit`, then `tsc -p tsconfig.test.json`. `assembly` has no `typecheck` script.
@@ -322,7 +322,7 @@ Source-file counts below are the files under `src/` in each workspace package,
 per `dependency-graph.json`. The generated `DEPENDENCY_GRAPH.md` gives the
 per-file breakdown. Regenerate with `npm run docs:deps:full`. The report counts
 **1,189 TypeScript files** in total, all reachable from package entry points,
-with **0 unused** files and **6,144 exports**.
+with **0 unused** files and **6,145 exports**.
 
 | Package                          | Reachable Files |
 | -------------------------------- | --------------- |
@@ -354,7 +354,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1984  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1989  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
