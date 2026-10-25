@@ -78,6 +78,7 @@ describe('createSeededRng', () => {
       { input: Infinity, seed: 0, first: 0.26642920868471265 },
       { input: -Infinity, seed: 0, first: 0.26642920868471265 },
       { input: 2 ** 32, seed: 0, first: 0.26642920868471265 },
+      { input: 2 ** 53, seed: 0, first: 0.26642920868471265 },
       { input: -1, seed: -1, first: 0.8964226141106337 },
       { input: -1.9, seed: -1, first: 0.8964226141106337 },
       { input: 2 ** 32 - 1, seed: -1, first: 0.8964226141106337 },
@@ -98,11 +99,14 @@ describe('createSeededRng', () => {
   it('hashes strings with FNV-1a 32 over UTF-8', () => {
     expect(createSeededRng('').seed >>> 0).toBe(0x811c9dc5);
     expect(createSeededRng('').next()).toBe(0.6112444521859288);
-    expect(createSeededRng('a').seed >>> 0 === 0xe40c292c).toBe(true);
+    expect(createSeededRng('a').seed >>> 0).toBe(0xe40c292c);
     expect(createSeededRng('a').next()).toBe(0.621685681398958);
+    expect(createSeededRng('foobar').seed >>> 0).toBe(0xbf9cf968);
     expect(createSeededRng('42').next()).not.toBe(createSeededRng(42).next());
     expect(createSeededRng('€').seed).toBe(697271083);
     expect(createSeededRng('\uD800').seed).toBe(55024714);
+    expect(createSeededRng('\uDFFF').seed).toBe(createSeededRng('\uD800').seed);
+    expect(createSeededRng('😀').seed >>> 0).toBe(0x33a29608);
     const a = createSeededRng('€');
     const b = createSeededRng('€');
     expect(a.next()).toBe(b.next());
@@ -166,6 +170,8 @@ describe('createSeededRng', () => {
     expect(parent.fork(NaN).seed).toBe(parent.fork(0).seed);
     expect(parent.fork('a').fork('b').seed).toBe(-2100871778);
     expect(parent.fork('b').fork('a').seed).toBe(-618994588);
+    expect(parent.fork('ab').seed).toBe(-463849639);
+    expect(parent.fork('ab').seed).not.toBe(parent.fork('a').fork('b').seed);
     expect(createSeededRng('a').fork('b').seed).toBe(-674113907);
     expect(createSeededRng(-1).fork('a').seed).toBe(1206314979);
 
@@ -185,45 +191,51 @@ describe('createSeededRng', () => {
   });
 
   it('fork does not mutate the parent stream or the parent spare', () => {
-    const a = createSeededRng(42);
-    a.next();
-    a.next();
-    a.next();
-    const b = createSeededRng(42);
-    b.next();
-    b.next();
-    b.next();
-    const forkOrder1 = createSeededRng(42);
-    forkOrder1.next();
-    forkOrder1.next();
-    forkOrder1.next();
-    const c1a = forkOrder1.fork('a');
-    const c1i = forkOrder1.fork('island');
-    const c1n = forkOrder1.fork(1);
-    const forkOrder2 = createSeededRng(42);
-    forkOrder2.next();
-    forkOrder2.next();
-    forkOrder2.next();
-    const c2n = forkOrder2.fork(1);
-    const c2i = forkOrder2.fork('island');
-    const c2a = forkOrder2.fork('a');
     const childSeq = (r: ReturnType<typeof createSeededRng>) => {
       const out: number[] = [];
       for (let i = 0; i < 8; i++) out.push(r.next());
       return out;
     };
-    expect(childSeq(c1a)).toEqual(childSeq(c2a));
-    expect(childSeq(c1i)).toEqual(childSeq(c2i));
-    expect(childSeq(c1n)).toEqual(childSeq(c2n));
+
+    // Draw 3 from A, then fork on A. A's following uniforms must match a
+    // never-forked stream and mulberry32 after the same 3 discards.
+    const a = createSeededRng(42);
+    a.next();
+    a.next();
+    a.next();
+    const childAfterDraws = a.fork('a');
+    const afterA: number[] = [];
+    for (let i = 0; i < 8; i++) afterA.push(a.next());
+
+    const b = createSeededRng(42);
+    b.next();
+    b.next();
+    b.next();
     const afterB: number[] = [];
     for (let i = 0; i < 8; i++) afterB.push(b.next());
+
     const ref = mulberry32(42);
     ref();
     ref();
     ref();
     const afterRef: number[] = [];
     for (let i = 0; i < 8; i++) afterRef.push(ref());
-    expect(afterB).toEqual(afterRef);
+    expect(afterA).toEqual(afterB);
+    expect(afterA).toEqual(afterRef);
+    // Child of an advanced parent equals the child of a fresh parent.
+    expect(childSeq(childAfterDraws)).toEqual(childSeq(createSeededRng(42).fork('a')));
+
+    const forkOrder1 = createSeededRng(42);
+    const c1a = forkOrder1.fork('a');
+    const c1i = forkOrder1.fork('island');
+    const c1n = forkOrder1.fork(1);
+    const forkOrder2 = createSeededRng(42);
+    const c2n = forkOrder2.fork(1);
+    const c2i = forkOrder2.fork('island');
+    const c2a = forkOrder2.fork('a');
+    expect(childSeq(c1a)).toEqual(childSeq(c2a));
+    expect(childSeq(c1i)).toEqual(childSeq(c2i));
+    expect(childSeq(c1n)).toEqual(childSeq(c2n));
 
     const spareParent = createSeededRng(42);
     expect(spareParent.normal()).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[0]);
@@ -232,6 +244,13 @@ describe('createSeededRng', () => {
     const childOnly = createSeededRng(1619994241);
     const childFromParent = createSeededRng(42).fork('a');
     expect(childFromParent.normal()).toBe(childOnly.normal());
+
+    const spareA = createSeededRng(42);
+    const spareB = createSeededRng(42);
+    expect(spareA.normal()).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[0]);
+    expect(spareB.normal()).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[0]);
+    expect(spareA.normal()).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[1]);
+    expect(spareB.normal()).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[1]);
   });
 
   it('frozen seed assignment throws and the stream stays on the original seed', () => {

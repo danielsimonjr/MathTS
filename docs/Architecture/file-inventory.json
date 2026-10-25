@@ -653,7 +653,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 192
+      "loc": 188
     },
     {
       "file": "core/src/numeric/stable.ts",
@@ -954,7 +954,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 305
+      "loc": 324
     },
     {
       "file": "core/tests/public-api-smoke.test.ts",
