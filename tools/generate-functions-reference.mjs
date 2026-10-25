@@ -14,9 +14,10 @@
  *
  * To cover a new package, add a row to TARGETS.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+import { packageDotEntry } from './package-dot-entry.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
@@ -287,96 +288,352 @@ function embedMarkdown(htmlRaw, md) {
   return `${h.slice(0, bodyStart)}\n${indented}\n    ${h.slice(close)}`;
 }
 
-// --- Build the desired content for every tracked doc file ------------------------
-const jobs = []; // { file, prev, next, label, isMd }
-let functionsSurface = null; // runtime dist Object.keys of the functions package
-for (const t of TARGETS) {
-  // Import through the PACKAGE NAME, not an absolute path into dist/.
-  // Node does not dedupe a bare specifier (resolved via the node_modules
-  // workspace symlink) against the same file reached by absolute path -- they
-  // become two module instances. Importing `functions` by path and then
-  // `compat` (which imports `@danielsimonjr/mathts-functions` by name) therefore
-  // instantiated functions TWICE, re-running its module-level side effects. The
-  // second run re-registered typed-function's string->Node conversion and threw
-  // `There is already a conversion from "string" to "Node"`, breaking the
-  // pre-commit hook for every source change.
-  const mod = await import(`@danielsimonjr/mathts-${t.pkg}`);
-  if (t.pkg === 'functions') functionsSurface = Object.keys(mod);
-  // Packages with a curated reference doc (functions) group their index by
-  // mathematical domain, derived from that doc's `##` sections + DOMAIN_SUPPLEMENT.
-  const domains = t.refDoc
-    ? deriveDomains(readFileSync(resolve(REPO, t.refDoc), 'utf8'), new Set(Object.keys(mod)))
-    : null;
-  const { block, total } = buildIndexBlock(mod, t.pkg, domains);
-  const docPaths = [t.refDoc, t.apiDoc].filter(Boolean);
-  let mdForHtml = null;
-  for (const rel of docPaths) {
-    const file = resolve(REPO, rel);
-    const prev = readFileSync(file, 'utf8');
-    const next = spliceIndex(prev, block);
-    jobs.push({ file, prev, next, label: `${rel} export index (${total} exports)`, isMd: true });
-    if (rel === t.refDoc) mdForHtml = next;
-  }
-  if (t.html && mdForHtml) {
-    const file = resolve(REPO, t.html);
-    const prev = readFileSync(file, 'utf8');
-    jobs.push({ file, prev, next: embedMarkdown(prev, mdForHtml), label: `${t.html} embedded markdown`, isMd: false });
+/** Resolve the `.` entry file for a package directory (`import`-first). */
+function distEntryPath(pkgDir) {
+  return packageDotEntry(pkgDir);
+}
+
+/** Walk up from a resolved module file to the package root. */
+function packageDirFromResolved(moduleUrl) {
+  let dir = dirname(fileURLToPath(moduleUrl));
+  for (;;) {
+    if (existsSync(join(dir, 'package.json'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) throw new Error(`No package.json above ${fileURLToPath(moduleUrl)}`);
+    dir = parent;
   }
 }
 
-// --- Cross-validate the shipped functions surface against the dep-graph's
-// independent static-source inventory. A name in the runtime `dist` with no source
-// origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
-// accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
-// absent the reconciliation is skipped (not failed) so this check stays self-contained.
-const SURFACES = resolve(REPO, 'docs', 'Architecture', 'package-export-surfaces.json');
-let reconcile = { skipped: true, orphans: [] };
-if (functionsSurface && existsSync(SURFACES)) {
-  const { surfaces } = JSON.parse(readFileSync(SURFACES, 'utf8'));
-  const source = new Set(surfaces?.functions ?? []);
-  reconcile = {
-    skipped: false,
-    orphans: functionsSurface.filter((n) => !source.has(n)).sort((a, b) => a.localeCompare(b)),
+function packageDirForTarget(pkg) {
+  return packageDirFromResolved(import.meta.resolve(`@danielsimonjr/mathts-${pkg}`));
+}
+
+const SRC_EXT = /\.(ts|tsx|mts|js|mjs)$/;
+
+/**
+ * Non-declaration source files under `src/` newer than the dist entry (`mtimeMs >`).
+ *
+ * Safe in CI after `bun run build`: `actions/checkout` stamps src at checkout time,
+ * and turbo 2.10 restores cached outputs with mtime = restore time (measured: tar
+ * headers are epoch 0; the restored file's mtime is the restore instant, not the
+ * archived `mtime_nanos`). Checkout runs first, so src cannot be newer than a
+ * just-restored dist. Test/Coverage do not run `docs:functions:check`; the Compile
+ * job runs it after Build. Equal mtimes do not fail (`>`).
+ */
+function srcFilesNewerThanDist(pkgDir, distPath) {
+  const srcRoot = join(pkgDir, 'src');
+  if (!existsSync(srcRoot)) return [];
+  const distMtime = statSync(distPath).mtimeMs;
+  const newer = [];
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name);
+      if (ent.isDirectory()) walk(p);
+      else if (SRC_EXT.test(ent.name) && !ent.name.endsWith('.d.ts')) {
+        if (statSync(p).mtimeMs > distMtime) newer.push(p);
+      }
+    }
   };
+  walk(srcRoot);
+  return newer;
 }
-const reconcileMsg = reconcile.skipped
-  ? 'functions surface reconciliation: SKIPPED (run `npm run docs:deps` to emit package-export-surfaces.json).'
-  : reconcile.orphans.length
-    ? `functions surface reconciliation: ${reconcile.orphans.length} shipped export(s) have no ` +
-      `source origin in the dep-graph inventory — real drift, or run \`npm run docs:deps\` to ` +
-      `refresh: ${reconcile.orphans.join(', ')}`
-    : `functions surface reconciles: all ${functionsSurface?.length ?? 0} shipped exports have a source origin.`;
 
-const check = process.argv.includes('--check');
-const stale = jobs.filter((j) => norm(j.next) !== norm(j.prev));
-
-if (check) {
-  if (!stale.length && !reconcile.orphans.length) {
-    console.log(`All ${jobs.length} generated doc blocks are up to date.`);
-    console.log(reconcileMsg);
-    process.exit(0);
+/** Strip line and block comments without touching string literals. */
+export function stripComments(source) {
+  let out = '';
+  let i = 0;
+  const len = source.length;
+  while (i < len) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (ch === '/' && next === '/') {
+      i += 2;
+      while (i < len && source[i] !== '\n') i++;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      i += 2;
+      while (i < len - 1 && !(source[i] === '*' && source[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '\u0060') {
+      const q = ch;
+      out += ch;
+      i++;
+      while (i < len) {
+        if (source[i] === '\\') {
+          out += source[i] + (source[i + 1] ?? '');
+          i += 2;
+          continue;
+        }
+        out += source[i];
+        if (source[i] === q) {
+          i++;
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+    out += ch;
+    i++;
   }
-  for (const j of stale) {
-    console.error(`${j.label} is STALE. Run \`npm run docs:functions\`.`);
-    if (j.isMd) {
-      const documented = new Set([...j.prev.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
-      // undocumented names appear in the regenerated content but not the on-disk file
-      const wanted = new Set([...j.next.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
-      const missing = [...wanted].filter((n) => !documented.has(n));
-      if (missing.length) console.error(`  Undocumented names (${missing.length}): ${missing.join(', ')}`);
+  return out;
+}
+
+/**
+ * Value export names declared in `src/index.ts` (not `export * from`, types, or default).
+ * Does not follow star re-exports — mtime covers those.
+ */
+export function runtimeExportNames(source) {
+  const text = stripComments(source);
+  const names = new Set();
+  for (const m of text.matchAll(/export\s+\*\s+as\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
+  for (const m of text.matchAll(
+    /export\s+(?:async\s+)?(?:const|let|var|function\*?|class|enum)\s+([A-Za-z_$][\w$]*)/g,
+  )) {
+    names.add(m[1]);
+  }
+  for (const m of text.matchAll(/export\s*\{([^}]+)\}/g)) {
+    for (const part of m[1].split(',')) {
+      const spec = part.trim();
+      if (!spec) continue;
+      if (/^type\s+/i.test(spec)) continue;
+      // `export { foo as type Bar }` is type-only (TS 4.5+). Skip it.
+      if (/\sas\s+type\s+/i.test(spec)) continue;
+      const asMatch = spec.match(/\sas\s+([A-Za-z_$][\w$]*)\s*$/);
+      const exported = asMatch ? asMatch[1] : spec;
+      // `export { x as default }` is a default export; Object.keys omits `default`.
+      if (exported === 'default') continue;
+      if (/^[A-Za-z_$][\w$]*$/.test(exported)) names.add(exported);
     }
   }
-  if (reconcile.orphans.length) console.error(reconcileMsg);
-  process.exit(1);
+  return [...names];
 }
 
-for (const j of jobs) {
-  if (norm(j.next) === norm(j.prev)) {
-    console.log(`${j.label} is up to date.`);
-    continue;
+/**
+ * Refuse missing dist, stale `src/` mtimes, or barrel value exports absent from dist.
+ * @param {string} pkgDir absolute package directory
+ * @param {{ load?: boolean, mod?: Record<string, unknown> }} [options]
+ *   `load` dynamic-imports the dist entry (fixtures). `mod` uses an already-loaded namespace.
+ */
+export async function preflightPackage(pkgDir, options = {}) {
+  const { load = false, mod = null } = options;
+  const errors = [];
+  let pkgName;
+  let distPath;
+  try {
+    ({ pkgName, distPath } = distEntryPath(pkgDir));
+  } catch (e) {
+    errors.push({ message: String(e.message ?? e) });
+    return { ok: false, errors, pkgName: pkgDir };
   }
-  const eol = j.prev.includes('\r\n') ? '\r\n' : '\n';
-  writeFileSync(j.file, eol === '\r\n' ? norm(j.next).replace(/\n/g, '\r\n') : norm(j.next));
-  console.log(`Wrote ${j.label}.`);
+
+  if (!existsSync(distPath)) {
+    errors.push({
+      kind: 'missing-dist',
+      pkgName,
+      path: distPath,
+      message:
+        `${pkgName}: dist entry missing (${distPath}). Run \`bun run build\` or ` +
+        `\`bunx turbo build --filter=${pkgName}\`.`,
+    });
+    return { ok: false, errors, pkgName };
+  }
+
+  for (const srcPath of srcFilesNewerThanDist(pkgDir, distPath)) {
+    errors.push({
+      kind: 'stale-mtime',
+      pkgName,
+      path: srcPath,
+      message:
+        `${pkgName}: ${srcPath} is newer than dist entry (${distPath}). ` +
+        `Run \`bunx turbo build --filter=${pkgName}\`.`,
+    });
+  }
+
+  const indexPath = join(pkgDir, 'src/index.ts');
+  if (existsSync(indexPath) && (mod || load)) {
+    const barrelNames = runtimeExportNames(readFileSync(indexPath, 'utf8'));
+    let keys;
+    if (mod) keys = Object.keys(mod);
+    else {
+      const imported = await import(pathToFileURL(distPath).href);
+      keys = Object.keys(imported);
+    }
+    for (const name of barrelNames) {
+      if (!keys.includes(name)) {
+        errors.push({
+          kind: 'missing-export',
+          pkgName,
+          path: indexPath,
+          exportName: name,
+          message:
+            `${pkgName}: value export \`${name}\` in ${indexPath} is missing from dist. ` +
+            `Run \`bunx turbo build --filter=${pkgName}\`.`,
+        });
+      }
+    }
+  }
+
+  return { ok: errors.length === 0, errors, pkgName };
 }
-console.log(reconcileMsg);
+
+function printPreflightErrors(results) {
+  for (const r of results) {
+    for (const e of r.errors) console.error(e.message);
+  }
+}
+
+async function runMain() {
+  const preflightOnlyIdx = process.argv.indexOf('--preflight-only');
+  if (preflightOnlyIdx !== -1) {
+    const arg = process.argv[preflightOnlyIdx + 1];
+    if (!arg) {
+      console.error('Usage: generate-functions-reference.mjs --preflight-only <packageDir>');
+      process.exit(1);
+    }
+    const result = await preflightPackage(resolve(arg), { load: true });
+    if (!result.ok) {
+      printPreflightErrors([result]);
+      process.exit(1);
+    }
+    process.exit(0);
+  }
+
+  const structural = [];
+  for (const t of TARGETS) {
+    const pkgDir = packageDirForTarget(t.pkg);
+    structural.push(await preflightPackage(pkgDir));
+  }
+  const structuralFail = structural.filter((r) => !r.ok);
+  if (structuralFail.length) {
+    printPreflightErrors(structuralFail);
+    process.exit(1);
+  }
+
+  // --- Build the desired content for every tracked doc file ------------------------
+  const jobs = []; // { file, prev, next, label, isMd }
+  let functionsSurface = null; // runtime dist Object.keys of the functions package
+  /** @type {Map<string, Record<string, unknown>>} */
+  const modsByPkg = new Map();
+  for (const t of TARGETS) {
+    // Import through the PACKAGE NAME, not an absolute path into dist/.
+    // Node does not dedupe a bare specifier (resolved via the node_modules
+    // workspace symlink) against the same file reached by absolute path -- they
+    // become two module instances. Importing `functions` by path and then
+    // `compat` (which imports `@danielsimonjr/mathts-functions` by name) therefore
+    // instantiated functions TWICE, re-running its module-level side effects. The
+    // second run re-registered typed-function's string->Node conversion and threw
+    // `There is already a conversion from "string" to "Node"`, breaking the
+    // pre-commit hook for every source change.
+    const mod = await import(`@danielsimonjr/mathts-${t.pkg}`);
+    modsByPkg.set(t.pkg, mod);
+    if (t.pkg === 'functions') functionsSurface = Object.keys(mod);
+    // Packages with a curated reference doc (functions) group their index by
+    // mathematical domain, derived from that doc's `##` sections + DOMAIN_SUPPLEMENT.
+    const domains = t.refDoc
+      ? deriveDomains(readFileSync(resolve(REPO, t.refDoc), 'utf8'), new Set(Object.keys(mod)))
+      : null;
+    const { block, total } = buildIndexBlock(mod, t.pkg, domains);
+    const docPaths = [t.refDoc, t.apiDoc].filter(Boolean);
+    let mdForHtml = null;
+    for (const rel of docPaths) {
+      const file = resolve(REPO, rel);
+      const prev = readFileSync(file, 'utf8');
+      const next = spliceIndex(prev, block);
+      jobs.push({ file, prev, next, label: `${rel} export index (${total} exports)`, isMd: true });
+      if (rel === t.refDoc) mdForHtml = next;
+    }
+    if (t.html && mdForHtml) {
+      const file = resolve(REPO, t.html);
+      const prev = readFileSync(file, 'utf8');
+      jobs.push({
+        file,
+        prev,
+        next: embedMarkdown(prev, mdForHtml),
+        label: `${t.html} embedded markdown`,
+        isMd: false,
+      });
+    }
+  }
+
+  const nameChecks = [];
+  for (const t of TARGETS) {
+    const pkgDir = packageDirForTarget(t.pkg);
+    nameChecks.push(await preflightPackage(pkgDir, { mod: modsByPkg.get(t.pkg) }));
+  }
+  const nameFail = nameChecks.filter((r) => !r.ok);
+  if (nameFail.length) {
+    printPreflightErrors(nameFail);
+    process.exit(1);
+  }
+
+  // --- Cross-validate the shipped functions surface against the dep-graph's
+  // independent static-source inventory. A name in the runtime `dist` with no source
+  // origin is real drift (stale dist, an aliased re-export the dep-graph missed, or an
+  // accidental export). The surfaces file is produced by `npm run docs:deps`; if it is
+  // absent the reconciliation is skipped (not failed) so this check stays self-contained.
+  const SURFACES = resolve(REPO, 'docs', 'Architecture', 'package-export-surfaces.json');
+  let reconcile = { skipped: true, orphans: [] };
+  if (functionsSurface && existsSync(SURFACES)) {
+    const { surfaces } = JSON.parse(readFileSync(SURFACES, 'utf8'));
+    const source = new Set(surfaces?.functions ?? []);
+    reconcile = {
+      skipped: false,
+      orphans: functionsSurface.filter((n) => !source.has(n)).sort((a, b) => a.localeCompare(b)),
+    };
+  }
+  const reconcileMsg = reconcile.skipped
+    ? 'functions surface reconciliation: SKIPPED (run `npm run docs:deps` to emit package-export-surfaces.json).'
+    : reconcile.orphans.length
+      ? `functions surface reconciliation: ${reconcile.orphans.length} shipped export(s) have no ` +
+        `source origin in the dep-graph inventory — real drift, or run \`npm run docs:deps\` to ` +
+        `refresh: ${reconcile.orphans.join(', ')}`
+      : `functions surface reconciles: all ${functionsSurface?.length ?? 0} shipped exports have a source origin.`;
+
+  const check = process.argv.includes('--check');
+  const stale = jobs.filter((j) => norm(j.next) !== norm(j.prev));
+
+  if (check) {
+    if (!stale.length && !reconcile.orphans.length) {
+      console.log(`All ${jobs.length} generated doc blocks are up to date.`);
+      console.log(reconcileMsg);
+      process.exit(0);
+    }
+    for (const j of stale) {
+      console.error(`${j.label} is STALE. Run \`npm run docs:functions\`.`);
+      if (j.isMd) {
+        const documented = new Set([...j.prev.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+        // undocumented names appear in the regenerated content but not the on-disk file
+        const wanted = new Set([...j.next.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+        const missing = [...wanted].filter((n) => !documented.has(n));
+        if (missing.length) console.error(`  Undocumented names (${missing.length}): ${missing.join(', ')}`);
+      }
+    }
+    if (reconcile.orphans.length) console.error(reconcileMsg);
+    process.exit(1);
+  }
+
+  for (const j of jobs) {
+    if (norm(j.next) === norm(j.prev)) {
+      console.log(`${j.label} is up to date.`);
+      continue;
+    }
+    const eol = j.prev.includes('\r\n') ? '\r\n' : '\n';
+    writeFileSync(j.file, eol === '\r\n' ? norm(j.next).replace(/\n/g, '\r\n') : norm(j.next));
+    console.log(`Wrote ${j.label}.`);
+  }
+  console.log(reconcileMsg);
+}
+
+const isMain =
+  process.argv[1] &&
+  resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
+if (isMain) {
+  runMain().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
