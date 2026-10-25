@@ -272,7 +272,7 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`,
 `scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights`.
 
-**Batch compile / Pareto** live in `functions` (`scalar-compile.ts`, `pareto-front.ts`).
+**Batch compile / Pareto / node bridge** live in `functions` (`scalar-compile.ts`, `scalar-node-bridge.ts`, `pareto-front.ts`).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
 regression guard for safe-access.
@@ -398,5 +398,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1989  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8031  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1991  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8045  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

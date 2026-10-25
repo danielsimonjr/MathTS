@@ -753,6 +753,14 @@ community/coloring `graphColoring` (Welsh-Powell), `maxClique` (Bron-Kerbosch),
 `solve`, `implicitDiff`, `summation`/`symbolicProduct`, `assume`/`getAssumptions`/`clearAssumptions`,
 `asymptotic`, `groebnerBasis`, `symbolicIntegral`.
 
+### Scalar node bridge
+
+`scalarToNode(node: ScalarNode): MathNode`, `nodeToScalar(node: MathNode): ScalarNode`
+(throws `ScalarBuildError` outside the subset), `simplifyScalar(node, options?)`,
+and `scalarToTex(node, options?)` — implemented in `functions/src/scalar-node-bridge.ts`,
+exported from `functions/src/factories/index.ts` via `export *` on the package barrel.
+Types `MathNode`, `StringOptions`, and `SimplifyOptions` are re-exported for signatures.
+
 ### Typed-dispatch & bridges
 
 Every `typed/` function is built with `mathTyped(name, signatureMap)` where keys are
@@ -787,7 +795,10 @@ from the root:
    flat `mathScope`. This is what `workbook` uses (no DI bootstrapping).
 
 The package exports **no plain top-level `parse`/`evaluate` function** — only the
-DI factories and the standalone builders.
+DI factories and the standalone builders. The root entry also re-exports `MathNode`
+and `StringOptions` types; `ScalarNode` ↔ `Node` conversion lives in
+`@danielsimonjr/mathts-functions` (`scalarToNode`, `nodeToScalar`, `simplifyScalar`,
+`scalarToTex`).
 
 ### AST Node hierarchy (15 node types)
 
@@ -1109,5 +1120,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8031  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 1989  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8045  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1991  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

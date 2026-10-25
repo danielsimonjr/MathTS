@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-25", "f": 1189, "e": 6145, "re": 2592 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-25", "f": 1190, "e": 6155, "re": 2597 },
   "s": {
-    "loc": 198637,
+    "loc": 199045,
     "cls": 58,
-    "int": 530,
-    "fn": 1954,
+    "int": 531,
+    "fn": 1955,
     "tg": 158,
     "en": 0,
     "co": 1617,
-    "toi": 602
+    "toi": 605
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -528,7 +528,7 @@
       ]
     },
     "functions": {
-      "f": 22,
+      "f": 23,
       "exp": [
         "gradient",
         "hessian",
@@ -623,6 +623,10 @@
         "parser",
         "replacer",
         "reviver",
+        "scalarToNode",
+        "nodeToScalar",
+        "simplifyScalar",
+        "scalarToTex",
         "apply",
         "index",
         "addScalar",
@@ -631,11 +635,7 @@
         "filter",
         "flatten",
         "forEach",
-        "getMatrixDataType",
-        "map",
-        "size",
-        "squeeze",
-        "erf"
+        "getMatrixDataType"
       ],
       "cls": ["MathJSDenseMatrix", "MathJSSparseMatrix"],
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
@@ -1849,11 +1849,11 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 244, "o": 10 },
+    { "p": "factories/index.ts", "i": 246, "o": 10 },
     { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "src/index.ts", "i": 139, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
-    { "p": "utils/is.ts", "i": 0, "o": 56 },
+    { "p": "utils/is.ts", "i": 0, "o": 57 },
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },

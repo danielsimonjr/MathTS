@@ -1,6 +1,6 @@
 # @danielsimonjr/mathts-expression
 
-Expression parser & evaluator for [MathTS](https://github.com/danielsimonjr/mathts).
+Expression parser & evaluator for [MathTS](https://github.com/danielsimonjr/mathts). The package root also re-exports the `MathNode` and `StringOptions` types used by `scalarToNode` / `scalarToTex` in `@danielsimonjr/mathts-functions`.
 
 The expression engine for MathTS: a parser (string → AST), an AST node set, a compiler, and an evaluator. Includes a sandbox (`getSafeProperty` / `getSafeMethod`) for safe property access.
 

@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-25",
-  "totalFiles": 1917,
+  "totalFiles": 1919,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1164,
+    "build-entry": 1165,
     "test-only": 0,
     "orphan": 0,
-    "test": 666,
+    "test": 667,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1189,
-    "tests": 666,
+    "src": 1190,
+    "tests": 667,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 800,
+    "@danielsimonjr/mathts-functions": 802,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -4083,7 +4083,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 75
+      "loc": 76
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4174,7 +4174,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 935
+      "loc": 954
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
@@ -4825,7 +4825,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 136
+      "loc": 143
     },
     {
       "file": "expression/tests/OperatorNode-render.test.ts",
@@ -5896,7 +5896,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1740
+      "loc": 1756
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -6057,7 +6057,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 650
+      "loc": 651
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6954,6 +6954,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 185
+    },
+    {
+      "file": "functions/src/scalar-node-bridge.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 371
     },
     {
       "file": "functions/src/set/setCartesian.ts",
@@ -10125,6 +10132,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 131
+    },
+    {
+      "file": "functions/tests/scalar-node-bridge.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 619
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

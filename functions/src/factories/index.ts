@@ -1373,6 +1373,22 @@ factoryScope.setSymDifference = setSymDifference;
 export const simplify = createSimplify(factoryScope as Parameters<typeof createSimplify>[0]);
 factoryScope.simplify = simplify;
 
+import { createScalarNodeBridge } from '../scalar-node-bridge.js';
+
+const { scalarToNode, nodeToScalar, simplifyScalar, scalarToTex } = createScalarNodeBridge({
+  ConstantNode: _ConstantNode,
+  SymbolNode: _SymbolNode,
+  OperatorNode: _OperatorNode,
+  FunctionNode: _FunctionNode,
+  simplify: simplify as (
+    node: import('@danielsimonjr/mathts-expression').MathNode,
+    ...rest: unknown[]
+  ) => import('@danielsimonjr/mathts-expression').MathNode,
+});
+
+export { scalarToNode, nodeToScalar, simplifyScalar, scalarToTex };
+export type { MathNode, StringOptions, SimplifyOptions } from '../scalar-node-bridge.js';
+
 // ---------------------------------------------------------------------------
 // Tier 15: factories unlocked by tier 14
 // ---------------------------------------------------------------------------

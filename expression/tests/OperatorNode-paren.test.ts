@@ -75,6 +75,13 @@ describe('OperatorNode - unary operators', () => {
     expect(e.toTex()).toBeTypeOf('string');
     expect(e.toHTML()).toContain('math-righthand-unary-operator');
   });
+
+  it('parenthesizes a negative ConstantNode used as a pow base', () => {
+    const e = new OperatorNode('^', 'pow', [c(-2), c(2)]);
+    expect(e.toString()).toBe('(-2) ^ 2');
+    expect(e.evaluate()).toBe(4);
+    expect(parse(e.toString()).evaluate()).toBe(4);
+  });
 });
 
 describe('OperatorNode - n-ary (>2 args) add/multiply', () => {

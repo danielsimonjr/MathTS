@@ -264,6 +264,10 @@ Canonical keys flatten `+` and `*`, rewrite `a-b` to `a+(-1)*b` and `a/b` to
 lowers a `ScalarNode` to a register tape over column `Float64Array`s with a
 per-row validity mask; no `eval` / `new Function` and no WASM load.
 
+**Scalar node bridge** (`functions/src/scalar-node-bridge.ts`): `scalarToNode`,
+`nodeToScalar`, `simplifyScalar`, and `scalarToTex` call the wired node
+constructors and `simplify` / `Node.toTex`; they do not parse a formula string.
+
 **Pareto front** (`functions/src/pareto-front.ts`): `paretoFront`, `scoreFront`,
 `selectFrontModel` — not `paretoDist`.
 
@@ -354,7 +358,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1989  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1991  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

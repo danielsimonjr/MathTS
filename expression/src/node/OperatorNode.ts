@@ -65,6 +65,22 @@ export const createOperatorNode = /* #__PURE__ */ factory(
     }
 
     /**
+     * ConstantNode(-2).toString() is `-2`. Used as an infix operand that
+     * string is parsed as unary minus, so `-2 ^ 2` becomes `-(2^2)`.
+     * Parenthesize the negative literal; LaTeX already braces it as `{-2}`.
+     */
+    function isNegativeNumberConstant(arg: MathNode): boolean {
+      const content = arg.getContent();
+      if (!isConstantNode(content)) return false;
+      const value = (content as { value?: unknown }).value;
+      return typeof value === 'number' && value < 0;
+    }
+
+    function parenthesizeNegativeConstants(args: MathNode[], parens: boolean[]): boolean[] {
+      return args.map((arg, i) => parens[i] === true || isNegativeNumberConstant(arg));
+    }
+
+    /**
      * Calculate which parentheses are necessary. Gets an OperatorNode
      * (which is the root of the tree) and an Array of Nodes
      * (this.args) and returns an array where 'true' means that an argument
@@ -96,19 +112,22 @@ export const createOperatorNode = /* #__PURE__ */ factory(
           root.getIdentifier() !== 'OperatorNode:add' &&
           root.getIdentifier() !== 'OperatorNode:multiply')
       ) {
-        return args.map(function (arg: MathNode): boolean {
-          switch (
-            arg.getContent().type // Nodes that don't need extra parentheses
-          ) {
-            case 'ArrayNode':
-            case 'ConstantNode':
-            case 'SymbolNode':
-            case 'ParenthesisNode':
-              return false;
-            default:
-              return true;
-          }
-        });
+        return parenthesizeNegativeConstants(
+          args,
+          args.map(function (arg: MathNode): boolean {
+            switch (
+              arg.getContent().type // Nodes that don't need extra parentheses
+            ) {
+              case 'ArrayNode':
+              case 'ConstantNode':
+              case 'SymbolNode':
+              case 'ParenthesisNode':
+                return false;
+              default:
+                return true;
+            }
+          })
+        );
       }
 
       // Initialised to [] so the n-ary `default` branch is definitely assigned;
@@ -325,7 +344,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
         }
       }
 
-      return result;
+      return parenthesizeNegativeConstants(args, result);
     }
 
     class OperatorNode extends Node {
