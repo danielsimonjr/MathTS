@@ -21,6 +21,7 @@
  *   node tools/benchmark/wasm/run-node.mjs                 # the four kernel areas
  *   node tools/benchmark/wasm/run-node.mjs opt-in          # public API, unloaded vs loaded
  *   node tools/benchmark/wasm/run-node.mjs opt-in sin exp  # only those opt-in cases
+ *   node tools/benchmark/wasm/run-node.mjs scalar          # evaluateScalar vs compileScalar
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -32,7 +33,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, '..', '..', '..');
 const outDir = join(repoRoot, 'functions', '.bench');
 const DEFAULT_AREAS = ['elementwise', 'special', 'sort', 'matrix'];
-const ALL_AREAS = [...DEFAULT_AREAS, 'opt-in'];
+const ALL_AREAS = [...DEFAULT_AREAS, 'opt-in', 'scalar'];
 const requested = process.argv.slice(2);
 const areaArgs = requested.filter((a) => ALL_AREAS.includes(a));
 const AREAS = areaArgs.length > 0 ? areaArgs : DEFAULT_AREAS;
