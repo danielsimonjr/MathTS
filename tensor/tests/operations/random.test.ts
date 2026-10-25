@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { mulberry32 } from '@danielsimonjr/mathts-core';
+import { mulberry32, boxMuller } from '@danielsimonjr/mathts-core';
 import { Tensor } from '../../src/Tensor';
 import { randomTensor } from '../../src/operations/random';
 import { idx } from '../../src/named-index';
@@ -192,11 +192,20 @@ describe('randomTensor', () => {
     }
   });
 
-  it('normal [8] seed 42 matches pre-#415 fixture (a6cf17af)', () => {
+  it('normal [8] seed 42 matches pre-#415 fixture and Box-Muller oracle (a6cf17af)', () => {
     const t = randomTensor([8], { distribution: 'normal', seed: 42 });
     for (let i = 0; i < PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42.length; i++) {
       expect(t.data[i]).toBe(PRE_415_RANDOM_TENSOR_NORMAL_8_SEED_42[i]);
     }
+    // Independent of the recorded vector: the normal path is Box–Muller on the
+    // same Mulberry32(42) uniforms as the uniform-[8] oracle (pairs of next()).
+    const rng = mulberry32(42);
+    const oracle: number[] = [];
+    for (let i = 0; i < 8; i += 2) {
+      const [z0, z1] = boxMuller(rng(), rng());
+      oracle.push(z0, z1);
+    }
+    expect(Array.from(t.data)).toEqual(oracle);
   });
 
   it('uniform [2,3] seed 99 matches pre-#415 fixture (a6cf17af)', () => {

@@ -10446,7 +10446,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 348
+      "loc": 347
     },
     {
       "file": "functions/tests/typed-hypothesis-parallel.test.ts",
@@ -12539,7 +12539,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 257
+      "loc": 266
     },
     {
       "file": "tensor/tests/operations/roll.test.ts",
