@@ -3034,6 +3034,7 @@
       "NUMBER_OPTIONS",
       "NumberTypeConfig",
       "numeric",
+      "NUMERIC_LITERAL",
       "numericJacobian",
       "NumericJacobianOptions",
       "ObjectNode",
