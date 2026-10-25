@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-25",
-  "totalFiles": 1916,
+  "totalFiles": 1917,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1164,
     "test-only": 0,
     "orphan": 0,
-    "test": 665,
+    "test": 666,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1189,
-    "tests": 665,
+    "tests": 666,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 15,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 49,
+    "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
     "@danielsimonjr/mathts-functions": 800,
     "@danielsimonjr/mathts-gpu": 17,
@@ -12687,6 +12687,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "tests/integration/export-index-completeness.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 78
     },
     {
       "file": "tests/integration/functions.test.ts",
