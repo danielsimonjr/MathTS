@@ -10660,7 +10660,7 @@ modules:
         - cummin
         - cumtrapz
     functions/src/optimization-extra.ts:
-      description: Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
+      description: Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:

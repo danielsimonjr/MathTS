@@ -4543,7 +4543,7 @@ graph LR
 
 ---
 
-### `functions/src/optimization-extra.ts` - Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
+### `functions/src/optimization-extra.ts` - Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;
 
 **Workspace Dependencies:**
 

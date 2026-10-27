@@ -449,6 +449,19 @@ const { parameters } = fitScalarParameters(node, [x], y, ['x'], {
 parameters[0]; // 2
 ```
 
+`minimize` is the absolute-step / absolute-tolerance wrapper over `nelderMead`
+(defaults `step` 0.1, `maxIter` 1000; returns the point `x`). `nelderMead` keeps
+relative step and relative stop (defaults `step` 0.05, `maxIter` 2000) so
+`fitScalarParameters` is unchanged. Typed options are `NelderMeadOptions.stepRule`
+and `tolRule` (`'relative' | 'absolute'`), not boolean flags.
+
+```ts
+import { minimize, nelderMead } from '@danielsimonjr/mathts-functions';
+
+minimize((x) => (x[0] - 1) ** 2 + (x[1] - 2) ** 2, [0, 0]); // ~[1, 2]
+nelderMead((x) => (x[0] - 1) ** 2, [2]).x; // ~[1]; relative step 0.05 by default
+```
+
 ---
 
 ## Combinatorics

@@ -1,8 +1,8 @@
 /**
- * Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
- * and Levenberg–Marquardt nonlinear least squares — the canonical methods the gap
- * analysis flagged (today only a generic `minimize` exists). LM reuses the matrix
- * `inv` for the normal-equations solve rather than re-implementing elimination.
+ * Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;
+ * `minimize` is the absolute-step wrapper), gradient descent, and Levenberg–Marquardt
+ * nonlinear least squares. LM reuses the matrix `inv` for the normal-equations solve
+ * rather than re-implementing elimination.
  */
 import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
@@ -41,7 +41,7 @@ export interface NelderMeadOptions {
  * Matches `scipy.optimize.minimize(method='Nelder-Mead')` to the requested tolerance.
  *
  * @example
- * nelderMead((x) => (x[0] - 1) ** 2, [0]) // relative step 0.05 by default
+ * nelderMead((x) => (x[0] - 1) ** 2, [2]) // => { x: ~[1], … }; relative step 0.05 by default
  */
 export function nelderMead(
   f: (x: number[]) => number,

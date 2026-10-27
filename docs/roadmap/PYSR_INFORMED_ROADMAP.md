@@ -598,8 +598,9 @@ Items 1–2 are **PR-RNG (#415)**; log-gamma, the retired erf, the nested-array 
 copies, the two Levenberg–Marquardt bodies, and `polymul`/`polyMulJS` were pulled
 forward into **PR-SPECIAL (#418)**, **PR-MATMUL (#417)**, **PR-LM (#416)**, and
 **PR-POLY (#412)**. Items 3–6 (regex, export-index gate, architecture prose, M3
-benchmark) are done (#435, #437, #438, #434). Sprint 2R's ODE/BVP/DAE Jacobians, Nelder–Mead merge,
-`linearRegression`/`linregress`, and `numericRealRoots` stay open.
+benchmark) are done (#435, #437, #438, #434). Sprint 2R's ODE/BVP/DAE Jacobians,
+`linearRegression`/`linregress`, and `numericRealRoots` stay open. The Nelder–Mead
+merge (item 7) is done: `minimize` calls `nelderMead`.
 
 **Status (2026-10-24).** Merged: PR-POLY (#412), PR-SIDIM (#414, D-2: `SiDimensionVector`
 exponents are `core` `Fraction`s), PR-RNG (#415: `mulberry32`, `boxMuller` and
@@ -751,8 +752,8 @@ export function compileScalarGradient(
   residuals; `core` `pairwiseSum` / `pairwiseDot` for loss sums (not `Array.reduce`);
   M5 for restart perturbations; `ols` (`functions/src/ml/ols.ts`) for standard-error
   conventions. Do not write another optimizer: `bfgs`, `nelderMead`, `gradientDescent`,
-  `levenbergMarquardt`, `minimize` (a second Nelder–Mead,
-  `functions/src/typed/numeric.ts:264`) and `curvefit` (a second Levenberg–Marquardt,
+  `levenbergMarquardt`, `minimize` (absolute-step wrapper over `nelderMead`,
+  `functions/src/typed/numeric.ts`) and `curvefit` (a second Levenberg–Marquardt,
   `functions/src/typed/numeric.ts:908`, model `f(x, params)` over `xs`/`ys`) already
   exist. Do not write another numeric Jacobian: `numericJacobian` exists, and six
   private finite-difference Jacobian loops already copy it (listed in Sprint 2R item 1),
