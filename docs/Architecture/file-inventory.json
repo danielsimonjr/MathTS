@@ -8381,7 +8381,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 345
+      "loc": 349
     },
     {
       "file": "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -8437,7 +8437,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 167
+      "loc": 164
     },
     {
       "file": "functions/src/wasm/special/scalars.ts",
