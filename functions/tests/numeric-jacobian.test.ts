@@ -79,13 +79,17 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     };
     const J = numericJacobian(f, x0, { scheme: 'forward', step: { rel: 1e-7, floor: 1e-8 } });
     // Base eval (default, no f0) then one eval per column.
-    // Column 0: max(1e-8, 1e-7*|0|) = 1e-8; column 1: max(1e-8, 1e-7*|3|) = 3e-7.
+    // Same formula as the retired ODE/DAE loops: max(floor, rel*|x_j|).
+    const h0 = Math.max(1e-8, 1e-7 * Math.abs(x0[0]));
+    const h1 = Math.max(1e-8, 1e-7 * Math.abs(x0[1]));
+    expect(h0).toBe(1e-8);
+    expect(h1).toBe(1e-7 * 3);
     expect(seen).toHaveLength(3);
     expect(seen[0]).toEqual(x0);
-    expect(seen[1][0] - x0[0]).toBe(1e-8);
+    expect(seen[1][0]).toBe(x0[0] + h0);
     expect(seen[1][1]).toBe(x0[1]);
     expect(seen[2][0]).toBe(x0[0]);
-    expect(seen[2][1] - x0[1]).toBe(3e-7);
+    expect(seen[2][1]).toBe(x0[1] + h1);
     expect(J[0][0]).toBeCloseTo(1, 6);
     expect(J[0][1]).toBeCloseTo(2, 6);
     expect(J[1][0]).toBeCloseTo(3, 6);
@@ -105,8 +109,8 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     });
     expect(seen).toHaveLength(3);
     expect(seen[0]).toEqual([0, 3]);
-    expect(seen[1][0] - 0).toBe(1e-3);
-    expect(seen[2][1] - 3).toBe(1e-3);
+    expect(seen[1][0]).toBe(0 + 1e-3);
+    expect(seen[2][1]).toBe(3 + 1e-3);
   });
 
   it('f0 skips the base evaluation of f at x0', () => {
