@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1922
+**Total files**: 1924
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1166 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1167 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      669 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      670 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1922** |                                                                                                                |
+| **Total**     | **1924** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1191 |
-| `tests`    |   669 |
+| `src`      |  1192 |
+| `tests`    |   670 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   547 |
-| `@danielsimonjr/mathts-functions`      |   805 |
+| `@danielsimonjr/mathts-functions`      |   807 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |    99 |
@@ -908,6 +908,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/factories/index.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/factories/matrix-bridge.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/factories/scope.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/fit-scalar.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry-extra.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/alpha-shape.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/delaunay.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1345,6 +1346,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/fft-helpers.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fir-smoothing.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fit-distribution.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/fit-scalar-parameters.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fixtures/dedup-bucketB-slice2/expression-array-original.ts`      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fixtures/dedup-bucketB-slice2/expression-collection-original.ts` | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fixtures/dedup-bucketB-slice2/expression-map-original.ts`        | @danielsimonjr/mathts-functions      | tests    | test        |

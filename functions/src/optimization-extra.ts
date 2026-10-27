@@ -143,17 +143,29 @@ export interface LMResult {
   converged: boolean;
 }
 
+/** Options for {@link levenbergMarquardt}. */
+export interface LMOptions {
+  maxIter?: number;
+  tol?: number;
+  /**
+   * Analytic Jacobian `J` with `J[i][j] = ∂r_i/∂x_j`. When omitted, a forward
+   * difference via {@link numericJacobian} is used (`h = 1e-7`).
+   */
+  jacobian?: (x: number[]) => number[][];
+}
+
 /**
  * Levenberg–Marquardt nonlinear least squares: minimize ½‖r(x)‖² for a vector
- * residual `r`. Numeric Jacobian; damped normal equations `(JᵀJ + λI)δ = Jᵀr`
+ * residual `r`. Uses `opts.jacobian` when provided, otherwise a forward-difference
+ * {@link numericJacobian} (`h = 1e-7`). Damped normal equations `(JᵀJ + λI)δ = Jᵀr`
  * solved via the matrix `inv`. Mirrors `scipy.optimize.least_squares(method='lm')`.
  */
 export function levenbergMarquardt(
   residual: (x: number[]) => number[],
   x0: readonly number[],
-  opts: { maxIter?: number; tol?: number } = {}
+  opts: LMOptions = {}
 ): LMResult {
-  const { maxIter = 200, tol = 1e-10 } = opts;
+  const { maxIter = 200, tol = 1e-10, jacobian } = opts;
   const n = x0.length;
   let x = Array.from(x0);
   let lambda = 1e-3;
@@ -161,7 +173,24 @@ export function levenbergMarquardt(
   let cost = pairwiseDot(r, r);
   let iter = 0;
   for (; iter < maxIter; iter++) {
-    const J = numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' });
+    const J = jacobian
+      ? (() => {
+          const Jx = jacobian(x);
+          if (Jx.length !== r.length) {
+            throw new TypeError(
+              `levenbergMarquardt: jacobian returned ${Jx.length} rows, expected ${r.length}`
+            );
+          }
+          for (let i = 0; i < Jx.length; i++) {
+            if (Jx[i].length < n) {
+              throw new TypeError(
+                `levenbergMarquardt: jacobian row ${i} has length ${Jx[i].length}, expected ${n}`
+              );
+            }
+          }
+          return Jx;
+        })()
+      : numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' });
     const m = r.length;
     // JᵀJ and Jᵀr
     const JtJ: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
