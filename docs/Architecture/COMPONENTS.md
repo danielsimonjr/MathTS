@@ -257,6 +257,13 @@ special functions. The largest package (478 src files).
 Compiles under `strict: true`; ships its `.d.ts` tree via `tsc -p tsconfig.dts.json` (rollup-dts can't bundle
 the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 
+Sprint 2R clone-merge batch 4 keeps the public names `mapSlices`, `matrixFromColumns` /
+`matrixFromRows`, factory `max` / `min`, factory and typed `print`, local `Decimal.max` /
+`Decimal.min`, `ImmutableDenseMatrix.min` / `.max`, and `Index.min` / `.max`. The shared
+bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLength`,
+`reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
+`_extreme` (cache slot + `smaller` argument order), and `_ends`.
+
 ---
 
 ## Expression & Notebook Components

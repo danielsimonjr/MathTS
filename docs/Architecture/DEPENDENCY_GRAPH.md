@@ -685,7 +685,7 @@ graph LR
 
 ---
 
-### `core/src/switch.ts` - Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
+### `core/src/switch.ts` - Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by
 
 **Exports:**
 
@@ -18820,7 +18820,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1195   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200764 |
+| Total Lines of Code     | 200753 |
 | Total Exports           | 6199   |
 | Total Re-exports        | 2624   |
 | Total Classes           | 59     |

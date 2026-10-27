@@ -119,6 +119,10 @@ active graph reachable from `functions/src/index.ts`:
 
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. They are edited like any other source.
+Clone-merge batch 4 (Sprint 2R) shares internals across those factories without
+changing public names: `mapSlices` calls core `_switch`; `matrixFromColumns` /
+`matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` /
+`min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.

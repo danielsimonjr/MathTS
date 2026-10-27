@@ -716,7 +716,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 22
+      "loc": 20
     },
     {
       "file": "core/src/typed/index.ts",
@@ -6260,7 +6260,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 97
+      "loc": 96
     },
     {
       "file": "functions/src/matrix/getMatrixDataType.ts",
@@ -6316,7 +6316,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 200
+      "loc": 199
     },
     {
       "file": "functions/src/matrix/matrixFromFunction.ts",
@@ -6330,7 +6330,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 189
+      "loc": 182
     },
     {
       "file": "functions/src/matrix/native-accel.ts",
@@ -7254,7 +7254,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 50
+      "loc": 52
     },
     {
       "file": "functions/src/statistics/mad.ts",
@@ -7681,7 +7681,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 424
+      "loc": 422
     },
     {
       "file": "functions/src/type/matrix/Spa.ts",
@@ -10215,7 +10215,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 273
+      "loc": 383
     },
     {
       "file": "functions/tests/s2r-jacobian-norms-parity.test.ts",

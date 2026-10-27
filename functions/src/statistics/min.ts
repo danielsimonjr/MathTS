@@ -106,7 +106,7 @@ export const createMin = /* #__PURE__ */ factory(
      * @private
      */
     function _min(array: unknown[] | MatrixType): unknown {
-      return reduceExtreme(array, (value, res) => Boolean(smaller(value, res)), 'min', {
+      return reduceExtreme(array, smaller as (value: unknown, best: unknown) => unknown, 'min', {
         isNaN: mathIsNaN,
         numeric,
         config,

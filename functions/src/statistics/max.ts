@@ -106,7 +106,7 @@ export const createMax = /* #__PURE__ */ factory(
      * @private
      */
     function _max(array: unknown[] | MatrixType): unknown {
-      return reduceExtreme(array, (value, res) => Boolean(larger(value, res)), 'max', {
+      return reduceExtreme(array, larger as (value: unknown, best: unknown) => unknown, 'max', {
         isNaN: mathIsNaN,
         numeric,
         config,

@@ -10,11 +10,13 @@ interface MatrixType {
 
 /**
  * Recursively reduce an array or matrix to a single extreme value.
+ * `compare` is the typed `larger` (max) or `smaller` (min) the factories close over —
+ * called as `compare(value, best)`, same argument order as the pre-merge loops.
  * @private
  */
 export function reduceExtreme(
   array: unknown[] | MatrixType,
-  compare: (value: unknown, best: unknown) => boolean,
+  compare: (value: unknown, best: unknown) => unknown,
   fnName: 'max' | 'min',
   deps: {
     isNaN: TypedFunction;
@@ -27,7 +29,7 @@ export function reduceExtreme(
 
   deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
     try {
-      if ((mathIsNaN as (x: unknown) => boolean)(value)) {
+      if (mathIsNaN(value)) {
         res = value;
       } else if (res === undefined || compare(value, res)) {
         res = value;

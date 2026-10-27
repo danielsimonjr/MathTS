@@ -1880,7 +1880,7 @@ modules:
         - escape
         - compareText
     core/src/switch.ts:
-      description: Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
+      description: Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -39520,7 +39520,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1195
   totalModules: 82
-  totalLinesOfCode: 200764
+  totalLinesOfCode: 200753
   totalExports: 6199
   totalClasses: 59
   totalInterfaces: 539
