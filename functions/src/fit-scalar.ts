@@ -10,7 +10,7 @@
 import { pairwiseDot, pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
 import { bfgs } from './numeric/bfgs.js';
-import { nelderMead, levenbergMarquardt } from './optimization-extra.js';
+import { nelderMead, levenbergMarquardt, type LMOptions } from './optimization-extra.js';
 import { compileScalarGradient } from './scalar-compile.js';
 import { inv as _invRaw } from './factories/index.js';
 
@@ -112,8 +112,16 @@ function dxDz(_x: number, z: number, lo: number, hi: number): number {
   return 1;
 }
 
-function paramsKey(x: readonly number[]): string {
-  return x.join('\x1f');
+function sameParams(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (!Object.is(a[i], b[i])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -165,7 +173,7 @@ export function fitScalarParameters(
     throw new RangeError(prefix('restarts must be a non-negative integer'));
   }
   const restarts = restartsRaw;
-  if (restarts > 0 && options.rng === undefined) {
+  if (p > 0 && restarts > 0 && options.rng === undefined) {
     throw new TypeError(prefix('rng is required when restarts > 0'));
   }
   const rng = options.rng;
@@ -247,27 +255,26 @@ export function fitScalarParameters(
   const valuesBuf = new Float64Array(n);
   const gradBuf = new Float64Array(n * p);
   let evaluations = 0;
-  const cache = new Map<string, { values: Float64Array; grad: Float64Array; valid: Uint8Array }>();
+  let cacheKey: Float64Array | null = null;
+  let cacheVal: { values: Float64Array; grad: Float64Array; valid: Uint8Array } | null = null;
 
   function evaluateAt(x: ArrayLike<number>): {
     values: Float64Array;
     grad: Float64Array;
     valid: Uint8Array;
   } {
-    const key = paramsKey(Array.from(x));
-    const hit = cache.get(key);
-    if (hit) {
-      return hit;
+    if (cacheVal !== null && cacheKey !== null && sameParams(x, cacheKey)) {
+      return cacheVal;
     }
     evaluations++;
     const batch = compiled.evaluate(columns, x, { values: valuesBuf, grad: gradBuf });
-    const stored = {
+    cacheKey = Float64Array.from(x);
+    cacheVal = {
       values: Float64Array.from(batch.values),
       grad: Float64Array.from(batch.grad),
       valid: Uint8Array.from(batch.valid),
     };
-    cache.set(key, stored);
-    return stored;
+    return cacheVal;
   }
 
   function rowIncluded(
@@ -374,6 +381,22 @@ export function fitScalarParameters(
     wts: Float64Array | undefined,
     strictFreeze: boolean
   ): number {
+    if (tag === 'l2') {
+      const rVec: number[] = [];
+      for (const row of rows) {
+        if (!rowActive(row, batch)) {
+          if (strictFreeze) {
+            continue;
+          }
+          return Number.POSITIVE_INFINITY;
+        }
+        rVec.push(sqrtW(row) * (batch.values[row] - observed[row]));
+      }
+      if (rVec.length === 0) {
+        return Number.POSITIVE_INFINITY;
+      }
+      return pairwiseDot(rVec, rVec);
+    }
     const terms: number[] = [];
     for (const row of rows) {
       if (!rowActive(row, batch)) {
@@ -385,10 +408,7 @@ export function fitScalarParameters(
       const pred = batch.values[row];
       const obs = observed[row];
       const w = wts === undefined ? 1 : wts[row];
-      if (tag === 'l2') {
-        const r = sqrtW(row) * (pred - obs);
-        terms.push(r * r);
-      } else if (tag === 'l1') {
+      if (tag === 'l1') {
         terms.push(w * Math.abs(pred - obs));
       } else if (tag === 'huber') {
         const a = pred - obs;
@@ -457,6 +477,60 @@ export function fitScalarParameters(
       J[i] = cols.map((col) => col[i]);
     }
     return J;
+  }
+
+  /**
+   * One undamped GLS step `(JᵀJ)⁻¹ Jᵀr` at `x` — the same linear algebra as
+   * standard errors, not an iterative optimizer. Returns null when a frozen
+   * row is inactive or `inv` reports a singular `JᵀJ`.
+   */
+  function glsStep(x: Float64Array): { x: Float64Array<ArrayBuffer>; loss: number } | null {
+    const batch = evaluateAt(x);
+    const rVec = new Array<number>(m);
+    for (let j = 0; j < m; j++) {
+      const row = frozenRows[j];
+      if (!rowActive(row, batch)) {
+        return null;
+      }
+      rVec[j] = sqrtW(row) * (batch.values[row] - observed[row]);
+    }
+    const cols = buildJacobianColumns(Array.from(x), batch, false, null);
+    const JtJ: number[][] = Array.from({ length: pFree }, () => new Array<number>(pFree).fill(0));
+    const Jtr = new Array<number>(pFree).fill(0);
+    for (let a = 0; a < pFree; a++) {
+      for (let b = 0; b < pFree; b++) {
+        JtJ[a][b] = pairwiseDot(cols[a], cols[b]);
+      }
+      Jtr[a] = pairwiseDot(cols[a], rVec);
+    }
+    let JtJinv: number[][];
+    try {
+      JtJinv = _inv(JtJ);
+    } catch (e) {
+      if (!(e instanceof Error) || !/determinant is zero|singular|zero pivot/i.test(e.message)) {
+        throw e;
+      }
+      return null;
+    }
+    const xNew = new Float64Array(x.length);
+    xNew.set(x);
+    for (let fi = 0; fi < pFree; fi++) {
+      const step = -pairwiseDot(JtJinv[fi], Jtr);
+      if (!Number.isFinite(step)) {
+        return null;
+      }
+      xNew[freeIdx[fi]] += step;
+    }
+    if (options.bounds !== undefined) {
+      for (const pi of freeIdx) {
+        xNew[pi] = nudgeInterior(xNew[pi], boundsLo[pi], boundsHi[pi]);
+      }
+    }
+    const lossNew = computeLoss(lossTag, customLoss, evaluateAt(xNew), frozenRows, weights, false);
+    if (!Number.isFinite(lossNew)) {
+      return null;
+    }
+    return { x: xNew, loss: lossNew };
   }
 
   function gradL2(x: number[], batch: EvalBatch): number[] {
@@ -632,56 +706,15 @@ export function fitScalarParameters(
         const cols = buildJacobianColumns(Array.from(xFull), batch, true, z);
         return jacobianMatrix(cols);
       };
-      const lmOpts: {
-        maxIter?: number;
-        tol?: number;
-        jacobian: (z: number[]) => number[][];
-      } = {
+      const lmOpts: LMOptions = {
         jacobian: jac,
-        tol: 1e-14,
+        tol: 1e-12,
       };
       if (maxIter !== undefined) {
         lmOpts.maxIter = maxIter;
       }
       const lmRes = levenbergMarquardt(residual, z0, lmOpts);
-      let zBest = lmRes.x;
-      for (let polish = 0; polish < 32; polish++) {
-        const rVec = residual(zBest);
-        const J = jac(zBest);
-        const nZ = zBest.length;
-        const JtJ: number[][] = Array.from({ length: nZ }, () => new Array<number>(nZ).fill(0));
-        const Jtr = new Array<number>(nZ).fill(0);
-        for (let a = 0; a < nZ; a++) {
-          for (let b = 0; b < nZ; b++) {
-            let s = 0;
-            for (let i = 0; i < rVec.length; i++) {
-              s += J[i][a] * J[i][b];
-            }
-            JtJ[a][b] = s;
-          }
-          let sr = 0;
-          for (let i = 0; i < rVec.length; i++) {
-            sr += J[i][a] * rVec[i];
-          }
-          Jtr[a] = sr;
-        }
-        let delta: number[];
-        try {
-          const JtJinv = _inv(JtJ);
-          delta = JtJinv.map((row) => row.reduce((s, v, k) => s - v * Jtr[k], 0));
-        } catch {
-          break;
-        }
-        let stepNorm = 0;
-        for (let i = 0; i < nZ; i++) {
-          stepNorm += delta[i] * delta[i];
-        }
-        zBest = zBest.map((v, i) => v + delta[i]);
-        if (stepNorm === 0) {
-          break;
-        }
-      }
-      const xOut = xFromFreeZ(zBest);
+      const xOut = xFromFreeZ(lmRes.x);
       const batch = evaluateAt(xOut);
       const loss = computeLoss(lossTag, customLoss, batch, frozenRows, weights, false);
       return { x: xOut, loss, converged: lmRes.converged };
@@ -725,73 +758,23 @@ export function fitScalarParameters(
     bestLoss = computeLoss(lossTag, customLoss, batch, frozenRows, weights, false);
   }
 
-  if (lossTag === 'l2' && pFree > 0 && algorithm === 'lm') {
-    let xRef = Float64Array.from(bestX);
-    for (let refine = 0; refine < 24; refine++) {
-      const batch = evaluateAt(xRef);
-      const rVec = new Array<number>(m);
-      let allZero = true;
-      for (let j = 0; j < m; j++) {
-        const row = frozenRows[j];
-        if (!rowActive(row, batch)) {
-          allZero = false;
-          break;
-        }
-        const pred = batch.values[row];
-        rVec[j] = sqrtW(row) * (pred - observed[row]);
-        if (rVec[j] !== 0) {
-          allZero = false;
-        }
-      }
-      if (allZero) {
-        bestX = xRef;
-        bestLoss = 0;
-        break;
-      }
-      const cols = buildJacobianColumns(Array.from(xRef), batch, false, null);
-      const JtJ: number[][] = Array.from({ length: pFree }, () => new Array<number>(pFree).fill(0));
-      const Jtr = new Array<number>(pFree).fill(0);
-      for (let a = 0; a < pFree; a++) {
-        for (let b = 0; b < pFree; b++) {
-          JtJ[a][b] = pairwiseDot(cols[a], cols[b]);
-        }
-        Jtr[a] = pairwiseDot(cols[a], rVec);
-      }
-      let delta: number[];
-      try {
-        const JtJinv = _inv(JtJ);
-        delta = JtJinv.map((row) => row.reduce((s, v, k) => s - v * Jtr[k], 0));
-      } catch {
-        break;
-      }
-      let moved = false;
-      for (let fi = 0; fi < pFree; fi++) {
-        if (delta[fi] !== 0) {
-          moved = true;
-        }
-        xRef[freeIdx[fi]] += delta[fi];
-      }
-      if (!moved) {
-        break;
-      }
-      const lossRef = computeLoss(
-        lossTag,
-        customLoss,
-        evaluateAt(xRef),
-        frozenRows,
-        weights,
-        false
-      );
-      if (lossRef === 0) {
-        bestX = xRef;
-        bestLoss = 0;
-        break;
-      }
+  // Closed-form GLS update (same (JᵀJ)⁻¹ Jᵀr as standard errors), not a
+  // second iterative optimizer. LM's damped float cost test stalls ~1e-11
+  // from the real-arithmetic OLS on short weighted linear problems, and can
+  // underflow residuals so a step from the LM point does not land on the
+  // exact linear fit; one step from the start covers that case. Skip when
+  // the caller asked for zero iterations.
+  if (algorithm === 'lm' && lossTag === 'l2' && pFree > 0 && options.maxIterations !== 0) {
+    const fromBest = glsStep(bestX);
+    if (fromBest) {
+      bestX = fromBest.x;
+      bestLoss = fromBest.loss;
     }
-  }
-
-  if (bestLoss > 0 && bestLoss < 1e-140) {
-    bestLoss = 0;
+    const fromInit = glsStep(xBase);
+    if (fromInit && fromInit.loss < bestLoss) {
+      bestX = fromInit.x;
+      bestLoss = fromInit.loss;
+    }
   }
 
   let standardErrors: Float64Array | null = null;

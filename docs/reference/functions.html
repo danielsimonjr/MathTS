@@ -2434,13 +2434,13 @@
 
       ### Optimization
 
-      | Function                                   | Description                                                                                                                                                                                                          |
-      | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-      | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`                                                                                 |
-      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                                                                                            |
-      | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }`                                                                      |
-      | `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }` |
-      | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); returns `{ x, residualNorm, iterations, converged }`                                                                                          |
+      | Function                                   | Description                                                                                                                                                                                                                                                         |
+      | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+      | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`                                                                                                                                |
+      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                                                                                                                                           |
+      | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }`                                                                                                                     |
+      | `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }`                                                |
+      | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); `opts.jacobian?: (x) => number[][]` with `J[i][j] = ∂r_i/∂x_j`; default `numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' })`; returns `{ x, residualNorm, iterations, converged }` |
 
       ### Differentiation
 
@@ -3393,27 +3393,28 @@
 
       ## Expression Evaluation
 
-      | Function                                   | Description                                                                      |
-      | ------------------------------------------ | -------------------------------------------------------------------------------- |
-      | `evaluate(expr[, scope])`                  | Evaluate an expression string                                                    |
-      | `evaluateScalar(node[, scope])`            | Evaluate a scalar node from `scalar` (typed tree; a formula string is rejected)  |
-      | `scalarToNode(node)`                       | Build wired expression `Node` from a scalar tree (no string parse)               |
-      | `nodeToScalar(node)`                       | Scalar subset of an expression node; throws `ScalarBuildError` when unsupported  |
-      | `simplifyScalar(node[, options])`          | Symbolic simplify via wired `simplify`, returning a scalar tree                  |
-      | `scalarToTex(node[, options])`             | LaTeX via `Node.toTex` on `scalarToNode(node)`                                   |
-      | `compileScalar(node, options)`             | Batch-evaluate a scalar node over `Float64Array` columns with per-row validity   |
-      | `compileScalarGradient(node, options)`     | Same tape as `compileScalar` plus exact ∂f/∂parameter per row (`grad` layout)    |
-      | `paretoFront(candidates)`                  | Pareto hall of fame (one survivor per complexity, ascending complexity)          |
-      | `scoreFront(front[, { lossScale }])`       | PySR log-loss scores (`'log'` default) for a front                               |
-      | `selectFrontModel(scored[, mode[, opts]])` | Pick `accuracy` / `score` / `best` champion (`ParetoFrontError` on bad input)    |
-      | `ParetoFrontError`                         | Thrown by `scoreFront` / `selectFrontModel` for invalid selection input          |
-      | `scalar`                                   | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                   |
-      | `ScalarEvalError`                          | Thrown when a scalar node cannot be evaluated                                    |
-      | `compileExpr(expr)`                        | Compile once, evaluate many                                                      |
-      | `parse(expr)`                              | Parse an expression into an AST node                                             |
-      | `parser()`                                 | Create a stateful parser with a scope retained across calls                      |
-      | `reviver(key, value)`                      | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers        |
-      | `replacer(key, value)`                     | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers |
+      | Function                                                           | Description                                                                                                                   |
+      | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+      | `evaluate(expr[, scope])`                                          | Evaluate an expression string                                                                                                 |
+      | `evaluateScalar(node[, scope])`                                    | Evaluate a scalar node from `scalar` (typed tree; a formula string is rejected)                                               |
+      | `scalarToNode(node)`                                               | Build wired expression `Node` from a scalar tree (no string parse)                                                            |
+      | `nodeToScalar(node)`                                               | Scalar subset of an expression node; throws `ScalarBuildError` when unsupported                                               |
+      | `simplifyScalar(node[, options])`                                  | Symbolic simplify via wired `simplify`, returning a scalar tree                                                               |
+      | `scalarToTex(node[, options])`                                     | LaTeX via `Node.toTex` on `scalarToNode(node)`                                                                                |
+      | `compileScalar(node, options)`                                     | Batch-evaluate a scalar node over `Float64Array` columns with per-row validity                                                |
+      | `compileScalarGradient(node, options)`                             | Same tape as `compileScalar` plus exact ∂f/∂parameter per row (`grad` layout)                                                 |
+      | `fitScalarParameters(node, columns, observed, variables, options)` | Fit `ScalarNode` parameters to columnar data (`FitScalarOptions` / `FitScalarResult`); default `l2` uses `levenbergMarquardt` |
+      | `paretoFront(candidates)`                                          | Pareto hall of fame (one survivor per complexity, ascending complexity)                                                       |
+      | `scoreFront(front[, { lossScale }])`                               | PySR log-loss scores (`'log'` default) for a front                                                                            |
+      | `selectFrontModel(scored[, mode[, opts]])`                         | Pick `accuracy` / `score` / `best` champion (`ParetoFrontError` on bad input)                                                 |
+      | `ParetoFrontError`                                                 | Thrown by `scoreFront` / `selectFrontModel` for invalid selection input                                                       |
+      | `scalar`                                                           | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                                                                |
+      | `ScalarEvalError`                                                  | Thrown when a scalar node cannot be evaluated                                                                                 |
+      | `compileExpr(expr)`                                                | Compile once, evaluate many                                                                                                   |
+      | `parse(expr)`                                                      | Parse an expression into an AST node                                                                                          |
+      | `parser()`                                                         | Create a stateful parser with a scope retained across calls                                                                   |
+      | `reviver(key, value)`                                              | `JSON.parse` reviver — restores `Complex`, `Fraction`, non-finite numbers                                                     |
+      | `replacer(key, value)`                                             | `JSON.stringify` replacer — serialises `Complex`, `Fraction`, non-finite numbers                                              |
 
       ### Details
 

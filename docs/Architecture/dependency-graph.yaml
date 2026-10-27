@@ -8555,6 +8555,7 @@ modules:
           imports:
             - nelderMead
             - levenbergMarquardt
+            - LMOptions
         - file: ./scalar-compile.js
           imports:
             - compileScalarGradient
@@ -39263,7 +39264,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1191
   totalModules: 82
-  totalLinesOfCode: 200415
+  totalLinesOfCode: 200399
   totalExports: 6166
   totalClasses: 58
   totalInterfaces: 536

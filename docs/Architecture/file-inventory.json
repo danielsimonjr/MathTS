@@ -5917,7 +5917,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 867
+      "loc": 850
     },
     {
       "file": "functions/src/geometry-extra.ts",
@@ -6666,7 +6666,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 244
     },
     {
       "file": "functions/src/pareto-front.ts",
@@ -8976,7 +8976,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 379
+      "loc": 431
     },
     {
       "file": "functions/tests/fixtures/dedup-bucketB-slice2/expression-array-original.ts",

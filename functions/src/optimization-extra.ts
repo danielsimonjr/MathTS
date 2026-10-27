@@ -156,7 +156,8 @@ export interface LMOptions {
 
 /**
  * Levenberg–Marquardt nonlinear least squares: minimize ½‖r(x)‖² for a vector
- * residual `r`. Numeric Jacobian; damped normal equations `(JᵀJ + λI)δ = Jᵀr`
+ * residual `r`. Uses `opts.jacobian` when provided, otherwise a forward-difference
+ * {@link numericJacobian} (`h = 1e-7`). Damped normal equations `(JᵀJ + λI)δ = Jᵀr`
  * solved via the matrix `inv`. Mirrors `scipy.optimize.least_squares(method='lm')`.
  */
 export function levenbergMarquardt(

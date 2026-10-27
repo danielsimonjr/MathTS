@@ -289,6 +289,33 @@ describe('fitScalarParameters', () => {
     expect(() =>
       fitScalarParameters(node, [x], y, ['x'], {
         parameters: ['a'],
+        weights: new Float64Array([NaN]),
+        restarts: 0,
+      })
+    ).toThrow(RangeError);
+    expect(() =>
+      fitScalarParameters(node, [x], [1] as unknown as Float64Array, ['x'], {
+        parameters: ['a'],
+        restarts: 0,
+      })
+    ).toThrow(RangeError);
+    expect(() =>
+      fitScalarParameters(node, [x], y, ['x'], {
+        parameters: ['a'],
+        weights: [1] as unknown as Float64Array,
+        restarts: 0,
+      })
+    ).toThrow(RangeError);
+    expect(() =>
+      fitScalarParameters(node, [x], y, ['x'], {
+        parameters: ['a'],
+        algorithm: 'gd' as 'lm',
+        restarts: 0,
+      })
+    ).toThrow(RangeError);
+    expect(() =>
+      fitScalarParameters(node, [x], y, ['x'], {
+        parameters: ['a'],
         bounds: [[2, 1]],
         restarts: 0,
       })
@@ -335,11 +362,23 @@ describe('fitScalarParameters', () => {
       [new Float64Array([1, Math.E])],
       new Float64Array([0, 1]),
       ['x'],
-      { parameters: [], restarts: 0 }
+      { parameters: [] }
     );
     expect(rEmpty.parameters.length).toBe(0);
     expect(rEmpty.loss).toBe(0);
     expect(rEmpty.validRows).toBe(2);
+
+    const optsObj = {
+      parameters: ['a'] as const,
+      initial: [1],
+      restarts: 0 as const,
+      maxIterations: 0 as const,
+    };
+    const initialSnapshot = optsObj.initial.slice();
+    fitScalarParameters(node, [x], y, ['x'], optsObj);
+    expect(optsObj.initial[0]).toBe(initialSnapshot[0]);
+    expect(optsObj.restarts).toBe(0);
+    expect(optsObj.maxIterations).toBe(0);
   });
 });
 
@@ -374,5 +413,18 @@ describe('levenbergMarquardt jacobian option', () => {
     });
     expect(Object.is(r.x[0], x0[0])).toBe(true);
     expect(Object.is(r.x[1], x0[1])).toBe(true);
+  });
+
+  it('wrong jacobian shape throws TypeError', () => {
+    expect(() =>
+      levenbergMarquardt((p) => t.map((ti, i) => p[0] * Math.exp(p[1] * ti) - y[i]), [1, 1], {
+        jacobian: () => [[1]],
+      })
+    ).toThrow(TypeError);
+    expect(() =>
+      levenbergMarquardt((p) => t.map((ti, i) => p[0] * Math.exp(p[1] * ti) - y[i]), [1, 1], {
+        jacobian: () => t.map(() => [1]),
+      })
+    ).toThrow(TypeError);
   });
 });

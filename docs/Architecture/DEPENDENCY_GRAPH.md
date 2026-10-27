@@ -4220,12 +4220,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                          | Type   |
-| ------------------------- | -------------------------------- | ------ |
-| `./numeric/bfgs.js`       | `bfgs`                           | Import |
-| `./optimization-extra.js` | `nelderMead, levenbergMarquardt` | Import |
-| `./scalar-compile.js`     | `compileScalarGradient`          | Import |
-| `./factories/index.js`    | `inv`                            | Import |
+| File                      | Imports                                     | Type   |
+| ------------------------- | ------------------------------------------- | ------ |
+| `./numeric/bfgs.js`       | `bfgs`                                      | Import |
+| `./optimization-extra.js` | `nelderMead, levenbergMarquardt, LMOptions` | Import |
+| `./scalar-compile.js`     | `compileScalarGradient`                     | Import |
+| `./factories/index.js`    | `inv`                                       | Import |
 
 **Exports:**
 
@@ -18699,7 +18699,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1191   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200415 |
+| Total Lines of Code     | 200399 |
 | Total Exports           | 6166   |
 | Total Re-exports        | 2605   |
 | Total Classes           | 58     |
