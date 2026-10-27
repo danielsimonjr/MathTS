@@ -790,6 +790,7 @@
       "functions/src/special/zeta.ts",
       "functions/src/statistics/corr.ts",
       "functions/src/statistics/cumsum.ts",
+      "functions/src/statistics/extreme.ts",
       "functions/src/statistics/mad.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/mean.ts",
@@ -889,8 +890,7 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
       "functions/src/special/erf.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/min.ts",
+      "functions/src/statistics/extreme.ts",
       "functions/src/trigonometry/cosh.ts",
       "functions/src/trigonometry/tanh.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
@@ -956,14 +956,13 @@
       "functions/src/statistics/std.ts",
       "functions/src/statistics/utils/improveErrorMessage.ts",
       "functions/src/statistics/variance.ts",
-      "functions/src/string/print.ts",
       "functions/src/type/chain/Chain.ts",
       "functions/src/type/matrix/ImmutableDenseMatrix.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/type/matrix/function/index.ts",
-      "functions/src/typed/string.ts",
       "functions/src/utils/numeric.ts",
       "functions/src/utils/optimizeCallback.ts",
+      "functions/src/utils/print.ts",
       "functions/src/utils/typeOf.ts"
     ],
     "functions/src/utils/node.ts": [
@@ -1018,6 +1017,7 @@
       "functions/src/relational/smallerEq.ts",
       "functions/src/relational/unequal.ts",
       "functions/src/special/zeta.ts",
+      "functions/src/statistics/extreme.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts",
       "functions/src/statistics/prod.ts",
@@ -1123,9 +1123,9 @@
       "functions/src/matrix/transpose.ts",
       "functions/src/relational/compareText.ts",
       "functions/src/string/format.ts",
-      "functions/src/string/print.ts",
       "functions/src/type/chain/Chain.ts",
-      "functions/src/typed/string.ts"
+      "functions/src/typed/string.ts",
+      "functions/src/utils/print.ts"
     ],
     "functions/src/algebra/sparse/csFkeep.ts": ["functions/src/algebra/sparse/csAmd.ts"],
     "functions/src/algebra/sparse/csFlip.ts": [
@@ -1195,6 +1195,7 @@
       "functions/src/probability/permutations.ts",
       "functions/src/special/erf.ts",
       "functions/src/statistics/cumsum.ts",
+      "functions/src/statistics/extreme.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/mean.ts",
       "functions/src/statistics/median.ts",
@@ -2180,6 +2181,10 @@
       "functions/src/matrix/forEach.ts",
       "functions/src/matrix/map.ts"
     ],
+    "functions/src/matrix/from-vectors.ts": [
+      "functions/src/matrix/matrixFromColumns.ts",
+      "functions/src/matrix/matrixFromRows.ts"
+    ],
     "functions/src/matrix/utils/zerosAndOnes.ts": [
       "functions/src/matrix/ones.ts",
       "functions/src/matrix/zeros.ts"
@@ -2259,6 +2264,7 @@
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
       "functions/src/statistics/cumsum.ts",
+      "functions/src/statistics/extreme.ts",
       "functions/src/statistics/mad.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/mean.ts",
@@ -2267,6 +2273,10 @@
       "functions/src/statistics/prod.ts",
       "functions/src/statistics/sum.ts",
       "functions/src/statistics/variance.ts"
+    ],
+    "functions/src/statistics/extreme.ts": [
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/min.ts"
     ],
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",

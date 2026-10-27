@@ -300,20 +300,7 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {MatrixValue | undefined} min
        */
       min(): MatrixValue | undefined {
-        // check min has been calculated before
-        if (this._min === null) {
-          // minimum
-          let m: MatrixValue | null = null;
-          // compute min
-          const smallerFn = smaller;
-          (DenseMatrix.prototype as _DenseMatrix).forEach.call(this, function (v: MatrixValue) {
-            if (m === null || smallerFn(v, m)) {
-              m = v;
-            }
-          });
-          this._min = m !== null ? m : undefined;
-        }
-        return this._min ?? undefined;
+        return this._extreme('_min', (v, m) => smaller(v, m));
       }
 
       /**
@@ -321,20 +308,27 @@ export const createImmutableDenseMatrixClass = /* #__PURE__ */ factory(
        * @return {MatrixValue | undefined} max
        */
       max(): MatrixValue | undefined {
-        // check max has been calculated before
-        if (this._max === null) {
-          // maximum
+        return this._extreme('_max', (v, m) => smaller(m, v));
+      }
+
+      /**
+       * Cached min/max over matrix entries.
+       * @private
+       */
+      _extreme(
+        slot: '_min' | '_max',
+        prefer: (v: MatrixValue, m: MatrixValue) => boolean
+      ): MatrixValue | undefined {
+        if (this[slot] === null) {
           let m: MatrixValue | null = null;
-          // compute max
-          const smallerFn = smaller;
           (DenseMatrix.prototype as _DenseMatrix).forEach.call(this, function (v: MatrixValue) {
-            if (m === null || smallerFn(m, v)) {
+            if (m === null || prefer(v, m)) {
               m = v;
             }
           });
-          this._max = m !== null ? m : undefined;
+          this[slot] = m !== null ? m : undefined;
         }
-        return this._max ?? undefined;
+        return this[slot] ?? undefined;
       }
     }
 

@@ -22,8 +22,7 @@
 
 import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
 import { format as formatValue } from '../utils/string.js';
-import { isString } from '../utils/is.js';
-import { printTemplate } from '../utils/print.js';
+import { fillPrintTemplate } from '../utils/print.js';
 
 // =============================================================================
 // Internal helpers
@@ -87,29 +86,7 @@ function interpolate(
   values: PrintValues,
   options?: number | Record<string, unknown>
 ): string {
-  return template.replace(printTemplate, function (original: string, key: string): string {
-    const keys = key.split('.');
-    let value: unknown = (values as Record<string, unknown>)[keys.shift()!];
-    // Handle Matrix-like objects
-    if (value !== undefined && (value as { isMatrix?: boolean }).isMatrix) {
-      value = (value as { toArray: () => unknown[] }).toArray();
-    }
-    // Walk nested path
-    while (keys.length && value !== undefined) {
-      const k = keys.shift();
-      value = k ? (value as Record<string, unknown>)[k] : (value as string) + '.';
-    }
-
-    if (value !== undefined) {
-      if (!isString(value)) {
-        return formatValue(value, options) as string;
-      } else {
-        return value as string;
-      }
-    }
-
-    return original;
-  });
+  return fillPrintTemplate(template, values, options);
 }
 
 // =============================================================================

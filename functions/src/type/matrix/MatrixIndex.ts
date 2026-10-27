@@ -233,17 +233,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} max
        */
       max(): (number | string | undefined)[] {
-        const values: (number | string | undefined)[] = [];
-
-        for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const range = this._dimensions[i];
-          values[i] =
-            isString(range) || isNumber(range)
-              ? (range as number | string)
-              : (range as RangeInterface).max();
-        }
-
-        return values;
+        return this._ends((range) => range.max());
       }
 
       /**
@@ -252,6 +242,14 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} min
        */
       min(): (number | string | undefined)[] {
+        return this._ends((range) => range.min());
+      }
+
+      /**
+       * Per-dimension min or max (scalar dimensions returned as-is).
+       * @private
+       */
+      _ends(pick: (range: RangeInterface) => number | undefined): (number | string | undefined)[] {
         const values: (number | string | undefined)[] = [];
 
         for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
@@ -259,7 +257,7 @@ export const createIndexClass = /* #__PURE__ */ factory(
           values[i] =
             isString(range) || isNumber(range)
               ? (range as number | string)
-              : (range as RangeInterface).min();
+              : pick(range as RangeInterface);
         }
 
         return values;

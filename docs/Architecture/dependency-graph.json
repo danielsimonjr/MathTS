@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1193,
+    "totalFiles": 1195,
     "totalModules": 82,
-    "totalExports": 6195
+    "totalExports": 6199
   },
   "entryPoints": [
     {
@@ -15064,6 +15064,15 @@
         "exports": ["createForEach"],
         "constants": ["createForEach"]
       },
+      "functions/src/matrix/from-vectors.ts": {
+        "description": "Return the logical length of a 1-D or 2-D column/row vector.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["vectorLength", "matrixFromVectorList"],
+        "functions": ["vectorLength", "matrixFromVectorList"]
+      },
       "functions/src/matrix/getMatrixDataType.ts": {
         "description": "Find the data type of all elements in a matrix or array,",
         "externalDependencies": [],
@@ -15254,7 +15263,14 @@
             "imports": ["TypedFunction", "Matrix", "BigNumber"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["_switch"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createMapSlices"],
         "constants": ["createMapSlices"]
       },
@@ -15266,6 +15282,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15298,6 +15318,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -18437,6 +18461,38 @@
         "exports": ["createCumSum"],
         "constants": ["createCumSum"]
       },
+      "functions/src/statistics/extreme.ts": {
+        "description": "Recursively reduce an array or matrix to a single extreme value.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepForEach"]
+          },
+          {
+            "file": "../utils/number.js",
+            "imports": ["safeNumberType"]
+          },
+          {
+            "file": "./utils/improveErrorMessage.js",
+            "imports": ["improveErrorMessage"]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          },
+          {
+            "file": "../core/config.js",
+            "imports": ["ConfigOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["reduceExtreme"],
+        "functions": ["reduceExtreme"]
+      },
       "functions/src/statistics/mad.ts": {
         "description": "Compute the median absolute deviation of a matrix or a list with values.",
         "externalDependencies": [],
@@ -18471,15 +18527,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["deepForEach", "reduce", "containsCollections"]
+            "imports": ["reduce", "containsCollections"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -18569,15 +18625,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["containsCollections", "deepForEach", "reduce"]
+            "imports": ["containsCollections", "reduce"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19086,20 +19142,12 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
           {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           },
           {
             "file": "../core/function/typed.js",
@@ -23620,12 +23668,8 @@
             "imports": ["format"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           }
         ],
         "workspaceDependencies": [
@@ -24846,12 +24890,22 @@
         "constants": ["createParseNumberWithConfig"]
       },
       "functions/src/utils/print.ts": {
-        "description": "print module",
+        "description": "Interpolate values into a string template (`$key` / `$key.nested`).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./string.js",
+            "imports": ["format"]
+          },
+          {
+            "file": "./is.js",
+            "imports": ["isString"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["printTemplate"],
+        "exports": ["printTemplate", "fillPrintTemplate"],
+        "functions": ["fillPrintTemplate"],
         "constants": ["printTemplate"]
       },
       "functions/src/utils/product.ts": {
@@ -40721,6 +40775,7 @@
           "functions/src/matrix/filter.ts",
           "functions/src/matrix/flatten.ts",
           "functions/src/matrix/forEach.ts",
+          "functions/src/matrix/from-vectors.ts",
           "functions/src/matrix/getMatrixDataType.ts",
           "functions/src/matrix/identity.ts",
           "functions/src/matrix/ifft.ts",
@@ -40901,6 +40956,7 @@
         "files": [
           "functions/src/statistics/corr.ts",
           "functions/src/statistics/cumsum.ts",
+          "functions/src/statistics/extreme.ts",
           "functions/src/statistics/mad.ts",
           "functions/src/statistics/max.ts",
           "functions/src/statistics/mean.ts",
@@ -41818,18 +41874,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1193,
+    "totalTypeScriptFiles": 1195,
     "totalModules": 82,
-    "totalLinesOfCode": 200798,
-    "totalExports": 6195,
+    "totalLinesOfCode": 200764,
+    "totalExports": 6199,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1965,
+    "totalFunctions": 1969,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
     "totalReExports": 2624,
-    "totalTypeOnlyImports": 608,
+    "totalTypeOnlyImports": 610,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
