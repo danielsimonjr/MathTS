@@ -183,29 +183,41 @@ export interface MathInstance {
  * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
  * ```
  */
+function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  currentConfig: MathJSConfig
+): T {
+  const wrapped = function (this: unknown, ...args: unknown[]) {
+    return mathFunctions.runWithConfig(currentConfig, () => {
+      if (new.target) {
+        return Reflect.construct(fn, args, new.target);
+      }
+      return fn.apply(this, args);
+    });
+  };
+  Object.defineProperty(wrapped, 'name', { value: fn.name, configurable: true });
+  return wrapped as T;
+}
+
 export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  const currentConfig: MathJSConfig = { ...defaultConfig, ...config };
-  // Push this instance's initial overrides into the shared functions config so
-  // they take effect immediately (the functions surface is a process singleton).
-  if (Object.keys(config).length > 0) {
-    mathFunctions.config(config as Partial<MathJSConfig>);
-  }
+  const currentConfig: MathJSConfig = {
+    ...mathFunctions.config(),
+    ...defaultConfig,
+    ...config,
+  };
 
   const instance: MathInstance = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...factories,
 
-    // Configuration — forwards to the shared functions runtime config so it
-    // actually DRIVES behavior (e.g. `config({ matrix: 'Array' })` changes the
-    // return type of matrix-producing ops). `currentConfig` mirrors it for the
-    // read path and seeds the functions config with this instance's overrides.
+    // Per-instance config — does not mutate the functions singleton; wrapped
+    // methods run under runWithConfig(currentConfig, …).
     config: (newConfig?: Partial<MathJSConfig>) => {
-      const merged = mathFunctions.config(newConfig as Partial<MathJSConfig>);
-      Object.assign(currentConfig, merged);
+      if (newConfig) Object.assign(currentConfig, newConfig);
       return { ...currentConfig };
     },
 
@@ -295,6 +307,17 @@ export function create(
       throw new Error('chain not initialized');
     }) as MathInstance['chain'],
   };
+
+  for (const key of Object.keys(instance)) {
+    if (key === 'config' || key === 'chain') continue;
+    const value = instance[key];
+    if (typeof value === 'function') {
+      (instance as Record<string, unknown>)[key] = wrapWithInstanceConfig(
+        value as (...args: unknown[]) => unknown,
+        currentConfig
+      );
+    }
+  }
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);

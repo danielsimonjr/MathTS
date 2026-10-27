@@ -73,21 +73,11 @@ describe('create(all) keeps compat shims overlaid on the functions namespace', (
 });
 
 describe('config is independent per instance', () => {
-  it('config is process-global — separate instances share it (singleton functions surface)', () => {
-    // GC12: `config()` now DRIVES behavior by forwarding to the shared functions
-    // runtime config. The MathTS functions surface is a process singleton, so —
-    // unlike mathjs's per-instance `create()` config — config is global: mutating
-    // it through one instance is observed by every instance. (Per-instance
-    // isolation is impossible without per-instance function surfaces, and was
-    // only "true" before because config was an inert no-op.)
+  it('each create(all) instance keeps its own config (#425)', () => {
     const a = create(all);
     const b = create(all);
-    try {
-      a.config({ precision: 99 });
-      expect(a.config().precision).toBe(99);
-      expect(b.config().precision).toBe(99); // shared, not isolated
-    } finally {
-      a.config({ precision: 64 }); // restore global default for other tests
-    }
+    a.config({ precision: 99 });
+    expect(a.config().precision).toBe(99);
+    expect(b.config().precision).not.toBe(99);
   });
 });
