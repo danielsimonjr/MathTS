@@ -8,6 +8,8 @@
  * so we use pure functions with explicit dimensions.
  */
 
+import { f64Add, f64Div, f64Max, f64Min, f64Mul, f64Sub } from './f64-buffer';
+
 // =============================================================================
 // Matrix Creation
 // =============================================================================
@@ -127,20 +129,14 @@ export function matrix_get_diag(data: Float64Array, rows: i32, cols: i32): Float
  * Matrix addition: C = A + B
  */
 export function matrix_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
-  }
+  f64Add(a, b, result);
 }
 
 /**
  * Matrix subtraction: C = A - B
  */
 export function matrix_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
-  }
+  f64Sub(a, b, result);
 }
 
 /**
@@ -151,10 +147,7 @@ export function matrix_mul_elementwise(
   b: Float64Array,
   result: Float64Array
 ): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) * unchecked(b[i])));
-  }
+  f64Mul(a, b, result);
 }
 
 /**
@@ -165,10 +158,7 @@ export function matrix_div_elementwise(
   b: Float64Array,
   result: Float64Array
 ): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) / unchecked(b[i])));
-  }
+  f64Div(a, b, result);
 }
 
 /**
@@ -391,30 +381,14 @@ export function matrix_mean(data: Float64Array): f64 {
  * Minimum element
  */
 export function matrix_min(data: Float64Array): f64 {
-  const len = data.length;
-  if (len == 0) return f64.NaN;
-
-  let minVal = unchecked(data[0]);
-  for (let i = 1; i < len; i++) {
-    const val = unchecked(data[i]);
-    if (val < minVal) minVal = val;
-  }
-  return minVal;
+  return f64Min(data);
 }
 
 /**
  * Maximum element
  */
 export function matrix_max(data: Float64Array): f64 {
-  const len = data.length;
-  if (len == 0) return f64.NaN;
-
-  let maxVal = unchecked(data[0]);
-  for (let i = 1; i < len; i++) {
-    const val = unchecked(data[i]);
-    if (val > maxVal) maxVal = val;
-  }
-  return maxVal;
+  return f64Max(data);
 }
 
 /**

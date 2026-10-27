@@ -4085,6 +4085,11 @@
     "assembly/src/special.ts": ["assembly/src/index.ts"],
     "assembly/src/sort.ts": ["assembly/src/index.ts"],
     "assembly/src/ops/complex-array.ts": ["assembly/src/index.ts"],
+    "assembly/src/ops/f64-buffer.ts": [
+      "assembly/src/ops/array.ts",
+      "assembly/src/ops/complex-array.ts",
+      "assembly/src/ops/matrix.ts"
+    ],
     "compat/src/shims.ts": ["compat/src/index.ts"],
     "compat/src/chain.ts": ["compat/src/index.ts"],
     "gpu/src/GPUContext.ts": [

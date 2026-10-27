@@ -183,7 +183,7 @@ The codebase is organized into the following modules:
 - **workbook**: 25 files
 - **assembly/algebra**: 1 file
 - **assembly**: 8 files
-- **assembly/ops**: 16 files
+- **assembly/ops**: 17 files
 - **assembly/types**: 1 file
 - **compat**: 3 files
 - **gpu**: 8 files
@@ -218,7 +218,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-signal` (`signal/`)                          | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
 | `@danielsimonjr/mathts-parallel` (`parallel/`)                      | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-workerpool`                                                                                                | 14             | 0               |
 | `@danielsimonjr/mathts-workbook` (`workbook/`)                      | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-plot`                                                             | 25             | 1               |
-| `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 26             | 0               |
+| `@danielsimonjr/mathts-wasm` (`assembly/`)                          | (none)                                                                                                                                                          | 27             | 0               |
 | `@danielsimonjr/mathts-compat` (`compat/`)                          | `@danielsimonjr/mathts-functions`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-parallel`                               | 3              | 0               |
 | `@danielsimonjr/mathts-gpu` (`gpu/`)                                | (none)                                                                                                                                                          | 8              | 0               |
 | `@danielsimonjr/mathts-plot` (`plot/`)                              | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-functions`                                                                                                 | 21             | 0               |
@@ -17470,6 +17470,12 @@ graph LR
 
 ### `assembly/src/ops/array.ts` - Array Operations for AssemblyScript
 
+**Internal Dependencies:**
+
+| File           | Imports                                          | Type   |
+| -------------- | ------------------------------------------------ | ------ |
+| `./f64-buffer` | `f64Add, f64Div, f64Max, f64Min, f64Mul, f64Sub` | Import |
+
 **Exports:**
 
 - Functions: `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_stddev`, `array_min`, `array_max`, `array_argmin`, `array_argmax`, `array_norm`, `array_norm_l1`, `array_norm_linf`, `array_dot`, `array_add`, `array_sub`, `array_mul`, `array_div`, `array_scale`, `array_add_scalar`, `array_neg`, `array_abs`, `array_sqrt`, `array_square`, `array_exp`, `array_log`, `array_sin`, `array_cos`, `array_axpby`, `array_distance`, `array_cosine_similarity`, `array_scale_inplace`, `array_add_scalar_inplace`, `array_add_inplace`, `array_clamp_inplace`, `array_fill`, `array_copy`
@@ -17488,9 +17494,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File               | Imports   | Type   |
-| ------------------ | --------- | ------ |
-| `../types/complex` | `Complex` | Import |
+| File               | Imports          | Type   |
+| ------------------ | ---------------- | ------ |
+| `../types/complex` | `Complex`        | Import |
+| `./f64-buffer`     | `f64Add, f64Sub` | Import |
 
 **Exports:**
 
@@ -17520,6 +17527,14 @@ graph LR
 
 ---
 
+### `assembly/src/ops/f64-buffer.ts` - Shared Float64Array buffer helpers (Sprint 2R clone-merge G0–G5).
+
+**Exports:**
+
+- Functions: `f64Min`, `f64Max`, `f64Add`, `f64Sub`, `f64Mul`, `f64Div`
+
+---
+
 ### `assembly/src/ops/fft.ts` - Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
 
 **Exports:**
@@ -17537,6 +17552,12 @@ graph LR
 ---
 
 ### `assembly/src/ops/matrix.ts` - Matrix Operations for AssemblyScript
+
+**Internal Dependencies:**
+
+| File           | Imports                                          | Type   |
+| -------------- | ------------------------------------------------ | ------ |
+| `./f64-buffer` | `f64Add, f64Div, f64Max, f64Min, f64Mul, f64Sub` | Import |
 
 **Exports:**
 
@@ -18899,11 +18920,11 @@ graph TD
         N463[complex-array]
         N464[complex-ops]
         N465[curvefit]
-        N466[fft]
-        N467[linalg]
-        N468[matrix]
-        N469[number-theory]
-        N470[...6 more]
+        N466[f64-buffer]
+        N467[fft]
+        N468[linalg]
+        N469[matrix]
+        N470[...7 more]
     end
 
     subgraph Assembly/types
@@ -19032,14 +19053,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1211   |
+| Total TypeScript Files  | 1212   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200592 |
-| Total Exports           | 6235   |
+| Total Lines of Code     | 200596 |
+| Total Exports           | 6241   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 542    |
-| Total Functions         | 2003   |
+| Total Functions         | 2009   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

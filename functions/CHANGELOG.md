@@ -4,6 +4,8 @@
 
 ### Patch Changes
 
+- Sprint 2R clone-merge: internal `fitOrthogonalSeries` for `chebyshevFit` and `legendreFit` (length check, WASM-threshold dispatch, normal-equation JS path). Public names and behavior unchanged.
+
 - Near-clone numeric batch 6 (Sprint 2R): internal `linearFit`, `solveAugmentedNormalEquations`, Struve/Kelvin series helpers, `zipIntPoly`, set `selectById`, and `fibPair`. Public exports and behavior unchanged.
 
 ## 0.69.2

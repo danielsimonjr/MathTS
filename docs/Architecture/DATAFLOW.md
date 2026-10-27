@@ -377,6 +377,8 @@ typed-function (@danielsimonjr/mathts-core)
     |         +---> WASMBackend (threshold check)
     |         |         |
     |         |         +---> WASM when per-op threshold met --> WasmLoader --> assembly
+    |         |               (element-wise add/sub/mul/div/min/max stay JS;
+    |         |                AS f64-buffer helpers back unused wasm export wrappers)
     |         |         +---> else JSBackend (fallback always available)
     |         |
     |         +---> (ComputePool is separate — per-op thresholds, not size ≥100K)
@@ -425,5 +427,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2046  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2049  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

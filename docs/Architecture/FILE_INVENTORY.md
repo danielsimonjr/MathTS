@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1972
+**Total files**: 1974
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
-| `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
+| `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
 | `build-entry` |     1186 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      699 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      700 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1972** |                                                                                                                |
+| **Total**     | **1974** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1211 |
-| `tests`    |   699 |
+| `src`      |  1212 |
+| `tests`    |   700 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   552 |
-| `@danielsimonjr/mathts-functions`      |   832 |
+| `@danielsimonjr/mathts-functions`      |   833 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   107 |
@@ -62,7 +62,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
-| `@danielsimonjr/mathts-wasm`           |    26 |
+| `@danielsimonjr/mathts-wasm`           |    27 |
 | `@danielsimonjr/mathts-workbook`       |    66 |
 | `@danielsimonjr/mathts-workerpool`     |    16 |
 
@@ -84,6 +84,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `assembly/src/ops/complex-array.ts`                                               | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/complex-ops.ts`                                                 | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/curvefit.ts`                                                    | @danielsimonjr/mathts-wasm           | src      | reachable   |
+| `assembly/src/ops/f64-buffer.ts`                                                  | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/fft.ts`                                                         | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/linalg.ts`                                                      | @danielsimonjr/mathts-wasm           | src      | reachable   |
 | `assembly/src/ops/matrix.ts`                                                      | @danielsimonjr/mathts-wasm           | src      | reachable   |
@@ -1306,6 +1307,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/clone-near-numeric-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/clones-batch3-pin.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/clones-batch7-graph-matrix-pin.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/clones-fit-orthogonal-series-pin.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/clones-functions-scalars-pins.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics-extended.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
