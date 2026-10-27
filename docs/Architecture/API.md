@@ -695,8 +695,10 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `curvefit`/`expfit`/`logfit`/`powerfit`, `solveODESystem`, `stiffODESolver`,
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
-`numeric/` package modules: `numericJacobian`, `newton`/`secant`/`halley`,
-`fsolve`/`root`, Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`, `eigsh` (Lanczos),
+`numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`
+and `solveDAE` for forward finite-difference Jacobians), `newton`/`secant`/`halley`,
+`fsolve`/`root` (core `norm2` in the line search), Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`
+(core `norm2`), `eigsh` (Lanczos, core `norm2`),
 `thomasSolve`/`solveBanded`/`toeplitzSolve`/`ldl`, `funm`/`cosm`/`sinm`,
 `dlyap`/`care`/`dare`, `minimizeScalar` (Brent), `quad` (Gauss-Kronrod), `interpn`,
 `bsplineFit`/`bsplineEval`, `monteCarloIntegrate`, `bfgs`, `nnls`/`lsqBounded`,
@@ -773,7 +775,8 @@ fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` parti
 `fitScalarParameters` (`functions/src/fit-scalar.ts`) fits those parameters to observed
 column data with `levenbergMarquardt` (default for `l2`), `bfgs`, or `nelderMead`.
 `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; when omitted
-it still uses `numericJacobian` (`h = 1e-7`, forward differences).
+it still uses `numericJacobian` (`h = 1e-7`, forward differences). Stiff `solveODE`,
+`solveDAE`, and `solveBVP` take the same helper for their forward finite-difference Jacobians.
 
 `numericallyEquivalent(a, b, options)` (`functions/src/numeric-equivalence.ts`) samples
 with `SeededRng.next`, evaluates both trees through `compileScalar`, and compares with
@@ -1139,5 +1142,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8083  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2001  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8084  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2002  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

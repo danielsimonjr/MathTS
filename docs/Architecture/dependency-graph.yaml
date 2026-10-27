@@ -14787,6 +14787,11 @@ modules:
           imports:
             - studentTTwoSidedP
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
+            - sumSquaredDeviations
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -14920,7 +14925,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - eigsh
       interfaces:
@@ -14940,7 +14949,11 @@ modules:
         - file: ../typed/numeric.js
           imports:
             - linsolve
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - root
         - fsolve
@@ -15013,7 +15026,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - incompleteLU
         - incompleteCholesky
@@ -15117,6 +15134,7 @@ modules:
       exports:
         - numericJacobian
       interfaces:
+        - NumericJacobianStepRule
         - NumericJacobianOptions
       functions:
         - numericJacobian
@@ -15183,6 +15201,9 @@ modules:
         - file: ./solveODE.js
           imports:
             - _factorSolver
+        - file: ./numeric-jacobian.js
+          imports:
+            - numericJacobian
       workspaceDependencies: []
       exports:
         - solveDAE
@@ -15210,6 +15231,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./numeric-jacobian.js
+          imports:
+            - numericJacobian
         - file: ../utils/is.js
           imports:
             - isUnit
@@ -21261,6 +21285,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
         - file: ../numeric/solveODE.js
           imports:
             - rosenbrockSolve
@@ -39359,10 +39386,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200870
+  totalLinesOfCode: 200872
   totalExports: 6181
   totalClasses: 59
-  totalInterfaces: 537
+  totalInterfaces: 538
   totalFunctions: 1959
   totalTypeGuards: 158
   totalEnums: 0
