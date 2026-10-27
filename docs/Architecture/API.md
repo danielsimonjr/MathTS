@@ -767,6 +767,11 @@ Types `MathNode`, `StringOptions`, and `SimplifyOptions` are re-exported for sig
 register tape over column `Float64Array`s; the gradient entry adds one forward lane per
 fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` partials.
 
+`fitScalarParameters` (`functions/src/fit-scalar.ts`) fits those parameters to observed
+column data with `levenbergMarquardt` (default for `l2`), `bfgs`, or `nelderMead`.
+`levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; when omitted
+it still uses `numericJacobian` (`h = 1e-7`, forward differences).
+
 ### Typed-dispatch & bridges
 
 Every `typed/` function is built with `mathTyped(name, signatureMap)` where keys are

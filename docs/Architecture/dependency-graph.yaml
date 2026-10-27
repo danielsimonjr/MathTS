@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1190
+  totalFiles: 1191
   totalModules: 82
-  totalExports: 6161
+  totalExports: 6166
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8543,6 +8543,42 @@ modules:
         - logisticPDF
         - logisticCDF
         - logisticQuantile
+    functions/src/fit-scalar.ts:
+      description: Nonlinear fitting of {@link ScalarNode} parameters to columnar data.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./numeric/bfgs.js
+          imports:
+            - bfgs
+        - file: ./optimization-extra.js
+          imports:
+            - nelderMead
+            - levenbergMarquardt
+        - file: ./scalar-compile.js
+          imports:
+            - compileScalarGradient
+        - file: ./factories/index.js
+          imports:
+            - inv
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
+            - pairwiseSum
+            - SeededRng
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - ScalarNode
+      exports:
+        - fitScalarParameters
+      interfaces:
+        - FitScalarOptions
+        - FitScalarResult
+      functions:
+        - fitScalarParameters
     functions/src/geometry-extra.ts:
       description: Geodesy / spherical-geometry connectors (Wave C / bridge C7).
       externalDependencies: []
@@ -8952,6 +8988,10 @@ modules:
             - nelderMead
             - gradientDescent
             - levenbergMarquardt
+          reExport: true
+        - file: ./fit-scalar.js
+          imports:
+            - fitScalarParameters
           reExport: true
         - file: ./clustering-extra.js
           imports:
@@ -9399,6 +9439,13 @@ modules:
           imports:
             - OptimizeResult
             - LMResult
+            - LMOptions
+          reExport: true
+          typeOnly: true
+        - file: ./fit-scalar.js
+          imports:
+            - FitScalarOptions
+            - FitScalarResult
           reExport: true
           typeOnly: true
         - file: ./ml/kde.js
@@ -9742,6 +9789,7 @@ modules:
         - nelderMead
         - gradientDescent
         - levenbergMarquardt
+        - fitScalarParameters
         - kmeans
         - spectralClustering
         - dbscan
@@ -9958,6 +10006,9 @@ modules:
         - LogisticRegressionResult
         - OptimizeResult
         - LMResult
+        - LMOptions
+        - FitScalarOptions
+        - FitScalarResult
         - GaussianKDEOptions
         - GaussianKDEResult
         - Chi2ContingencyOptions
@@ -10180,6 +10231,7 @@ modules:
         - nelderMead
         - gradientDescent
         - levenbergMarquardt
+        - fitScalarParameters
         - kmeans
         - spectralClustering
         - dbscan
@@ -10396,6 +10448,9 @@ modules:
         - LogisticRegressionResult
         - OptimizeResult
         - LMResult
+        - LMOptions
+        - FitScalarOptions
+        - FitScalarResult
         - GaussianKDEOptions
         - GaussianKDEResult
         - Chi2ContingencyOptions
@@ -10566,6 +10621,7 @@ modules:
       interfaces:
         - OptimizeResult
         - LMResult
+        - LMOptions
       functions:
         - nelderMead
         - gradientDescent
@@ -38113,6 +38169,7 @@ dependencyGraph:
         - functions/src/config-api.ts
         - functions/src/descriptive-stats.ts
         - functions/src/distribution-functions.ts
+        - functions/src/fit-scalar.ts
         - functions/src/geometry-extra.ts
         - functions/src/grad-forward.ts
         - functions/src/help.ts
@@ -39204,18 +39261,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1190
+  totalTypeScriptFiles: 1191
   totalModules: 82
-  totalLinesOfCode: 199518
-  totalExports: 6161
+  totalLinesOfCode: 200427
+  totalExports: 6166
   totalClasses: 58
-  totalInterfaces: 533
-  totalFunctions: 1957
+  totalInterfaces: 536
+  totalFunctions: 1958
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1617
-  totalReExports: 2601
-  totalTypeOnlyImports: 605
+  totalReExports: 2605
+  totalTypeOnlyImports: 606
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

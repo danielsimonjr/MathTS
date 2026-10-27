@@ -1602,6 +1602,7 @@
       "functions/src/clustering-extra.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/evaluate.ts",
+      "functions/src/fit-scalar.ts",
       "functions/src/index.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
@@ -1670,6 +1671,13 @@
       "functions/src/typed/special.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
+    "functions/src/numeric/bfgs.ts": ["functions/src/fit-scalar.ts", "functions/src/index.ts"],
+    "functions/src/optimization-extra.ts": [
+      "functions/src/fit-scalar.ts",
+      "functions/src/index.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/scalar-compile.ts": ["functions/src/fit-scalar.ts", "functions/src/index.ts"],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
       "functions/src/scalar-eval.ts",
@@ -1704,7 +1712,6 @@
     ],
     "functions/src/typed/unit.ts": ["functions/src/index.ts", "functions/src/typed/index.ts"],
     "functions/src/scalar-eval.ts": ["functions/src/index.ts", "functions/src/scalar-compile.ts"],
-    "functions/src/scalar-compile.ts": ["functions/src/index.ts"],
     "functions/src/pareto-front.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
@@ -1747,10 +1754,7 @@
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/optimization-extra.ts": [
-      "functions/src/index.ts",
-      "functions/src/typed/numeric.ts"
-    ],
+    "functions/src/fit-scalar.ts": ["functions/src/index.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": ["functions/src/index.ts"],
     "functions/src/ml/kde.ts": ["functions/src/index.ts"],
@@ -1759,7 +1763,6 @@
       "functions/src/typed/hypothesis.ts"
     ],
     "functions/src/stats/fit-distribution.ts": ["functions/src/index.ts"],
-    "functions/src/numeric/bfgs.ts": ["functions/src/index.ts"],
     "functions/src/numeric/nnls.ts": ["functions/src/index.ts"],
     "functions/src/cas-integration.ts": ["functions/src/index.ts"],
     "functions/src/signal-filter-extra.ts": [

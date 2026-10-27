@@ -270,7 +270,9 @@ Canonical keys flatten `+` and `*`, rewrite `a-b` to `a+(-1)*b` and `a/b` to
 lowers a `ScalarNode` to a register tape over column `Float64Array`s with a
 per-row validity mask; `compileScalarGradient` extends the same interpreter with
 one gradient lane per parameter (unaries from `DUAL_UNARY_RULES`, explicit `^`
-partials). No `eval` / `new Function` and no WASM load.
+partials). `fit-scalar.ts` freezes valid rows and fits parameters with
+`levenbergMarquardt`, `bfgs`, or `nelderMead` on compiled residuals and gradients.
+No `eval` / `new Function` and no WASM load.
 
 **Scalar node bridge** (`functions/src/scalar-node-bridge.ts`): `scalarToNode`,
 `nodeToScalar`, `simplifyScalar`, and `scalarToTex` call the wired node

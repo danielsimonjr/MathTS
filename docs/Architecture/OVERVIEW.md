@@ -77,6 +77,7 @@ The mathjs-derived factories are wired into the graph via
 
 - **`expression/src/scalar-structure.ts`**: `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, and `ScalarComplexityWeights` — PySR-style canonical keys (`+`/`*` flattening; `a-b` → `a+(-1)*b`; `a/b` → `a*b^-1`; no constant-fold of `^`).
 - **`functions/src/scalar-compile.ts`**: `compileScalar` builds a register tape over column `Float64Array`s with a per-row `valid` mask; `compileScalarGradient` reuses that tape with one forward lane per fitted parameter for exact ∂f/∂param batch values; no `eval` / `new Function`; does not load WASM.
+- **`functions/src/fit-scalar.ts`**: `fitScalarParameters` fits `ScalarNode` parameters to columnar data via `levenbergMarquardt`, `bfgs`, or `nelderMead`, using `compileScalarGradient` for residuals and (for `l2`) standard errors from \((J^\top J)^{-1}\sigma^2\); does not load WASM.
 - **`functions/src/scalar-node-bridge.ts`**: `scalarToNode`, `nodeToScalar`, `simplifyScalar`, and `scalarToTex` convert between `ScalarNode` and wired expression nodes via the factory `ConstantNode` / `SymbolNode` / `OperatorNode` / `FunctionNode` classes and `simplify` / `Node.toTex` (no formula string).
 - **`functions/src/pareto-front.ts`**: `paretoFront`, `scoreFront`, `selectFrontModel` (not `paretoDist`).
 

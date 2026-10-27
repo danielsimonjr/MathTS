@@ -429,7 +429,21 @@ gaussQuad((x) => x * x, 0, 2); // ~2.6667 (exact)
 
 ## Nonlinear least squares
 
-`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Its Jacobian is `numericJacobian` with `scheme: 'forward'` and `h = 1e-7`. `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver.
+`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Options (`LMOptions`) include `maxIter`, `tol`, and an optional analytic `jacobian`; when `jacobian` is omitted the solver uses `numericJacobian` with `scheme: 'forward'` and `h = 1e-7` (unchanged default). `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver.
+
+`fitScalarParameters` fits free constants in a `ScalarNode` to columnar data using `compileScalarGradient` for residuals and (for `l2`) standard errors. Example (slope `a·x` on `(1,2),(2,4),(3,6)` → `a ≈ 2`, `restarts: 0`):
+
+```ts
+import { fitScalarParameters, scalar } from '@danielsimonjr/mathts-functions';
+const node = scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]);
+const x = new Float64Array([1, 2, 3]);
+const y = new Float64Array([2, 4, 6]);
+const { parameters } = fitScalarParameters(node, [x], y, ['x'], {
+  parameters: ['a'],
+  restarts: 0,
+});
+parameters[0]; // 2
+```
 
 ---
 
@@ -558,7 +572,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1095 exports).
+> `@danielsimonjr/mathts-functions` (1096 exports).
 
 ### Functions by category
 
@@ -612,7 +626,7 @@ ceil(2.1); // 3
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (18): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (19): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
