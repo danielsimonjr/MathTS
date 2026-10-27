@@ -28,14 +28,42 @@ export function cloneMatrix(A: number[][]): number[][] {
   return A.map((row) => [...row]);
 }
 
-/** Transpose a matrix. */
+/**
+ * Transpose a nested `number[][]` matrix (rows become columns).
+ *
+ * Reads `A[0].length` for the column count, so an empty `A` throws. Jagged rows
+ * yield `undefined` at missing entries. This is the nested-array helper; the
+ * DenseMatrix typed function is `transpose`. The public name is
+ * `transposeNestedArray`.
+ *
+ * @param A - Input matrix with at least one row
+ * @returns Transposed nested array of shape `n × m` when `A` is `m × n`
+ *
+ * @example
+ * ```ts
+ * import { transposeNestedArray } from '@danielsimonjr/mathts-matrix';
+ *
+ * const T = transposeNestedArray([
+ *   [1, 2],
+ *   [3, 4],
+ * ]);
+ * // T[0] === [1, 3], T[1] === [2, 4]
+ * ```
+ */
 export function transpose(A: number[][]): number[][] {
   const m = A.length;
   const n = A[0].length;
   return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
 }
 
-/** Matrix inverse via Gauss-Jordan. Returns null on singular input. */
+/**
+ * Matrix inverse via Gauss-Jordan. Returns null on singular input.
+ *
+ * Pivot `|a| < 1e-15` is treated as singular. Not on the package barrel;
+ * `logm` and `sqrtm` import it from this module.
+ *
+ * @internal
+ */
 export function matInv(A: number[][]): number[][] | null {
   const n = A.length;
   const M = A.map((row, i) => {

@@ -11503,7 +11503,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 262
+      "loc": 257
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

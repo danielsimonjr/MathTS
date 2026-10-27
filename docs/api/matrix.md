@@ -258,6 +258,10 @@ if (isDenseMatrix(m)) {
 ```
 
 `matMul` is the dense `number[][]` matrix product (i–k–j accumulation with zero-skip).
+`transposeNestedArray` is the dense `number[][]` transpose (`common.transpose`); the
+typed `transpose` remains the DenseMatrix operation. Empty input throws (`A[0]` is
+read). The public name is required: `functions` already depends on `matrix`, the
+package exports only `.`, and `transpose` is taken.
 
 ## Complete export index
 
