@@ -100,14 +100,15 @@ jobs:
       - name: Audit (high+)
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
         # `npm audit --audit-level=high` gate. The tree currently audits clean at
-        # every level (`bun audit` with no floor reports 0).
-        run: bun audit --audit-level=high
+        # every level (`bun audit` with no floor reports 0). Retries registry outages only
+        # (`tools/test/bun-audit-retry.mjs`); a real high+ advisory still fails on first try.
+        run: node tools/test/bun-audit-retry.mjs
 
       # Tool tests that no workflow used to run. `check:browser-safety` is the query
       # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker,
       # the scanner that `smoke-dist-node.mjs` uses to find a Node builtin in a built browser
       # entry is tested without a build, and the docs dist-freshness preflight uses its own
-      # fixtures. The first two run under `bun test` through their root scripts. The last two
+      # fixtures. The first two run under `bun test` through their root scripts. The last three
       # are direct `node --test`, as the other `tools/test` files are. They sit just before
       # the Node 22 setup below, so none of them sees that Node.
       - name: Dependency-graph query tests
@@ -121,6 +122,9 @@ jobs:
 
       - name: Docs dist-freshness tests
         run: node --test tools/test/dist-freshness.test.mjs
+
+      - name: Bun audit retry tests
+        run: node --test tools/test/bun-audit-retry.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
