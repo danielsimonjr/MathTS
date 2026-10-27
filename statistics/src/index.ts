@@ -65,6 +65,7 @@ export {
   parallelStatDistance,
   parallelStatCorr,
   parallelStatMAD,
+  parallelStatMeanAD,
   parallelStatCumsum,
   parallelStatQuantile,
   parallelStatPercentile,

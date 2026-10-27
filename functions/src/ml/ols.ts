@@ -6,6 +6,7 @@
  * to an arbitrary number of predictors via the normal equations, with the same
  * `studentTTwoSidedP`-based significance testing (the tail computed directly).
  */
+import { pairwiseDot, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
 import { studentTTwoSidedP } from '../distribution-functions.js';
 
@@ -133,10 +134,9 @@ export function ols(X: number[][], y: number[], opts?: OlsOptions): OlsResult {
 
   const fitted = matVec(design, coefficients);
   const residuals = y.map((yi, i) => yi - fitted[i]);
-  const rss = residuals.reduce((sum, e) => sum + e * e, 0);
+  const rss = pairwiseDot(residuals, residuals);
 
-  const yMean = y.reduce((sum, v) => sum + v, 0) / n;
-  const tss = y.reduce((sum, v) => sum + (v - yMean) * (v - yMean), 0);
+  const tss = sumSquaredDeviations(y);
 
   const dfResid = n - p;
   const sigma2 = rss / dfResid;

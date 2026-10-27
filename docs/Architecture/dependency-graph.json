@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6179
+    "totalExports": 6181
   },
   "entryPoints": [
     {
@@ -15872,6 +15872,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseDot", "sumSquaredDeviations"]
+          },
+          {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["matMul"]
@@ -15989,7 +15994,13 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
         "exports": ["eigsh"],
         "interfaces": ["EigshOptions", "EigshResult"],
         "functions": ["eigsh"]
@@ -16008,7 +16019,13 @@
             "imports": ["linsolve"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
         "exports": ["root", "fsolve"],
         "interfaces": ["FsolveOptions"],
         "functions": ["fsolve"],
@@ -16060,7 +16077,13 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["norm2"]
+          }
+        ],
         "exports": ["incompleteLU", "incompleteCholesky", "cg", "minres", "gmres", "bicgstab"],
         "interfaces": ["KrylovOptions", "GmresOptions", "KrylovResult"],
         "functions": ["incompleteLU", "incompleteCholesky", "cg", "minres", "gmres", "bicgstab"]
@@ -16134,7 +16157,7 @@
         "internalDependencies": [],
         "workspaceDependencies": [],
         "exports": ["numericJacobian"],
-        "interfaces": ["NumericJacobianOptions"],
+        "interfaces": ["NumericJacobianStepRule", "NumericJacobianOptions"],
         "functions": ["numericJacobian"]
       },
       "functions/src/numeric/open-root-finders.ts": {
@@ -16190,6 +16213,10 @@
           {
             "file": "./solveODE.js",
             "imports": ["_factorSolver"]
+          },
+          {
+            "file": "./numeric-jacobian.js",
+            "imports": ["numericJacobian"]
           }
         ],
         "workspaceDependencies": [],
@@ -16212,6 +16239,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./numeric-jacobian.js",
+            "imports": ["numericJacobian"]
+          },
           {
             "file": "../utils/is.js",
             "imports": ["isUnit", "isNumber", "isBigNumber"]
@@ -22772,6 +22803,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../numeric/numeric-jacobian.js",
+            "imports": ["numericJacobian"]
+          },
+          {
             "file": "../numeric/solveODE.js",
             "imports": ["rosenbrockSolve"]
           },
@@ -23482,6 +23517,7 @@
           "parallelStatDistance",
           "parallelStatCorr",
           "parallelStatMAD",
+          "parallelStatMeanAD",
           "parallelStatCumsum",
           "parallelStatQuantile",
           "parallelStatHistogram",
@@ -23518,6 +23554,7 @@
           "parallelStatDistance",
           "parallelStatCorr",
           "parallelStatMAD",
+          "parallelStatMeanAD",
           "parallelStatCumsum",
           "parallelStatQuantile",
           "parallelStatHistogram",
@@ -34427,6 +34464,7 @@
               "parallelStatDistance",
               "parallelStatCorr",
               "parallelStatMAD",
+              "parallelStatMeanAD",
               "parallelStatCumsum",
               "parallelStatQuantile",
               "parallelStatPercentile",
@@ -34696,6 +34734,7 @@
           "parallelStatDistance",
           "parallelStatCorr",
           "parallelStatMAD",
+          "parallelStatMeanAD",
           "parallelStatCumsum",
           "parallelStatQuantile",
           "parallelStatPercentile",
@@ -34894,6 +34933,7 @@
           "parallelStatDistance",
           "parallelStatCorr",
           "parallelStatMAD",
+          "parallelStatMeanAD",
           "parallelStatCumsum",
           "parallelStatQuantile",
           "parallelStatPercentile",
@@ -41713,15 +41753,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200850,
-    "totalExports": 6179,
+    "totalLinesOfCode": 200873,
+    "totalExports": 6181,
     "totalClasses": 59,
-    "totalInterfaces": 537,
+    "totalInterfaces": 538,
     "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,
-    "totalConstants": 1617,
-    "totalReExports": 2616,
+    "totalConstants": 1618,
+    "totalReExports": 2617,
     "totalTypeOnlyImports": 609,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

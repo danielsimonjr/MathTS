@@ -280,8 +280,8 @@ against #412–#418. Line numbers drift; the symbol names are the stable referen
 | Pareto front and PySR scoring (**M4, merged**)                                         | `functions/src/pareto-front.ts`, exported at `functions/src/index.ts:54`                                                                                                                                                                                                                                                                                                                                                                   | `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`; types `FrontCandidate`, `ScoredCandidate`. Unrelated to the Pareto _distribution_ `paretoDist` (`functions/src/typed/dist-objects.ts:1177`). `@example` TSDoc and architecture prose (item 5).                                                                                                                                                                                                                                                                                                                                                                                          |
 | Expression `Node` AST, `toTex`, `simplify`, `derivative`, `symbolicEqual`, `leafCount` | `expression/src/node/*` (`Node.toTex` at `expression/src/node/Node.ts:395`), `functions/src/algebra/{simplify,derivative,symbolicEqual,leafCount}.ts`                                                                                                                                                                                                                                                                                      | All operate on `Node`, not on `ScalarNode`. The node classes are built from the expression `create*Node` factories in `functions/src/factories/index.ts` (`_OperatorNode`, `_ParenthesisNode`, `_ConstantNode`, `_SymbolNode`, `_FunctionNode`, lines 977-1037) and are not on the `functions` barrel. `symbolicEqual` simplifies `e1 − e2` and is one-sided ("`false` does not absolutely rule this out"). `leafCount` counts leaves only.                                                                                                                                                                                                                  |
 | Optimizers                                                                             | `functions/src/numeric/bfgs.ts` (`bfgs`, optional analytic `grad`, projected box bounds), `functions/src/optimization-extra.ts` (`nelderMead`, `gradientDescent`, `levenbergMarquardt`)                                                                                                                                                                                                                                                    | All take `number[]` closures. `levenbergMarquardt` options are `LMOptions` (`maxIter?`, `tol?`, optional analytic `jacobian`; default Jacobian remains `numericJacobian(..., { h: 1e-7, scheme: 'forward' })`). `fitScalarParameters` (`functions/src/fit-scalar.ts`, M7) wires `compileScalarGradient` into LM/BFGS/NM. `curvefit` (`functions/src/typed/numeric.ts:909`) is a wrapper over LM. `minimize` (`functions/src/typed/numeric.ts:264`) is a second public Nelder–Mead (Sprint 2R).                                                                                                                                                               |
-| Shared numeric Jacobian                                                                | `numericJacobian` (`functions/src/numeric/numeric-jacobian.ts:47`, on the `functions` barrel)                                                                                                                                                                                                                                                                                                                                              | Central differences by default, with optional `scheme: 'forward'` (#416). Step `max(1, \|x\|)·cbrt(eps)`. `levenbergMarquardt` / `curvefit` now call it. `solveBVP`, `solveODE` (stiff methods) and `solveDAE` still bypass it with private forward differences (Sprint 2R).                                                                                                                                                                                                                                                                                                                                                                                 |
-| Stable reductions and tolerance                                                        | `pairwiseSum`, `pairwiseDot`, `norm2` (`core/src/numeric/stable.ts`, on the `core` barrel); `nearlyEqual` (`core/src/number.ts:710`, through `@danielsimonjr/mathts-core/internal`)                                                                                                                                                                                                                                                        | New losses, residual sums and tolerance checks use these. `svds` (`functions/src/numeric/svds.ts:117`) uses core `norm2` since #416. Private `norm2` copies remain in `eigsh.ts`, `fsolve.ts` and `krylov.ts` (Sprint 2R).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Shared numeric Jacobian                                                                | `numericJacobian` (`functions/src/numeric/numeric-jacobian.ts:47`, on the `functions` barrel)                                                                                                                                                                                                                                                                                                                                              | Central differences by default, with optional `scheme: 'forward'` (#416). Step `max(1, \|x\|)·cbrt(eps)` or `step: { rel, floor }`; optional `f0`. `levenbergMarquardt`, `curvefit`, `solveBVP`, stiff `solveODE` and `solveDAE` call it (#422).                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Stable reductions and tolerance                                                        | `pairwiseSum`, `pairwiseDot`, `norm2` (`core/src/numeric/stable.ts`, on the `core` barrel); `nearlyEqual` (`core/src/number.ts:710`, through `@danielsimonjr/mathts-core/internal`)                                                                                                                                                                                                                                                        | New losses, residual sums and tolerance checks use these. `svds`, `eigsh`, `fsolve` and Krylov use core `norm2`; `ols` RSS is `pairwiseDot`, TSS is `sumSquaredDeviations` (pairwise mean + correction) (#422).                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Forward-mode duals                                                                     | `core/src/types/dual.ts`, `core/src/types/dual-rules.ts` (`DUAL_UNARY_RULES`), `functions/src/grad-forward.ts` (`derivativeAt`, `valueAndDerivativeAt`, `gradientAt`)                                                                                                                                                                                                                                                                      | The dual rules cover every lowered `ScalarNode` function (exp, log, log2, log10, sin, cos, tan, sinh, cosh, tanh, abs), so exact constant gradients need no new calculus. They are unary only; `^` needs its two partials (M6).                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Reverse-mode AD                                                                        | `autograd/src/{tape,reverse-grad,grad}.ts`                                                                                                                                                                                                                                                                                                                                                                                                 | Tensor-level. It is not needed for the scalar constant counts PySR uses.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Units and dimension vectors                                                            | `core/src/types/unit/Unit.ts` (10-slot `dimensions`, `equalBase`, `multiply` / `divide` / `pow`), `core/src/types/si-dimension-vector.ts` (`SiDimensionVector` `[L,M,T,I,Θ,N,J]`, "the order UPT's Buckingham routine uses"; `toSiDimensionVector` and its inverse `fromSiDimensionVector`, plus the record form `fromSiDimensions`)                                                                                                       | `SiDimensionVector` exponents are `core` `Fraction`s since #414 (`si-dimension-vector.ts:44-52`). D-2 is decided and implemented. `Unit.dimensions` stays `number[]`. Unit-string parsing was hardened for UPT delegation (issue #347, `core/tests/types/unit-upt-delegation.test.ts`). `docs/integration/upt.md` Q2 keeps dimensional analysis **on `Tensor`** UPT-only.                                                                                                                                                                                                                                                                                    |
@@ -867,21 +867,20 @@ export function numericallyEquivalent(
 
 The two Levenberg–Marquardt bodies, `svds` `norm2`, nested-array `matMul` copies,
 log-gamma, and the retired erf were pulled forward into **PR-LM (#416)**, **PR-MATMUL
-(#417)**, and **PR-SPECIAL (#418)** and are done. Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead merge.
+(#417)**, and **PR-SPECIAL (#418)** and are done. Remaining open: Nelder–Mead merge.
+ODE/BVP/DAE Jacobians and `ols` / `norm2` consolidation are done (#422);
 `linearRegression`/`linregress` and `numericRealRoots` consolidation done (#423).
 
 - **Scope:** M7 and M8 fit and compare numbers, so the numerics under them must have
   one correct implementation each.
-  1. **Levenberg–Marquardt and finite-difference Jacobians** (I-5, extended).
-     **LM/`curvefit` done (#416):** one body on `numericJacobian` (`scheme: 'forward'`,
-     `h = 1e-7`) and core `pairwiseDot`. Still open: `solveBVP` Jacobian
-     (`typed/numeric.ts:1279-1288`, `delta = 1e-7`), `solveODE` `_fdJacobian` (`:209`),
-     `solveDAE` (`:229-236` and `:404-412`). The scalar finite-difference derivatives
-     (BFGS's `numericGradient`, `centralDiff1` / `centralDiff2`, `centralPartial`,
-     `numericalDerivative`) are not Jacobians and are not part of this item. Route the
-     remaining solvers through `numericJacobian`; if they need their relative forward
-     step, add that step rule to `NumericJacobianOptions` instead of keeping private
-     loops. The M7 public `jacobian` option is implemented (`LMOptions.jacobian`).
+  1. **Levenberg–Marquardt and finite-difference Jacobians** (I-5, extended). **Done (#422).**
+     **LM/`curvefit` (#416)** and **`solveBVP` / stiff `solveODE` / `solveDAE` (#422)** use
+     `numericJacobian` (forward differences; `h = 1e-7` for BVP shooting,
+     `step: { rel: 1e-7, floor: 1e-8 }` plus optional `f0` for ODE/DAE). Scalar
+     finite-difference derivatives
+     (BFGS `numericGradient`, `centralDiff1` / `centralDiff2`, `centralPartial`,
+     `numericalDerivative`) are not Jacobians and stay separate. The M7 public `jacobian`
+     option is implemented (`LMOptions.jacobian`).
 
   2. **`svds` vector norm** (I-5). **Done (#416).** `functions/src/numeric/svds.ts:117`
      calls core `norm2`.
@@ -889,8 +888,8 @@ log-gamma, and the retired erf were pulled forward into **PR-LM (#416)**, **PR-M
      (`matrix/src/operations/common.ts:80`, on the matrix barrel). `ols`,
      `geometry-extra`, `control-equations`, `solveODE` and the sequential path of
      `matrix-ops.ts` call it. Leave `functions/src/typed/arithmetic.ts:1557` `matmul`
-     alone. **Still open:** replace the naive `reduce` sums in `ols` (RSS, mean, TSS)
-     with `core` `pairwiseSum`.
+     alone. **`ols` RSS/mean/TSS (#422):** `pairwiseDot` (RSS) and
+     `sumSquaredDeviations` (TSS, which uses `pairwiseSum` for the mean).
   4. **Log-gamma drift** (I-2). **Copies unified (#418).** `lgammaNumber` keeps the
      NaN-for-negative contract (documented; not delegated).
   5. **Retired erf** (I-3). **Done (#418).** Hypothesis CDF and the KS kernel use
@@ -1031,10 +1030,9 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   1. **D-2 and the units docs.** D-2 is recorded in §10 and implemented by Sprint 1R
      item 7 (PR-SIDIM, #414); do not re-decide here. Update `docs/integration/upt.md` with
      what UPT may now delegate after #414.
-  2. **`simplify` with `exactFractions`** (I-12). `_exactFraction`
-     (`functions/src/algebra/simplifyConstant.ts:244`) reads mathjs-style `f.n` / `f.d`,
-     while `core` `Fraction` exposes `numerator` / `denominator`, so `0.4 * x` is never
-     converted. Read the `core` fields; do not add a Fraction adapter type.
+  2. **`simplify` with `exactFractions`** (I-12). **Done.** `_exactFraction` reads
+     `core` `Fraction` `numerator` / `denominator`; `0.4 * x` with `exactFractions` is
+     pinned to 2/5 by oracle test.
   3. **Constant uncertainty** (§10, question 4). Only if the owner says yes: add
      CODATA standard uncertainties to `functions/src/type/unit/physicalConstants.ts`
      so `propagateUncertainty` and M7's weights can use them.
@@ -1043,7 +1041,7 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   the exact fraction 2/5, pinned by a test; D-2 is recorded; `docs/integration/upt.md`
   matches the code.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
+  - [x] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
 
 ### Phase 4 — Search kit (optional; no new package)
@@ -1252,7 +1250,8 @@ re-decide it here if PR-POLY has already merged.
   4. **Configuration and dependency hygiene.** `create(all, config)` mutates the
      process-wide `DEFAULT_CONFIG` (I-9); the nine unused `typed-function ^4.0.0` pins are
      gone (#413) and `packages/typed-function` still has no workspace dependents (I-10);
-     the `mad` / `parallelStatMAD` naming (I-16).
+     the `mad` / `parallelStatMAD` naming (I-16). **Done (mad clause):** `parallelStatMeanAD`
+     alias, docs, and median-vs-mean oracle test; I-9 and I-10 in this item remain open.
   5. **Dead artefacts** (D-3, I-6, I-18). **Done (#413).** Deleted
      `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
      (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).

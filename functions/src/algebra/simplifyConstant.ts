@@ -15,11 +15,10 @@ import { noBignumber, noFraction } from '../utils/noop.js';
 import type { MathNode, ConstantNode, ArrayNode, OperatorNode } from '../utils/node.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
-/** A Fraction-like runtime value (fraction.js) */
+/** Core `Fraction` (or compatible) injected by the factory scope */
 interface FractionLike {
-  n: bigint;
-  d: bigint;
-  s: number;
+  numerator: bigint;
+  denominator: bigint;
   valueOf(): number;
 }
 /** Simplification options */
@@ -248,7 +247,9 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
         const fractionsLimit =
           options && typeof options.fractionsLimit === 'number' ? options.fractionsLimit : Infinity; // no limit by default
 
-        if (f.valueOf() === n && f.n < fractionsLimit && f.d < fractionsLimit) {
+        const num = f.numerator < 0n ? -f.numerator : f.numerator;
+        const den = f.denominator;
+        if (f.valueOf() === n && num < fractionsLimit && den < fractionsLimit) {
           return f;
         }
       }
@@ -320,17 +321,19 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       const fromBigInt = (value: bigint): unknown =>
         config.number === 'BigNumber' && bignumber ? bignumber(value) : Number(value);
 
-      // Convert sign to BigInt to avoid "Cannot mix BigInt and other types" error
-      const signBigInt = BigInt(f.s);
-      const numeratorValue = signBigInt * f.n;
+      const numeratorValue = f.numerator;
+      const denominator = f.denominator;
       const numeratorNode =
         numeratorValue < 0n
           ? new OperatorNode('-', 'unaryMinus', [new ConstantNode(fromBigInt(-numeratorValue))])
           : new ConstantNode(fromBigInt(numeratorValue));
 
-      return f.d === 1n
+      return denominator === 1n
         ? numeratorNode
-        : new OperatorNode('/', 'divide', [numeratorNode, new ConstantNode(fromBigInt(f.d))]);
+        : new OperatorNode('/', 'divide', [
+            numeratorNode,
+            new ConstantNode(fromBigInt(denominator)),
+          ]);
     }
 
     /* Handles constant indexing of ArrayNodes, matrices, and ObjectNodes */

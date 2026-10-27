@@ -6656,9 +6656,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import   |
-| ------------------------------ | -------- |
-| `@danielsimonjr/mathts-matrix` | `matMul` |
+| Package                        | Import                              |
+| ------------------------------ | ----------------------------------- |
+| `@danielsimonjr/mathts-core`   | `pairwiseDot, sumSquaredDeviations` |
+| `@danielsimonjr/mathts-matrix` | `matMul`                            |
 
 **Internal Dependencies:**
 
@@ -6759,6 +6760,12 @@ graph LR
 
 ### `functions/src/numeric/eigsh.ts` - Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.
 
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
+
 **Exports:**
 
 - Interfaces: `EigshOptions`, `EigshResult`
@@ -6768,6 +6775,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/fsolve.ts` - Nonlinear system solver: `fsolve` (damped Newton with a backtracking line
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Internal Dependencies:**
 
@@ -6823,6 +6836,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/krylov.ts` - Iterative Krylov-subspace linear solvers.
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Exports:**
 
@@ -6894,7 +6913,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `NumericJacobianOptions`
+- Interfaces: `NumericJacobianStepRule`, `NumericJacobianOptions`
 - Types: `VectorField`
 - Functions: `numericJacobian`
 
@@ -6945,9 +6964,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports         | Type   |
-| --------------- | --------------- | ------ |
-| `./solveODE.js` | `_factorSolver` | Import |
+| File                    | Imports           | Type   |
+| ----------------------- | ----------------- | ------ |
+| `./solveODE.js`         | `_factorSolver`   | Import |
+| `./numeric-jacobian.js` | `numericJacobian` | Import |
 
 **Exports:**
 
@@ -6977,11 +6997,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                              | Type               |
-| --------------------- | -------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`      | `isUnit, isNumber, isBigNumber`                                      | Import             |
-| `../utils/factory.js` | `factory`                                                            | Import             |
-| `../types.js`         | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
+| File                    | Imports                                                              | Type               |
+| ----------------------- | -------------------------------------------------------------------- | ------------------ |
+| `./numeric-jacobian.js` | `numericJacobian`                                                    | Import             |
+| `../utils/is.js`        | `isUnit, isNumber, isBigNumber`                                      | Import             |
+| `../utils/factory.js`   | `factory`                                                            | Import             |
+| `../types.js`           | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -10232,6 +10253,7 @@ graph LR
 
 | File                               | Imports                                                                                                                            | Type      |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
 | `../optimization-extra.js`         | `levenbergMarquardt`                                                                                                               | Import    |
@@ -10403,7 +10425,7 @@ graph LR
 
 - Types: `NormalizationType`
 - Functions: `parallelStatPercentile`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `initializeStatistics`, `terminateStatistics`
-- Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
+- Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatMeanAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
 
 ---
 
@@ -16313,7 +16335,7 @@ graph LR
 | Package                           | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `@danielsimonjr/mathts-functions` | `mean, median, mode, variance, std, quantileSeq, mad, corr, cumsum, sum, prod, min, max, rankdata, spearman, kendallTau, gmean, hmean, moment, skewness, kurtosis, iqr, sem, zscore, cov, corrcoef`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `@danielsimonjr/mathts-functions` | `parallelStatSum, parallelStatMean, parallelStatVariance, parallelStatStd, parallelStatMin, parallelStatMax, parallelStatMinMax, parallelStatMedian, parallelStatMode, parallelStatProd, parallelStatNorm, parallelStatDistance, parallelStatCorr, parallelStatMAD, parallelStatCumsum, parallelStatQuantile, parallelStatPercentile, parallelStatHistogram, quickSelect, medianSelect, minSelect, maxSelect, typedStatistics`                                                                                                                                                                                                                                                                               |
+| `@danielsimonjr/mathts-functions` | `parallelStatSum, parallelStatMean, parallelStatVariance, parallelStatStd, parallelStatMin, parallelStatMax, parallelStatMinMax, parallelStatMedian, parallelStatMode, parallelStatProd, parallelStatNorm, parallelStatDistance, parallelStatCorr, parallelStatMAD, parallelStatMeanAD, parallelStatCumsum, parallelStatQuantile, parallelStatPercentile, parallelStatHistogram, quickSelect, medianSelect, minSelect, maxSelect, typedStatistics`                                                                                                                                                                                                                                                           |
 | `@danielsimonjr/mathts-functions` | `normalDist, betaDist, binomialDist, chiSquaredDist, exponentialDist, fDist, gammaDist, logNormalDist, poissonDist, tDist, uniformDist, weibullDist, hypergeometricDist, negativeBinomialDist, DIST_WORKER_THRESHOLD, normalPDF, normalCDF, exponentialPDF, exponentialCDF, poissonPMF, binomialPMF, geometricPMF, bernoulliPMF, betaPDF, gammaPDF, studentTPDF, noncentralChi2PDF, entropy, jsDivergence, typedDistributions, normalQuantile, studentTCDF, studentTQuantile, chiSquaredCDF, chiSquaredQuantile, fCDF, fQuantile, gammaCDF, gammaQuantile, betaCDF, betaQuantile, cauchyPDF, cauchyCDF, cauchyQuantile, laplacePDF, laplaceCDF, laplaceQuantile, logisticPDF, logisticCDF, logisticQuantile` |
 | `@danielsimonjr/mathts-functions` | `studentTTest, studentTTestPaired, chiSquareTest, anova, kolmogorovSmirnovTest, kolmogorovSmirnov2Test, mannWhitneyTest, shapiroWilkTest, leveneTest, bartlettTest, proportionZTest, binomialTest, principalComponentAnalysis, fTest, jarqueBera, kruskalWallis, wilcoxon, fisherExact, studentizedRangeCDF, studentizedRangeQuantile, tukeyHSD`                                                                                                                                                                                                                                                                                                                                                             |
 | `@danielsimonjr/mathts-functions` | `combinations, combinationsWithRep, permutations, multinomial, factorial, doubleFactorial, risingFactorial, fallingFactorial, subfactorial, bernoulli, gamma, lgamma, kldivergence, random, randomInt, pickRandom, seedProbabilityRng, typedProbability`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -16330,7 +16352,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `mean`, `median`, `mode`, `variance`, `std`, `quantileSeq`, `mad`, `corr`, `cumsum`, `sum`, `prod`, `min`, `max`, `rankdata`, `spearman`, `kendallTau`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`, `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `DIST_WORKER_THRESHOLD`, `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `entropy`, `jsDivergence`, `typedDistributions`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `studentTTest`, `studentTTestPaired`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `kolmogorovSmirnov2Test`, `mannWhitneyTest`, `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `principalComponentAnalysis`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `combinations`, `combinationsWithRep`, `permutations`, `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, `random`, `randomInt`, `pickRandom`, `seedProbabilityRng`, `typedProbability`, `linearRegression`, `polyFit`, `cummax`, `cummin`, `cumprod`, `cumtrapz`, `trapzF64`, `movingAverage`, `ewma`, `detrend`, `acf`, `logsumexp`, `softmax`, `kmeans`, `spectralClustering`, `beta`, `digamma`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`, `Distribution`, `SampleNOptions`, `LinRegressResult`, `CorrelationTestResult`, `DescribeResult`, `HistogramResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `MultivariateDistribution`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
+- Re-exports: `mean`, `median`, `mode`, `variance`, `std`, `quantileSeq`, `mad`, `corr`, `cumsum`, `sum`, `prod`, `min`, `max`, `rankdata`, `spearman`, `kendallTau`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatMeanAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatPercentile`, `parallelStatHistogram`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `typedStatistics`, `normalDist`, `betaDist`, `binomialDist`, `chiSquaredDist`, `exponentialDist`, `fDist`, `gammaDist`, `logNormalDist`, `poissonDist`, `tDist`, `uniformDist`, `weibullDist`, `hypergeometricDist`, `negativeBinomialDist`, `DIST_WORKER_THRESHOLD`, `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `entropy`, `jsDivergence`, `typedDistributions`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `studentTTest`, `studentTTestPaired`, `chiSquareTest`, `anova`, `kolmogorovSmirnovTest`, `kolmogorovSmirnov2Test`, `mannWhitneyTest`, `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `principalComponentAnalysis`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `combinations`, `combinationsWithRep`, `permutations`, `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`, `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, `random`, `randomInt`, `pickRandom`, `seedProbabilityRng`, `typedProbability`, `linearRegression`, `polyFit`, `cummax`, `cummin`, `cumprod`, `cumtrapz`, `trapzF64`, `movingAverage`, `ewma`, `detrend`, `acf`, `logsumexp`, `softmax`, `kmeans`, `spectralClustering`, `beta`, `digamma`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `andersonDarlingTest`, `dagostinoTest`, `friedmanTest`, `anova2`, `multipleComparison`, `paretoDist`, `rayleighDist`, `triangularDist`, `discreteUniformDist`, `gumbelDist`, `invGaussDist`, `multivariateNormal`, `meanCI`, `proportionCI`, `bootstrapCI`, `permutationTest`, `mahalanobis`, `hotellingT2`, `Distribution`, `SampleNOptions`, `LinRegressResult`, `CorrelationTestResult`, `DescribeResult`, `HistogramResult`, `NormalityTestResult`, `Anova2Effect`, `Anova2Result`, `MultivariateDistribution`, `ConfidenceInterval`, `BootstrapCIOptions`, `PermutationOptions`, `HotellingResult`
 
 ---
 
@@ -17882,10 +17904,10 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `core/src/index`                                       | 17 files     | 0 files    |
 | `matrix/src/operations/index`                          | 16 files     | 1 file     |
-| `functions/src/typed/numeric`                          | 8 files      | 9 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
@@ -18732,11 +18754,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200850 |
-| Total Exports           | 6179   |
-| Total Re-exports        | 2616   |
+| Total Lines of Code     | 200873 |
+| Total Exports           | 6181   |
+| Total Re-exports        | 2617   |
 | Total Classes           | 59     |
-| Total Interfaces        | 537    |
+| Total Interfaces        | 538    |
 | Total Functions         | 1959   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |

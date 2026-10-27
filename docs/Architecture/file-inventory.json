@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1925,
+  "totalFiles": 1928,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 671,
+    "test": 674,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 671,
+    "tests": 674,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 807,
+    "@danielsimonjr/mathts-functions": 810,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -5161,7 +5161,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 664
+      "loc": 667
     },
     {
       "file": "functions/src/algebra/simplifyCore.ts",
@@ -6526,14 +6526,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 275
+      "loc": 273
     },
     {
       "file": "functions/src/numeric/fsolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 113
+      "loc": 107
     },
     {
       "file": "functions/src/numeric/gauss-legendre4.ts",
@@ -6568,7 +6568,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 602
+      "loc": 600
     },
     {
       "file": "functions/src/numeric/matrix-functions.ts",
@@ -6603,7 +6603,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 119
     },
     {
       "file": "functions/src/numeric/open-root-finders.ts",
@@ -6631,7 +6631,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 540
+      "loc": 532
     },
     {
       "file": "functions/src/numeric/solveDDE.ts",
@@ -6645,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1842
+      "loc": 1838
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -7996,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2346
+      "loc": 2336
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -8052,7 +8052,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 870
+      "loc": 887
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -9826,6 +9826,13 @@
       "loc": 27
     },
     {
+      "file": "functions/tests/mad-median-vs-mean-ad.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 45
+    },
+    {
       "file": "functions/tests/matrix-bridge-accel.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9907,7 +9914,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 138
     },
     {
       "file": "functions/tests/numeric-literal.test.ts",
@@ -9928,7 +9935,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 52
     },
     {
       "file": "functions/tests/open-root-finders.test.ts",
@@ -10148,6 +10155,13 @@
       "loc": 105
     },
     {
+      "file": "functions/tests/s2r-jacobian-norms-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
+    },
+    {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10223,6 +10237,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 66
+    },
+    {
+      "file": "functions/tests/simplify-exact-fractions.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 150
     },
     {
       "file": "functions/tests/solveode-events.test.ts",
@@ -12322,14 +12343,14 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 291
+      "loc": 292
     },
     {
       "file": "statistics/tests/statistics.test.ts",
       "package": "@danielsimonjr/mathts-statistics",
       "area": "tests",
       "disposition": "test",
-      "loc": 135
+      "loc": 137
     },
     {
       "file": "statistics/vitest.config.ts",

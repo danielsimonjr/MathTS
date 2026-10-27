@@ -187,6 +187,10 @@ sin(new Complex(0, 1)); // i * sinh(1)
 | `std`      | `(arr, normalization?) => number` | Standard deviation        |
 | `mad`      | `(arr) => number`                 | Median absolute deviation |
 
+`mad([1, 2, 3, 4, 5])` is **1** (median of |xᵢ − median|). `parallelStatMAD` /
+`parallelStatMeanAD` are the **mean** absolute deviation from the mean (**1.2** on the same
+array); they are not interchangeable with factory `mad`.
+
 ### Advanced
 
 | Function      | Signature                 | Description          |
@@ -429,7 +433,18 @@ gaussQuad((x) => x * x, 0, 2); // ~2.6667 (exact)
 
 ## Nonlinear least squares
 
-`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Options (`LMOptions`) include `maxIter`, `tol`, and an optional analytic `jacobian`; when `jacobian` is omitted the solver uses `numericJacobian` with `scheme: 'forward'` and `h = 1e-7` (unchanged default). `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver.
+`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Options (`LMOptions`) include `maxIter`, `tol`, and an optional analytic `jacobian`; when `jacobian` is omitted the solver uses `numericJacobian` with `scheme: 'forward'` and `h = 1e-7` (unchanged default). `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver. Stiff `solveODE`, `solveDAE`, and `solveBVP` (shooting) take their forward finite-difference Jacobians from the same `numericJacobian` helper (`step: { rel: 1e-7, floor: 1e-8 }` and optional `f0` on ODE/DAE; `h = 1e-7` on BVP). Forward differences on a linear map are exact for any step:
+
+```ts
+import { numericJacobian } from '@danielsimonjr/mathts-functions';
+const A = [
+  [1, 2],
+  [3, 4],
+];
+const f = (v) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+numericJacobian(f, [1, 2], { scheme: 'forward', h: 1e-7 });
+// => [[1, 2], [3, 4]]
+```
 
 `fitScalarParameters` fits free constants in a `ScalarNode` to columnar data using `compileScalarGradient` for residuals and (for `l2`) standard errors. Example (slope `a·x` on `(1,2),(2,4),(3,6)` → `a ≈ 2`, `restarts: 0`):
 
@@ -581,13 +596,26 @@ floor(2.9); // 2
 ceil(2.1); // 3
 ```
 
+### `simplify` and `exactFractions`
+
+With `exactFractions: true` (default), decimal literals that are exact rationals are
+rewritten when both numerator and denominator are below `fractionsLimit` (default
+`Infinity`):
+
+```typescript
+import { simplify } from '@danielsimonjr/mathts-functions';
+
+simplify('0.4 * x', {}, { exactFractions: true }).toString(); // e.g. 'x * 2 / 5'
+simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
+```
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1098 exports).
+> `@danielsimonjr/mathts-functions` (1099 exports).
 
 ### Functions by category
 
@@ -605,7 +633,7 @@ ceil(2.1); // 3
 
 **Combinatorics & Number Theory** (40): `bellNumbers`, `bernoulli`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `continuedFraction`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fibonacci`, `harmonicNumber`, `integerDigits`, `jacobiSymbol`, `kroneckerSymbol`, `lucas`, `lucasL`, `moebiusMu`, `multinomial`, `multiplicativeOrder`, `nextPrime`, `partitions`, `permutations`, `permutationsGen`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `risingFactorial`, `stirlingS1`, `stirlingS2`, `subfactorial`
 
-**Statistics** (87): `acf`, `adfuller`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `durbinWatson`, `elasticNet`, `ewma`, `fitDistribution`, `glm`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `ljungBox`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `mvnPdf`, `mvnSample`, `ols`, `pacf`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `ridge`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `tTestPower`, `variation`, `zscore`
+**Statistics** (88): `acf`, `adfuller`, `bootstrapCI`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `durbinWatson`, `elasticNet`, `ewma`, `fitDistribution`, `glm`, `gmean`, `histogram`, `hmean`, `iqr`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `ljungBox`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `mvnPdf`, `mvnSample`, `ols`, `pacf`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMeanAD`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `pearsonr`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankdata`, `ridge`, `sem`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `trimmedMean`, `tTestPower`, `variation`, `zscore`
 
 **Probability Distributions** (71): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `circmean`, `circstd`, `circvar`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gumbelDist`, `hypergeometricDist`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `seedProbabilityRng`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `tDist`, `triangularDist`, `uniformDist`, `vonMisesPDF`, `weibullDist`
 

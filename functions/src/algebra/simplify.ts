@@ -278,7 +278,7 @@ export const createSimplify = /* #__PURE__ */ factory(
      *    `simplify.realContext` will not, as `0/0` is not equal to 1.)
      *  - `exactFractions` (true): whether to try to convert all constants to
      *    exact rational numbers.
-     *  - `fractionsLimit` (10000): when `exactFractions` is true, constants will
+     *  - `fractionsLimit` (`Infinity`): when `exactFractions` is true, constants will
      *    be expressed as fractions only when both numerator and denominator
      *    are smaller than `fractionsLimit`.
      *
