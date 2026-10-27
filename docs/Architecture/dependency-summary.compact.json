@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1192, "e": 6189, "re": 2620 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1193, "e": 6195, "re": 2624 },
   "s": {
-    "loc": 200941,
+    "loc": 200798,
     "cls": 59,
     "int": 539,
-    "fn": 1963,
+    "fn": 1965,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 607
+    "toi": 608
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -441,7 +441,7 @@
       ]
     },
     "autograd": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "DualTensor",
         "forwardGrad",
@@ -453,7 +453,8 @@
         "TapedTensor",
         "reverseGrad",
         "ScalarFn",
-        "NumericInput"
+        "NumericInput",
+        "assertSameShape"
       ],
       "cls": ["DualTensor", "Tape", "TapedTensor"]
     },

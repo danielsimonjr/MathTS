@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1192
+  totalFiles: 1193
   totalModules: 82
-  totalExports: 6189
+  totalExports: 6195
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1418,6 +1418,7 @@ modules:
             - verifyWasmIntegrity
             - resolvePackagedWasm
             - defaultWasmLocation
+            - WasmModuleLoader
           reExport: true
         - file: ./shared.js
           imports:
@@ -1520,6 +1521,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - format
         - toEngineering
         - toExponential
@@ -1608,6 +1610,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - MemoizedFunction
         - ConfigOptions
         - MathJsConfig
@@ -1893,6 +1896,7 @@ modules:
       internalDependencies:
         - file: ./types/wasm-loader.js
           imports:
+            - LoadingMetrics
             - WasmManifest
           typeOnly: true
       workspaceDependencies: []
@@ -3537,6 +3541,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -5800,7 +5805,10 @@ modules:
       description: DualTensor — a Tensor + per-element tangent component for forward-mode AD.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./shape.js
+          imports:
+            - assertSameShape
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-tensor'
           directory: tensor
@@ -5930,11 +5938,24 @@ modules:
         - reverseGrad
       functions:
         - reverseGrad
+    autograd/src/shape.ts:
+      description: Shared shape guard for DualTensor and TapedTensor elementwise ops.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - assertSameShape
+      functions:
+        - assertSameShape
     autograd/src/tape.ts:
       description: Tape — records the sequence of ops during a forward pass so we can
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./shape.js
+          imports:
+            - assertSameShape
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-tensor'
           directory: tensor
@@ -14622,9 +14643,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isIndex
         - file: ../utils/object.js
           imports:
             - clone
@@ -14651,7 +14669,11 @@ modules:
           imports:
             - Index
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - getStringSubset
       exports:
         - createSubset
       constants:
@@ -21520,12 +21542,15 @@ modules:
           directory: parallel
           imports:
             - computePool
+            - OpName
       exports:
         - kernelSource
         - mapArray
+        - mapBinaryF64
       functions:
         - kernelSource
         - mapArray
+        - mapBinaryF64
     functions/src/typed/polynomial-ideal.ts:
       description: Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
       externalDependencies: []
@@ -21675,6 +21700,9 @@ modules:
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
+        - file: ./parallel-map.js
+          imports:
+            - mapBinaryF64
         - file: ../wasm/signal/wasm-bridge.js
           imports:
             - applyWindowDispatch
@@ -23261,6 +23289,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -23945,6 +23974,11 @@ modules:
           imports:
             - createSymbolNode
           reExport: true
+        - file: ./node/utils/stringSubset.js
+          imports:
+            - getStringSubset
+            - setStringSubset
+          reExport: true
         - file: ./scalar-builder.js
           imports:
             - createScalarBuilder
@@ -23968,6 +24002,11 @@ modules:
           imports:
             - MathNode
             - StringOptions
+          reExport: true
+          typeOnly: true
+        - file: ./node/utils/stringSubset.js
+          imports:
+            - IndexLike
           reExport: true
           typeOnly: true
         - file: ./scalar-builder.js
@@ -24008,6 +24047,8 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - getStringSubset
+        - setStringSubset
         - createScalarBuilder
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
@@ -24023,6 +24064,7 @@ modules:
         - scalarEquals
         - MathNode
         - StringOptions
+        - IndexLike
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -24061,6 +24103,8 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - getStringSubset
+        - setStringSubset
         - createScalarBuilder
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
@@ -24076,6 +24120,7 @@ modules:
         - scalarEquals
         - MathNode
         - StringOptions
+        - IndexLike
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -30265,7 +30310,7 @@ modules:
       functions:
         - assignFactory
     expression/src/node/utils/stringSubset.ts:
-      description: Retrieve a subset of a string
+      description: Retrieve a subset of a string.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -38221,6 +38266,7 @@ dependencyGraph:
         - autograd/src/grad.ts
         - autograd/src/index.ts
         - autograd/src/reverse-grad.ts
+        - autograd/src/shape.ts
         - autograd/src/tape.ts
     - name: Functions/algebra
       files:
@@ -39420,18 +39466,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1192
+  totalTypeScriptFiles: 1193
   totalModules: 82
-  totalLinesOfCode: 200941
-  totalExports: 6189
+  totalLinesOfCode: 200798
+  totalExports: 6195
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1963
+  totalFunctions: 1965
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2620
-  totalTypeOnlyImports: 607
+  totalReExports: 2624
+  totalTypeOnlyImports: 608
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

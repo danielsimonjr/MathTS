@@ -11,6 +11,7 @@
  * v0.2.0 adds: contract (named-index), matmul (batched rank-N).
  */
 import { Tensor, Index, tensorSvd, tensorEig } from '@danielsimonjr/mathts-tensor';
+import { assertSameShape } from './shape.js';
 
 type BackwardFn = (outputGrad: Float64Array) => void;
 
@@ -456,12 +457,7 @@ export class TapedTensor {
   }
 
   private checkSameShape(other: TapedTensor, op: string): void {
-    if (
-      this.shape.length !== other.shape.length ||
-      !this.shape.every((v, i) => v === other.shape[i])
-    ) {
-      throw new Error(`TapedTensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
-    }
+    assertSameShape(this.shape, other.shape, 'TapedTensor', op);
   }
 
   // ---------------------------------------------------------------------------

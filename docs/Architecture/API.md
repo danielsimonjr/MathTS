@@ -244,10 +244,14 @@ utilities (`clone`, `memoize`, `deepStrictEqual`, `arraySize`, `resize`, `reshap
 and unit factory internals.
 
 **WASM integrity helpers** (JS side of the SHA-384 manifest security invariant),
-in `core/src/wasm-loader.ts` and surfaced via `core/internal`:
+in `core/src/wasm-loader.ts` and surfaced via `core/internal` (not the `.` entry):
 `sha384OfBuffer(buffer)`, `verifyWasmIntegrity(buffer, wasmPath, options?)`,
 `loadWasmManifest(wasmPath)`, `resolvePackagedWasm(metaUrl, wasmFile)`,
-`defaultWasmLocation(metaUrl, wasmFile, opts?)`. Types `WasmManifest`, `LoadingMetrics`.
+`defaultWasmLocation(metaUrl, wasmFile, opts?)`. Abstract class
+`WasmModuleLoader<TModule>` holds the shared `load` / cached `loadModule` /
+`getImports` orchestration; each package's `WasmLoader` subclasses it and keeps
+the Node/browser arms that call `verifyWasmIntegrity`. Types `WasmManifest`,
+`LoadingMetrics`.
 
 ---
 
@@ -1147,5 +1151,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8092  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2007  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8098  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2014  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

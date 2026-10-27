@@ -347,6 +347,7 @@
     "tensor/src/operations/pad.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/roll.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/flip.ts": ["tensor/src/index.ts"],
+    "autograd/src/shape.ts": ["autograd/src/dual-tensor.ts", "autograd/src/tape.ts"],
     "autograd/src/dual-tensor.ts": ["autograd/src/forward-grad.ts", "autograd/src/index.ts"],
     "autograd/src/tape.ts": [
       "autograd/src/grad.ts",
@@ -2322,6 +2323,7 @@
     "functions/src/typed/parallel-map.ts": [
       "functions/src/typed/distributions.ts",
       "functions/src/typed/hypothesis.ts",
+      "functions/src/typed/signal.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [
@@ -2589,6 +2591,12 @@
     "expression/src/node/RangeNode.ts": ["expression/src/index.ts"],
     "expression/src/node/RelationalNode.ts": ["expression/src/index.ts"],
     "expression/src/node/SymbolNode.ts": ["expression/src/index.ts"],
+    "expression/src/node/utils/stringSubset.ts": [
+      "expression/src/index.ts",
+      "expression/src/node/AssignmentNode.ts",
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts"
+    ],
     "expression/src/scalar-builder.ts": [
       "expression/src/index.ts",
       "expression/src/scalar-structure.ts"
@@ -3799,11 +3807,6 @@
       "expression/src/node/utils/stringSubset.ts"
     ],
     "expression/src/node/utils/assign.ts": ["expression/src/node/AssignmentNode.ts"],
-    "expression/src/node/utils/stringSubset.ts": [
-      "expression/src/node/AssignmentNode.ts",
-      "expression/src/node/utils/access.ts",
-      "expression/src/node/utils/assign.ts"
-    ],
     "expression/src/utils/latex.ts": [
       "expression/src/node/ConstantNode.ts",
       "expression/src/node/FunctionAssignmentNode.ts",
