@@ -21,6 +21,7 @@
  */
 
 import { parse, evaluate } from '../factories/evaluate.js';
+import { euclidSnap } from './euclid.js';
 import {
   polyFromExpression,
   buchberger,
@@ -2133,14 +2134,7 @@ function iltMatchPattern(node: MathNode, sVar: string, pattern: string): boolean
 }
 
 function iltGcd(a: number, b: number): number {
-  a = Math.abs(Math.round(a));
-  b = Math.abs(Math.round(b));
-  while (b !== 0) {
-    const tmp = b;
-    b = a % b;
-    a = tmp;
-  }
-  return a;
+  return euclidSnap(a, b, Math.round);
 }
 
 function iltNiceNumber(val: f64): string {

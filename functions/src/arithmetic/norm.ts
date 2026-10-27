@@ -254,21 +254,18 @@ export const createNorm = /* #__PURE__ */ factory(
      * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormOne(x: MatrixType): number | BigNumberType {
-      // norm(x) = the largest column sum
-      const c: (number | BigNumberType)[] = [];
-      // result
-      let maxc: number | BigNumberType = 0;
-      // skip zeros since abs(0) == 0
+    function _matrixNormSum(x: MatrixType, axis: 0 | 1): number | BigNumberType {
+      const sums: (number | BigNumberType)[] = [];
+      let maxSum: number | BigNumberType = 0;
       x.forEach(function (value: number | BigNumberType | ComplexType, index: number[]) {
-        const j = index[1];
-        const cj = add(c[j] || 0, abs(value)) as number | BigNumberType;
-        if (larger(cj, maxc)) {
-          maxc = cj;
+        const k = index[axis];
+        const sk = add(sums[k] || 0, abs(value)) as number | BigNumberType;
+        if (larger(sk, maxSum)) {
+          maxSum = sk;
         }
-        c[j] = cj;
+        sums[k] = sk;
       }, true);
-      return maxc;
+      return maxSum;
     }
 
     /**
@@ -296,23 +293,6 @@ export const createNorm = /* #__PURE__ */ factory(
      * @returns {number | BigNumberType} Returns the norm
      * @private
      */
-    function _matrixNormInfinity(x: MatrixType): number | BigNumberType {
-      // norm(x) = the largest row sum
-      const r: (number | BigNumberType)[] = [];
-      // result
-      let maxr: number | BigNumberType = 0;
-      // skip zeros since abs(0) == 0
-      x.forEach(function (value: number | BigNumberType | ComplexType, index: number[]) {
-        const i = index[0];
-        const ri = add(r[i] || 0, abs(value)) as number | BigNumberType;
-        if (larger(ri, maxr)) {
-          maxr = ri;
-        }
-        r[i] = ri;
-      }, true);
-      return maxr;
-    }
-
     /**
      * Calculate the norm for a 2D Matrix (M*N)
      * @param {Matrix} x
@@ -326,10 +306,10 @@ export const createNorm = /* #__PURE__ */ factory(
     ): number | BigNumberType {
       // check p
       if (p === 1) {
-        return _matrixNormOne(x);
+        return _matrixNormSum(x, 1);
       }
       if (p === Number.POSITIVE_INFINITY || p === 'inf') {
-        return _matrixNormInfinity(x);
+        return _matrixNormSum(x, 0);
       }
       if (p === 'fro') {
         return _matrixNormFrobenius(x);

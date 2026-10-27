@@ -570,6 +570,63 @@ export function betaScalar(a: f64, b: f64): f64 {
   return Math.exp(_lgamma(a) + _lgamma(b) - _lgamma(a + b));
 }
 
+/**
+ * Regularized incomplete beta I_x(a,b) with closed domain [0,1] (out-of-range → 0/1).
+ * Argument order matches dist-objects/hypothesis call sites: (x, a, b).
+ * @internal — not re-exported from special.ts or the package barrel.
+ */
+export function betaincClosedScalar(x: f64, a: f64, b: f64): f64 {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+
+  if (x > (a + 1) / (a + b + 2)) {
+    return 1 - betaincClosedScalar(1 - x, b, a);
+  }
+
+  const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
+  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
+
+  const TINY = 1e-30;
+  let c = 1.0;
+  let d = 1.0 - ((a + b) * x) / (a + 1);
+  if (Math.abs(d) < TINY) d = TINY;
+  d = 1.0 / d;
+  let f = d;
+
+  for (let m = 1; m <= 200; m++) {
+    let numerator = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
+    d = 1.0 + numerator * d;
+    if (Math.abs(d) < TINY) d = TINY;
+    c = 1.0 + numerator / c;
+    if (Math.abs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    f *= d * c;
+
+    numerator = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
+    d = 1.0 + numerator * d;
+    if (Math.abs(d) < TINY) d = TINY;
+    c = 1.0 + numerator / c;
+    if (Math.abs(c) < TINY) c = TINY;
+    d = 1.0 / d;
+    const delta = d * c;
+    f *= delta;
+    if (Math.abs(delta - 1) < 1e-14) break;
+  }
+  return front * f;
+}
+
+/**
+ * Binomial coefficient C(n, k) via stable multiplicative recurrence.
+ * @internal — private call sites only; not re-exported from the package barrel.
+ */
+export function chooseScalar(n: number, k: number): f64 {
+  if (k < 0 || k > n) return 0;
+  const kk = Math.min(k, n - k);
+  let r = 1;
+  for (let i = 0; i < kk; i++) r = (r * (n - i)) / (i + 1);
+  return r;
+}
+
 /** Regularized lower incomplete gamma function P(a, x). */
 export function gammaincScalar(a: f64, x: f64): f64 {
   if (x < 0) return NaN;

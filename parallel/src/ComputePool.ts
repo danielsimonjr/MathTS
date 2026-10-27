@@ -18,6 +18,7 @@ import {
 import {
   MathWorkerPool,
   Transfer,
+  forEachMultiIndex,
   type WorkerPoolConfig,
   type ParallelResult as WorkerParallelResult,
   type TaskOptions,
@@ -397,28 +398,6 @@ function _flatIndex(idx: readonly number[], strides: readonly number[]): number 
 }
 
 /**
- * Iterate over all multi-indices for `sizes` calling `cb(multiIndex)`.
- * @internal
- */
-function _forEachIndex(sizes: readonly number[], cb: (idx: number[]) => void): void {
-  const rank = sizes.length;
-  if (rank === 0) {
-    cb([]);
-    return;
-  }
-  const idx = new Array<number>(rank).fill(0);
-  const total = sizes.reduce((a, b) => a * b, 1);
-  for (let n = 0; n < total; n++) {
-    cb(idx.slice());
-    for (let d = rank - 1; d >= 0; d--) {
-      idx[d]++;
-      if (idx[d] < sizes[d]) break;
-      idx[d] = 0;
-    }
-  }
-}
-
-/**
  * Pure-JS tensordot computation over a contiguous range of output elements
  * `[outStart, outEnd)`.
  *
@@ -479,7 +458,7 @@ export function tensordotChunkKernel(
 
     // Sum over contracted axes
     let acc = 0;
-    _forEachIndex(contractedSizes, (contractVals) => {
+    forEachMultiIndex(contractedSizes, (contractVals) => {
       const aIdx = new Array<number>(aRank).fill(0);
       for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
       for (let ci = 0; ci < contractedAxesA.length; ci++)
@@ -581,6 +560,88 @@ export class ComputePool {
   }
 
   /**
+   * Gated Float64Array binary reduction (dot / distance): per-op threshold, shared shape.
+   * @internal
+   */
+  private async gatedBinary(
+    a: Float64Array,
+    b: Float64Array,
+    options: {
+      op: 'dot' | 'distance';
+      sequential: (x: Float64Array, y: Float64Array) => number;
+      worker: (x: Float64Array, y: Float64Array) => Promise<WorkerParallelResult<number>>;
+    }
+  ): Promise<ParallelResult<number>> {
+    if (!this.shouldParallelize(a.length, options.op)) {
+      if (a.length !== b.length) {
+        throw new Error(`${options.op}: vectors must have the same length`);
+      }
+      return this.seqResult(options.sequential(a, b));
+    }
+    return toParallelResult(await options.worker(a, b));
+  }
+
+  /**
+   * Gated Int32Array element-wise binary bitwise op.
+   * @internal
+   */
+  private async bitwiseBinary(
+    a: Int32Array,
+    b: Int32Array,
+    options: {
+      op: 'bitAnd' | 'bitOr' | 'bitXor';
+      fallback: (x: Int32Array, y: Int32Array) => Int32Array;
+    }
+  ): Promise<ParallelResult<Int32Array>> {
+    if (a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.shouldParallelize(a.length, options.op)) {
+      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, options.op));
+    }
+    const start = performance.now();
+    const result = options.fallback(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
+   * Gated Int32Array shift (scalar or per-element counts).
+   * @internal
+   */
+  private async bitwiseShift(
+    a: Int32Array,
+    b: Int32Array | number,
+    options: {
+      op: 'leftShift' | 'rightArithShift' | 'rightLogShift';
+      fallback: (x: Int32Array, y: Int32Array | number) => Int32Array;
+    }
+  ): Promise<ParallelResult<Int32Array>> {
+    if (typeof b !== 'number' && a.length !== b.length) {
+      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
+    }
+    if (this.shouldParallelize(a.length, options.op)) {
+      const result =
+        typeof b === 'number'
+          ? await this.workerPool.bitwiseScalar(a, b, options.op)
+          : await this.workerPool.bitwiseBinary(a, b, options.op);
+      return toParallelResult(result);
+    }
+    const start = performance.now();
+    const result = options.fallback(a, b);
+    return {
+      result,
+      duration: performance.now() - start,
+      chunks: 1,
+      parallelized: false,
+    };
+  }
+
+  /**
    * Execute a method in the worker pool
    */
   async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
@@ -623,11 +684,11 @@ export class ComputePool {
    * Parallel dot product
    */
   async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(a.length, 'dot')) {
-      if (a.length !== b.length) throw new Error('dot: vectors must have the same length');
-      return this.seqResult(pairwiseDot(a, b));
-    }
-    return toParallelResult(await this.workerPool.dot(a, b));
+    return this.gatedBinary(a, b, {
+      op: 'dot',
+      sequential: pairwiseDot,
+      worker: (x, y) => this.workerPool.dot(x, y),
+    });
   }
 
   /**
@@ -815,11 +876,11 @@ export class ComputePool {
    * Compute Euclidean distance in parallel
    */
   async distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(a.length, 'distance')) {
-      if (a.length !== b.length) throw new Error('distance: vectors must have the same length');
-      return this.seqResult(scaledDistance(a, b));
-    }
-    return toParallelResult(await this.workerPool.distance(a, b));
+    return this.gatedBinary(a, b, {
+      op: 'distance',
+      sequential: scaledDistance,
+      worker: (x, y) => this.workerPool.distance(x, y),
+    });
   }
 
   /**
@@ -1457,60 +1518,21 @@ export class ComputePool {
    * Element-wise bitwise AND on two `Int32Array`s.
    */
   async bitAnd(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'bitAnd')) {
-      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitAnd'));
-    }
-    const start = performance.now();
-    const result = bitAndOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseBinary(a, b, { op: 'bitAnd', fallback: bitAndOp });
   }
 
   /**
    * Element-wise bitwise OR on two `Int32Array`s.
    */
   async bitOr(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'bitOr')) {
-      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitOr'));
-    }
-    const start = performance.now();
-    const result = bitOrOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseBinary(a, b, { op: 'bitOr', fallback: bitOrOp });
   }
 
   /**
    * Element-wise bitwise XOR on two `Int32Array`s.
    */
   async bitXor(a: Int32Array, b: Int32Array): Promise<ParallelResult<Int32Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'bitXor')) {
-      return toParallelResult(await this.workerPool.bitwiseBinary(a, b, 'bitXor'));
-    }
-    const start = performance.now();
-    const result = bitXorOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseBinary(a, b, { op: 'bitXor', fallback: bitXorOp });
   }
 
   /**
@@ -1535,24 +1557,7 @@ export class ComputePool {
    * shift counts or a single scalar `number` applied uniformly.
    */
   async leftShift(a: Int32Array, b: Int32Array | number): Promise<ParallelResult<Int32Array>> {
-    if (typeof b !== 'number' && a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'leftShift')) {
-      const result =
-        typeof b === 'number'
-          ? await this.workerPool.bitwiseScalar(a, b, 'leftShift')
-          : await this.workerPool.bitwiseBinary(a, b, 'leftShift');
-      return toParallelResult(result);
-    }
-    const start = performance.now();
-    const result = leftShiftOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseShift(a, b, { op: 'leftShift', fallback: leftShiftOp });
   }
 
   /**
@@ -1562,24 +1567,7 @@ export class ComputePool {
     a: Int32Array,
     b: Int32Array | number
   ): Promise<ParallelResult<Int32Array>> {
-    if (typeof b !== 'number' && a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'rightArithShift')) {
-      const result =
-        typeof b === 'number'
-          ? await this.workerPool.bitwiseScalar(a, b, 'rightArithShift')
-          : await this.workerPool.bitwiseBinary(a, b, 'rightArithShift');
-      return toParallelResult(result);
-    }
-    const start = performance.now();
-    const result = rightArithShiftOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseShift(a, b, { op: 'rightArithShift', fallback: rightArithShiftOp });
   }
 
   /**
@@ -1588,24 +1576,7 @@ export class ComputePool {
    * matching `(x >>> n) | 0` JavaScript semantics.
    */
   async rightLogShift(a: Int32Array, b: Int32Array | number): Promise<ParallelResult<Int32Array>> {
-    if (typeof b !== 'number' && a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
-    if (this.shouldParallelize(a.length, 'rightLogShift')) {
-      const result =
-        typeof b === 'number'
-          ? await this.workerPool.bitwiseScalar(a, b, 'rightLogShift')
-          : await this.workerPool.bitwiseBinary(a, b, 'rightLogShift');
-      return toParallelResult(result);
-    }
-    const start = performance.now();
-    const result = rightLogShiftOp(a, b);
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: 1,
-      parallelized: false,
-    };
+    return this.bitwiseShift(a, b, { op: 'rightLogShift', fallback: rightLogShiftOp });
   }
 
   /**
