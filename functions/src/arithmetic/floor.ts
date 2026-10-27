@@ -1,8 +1,9 @@
 import { Decimal } from 'decimal.js';
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
-import { isInteger, nearlyEqual } from '../utils/number.js';
+import { isInteger } from '../utils/number.js';
 import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { snapBig, snapNumber } from './snap-to-round.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
@@ -59,24 +60,13 @@ export const createFloorNumber = /* #__PURE__ */ factory(
   ['typed', 'config', 'round'] as const,
   ({ typed, config, round }: FloorNumberDependencies) => {
     function _floorNumber(x: number): number {
-      // First, if the floor and the round are identical we can be
-      // quite comfortable that is the best answer:
-      const f = Math.floor(x);
-      const r = round(x) as number;
-      if (f === r) return f;
-      // OK, they are different. If x is truly distinct from f but
-      // appears indistinguishable from r, presume it really is just
-      // the integer r with rounding/computation error, and return that
-      if (
-        nearlyEqual(x, r, config.relTol, config.absTol) &&
-        !nearlyEqual(x, f, config.relTol, config.absTol)
-      ) {
-        return r;
-      }
-      // Otherwise (x distinct from both r and f, or indistinguishable from
-      // both r and f) may as well just return f, as that's the best
-      // candidate we can discern:
-      return f;
+      return snapNumber(
+        x,
+        Math.floor,
+        round as (n: number) => number,
+        config.relTol,
+        config.absTol
+      );
     }
 
     return typed(name, {
@@ -105,14 +95,9 @@ export const createFloor = /* #__PURE__ */ factory(
 
     const floorNumber = createFloorNumber({ typed, config, round }) as TypedFunction;
     function _bigFloor(x: BigNumberType): BigNumberType {
-      // see _floorNumber above for rationale
       const bne = (a: BigNumberType, b: BigNumberType): boolean =>
         bigNearlyEqual(a, b, config.relTol, config.absTol);
-      const f = x.floor();
-      const r = round(x) as BigNumberType; // round returns unknown from TypedFunction
-      if (f.eq(r)) return f;
-      if (bne(x, r) && !bne(x, f)) return r;
-      return f;
+      return snapBig(x, (v) => v.floor(), round as (v: BigNumberType) => BigNumberType, bne);
     }
     /**
      * Round a value towards minus infinity.

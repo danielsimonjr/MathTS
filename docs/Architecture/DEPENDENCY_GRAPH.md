@@ -124,7 +124,7 @@ The codebase is organized into the following modules:
 - **tensor/operations**: 17 files
 - **autograd**: 6 files
 - **functions/algebra**: 45 files
-- **functions/arithmetic**: 38 files
+- **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
 - **functions**: 25 files
 - **functions/cas**: 3 files
@@ -141,7 +141,7 @@ The codebase is organized into the following modules:
 - **functions/matrix**: 45 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 1 file
-- **functions/numeric**: 25 files
+- **functions/numeric**: 26 files
 - **functions/plain**: 10 files
 - **functions/probability**: 15 files
 - **functions/relational**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 481            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 483            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -3265,17 +3265,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                    | Imports                  | Type               |
-| --------------------------------------- | ------------------------ | ------------------ |
-| `../utils/factory.js`                   | `factory`                | Import             |
-| `../utils/collection.js`                | `deepMap`                | Import             |
-| `../utils/number.js`                    | `isInteger, nearlyEqual` | Import             |
-| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`            | Import             |
-| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s`    | Import             |
-| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs`    | Import             |
-| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`     | Import             |
-| `../core/function/typed.js`             | `TypedFunction`          | Import (type-only) |
-| `../core/config.js`                     | `ConfigOptions`          | Import (type-only) |
+| File                                    | Imports               | Type               |
+| --------------------------------------- | --------------------- | ------------------ |
+| `../utils/factory.js`                   | `factory`             | Import             |
+| `../utils/collection.js`                | `deepMap`             | Import             |
+| `../utils/number.js`                    | `isInteger`           | Import             |
+| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`         | Import             |
+| `./snap-to-round.js`                    | `snapBig, snapNumber` | Import             |
+| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s` | Import             |
+| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs` | Import             |
+| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`  | Import             |
+| `../core/function/typed.js`             | `TypedFunction`       | Import (type-only) |
+| `../core/config.js`                     | `ConfigOptions`       | Import (type-only) |
 
 **Exports:**
 
@@ -3454,17 +3455,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                    | Imports                  | Type               |
-| --------------------------------------- | ------------------------ | ------------------ |
-| `../utils/factory.js`                   | `factory`                | Import             |
-| `../utils/collection.js`                | `deepMap`                | Import             |
-| `../utils/number.js`                    | `isInteger, nearlyEqual` | Import             |
-| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`            | Import             |
-| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s`    | Import             |
-| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs`    | Import             |
-| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`     | Import             |
-| `../core/function/typed.js`             | `TypedFunction`          | Import (type-only) |
-| `../core/config.js`                     | `ConfigOptions`          | Import (type-only) |
+| File                                    | Imports               | Type               |
+| --------------------------------------- | --------------------- | ------------------ |
+| `../utils/factory.js`                   | `factory`             | Import             |
+| `../utils/collection.js`                | `deepMap`             | Import             |
+| `../utils/number.js`                    | `isInteger`           | Import             |
+| `../utils/bignumber/nearlyEqual.js`     | `nearlyEqual`         | Import             |
+| `./snap-to-round.js`                    | `snapBig, snapNumber` | Import             |
+| `../type/matrix/utils/matAlgo11xS0s.js` | `createMatAlgo11xS0s` | Import             |
+| `../type/matrix/utils/matAlgo12xSfs.js` | `createMatAlgo12xSfs` | Import             |
+| `../type/matrix/utils/matAlgo14xDs.js`  | `createMatAlgo14xDs`  | Import             |
+| `../core/function/typed.js`             | `TypedFunction`       | Import (type-only) |
+| `../core/config.js`                     | `ConfigOptions`       | Import (type-only) |
 
 **Exports:**
 
@@ -3779,6 +3781,20 @@ graph LR
 **Exports:**
 
 - Constants: `createSign`
+
+---
+
+### `functions/src/arithmetic/snap-to-round.ts` - snap-to-round module
+
+**Internal Dependencies:**
+
+| File                 | Imports       | Type   |
+| -------------------- | ------------- | ------ |
+| `../utils/number.js` | `nearlyEqual` | Import |
+
+**Exports:**
+
+- Functions: `snapNumber`, `snapBig`
 
 ---
 
@@ -5497,6 +5513,7 @@ graph LR
 | ---------------------- | ------------------------------ | ------ |
 | `../geometry-extra.js` | `quaternionConjugate`          | Import |
 | `../typed/set.js`      | `setIsSubset, setMultiplicity` | Import |
+| `../utils/array.js`    | `flatten`                      | Import |
 
 **Exports:**
 
@@ -5624,7 +5641,7 @@ graph LR
 
 - Interfaces: `GpuChainOptions`
 - Types: `GpuElementwiseOp`, `GpuReduceOp`
-- Functions: `isGpuChainSupported`, `resetGpuElementwise`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`
+- Functions: `isGpuChainSupported`, `resetGpuElementwise`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `reduceNumbers`
 - Constants: `GPU_ELEMENTWISE_OPS`, `GPU_REDUCE_OPS`
 
 ---
@@ -6812,6 +6829,14 @@ graph LR
 
 ---
 
+### `functions/src/numeric/hermite.ts` - Cubic-Hermite interpolation on `[ta, tb]` (internal; shared by DDE/ODE solvers).
+
+**Exports:**
+
+- Functions: `hermiteCubic`
+
+---
+
 ### `functions/src/numeric/interpn.ts` - Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`
 
 **Exports:**
@@ -6974,6 +6999,12 @@ graph LR
 
 ### `functions/src/numeric/solveDDE.ts` - Constant-delay delay differential equation (DDE) solver via the method of steps.
 
+**Internal Dependencies:**
+
+| File           | Imports        | Type   |
+| -------------- | -------------- | ------ |
+| `./hermite.js` | `hermiteCubic` | Import |
+
 **Exports:**
 
 - Interfaces: `SolveDDEOptions`, `DDESolution`
@@ -6995,6 +7026,7 @@ graph LR
 | File                    | Imports                                                              | Type               |
 | ----------------------- | -------------------------------------------------------------------- | ------------------ |
 | `./numeric-jacobian.js` | `numericJacobian`                                                    | Import             |
+| `./hermite.js`          | `hermiteCubic`                                                       | Import             |
 | `../utils/is.js`        | `isUnit, isNumber, isBigNumber`                                      | Import             |
 | `../utils/factory.js`   | `factory`                                                            | Import             |
 | `../types.js`           | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
@@ -10014,11 +10046,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                                                                        | Type   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- | ------ |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseChainDispatch, WasmElementwiseOp`                                                  | Import |
-| `../gpu/elementwise-gpu.js`          | `elementwiseChainGpuDispatch, elementwiseChainReduceGpuDispatch, GpuChainOptions, GpuReduceOp` | Import |
-| `./special.js`                       | `erfcScalar`                                                                                   | Import |
+| File                                 | Imports                                                                                                       | Type   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ------ |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseChainDispatch, WasmElementwiseOp`                                                                 | Import |
+| `../gpu/elementwise-gpu.js`          | `elementwiseChainGpuDispatch, elementwiseChainReduceGpuDispatch, reduceNumbers, GpuChainOptions, GpuReduceOp` | Import |
+| `./special.js`                       | `erfcScalar`                                                                                                  | Import |
 
 **Exports:**
 
@@ -10345,6 +10377,12 @@ graph LR
 | Package                      | Import      |
 | ---------------------------- | ----------- |
 | `@danielsimonjr/mathts-core` | `mathTyped` |
+
+**Internal Dependencies:**
+
+| File                | Imports   | Type   |
+| ------------------- | --------- | ------ |
+| `../utils/array.js` | `flatten` | Import |
 
 **Exports:**
 
@@ -17876,10 +17914,10 @@ graph LR
 | `functions/src/utils/is`                               | 0 files      | 57 files   |
 | `functions/src/core/config`                            | 0 files      | 55 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
+| `functions/src/utils/array`                            | 0 files      | 50 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
-| `functions/src/utils/array`                            | 0 files      | 48 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
-| `functions/src/utils/number`                           | 0 files      | 44 files   |
+| `functions/src/utils/number`                           | 0 files      | 45 files   |
 | `functions/src/utils/collection`                       | 0 files      | 38 files   |
 | `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
@@ -18090,7 +18128,7 @@ graph TD
         N112[dotDivide]
         N113[dotMultiply]
         N114[dotPow]
-        N115[...28 more]
+        N115[...29 more]
     end
 
     subgraph Functions/bitwise
@@ -18232,9 +18270,9 @@ graph TD
         N203[fsolve]
         N204[gauss-legendre4]
         N205[gauss-nodes]
-        N206[interpn]
-        N207[interval]
-        N208[...15 more]
+        N206[hermite]
+        N207[interpn]
+        N208[...16 more]
     end
 
     subgraph Functions/plain
@@ -18747,14 +18785,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1192   |
+| Total TypeScript Files  | 1194   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 201020 |
-| Total Exports           | 6186   |
+| Total Lines of Code     | 200959 |
+| Total Exports           | 6190   |
 | Total Re-exports        | 2619   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1962   |
+| Total Functions         | 1966   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 607    |

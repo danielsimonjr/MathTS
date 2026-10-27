@@ -40,6 +40,8 @@
  * @packageDocumentation
  */
 
+import { hermiteCubic } from './hermite.js';
+
 /**
  * Forcing function `y'(t) = f(t, y, yDelayed)`.
  * - `y` is the current state (`number[]`; a length-1 array for a scalar DDE).
@@ -93,30 +95,6 @@ export interface DDESolution {
 /** Coerce a `number | number[]` into a fresh `number[]`. */
 function _arr(v: number | number[]): number[] {
   return Array.isArray(v) ? v.slice() : [v];
-}
-
-/**
- * Cubic-Hermite interpolation of the state on `[ta, tb]` from endpoint states
- * `ya`, `yb` and endpoint derivatives `fa`, `fb`. C¹ and O(h⁴) accurate.
- */
-function _hermite(
-  ta: number,
-  tb: number,
-  ya: number[],
-  yb: number[],
-  fa: number[],
-  fb: number[],
-  t: number
-): number[] {
-  const h = tb - ta;
-  const theta = h === 0 ? 0 : (t - ta) / h;
-  const th2 = theta * theta;
-  const th3 = th2 * theta;
-  const h00 = 2 * th3 - 3 * th2 + 1;
-  const h10 = th3 - 2 * th2 + theta;
-  const h01 = -2 * th3 + 3 * th2;
-  const h11 = th3 - th2;
-  return ya.map((_, i) => h00 * ya[i] + h10 * h * fa[i] + h01 * yb[i] + h11 * h * fb[i]);
 }
 
 /** Weighted-RMS norm `‖v/scale‖₂ / √n`. */
@@ -214,7 +192,7 @@ export function solveDDE(
   function delayedState(s: number): number[] {
     if (s <= t0) return histFn(s);
     const i = _locate(s);
-    return _hermite(Ts[i], Ts[i + 1], Ys[i], Ys[i + 1], Fs[i], Fs[i + 1], s);
+    return hermiteCubic(Ts[i], Ts[i + 1], Ys[i], Ys[i + 1], Fs[i], Fs[i + 1], s);
   }
 
   /** Evaluate the forcing at `(t, y)`, gathering the delayed states, coerced to `number[]`. */
@@ -325,7 +303,7 @@ export function solveDDE(
   const yInterp = (tq: number): number[] | number => {
     const s = tq <= t0 ? t0 : tq >= t ? t : tq;
     const i = _locate(s);
-    const val = _hermite(Ts[i], Ts[i + 1], Ys[i], Ys[i + 1], Fs[i], Fs[i + 1], s);
+    const val = hermiteCubic(Ts[i], Ts[i + 1], Ys[i], Ys[i + 1], Fs[i], Fs[i + 1], s);
     return yScalar ? val[0] : val;
   };
 

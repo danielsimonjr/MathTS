@@ -1,8 +1,9 @@
 import { Decimal } from 'decimal.js';
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
-import { isInteger, nearlyEqual } from '../utils/number.js';
+import { isInteger } from '../utils/number.js';
 import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { snapBig, snapNumber } from './snap-to-round.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
@@ -64,17 +65,7 @@ export const createCeilNumber = /* #__PURE__ */ factory(
   ['typed', 'config', 'round'] as const,
   ({ typed, config, round }: CeilNumberDependencies) => {
     function _ceilNumber(x: number): number {
-      // See ./floor.js _floorNumber for rationale here
-      const c = Math.ceil(x);
-      const r = round(x) as number;
-      if (c === r) return c;
-      if (
-        nearlyEqual(x, r, config.relTol, config.absTol) &&
-        !nearlyEqual(x, c, config.relTol, config.absTol)
-      ) {
-        return r;
-      }
-      return c;
+      return snapNumber(x, Math.ceil, round as (n: number) => number, config.relTol, config.absTol);
     }
 
     return typed(name, {
@@ -103,14 +94,9 @@ export const createCeil = /* #__PURE__ */ factory(
 
     const ceilNumber = createCeilNumber({ typed, config, round }) as TypedFunction;
     function _bigCeil(x: BigNumberType): BigNumberType {
-      // see ./floor.js _floorNumber for rationale
       const bne = (a: BigNumberType, b: BigNumberType): boolean =>
         bigNearlyEqual(a, b, config.relTol, config.absTol);
-      const c = x.ceil();
-      const r = round(x) as BigNumberType;
-      if (c.eq(r)) return c;
-      if (bne(x, r) && !bne(x, c)) return r;
-      return c;
+      return snapBig(x, (v) => v.ceil(), round as (v: BigNumberType) => BigNumberType, bne);
     }
     /**
      * Round a value towards plus infinity
