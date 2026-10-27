@@ -5,9 +5,9 @@
  * the package's public API. The bundler emits it as a chunk that both entry
  * points import — the goal here is a single source of truth in `src/`.
  *
- * NOTE: `functions/src/typed/signal.ts` has its own copy (`fftCoreFloat64`).
- * Pulling that across the package boundary would violate the layering rules,
- * so it is intentionally left separate.
+ * NOTE: The canonical JS FFT core lives in `functions/src/signal/fft-core-f64.ts`
+ * (imported by `functions/src/typed/signal.ts`). Pulling it across the package
+ * boundary would violate the layering rules, so this file stays a separate copy.
  *
  * @packageDocumentation
  */
@@ -29,7 +29,7 @@ export function fftBitReverse(x: number, bits: number): number {
  *
  * Operates on the [`offset`, `offset + n`) slice of `real`/`imag`. `n` must be
  * a power of two. This is a self-contained copy of
- * `functions/src/typed/signal.ts#fftCoreFloat64` — the worker sits below the
+ * `functions/src/signal/fft-core-f64.ts` — the worker sits below the
  * `functions` package in the dependency graph and cannot import it.
  */
 export function fftFrameInPlace(
