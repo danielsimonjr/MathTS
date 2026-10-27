@@ -9830,7 +9830,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 45
     },
     {
       "file": "functions/tests/matrix-bridge-accel.test.ts",
@@ -10236,7 +10236,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 87
+      "loc": 150
     },
     {
       "file": "functions/tests/solveode-events.test.ts",
@@ -12343,7 +12343,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "tests",
       "disposition": "test",
-      "loc": 135
+      "loc": 137
     },
     {
       "file": "statistics/vitest.config.ts",
