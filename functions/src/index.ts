@@ -19,7 +19,7 @@ export * from './typed/cas.js';
 
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
-export { config } from './config-api.js'; // GC12: runtime config accessor
+export { config, runWithConfig } from './config-api.js'; // GC12: runtime config accessor
 
 // Opt-in AssemblyScript tier. Nothing loads the WASM binary on its own; until
 // `await loadWasm()` resolves true, every function runs its JavaScript path.

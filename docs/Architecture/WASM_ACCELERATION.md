@@ -13,8 +13,10 @@ WASM acceleration is **selective, opt-in and size-gated**, not universal:
   `functions` package bundles `dist/wasm/mathts-as.wasm`, resolves it
   package-relative, and its dispatch is **AS → JS**. The `matrix` package
   loads the same AssemblyScript binary for the operations where SIMD wins: the
-  f64x2 matrix **multiply** kernel and the dense **LU/QR/Cholesky/inverse/
-  determinant** decompositions. Element-wise operations, transpose, reductions
+  f64x2 matrix **multiply** kernel on the `backendManager` path (public
+  `DenseMatrix.multiply` and `lu`/`qr`/`cholesky` stay JS). Dense
+  LU/QR/Cholesky/inverse/determinant kernels exist on `WASMBackend` for direct
+  callers only. Element-wise operations, transpose, reductions
   and `eig`/`svd` measured slower on WASM and run on JS. The binary is
   SHA-384 integrity-verified before instantiation.
 - **Opt-in:** the `functions` package loads no WASM until the consumer calls
@@ -127,4 +129,4 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2004  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2007  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

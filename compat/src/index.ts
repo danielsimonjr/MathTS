@@ -183,29 +183,82 @@ export interface MathInstance {
  * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
  * ```
  */
+function copyFunctionSurface(
+  from: (...args: unknown[]) => unknown,
+  to: (...args: unknown[]) => unknown
+): void {
+  Object.defineProperty(to, 'name', { value: from.name, configurable: true });
+  Object.defineProperty(to, 'length', { value: from.length, configurable: true });
+  try {
+    Object.setPrototypeOf(to, Object.getPrototypeOf(from));
+  } catch {
+    // exotic functions may refuse a prototype swap
+  }
+  const proto = Object.getOwnPropertyDescriptor(from, 'prototype');
+  if (proto) {
+    try {
+      Object.defineProperty(to, 'prototype', proto);
+    } catch {
+      try {
+        (to as { prototype: unknown }).prototype = (from as { prototype: unknown }).prototype;
+      } catch {
+        // class `.prototype` can be non-writable; instanceof still works if
+        // Reflect.construct uses `from` as newTarget when the wrapper is used.
+      }
+    }
+  }
+  for (const key of Reflect.ownKeys(from)) {
+    if (key === 'length' || key === 'name' || key === 'prototype') continue;
+    if (Object.prototype.hasOwnProperty.call(to, key)) continue;
+    const desc = Object.getOwnPropertyDescriptor(from, key);
+    if (!desc) continue;
+    try {
+      Object.defineProperty(to, key, desc);
+    } catch {
+      // skip non-configurable exotic keys (caller/arguments)
+    }
+  }
+}
+
+function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  currentConfig: MathJSConfig
+): T {
+  const wrapped = function (this: unknown, ...args: unknown[]) {
+    const construct = new.target;
+    return mathFunctions.runWithConfig(currentConfig, () => {
+      if (construct) {
+        // Use `fn` as newTarget when the caller wrote `new wrapper(...)` so
+        // the instance's [[Prototype]] is `fn.prototype` (instanceof works).
+        // Preserve a subclass newTarget (`class X extends wrapper`).
+        return Reflect.construct(fn, args, construct === wrapped ? fn : construct);
+      }
+      return fn.apply(this, args);
+    });
+  };
+  copyFunctionSurface(fn, wrapped);
+  return wrapped as T;
+}
+
 export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  const currentConfig: MathJSConfig = { ...defaultConfig, ...config };
-  // Push this instance's initial overrides into the shared functions config so
-  // they take effect immediately (the functions surface is a process singleton).
-  if (Object.keys(config).length > 0) {
-    mathFunctions.config(config as Partial<MathJSConfig>);
-  }
+  const currentConfig: MathJSConfig = {
+    ...mathFunctions.config(),
+    ...defaultConfig,
+    ...config,
+  };
 
   const instance: MathInstance = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...factories,
 
-    // Configuration — forwards to the shared functions runtime config so it
-    // actually DRIVES behavior (e.g. `config({ matrix: 'Array' })` changes the
-    // return type of matrix-producing ops). `currentConfig` mirrors it for the
-    // read path and seeds the functions config with this instance's overrides.
+    // Per-instance config — does not mutate the functions singleton; wrapped
+    // methods run under runWithConfig(currentConfig, …).
     config: (newConfig?: Partial<MathJSConfig>) => {
-      const merged = mathFunctions.config(newConfig as Partial<MathJSConfig>);
-      Object.assign(currentConfig, merged);
+      if (newConfig) Object.assign(currentConfig, newConfig);
       return { ...currentConfig };
     },
 
@@ -295,6 +348,17 @@ export function create(
       throw new Error('chain not initialized');
     }) as MathInstance['chain'],
   };
+
+  for (const key of Object.keys(instance)) {
+    if (key === 'config' || key === 'chain') continue;
+    const value = instance[key];
+    if (typeof value === 'function') {
+      (instance as Record<string, unknown>)[key] = wrapWithInstanceConfig(
+        value as (...args: unknown[]) => unknown,
+        currentConfig
+      );
+    }
+  }
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
   instance.chain = createChain(instance as Record<string, unknown>);

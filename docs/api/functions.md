@@ -32,6 +32,26 @@ add(new Fraction(1, 2), new Fraction(1, 3)); // Fraction(5, 6)
 add(BigNumber.parse('0.1'), BigNumber.parse('0.2')); // BigNumber(0.3)
 ```
 
+### Runtime configuration
+
+`config()` reads or merges the process-wide `DEFAULT_CONFIG` (mathjs-compatible). Use
+`runWithConfig(partial, fn)` for a synchronous overlay while `fn` runs. Missing overlay
+keys fall back to `DEFAULT_CONFIG`. Nested calls replace the overlay (they do not
+stack-merge with the parent); the stack is popped in `finally` (including on throw).
+If `fn` returns a Promise, config reads in a `.then` / `await` continuation see the
+base config — the overlay is already gone.
+
+```typescript
+import { config, runWithConfig, evaluate } from '@danielsimonjr/mathts-functions';
+import { Fraction } from '@danielsimonjr/mathts-core';
+
+const half = runWithConfig({ number: 'Fraction' }, () => evaluate('1/2'));
+// half is a Fraction; config().number is still 'number'
+```
+
+`@danielsimonjr/mathts-compat` `create(all, …)` uses the same overlay mechanism per
+instance; see `docs/api/compat.md`.
+
 ---
 
 ## Arithmetic Functions
@@ -628,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1099 exports).
+> `@danielsimonjr/mathts-functions` (1100 exports).
 
 ### Functions by category
 
@@ -686,7 +706,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (17): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
+**Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `runWithConfig`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
 ### Constants & values (70)
 

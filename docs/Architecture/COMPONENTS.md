@@ -106,8 +106,9 @@ for back-compat.
 ### @danielsimonjr/mathts-wasm (`assembly/`)
 
 **Purpose**: The AssemblyScript source for the **sole** WASM backend of the repo (`mathts-as.wasm`) — SIMD
-`f64x2` matrix multiply plus the dense LU/QR/Cholesky/inverse/determinant kernels, and the `functions`
-special/FFT kernels.
+`f64x2` matrix multiply (reached via `backendManager` / `wasmBackend` / `Tensor.matMul`; public
+`DenseMatrix.multiply` and `lu`/`qr`/`cholesky` stay JS) plus dense LU/QR/Cholesky/inverse/determinant
+kernels on `WASMBackend` for direct callers, and the `functions` special/FFT kernels.
 
 ```
 asc src/index.ts  →  mathts-as.wasm   (built by `npm run build:wasm`)
@@ -170,7 +171,7 @@ export class DenseMatrix          // Float64Array-backed
 export class SparseMatrix         // CSR
 export class BackendManager       // per-op JS/WASM selection
 export class JSBackend            // pure TS, always available
-export class WASMBackend          // AssemblyScript (SIMD multiply + LU/QR/Cholesky/inverse/det)
+export class WASMBackend          // AssemblyScript (manager SIMD matmul; decomp methods opt-in)
 export class GPUBackend           // experimental WebGPU compute (re-exports the gpu foundation)
 export class WasmLoader           // per-package loader (SHA-384 verify via core/internal)
 ```
@@ -315,6 +316,10 @@ Intentionally reimplements some homonyms to guarantee mathjs behavior (guarded b
 `compat/tests/parity-oracle.test.ts` pinning compat ≡ mathjs/numpy). Single-arg `zeros(n)`/`ones(n)` return a
 length-`n` vector (mathjs parity). Depends on `core`, `matrix`, `parallel`, `functions`.
 
+`create(all, config)` seeds a per-instance config record and wraps surfaced methods with
+`runWithConfig` from `@danielsimonjr/mathts-functions` so factories read the instance
+overlay without mutating the process-wide `DEFAULT_CONFIG` (audit I-9 / #425).
+
 ### @danielsimonjr/mathts-plot (`plot/`)
 
 **Purpose**: 2D/3D plotting — SVG/TikZ vector output plus a PNG/PDF render bridge, and the workbook chart
@@ -399,5 +404,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2004  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8087  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2007  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8091  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

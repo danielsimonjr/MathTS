@@ -8,12 +8,17 @@
  * @packageDocumentation
  */
 
-import { GPU_MIN_ELEMENTS } from '@danielsimonjr/mathts-gpu';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { MatrixBackend, BackendType, BackendHints } from './Backend.js';
 import { backendRegistry, DEFAULT_BACKEND_HINTS } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
-import { getConfig, onConfigChange, type MatrixConfig, type OperationType } from '../config.js';
+import {
+  DEFAULT_CONFIG,
+  getConfig,
+  onConfigChange,
+  type MatrixConfig,
+  type OperationType,
+} from '../config.js';
 // Side-effect import: makes sure JS / AS-WASM backends are
 // registered in `backendRegistry` even when consumers import this module
 // without first touching `./index.ts`. Cheap (no WASM load until init()).
@@ -37,30 +42,42 @@ export interface ExtendedBackendHints extends BackendHints {
 }
 
 /**
- * Default extended hints
+ * Build extended hints from the authoritative `DEFAULT_CONFIG` backend table.
  */
-export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> = {
-  ...DEFAULT_BACKEND_HINTS,
-  operationThresholds: {
-    // matmul: the SIMD-WASM kernel wins from ~256 elems (16²), solidly 1.3–2.2× (measured,
-    // tools/benchmarks/matmul-threshold.mjs); below that copy/alloc overhead dominates (8²
-    // loses, 12² marginal). Dropped 500→256 to stop forcing 16²–22² matmuls onto JS.
-    // ⚠️ Every `gpu:` threshold below is DORMANT — `selectBackend` gates the GPU
-    // branch on `backendRegistry.has('gpu')`, and no 'gpu' backend is ever
-    // registered (register-backends.ts registers js + wasm only). They are aligned
-    // to the single canonical GPU_MIN_ELEMENTS rather than left as four divergent
-    // magic numbers (50_000 / 10_000 / 200_000 against a live 65_536), which would
-    // mislead whoever wires this route up. GPU matrix work currently reaches the
-    // device via `gpuMatmul` -> `gpuMatrixBackend`, not through this manager.
-    multiply: { wasm: 256, gpu: GPU_MIN_ELEMENTS },
-    decomposition: { wasm: 100, gpu: GPU_MIN_ELEMENTS },
-    // transpose WASM is retired (memory-bound, lost 4–6×) — WASMBackend.transpose always uses
-    // JS regardless of this gate; kept high so the manager doesn't even select the WASM backend.
-    transpose: { wasm: 2000, gpu: GPU_MIN_ELEMENTS },
-  },
-  autoSIMD: true,
-  fallbackOnError: true,
-};
+function extendedHintsFromConfig(config: MatrixConfig): Required<ExtendedBackendHints> {
+  const { wasm, gpu } = config.backends;
+  const wasmOps = wasm.operationThresholds ?? {};
+  const gpuOps = gpu.operationThresholds ?? {};
+
+  return {
+    wasmThreshold: wasm.threshold,
+    gpuThreshold: gpu.threshold,
+    preferredBackend: DEFAULT_BACKEND_HINTS.preferredBackend,
+    operationThresholds: {
+      multiply: {
+        wasm: wasmOps.multiply ?? wasm.threshold,
+        gpu: gpuOps.multiply ?? gpu.threshold,
+      },
+      decomposition: {
+        wasm: wasmOps.decomposition ?? wasm.threshold,
+        gpu: gpuOps.decomposition ?? gpu.threshold,
+      },
+      // transpose WASM is retired (memory-bound) — WASMBackend.transpose always uses JS.
+      transpose: {
+        wasm: wasmOps.transpose ?? wasm.threshold,
+        gpu: gpuOps.transpose ?? gpu.threshold,
+      },
+    },
+    autoSIMD: true,
+    fallbackOnError: true,
+  };
+}
+
+/**
+ * Default extended hints (derived from `DEFAULT_CONFIG` — single threshold table).
+ */
+export const DEFAULT_EXTENDED_HINTS: Required<ExtendedBackendHints> =
+  extendedHintsFromConfig(DEFAULT_CONFIG);
 
 /**
  * Performance sample for adaptive tuning
