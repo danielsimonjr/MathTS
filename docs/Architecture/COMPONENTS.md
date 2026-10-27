@@ -230,7 +230,11 @@ export function chunkArray, calculateOptimalChunks, mergeFloat64Chunks, dispatch
 ```
 
 Depends on `workerpool` and `core` (core only for stable numeric primitives — still **not** `matrix`). The
-`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it.
+`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it. Tensordot walks
+`forEachMultiIndex` from workerpool (no local `_forEachIndex`). `dot` / `distance` share `gatedBinary`
+(`pairwiseDot` / `scaledDistance` sequential; worker methods parallel); `bitAnd` / `bitOr` / `bitXor`
+share `bitwiseBinary`; shifts share `bitwiseShift` (scalar vs array split once). Each helper passes the
+op name into `shouldParallelize` so per-op `'never'` entries govern.
 
 ---
 
@@ -417,5 +421,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2027  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2028  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalExports         | 8119  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

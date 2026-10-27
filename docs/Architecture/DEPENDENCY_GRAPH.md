@@ -16533,10 +16533,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                   |
-| ---------------------------------- | ---------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations, rowMajorStrides` |
-| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats`     |
+| Package                            | Import                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations, rowMajorStrides`                |
+| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, forEachMultiIndex, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Internal Dependencies:**
 
@@ -18908,7 +18908,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1201   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200718 |
+| Total Lines of Code     | 200689 |
 | Total Exports           | 6214   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
