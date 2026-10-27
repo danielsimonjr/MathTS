@@ -92,6 +92,15 @@ threshold): `sum`, `prod`, `dot(a,b)`, `elementwise(a,b,op)`
 `TaskOptions`, `WorkerpoolCapabilities`, `WasmFeatureStatus`. Constant:
 `DEFAULT_WORKER_CONFIG`.
 
+**@internal** (for `@danielsimonjr/mathts-parallel`, not a stable public API):
+`chunkTyped`, `chunkPairTyped` (`slice`, not `subarray`, so each worker chunk
+owns its buffer), `forEachMultiIndex` (row-major; rank 0 calls `cb([])` once;
+`multi-index.ts` has no imports, so `dist/worker.js` cannot pull `core` or
+`parallel`). Generic `map` / `filter` share one `runChunks` helper: below
+threshold they call `Array#map` / `Array#filter`; above threshold they dispatch
+`mapChunk` / `filterChunk` with `fn.toString()` and concatenate `Promise.all`
+results in chunk order.
+
 ---
 
 ## @danielsimonjr/mathts-core
@@ -1151,5 +1160,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8098  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2014  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8104  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2017  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1193,
+    "totalFiles": 1195,
     "totalModules": 82,
-    "totalExports": 6195
+    "totalExports": 6201
   },
   "entryPoints": [
     {
@@ -229,6 +229,15 @@
       }
     },
     "packages/workerpool": {
+      "packages/workerpool/src/chunk-typed.ts": {
+        "description": "Slice-based chunking for typed arrays passed to worker kernels.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["chunkTyped", "chunkPairTyped"],
+        "functions": ["chunkTyped", "chunkPairTyped"]
+      },
       "packages/workerpool/src/compile-function-source.ts": {
         "description": "Rebuild a function from its source text.",
         "externalDependencies": [],
@@ -262,13 +271,30 @@
             "imports": ["compileFunctionSource"]
           },
           {
+            "file": "./chunk-typed.js",
+            "imports": ["chunkPairTyped", "chunkTyped"]
+          },
+          {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./chunk-typed.js",
+            "imports": ["chunkTyped", "chunkPairTyped"],
+            "reExport": true
+          },
+          {
+            "file": "./multi-index.js",
+            "imports": ["forEachMultiIndex"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
         "exports": [
           "Transfer",
+          "chunkTyped",
+          "chunkPairTyped",
+          "forEachMultiIndex",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -288,6 +314,7 @@
           "getPoolStats",
           "MathWorkerPool"
         ],
+        "reExported": ["chunkTyped", "chunkPairTyped", "forEachMultiIndex"],
         "classes": ["MathWorkerPool"],
         "interfaces": [
           "WorkerpoolCapabilities",
@@ -317,6 +344,15 @@
         ],
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
+      "packages/workerpool/src/multi-index.ts": {
+        "description": "Multi-dimensional index iteration (no imports — safe for the worker bundle).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["forEachMultiIndex"],
+        "functions": ["forEachMultiIndex"]
+      },
       "packages/workerpool/src/worker-numerics.ts": {
         "description": "Worker-bundle copies of core numeric helpers.",
         "externalDependencies": [],
@@ -343,6 +379,10 @@
           {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./multi-index.js",
+            "imports": ["forEachMultiIndex"]
           },
           {
             "file": "./worker-numerics.js",
@@ -40277,9 +40317,11 @@
       {
         "name": "Packages/workerpool",
         "files": [
+          "packages/workerpool/src/chunk-typed.ts",
           "packages/workerpool/src/compile-function-source.ts",
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
+          "packages/workerpool/src/multi-index.ts",
           "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
           "packages/workerpool/src/workerpool-browser-shim.ts"
@@ -41818,17 +41860,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1193,
+    "totalTypeScriptFiles": 1195,
     "totalModules": 82,
-    "totalLinesOfCode": 200798,
-    "totalExports": 6195,
+    "totalLinesOfCode": 200873,
+    "totalExports": 6201,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1965,
+    "totalFunctions": 1968,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2624,
+    "totalReExports": 2627,
     "totalTypeOnlyImports": 608,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

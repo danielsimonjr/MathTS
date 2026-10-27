@@ -18,6 +18,7 @@ import {
   type PoolStats,
 } from 'workerpool';
 import { compileFunctionSource } from './compile-function-source.js';
+import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
 
 // Try to import WASM feature detection from workerpool/wasm subpath
@@ -2280,18 +2281,25 @@ export class MathWorkerPool {
   // =========================================================================
 
   /**
-   * Parallel map operation
+   * Shared map/filter dispatch. Below threshold, `spec.sequential` runs
+   * (`data.map` / `data.filter`). Above threshold, each chunk is sent to
+   * `spec.task` with `spec.fnString` (`fn.toString()`), then concatenated in
+   * chunk order via `Promise.all(...).flat()`.
    */
-  async map<T, R>(
-    data: T[],
-    fn: (item: T) => R,
-    options?: TaskOptions
-  ): Promise<ParallelResult<R[]>> {
+  private async runChunks<TItem, TOut extends unknown[]>(
+    data: TItem[],
+    options: TaskOptions | undefined,
+    spec: {
+      sequential: () => TOut;
+      task: 'mapChunk' | 'filterChunk';
+      fnString: string;
+    }
+  ): Promise<ParallelResult<TOut>> {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
       return {
-        result: data.map(fn),
+        result: spec.sequential(),
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -2304,16 +2312,31 @@ export class MathWorkerPool {
     const stats = this.stats();
 
     const results = await Promise.all(
-      chunks.map((chunk) => this.exec<R[]>('mapChunk', [chunk, fn.toString()]))
+      chunks.map((chunk) => this.exec<TOut[number][]>(spec.task, [chunk, spec.fnString]))
     );
 
     return {
-      result: results.flat(),
+      result: results.flat() as TOut,
       duration: performance.now() - start,
       chunks: chunks.length,
       parallelized: true,
       workersUsed: Math.min(chunks.length, stats.totalWorkers),
     };
+  }
+
+  /**
+   * Parallel map operation
+   */
+  async map<T, R>(
+    data: T[],
+    fn: (item: T) => R,
+    options?: TaskOptions
+  ): Promise<ParallelResult<R[]>> {
+    return this.runChunks(data, options, {
+      sequential: () => data.map(fn),
+      task: 'mapChunk',
+      fnString: fn.toString(),
+    });
   }
 
   /**
@@ -2370,33 +2393,11 @@ export class MathWorkerPool {
     predicate: (item: T) => boolean,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      return {
-        result: data.filter(predicate),
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
-    const chunks = this.chunkArray(data, chunkSize);
-    const stats = this.stats();
-
-    const results = await Promise.all(
-      chunks.map((chunk) => this.exec<T[]>('filterChunk', [chunk, predicate.toString()]))
-    );
-
-    return {
-      result: results.flat(),
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    return this.runChunks(data, options, {
+      sequential: () => data.filter(predicate),
+      task: 'filterChunk',
+      fnString: predicate.toString(),
+    });
   }
 
   // =========================================================================
@@ -2430,17 +2431,8 @@ export class MathWorkerPool {
   // Helper Methods
   // =========================================================================
 
-  // Chunks are produced with slice() (not subarray()): a subarray shares the
-  // full underlying ArrayBuffer, so passing `chunk.buffer` with `start: 0` to
-  // a worker kernel would read the wrong region for every chunk past the first.
   private chunkFloat64Array(data: Float64Array, customChunkSize?: number): Float64Array[] {
-    const chunkSize = customChunkSize ?? this.config.chunkSize;
-    const chunks: Float64Array[] = [];
-    for (let i = 0; i < data.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, data.length);
-      chunks.push(data.slice(i, end));
-    }
-    return chunks;
+    return chunkTyped(data, customChunkSize ?? this.config.chunkSize);
   }
 
   private chunkPairFloat64Array(
@@ -2448,27 +2440,11 @@ export class MathWorkerPool {
     b: Float64Array,
     customChunkSize?: number
   ): [Float64Array, Float64Array][] {
-    const chunkSize = customChunkSize ?? this.config.chunkSize;
-    const pairs: [Float64Array, Float64Array][] = [];
-    for (let i = 0; i < a.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, a.length);
-      pairs.push([a.slice(i, end), b.slice(i, end)]);
-    }
-    return pairs;
+    return chunkPairTyped(a, b, customChunkSize ?? this.config.chunkSize);
   }
 
-  // Int32 counterparts to the Float64 chunkers. Same slice()-not-subarray()
-  // invariant: a subarray shares the full underlying ArrayBuffer, so passing
-  // `chunk.buffer` with `start: 0` to a worker kernel would read the wrong
-  // region for every chunk past the first.
   private chunkInt32Array(data: Int32Array, customChunkSize?: number): Int32Array[] {
-    const chunkSize = customChunkSize ?? this.config.chunkSize;
-    const chunks: Int32Array[] = [];
-    for (let i = 0; i < data.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, data.length);
-      chunks.push(data.slice(i, end));
-    }
-    return chunks;
+    return chunkTyped(data, customChunkSize ?? this.config.chunkSize);
   }
 
   private chunkPairInt32Array(
@@ -2476,13 +2452,7 @@ export class MathWorkerPool {
     b: Int32Array,
     customChunkSize?: number
   ): [Int32Array, Int32Array][] {
-    const chunkSize = customChunkSize ?? this.config.chunkSize;
-    const pairs: [Int32Array, Int32Array][] = [];
-    for (let i = 0; i < a.length; i += chunkSize) {
-      const end = Math.min(i + chunkSize, a.length);
-      pairs.push([a.slice(i, end), b.slice(i, end)]);
-    }
-    return pairs;
+    return chunkPairTyped(a, b, customChunkSize ?? this.config.chunkSize);
   }
 
   private combineInt32Buffers(buffers: ArrayBuffer[], totalLength: number): Int32Array {
@@ -2561,3 +2531,8 @@ export function getPoolStats(): PoolStats {
 
 export { Transfer };
 export type { Pool, PoolOptions, ExecOptions, PoolStats };
+
+/** @internal */
+export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
+/** @internal */
+export { forEachMultiIndex } from './multi-index.js';
