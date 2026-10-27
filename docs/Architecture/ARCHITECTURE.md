@@ -119,6 +119,10 @@ active graph reachable from `functions/src/index.ts`:
 
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. They are edited like any other source.
+Clone-merge batch 4 (Sprint 2R) shares internals across those factories without
+changing public names: `mapSlices` calls core `_switch`; `matrixFromColumns` /
+`matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` /
+`min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
@@ -378,7 +382,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2023  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2026  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -261,6 +261,13 @@ special functions. The largest package (478 src files).
 Compiles under `strict: true`; ships its `.d.ts` tree via `tsc -p tsconfig.dts.json` (rollup-dts can't bundle
 the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 
+Sprint 2R clone-merge batch 4 keeps the public names `mapSlices`, `matrixFromColumns` /
+`matrixFromRows`, factory `max` / `min`, factory and typed `print`, local `Decimal.max` /
+`Decimal.min`, `ImmutableDenseMatrix.min` / `.max`, and `Index.min` / `.max`. The shared
+bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLength`,
+`reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
+`_extreme` (cache slot + `smaller` argument order), and `_ends`.
+
 ---
 
 ## Expression & Notebook Components
@@ -410,5 +417,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2023  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8115  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2026  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8119  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import { matrixFromVectorList, vectorLength } from './from-vectors.js';
 
 // Type definitions
 type NestedArray<T = unknown> = T | NestedArray<T>[];
@@ -85,58 +86,26 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
      * @return { number[][] | Matrix } if at least one of the arguments is an array, an array will be returned
      */
     return typed(name, {
-      // Single variadic handler for arrays, matrices, and mixed types
       '...': function (arr: (unknown[] | Matrix)[]): unknown[][] | Matrix {
-        if (arr.length === 0) {
-          throw new TypeError('At least one column is needed to construct a matrix.');
-        }
-
-        // Check if all arguments are Matrix (none are plain arrays)
-        const allMatrix = arr.every(
-          (item) => typeof (item as { toArray?: unknown }).toArray === 'function'
+        return matrixFromVectorList(
+          arr,
+          'column',
+          matrix,
+          _createSparseMatrixFromColumns,
+          _createArray
         );
-        // Check if any argument is a plain array
-        const hasArray = arr.some((item) => Array.isArray(item));
-
-        const isSparse =
-          allMatrix &&
-          !hasArray &&
-          arr.some(
-            (item) =>
-              typeof (item as Matrix).storage === 'function' &&
-              (item as Matrix).storage() === 'sparse'
-          );
-
-        if (isSparse) {
-          return _createSparseMatrixFromColumns(arr as Matrix[]);
-        }
-
-        // Convert all to arrays for processing
-        const arrays = arr.map((item) =>
-          typeof (item as { toArray?: unknown }).toArray === 'function'
-            ? (item as Matrix).toArray()
-            : item
-        );
-
-        const result = _createArray(arrays);
-
-        // Return Matrix only if all inputs were Matrix, otherwise return array
-        if (allMatrix && !hasArray) {
-          return matrix(result, 'dense');
-        }
-        return result;
       },
     });
 
     function _createSparseMatrixFromColumns(arr: Matrix[]): Matrix {
       const M = arr.length;
-      const N = checkVectorTypeAndReturnLength(arr[0]);
+      const N = vectorLength(arr[0], size);
 
       const entries: { row: number; col: number; value: unknown }[] = [];
 
       for (let j = 0; j < M; j++) {
         const colVec = arr[j];
-        const colLength = checkVectorTypeAndReturnLength(colVec);
+        const colLength = vectorLength(colVec, size);
         if (colLength !== N) {
           throw new TypeError(
             'The vectors had different length: ' + (N | 0) + ' ≠ ' + (colLength | 0)
@@ -197,7 +166,7 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
     function _createArray(arr: unknown[]): unknown[][] {
       if (arr.length === 0)
         throw new TypeError('At least one column is needed to construct a matrix.');
-      const N = checkVectorTypeAndReturnLength(arr[0]);
+      const N = vectorLength(arr[0], size);
 
       // create an array with empty rows
       const result: unknown[][] = [];
@@ -207,7 +176,7 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
 
       // loop columns
       for (const col of arr) {
-        const colLength = checkVectorTypeAndReturnLength(col);
+        const colLength = vectorLength(col, size);
 
         if (colLength !== N) {
           throw new TypeError(
@@ -224,28 +193,6 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
       }
 
       return result;
-    }
-
-    function checkVectorTypeAndReturnLength(vec: unknown): number {
-      const s = size(vec);
-
-      if (s.length === 1) {
-        // 1D vector
-        return s[0];
-      } else if (s.length === 2) {
-        // 2D vector
-        if (s[0] === 1) {
-          // row vector
-          return s[1];
-        } else if (s[1] === 1) {
-          // col vector
-          return s[0];
-        } else {
-          throw new TypeError('At least one of the arguments is not a vector.');
-        }
-      } else {
-        throw new TypeError('Only one- or two-dimensional vectors are supported.');
-      }
     }
   }
 );

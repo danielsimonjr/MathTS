@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1949,
+  "totalFiles": 1952,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1174,
+    "build-entry": 1176,
     "test-only": 0,
     "orphan": 0,
-    "test": 688,
+    "test": 689,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1199,
-    "tests": 688,
+    "src": 1201,
+    "tests": 689,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 820,
+    "@danielsimonjr/mathts-functions": 823,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 102,
@@ -716,7 +716,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 22
+      "loc": 20
     },
     {
       "file": "core/src/typed/index.ts",
@@ -6263,6 +6263,13 @@
       "loc": 73
     },
     {
+      "file": "functions/src/matrix/from-vectors.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 96
+    },
+    {
       "file": "functions/src/matrix/getMatrixDataType.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6309,14 +6316,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 124
     },
     {
       "file": "functions/src/matrix/matrixFromColumns.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 252
+      "loc": 199
     },
     {
       "file": "functions/src/matrix/matrixFromFunction.ts",
@@ -6330,7 +6337,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 241
+      "loc": 182
     },
     {
       "file": "functions/src/matrix/native-accel.ts",
@@ -7257,6 +7264,13 @@
       "loc": 199
     },
     {
+      "file": "functions/src/statistics/extreme.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 52
+    },
+    {
       "file": "functions/src/statistics/mad.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7268,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 136
+      "loc": 117
     },
     {
       "file": "functions/src/statistics/mean.ts",
@@ -7289,7 +7303,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 136
+      "loc": 117
     },
     {
       "file": "functions/src/statistics/mode.ts",
@@ -7429,7 +7443,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 109
+      "loc": 84
     },
     {
       "file": "functions/src/timeseries-extra.ts",
@@ -7653,7 +7667,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1039
+      "loc": 1040
     },
     {
       "file": "functions/src/type/matrix/FibonacciHeap.ts",
@@ -7674,14 +7688,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 358
+      "loc": 352
     },
     {
       "file": "functions/src/type/matrix/MatrixIndex.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 424
+      "loc": 422
     },
     {
       "file": "functions/src/type/matrix/Spa.ts",
@@ -8115,7 +8129,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 310
+      "loc": 287
     },
     {
       "file": "functions/src/typed/trigonometry.ts",
@@ -8367,7 +8381,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2
+      "loc": 36
     },
     {
       "file": "functions/src/utils/product.ts",
@@ -10237,6 +10251,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "functions/tests/s2r-clones-batch4-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 383
     },
     {
       "file": "functions/tests/s2r-jacobian-norms-parity.test.ts",
