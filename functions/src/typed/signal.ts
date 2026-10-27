@@ -19,6 +19,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { mapBinaryF64 } from './parallel-map.js';
 import {
   applyWindowDispatch,
   bartlettPSDDispatch,
@@ -271,25 +272,14 @@ export const parallelIFFT = mathTyped('parallelIFFT', {
  * FFT magnitude spectrum
  */
 export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
-  'Float64Array, Float64Array': async (
-    real: Float64Array,
-    imag: Float64Array
-  ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
-      const r = await computePool.applyKernel2(
-        real,
-        imag,
-        '(re, im) => Math.sqrt(re * re + im * im)'
-      );
-      return r.result;
-    }
-
-    const result = new Float64Array(real.length);
-    for (let i: i32 = 0; i < real.length; i++) {
-      result[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
-    }
-    return result;
-  },
+  'Float64Array, Float64Array': (real: Float64Array, imag: Float64Array): Promise<Float64Array> =>
+    mapBinaryF64(
+      real,
+      imag,
+      (re, im) => Math.sqrt(re * re + im * im),
+      '(re, im) => Math.sqrt(re * re + im * im)',
+      'parallelFFT'
+    ),
 
   Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTMagnitude(spectrum.real, spectrum.imag) as Promise<Float64Array>;
@@ -300,21 +290,14 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
  * FFT power spectrum (|X|^2)
  */
 export const parallelFFTPower = mathTyped('parallelFFTPower', {
-  'Float64Array, Float64Array': async (
-    real: Float64Array,
-    imag: Float64Array
-  ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
-      const r = await computePool.applyKernel2(real, imag, '(re, im) => re * re + im * im');
-      return r.result;
-    }
-
-    const result = new Float64Array(real.length);
-    for (let i: i32 = 0; i < real.length; i++) {
-      result[i] = real[i] * real[i] + imag[i] * imag[i];
-    }
-    return result;
-  },
+  'Float64Array, Float64Array': (real: Float64Array, imag: Float64Array): Promise<Float64Array> =>
+    mapBinaryF64(
+      real,
+      imag,
+      (re, im) => re * re + im * im,
+      '(re, im) => re * re + im * im',
+      'parallelFFT'
+    ),
 
   Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTPower(spectrum.real, spectrum.imag) as Promise<Float64Array>;

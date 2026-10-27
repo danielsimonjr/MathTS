@@ -2896,6 +2896,7 @@
       "mannWhitneyTest",
       "map",
       "mapArray",
+      "mapBinaryF64",
       "mapObject",
       "mapSlices",
       "MASS_PROPERTY_SHAPES",

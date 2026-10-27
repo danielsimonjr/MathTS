@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1933,
+  "totalFiles": 1934,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 679,
+    "test": 680,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 679,
+    "tests": 680,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 812,
+    "@danielsimonjr/mathts-functions": 813,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 100,
@@ -8010,7 +8010,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 46
+      "loc": 71
     },
     {
       "file": "functions/src/typed/polynomial-ideal.ts",
@@ -8045,7 +8045,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1501
+      "loc": 1484
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10664,6 +10664,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 140
+    },
+    {
+      "file": "functions/tests/unary-f64-merge.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 181
     },
     {
       "file": "functions/tests/unit-characterization.test.ts",
