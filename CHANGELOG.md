@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone merge (G17 set):** `setStringSubset` in `expression` is the
+  single permissive string-assignment body; `functions` `_setSubstring` delegates
+  to it (same pattern as `getStringSubset` / `_getSubstring` in PR #456). The
+  `index.isIndex === true` guard and error strings are unchanged.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
