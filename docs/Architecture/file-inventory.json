@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1932,
+  "totalFiles": 1933,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 678,
+    "test": 679,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 678,
+    "tests": 679,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 50,
+    "(root)": 51,
     "@danielsimonjr/mathts-expression": 547,
     "@danielsimonjr/mathts-functions": 812,
     "@danielsimonjr/mathts-gpu": 17,
@@ -1241,7 +1241,7 @@
       "package": "(root)",
       "area": "examples",
       "disposition": "example",
-      "loc": 116
+      "loc": 119
     },
     {
       "file": "expression/src/compiler/compile.ts",
@@ -7814,7 +7814,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1831
+      "loc": 1832
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7863,7 +7863,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 720
+      "loc": 715
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -7961,7 +7961,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2214
+      "loc": 2215
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -7982,7 +7982,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 761
+      "loc": 760
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -8059,7 +8059,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 887
+      "loc": 888
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -8430,7 +8430,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 796
+      "loc": 795
     },
     {
       "file": "functions/src/wasm/WasmLoader.ts",
@@ -12785,6 +12785,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "tests/integration/examples-smoke.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 147
     },
     {
       "file": "tests/integration/export-index-completeness.test.ts",

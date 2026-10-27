@@ -105,10 +105,9 @@ function evalNewton(xs: Float64Array, coeffs: Float64Array, x: number): number {
  * Computes the unique polynomial of degree n-1 passing through n data points,
  * evaluated at x.
  *
- * When `xs.length >= WASM_INTERP_THRESHOLD` (256), the O(n²)
- * divided-difference table is computed via the AssemblyScript WASM kernel
- * and the result is evaluated in Newton form.
- * Below the threshold the classical direct Lagrange formula is used.
+ * When `xs.length >= WASM_INTERP_THRESHOLD` (256), divided differences use the
+ * dispatch bridge; Newton/Lagrange kernels stay on JS per `wasmPolicyAllows`
+ * (`functions/src/wasm/policy.ts`). Below the threshold the direct Lagrange formula runs.
  *
  * @param xs - Distinct x-coordinates
  * @param ys - Corresponding y-values
@@ -163,9 +162,9 @@ export function lagrangeInterp(xs: number[], ys: number[], x: number): number {
  * Lagrange interpolation but computed via a different (and more numerically
  * efficient) algorithm.
  *
- * When `xs.length >= WASM_INTERP_THRESHOLD` (256), the O(n²)
- * divided-difference table is dispatched to the WASM kernel; otherwise the
- * pure-JS path runs.
+ * When `xs.length >= WASM_INTERP_THRESHOLD` (256), divided differences use the
+ * dispatch bridge; Newton/Lagrange kernels stay on JS per `wasmPolicyAllows`
+ * (`functions/src/wasm/policy.ts`). Otherwise the pure-JS path runs.
  *
  * @param xs - Distinct x-coordinates
  * @param ys - Corresponding y-values

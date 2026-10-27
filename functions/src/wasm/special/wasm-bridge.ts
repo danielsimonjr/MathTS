@@ -11,9 +11,11 @@
  *   - `airy_ai_f64`   — Ai(x) applied element-wise
  *   - `airy_bi_f64`   — Bi(x) applied element-wise
  *
- * Dispatch order (for arrays ≥ WASM_SPECIAL_THRESHOLD = 1024 elements):
- *   1. AS managed kernel (the binary the functions package bundles).
- *   2. Fall back to pure-JS implementation.
+ * Dispatch order (arrays at or above each export's `WASM_SPECIAL_THRESHOLD`):
+ *   1. If `wasmPolicyAllows(<kernel>, n)` is true (`functions/src/wasm/policy.ts`,
+ *      measured 2026-09-26 with two Node runs of
+ *      `node tools/benchmark/wasm/run-node.mjs opt-in`), call the AS managed kernel.
+ *   2. Otherwise run the pure-JS implementation (including when the module is loaded).
  *
  * AS parity (Slice 4.9): `assembly/src/special.ts` implements the Bessel/Y and
  *   lgamma/elliptic kernels with the same algorithms, validated ≤1e-12 vs the JS
@@ -25,10 +27,10 @@
  * Any thrown error is swallowed and the JS fallback runs — the WASM tier
  * is an optimisation, not a correctness requirement.
  *
- * Threshold:
- *   The pointer-marshal overhead (2 memcpys in + 1 out) pays off for arrays
- *   of ≥ 1024 elements.  Verified empirically; see
- *   `tools/benchmark/wasm/special.bench.ts`.
+ * Threshold constant:
+ *   `WASM_SPECIAL_THRESHOLD` (1024) is when the bridge is consulted; only kernels
+ *   listed in `wasmPolicyAllows` actually call AS (today `lgamma_f64` at n ≥ 1_048_576;
+ *   Bessel/Airy/elliptic/Carlson exports are absent from the policy and stay JS).
  */
 
 import { wasmLoader } from '../WasmLoader.js';
@@ -256,11 +258,8 @@ export function lgammaJS(xs: Float64Array): Float64Array {
 }
 
 /**
- * Dispatch lgamma over an array — AS managed above threshold, then JS.
- *
- * For arrays ≥ WASM_SPECIAL_THRESHOLD (1024):
- *   1. AS managed `lgamma_f64` kernel (the binary the functions package bundles).
- *   2. Fall back to pure-JS `lgammaJS`.
+ * Dispatch lgamma over an array — bridge at WASM_SPECIAL_THRESHOLD, AS only when
+ * `wasmPolicyAllows('lgamma_f64', n)` (n ≥ 1_048_576 per `policy.ts`), else `lgammaJS`.
  */
 export const lgammaDispatch = makeUnaryArrayDispatch({
   threshold: WASM_SPECIAL_THRESHOLD,
