@@ -701,12 +701,12 @@ most op thresholds in `ComputePool` are `'never'` (inline JS). Scalar overloads
 | `parallelStatCorr(a, b)`                  | Pearson correlation                                          | parallel†   |
 | `parallelStatMAD(a)`                      | Mean absolute deviation from the mean                        | parallel†   |
 | `parallelStatMeanAD(a)`                   | Alias of `parallelStatMAD` (same mean AD, not factory `mad`) | parallel†   |
+| `parallelStatCumsum(a)`                   | Cumulative sum                                               | —           |
+| `parallelStatQuantile(a, q)`              | q-th quantile (0–1); uses `sort_f64` like median             | WASM (≥1 M) |
+| `parallelStatHistogram(a, bins)`          | Histogram bin counts                                         | parallel†   |
 
 Factory `mad([1, 2, 3, 4, 5])` is **1** (median absolute deviation). `parallelStatMAD` /
 `parallelStatMeanAD` on the same array are **1.2** (mean absolute deviation from the mean).
-| `parallelStatCumsum(a)` | Cumulative sum | — |
-| `parallelStatQuantile(a, q)` | q-th quantile (0–1); uses `sort_f64` like median | WASM (≥1 M) |
-| `parallelStatHistogram(a, bins)` | Histogram bin counts | parallel† |
 
 ### Selection (O(n), no full sort)
 
