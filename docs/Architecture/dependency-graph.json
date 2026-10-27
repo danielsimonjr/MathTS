@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1190,
+    "totalFiles": 1191,
     "totalModules": 82,
-    "totalExports": 6161
+    "totalExports": 6167
   },
   "entryPoints": [
     {
@@ -9284,6 +9284,11 @@
             "reExport": true
           },
           {
+            "file": "./numeric-equivalence.js",
+            "imports": ["numericallyEquivalent", "NumericEquivalenceError"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/propagate-uncertainty.js",
             "imports": [
               "propagateUncertainty",
@@ -9833,6 +9838,12 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric-equivalence.js",
+            "imports": ["NumericEquivalenceOptions", "NumericEquivalence"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -10197,6 +10208,8 @@
           "scoreFront",
           "selectFrontModel",
           "ParetoFrontError",
+          "numericallyEquivalent",
+          "NumericEquivalenceError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10495,6 +10508,8 @@
           "CompiledScalarGradient",
           "FrontCandidate",
           "ScoredCandidate",
+          "NumericEquivalenceOptions",
+          "NumericEquivalence",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -10636,6 +10651,8 @@
           "scoreFront",
           "selectFrontModel",
           "ParetoFrontError",
+          "numericallyEquivalent",
+          "NumericEquivalenceError",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10934,6 +10951,8 @@
           "CompiledScalarGradient",
           "FrontCandidate",
           "ScoredCandidate",
+          "NumericEquivalenceOptions",
+          "NumericEquivalence",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11112,6 +11131,48 @@
         "exports": ["orth"],
         "interfaces": ["OrthOptions"],
         "functions": ["orth"]
+      },
+      "functions/src/numeric-equivalence.ts": {
+        "description": "Guarded numerical equivalence for scalar trees (UPT §9 level 5).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-compile.js",
+            "imports": ["compileScalar"]
+          },
+          {
+            "file": "./scalar-eval.js",
+            "imports": ["NUMERIC_LITERAL"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["scalarSymbols"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["SeededRng"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["nearlyEqual"],
+            "subpath": "internal"
+          }
+        ],
+        "exports": ["numericallyEquivalent", "NumericEquivalenceError"],
+        "classes": ["NumericEquivalenceError"],
+        "interfaces": ["NumericEquivalenceOptions"],
+        "functions": ["numericallyEquivalent"]
       },
       "functions/src/numeric-extra.ts": {
         "description": "Elementwise / cumulative / log-domain primitives (Wave A of the gap analysis).",
@@ -40330,6 +40391,7 @@
           "functions/src/index.ts",
           "functions/src/linalg-extra.ts",
           "functions/src/linalg-svd-extra.ts",
+          "functions/src/numeric-equivalence.ts",
           "functions/src/numeric-extra.ts",
           "functions/src/optimization-extra.ts",
           "functions/src/pareto-front.ts",
@@ -41553,18 +41615,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1190,
+    "totalTypeScriptFiles": 1191,
     "totalModules": 82,
-    "totalLinesOfCode": 199518,
-    "totalExports": 6161,
-    "totalClasses": 58,
-    "totalInterfaces": 533,
-    "totalFunctions": 1957,
+    "totalLinesOfCode": 199940,
+    "totalExports": 6167,
+    "totalClasses": 59,
+    "totalInterfaces": 534,
+    "totalFunctions": 1958,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1617,
-    "totalReExports": 2601,
-    "totalTypeOnlyImports": 605,
+    "totalReExports": 2605,
+    "totalTypeOnlyImports": 606,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

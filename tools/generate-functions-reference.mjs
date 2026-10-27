@@ -132,6 +132,8 @@ const DOMAIN_SUPPLEMENT = {
     'scoreFront',
     'selectFrontModel',
     'ParetoFrontError',
+    'numericallyEquivalent',
+    'NumericEquivalenceError',
   ],
   'Parallel Execution Model': [
     'getComputePool', 'initializePool', 'initializeSignal', 'initializeStatistics',
