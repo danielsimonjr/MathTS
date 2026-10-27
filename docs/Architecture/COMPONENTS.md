@@ -151,7 +151,8 @@ export const DEFAULT_CONFIG
 export class MathjsError, IndexError, DimensionError, DimensionMismatchError, UnitParseError
 
 // Subpath: @danielsimonjr/mathts-core/internal — cold shared utils (is/number/object/array/
-// collection/map/string/customs/switch), the WASM loader, and shared types. NOT on the browser-safe `.` entry.
+// collection/map/string/customs/switch), WASM integrity + WasmModuleLoader, and shared types.
+// NOT on the browser-safe `.` entry.
 ```
 
 Hot-path type guards (`is.ts`) are deliberately kept **local** to each package (V8 won't inline across module
@@ -404,5 +405,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2008  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8091  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2010  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8092  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
