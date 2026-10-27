@@ -1,8 +1,8 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1973,
+  "totalFiles": 1974,
   "byDisposition": {
-    "reachable": 25,
+    "reachable": 26,
     "build-entry": 1186,
     "test-only": 0,
     "orphan": 0,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1211,
+    "src": 1212,
     "tests": 700,
     "config": 29,
     "examples": 5,
@@ -20,7 +20,7 @@
   },
   "byPackage": {
     "@danielsimonjr/mathts-arithmetic": 4,
-    "@danielsimonjr/mathts-wasm": 26,
+    "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 23,
     "@danielsimonjr/mathts-compat": 16,
@@ -114,7 +114,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 443
+      "loc": 417
     },
     {
       "file": "assembly/src/ops/bitwise.ts",
@@ -128,7 +128,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 431
+      "loc": 426
     },
     {
       "file": "assembly/src/ops/complex-ops.ts",
@@ -143,6 +143,13 @@
       "area": "src",
       "disposition": "reachable",
       "loc": 78
+    },
+    {
+      "file": "assembly/src/ops/f64-buffer.ts",
+      "package": "@danielsimonjr/mathts-wasm",
+      "area": "src",
+      "disposition": "reachable",
+      "loc": 69
     },
     {
       "file": "assembly/src/ops/fft.ts",
@@ -163,7 +170,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 658
+      "loc": 632
     },
     {
       "file": "assembly/src/ops/number-theory.ts",

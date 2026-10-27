@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1211
+  totalFiles: 1212
   totalModules: 82
-  totalExports: 6235
+  totalExports: 6241
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -36668,7 +36668,15 @@ modules:
       description: Array Operations for AssemblyScript
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./f64-buffer
+          imports:
+            - f64Add
+            - f64Div
+            - f64Max
+            - f64Min
+            - f64Mul
+            - f64Sub
       workspaceDependencies: []
       exports:
         - array_sum
@@ -36774,6 +36782,10 @@ modules:
         - file: ../types/complex
           imports:
             - Complex
+        - file: ./f64-buffer
+          imports:
+            - f64Add
+            - f64Sub
       workspaceDependencies: []
       exports:
         - complex_array_zeros
@@ -36957,6 +36969,26 @@ modules:
         - expfit
         - logfit
         - powerfit
+    assembly/src/ops/f64-buffer.ts:
+      description: Shared Float64Array buffer helpers (Sprint 2R clone-merge G0–G5).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - f64Min
+        - f64Max
+        - f64Add
+        - f64Sub
+        - f64Mul
+        - f64Div
+      functions:
+        - f64Min
+        - f64Max
+        - f64Add
+        - f64Sub
+        - f64Mul
+        - f64Div
     assembly/src/ops/fft.ts:
       description: Fast Fourier Transform — radix-2 Cooley-Tukey, in-place on interleaved
       externalDependencies: []
@@ -36987,7 +37019,15 @@ modules:
       description: Matrix Operations for AssemblyScript
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./f64-buffer
+          imports:
+            - f64Add
+            - f64Div
+            - f64Max
+            - f64Min
+            - f64Mul
+            - f64Sub
       workspaceDependencies: []
       exports:
         - matrix_zeros
@@ -39805,6 +39845,7 @@ dependencyGraph:
         - assembly/src/ops/complex-array.ts
         - assembly/src/ops/complex-ops.ts
         - assembly/src/ops/curvefit.ts
+        - assembly/src/ops/f64-buffer.ts
         - assembly/src/ops/fft.ts
         - assembly/src/ops/linalg.ts
         - assembly/src/ops/matrix.ts
@@ -39859,13 +39900,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1211
+  totalTypeScriptFiles: 1212
   totalModules: 82
-  totalLinesOfCode: 200584
-  totalExports: 6235
+  totalLinesOfCode: 200596
+  totalExports: 6241
   totalClasses: 59
   totalInterfaces: 542
-  totalFunctions: 2003
+  totalFunctions: 2009
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618

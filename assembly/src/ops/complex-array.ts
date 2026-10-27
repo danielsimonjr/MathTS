@@ -7,6 +7,7 @@
  */
 
 import { Complex } from '../types/complex';
+import { f64Add, f64Sub } from './f64-buffer';
 
 // =============================================================================
 // Array Creation
@@ -102,20 +103,14 @@ export function complex_array_length(data: Float64Array): i32 {
  * Complex array addition: result = a + b
  */
 export function complex_array_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
-  }
+  f64Add(a, b, result);
 }
 
 /**
  * Complex array subtraction: result = a - b
  */
 export function complex_array_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
-  }
+  f64Sub(a, b, result);
 }
 
 /**

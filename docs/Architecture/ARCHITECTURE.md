@@ -9,7 +9,7 @@ the `@danielsimonjr/mathts-wasm` package) is the **sole WASM backend**.
 
 The figures in this section come from `docs/Architecture/dependency-graph.json` (`statistics`). They cover the `src/` tree of every workspace package. Regenerate them with `npm run docs:deps:full`.
 
-- **1,189 TypeScript files**, all reachable from package entry points (0 unused files)
+- **1,190 TypeScript files**, all reachable from package entry points (0 unused files)
 - **198,637 lines of code**
 - **6,145 total exports** (2,592 re-exports) — 58 classes, 530 interfaces, 1,954 functions, 158 type guards, 1,617 constants, 0 enums; 602 type-only imports
 - Test-coverage figures are in the generated `TEST_COVERAGE.md`
@@ -329,7 +329,7 @@ mathjs `createTyped` instance, enabling factories from both layers to interopera
 
 | Metric                              | Value                     |
 | ----------------------------------- | ------------------------- |
-| Reachable files (from entry points) | 1,189                     |
+| Reachable files (from entry points) | 1,190                     |
 | Unused files                        | 0                         |
 | Synced mathjs factories             | Activated into live graph |
 | Synced categories                   | 19                        |
@@ -358,7 +358,7 @@ also waits on `matrix` and `functions` builds.
 Source-file counts below are the files under `src/` in each workspace package,
 per `dependency-graph.json`. The generated `DEPENDENCY_GRAPH.md` gives the
 per-file breakdown. Regenerate with `npm run docs:deps:full`. The report counts
-**1,189 TypeScript files** in total, all reachable from package entry points,
+**1,190 TypeScript files** in total, all reachable from package entry points,
 with **0 unused** files and **6,145 exports**.
 
 | Package                          | Reachable Files |
@@ -372,13 +372,13 @@ with **0 unused** files and **6,145 exports**.
 | expression                       | 477             |
 | workbook                         | 25              |
 | compat                           | 3               |
-| assembly (wasm)                  | 26              |
+| assembly (wasm)                  | 27              |
 | typed-function                   | 1               |
 | workerpool                       | 6               |
 | gpu                              | 8               |
 | plot                             | 21              |
 | thin re-export packages (10 × 1) | 10              |
-| **Total**                        | **1,189**       |
+| **Total**                        | **1,190**       |
 
 ## Verification
 
@@ -391,7 +391,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2047  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2049  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

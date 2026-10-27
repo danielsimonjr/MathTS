@@ -38,7 +38,7 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Core             │  core (48)  — types · typed-function · factory           │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Shared leaves    │  gpu (8, WebGPU foundation) · assembly (26, AS/WASM)     │
+│  Shared leaves    │  gpu (8, WebGPU foundation) · assembly (27, AS/WASM)     │
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Forked runtime   │  typed-function (1) · workerpool (6)                     │
 └────────────────────────────────────────────────────────────────────────────┘
@@ -121,6 +121,16 @@ asc src/index.ts  →  mathts-as.wasm   (built by `npm run build:wasm`)
 Compiled + type-checked by `asc`, not `tsc` (its `@inline`/`i32`/`f64`/`usize` source is eslint-excluded).
 The JS-side loaders live in `functions`/`matrix`; the shared SHA-384 integrity + resolution logic lives in
 `core/src/wasm-loader.ts`. Package name `@danielsimonjr/mathts-wasm`.
+
+Sprint 2R clone-merge G0–G5 keeps the wasm export names `array_min` / `matrix_min`,
+`array_max` / `matrix_max`, `array_add` / `matrix_add` / `complex_array_add`,
+`array_sub` / `matrix_sub` / `complex_array_sub`, `array_mul` / `matrix_mul_elementwise`,
+and `array_div` / `matrix_div_elementwise`. Shared `@inline` helpers live in
+`assembly/src/ops/f64-buffer.ts` (`f64Min` / `f64Max` / `f64Add` / `f64Sub` /
+`f64Mul` / `f64Div`) and are not wasm exports. Element-wise length is the
+`Float64Array` element count (interleaved complex add/sub is componentwise f64;
+the helper does not double it). Empty min/max return NaN. Public `matrix` /
+`functions` element-wise paths stay on JS (`WASMBackend.shouldUseWasm` is matmul-only).
 
 ---
 
@@ -451,5 +461,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2047  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8144  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2049  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8150  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
