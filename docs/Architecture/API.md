@@ -701,7 +701,9 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `dlyap`/`care`/`dare`, `minimizeScalar` (Brent), `quad` (Gauss-Kronrod), `interpn`,
 `bsplineFit`/`bsplineEval`, `monteCarloIntegrate`, `bfgs`, `nnls`/`lsqBounded`,
 `rootsLegendre`, `interval`/`Interval` (outward-rounded interval arithmetic).
-Optimization extras: `nelderMead`, `gradientDescent`, `levenbergMarquardt`.
+Optimization extras: `nelderMead`, `gradientDescent`, `levenbergMarquardt`. The
+`minimize` entry in `typed/numeric.ts` is a thin wrapper: it calls `nelderMead` with
+absolute simplex step and absolute vertex-spread tolerance; both public names remain.
 
 ### Regression / ML / clustering
 

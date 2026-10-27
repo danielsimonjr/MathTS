@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6181
+    "totalExports": 6182
   },
   "entryPoints": [
     {
@@ -10039,7 +10039,7 @@
           },
           {
             "file": "./optimization-extra.js",
-            "imports": ["OptimizeResult", "LMResult", "LMOptions"],
+            "imports": ["OptimizeResult", "LMResult", "LMOptions", "NelderMeadOptions"],
             "reExport": true,
             "typeOnly": true
           },
@@ -10618,6 +10618,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -11065,6 +11066,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -22777,7 +22779,7 @@
           },
           {
             "file": "../optimization-extra.js",
-            "imports": ["levenbergMarquardt"]
+            "imports": ["levenbergMarquardt", "nelderMead"]
           },
           {
             "file": "../numeric/rational-nullspace.js",
@@ -41714,15 +41716,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200904,
-    "totalExports": 6181,
+    "totalLinesOfCode": 200824,
+    "totalExports": 6182,
     "totalClasses": 59,
     "totalInterfaces": 538,
     "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2617,
+    "totalReExports": 2618,
     "totalTypeOnlyImports": 609,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
