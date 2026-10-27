@@ -1,8 +1,8 @@
 /**
- * Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
- * and Levenberg–Marquardt nonlinear least squares — the canonical methods the gap
- * analysis flagged (today only a generic `minimize` exists). LM reuses the matrix
- * `inv` for the normal-equations solve rather than re-implementing elimination.
+ * Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;
+ * `minimize` is the absolute-step wrapper), gradient descent, and Levenberg–Marquardt
+ * nonlinear least squares. LM reuses the matrix `inv` for the normal-equations solve
+ * rather than re-implementing elimination.
  */
 import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
@@ -22,15 +22,39 @@ export interface OptimizeResult {
 }
 
 /**
+ * Options for {@link nelderMead}. Defaults use a relative simplex step and relative
+ * convergence test (SciPy-style); set `stepRule` / `tolRule` to `'absolute'` for the
+ * contract used by {@link minimize}.
+ */
+export interface NelderMeadOptions {
+  maxIter?: number;
+  tol?: number;
+  step?: number;
+  /** `'relative'` (default): perturb each coordinate by `step * x_j` (or `step` at zero). */
+  stepRule?: 'relative' | 'absolute';
+  /** `'relative'` (default): `|f_worst−f_best| ≤ tol·(|f_best|+tol)`. `'absolute'`: max vertex spread `< tol`. */
+  tolRule?: 'relative' | 'absolute';
+}
+
+/**
  * Nelder–Mead downhill-simplex minimization of `f: ℝⁿ → ℝ` from `x0`. Derivative-free.
  * Matches `scipy.optimize.minimize(method='Nelder-Mead')` to the requested tolerance.
+ *
+ * @example
+ * nelderMead((x) => (x[0] - 1) ** 2, [2]) // => { x: ~[1], … }; relative step 0.05 by default
  */
 export function nelderMead(
   f: (x: number[]) => number,
   x0: readonly number[],
-  opts: { maxIter?: number; tol?: number; step?: number } = {}
+  opts: NelderMeadOptions = {}
 ): OptimizeResult {
-  const { maxIter = 2000, tol = 1e-8, step = 0.05 } = opts;
+  const {
+    maxIter = 2000,
+    tol = 1e-8,
+    step = 0.05,
+    stepRule = 'relative',
+    tolRule = 'relative',
+  } = opts;
   const n = x0.length;
   const alpha = 1;
   const gamma = 2;
@@ -40,7 +64,11 @@ export function nelderMead(
   let simplex: number[][] = [Array.from(x0)];
   for (let i = 0; i < n; i++) {
     const p = Array.from(x0);
-    p[i] += p[i] !== 0 ? step * p[i] : step;
+    if (stepRule === 'absolute') {
+      p[i] += step;
+    } else {
+      p[i] += p[i] !== 0 ? step * p[i] : step;
+    }
     simplex.push(p);
   }
   let fv = simplex.map(f);
@@ -58,7 +86,13 @@ export function nelderMead(
     const order = fv.map((_, i) => i).sort((i, j) => fv[i] - fv[j]);
     simplex = order.map((i) => simplex[i]);
     fv = order.map((i) => fv[i]);
-    if (Math.abs(fv[n] - fv[0]) <= tol * (Math.abs(fv[0]) + tol)) break;
+    if (tolRule === 'absolute') {
+      let maxDiff = 0;
+      for (let i = 1; i <= n; i++) maxDiff = Math.max(maxDiff, Math.abs(fv[i] - fv[0]));
+      if (maxDiff < tol) break;
+    } else if (Math.abs(fv[n] - fv[0]) <= tol * (Math.abs(fv[0]) + tol)) {
+      break;
+    }
     const c = centroid(simplex.slice(0, n));
     const xr = add(c, sub(c, simplex[n]), alpha);
     const fr = f(xr);

@@ -349,7 +349,12 @@ export type {
 
 // Gap-analysis Wave D — named optimizers + nonlinear least squares.
 export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
-export type { OptimizeResult, LMResult, LMOptions } from './optimization-extra.js';
+export type {
+  OptimizeResult,
+  LMResult,
+  LMOptions,
+  NelderMeadOptions,
+} from './optimization-extra.js';
 export { fitScalarParameters } from './fit-scalar.js';
 export type { FitScalarOptions, FitScalarResult } from './fit-scalar.js';
 
