@@ -761,6 +761,10 @@ and `scalarToTex(node, options?)` — implemented in `functions/src/scalar-node-
 exported from `functions/src/factories/index.ts` via `export *` on the package barrel.
 Types `MathNode`, `StringOptions`, and `SimplifyOptions` are re-exported for signatures.
 
+`numericallyEquivalent(a, b, options)` (`functions/src/numeric-equivalence.ts`) samples
+with `SeededRng.next`, evaluates both trees through `compileScalar`, and compares with
+core `nearlyEqual`. A `consistent` verdict is evidence, not proof of symbolic equivalence.
+
 ### Typed-dispatch & bridges
 
 Every `typed/` function is built with `mathTyped(name, signatureMap)` where keys are

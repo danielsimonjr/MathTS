@@ -41,6 +41,7 @@ ScalarNode tree (expression scalar-structure toolkit)
   → compileScalar (functions/scalar-compile.ts): one register tape, column Float64Array bindings
   → CompiledScalar.evaluate(rows): per-row valid mask (no typed dispatch per row)
   → optional paretoFront / scoreFront / selectFrontModel on { loss, complexity, item } rows
+  → numericallyEquivalent (functions/numeric-equivalence.ts): SeededRng.next samples → compileScalar on both trees → nearlyEqual per valid row (consistent is evidence, not proof)
 ```
 
 `compileScalar` does not use `eval` / `new Function` and does not load WASM.

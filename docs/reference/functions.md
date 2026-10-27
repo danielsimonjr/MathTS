@@ -2881,6 +2881,8 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 | `scoreFront(front[, { lossScale }])`       | PySR log-loss scores (`'log'` default) for a front                               |
 | `selectFrontModel(scored[, mode[, opts]])` | Pick `accuracy` / `score` / `best` champion (`ParetoFrontError` on bad input)    |
 | `ParetoFrontError`                         | Thrown by `scoreFront` / `selectFrontModel` for invalid selection input          |
+| `numericallyEquivalent(a, b, options)`     | Sample two scalar trees; compare with `nearlyEqual` (evidence, not proof)        |
+| `NumericEquivalenceError`                  | Thrown for invalid `numericallyEquivalent` options or domain                     |
 | `scalar`                                   | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                   |
 | `ScalarEvalError`                          | Thrown when a scalar node cannot be evaluated                                    |
 | `compileExpr(expr)`                        | Compile once, evaluate many                                                      |
@@ -2901,6 +2903,10 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 - Property and method access inside expressions is routed through sandbox
   helpers — a deliberate security boundary so that user-supplied formulas cannot
   reach arbitrary JavaScript.
+- `numericallyEquivalent` draws sample points with `SeededRng.next`, evaluates
+  both trees through `compileScalar`, and compares with core `nearlyEqual`.
+  **Numerical agreement alone never proves symbolic equivalence;** a `consistent`
+  verdict is evidence, not proof.
 
 ### Background & History
 
@@ -2973,7 +2979,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1094 exports).
+> `@danielsimonjr/mathts-functions` (1096 exports).
 
 ### Functions by category
 
@@ -3027,7 +3033,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (17): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (19): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

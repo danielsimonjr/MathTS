@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-25",
-  "totalFiles": 1919,
+  "generated": "2026-10-27",
+  "totalFiles": 1921,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1165,
+    "build-entry": 1166,
     "test-only": 0,
     "orphan": 0,
-    "test": 667,
+    "test": 668,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1190,
-    "tests": 667,
+    "src": 1191,
+    "tests": 668,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 802,
+    "@danielsimonjr/mathts-functions": 804,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -6057,7 +6057,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 651
+      "loc": 656
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6471,6 +6471,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 453
+    },
+    {
+      "file": "functions/src/numeric-equivalence.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 412
     },
     {
       "file": "functions/src/numeric-extra.ts",
@@ -9873,6 +9880,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 298
+    },
+    {
+      "file": "functions/tests/numeric-equivalence.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 277
     },
     {
       "file": "functions/tests/numeric-jacobian.test.ts",

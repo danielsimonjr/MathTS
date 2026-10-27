@@ -79,6 +79,7 @@ The mathjs-derived factories are wired into the graph via
 - **`functions/src/scalar-compile.ts`**: `compileScalar` builds a register tape over column `Float64Array`s with a per-row `valid` mask; no `eval` / `new Function`; does not load WASM.
 - **`functions/src/scalar-node-bridge.ts`**: `scalarToNode`, `nodeToScalar`, `simplifyScalar`, and `scalarToTex` convert between `ScalarNode` and wired expression nodes via the factory `ConstantNode` / `SymbolNode` / `OperatorNode` / `FunctionNode` classes and `simplify` / `Node.toTex` (no formula string).
 - **`functions/src/pareto-front.ts`**: `paretoFront`, `scoreFront`, `selectFrontModel` (not `paretoDist`).
+- **`functions/src/numeric-equivalence.ts`**: `numericallyEquivalent` samples with `SeededRng.next`, evaluates both trees via `compileScalar`, compares with core `nearlyEqual`; a `consistent` verdict is evidence, not proof.
 
 ### Beyond the mathjs API surface
 

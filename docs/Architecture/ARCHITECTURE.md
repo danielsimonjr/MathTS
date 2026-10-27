@@ -277,6 +277,11 @@ constructors and `simplify` / `Node.toTex`; they do not parse a formula string.
 **Pareto front** (`functions/src/pareto-front.ts`): `paretoFront`, `scoreFront`,
 `selectFrontModel` — not `paretoDist`.
 
+**Numerical equivalence** (`functions/src/numeric-equivalence.ts`):
+`numericallyEquivalent` draws sample points with `SeededRng.next`, batch-evaluates
+both `ScalarNode` trees through `compileScalar`, and compares rows with core
+`nearlyEqual`. A `consistent` verdict is evidence, not proof of symbolic equality.
+
 ### 8. Workbook Runtime
 
 YAML-based reactive notebooks (.mtsw files):

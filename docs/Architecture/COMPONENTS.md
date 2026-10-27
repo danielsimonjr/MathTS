@@ -273,7 +273,7 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`,
 `scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights`.
 
-**Batch compile / Pareto / node bridge** live in `functions` (`scalar-compile.ts`, `scalar-node-bridge.ts`, `pareto-front.ts`).
+**Batch compile / Pareto / node bridge / numeric equivalence** live in `functions` (`scalar-compile.ts`, `scalar-node-bridge.ts`, `pareto-front.ts`, `numeric-equivalence.ts`). `numericallyEquivalent` samples with `SeededRng.next`, evaluates via `compileScalar`, and compares with core `nearlyEqual` (`consistent` is evidence, not proof).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
 regression guard for safe-access.
