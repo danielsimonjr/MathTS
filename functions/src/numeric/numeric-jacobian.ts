@@ -65,7 +65,7 @@ export interface NumericJacobianOptions {
  * @example
  * // Forward differences on a linear map are exact for any step.
  * const A = [[1, 2], [3, 4]];
- * const f = (v: number[]) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+ * const f = (v) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
  * numericJacobian(f, [1, 2], { scheme: 'forward', h: 1e-7 })
  * // => [[1, 2], [3, 4]]
  */

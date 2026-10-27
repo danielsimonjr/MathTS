@@ -9907,7 +9907,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 101
+      "loc": 131
     },
     {
       "file": "functions/tests/numeric-literal.test.ts",
@@ -9928,7 +9928,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 48
+      "loc": 52
     },
     {
       "file": "functions/tests/open-root-finders.test.ts",

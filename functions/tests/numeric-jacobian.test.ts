@@ -71,12 +71,39 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
       [1, 2],
       [3, 4],
     ];
-    const f = (v: number[]) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
-    const J = numericJacobian(f, [0, 3], { scheme: 'forward', step: { rel: 1e-7, floor: 1e-8 } });
+    const x0 = [0, 3];
+    const seen: number[][] = [];
+    const f = (v: number[]) => {
+      seen.push(v.slice());
+      return [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    };
+    const J = numericJacobian(f, x0, { scheme: 'forward', step: { rel: 1e-7, floor: 1e-8 } });
+    // Column 0: max(1e-8, 1e-7*|0|) = 1e-8; column 1: max(1e-8, 1e-7*|3|) = 3e-7.
+    expect(seen).toHaveLength(2);
+    expect(seen[0][0] - x0[0]).toBe(1e-8);
+    expect(seen[0][1]).toBe(x0[1]);
+    expect(seen[1][0]).toBe(x0[0]);
+    expect(seen[1][1] - x0[1]).toBe(3e-7);
     expect(J[0][0]).toBeCloseTo(1, 6);
     expect(J[0][1]).toBeCloseTo(2, 6);
     expect(J[1][0]).toBeCloseTo(3, 6);
     expect(J[1][1]).toBeCloseTo(4, 6);
+  });
+
+  it('absolute h wins over step', () => {
+    const seen: number[][] = [];
+    const f = (v: number[]) => {
+      seen.push(v.slice());
+      return [v[0] + 2 * v[1]];
+    };
+    numericJacobian(f, [0, 3], {
+      scheme: 'forward',
+      h: 1e-3,
+      step: { rel: 1e-7, floor: 1e-8 },
+    });
+    expect(seen).toHaveLength(2);
+    expect(seen[0][0] - 0).toBe(1e-3);
+    expect(seen[1][1] - 3).toBe(1e-3);
   });
 
   it('f0 skips the base evaluation of f at x0', () => {
@@ -95,6 +122,9 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     const J = numericJacobian(f, x0, { scheme: 'forward', h: 1e-7, f0 });
     // One eval per column (n=2), not n+1.
     expect(calls - callsAfterF0).toBe(2);
+    expect(J[0][0]).toBeCloseTo(1, 6);
+    expect(J[0][1]).toBeCloseTo(2, 6);
+    expect(J[1][0]).toBeCloseTo(3, 6);
     expect(J[1][1]).toBeCloseTo(4, 6);
   });
 });

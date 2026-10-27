@@ -65,7 +65,7 @@ describe('S2R parity — solveDAE (FD ∂g/∂z and Newton matrix)', () => {
   });
 });
 
-describe('S2R parity — fsolve (line search uses local norm2)', () => {
+describe('S2R parity — fsolve (line search uses core norm2)', () => {
   it('[x^2-y, x+y-2] from [0.5,0.5]', () => {
     const x = fsolve((v) => [v[0] ** 2 - v[1], v[0] + v[1] - 2], [0.5, 0.5]);
     expect(x[0]).toBeCloseTo(1, 10);
@@ -75,7 +75,7 @@ describe('S2R parity — fsolve (line search uses local norm2)', () => {
   });
 });
 
-describe('S2R parity — eigsh / Krylov (local norm2 in iteration)', () => {
+describe('S2R parity — eigsh / Krylov (core norm2 in iteration)', () => {
   const T = [
     [2, 1, 0],
     [1, 2, 1],

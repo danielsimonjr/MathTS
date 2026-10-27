@@ -772,7 +772,8 @@ fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` parti
 `fitScalarParameters` (`functions/src/fit-scalar.ts`) fits those parameters to observed
 column data with `levenbergMarquardt` (default for `l2`), `bfgs`, or `nelderMead`.
 `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; when omitted
-it still uses `numericJacobian` (`h = 1e-7`, forward differences).
+it still uses `numericJacobian` (`h = 1e-7`, forward differences). Stiff `solveODE`,
+`solveDAE`, and `solveBVP` take the same helper for their forward finite-difference Jacobians.
 
 `numericallyEquivalent(a, b, options)` (`functions/src/numeric-equivalence.ts`) samples
 with `SeededRng.next`, evaluates both trees through `compileScalar`, and compares with
