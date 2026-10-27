@@ -28,11 +28,75 @@ export function cloneMatrix(A: number[][]): number[][] {
   return A.map((row) => [...row]);
 }
 
-/** Transpose a matrix. */
+/**
+ * Transpose a nested `number[][]` matrix (rows become columns).
+ *
+ * Reads `A[0].length` for the column count, so an empty `A` throws. Jagged rows
+ * yield `undefined` at missing entries. This is the nested-array helper; the
+ * DenseMatrix typed function is `transpose`. The public name is
+ * `transposeNestedArray`.
+ *
+ * @param A - Input matrix with at least one row
+ * @returns Transposed nested array of shape `n × m` when `A` is `m × n`
+ *
+ * @example
+ * ```ts
+ * import { transposeNestedArray } from '@danielsimonjr/mathts-matrix';
+ *
+ * const T = transposeNestedArray([
+ *   [1, 2],
+ *   [3, 4],
+ * ]);
+ * // T[0] === [1, 3], T[1] === [2, 4]
+ * ```
+ */
 export function transpose(A: number[][]): number[][] {
   const m = A.length;
   const n = A[0].length;
   return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
+}
+
+/**
+ * Matrix inverse via Gauss-Jordan. Returns null on singular input.
+ *
+ * Pivot `|a| < 1e-15` is treated as singular. Not on the package barrel;
+ * `logm` and `sqrtm` import it from this module.
+ *
+ * @internal
+ */
+export function matInv(A: number[][]): number[][] | null {
+  const n = A.length;
+  const M = A.map((row, i) => {
+    const r = new Array(2 * n).fill(0);
+    for (let j = 0; j < n; j++) r[j] = row[j];
+    r[n + i] = 1;
+    return r;
+  });
+
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(M[col][col]);
+    for (let row = col + 1; row < n; row++) {
+      if (Math.abs(M[row][col]) > maxVal) {
+        maxVal = Math.abs(M[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
+
+    const pivot = M[col][col];
+    if (Math.abs(pivot) < 1e-15) return null; // singular
+
+    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
+    for (let row = 0; row < n; row++) {
+      if (row === col) continue;
+      const f = M[row][col];
+      if (f === 0) continue;
+      for (let j = 0; j < 2 * n; j++) M[row][j] -= f * M[col][j];
+    }
+  }
+
+  return M.map((row) => row.slice(n));
 }
 
 /**

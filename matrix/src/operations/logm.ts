@@ -19,76 +19,12 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
-import { eye, matMul, transpose, matScale, normInf, norm1 } from './common.js';
+import { eye, matMul, transpose, matScale, normInf, norm1, matInv } from './common.js';
+import { matrixSqrtNewtonInternal } from './sqrtm.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** Matrix inverse via Gauss-Jordan. Returns null on singular input. */
-function matInv(A: number[][]): number[][] | null {
-  const n = A.length;
-  const M = A.map((row, i) => {
-    const r = new Array(2 * n).fill(0);
-    for (let j = 0; j < n; j++) r[j] = row[j];
-    r[n + i] = 1;
-    return r;
-  });
-
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(M[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(M[row][col]) > maxVal) {
-        maxVal = Math.abs(M[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
-
-    const pivot = M[col][col];
-    if (Math.abs(pivot) < 1e-15) return null; // singular
-
-    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const f = M[row][col];
-      if (f === 0) continue;
-      for (let j = 0; j < 2 * n; j++) M[row][j] -= f * M[col][j];
-    }
-  }
-
-  return M.map((row) => row.slice(n));
-}
-
-/**
- * Matrix square root via Newton iteration (product form).
- * Y_{k+1} = (Y_k + A * Y_k^{-1}) / 2, starting from Y_0 = I.
- * Converges for matrices with no eigenvalues on the negative real axis.
- */
-function matSqrt(A: number[][]): number[][] {
-  const n = A.length;
-  let Y = eye(n); // start from identity — better convergence than Y_0 = A
-
-  for (let iter = 0; iter < 150; iter++) {
-    const Yinv = matInv(Y);
-    if (Yinv === null) break; // stop if singular
-
-    const AYinv = matMul(A, Yinv);
-    const Ynew = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => (Y[i][j] + AYinv[i][j]) / 2)
-    );
-
-    let diff = 0;
-    for (let i = 0; i < n; i++)
-      for (let j = 0; j < n; j++) diff = Math.max(diff, Math.abs(Ynew[i][j] - Y[i][j]));
-
-    Y = Ynew;
-    if (diff < 1e-14) break;
-  }
-
-  return Y;
-}
 
 // ---------------------------------------------------------------------------
 // Padé-7 approximant for log(I + X) — valid when ||X||_1 < 1
@@ -460,7 +396,7 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
     const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
     if (norm1(MminI) < tol) break;
 
-    const sqrtM = matSqrt(M);
+    const sqrtM = matrixSqrtNewtonInternal(M);
     if (!isFinite(normInf(sqrtM))) break;
 
     M = sqrtM;

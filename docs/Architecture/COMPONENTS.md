@@ -178,8 +178,9 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 ```
 
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
-factory layer routes to (the "prefer the accelerated primitive" pattern). Depends on `core`, `parallel`,
-`gpu`.
+factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
+`transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
+`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -405,5 +406,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2013  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8096  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2014  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8098  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

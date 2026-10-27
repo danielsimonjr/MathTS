@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1193,
     "totalModules": 82,
-    "totalExports": 6192
+    "totalExports": 6195
   },
   "entryPoints": [
     {
@@ -3564,6 +3564,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "../types/dense/reduction.js",
+            "imports": ["* as reduction"]
+          },
+          {
             "file": "./Backend.js",
             "imports": ["MatrixBackend", "BackendType"],
             "typeOnly": true
@@ -3587,6 +3591,10 @@
             "file": "./Backend.js",
             "imports": ["BackendType"],
             "typeOnly": true
+          },
+          {
+            "file": "./JSBackend.js",
+            "imports": ["jsBackend"]
           }
         ],
         "workspaceDependencies": [
@@ -4571,6 +4579,7 @@
           "eye",
           "cloneMatrix",
           "transpose",
+          "matInv",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4586,6 +4595,7 @@
           "eye",
           "cloneMatrix",
           "transpose",
+          "matInv",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4756,7 +4766,7 @@
           },
           {
             "file": "./common.js",
-            "imports": ["matMul"],
+            "imports": ["matMul", "transpose"],
             "reExport": true
           }
         ],
@@ -4809,7 +4819,9 @@
           "RQResult",
           "QLResult",
           "condest",
-          "matMul"
+          "matMul",
+          "transposeNestedArray",
+          "transpose"
         ],
         "reExported": [
           "eig",
@@ -4858,7 +4870,8 @@
           "RQResult",
           "QLResult",
           "condest",
-          "matMul"
+          "matMul",
+          "transpose"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -4880,7 +4893,11 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1"]
+            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1", "matInv"]
+          },
+          {
+            "file": "./sqrtm.js",
+            "imports": ["matrixSqrtNewtonInternal"]
           }
         ],
         "workspaceDependencies": [],
@@ -5019,7 +5036,7 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose"]
+            "imports": ["eye", "matMul", "transpose", "matInv"]
           }
         ],
         "workspaceDependencies": [],
@@ -22766,7 +22783,8 @@
               "LogmOptions",
               "SqrtmOptions",
               "DenseMatrix",
-              "matMul"
+              "matMul",
+              "transposeNestedArray"
             ]
           },
           {
@@ -41802,15 +41820,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1193,
     "totalModules": 82,
-    "totalLinesOfCode": 200877,
-    "totalExports": 6192,
+    "totalLinesOfCode": 200798,
+    "totalExports": 6195,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1964,
+    "totalFunctions": 1965,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2623,
+    "totalReExports": 2624,
     "totalTypeOnlyImports": 608,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

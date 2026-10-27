@@ -8,6 +8,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import * as reduction from '../types/dense/reduction.js';
 import type { MatrixBackend, BackendType } from './Backend.js';
 
 /**
@@ -239,16 +240,7 @@ export class JSBackend implements MatrixBackend {
    * Frobenius norm: sqrt(sum of squared elements)
    */
   norm(a: DenseMatrix): number {
-    let sumSq = 0;
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        const val = a.get(i, j);
-        sumSq += val * val;
-      }
-    }
-
-    return Math.sqrt(sumSq);
+    return reduction.norm(a);
   }
 
   /**

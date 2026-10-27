@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
+- **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
+  `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
+  stays on DenseMatrix). `ParallelBackend.sumAxis` delegates to `jsBackend` like GPU/WASM;
+  `JSBackend.norm` calls `reduction.norm` once (inner loop unchanged). `add` / `subtract` /
+  `multiplyElementwise` share `parallelBinary`. `logm` / `sqrtm` share `common.matInv` (singular
+  at `1e-15`) and `matrixSqrtNewtonInternal` (150 iters, `1e-14`, `Y0 = I`). Public names and
+  behavior stay; `matInv` is not on the barrel.
 
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
