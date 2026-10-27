@@ -764,7 +764,7 @@ export async function kolmogorovSmirnovTest(
   }
 
   const n = sample.length;
-  // Sort — WASM-accelerated above WASM_SORT_THRESHOLD (16 K elements).
+  // Sort — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
   const sorted = new Float64Array(n);
   for (let i = 0; i < n; i++) sorted[i] = sample[i];
   sortF64Dispatch(sorted);
@@ -968,7 +968,7 @@ export async function mannWhitneyTest(
   const n2 = sample2.length;
   const nTotal = n1 + n2;
 
-  // Combine and rank — WASM-sort-accelerated above WASM_SORT_THRESHOLD.
+  // Combine and rank — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
   const combined: { value: f64; group: number }[] = [];
   for (const v of sample1) combined.push({ value: v, group: 1 });
   for (const v of sample2) combined.push({ value: v, group: 2 });
@@ -1160,7 +1160,7 @@ export async function shapiroWilkTest(
   if (n < 3) throw new Error('shapiroWilkTest: need at least 3 observations');
   if (n > 5000) throw new Error('shapiroWilkTest: maximum 5000 observations');
 
-  // Sort — WASM-accelerated above WASM_SORT_THRESHOLD (16 K elements).
+  // Sort — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
   const sorted = new Float64Array(n);
   for (let k = 0; k < n; k++) sorted[k] = sample[k];
   sortF64Dispatch(sorted);

@@ -438,9 +438,9 @@ function betaPDFScalar(x: f64, alpha: f64, beta_: f64): f64 {
  *
  * f(x; α, β) = x^(α-1) · (1-x)^(β-1) / B(α, β),  x ∈ (0, 1).
  *
- * When x is a Float64Array of length ≥ WASM_SPECIAL_THRESHOLD (1024),
- * lgamma is computed in a single vectorised WASM dispatch over the array
- * instead of per-element scalar calls.
+ * Float64Array PDF evaluation uses scalar `_lgamma` for normalisation constants; array
+ * `lgamma_f64` AS runs only when `wasmPolicyAllows('lgamma_f64', n)` (n ≥ 1_048_576;
+ * see `functions/src/wasm/policy.ts`).
  *
  * @param x      - Sample value(s) in (0, 1)
  * @param alpha  - Shape parameter α > 0
@@ -506,8 +506,8 @@ function gammaPDFScalar(x: f64, shape: f64, scale: f64): f64 {
  *
  * f(x; k, θ) = x^(k-1) · exp(−x/θ) / (Γ(k) · θ^k),  x > 0.
  *
- * When x is a Float64Array of length ≥ WASM_SPECIAL_THRESHOLD (1024),
- * lgamma(shape) is pre-computed once (scalar), sparing per-element Γ calls.
+ * Float64Array paths pre-compute scalar `_lgamma(shape)` once (no array `lgamma_f64` band
+ * at typical PDF lengths; see `functions/src/wasm/policy.ts`).
  *
  * @param x     - Sample value(s)
  * @param shape - Shape parameter k > 0
@@ -564,9 +564,7 @@ function studentTPDFScalar(x: f64, df: f64): f64 {
  *
  * f(x; ν) = Γ((ν+1)/2) / (√(νπ)·Γ(ν/2)) · (1 + x²/ν)^(−(ν+1)/2).
  *
- * When x is a Float64Array of length ≥ WASM_SPECIAL_THRESHOLD (1024),
- * the two lgamma calls for the normalisation constant are performed once
- * on the main thread; only the per-element `(1 + x²/ν)` power is looped.
+ * Float64Array paths pre-compute scalar `_lgamma` normalisation once; per-element loop only.
  *
  * @param x  - Sample value(s)
  * @param df - Degrees of freedom ν > 0
@@ -634,11 +632,8 @@ function noncentralChi2PDFScalar(x: f64, df: f64, ncp: f64): f64 {
  *
  * f(x; k, λ) via Poisson-mixture of central chi-squared densities.
  *
- * When x is a Float64Array of length ≥ WASM_SPECIAL_THRESHOLD (1024),
- * lgamma in the inner Bessel sum is vectorised via `lgammaDispatch` over
- * the unique m values needed; for the outer product loop each element is
- * still evaluated independently (the lgamma argument depends on both j and
- * the fixed df, not on x[i], so the per-element work remains O(terms)).
+ * For large x, `lgammaDispatch` builds Γ(m/2) for mixture terms; AS `lgamma_f64` runs
+ * only when `wasmPolicyAllows('lgamma_f64', n)` (n ≥ 1_048_576; `functions/src/wasm/policy.ts`).
  *
  * @param x   - Sample value(s)
  * @param df  - Degrees of freedom k > 0

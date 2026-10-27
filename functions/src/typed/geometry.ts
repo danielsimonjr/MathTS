@@ -3,8 +3,8 @@
  *
  * Pure TypeScript implementations of geometric operations including
  * angles, products, areas, spatial queries, transforms, distances,
- * and intersections. The 2-D convex hull's coordinate sort goes through
- * the AssemblyScript argsort bridge for large inputs.
+ * and intersections. The 2-D convex hull's coordinate sort consults the argsort
+ * bridge for large n; `wasmPolicyAllows` has no argsort band (`policy.ts`).
  *
  * @packageDocumentation
  */
@@ -135,7 +135,7 @@ export function convexHull2D(points: number[][]): number[][] {
   if (n === 2) return points.slice();
 
   // Sort by x then by y.
-  // WASM argsort on x-coordinates (primary key) above WASM_SORT_THRESHOLD.
+  // argsort bridge above WASM_SORT_THRESHOLD; argsort has no WASM win in policy.ts — JS runs.
   let sorted: number[][];
   if (n >= WASM_SORT_THRESHOLD) {
     // Build x-coord Float64Array for WASM argsort (primary key).

@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1928
+**Total files**: 1929
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1167 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      674 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      675 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1928** |                                                                                                                |
+| **Total**     | **1929** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,14 +33,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1192 |
-| `tests`    |   674 |
+| `tests`    |   675 |
 | `tools`    |    28 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    50 |
+| `(root)`                               |    51 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    20 |
@@ -1886,6 +1886,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tests/benchmark/parallel-report.test.ts`                                         | (root)                               | tests    | test        |
 | `tests/benchmark/performance.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/benchmark/wasm-comparison.test.ts`                                         | (root)                               | tests    | test        |
+| `tests/integration/examples-smoke.test.ts`                                        | (root)                               | tests    | test        |
 | `tests/integration/export-index-completeness.test.ts`                             | (root)                               | tests    | test        |
 | `tests/integration/functions.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/integration/instance.test.ts`                                              | (root)                               | tests    | test        |

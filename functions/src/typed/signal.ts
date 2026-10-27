@@ -1289,8 +1289,8 @@ export function correlate(a: number[], b: number[]): number[] {
 /**
  * Welch's overlapped-segment-averaging Power Spectral Density.
  *
- * For arrays >= WASM_SIGNAL_THRESHOLD samples (4096) dispatches to the
- * WASM kernel (AS → JS fallback).
+ * Welch PSD measures slower on WASM than JS (`functions/src/wasm/policy.ts` header);
+ * bridges may be consulted but `wasmPolicyAllows` keeps welch/bartlett on JS.
  *
  * @param signal - Input signal samples
  * @param opts - { frameLength, overlap, window }
@@ -1342,8 +1342,8 @@ export function bartlettPSD(
  * as Slepian windows via cos-sum) to reduce spectral leakage. The final
  * PSD is the mean of the K individual tapered periodograms.
  *
- * For large inputs, each tapered periodogram is computed via the WASM
- * Welch kernel (frame = full signal, overlap = 0).
+ * For large inputs, each tapered periodogram uses the Welch dispatch (JS path per
+ * `wasmPolicyAllows`; see `functions/src/wasm/policy.ts`).
  *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
@@ -1397,7 +1397,7 @@ export function multiTaperPSD(
 /**
  * Goertzel algorithm: compute the power |X[k]|² at a single frequency.
  *
- * Dispatches to the WASM kernel for arrays >= 4096 samples.
+ * Goertzel measures slower on WASM (`functions/src/wasm/policy.ts`); JS runs after the bridge check.
  *
  * @param signal - Input signal samples
  * @param targetFreq - Target frequency in Hz
@@ -1417,7 +1417,7 @@ export function goertzel(signal: number[] | Float64Array, targetFreq: f64, sampl
  *   A = exp(2πi·phiStart)  — starting point
  *   W = exp(2πi·phiStep)   — angular step
  *
- * Dispatches to the WASM kernel for max(n, m) >= 4096.
+ * Chirp-Z measures slower on WASM (`functions/src/wasm/policy.ts`); JS runs after the bridge check.
  *
  * @param signal - Input signal samples (real)
  * @param m - Number of output points
