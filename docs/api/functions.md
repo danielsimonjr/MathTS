@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1101 exports).
+> `@danielsimonjr/mathts-functions` (1100 exports).
 
 ### Functions by category
 
@@ -706,7 +706,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (19): `aggregateRestartVectors`, `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `runWithConfig`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
+**Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `runWithConfig`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
 ### Constants & values (70)
 

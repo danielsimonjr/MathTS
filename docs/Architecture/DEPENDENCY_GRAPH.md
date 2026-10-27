@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 41 files
+- **functions/typed**: 42 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 6              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 482            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 483            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -9702,6 +9702,15 @@ graph LR
 
 ## Functions/typed Dependencies
 
+### `functions/src/typed/aggregate-restart.ts` - Element-wise mean and population std across centrality restart vectors.
+
+**Exports:**
+
+- Types: `RestartAggregation`
+- Functions: `aggregateRestartVectors`
+
+---
+
 ### `functions/src/typed/algebra.ts` - Typed Algebra Functions
 
 **Internal Dependencies:**
@@ -10081,10 +10090,16 @@ graph LR
 | ---------------------------- | ------------ |
 | `@danielsimonjr/mathts-core` | `mulberry32` |
 
+**Internal Dependencies:**
+
+| File                     | Imports                                       | Type   |
+| ------------------------ | --------------------------------------------- | ------ |
+| `./aggregate-restart.js` | `aggregateRestartVectors, RestartAggregation` | Import |
+
 **Exports:**
 
 - Interfaces: `CentralityRestartOptions`, `PageRankOptions`, `PageRankResult`, `PageRankRestartResult`, `BetweennessOptions`, `BetweennessResult`, `BetweennessRestartResult`, `EigenvectorOptions`, `EigenvectorResult`, `EigenvectorRestartResult`
-- Functions: `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`, `aggregateRestartVectors`, `pageRank`, `betweennessCentrality`, `eigenvectorCentrality`
+- Functions: `adjacencyMatrix`, `shortestPath`, `minimumSpanningTree`, `connectedComponents`, `stronglyConnectedComponents`, `topologicalSort`, `isConnected`, `graphDistance`, `pageRank`, `betweennessCentrality`, `eigenvectorCentrality`
 - Constants: `CENTRALITY_WORKER_THRESHOLD`
 
 ---
@@ -10826,7 +10841,7 @@ graph LR
 
 ---
 
-### `functions/src/utils/isPrime.ts` - Test whether a value is prime: has no divisors other than itself and one.
+### `functions/src/utils/isPrime.ts` - Trial-division primality test. `c` supplies typed literals so the loop
 
 **Internal Dependencies:**
 
@@ -18392,17 +18407,17 @@ graph TD
     end
 
     subgraph Functions/typed
-        N317[algebra]
-        N318[arithmetic]
-        N319[bitwise]
-        N320[cas]
-        N321[combinatorics]
-        N322[complex]
-        N323[dist-objects]
-        N324[distributions]
-        N325[euclid]
-        N326[finite-field]
-        N327[...31 more]
+        N317[aggregate-restart]
+        N318[algebra]
+        N319[arithmetic]
+        N320[bitwise]
+        N321[cas]
+        N322[combinatorics]
+        N323[complex]
+        N324[dist-objects]
+        N325[distributions]
+        N326[euclid]
+        N327[...32 more]
     end
 
     subgraph Functions/unit
@@ -18760,9 +18775,9 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1193   |
+| Total TypeScript Files  | 1194   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200899 |
+| Total Lines of Code     | 200905 |
 | Total Exports           | 6192   |
 | Total Re-exports        | 2619   |
 | Total Classes           | 59     |

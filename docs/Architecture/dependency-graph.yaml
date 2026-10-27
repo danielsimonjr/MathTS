@@ -2,7 +2,7 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1193
+  totalFiles: 1194
   totalModules: 82
   totalExports: 6192
 entryPoints:
@@ -19519,6 +19519,16 @@ modules:
         - createPlanckCharge
         - createPlanckTemperature
   functions/typed:
+    functions/src/typed/aggregate-restart.ts:
+      description: Element-wise mean and population std across centrality restart vectors.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - aggregateRestartVectors
+      functions:
+        - aggregateRestartVectors
     functions/src/typed/algebra.ts:
       description: Typed Algebra Functions
       externalDependencies: []
@@ -20638,7 +20648,11 @@ modules:
       description: Graph Theory Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./aggregate-restart.js
+          imports:
+            - aggregateRestartVectors
+            - RestartAggregation
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20654,7 +20668,6 @@ modules:
         - topologicalSort
         - isConnected
         - graphDistance
-        - aggregateRestartVectors
         - pageRank
         - betweennessCentrality
         - eigenvectorCentrality
@@ -20678,7 +20691,6 @@ modules:
         - topologicalSort
         - isConnected
         - graphDistance
-        - aggregateRestartVectors
         - pageRank
         - betweennessCentrality
         - eigenvectorCentrality
@@ -22809,7 +22821,7 @@ modules:
       constants:
         - createIsPositive
     functions/src/utils/isPrime.ts:
-      description: 'Test whether a value is prime: has no divisors other than itself and one.'
+      description: Trial-division primality test. `c` supplies typed literals so the loop
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -38697,6 +38709,7 @@ dependencyGraph:
         - functions/src/type/unit/physicalConstants.ts
     - name: Functions/typed
       files:
+        - functions/src/typed/aggregate-restart.ts
         - functions/src/typed/algebra.ts
         - functions/src/typed/arithmetic.ts
         - functions/src/typed/bitwise.ts
@@ -39442,9 +39455,9 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1193
+  totalTypeScriptFiles: 1194
   totalModules: 82
-  totalLinesOfCode: 200899
+  totalLinesOfCode: 200905
   totalExports: 6192
   totalClasses: 59
   totalInterfaces: 539

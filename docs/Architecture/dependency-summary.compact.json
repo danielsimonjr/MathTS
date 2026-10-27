@@ -1,7 +1,7 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1193, "e": 6192, "re": 2619 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1194, "e": 6192, "re": 2619 },
   "s": {
-    "loc": 200899,
+    "loc": 200905,
     "cls": 59,
     "int": 539,
     "fn": 1970,
@@ -1108,8 +1108,9 @@
       ]
     },
     "functions/typed": {
-      "f": 41,
+      "f": 42,
       "exp": [
+        "aggregateRestartVectors",
         "typedAlgebra",
         "polyval",
         "polyadd",
@@ -1128,8 +1129,7 @@
         "expand",
         "factor",
         "collect",
-        "cancel",
-        "together"
+        "cancel"
       ],
       "cls": ["DivisorGeobucket"],
       "int": [

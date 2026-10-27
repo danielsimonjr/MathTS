@@ -1,9 +1,9 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1936,
+  "totalFiles": 1937,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1168,
+    "build-entry": 1169,
     "test-only": 0,
     "orphan": 0,
     "test": 681,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1193,
+    "src": 1194,
     "tests": 681,
     "config": 29,
     "examples": 5,
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 815,
+    "@danielsimonjr/mathts-functions": 816,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 100,
@@ -7810,6 +7810,13 @@
       "loc": 319
     },
     {
+      "file": "functions/src/typed/aggregate-restart.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 40
+    },
+    {
       "file": "functions/src/typed/algebra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7961,7 +7968,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1109
+      "loc": 1075
     },
     {
       "file": "functions/src/typed/hypothesis.ts",
@@ -8549,7 +8556,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 181
+      "loc": 321
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
