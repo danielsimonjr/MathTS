@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1940,
+  "totalFiles": 1941,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1168,
     "test-only": 0,
     "orphan": 0,
-    "test": 685,
+    "test": 686,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1193,
-    "tests": 685,
+    "tests": 686,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 814,
+    "@danielsimonjr/mathts-functions": 815,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 102,
@@ -10195,6 +10195,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "functions/tests/s2r-clones-batch4-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 270
     },
     {
       "file": "functions/tests/s2r-jacobian-norms-parity.test.ts",
