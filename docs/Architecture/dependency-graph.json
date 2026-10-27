@@ -11289,7 +11289,7 @@
           }
         ],
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
-        "interfaces": ["OptimizeResult", "LMResult", "LMOptions"],
+        "interfaces": ["OptimizeResult", "NelderMeadOptions", "LMResult", "LMOptions"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
       },
       "functions/src/pareto-front.ts": {
@@ -41714,10 +41714,10 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200870,
+    "totalLinesOfCode": 200904,
     "totalExports": 6181,
     "totalClasses": 59,
-    "totalInterfaces": 537,
+    "totalInterfaces": 538,
     "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,

@@ -10678,6 +10678,7 @@ modules:
         - levenbergMarquardt
       interfaces:
         - OptimizeResult
+        - NelderMeadOptions
         - LMResult
         - LMOptions
       functions:
@@ -39359,10 +39360,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200870
+  totalLinesOfCode: 200904
   totalExports: 6181
   totalClasses: 59
-  totalInterfaces: 537
+  totalInterfaces: 538
   totalFunctions: 1959
   totalTypeGuards: 158
   totalEnums: 0

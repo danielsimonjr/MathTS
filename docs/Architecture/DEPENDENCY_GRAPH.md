@@ -4560,7 +4560,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `OptimizeResult`, `LMResult`, `LMOptions`
+- Interfaces: `OptimizeResult`, `NelderMeadOptions`, `LMResult`, `LMOptions`
 - Functions: `nelderMead`, `gradientDescent`, `levenbergMarquardt`
 
 ---
@@ -18731,11 +18731,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200870 |
+| Total Lines of Code     | 200904 |
 | Total Exports           | 6181   |
 | Total Re-exports        | 2617   |
 | Total Classes           | 59     |
-| Total Interfaces        | 537    |
+| Total Interfaces        | 538    |
 | Total Functions         | 1959   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
