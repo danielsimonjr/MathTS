@@ -15,6 +15,7 @@
  */
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
+import { assertSameShape } from './shape.js';
 
 /**
  * Holds a tensor value and its tangent for forward-mode automatic differentiation.
@@ -339,11 +340,6 @@ export class DualTensor {
   }
 
   private checkSameShape(other: DualTensor, op: string): void {
-    if (
-      this.shape.length !== other.shape.length ||
-      !this.shape.every((v, i) => v === other.shape[i])
-    ) {
-      throw new Error(`DualTensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
-    }
+    assertSameShape(this.shape, other.shape, 'DualTensor', op);
   }
 }

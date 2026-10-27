@@ -258,6 +258,10 @@ if (isDenseMatrix(m)) {
 ```
 
 `matMul` is the dense `number[][]` matrix product (i–k–j accumulation with zero-skip).
+`transposeNestedArray` is the dense `number[][]` transpose (`common.transpose`); the
+typed `transpose` remains the DenseMatrix operation. Empty input throws (`A[0]` is
+read). The public name is required: `functions` already depends on `matrix`, the
+package exports only `.`, and `transpose` is taken.
 
 ## Complete export index
 
@@ -265,13 +269,13 @@ if (isDenseMatrix(m)) {
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-matrix` (148 exports).
+> `@danielsimonjr/mathts-matrix` (149 exports).
 
 ### Functions by category
 
 **MatrixOperations** (30): `abs`, `add`, `column`, `diag`, `diagonal`, `divide`, `dotMultiply`, `exp`, `identity`, `log`, `matrix`, `max`, `mean`, `min`, `multiply`, `norm`, `ones`, `pow`, `random`, `row`, `size`, `sqrt`, `square`, `subset`, `subtract`, `sum`, `trace`, `transpose`, `unaryMinus`, `zeros`
 
-**Factory / uncategorized** (92): `cholesky`, `clearFeatureCache`, `cond`, `condest`, `createBackendManager`, `createGPUMatrixBackend`, `createParallelBackend`, `createSyncManager`, `createWASMBackend`, `destroyGlobalGPU`, `destroyGlobalGPUBackend`, `detectGPUCapabilities`, `detectWasmFeatures`, `eig`, `eigvals`, `eigvalsWasm`, `eigWasm`, `getCachedFeatures`, `getGlobalGPUBackend`, `getGlobalGPUContext`, `getRecommendedWorkgroupSize`, `hasWebGPU`, `initializeGlobalGPUBackend`, `initializeParallelMatrix`, `isAtomicsAvailable`, `isDenseMatrix`, `isMatrix`, `isSharedMemoryAvailable`, `isSparseMatrix`, `isWasmAvailable`, `lowRankApprox`, `lq`, `lu`, `luSolve`, `matMul`, `matrixExpm`, `matrixLogm`, `matrixPinv`, `matrixSchur`, `matrixSqrtm`, `norm2`, `normFro`, `parallelDiag`, `parallelDotMultiply`, `parallelIdentity`, `parallelMatrix`, `parallelMatrixAbs`, `parallelMatrixAdd`, `parallelMatrixColumn`, `parallelMatrixCos`, `parallelMatrixDiagonal`, `parallelMatrixDistance`, `parallelMatrixDivide`, `parallelMatrixDot`, `parallelMatrixExp`, `parallelMatrixHistogram`, `parallelMatrixLog`, `parallelMatrixMatvec`, `parallelMatrixMax`, `parallelMatrixMean`, `parallelMatrixMin`, `parallelMatrixMultiply`, `parallelMatrixNorm`, `parallelMatrixOuter`, `parallelMatrixRow`, `parallelMatrixSin`, `parallelMatrixSize`, `parallelMatrixSqrt`, `parallelMatrixSquare`, `parallelMatrixStd`, `parallelMatrixSubset`, `parallelMatrixSubtract`, `parallelMatrixSum`, `parallelMatrixTan`, `parallelMatrixTrace`, `parallelMatrixTranspose`, `parallelMatrixVariance`, `parallelOnes`, `parallelRandom`, `parallelUnaryMinus`, `parallelZeros`, `pinv`, `powerIteration`, `ql`, `qr`, `qrPivoted`, `rq`, `singularValues`, `spectralRadiusWasm`, `svd`, `svdWasm`, `terminateParallelMatrix`
+**Factory / uncategorized** (93): `cholesky`, `clearFeatureCache`, `cond`, `condest`, `createBackendManager`, `createGPUMatrixBackend`, `createParallelBackend`, `createSyncManager`, `createWASMBackend`, `destroyGlobalGPU`, `destroyGlobalGPUBackend`, `detectGPUCapabilities`, `detectWasmFeatures`, `eig`, `eigvals`, `eigvalsWasm`, `eigWasm`, `getCachedFeatures`, `getGlobalGPUBackend`, `getGlobalGPUContext`, `getRecommendedWorkgroupSize`, `hasWebGPU`, `initializeGlobalGPUBackend`, `initializeParallelMatrix`, `isAtomicsAvailable`, `isDenseMatrix`, `isMatrix`, `isSharedMemoryAvailable`, `isSparseMatrix`, `isWasmAvailable`, `lowRankApprox`, `lq`, `lu`, `luSolve`, `matMul`, `matrixExpm`, `matrixLogm`, `matrixPinv`, `matrixSchur`, `matrixSqrtm`, `norm2`, `normFro`, `parallelDiag`, `parallelDotMultiply`, `parallelIdentity`, `parallelMatrix`, `parallelMatrixAbs`, `parallelMatrixAdd`, `parallelMatrixColumn`, `parallelMatrixCos`, `parallelMatrixDiagonal`, `parallelMatrixDistance`, `parallelMatrixDivide`, `parallelMatrixDot`, `parallelMatrixExp`, `parallelMatrixHistogram`, `parallelMatrixLog`, `parallelMatrixMatvec`, `parallelMatrixMax`, `parallelMatrixMean`, `parallelMatrixMin`, `parallelMatrixMultiply`, `parallelMatrixNorm`, `parallelMatrixOuter`, `parallelMatrixRow`, `parallelMatrixSin`, `parallelMatrixSize`, `parallelMatrixSqrt`, `parallelMatrixSquare`, `parallelMatrixStd`, `parallelMatrixSubset`, `parallelMatrixSubtract`, `parallelMatrixSum`, `parallelMatrixTan`, `parallelMatrixTrace`, `parallelMatrixTranspose`, `parallelMatrixVariance`, `parallelOnes`, `parallelRandom`, `parallelUnaryMinus`, `parallelZeros`, `pinv`, `powerIteration`, `ql`, `qr`, `qrPivoted`, `rq`, `singularValues`, `spectralRadiusWasm`, `svd`, `svdWasm`, `terminateParallelMatrix`, `transposeNestedArray`
 
 ### Constants & values (10)
 

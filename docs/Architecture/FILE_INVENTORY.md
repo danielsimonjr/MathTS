@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1935
+**Total files**: 1946
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1169 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1172 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      679 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      687 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1935** |                                                                                                                |
+| **Total**     | **1946** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,26 +32,26 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1194 |
-| `tests`    |   679 |
+| `src`      |  1197 |
+| `tests`    |   687 |
 | `tools`    |    28 |
 
 ## Per-package counts
 
 | Package                                | Files |
 | -------------------------------------- | ----: |
-| `(root)`                               |    50 |
+| `(root)`                               |    51 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
-| `@danielsimonjr/mathts-autograd`       |    20 |
+| `@danielsimonjr/mathts-autograd`       |    22 |
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   547 |
-| `@danielsimonjr/mathts-functions`      |   815 |
+| `@danielsimonjr/mathts-expression`     |   548 |
+| `@danielsimonjr/mathts-functions`      |   817 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   100 |
+| `@danielsimonjr/mathts-matrix`         |   102 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    38 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -64,7 +64,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-units`          |     3 |
 | `@danielsimonjr/mathts-wasm`           |    26 |
 | `@danielsimonjr/mathts-workbook`       |    66 |
-| `@danielsimonjr/mathts-workerpool`     |    13 |
+| `@danielsimonjr/mathts-workerpool`     |    16 |
 
 ## All files
 
@@ -108,8 +108,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/src/grad.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/index.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/reverse-grad.ts`                                                    | @danielsimonjr/mathts-autograd       | src      | build-entry |
+| `autograd/src/shape.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/tape.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/tests/ad-wasm-interop.test.ts`                                          | @danielsimonjr/mathts-autograd       | tests    | test        |
+| `autograd/tests/assert-same-shape.test.ts`                                        | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/dual-elementwise-ad.test.ts`                                      | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/forward-grad.test.ts`                                             | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/grad-bridge-ad.test.ts`                                           | @danielsimonjr/mathts-autograd       | tests    | test        |
@@ -769,6 +771,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/scalar-builder.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-structure.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/sandbox.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/stringSubset-clone.test.ts`                                     | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/SymbolNode.test.ts`                                             | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/toMathML.test.ts`                                               | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/types.test.ts`                                                  | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -1526,6 +1529,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/scalar-eval.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-node-bridge.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-integrity.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/security/wasm-loader-pin.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-as-wasm.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-extended.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-extended2.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1590,6 +1594,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/typed-string.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-unit.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-variadic.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/unary-f64-merge.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-characterization.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-operators.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/upt-review-2-2026-10-15.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1709,7 +1714,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/operations/sqrtm.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/parallel-matrix.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/public-api-smoke.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/s2r-clones-batch3-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/security/wasm-integrity.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/security/wasm-loader-pin.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/sparse/operations.test.ts`                                          | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/sparse/SparseMatrix.test.ts`                                        | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/svd-wasm.test.ts`                                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
@@ -1730,9 +1737,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/typed-function/tests/index.test.ts`                                     | @danielsimonjr/mathts-typed-function | tests    | test        |
 | `packages/typed-function/tests/robust-types.test.ts`                              | @danielsimonjr/mathts-typed-function | tests    | test        |
 | `packages/typed-function/vitest.config.ts`                                        | @danielsimonjr/mathts-typed-function | config   | config      |
+| `packages/workerpool/src/chunk-typed.ts`                                          | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/compile-function-source.ts`                              | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/fft-core.ts`                                             | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/index.ts`                                                | @danielsimonjr/mathts-workerpool     | src      | build-entry |
+| `packages/workerpool/src/multi-index.ts`                                          | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/worker-numerics.ts`                                      | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/worker.ts`                                               | @danielsimonjr/mathts-workerpool     | src      | build-entry |
 | `packages/workerpool/src/workerpool-browser-shim.ts`                              | @danielsimonjr/mathts-workerpool     | src      | build-entry |
@@ -1741,6 +1750,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `packages/workerpool/tests/fft-core.test.ts`                                      | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/index.test.ts`                                         | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/parallel-dispatch.test.ts`                             | @danielsimonjr/mathts-workerpool     | tests    | test        |
+| `packages/workerpool/tests/s2r-clones-workerpool-chunks-oracle.test.ts`           | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/tests/worker-numerics.test.ts`                               | @danielsimonjr/mathts-workerpool     | tests    | test        |
 | `packages/workerpool/vitest.config.ts`                                            | @danielsimonjr/mathts-workerpool     | config   | config      |
 | `parallel/src/ComputePool.ts`                                                     | @danielsimonjr/mathts-parallel       | src      | build-entry |
@@ -1893,6 +1903,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tests/benchmark/parallel-report.test.ts`                                         | (root)                               | tests    | test        |
 | `tests/benchmark/performance.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/benchmark/wasm-comparison.test.ts`                                         | (root)                               | tests    | test        |
+| `tests/integration/examples-smoke.test.ts`                                        | (root)                               | tests    | test        |
 | `tests/integration/export-index-completeness.test.ts`                             | (root)                               | tests    | test        |
 | `tests/integration/functions.test.ts`                                             | (root)                               | tests    | test        |
 | `tests/integration/instance.test.ts`                                              | (root)                               | tests    | test        |

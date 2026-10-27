@@ -68,6 +68,47 @@ export const createRangeNode = /* #__PURE__ */ factory(
       return parens;
     }
 
+    type RangeRender = (node: MathNode) => string;
+    type RangeWrap = (inner: string) => string;
+    type RangeSep = () => string;
+
+    function formatRangeDisplay(
+      node: RangeNode,
+      options: StringOptions | undefined,
+      render: RangeRender,
+      wrap: RangeWrap,
+      rangeSep: RangeSep
+    ): string {
+      const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+      const parens = calculateNecessaryParentheses(
+        node,
+        parenthesis,
+        (options && options.implicit) || 'hide'
+      );
+
+      let start = render(node.start);
+      if (parens.start) {
+        start = wrap(start);
+      }
+      let str = start;
+
+      if (node.step) {
+        let step = render(node.step);
+        if (parens.step) {
+          step = wrap(step);
+        }
+        str += rangeSep() + step;
+      }
+
+      let end = render(node.end);
+      if (parens.end) {
+        end = wrap(end);
+      }
+      str += rangeSep() + end;
+
+      return str;
+    }
+
     class RangeNode extends Node {
       start: MathNode;
       end: MathNode;
@@ -197,37 +238,13 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        const parens = calculateNecessaryParentheses(
+        return formatRangeDisplay(
           this,
-          parenthesis,
-          (options && options.implicit) || 'hide'
+          options,
+          (child) => child.toString(options),
+          (inner) => '(' + inner + ')',
+          () => ':'
         );
-
-        // format string as start:step:stop
-        let str: string;
-
-        let start = this.start.toString(options);
-        if (parens.start) {
-          start = '(' + start + ')';
-        }
-        str = start;
-
-        if (this.step) {
-          let step = this.step.toString(options);
-          if (parens.step) {
-            step = '(' + step + ')';
-          }
-          str += ':' + step;
-        }
-
-        let end = this.end.toString(options);
-        if (parens.end) {
-          end = '(' + end + ')';
-        }
-        str += ':' + end;
-
-        return str;
       }
 
       /**
@@ -259,46 +276,15 @@ export const createRangeNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        const parens = calculateNecessaryParentheses(
+        const parenOpen = '<span class="math-parenthesis math-round-parenthesis">(</span>';
+        const parenClose = '<span class="math-parenthesis math-round-parenthesis">)</span>';
+        return formatRangeDisplay(
           this,
-          parenthesis,
-          (options && options.implicit) || 'hide'
+          options,
+          (child) => child.toHTML(options),
+          (inner) => parenOpen + inner + parenClose,
+          () => '<span class="math-operator math-range-operator">:</span>'
         );
-
-        // format string as start:step:stop
-        let str: string;
-
-        let start = this.start.toHTML(options);
-        if (parens.start) {
-          start =
-            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
-            start +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>';
-        }
-        str = start;
-
-        if (this.step) {
-          let step = this.step.toHTML(options);
-          if (parens.step) {
-            step =
-              '<span class="math-parenthesis math-round-parenthesis">(</span>' +
-              step +
-              '<span class="math-parenthesis math-round-parenthesis">)</span>';
-          }
-          str += '<span class="math-operator math-range-operator">:</span>' + step;
-        }
-
-        let end = this.end.toHTML(options);
-        if (parens.end) {
-          end =
-            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
-            end +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>';
-        }
-        str += '<span class="math-operator math-range-operator">:</span>' + end;
-
-        return str;
       }
 
       /**

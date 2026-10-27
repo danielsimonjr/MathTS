@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1194
+  totalFiles: 1197
   totalModules: 82
-  totalExports: 6190
+  totalExports: 6205
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -179,6 +179,18 @@ modules:
         - isUint32Array
         - isArrayBuffer
   packages/workerpool:
+    packages/workerpool/src/chunk-typed.ts:
+      description: Slice-based chunking for typed arrays passed to worker kernels.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - chunkTyped
+        - chunkPairTyped
+      functions:
+        - chunkTyped
+        - chunkPairTyped
     packages/workerpool/src/compile-function-source.ts:
       description: Rebuild a function from its source text.
       externalDependencies: []
@@ -217,12 +229,28 @@ modules:
         - file: ./compile-function-source.js
           imports:
             - compileFunctionSource
+        - file: ./chunk-typed.js
+          imports:
+            - chunkPairTyped
+            - chunkTyped
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./chunk-typed.js
+          imports:
+            - chunkTyped
+            - chunkPairTyped
+          reExport: true
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
+          reExport: true
       workspaceDependencies: []
       exports:
         - Transfer
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -241,6 +269,10 @@ modules:
         - terminatePool
         - getPoolStats
         - MathWorkerPool
+      reExported:
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
       classes:
         - MathWorkerPool
       interfaces:
@@ -270,6 +302,16 @@ modules:
       constants:
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
+    packages/workerpool/src/multi-index.ts:
+      description: Multi-dimensional index iteration (no imports — safe for the worker bundle).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - forEachMultiIndex
+      functions:
+        - forEachMultiIndex
     packages/workerpool/src/worker-numerics.ts:
       description: Worker-bundle copies of core numeric helpers.
       externalDependencies: []
@@ -296,6 +338,9 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
         - file: ./worker-numerics.js
           imports:
             - _tdRowMajorStrides
@@ -1418,6 +1463,7 @@ modules:
             - verifyWasmIntegrity
             - resolvePackagedWasm
             - defaultWasmLocation
+            - WasmModuleLoader
           reExport: true
         - file: ./shared.js
           imports:
@@ -1520,6 +1566,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - format
         - toEngineering
         - toExponential
@@ -1608,6 +1655,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - MemoizedFunction
         - ConfigOptions
         - MathJsConfig
@@ -1893,6 +1941,7 @@ modules:
       internalDependencies:
         - file: ./types/wasm-loader.js
           imports:
+            - LoadingMetrics
             - WasmManifest
           typeOnly: true
       workspaceDependencies: []
@@ -3433,6 +3482,9 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ../types/dense/reduction.js
+          imports:
+            - '* as reduction'
         - file: ./Backend.js
           imports:
             - MatrixBackend
@@ -3458,6 +3510,9 @@ modules:
           imports:
             - BackendType
           typeOnly: true
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -3531,6 +3586,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -4381,6 +4437,7 @@ modules:
         - eye
         - cloneMatrix
         - transpose
+        - matInv
         - isSymmetric
         - matMul
         - matAdd
@@ -4395,6 +4452,7 @@ modules:
         - eye
         - cloneMatrix
         - transpose
+        - matInv
         - isSymmetric
         - matMul
         - matAdd
@@ -4586,6 +4644,7 @@ modules:
         - file: ./common.js
           imports:
             - matMul
+            - transpose
           reExport: true
       workspaceDependencies: []
       exports:
@@ -4637,6 +4696,8 @@ modules:
         - QLResult
         - condest
         - matMul
+        - transposeNestedArray
+        - transpose
       reExported:
         - eig
         - eigvals
@@ -4685,6 +4746,7 @@ modules:
         - QLResult
         - condest
         - matMul
+        - transpose
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -4707,6 +4769,10 @@ modules:
             - matScale
             - normInf
             - norm1
+            - matInv
+        - file: ./sqrtm.js
+          imports:
+            - matrixSqrtNewtonInternal
       workspaceDependencies: []
       exports:
         - matrixLogm
@@ -4855,6 +4921,7 @@ modules:
             - eye
             - matMul
             - transpose
+            - matInv
       workspaceDependencies: []
       exports:
         - matrixSqrtm
@@ -5783,7 +5850,10 @@ modules:
       description: DualTensor — a Tensor + per-element tangent component for forward-mode AD.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./shape.js
+          imports:
+            - assertSameShape
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-tensor'
           directory: tensor
@@ -5913,11 +5983,24 @@ modules:
         - reverseGrad
       functions:
         - reverseGrad
+    autograd/src/shape.ts:
+      description: Shared shape guard for DualTensor and TapedTensor elementwise ops.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - assertSameShape
+      functions:
+        - assertSameShape
     autograd/src/tape.ts:
       description: Tape — records the sequence of ops during a forward pass so we can
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./shape.js
+          imports:
+            - assertSameShape
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-tensor'
           directory: tensor
@@ -14631,9 +14714,6 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isIndex
         - file: ../utils/object.js
           imports:
             - clone
@@ -14660,7 +14740,11 @@ modules:
           imports:
             - Index
           typeOnly: true
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - getStringSubset
       exports:
         - createSubset
       constants:
@@ -21288,6 +21372,7 @@ modules:
             - SqrtmOptions
             - DenseMatrix
             - matMul
+            - transposeNestedArray
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -21545,12 +21630,15 @@ modules:
           directory: parallel
           imports:
             - computePool
+            - OpName
       exports:
         - kernelSource
         - mapArray
+        - mapBinaryF64
       functions:
         - kernelSource
         - mapArray
+        - mapBinaryF64
     functions/src/typed/polynomial-ideal.ts:
       description: Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
       externalDependencies: []
@@ -21703,6 +21791,9 @@ modules:
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
+        - file: ./parallel-map.js
+          imports:
+            - mapBinaryF64
         - file: ../wasm/signal/wasm-bridge.js
           imports:
             - applyWindowDispatch
@@ -23289,6 +23380,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -23973,6 +24065,11 @@ modules:
           imports:
             - createSymbolNode
           reExport: true
+        - file: ./node/utils/stringSubset.js
+          imports:
+            - getStringSubset
+            - setStringSubset
+          reExport: true
         - file: ./scalar-builder.js
           imports:
             - createScalarBuilder
@@ -23996,6 +24093,11 @@ modules:
           imports:
             - MathNode
             - StringOptions
+          reExport: true
+          typeOnly: true
+        - file: ./node/utils/stringSubset.js
+          imports:
+            - IndexLike
           reExport: true
           typeOnly: true
         - file: ./scalar-builder.js
@@ -24036,6 +24138,8 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - getStringSubset
+        - setStringSubset
         - createScalarBuilder
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
@@ -24051,6 +24155,7 @@ modules:
         - scalarEquals
         - MathNode
         - StringOptions
+        - IndexLike
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -24089,6 +24194,8 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+        - getStringSubset
+        - setStringSubset
         - createScalarBuilder
         - SCALAR_FUNCTIONS
         - SCALAR_FUNCTION_LOWERING
@@ -24104,6 +24211,7 @@ modules:
         - scalarEquals
         - MathNode
         - StringOptions
+        - IndexLike
         - LoweredScalarFn
         - ScalarBuilder
         - ScalarFunctionName
@@ -30293,7 +30401,7 @@ modules:
       functions:
         - assignFactory
     expression/src/node/utils/stringSubset.ts:
-      description: Retrieve a subset of a string
+      description: Retrieve a subset of a string.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -38096,9 +38204,11 @@ dependencyGraph:
         - packages/typed-function/src/index.ts
     - name: Packages/workerpool
       files:
+        - packages/workerpool/src/chunk-typed.ts
         - packages/workerpool/src/compile-function-source.ts
         - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
+        - packages/workerpool/src/multi-index.ts
         - packages/workerpool/src/worker-numerics.ts
         - packages/workerpool/src/worker.ts
         - packages/workerpool/src/workerpool-browser-shim.ts
@@ -38249,6 +38359,7 @@ dependencyGraph:
         - autograd/src/grad.ts
         - autograd/src/index.ts
         - autograd/src/reverse-grad.ts
+        - autograd/src/shape.ts
         - autograd/src/tape.ts
     - name: Functions/algebra
       files:
@@ -39450,18 +39561,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1194
+  totalTypeScriptFiles: 1197
   totalModules: 82
-  totalLinesOfCode: 200999
-  totalExports: 6190
+  totalLinesOfCode: 200852
+  totalExports: 6205
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1966
+  totalFunctions: 1972
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2619
-  totalTypeOnlyImports: 607
+  totalReExports: 2627
+  totalTypeOnlyImports: 608
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

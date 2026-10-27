@@ -234,7 +234,20 @@ shifts a base function's index/dim convention from 0-based (JS) to 1-based
 ## Types
 
 `CompiledExpression`, `Scope`, `TypedFunction`, `TypedFunctionConstructor`,
-`OperatorGroup`, `OperatorProperty`, `EvaluateOptions`, `MathNode`.
+`OperatorGroup`, `OperatorProperty`, `EvaluateOptions`, `MathNode`, `IndexLike`.
+
+## String subset
+
+`getStringSubset` / `setStringSubset` are the one string-index implementation.
+`functions` `subset` on a string calls `getStringSubset` (allowed:
+`functions` → `expression`) and passes the functions invalid-index message.
+The barrel is the only public entry; do not import the file path.
+
+```typescript
+import { getStringSubset } from '@danielsimonjr/mathts-expression';
+
+getStringSubset('abcd', {} as never); // throws TypeError('Index expected')
+```
 
 ## Example
 
@@ -258,11 +271,11 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-expression` (72 exports).
+> `@danielsimonjr/mathts-expression` (74 exports).
 
-### Functions (67)
+### Functions (69)
 
-`compile`, `compileExpression`, `createAccessorNode`, `createAndTransform`, `createArrayNode`, `createAssignmentNode`, `createBitAndTransform`, `createBitOrTransform`, `createBlockNode`, `createColumnTransform`, `createConcatTransform`, `createConditionalNode`, `createConstantNode`, `createCumSumTransform`, `createDiffTransform`, `createEvaluate`, `createFilterTransform`, `createForEachTransform`, `createFunctionAssignmentNode`, `createFunctionNode`, `createHelpClass`, `createIndexNode`, `createIndexTransform`, `createMapSlicesTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createNode`, `createNullishTransform`, `createObjectNode`, `createOperatorNode`, `createOrTransform`, `createParenthesisNode`, `createParse`, `createParser`, `createParserClass`, `createPrintTransform`, `createQuantileSeqTransform`, `createRangeNode`, `createRangeTransform`, `createRelationalNode`, `createRowTransform`, `createScalarBuilder`, `createStdTransform`, `createSubsetTransform`, `createSumTransform`, `createSymbolNode`, `createVarianceTransform`, `escapeMathML`, `forEachScalar`, `getAssociativity`, `getOperator`, `getPrecedence`, `isAssociativeWith`, `mapScalar`, `mathMLDocument`, `mathMLError`, `ScalarBuildError`, `scalarCanonical`, `scalarCanonicalKey`, `scalarComplexity`, `scalarDepth`, `scalarEquals`, `scalarSize`, `scalarSymbols`, `toMathMLSymbol`
+`compile`, `compileExpression`, `createAccessorNode`, `createAndTransform`, `createArrayNode`, `createAssignmentNode`, `createBitAndTransform`, `createBitOrTransform`, `createBlockNode`, `createColumnTransform`, `createConcatTransform`, `createConditionalNode`, `createConstantNode`, `createCumSumTransform`, `createDiffTransform`, `createEvaluate`, `createFilterTransform`, `createForEachTransform`, `createFunctionAssignmentNode`, `createFunctionNode`, `createHelpClass`, `createIndexNode`, `createIndexTransform`, `createMapSlicesTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createNode`, `createNullishTransform`, `createObjectNode`, `createOperatorNode`, `createOrTransform`, `createParenthesisNode`, `createParse`, `createParser`, `createParserClass`, `createPrintTransform`, `createQuantileSeqTransform`, `createRangeNode`, `createRangeTransform`, `createRelationalNode`, `createRowTransform`, `createScalarBuilder`, `createStdTransform`, `createSubsetTransform`, `createSumTransform`, `createSymbolNode`, `createVarianceTransform`, `escapeMathML`, `forEachScalar`, `getAssociativity`, `getOperator`, `getPrecedence`, `getStringSubset`, `isAssociativeWith`, `mapScalar`, `mathMLDocument`, `mathMLError`, `ScalarBuildError`, `scalarCanonical`, `scalarCanonicalKey`, `scalarComplexity`, `scalarDepth`, `scalarEquals`, `scalarSize`, `scalarSymbols`, `setStringSubset`, `toMathMLSymbol`
 
 ### Constants & values (5)
 

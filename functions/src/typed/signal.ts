@@ -19,6 +19,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { fftGpuDispatch } from '../gpu/fft-gpu.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
+import { mapBinaryF64 } from './parallel-map.js';
 import {
   applyWindowDispatch,
   bartlettPSDDispatch,
@@ -271,25 +272,14 @@ export const parallelIFFT = mathTyped('parallelIFFT', {
  * FFT magnitude spectrum
  */
 export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
-  'Float64Array, Float64Array': async (
-    real: Float64Array,
-    imag: Float64Array
-  ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
-      const r = await computePool.applyKernel2(
-        real,
-        imag,
-        '(re, im) => Math.sqrt(re * re + im * im)'
-      );
-      return r.result;
-    }
-
-    const result = new Float64Array(real.length);
-    for (let i: i32 = 0; i < real.length; i++) {
-      result[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
-    }
-    return result;
-  },
+  'Float64Array, Float64Array': (real: Float64Array, imag: Float64Array): Promise<Float64Array> =>
+    mapBinaryF64(
+      real,
+      imag,
+      (re, im) => Math.sqrt(re * re + im * im),
+      '(re, im) => Math.sqrt(re * re + im * im)',
+      'parallelFFT'
+    ),
 
   Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTMagnitude(spectrum.real, spectrum.imag) as Promise<Float64Array>;
@@ -300,21 +290,14 @@ export const parallelFFTMagnitude = mathTyped('parallelFFTMagnitude', {
  * FFT power spectrum (|X|^2)
  */
 export const parallelFFTPower = mathTyped('parallelFFTPower', {
-  'Float64Array, Float64Array': async (
-    real: Float64Array,
-    imag: Float64Array
-  ): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(real.length, 'parallelFFT')) {
-      const r = await computePool.applyKernel2(real, imag, '(re, im) => re * re + im * im');
-      return r.result;
-    }
-
-    const result = new Float64Array(real.length);
-    for (let i: i32 = 0; i < real.length; i++) {
-      result[i] = real[i] * real[i] + imag[i] * imag[i];
-    }
-    return result;
-  },
+  'Float64Array, Float64Array': (real: Float64Array, imag: Float64Array): Promise<Float64Array> =>
+    mapBinaryF64(
+      real,
+      imag,
+      (re, im) => re * re + im * im,
+      '(re, im) => re * re + im * im',
+      'parallelFFT'
+    ),
 
   Object: async (spectrum: { real: Float64Array; imag: Float64Array }): Promise<Float64Array> => {
     return parallelFFTPower(spectrum.real, spectrum.imag) as Promise<Float64Array>;
@@ -1289,8 +1272,8 @@ export function correlate(a: number[], b: number[]): number[] {
 /**
  * Welch's overlapped-segment-averaging Power Spectral Density.
  *
- * For arrays >= WASM_SIGNAL_THRESHOLD samples (4096) dispatches to the
- * WASM kernel (AS → JS fallback).
+ * Welch PSD measures slower on WASM than JS (`functions/src/wasm/policy.ts` header);
+ * bridges may be consulted but `wasmPolicyAllows` keeps welch/bartlett on JS.
  *
  * @param signal - Input signal samples
  * @param opts - { frameLength, overlap, window }
@@ -1342,8 +1325,8 @@ export function bartlettPSD(
  * as Slepian windows via cos-sum) to reduce spectral leakage. The final
  * PSD is the mean of the K individual tapered periodograms.
  *
- * For large inputs, each tapered periodogram is computed via the WASM
- * Welch kernel (frame = full signal, overlap = 0).
+ * For large inputs, each tapered periodogram uses the Welch dispatch (JS path per
+ * `wasmPolicyAllows`; see `functions/src/wasm/policy.ts`).
  *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
@@ -1397,7 +1380,7 @@ export function multiTaperPSD(
 /**
  * Goertzel algorithm: compute the power |X[k]|² at a single frequency.
  *
- * Dispatches to the WASM kernel for arrays >= 4096 samples.
+ * Goertzel measures slower on WASM (`functions/src/wasm/policy.ts`); JS runs after the bridge check.
  *
  * @param signal - Input signal samples
  * @param targetFreq - Target frequency in Hz
@@ -1417,7 +1400,7 @@ export function goertzel(signal: number[] | Float64Array, targetFreq: f64, sampl
  *   A = exp(2πi·phiStart)  — starting point
  *   W = exp(2πi·phiStep)   — angular step
  *
- * Dispatches to the WASM kernel for max(n, m) >= 4096.
+ * Chirp-Z measures slower on WASM (`functions/src/wasm/policy.ts`); JS runs after the bridge check.
  *
  * @param signal - Input signal samples (real)
  * @param m - Number of output points

@@ -536,15 +536,15 @@
     {
       "name": "parallelFFTMagnitude",
       "file": "signal.ts",
-      "ops": ["applyKernel", "applyKernel2"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
     },
     {
       "name": "parallelFFTPower",
       "file": "signal.ts",
-      "ops": ["applyKernel", "applyKernel2"],
-      "thresholds": ["50000 (global kernel)", "50000 (global)"],
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
     },
     {
@@ -1009,12 +1009,6 @@
         "sinh",
         "tanh"
       ]
-    },
-    {
-      "op": "applyKernel2",
-      "threshold": "50000 (global)",
-      "active": true,
-      "functions": ["parallelFFTMagnitude", "parallelFFTPower"]
     },
     {
       "op": "besselJ",
