@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1201, "e": 6218, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1202, "e": 6219, "re": 2627 },
   "s": {
-    "loc": 200662,
+    "loc": 200640,
     "cls": 59,
-    "int": 539,
-    "fn": 1987,
+    "int": 540,
+    "fn": 1988,
     "tg": 158,
     "en": 0,
     "co": 1618,
@@ -1302,7 +1302,7 @@
       "int": ["CompiledExpression", "StringOptions", "IndexLike"]
     },
     "expression/transform": {
-      "f": 31,
+      "f": 32,
       "exp": [
         "createAndTransform",
         "createBitAndTransform",
@@ -1314,7 +1314,8 @@
         "createFilterTransform",
         "createForEachTransform",
         "createIndexTransform"
-      ]
+      ],
+      "int": ["PreparedTransformArgs"]
     },
     "expression/utils": {
       "f": 13,

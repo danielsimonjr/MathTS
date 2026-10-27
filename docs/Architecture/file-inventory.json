@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1955,
+  "totalFiles": 1959,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1176,
+    "build-entry": 1177,
     "test-only": 0,
     "orphan": 0,
-    "test": 692,
+    "test": 695,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1201,
-    "tests": 692,
+    "src": 1202,
+    "tests": 695,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,12 +22,12 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 26,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 22,
+    "@danielsimonjr/mathts-autograd": 23,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 548,
+    "@danielsimonjr/mathts-expression": 551,
     "@danielsimonjr/mathts-functions": 824,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -324,7 +324,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2430
+      "loc": 2405
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -374,6 +374,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "autograd/tests/s2r-clones-extrema-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "autograd/tests/scaffold.test.ts",
@@ -4216,7 +4223,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 314
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
@@ -4335,14 +4342,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 87
+      "loc": 67
     },
     {
       "file": "expression/src/transform/forEach.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 64
     },
     {
       "file": "expression/src/transform/index.transform.ts",
@@ -4483,6 +4490,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 16
+    },
+    {
+      "file": "expression/src/transform/utils/prepareTransformArgs.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 49
     },
     {
       "file": "expression/src/transform/utils/transformCallback.ts",
@@ -4931,6 +4945,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 311
+    },
+    {
+      "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 103
+    },
+    {
+      "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",

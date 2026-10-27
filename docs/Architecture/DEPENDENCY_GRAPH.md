@@ -164,7 +164,7 @@ The codebase is organized into the following modules:
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
 - **expression/node**: 19 files
-- **expression/transform**: 31 files
+- **expression/transform**: 32 files
 - **expression/utils**: 13 files
 - **parser**: 1 file
 - **units**: 1 file
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 487            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 478            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -15749,12 +15749,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                  | Type   |
-| ------------------------------------ | ---------------------------------------- | ------ |
-| `../utils/factory.js`                | `factory`                                | Import |
-| `../utils/is.js`                     | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.js` | `compileInlineExpression`                | Import |
-| `./utils/transformCallback.js`       | `createTransformCallback`                | Import |
+| File                              | Imports                            | Type   |
+| --------------------------------- | ---------------------------------- | ------ |
+| `../utils/factory.js`             | `factory`                          | Import |
+| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
+| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
 
 **Exports:**
 
@@ -15766,12 +15765,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                  | Type   |
-| ------------------------------------ | ---------------------------------------- | ------ |
-| `./utils/transformCallback.js`       | `createTransformCallback`                | Import |
-| `../utils/factory.js`                | `factory`                                | Import |
-| `../utils/is.js`                     | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.js` | `compileInlineExpression`                | Import |
+| File                              | Imports                            | Type   |
+| --------------------------------- | ---------------------------------- | ------ |
+| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
+| `../utils/factory.js`             | `factory`                          | Import |
+| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
 
 **Exports:**
 
@@ -16105,6 +16103,22 @@ graph LR
 **Exports:**
 
 - Functions: `lastDimToZeroBase`
+
+---
+
+### `expression/src/transform/utils/prepareTransformArgs.ts` - Shared tail of filter/forEach transforms: evaluate the collection argument and
+
+**Internal Dependencies:**
+
+| File                           | Imports                                  | Type   |
+| ------------------------------ | ---------------------------------------- | ------ |
+| `../../utils/is.js`            | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./compileInlineExpression.js` | `compileInlineExpression`                | Import |
+
+**Exports:**
+
+- Interfaces: `PreparedTransformArgs`
+- Functions: `prepareTransformArrayAndCallback`
 
 ---
 
@@ -18037,8 +18051,8 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
 | `functions/src/utils/collection`                       | 0 files      | 39 files   |
-| `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
+| `expression/src/utils/is`                              | 0 files      | 35 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 31 files     | 0 files    |
 | `functions/src/typed/index`                            | 28 files     | 2 files    |
@@ -18654,7 +18668,7 @@ graph TD
         N400[filter.transform]
         N401[forEach.transform]
         N402[index.transform]
-        N403[...21 more]
+        N403[...22 more]
     end
 
     subgraph Expression/utils
@@ -18906,14 +18920,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1201   |
+| Total TypeScript Files  | 1202   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200662 |
-| Total Exports           | 6218   |
+| Total Lines of Code     | 200640 |
+| Total Exports           | 6219   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 539    |
-| Total Functions         | 1987   |
+| Total Interfaces        | 540    |
+| Total Functions         | 1988   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 610    |

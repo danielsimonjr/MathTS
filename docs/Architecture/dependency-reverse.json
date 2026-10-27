@@ -2459,8 +2459,6 @@
       "expression/src/transform/column.transform.ts",
       "expression/src/transform/concat.transform.ts",
       "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
       "expression/src/transform/index.transform.ts",
       "expression/src/transform/map.transform.ts",
       "expression/src/transform/mapSlices.transform.ts",
@@ -2469,7 +2467,8 @@
       "expression/src/transform/row.transform.ts",
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/transform/utils/dimToZeroBase.ts",
-      "expression/src/transform/utils/lastDimToZeroBase.ts"
+      "expression/src/transform/utils/lastDimToZeroBase.ts",
+      "expression/src/transform/utils/prepareTransformArgs.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3878,10 +3877,9 @@
       "expression/src/transform/sum.transform.ts",
       "expression/src/transform/variance.transform.ts"
     ],
-    "expression/src/transform/utils/compileInlineExpression.ts": [
+    "expression/src/transform/utils/prepareTransformArgs.ts": [
       "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/map.transform.ts"
+      "expression/src/transform/forEach.transform.ts"
     ],
     "expression/src/transform/utils/transformCallback.ts": [
       "expression/src/transform/filter.transform.ts",
@@ -3913,6 +3911,10 @@
     "expression/src/transform/subset.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/utils/compileInlineExpression.ts": [
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/utils/prepareTransformArgs.ts"
+    ],
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "expression/src/transform/utils/dimToZeroBase.ts": [
