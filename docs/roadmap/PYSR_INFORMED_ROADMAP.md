@@ -1256,8 +1256,8 @@ re-decide it here if PR-POLY has already merged.
   5. **Dead artefacts** (D-3, I-6, I-18). **Done (#413).** Deleted
      `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
      (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).
-  6. **CI audit step** (I-1). Retry `bun audit` on a registry outage, keep
-     `--audit-level=high`, fail on a real advisory.
+  6. **CI audit step** (I-1). **Done (#421).** Retry `bun audit` on a registry outage via
+     `tools/test/bun-audit-retry.mjs`, keep `--audit-level=high`, fail on a real advisory.
   7. **Roadmap close-out.** Every milestone and sprint box in this file ticked or the
      item moved to §9; `CHANGELOG.md` entries; this file's status line set to "complete,
      ready to release".
