@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1192, "e": 6182, "re": 2618 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1192, "e": 6186, "re": 2619 },
   "s": {
-    "loc": 200853,
+    "loc": 201020,
     "cls": 59,
     "int": 539,
-    "fn": 1959,
+    "fn": 1962,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 608
+    "toi": 607
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -537,6 +537,7 @@
         "symbolicIntegral",
         "kmeans",
         "spectralClustering",
+        "runWithConfig",
         "config",
         "rankdata",
         "spearman",
@@ -550,8 +551,7 @@
         "zscore",
         "cov",
         "corrcoef",
-        "kendallTau",
-        "linregress"
+        "kendallTau"
       ],
       "cls": ["NumericEquivalenceError", "ParetoFrontError", "ScalarEvalError"],
       "int": [

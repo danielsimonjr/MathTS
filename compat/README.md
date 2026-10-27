@@ -14,6 +14,8 @@ npm install @danielsimonjr/mathts-compat
 
 - `create(all)` exposes `math.evaluate`, `math.chain`, `math.config`, and functions
   names such as `math.createUnit` (spread from `@danielsimonjr/mathts-functions`).
+  Each instance's `config` is isolated: `create(all, { number: 'BigNumber' })` does not
+  change bare `evaluate` from `@danielsimonjr/mathts-functions`.
 - Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
   no `math.import` and no named `import` / `createUnit` / `config` export from this
   package.
