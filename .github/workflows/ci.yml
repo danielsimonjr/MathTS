@@ -100,8 +100,9 @@ jobs:
       - name: Audit (high+)
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
         # `npm audit --audit-level=high` gate. The tree currently audits clean at
-        # every level (`bun audit` with no floor reports 0).
-        run: bun audit --audit-level=high
+        # every level (`bun audit` with no floor reports 0). Retries registry outages only
+        # (`tools/test/bun-audit-retry.mjs`); a real high+ advisory still fails on first try.
+        run: node tools/test/bun-audit-retry.mjs
 
       # Tool tests that no workflow used to run. `check:browser-safety` is the query
       # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker,
@@ -121,6 +122,9 @@ jobs:
 
       - name: Docs dist-freshness tests
         run: node --test tools/test/dist-freshness.test.mjs
+
+      - name: Bun audit retry tests
+        run: node --test tools/test/bun-audit-retry.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
