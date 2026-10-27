@@ -5,7 +5,12 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
+    "packages/workerpool/src/chunk-typed.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/fft-core.ts": [
+      "packages/workerpool/src/index.ts",
+      "packages/workerpool/src/worker.ts"
+    ],
+    "packages/workerpool/src/multi-index.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],

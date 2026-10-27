@@ -9,6 +9,7 @@
 
 import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
+import { forEachMultiIndex } from './multi-index.js';
 import { _tdRowMajorStrides, _workerMulberry32 } from './worker-numerics.js';
 import { worker } from 'workerpool';
 
@@ -759,27 +760,6 @@ function _tdFlatIndex(idx: readonly number[], strides: readonly number[]): numbe
 }
 
 /**
- * Iterate over all multi-indices for `sizes`, calling `cb(idx)`.
- */
-function _tdForEachIndex(sizes: readonly number[], cb: (idx: number[]) => void): void {
-  const rank = sizes.length;
-  if (rank === 0) {
-    cb([]);
-    return;
-  }
-  const idx = new Array<number>(rank).fill(0);
-  const total = sizes.reduce((a: number, b: number) => a * b, 1);
-  for (let n = 0; n < total; n++) {
-    cb(idx.slice());
-    for (let d = rank - 1; d >= 0; d--) {
-      idx[d]++;
-      if (idx[d] < sizes[d]) break;
-      idx[d] = 0;
-    }
-  }
-}
-
-/**
  * Worker kernel for a contiguous slice `[outStart, outEnd)` of a tensordot
  * output. Called by `ComputePool.tensordot` when the contracted-axis volume
  * exceeds the parallelization threshold.
@@ -833,7 +813,7 @@ function tensordotChunk(
     const bFreeVals = outIdx.slice(aFreeAxes.length);
 
     let acc = 0;
-    _tdForEachIndex(contractedSizes, (contractVals: number[]) => {
+    forEachMultiIndex(contractedSizes, (contractVals: number[]) => {
       const aIdx = new Array<number>(aRank).fill(0);
       for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
       for (let ci = 0; ci < axesA.length; ci++) aIdx[axesA[ci]] = contractVals[ci];

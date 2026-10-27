@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { MathWorkerPool } from '../src/index.js';
+import { MathWorkerPool, chunkTyped, chunkPairTyped, forEachMultiIndex } from '../src/index.js';
 
 const pkgRoot = fileURLToPath(new URL('..', import.meta.url));
 const tsdownCli = createRequire(import.meta.url).resolve('tsdown/run');
@@ -117,7 +117,8 @@ describe('S2R workerpool batch2 — typed chunking (G62 oracle)', () => {
     const pool = new MathWorkerPool({ chunkSize: 2 });
     const surface = asChunkTestSurface(pool);
     const data = Float64Array.from([1, 2, 3, 4, 5]);
-    const chunks = surface.chunkFloat64Array(data, 2);
+    const chunks = chunkTyped(data, 2);
+    expect(chunks).toEqual(surface.chunkFloat64Array(data, 2));
     expect(chunks.length).toBe(3);
     expect(chunks[0].length).toBe(2);
     expect(chunks[1].length).toBe(2);
@@ -130,7 +131,8 @@ describe('S2R workerpool batch2 — typed chunking (G62 oracle)', () => {
     const pool = new MathWorkerPool({ chunkSize: 2 });
     const surface = asChunkTestSurface(pool);
     const data = Int32Array.from([10, 20, 30]);
-    const chunks = surface.chunkInt32Array(data, 2);
+    const chunks = chunkTyped(data, 2);
+    expect(chunks).toEqual(surface.chunkInt32Array(data, 2));
     expect(chunks.length).toBe(2);
     expect(chunks[1].byteLength).toBe(4);
     expect(chunks[1].buffer).not.toBe(data.buffer);
@@ -143,7 +145,8 @@ describe('S2R workerpool batch2 — pair chunking (G63 oracle)', () => {
     const surface = asChunkTestSurface(pool);
     const a = Float64Array.from([1, 2, 3, 4, 5]);
     const b = Float64Array.from([10, 20, 30, 40, 50]);
-    const pairs = surface.chunkPairFloat64Array(a, b, 2);
+    const pairs = chunkPairTyped(a, b, 2);
+    expect(pairs).toEqual(surface.chunkPairFloat64Array(a, b, 2));
     expect(pairs.length).toBe(3);
     for (const [ca, cb] of pairs) {
       expect(ca.length).toBe(cb.length);
@@ -159,7 +162,8 @@ describe('S2R workerpool batch2 — pair chunking (G63 oracle)', () => {
     const surface = asChunkTestSurface(pool);
     const a = Int32Array.from([1, 2, 3, 4]);
     const b = Int32Array.from([5, 6, 7, 8]);
-    const pairs = surface.chunkPairInt32Array(a, b, 3);
+    const pairs = chunkPairTyped(a, b, 3);
+    expect(pairs).toEqual(surface.chunkPairInt32Array(a, b, 3));
     expect(pairs.length).toBe(2);
     expect(pairs[0][0].length).toBe(3);
     expect(pairs[1][0].length).toBe(1);
@@ -170,13 +174,19 @@ describe('S2R workerpool batch2 — pair chunking (G63 oracle)', () => {
 describe('S2R workerpool batch2 — multi-index (G64 oracle)', () => {
   it('rank 0 calls cb([]) once', () => {
     const visits: number[][] = [];
-    forEachMultiIndexOracle([], (idx) => visits.push(idx));
+    forEachMultiIndex([], (idx) => visits.push(idx));
     expect(visits).toEqual([[]]);
+    const oracleVisits: number[][] = [];
+    forEachMultiIndexOracle([], (idx) => oracleVisits.push(idx));
+    expect(visits).toEqual(oracleVisits);
   });
 
   it('sizes [2,2] visits 4 indices in row-major order', () => {
     const visits: number[][] = [];
-    forEachMultiIndexOracle([2, 2], (idx) => visits.push(idx));
+    forEachMultiIndex([2, 2], (idx) => visits.push(idx));
+    const oracleVisits: number[][] = [];
+    forEachMultiIndexOracle([2, 2], (idx) => oracleVisits.push(idx));
+    expect(visits).toEqual(oracleVisits);
     expect(visits).toEqual([
       [0, 0],
       [0, 1],

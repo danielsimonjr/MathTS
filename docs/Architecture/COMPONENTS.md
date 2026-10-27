@@ -81,8 +81,12 @@ export async function initializePool(config?: Partial<WorkerPoolConfig>): Promis
 export async function terminatePool(force?: boolean): Promise<void>;
 ```
 
-Consumed only by `parallel`. Ships a `workerpool-browser-shim.ts` for the browser build (its `canUse*`
-probes are the node/browser split).
+Consumed only by `parallel`. `MathWorkerPool` chunks typed arrays with `chunkTyped` / `chunkPairTyped`
+(`slice`, not `subarray`, so each worker chunk owns its buffer region) and shares one `runChunks` helper
+for generic `map` / `filter` dispatch. `forEachMultiIndex` in `multi-index.ts` has **no imports** so
+`dist/worker.js` can use it for tensordot without pulling `core` or `parallel`; it is re-exported from
+`.` as `@internal` for `ComputePool` (PR batch 5). Ships a `workerpool-browser-shim.ts` for the browser
+build (its `canUse*` probes are the node/browser split).
 
 ### @danielsimonjr/mathts-gpu (`gpu/`)
 
@@ -404,5 +408,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2006  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8090  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2007  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8093  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

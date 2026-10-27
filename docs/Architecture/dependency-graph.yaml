@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1192
+  totalFiles: 1194
   totalModules: 82
-  totalExports: 6186
+  totalExports: 6192
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -179,6 +179,18 @@ modules:
         - isUint32Array
         - isArrayBuffer
   packages/workerpool:
+    packages/workerpool/src/chunk-typed.ts:
+      description: Slice-based chunking for typed arrays passed to worker kernels.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - chunkTyped
+        - chunkPairTyped
+      functions:
+        - chunkTyped
+        - chunkPairTyped
     packages/workerpool/src/compile-function-source.ts:
       description: Rebuild a function from its source text.
       externalDependencies: []
@@ -217,12 +229,28 @@ modules:
         - file: ./compile-function-source.js
           imports:
             - compileFunctionSource
+        - file: ./chunk-typed.js
+          imports:
+            - chunkPairTyped
+            - chunkTyped
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./chunk-typed.js
+          imports:
+            - chunkTyped
+            - chunkPairTyped
+          reExport: true
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
+          reExport: true
       workspaceDependencies: []
       exports:
         - Transfer
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -241,6 +269,10 @@ modules:
         - terminatePool
         - getPoolStats
         - MathWorkerPool
+      reExported:
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
       classes:
         - MathWorkerPool
       interfaces:
@@ -270,6 +302,16 @@ modules:
       constants:
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
+    packages/workerpool/src/multi-index.ts:
+      description: Multi-dimensional index iteration (no imports — safe for the worker bundle).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - forEachMultiIndex
+      functions:
+        - forEachMultiIndex
     packages/workerpool/src/worker-numerics.ts:
       description: Worker-bundle copies of core numeric helpers.
       externalDependencies: []
@@ -296,6 +338,9 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
         - file: ./worker-numerics.js
           imports:
             - _tdRowMajorStrides
@@ -38050,9 +38095,11 @@ dependencyGraph:
         - packages/typed-function/src/index.ts
     - name: Packages/workerpool
       files:
+        - packages/workerpool/src/chunk-typed.ts
         - packages/workerpool/src/compile-function-source.ts
         - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
+        - packages/workerpool/src/multi-index.ts
         - packages/workerpool/src/worker-numerics.ts
         - packages/workerpool/src/worker.ts
         - packages/workerpool/src/workerpool-browser-shim.ts
@@ -39402,17 +39449,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1192
+  totalTypeScriptFiles: 1194
   totalModules: 82
-  totalLinesOfCode: 201020
-  totalExports: 6186
+  totalLinesOfCode: 201032
+  totalExports: 6192
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1962
+  totalFunctions: 1965
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2619
+  totalReExports: 2622
   totalTypeOnlyImports: 607
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
