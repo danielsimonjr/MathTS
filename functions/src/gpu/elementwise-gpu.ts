@@ -617,7 +617,7 @@ async function chainReduceGpuDispatchImpl(
     // at n=4M), so this costs microseconds — a second GPU pass would buy nothing
     // and cost another round-trip. Accumulating in f64 also keeps this last step
     // from adding f32 error on top of the kernel's.
-    return foldPartials(parts, reduce);
+    return reduceNumbers(parts, reduce);
   } catch {
     return null;
   } finally {
@@ -638,16 +638,16 @@ async function chainReduceGpuDispatchImpl(
   }
 }
 
-/** Fold the per-workgroup partials into the final scalar, accumulating in f64. */
-function foldPartials(parts: Float32Array, reduce: GpuReduceOp): number {
+/** Fold partial buffers or chain output into one scalar (f64 accumulation). */
+export function reduceNumbers(xs: ArrayLike<number>, reduce: GpuReduceOp): number {
   if (reduce === 'sum') {
     let acc = 0;
-    for (let i = 0; i < parts.length; i++) acc += parts[i];
+    for (let i = 0; i < xs.length; i++) acc += xs[i];
     return acc;
   }
   let acc = reduce === 'max' ? -Infinity : Infinity;
-  for (let i = 0; i < parts.length; i++) {
-    acc = reduce === 'max' ? Math.max(acc, parts[i]) : Math.min(acc, parts[i]);
+  for (let i = 0; i < xs.length; i++) {
+    acc = reduce === 'max' ? Math.max(acc, xs[i]) : Math.min(acc, xs[i]);
   }
   return acc;
 }

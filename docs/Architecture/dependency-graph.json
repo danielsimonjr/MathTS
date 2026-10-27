@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1195,
+    "totalFiles": 1201,
     "totalModules": 82,
-    "totalExports": 6201
+    "totalExports": 6214
   },
   "entryPoints": [
     {
@@ -1990,7 +1990,7 @@
         "functions": ["format", "stringify", "escape", "compareText"]
       },
       "core/src/switch.ts": {
-        "description": "Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s",
+        "description": "Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -7362,11 +7362,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -7692,11 +7696,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -8305,6 +8313,20 @@
         "workspaceDependencies": [],
         "exports": ["createSign"],
         "constants": ["createSign"]
+      },
+      "functions/src/arithmetic/snap-to-round.ts": {
+        "description": "Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/number.js",
+            "imports": ["nearlyEqual"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["snapNumber", "snapBig"],
+        "functions": ["snapNumber", "snapBig"]
       },
       "functions/src/arithmetic/sqrt.ts": {
         "description": "Calculate the square root of a value.",
@@ -14168,6 +14190,10 @@
           {
             "file": "../typed/set.js",
             "imports": ["setIsSubset", "setMultiplicity"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
           }
         ],
         "workspaceDependencies": [
@@ -14353,14 +14379,16 @@
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "interfaces": ["GpuChainOptions"],
         "functions": [
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "constants": ["GPU_ELEMENTWISE_OPS", "GPU_REDUCE_OPS"]
       },
@@ -15104,6 +15132,15 @@
         "exports": ["createForEach"],
         "constants": ["createForEach"]
       },
+      "functions/src/matrix/from-vectors.ts": {
+        "description": "Return the logical length of a 1-D or 2-D column/row vector.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["vectorLength", "matrixFromVectorList"],
+        "functions": ["vectorLength", "matrixFromVectorList"]
+      },
       "functions/src/matrix/getMatrixDataType.ts": {
         "description": "Find the data type of all elements in a matrix or array,",
         "externalDependencies": [],
@@ -15294,7 +15331,14 @@
             "imports": ["TypedFunction", "Matrix", "BigNumber"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["_switch"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createMapSlices"],
         "constants": ["createMapSlices"]
       },
@@ -15306,6 +15350,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15338,6 +15386,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -16137,6 +16189,15 @@
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
       },
+      "functions/src/numeric/hermite.ts": {
+        "description": "Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hermiteCubic"],
+        "functions": ["hermiteCubic"]
+      },
       "functions/src/numeric/interpn.ts": {
         "description": "Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`",
         "externalDependencies": [],
@@ -16312,7 +16373,12 @@
         "description": "Constant-delay delay differential equation (DDE) solver via the method of steps.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["solveDDE"],
         "interfaces": ["SolveDDEOptions", "DDESolution"],
@@ -16326,6 +16392,10 @@
           {
             "file": "./numeric-jacobian.js",
             "imports": ["numericJacobian"]
+          },
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
           },
           {
             "file": "../utils/is.js",
@@ -18477,6 +18547,38 @@
         "exports": ["createCumSum"],
         "constants": ["createCumSum"]
       },
+      "functions/src/statistics/extreme.ts": {
+        "description": "Recursively reduce an array or matrix to a single extreme value.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepForEach"]
+          },
+          {
+            "file": "../utils/number.js",
+            "imports": ["safeNumberType"]
+          },
+          {
+            "file": "./utils/improveErrorMessage.js",
+            "imports": ["improveErrorMessage"]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          },
+          {
+            "file": "../core/config.js",
+            "imports": ["ConfigOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["reduceExtreme"],
+        "functions": ["reduceExtreme"]
+      },
       "functions/src/statistics/mad.ts": {
         "description": "Compute the median absolute deviation of a matrix or a list with values.",
         "externalDependencies": [],
@@ -18511,15 +18613,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["deepForEach", "reduce", "containsCollections"]
+            "imports": ["reduce", "containsCollections"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -18609,15 +18711,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["containsCollections", "deepForEach", "reduce"]
+            "imports": ["containsCollections", "reduce"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19126,20 +19228,12 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
           {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           },
           {
             "file": "../core/function/typed.js",
@@ -20998,6 +21092,15 @@
       }
     },
     "functions/typed": {
+      "functions/src/typed/aggregate-restart.ts": {
+        "description": "Element-wise mean and population std across centrality restart vectors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["aggregateRestartVectors"],
+        "functions": ["aggregateRestartVectors"]
+      },
       "functions/src/typed/algebra.ts": {
         "description": "Typed Algebra Functions",
         "externalDependencies": [],
@@ -21116,6 +21219,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
@@ -21333,6 +21440,10 @@
             "imports": ["parse", "evaluate"]
           },
           {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
+          {
             "file": "./polynomial-ideal.js",
             "imports": ["polyFromExpression", "buchberger", "polyToString"]
           },
@@ -21528,7 +21639,7 @@
         "internalDependencies": [
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma"]
+            "imports": ["_lgamma", "betaincClosedScalar", "chooseScalar", "gammaincScalar"]
           },
           {
             "file": "./special.js",
@@ -21660,6 +21771,15 @@
           "noncentralChi2PDF",
           "typedDistributions"
         ]
+      },
+      "functions/src/typed/euclid.ts": {
+        "description": "Euclidean GCD with a caller-chosen integer snap (floor vs round).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["euclidSnap"],
+        "functions": ["euclidSnap"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -22005,6 +22125,7 @@
             "imports": [
               "elementwiseChainGpuDispatch",
               "elementwiseChainReduceGpuDispatch",
+              "reduceNumbers",
               "GpuChainOptions",
               "GpuReduceOp"
             ]
@@ -22129,7 +22250,12 @@
         "description": "Graph Theory Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./aggregate-restart.js",
+            "imports": ["aggregateRestartVectors", "RestartAggregation"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -22189,7 +22315,13 @@
           },
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma", "erfcSelfContained"]
+            "imports": [
+              "_lgamma",
+              "betaincClosedScalar",
+              "chooseScalar",
+              "erfcSelfContained",
+              "gammaincScalar"
+            ]
           },
           {
             "file": "./special.js",
@@ -23227,7 +23359,12 @@
         "description": "Typed Set Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -23660,12 +23797,8 @@
             "imports": ["format"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           }
         ],
         "workspaceDependencies": [
@@ -24482,7 +24615,7 @@
         "constants": ["createIsPositive"]
       },
       "functions/src/utils/isPrime.ts": {
-        "description": "Test whether a value is prime: has no divisors other than itself and one.",
+        "description": "Trial-division primality test. `c` supplies typed literals so the loop",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -24501,7 +24634,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createIsPrime"],
+        "exports": ["createIsPrime", "trialPrime"],
+        "functions": ["trialPrime", "trialPrime", "trialPrime"],
         "constants": ["createIsPrime"]
       },
       "functions/src/utils/isZero.ts": {
@@ -24886,12 +25020,22 @@
         "constants": ["createParseNumberWithConfig"]
       },
       "functions/src/utils/print.ts": {
-        "description": "print module",
+        "description": "Interpolate values into a string template (`$key` / `$key.nested`).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./string.js",
+            "imports": ["format"]
+          },
+          {
+            "file": "./is.js",
+            "imports": ["isString"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["printTemplate"],
+        "exports": ["printTemplate", "fillPrintTemplate"],
+        "functions": ["fillPrintTemplate"],
         "constants": ["printTemplate"]
       },
       "functions/src/utils/product.ts": {
@@ -25324,6 +25468,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -25353,6 +25499,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -40597,6 +40745,7 @@
           "functions/src/arithmetic/pow.ts",
           "functions/src/arithmetic/round.ts",
           "functions/src/arithmetic/sign.ts",
+          "functions/src/arithmetic/snap-to-round.ts",
           "functions/src/arithmetic/sqrt.ts",
           "functions/src/arithmetic/square.ts",
           "functions/src/arithmetic/subtract.ts",
@@ -40764,6 +40913,7 @@
           "functions/src/matrix/filter.ts",
           "functions/src/matrix/flatten.ts",
           "functions/src/matrix/forEach.ts",
+          "functions/src/matrix/from-vectors.ts",
           "functions/src/matrix/getMatrixDataType.ts",
           "functions/src/matrix/identity.ts",
           "functions/src/matrix/ifft.ts",
@@ -40821,6 +40971,7 @@
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-legendre4.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/hermite.ts",
           "functions/src/numeric/interpn.ts",
           "functions/src/numeric/interval.ts",
           "functions/src/numeric/krylov.ts",
@@ -40944,6 +41095,7 @@
         "files": [
           "functions/src/statistics/corr.ts",
           "functions/src/statistics/cumsum.ts",
+          "functions/src/statistics/extreme.ts",
           "functions/src/statistics/mad.ts",
           "functions/src/statistics/max.ts",
           "functions/src/statistics/mean.ts",
@@ -41052,6 +41204,7 @@
       {
         "name": "Functions/typed",
         "files": [
+          "functions/src/typed/aggregate-restart.ts",
           "functions/src/typed/algebra.ts",
           "functions/src/typed/arithmetic.ts",
           "functions/src/typed/bitwise.ts",
@@ -41060,6 +41213,7 @@
           "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
+          "functions/src/typed/euclid.ts",
           "functions/src/typed/factorization/finite-field.ts",
           "functions/src/typed/factorization/hensel.ts",
           "functions/src/typed/factorization/index.ts",
@@ -41861,18 +42015,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1195,
+    "totalTypeScriptFiles": 1201,
     "totalModules": 82,
-    "totalLinesOfCode": 200844,
-    "totalExports": 6201,
+    "totalLinesOfCode": 200689,
+    "totalExports": 6214,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1968,
+    "totalFunctions": 1983,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
     "totalReExports": 2627,
-    "totalTypeOnlyImports": 608,
+    "totalTypeOnlyImports": 610,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

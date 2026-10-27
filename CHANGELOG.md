@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone-merge batch 4 (G12, G24–G25, G28–G32).** `mapSlices` uses core `_switch`; `matrixFromColumns` / `matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` / `min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`; local `Decimal` max/min share `decimalExtreme`; `ImmutableDenseMatrix` min/max share `_extreme`; `Index` min/max share `_ends`. Public names and behavior unchanged.
 - **`ComputePool` clone-merge (Sprint 2R G64–G67, batch 5).** Tensordot contraction walks import workerpool
   `forEachMultiIndex` instead of a local copy. `dot` and `distance` share `gatedBinary` (`pairwiseDot` /
   `scaledDistance` sequential, worker pool methods parallel); thresholds stay `'never'`. `bitAnd` / `bitOr` /
   `bitXor` share `bitwiseBinary`; `leftShift` / `rightArithShift` / `rightLogShift` share `bitwiseShift`
   (scalar vs array split once). Public method names and behavior stay.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
+- **Matrix WASM alloc and parallel dense-pair clone-merge (Sprint 2R G54–G56, G59, G60).** `WASMBackend` Float64 pool growth and fresh Int32 headers share `allocHeader` (type ids 5 and 6 stay on that file). `WasmLoader` `allocateAs*` / `makeAs*` share `allocateAs` and `makeAs` (Int32 id 4 unchanged). `parallelMatrixAdd` / `Subtract` / `parallelDotMultiply` / `parallelMatrixDivide` DenseMatrix pairs route through `densePair` with per-op mismatch messages. Pool recycle and stub-heap behavior are unchanged.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
   stays on DenseMatrix). `ParallelBackend.sumAxis` delegates to `jsBackend` like GPU/WASM;
@@ -21,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `multiplyElementwise` share `parallelBinary`. `logm` / `sqrtm` share `common.matInv` (singular
   at `1e-15`) and `matrixSqrtNewtonInternal` (150 iters, `1e-14`, `Y0 = I`). Public names and
   behavior stay; `matInv` is not on the barrel.
+- **Sprint 2R clone batch 3 (`functions`):** factory `ceil`/`floor` share `snapNumber`/`snapBig`,
+  matrix 1/∞ norms share `_matrixNormSum`, geometry/set flatten call core `flatten`, GPU/CPU
+  reductions share `reduceNumbers`, and `solveODE`/`solveDDE` share `hermiteCubic`. `snapBig`
+  compares with core BigNumber `equals` as well as decimal.js `eq`.
 
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
