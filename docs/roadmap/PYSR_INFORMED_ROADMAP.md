@@ -71,8 +71,9 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
 
 1. **Phase 1 (M2 and M5) is complete.** M2 is on `main` as
    [#440](https://github.com/danielsimonjr/MathTS/pull/440) (`71f8c3ce`). M5 is
-   `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`) is done on the M6
-   branch; next in Phase 2 are M7–M8. Leave §6 B9 for M5 and M6 unchecked until a review is recorded.
+   `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`) and **M7**
+   (`fitScalarParameters`) are implemented; next in Phase 2 is M8. Leave §6 B9 for M5, M6
+   and M7 unchecked until a review is recorded.
 2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
    ticked below). Do not tick §6 B9 for M1, M3 or M4.
 3. Phase 2 (M6–M8), then Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge,
