@@ -761,6 +761,12 @@ and `scalarToTex(node, options?)` — implemented in `functions/src/scalar-node-
 exported from `functions/src/factories/index.ts` via `export *` on the package barrel.
 Types `MathNode`, `StringOptions`, and `SimplifyOptions` are re-exported for signatures.
 
+### Batch scalar compile
+
+`compileScalar` and `compileScalarGradient` (`functions/src/scalar-compile.ts`) share one
+register tape over column `Float64Array`s; the gradient entry adds one forward lane per
+fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` partials.
+
 ### Typed-dispatch & bridges
 
 Every `typed/` function is built with `mathTyped(name, signatureMap)` where keys are

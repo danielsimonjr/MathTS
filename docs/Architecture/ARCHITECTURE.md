@@ -268,7 +268,9 @@ Canonical keys flatten `+` and `*`, rewrite `a-b` to `a+(-1)*b` and `a/b` to
 
 **Batch scalar compile** (`functions/src/scalar-compile.ts`): `compileScalar`
 lowers a `ScalarNode` to a register tape over column `Float64Array`s with a
-per-row validity mask; no `eval` / `new Function` and no WASM load.
+per-row validity mask; `compileScalarGradient` extends the same interpreter with
+one gradient lane per parameter (unaries from `DUAL_UNARY_RULES`, explicit `^`
+partials). No `eval` / `new Function` and no WASM load.
 
 **Scalar node bridge** (`functions/src/scalar-node-bridge.ts`): `scalarToNode`,
 `nodeToScalar`, `simplifyScalar`, and `scalarToTex` call the wired node

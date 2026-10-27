@@ -8,6 +8,7 @@ import {
   gradientAt,
   numericJacobian,
   scalar,
+  ScalarEvalError,
   scalarToNode,
 } from '../src/index.js';
 import { compileScalarGradient as gradFromCompile } from '../src/scalar-compile.js';
@@ -25,6 +26,16 @@ function evalSymbolicGrad(node: ScalarNode, param: string, scope: Record<string,
 describe('compileScalarGradient', () => {
   it('re-exports compileScalarGradient from the package index', () => {
     expect(gradFromCompile).toBe(compileScalarGradient);
+  });
+
+  it('throws on duplicate parameter names at compile time', () => {
+    const node = scalar.symbol('a');
+    expect(() => compileScalarGradient(node, { variables: [], parameters: ['a', 'a'] })).toThrow(
+      ScalarEvalError
+    );
+    expect(() => compileScalarGradient(node, { variables: [], parameters: ['a', 'a'] })).toThrow(
+      /compileScalarGradient:.*more than once/
+    );
   });
 
   describe('hand closed forms', () => {

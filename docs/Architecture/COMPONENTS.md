@@ -273,7 +273,7 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`,
 `scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights`.
 
-**Batch compile / Pareto / node bridge** live in `functions` (`scalar-compile.ts`, `scalar-node-bridge.ts`, `pareto-front.ts`).
+**Batch compile / gradients / Pareto / node bridge** live in `functions` (`scalar-compile.ts` for `compileScalar` and `compileScalarGradient`, `scalar-node-bridge.ts`, `pareto-front.ts`).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
 regression guard for safe-access.
