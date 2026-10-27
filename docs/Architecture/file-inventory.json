@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1929,
+  "totalFiles": 1930,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 675,
+    "test": 676,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 675,
+    "tests": 676,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 811,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 99,
+    "@danielsimonjr/mathts-matrix": 100,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 13,
@@ -10894,7 +10894,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 654
+      "loc": 671
     },
     {
       "file": "matrix/src/backends/gpu/BatchExecutor.ts",
@@ -11013,7 +11013,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 429
+      "loc": 433
     },
     {
       "file": "matrix/src/index.ts",
@@ -11265,7 +11265,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 218
+      "loc": 229
     },
     {
       "file": "matrix/tests/decomposition/eig-general-wasm.test.ts",
@@ -11308,6 +11308,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 628
+    },
+    {
+      "file": "matrix/tests/dense-js-backend-reach.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 224
     },
     {
       "file": "matrix/tests/DenseMatrix.test.ts",

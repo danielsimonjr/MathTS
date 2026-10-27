@@ -69,7 +69,7 @@ The mathjs-derived factories are wired into the graph via
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
 - **`@danielsimonjr/mathts-functions`**: the typed-dispatch source dir (`functions/src/typed/`) holds 40 files, including `factorization/`. They span arithmetic, trigonometry, statistics, signal, special, distributions, combinatorics, geometry, algebra, CAS, hypothesis tests, numeric/optimization, bitwise, relational, and set domains.
 - **mathjs factory layer**: the mathjs-derived factory functions are wired into the graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`).
-- **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM via `BackendManager` (GPU is opt-in, not registered)
+- **Matrix system**: DenseMatrix / SparseMatrix methods and public `lu`/`qr`/`cholesky` stay JS; WASM GEMM is `backendManager` (GPU is opt-in, not registered)
 - **Parallel**: ComputePool with 40+ parallel operations
 - **WASM**: see [`wasm-pairing.md` › _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports) for function and total export counts (315 / 327 at last regen)
 
@@ -167,7 +167,7 @@ math.add(1, 2);
 | Workbook   | Active      | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                       |
 | Expression | Active      | Parser (15 node classes), compiler, and evaluator fully functional; sandbox-hardened                                                                                                                                                                      |
 | Compat     | Active      | mathjs-compatible shims wired to real implementations                                                                                                                                                                                                     |
-| Assembly   | **Primary** | Sole WASM backend — export counts in [`wasm-pairing.md`](./wasm-pairing.md); powers `matrix` heavy ops (SIMD matmul + LU/QR/Cholesky/inverse/determinant) and `functions` kernels (AS → JS dispatch)                                                      |
+| Assembly   | **Primary** | Sole WASM backend — export counts in [`wasm-pairing.md`](./wasm-pairing.md); `matrix` SIMD matmul via `backendManager` (public `DenseMatrix.multiply` / `lu`/`qr`/`cholesky` stay JS); `functions` kernels (AS → JS dispatch)                             |
 
 ## Integration Status
 
@@ -199,8 +199,8 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2003   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 354008 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2004   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 354263 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalExports         | 8086   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

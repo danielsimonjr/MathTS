@@ -128,11 +128,11 @@ dependencies, and the `math` singleton provides the fully configured instance.
 `BackendManager` selects **JS and WASM** from size and operation type (GPU is not
 registered in `backendRegistry` — only js + wasm in `register-backends.ts`):
 
-| Backend     | Implementation         | Threshold                                                                                                                        |
-| ----------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| JSBackend   | Pure TypeScript        | Always (default)                                                                                                                 |
-| WASMBackend | AssemblyScript + SIMD  | Per-op (e.g. `multiply` when `rows*cols*inner >= 256`; decompositions via WASMBackend `minElements` 100; default wasm hint 1000) |
-| GPUBackend  | WebGPU compute shaders | Dormant in `BackendManager`; use explicit `gpuMatmul` / `gpuMatrixBackend` or `enableGpu()` fused paths in functions             |
+| Backend     | Implementation         | Threshold                                                                                                                                                                             |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JSBackend   | Pure TypeScript        | Always (default)                                                                                                                                                                      |
+| WASMBackend | AssemblyScript + SIMD  | Manager path: `multiply` ≥256 flop count (`DEFAULT_CONFIG` in `config.ts`). Public `DenseMatrix.multiply` / `lu`/`qr`/`cholesky` are JS; `WASMBackend` decomp methods are opt-in only |
+| GPUBackend  | WebGPU compute shaders | Dormant in `BackendManager`; use explicit `gpuMatmul` / `gpuMatrixBackend` or `enableGpu()` fused paths in functions                                                                  |
 
 BackendManager applies per-operation WASM thresholds, backend availability, and
 optional adaptive tuning — not automatic GPU selection.
@@ -207,11 +207,13 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   exports take a 12-byte header pointer; callers receive an opaque `Allocation`
   handle so they need not do pointer arithmetic.
 - **`matrix/src/backends/WASMBackend.ts`**: The sole WASM matrix backend. It
-  decides JS vs. WASM per operation by element-count threshold (e.g. matrix
-  multiply switches to WASM at ≥256 elements) and falls back to `JSBackend`
-  transparently on WASM failure. It hosts the AS kernels only where SIMD wins:
-  SIMD multiply/gemm plus the dense inverse, determinant, and LU/QR/Cholesky
-  decompositions. Element-wise ops, transpose, reductions, and `eig`/`svd` were
+  decides JS vs. WASM per operation (manager multiply uses flop count ≥256 from
+  `DEFAULT_CONFIG`; `WASMBackend.multiply` also requires stored-element count ≥100)
+  and falls back to `JSBackend` transparently on WASM failure. It hosts the AS
+  kernels only where SIMD wins: SIMD multiply/gemm on the manager path; dense
+  inverse/determinant/LU/QR/Cholesky exist on `WASMBackend` but are not reached by
+  public `lu`/`qr`/`cholesky`.
+  Element-wise ops, transpose, reductions, and `eig`/`svd` were
   measured slower on WASM and run on JS; FFT/IFFT is not a matrix-backend op.
 - **`functions/src/wasm/`**: The `functions` package's own AS bridges
   (`bridges/`, `elementwise/`, `special/`, `poly/`, `sort/`, `signal/`,
@@ -373,7 +375,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2003  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2004  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

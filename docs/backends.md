@@ -57,9 +57,9 @@ separate path (`gpuMatrixBackend` in this package, `enableGpu()` in functions).
 columns in the table below are stored for a future registry hook but are **not read**
 while `'gpu'` is unregistered.
 
-Thresholds come from `backendManager.getHints().operationThresholds` (defaults in
-`BackendManager`, not the internal `matrix/src/config.ts` table unless that module
-is wired by a future export).
+Live thresholds come from one table: `matrix/src/config.ts` `DEFAULT_CONFIG`.
+`DEFAULT_EXTENDED_HINTS` is derived from that table at load, and `setConfig`
+resyncs `backendManager.getHints().operationThresholds`.
 
 | Operation | WASM gate (manager)                | GPU gate (unused until registered) | Notes                                                                     |
 | --------- | ---------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- |

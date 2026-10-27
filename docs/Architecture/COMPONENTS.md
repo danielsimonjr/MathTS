@@ -106,8 +106,9 @@ for back-compat.
 ### @danielsimonjr/mathts-wasm (`assembly/`)
 
 **Purpose**: The AssemblyScript source for the **sole** WASM backend of the repo (`mathts-as.wasm`) — SIMD
-`f64x2` matrix multiply plus the dense LU/QR/Cholesky/inverse/determinant kernels, and the `functions`
-special/FFT kernels.
+`f64x2` matrix multiply (reached via `backendManager` / `wasmBackend` / `Tensor.matMul`; public
+`DenseMatrix.multiply` and `lu`/`qr`/`cholesky` stay JS) plus dense LU/QR/Cholesky/inverse/determinant
+kernels on `WASMBackend` for direct callers, and the `functions` special/FFT kernels.
 
 ```
 asc src/index.ts  →  mathts-as.wasm   (built by `npm run build:wasm`)
@@ -170,7 +171,7 @@ export class DenseMatrix          // Float64Array-backed
 export class SparseMatrix         // CSR
 export class BackendManager       // per-op JS/WASM selection
 export class JSBackend            // pure TS, always available
-export class WASMBackend          // AssemblyScript (SIMD multiply + LU/QR/Cholesky/inverse/det)
+export class WASMBackend          // AssemblyScript (manager SIMD matmul; decomp methods opt-in)
 export class GPUBackend           // experimental WebGPU compute (re-exports the gpu foundation)
 export class WasmLoader           // per-package loader (SHA-384 verify via core/internal)
 ```
@@ -399,5 +400,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2003  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2004  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalExports         | 8086  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

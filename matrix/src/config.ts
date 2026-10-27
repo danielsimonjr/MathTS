@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { BackendType } from './backends/Backend.js';
+import { DEFAULT_BACKEND_HINTS, type BackendType } from './backends/Backend.js';
 
 /**
  * Operation type hints for backend selection.
@@ -110,21 +110,25 @@ export const DEFAULT_CONFIG: MatrixConfig = {
     wasm: {
       enabled: true,
       preference: 'auto',
-      threshold: 1000, // >1000 elements
+      threshold: DEFAULT_BACKEND_HINTS.wasmThreshold,
       operationThresholds: {
-        multiply: 500,
+        // Measured SIMD matmul win from ~256 elems (tools/benchmarks/matmul-threshold.mjs).
+        multiply: 256,
+        // Advisory only — no public matrix call passes 'decomposition' to BackendManager.selectBackend.
         decomposition: 100,
         transpose: 2000,
       },
     },
     gpu: {
-      enabled: true,
+      // Dormant on BackendManager: register-backends.ts registers js + wasm only.
+      // GPU matrix work uses gpuMatmul / GPUMatrixBackend, not this table.
+      enabled: false,
       preference: 'auto',
-      threshold: 100000, // >100K elements
+      threshold: DEFAULT_BACKEND_HINTS.gpuThreshold,
       operationThresholds: {
-        multiply: 50000,
-        decomposition: 10000,
-        transpose: 200000,
+        multiply: DEFAULT_BACKEND_HINTS.gpuThreshold,
+        decomposition: DEFAULT_BACKEND_HINTS.gpuThreshold,
+        transpose: DEFAULT_BACKEND_HINTS.gpuThreshold,
       },
     },
   },
