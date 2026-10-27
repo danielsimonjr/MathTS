@@ -13,8 +13,8 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | Routing (static)            |   Count |
 | --------------------------- | ------: |
 | WASM (incl. wasm+parallel)  |      41 |
-| Parallel only (worker pool) |      50 |
-| JS-only                     |     128 |
+| Parallel only (worker pool) |      48 |
+| JS-only                     |     130 |
 | **Total**                   | **219** |
 
 **Runtime effectiveness** (probe of the bundled `functions/dist/wasm/mathts-as.wasm`, backend: **assemblyscript**): of the 41 wasm-routed functions, **39 actually execute wasm**, **0 fall back to JS** (their `*Dispatch` has no AS-managed execution path — the poly-fit / Airy / argsort+rank kernels are deliberately kept on JS pending AS kernel-stabilization fixes).
@@ -93,8 +93,6 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | `multiply`              | arithmetic   |
 | `norm`                  | arithmetic   |
 | `parallelConv`          | signal       |
-| `parallelFFTMagnitude`  | signal       |
-| `parallelFFTPower`      | signal       |
 | `parallelStatCorr`      | statistics   |
 | `parallelStatDistance`  | statistics   |
 | `parallelStatHistogram` | statistics   |
@@ -134,7 +132,7 @@ Per public `mathTyped` function in `functions/src/typed/`, its acceleration rout
 | probability   |    0 |        0 |       8 |
 | relational    |    0 |        0 |       7 |
 | set           |    0 |        0 |      10 |
-| signal        |    2 |        3 |       2 |
+| signal        |    2 |        1 |       4 |
 | special       |   19 |        0 |      19 |
 | statistics    |    2 |       13 |       2 |
 | string        |    0 |        0 |       5 |

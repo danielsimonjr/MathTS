@@ -93,7 +93,8 @@ function trimPoly(coeffs: number[]): number[] {
 /**
  * Polynomial long division: returns [quotient, remainder].
  * Both dividend and divisor are coefficient arrays (index = power).
- * Routes through the WASM kernel for large inputs.
+ * Large inputs call `polyDivModDispatch`; polynomial division stays on JS per
+ * `wasmPolicyAllows` (`functions/src/wasm/policy.ts`).
  */
 function polyDivMod(a: number[], b: number[]): [number[], number[]] {
   const at = trimPoly(a);

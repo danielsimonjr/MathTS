@@ -21,90 +21,90 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 
 ## Effectively parallelized functions
 
-| Function                | Ops                           | Thresholds (elements)                 | Module        |
-| ----------------------- | ----------------------------- | ------------------------------------- | ------------- |
-| `acos`                  | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `acosh`                 | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `airyAi`                | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `airyBi`                | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `asin`                  | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `asinh`                 | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `atan`                  | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `atanh`                 | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `bernoulliPMF`          | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `besselI`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselJ`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselJ0`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselJ1`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselK`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselY`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselY0`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `besselY1`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `beta`                  | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `betainc`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `binomialPMF`           | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `cbrt`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `ceil`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `chebyshevT`            | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `cosh`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `cosIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `cot`                   | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `csc`                   | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `cube`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `digamma`               | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `ellipticE`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `ellipticK`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `erfc`                  | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `erfi`                  | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `expIntegralEi`         | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `expm1`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `exponentialCDF`        | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `exponentialPDF`        | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `fix`                   | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `floor`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `fresnelC`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `fresnelS`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `gammainc`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `gammaincp`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `geometricPMF`          | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `hermiteH`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `laguerreL`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `lambertW`              | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `legendreP`             | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `lgamma`                | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `log10`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `log1p`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `log2`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `logIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `max`                   | `applyKernel`, `max`          | 50000 (global kernel), never          | arithmetic    |
-| `min`                   | `applyKernel`, `min`          | 50000 (global kernel), never          | arithmetic    |
-| `norm`                  | `applyKernel`, `norm`         | 50000 (global kernel), never          | arithmetic    |
-| `normalCDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `normalPDF`             | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `parallelAutoCorr`      | `applyKernel`                 | 50000 (global kernel)                 | signal        |
-| `parallelConv`          | `applyKernel`, `fftBatch`     | 50000 (global kernel), 50000 (global) | signal        |
-| `parallelFFT`           | `applyKernel`                 | 50000 (global kernel)                 | signal        |
-| `parallelFFTMagnitude`  | `applyKernel`, `applyKernel2` | 50000 (global kernel), 50000 (global) | signal        |
-| `parallelFFTPower`      | `applyKernel`, `applyKernel2` | 50000 (global kernel), 50000 (global) | signal        |
-| `parallelIFFT`          | `applyKernel`                 | 50000 (global kernel)                 | signal        |
-| `parallelStatCorr`      | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
-| `parallelStatHistogram` | `applyKernel`, `histogram`    | 50000 (global kernel), never          | statistics    |
-| `parallelStatMAD`       | `applyKernel`, `mean`         | 50000 (global kernel), never          | statistics    |
-| `parallelStatMedian`    | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatMode`      | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatNorm`      | `applyKernel`, `norm`         | 50000 (global kernel), never          | statistics    |
-| `parallelStatProd`      | `applyKernel`, `prod`         | 50000 (global kernel), never          | statistics    |
-| `parallelStatQuantile`  | `applyKernel`                 | 50000 (global kernel)                 | statistics    |
-| `parallelStatStd`       | `applyKernel`, `std`          | 50000 (global kernel), never          | statistics    |
-| `parallelStatVariance`  | `applyKernel`, `variance`     | 50000 (global kernel), never          | statistics    |
-| `parallelXCorr`         | `applyKernel`                 | 50000 (global kernel)                 | signal        |
-| `poissonPMF`            | `applyKernel`                 | 50000 (global kernel)                 | distributions |
-| `round`                 | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `sec`                   | `applyKernel`                 | 50000 (global kernel)                 | trigonometry  |
-| `sign`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `sinh`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
-| `sinIntegral`           | `applyKernel`                 | 50000 (global kernel)                 | special       |
-| `tanh`                  | `applyKernel`                 | 50000 (global kernel)                 | arithmetic    |
+| Function                | Ops                        | Thresholds (elements)                 | Module        |
+| ----------------------- | -------------------------- | ------------------------------------- | ------------- |
+| `acos`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `acosh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `airyAi`                | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `airyBi`                | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `asin`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `asinh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `atan`                  | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `atanh`                 | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `bernoulliPMF`          | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `besselI`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselJ`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselJ0`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselJ1`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselK`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselY`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselY0`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `besselY1`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `beta`                  | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `betainc`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `binomialPMF`           | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `cbrt`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `ceil`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `chebyshevT`            | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `cosh`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `cosIntegral`           | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `cot`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `csc`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `cube`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `digamma`               | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `ellipticE`             | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `ellipticK`             | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `erfc`                  | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `erfi`                  | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `expIntegralEi`         | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `expm1`                 | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `exponentialCDF`        | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `exponentialPDF`        | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `fix`                   | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `floor`                 | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `fresnelC`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `fresnelS`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `gammainc`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `gammaincp`             | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `geometricPMF`          | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `hermiteH`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `laguerreL`             | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `lambertW`              | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `legendreP`             | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `lgamma`                | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `log10`                 | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `log1p`                 | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `log2`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `logIntegral`           | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `max`                   | `applyKernel`, `max`       | 50000 (global kernel), never          | arithmetic    |
+| `min`                   | `applyKernel`, `min`       | 50000 (global kernel), never          | arithmetic    |
+| `norm`                  | `applyKernel`, `norm`      | 50000 (global kernel), never          | arithmetic    |
+| `normalCDF`             | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `normalPDF`             | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `parallelAutoCorr`      | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `parallelConv`          | `applyKernel`, `fftBatch`  | 50000 (global kernel), 50000 (global) | signal        |
+| `parallelFFT`           | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `parallelFFTMagnitude`  | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `parallelFFTPower`      | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `parallelIFFT`          | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `parallelStatCorr`      | `applyKernel`, `variance`  | 50000 (global kernel), never          | statistics    |
+| `parallelStatHistogram` | `applyKernel`, `histogram` | 50000 (global kernel), never          | statistics    |
+| `parallelStatMAD`       | `applyKernel`, `mean`      | 50000 (global kernel), never          | statistics    |
+| `parallelStatMedian`    | `applyKernel`              | 50000 (global kernel)                 | statistics    |
+| `parallelStatMode`      | `applyKernel`              | 50000 (global kernel)                 | statistics    |
+| `parallelStatNorm`      | `applyKernel`, `norm`      | 50000 (global kernel), never          | statistics    |
+| `parallelStatProd`      | `applyKernel`, `prod`      | 50000 (global kernel), never          | statistics    |
+| `parallelStatQuantile`  | `applyKernel`              | 50000 (global kernel)                 | statistics    |
+| `parallelStatStd`       | `applyKernel`, `std`       | 50000 (global kernel), never          | statistics    |
+| `parallelStatVariance`  | `applyKernel`, `variance`  | 50000 (global kernel), never          | statistics    |
+| `parallelXCorr`         | `applyKernel`              | 50000 (global kernel)                 | signal        |
+| `poissonPMF`            | `applyKernel`              | 50000 (global kernel)                 | distributions |
+| `round`                 | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `sec`                   | `applyKernel`              | 50000 (global kernel)                 | trigonometry  |
+| `sign`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `sinh`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
+| `sinIntegral`           | `applyKernel`              | 50000 (global kernel)                 | special       |
+| `tanh`                  | `applyKernel`              | 50000 (global kernel)                 | arithmetic    |
 
 ## Disabled parallel paths (wired but always inline JS)
 
@@ -174,7 +174,6 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | `abs`                      | never                 |    —    |           1 |
 | `add`                      | never                 |    —    |           1 |
 | `applyKernel`              | 50000 (global kernel) |    ✓    |          82 |
-| `applyKernel2`             | 50000 (global)        |    ✓    |           2 |
 | `besselJ`                  | 1000000               |    ✓    |           0 |
 | `bitAnd`                   | never                 |    —    |           1 |
 | `bitNot`                   | never                 |    —    |           1 |

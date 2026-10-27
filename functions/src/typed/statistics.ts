@@ -313,7 +313,7 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
     if (n === 0) return NaN;
     if (n === 1) return data[0];
 
-    // Sort a copy — WASM-accelerated above WASM_SORT_THRESHOLD (16 K).
+    // Sort a copy — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
     const sorted = new Float64Array(data);
     sortF64Dispatch(sorted);
 
@@ -637,7 +637,7 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
     if (data.length === 0) return NaN;
     if (data.length === 1) return data[0];
 
-    // Sort a copy — WASM-accelerated above WASM_SORT_THRESHOLD (16 K).
+    // Sort a copy — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
     const sorted = new Float64Array(data);
     sortF64Dispatch(sorted);
 
@@ -670,7 +670,8 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
  * Compute the p-th percentile of a Float64Array.
  *
  * Identical to `parallelStatQuantile(data, p / 100)`.
- * Uses WASM sort acceleration above WASM_SORT_THRESHOLD elements.
+ * Uses `sortF64Dispatch`; AS sort runs only when `wasmPolicyAllows('sort_f64', n)` (n ≥
+ * 1_048_576, see `functions/src/wasm/policy.ts`).
  *
  * @param data - Input data array.
  * @param p    - Percentile in [0, 100].

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-27'
   totalFiles: 1193
   totalModules: 82
-  totalExports: 6190
+  totalExports: 6192
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1418,6 +1418,7 @@ modules:
             - verifyWasmIntegrity
             - resolvePackagedWasm
             - defaultWasmLocation
+            - WasmModuleLoader
           reExport: true
         - file: ./shared.js
           imports:
@@ -1520,6 +1521,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - format
         - toEngineering
         - toExponential
@@ -1608,6 +1610,7 @@ modules:
         - verifyWasmIntegrity
         - resolvePackagedWasm
         - defaultWasmLocation
+        - WasmModuleLoader
         - MemoizedFunction
         - ConfigOptions
         - MathJsConfig
@@ -1893,6 +1896,7 @@ modules:
       internalDependencies:
         - file: ./types/wasm-loader.js
           imports:
+            - LoadingMetrics
             - WasmManifest
           typeOnly: true
       workspaceDependencies: []
@@ -3531,6 +3535,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -21519,12 +21524,15 @@ modules:
           directory: parallel
           imports:
             - computePool
+            - OpName
       exports:
         - kernelSource
         - mapArray
+        - mapBinaryF64
       functions:
         - kernelSource
         - mapArray
+        - mapBinaryF64
     functions/src/typed/polynomial-ideal.ts:
       description: Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).
       externalDependencies: []
@@ -21674,6 +21682,9 @@ modules:
         - file: ../gpu/fft-gpu.js
           imports:
             - fftGpuDispatch
+        - file: ./parallel-map.js
+          imports:
+            - mapBinaryF64
         - file: ../wasm/signal/wasm-bridge.js
           imports:
             - applyWindowDispatch
@@ -23260,6 +23271,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - WasmModuleLoader
             - LoadingMetrics
           subpath: internal
       exports:
@@ -39438,15 +39450,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1193
   totalModules: 82
-  totalLinesOfCode: 200928
-  totalExports: 6190
+  totalLinesOfCode: 200877
+  totalExports: 6192
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1963
+  totalFunctions: 1964
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2622
+  totalReExports: 2623
   totalTypeOnlyImports: 608
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
