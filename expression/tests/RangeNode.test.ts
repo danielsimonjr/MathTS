@@ -206,6 +206,32 @@ describe('RangeNode - clone', () => {
   });
 });
 
+describe('RangeNode - render oracle (clone G16)', () => {
+  it('toString exact: start:end', () => {
+    const node = new RangeNode(makeConst(1), makeConst(5));
+    expect(node.toString()).toBe('1:5');
+  });
+
+  it('toString exact: start:step:end', () => {
+    const node = new RangeNode(makeConst(0), makeConst(10), makeConst(2));
+    expect(node.toString()).toBe('0:2:10');
+  });
+
+  it('toHTML exact: start:end', () => {
+    const node = new RangeNode(makeConst(1), makeConst(5));
+    expect(node.toHTML()).toBe(
+      '<span class="math-number">1</span><span class="math-operator math-range-operator">:</span><span class="math-number">5</span>'
+    );
+  });
+
+  it('toHTML exact: start:step:end', () => {
+    const node = new RangeNode(makeConst(0), makeConst(10), makeConst(2));
+    expect(node.toHTML()).toBe(
+      '<span class="math-number">0</span><span class="math-operator math-range-operator">:</span><span class="math-number">2</span><span class="math-operator math-range-operator">:</span><span class="math-number">10</span>'
+    );
+  });
+});
+
 describe('RangeNode - toString', () => {
   it('formats start:end', () => {
     const node = new RangeNode(makeConst(1), makeConst(5));

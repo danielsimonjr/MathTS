@@ -166,6 +166,27 @@ describe('ConditionalNode - clone', () => {
   });
 });
 
+describe('ConditionalNode - render oracle (clone G15)', () => {
+  it('toString exact: numeric branches', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toString()).toBe('1 ? 2 : 3');
+  });
+
+  it('toHTML exact: numeric branches', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toHTML()).toBe(
+      '<span class="math-number">1</span><span class="math-operator math-conditional-operator">?</span><span class="math-number">2</span><span class="math-operator math-conditional-operator">:</span><span class="math-number">3</span>'
+    );
+  });
+
+  it('toHTML exact: boolean condition', () => {
+    const node = new ConditionalNode(makeConst(true), makeConst(1), makeConst(0));
+    expect(node.toHTML()).toBe(
+      '<span class="math-boolean">true</span><span class="math-operator math-conditional-operator">?</span><span class="math-number">1</span><span class="math-operator math-conditional-operator">:</span><span class="math-number">0</span>'
+    );
+  });
+});
+
 describe('ConditionalNode - toString', () => {
   it('formats as "condition ? trueExpr : falseExpr"', () => {
     const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));

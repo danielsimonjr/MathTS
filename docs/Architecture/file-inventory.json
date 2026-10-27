@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1932,
+  "totalFiles": 1934,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 678,
+    "test": 680,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 678,
+    "tests": 680,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,12 +22,12 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 26,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 20,
+    "@danielsimonjr/mathts-autograd": 21,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
-    "@danielsimonjr/mathts-expression": 547,
+    "@danielsimonjr/mathts-expression": 548,
     "@danielsimonjr/mathts-functions": 812,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -325,6 +325,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 140
+    },
+    {
+      "file": "autograd/tests/assert-same-shape.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 53
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
@@ -4650,7 +4657,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 258
+      "loc": 279
     },
     {
       "file": "expression/tests/ConstantNode.test.ts",
@@ -4909,7 +4916,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 332
+      "loc": 358
     },
     {
       "file": "expression/tests/RelationalNode.test.ts",
@@ -4938,6 +4945,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 234
+    },
+    {
+      "file": "expression/tests/stringSubset-clone.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 37
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
