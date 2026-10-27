@@ -6526,14 +6526,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 275
+      "loc": 273
     },
     {
       "file": "functions/src/numeric/fsolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 113
+      "loc": 107
     },
     {
       "file": "functions/src/numeric/gauss-legendre4.ts",
@@ -6568,7 +6568,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 602
+      "loc": 600
     },
     {
       "file": "functions/src/numeric/matrix-functions.ts",
@@ -6603,7 +6603,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 119
     },
     {
       "file": "functions/src/numeric/open-root-finders.ts",
@@ -6631,7 +6631,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 540
+      "loc": 532
     },
     {
       "file": "functions/src/numeric/solveDDE.ts",
@@ -6645,7 +6645,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1842
+      "loc": 1838
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -7996,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2346
+      "loc": 2336
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9907,7 +9907,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 101
     },
     {
       "file": "functions/tests/numeric-literal.test.ts",
@@ -9928,7 +9928,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 48
     },
     {
       "file": "functions/tests/open-root-finders.test.ts",
@@ -10152,7 +10152,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 158
+      "loc": 156
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",

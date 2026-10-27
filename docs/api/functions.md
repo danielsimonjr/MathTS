@@ -429,7 +429,7 @@ gaussQuad((x) => x * x, 0, 2); // ~2.6667 (exact)
 
 ## Nonlinear least squares
 
-`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Options (`LMOptions`) include `maxIter`, `tol`, and an optional analytic `jacobian`; when `jacobian` is omitted the solver uses `numericJacobian` with `scheme: 'forward'` and `h = 1e-7` (unchanged default). `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver.
+`levenbergMarquardt` minimizes \(\|r(x)\|_2\) for a vector residual. Options (`LMOptions`) include `maxIter`, `tol`, and an optional analytic `jacobian`; when `jacobian` is omitted the solver uses `numericJacobian` with `scheme: 'forward'` and `h = 1e-7` (unchanged default). `curvefit` is a thin wrapper that builds residuals `y_i - f(x_i, p)` and calls the same solver. Stiff `solveODE`, `solveDAE`, and `solveBVP` (shooting) take their forward finite-difference Jacobians from the same `numericJacobian` helper (`step: { rel: 1e-7, floor: 1e-8 }` and optional `f0` on ODE/DAE; `h = 1e-7` on BVP).
 
 `fitScalarParameters` fits free constants in a `ScalarNode` to columnar data using `compileScalarGradient` for residuals and (for `l2`) standard errors. Example (slope `a·x` on `(1,2),(2,4),(3,6)` → `a ≈ 2`, `restarts: 0`):
 

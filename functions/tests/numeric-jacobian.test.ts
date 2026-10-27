@@ -39,4 +39,62 @@ describe('numericJacobian (F: R^n -> R^m, central differences)', () => {
     const r = jacobian(['x^2', 'x*y'], ['x', 'y'], { x: 2, y: 3 });
     expect(r).toBeTruthy();
   });
+
+  it('linear map Ax — central default at (1,2) equals A', () => {
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const f = (v: number[]) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    const J = numericJacobian(f, [1, 2]);
+    expect(J[0][0]).toBeCloseTo(1, 8);
+    expect(J[0][1]).toBeCloseTo(2, 8);
+    expect(J[1][0]).toBeCloseTo(3, 8);
+    expect(J[1][1]).toBeCloseTo(4, 8);
+  });
+
+  it('linear map — forward with fixed h equals A', () => {
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const f = (v: number[]) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    const J = numericJacobian(f, [1, 2], { h: 1e-7, scheme: 'forward' });
+    expect(J[0][0]).toBeCloseTo(1, 6);
+    expect(J[0][1]).toBeCloseTo(2, 6);
+    expect(J[1][0]).toBeCloseTo(3, 6);
+    expect(J[1][1]).toBeCloseTo(4, 6);
+  });
+
+  it('linear map — forward step rule uses floor on x_j=0 and rel*|x| otherwise', () => {
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const f = (v: number[]) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    const J = numericJacobian(f, [0, 3], { scheme: 'forward', step: { rel: 1e-7, floor: 1e-8 } });
+    expect(J[0][0]).toBeCloseTo(1, 6);
+    expect(J[0][1]).toBeCloseTo(2, 6);
+    expect(J[1][0]).toBeCloseTo(3, 6);
+    expect(J[1][1]).toBeCloseTo(4, 6);
+  });
+
+  it('f0 skips the base evaluation of f at x0', () => {
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    let calls = 0;
+    const f = (v: number[]) => {
+      calls++;
+      return [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+    };
+    const x0 = [1, 2];
+    const f0 = f(x0);
+    const callsAfterF0 = calls;
+    const J = numericJacobian(f, x0, { scheme: 'forward', h: 1e-7, f0 });
+    // One eval per column (n=2), not n+1.
+    expect(calls - callsAfterF0).toBe(2);
+    expect(J[1][1]).toBeCloseTo(4, 6);
+  });
 });

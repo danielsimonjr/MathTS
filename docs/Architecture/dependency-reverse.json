@@ -1733,8 +1733,11 @@
     "functions/src/numeric/numeric-jacobian.ts": [
       "functions/src/index.ts",
       "functions/src/numeric/fsolve.ts",
+      "functions/src/numeric/solveDAE.ts",
+      "functions/src/numeric/solveODE.ts",
       "functions/src/optimization-extra.ts",
-      "functions/src/typed/cas.ts"
+      "functions/src/typed/cas.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/numeric/open-root-finders.ts": [
       "functions/src/index.ts",
