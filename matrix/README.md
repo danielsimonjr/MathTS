@@ -58,9 +58,11 @@ const c = backendManager.multiply(a, a);
 | **WASM** | `backendManager.multiply`, `wasmBackend.multiply`, `Tensor.matMul`                     | SIMD GEMM (+ unused-by-public decomp methods on `WASMBackend`) |
 | **GPU**  | `gpuMatrixBackend.multiplyAsync`; `@danielsimonjr/mathts-functions` with `enableGpu()` | f32 opt-in; **not** registered on `BackendManager`             |
 
-Live defaults (`backendManager.getHints().operationThresholds`): multiply WASM **256**
-(flop count), GPU hint **65536** (inactive until GPU registers). Element-wise WASM
-paths were retired as slower than JS (2026-07).
+Live defaults come from one table: `matrix/src/config.ts` `DEFAULT_CONFIG` (multiply
+WASM **256** flop count; `gpu.enabled` **false**). `DEFAULT_EXTENDED_HINTS` on
+`BackendManager` is derived from that table at load time. GPU hint **65536** is
+dormant until a GPU backend registers. Element-wise WASM paths were retired as
+slower than JS (2026-07).
 
 ## Matrix Types
 

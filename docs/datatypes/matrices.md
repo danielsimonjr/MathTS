@@ -1,6 +1,6 @@
 # Matrices
 
-MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. Some decomposition paths can use WASM via `backendManager` when size thresholds are met; `DenseMatrix.prototype.multiply` stays on a pure JS loop, and no `'gpu'` backend is registered on the manager today (see [Backends](#backends) below).
+MathTS provides two matrix types — `DenseMatrix` and `SparseMatrix` — both backed by typed arrays (`Float64Array`) and sharing a common abstract `Matrix<T>` base. Public `DenseMatrix.prototype.multiply` and `lu`/`qr`/`cholesky` use pure JavaScript; WASM SIMD matmul is available via `backendManager.multiply` / `Tensor.matMul` after `initialize()`. No `'gpu'` backend is registered on the manager today (see [Backends](#backends) below).
 
 Import from `@danielsimonjr/mathts-matrix`:
 
@@ -149,7 +149,7 @@ sparse.toFlatArray(); // number[]
 
 `@danielsimonjr/mathts-matrix` registers **JS** and **WASM** backends on `backendManager`. A `'gpu'` backend is not registered on that manager today; GPU matrix work that exists uses separate `gpuMatmul` paths in functions/matrix, not `backendManager` selection.
 
-`DenseMatrix.prototype.multiply` calls the pure TypeScript `arithmetic.multiply` loop — it does **not** consult `backendManager`. Use `backendManager`-aware APIs (for example decompositions routed through the manager) when you need WASM acceleration.
+`DenseMatrix.prototype.multiply` calls the pure TypeScript `arithmetic.multiply` loop — it does **not** consult `backendManager`. Public `lu`/`qr`/`cholesky` are also JS (`matrix/src/operations/*`). For WASM SIMD GEMM, call `backendManager.multiply` or use `Tensor.matMul`.
 
 When the manager does select a backend, operation thresholds include:
 
@@ -178,7 +178,7 @@ The matrix WASM bridge provides interoperability between the TypeScript matrix l
 
 ## Decompositions
 
-Dense LU/QR/Cholesky/inverse/determinant can use WASM via `backendManager` when matrix size exceeds the decomposition WASM threshold. Public `eig` and `svd` run synchronously in JavaScript (WASM kernels were removed after measuring slower performance):
+Public `lu`/`qr`/`cholesky` run in JavaScript. `WASMBackend` exposes dense LU/QR/Cholesky/inverse/determinant for direct callers only (not wired from the public `lu()`/`qr()`/`cholesky()` exports). Public `eig` and `svd` also run synchronously in JavaScript (WASM kernels were removed after measuring slower performance):
 
 ```ts
 import { DenseMatrix, eig, svd } from '@danielsimonjr/mathts-matrix';
