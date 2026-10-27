@@ -317,7 +317,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 19
+      "loc": 14
     },
     {
       "file": "autograd/src/tape.ts",
@@ -4146,7 +4146,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 284
+      "loc": 287
     },
     {
       "file": "expression/src/node/ConstantNode.ts",
@@ -4209,7 +4209,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 332
+      "loc": 330
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
@@ -6428,7 +6428,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 347
+      "loc": 343
     },
     {
       "file": "functions/src/matrix/trace.ts",

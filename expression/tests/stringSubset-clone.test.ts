@@ -2,7 +2,7 @@
  * Oracle pins for getStringSubset / functions subset string path (clone G17).
  */
 import { describe, it, expect } from 'vitest';
-import { getStringSubset } from '../src/node/utils/stringSubset.js';
+import { getStringSubset, type IndexLike } from '../src/node/utils/stringSubset.js';
 import { index, subset } from '../../functions/src/factories/index.js';
 
 describe('getStringSubset / subset string oracle (clone G17)', () => {
@@ -17,7 +17,7 @@ describe('getStringSubset / subset string oracle (clone G17)', () => {
   });
 
   it('getStringSubset: single 1-wide index on abcd', () => {
-    expect(getStringSubset('abcd', index(2))).toBe('c');
+    expect(getStringSubset('abcd', index(2) as IndexLike)).toBe('c');
   });
 
   it('subset(string): single 1-wide index on abcd', () => {
@@ -25,7 +25,7 @@ describe('getStringSubset / subset string oracle (clone G17)', () => {
   });
 
   it('getStringSubset: empty index dimension returns empty string', () => {
-    expect(getStringSubset('abcd', index(''))).toBe('');
+    expect(getStringSubset('abcd', index('') as IndexLike)).toBe('');
   });
 
   it('subset(string): empty index dimension returns empty string', () => {
