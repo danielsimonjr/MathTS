@@ -574,6 +574,50 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
   return coeffs;
 }
 
+type OrthogonalSeriesFitDeps = {
+  name: 'chebyshevFit' | 'legendreFit';
+  basisRow: (x: number, k: number) => Float64Array;
+  dispatch: (xs: Float64Array, ys: Float64Array, degree: number) => Float64Array;
+};
+
+function fitOrthogonalSeries(
+  xs: number[],
+  ys: number[],
+  degree: number,
+  { name, basisRow, dispatch }: OrthogonalSeriesFitDeps
+): number[] {
+  if (xs.length !== ys.length || xs.length < degree + 1) {
+    throw new Error(`${name} requires more data points than polynomial degree`);
+  }
+
+  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
+    try {
+      const result = dispatch(new Float64Array(xs), new Float64Array(ys), degree);
+      return Array.from(result);
+    } catch {
+      // fall through to JS path
+    }
+  }
+
+  const n = xs.length;
+  const k = degree + 1;
+
+  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
+  for (let i = 0; i < n; i++) {
+    const row = basisRow(xs[i], k);
+    for (let j = 0; j < k; j++) {
+      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
+      ATA[j][k] += row[j] * ys[i];
+    }
+  }
+
+  const solved = solveAugmentedNormalEquations(ATA);
+  if (!solved) {
+    throw new Error(`${name}: rank-deficient system`);
+  }
+  return solved;
+}
+
 // =============================================================================
 // chebyshevFit — Chebyshev-basis least-squares fit (Slice 5.4)
 // =============================================================================
@@ -598,37 +642,11 @@ export function polyFit(xs: number[], ys: number[], degree: number): number[] {
  * chebyshevFit(xs, ys, 2) // ys = T_2(xs): => ~[0, 0, 1]
  */
 export function chebyshevFit(xs: number[], ys: number[], degree: number): number[] {
-  if (xs.length !== ys.length || xs.length < degree + 1) {
-    throw new Error('chebyshevFit requires more data points than polynomial degree');
-  }
-
-  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
-    try {
-      const result = chebFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
-      return Array.from(result);
-    } catch {
-      // fall through to JS path
-    }
-  }
-
-  // --- JS path (normal equations using Chebyshev basis) ---
-  const n = xs.length;
-  const k = degree + 1;
-
-  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
-  for (let i = 0; i < n; i++) {
-    const row = chebBasisRow(xs[i], k);
-    for (let j = 0; j < k; j++) {
-      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
-      ATA[j][k] += row[j] * ys[i];
-    }
-  }
-
-  const solved = solveAugmentedNormalEquations(ATA);
-  if (!solved) {
-    throw new Error('chebyshevFit: rank-deficient system');
-  }
-  return solved;
+  return fitOrthogonalSeries(xs, ys, degree, {
+    name: 'chebyshevFit',
+    basisRow: chebBasisRow,
+    dispatch: chebFitDispatch,
+  });
 }
 
 // =============================================================================
@@ -654,35 +672,9 @@ export function chebyshevFit(xs: number[], ys: number[], degree: number): number
  * legendreFit(xs, ys, 2) // ys = P_2(xs): => ~[0, 0, 1]
  */
 export function legendreFit(xs: number[], ys: number[], degree: number): number[] {
-  if (xs.length !== ys.length || xs.length < degree + 1) {
-    throw new Error('legendreFit requires more data points than polynomial degree');
-  }
-
-  if (xs.length >= WASM_POLY_FIT_THRESHOLD) {
-    try {
-      const result = legendreFitDispatch(new Float64Array(xs), new Float64Array(ys), degree);
-      return Array.from(result);
-    } catch {
-      // fall through to JS path
-    }
-  }
-
-  // --- JS path (normal equations using Legendre basis) ---
-  const n = xs.length;
-  const k = degree + 1;
-
-  const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
-  for (let i = 0; i < n; i++) {
-    const row = legendreBasisRow(xs[i], k);
-    for (let j = 0; j < k; j++) {
-      for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
-      ATA[j][k] += row[j] * ys[i];
-    }
-  }
-
-  const solvedLeg = solveAugmentedNormalEquations(ATA);
-  if (!solvedLeg) {
-    throw new Error('legendreFit: rank-deficient system');
-  }
-  return solvedLeg;
+  return fitOrthogonalSeries(xs, ys, degree, {
+    name: 'legendreFit',
+    basisRow: legendreBasisRow,
+    dispatch: legendreFitDispatch,
+  });
 }

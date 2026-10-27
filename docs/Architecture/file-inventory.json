@@ -8115,7 +8115,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 689
+      "loc": 681
     },
     {
       "file": "functions/src/typed/logical.ts",
