@@ -34,7 +34,7 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Function graph   │  functions (478)          expression (477)              │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Numeric / accel  │  matrix (45) · tensor (21) · autograd (6) · parallel(14) │
+│  Numeric / accel  │  matrix (48) · tensor (21) · autograd (6) · parallel(14) │
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Core             │  core (48)  — types · typed-function · factory           │
 ├────────────────────────────────────────────────────────────────────────────┤
