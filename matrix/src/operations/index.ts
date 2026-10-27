@@ -61,4 +61,4 @@ export { lq, rq, ql, type LQResult, type RQResult, type QLResult } from './qr-fa
 export { condest } from './condest.js';
 
 // Dense nested-array matrix product (shared by decompositions and @danielsimonjr/mathts-functions)
-export { matMul } from './common.js';
+export { matMul, transpose as transposeNestedArray } from './common.js';

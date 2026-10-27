@@ -22,7 +22,7 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
-import { eye, matMul, transpose } from './common.js';
+import { eye, matMul, transpose, matInv } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -36,42 +36,6 @@ function symmetrize(A: number[][]): number[][] {
   return Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => (A[i][j] + A[j][i]) / 2)
   );
-}
-
-/** Matrix inverse via Gauss-Jordan. Returns null on singular input. */
-function matInv(A: number[][]): number[][] | null {
-  const n = A.length;
-  const M = A.map((row, i) => {
-    const r = new Array(2 * n).fill(0);
-    for (let j = 0; j < n; j++) r[j] = row[j];
-    r[n + i] = 1;
-    return r;
-  });
-
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(M[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(M[row][col]) > maxVal) {
-        maxVal = Math.abs(M[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
-
-    const pivot = M[col][col];
-    if (Math.abs(pivot) < 1e-15) return null; // singular
-
-    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const f = M[row][col];
-      if (f === 0) continue;
-      for (let j = 0; j < 2 * n; j++) M[row][j] -= f * M[col][j];
-    }
-  }
-
-  return M.map((row) => row.slice(n));
 }
 
 /**

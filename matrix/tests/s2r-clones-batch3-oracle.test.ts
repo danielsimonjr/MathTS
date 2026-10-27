@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { transpose } from '../src/operations/common.js';
+import { transpose, matInv } from '../src/operations/common.js';
 import { matrixSqrtNewtonInternal } from '../src/operations/sqrtm.js';
 import { jsBackend } from '../src/backends/JSBackend.js';
 import { ParallelBackend } from '../src/backends/ParallelBackend.js';
@@ -113,45 +113,9 @@ describe('S2R batch3 — ParallelBackend binary ops (G53 oracle)', () => {
   });
 });
 
-/** Gauss–Jordan oracle (same pivot rule as logm/sqrtm matInv: singular if |pivot| < 1e-15). */
-function oracleMatInv(A: number[][]): number[][] | null {
-  const n = A.length;
-  const M = A.map((row, i) => {
-    const r = new Array(2 * n).fill(0);
-    for (let j = 0; j < n; j++) r[j] = row[j];
-    r[n + i] = 1;
-    return r;
-  });
-
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(M[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(M[row][col]) > maxVal) {
-        maxVal = Math.abs(M[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
-
-    const pivot = M[col][col];
-    if (Math.abs(pivot) < 1e-15) return null;
-
-    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const f = M[row][col];
-      if (f === 0) continue;
-      for (let j = 0; j < 2 * n; j++) M[row][j] -= f * M[col][j];
-    }
-  }
-
-  return M.map((row) => row.slice(n));
-}
-
 describe('S2R batch3 — matInv (G57 oracle)', () => {
   it('inverts [[1,2],[3,4]]', () => {
-    const inv = oracleMatInv([
+    const inv = matInv([
       [1, 2],
       [3, 4],
     ]);
@@ -165,7 +129,7 @@ describe('S2R batch3 — matInv (G57 oracle)', () => {
 
   it('singular matrix returns null', () => {
     expect(
-      oracleMatInv([
+      matInv([
         [1, 2],
         [2, 4],
       ])

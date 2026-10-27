@@ -7996,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1262
+      "loc": 1256
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -10964,14 +10964,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 302
+      "loc": 294
     },
     {
       "file": "matrix/src/backends/ParallelBackend.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 371
+      "loc": 340
     },
     {
       "file": "matrix/src/backends/register-backends.ts",
@@ -11048,7 +11048,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 234
+      "loc": 270
     },
     {
       "file": "matrix/src/operations/condest.ts",
@@ -11090,7 +11090,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 489
+      "loc": 425
     },
     {
       "file": "matrix/src/operations/lu.ts",
@@ -11139,7 +11139,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 568
+      "loc": 532
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -11503,7 +11503,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 188
+      "loc": 152
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-27'
   totalFiles: 1192
   totalModules: 82
-  totalExports: 6186
+  totalExports: 6189
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3433,6 +3433,9 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ../types/dense/reduction.js
+          imports:
+            - '* as reduction'
         - file: ./Backend.js
           imports:
             - MatrixBackend
@@ -3458,6 +3461,9 @@ modules:
           imports:
             - BackendType
           typeOnly: true
+        - file: ./JSBackend.js
+          imports:
+            - jsBackend
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -4381,6 +4387,7 @@ modules:
         - eye
         - cloneMatrix
         - transpose
+        - matInv
         - isSymmetric
         - matMul
         - matAdd
@@ -4395,6 +4402,7 @@ modules:
         - eye
         - cloneMatrix
         - transpose
+        - matInv
         - isSymmetric
         - matMul
         - matAdd
@@ -4586,6 +4594,7 @@ modules:
         - file: ./common.js
           imports:
             - matMul
+            - transpose
           reExport: true
       workspaceDependencies: []
       exports:
@@ -4637,6 +4646,8 @@ modules:
         - QLResult
         - condest
         - matMul
+        - transposeNestedArray
+        - transpose
       reExported:
         - eig
         - eigvals
@@ -4685,6 +4696,7 @@ modules:
         - QLResult
         - condest
         - matMul
+        - transpose
     matrix/src/operations/logm.ts:
       description: Matrix Logarithm — Schur-Padé inverse scaling-and-squaring (Slices 5.9a + 6.1)
       externalDependencies: []
@@ -4707,6 +4719,10 @@ modules:
             - matScale
             - normInf
             - norm1
+            - matInv
+        - file: ./sqrtm.js
+          imports:
+            - matrixSqrtNewtonInternal
       workspaceDependencies: []
       exports:
         - matrixLogm
@@ -4855,6 +4871,7 @@ modules:
             - eye
             - matMul
             - transpose
+            - matInv
       workspaceDependencies: []
       exports:
         - matrixSqrtm
@@ -21245,6 +21262,7 @@ modules:
             - SqrtmOptions
             - DenseMatrix
             - matMul
+            - transposeNestedArray
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -39404,15 +39422,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 201020
-  totalExports: 6186
+  totalLinesOfCode: 200911
+  totalExports: 6189
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1962
+  totalFunctions: 1963
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2619
+  totalReExports: 2620
   totalTypeOnlyImports: 607
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

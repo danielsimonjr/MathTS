@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1192, "e": 6186, "re": 2619 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1192, "e": 6189, "re": 2620 },
   "s": {
-    "loc": 201020,
+    "loc": 200911,
     "cls": 59,
     "int": 539,
-    "fn": 1962,
+    "fn": 1963,
     "tg": 158,
     "en": 0,
     "co": 1618,
@@ -324,6 +324,7 @@
         "eye",
         "cloneMatrix",
         "transpose",
+        "matInv",
         "isSymmetric",
         "matMul",
         "matAdd",
@@ -338,8 +339,7 @@
         "eigWasm",
         "eigvalsWasm",
         "spectralRadiusWasm",
-        "eig",
-        "eigvals"
+        "eig"
       ],
       "int": [
         "CholeskyResult",

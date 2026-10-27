@@ -1276,10 +1276,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                      | Type               |
-| ------------------------- | ---------------------------- | ------------------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                | Import             |
-| `./Backend.js`            | `MatrixBackend, BackendType` | Import (type-only) |
+| File                          | Imports                      | Type               |
+| ----------------------------- | ---------------------------- | ------------------ |
+| `../types/DenseMatrix.js`     | `DenseMatrix`                | Import             |
+| `../types/dense/reduction.js` | `* as reduction`             | Import             |
+| `./Backend.js`                | `MatrixBackend, BackendType` | Import (type-only) |
 
 **Exports:**
 
@@ -1302,6 +1303,7 @@ graph LR
 | ------------------------- | ------------- | ------------------ |
 | `../types/DenseMatrix.js` | `DenseMatrix` | Import             |
 | `./Backend.js`            | `BackendType` | Import (type-only) |
+| `./JSBackend.js`          | `jsBackend`   | Import             |
 
 **Exports:**
 
@@ -1629,7 +1631,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 
 ---
 
@@ -1714,11 +1716,11 @@ graph LR
 | `./qr-pivoted.js` | `qrPivoted, QRPivotedResult, QRPivotedOptions`                                          | Re-export |
 | `./qr-family.js`  | `lq, rq, ql, LQResult, RQResult, QLResult`                                              | Re-export |
 | `./condest.js`    | `condest`                                                                               | Re-export |
-| `./common.js`     | `matMul`                                                                                | Re-export |
+| `./common.js`     | `matMul, transpose`                                                                     | Re-export |
 
 **Exports:**
 
-- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`
+- Re-exports: `eig`, `eigvals`, `powerIteration`, `EigResult`, `EigOptions`, `svd`, `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro`, `SVDResult`, `SVDOptions`, `eigWasm`, `eigvalsWasm`, `spectralRadiusWasm`, `svdWasm`, `PinvOptions`, `qr`, `QRResult`, `QROptions`, `lu`, `luSolve`, `LUResult`, `cholesky`, `CholeskyResult`, `matrixExpm`, `ExpmOptions`, `matrixLogm`, `LogmOptions`, `matrixSqrtm`, `SqrtmOptions`, `matrixSchur`, `SchurResult`, `SchurOptions`, `qrPivoted`, `QRPivotedResult`, `QRPivotedOptions`, `lq`, `rq`, `ql`, `LQResult`, `RQResult`, `QLResult`, `condest`, `matMul`, `transpose`
 
 ---
 
@@ -1726,12 +1728,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                            | Type   |
-| ------------------------- | -------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                      | Import |
-| `./eig.js`                | `eig`                                              | Import |
-| `./schur.js`              | `schurInternal`                                    | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1` | Import |
+| File                      | Imports                                                    | Type   |
+| ------------------------- | ---------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                              | Import |
+| `./eig.js`                | `eig`                                                      | Import |
+| `./schur.js`              | `schurInternal`                                            | Import |
+| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv` | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                 | Import |
 
 **Exports:**
 
@@ -1838,12 +1841,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                  | Type   |
-| ------------------------- | ------------------------ | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`            | Import |
-| `./eig.js`                | `eig`                    | Import |
-| `./schur.js`              | `schurInternal`          | Import |
-| `./common.js`             | `eye, matMul, transpose` | Import |
+| File                      | Imports                          | Type   |
+| ------------------------- | -------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                    | Import |
+| `./eig.js`                | `eig`                            | Import |
+| `./schur.js`              | `schurInternal`                  | Import |
+| `./common.js`             | `eye, matMul, transpose, matInv` | Import |
 
 **Exports:**
 
@@ -10228,11 +10231,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import                                                                                                                                                                                               |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul` |
-| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                          |
-| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                        |
+| Package                          | Import                                                                                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix`   | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, matMul, transposeNestedArray` |
+| `@danielsimonjr/mathts-core`     | `mathTyped`                                                                                                                                                                                                                |
+| `@danielsimonjr/mathts-parallel` | `computePool`                                                                                                                                                                                                              |
 
 **Exports:**
 
@@ -18749,12 +18752,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 201020 |
-| Total Exports           | 6186   |
-| Total Re-exports        | 2619   |
+| Total Lines of Code     | 200911 |
+| Total Exports           | 6189   |
+| Total Re-exports        | 2620   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1962   |
+| Total Functions         | 1963   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 607    |

@@ -182,6 +182,7 @@
     "matrix/src/backends/JSBackend.ts": [
       "matrix/src/backends/BackendManager.ts",
       "matrix/src/backends/GPUMatrixBackend.ts",
+      "matrix/src/backends/ParallelBackend.ts",
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/backends/index.ts",
       "matrix/src/backends/register-backends.ts"
@@ -198,6 +199,10 @@
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
       "matrix/src/backends/index.ts"
+    ],
+    "matrix/src/types/dense/reduction.ts": [
+      "matrix/src/backends/JSBackend.ts",
+      "matrix/src/types/DenseMatrix.ts"
     ],
     "matrix/src/backends/wasm/detect.ts": [
       "matrix/src/backends/WASMBackend.ts",
@@ -262,7 +267,10 @@
     "matrix/src/operations/cholesky.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/expm.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/logm.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/sqrtm.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/sqrtm.ts": [
+      "matrix/src/operations/index.ts",
+      "matrix/src/operations/logm.ts"
+    ],
     "matrix/src/operations/schur.ts": [
       "matrix/src/operations/index.ts",
       "matrix/src/operations/logm.ts",
@@ -279,7 +287,6 @@
       "matrix/src/types/index.ts"
     ],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
-    "matrix/src/types/dense/reduction.ts": ["matrix/src/types/DenseMatrix.ts"],
     "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",
