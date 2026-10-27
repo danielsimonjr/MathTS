@@ -23,6 +23,7 @@ import {
   ewma,
   detrend,
   linearRegression,
+  linregress,
   kmeans,
   butter,
   firwin,
@@ -205,6 +206,14 @@ describe('regression-extra — degenerate input guards', () => {
   it('linearRegression throws on <3 points and a zero-variance predictor', () => {
     expect(() => linearRegression([1, 2], [3, 4])).toThrow(/at least 3|3 points/i);
     expect(() => linearRegression([5, 5, 5], [1, 2, 3])).toThrow(/zero variance/i);
+    // linregress keeps the published non-throwing all-NaN result (does not wrap the throw).
+    const degenerate = linregress([5, 5, 5], [1, 2, 3]);
+    expect(degenerate.slope).toBeNaN();
+    expect(degenerate.intercept).toBeNaN();
+    expect(degenerate.rValue).toBeNaN();
+    expect(degenerate.pValue).toBeNaN();
+    expect(degenerate.stdErr).toBeNaN();
+    expect(degenerate.interceptStdErr).toBeNaN();
     const r = linearRegression([1, 2, 3, 4], [2, 4, 6, 8]); // happy path: y = 2x
     expect(r.slope).toBeCloseTo(2, 10);
     expect(r.intercept).toBeCloseTo(0, 10);

@@ -18,7 +18,7 @@
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
 import { studentTCDF as _studentTCDF } from './distribution-functions.js';
-import { fitLine } from './regression-extra.js';
+import { fitLine, linearRegression } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
@@ -296,23 +296,37 @@ export interface LinRegressResult {
  * OLS simple linear regression **with inference** — `y ≈ slope·x + intercept`,
  * plus the correlation coefficient, the slope p-value (t-test, df = n−2), and
  * the slope/intercept standard errors. Matches `scipy.stats.linregress`.
+ *
+ * Slope inference (p-value, slope standard error) is delegated to
+ * {@link linearRegression} (`studentTTwoSidedP`, same incomplete-beta tail as SciPy
+ * `t.sf`). Unlike `linearRegression`, a zero-variance predictor does not throw.
  */
 export function linregress(x: Vec, y: Vec): LinRegressResult {
   const n = x.length;
   if (n !== y.length) throw new Error('linregress: x and y must have equal length');
   if (n < 3) throw new Error('linregress: need at least 3 points for inference');
-  const { slope, intercept, rValue, mx: xbar, sxx, rss } = fitLine(Array.from(x), Array.from(y));
+  const fit = fitLine(Array.from(x), Array.from(y));
+  if (fit.sxx === 0) {
+    const nan = Number.NaN;
+    return {
+      slope: nan,
+      intercept: nan,
+      rValue: nan,
+      pValue: nan,
+      stdErr: nan,
+      interceptStdErr: nan,
+    };
+  }
+  const base = linearRegression(x, y);
   const df = n - 2;
-  // Residual mean square from the residuals (see `fitLine`), so a near-exact fit is not NaN.
-  const s2 = rss / df;
-  const stdErr = Math.sqrt(s2 / sxx);
-  const interceptStdErr = Math.sqrt(s2 * (1 / n + (xbar * xbar) / sxx));
+  const s2 = fit.rss / df;
+  const interceptStdErr = Math.sqrt(s2 * (1 / n + (fit.mx * fit.mx) / fit.sxx));
   return {
-    slope,
-    intercept,
-    rValue,
-    pValue: _tTwoTail(slope / stdErr, df),
-    stdErr,
+    slope: base.slope,
+    intercept: base.intercept,
+    rValue: base.rValue,
+    pValue: base.pValue,
+    stdErr: base.stdErr,
     interceptStdErr,
   };
 }

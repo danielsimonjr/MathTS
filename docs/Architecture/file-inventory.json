@@ -5847,7 +5847,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 525
+      "loc": 539
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -7828,7 +7828,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2874
+      "loc": 2861
     },
     {
       "file": "functions/src/typed/combinatorics.ts",
@@ -8528,7 +8528,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 781
+      "loc": 786
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
@@ -9109,7 +9109,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 283
+      "loc": 292
     },
     {
       "file": "functions/tests/gap-distribution-oracles.test.ts",
@@ -10663,7 +10663,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 104
     },
     {
       "file": "functions/tests/upt-review-2026-10-15.test.ts",

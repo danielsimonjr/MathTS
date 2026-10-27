@@ -4178,13 +4178,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports          | Type   |
-| ----------------------------- | ---------------- | ------ |
-| `./typed/arithmetic.js`       | `mean, std, sum` | Import |
-| `./factories/index.js`        | `quantileSeq`    | Import |
-| `./distribution-functions.js` | `studentTCDF`    | Import |
-| `./regression-extra.js`       | `fitLine`        | Import |
-| `./typed/distributions.js`    | `normalCDF`      | Import |
+| File                          | Imports                     | Type   |
+| ----------------------------- | --------------------------- | ------ |
+| `./typed/arithmetic.js`       | `mean, std, sum`            | Import |
+| `./factories/index.js`        | `quantileSeq`               | Import |
+| `./distribution-functions.js` | `studentTCDF`               | Import |
+| `./regression-extra.js`       | `fitLine, linearRegression` | Import |
+| `./typed/distributions.js`    | `normalCDF`                 | Import |
 
 **Exports:**
 
@@ -9791,6 +9791,7 @@ graph LR
 | `./algebra.js`                   | `expand, factor`                               | Import |
 | `../factories/index.js`          | `polynomialRoot`                               | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                 | Import |
+| `./numeric.js`                   | `findRoot`                                     | Import |
 
 **Exports:**
 
@@ -17903,10 +17904,10 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `core/src/index`                                       | 17 files     | 0 files    |
 | `matrix/src/operations/index`                          | 16 files     | 1 file     |
-| `functions/src/typed/numeric`                          | 9 files      | 8 files    |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
@@ -18753,7 +18754,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200872 |
+| Total Lines of Code     | 200873 |
 | Total Exports           | 6181   |
 | Total Re-exports        | 2617   |
 | Total Classes           | 59     |

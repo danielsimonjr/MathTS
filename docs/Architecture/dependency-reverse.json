@@ -2185,6 +2185,7 @@
       "functions/src/numeric/control-equations.ts",
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/nnls.ts",
+      "functions/src/typed/cas.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/probability/util/seededRNG.ts": [
