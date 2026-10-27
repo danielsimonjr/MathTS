@@ -153,11 +153,11 @@ sparse.toFlatArray(); // number[]
 
 When the manager does select a backend, operation thresholds include:
 
-| Operation       | WASM threshold (elements) | Notes                              |
-| --------------- | ------------------------- | ---------------------------------- |
-| `multiply`      | 256                       | SIMD WASM matmul                   |
-| `decomposition` | 100                       | LU/QR/Cholesky-style paths         |
-| `transpose`     | 2,000 (gate only)         | WASM transpose retired; JS is used |
+| Operation       | WASM threshold (elements) | Notes                                              |
+| --------------- | ------------------------- | -------------------------------------------------- |
+| `multiply`      | 256                       | SIMD WASM matmul                                   |
+| `decomposition` | 100                       | Advisory only; public `lu`/`qr`/`cholesky` stay JS |
+| `transpose`     | 2,000 (gate only)         | WASM transpose retired; JS is used                 |
 
 GPU threshold fields in the manager align to `GPU_MIN_ELEMENTS` (65,536) but are dormant until a GPU backend is registered.
 
