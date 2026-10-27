@@ -1,4 +1,5 @@
 import { numericJacobian } from './numeric-jacobian.js';
+import { hermiteCubic } from './hermite.js';
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { DenseMatrix, lu, luSolve, matMul as _matMul } from '@danielsimonjr/mathts-matrix';
@@ -287,31 +288,6 @@ function _normalizeEvents(events: ODEEvents): NormalizedEvent[] {
 }
 
 /**
- * Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`, using the endpoint
- * states `ya`, `yb` and endpoint derivatives `fa = f(ta, ya)`, `fb = f(tb, yb)`. C¹ and O(h⁴)
- * accurate, so an event root located on it matches the true crossing to well under the solver `tol`.
- */
-function _hermite(
-  ta: number,
-  tb: number,
-  ya: number[],
-  yb: number[],
-  fa: number[],
-  fb: number[],
-  t: number
-): number[] {
-  const h = tb - ta;
-  const theta = h === 0 ? 0 : (t - ta) / h;
-  const th2 = theta * theta;
-  const th3 = th2 * theta;
-  const h00 = 2 * th3 - 3 * th2 + 1;
-  const h10 = th3 - 2 * th2 + theta;
-  const h01 = -2 * th3 + 3 * th2;
-  const h11 = th3 - th2;
-  return ya.map((_, i) => h00 * ya[i] + h10 * h * fa[i] + h01 * yb[i] + h11 * h * fb[i]);
-}
-
-/**
  * Locate the zero of `gEval` in `[ta, tb]` by bisection, given endpoint values `ga`, `gb` that
  * straddle zero (or `gb === 0`). Works for forward (`ta < tb`) or backward (`ta > tb`) steps.
  */
@@ -409,7 +385,7 @@ function _detectEvents(
           fa = _fArr(f, ta, ya);
           fb = _fArr(f, tb, yb);
         }
-        const interp = (t: number): number[] => _hermite(ta, tb, ya, yb, fa!, fb!, t);
+        const interp = (t: number): number[] => hermiteCubic(ta, tb, ya, yb, fa!, fb!, t);
         tStar = _bisectEventRoot((t) => evs[e].g(t, interp(t)), ta, tb, ga, gb);
         yStar = interp(tStar);
       }

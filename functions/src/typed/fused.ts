@@ -19,6 +19,7 @@ import {
 import {
   elementwiseChainGpuDispatch,
   elementwiseChainReduceGpuDispatch,
+  reduceNumbers,
   type GpuChainOptions,
   type GpuReduceOp,
 } from '../gpu/elementwise-gpu.js';
@@ -185,19 +186,5 @@ export async function fuseUnaryChainReduceAsync(
   // CPU: run the chain on the best available tier, then reduce in f64. There is no
   // WASM reduction kernel, so the reduce is JS either way.
   const chained = elementwiseChainDispatch(ops, xs) ?? jsChain(ops, xs);
-  return reduceF64(chained, reduce);
-}
-
-/** f64 reduction over the chain output — the CPU counterpart of the GPU kernel. */
-function reduceF64(xs: Float64Array, reduce: GpuReduceOp): number {
-  if (reduce === 'sum') {
-    let acc = 0;
-    for (let i = 0; i < xs.length; i++) acc += xs[i];
-    return acc;
-  }
-  let acc = reduce === 'max' ? -Infinity : Infinity;
-  for (let i = 0; i < xs.length; i++) {
-    acc = reduce === 'max' ? Math.max(acc, xs[i]) : Math.min(acc, xs[i]);
-  }
-  return acc;
+  return reduceNumbers(chained, reduce);
 }

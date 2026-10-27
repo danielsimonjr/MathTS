@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1195
+  totalFiles: 1201
   totalModules: 82
-  totalExports: 6199
+  totalExports: 6214
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -179,6 +179,18 @@ modules:
         - isUint32Array
         - isArrayBuffer
   packages/workerpool:
+    packages/workerpool/src/chunk-typed.ts:
+      description: Slice-based chunking for typed arrays passed to worker kernels.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - chunkTyped
+        - chunkPairTyped
+      functions:
+        - chunkTyped
+        - chunkPairTyped
     packages/workerpool/src/compile-function-source.ts:
       description: Rebuild a function from its source text.
       externalDependencies: []
@@ -217,12 +229,28 @@ modules:
         - file: ./compile-function-source.js
           imports:
             - compileFunctionSource
+        - file: ./chunk-typed.js
+          imports:
+            - chunkPairTyped
+            - chunkTyped
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./chunk-typed.js
+          imports:
+            - chunkTyped
+            - chunkPairTyped
+          reExport: true
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
+          reExport: true
       workspaceDependencies: []
       exports:
         - Transfer
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -241,6 +269,10 @@ modules:
         - terminatePool
         - getPoolStats
         - MathWorkerPool
+      reExported:
+        - chunkTyped
+        - chunkPairTyped
+        - forEachMultiIndex
       classes:
         - MathWorkerPool
       interfaces:
@@ -270,6 +302,16 @@ modules:
       constants:
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
+    packages/workerpool/src/multi-index.ts:
+      description: Multi-dimensional index iteration (no imports — safe for the worker bundle).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - forEachMultiIndex
+      functions:
+        - forEachMultiIndex
     packages/workerpool/src/worker-numerics.ts:
       description: Worker-bundle copies of core numeric helpers.
       externalDependencies: []
@@ -296,6 +338,9 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
         - file: ./worker-numerics.js
           imports:
             - _tdRowMajorStrides
@@ -7036,10 +7081,13 @@ modules:
         - file: ../utils/number.js
           imports:
             - isInteger
-            - nearlyEqual
         - file: ../utils/bignumber/nearlyEqual.js
           imports:
             - nearlyEqual
+        - file: ./snap-to-round.js
+          imports:
+            - snapBig
+            - snapNumber
         - file: ../type/matrix/utils/matAlgo11xS0s.js
           imports:
             - createMatAlgo11xS0s
@@ -7317,10 +7365,13 @@ modules:
         - file: ../utils/number.js
           imports:
             - isInteger
-            - nearlyEqual
         - file: ../utils/bignumber/nearlyEqual.js
           imports:
             - nearlyEqual
+        - file: ./snap-to-round.js
+          imports:
+            - snapBig
+            - snapNumber
         - file: ../type/matrix/utils/matAlgo11xS0s.js
           imports:
             - createMatAlgo11xS0s
@@ -7830,6 +7881,21 @@ modules:
         - createSign
       constants:
         - createSign
+    functions/src/arithmetic/snap-to-round.ts:
+      description: Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/number.js
+          imports:
+            - nearlyEqual
+      workspaceDependencies: []
+      exports:
+        - snapNumber
+        - snapBig
+      functions:
+        - snapNumber
+        - snapBig
     functions/src/arithmetic/sqrt.ts:
       description: Calculate the square root of a value.
       externalDependencies: []
@@ -13237,6 +13303,9 @@ modules:
           imports:
             - setIsSubset
             - setMultiplicity
+        - file: ../utils/array.js
+          imports:
+            - flatten
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -13423,6 +13492,7 @@ modules:
         - resetGpuElementwise
         - elementwiseChainGpuDispatch
         - elementwiseChainReduceGpuDispatch
+        - reduceNumbers
       interfaces:
         - GpuChainOptions
       functions:
@@ -13430,6 +13500,7 @@ modules:
         - resetGpuElementwise
         - elementwiseChainGpuDispatch
         - elementwiseChainReduceGpuDispatch
+        - reduceNumbers
       constants:
         - GPU_ELEMENTWISE_OPS
         - GPU_REDUCE_OPS
@@ -15076,6 +15147,16 @@ modules:
         - RootsLegendreResult
       functions:
         - rootsLegendre
+    functions/src/numeric/hermite.ts:
+      description: Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - hermiteCubic
+      functions:
+        - hermiteCubic
     functions/src/numeric/interpn.ts:
       description: Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`
       externalDependencies: []
@@ -15295,7 +15376,10 @@ modules:
       description: Constant-delay delay differential equation (DDE) solver via the method of steps.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./hermite.js
+          imports:
+            - hermiteCubic
       workspaceDependencies: []
       exports:
         - solveDDE
@@ -15312,6 +15396,9 @@ modules:
         - file: ./numeric-jacobian.js
           imports:
             - numericJacobian
+        - file: ./hermite.js
+          imports:
+            - hermiteCubic
         - file: ../utils/is.js
           imports:
             - isUnit
@@ -19602,6 +19689,16 @@ modules:
         - createPlanckCharge
         - createPlanckTemperature
   functions/typed:
+    functions/src/typed/aggregate-restart.ts:
+      description: Element-wise mean and population std across centrality restart vectors.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - aggregateRestartVectors
+      functions:
+        - aggregateRestartVectors
     functions/src/typed/algebra.ts:
       description: Typed Algebra Functions
       externalDependencies: []
@@ -19713,6 +19810,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./euclid.js
+          imports:
+            - euclidSnap
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -19919,6 +20019,9 @@ modules:
           imports:
             - parse
             - evaluate
+        - file: ./euclid.js
+          imports:
+            - euclidSnap
         - file: ./polynomial-ideal.js
           imports:
             - polyFromExpression
@@ -20114,6 +20217,9 @@ modules:
         - file: ../wasm/special/scalars.js
           imports:
             - _lgamma
+            - betaincClosedScalar
+            - chooseScalar
+            - gammaincScalar
         - file: ./special.js
           imports:
             - erfcScalar
@@ -20237,6 +20343,16 @@ modules:
         - studentTPDF
         - noncentralChi2PDF
         - typedDistributions
+    functions/src/typed/euclid.ts:
+      description: Euclidean GCD with a caller-chosen integer snap (floor vs round).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - euclidSnap
+      functions:
+        - euclidSnap
     functions/src/typed/factorization/finite-field.ts:
       description: Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed
       externalDependencies: []
@@ -20578,6 +20694,7 @@ modules:
           imports:
             - elementwiseChainGpuDispatch
             - elementwiseChainReduceGpuDispatch
+            - reduceNumbers
             - GpuChainOptions
             - GpuReduceOp
         - file: ./special.js
@@ -20702,7 +20819,11 @@ modules:
       description: Graph Theory Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./aggregate-restart.js
+          imports:
+            - aggregateRestartVectors
+            - RestartAggregation
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20758,7 +20879,10 @@ modules:
         - file: ../wasm/special/scalars.js
           imports:
             - _lgamma
+            - betaincClosedScalar
+            - chooseScalar
             - erfcSelfContained
+            - gammaincScalar
         - file: ./special.js
           imports:
             - erfcScalar
@@ -21703,7 +21827,10 @@ modules:
       description: Typed Set Functions
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - flatten
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -22866,7 +22993,7 @@ modules:
       constants:
         - createIsPositive
     functions/src/utils/isPrime.ts:
-      description: 'Test whether a value is prime: has no divisors other than itself and one.'
+      description: Trial-division primality test. `c` supplies typed literals so the loop
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22883,6 +23010,11 @@ modules:
       workspaceDependencies: []
       exports:
         - createIsPrime
+        - trialPrime
+      functions:
+        - trialPrime
+        - trialPrime
+        - trialPrime
       constants:
         - createIsPrime
     functions/src/utils/isZero.ts:
@@ -23697,6 +23829,8 @@ modules:
         - airyBiScalar
         - factorial
         - betaScalar
+        - betaincClosedScalar
+        - chooseScalar
         - gammaincScalar
         - gammaincpScalar
         - betaincScalar
@@ -23725,6 +23859,8 @@ modules:
         - airyBiScalar
         - factorial
         - betaScalar
+        - betaincClosedScalar
+        - chooseScalar
         - gammaincScalar
         - gammaincpScalar
         - betaincScalar
@@ -38163,9 +38299,11 @@ dependencyGraph:
         - packages/typed-function/src/index.ts
     - name: Packages/workerpool
       files:
+        - packages/workerpool/src/chunk-typed.ts
         - packages/workerpool/src/compile-function-source.ts
         - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
+        - packages/workerpool/src/multi-index.ts
         - packages/workerpool/src/worker-numerics.ts
         - packages/workerpool/src/worker.ts
         - packages/workerpool/src/workerpool-browser-shim.ts
@@ -38397,6 +38535,7 @@ dependencyGraph:
         - functions/src/arithmetic/pow.ts
         - functions/src/arithmetic/round.ts
         - functions/src/arithmetic/sign.ts
+        - functions/src/arithmetic/snap-to-round.ts
         - functions/src/arithmetic/sqrt.ts
         - functions/src/arithmetic/square.ts
         - functions/src/arithmetic/subtract.ts
@@ -38578,6 +38717,7 @@ dependencyGraph:
         - functions/src/numeric/fsolve.ts
         - functions/src/numeric/gauss-legendre4.ts
         - functions/src/numeric/gauss-nodes.ts
+        - functions/src/numeric/hermite.ts
         - functions/src/numeric/interpn.ts
         - functions/src/numeric/interval.ts
         - functions/src/numeric/krylov.ts
@@ -38774,6 +38914,7 @@ dependencyGraph:
         - functions/src/type/unit/physicalConstants.ts
     - name: Functions/typed
       files:
+        - functions/src/typed/aggregate-restart.ts
         - functions/src/typed/algebra.ts
         - functions/src/typed/arithmetic.ts
         - functions/src/typed/bitwise.ts
@@ -38782,6 +38923,7 @@ dependencyGraph:
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
         - functions/src/typed/distributions.ts
+        - functions/src/typed/euclid.ts
         - functions/src/typed/factorization/finite-field.ts
         - functions/src/typed/factorization/hensel.ts
         - functions/src/typed/factorization/index.ts
@@ -39518,17 +39660,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1195
+  totalTypeScriptFiles: 1201
   totalModules: 82
-  totalLinesOfCode: 200753
-  totalExports: 6199
+  totalLinesOfCode: 200688
+  totalExports: 6214
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1969
+  totalFunctions: 1983
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2624
+  totalReExports: 2627
   totalTypeOnlyImports: 610
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

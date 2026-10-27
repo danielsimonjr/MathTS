@@ -33,7 +33,13 @@
 import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
-import { _lgamma, erfcSelfContained } from '../wasm/special/scalars.js';
+import {
+  _lgamma,
+  betaincClosedScalar,
+  chooseScalar,
+  erfcSelfContained,
+  gammaincScalar,
+} from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
 import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
@@ -252,93 +258,11 @@ function _variance(arr: f64[], ddof: number = 1): f64 {
 }
 
 /**
- * Regularized lower incomplete gamma function P(a, x).
- */
-function _gammainc(a: f64, x: f64): f64 {
-  if (x < 0) return NaN;
-  if (x === 0) return 0;
-
-  if (x < a + 1) {
-    let sum = 1.0 / a;
-    let term = 1.0 / a;
-    for (let n = 1; n < 200; n++) {
-      term *= x / (a + n);
-      sum += term;
-      if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
-    }
-    return sum * Math.exp(-x + a * Math.log(x) - _lgamma(a));
-  } else {
-    const TINY = 1e-30;
-    const b0 = x + 1 - a;
-    let c = 1.0 / TINY;
-    let d = 1.0 / b0;
-    let f = d;
-    for (let n = 1; n < 300; n++) {
-      const an = n * (a - n);
-      const bn = x + 2 * n + 1 - a;
-      d = bn + an * d;
-      if (Math.abs(d) < TINY) d = TINY;
-      c = bn + an / c;
-      if (Math.abs(c) < TINY) c = TINY;
-      d = 1.0 / d;
-      const delta = d * c;
-      f *= delta;
-      if (Math.abs(delta - 1) < 1e-14) break;
-    }
-    const Q = f * Math.exp(-x + a * Math.log(x) - _lgamma(a));
-    return 1 - Q;
-  }
-}
-
-/**
- * Regularized incomplete beta function I_x(a,b).
- */
-function _betainc(x: f64, a: f64, b: f64): f64 {
-  if (x <= 0) return 0;
-  if (x >= 1) return 1;
-
-  if (x > (a + 1) / (a + b + 2)) {
-    return 1 - _betainc(1 - x, b, a);
-  }
-
-  const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
-  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
-
-  const TINY = 1e-30;
-  let c = 1.0;
-  let d = 1.0 - ((a + b) * x) / (a + 1);
-  if (Math.abs(d) < TINY) d = TINY;
-  d = 1.0 / d;
-  let f = d;
-
-  for (let m = 1; m <= 200; m++) {
-    let numerator = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
-    d = 1.0 + numerator * d;
-    if (Math.abs(d) < TINY) d = TINY;
-    c = 1.0 + numerator / c;
-    if (Math.abs(c) < TINY) c = TINY;
-    d = 1.0 / d;
-    f *= d * c;
-
-    numerator = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
-    d = 1.0 + numerator * d;
-    if (Math.abs(d) < TINY) d = TINY;
-    c = 1.0 + numerator / c;
-    if (Math.abs(c) < TINY) c = TINY;
-    d = 1.0 / d;
-    const delta = d * c;
-    f *= delta;
-    if (Math.abs(delta - 1) < 1e-14) break;
-  }
-  return front * f;
-}
-
-/**
  * Two-tailed p-value from t-distribution using incomplete beta.
  */
 function _tPValue(t: f64, df: f64): f64 {
   const x = df / (df + t * t);
-  const ib = _betainc(x, df / 2, 0.5);
+  const ib = betaincClosedScalar(x, df / 2, 0.5);
   return ib;
 }
 
@@ -353,26 +277,14 @@ function _normalCDF(x: f64): f64 {
  * Upper-tail p-value from chi-squared distribution.
  */
 function _chiSquaredPValue(x: f64, df: f64): f64 {
-  return 1 - _gammainc(df / 2, x / 2);
+  return 1 - gammaincScalar(df / 2, x / 2);
 }
 
 /**
  * Upper-tail p-value from F-distribution.
  */
 function _fPValue(f: f64, d1: f64, d2: f64): f64 {
-  return 1 - _betainc((d1 * f) / (d1 * f + d2), d1 / 2, d2 / 2);
-}
-
-/**
- * Binomial coefficient C(n, k), computed via the standard multiplicative
- * iteration (exact for the small n used here — well within double precision).
- */
-function _binomCoeff(n: number, k: number): f64 {
-  if (k < 0 || k > n) return 0;
-  const kk = Math.min(k, n - k);
-  let r = 1;
-  for (let i = 0; i < kk; i++) r = (r * (n - i)) / (i + 1);
-  return r;
+  return 1 - betaincClosedScalar((d1 * f) / (d1 * f + d2), d1 / 2, d2 / 2);
 }
 
 // =============================================================================
@@ -1538,7 +1450,7 @@ function _ks2ExactPValue(n1: number, n2: number, D: f64): f64 {
       dp[i][j] = v;
     }
   }
-  const total = _binomCoeff(n1 + n2, n1);
+  const total = chooseScalar(n1 + n2, n1);
   const inside = dp[n1][n2];
   return Math.max(0, Math.min(1, 1 - inside / total));
 }
