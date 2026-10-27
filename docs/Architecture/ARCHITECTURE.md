@@ -207,11 +207,12 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   exports take a 12-byte header pointer; callers receive an opaque `Allocation`
   handle so they need not do pointer arithmetic.
 - **`matrix/src/backends/WASMBackend.ts`**: The sole WASM matrix backend. It
-  decides JS vs. WASM per operation by element-count threshold (e.g. matrix
-  multiply switches to WASM at ≥256 elements) and falls back to `JSBackend`
-  transparently on WASM failure. It hosts the AS kernels only where SIMD wins:
-  SIMD multiply/gemm on the manager path; dense inverse/determinant/LU/QR/Cholesky
-  exist on `WASMBackend` but are not reached by public `lu`/`qr`/`cholesky`.
+  decides JS vs. WASM per operation (manager multiply uses flop count ≥256 from
+  `DEFAULT_CONFIG`; `WASMBackend.multiply` also requires stored-element count ≥100)
+  and falls back to `JSBackend` transparently on WASM failure. It hosts the AS
+  kernels only where SIMD wins: SIMD multiply/gemm on the manager path; dense
+  inverse/determinant/LU/QR/Cholesky exist on `WASMBackend` but are not reached by
+  public `lu`/`qr`/`cholesky`.
   Element-wise ops, transpose, reductions, and `eig`/`svd` were
   measured slower on WASM and run on JS; FFT/IFFT is not a matrix-backend op.
 - **`functions/src/wasm/`**: The `functions` package's own AS bridges

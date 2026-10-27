@@ -198,8 +198,15 @@ describe('dense JS backend reach', () => {
       expect(DEFAULT_EXTENDED_HINTS.operationThresholds.transpose?.wasm).toBe(2000);
       expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.transpose).toBe(2000);
       expect(DEFAULT_EXTENDED_HINTS.operationThresholds.decomposition?.wasm).toBe(100);
+      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.decomposition).toBe(100);
       expect(DEFAULT_CONFIG.backends.gpu.enabled).toBe(false);
       expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.gpu).toBe(
+        DEFAULT_BACKEND_HINTS.gpuThreshold
+      );
+      expect(DEFAULT_EXTENDED_HINTS.operationThresholds.transpose?.gpu).toBe(
+        DEFAULT_BACKEND_HINTS.gpuThreshold
+      );
+      expect(DEFAULT_EXTENDED_HINTS.operationThresholds.decomposition?.gpu).toBe(
         DEFAULT_BACKEND_HINTS.gpuThreshold
       );
       expect(DEFAULT_CONFIG.backends.gpu.operationThresholds?.multiply).toBe(

@@ -106,8 +106,9 @@ for back-compat.
 ### @danielsimonjr/mathts-wasm (`assembly/`)
 
 **Purpose**: The AssemblyScript source for the **sole** WASM backend of the repo (`mathts-as.wasm`) — SIMD
-`f64x2` matrix multiply plus the dense LU/QR/Cholesky/inverse/determinant kernels, and the `functions`
-special/FFT kernels.
+`f64x2` matrix multiply (reached via `backendManager` / `wasmBackend` / `Tensor.matMul`; public
+`DenseMatrix.multiply` and `lu`/`qr`/`cholesky` stay JS) plus dense LU/QR/Cholesky/inverse/determinant
+kernels on `WASMBackend` for direct callers, and the `functions` special/FFT kernels.
 
 ```
 asc src/index.ts  →  mathts-as.wasm   (built by `npm run build:wasm`)

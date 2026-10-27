@@ -11251,7 +11251,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 226
+      "loc": 229
     },
     {
       "file": "matrix/tests/decomposition/eig-general-wasm.test.ts",
@@ -11300,7 +11300,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 217
+      "loc": 224
     },
     {
       "file": "matrix/tests/DenseMatrix.test.ts",

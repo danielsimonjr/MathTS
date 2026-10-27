@@ -69,7 +69,7 @@ The mathjs-derived factories are wired into the graph via
 - **3 numeric types**: Complex (83 methods), Fraction (61 methods), BigNumber (96 methods including 22 math functions)
 - **`@danielsimonjr/mathts-functions`**: the typed-dispatch source dir (`functions/src/typed/`) holds 40 files, including `factorization/`. They span arithmetic, trigonometry, statistics, signal, special, distributions, combinatorics, geometry, algebra, CAS, hypothesis tests, numeric/optimization, bitwise, relational, and set domains.
 - **mathjs factory layer**: the mathjs-derived factory functions are wired into the graph via `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`).
-- **Matrix system**: DenseMatrix + SparseMatrix with JS/WASM via `BackendManager` (GPU is opt-in, not registered)
+- **Matrix system**: DenseMatrix / SparseMatrix methods and public `lu`/`qr`/`cholesky` stay JS; WASM GEMM is `backendManager` (GPU is opt-in, not registered)
 - **Parallel**: ComputePool with 40+ parallel operations
 - **WASM**: see [`wasm-pairing.md` › _WASM binary exports_](./wasm-pairing.md#wasm-binary-exports) for function and total export counts (315 / 327 at last regen)
 

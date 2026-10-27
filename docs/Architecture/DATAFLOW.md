@@ -67,8 +67,11 @@ directly (pinned fixtures). `seedProbabilityRng` / `createRng` remain seedrandom
 ## 2. Matrix Backend Selection Flow
 
 ```text
-matrix.multiply(other)   // DenseMatrix or SparseMatrix
-  1. BackendManager.multiply uses elementCount = a.rows * b.cols * a.cols, then
+DenseMatrix.multiply(other) uses arithmetic.multiply (JS ikj). It does not
+call BackendManager. Public lu / qr / cholesky are also JS (operations/*).
+
+backendManager.multiply(a, b)   // WASM GEMM path after initialize()
+  1. elementCount = a.rows * b.cols * a.cols, then
      selectBackend(elementCount, 'multiply') — not rows * cols alone.
   2. Registered backends are js + wasm only (no 'gpu' in backendRegistry):
        multiply: WASM when elementCount >= 256 (operation threshold), else JS

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { DEFAULT_BACKEND_HINTS } from '../src/backends/Backend.js';
+import { DEFAULT_BACKEND_HINTS, backendRegistry } from '../src/backends/Backend.js';
 import {
   DEFAULT_CONFIG,
   getConfig,
@@ -129,7 +129,10 @@ describe('matrix config', () => {
     });
 
     it('should return wasm for large data when gpu is disabled', () => {
-      // Oracle: backendRegistry.has('gpu') is false; gpu.enabled is false — 'gpu' was unreachable.
+      // getRecommendedBackend reads gpu.enabled (now false). selectBackend would also
+      // skip GPU because backendRegistry.has('gpu') is false — 'gpu' was unreachable.
+      expect(backendRegistry.has('gpu')).toBe(false);
+      expect(DEFAULT_CONFIG.backends.gpu.enabled).toBe(false);
       expect(getRecommendedBackend(200000)).toBe('wasm');
     });
 
