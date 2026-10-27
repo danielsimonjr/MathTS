@@ -107,16 +107,22 @@ describe('functions WasmLoader — merge pins (G45–G47)', () => {
   it.skipIf(!AS_WASM_PATH)(
     'precompile() then load() uses cached module without re-reading the file',
     async () => {
-      const loader = freshLoader();
-      // Loaders wrap callback `fs.readFile` with promisify, not `fs.promises.readFile`.
-      const fs = await import('node:fs');
-      const readSpy = vi.spyOn(fs, 'readFile');
-      await loader.precompile(AS_WASM_PATH!);
-      expect(readSpy).toHaveBeenCalled();
-      readSpy.mockClear();
-      await loader.load(AS_WASM_PATH!);
-      expect(readSpy).not.toHaveBeenCalled();
-      expect(loader.getLoadingMetrics()?.fromCache).toBe(true);
+      const dir = mkdtempSync(join(tmpdir(), 'mathts-fn-loader-precompile-'));
+      try {
+        const wasm = join(dir, 'mathts-as.wasm');
+        copyFileSync(AS_WASM_PATH!, wasm);
+        const loader = freshLoader();
+        await loader.precompile(wasm);
+        expect(loader.isPrecompiled()).toBe(true);
+        // Independent of fs spies (vitest cannot spy ESM `fs.readFile`): if load()
+        // re-read the path it would throw ENOENT instead of using compiledModule.
+        rmSync(wasm);
+        await expect(loader.load(wasm)).resolves.toBeDefined();
+        expect(loader.getLoadingMetrics()?.fromCache).toBe(true);
+        expect(loader.isLoaded()).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
   );
 });

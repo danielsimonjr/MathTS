@@ -108,16 +108,22 @@ describe('matrix WasmLoader — merge pins (G45–G47)', () => {
   it.skipIf(!asAvailable)(
     'precompile() then load() uses cached module without re-reading the file',
     async () => {
-      const loader = freshLoader();
-      // Loaders wrap callback `fs.readFile` with promisify, not `fs.promises.readFile`.
-      const fs = await import('node:fs');
-      const readSpy = vi.spyOn(fs, 'readFile');
-      await loader.precompile(asWasmPath);
-      expect(readSpy).toHaveBeenCalled();
-      readSpy.mockClear();
-      await loader.load(asWasmPath);
-      expect(readSpy).not.toHaveBeenCalled();
-      expect(loader.getLoadingMetrics()?.fromCache).toBe(true);
+      const dir = mkdtempSync(join(tmpdir(), 'mathts-mx-loader-precompile-'));
+      try {
+        const wasm = join(dir, 'mathts.wasm');
+        copyFileSync(asWasmPath, wasm);
+        const loader = freshLoader();
+        await loader.precompile(wasm);
+        expect(loader.isPrecompiled()).toBe(true);
+        // Independent of fs spies (vitest cannot spy ESM `fs.readFile`): if load()
+        // re-read the path it would throw ENOENT instead of using compiledModule.
+        rmSync(wasm);
+        await expect(loader.load(wasm)).resolves.toBeDefined();
+        expect(loader.getLoadingMetrics()?.fromCache).toBe(true);
+        expect(loader.isLoaded()).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
   );
 });
