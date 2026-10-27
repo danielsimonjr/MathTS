@@ -8967,7 +8967,7 @@
           },
           {
             "file": "./regression-extra.js",
-            "imports": ["fitLine"]
+            "imports": ["fitLine", "linearRegression"]
           },
           {
             "file": "./typed/distributions.js",
@@ -21232,6 +21232,10 @@
           {
             "file": "../numeric/numeric-jacobian.js",
             "imports": ["numericJacobian", "VectorField"]
+          },
+          {
+            "file": "./numeric.js",
+            "imports": ["findRoot"]
           }
         ],
         "workspaceDependencies": [
@@ -41709,7 +41713,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200849,
+    "totalLinesOfCode": 200850,
     "totalExports": 6179,
     "totalClasses": 59,
     "totalInterfaces": 537,

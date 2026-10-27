@@ -3,7 +3,7 @@
  * 2026-10-15, each proved red before its fix.
  */
 import { describe, expect, it } from 'vitest';
-import { linearRegression, ols, symbolicEqual } from '../src/index.js';
+import { linearRegression, linregress, ols, symbolicEqual } from '../src/index.js';
 
 describe('symbolicEqual simplifies with the default rules', () => {
   it('recognises commuted products, squares and nested quotients', () => {
@@ -26,6 +26,9 @@ describe('a t-distribution p-value resolves the far tail', () => {
     const r = linearRegression(x, y);
     expect(r.pValue).toBeGreaterThan(0);
     expect(r.pValue).toBeLessThan(1e-20);
+    const lr = linregress(x, y);
+    expect(lr.pValue).toBeGreaterThan(0);
+    expect(lr.pValue).toBeLessThan(1e-20);
     // Two-sided p of |t| with ν degrees of freedom is the regularized incomplete beta
     // I_{ν/(ν+t²)}(ν/2, 1/2); at t = 1, ν = 1 (Cauchy) that is exactly 1/2.
     const t1 = linearRegression([0, 1, 2], [0, 1, 0]);

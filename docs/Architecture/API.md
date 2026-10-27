@@ -616,7 +616,8 @@ Parallel-first primitives (the actual public names): `parallelStatSum`,
 `parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`,
 `parallelStatPercentile`, `parallelStatHistogram`. Composites: `gmean`, `hmean`,
 `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`,
-`rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`,
+`rankdata`, `spearman`, `kendallTau`, `linregress` (wraps `linearRegression` for slope
+inference; adds `interceptStdErr`), `pearsonr`, `spearmanr`,
 `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`.
 Factory-layer plain names: `mode`, `prod`, `median`, `quantileSeq`, `corr`, `mad`.
 
@@ -750,7 +751,8 @@ community/coloring `graphColoring` (Welsh-Powell), `maxClique` (Bron-Kerbosch),
 `integrate`, `limit`, `partialDerivative`, `directionalDerivative`, `gradientSymbolic`,
 `jacobian` (symbolic), `laplacian`, `divergence`, `laplace`/`inverseLaplace`,
 `fourierSeries`, `zTransform`, `taylor`/`multivariateTaylor`/`series`/`seriesCoefficient`,
-`solve`, `implicitDiff`, `summation`/`symbolicProduct`, `assume`/`getAssumptions`/`clearAssumptions`,
+`solve` (degree ≤ 3 via `polynomialRoot`; higher-degree/transcendental real roots via scan +
+`findRoot`), `implicitDiff`, `summation`/`symbolicProduct`, `assume`/`getAssumptions`/`clearAssumptions`,
 `asymptotic`, `groebnerBasis`, `symbolicIntegral`.
 
 ### Scalar node bridge

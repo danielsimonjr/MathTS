@@ -8423,6 +8423,7 @@ modules:
         - file: ./regression-extra.js
           imports:
             - fitLine
+            - linearRegression
         - file: ./typed/distributions.js
           imports:
             - normalCDF
@@ -19814,6 +19815,9 @@ modules:
           imports:
             - numericJacobian
             - VectorField
+        - file: ./numeric.js
+          imports:
+            - findRoot
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -39354,7 +39358,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200849
+  totalLinesOfCode: 200850
   totalExports: 6179
   totalClasses: 59
   totalInterfaces: 537
