@@ -377,6 +377,8 @@ typed-function (@danielsimonjr/mathts-core)
     |         +---> WASMBackend (threshold check)
     |         |         |
     |         |         +---> WASM when per-op threshold met --> WasmLoader --> assembly
+    |         |               (element-wise add/sub/mul/div/min/max stay JS;
+    |         |                AS f64-buffer helpers back unused wasm export wrappers)
     |         |         +---> else JSBackend (fallback always available)
     |         |
     |         +---> (ComputePool is separate — per-op thresholds, not size ≥100K)

@@ -1082,7 +1082,9 @@ implementation of its own. Versions track independently.
 
 AssemblyScript compiles `src/index.ts` directly to the single binary `mathts-as.wasm`
 consumed by both `matrix` (SIMD matmul via `backendManager`; public decomp stays JS) and
-`functions` (FFT/signal, special functions, elementwise transcendentals). There is
+`functions` (FFT/signal, special functions, elementwise transcendentals). Array/matrix
+element-wise add/sub/mul/div and min/max share `@inline` `f64-buffer.ts` helpers; the
+wasm export names and signatures stay the wrappers on `src/index.ts`. There is
 **no `dist/index.d.ts`** — AS ships a `.wasm`, not a TS declaration — so this surface
 is sourced from `src/index.ts`. AS exports functions
 only, never classes (AS231 constraint). Per project memory this is the production-matured

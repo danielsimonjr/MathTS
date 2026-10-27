@@ -23,7 +23,7 @@ There is one active code graph. Every file is reachable from a package `src/inde
 
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
-| TypeScript Files             | 1,189 (0 unused)                                             |
+| TypeScript Files             | 1,190 (0 unused)                                             |
 | Lines of Code                | 198,637                                                      |
 | Total Exports                | 6,145 (2,592 re-exports)                                     |
 | Modules                      | 82                                                           |
@@ -54,14 +54,14 @@ toolchain. The Active Files column counts the `src/` files of each package, per
 | `@danielsimonjr/mathts-plot`              | Headless SVG 2D/3D plotting for MathTS                       | 21           |
 | `@danielsimonjr/mathts-workbook`          | .mtsw notebook runtime + CLI                                 | 25           |
 | `@danielsimonjr/mathts-compat`            | mathjs compatibility shim                                    | 3            |
-| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 26           |
+| `@danielsimonjr/mathts-wasm` (`assembly`) | WASM backend (AssemblyScript) — sole WASM toolchain          | 27           |
 
 Versions are not listed here. Each package's `package.json` gives its version.
 
 ## Single Active Code Graph
 
 MathTS is **one active code graph**. Every file is reachable from a package
-`src/index.ts`. The `src/` tree of every workspace package has 1,189 files and
+`src/index.ts`. The `src/` tree of every workspace package has 1,190 files and
 0 unused files, per `dependency-graph.json` (regenerate with `npm run docs:deps:full`).
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. Highlights:
@@ -117,7 +117,7 @@ WebGPU paths in `@danielsimonjr/mathts-functions` / `@danielsimonjr/mathts-gpu`:
 | AssemblyScript WASM | `assembly/`                        | **Sole WASM backend** | counts in [`wasm-pairing.md`](./wasm-pairing.md); SIMD where measured                                                                       |
 | WebGPU (opt-in)     | `gpu/src/`, `functions/src/gpu/`   | Per-kernel f32 gates  | Fused ops: `enableGpu()` + `GPU_MIN_ELEMENTS` (65,536); GPU FFT: 262,144; explicit `gpuMatmul` without `enableGpu()` — not `BackendManager` |
 
-The AssemblyScript backend compiles `assembly/src/` (26 `.ts` sources per
+The AssemblyScript backend compiles `assembly/src/` (27 `.ts` sources per
 [`wasm-pairing.md`](./wasm-pairing.md)) to a single `mathts-as.wasm` binary,
 bundled into both `matrix/dist/wasm/` and `functions/dist/wasm/`. There is no
 backend-selection step — AssemblyScript is the sole WASM toolchain.
@@ -173,7 +173,7 @@ math.add(1, 2);
 
 The mathjs-derived factory layer is wired into the graph via
 `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`). The
-codebase is one active graph of 1,189 files (0 unused).
+codebase is one active graph of 1,190 files (0 unused).
 
 ### Bridges in Place
 
