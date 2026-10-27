@@ -48,6 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`ARCHITECTURE.md` no longer carries the "Activation Barriers (historical)" section.** The section listed three barriers to activating the synced factories (two `typed-function` instances, the matrix interface mismatch and missing subsystems) and called itself historical context. The "Integration Status" section above it states the current state: the synced factories are in the live graph and the type bridge and the factory bridge are in place. History belongs in this file and not in an architecture document.
 
 ### Changed
+- **Sprint 2R clone merge (G7, G15, G16, G17).** DualTensor and TapedTensor call
+  shared `assertSameShape` (the mismatch string is built only on throw).
+  ConditionalNode and RangeNode `toString` / `toHTML` share callback helpers
+  (`render` / `wrap` / join-or-separator; no `html` or `mode` flag).
+  `getStringSubset` is the one string-subset getter, exported from the
+  expression barrel; functions `subset` calls it with the functions invalid-index
+  message.
 - **CI runs the architecture-docs gate.** `Architecture docs` is a new job of `ci.yml`. It installs `@danielsimonjr/repo-tools` at the exact version 2.2.4 and runs `repo-tools check . --docs=docs/Architecture`. The check exits 1 when an architecture document claims a count that the parse of the source does not give. No job ran it before, so the three PySR merges left the counts of six documents stale until a person ran the command. The job needs no Bun, no install of the workspace and no build, and it runs in parallel with the other jobs. Raise the pin on purpose, after a local run of the check.
 - **CI runs the `node:test` files of the query tool, the roadmap checker and the dist builtin scanner.** Three new steps of the Compile & Lint job, just before the Node 22 setup and the release script tests: `bun run docs:graph:test` (6 tests), `bun run docs:roadmap-check:test` (4 tests) and `node --test tools/test/dist-node-imports.test.mjs` (15 tests). No workflow ran these files before, so a break in the helpers behind `check:browser-safety`, in the roadmap checker or in the scanner that `smoke-dist-node.mjs` uses could not fail a check. Each file passes alone, and a one-token break of each tool turns its step red.
 - **CI runs the four tests of the dependency-graph generator.** `bun run docs:deps:test` (`bun test ./tools/create-dependency-graph/`) is a new step of the Compile & Lint job, after the export-index drift check. The files are `document-stateless`, `entry-seeding`, `wasm-build-guard` and `enumeration-order`; no workflow ran them before, so a regression of the sorted directory walks could not fail a check. The step runs the same script as a local run.

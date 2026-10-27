@@ -19,10 +19,17 @@ export interface IndexLike {
 }
 
 /**
- * Retrieve a subset of a string
+ * Retrieve a subset of a string.
+ *
  * @param str - string from which to get a substring
  * @param index - An index or list of indices (character positions)
+ * @param invalidIndexMessage - TypeError text when `index` fails `isIndex`.
+ *   Default `'Index expected'`. The functions `subset` string getter passes
+ *   `'Invalid index: must be an Index or Index-like object'`.
  * @returns substring
+ *
+ * @example
+ * getStringSubset('ab', {} as never) // throws TypeError('Index expected')
  */
 export function getStringSubset(
   str: string,

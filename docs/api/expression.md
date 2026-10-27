@@ -234,7 +234,20 @@ shifts a base function's index/dim convention from 0-based (JS) to 1-based
 ## Types
 
 `CompiledExpression`, `Scope`, `TypedFunction`, `TypedFunctionConstructor`,
-`OperatorGroup`, `OperatorProperty`, `EvaluateOptions`, `MathNode`.
+`OperatorGroup`, `OperatorProperty`, `EvaluateOptions`, `MathNode`, `IndexLike`.
+
+## String subset
+
+`getStringSubset` / `setStringSubset` are the one string-index implementation.
+`functions` `subset` on a string calls `getStringSubset` (allowed:
+`functions` → `expression`) and passes the functions invalid-index message.
+The barrel is the only public entry; do not import the file path.
+
+```typescript
+import { getStringSubset } from '@danielsimonjr/mathts-expression';
+
+getStringSubset('abcd', {} as never); // throws TypeError('Index expected')
+```
 
 ## Example
 

@@ -41,6 +41,8 @@ export { createParenthesisNode } from './node/ParenthesisNode.js';
 export { createRangeNode } from './node/RangeNode.js';
 export { createRelationalNode } from './node/RelationalNode.js';
 export { createSymbolNode } from './node/SymbolNode.js';
+// One public entry for the shared string-index helpers. functions subset
+// imports getStringSubset from this barrel (functions → expression is allowed).
 export { getStringSubset, setStringSubset } from './node/utils/stringSubset.js';
 export type { IndexLike } from './node/utils/stringSubset.js';
 
