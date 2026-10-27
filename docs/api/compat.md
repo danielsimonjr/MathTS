@@ -48,15 +48,35 @@ const math = create(all);
 
 ### Configuration
 
+Per-instance settings do **not** mutate the shared `@danielsimonjr/mathts-functions`
+singleton. Barrel `evaluate` / `config()` stay on the process default unless you call
+`config({ … })` on the functions package directly.
+
+```typescript
+import { create, all } from '@danielsimonjr/mathts-compat';
+import { evaluate, config as fnConfig } from '@danielsimonjr/mathts-functions';
+
+const a = create(all, { number: 'BigNumber' });
+const b = create(all, { number: 'Fraction' });
+
+a.evaluate('e ^ 2'); // BigNumber
+b.evaluate('1/2'); // Fraction
+evaluate('e ^ 2'); // number — unchanged barrel
+fnConfig().number; // 'number'
+
+a.config({ precision: 128, matrix: 'Array' });
+a.config().precision; // 128
+b.config().precision; // not 128
+```
+
 ```typescript
 const math = create(all, {
   precision: 64, // BigNumber precision
   matrix: 'Matrix', // 'Matrix' or 'Array'
   number: 'number', // 'number' | 'BigNumber' | 'Fraction'
-  epsilon: 1e-12, // Floating point tolerance
+  epsilon: 1e-12, // Floating point tolerance (instance mirror only)
 });
 
-// Update configuration
 math.config({ precision: 128 });
 ```
 

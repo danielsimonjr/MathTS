@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6181
+    "totalExports": 6185
   },
   "entryPoints": [
     {
@@ -8935,18 +8935,17 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./factories/scope.js",
-            "imports": ["factoryScope"]
+            "file": "./core/config.js",
+            "imports": ["DEFAULT_CONFIG", "ConfigOptions"]
           },
           {
-            "file": "./core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
+            "file": "./factories/scope.js",
+            "imports": ["pushConfigOverlay", "popConfigOverlay"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["config"],
-        "functions": ["config"]
+        "exports": ["runWithConfig", "config"],
+        "functions": ["runWithConfig", "config"]
       },
       "functions/src/descriptive-stats.ts": {
         "description": "Descriptive-statistics composites (Wave A of the domain gap analysis).",
@@ -9280,7 +9279,7 @@
           },
           {
             "file": "./config-api.js",
-            "imports": ["config"],
+            "imports": ["config", "runWithConfig"],
             "reExport": true
           },
           {
@@ -10237,6 +10236,7 @@
         ],
         "exports": [
           "config",
+          "runWithConfig",
           "loadWasm",
           "isWasmLoaded",
           "to",
@@ -10684,6 +10684,7 @@
           "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "config",
+          "runWithConfig",
           "loadWasm",
           "isWasmLoaded",
           "to",
@@ -13991,7 +13992,7 @@
           },
           {
             "file": "../core/config.js",
-            "imports": ["DEFAULT_CONFIG"]
+            "imports": ["DEFAULT_CONFIG", "ConfigOptions"]
           },
           {
             "file": "./matrix-bridge.js",
@@ -14005,7 +14006,8 @@
             "imports": ["mathTyped", "Complex", "Fraction", "BigNumber"]
           }
         ],
-        "exports": ["factoryScope"],
+        "exports": ["factoryScope", "pushConfigOverlay", "popConfigOverlay"],
+        "functions": ["pushConfigOverlay", "popConfigOverlay"],
         "constants": ["factoryScope"]
       }
     },
@@ -41714,16 +41716,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200870,
-    "totalExports": 6181,
+    "totalLinesOfCode": 200979,
+    "totalExports": 6185,
     "totalClasses": 59,
     "totalInterfaces": 537,
-    "totalFunctions": 1959,
+    "totalFunctions": 1962,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2617,
-    "totalTypeOnlyImports": 609,
+    "totalReExports": 2618,
+    "totalTypeOnlyImports": 608,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

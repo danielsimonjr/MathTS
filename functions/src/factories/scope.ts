@@ -7,7 +7,7 @@
 
 import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
-import { DEFAULT_CONFIG } from '../core/config.js';
+import { DEFAULT_CONFIG, type ConfigOptions } from '../core/config.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
 
 // Initialize type bridge so typed-function recognizes native types
@@ -139,13 +139,69 @@ for (const t of extraTypes) {
   }
 }
 
+/** Synchronous config overlay stack for {@link runWithConfig} (see config-api.ts). */
+const configOverlayStack: ConfigOptions[] = [];
+
+function activeConfigSource(): ConfigOptions {
+  return configOverlayStack.length > 0
+    ? configOverlayStack[configOverlayStack.length - 1]!
+    : DEFAULT_CONFIG;
+}
+
+/**
+ * Push/pop helpers used by `runWithConfig` in config-api.ts.
+ * @internal
+ */
+export function pushConfigOverlay(overlay: ConfigOptions): void {
+  configOverlayStack.push(overlay);
+}
+
+/** @internal */
+export function popConfigOverlay(): void {
+  configOverlayStack.pop();
+}
+
+/**
+ * Config object factories close over — reads/writes route through the active
+ * overlay when `runWithConfig` has pushed one, else `DEFAULT_CONFIG`.
+ */
+const factoryConfigProxy = new Proxy(DEFAULT_CONFIG, {
+  get(_target, prop, receiver) {
+    return Reflect.get(activeConfigSource(), prop, receiver);
+  },
+  set(_target, prop, value, receiver) {
+    return Reflect.set(activeConfigSource(), prop, value, receiver);
+  },
+  has(_target, prop) {
+    const active = activeConfigSource();
+    if (prop in active) return true;
+    return configOverlayStack.length > 0 && prop in DEFAULT_CONFIG;
+  },
+  ownKeys() {
+    const active = activeConfigSource();
+    if (configOverlayStack.length === 0) {
+      return Reflect.ownKeys(DEFAULT_CONFIG);
+    }
+    return [...new Set([...Reflect.ownKeys(DEFAULT_CONFIG), ...Reflect.ownKeys(active)])];
+  },
+  getOwnPropertyDescriptor(_target, prop) {
+    const active = activeConfigSource();
+    const desc = Object.getOwnPropertyDescriptor(active, prop);
+    if (desc) return desc;
+    if (configOverlayStack.length > 0) {
+      return Object.getOwnPropertyDescriptor(DEFAULT_CONFIG, prop);
+    }
+    return undefined;
+  },
+});
+
 /**
  * The scope object passed to each factory's assertAndCreate().
  * Keys match the dependency names factories declare.
  */
 export const factoryScope: Record<string, unknown> = {
   typed: mathTyped,
-  config: DEFAULT_CONFIG,
+  config: factoryConfigProxy,
 
   // Class constructors (uppercase) — factories use `new BigNumber(...)` etc.
   Complex,

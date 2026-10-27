@@ -315,6 +315,10 @@ Intentionally reimplements some homonyms to guarantee mathjs behavior (guarded b
 `compat/tests/parity-oracle.test.ts` pinning compat ≡ mathjs/numpy). Single-arg `zeros(n)`/`ones(n)` return a
 length-`n` vector (mathjs parity). Depends on `core`, `matrix`, `parallel`, `functions`.
 
+`create(all, config)` seeds a per-instance config record and wraps surfaced methods with
+`runWithConfig` from `@danielsimonjr/mathts-functions` so factories read the instance
+overlay without mutating the process-wide `DEFAULT_CONFIG` (audit I-9 / #425).
+
 ### @danielsimonjr/mathts-plot (`plot/`)
 
 **Purpose**: 2D/3D plotting — SVG/TikZ vector output plus a PNG/PDF render bridge, and the workbook chart
@@ -400,4 +404,4 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
 | totalTypeScriptFiles | 2001  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8083  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8087  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
