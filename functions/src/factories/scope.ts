@@ -143,11 +143,8 @@ for (const t of extraTypes) {
 const configOverlayStack: ConfigOptions[] = [];
 
 /**
- * Predicted-false on the barrel hot path (no overlay). Kept as a boolean so the
- * proxy `get` trap is a single well-predicted branch plus a direct property
- * read of `DEFAULT_CONFIG` — `Reflect.get(..., receiver)` plus an overlay
- * lookup on every `config.matrix` access was a measurable regression on
- * `range` / `evaluate`.
+ * Predicted-false on the barrel hot path (no overlay). Accessor getters
+ * branch on this instead of walking a stack.
  */
 let overlayActive = false;
 
@@ -155,12 +152,19 @@ function activeConfigSource(): ConfigOptions {
   return overlayActive ? configOverlayStack[configOverlayStack.length - 1]! : DEFAULT_CONFIG;
 }
 
-function readConfigProp(source: object, prop: string | symbol): unknown {
-  return (source as unknown as Record<string | symbol, unknown>)[prop];
-}
-
 function writeConfigProp(source: object, prop: string | symbol, value: unknown): void {
   (source as unknown as Record<string | symbol, unknown>)[prop] = value;
+}
+
+function readLiveConfig(key: string | symbol): unknown {
+  if (!overlayActive) {
+    return (DEFAULT_CONFIG as unknown as Record<string | symbol, unknown>)[key];
+  }
+  const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+  if (Object.hasOwn(overlay, key)) {
+    return (overlay as unknown as Record<string | symbol, unknown>)[key];
+  }
+  return (DEFAULT_CONFIG as unknown as Record<string | symbol, unknown>)[key];
 }
 
 /**
@@ -186,57 +190,22 @@ export function popConfigOverlay(): void {
  * `runWithConfig({ number: 'Fraction' })` then `config.matrix`) falls back to
  * the process default. Nested `runWithConfig` calls replace the overlay; they
  * do not stack-merge keys with the parent overlay.
+ *
+ * Accessors (not a Proxy `get` trap) are the empty-stack hot path: wrapping
+ * this object in a Proxy measured ~3× on `range()` even with no `get` trap.
+ * Known-key assignment uses the setter and writes the active overlay.
  */
-const factoryConfigProxy = new Proxy(DEFAULT_CONFIG, {
-  get(target, prop) {
-    if (!overlayActive) {
-      return readConfigProp(target, prop);
-    }
-    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
-    if (Object.hasOwn(overlay, prop)) {
-      return readConfigProp(overlay, prop);
-    }
-    return readConfigProp(target, prop);
-  },
-  set(_target, prop, value) {
-    writeConfigProp(activeConfigSource(), prop, value);
-    return true;
-  },
-  has(target, prop) {
-    if (!overlayActive) return prop in target;
-    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
-    return Object.hasOwn(overlay, prop) || prop in target;
-  },
-  ownKeys(target) {
-    if (!overlayActive) return Reflect.ownKeys(target);
-    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
-    return [...new Set([...Reflect.ownKeys(target), ...Reflect.ownKeys(overlay)])];
-  },
-  getOwnPropertyDescriptor(target, prop) {
-    if (!overlayActive) {
-      return Object.getOwnPropertyDescriptor(target, prop);
-    }
-    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
-    if (Object.hasOwn(overlay, prop)) {
-      const desc = Object.getOwnPropertyDescriptor(overlay, prop);
-      if (!desc) return undefined;
-      // Extra overlay keys (e.g. compat `epsilon`) are not on the target;
-      // Proxy invariants require those descriptors to be configurable.
-      if (!Object.hasOwn(target, prop)) {
-        return { ...desc, configurable: true };
-      }
-      return desc;
-    }
-    return Object.getOwnPropertyDescriptor(target, prop);
-  },
-  defineProperty(_target, prop, descriptor) {
-    Object.defineProperty(activeConfigSource(), prop, descriptor);
-    return true;
-  },
-  deleteProperty(_target, prop) {
-    return Reflect.deleteProperty(activeConfigSource(), prop);
-  },
-});
+const configView = {} as ConfigOptions;
+for (const key of Object.keys(DEFAULT_CONFIG) as (keyof ConfigOptions)[]) {
+  Object.defineProperty(configView, key, {
+    enumerable: true,
+    configurable: true,
+    get: () => readLiveConfig(key) as ConfigOptions[typeof key],
+    set: (value: ConfigOptions[typeof key]) => {
+      writeConfigProp(activeConfigSource(), key, value);
+    },
+  });
+}
 
 /**
  * The scope object passed to each factory's assertAndCreate().
@@ -244,7 +213,7 @@ const factoryConfigProxy = new Proxy(DEFAULT_CONFIG, {
  */
 export const factoryScope: Record<string, unknown> = {
   typed: mathTyped,
-  config: factoryConfigProxy,
+  config: configView,
 
   // Class constructors (uppercase) — factories use `new BigNumber(...)` etc.
   Complex,

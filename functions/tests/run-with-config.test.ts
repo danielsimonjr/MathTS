@@ -116,19 +116,13 @@ describe('runWithConfig', () => {
     expect(config().number).toBe('number');
   });
 
-  it('defineProperty / deleteProperty during an overlay do not mutate DEFAULT_CONFIG', () => {
-    const overlay: { number: 'Fraction'; scratch?: number } = { number: 'Fraction' };
+  it('assignment during an overlay does not define extra keys on DEFAULT_CONFIG', () => {
+    const overlay: { number: string } = { number: 'Fraction' };
     runWithConfig(overlay, () => {
-      Object.defineProperty(factoryConfig, 'scratch', {
-        value: 7,
-        enumerable: true,
-        writable: true,
-        configurable: true,
-      });
-      expect((overlay as { scratch?: number }).scratch).toBe(7);
-      expect(delete (factoryConfig as { scratch?: number }).scratch).toBe(true);
-      expect(Object.hasOwn(overlay, 'scratch')).toBe(false);
+      (factoryConfig as { number: string }).number = 'BigNumber';
+      expect(evaluate('1')).toBeInstanceOf(BigNumber);
     });
+    expect(overlay.number).toBe('BigNumber');
     expect(Object.hasOwn(DEFAULT_CONFIG, 'scratch')).toBe(false);
     expect(config().number).toBe('number');
   });

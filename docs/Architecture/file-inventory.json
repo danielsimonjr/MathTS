@@ -5917,7 +5917,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 282
+      "loc": 251
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -10166,7 +10166,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 136
+      "loc": 130
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
