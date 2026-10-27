@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1955,
+  "totalFiles": 1956,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1176,
     "test-only": 0,
     "orphan": 0,
-    "test": 692,
+    "test": 693,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1201,
-    "tests": 692,
+    "tests": 693,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 824,
+    "@danielsimonjr/mathts-functions": 825,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 103,
@@ -8606,6 +8606,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 251
+    },
+    {
+      "file": "functions/tests/clones-batch7-graph-matrix-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 191
     },
     {
       "file": "functions/tests/clones-functions-scalars-pins.test.ts",
