@@ -105,12 +105,22 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function symbolsOf(node: ScalarNode): readonly string[] {
+  try {
+    return scalarSymbols(node);
+  } catch (err) {
+    // Broken trees should surface as ScalarEvalError from the tape compiler.
+    compileScalar(node, { variables: [] });
+    throw err;
+  }
+}
+
 function freeSymbols(a: ScalarNode, b: ScalarNode): string[] {
   const names = new Set<string>();
-  for (const n of scalarSymbols(a)) {
+  for (const n of symbolsOf(a)) {
     if (!NUMERIC_LITERAL.test(n)) names.add(n);
   }
-  for (const n of scalarSymbols(b)) {
+  for (const n of symbolsOf(b)) {
     if (!NUMERIC_LITERAL.test(n)) names.add(n);
   }
   return [...names].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0));
@@ -308,9 +318,15 @@ export function numericallyEquivalent(
       const pair = domain[name]!;
       const lo = pair[0];
       const hi = pair[1];
+      // Point boxes are the bound itself; do not consume the stream.
+      if (lo === hi) {
+        columns[col][row] = lo;
+        continue;
+      }
       const u = rng.next();
-      const value = logUniform.has(name) ? sampleLogUniform(lo, hi, u) : sampleUniform(lo, hi, u);
-      columns[col][row] = value;
+      columns[col][row] = logUniform.has(name)
+        ? sampleLogUniform(lo, hi, u)
+        : sampleUniform(lo, hi, u);
     }
   }
 
