@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1193, "e": 6195, "re": 2624 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1201, "e": 6214, "re": 2627 },
   "s": {
-    "loc": 200828,
+    "loc": 200718,
     "cls": 59,
     "int": 539,
-    "fn": 1965,
+    "fn": 1983,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 608
+    "toi": 610
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -40,12 +40,15 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 6,
+      "f": 8,
       "exp": [
+        "chunkTyped",
+        "chunkPairTyped",
         "compileFunctionSource",
         "fftBitReverse",
         "fftFrameInPlace",
         "Transfer",
+        "forEachMultiIndex",
         "DEFAULT_WORKER_CONFIG",
         "mathWorkerPool",
         "canUseWasm",
@@ -56,12 +59,7 @@
         "createSharedFloat64Array",
         "createSharedBuffer",
         "isSharedBuffer",
-        "getCapabilities",
-        "initWorkerWasm",
-        "isWorkerWasmAvailable",
-        "getWasmFeatures",
-        "initializePool",
-        "terminatePool"
+        "getCapabilities"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -492,7 +490,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 38,
+      "f": 39,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -689,6 +687,7 @@
         "resetGpuElementwise",
         "elementwiseChainGpuDispatch",
         "elementwiseChainReduceGpuDispatch",
+        "reduceNumbers",
         "resetGpuFft",
         "fftGpuDispatch"
       ],
@@ -726,7 +725,7 @@
       "exp": ["createAnd", "createNot", "createNullish", "createOr", "createXor"]
     },
     "functions/matrix": {
-      "f": 45,
+      "f": 46,
       "exp": [
         "createColumn",
         "createConcat",
@@ -744,10 +743,10 @@
         "createFilter",
         "createFlatten",
         "createForEach",
+        "vectorLength",
+        "matrixFromVectorList",
         "createGetMatrixDataType",
-        "createIdentity",
-        "createIfft",
-        "createInv"
+        "createIdentity"
       ],
       "int": [
         "Matrix",
@@ -800,7 +799,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 25,
+      "f": 26,
       "exp": [
         "quad",
         "bfgs",
@@ -818,10 +817,10 @@
         "gaussLegendre4",
         "GL4ConvergenceError",
         "rootsLegendre",
+        "hermiteCubic",
         "interpn",
         "interval",
-        "Interval",
-        "incompleteLU"
+        "Interval"
       ],
       "cls": ["GL4ConvergenceError", "Interval"],
       "int": [
@@ -986,10 +985,11 @@
       "int": ["CoulombFG"]
     },
     "functions/statistics": {
-      "f": 14,
+      "f": 15,
       "exp": [
         "createCorr",
         "createCumSum",
+        "reduceExtreme",
         "createMad",
         "createMax",
         "createMean",
@@ -1109,8 +1109,9 @@
       ]
     },
     "functions/typed": {
-      "f": 40,
+      "f": 42,
       "exp": [
+        "aggregateRestartVectors",
         "typedAlgebra",
         "polyval",
         "polyadd",
@@ -1129,8 +1130,7 @@
         "expand",
         "factor",
         "collect",
-        "cancel",
-        "together"
+        "cancel"
       ],
       "cls": ["DivisorGeobucket"],
       "int": [
@@ -1853,17 +1853,17 @@
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 11 },
-    { "p": "function/typed.ts", "i": 3, "o": 202 },
+    { "p": "function/typed.ts", "i": 3, "o": 203 },
     { "p": "src/index.ts", "i": 143, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
-    { "p": "utils/is.ts", "i": 0, "o": 57 },
-    { "p": "core/config.ts", "i": 0, "o": 55 },
+    { "p": "core/config.ts", "i": 0, "o": 56 },
+    { "p": "utils/is.ts", "i": 0, "o": 56 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
+    { "p": "utils/array.ts", "i": 0, "o": 50 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/array.ts", "i": 0, "o": 48 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 44 },
-    { "p": "utils/collection.ts", "i": 0, "o": 38 }
+    { "p": "utils/collection.ts", "i": 0, "o": 39 }
   ]
 }

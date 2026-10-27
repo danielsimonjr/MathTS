@@ -81,8 +81,12 @@ export async function initializePool(config?: Partial<WorkerPoolConfig>): Promis
 export async function terminatePool(force?: boolean): Promise<void>;
 ```
 
-Consumed only by `parallel`. Ships a `workerpool-browser-shim.ts` for the browser build (its `canUse*`
-probes are the node/browser split).
+Consumed only by `parallel`. `MathWorkerPool` chunks typed arrays with `chunkTyped` / `chunkPairTyped`
+(`slice`, not `subarray`, so each worker chunk owns its buffer region) and shares one `runChunks` helper
+for generic `map` / `filter` dispatch. `forEachMultiIndex` in `multi-index.ts` has **no imports** so
+`dist/worker.js` can use it for tensordot without pulling `core` or `parallel`; it is re-exported from
+`.` as `@internal` for `ComputePool` (PR batch 5). Ships a `workerpool-browser-shim.ts` for the browser
+build (its `canUse*` probes are the node/browser split).
 
 ### @danielsimonjr/mathts-gpu (`gpu/`)
 
@@ -245,7 +249,7 @@ special functions. The largest package (478 src files).
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
 
 // Representative domains (each a src subtree under functions/src/):
-//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte …
+//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte · hermiteCubic …
 //   signal/      internal fft (conv) · fir · iir · spectral · wavelets
 // Public fft: factory matrix/fft.ts; parallelFFT in typed/signal.ts; shared fft-core-f64.ts; AS kernel assembly/src/ops/fft.ts
 //   stats/       fit · inference · mvn · power · timeseries
@@ -256,6 +260,13 @@ special functions. The largest package (478 src files).
 
 Compiles under `strict: true`; ships its `.d.ts` tree via `tsc -p tsconfig.dts.json` (rollup-dts can't bundle
 the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
+
+Sprint 2R clone-merge batch 4 keeps the public names `mapSlices`, `matrixFromColumns` /
+`matrixFromRows`, factory `max` / `min`, factory and typed `print`, local `Decimal.max` /
+`Decimal.min`, `ImmutableDenseMatrix.min` / `.max`, and `Index.min` / `.max`. The shared
+bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLength`,
+`reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
+`_extreme` (cache slot + `smaller` argument order), and `_ends`.
 
 ---
 
@@ -406,5 +417,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2015  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8098  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2027  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8119  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

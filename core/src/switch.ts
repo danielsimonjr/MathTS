@@ -1,8 +1,6 @@
 /**
- * Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
- * `_reduce` (Bucket B slice 2 canonical) — mirrors `expression/src/utils/switch.ts`
- * / `functions/src/utils/switch.ts`, which remain in place unchanged for now
- * (not part of this slice's named scope). Not exported from `internal.ts`.
+ * Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by
+ * `functions` `mapSlices` (imported from `@danielsimonjr/mathts-core/internal`).
  * @private
  */
 export function _switch<T>(mat: T[][]): T[][] {

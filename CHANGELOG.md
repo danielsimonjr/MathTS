@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone-merge batch 4 (G12, G24–G25, G28–G32).** `mapSlices` uses core `_switch`; `matrixFromColumns` / `matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` / `min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`; local `Decimal` max/min share `decimalExtreme`; `ImmutableDenseMatrix` min/max share `_extreme`; `Index` min/max share `_ends`. Public names and behavior unchanged.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix WASM alloc and parallel dense-pair clone-merge (Sprint 2R G54–G56, G59, G60).** `WASMBackend` Float64 pool growth and fresh Int32 headers share `allocHeader` (type ids 5 and 6 stay on that file). `WasmLoader` `allocateAs*` / `makeAs*` share `allocateAs` and `makeAs` (Int32 id 4 unchanged). `parallelMatrixAdd` / `Subtract` / `parallelDotMultiply` / `parallelMatrixDivide` DenseMatrix pairs route through `densePair` with per-op mismatch messages. Pool recycle and stub-heap behavior are unchanged.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
@@ -17,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `multiplyElementwise` share `parallelBinary`. `logm` / `sqrtm` share `common.matInv` (singular
   at `1e-15`) and `matrixSqrtNewtonInternal` (150 iters, `1e-14`, `Y0 = I`). Public names and
   behavior stay; `matInv` is not on the barrel.
+- **Sprint 2R clone batch 3 (`functions`):** factory `ceil`/`floor` share `snapNumber`/`snapBig`,
+  matrix 1/∞ norms share `_matrixNormSum`, geometry/set flatten call core `flatten`, GPU/CPU
+  reductions share `reduceNumbers`, and `solveODE`/`solveDDE` share `hermiteCubic`. `snapBig`
+  compares with core BigNumber `equals` as well as decimal.js `eq`.
 
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
@@ -67,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `getStringSubset` is the one string-subset getter, exported from the
   expression barrel; functions `subset` calls it with the functions invalid-index
   message.
+- **workerpool `map`/`filter` share `runChunks`; Float64/Int32 chunk helpers share `chunkTyped`/`chunkPairTyped`; tensordot index walk lives in `forEachMultiIndex`.** Sprint 2R clones G61–G64. `slice` (not `subarray`) is unchanged, so each worker chunk owns its buffer. `multi-index.ts` has no imports, so `dist/worker.js` cannot pull `core` or `parallel`. Public method names stay. `ComputePool`'s copy of the walker stays until batch 5. The three helpers are exported from `.` as `@internal`.
 - **CI runs the architecture-docs gate.** `Architecture docs` is a new job of `ci.yml`. It installs `@danielsimonjr/repo-tools` at the exact version 2.2.4 and runs `repo-tools check . --docs=docs/Architecture`. The check exits 1 when an architecture document claims a count that the parse of the source does not give. No job ran it before, so the three PySR merges left the counts of six documents stale until a person ran the command. The job needs no Bun, no install of the workspace and no build, and it runs in parallel with the other jobs. Raise the pin on purpose, after a local run of the check.
 - **CI runs the `node:test` files of the query tool, the roadmap checker and the dist builtin scanner.** Three new steps of the Compile & Lint job, just before the Node 22 setup and the release script tests: `bun run docs:graph:test` (6 tests), `bun run docs:roadmap-check:test` (4 tests) and `node --test tools/test/dist-node-imports.test.mjs` (15 tests). No workflow ran these files before, so a break in the helpers behind `check:browser-safety`, in the roadmap checker or in the scanner that `smoke-dist-node.mjs` uses could not fail a check. Each file passes alone, and a one-token break of each tool turns its step red.
 - **CI runs the four tests of the dependency-graph generator.** `bun run docs:deps:test` (`bun test ./tools/create-dependency-graph/`) is a new step of the Compile & Lint job, after the export-index drift check. The files are `document-stateless`, `entry-seeding`, `wasm-build-guard` and `enumeration-order`; no workflow ran them before, so a regression of the sorted directory walks could not fail a check. The step runs the same script as a local run.

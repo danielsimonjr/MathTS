@@ -13,6 +13,7 @@
  */
 
 import { mathTyped, Complex, Fraction, BigNumber, Dual } from '@danielsimonjr/mathts-core';
+import { euclidSnap } from './euclid.js';
 import {
   pairwiseSum,
   neumaierSum,
@@ -960,16 +961,7 @@ export const mod = mathTyped('mod', {
  * Greatest common divisor
  */
 export const gcd = mathTyped('gcd', {
-  'number, number': (a: f64, b: f64): f64 => {
-    a = Math.abs(Math.floor(a));
-    b = Math.abs(Math.floor(b));
-    while (b !== 0) {
-      const t = b;
-      b = a % b;
-      a = t;
-    }
-    return a;
-  },
+  'number, number': (a: f64, b: f64): f64 => euclidSnap(a, b, Math.floor),
   'bigint, bigint': (a: i64, b: i64): i64 => {
     a = a < 0n ? -a : a;
     b = b < 0n ? -b : b;
