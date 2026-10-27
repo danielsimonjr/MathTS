@@ -1203,22 +1203,16 @@ graph LR
 
 ### `matrix/src/backends/BackendManager.ts` - Backend Manager
 
-**Workspace Dependencies:**
-
-| Package                     | Import             |
-| --------------------------- | ------------------ |
-| `@danielsimonjr/mathts-gpu` | `GPU_MIN_ELEMENTS` |
-
 **Internal Dependencies:**
 
-| File                      | Imports                                                  | Type               |
-| ------------------------- | -------------------------------------------------------- | ------------------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                            | Import             |
-| `./Backend.js`            | `MatrixBackend, BackendType, BackendHints`               | Import (type-only) |
-| `./Backend.js`            | `backendRegistry, DEFAULT_BACKEND_HINTS`                 | Import             |
-| `./JSBackend.js`          | `jsBackend`                                              | Import             |
-| `../config.js`            | `getConfig, onConfigChange, MatrixConfig, OperationType` | Import             |
-| `./register-backends.js`  | ``                                                       | Import             |
+| File                      | Imports                                                                  | Type               |
+| ------------------------- | ------------------------------------------------------------------------ | ------------------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                            | Import             |
+| `./Backend.js`            | `MatrixBackend, BackendType, BackendHints`                               | Import (type-only) |
+| `./Backend.js`            | `backendRegistry, DEFAULT_BACKEND_HINTS`                                 | Import             |
+| `./JSBackend.js`          | `jsBackend`                                                              | Import             |
+| `../config.js`            | `DEFAULT_CONFIG, getConfig, onConfigChange, MatrixConfig, OperationType` | Import             |
+| `./register-backends.js`  | ``                                                                       | Import             |
 
 **Exports:**
 
@@ -1535,9 +1529,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports       | Type               |
-| ----------------------- | ------------- | ------------------ |
-| `./backends/Backend.js` | `BackendType` | Import (type-only) |
+| File                    | Imports                              | Type   |
+| ----------------------- | ------------------------------------ | ------ |
+| `./backends/Backend.js` | `DEFAULT_BACKEND_HINTS, BackendType` | Import |
 
 **Exports:**
 
@@ -18731,7 +18725,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200870 |
+| Total Lines of Code     | 200891 |
 | Total Exports           | 6181   |
 | Total Re-exports        | 2617   |
 | Total Classes           | 59     |
@@ -18739,7 +18733,7 @@ graph TD
 | Total Functions         | 1959   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 609    |
+| Type-only Imports       | 608    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

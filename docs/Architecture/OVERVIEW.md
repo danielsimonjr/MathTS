@@ -167,7 +167,7 @@ math.add(1, 2);
 | Workbook   | Active      | YAML parsing, dep graphs, executor; `executeCode()` evaluates cells via `evaluate()` from functions                                                                                                                                                       |
 | Expression | Active      | Parser (15 node classes), compiler, and evaluator fully functional; sandbox-hardened                                                                                                                                                                      |
 | Compat     | Active      | mathjs-compatible shims wired to real implementations                                                                                                                                                                                                     |
-| Assembly   | **Primary** | Sole WASM backend — export counts in [`wasm-pairing.md`](./wasm-pairing.md); powers `matrix` heavy ops (SIMD matmul + LU/QR/Cholesky/inverse/determinant) and `functions` kernels (AS → JS dispatch)                                                      |
+| Assembly   | **Primary** | Sole WASM backend — export counts in [`wasm-pairing.md`](./wasm-pairing.md); `matrix` SIMD matmul via `backendManager` (public `DenseMatrix.multiply` / `lu`/`qr`/`cholesky` stay JS); `functions` kernels (AS → JS dispatch)                             |
 
 ## Integration Status
 

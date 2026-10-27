@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
+import { DEFAULT_BACKEND_HINTS } from '../src/backends/Backend.js';
 import {
   DEFAULT_CONFIG,
   getConfig,
@@ -32,8 +33,13 @@ describe('matrix config', () => {
       expect(DEFAULT_CONFIG.backends.wasm.threshold).toBe(1000);
     });
 
-    it('should have GPU threshold of 100000', () => {
-      expect(DEFAULT_CONFIG.backends.gpu.threshold).toBe(100000);
+    it('should have GPU threshold aligned to DEFAULT_BACKEND_HINTS (dormant on manager)', () => {
+      expect(DEFAULT_CONFIG.backends.gpu.threshold).toBe(DEFAULT_BACKEND_HINTS.gpuThreshold);
+      expect(DEFAULT_CONFIG.backends.gpu.enabled).toBe(false);
+    });
+
+    it('should have WASM multiply threshold 256 (measured matmul crossover)', () => {
+      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.multiply).toBe(256);
     });
 
     it('should default to double precision', () => {
@@ -122,13 +128,15 @@ describe('matrix config', () => {
       expect(getRecommendedBackend(5000)).toBe('wasm');
     });
 
-    it('should return gpu for large data', () => {
-      expect(getRecommendedBackend(200000)).toBe('gpu');
+    it('should return wasm for large data when gpu is disabled', () => {
+      // Oracle: backendRegistry.has('gpu') is false; gpu.enabled is false — 'gpu' was unreachable.
+      expect(getRecommendedBackend(200000)).toBe('wasm');
     });
 
     it('should use operation-specific thresholds', () => {
-      // multiply has lower wasm threshold (500)
+      // multiply WASM threshold is 256 (measured), not the retired 500.
       expect(getRecommendedBackend(600, 'multiply')).toBe('wasm');
+      expect(getRecommendedBackend(300, 'multiply')).toBe('wasm');
     });
   });
 

@@ -1052,7 +1052,7 @@ implementation of its own. Versions track independently.
 ### AssemblyScript WASM (`assembly/`, `@danielsimonjr/mathts-wasm`) — the sole WASM backend
 
 AssemblyScript compiles `src/index.ts` directly to the single binary `mathts-as.wasm`
-consumed by both `matrix` (LU/QR/Cholesky/inverse/determinant + SIMD matmul) and
+consumed by both `matrix` (SIMD matmul via `backendManager`; public decomp stays JS) and
 `functions` (FFT/signal, special functions, elementwise transcendentals). There is
 **no `dist/index.d.ts`** — AS ships a `.wasm`, not a TS declaration — so this surface
 is sourced from `src/index.ts`. AS exports functions
@@ -1085,7 +1085,7 @@ rational approximation (`residue`/`padeApproximant`), `tensorTranspose`, bitwise
 Int32Array elementwise ops, 18-op elementwise transcendental array kernels
 (`array_<op>_ptr`), `tridiag_solve_f64`, `divided_difference_f64`, and complex array
 creation/arithmetic. Note the AS binary holds no eig/SVD kernels (they measured slower than the JS path); only matmul +
-the dense factored decompositions are WASM-accelerated for `matrix`.
+only manager-driven matmul is WASM-accelerated on the public `matrix` API today; dense factored decompositions on `WASMBackend` are opt-in.
 
 > **Security invariant — WASM SHA-384 manifest verification.** Canonical logic is
 > `core/src/wasm-loader.ts` (`sha384OfBuffer` / `verifyWasmIntegrity`). The

@@ -170,7 +170,7 @@ export class DenseMatrix          // Float64Array-backed
 export class SparseMatrix         // CSR
 export class BackendManager       // per-op JS/WASM selection
 export class JSBackend            // pure TS, always available
-export class WASMBackend          // AssemblyScript (SIMD multiply + LU/QR/Cholesky/inverse/det)
+export class WASMBackend          // AssemblyScript (manager SIMD matmul; decomp methods opt-in)
 export class GPUBackend           // experimental WebGPU compute (re-exports the gpu foundation)
 export class WasmLoader           // per-package loader (SHA-384 verify via core/internal)
 ```

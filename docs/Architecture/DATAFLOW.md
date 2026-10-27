@@ -91,12 +91,12 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
   6. Returns result as DenseMatrix
 ```
 
-| Backend         | Threshold                                                                | Key Ops                                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JSBackend`     | Default                                                                  | All ops, pure TypeScript, Float64Array                                                                                                                             |
-| `WASMBackend`   | Per-op (e.g. multiply ≥256 op-count; decompositions via minElements 100) | SIMD matmul, LU/QR/Cholesky/inverse/determinant                                                                                                                    |
-| WebGPU (opt-in) | f32, per kernel                                                          | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
-| `ComputePool`   | Per-op map                                                               | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
+| Backend         | Threshold                                                              | Key Ops                                                                                                                                                            |
+| --------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JSBackend`     | Default                                                                | All ops, pure TypeScript, Float64Array                                                                                                                             |
+| `WASMBackend`   | Manager multiply ≥256 flop count (`config.ts`); public decomp stays JS | SIMD matmul via manager; LU/QR/Cholesky/inverse/det on `WASMBackend` only for direct callers                                                                       |
+| WebGPU (opt-in) | f32, per kernel                                                        | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
+| `ComputePool`   | Per-op map                                                             | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
 
 ---
 
