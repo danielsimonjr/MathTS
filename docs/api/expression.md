@@ -239,8 +239,9 @@ shifts a base function's index/dim convention from 0-based (JS) to 1-based
 ## String subset
 
 `getStringSubset` / `setStringSubset` are the one string-index implementation.
-`functions` `subset` on a string calls `getStringSubset` (allowed:
-`functions` → `expression`) and passes the functions invalid-index message.
+`functions` `subset` on a string calls `getStringSubset` for reads and
+`setStringSubset` for writes (allowed: `functions` → `expression`); the getter
+passes the functions invalid-index message.
 The barrel is the only public entry; do not import the file path.
 
 ```typescript

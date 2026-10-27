@@ -6588,21 +6588,21 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import            |
-| ---------------------------------- | ----------------- |
-| `@danielsimonjr/mathts-expression` | `getStringSubset` |
+| Package                            | Import                             |
+| ---------------------------------- | ---------------------------------- |
+| `@danielsimonjr/mathts-expression` | `getStringSubset, setStringSubset` |
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                | Type               |
-| ---------------------------- | ------------------------------------------------------ | ------------------ |
-| `../utils/object.js`         | `clone`                                                | Import             |
-| `../utils/array.js`          | `isEmptyIndex, validateIndex, validateIndexSourceSize` | Import             |
-| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`                     | Import             |
-| `../error/DimensionError.js` | `DimensionError`                                       | Import             |
-| `../utils/factory.js`        | `factory`                                              | Import             |
-| `../core/function/typed.js`  | `TypedFunction`                                        | Import (type-only) |
-| `../utils/is.js`             | `Index`                                                | Import (type-only) |
+| File                         | Imports                                 | Type               |
+| ---------------------------- | --------------------------------------- | ------------------ |
+| `../utils/object.js`         | `clone`                                 | Import             |
+| `../utils/array.js`          | `isEmptyIndex, validateIndexSourceSize` | Import             |
+| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`      | Import             |
+| `../error/DimensionError.js` | `DimensionError`                        | Import             |
+| `../utils/factory.js`        | `factory`                               | Import             |
+| `../core/function/typed.js`  | `TypedFunction`                         | Import (type-only) |
+| `../utils/is.js`             | `Index`                                 | Import (type-only) |
 
 **Exports:**
 
@@ -18922,7 +18922,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1202   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200640 |
+| Total Lines of Code     | 200585 |
 | Total Exports           | 6219   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |

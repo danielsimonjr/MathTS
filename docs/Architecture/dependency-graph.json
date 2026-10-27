@@ -15803,7 +15803,7 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["isEmptyIndex", "validateIndex", "validateIndexSourceSize"]
+            "imports": ["isEmptyIndex", "validateIndexSourceSize"]
           },
           {
             "file": "../utils/customs.js",
@@ -15832,7 +15832,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["getStringSubset"]
+            "imports": ["getStringSubset", "setStringSubset"]
           }
         ],
         "exports": ["createSubset"],
@@ -42039,7 +42039,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1202,
     "totalModules": 82,
-    "totalLinesOfCode": 200640,
+    "totalLinesOfCode": 200585,
     "totalExports": 6219,
     "totalClasses": 59,
     "totalInterfaces": 540,
