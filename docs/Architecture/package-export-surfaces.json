@@ -392,6 +392,7 @@
       "createSymbolNode"
     ],
     "autograd": [
+      "assertSameShape",
       "derivative",
       "DualTensor",
       "forwardGrad",
@@ -1113,6 +1114,7 @@
       "importDocs",
       "indexDocs",
       "IndexError",
+      "IndexLike",
       "InfinityDocs",
       "initial",
       "inlineOperator",

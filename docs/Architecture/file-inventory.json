@@ -1,9 +1,9 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1934,
+  "totalFiles": 1935,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1167,
+    "build-entry": 1168,
     "test-only": 0,
     "orphan": 0,
     "test": 680,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1192,
+    "src": 1193,
     "tests": 680,
     "config": 29,
     "examples": 5,
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 26,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 21,
+    "@danielsimonjr/mathts-autograd": 22,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
@@ -282,7 +282,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 350
+      "loc": 346
     },
     {
       "file": "autograd/src/forward-grad.ts",
@@ -313,11 +313,18 @@
       "loc": 69
     },
     {
+      "file": "autograd/src/shape.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 19
+    },
+    {
       "file": "autograd/src/tape.ts",
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2434
+      "loc": 2430
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -331,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 53
+      "loc": 49
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
@@ -4097,7 +4104,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 78
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4139,7 +4146,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 355
+      "loc": 284
     },
     {
       "file": "expression/src/node/ConstantNode.ts",
@@ -4202,7 +4209,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 344
+      "loc": 332
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
@@ -4237,7 +4244,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 154
     },
     {
       "file": "expression/src/operators.ts",
@@ -4951,7 +4958,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 37
+      "loc": 35
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
@@ -6421,7 +6428,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 373
+      "loc": 347
     },
     {
       "file": "functions/src/matrix/trace.ts",

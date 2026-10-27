@@ -45,6 +45,50 @@ export const createConditionalNode = /* #__PURE__ */ factory(
       throw new TypeError('Unsupported type of condition "' + typeOf(condition) + '"');
     }
 
+    type BranchRender = (node: MathNode) => string;
+    type WrapFn = (inner: string) => string;
+    type JoinFn = (condition: string, trueExpr: string, falseExpr: string) => string;
+
+    function formatConditionalBranches(
+      self: ConditionalNode,
+      options: StringOptions | undefined,
+      render: BranchRender,
+      wrap: WrapFn,
+      join: JoinFn
+    ): string {
+      const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+      const precedence = getPrecedence(
+        self,
+        parenthesis,
+        options && options.implicit,
+        undefined
+      ) as number;
+
+      function branchText(node: MathNode): string {
+        let text = render(node);
+        const nodePrecedence = getPrecedence(
+          node,
+          parenthesis,
+          options && options.implicit,
+          undefined
+        );
+        if (
+          parenthesis === 'all' ||
+          node.type === 'OperatorNode' ||
+          (nodePrecedence !== null && nodePrecedence <= precedence)
+        ) {
+          text = wrap(text);
+        }
+        return text;
+      }
+
+      return join(
+        branchText(self.condition),
+        branchText(self.trueExpr),
+        branchText(self.falseExpr)
+      );
+    }
+
     class ConditionalNode extends Node {
       condition: MathNode;
       trueExpr: MathNode;
@@ -155,65 +199,13 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        // `this` is the ConditionalNode being rendered (a registered operator),
-        // so its precedence is never null; only the branches may lack one.
-        const precedence = getPrecedence(
+        return formatConditionalBranches(
           this,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        ) as number;
-
-        // Enclose Arguments in parentheses if they are an OperatorNode
-        // or have lower or equal precedence
-        // NOTE: enclosing all OperatorNodes in parentheses is a decision
-        // purely based on aesthetics and readability
-        let condition = this.condition.toString(options);
-        const conditionPrecedence = getPrecedence(
-          this.condition,
-          parenthesis,
-          options && options.implicit,
-          undefined
+          options,
+          (node) => node.toString(options),
+          (inner) => '(' + inner + ')',
+          (condition, trueExpr, falseExpr) => condition + ' ? ' + trueExpr + ' : ' + falseExpr
         );
-        if (
-          parenthesis === 'all' ||
-          this.condition.type === 'OperatorNode' ||
-          (conditionPrecedence !== null && conditionPrecedence <= precedence)
-        ) {
-          condition = '(' + condition + ')';
-        }
-
-        let trueExpr = this.trueExpr.toString(options);
-        const truePrecedence = getPrecedence(
-          this.trueExpr,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        );
-        if (
-          parenthesis === 'all' ||
-          this.trueExpr.type === 'OperatorNode' ||
-          (truePrecedence !== null && truePrecedence <= precedence)
-        ) {
-          trueExpr = '(' + trueExpr + ')';
-        }
-
-        let falseExpr = this.falseExpr.toString(options);
-        const falsePrecedence = getPrecedence(
-          this.falseExpr,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        );
-        if (
-          parenthesis === 'all' ||
-          this.falseExpr.type === 'OperatorNode' ||
-          (falsePrecedence !== null && falsePrecedence <= precedence)
-        ) {
-          falseExpr = '(' + falseExpr + ')';
-        }
-        return condition + ' ? ' + trueExpr + ' : ' + falseExpr;
       }
 
       /**
@@ -254,79 +246,19 @@ export const createConditionalNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        // `this` is the ConditionalNode being rendered (a registered operator),
-        // so its precedence is never null; only the branches may lack one.
-        const precedence = getPrecedence(
+        const parenOpen = '<span class="math-parenthesis math-round-parenthesis">(</span>';
+        const parenClose = '<span class="math-parenthesis math-round-parenthesis">)</span>';
+        return formatConditionalBranches(
           this,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        ) as number;
-
-        // Enclose Arguments in parentheses if they are an OperatorNode
-        // or have lower or equal precedence
-        // NOTE: enclosing all OperatorNodes in parentheses is a decision
-        // purely based on aesthetics and readability
-        let condition = this.condition.toHTML(options);
-        const conditionPrecedence = getPrecedence(
-          this.condition,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        );
-        if (
-          parenthesis === 'all' ||
-          this.condition.type === 'OperatorNode' ||
-          (conditionPrecedence !== null && conditionPrecedence <= precedence)
-        ) {
-          condition =
-            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
+          options,
+          (node) => node.toHTML(options),
+          (inner) => parenOpen + inner + parenClose,
+          (condition, trueExpr, falseExpr) =>
             condition +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>';
-        }
-
-        let trueExpr = this.trueExpr.toHTML(options);
-        const truePrecedence = getPrecedence(
-          this.trueExpr,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        );
-        if (
-          parenthesis === 'all' ||
-          this.trueExpr.type === 'OperatorNode' ||
-          (truePrecedence !== null && truePrecedence <= precedence)
-        ) {
-          trueExpr =
-            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
+            '<span class="math-operator math-conditional-operator">?</span>' +
             trueExpr +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>';
-        }
-
-        let falseExpr = this.falseExpr.toHTML(options);
-        const falsePrecedence = getPrecedence(
-          this.falseExpr,
-          parenthesis,
-          options && options.implicit,
-          undefined
-        );
-        if (
-          parenthesis === 'all' ||
-          this.falseExpr.type === 'OperatorNode' ||
-          (falsePrecedence !== null && falsePrecedence <= precedence)
-        ) {
-          falseExpr =
-            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
-            falseExpr +
-            '<span class="math-parenthesis math-round-parenthesis">)</span>';
-        }
-        return (
-          condition +
-          '<span class="math-operator math-conditional-operator">?</span>' +
-          trueExpr +
-          '<span class="math-operator math-conditional-operator">:</span>' +
-          falseExpr
+            '<span class="math-operator math-conditional-operator">:</span>' +
+            falseExpr
         );
       }
 

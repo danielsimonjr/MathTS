@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1934
+**Total files**: 1935
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1167 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1168 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |      680 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1934** |                                                                                                                |
+| **Total**     | **1935** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,7 +32,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1192 |
+| `src`      |  1193 |
 | `tests`    |   680 |
 | `tools`    |    28 |
 
@@ -43,7 +43,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `(root)`                               |    50 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
-| `@danielsimonjr/mathts-autograd`       |    21 |
+| `@danielsimonjr/mathts-autograd`       |    22 |
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
@@ -108,6 +108,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/src/grad.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/index.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/reverse-grad.ts`                                                    | @danielsimonjr/mathts-autograd       | src      | build-entry |
+| `autograd/src/shape.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/tape.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/tests/ad-wasm-interop.test.ts`                                          | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/assert-same-shape.test.ts`                                        | @danielsimonjr/mathts-autograd       | tests    | test        |

@@ -24,10 +24,13 @@ export interface IndexLike {
  * @param index - An index or list of indices (character positions)
  * @returns substring
  */
-export function getStringSubset(str: string, index: IndexLike): string {
+export function getStringSubset(
+  str: string,
+  index: IndexLike,
+  invalidIndexMessage = 'Index expected'
+): string {
   if (!isIndex(index)) {
-    // TODO: better error message
-    throw new TypeError('Index expected');
+    throw new TypeError(invalidIndexMessage);
   }
 
   if (isEmptyIndex(index)) {

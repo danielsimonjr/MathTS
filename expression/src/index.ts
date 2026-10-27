@@ -41,6 +41,8 @@ export { createParenthesisNode } from './node/ParenthesisNode.js';
 export { createRangeNode } from './node/RangeNode.js';
 export { createRelationalNode } from './node/RelationalNode.js';
 export { createSymbolNode } from './node/SymbolNode.js';
+export { getStringSubset, setStringSubset } from './node/utils/stringSubset.js';
+export type { IndexLike } from './node/utils/stringSubset.js';
 
 // Scalar trees for numeric ExprNode lowering (UPT). No formula string is parsed.
 export {
