@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1928,
+  "totalFiles": 1929,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 674,
+    "test": 675,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 674,
+    "tests": 675,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 810,
+    "@danielsimonjr/mathts-functions": 811,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -6064,7 +6064,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 660
+      "loc": 665
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6673,7 +6673,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 244
+      "loc": 278
     },
     {
       "file": "functions/src/pareto-front.ts",
@@ -7996,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2336
+      "loc": 2256
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -9873,6 +9873,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 151
+    },
+    {
+      "file": "functions/tests/nelder-mead-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 38
     },
     {
       "file": "functions/tests/nnls.test.ts",

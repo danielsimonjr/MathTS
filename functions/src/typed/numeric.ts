@@ -14,7 +14,7 @@
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
-import { levenbergMarquardt } from '../optimization-extra.js';
+import { levenbergMarquardt, nelderMead } from '../optimization-extra.js';
 export {
   rationalNullspace,
   type RationalNullspaceOptions,
@@ -255,6 +255,10 @@ export interface MinimizeOptions {
 /**
  * Minimize a function using the Nelder-Mead simplex method.
  *
+ * Delegates to {@link nelderMead} with an absolute simplex step and absolute vertex
+ * spread tolerance (defaults `step` 0.1, `maxIter` 1000). For relative step/tolerance
+ * and a full result object, use `nelderMead` directly.
+ *
  * @param f - Objective function (n-dimensional input)
  * @param x0 - Initial guess
  * @param opts - Options
@@ -267,97 +271,13 @@ export function minimize(f: (x: number[]) => f64, x0: number[], opts?: MinimizeO
   const tol = opts?.tol ?? 1e-8;
   const maxIter = opts?.maxIter ?? 1000;
   const step = opts?.step ?? 0.1;
-  const n = x0.length;
-  const alpha = 1.0; // reflection
-  const gamma = 2.0; // expansion
-  const rho = 0.5; // contraction
-  const sigma = 0.5; // shrink
-
-  // Initialize simplex
-  const simplex: number[][] = [x0.slice()];
-  for (let i = 0; i < n; i++) {
-    const p = x0.slice();
-    p[i] += step;
-    simplex.push(p);
-  }
-
-  const fValues = simplex.map((p) => f(p));
-
-  for (let iter = 0; iter < maxIter; iter++) {
-    // Sort by function value
-    const indices = Array.from({ length: n + 1 }, (_, i) => i);
-    indices.sort((a, b) => fValues[a] - fValues[b]);
-    const sorted = indices.map((i) => simplex[i]);
-    const sortedF = indices.map((i) => fValues[i]);
-    for (let i = 0; i <= n; i++) {
-      simplex[i] = sorted[i];
-      fValues[i] = sortedF[i];
-    }
-
-    // Check convergence
-    let maxDiff: f64 = 0;
-    for (let i = 1; i <= n; i++) {
-      maxDiff = Math.max(maxDiff, Math.abs(fValues[i] - fValues[0]));
-    }
-    if (maxDiff < tol) break;
-
-    // Centroid of all points except worst
-    const centroid = new Array(n).fill(0);
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        centroid[j] += simplex[i][j];
-      }
-    }
-    for (let j = 0; j < n; j++) centroid[j] /= n;
-
-    // Reflection
-    const xr = centroid.map((c, j) => c + alpha * (c - simplex[n][j]));
-    const fr = f(xr);
-
-    if (fr < fValues[n - 1] && fr >= fValues[0]) {
-      simplex[n] = xr;
-      fValues[n] = fr;
-      continue;
-    }
-
-    if (fr < fValues[0]) {
-      // Expansion
-      const xe = centroid.map((c, j) => c + gamma * (xr[j] - c));
-      const fe = f(xe);
-      if (fe < fr) {
-        simplex[n] = xe;
-        fValues[n] = fe;
-      } else {
-        simplex[n] = xr;
-        fValues[n] = fr;
-      }
-      continue;
-    }
-
-    // Contraction
-    const xc = centroid.map((c, j) => c + rho * (simplex[n][j] - c));
-    const fc = f(xc);
-    if (fc < fValues[n]) {
-      simplex[n] = xc;
-      fValues[n] = fc;
-      continue;
-    }
-
-    // Shrink
-    for (let i = 1; i <= n; i++) {
-      for (let j = 0; j < n; j++) {
-        simplex[i][j] = simplex[0][j] + sigma * (simplex[i][j] - simplex[0][j]);
-      }
-      fValues[i] = f(simplex[i]);
-    }
-  }
-
-  // Return best point
-  let bestIdx = 0;
-  for (let i = 1; i <= n; i++) {
-    if (fValues[i] < fValues[bestIdx]) bestIdx = i;
-  }
-  return simplex[bestIdx];
+  return nelderMead(f, x0, {
+    tol,
+    maxIter,
+    step,
+    stepRule: 'absolute',
+    tolRule: 'absolute',
+  }).x;
 }
 
 /**

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6181
+    "totalExports": 6182
   },
   "entryPoints": [
     {
@@ -10039,7 +10039,7 @@
           },
           {
             "file": "./optimization-extra.js",
-            "imports": ["OptimizeResult", "LMResult", "LMOptions"],
+            "imports": ["OptimizeResult", "LMResult", "LMOptions", "NelderMeadOptions"],
             "reExport": true,
             "typeOnly": true
           },
@@ -10618,6 +10618,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -11065,6 +11066,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -11268,7 +11270,7 @@
         ]
       },
       "functions/src/optimization-extra.ts": {
-        "description": "Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,",
+        "description": "Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -11289,7 +11291,7 @@
           }
         ],
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
-        "interfaces": ["OptimizeResult", "LMResult", "LMOptions"],
+        "interfaces": ["OptimizeResult", "NelderMeadOptions", "LMResult", "LMOptions"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
       },
       "functions/src/pareto-front.ts": {
@@ -22816,7 +22818,7 @@
           },
           {
             "file": "../optimization-extra.js",
-            "imports": ["levenbergMarquardt"]
+            "imports": ["levenbergMarquardt", "nelderMead"]
           },
           {
             "file": "../numeric/rational-nullspace.js",
@@ -41753,15 +41755,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200873,
-    "totalExports": 6181,
+    "totalLinesOfCode": 200832,
+    "totalExports": 6182,
     "totalClasses": 59,
-    "totalInterfaces": 538,
+    "totalInterfaces": 539,
     "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2617,
+    "totalReExports": 2618,
     "totalTypeOnlyImports": 609,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

@@ -2441,7 +2441,7 @@
       | Function                                   | Description                                                                                                                                                                                                                                                         |
       | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
       | `minimizeScalar(f[, opts])`                | Brent's method for 1-D minimization over a bounded interval (golden-section search + parabolic interpolation); returns `{ x, fval }`                                                                                                                                |
-      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; returns `{ x, fx, iterations, converged }`                                                                                                                                                                           |
+      | `nelderMead(f, x0[, opts])`                | Derivative-free downhill-simplex minimization; `NelderMeadOptions.stepRule` / `tolRule` default `'relative'`; `minimize` is the `'absolute'` wrapper and returns `x` only. Result `{ x, fx, iterations, converged }`                                                |
       | `gradientDescent(f, x0[, opts])`           | Gradient descent with backtracking line search (analytic `grad` optional, else central differences); returns `{ x, fx, iterations, converged }`                                                                                                                     |
       | `bfgs(f, x0[, opts])`                      | BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic `grad` optional, else central differences; optional box `bounds` via projection); returns `{ x, fval, iterations, converged }`                                                |
       | `levenbergMarquardt(residual, x0[, opts])` | Levenberg–Marquardt nonlinear least squares (damped normal equations); `opts.jacobian?: (x) => number[][]` with `J[i][j] = ∂r_i/∂x_j`; default `numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' })`; returns `{ x, residualNorm, iterations, converged }` |
@@ -2516,7 +2516,10 @@
         `max_i |F_i(x)| < tol` (default `tol = 1e-10`, `maxIter = 100`); throws on a
         singular Jacobian or non-convergence.
       - `minimize` / `maximize` find a **local** optimum near the starting point
-        `x0`; `globalMinimize` searches a bounded region for a global optimum.
+        `x0`; `minimize` calls `nelderMead` with absolute simplex step and absolute
+        vertex-spread tolerance (`step` 0.1, `maxIter` 1000) and returns `x` only.
+        `nelderMead` itself keeps relative defaults for `fitScalarParameters`.
+        `globalMinimize` searches a bounded region for a global optimum.
       - `minimizeScalar` is a 1-D-only minimizer — distinct from root-finding — for
         `f: ℝ → ℝ` over a bounded interval (`opts.bracket`, default `[-10, 10]`);
         Brent's method falls back to golden-section steps when the points aren't
