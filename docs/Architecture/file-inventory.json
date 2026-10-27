@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1929,
+  "totalFiles": 1930,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 675,
+    "test": 676,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 675,
+    "tests": 676,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 810,
+    "@danielsimonjr/mathts-functions": 811,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -5854,7 +5854,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 525
+      "loc": 539
     },
     {
       "file": "functions/src/distribution-functions.ts",
@@ -6533,14 +6533,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 275
+      "loc": 273
     },
     {
       "file": "functions/src/numeric/fsolve.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 113
+      "loc": 107
     },
     {
       "file": "functions/src/numeric/gauss-legendre4.ts",
@@ -6575,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 602
+      "loc": 600
     },
     {
       "file": "functions/src/numeric/matrix-functions.ts",
@@ -6610,7 +6610,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 119
     },
     {
       "file": "functions/src/numeric/open-root-finders.ts",
@@ -6638,7 +6638,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 540
+      "loc": 532
     },
     {
       "file": "functions/src/numeric/solveDDE.ts",
@@ -6652,7 +6652,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1842
+      "loc": 1838
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -7835,7 +7835,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2874
+      "loc": 2861
     },
     {
       "file": "functions/src/typed/combinatorics.ts",
@@ -8003,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2346
+      "loc": 2336
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -8535,7 +8535,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 781
+      "loc": 786
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
@@ -9116,7 +9116,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 283
+      "loc": 292
     },
     {
       "file": "functions/tests/gap-distribution-oracles.test.ts",
@@ -9921,7 +9921,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 138
     },
     {
       "file": "functions/tests/numeric-literal.test.ts",
@@ -9942,7 +9942,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 52
     },
     {
       "file": "functions/tests/open-root-finders.test.ts",
@@ -10167,6 +10167,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "functions/tests/s2r-jacobian-norms-parity.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
@@ -10670,7 +10677,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 104
     },
     {
       "file": "functions/tests/upt-review-2026-10-15.test.ts",

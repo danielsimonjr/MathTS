@@ -11,12 +11,27 @@
 /** A vector field ℝⁿ → ℝᵐ. */
 export type VectorField = (x: number[]) => number[];
 
+/** Relative forward/central step rule used when `h` is omitted. */
+export interface NumericJacobianStepRule {
+  /** Multiplier on `|x_j|` (default central rule uses `cbrt(eps)` instead). */
+  rel: number;
+  /** Minimum absolute step per coordinate. */
+  floor: number;
+}
+
 /** Options for `numericJacobian`. */
 export interface NumericJacobianOptions {
   /** Absolute step override. Default: per-coordinate relative step (see below). */
   h?: number;
   /** `'central'` (default) or forward difference `(f(x+h·e_j) − f(x)) / h`. */
   scheme?: 'central' | 'forward';
+  /**
+   * When `h` is omitted, use `max(floor, rel * |x_j|)` per column instead of the
+   * default central-difference rule `max(1, |x_j|) * cbrt(eps)`.
+   */
+  step?: NumericJacobianStepRule;
+  /** Precomputed `f(x0)`; skips the base evaluation at `x0`. */
+  f0?: readonly number[];
 }
 
 /**
@@ -32,17 +47,27 @@ export interface NumericJacobianOptions {
  * (eps = 2.22e-16, i.e. Number.EPSILON), the standard relative step for
  * central differences (~6e-6 relative) that balances truncation error
  * (O(h^2)) against floating-point round-off (O(eps/h)). Passing `h` uses
- * that absolute step for every column (both schemes).
+ * that absolute step for every column (both schemes). With `step: { rel, floor }`
+ * and no `h`, each column uses `max(floor, rel * |x0[j]|)`.
  *
  * @param f - Vector field ℝⁿ → ℝᵐ.
  * @param x0 - Point at which to evaluate the Jacobian.
  * @param opts.h - Absolute step override. Default: per-coordinate relative step.
  * @param opts.scheme - `'central'` (default) or `'forward'`. Existing callers
  *   that omit `scheme` keep central differences.
+ * @param opts.step - Relative step rule when `h` is omitted.
+ * @param opts.f0 - Optional precomputed `f(x0)` (must match `f(x0)` if supplied).
  *
  * @example
  * numericJacobian((v) => [v[0] ** 2 + v[1], v[0] * v[1]], [1, 2])
  * // => [[2, 1], [2, 1]]
+ *
+ * @example
+ * // Forward differences on a linear map are exact for any step.
+ * const A = [[1, 2], [3, 4]];
+ * const f = (v) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+ * numericJacobian(f, [1, 2], { scheme: 'forward', h: 1e-7 })
+ * // => [[1, 2], [3, 4]]
  */
 export function numericJacobian(
   f: VectorField,
@@ -51,15 +76,24 @@ export function numericJacobian(
 ): number[][] {
   const n = x0.length;
   const base = Array.from(x0);
-  const f0 = f(base);
+  const f0 = opts.f0 !== undefined ? Array.from(opts.f0) : f(base);
   const m = f0.length;
   const cbrtEps = Math.cbrt(2.22e-16);
+  const stepRule = opts.step;
+
+  const columnStep = (j: number): number => {
+    if (opts.h !== undefined) return opts.h;
+    if (stepRule !== undefined) {
+      return Math.max(stepRule.floor, stepRule.rel * Math.abs(base[j]));
+    }
+    return Math.max(1, Math.abs(base[j])) * cbrtEps;
+  };
 
   const J: number[][] = Array.from({ length: m }, () => new Array<number>(n).fill(0));
   const forward = opts.scheme === 'forward';
 
   for (let j = 0; j < n; j++) {
-    const h = opts.h ?? Math.max(1, Math.abs(base[j])) * cbrtEps;
+    const h = columnStep(j);
 
     const xPlus = base.slice();
     xPlus[j] += h;

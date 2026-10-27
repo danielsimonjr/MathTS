@@ -1,3 +1,4 @@
+import { numericJacobian } from './numeric-jacobian.js';
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { DenseMatrix, lu, luSolve, matMul as _matMul } from '@danielsimonjr/mathts-matrix';
@@ -207,16 +208,11 @@ function _fArr(f: ForcingFunction, t: number, y: number[]): number[] {
 
 /** Finite-difference Jacobian ∂fᵢ/∂yⱼ of the forcing function at (t, y), for the stiff method. */
 function _fdJacobian(f: ForcingFunction, t: number, y: number[], f0: number[]): number[][] {
-  const n = y.length;
-  const J: number[][] = Array.from({ length: n }, () => new Array<number>(n));
-  for (let j = 0; j < n; j++) {
-    const eps = Math.max(1e-8, 1e-7 * Math.abs(y[j]));
-    const yj = y.slice();
-    yj[j] += eps;
-    const fj = _fArr(f, t, yj);
-    for (let i = 0; i < n; i++) J[i][j] = (fj[i] - f0[i]) / eps;
-  }
-  return J;
+  return numericJacobian((yj) => _fArr(f, t, yj), y, {
+    scheme: 'forward',
+    step: { rel: 1e-7, floor: 1e-8 },
+    f0,
+  });
 }
 
 /**

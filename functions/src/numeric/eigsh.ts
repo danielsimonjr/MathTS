@@ -17,6 +17,8 @@
  * @packageDocumentation
  */
 
+import { norm2 } from '@danielsimonjr/mathts-core';
+
 /** A symmetric linear operator: either a dense matrix or a matvec callback `x -> A x`. */
 export type EigshOperatorInput = number[][] | ((x: number[]) => number[]);
 
@@ -79,10 +81,6 @@ function dot(a: number[], b: number[]): number {
   let s = 0;
   for (let i = 0; i < a.length; i++) s += a[i] * b[i];
   return s;
-}
-
-function norm2(a: number[]): number {
-  return Math.sqrt(dot(a, a));
 }
 
 /** `alpha * x + y` (does not mutate `x`/`y`). */

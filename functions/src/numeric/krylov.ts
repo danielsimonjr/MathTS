@@ -14,6 +14,8 @@
  * @packageDocumentation
  */
 
+import { norm2 } from '@danielsimonjr/mathts-core';
+
 /** A linear operator: either a dense matrix or a matvec callback `x -> A x`. */
 export type LinearOperatorInput = number[][] | ((x: number[]) => number[]);
 
@@ -81,10 +83,6 @@ function dot(a: number[], b: number[]): number {
   let s = 0;
   for (let i = 0; i < a.length; i++) s += a[i] * b[i];
   return s;
-}
-
-function norm2(a: number[]): number {
-  return Math.sqrt(dot(a, a));
 }
 
 function axpy(alpha: number, x: number[], y: number[]): number[] {
