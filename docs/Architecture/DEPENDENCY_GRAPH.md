@@ -10270,13 +10270,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import        |
-| -------------------------------- | ------------- |
-| `@danielsimonjr/mathts-parallel` | `computePool` |
+| Package                          | Import                |
+| -------------------------------- | --------------------- |
+| `@danielsimonjr/mathts-parallel` | `computePool, OpName` |
 
 **Exports:**
 
-- Functions: `kernelSource`, `mapArray`
+- Functions: `kernelSource`, `mapArray`, `mapBinaryF64`
 
 ---
 
@@ -10367,6 +10367,7 @@ graph LR
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
+| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
 | `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                         | Import |
 
@@ -18749,12 +18750,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200965 |
-| Total Exports           | 6187   |
+| Total Lines of Code     | 200969 |
+| Total Exports           | 6188   |
 | Total Re-exports        | 2620   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1962   |
+| Total Functions         | 1963   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 607    |

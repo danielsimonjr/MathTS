@@ -2315,6 +2315,7 @@
     "functions/src/typed/parallel-map.ts": [
       "functions/src/typed/distributions.ts",
       "functions/src/typed/hypothesis.ts",
+      "functions/src/typed/signal.ts",
       "functions/src/typed/special.ts"
     ],
     "functions/src/typed/factorization/finite-field.ts": [
