@@ -8647,7 +8647,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 196
+      "loc": 336
     },
     {
       "file": "functions/tests/clones-functions-scalars-pins.test.ts",

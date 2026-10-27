@@ -1,85 +1,132 @@
 /**
  * Sprint 2R clone-merge batch 7: independent oracles for graph restart scheduler,
  * matrix slice/CSC/FFT helpers, CAS renderCoeffTimes, and rankNearest k semantics.
+ *
+ * Expected values are literals / hand-computed arrays / exact strings. Errors are
+ * compared by class + message string (vitest `toThrow(new Error(...))` also
+ * compares IndexError extra fields and is the wrong matcher here).
  */
 import { describe, it, expect } from 'vitest';
+import { IndexError } from '../src/error/IndexError.js';
 import {
   pageRank,
   betweennessCentrality,
   eigenvectorCentrality,
   CENTRALITY_WORKER_THRESHOLD,
 } from '../src/typed/graph.js';
-import { column, row, matrixFromColumns, matrixFromRows } from '../src/factories/index.js';
+import {
+  CENTRALITY_WORKER_THRESHOLD as HELPER_THRESHOLD,
+  runCentralityRestarts,
+} from '../src/typed/centrality-restarts.js';
+import { column, row, matrix, matrixFromColumns, matrixFromRows } from '../src/factories/index.js';
 import { MathJSSparseMatrix, createMatrixBridge } from '../src/factories/matrix-bridge.js';
 import { fft, ifft } from '../src/index.js';
 import { kdTreeKNN } from '../src/geometry/geometry-extra.js';
-import { knnClassify } from '../src/ml/dbscan-knn.js';
+import { knnClassify, rankNearest } from '../src/ml/dbscan-knn.js';
 import { renderCoeffTimes } from '../src/cas/render-coeff-times.js';
 import { complexToInterleaved } from '../src/matrix/complex-to-interleaved.js';
+import { slice2d } from '../src/matrix/slice-2d.js';
+import { buildSparseCscFromEntries } from '../src/matrix/sparse-csc-tail.js';
 
-/** SplitMix-style seed derivation (oracle for restart scheduler). */
-function oracleSplitSeed(baseSeed: number, k: number): number {
+type MatrixLike = { size(): number[]; subset(index: unknown): unknown; valueOf?: () => unknown };
+
+function splitSeed(baseSeed: number, k: number): number {
   return ((baseSeed ^ (((k * 0x9e3779b9) | 0) >>> 0)) >>> 0) | 0;
 }
 
-/** Independent oracle for `coeff * rest` string rendering (G batch7 renderCoeffTimes). */
-function oracleRenderCoeffTimes(num: bigint, den: bigint, rest: string): string {
-  const neg = num < 0n;
-  const absNum = neg ? -num : num;
-  const sign = neg ? '-' : '';
-  if (absNum === den) return `${sign}${rest}`;
-  const denPart = den === 1n ? '' : `/${den}`;
-  return `${sign}${absNum}${denPart}*${rest}`;
-}
-
-/** Oracle for interleaved complex layout (factory FFT path). */
-function oracleComplexToInterleaved(arr: unknown[]): Float64Array | null {
-  const n = arr.length;
-  const result = new Float64Array(n * 2);
-  for (let i = 0; i < n; i++) {
-    const val = arr[i];
-    if (typeof val === 'number') {
-      result[i * 2] = val;
-      result[i * 2 + 1] = 0;
-    } else if (
-      val &&
-      typeof (val as { re?: unknown }).re === 'number' &&
-      typeof (val as { im?: unknown }).im === 'number'
-    ) {
-      result[i * 2] = (val as { re: number }).re;
-      result[i * 2 + 1] = (val as { im: number }).im;
-    } else {
-      return null;
-    }
+function expectError(
+  fn: () => unknown,
+  ctor: typeof Error | typeof IndexError,
+  message: string
+): void {
+  let thrown: unknown;
+  try {
+    fn();
+  } catch (e) {
+    thrown = e;
   }
-  return result;
+  expect(thrown).toBeInstanceOf(ctor);
+  expect(Object.getPrototypeOf(thrown)).toBe(ctor.prototype);
+  expect((thrown as Error).message).toBe(message);
 }
 
-describe('clone batch7 pin — splitSeed oracle (restart scheduler)', () => {
-  it('matches documented Fibonacci-hash seeds for baseSeed=42', () => {
-    expect(oracleSplitSeed(42, 0)).toBe(oracleSplitSeed(42, 0));
-    expect(oracleSplitSeed(42, 1)).toBe(((42 ^ 0x9e3779b9) >>> 0) | 0);
-    expect(oracleSplitSeed(0, 2)).toBe(((0 ^ 0x3c6ef372) >>> 0) | 0);
+describe('clone batch7 pin — restart scheduler (runCentralityRestarts)', () => {
+  it('CENTRALITY_WORKER_THRESHOLD is 4 on the helper and the graph re-export', () => {
+    expect(HELPER_THRESHOLD).toBe(4);
+    expect(CENTRALITY_WORKER_THRESHOLD).toBe(4);
   });
 
-  it('fan-out path is deterministic for the same restart count (restarts=4)', async () => {
+  it('sequential path (restarts=3 < 4) applies splitSeed then seed===0 ? 1 : seed', async () => {
+    const seen: number[] = [];
+    const out = await runCentralityRestarts(
+      3,
+      0,
+      splitSeed,
+      (s) => {
+        seen.push(s);
+        return new Float64Array([s]);
+      },
+      (vectors) => vectors.map((v) => v[0]),
+      'mean'
+    );
+    // k=0: splitSeed(0,0)=0 → coerced to 1; k=1,2: non-zero Fibonacci-hash literals
+    expect(seen).toEqual([1, -1640531527, 1013904242]);
+    expect(out).toEqual([1, -1640531527, 1013904242]);
+  });
+
+  it('fan-out path (restarts=4) records the same coerced seeds in k order', async () => {
+    const seen: number[] = [];
+    await runCentralityRestarts(
+      4,
+      99,
+      splitSeed,
+      (s) => {
+        seen.push(s);
+        return new Float64Array([s]);
+      },
+      (vectors) => vectors,
+      'mean'
+    );
+    expect(seen).toEqual([99, -1640531494, 1013904145, -626627256]);
+  });
+
+  it('restarts===1 stays in wrappers with seed 0; return keys stay {ranks} vs {centrality}', async () => {
     const adj = [
       [0, 1, 0],
       [0, 0, 1],
       [1, 0, 0],
     ];
-    const opts = { restarts: 4, restartSeed: 99, aggregation: 'mean' as const };
-    expect(CENTRALITY_WORKER_THRESHOLD).toBe(4);
-    const a = await pageRank(adj, opts);
-    const b = await pageRank(adj, opts);
-    expect(a.ranks.length).toBe(3);
-    for (let i = 0; i < 3; i++) {
-      expect(a.ranks[i]).toBeCloseTo(b.ranks[i], 12);
-    }
+    const pr = await pageRank(adj, { restarts: 1, restartSeed: 999, aggregation: 'all' });
+    expect(Object.keys(pr)).toEqual(['ranks']);
+    expect(pr).not.toHaveProperty('ranksPerRestart');
+    expect(pr.ranks.length).toBe(3);
+
+    const bc = await betweennessCentrality(adj, { restarts: 1, aggregation: 'all' });
+    expect(Object.keys(bc)).toEqual(['centrality']);
+    expect(bc).not.toHaveProperty('centralityPerRestart');
+
+    const ev = await eigenvectorCentrality(adj, { restarts: 1, aggregation: 'all' });
+    expect(Object.keys(ev)).toEqual(['centrality']);
+  });
+
+  it('multi-restart pageRank returns {ranks}; betweenness/eigenvector return {centrality}', async () => {
+    const adj = [
+      [0, 1, 1],
+      [1, 0, 1],
+      [1, 1, 0],
+    ];
+    const pr = await pageRank(adj, { restarts: 2, restartSeed: 7 });
+    expect(Object.keys(pr).sort()).toEqual(['ranks']);
+    const bc = await betweennessCentrality(adj, { restarts: 2, restartSeed: 7 });
+    expect(Object.keys(bc).sort()).toEqual(['centrality']);
+    const ev = await eigenvectorCentrality(adj, { restarts: 2, restartSeed: 7 });
+    expect(Object.keys(ev).sort()).toEqual(['centrality']);
+    expect(bc.centrality.every((v) => Number.isFinite(v))).toBe(true);
+    expect(ev.centrality.every((v) => Number.isFinite(v))).toBe(true);
   });
 });
 
-describe('clone batch7 pin — column/row slice (G _slice2d)', () => {
+describe('clone batch7 pin — column/row slice (slice2d)', () => {
   const m = [
     [1, 2],
     [3, 4],
@@ -92,47 +139,138 @@ describe('clone batch7 pin — column/row slice (G _slice2d)', () => {
   it('row index 0 extracts the first row [1, 2] (0-based factory)', () => {
     expect(row(m, 0)).toEqual([[1, 2]]);
   });
-});
 
-describe('clone batch7 pin — CSC tail (G sparse from columns/rows)', () => {
-  const matrix = createMatrixBridge();
-
-  it('sparse matrixFromColumns CSC matches hand-built ptr/index/values', () => {
-    const c0 = matrix([[1], [0], [3]], 'sparse');
-    const c1 = matrix([[0], [2], [0]], 'sparse');
-    const m = matrixFromColumns(c0, c1) as MathJSSparseMatrix;
-    expect(m.storage()).toBe('sparse');
-    expect(m.size()).toEqual([3, 2]);
-    expect(m._ptr).toEqual([0, 2, 3]);
-    expect(m._index).toEqual([0, 2, 1]);
-    expect(m._values).toEqual([1, 3, 2]);
+  it('axis 0 builds Index([i], cols); axis 1 builds Index(rows, [j])', () => {
+    class FakeIndex {
+      args: unknown[];
+      constructor(...args: unknown[]) {
+        this.args = args;
+      }
+    }
+    const rangeFn = (start: number, end: number) => ({ start, end });
+    const wrap = (data: unknown[][]) => data;
+    let seen: unknown;
+    const value: MatrixLike = {
+      size: () => [3, 5],
+      subset: (index: unknown) => {
+        seen = index;
+        return 0;
+      },
+    };
+    slice2d(value, 1, 2, wrap, FakeIndex, rangeFn);
+    expect((seen as FakeIndex).args).toEqual([{ start: 0, end: 3 }, [2]]);
+    slice2d(value, 0, 1, wrap, FakeIndex, rangeFn);
+    expect((seen as FakeIndex).args).toEqual([[1], { start: 0, end: 5 }]);
   });
 
-  it('sparse matrixFromRows builds the same CSC pattern for row-wise assembly', () => {
-    const r0 = matrix([[1, 0, 3]], 'sparse');
-    const r1 = matrix([[0, 2, 0]], 'sparse');
-    const m = matrixFromRows(r0, r1) as MathJSSparseMatrix;
-    expect(m.size()).toEqual([2, 3]);
-    expect(m._ptr).toEqual([0, 1, 2, 3]);
-    expect(m._index).toEqual([0, 1, 0]);
-    expect(m._values).toEqual([1, 2, 3]);
+  it('non-2-D input throws Error with the original message (class + string)', () => {
+    const value: MatrixLike = {
+      size: () => [2, 2, 2],
+      subset: () => {
+        throw new Error('subset must not run');
+      },
+    };
+    expectError(
+      () =>
+        slice2d(
+          value,
+          0,
+          0,
+          (d) => d,
+          class {},
+          () => 0
+        ),
+      Error,
+      'Only two dimensional matrix is supported'
+    );
+  });
+
+  it('out-of-range column/row throw IndexError by class + message (not toThrow(new Error))', () => {
+    expectError(() => column(m, 2), IndexError, 'Index out of range (2 > 1)');
+    expectError(() => row(m, 2), IndexError, 'Index out of range (2 > 1)');
+    expectError(() => column(m, -1), IndexError, 'Index out of range (-1 < 0)');
+  });
+
+  it('sparse and dense 2×2 yield the same column/row values', () => {
+    const dense = matrix(m) as MatrixLike;
+    const sparse = matrix(m, 'sparse') as MatrixLike;
+    const asValue = (x: unknown): unknown => (x as MatrixLike).valueOf?.() ?? x;
+    expect(asValue(column(dense, 1))).toEqual([[2], [4]]);
+    expect(asValue(column(sparse, 1))).toEqual([[2], [4]]);
+    expect(asValue(row(dense, 1))).toEqual([[3, 4]]);
+    expect(asValue(row(sparse, 1))).toEqual([[3, 4]]);
+  });
+});
+
+describe('clone batch7 pin — CSC tail (buildSparseCscFromEntries)', () => {
+  const matrixBridge = createMatrixBridge();
+
+  it('sparse matrixFromColumns CSC matches hand-built ptr/index/values', () => {
+    const c0 = matrixBridge([[1], [0], [3]], 'sparse');
+    const c1 = matrixBridge([[0], [2], [0]], 'sparse');
+    const result = matrixFromColumns(c0, c1) as MathJSSparseMatrix;
+    expect(result.storage()).toBe('sparse');
+    expect(result.size()).toEqual([3, 2]);
+    expect(result._ptr).toEqual([0, 2, 3]);
+    expect(result._index).toEqual([0, 2, 1]);
+    expect(result._values).toEqual([1, 3, 2]);
+  });
+
+  it('sparse matrixFromRows builds the swapped [N,M] CSC pattern', () => {
+    const r0 = matrixBridge([[1, 0, 3]], 'sparse');
+    const r1 = matrixBridge([[0, 2, 0]], 'sparse');
+    const result = matrixFromRows(r0, r1) as MathJSSparseMatrix;
+    expect(result.size()).toEqual([2, 3]);
+    expect(result._ptr).toEqual([0, 1, 2, 3]);
+    expect(result._index).toEqual([0, 1, 0]);
+    expect(result._values).toEqual([1, 2, 3]);
+  });
+
+  it('sorts by col then row and keeps duplicate (col,row) pairs in encounter order', () => {
+    const captured = buildSparseCscFromEntries(
+      [
+        { row: 1, col: 0, value: 5 },
+        { row: 0, col: 0, value: 1 },
+        { row: 1, col: 0, value: 7 },
+      ],
+      2,
+      [3, 2],
+      (data) => data
+    ) as { values: unknown[]; index: number[]; ptr: number[]; size: number[] };
+    // After sort: (0,0,1), (1,0,5), (1,0,7). Col 0 has 3 nnz; col 1 empty.
+    expect(captured.ptr).toEqual([0, 3, 3]);
+    expect(captured.index).toEqual([0, 1, 1]);
+    expect(captured.values).toEqual([1, 5, 7]);
+    expect(captured.size).toEqual([3, 2]);
+  });
+
+  it('wrappers pass size through: columns [N,M], rows [N,M] with N/M swapped meaning', () => {
+    const asCols = buildSparseCscFromEntries([], 4, [7, 4], (data) => data) as { size: number[] };
+    const asRows = buildSparseCscFromEntries([], 4, [3, 4], (data) => data) as { size: number[] };
+    expect(asCols.size).toEqual([7, 4]);
+    expect(asRows.size).toEqual([3, 4]);
+    expect(asCols).not.toEqual(asRows);
   });
 });
 
 describe('clone batch7 pin — complexToInterleaved oracle', () => {
-  it('encodes number and complex entries; rejects unsupported types', () => {
-    const sample = [1, { re: 2, im: -1 }];
-    expect(oracleComplexToInterleaved(sample)).toEqual(new Float64Array([1, 0, 2, -1]));
-    expect(complexToInterleaved(sample, () => null)).toEqual(new Float64Array([1, 0, 2, -1]));
-    expect(oracleComplexToInterleaved([1, 'x'])).toBeNull();
+  it('number → imag 0; {re,im} pair; anything else null', () => {
+    expect(complexToInterleaved([1, { re: 2, im: -1 }], () => null)).toEqual(
+      new Float64Array([1, 0, 2, -1])
+    );
+    expect(complexToInterleaved([3, 4], () => null)).toEqual(new Float64Array([3, 0, 4, 0]));
+    expect(complexToInterleaved([{ re: 1, im: 2 }], () => null)).toEqual(new Float64Array([1, 2]));
+    expect(complexToInterleaved([], () => null)).toEqual(new Float64Array(0));
     expect(complexToInterleaved([1, 'x'], () => null)).toBeNull();
+    expect(complexToInterleaved([{ re: 1 }], () => null)).toBeNull();
+    expect(complexToInterleaved([null], () => null)).toBeNull();
   });
 
   it('factory fft/ifft accept mixed number and {re,im} on the fast path (n=64)', () => {
     const x = Array.from({ length: 64 }, (_, i) =>
       i % 3 === 0 ? { re: Math.sin(i * 0.1), im: 0.01 * i } : Math.cos(i * 0.07)
     );
-    expect(oracleComplexToInterleaved(x)).not.toBeNull();
+    expect(complexToInterleaved(x, () => null)).not.toBeNull();
     const spec = fft(x) as unknown[];
     const back = ifft(spec) as unknown[];
     for (let i = 0; i < 64; i++) {
@@ -150,11 +288,13 @@ describe('clone batch7 pin — renderCoeffTimes string oracle', () => {
     { num: -1n, den: 1n, rest: 'log(x)', want: '-log(x)' },
     { num: 2n, den: 3n, rest: '(x-1)^(2)', want: '2/3*(x-1)^(2)' },
     { num: -4n, den: 2n, rest: 'atan(y)', want: '-4/2*atan(y)' },
+    { num: 3n, den: 1n, rest: 'x', want: '3*x' },
+    { num: 0n, den: 1n, rest: 'x', want: '0*x' },
+    { num: 5n, den: 5n, rest: 'x', want: 'x' },
   ];
 
   for (const { num, den, rest, want } of cases) {
-    it(`shared helper matches oracle for ${want}`, () => {
-      expect(oracleRenderCoeffTimes(num, den, rest)).toBe(want);
+    it(`renders ${num}/${den} * ${rest} as ${want}`, () => {
       expect(renderCoeffTimes({ num, den }, rest)).toBe(want);
     });
   }
@@ -167,29 +307,29 @@ describe('clone batch7 pin — rankNearest k semantics (kdTreeKNN vs kNearestInd
     [2, 0],
     [10, 10],
   ];
+  const dist = (a: number[], b: number[]): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
-  it('k=-1: kdTreeKNN clamps to k=0 (empty); kNearestIndices slices all but last neighbor', () => {
+  it('k=-1: kNearestIndices slices from the end; kdTreeKNN clamps with Math.max(0,k)', () => {
+    expect(rankNearest(pts, [0, 0], -1, dist)).toEqual([0, 1, 2]);
+    expect(rankNearest(pts, [0, 0], 0, dist)).toEqual([]);
     expect(kdTreeKNN(pts, [0, 0], -1)).toEqual([]);
-    const label = knnClassify(pts, ['a', 'b', 'c', 'd'], [[0, 0]], -1)[0];
-    expect(label).toBe('a');
+    expect(kdTreeKNN(pts, [0, 0], 0)).toEqual([]);
   });
 
-  it('k=2: kdTreeKNN returns two nearest indices in order', () => {
+  it('knnClassify k=-1 majority is first-3 labels, distinct from k=1 and k=4', () => {
+    const labels = ['A', 'B', 'B', 'A'];
+    expect(knnClassify(pts, labels, [[0, 0]], -1)[0]).toBe('B');
+    expect(knnClassify(pts, labels, [[0, 0]], 1)[0]).toBe('A');
+    expect(knnClassify(pts, labels, [[0, 0]], 4)[0]).toBe('A');
+  });
+
+  it('k=2: nearest-first indices; equal distances keep insertion order', () => {
     expect(kdTreeKNN(pts, [0, 0], 2)).toEqual([0, 1]);
-  });
-});
-
-describe('clone batch7 pin — centrality multi-restart smoke', () => {
-  const adj = [
-    [0, 1, 1],
-    [1, 0, 1],
-    [1, 1, 0],
-  ];
-
-  it('betweenness and eigenvector restarts=2 return finite centrality', async () => {
-    const b = await betweennessCentrality(adj, { restarts: 2, restartSeed: 7 });
-    const e = await eigenvectorCentrality(adj, { restarts: 2, restartSeed: 7 });
-    expect(b.centrality.every((v) => Number.isFinite(v))).toBe(true);
-    expect(e.centrality.every((v) => Number.isFinite(v))).toBe(true);
+    const ties = [
+      [0, 1],
+      [0, -1],
+      [10, 0],
+    ];
+    expect(rankNearest(ties, [0, 0], 2, dist)).toEqual([0, 1]);
   });
 });

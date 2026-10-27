@@ -276,6 +276,15 @@ bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLengt
 `reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
 `_extreme` (cache slot + `smaller` argument order), and `_ends`.
 
+Sprint 2R clone-merge batch 7 keeps the public names `pageRank` /
+`betweennessCentrality` / `eigenvectorCentrality`, factory `column` / `row`, sparse
+`matrixFromColumns` / `matrixFromRows`, factory `fft` / `ifft`, the CAS
+`renderCoeffTimes` call sites, `kNearestIndices`, and `kdTreeKNN`. The shared bodies
+are `runCentralityRestarts` (each wrapper keeps `restarts === 1` with seed 0 and the
+`{ranks}` / `{centrality}` keys), `slice2d` (`axis` 0 is a row, `axis` 1 is a column),
+`buildSparseCscFromEntries`, `complexToInterleaved`, `renderCoeffTimes`, and
+`rankNearest` (`kdTreeKNN` passes `Math.max(0, k)` so a negative `k` stays empty).
+
 ---
 
 ## Expression & Notebook Components
