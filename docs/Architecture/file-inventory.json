@@ -632,7 +632,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 181
+      "loc": 183
     },
     {
       "file": "core/src/is.ts",
@@ -863,7 +863,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 227
+      "loc": 316
     },
     {
       "file": "core/tests/arithmetic/scalar.test.ts",
@@ -8437,7 +8437,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 618
+      "loc": 545
     },
     {
       "file": "functions/tests/acsc-asec-acot-bignumber.test.ts",
@@ -10222,7 +10222,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 116
     },
     {
       "file": "functions/tests/signal-as-wasm.test.ts",
@@ -11027,7 +11027,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1166
+      "loc": 1093
     },
     {
       "file": "matrix/src/config.ts",
@@ -11517,7 +11517,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 120
+      "loc": 121
     },
     {
       "file": "matrix/tests/sparse/operations.test.ts",

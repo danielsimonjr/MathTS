@@ -817,7 +817,8 @@
       "verifyWasmIntegrity",
       "VERSION",
       "warnOnce",
-      "WasmManifest"
+      "WasmManifest",
+      "WasmModuleLoader"
     ],
     "evaluator": ["compile", "CompiledExpression", "compileExpression", "createEvaluate", "Scope"],
     "expression": [

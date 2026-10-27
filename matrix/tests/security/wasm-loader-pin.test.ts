@@ -109,9 +109,7 @@ describe('matrix WasmLoader — merge pins (G45–G47)', () => {
     async () => {
       const loader = freshLoader();
       const fs = await import('node:fs');
-      const { promisify } = await import('node:util');
-      const readFile = promisify(fs.readFile);
-      const readSpy = vi.spyOn(fs.promises, 'readFile').mockImplementation(readFile);
+      const readSpy = vi.spyOn(fs.promises, 'readFile');
       await loader.precompile(asWasmPath);
       readSpy.mockClear();
       await loader.load(asWasmPath);

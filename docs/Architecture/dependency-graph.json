@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6186
+    "totalExports": 6187
   },
   "entryPoints": [
     {
@@ -1485,7 +1485,8 @@
               "loadWasmManifest",
               "verifyWasmIntegrity",
               "resolvePackagedWasm",
-              "defaultWasmLocation"
+              "defaultWasmLocation",
+              "WasmModuleLoader"
             ],
             "reExport": true
           },
@@ -1593,6 +1594,7 @@
           "verifyWasmIntegrity",
           "resolvePackagedWasm",
           "defaultWasmLocation",
+          "WasmModuleLoader",
           "format",
           "toEngineering",
           "toExponential",
@@ -1682,6 +1684,7 @@
           "verifyWasmIntegrity",
           "resolvePackagedWasm",
           "defaultWasmLocation",
+          "WasmModuleLoader",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -1962,7 +1965,7 @@
         "internalDependencies": [
           {
             "file": "./types/wasm-loader.js",
-            "imports": ["WasmManifest"],
+            "imports": ["LoadingMetrics", "WasmManifest"],
             "typeOnly": true
           }
         ],
@@ -3659,7 +3662,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["LoadingMetrics"],
+            "imports": ["WasmModuleLoader", "LoadingMetrics"],
             "subpath": "internal"
           }
         ],
@@ -24892,7 +24895,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["LoadingMetrics"],
+            "imports": ["WasmModuleLoader", "LoadingMetrics"],
             "subpath": "internal"
           }
         ],
@@ -41756,15 +41759,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 201020,
-    "totalExports": 6186,
+    "totalLinesOfCode": 200965,
+    "totalExports": 6187,
     "totalClasses": 59,
     "totalInterfaces": 539,
     "totalFunctions": 1962,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2619,
+    "totalReExports": 2620,
     "totalTypeOnlyImports": 607,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
