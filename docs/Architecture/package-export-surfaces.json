@@ -3001,6 +3001,7 @@
       "negativeBinomialDist",
       "negMP",
       "nelderMead",
+      "NelderMeadOptions",
       "NestedArray",
       "neutronMass",
       "newton",
