@@ -35,6 +35,7 @@ import { Complex } from '@danielsimonjr/mathts-core';
 // cubic, real + complex) instead of duplicating the formulas here.
 import { polynomialRoot } from '../factories/index.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
+import { findRoot } from './numeric.js';
 
 // =============================================================================
 // Type Aliases
@@ -1113,7 +1114,7 @@ function polyCoeffsDeg3(expr: string, varName: string): f64[] | null {
   }
 }
 
-/** Numeric real-root scan (sign change + bisection) — fallback for degree ≥ 4 / transcendental. */
+/** Numeric real-root scan (sign change + Brent refinement) — fallback for degree ≥ 4 / transcendental. */
 function numericRealRoots(expr: string, varName: string): f64[] {
   const roots: f64[] = [];
   const seen = new Set<string>();
@@ -1148,26 +1149,11 @@ function numericRealRoots(expr: string, varName: string): f64[] {
       } catch {
         continue;
       }
-      if (fa * fb < 0) {
-        let a = x,
-          b = x + step;
-        let faB = fa;
-        for (let iter = 0; iter < 60; iter++) {
-          const mid = (a + b) / 2;
-          const fm = evalAt(expr, varName, mid);
-          if (Math.abs(fm) < 1e-14) {
-            a = mid;
-            b = mid;
-            break;
-          }
-          if (faB * fm < 0) {
-            b = mid;
-          } else {
-            a = mid;
-            faB = fm;
-          }
-        }
-        addRoot((a + b) / 2);
+      if (fa * fb < 0 && Number.isFinite(fa) && Number.isFinite(fb)) {
+        const a = x;
+        const b = x + step;
+        const root = findRoot((t) => evalAt(expr, varName, t), a, b, { tol: 1e-14, xtol: 1e-14 });
+        addRoot(root);
       }
     }
     if (roots.length > 0) break;
@@ -1182,7 +1168,8 @@ function numericRealRoots(expr: string, varName: string): f64[] {
  * Accepts either an expression (treated as `expr = 0`) or a full equation with a
  * single `=` sign. Polynomials of degree ≤ 3 yield exact closed-form roots —
  * including complex conjugates — while higher-degree and transcendental
- * equations fall back to a numeric scan for real roots. Real roots are returned
+ * equations fall back to a numeric scan for real roots, refining each bracket with
+ * Brent's method (`findRoot`). Real roots are returned
  * first (cleaned of float noise and sorted ascending), followed by any complex
  * roots.
  *

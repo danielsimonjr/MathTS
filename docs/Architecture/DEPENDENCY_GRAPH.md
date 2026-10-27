@@ -4172,13 +4172,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports          | Type   |
-| ----------------------------- | ---------------- | ------ |
-| `./typed/arithmetic.js`       | `mean, std, sum` | Import |
-| `./factories/index.js`        | `quantileSeq`    | Import |
-| `./distribution-functions.js` | `studentTCDF`    | Import |
-| `./regression-extra.js`       | `fitLine`        | Import |
-| `./typed/distributions.js`    | `normalCDF`      | Import |
+| File                          | Imports                     | Type   |
+| ----------------------------- | --------------------------- | ------ |
+| `./typed/arithmetic.js`       | `mean, std, sum`            | Import |
+| `./factories/index.js`        | `quantileSeq`               | Import |
+| `./distribution-functions.js` | `studentTCDF`               | Import |
+| `./regression-extra.js`       | `fitLine, linearRegression` | Import |
+| `./typed/distributions.js`    | `normalCDF`                 | Import |
 
 **Exports:**
 
@@ -6650,9 +6650,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import   |
-| ------------------------------ | -------- |
-| `@danielsimonjr/mathts-matrix` | `matMul` |
+| Package                        | Import                              |
+| ------------------------------ | ----------------------------------- |
+| `@danielsimonjr/mathts-core`   | `pairwiseDot, sumSquaredDeviations` |
+| `@danielsimonjr/mathts-matrix` | `matMul`                            |
 
 **Internal Dependencies:**
 
@@ -6753,6 +6754,12 @@ graph LR
 
 ### `functions/src/numeric/eigsh.ts` - Iterative symmetric eigensolver — Lanczos tridiagonalization + Rayleigh-Ritz.
 
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
+
 **Exports:**
 
 - Interfaces: `EigshOptions`, `EigshResult`
@@ -6762,6 +6769,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/fsolve.ts` - Nonlinear system solver: `fsolve` (damped Newton with a backtracking line
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Internal Dependencies:**
 
@@ -6817,6 +6830,12 @@ graph LR
 ---
 
 ### `functions/src/numeric/krylov.ts` - Iterative Krylov-subspace linear solvers.
+
+**Workspace Dependencies:**
+
+| Package                      | Import  |
+| ---------------------------- | ------- |
+| `@danielsimonjr/mathts-core` | `norm2` |
 
 **Exports:**
 
@@ -6888,7 +6907,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `NumericJacobianOptions`
+- Interfaces: `NumericJacobianStepRule`, `NumericJacobianOptions`
 - Types: `VectorField`
 - Functions: `numericJacobian`
 
@@ -6939,9 +6958,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports         | Type   |
-| --------------- | --------------- | ------ |
-| `./solveODE.js` | `_factorSolver` | Import |
+| File                    | Imports           | Type   |
+| ----------------------- | ----------------- | ------ |
+| `./solveODE.js`         | `_factorSolver`   | Import |
+| `./numeric-jacobian.js` | `numericJacobian` | Import |
 
 **Exports:**
 
@@ -6971,11 +6991,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                              | Type               |
-| --------------------- | -------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`      | `isUnit, isNumber, isBigNumber`                                      | Import             |
-| `../utils/factory.js` | `factory`                                                            | Import             |
-| `../types.js`         | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
+| File                    | Imports                                                              | Type               |
+| ----------------------- | -------------------------------------------------------------------- | ------------------ |
+| `./numeric-jacobian.js` | `numericJacobian`                                                    | Import             |
+| `../utils/is.js`        | `isUnit, isNumber, isBigNumber`                                      | Import             |
+| `../utils/factory.js`   | `factory`                                                            | Import             |
+| `../types.js`           | `MathNumericType, MathArray, Matrix, Unit, BigNumber, TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -9764,6 +9785,7 @@ graph LR
 | `./algebra.js`                   | `expand, factor`                               | Import |
 | `../factories/index.js`          | `polynomialRoot`                               | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                 | Import |
+| `./numeric.js`                   | `findRoot`                                     | Import |
 
 **Exports:**
 
@@ -10225,6 +10247,7 @@ graph LR
 
 | File                               | Imports                                                                                                                            | Type      |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
 | `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/adaptive-quad.js`      | `quad`                                                                                                                             | Import    |
 | `../optimization-extra.js`         | `levenbergMarquardt`                                                                                                               | Import    |
@@ -17875,11 +17898,11 @@ graph LR
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `tensor/src/named-index`                               | 0 files      | 18 files   |
 | `functions/src/type/matrix/utils/matAlgo11xS0s`        | 2 files      | 16 files   |
+| `functions/src/typed/numeric`                          | 9 files      | 9 files    |
 | `workbook/src/cli`                                     | 18 files     | 0 files    |
 | `core/src/index`                                       | 17 files     | 0 files    |
 | `matrix/src/operations/index`                          | 16 files     | 1 file     |
 | `functions/src/error/DimensionError`                   | 0 files      | 16 files   |
-| `functions/src/typed/numeric`                          | 8 files      | 8 files    |
 | `expression/src/transform/utils/errorTransform`        | 1 file       | 15 files   |
 | `functions/src/bitwise/leftShift`                      | 14 files     | 1 file     |
 | `functions/src/bitwise/rightArithShift`                | 14 files     | 1 file     |
@@ -18725,11 +18748,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200891 |
+| Total Lines of Code     | 200894 |
 | Total Exports           | 6181   |
 | Total Re-exports        | 2617   |
 | Total Classes           | 59     |
-| Total Interfaces        | 537    |
+| Total Interfaces        | 538    |
 | Total Functions         | 1959   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |

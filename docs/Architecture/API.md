@@ -617,7 +617,8 @@ Parallel-first primitives (the actual public names): `parallelStatSum`,
 `parallelStatMAD`), `parallelStatCumsum`, `parallelStatQuantile`,
 `parallelStatPercentile`, `parallelStatHistogram`. Composites: `gmean`, `hmean`,
 `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`,
-`rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`,
+`rankdata`, `spearman`, `kendallTau`, `linregress` (wraps `linearRegression` for slope
+inference; adds `interceptStdErr`), `pearsonr`, `spearmanr`,
 `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`.
 Factory-layer plain names: `mode`, `prod`, `median`, `quantileSeq`, `corr`, `mad`
 (median absolute deviation). `typedStatistics.mad` is the parallel **mean** AD
@@ -695,8 +696,10 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `curvefit`/`expfit`/`logfit`/`powerfit`, `solveODESystem`, `stiffODESolver`,
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
-`numeric/` package modules: `numericJacobian`, `newton`/`secant`/`halley`,
-`fsolve`/`root`, Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`, `eigsh` (Lanczos),
+`numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`
+and `solveDAE` for forward finite-difference Jacobians), `newton`/`secant`/`halley`,
+`fsolve`/`root` (core `norm2` in the line search), Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`
+(core `norm2`), `eigsh` (Lanczos, core `norm2`),
 `thomasSolve`/`solveBanded`/`toeplitzSolve`/`ldl`, `funm`/`cosm`/`sinm`,
 `dlyap`/`care`/`dare`, `minimizeScalar` (Brent), `quad` (Gauss-Kronrod), `interpn`,
 `bsplineFit`/`bsplineEval`, `monteCarloIntegrate`, `bfgs`, `nnls`/`lsqBounded`,
@@ -753,7 +756,8 @@ community/coloring `graphColoring` (Welsh-Powell), `maxClique` (Bron-Kerbosch),
 `integrate`, `limit`, `partialDerivative`, `directionalDerivative`, `gradientSymbolic`,
 `jacobian` (symbolic), `laplacian`, `divergence`, `laplace`/`inverseLaplace`,
 `fourierSeries`, `zTransform`, `taylor`/`multivariateTaylor`/`series`/`seriesCoefficient`,
-`solve`, `implicitDiff`, `summation`/`symbolicProduct`, `assume`/`getAssumptions`/`clearAssumptions`,
+`solve` (degree ≤ 3 via `polynomialRoot`; higher-degree/transcendental real roots via scan +
+`findRoot`), `implicitDiff`, `summation`/`symbolicProduct`, `assume`/`getAssumptions`/`clearAssumptions`,
 `asymptotic`, `groebnerBasis`, `symbolicIntegral`.
 
 ### Scalar node bridge
@@ -773,7 +777,8 @@ fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` parti
 `fitScalarParameters` (`functions/src/fit-scalar.ts`) fits those parameters to observed
 column data with `levenbergMarquardt` (default for `l2`), `bfgs`, or `nelderMead`.
 `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; when omitted
-it still uses `numericJacobian` (`h = 1e-7`, forward differences).
+it still uses `numericJacobian` (`h = 1e-7`, forward differences). Stiff `solveODE`,
+`solveDAE`, and `solveBVP` take the same helper for their forward finite-difference Jacobians.
 
 `numericallyEquivalent(a, b, options)` (`functions/src/numeric-equivalence.ts`) samples
 with `SeededRng.next`, evaluates both trees through `compileScalar`, and compares with
@@ -1139,5 +1144,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8083  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2002  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8084  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2003  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 
+import { norm2 } from '@danielsimonjr/mathts-core';
 import { numericJacobian, type VectorField } from './numeric-jacobian.js';
 import { linsolve } from '../typed/numeric.js';
 
@@ -27,13 +28,6 @@ function maxNorm(v: readonly number[]): number {
   let m = 0;
   for (const vi of v) m = Math.max(m, Math.abs(vi));
   return m;
-}
-
-/** Euclidean norm, used only to compare residual magnitude during line search. */
-function norm2(v: readonly number[]): number {
-  let s = 0;
-  for (const vi of v) s += vi * vi;
-  return Math.sqrt(s);
 }
 
 /**
