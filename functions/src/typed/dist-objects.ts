@@ -25,7 +25,12 @@
 
 import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
-import { _lgamma } from '../wasm/special/scalars.js';
+import {
+  _lgamma,
+  betaincClosedScalar,
+  chooseScalar,
+  gammaincScalar,
+} from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
@@ -154,92 +159,6 @@ function _gamma(x: f64): f64 {
 }
 
 /**
- * Regularized lower incomplete gamma function P(a, x).
- */
-function _gammainc(a: f64, x: f64): f64 {
-  if (x < 0) return NaN;
-  if (x === 0) return 0;
-
-  if (x < a + 1) {
-    let sum = 1.0 / a;
-    let term = 1.0 / a;
-    for (let n = 1; n < 200; n++) {
-      term *= x / (a + n);
-      sum += term;
-      if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
-    }
-    return sum * Math.exp(-x + a * Math.log(x) - _lgamma(a));
-  } else {
-    const TINY = 1e-30;
-    const b0 = x + 1 - a;
-    let c = 1.0 / TINY;
-    let d = 1.0 / b0;
-    let f = d;
-    for (let n = 1; n < 300; n++) {
-      const an = n * (a - n);
-      const bn = x + 2 * n + 1 - a;
-      d = bn + an * d;
-      if (Math.abs(d) < TINY) d = TINY;
-      c = bn + an / c;
-      if (Math.abs(c) < TINY) c = TINY;
-      d = 1.0 / d;
-      const delta = d * c;
-      f *= delta;
-      if (Math.abs(delta - 1) < 1e-14) break;
-    }
-    const Q = f * Math.exp(-x + a * Math.log(x) - _lgamma(a));
-    return 1 - Q;
-  }
-}
-
-/**
- * Regularized incomplete beta function I_x(a,b) via continued fraction.
- */
-function _betainc(x: f64, a: f64, b: f64): f64 {
-  if (x <= 0) return 0;
-  if (x >= 1) return 1;
-
-  // Use symmetry: I_x(a,b) = 1 - I_{1-x}(b,a)
-  if (x > (a + 1) / (a + b + 2)) {
-    return 1 - _betainc(1 - x, b, a);
-  }
-
-  const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
-  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
-
-  // Lentz's continued fraction
-  const TINY = 1e-30;
-  let c = 1.0;
-  let d = 1.0 - ((a + b) * x) / (a + 1);
-  if (Math.abs(d) < TINY) d = TINY;
-  d = 1.0 / d;
-  let f = d;
-
-  for (let m = 1; m <= 200; m++) {
-    // Even step
-    let numerator = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
-    d = 1.0 + numerator * d;
-    if (Math.abs(d) < TINY) d = TINY;
-    c = 1.0 + numerator / c;
-    if (Math.abs(c) < TINY) c = TINY;
-    d = 1.0 / d;
-    f *= d * c;
-
-    // Odd step
-    numerator = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
-    d = 1.0 + numerator * d;
-    if (Math.abs(d) < TINY) d = TINY;
-    c = 1.0 + numerator / c;
-    if (Math.abs(c) < TINY) c = TINY;
-    d = 1.0 / d;
-    const delta = d * c;
-    f *= delta;
-    if (Math.abs(delta - 1) < 1e-14) break;
-  }
-  return front * f;
-}
-
-/**
  * Log-factorial using Stirling for large n.
  */
 function _logFactorial(n: number): f64 {
@@ -361,7 +280,7 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
     cdf: (x: f64) => {
       if (x <= 0) return 0;
       if (x >= 1) return 1;
-      return _betainc(x, alpha, beta_);
+      return betaincClosedScalar(x, alpha, beta_);
     },
     quantile: (p: f64) => {
       // Newton's method on the CDF
@@ -369,7 +288,7 @@ export function betaDist(alpha: f64, beta_: f64): Distribution {
       if (p >= 1) return 1;
       let x = alpha / (alpha + beta_); // initial guess = mean
       for (let i = 0; i < 100; i++) {
-        const fx = _betainc(x, alpha, beta_) - p;
+        const fx = betaincClosedScalar(x, alpha, beta_) - p;
         const dx = (Math.pow(x, alpha - 1) * Math.pow(1 - x, beta_ - 1)) / B;
         if (dx === 0) break;
         const step = fx / dx;
@@ -453,7 +372,7 @@ export function binomialDist(n: number, p: f64): Distribution {
       if (k >= n) return 1;
       const kInt = Math.floor(k);
       // Use regularized incomplete beta: CDF = I_{1-p}(n-k, k+1)
-      return _betainc(q, n - kInt, kInt + 1);
+      return betaincClosedScalar(q, n - kInt, kInt + 1);
     },
     quantile: (prob: f64) => {
       if (prob <= 0) return 0;
@@ -515,7 +434,7 @@ export function chiSquaredDist(k: number): Distribution {
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
-      return _gammainc(halfK, x / 2);
+      return gammaincScalar(halfK, x / 2);
     },
     quantile: (p: f64) => {
       // Newton's method
@@ -523,7 +442,7 @@ export function chiSquaredDist(k: number): Distribution {
       if (p >= 1) return Infinity;
       let x = k; // initial guess
       for (let i = 0; i < 100; i++) {
-        const fx = _gammainc(halfK, x / 2) - p;
+        const fx = gammaincScalar(halfK, x / 2) - p;
         const dx = Math.exp((halfK - 1) * Math.log(x) - x / 2 - halfK * Math.LN2 - _lgamma(halfK));
         if (dx === 0) break;
         x = Math.max(1e-15, x - fx / dx);
@@ -633,7 +552,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
-      return _betainc((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
+      return betaincClosedScalar((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
     },
     quantile: (p: f64) => {
       // Newton's method
@@ -645,7 +564,7 @@ export function fDist(d1: f64, d2: f64): Distribution {
       let hi = 1000;
       for (let i = 0; i < 100; i++) {
         x = (lo + hi) / 2;
-        const cx = _betainc((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
+        const cx = betaincClosedScalar((d1 * x) / (d1 * x + d2), d1 / 2, d2 / 2);
         if (cx < p) lo = x;
         else hi = x;
         if (hi - lo < 1e-12) break;
@@ -704,7 +623,7 @@ export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;
-      return _gammainc(shape, x * rate);
+      return gammaincScalar(shape, x * rate);
     },
     quantile: (p: f64) => {
       if (p <= 0) return 0;
@@ -712,10 +631,10 @@ export function gammaDist(shape: f64, rate: f64 = 1): Distribution {
       // Bisection
       let lo = 0;
       let hi = shape * scale * 20;
-      while (_gammainc(shape, hi * rate) < p) hi *= 2;
+      while (gammaincScalar(shape, hi * rate) < p) hi *= 2;
       for (let i = 0; i < 100; i++) {
         const mid = (lo + hi) / 2;
-        if (_gammainc(shape, mid * rate) < p) lo = mid;
+        if (gammaincScalar(shape, mid * rate) < p) lo = mid;
         else hi = mid;
         if (hi - lo < 1e-12) break;
       }
@@ -810,7 +729,7 @@ export function poissonDist(lambda: f64): Distribution {
       if (k < 0) return 0;
       const kInt = Math.floor(k);
       // P(X <= k) = Q(k+1, lambda) = 1 - P(k+1, lambda)
-      return 1 - _gammainc(kInt + 1, lambda);
+      return 1 - gammaincScalar(kInt + 1, lambda);
     },
     quantile: (p: f64) => {
       if (p <= 0) return 0;
@@ -876,7 +795,7 @@ export function tDist(nu: f64): Distribution {
     },
     cdf: (x: f64) => {
       const t = nu / (nu + x * x);
-      const ib = _betainc(t, nu / 2, 0.5);
+      const ib = betaincClosedScalar(t, nu / 2, 0.5);
       return x >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
     },
     quantile: (p: f64) => {
@@ -889,7 +808,7 @@ export function tDist(nu: f64): Distribution {
       for (let i = 0; i < 100; i++) {
         const mid = (lo + hi) / 2;
         const t = nu / (nu + mid * mid);
-        const ib = _betainc(t, nu / 2, 0.5);
+        const ib = betaincClosedScalar(t, nu / 2, 0.5);
         const cx = mid >= 0 ? 1 - 0.5 * ib : 0.5 * ib;
         if (cx < p) lo = mid;
         else hi = mid;
@@ -1021,20 +940,6 @@ function _logChoose(n: number, r: number): f64 {
   return _logFactorial(n) - _logFactorial(r) - _logFactorial(n - r);
 }
 
-/**
- * Exact binomial coefficient C(n, r) via the stable multiplicative recurrence
- * (each partial `C(n,i)` is an exact integer). Exact in double precision while
- * `C(n,r) < 2^53` — i.e. for the moderate populations hypergeometric sampling
- * uses in practice — avoiding the ~1e-8 Stirling error of the log-factorial path.
- */
-function _choose(n: number, r: number): f64 {
-  if (r < 0 || r > n) return 0;
-  const k = Math.min(r, n - r);
-  let c = 1;
-  for (let i = 0; i < k; i++) c = (c * (n - i)) / (i + 1);
-  return c;
-}
-
 /** Inverse-transform sampler for a discrete distribution: smallest k with cdf(k) ≥ u. */
 function _discreteSample(cdf: (k: f64) => f64, rng: () => number, cap: number): f64 {
   const u = rng();
@@ -1076,7 +981,7 @@ export function hypergeometricDist(
   const pmf = (k: f64): f64 => {
     if (!Number.isInteger(k) || k < kMin || k > kMax) return 0;
     return useExact
-      ? (_choose(K, k) * _choose(M - K, N - k)) / _choose(M, N)
+      ? (chooseScalar(K, k) * chooseScalar(M - K, N - k)) / chooseScalar(M, N)
       : Math.exp(_logChoose(K, k) + _logChoose(M - K, N - k) - _logChoose(M, N));
   };
   const cdf = (k: f64): f64 => {
@@ -1127,7 +1032,7 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
   // P(X ≤ k) = I_p(r, k+1) — regularized incomplete beta (matches scipy nbinom.cdf).
   const cdf = (k: f64): f64 => {
     if (k < 0) return 0;
-    return Math.min(1, _betainc(p, r, Math.floor(k) + 1));
+    return Math.min(1, betaincClosedScalar(p, r, Math.floor(k) + 1));
   };
   const mean = (r * (1 - p)) / p;
   const variance = (r * (1 - p)) / (p * p);

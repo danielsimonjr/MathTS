@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1946,
+  "totalFiles": 1949,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1172,
+    "build-entry": 1174,
     "test-only": 0,
     "orphan": 0,
-    "test": 687,
+    "test": 688,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1197,
-    "tests": 687,
+    "src": 1199,
+    "tests": 688,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 817,
+    "@danielsimonjr/mathts-functions": 820,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 102,
@@ -7845,6 +7845,13 @@
       "loc": 319
     },
     {
+      "file": "functions/src/typed/aggregate-restart.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 40
+    },
+    {
       "file": "functions/src/typed/algebra.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7856,7 +7863,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1713
+      "loc": 1705
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -7870,7 +7877,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2861
+      "loc": 2855
     },
     {
       "file": "functions/src/typed/combinatorics.ts",
@@ -7891,7 +7898,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1440
+      "loc": 1345
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -7899,6 +7906,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 715
+    },
+    {
+      "file": "functions/src/typed/euclid.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 15
     },
     {
       "file": "functions/src/typed/factorization/finite-field.ts",
@@ -7989,14 +8003,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1118
+      "loc": 1075
     },
     {
       "file": "functions/src/typed/hypothesis.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2215
+      "loc": 2127
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -8283,7 +8297,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 176
+      "loc": 185
     },
     {
       "file": "functions/src/utils/isZero.ts",
@@ -8458,7 +8472,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 700
+      "loc": 757
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -8578,6 +8592,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 251
+    },
+    {
+      "file": "functions/tests/clones-functions-scalars-pins.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 321
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",

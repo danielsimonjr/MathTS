@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 40 files
+- **functions/typed**: 42 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 483            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 485            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -9783,6 +9783,15 @@ graph LR
 
 ## Functions/typed Dependencies
 
+### `functions/src/typed/aggregate-restart.ts` - Element-wise mean and population std across centrality restart vectors.
+
+**Exports:**
+
+- Types: `RestartAggregation`
+- Functions: `aggregateRestartVectors`
+
+---
+
 ### `functions/src/typed/algebra.ts` - Typed Algebra Functions
 
 **Internal Dependencies:**
@@ -9818,6 +9827,7 @@ graph LR
 
 | File                                 | Imports                                 | Type   |
 | ------------------------------------ | --------------------------------------- | ------ |
+| `./euclid.js`                        | `euclidSnap`                            | Import |
 | `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
 
@@ -9863,6 +9873,7 @@ graph LR
 | File                             | Imports                                        | Type   |
 | -------------------------------- | ---------------------------------------------- | ------ |
 | `../factories/evaluate.js`       | `parse, evaluate`                              | Import |
+| `./euclid.js`                    | `euclidSnap`                                   | Import |
 | `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString` | Import |
 | `./algebra.js`                   | `expand, factor`                               | Import |
 | `../factories/index.js`          | `polynomialRoot`                               | Import |
@@ -9915,11 +9926,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                           | Type   |
-| ------------------------------------ | --------------------------------- | ------ |
-| `../wasm/special/scalars.js`         | `_lgamma`                         | Import |
-| `./special.js`                       | `erfcScalar`                      | Import |
-| `../probability/util/gammaSample.js` | `gammaSampleRng, normalSampleRng` | Import |
+| File                                 | Imports                                                      | Type   |
+| ------------------------------------ | ------------------------------------------------------------ | ------ |
+| `../wasm/special/scalars.js`         | `_lgamma, betaincClosedScalar, chooseScalar, gammaincScalar` | Import |
+| `./special.js`                       | `erfcScalar`                                                 | Import |
+| `../probability/util/gammaSample.js` | `gammaSampleRng, normalSampleRng`                            | Import |
 
 **Exports:**
 
@@ -9948,6 +9959,14 @@ graph LR
 **Exports:**
 
 - Constants: `normalPDF`, `normalCDF`, `exponentialPDF`, `exponentialCDF`, `poissonPMF`, `binomialPMF`, `geometricPMF`, `bernoulliPMF`, `entropy`, `jsDivergence`, `betaPDF`, `gammaPDF`, `studentTPDF`, `noncentralChi2PDF`, `typedDistributions`
+
+---
+
+### `functions/src/typed/euclid.ts` - Euclidean GCD with a caller-chosen integer snap (floor vs round).
+
+**Exports:**
+
+- Functions: `euclidSnap`
 
 ---
 
@@ -10152,6 +10171,12 @@ graph LR
 | ---------------------------- | ------------ |
 | `@danielsimonjr/mathts-core` | `mulberry32` |
 
+**Internal Dependencies:**
+
+| File                     | Imports                                       | Type   |
+| ------------------------ | --------------------------------------------- | ------ |
+| `./aggregate-restart.js` | `aggregateRestartVectors, RestartAggregation` | Import |
+
 **Exports:**
 
 - Interfaces: `CentralityRestartOptions`, `PageRankOptions`, `PageRankResult`, `PageRankRestartResult`, `BetweennessOptions`, `BetweennessResult`, `BetweennessRestartResult`, `EigenvectorOptions`, `EigenvectorResult`, `EigenvectorRestartResult`
@@ -10171,14 +10196,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports                                | Type   |
-| ------------------------------ | -------------------------------------- | ------ |
-| `../wasm/sort/wasm-bridge.js`  | `sortF64Dispatch, WASM_SORT_THRESHOLD` | Import |
-| `../wasm/special/scalars.js`   | `_lgamma, erfcSelfContained`           | Import |
-| `./special.js`                 | `erfcScalar`                           | Import |
-| `./parallel-map.js`            | `kernelSource`                         | Import |
-| `../distribution-functions.js` | `studentTQuantile, normalQuantile`     | Import |
-| `../stats/inference-extra.js`  | `multipleTest`                         | Import |
+| File                           | Imports                                                                         | Type   |
+| ------------------------------ | ------------------------------------------------------------------------------- | ------ |
+| `../wasm/sort/wasm-bridge.js`  | `sortF64Dispatch, WASM_SORT_THRESHOLD`                                          | Import |
+| `../wasm/special/scalars.js`   | `_lgamma, betaincClosedScalar, chooseScalar, erfcSelfContained, gammaincScalar` | Import |
+| `./special.js`                 | `erfcScalar`                                                                    | Import |
+| `./parallel-map.js`            | `kernelSource`                                                                  | Import |
+| `../distribution-functions.js` | `studentTQuantile, normalQuantile`                                              | Import |
+| `../stats/inference-extra.js`  | `multipleTest`                                                                  | Import |
 
 **Exports:**
 
@@ -10903,7 +10928,7 @@ graph LR
 
 ---
 
-### `functions/src/utils/isPrime.ts` - Test whether a value is prime: has no divisors other than itself and one.
+### `functions/src/utils/isPrime.ts` - Trial-division primality test. `c` supplies typed literals so the loop
 
 **Internal Dependencies:**
 
@@ -10915,6 +10940,8 @@ graph LR
 
 **Exports:**
 
+- Types: `TrialPrimeConsts`
+- Functions: `trialPrime`, `trialPrime`, `trialPrime`
 - Constants: `createIsPrime`
 
 ---
@@ -11299,7 +11326,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `betaincClosedScalar`, `chooseScalar`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -18472,17 +18499,17 @@ graph TD
     end
 
     subgraph Functions/typed
-        N320[algebra]
-        N321[arithmetic]
-        N322[bitwise]
-        N323[cas]
-        N324[combinatorics]
-        N325[complex]
-        N326[dist-objects]
-        N327[distributions]
-        N328[finite-field]
-        N329[hensel]
-        N330[...30 more]
+        N320[aggregate-restart]
+        N321[algebra]
+        N322[arithmetic]
+        N323[bitwise]
+        N324[cas]
+        N325[combinatorics]
+        N326[complex]
+        N327[dist-objects]
+        N328[distributions]
+        N329[euclid]
+        N330[...32 more]
     end
 
     subgraph Functions/unit
@@ -18840,14 +18867,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1197   |
+| Total TypeScript Files  | 1199   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200852 |
-| Total Exports           | 6205   |
+| Total Lines of Code     | 200733 |
+| Total Exports           | 6210   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1972   |
+| Total Functions         | 1979   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 608    |

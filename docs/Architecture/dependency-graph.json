@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1197,
+    "totalFiles": 1199,
     "totalModules": 82,
-    "totalExports": 6205
+    "totalExports": 6210
   },
   "entryPoints": [
     {
@@ -21044,6 +21044,15 @@
       }
     },
     "functions/typed": {
+      "functions/src/typed/aggregate-restart.ts": {
+        "description": "Element-wise mean and population std across centrality restart vectors.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["aggregateRestartVectors"],
+        "functions": ["aggregateRestartVectors"]
+      },
       "functions/src/typed/algebra.ts": {
         "description": "Typed Algebra Functions",
         "externalDependencies": [],
@@ -21162,6 +21171,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
@@ -21379,6 +21392,10 @@
             "imports": ["parse", "evaluate"]
           },
           {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
+          {
             "file": "./polynomial-ideal.js",
             "imports": ["polyFromExpression", "buchberger", "polyToString"]
           },
@@ -21574,7 +21591,7 @@
         "internalDependencies": [
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma"]
+            "imports": ["_lgamma", "betaincClosedScalar", "chooseScalar", "gammaincScalar"]
           },
           {
             "file": "./special.js",
@@ -21706,6 +21723,15 @@
           "noncentralChi2PDF",
           "typedDistributions"
         ]
+      },
+      "functions/src/typed/euclid.ts": {
+        "description": "Euclidean GCD with a caller-chosen integer snap (floor vs round).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["euclidSnap"],
+        "functions": ["euclidSnap"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -22176,7 +22202,12 @@
         "description": "Graph Theory Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./aggregate-restart.js",
+            "imports": ["aggregateRestartVectors", "RestartAggregation"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -22236,7 +22267,13 @@
           },
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma", "erfcSelfContained"]
+            "imports": [
+              "_lgamma",
+              "betaincClosedScalar",
+              "chooseScalar",
+              "erfcSelfContained",
+              "gammaincScalar"
+            ]
           },
           {
             "file": "./special.js",
@@ -24534,7 +24571,7 @@
         "constants": ["createIsPositive"]
       },
       "functions/src/utils/isPrime.ts": {
-        "description": "Test whether a value is prime: has no divisors other than itself and one.",
+        "description": "Trial-division primality test. `c` supplies typed literals so the loop",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -24553,7 +24590,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createIsPrime"],
+        "exports": ["createIsPrime", "trialPrime"],
+        "functions": ["trialPrime", "trialPrime", "trialPrime"],
         "constants": ["createIsPrime"]
       },
       "functions/src/utils/isZero.ts": {
@@ -25376,6 +25414,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -25405,6 +25445,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -41105,6 +41147,7 @@
       {
         "name": "Functions/typed",
         "files": [
+          "functions/src/typed/aggregate-restart.ts",
           "functions/src/typed/algebra.ts",
           "functions/src/typed/arithmetic.ts",
           "functions/src/typed/bitwise.ts",
@@ -41113,6 +41156,7 @@
           "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
+          "functions/src/typed/euclid.ts",
           "functions/src/typed/factorization/finite-field.ts",
           "functions/src/typed/factorization/hensel.ts",
           "functions/src/typed/factorization/index.ts",
@@ -41914,13 +41958,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1197,
+    "totalTypeScriptFiles": 1199,
     "totalModules": 82,
-    "totalLinesOfCode": 200852,
-    "totalExports": 6205,
+    "totalLinesOfCode": 200733,
+    "totalExports": 6210,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1972,
+    "totalFunctions": 1979,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
