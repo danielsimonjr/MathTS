@@ -67,8 +67,11 @@ directly (pinned fixtures). `seedProbabilityRng` / `createRng` remain seedrandom
 ## 2. Matrix Backend Selection Flow
 
 ```text
-matrix.multiply(other)   // DenseMatrix or SparseMatrix
-  1. BackendManager.multiply uses elementCount = a.rows * b.cols * a.cols, then
+DenseMatrix.multiply(other) uses arithmetic.multiply (JS ikj). It does not
+call BackendManager. Public lu / qr / cholesky are also JS (operations/*).
+
+backendManager.multiply(a, b)   // WASM GEMM path after initialize()
+  1. elementCount = a.rows * b.cols * a.cols, then
      selectBackend(elementCount, 'multiply') — not rows * cols alone.
   2. Registered backends are js + wasm only (no 'gpu' in backendRegistry):
        multiply: WASM when elementCount >= 256 (operation threshold), else JS
@@ -91,12 +94,12 @@ matrix.multiply(other)   // DenseMatrix or SparseMatrix
   6. Returns result as DenseMatrix
 ```
 
-| Backend         | Threshold                                                                | Key Ops                                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JSBackend`     | Default                                                                  | All ops, pure TypeScript, Float64Array                                                                                                                             |
-| `WASMBackend`   | Per-op (e.g. multiply ≥256 op-count; decompositions via minElements 100) | SIMD matmul, LU/QR/Cholesky/inverse/determinant                                                                                                                    |
-| WebGPU (opt-in) | f32, per kernel                                                          | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
-| `ComputePool`   | Per-op map                                                               | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
+| Backend         | Threshold                                                              | Key Ops                                                                                                                                                            |
+| --------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JSBackend`     | Default                                                                | All ops, pure TypeScript, Float64Array                                                                                                                             |
+| `WASMBackend`   | Manager multiply ≥256 flop count (`config.ts`); public decomp stays JS | SIMD matmul via manager; LU/QR/Cholesky/inverse/det on `WASMBackend` only for direct callers                                                                       |
+| WebGPU (opt-in) | f32, per kernel                                                        | Explicit `gpuMatmul` et al. (65,536); fused ops after `enableGpu()` at `GPU_MIN_ELEMENTS` 65,536; GPU FFT at 262,144 (`FFT_GPU_MIN_ELEMENTS`) — not BackendManager |
+| `ComputePool`   | Per-op map                                                             | `matmul` at 4,096; most element-wise ops `'never'`; global fallback 50,000                                                                                         |
 
 ---
 
@@ -397,5 +400,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2005  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2006  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

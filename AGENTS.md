@@ -117,7 +117,9 @@ Structure**. Don't duplicate it here — reference it.
 > (binary `mathts-as.wasm`, source `assembly/src/`, SHA-384-verified before instantiation);
 > dispatch is **AS→JS**. The legacy native-WASM path and its toolchain have been removed.
 >
-> - **`matrix`** loads it for consumers through `backendManager.initialize()`.
+> - **`matrix`** loads it for consumers through `backendManager.initialize()` (SIMD
+>   **matmul** on that manager path). Public `DenseMatrix.multiply` and `lu`/`qr`/`cholesky`
+>   stay on JS unless a future benchmark wires them.
 > - **`functions`** ships the binary and AS bridges (bitwise, elementwise, interpolation,
 >   poly incl. fits, signal, sort incl. argsort/rank, special incl. Airy). A test proves each
 >   bridge runs its AS export once the module is loaded, but **nothing in the public API
