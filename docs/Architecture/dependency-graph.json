@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1191,
+    "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6167
+    "totalExports": 6172
   },
   "entryPoints": [
     {
@@ -9095,6 +9095,44 @@
           "logisticQuantile"
         ]
       },
+      "functions/src/fit-scalar.ts": {
+        "description": "Nonlinear fitting of {@link ScalarNode} parameters to columnar data.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./numeric/bfgs.js",
+            "imports": ["bfgs"]
+          },
+          {
+            "file": "./optimization-extra.js",
+            "imports": ["nelderMead", "levenbergMarquardt", "LMOptions"]
+          },
+          {
+            "file": "./scalar-compile.js",
+            "imports": ["compileScalarGradient"]
+          },
+          {
+            "file": "./factories/index.js",
+            "imports": ["inv"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseDot", "pairwiseSum", "SeededRng"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          }
+        ],
+        "exports": ["fitScalarParameters"],
+        "interfaces": ["FitScalarOptions", "FitScalarResult"],
+        "functions": ["fitScalarParameters"]
+      },
       "functions/src/geometry-extra.ts": {
         "description": "Geodesy / spherical-geometry connectors (Wave C / bridge C7).",
         "externalDependencies": [],
@@ -9535,6 +9573,11 @@
           {
             "file": "./optimization-extra.js",
             "imports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
+            "reExport": true
+          },
+          {
+            "file": "./fit-scalar.js",
+            "imports": ["fitScalarParameters"],
             "reExport": true
           },
           {
@@ -9996,7 +10039,13 @@
           },
           {
             "file": "./optimization-extra.js",
-            "imports": ["OptimizeResult", "LMResult"],
+            "imports": ["OptimizeResult", "LMResult", "LMOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./fit-scalar.js",
+            "imports": ["FitScalarOptions", "FitScalarResult"],
             "reExport": true,
             "typeOnly": true
           },
@@ -10349,6 +10398,7 @@
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
+          "fitScalarParameters",
           "kmeans",
           "spectralClustering",
           "dbscan",
@@ -10567,6 +10617,9 @@
           "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
+          "LMOptions",
+          "FitScalarOptions",
+          "FitScalarResult",
           "GaussianKDEOptions",
           "GaussianKDEResult",
           "Chi2ContingencyOptions",
@@ -10792,6 +10845,7 @@
           "nelderMead",
           "gradientDescent",
           "levenbergMarquardt",
+          "fitScalarParameters",
           "kmeans",
           "spectralClustering",
           "dbscan",
@@ -11010,6 +11064,9 @@
           "LogisticRegressionResult",
           "OptimizeResult",
           "LMResult",
+          "LMOptions",
+          "FitScalarOptions",
+          "FitScalarResult",
           "GaussianKDEOptions",
           "GaussianKDEResult",
           "Chi2ContingencyOptions",
@@ -11232,7 +11289,7 @@
           }
         ],
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
-        "interfaces": ["OptimizeResult", "LMResult"],
+        "interfaces": ["OptimizeResult", "LMResult", "LMOptions"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
       },
       "functions/src/pareto-front.ts": {
@@ -40384,6 +40441,7 @@
           "functions/src/config-api.ts",
           "functions/src/descriptive-stats.ts",
           "functions/src/distribution-functions.ts",
+          "functions/src/fit-scalar.ts",
           "functions/src/geometry-extra.ts",
           "functions/src/grad-forward.ts",
           "functions/src/help.ts",
@@ -41615,18 +41673,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1191,
+    "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 199940,
-    "totalExports": 6167,
+    "totalLinesOfCode": 200821,
+    "totalExports": 6172,
     "totalClasses": 59,
-    "totalInterfaces": 534,
-    "totalFunctions": 1958,
+    "totalInterfaces": 537,
+    "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1617,
-    "totalReExports": 2605,
-    "totalTypeOnlyImports": 606,
+    "totalReExports": 2609,
+    "totalTypeOnlyImports": 607,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
