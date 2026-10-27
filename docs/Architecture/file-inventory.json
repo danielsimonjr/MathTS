@@ -6057,7 +6057,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 656
+      "loc": 653
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -6477,7 +6477,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 412
+      "loc": 404
     },
     {
       "file": "functions/src/numeric-extra.ts",
