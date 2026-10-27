@@ -386,7 +386,7 @@ export const setCartesian = mathTyped('setCartesian', {
 /**
  * Compute the intersection of two flat arrays using identifier-based multiplicity tracking.
  */
-function _intersect(b1: unknown[], b2: unknown[]): unknown[] {
+function selectById(b1: unknown[], b2: unknown[], includeFound: boolean): unknown[] {
   const id1 = identify(b1.slice().sort(naturalCompare));
   const id2 = identify(b2.slice().sort(naturalCompare));
   const result: unknown[] = [];
@@ -394,25 +394,20 @@ function _intersect(b1: unknown[], b2: unknown[]): unknown[] {
     const found = id2.some(
       (e) => naturalCompare(e.value, elem.value) === 0 && e.identifier === elem.identifier
     );
-    if (found) result.push(elem.value);
+    if (found === includeFound) result.push(elem.value);
   }
   return result;
+}
+
+function _intersect(b1: unknown[], b2: unknown[]): unknown[] {
+  return selectById(b1, b2, true);
 }
 
 /**
  * Compute the difference of two flat arrays (b1 minus b2) using identifier-based multiplicity.
  */
 function _difference(b1: unknown[], b2: unknown[]): unknown[] {
-  const id1 = identify(b1.slice().sort(naturalCompare));
-  const id2 = identify(b2.slice().sort(naturalCompare));
-  const result: unknown[] = [];
-  for (const elem of id1) {
-    const found = id2.some(
-      (e) => naturalCompare(e.value, elem.value) === 0 && e.identifier === elem.identifier
-    );
-    if (!found) result.push(elem.value);
-  }
-  return result;
+  return selectById(b1, b2, false);
 }
 
 // =============================================================================

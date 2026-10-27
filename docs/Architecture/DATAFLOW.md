@@ -220,6 +220,11 @@ const y = interp(1.5);  // evaluates spline at x=1.5
 
 `lagrangeInterp` and `hermiteInterp` follow the same factory pattern (input points → output function).
 `polyFit` returns a polynomial coefficient array, not a function.
+`chebyshevFit` and `legendreFit` (JS path, below `WASM_POLY_FIT_THRESHOLD`) build
+normal equations in their own basis recurrences, then share
+`solveAugmentedNormalEquations` (partial pivot, `|pivot| < 1e-14` throws a
+wrapper-specific rank-deficient error). The poly WASM JS fallback uses the same
+solver and returns `null` instead of throwing.
 
 ### Distribution Functions
 
@@ -243,8 +248,11 @@ They are suitable as building blocks for Monte Carlo sampling loops.
 ### Special Functions
 
 Special functions (`erfc`, `beta`, `gammainc`, `digamma`, `besselJ0/1/Y0/Y1`,
-`airyAi/Bi`, `ellipticK/E/F/Pi`, `carlsonR*`, `lgamma`) are synchronous scalars
-on the public surface. Nothing in `functions` loads WASM until `loadWasm()`;
+`airyAi/Bi`, `ellipticK/E/F/Pi`, `carlsonR*`, `lgamma`, plus niche `struveH` /
+`struveL` / `kelvinBer` / `kelvinBei`) are synchronous scalars
+on the public surface. Struve H/L share one power series (`ratioSign` −1 vs +1)
+and keep their own `z < 0` error text. Kelvin ber/bei share one recurrence
+(`term0` and `denom(k)`). Nothing in `functions` loads WASM until `loadWasm()`;
 `functions/src/wasm/policy.ts` keeps most bridges on JS (no Bessel band — Bessel
 stays JS; `lgamma_f64` only for `n >= 1048576`). `normalCDF` still uses `erfc`
 (`normalCDFScalar` in `functions/src/wasm/special/scalars.ts`). Canonical
@@ -258,8 +266,16 @@ Combinatorics functions (`fibonacci`, `lucas`, etc.) operate on non-negative int
 ```text
 fibonacci(n)
   1. Validate: n must be a non-negative integer
-  2. For n <= 70: lookup table or iterative O(n)
-  3. Returns number (or BigInt for large n if configured)
+     (error: "fibonacci requires a non-negative integer")
+  2. n = 0 → 0; n = 1 → 1
+  3. Else fast doubling via fibPair(n) → [F(n), F(n+1)]; return F(n)
+  4. Returns a JS number (IEEE-754; not BigInt)
+
+lucas(n)
+  1. Validate: n must be a non-negative integer
+     (error: "lucas requires a non-negative integer")
+  2. n = 0 → 2; n = 1 → 1 (direct; not routed through fibPair)
+  3. Else L(n) = 2·F(n+1) − F(n) from fibPair(n)
 
 subfactorial(n)
   1. Compute D(n) = (n-1) * (D(n-1) + D(n-2))  with D(0)=1, D(1)=0
@@ -409,5 +425,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2035  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2046  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

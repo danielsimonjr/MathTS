@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1961,
+  "totalFiles": 1972,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1181,
+    "build-entry": 1186,
     "test-only": 0,
     "orphan": 0,
-    "test": 693,
+    "test": 699,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1206,
-    "tests": 693,
+    "src": 1211,
+    "tests": 699,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,16 +22,16 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 26,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 22,
+    "@danielsimonjr/mathts-autograd": 23,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 830,
+    "@danielsimonjr/mathts-expression": 552,
+    "@danielsimonjr/mathts-functions": 832,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 103,
+    "@danielsimonjr/mathts-matrix": 107,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 16,
@@ -324,7 +324,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2430
+      "loc": 2405
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -374,6 +374,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "autograd/tests/s2r-clones-extrema-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
     },
     {
       "file": "autograd/tests/scaffold.test.ts",
@@ -4216,7 +4223,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 314
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
@@ -4335,14 +4342,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 87
+      "loc": 67
     },
     {
       "file": "expression/src/transform/forEach.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 64
     },
     {
       "file": "expression/src/transform/index.transform.ts",
@@ -4483,6 +4490,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 16
+    },
+    {
+      "file": "expression/src/transform/utils/prepareTransformArgs.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 49
     },
     {
       "file": "expression/src/transform/utils/transformCallback.ts",
@@ -4933,6 +4947,20 @@
       "loc": 311
     },
     {
+      "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 103
+    },
+    {
+      "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
+    },
+    {
       "file": "expression/tests/scalar-builder.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -4959,6 +4987,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 35
+    },
+    {
+      "file": "expression/tests/stringSubset-set-clone.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 202
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
@@ -6470,7 +6505,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 288
     },
     {
       "file": "functions/src/matrix/trace.ts",
@@ -7247,7 +7282,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 291
+      "loc": 284
     },
     {
       "file": "functions/src/special/polygamma-orthopoly.ts",
@@ -7933,7 +7968,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 924
+      "loc": 891
     },
     {
       "file": "functions/src/typed/complex.ts",
@@ -7968,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 331
+      "loc": 317
     },
     {
       "file": "functions/src/typed/factorization/hensel.ts",
@@ -7989,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 337
+      "loc": 339
     },
     {
       "file": "functions/src/typed/factorization/kronecker-factor.ts",
@@ -8080,7 +8115,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 730
+      "loc": 689
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -8097,11 +8132,18 @@
       "loc": 1256
     },
     {
+      "file": "functions/src/typed/normal-equations-solve.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 35
+    },
+    {
       "file": "functions/src/typed/numeric.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2256
+      "loc": 2255
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -8136,7 +8178,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 437
+      "loc": 432
     },
     {
       "file": "functions/src/typed/signal.ts",
@@ -8493,7 +8535,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 533
+      "loc": 512
     },
     {
       "file": "functions/src/wasm/resolve.ts",
@@ -8634,6 +8676,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 786
+    },
+    {
+      "file": "functions/tests/clone-near-numeric-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 210
     },
     {
       "file": "functions/tests/clones-batch3-pin.test.ts",
@@ -11072,11 +11121,25 @@
       "loc": 191
     },
     {
+      "file": "matrix/src/backends/gpu/gpu-or-js.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 16
+    },
+    {
       "file": "matrix/src/backends/gpu/index.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
       "loc": 59
+    },
+    {
+      "file": "matrix/src/backends/gpu/run-shader.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 175
     },
     {
       "file": "matrix/src/backends/gpu/Sync.ts",
@@ -11090,14 +11153,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 464
+      "loc": 358
     },
     {
       "file": "matrix/src/backends/GPUMatrixBackend.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 395
+      "loc": 387
     },
     {
       "file": "matrix/src/backends/index.ts",
@@ -11226,6 +11289,13 @@
       "loc": 199
     },
     {
+      "file": "matrix/src/operations/givens.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 36
+    },
+    {
       "file": "matrix/src/operations/index.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
@@ -11279,7 +11349,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 446
+      "loc": 431
     },
     {
       "file": "matrix/src/operations/sqrtm.ts",
@@ -11300,7 +11370,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 694
+      "loc": 676
     },
     {
       "file": "matrix/src/parallel-matrix.ts",
@@ -11658,6 +11728,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 257
+    },
+    {
+      "file": "matrix/tests/s2r-clones-near-dispatch-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 363
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

@@ -15,6 +15,7 @@ import {
   applyHouseholderLeft,
   applyHouseholderRight,
 } from './common.js';
+import { applyGivensCols } from './givens.js';
 
 /**
  * Result of SVD decomposition
@@ -124,25 +125,6 @@ function givens(a: number, b: number): { c: number; s: number } {
     const t = -b / a;
     const c = 1 / Math.sqrt(1 + t * t);
     return { c, s: c * t };
-  }
-}
-
-/**
- * Apply Givens rotation to columns i and k
- */
-function applyGivensCols(
-  A: number[][],
-  c: number,
-  s: number,
-  i: number,
-  k: number,
-  rowStart: number,
-  rowEnd: number
-): void {
-  for (let j = rowStart; j < rowEnd; j++) {
-    const temp = c * A[j][i] - s * A[j][k];
-    A[j][k] = s * A[j][i] + c * A[j][k];
-    A[j][i] = temp;
   }
 }
 

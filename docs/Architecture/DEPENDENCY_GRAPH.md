@@ -116,9 +116,9 @@ The codebase is organized into the following modules:
 - **core/numeric**: 3 files
 - **core/typed**: 3 files
 - **core/types**: 19 files
-- **matrix/backends**: 18 files
+- **matrix/backends**: 20 files
 - **matrix**: 4 files
-- **matrix/operations**: 17 files
+- **matrix/operations**: 18 files
 - **matrix/types**: 6 files
 - **tensor**: 4 files
 - **tensor/operations**: 17 files
@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 43 files
+- **functions/typed**: 44 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -164,7 +164,7 @@ The codebase is organized into the following modules:
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
 - **expression/node**: 19 files
-- **expression/transform**: 31 files
+- **expression/transform**: 32 files
 - **expression/utils**: 13 files
 - **parser**: 1 file
 - **units**: 1 file
@@ -201,11 +201,11 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 8              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 48             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 492            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 493            | 2               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 478            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -1254,9 +1254,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                  | Type   |
-| -------------------------- | ------------------------ | ------ |
-| `./gpu/builtin-shaders.js` | `registerBuiltinShaders` | Import |
+| File                       | Imports                                                                                | Type   |
+| -------------------------- | -------------------------------------------------------------------------------------- | ------ |
+| `./gpu/builtin-shaders.js` | `registerBuiltinShaders`                                                               | Import |
+| `./gpu/run-shader.js`      | `planRunShaderFromAdd, planRunShaderFromMatmul, planRunShaderFromTranspose, runShader` | Import |
 
 **Exports:**
 
@@ -1283,6 +1284,7 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                    | Import             |
 | `./JSBackend.js`          | `jsBackend`                                                                      | Import             |
 | `./GPUBackend.js`         | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, GPUBackendOptions` | Import             |
+| `./gpu/gpu-or-js.js`      | `gpuOrJs`                                                                        | Import             |
 
 **Exports:**
 
@@ -1432,6 +1434,14 @@ graph LR
 
 ---
 
+### `matrix/src/backends/gpu/gpu-or-js.ts` - Route a matrix op to GPU when over the element threshold, else JS (with optional fallback).
+
+**Exports:**
+
+- Functions: `gpuOrJs`
+
+---
+
 ### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
 
 **Workspace Dependencies:**
@@ -1451,6 +1461,22 @@ graph LR
 **Exports:**
 
 - Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `ShaderManager`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPoolOptions`, `ShaderSource`, `PipelineConfig`, `BUILTIN_SHADERS`, `registerBuiltinShaders`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
+
+---
+
+### `matrix/src/backends/gpu/run-shader.ts` - Shared acquire / write / dispatch / read / release path for matrix GPU kernels.
+
+**Workspace Dependencies:**
+
+| Package                     | Import                                  |
+| --------------------------- | --------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `BufferPool, GPUContext, ShaderManager` |
+
+**Exports:**
+
+- Interfaces: `RunShaderHost`, `RunShaderPlan`
+- Types: `ShaderBindEntry`
+- Functions: `planRunShaderFromAdd`, `planRunShaderFromMatmul`, `planRunShaderFromTranspose`, `runShader`
 
 ---
 
@@ -1716,6 +1742,14 @@ graph LR
 
 ---
 
+### `matrix/src/operations/givens.ts` - Givens rotation on matrix columns (shared by Schur and SVD).
+
+**Exports:**
+
+- Functions: `applyGivensCols`, `applyGivensRight`
+
+---
+
 ### `matrix/src/operations/index.ts` - Matrix Operations
 
 **Internal Dependencies:**
@@ -1850,6 +1884,7 @@ graph LR
 | ------------------------- | ---------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
 | `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js`             | `applyGivensRight`                                                           | Import |
 
 **Exports:**
 
@@ -1897,6 +1932,7 @@ graph LR
 | File          | Imports                                                                      | Type   |
 | ------------- | ---------------------------------------------------------------------------- | ------ |
 | `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js` | `applyGivensCols`                                                            | Import |
 
 **Exports:**
 
@@ -6638,21 +6674,21 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import            |
-| ---------------------------------- | ----------------- |
-| `@danielsimonjr/mathts-expression` | `getStringSubset` |
+| Package                            | Import                             |
+| ---------------------------------- | ---------------------------------- |
+| `@danielsimonjr/mathts-expression` | `getStringSubset, setStringSubset` |
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                | Type               |
-| ---------------------------- | ------------------------------------------------------ | ------------------ |
-| `../utils/object.js`         | `clone`                                                | Import             |
-| `../utils/array.js`          | `isEmptyIndex, validateIndex, validateIndexSourceSize` | Import             |
-| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`                     | Import             |
-| `../error/DimensionError.js` | `DimensionError`                                       | Import             |
-| `../utils/factory.js`        | `factory`                                              | Import             |
-| `../core/function/typed.js`  | `TypedFunction`                                        | Import (type-only) |
-| `../utils/is.js`             | `Index`                                                | Import (type-only) |
+| File                         | Imports                                 | Type               |
+| ---------------------------- | --------------------------------------- | ------------------ |
+| `../utils/object.js`         | `clone`                                 | Import             |
+| `../utils/array.js`          | `isEmptyIndex, validateIndexSourceSize` | Import             |
+| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`      | Import             |
+| `../error/DimensionError.js` | `DimensionError`                        | Import             |
+| `../utils/factory.js`        | `factory`                               | Import             |
+| `../core/function/typed.js`  | `TypedFunction`                         | Import (type-only) |
+| `../utils/is.js`             | `Index`                                 | Import (type-only) |
 
 **Exports:**
 
@@ -10071,10 +10107,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                             | Type                  |
-| ------------------- | ----------------------------------- | --------------------- |
-| `./integer-poly.js` | `trim, degree, lc, isZero, IntPoly` | Import                |
-| `./integer-poly.js` | `IntPoly`                           | Re-export (type-only) |
+| File                | Imports                                         | Type                  |
+| ------------------- | ----------------------------------------------- | --------------------- |
+| `./integer-poly.js` | `trim, degree, lc, isZero, zipIntPoly, IntPoly` | Import                |
+| `./integer-poly.js` | `IntPoly`                                       | Re-export (type-only) |
 
 **Exports:**
 
@@ -10121,7 +10157,7 @@ graph LR
 **Exports:**
 
 - Types: `IntPoly`
-- Functions: `trim`, `degree`, `lc`, `isZero`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
 
 ---
 
@@ -10406,6 +10442,7 @@ graph LR
 | `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                                                           | Import |
 | `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`                                          | Import |
 | `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD, chebBasisRow, legendreBasisRow` | Import |
+| `./normal-equations-solve.js`          | `solveAugmentedNormalEquations`                                                                                  | Import |
 
 **Exports:**
 
@@ -10442,6 +10479,14 @@ graph LR
 - Interfaces: `CholeskyResult`, `HessenbergResult`, `PolarResult`, `JordanResult`
 - Functions: `characteristicPolynomial`, `rowReduce`, `matrixRank`, `cholesky`, `hessenbergForm`, `matrixPower`, `matrixLog`, `polarDecomposition`, `jordanForm`
 - Constants: `pinv`, `cond`, `norm2`, `normFro`, `lowRankApprox`, `singularValues`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`
+
+---
+
+### `functions/src/typed/normal-equations-solve.ts` - Gaussian elimination with partial pivoting on an augmented normal-equations
+
+**Exports:**
+
+- Functions: `solveAugmentedNormalEquations`
 
 ---
 
@@ -11366,11 +11411,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                                                    | Type   |
-| ---------------------- | ---------------------------------------------------------- | ------ |
-| `../WasmLoader.js`     | `wasmLoader`                                               | Import |
-| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
-| `../policy.js`         | `wasmPolicyAllows`                                         | Import |
+| File                                    | Imports                                                    | Type   |
+| --------------------------------------- | ---------------------------------------------------------- | ------ |
+| `../WasmLoader.js`                      | `wasmLoader`                                               | Import |
+| `../bridges/common.js`                  | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
+| `../policy.js`                          | `wasmPolicyAllows`                                         | Import |
+| `../../typed/normal-equations-solve.js` | `solveAugmentedNormalEquations`                            | Import |
 
 **Exports:**
 
@@ -15814,12 +15860,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                  | Type   |
-| ------------------------------------ | ---------------------------------------- | ------ |
-| `../utils/factory.js`                | `factory`                                | Import |
-| `../utils/is.js`                     | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.js` | `compileInlineExpression`                | Import |
-| `./utils/transformCallback.js`       | `createTransformCallback`                | Import |
+| File                              | Imports                            | Type   |
+| --------------------------------- | ---------------------------------- | ------ |
+| `../utils/factory.js`             | `factory`                          | Import |
+| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
+| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
 
 **Exports:**
 
@@ -15831,12 +15876,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                  | Type   |
-| ------------------------------------ | ---------------------------------------- | ------ |
-| `./utils/transformCallback.js`       | `createTransformCallback`                | Import |
-| `../utils/factory.js`                | `factory`                                | Import |
-| `../utils/is.js`                     | `isFunctionAssignmentNode, isSymbolNode` | Import |
-| `./utils/compileInlineExpression.js` | `compileInlineExpression`                | Import |
+| File                              | Imports                            | Type   |
+| --------------------------------- | ---------------------------------- | ------ |
+| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
+| `../utils/factory.js`             | `factory`                          | Import |
+| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
 
 **Exports:**
 
@@ -16170,6 +16214,22 @@ graph LR
 **Exports:**
 
 - Functions: `lastDimToZeroBase`
+
+---
+
+### `expression/src/transform/utils/prepareTransformArgs.ts` - Shared tail of filter/forEach transforms: evaluate the collection argument and
+
+**Internal Dependencies:**
+
+| File                           | Imports                                  | Type   |
+| ------------------------------ | ---------------------------------------- | ------ |
+| `../../utils/is.js`            | `isFunctionAssignmentNode, isSymbolNode` | Import |
+| `./compileInlineExpression.js` | `compileInlineExpression`                | Import |
+
+**Exports:**
+
+- Interfaces: `PreparedTransformArgs`
+- Functions: `prepareTransformArrayAndCallback`
 
 ---
 
@@ -18102,8 +18162,8 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
 | `functions/src/utils/collection`                       | 0 files      | 39 files   |
-| `expression/src/utils/is`                              | 0 files      | 36 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
+| `expression/src/utils/is`                              | 0 files      | 35 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 31 files     | 0 files    |
 | `functions/src/typed/index`                            | 28 files     | 2 files    |
@@ -18225,7 +18285,7 @@ graph TD
         N50[WasmLoader]
         N51[BatchExecutor]
         N52[Sync]
-        N53[...8 more]
+        N53[...10 more]
     end
 
     subgraph Matrix
@@ -18242,11 +18302,11 @@ graph TD
         N61[eig-wasm]
         N62[eig]
         N63[expm]
-        N64[index]
-        N65[logm]
-        N66[lu]
-        N67[pinv]
-        N68[...7 more]
+        N64[givens]
+        N65[index]
+        N66[logm]
+        N67[lu]
+        N68[...8 more]
     end
 
     subgraph Matrix/types
@@ -18614,7 +18674,7 @@ graph TD
         N328[complex]
         N329[dist-objects]
         N330[distributions]
-        N331[...33 more]
+        N331[...34 more]
     end
 
     subgraph Functions/unit
@@ -18720,7 +18780,7 @@ graph TD
         N401[filter.transform]
         N402[forEach.transform]
         N403[index.transform]
-        N404[...21 more]
+        N404[...22 more]
     end
 
     subgraph Expression/utils
@@ -18972,14 +19032,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1206   |
+| Total TypeScript Files  | 1211   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200674 |
-| Total Exports           | 6225   |
+| Total Lines of Code     | 200592 |
+| Total Exports           | 6235   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 539    |
-| Total Functions         | 1993   |
+| Total Interfaces        | 542    |
+| Total Functions         | 2003   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

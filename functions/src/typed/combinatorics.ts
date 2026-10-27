@@ -20,6 +20,30 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 // fibonacci - Fibonacci Number (Fast Doubling)
 // =============================================================================
 
+/** Fast doubling: returns [F(n), F(n+1)] for n >= 0 (n=0 → [0, 1]). */
+function fibPair(n: number): [number, number] {
+  let a = 0;
+  let b = 1;
+  let bits = 0;
+  let temp = n;
+  while (temp > 0) {
+    bits++;
+    temp >>>= 1;
+  }
+  for (let i = bits - 1; i >= 0; i--) {
+    const c = a * (2 * b - a);
+    const d = a * a + b * b;
+    if ((n >>> i) & 1) {
+      a = d;
+      b = c + d;
+    } else {
+      a = c;
+      b = d;
+    }
+  }
+  return [a, b];
+}
+
 /**
  * Compute the nth Fibonacci number using the fast doubling method.
  *
@@ -45,36 +69,7 @@ export const fibonacci = mathTyped('fibonacci', {
     }
     if (n === 0) return 0;
     if (n === 1) return 1;
-
-    // Fast doubling
-    let a = 0; // F(k)
-    let b = 1; // F(k+1)
-
-    // Find highest bit position
-    let bits = 0;
-    let temp = n;
-    while (temp > 0) {
-      bits++;
-      temp >>>= 1;
-    }
-
-    for (let i = bits - 1; i >= 0; i--) {
-      // Doubling step: compute F(2k) and F(2k+1)
-      const c = a * (2 * b - a);
-      const d = a * a + b * b;
-
-      if ((n >>> i) & 1) {
-        // Bit is 1: k = 2k + 1
-        a = d;
-        b = c + d;
-      } else {
-        // Bit is 0: k = 2k
-        a = c;
-        b = d;
-      }
-    }
-
-    return a;
+    return fibPair(n)[0];
   },
 });
 
@@ -108,36 +103,8 @@ export const lucas = mathTyped('lucas', {
     if (n === 0) return 2;
     if (n === 1) return 1;
 
-    // Use relation L(n) = F(n-1) + F(n+1)
-    // Compute F(n-1) and F(n) via fast doubling, then L(n) = F(n-1) + F(n+1)
-    // F(n+1) = F(n) + F(n-1), so L(n) = 2*F(n-1) + F(n)
-    let a = 0; // F(k)
-    let b = 1; // F(k+1)
-
-    let bits = 0;
-    let temp = n;
-    while (temp > 0) {
-      bits++;
-      temp >>>= 1;
-    }
-
-    for (let i = bits - 1; i >= 0; i--) {
-      const c = a * (2 * b - a);
-      const d = a * a + b * b;
-
-      if ((n >>> i) & 1) {
-        a = d;
-        b = c + d;
-      } else {
-        a = c;
-        b = d;
-      }
-    }
-
-    // a = F(n), b = F(n+1)
-    // F(n-1) = F(n+1) - F(n) = b - a
-    // L(n) = F(n-1) + F(n+1) = (b - a) + b = 2*b - a
-    return 2 * b - a;
+    const [fn, fn1] = fibPair(n);
+    return 2 * fn1 - fn;
   },
 });
 

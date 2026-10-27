@@ -1,7 +1,6 @@
 import { createTransformCallback } from './utils/transformCallback.js';
 import { factory } from '../utils/factory.js';
-import { isFunctionAssignmentNode, isSymbolNode } from '../utils/is.js';
-import { compileInlineExpression } from './utils/compileInlineExpression.js';
+import { prepareTransformArrayAndCallback } from './utils/prepareTransformArgs.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
@@ -49,34 +48,15 @@ export const createForEachTransform = /* #__PURE__ */ factory(
         return forEach(x);
       }
 
-      const N = args.length - 1;
-      let callback: unknown = args[N];
+      const prepared = prepareTransformArrayAndCallback(
+        args as Node[],
+        math as Record<string, unknown>,
+        scope as Map<string, unknown>
+      );
 
-      if (x) {
-        x = _compileAndEvaluate(x as Node, scope);
-      }
-
-      if (callback) {
-        if (isSymbolNode(callback) || isFunctionAssignmentNode(callback)) {
-          // a function pointer, like filter([3, -2, 5], myTestFunction)
-          callback = _compileAndEvaluate(callback as unknown as Node, scope);
-        } else {
-          // an expression like filter([3, -2, 5], x > 0)
-          callback = compileInlineExpression(
-            callback as Parameters<typeof compileInlineExpression>[0],
-            math as Record<string, unknown>,
-            scope as Map<string, unknown>
-          );
-        }
-      }
-
-      return forEach(x, transformCallback(callback, N));
+      return forEach(prepared.x, transformCallback(prepared.callback, prepared.callbackArity));
     }
     forEachTransform.rawArgs = true;
-
-    function _compileAndEvaluate(arg: Node, scope: unknown): unknown {
-      return arg.compile().evaluate(scope);
-    }
     return forEachTransform as TransformFunction;
   },
   { isTransformFunction: true }

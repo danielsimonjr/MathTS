@@ -33,6 +33,7 @@ import {
   type RawWasm,
 } from '../bridges/common.js';
 import { wasmPolicyAllows } from '../policy.js';
+import { solveAugmentedNormalEquations } from '../../typed/normal-equations-solve.js';
 
 /**
  * Coefficient-count threshold above which we attempt the WASM kernel.
@@ -348,31 +349,9 @@ function polyFitJS(
     ATA[j][k] = s;
   }
 
-  // Gaussian elimination with partial pivoting.
-  for (let col = 0; col < k; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(ATA[col][col]);
-    for (let row = col + 1; row < k; row++) {
-      if (Math.abs(ATA[row][col]) > maxVal) {
-        maxVal = Math.abs(ATA[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxVal < 1e-14) return null;
-    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
-    for (let row = col + 1; row < k; row++) {
-      const factor = ATA[row][col] / ATA[col][col];
-      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
-    }
-  }
-
-  const coeffs = new Float64Array(k);
-  for (let i = k - 1; i >= 0; i--) {
-    coeffs[i] = ATA[i][k];
-    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
-    coeffs[i] /= ATA[i][i];
-  }
-  return coeffs;
+  const solved = solveAugmentedNormalEquations(ATA);
+  if (!solved) return null;
+  return Float64Array.from(solved);
 }
 
 /** Build a standard power basis row: [1, x, x^2, ...]. */

@@ -32,6 +32,7 @@ import {
   chebBasisRow,
   legendreBasisRow,
 } from '../wasm/poly/wasm-bridge.js';
+import { solveAugmentedNormalEquations } from './normal-equations-solve.js';
 
 // =============================================================================
 // linearInterp - Linear Interpolation
@@ -623,32 +624,11 @@ export function chebyshevFit(xs: number[], ys: number[], degree: number): number
     }
   }
 
-  for (let col = 0; col < k; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(ATA[col][col]);
-    for (let row = col + 1; row < k; row++) {
-      if (Math.abs(ATA[row][col]) > maxVal) {
-        maxVal = Math.abs(ATA[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
-    if (Math.abs(ATA[col][col]) < 1e-14) {
-      throw new Error('chebyshevFit: rank-deficient system');
-    }
-    for (let row = col + 1; row < k; row++) {
-      const factor = ATA[row][col] / ATA[col][col];
-      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
-    }
+  const solved = solveAugmentedNormalEquations(ATA);
+  if (!solved) {
+    throw new Error('chebyshevFit: rank-deficient system');
   }
-
-  const coeffs = new Array(k);
-  for (let i = k - 1; i >= 0; i--) {
-    coeffs[i] = ATA[i][k];
-    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
-    coeffs[i] /= ATA[i][i];
-  }
-  return coeffs;
+  return solved;
 }
 
 // =============================================================================
@@ -700,30 +680,9 @@ export function legendreFit(xs: number[], ys: number[], degree: number): number[
     }
   }
 
-  for (let col = 0; col < k; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(ATA[col][col]);
-    for (let row = col + 1; row < k; row++) {
-      if (Math.abs(ATA[row][col]) > maxVal) {
-        maxVal = Math.abs(ATA[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [ATA[col], ATA[maxRow]] = [ATA[maxRow], ATA[col]];
-    if (Math.abs(ATA[col][col]) < 1e-14) {
-      throw new Error('legendreFit: rank-deficient system');
-    }
-    for (let row = col + 1; row < k; row++) {
-      const factor = ATA[row][col] / ATA[col][col];
-      for (let j = col; j <= k; j++) ATA[row][j] -= factor * ATA[col][j];
-    }
+  const solvedLeg = solveAugmentedNormalEquations(ATA);
+  if (!solvedLeg) {
+    throw new Error('legendreFit: rank-deficient system');
   }
-
-  const coeffs = new Array(k);
-  for (let i = k - 1; i >= 0; i--) {
-    coeffs[i] = ATA[i][k];
-    for (let j = i + 1; j < k; j++) coeffs[i] -= ATA[i][j] * coeffs[j];
-    coeffs[i] /= ATA[i][i];
-  }
-  return coeffs;
+  return solvedLeg;
 }

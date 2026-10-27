@@ -17,6 +17,7 @@ import {
   type GPUBackendOptions,
 } from './GPUBackend.js';
 import { hasWebGPU, detectGPUCapabilities, type GPUCapabilities } from '@danielsimonjr/mathts-gpu';
+import { gpuOrJs } from './gpu/gpu-or-js.js';
 
 /**
  * Configuration for GPU Matrix Backend
@@ -181,19 +182,16 @@ export class GPUMatrixBackend implements MatrixBackend {
    */
   async addAsync(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
     const elementCount = a.rows * a.cols;
-
-    if (!this.shouldUseGPU(elementCount)) {
-      return jsBackend.add(a, b);
-    }
-
-    return this.executeWithFallback(
+    return gpuOrJs(
+      this.shouldUseGPU(elementCount),
+      () => jsBackend.add(a, b),
       async () => {
         const aData = new Float32Array(a.toFloat64Array());
         const bData = new Float32Array(b.toFloat64Array());
         const result = await this.backend!.add(aData, bData, a.rows, a.cols);
         return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
       },
-      () => jsBackend.add(a, b)
+      (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
   }
 
@@ -243,18 +241,15 @@ export class GPUMatrixBackend implements MatrixBackend {
    */
   async scaleAsync(a: DenseMatrix, scalar: number): Promise<DenseMatrix> {
     const elementCount = a.rows * a.cols;
-
-    if (!this.shouldUseGPU(elementCount)) {
-      return jsBackend.scale(a, scalar);
-    }
-
-    return this.executeWithFallback(
+    return gpuOrJs(
+      this.shouldUseGPU(elementCount),
+      () => jsBackend.scale(a, scalar),
       async () => {
         const aData = new Float32Array(a.toFloat64Array());
         const result = await this.backend!.scale(aData, scalar);
         return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
       },
-      () => jsBackend.scale(a, scalar)
+      (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
   }
 
@@ -286,19 +281,16 @@ export class GPUMatrixBackend implements MatrixBackend {
    */
   async multiplyAsync(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
     const elementCount = a.rows * b.cols * a.cols;
-
-    if (!this.shouldUseGPU(elementCount)) {
-      return jsBackend.multiply(a, b);
-    }
-
-    return this.executeWithFallback(
+    return gpuOrJs(
+      this.shouldUseGPU(elementCount),
+      () => jsBackend.multiply(a, b),
       async () => {
         const aData = new Float32Array(a.toFloat64Array());
         const bData = new Float32Array(b.toFloat64Array());
         const result = await this.backend!.matmul(aData, bData, a.rows, a.cols, b.cols);
         return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
       },
-      () => jsBackend.multiply(a, b)
+      (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
   }
 

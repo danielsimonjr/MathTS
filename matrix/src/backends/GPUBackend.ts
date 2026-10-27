@@ -16,6 +16,12 @@ import {
   type GPUCapabilities,
 } from '@danielsimonjr/mathts-gpu';
 import { registerBuiltinShaders } from './gpu/builtin-shaders.js';
+import {
+  planRunShaderFromAdd,
+  planRunShaderFromMatmul,
+  planRunShaderFromTranspose,
+  runShader,
+} from './gpu/run-shader.js';
 
 /**
  * GPU Backend status
@@ -204,47 +210,10 @@ export class GPUBackend {
    * Add two matrices element-wise
    */
   async add(a: Float32Array, b: Float32Array, rows: number, cols: number): Promise<Float32Array> {
-    const ctx = this.getContext();
-    const pool = this.getBufferPool();
-    const shaders = this.getShaderManager();
-
-    const size = rows * cols * 4; // f32 = 4 bytes
-
-    // Create buffers
-    const bufferA = pool.acquireStorageBuffer(size, 'matrix-a', true, true);
-    const bufferB = pool.acquireStorageBuffer(size, 'matrix-b', true, true);
-    const bufferResult = pool.acquireStorageBuffer(size, 'matrix-result', true, false);
-    const bufferParams = pool.acquireUniformBuffer(16, 'params'); // 4 u32s
-
-    // Write data
-    ctx.writeBuffer(bufferA, a);
-    ctx.writeBuffer(bufferB, b);
-    ctx.writeBuffer(bufferParams, new Uint32Array([rows, cols, 0, 0]));
-
-    // Get pipeline
-    const pipeline = shaders.getRegisteredPipeline('matrixAdd');
-
-    // Create bind group
-    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
-      { binding: 0, resource: { buffer: bufferA } },
-      { binding: 1, resource: { buffer: bufferB } },
-      { binding: 2, resource: { buffer: bufferResult } },
-      { binding: 3, resource: { buffer: bufferParams } },
-    ]);
-
-    // Dispatch
-    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(rows, cols));
-
-    // Read result
-    const resultData = await ctx.readBuffer(bufferResult);
-
-    // Release buffers
-    pool.release(bufferA);
-    pool.release(bufferB);
-    pool.release(bufferResult);
-    pool.release(bufferParams);
-
-    return new Float32Array(resultData);
+    return runShader(
+      this,
+      planRunShaderFromAdd(a, b, rows, cols, this.calculateWorkgroups(rows, cols))
+    );
   }
 
   /**
@@ -257,92 +226,17 @@ export class GPUBackend {
     K: number,
     N: number
   ): Promise<Float32Array> {
-    const ctx = this.getContext();
-    const pool = this.getBufferPool();
-    const shaders = this.getShaderManager();
-
-    const sizeA = M * K * 4;
-    const sizeB = K * N * 4;
-    const sizeResult = M * N * 4;
-
-    // Create buffers
-    const bufferA = pool.acquireStorageBuffer(sizeA, 'matmul-a', true, true);
-    const bufferB = pool.acquireStorageBuffer(sizeB, 'matmul-b', true, true);
-    const bufferResult = pool.acquireStorageBuffer(sizeResult, 'matmul-result', true, false);
-    const bufferParams = pool.acquireUniformBuffer(16, 'params');
-
-    // Write data
-    ctx.writeBuffer(bufferA, a);
-    ctx.writeBuffer(bufferB, b);
-    ctx.writeBuffer(bufferParams, new Uint32Array([M, N, K, 0]));
-
-    // Get pipeline
-    const pipeline = shaders.getRegisteredPipeline('matmul');
-
-    // Create bind group
-    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
-      { binding: 0, resource: { buffer: bufferA } },
-      { binding: 1, resource: { buffer: bufferB } },
-      { binding: 2, resource: { buffer: bufferResult } },
-      { binding: 3, resource: { buffer: bufferParams } },
-    ]);
-
-    // Dispatch
-    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(M, N));
-
-    // Read result
-    const resultData = await ctx.readBuffer(bufferResult);
-
-    // Release buffers
-    pool.release(bufferA);
-    pool.release(bufferB);
-    pool.release(bufferResult);
-    pool.release(bufferParams);
-
-    return new Float32Array(resultData);
+    return runShader(this, planRunShaderFromMatmul(a, b, M, K, N, this.calculateWorkgroups(M, N)));
   }
 
   /**
    * Transpose a matrix
    */
   async transpose(a: Float32Array, rows: number, cols: number): Promise<Float32Array> {
-    const ctx = this.getContext();
-    const pool = this.getBufferPool();
-    const shaders = this.getShaderManager();
-
-    const size = rows * cols * 4;
-
-    // Create buffers
-    const bufferA = pool.acquireStorageBuffer(size, 'transpose-a', true, true);
-    const bufferResult = pool.acquireStorageBuffer(size, 'transpose-result', true, false);
-    const bufferParams = pool.acquireUniformBuffer(16, 'params');
-
-    // Write data
-    ctx.writeBuffer(bufferA, a);
-    ctx.writeBuffer(bufferParams, new Uint32Array([rows, cols, 0, 0]));
-
-    // Get pipeline
-    const pipeline = shaders.getRegisteredPipeline('transpose');
-
-    // Create bind group
-    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), [
-      { binding: 0, resource: { buffer: bufferA } },
-      { binding: 1, resource: { buffer: bufferResult } },
-      { binding: 2, resource: { buffer: bufferParams } },
-    ]);
-
-    // Dispatch
-    ctx.dispatchCompute(pipeline, [bindGroup], this.calculateWorkgroups(rows, cols));
-
-    // Read result
-    const resultData = await ctx.readBuffer(bufferResult);
-
-    // Release buffers
-    pool.release(bufferA);
-    pool.release(bufferResult);
-    pool.release(bufferParams);
-
-    return new Float32Array(resultData);
+    return runShader(
+      this,
+      planRunShaderFromTranspose(a, rows, cols, this.calculateWorkgroups(rows, cols))
+    );
   }
 
   /**

@@ -34,7 +34,7 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Function graph   │  functions (478)          expression (477)              │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Numeric / accel  │  matrix (45) · tensor (21) · autograd (6) · parallel(14) │
+│  Numeric / accel  │  matrix (48) · tensor (21) · autograd (6) · parallel(14) │
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Core             │  core (48)  — types · typed-function · factory           │
 ├────────────────────────────────────────────────────────────────────────────┤
@@ -184,7 +184,10 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
 factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
 `transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
-`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
+`matInv` stays internal to the package. `GPUBackend.add` / `matmul` / `transpose` share an internal
+`runShader` helper (`backends/gpu/run-shader.ts`; not on the barrel). `GPUMatrixBackend.addAsync` /
+`scaleAsync` / `multiplyAsync` share `gpuOrJs`; the sync `scale` path stays on JS. Schur and SVD share
+`applyGivensCols` (`operations/givens.ts`; not on the barrel). Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -208,6 +211,8 @@ export class TapedTensor     // reverse-mode leaf/intermediate
 ```
 
 Depends on `core`, `tensor`. Forward-mode `Dual` rules are shared from `core` (`DUAL_UNARY_RULES`).
+`TapedTensor.max` / `min` share one reverse-mode helper (`scatterArgExtrema`) with a strict
+first-wins `better` comparator (`>` vs `<`); there is no `'max'|'min'` mode string.
 
 ---
 
@@ -276,6 +281,14 @@ bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLengt
 `reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
 `_extreme` (cache slot + `smaller` argument order), and `_ends`.
 
+Sprint 2R clone-merge batch 6 keeps the public names `expfit` / `logfit` / `powerfit`,
+`chebyshevFit` / `legendreFit`, `struveH` / `struveL`, `kelvinBer` / `kelvinBei`, integer
+`add` / `sub` and 𝔽_p `addP` / `subP`, `setIntersect` / `setDifference`, and `fibonacci` /
+`lucas`. Shared internals are `linearFit` (coordinate maps; exp keeps `log(abs(y)||1e-15)`
+and `exp(intercept)`), `solveAugmentedNormalEquations` (partial pivot, `|pivot| < 1e-14`),
+`struveSeries` (ratio sign), `kelvinSeries` (`term0` / `denom`), `zipIntPoly`, `selectById`,
+and `fibPair` (`lucas(0)` / `lucas(1)` stay direct). The helpers are not barrel-exported.
+
 Sprint 2R clone-merge batch 7 keeps the public names `pageRank` /
 `betweennessCentrality` / `eigenvectorCentrality`, factory `column` / `row`, sparse
 `matrixFromColumns` / `matrixFromRows`, factory `fft` / `ifft`, the CAS
@@ -307,7 +320,11 @@ are `runCentralityRestarts` (each wrapper keeps `restarts === 1` with seed 0 and
 **Batch compile / gradients / fitting / Pareto / node bridge / numeric equivalence** live in `functions` (`scalar-compile.ts` for `compileScalar` and `compileScalarGradient`, `fit-scalar.ts` for `fitScalarParameters`, `scalar-node-bridge.ts`, `pareto-front.ts`, `numeric-equivalence.ts`). `numericallyEquivalent` samples with `SeededRng.next`, evaluates via `compileScalar`, and compares with core `nearlyEqual` (`consistent` is evidence, not proof).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
-regression guard for safe-access.
+regression guard for safe-access. `RelationalNode` `_toString` / `_toTex` share `renderRelational`
+(one precedence walk; string joins `' ' + op + ' '`, TeX uses `latexOperators` and `\left(\right)`
+wraps). `filterTransform` / `forEachTransform` share `prepareTransformArrayAndCallback` for collection
+and callback compilation; each transform still owns its `filter` / `forEach` call and
+`createTransformCallback` placement.
 
 ### @danielsimonjr/mathts-workbook (`workbook/`)
 
@@ -434,5 +451,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2035  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8130  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2046  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8144  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

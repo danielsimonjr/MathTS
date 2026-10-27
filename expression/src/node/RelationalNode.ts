@@ -40,6 +40,45 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       largerEq: '>=',
     };
 
+    type ParamRender = (param: MathNode) => string;
+    type ParamWrap = (inner: string) => string;
+    type RelationalJoin = (conditional: string, rhs: string) => string;
+
+    function renderRelational(
+      self: RelationalNode,
+      options: StringOptions | undefined,
+      renderParam: ParamRender,
+      wrapParam: ParamWrap,
+      join: RelationalJoin
+    ): string {
+      const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
+      const precedence = getPrecedence(
+        self,
+        parenthesis,
+        (options && options.implicit) || 'hide',
+        undefined
+      ) as number;
+
+      const paramStrings = self.params.map(function (p: MathNode): string {
+        const paramPrecedence = getPrecedence(
+          p,
+          parenthesis,
+          (options && options.implicit) || 'hide',
+          undefined
+        );
+        const text = renderParam(p);
+        return parenthesis === 'all' || (paramPrecedence !== null && paramPrecedence <= precedence)
+          ? wrapParam(text)
+          : text;
+      });
+
+      let ret = paramStrings[0];
+      for (let i = 0; i < self.conditionals.length; i++) {
+        ret += join(self.conditionals[i], paramStrings[i + 1]);
+      }
+      return ret;
+    }
+
     class RelationalNode extends Node {
       conditionals: string[];
       params: MathNode[];
@@ -164,36 +203,13 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toString(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        // `this` is the RelationalNode being rendered (a registered operator),
-        // so its precedence is never null; only params may lack a precedence.
-        const precedence = getPrecedence(
+        return renderRelational(
           this,
-          parenthesis,
-          (options && options.implicit) || 'hide',
-          undefined
-        ) as number;
-
-        const paramStrings = this.params.map(function (p: MathNode, _index: number): string {
-          const paramPrecedence = getPrecedence(
-            p,
-            parenthesis,
-            (options && options.implicit) || 'hide',
-            undefined
-          );
-          return parenthesis === 'all' ||
-            (paramPrecedence !== null && paramPrecedence <= precedence)
-            ? '(' + p.toString(options) + ')'
-            : p.toString(options);
-        });
-
-        let ret = paramStrings[0];
-        for (let i = 0; i < this.conditionals.length; i++) {
-          ret += ' ' + operatorMap[this.conditionals[i]];
-          ret += ' ' + paramStrings[i + 1];
-        }
-
-        return ret;
+          options,
+          (p) => p.toString(options),
+          (inner) => '(' + inner + ')',
+          (cond, rhs) => ' ' + operatorMap[cond] + ' ' + rhs
+        );
       }
 
       /**
@@ -280,36 +296,14 @@ export const createRelationalNode = /* #__PURE__ */ factory(
       }
 
       _toTex(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        // `this` is the RelationalNode being rendered (a registered operator),
-        // so its precedence is never null; only params may lack a precedence.
-        const precedence = getPrecedence(
+        const latex = latexOperators as Record<string, string>;
+        return renderRelational(
           this,
-          parenthesis,
-          (options && options.implicit) || 'hide',
-          undefined
-        ) as number;
-
-        const paramStrings = this.params.map(function (p: MathNode, _index: number): string {
-          const paramPrecedence = getPrecedence(
-            p,
-            parenthesis,
-            (options && options.implicit) || 'hide',
-            undefined
-          );
-          return parenthesis === 'all' ||
-            (paramPrecedence !== null && paramPrecedence <= precedence)
-            ? '\\left(' + p.toTex(options) + '\\right)'
-            : p.toTex(options);
-        });
-
-        let ret = paramStrings[0];
-        for (let i = 0; i < this.conditionals.length; i++) {
-          ret +=
-            (latexOperators as Record<string, string>)[this.conditionals[i]] + paramStrings[i + 1];
-        }
-
-        return ret;
+          options,
+          (p) => p.toTex(options),
+          (inner) => '\\left(' + inner + '\\right)',
+          (cond, rhs) => latex[cond] + rhs
+        );
       }
     }
 
