@@ -12021,7 +12021,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 149
+      "loc": 235
     },
     {
       "file": "parallel/tests/strategies-index.test.ts",
