@@ -43,28 +43,30 @@ export function isZero(p: IntPoly): boolean {
   return trim(p).length === 0;
 }
 
-/** `a + b`, trimmed. */
-export function add(a: IntPoly, b: IntPoly): IntPoly {
+/** Zip coefficient vectors with a per-index combiner, then trim. */
+export function zipIntPoly(
+  a: IntPoly,
+  b: IntPoly,
+  combine: (av: bigint, bv: bigint) => bigint
+): IntPoly {
   const n = Math.max(a.length, b.length);
   const out: bigint[] = new Array<bigint>(n);
   for (let i = 0; i < n; i += 1) {
     const av = i < a.length ? a[i] : 0n;
     const bv = i < b.length ? b[i] : 0n;
-    out[i] = av + bv;
+    out[i] = combine(av, bv);
   }
   return trim(out);
 }
 
+/** `a + b`, trimmed. */
+export function add(a: IntPoly, b: IntPoly): IntPoly {
+  return zipIntPoly(a, b, (av, bv) => av + bv);
+}
+
 /** `a - b`, trimmed. */
 export function sub(a: IntPoly, b: IntPoly): IntPoly {
-  const n = Math.max(a.length, b.length);
-  const out: bigint[] = new Array<bigint>(n);
-  for (let i = 0; i < n; i += 1) {
-    const av = i < a.length ? a[i] : 0n;
-    const bv = i < b.length ? b[i] : 0n;
-    out[i] = av - bv;
-  }
-  return trim(out);
+  return zipIntPoly(a, b, (av, bv) => av - bv);
 }
 
 /** `-a`, trimmed. */

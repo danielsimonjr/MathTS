@@ -9,7 +9,7 @@
  * (`functions/src/typed/factorization/`) and is `bigint`-only by design.
  */
 
-import { trim, degree, lc, isZero, type IntPoly } from './integer-poly.js';
+import { trim, degree, lc, isZero, zipIntPoly, type IntPoly } from './integer-poly.js';
 
 export type { IntPoly } from './integer-poly.js';
 
@@ -29,26 +29,12 @@ export function reduceModP(a: IntPoly, p: bigint): IntPoly {
 
 /** `a + b` over 𝔽_p, coefficients reduced into `[0, p)`. */
 export function addP(a: IntPoly, b: IntPoly, p: bigint): IntPoly {
-  const n = Math.max(a.length, b.length);
-  const out: bigint[] = new Array<bigint>(n);
-  for (let i = 0; i < n; i += 1) {
-    const av = i < a.length ? a[i] : 0n;
-    const bv = i < b.length ? b[i] : 0n;
-    out[i] = modP(av + bv, p);
-  }
-  return trim(out);
+  return zipIntPoly(a, b, (av, bv) => modP(av + bv, p));
 }
 
 /** `a - b` over 𝔽_p, coefficients reduced into `[0, p)`. */
 export function subP(a: IntPoly, b: IntPoly, p: bigint): IntPoly {
-  const n = Math.max(a.length, b.length);
-  const out: bigint[] = new Array<bigint>(n);
-  for (let i = 0; i < n; i += 1) {
-    const av = i < a.length ? a[i] : 0n;
-    const bv = i < b.length ? b[i] : 0n;
-    out[i] = modP(av - bv, p);
-  }
-  return trim(out);
+  return zipIntPoly(a, b, (av, bv) => modP(av - bv, p));
 }
 
 /** `a * b` over 𝔽_p via schoolbook convolution, coefficients in `[0, p)`. */

@@ -7219,7 +7219,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 287
+      "loc": 284
     },
     {
       "file": "functions/src/special/polygamma-orthopoly.ts",
