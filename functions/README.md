@@ -16,6 +16,7 @@ npm install @danielsimonjr/mathts-functions
 - A wired `parse` / `evaluate` against the full activated math scope.
 - `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw. `compileScalarGradient` reuses that tape to return exact ∂f/∂parameter for each row. `fitScalarParameters` fits those constants to data via `levenbergMarquardt`, `bfgs`, or `nelderMead` (PySR-style restarts and optional bounds).
 - `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; the default remains forward-difference `numericJacobian`.
+- `minimize` (Nelder–Mead) delegates to `nelderMead` with an absolute simplex step; `nelderMead` keeps relative defaults for `fitScalarParameters`.
 - `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` — convert between scalar trees and wired expression nodes (no formula string); `simplifyScalar` uses the same `simplify` as the expression language.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
 - `numericallyEquivalent` — sample two scalar trees with `createSeededRng`, evaluate via `compileScalar`, compare with core `nearlyEqual`. **Numerical agreement alone never proves symbolic equivalence;** a `consistent` verdict is evidence, not proof.
