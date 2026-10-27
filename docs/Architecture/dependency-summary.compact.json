@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1202, "e": 6220, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1206, "e": 6228, "re": 2627 },
   "s": {
-    "loc": 200577,
+    "loc": 200580,
     "cls": 59,
-    "int": 539,
-    "fn": 1989,
+    "int": 542,
+    "fn": 1997,
     "tg": 158,
     "en": 0,
     "co": 1618,
@@ -241,7 +241,7 @@
       ]
     },
     "matrix/backends": {
-      "f": 18,
+      "f": 20,
       "exp": [
         "DEFAULT_BACKEND_HINTS",
         "backendRegistry",
@@ -316,7 +316,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "cholesky",
         "eye",
@@ -1302,7 +1302,7 @@
       "int": ["CompiledExpression", "StringOptions", "IndexLike"]
     },
     "expression/transform": {
-      "f": 31,
+      "f": 32,
       "exp": [
         "createAndTransform",
         "createBitAndTransform",
@@ -1314,7 +1314,8 @@
         "createFilterTransform",
         "createForEachTransform",
         "createIndexTransform"
-      ]
+      ],
+      "int": ["PreparedTransformArgs"]
     },
     "expression/utils": {
       "f": 13,

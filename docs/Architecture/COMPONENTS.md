@@ -34,7 +34,7 @@ AssemblyScript WASM backend where SIMD wins, and an experimental WebGPU tier —
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Function graph   │  functions (478)          expression (477)              │
 ├────────────────────────────────────────────────────────────────────────────┤
-│  Numeric / accel  │  matrix (45) · tensor (21) · autograd (6) · parallel(14) │
+│  Numeric / accel  │  matrix (48) · tensor (21) · autograd (6) · parallel(14) │
 ├────────────────────────────────────────────────────────────────────────────┤
 │  Core             │  core (48)  — types · typed-function · factory           │
 ├────────────────────────────────────────────────────────────────────────────┤
@@ -184,7 +184,10 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
 factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
 `transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
-`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
+`matInv` stays internal to the package. `GPUBackend.add` / `matmul` / `transpose` share an internal
+`runShader` helper (`backends/gpu/run-shader.ts`; not on the barrel). `GPUMatrixBackend.addAsync` /
+`scaleAsync` / `multiplyAsync` share `gpuOrJs`; the sync `scale` path stays on JS. Schur and SVD share
+`applyGivensCols` (`operations/givens.ts`; not on the barrel). Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -208,6 +211,8 @@ export class TapedTensor     // reverse-mode leaf/intermediate
 ```
 
 Depends on `core`, `tensor`. Forward-mode `Dual` rules are shared from `core` (`DUAL_UNARY_RULES`).
+`TapedTensor.max` / `min` share one reverse-mode helper (`scatterArgExtrema`) with a strict
+first-wins `better` comparator (`>` vs `<`); there is no `'max'|'min'` mode string.
 
 ---
 
@@ -306,7 +311,11 @@ and `fibPair` (`lucas(0)` / `lucas(1)` stay direct). The helpers are not barrel-
 **Batch compile / gradients / fitting / Pareto / node bridge / numeric equivalence** live in `functions` (`scalar-compile.ts` for `compileScalar` and `compileScalarGradient`, `fit-scalar.ts` for `fitScalarParameters`, `scalar-node-bridge.ts`, `pareto-front.ts`, `numeric-equivalence.ts`). `numericallyEquivalent` samples with `SeededRng.next`, evaluates via `compileScalar`, and compares with core `nearlyEqual` (`consistent` is evidence, not proof).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
-regression guard for safe-access.
+regression guard for safe-access. `RelationalNode` `_toString` / `_toTex` share `renderRelational`
+(one precedence walk; string joins `' ' + op + ' '`, TeX uses `latexOperators` and `\left(\right)`
+wraps). `filterTransform` / `forEachTransform` share `prepareTransformArrayAndCallback` for collection
+and callback compilation; each transform still owns its `filter` / `forEach` call and
+`createTransformCallback` placement.
 
 ### @danielsimonjr/mathts-workbook (`workbook/`)
 
@@ -433,5 +442,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2031  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8125  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2040  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8137  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

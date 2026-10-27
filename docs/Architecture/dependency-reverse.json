@@ -201,10 +201,12 @@
       "matrix/src/backends/GPUBackend.ts",
       "matrix/src/backends/gpu/index.ts"
     ],
+    "matrix/src/backends/gpu/run-shader.ts": ["matrix/src/backends/GPUBackend.ts"],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
       "matrix/src/backends/index.ts"
     ],
+    "matrix/src/backends/gpu/gpu-or-js.ts": ["matrix/src/backends/GPUMatrixBackend.ts"],
     "matrix/src/types/dense/reduction.ts": [
       "matrix/src/backends/JSBackend.ts",
       "matrix/src/types/DenseMatrix.ts"
@@ -284,6 +286,10 @@
     "matrix/src/operations/qr-pivoted.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/qr-family.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/condest.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/givens.ts": [
+      "matrix/src/operations/schur.ts",
+      "matrix/src/operations/svd.ts"
+    ],
     "matrix/src/types/Matrix.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/SparseMatrix.ts",
@@ -2463,8 +2469,6 @@
       "expression/src/transform/column.transform.ts",
       "expression/src/transform/concat.transform.ts",
       "expression/src/transform/cumsum.transform.ts",
-      "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
       "expression/src/transform/index.transform.ts",
       "expression/src/transform/map.transform.ts",
       "expression/src/transform/mapSlices.transform.ts",
@@ -2473,7 +2477,8 @@
       "expression/src/transform/row.transform.ts",
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/transform/utils/dimToZeroBase.ts",
-      "expression/src/transform/utils/lastDimToZeroBase.ts"
+      "expression/src/transform/utils/lastDimToZeroBase.ts",
+      "expression/src/transform/utils/prepareTransformArgs.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3882,10 +3887,9 @@
       "expression/src/transform/sum.transform.ts",
       "expression/src/transform/variance.transform.ts"
     ],
-    "expression/src/transform/utils/compileInlineExpression.ts": [
+    "expression/src/transform/utils/prepareTransformArgs.ts": [
       "expression/src/transform/filter.transform.ts",
-      "expression/src/transform/forEach.transform.ts",
-      "expression/src/transform/map.transform.ts"
+      "expression/src/transform/forEach.transform.ts"
     ],
     "expression/src/transform/utils/transformCallback.ts": [
       "expression/src/transform/filter.transform.ts",
@@ -3917,6 +3921,10 @@
     "expression/src/transform/subset.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/sum.transform.ts": ["expression/src/transform/index.ts"],
     "expression/src/transform/variance.transform.ts": ["expression/src/transform/index.ts"],
+    "expression/src/transform/utils/compileInlineExpression.ts": [
+      "expression/src/transform/map.transform.ts",
+      "expression/src/transform/utils/prepareTransformArgs.ts"
+    ],
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "expression/src/transform/utils/dimToZeroBase.ts": [

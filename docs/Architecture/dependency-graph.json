@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1202,
+    "totalFiles": 1206,
     "totalModules": 82,
-    "totalExports": 6220
+    "totalExports": 6228
   },
   "entryPoints": [
     {
@@ -3520,6 +3520,15 @@
           {
             "file": "./gpu/builtin-shaders.js",
             "imports": ["registerBuiltinShaders"]
+          },
+          {
+            "file": "./gpu/run-shader.js",
+            "imports": [
+              "planRunShaderFromAdd",
+              "planRunShaderFromMatmul",
+              "planRunShaderFromTranspose",
+              "runShader"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -3579,6 +3588,10 @@
               "initializeGlobalGPUBackend",
               "GPUBackendOptions"
             ]
+          },
+          {
+            "file": "./gpu/gpu-or-js.js",
+            "imports": ["gpuOrJs"]
           }
         ],
         "workspaceDependencies": [
@@ -3784,6 +3797,15 @@
         "functions": ["registerBuiltinShaders"],
         "constants": ["BUILTIN_SHADERS"]
       },
+      "matrix/src/backends/gpu/gpu-or-js.ts": {
+        "description": "Route a matrix op to GPU when over the element threshold, else JS (with optional fallback).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gpuOrJs"],
+        "functions": ["gpuOrJs"]
+      },
       "matrix/src/backends/gpu/index.ts": {
         "description": "GPU Backend Exports",
         "externalDependencies": [],
@@ -3927,6 +3949,32 @@
           "TransferRequest",
           "TransferResult",
           "SyncConfig"
+        ]
+      },
+      "matrix/src/backends/gpu/run-shader.ts": {
+        "description": "Shared acquire / write / dispatch / read / release path for matrix GPU kernels.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-gpu",
+            "directory": "gpu",
+            "imports": ["BufferPool", "GPUContext", "ShaderManager"]
+          }
+        ],
+        "exports": [
+          "planRunShaderFromAdd",
+          "planRunShaderFromMatmul",
+          "planRunShaderFromTranspose",
+          "runShader"
+        ],
+        "interfaces": ["RunShaderHost", "RunShaderPlan"],
+        "functions": [
+          "planRunShaderFromAdd",
+          "planRunShaderFromMatmul",
+          "planRunShaderFromTranspose",
+          "runShader"
         ]
       },
       "matrix/src/backends/index.ts": {
@@ -4714,6 +4762,15 @@
         "interfaces": ["ExpmOptions"],
         "functions": ["matrixExpm"]
       },
+      "matrix/src/operations/givens.ts": {
+        "description": "Givens rotation on matrix columns (shared by Schur and SVD).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["applyGivensCols", "applyGivensRight"],
+        "functions": ["applyGivensCols", "applyGivensRight"]
+      },
       "matrix/src/operations/index.ts": {
         "description": "Matrix Operations",
         "externalDependencies": [],
@@ -5050,6 +5107,10 @@
               "applyHouseholderLeft",
               "applyHouseholderRight"
             ]
+          },
+          {
+            "file": "./givens.js",
+            "imports": ["applyGivensRight"]
           }
         ],
         "workspaceDependencies": [],
@@ -5112,6 +5173,10 @@
               "applyHouseholderLeft",
               "applyHouseholderRight"
             ]
+          },
+          {
+            "file": "./givens.js",
+            "imports": ["applyGivensCols"]
           }
         ],
         "workspaceDependencies": [],
@@ -15803,7 +15868,7 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["isEmptyIndex", "validateIndex", "validateIndexSourceSize"]
+            "imports": ["isEmptyIndex", "validateIndexSourceSize"]
           },
           {
             "file": "../utils/customs.js",
@@ -15832,7 +15897,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["getStringSubset"]
+            "imports": ["getStringSubset", "setStringSubset"]
           }
         ],
         "exports": ["createSubset"],
@@ -32491,12 +32556,8 @@
             "imports": ["factory"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
-          },
-          {
-            "file": "./utils/compileInlineExpression.js",
-            "imports": ["compileInlineExpression"]
+            "file": "./utils/prepareTransformArgs.js",
+            "imports": ["prepareTransformArrayAndCallback"]
           },
           {
             "file": "./utils/transformCallback.js",
@@ -32521,12 +32582,8 @@
             "imports": ["factory"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
-          },
-          {
-            "file": "./utils/compileInlineExpression.js",
-            "imports": ["compileInlineExpression"]
+            "file": "./utils/prepareTransformArgs.js",
+            "imports": ["prepareTransformArrayAndCallback"]
           }
         ],
         "workspaceDependencies": [],
@@ -33085,6 +33142,25 @@
         "workspaceDependencies": [],
         "exports": ["lastDimToZeroBase"],
         "functions": ["lastDimToZeroBase"]
+      },
+      "expression/src/transform/utils/prepareTransformArgs.ts": {
+        "description": "Shared tail of filter/forEach transforms: evaluate the collection argument and",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
+          },
+          {
+            "file": "./compileInlineExpression.js",
+            "imports": ["compileInlineExpression"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["prepareTransformArrayAndCallback"],
+        "interfaces": ["PreparedTransformArgs"],
+        "functions": ["prepareTransformArrayAndCallback"]
       },
       "expression/src/transform/utils/transformCallback.ts": {
         "description": "Transforms the given callback function based on its type and number of arrays.",
@@ -40597,7 +40673,9 @@
           "matrix/src/backends/gpu/BatchExecutor.ts",
           "matrix/src/backends/gpu/Sync.ts",
           "matrix/src/backends/gpu/builtin-shaders.ts",
+          "matrix/src/backends/gpu/gpu-or-js.ts",
           "matrix/src/backends/gpu/index.ts",
+          "matrix/src/backends/gpu/run-shader.ts",
           "matrix/src/backends/index.ts",
           "matrix/src/backends/register-backends.ts",
           "matrix/src/backends/wasm/detect.ts",
@@ -40624,6 +40702,7 @@
           "matrix/src/operations/eig-wasm.ts",
           "matrix/src/operations/eig.ts",
           "matrix/src/operations/expm.ts",
+          "matrix/src/operations/givens.ts",
           "matrix/src/operations/index.ts",
           "matrix/src/operations/logm.ts",
           "matrix/src/operations/lu.ts",
@@ -41828,6 +41907,7 @@
           "expression/src/transform/utils/dimToZeroBase.ts",
           "expression/src/transform/utils/errorTransform.ts",
           "expression/src/transform/utils/lastDimToZeroBase.ts",
+          "expression/src/transform/utils/prepareTransformArgs.ts",
           "expression/src/transform/utils/transformCallback.ts",
           "expression/src/transform/variance.transform.ts"
         ]
@@ -42045,13 +42125,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1202,
+    "totalTypeScriptFiles": 1206,
     "totalModules": 82,
-    "totalLinesOfCode": 200577,
-    "totalExports": 6220,
+    "totalLinesOfCode": 200580,
+    "totalExports": 6228,
     "totalClasses": 59,
-    "totalInterfaces": 539,
-    "totalFunctions": 1989,
+    "totalInterfaces": 542,
+    "totalFunctions": 1997,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

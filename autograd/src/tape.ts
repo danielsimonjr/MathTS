@@ -672,56 +672,13 @@ export class TapedTensor {
    */
   max(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
-    const outT = primalT.max(axis, opts);
-
-    const inputShape = [...this.shape];
-    const keepDims = opts?.keepDims ?? false;
-    const axes = _resolveAxes(axis, this.shape.length);
-    const axisSet = new Set(axes);
-
-    const primalData = new Float64Array(this.primal);
-    const thisGradSlot = this.tape.getInputGrad(this.id)!;
-
-    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
-      const outShape = [...outT.shape];
-      const outStrides = Tensor.rowMajorStrides(outShape);
-
-      // First-wins: track which input flat index achieves the max for each output.
-      const argmaxSlot = new Int32Array(outT.data.length).fill(-1);
-
-      const inCoords = new Array<number>(inputShape.length).fill(0);
-      for (let n = 0; n < primalData.length; n++) {
-        let outFlat = 0;
-        let outDim = 0;
-        for (let k = 0; k < inputShape.length; k++) {
-          if (axisSet.has(k)) {
-            if (keepDims) outDim++;
-          } else {
-            outFlat += inCoords[k] * outStrides[outDim];
-            outDim++;
-          }
-        }
-        // First-wins: only update argmax if this element strictly exceeds the current max.
-        // The forward primalT.max() stores the max value in outT.data[outFlat].
-        if (argmaxSlot[outFlat] === -1 || primalData[n] > primalData[argmaxSlot[outFlat]]) {
-          argmaxSlot[outFlat] = n;
-        }
-        for (let k = inputShape.length - 1; k >= 0; k--) {
-          if (++inCoords[k] < inputShape[k]) break;
-          inCoords[k] = 0;
-        }
-      }
-
-      // Scatter dY to the argmax positions.
-      for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
-        const winner = argmaxSlot[outFlat];
-        if (winner !== -1) {
-          thisGradSlot[winner] += outputGrad[outFlat];
-        }
-      }
-    });
-
-    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+    return scatterArgExtrema(
+      this,
+      primalT.max(axis, opts),
+      axis,
+      opts,
+      (candidate, incumbent) => candidate > incumbent
+    );
   }
 
   /**
@@ -733,53 +690,13 @@ export class TapedTensor {
    */
   min(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): TapedTensor {
     const primalT = this.toPrimalTensor();
-    const outT = primalT.min(axis, opts);
-
-    const inputShape = [...this.shape];
-    const keepDims = opts?.keepDims ?? false;
-    const axes = _resolveAxes(axis, this.shape.length);
-    const axisSet = new Set(axes);
-
-    const primalData = new Float64Array(this.primal);
-    const thisGradSlot = this.tape.getInputGrad(this.id)!;
-
-    const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
-      const outShape = [...outT.shape];
-      const outStrides = Tensor.rowMajorStrides(outShape);
-
-      // First-wins: track which input flat index achieves the min for each output.
-      const argminSlot = new Int32Array(outT.data.length).fill(-1);
-
-      const inCoords = new Array<number>(inputShape.length).fill(0);
-      for (let n = 0; n < primalData.length; n++) {
-        let outFlat = 0;
-        let outDim = 0;
-        for (let k = 0; k < inputShape.length; k++) {
-          if (axisSet.has(k)) {
-            if (keepDims) outDim++;
-          } else {
-            outFlat += inCoords[k] * outStrides[outDim];
-            outDim++;
-          }
-        }
-        if (argminSlot[outFlat] === -1 || primalData[n] < primalData[argminSlot[outFlat]]) {
-          argminSlot[outFlat] = n;
-        }
-        for (let k = inputShape.length - 1; k >= 0; k--) {
-          if (++inCoords[k] < inputShape[k]) break;
-          inCoords[k] = 0;
-        }
-      }
-
-      for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
-        const winner = argminSlot[outFlat];
-        if (winner !== -1) {
-          thisGradSlot[winner] += outputGrad[outFlat];
-        }
-      }
-    });
-
-    return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
+    return scatterArgExtrema(
+      this,
+      primalT.min(axis, opts),
+      axis,
+      opts,
+      (candidate, incumbent) => candidate < incumbent
+    );
   }
 
   /**
@@ -1815,6 +1732,64 @@ export class TapedTensor {
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+/**
+ * Reverse-mode adjoint for max/min reductions: scatter output gradient to the
+ * strict first-wins arg-extremum flat index per output element.
+ */
+function scatterArgExtrema(
+  self: TapedTensor,
+  outT: Tensor,
+  axis: number | ReadonlyArray<number> | undefined,
+  opts: { keepDims?: boolean } | undefined,
+  better: (candidate: number, incumbent: number) => boolean
+): TapedTensor {
+  const inputShape = [...self.shape];
+  const keepDims = opts?.keepDims ?? false;
+  const axes = _resolveAxes(axis, self.shape.length);
+  const axisSet = new Set(axes);
+
+  const primalData = new Float64Array(self.primal);
+  const thisGradSlot = self.tape.getInputGrad(self.id)!;
+
+  const { id } = self.tape.record([self.id], outT.data.length, (outputGrad) => {
+    const outShape = [...outT.shape];
+    const outStrides = Tensor.rowMajorStrides(outShape);
+
+    const winnerSlot = new Int32Array(outT.data.length).fill(-1);
+
+    const inCoords = new Array<number>(inputShape.length).fill(0);
+    for (let n = 0; n < primalData.length; n++) {
+      let outFlat = 0;
+      let outDim = 0;
+      for (let k = 0; k < inputShape.length; k++) {
+        if (axisSet.has(k)) {
+          if (keepDims) outDim++;
+        } else {
+          outFlat += inCoords[k] * outStrides[outDim];
+          outDim++;
+        }
+      }
+      const winner = winnerSlot[outFlat];
+      if (winner === -1 || better(primalData[n], primalData[winner])) {
+        winnerSlot[outFlat] = n;
+      }
+      for (let k = inputShape.length - 1; k >= 0; k--) {
+        if (++inCoords[k] < inputShape[k]) break;
+        inCoords[k] = 0;
+      }
+    }
+
+    for (let outFlat = 0; outFlat < outT.data.length; outFlat++) {
+      const winner = winnerSlot[outFlat];
+      if (winner !== -1) {
+        thisGradSlot[winner] += outputGrad[outFlat];
+      }
+    }
+  });
+
+  return new TapedTensor([...outT.shape], new Float64Array(outT.data), self.tape, id);
+}
 
 /**
  * SVD reverse-mode adjoint.
