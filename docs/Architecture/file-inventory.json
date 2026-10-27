@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1924,
+  "totalFiles": 1926,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 670,
+    "test": 672,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 670,
+    "tests": 672,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 807,
+    "@danielsimonjr/mathts-functions": 809,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 99,
@@ -8052,7 +8052,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 870
+      "loc": 887
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -9826,6 +9826,13 @@
       "loc": 27
     },
     {
+      "file": "functions/tests/mad-median-vs-mean-ad.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 29
+    },
+    {
       "file": "functions/tests/matrix-bridge-accel.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10223,6 +10230,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 66
+    },
+    {
+      "file": "functions/tests/simplify-exact-fractions.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 89
     },
     {
       "file": "functions/tests/solveode-events.test.ts",
@@ -12322,7 +12336,7 @@
       "package": "@danielsimonjr/mathts-statistics",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 291
+      "loc": 292
     },
     {
       "file": "statistics/tests/statistics.test.ts",

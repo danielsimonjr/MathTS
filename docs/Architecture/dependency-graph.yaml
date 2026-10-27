@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-27'
   totalFiles: 1192
   totalModules: 82
-  totalExports: 6172
+  totalExports: 6174
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -21911,6 +21911,7 @@ modules:
         - parallelStatDistance
         - parallelStatCorr
         - parallelStatMAD
+        - parallelStatMeanAD
         - parallelStatCumsum
         - parallelStatQuantile
         - parallelStatHistogram
@@ -21945,6 +21946,7 @@ modules:
         - parallelStatDistance
         - parallelStatCorr
         - parallelStatMAD
+        - parallelStatMeanAD
         - parallelStatCumsum
         - parallelStatQuantile
         - parallelStatHistogram
@@ -32450,6 +32452,7 @@ modules:
             - parallelStatDistance
             - parallelStatCorr
             - parallelStatMAD
+            - parallelStatMeanAD
             - parallelStatCumsum
             - parallelStatQuantile
             - parallelStatPercentile
@@ -32686,6 +32689,7 @@ modules:
         - parallelStatDistance
         - parallelStatCorr
         - parallelStatMAD
+        - parallelStatMeanAD
         - parallelStatCumsum
         - parallelStatQuantile
         - parallelStatPercentile
@@ -32883,6 +32887,7 @@ modules:
         - parallelStatDistance
         - parallelStatCorr
         - parallelStatMAD
+        - parallelStatMeanAD
         - parallelStatCumsum
         - parallelStatQuantile
         - parallelStatPercentile
@@ -39322,15 +39327,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200821
-  totalExports: 6172
+  totalLinesOfCode: 200839
+  totalExports: 6174
   totalClasses: 59
   totalInterfaces: 537
   totalFunctions: 1959
   totalTypeGuards: 158
   totalEnums: 0
-  totalConstants: 1617
-  totalReExports: 2609
+  totalConstants: 1618
+  totalReExports: 2610
   totalTypeOnlyImports: 607
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

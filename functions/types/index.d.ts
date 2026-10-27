@@ -4545,7 +4545,7 @@ export interface SimplifyOptions {
   /**
    * When `exactFractions` is true, a fraction will be returned only
    * when both numerator and denominator are smaller than `fractionsLimit`.
-   * Default value is 10000.
+   * Default value is `Infinity` (no cap).
    */
   fractionsLimit?: number;
   /** A boolean which is `false` by default. */
