@@ -8038,7 +8038,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1490
+      "loc": 1484
     },
     {
       "file": "functions/src/typed/special.ts",
