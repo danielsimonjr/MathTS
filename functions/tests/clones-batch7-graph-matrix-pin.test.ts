@@ -29,6 +29,9 @@ import { slice2d } from '../src/matrix/slice-2d.js';
 import { buildSparseCscFromEntries } from '../src/matrix/sparse-csc-tail.js';
 
 type MatrixLike = { size(): number[]; subset(index: unknown): unknown; valueOf?: () => unknown };
+type TestMatrixCtor = (data: unknown[][]) => MatrixLike;
+const passThroughCtor: TestMatrixCtor = ((data: unknown[][]) => data) as unknown as TestMatrixCtor;
+const dummyCtor: TestMatrixCtor = () => ({ size: () => [1, 1], subset: () => 0 });
 
 function splitSeed(baseSeed: number, k: number): number {
   return ((baseSeed ^ (((k * 0x9e3779b9) | 0) >>> 0)) >>> 0) | 0;
@@ -148,7 +151,6 @@ describe('clone batch7 pin — column/row slice (slice2d)', () => {
       }
     }
     const rangeFn = (start: number, end: number) => ({ start, end });
-    const wrap = (data: unknown[][]) => data;
     let seen: unknown;
     const value: MatrixLike = {
       size: () => [3, 5],
@@ -157,9 +159,9 @@ describe('clone batch7 pin — column/row slice (slice2d)', () => {
         return 0;
       },
     };
-    slice2d(value, 1, 2, wrap, FakeIndex, rangeFn);
+    slice2d(value, 1, 2, passThroughCtor, FakeIndex, rangeFn);
     expect((seen as FakeIndex).args).toEqual([{ start: 0, end: 3 }, [2]]);
-    slice2d(value, 0, 1, wrap, FakeIndex, rangeFn);
+    slice2d(value, 0, 1, passThroughCtor, FakeIndex, rangeFn);
     expect((seen as FakeIndex).args).toEqual([[1], { start: 0, end: 5 }]);
   });
 
@@ -171,15 +173,7 @@ describe('clone batch7 pin — column/row slice (slice2d)', () => {
       },
     };
     expectError(
-      () =>
-        slice2d(
-          value,
-          0,
-          0,
-          (d) => d,
-          class {},
-          () => 0
-        ),
+      () => slice2d(value, 0, 0, dummyCtor, class {}, () => 0),
       Error,
       'Only two dimensional matrix is supported'
     );
@@ -208,10 +202,10 @@ describe('clone batch7 pin — column/row slice (slice2d)', () => {
     }
     Object.defineProperty(FakeMatrix.prototype, 'isMatrix', { value: true });
     const wrapped: unknown[][][] = [];
-    const wrap = (data: unknown[][]) => {
+    const wrap: TestMatrixCtor = ((data: unknown[][]) => {
       wrapped.push(data);
       return data;
-    };
+    }) as unknown as TestMatrixCtor;
     const matrixResult = new FakeMatrix();
     const asMatrix: MatrixLike = {
       size: () => [2, 2],
