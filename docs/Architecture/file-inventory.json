@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1972,
+  "totalFiles": 1973,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1186,
     "test-only": 0,
     "orphan": 0,
-    "test": 699,
+    "test": 700,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1211,
-    "tests": 699,
+    "tests": 700,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 552,
-    "@danielsimonjr/mathts-functions": 832,
+    "@danielsimonjr/mathts-functions": 833,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 107,
@@ -8115,7 +8115,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 689
+      "loc": 681
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -8697,6 +8697,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 357
+    },
+    {
+      "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "functions/tests/clones-functions-scalars-pins.test.ts",
