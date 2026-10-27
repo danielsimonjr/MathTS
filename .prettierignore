@@ -37,6 +37,11 @@ matrix/assembly/
 # any formatting, and the diff tests compare the values, not the layout.
 *.golden.json
 
+# Assembly coverage matrix — written by tests/audit/coverage_matrix.py
+# (`json.dump`). Regeneration must stay byte-identical; prettier wrapping
+# would leave `python -X utf8 tests/audit/coverage_matrix.py` dirty.
+assembly/tests/audit/coverage_matrix.json
+
 # Codebase inventory - written by tools/build-mathts-inventory.py and
 # tools/scan-inventory.py (json.dump layout).
 tools/codebase-inventory.json

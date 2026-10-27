@@ -968,7 +968,8 @@ export async function mannWhitneyTest(
   const n2 = sample2.length;
   const nTotal = n1 + n2;
 
-  // Combine and rank — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
+  // Combine and rank via argsortF64Dispatch above WASM_SORT_THRESHOLD; argsort
+  // has no wasmPolicyAllows band (`functions/src/wasm/policy.ts`) so JS runs.
   const combined: { value: f64; group: number }[] = [];
   for (const v of sample1) combined.push({ value: v, group: 1 });
   for (const v of sample2) combined.push({ value: v, group: 2 });

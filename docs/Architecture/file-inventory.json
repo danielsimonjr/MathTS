@@ -7954,7 +7954,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2214
+      "loc": 2215
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -12763,7 +12763,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 90
+      "loc": 147
     },
     {
       "file": "tests/integration/export-index-completeness.test.ts",

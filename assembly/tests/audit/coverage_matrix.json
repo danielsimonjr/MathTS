@@ -221,7 +221,10 @@
     },
     "./poly": {
       "total": 7,
-      "tested": ["poly_discriminant_f64", "poly_resultant_f64"],
+      "tested": [
+        "poly_discriminant_f64",
+        "poly_resultant_f64"
+      ],
       "untested": [
         "cheb_fit_f64",
         "legendre_fit_f64",
@@ -244,27 +247,43 @@
     "./ops/fft": {
       "total": 3,
       "tested": [],
-      "untested": ["fft", "powerSpectrum", "rfft"]
+      "untested": [
+        "fft",
+        "powerSpectrum",
+        "rfft"
+      ]
     },
     "./sort": {
       "total": 3,
       "tested": [],
-      "untested": ["argsort_f64", "rank_f64", "sort_f64"]
+      "untested": [
+        "argsort_f64",
+        "rank_f64",
+        "sort_f64"
+      ]
     },
     "./tridiag": {
       "total": 2,
       "tested": [],
-      "untested": ["divided_difference_f64", "tridiag_solve_f64"]
+      "untested": [
+        "divided_difference_f64",
+        "tridiag_solve_f64"
+      ]
     },
     "./types/complex": {
       "total": 2,
       "tested": [],
-      "untested": ["complex", "complexFromPolar"]
+      "untested": [
+        "complex",
+        "complexFromPolar"
+      ]
     },
     "./heap": {
       "total": 1,
       "tested": [],
-      "untested": ["heap_reset"]
+      "untested": [
+        "heap_reset"
+      ]
     },
     "./algebra/decomposition": {
       "total": 5,
@@ -279,17 +298,27 @@
     },
     "./ops/approx": {
       "total": 2,
-      "tested": ["padeApproximant", "residue"],
+      "tested": [
+        "padeApproximant",
+        "residue"
+      ],
       "untested": []
     },
     "./ops/curvefit": {
       "total": 3,
-      "tested": ["expfit", "logfit", "powerfit"],
+      "tested": [
+        "expfit",
+        "logfit",
+        "powerfit"
+      ],
       "untested": []
     },
     "./ops/linalg": {
       "total": 2,
-      "tested": ["characteristicPolynomial", "rowReduce"],
+      "tested": [
+        "characteristicPolynomial",
+        "rowReduce"
+      ],
       "untested": []
     },
     "./ops/number-theory": {
@@ -311,7 +340,11 @@
     },
     "./ops/optimization": {
       "total": 3,
-      "tested": ["linprog", "nullspace", "quadprog"],
+      "tested": [
+        "linprog",
+        "nullspace",
+        "quadprog"
+      ],
       "untested": []
     },
     "./ops/polynomial": {
@@ -387,7 +420,11 @@
     },
     "./ops/signal": {
       "total": 3,
-      "tested": ["medfilt", "resample", "windowFunction"],
+      "tested": [
+        "medfilt",
+        "resample",
+        "windowFunction"
+      ],
       "untested": []
     },
     "./ops/special": {
@@ -407,7 +444,9 @@
     },
     "./ops/tensor": {
       "total": 1,
-      "tested": ["tensorTranspose"],
+      "tested": [
+        "tensorTranspose"
+      ],
       "untested": []
     },
     "./special": {
@@ -441,58 +480,163 @@
     "heap_reset": [],
     "complex": [],
     "complexFromPolar": [],
-    "add_f64": ["run.js"],
-    "sub_f64": ["run.js"],
-    "mul_f64": ["run.js"],
-    "div_f64": ["run.js"],
-    "mod_f64": ["run.js"],
-    "neg_f64": ["run.js"],
-    "sqrt_f64": ["run.js"],
-    "pow_f64": ["run.js"],
-    "square_f64": ["run.js"],
-    "cube_f64": ["run.js"],
-    "cbrt_f64": ["run.js"],
-    "nthRoot_f64": ["run.js"],
-    "exp_f64": ["run.js"],
-    "expm1_f64": ["run.js"],
-    "log_f64": ["run.js"],
-    "log1p_f64": ["run.js"],
-    "log10_f64": ["run.js"],
-    "log2_f64": ["run.js"],
-    "sin_f64": ["run.js"],
-    "cos_f64": ["run.js"],
-    "tan_f64": ["run.js"],
-    "asin_f64": ["run.js"],
-    "acos_f64": ["run.js"],
-    "atan_f64": ["run.js"],
-    "atan2_f64": ["run.js"],
-    "sinh_f64": ["run.js"],
-    "cosh_f64": ["run.js"],
-    "tanh_f64": ["run.js"],
-    "asinh_f64": ["run.js"],
-    "acosh_f64": ["run.js"],
-    "atanh_f64": ["run.js"],
-    "abs_f64": ["run.js"],
-    "floor_f64": ["run.js"],
-    "ceil_f64": ["run.js"],
-    "round_f64": ["run.js"],
-    "trunc_f64": ["run.js"],
-    "sign_f64": ["run.js"],
-    "min_f64": ["run.js"],
-    "max_f64": ["run.js"],
-    "clamp_f64": ["run.js"],
-    "isNaN_f64": ["run.js"],
-    "isFinite_f64": ["run.js"],
-    "PI": ["phase2-kernels.test.mjs", "run.js"],
-    "E": ["run.js"],
-    "PHI": ["run.js"],
-    "SQRT2": ["run.js"],
-    "SQRT1_2": ["run.js"],
-    "LN2": ["run.js"],
-    "LN10": ["run.js"],
-    "LOG2E": ["run.js"],
-    "LOG10E": ["run.js"],
-    "EPSILON": ["run.js"],
+    "add_f64": [
+      "run.js"
+    ],
+    "sub_f64": [
+      "run.js"
+    ],
+    "mul_f64": [
+      "run.js"
+    ],
+    "div_f64": [
+      "run.js"
+    ],
+    "mod_f64": [
+      "run.js"
+    ],
+    "neg_f64": [
+      "run.js"
+    ],
+    "sqrt_f64": [
+      "run.js"
+    ],
+    "pow_f64": [
+      "run.js"
+    ],
+    "square_f64": [
+      "run.js"
+    ],
+    "cube_f64": [
+      "run.js"
+    ],
+    "cbrt_f64": [
+      "run.js"
+    ],
+    "nthRoot_f64": [
+      "run.js"
+    ],
+    "exp_f64": [
+      "run.js"
+    ],
+    "expm1_f64": [
+      "run.js"
+    ],
+    "log_f64": [
+      "run.js"
+    ],
+    "log1p_f64": [
+      "run.js"
+    ],
+    "log10_f64": [
+      "run.js"
+    ],
+    "log2_f64": [
+      "run.js"
+    ],
+    "sin_f64": [
+      "run.js"
+    ],
+    "cos_f64": [
+      "run.js"
+    ],
+    "tan_f64": [
+      "run.js"
+    ],
+    "asin_f64": [
+      "run.js"
+    ],
+    "acos_f64": [
+      "run.js"
+    ],
+    "atan_f64": [
+      "run.js"
+    ],
+    "atan2_f64": [
+      "run.js"
+    ],
+    "sinh_f64": [
+      "run.js"
+    ],
+    "cosh_f64": [
+      "run.js"
+    ],
+    "tanh_f64": [
+      "run.js"
+    ],
+    "asinh_f64": [
+      "run.js"
+    ],
+    "acosh_f64": [
+      "run.js"
+    ],
+    "atanh_f64": [
+      "run.js"
+    ],
+    "abs_f64": [
+      "run.js"
+    ],
+    "floor_f64": [
+      "run.js"
+    ],
+    "ceil_f64": [
+      "run.js"
+    ],
+    "round_f64": [
+      "run.js"
+    ],
+    "trunc_f64": [
+      "run.js"
+    ],
+    "sign_f64": [
+      "run.js"
+    ],
+    "min_f64": [
+      "run.js"
+    ],
+    "max_f64": [
+      "run.js"
+    ],
+    "clamp_f64": [
+      "run.js"
+    ],
+    "isNaN_f64": [
+      "run.js"
+    ],
+    "isFinite_f64": [
+      "run.js"
+    ],
+    "PI": [
+      "phase2-kernels.test.mjs",
+      "run.js"
+    ],
+    "E": [
+      "run.js"
+    ],
+    "PHI": [
+      "run.js"
+    ],
+    "SQRT2": [
+      "run.js"
+    ],
+    "SQRT1_2": [
+      "run.js"
+    ],
+    "LN2": [
+      "run.js"
+    ],
+    "LN10": [
+      "run.js"
+    ],
+    "LOG2E": [
+      "run.js"
+    ],
+    "LOG10E": [
+      "run.js"
+    ],
+    "EPSILON": [
+      "run.js"
+    ],
     "array_sum": [],
     "array_product": [],
     "array_mean": [],
@@ -584,57 +728,150 @@
     "fft": [],
     "rfft": [],
     "powerSpectrum": [],
-    "matrix_lu_decompose": ["diff-decomposition.test.mjs"],
-    "matrix_qr_decompose": ["diff-decomposition.test.mjs"],
-    "matrix_cholesky": ["diff-decomposition.test.mjs"],
-    "matrix_inverse": ["diff-decomposition.test.mjs"],
-    "matrix_determinant": ["diff-decomposition.test.mjs"],
-    "chebyshevT": ["special-numtheory.test.mjs"],
-    "hermiteH": ["special-numtheory.test.mjs"],
-    "laguerreL": ["special-numtheory.test.mjs"],
-    "legendreP": ["special-numtheory.test.mjs"],
-    "erfi": ["special-numtheory.test.mjs"],
-    "expIntegralEi": ["special-numtheory.test.mjs"],
-    "sinIntegral": ["special-numtheory.test.mjs"],
-    "cosIntegral": ["special-numtheory.test.mjs"],
-    "logIntegral": ["special-numtheory.test.mjs"],
-    "eulerPhi": ["special-numtheory.test.mjs"],
-    "divisorSigma": ["special-numtheory.test.mjs"],
-    "moebiusMu": ["special-numtheory.test.mjs"],
-    "carmichaelLambda": ["special-numtheory.test.mjs"],
-    "jacobiSymbol": ["special-numtheory.test.mjs"],
-    "harmonicNumber": ["special-numtheory.test.mjs"],
-    "partitions": ["special-numtheory.test.mjs"],
-    "primeFactors": ["special-numtheory.test.mjs"],
-    "divisors": ["special-numtheory.test.mjs"],
-    "integerDigits": ["special-numtheory.test.mjs"],
-    "chineseRemainder": ["special-numtheory.test.mjs"],
-    "polyadd": ["polynomial.test.mjs"],
-    "polynomialQuotient": ["polynomial.test.mjs"],
-    "polynomialRemainder": ["polynomial.test.mjs"],
-    "polynomialGCD": ["polynomial.test.mjs"],
-    "polynomialLCM": ["polynomial.test.mjs"],
-    "discriminant": ["polynomial.test.mjs"],
-    "resultant": ["phase2-kernels.test.mjs", "polynomial.test.mjs"],
-    "resample": ["signal.test.mjs"],
-    "medfilt": ["signal.test.mjs"],
-    "windowFunction": ["signal.test.mjs"],
+    "matrix_lu_decompose": [
+      "diff-decomposition.test.mjs"
+    ],
+    "matrix_qr_decompose": [
+      "diff-decomposition.test.mjs"
+    ],
+    "matrix_cholesky": [
+      "diff-decomposition.test.mjs"
+    ],
+    "matrix_inverse": [
+      "diff-decomposition.test.mjs"
+    ],
+    "matrix_determinant": [
+      "diff-decomposition.test.mjs"
+    ],
+    "chebyshevT": [
+      "special-numtheory.test.mjs"
+    ],
+    "hermiteH": [
+      "special-numtheory.test.mjs"
+    ],
+    "laguerreL": [
+      "special-numtheory.test.mjs"
+    ],
+    "legendreP": [
+      "special-numtheory.test.mjs"
+    ],
+    "erfi": [
+      "special-numtheory.test.mjs"
+    ],
+    "expIntegralEi": [
+      "special-numtheory.test.mjs"
+    ],
+    "sinIntegral": [
+      "special-numtheory.test.mjs"
+    ],
+    "cosIntegral": [
+      "special-numtheory.test.mjs"
+    ],
+    "logIntegral": [
+      "special-numtheory.test.mjs"
+    ],
+    "eulerPhi": [
+      "special-numtheory.test.mjs"
+    ],
+    "divisorSigma": [
+      "special-numtheory.test.mjs"
+    ],
+    "moebiusMu": [
+      "special-numtheory.test.mjs"
+    ],
+    "carmichaelLambda": [
+      "special-numtheory.test.mjs"
+    ],
+    "jacobiSymbol": [
+      "special-numtheory.test.mjs"
+    ],
+    "harmonicNumber": [
+      "special-numtheory.test.mjs"
+    ],
+    "partitions": [
+      "special-numtheory.test.mjs"
+    ],
+    "primeFactors": [
+      "special-numtheory.test.mjs"
+    ],
+    "divisors": [
+      "special-numtheory.test.mjs"
+    ],
+    "integerDigits": [
+      "special-numtheory.test.mjs"
+    ],
+    "chineseRemainder": [
+      "special-numtheory.test.mjs"
+    ],
+    "polyadd": [
+      "polynomial.test.mjs"
+    ],
+    "polynomialQuotient": [
+      "polynomial.test.mjs"
+    ],
+    "polynomialRemainder": [
+      "polynomial.test.mjs"
+    ],
+    "polynomialGCD": [
+      "polynomial.test.mjs"
+    ],
+    "polynomialLCM": [
+      "polynomial.test.mjs"
+    ],
+    "discriminant": [
+      "polynomial.test.mjs"
+    ],
+    "resultant": [
+      "phase2-kernels.test.mjs",
+      "polynomial.test.mjs"
+    ],
+    "resample": [
+      "signal.test.mjs"
+    ],
+    "medfilt": [
+      "signal.test.mjs"
+    ],
+    "windowFunction": [
+      "signal.test.mjs"
+    ],
     "apply_window_f64": [],
     "welch_psd_f64": [],
     "bartlett_psd_f64": [],
     "goertzel_f64": [],
     "chirp_z_transform_f64": [],
-    "rowReduce": ["linalg.test.mjs"],
-    "characteristicPolynomial": ["linalg.test.mjs"],
-    "expfit": ["curvefit.test.mjs"],
-    "logfit": ["curvefit.test.mjs"],
-    "powerfit": ["curvefit.test.mjs"],
-    "quadprog": ["optimization.test.mjs"],
-    "linprog": ["optimization.test.mjs"],
-    "nullspace": ["optimization.test.mjs"],
-    "residue": ["approx.test.mjs"],
-    "padeApproximant": ["approx.test.mjs"],
-    "tensorTranspose": ["tensor.test.mjs"],
+    "rowReduce": [
+      "linalg.test.mjs"
+    ],
+    "characteristicPolynomial": [
+      "linalg.test.mjs"
+    ],
+    "expfit": [
+      "curvefit.test.mjs"
+    ],
+    "logfit": [
+      "curvefit.test.mjs"
+    ],
+    "powerfit": [
+      "curvefit.test.mjs"
+    ],
+    "quadprog": [
+      "optimization.test.mjs"
+    ],
+    "linprog": [
+      "optimization.test.mjs"
+    ],
+    "nullspace": [
+      "optimization.test.mjs"
+    ],
+    "residue": [
+      "approx.test.mjs"
+    ],
+    "padeApproximant": [
+      "approx.test.mjs"
+    ],
+    "tensorTranspose": [
+      "tensor.test.mjs"
+    ],
     "complex_add": [],
     "complex_sub": [],
     "complex_mul": [],
@@ -691,8 +928,12 @@
     "poly_fit_f64": [],
     "cheb_fit_f64": [],
     "legendre_fit_f64": [],
-    "poly_resultant_f64": ["phase2-kernels.test.mjs"],
-    "poly_discriminant_f64": ["phase2-kernels.test.mjs"],
+    "poly_resultant_f64": [
+      "phase2-kernels.test.mjs"
+    ],
+    "poly_discriminant_f64": [
+      "phase2-kernels.test.mjs"
+    ],
     "array_abs_ptr": [],
     "array_sin_ptr": [],
     "array_cos_ptr": [],
@@ -713,26 +954,66 @@
     "array_erfc_ptr": [],
     "tridiag_solve_f64": [],
     "divided_difference_f64": [],
-    "bessel_j0_f64": ["golden/*.json"],
-    "bessel_j1_f64": ["golden/*.json"],
-    "bessel_jn_f64": ["golden/*.json"],
-    "bessel_j_f64": ["phase2-kernels.test.mjs"],
-    "bessel_y0_f64": ["golden/*.json"],
-    "bessel_y1_f64": ["golden/*.json"],
-    "bessel_yn_f64": ["golden/*.json"],
-    "bessel_y_f64": ["phase2-kernels.test.mjs"],
-    "airy_ai_f64": ["golden/*.json"],
-    "airy_bi_f64": ["golden/*.json"],
-    "elliptic_k_f64": ["golden/*.json"],
-    "elliptic_e_f64": ["golden/*.json"],
-    "lgamma_f64": ["golden/*.json"],
-    "carlson_rc_f64": ["golden/*.json"],
-    "carlson_rf_f64": ["golden/*.json"],
-    "carlson_rd_f64": ["golden/*.json"],
-    "carlson_rj_f64": ["golden/*.json"],
-    "elliptic_f_incomplete_f64": ["golden/*.json"],
-    "elliptic_e_incomplete_f64": ["golden/*.json"],
-    "elliptic_pi_incomplete_f64": ["golden/*.json"],
+    "bessel_j0_f64": [
+      "golden/*.json"
+    ],
+    "bessel_j1_f64": [
+      "golden/*.json"
+    ],
+    "bessel_jn_f64": [
+      "golden/*.json"
+    ],
+    "bessel_j_f64": [
+      "phase2-kernels.test.mjs"
+    ],
+    "bessel_y0_f64": [
+      "golden/*.json"
+    ],
+    "bessel_y1_f64": [
+      "golden/*.json"
+    ],
+    "bessel_yn_f64": [
+      "golden/*.json"
+    ],
+    "bessel_y_f64": [
+      "phase2-kernels.test.mjs"
+    ],
+    "airy_ai_f64": [
+      "golden/*.json"
+    ],
+    "airy_bi_f64": [
+      "golden/*.json"
+    ],
+    "elliptic_k_f64": [
+      "golden/*.json"
+    ],
+    "elliptic_e_f64": [
+      "golden/*.json"
+    ],
+    "lgamma_f64": [
+      "golden/*.json"
+    ],
+    "carlson_rc_f64": [
+      "golden/*.json"
+    ],
+    "carlson_rf_f64": [
+      "golden/*.json"
+    ],
+    "carlson_rd_f64": [
+      "golden/*.json"
+    ],
+    "carlson_rj_f64": [
+      "golden/*.json"
+    ],
+    "elliptic_f_incomplete_f64": [
+      "golden/*.json"
+    ],
+    "elliptic_e_incomplete_f64": [
+      "golden/*.json"
+    ],
+    "elliptic_pi_incomplete_f64": [
+      "golden/*.json"
+    ],
     "sort_f64": [],
     "argsort_f64": [],
     "rank_f64": [],
