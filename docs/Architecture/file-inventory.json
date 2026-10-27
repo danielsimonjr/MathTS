@@ -471,7 +471,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 96
+      "loc": 99
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -5413,7 +5413,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 308
+      "loc": 297
     },
     {
       "file": "functions/src/arithmetic/cube.ts",
@@ -5483,7 +5483,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 306
+      "loc": 301
     },
     {
       "file": "functions/src/arithmetic/gcd.ts",

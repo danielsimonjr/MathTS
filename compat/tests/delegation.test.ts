@@ -56,11 +56,14 @@ describe('create(all) statistics + rounding delegate correctly', () => {
   });
 
   it('BigNumber floor/ceil toward ±infinity at half-integers (clone batch3 G20)', () => {
-    const bn = math.bignumber as (x: number | string) => { toNumber(): number };
-    expect(math.floor(bn(2.5)).toNumber()).toBe(2);
-    expect(math.ceil(bn(2.5)).toNumber()).toBe(3);
-    expect(math.floor(bn(-2.5)).toNumber()).toBe(-3);
-    expect(math.ceil(bn(-2.5)).toNumber()).toBe(-2);
+    type BN = { toNumber(): number };
+    const bn = math.bignumber as (x: number | string) => BN;
+    const floorBn = math.floor as (x: BN) => BN;
+    const ceilBn = math.ceil as (x: BN) => BN;
+    expect(floorBn(bn(2.5)).toNumber()).toBe(2);
+    expect(ceilBn(bn(2.5)).toNumber()).toBe(3);
+    expect(floorBn(bn(-2.5)).toNumber()).toBe(-3);
+    expect(ceilBn(bn(-2.5)).toNumber()).toBe(-2);
   });
 });
 
