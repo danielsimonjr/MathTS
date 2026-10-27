@@ -281,6 +281,14 @@ bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLengt
 `reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
 `_extreme` (cache slot + `smaller` argument order), and `_ends`.
 
+Sprint 2R clone-merge batch 6 keeps the public names `expfit` / `logfit` / `powerfit`,
+`chebyshevFit` / `legendreFit`, `struveH` / `struveL`, `kelvinBer` / `kelvinBei`, integer
+`add` / `sub` and 𝔽_p `addP` / `subP`, `setIntersect` / `setDifference`, and `fibonacci` /
+`lucas`. Shared internals are `linearFit` (coordinate maps; exp keeps `log(abs(y)||1e-15)`
+and `exp(intercept)`), `solveAugmentedNormalEquations` (partial pivot, `|pivot| < 1e-14`),
+`struveSeries` (ratio sign), `kelvinSeries` (`term0` / `denom`), `zipIntPoly`, `selectById`,
+and `fibPair` (`lucas(0)` / `lucas(1)` stay direct). The helpers are not barrel-exported.
+
 ---
 
 ## Expression & Notebook Components
@@ -434,5 +442,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2038  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8135  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2040  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8137  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

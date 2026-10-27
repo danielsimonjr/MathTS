@@ -710,7 +710,9 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `typed/numeric.ts`: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`,
 `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`,
 `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`,
-`curvefit`/`expfit`/`logfit`/`powerfit`, `solveODESystem`, `stiffODESolver`,
+`curvefit`/`expfit`/`logfit`/`powerfit` (`linearFit` internally; exp keeps
+`log(abs(y)||1e-15)` and `exp(intercept)`; log returns `[a,b]` with no exp),
+`solveODESystem`, `stiffODESolver`,
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
 `numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`
@@ -1166,5 +1168,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8135  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2038  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8137  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2040  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## Unreleased
+
+### Patch Changes
+
+- Near-clone numeric batch 6 (Sprint 2R): internal `linearFit`, `solveAugmentedNormalEquations`, Struve/Kelvin series helpers, `zipIntPoly`, set `selectById`, and `fibPair`. Public exports and behavior unchanged.
+
 ## 0.69.2
 
 ### Patch Changes

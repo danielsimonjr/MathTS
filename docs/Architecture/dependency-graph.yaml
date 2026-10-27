@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1205
+  totalFiles: 1206
   totalModules: 82
-  totalExports: 6226
+  totalExports: 6228
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -20426,6 +20426,7 @@ modules:
             - degree
             - lc
             - isZero
+            - zipIntPoly
             - IntPoly
         - file: ./integer-poly.js
           imports:
@@ -20536,6 +20537,7 @@ modules:
         - degree
         - lc
         - isZero
+        - zipIntPoly
         - add
         - sub
         - neg
@@ -20556,6 +20558,7 @@ modules:
         - degree
         - lc
         - isZero
+        - zipIntPoly
         - add
         - sub
         - neg
@@ -21441,6 +21444,9 @@ modules:
             - WASM_POLY_FIT_THRESHOLD
             - chebBasisRow
             - legendreBasisRow
+        - file: ./normal-equations-solve.js
+          imports:
+            - solveAugmentedNormalEquations
       workspaceDependencies: []
       exports:
         - WASM_INTERP_THRESHOLD
@@ -21569,6 +21575,16 @@ modules:
         - matrixExpm
         - matrixLogm
         - matrixSqrtm
+    functions/src/typed/normal-equations-solve.ts:
+      description: Gaussian elimination with partial pivoting on an augmented normal-equations
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - solveAugmentedNormalEquations
+      functions:
+        - solveAugmentedNormalEquations
     functions/src/typed/numeric.ts:
       description: Typed Numerical Methods Functions
       externalDependencies: []
@@ -23745,6 +23761,9 @@ modules:
         - file: ../policy.js
           imports:
             - wasmPolicyAllows
+        - file: ../../typed/normal-equations-solve.js
+          imports:
+            - solveAugmentedNormalEquations
       workspaceDependencies: []
       exports:
         - WASM_POLY_THRESHOLD
@@ -39030,6 +39049,7 @@ dependencyGraph:
         - functions/src/typed/interpolation.ts
         - functions/src/typed/logical.ts
         - functions/src/typed/matrix-ops.ts
+        - functions/src/typed/normal-equations-solve.ts
         - functions/src/typed/numeric.ts
         - functions/src/typed/parallel-map.ts
         - functions/src/typed/polynomial-ideal.ts
@@ -39748,13 +39768,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1205
+  totalTypeScriptFiles: 1206
   totalModules: 82
-  totalLinesOfCode: 200665
-  totalExports: 6226
+  totalLinesOfCode: 200580
+  totalExports: 6228
   totalClasses: 59
   totalInterfaces: 542
-  totalFunctions: 1995
+  totalFunctions: 1997
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618

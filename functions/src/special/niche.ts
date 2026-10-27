@@ -71,6 +71,20 @@ export function polylog(s: f64, z: f64): f64 {
 // Struve H and modified Struve L functions
 // =============================================================================
 
+function struveSeries(v: f64, z: f64, ratioSign: -1 | 1): f64 {
+  const halfZ = z / 2;
+  const logHalfZ = Math.log(halfZ);
+  let term = Math.exp((v + 1) * logHalfZ - _lgamma(1.5) - _lgamma(v + 1.5));
+  let sum = term;
+  for (let k = 0; k < MAX_TERMS; k++) {
+    const ratio = (ratioSign * halfZ * halfZ) / ((k + 1.5) * (k + v + 1.5));
+    term *= ratio;
+    sum += term;
+    if (Math.abs(term) < Math.abs(sum) * RELTOL) break;
+  }
+  return sum;
+}
+
 /**
  * Struve function H_v(z), via its power series (DLMF 11.2.1):
  *
@@ -96,18 +110,7 @@ export function struveH(v: f64, z: f64): f64 {
     throw new Error('struveH: z must be >= 0');
   }
   if (z === 0) return 0;
-
-  const halfZ = z / 2;
-  const logHalfZ = Math.log(halfZ);
-  let term = Math.exp((v + 1) * logHalfZ - _lgamma(1.5) - _lgamma(v + 1.5));
-  let sum = term;
-  for (let k = 0; k < MAX_TERMS; k++) {
-    const ratio = -(halfZ * halfZ) / ((k + 1.5) * (k + v + 1.5));
-    term *= ratio;
-    sum += term;
-    if (Math.abs(term) < Math.abs(sum) * RELTOL) break;
-  }
-  return sum;
+  return struveSeries(v, z, -1);
 }
 
 /**
@@ -133,23 +136,26 @@ export function struveL(v: f64, z: f64): f64 {
     throw new Error('struveL: z must be >= 0');
   }
   if (z === 0) return 0;
-
-  const halfZ = z / 2;
-  const logHalfZ = Math.log(halfZ);
-  let term = Math.exp((v + 1) * logHalfZ - _lgamma(1.5) - _lgamma(v + 1.5));
-  let sum = term;
-  for (let k = 0; k < MAX_TERMS; k++) {
-    const ratio = (halfZ * halfZ) / ((k + 1.5) * (k + v + 1.5));
-    term *= ratio;
-    sum += term;
-    if (Math.abs(term) < Math.abs(sum) * RELTOL) break;
-  }
-  return sum;
+  return struveSeries(v, z, 1);
 }
 
 // =============================================================================
 // Kelvin functions ber, bei (order 0)
 // =============================================================================
+
+function kelvinSeries(x: f64, opts: { term0: f64; denom: (k: number) => number }): f64 {
+  const halfX = x / 2;
+  const halfX4 = halfX * halfX * halfX * halfX;
+  let term = opts.term0;
+  let sum = term;
+  for (let k = 0; k < MAX_TERMS; k++) {
+    const denom = opts.denom(k);
+    term *= -halfX4 / (denom * denom);
+    sum += term;
+    if (k > 0 && Math.abs(term) < Math.abs(sum) * RELTOL) break;
+  }
+  return sum;
+}
 
 /**
  * Kelvin function ber(x) (order 0), via its power series (DLMF 10.65.1):
@@ -167,17 +173,10 @@ export function struveL(v: f64, z: f64): f64 {
  * kelvinBer(2) // ~0.7517341827
  */
 export function kelvinBer(x: f64): f64 {
-  const halfX = x / 2;
-  const halfX4 = halfX * halfX * halfX * halfX;
-  let term = 1;
-  let sum = term;
-  for (let k = 0; k < MAX_TERMS; k++) {
-    const denom = (2 * k + 1) * (2 * k + 2);
-    term *= -halfX4 / (denom * denom);
-    sum += term;
-    if (k > 0 && Math.abs(term) < Math.abs(sum) * RELTOL) break;
-  }
-  return sum;
+  return kelvinSeries(x, {
+    term0: 1,
+    denom: (k) => (2 * k + 1) * (2 * k + 2),
+  });
 }
 
 /**
@@ -197,16 +196,10 @@ export function kelvinBer(x: f64): f64 {
  */
 export function kelvinBei(x: f64): f64 {
   const halfX = x / 2;
-  const halfX4 = halfX * halfX * halfX * halfX;
-  let term = halfX * halfX;
-  let sum = term;
-  for (let k = 0; k < MAX_TERMS; k++) {
-    const denom = (2 * k + 2) * (2 * k + 3);
-    term *= -halfX4 / (denom * denom);
-    sum += term;
-    if (k > 0 && Math.abs(term) < Math.abs(sum) * RELTOL) break;
-  }
-  return sum;
+  return kelvinSeries(x, {
+    term0: halfX * halfX,
+    denom: (k) => (2 * k + 2) * (2 * k + 3),
+  });
 }
 
 // =============================================================================

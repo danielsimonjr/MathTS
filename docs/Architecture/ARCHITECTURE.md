@@ -123,6 +123,12 @@ Clone-merge batch 4 (Sprint 2R) shares internals across those factories without
 changing public names: `mapSlices` calls core `_switch`; `matrixFromColumns` /
 `matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` /
 `min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`.
+Clone-merge batch 6 shares typed numeric internals without changing public names:
+`expfit` / `logfit` / `powerfit` call `linearFit`; `chebyshevFit` / `legendreFit`
+and the poly WASM JS fallback call `solveAugmentedNormalEquations`; Struve and
+Kelvin series share ratio-sign / term options; integer and 𝔽_p add/sub call
+`zipIntPoly`; set intersect/difference call `selectById`; `fibonacci` / `lucas`
+call `fibPair`.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
@@ -385,7 +391,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2038  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2040  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
