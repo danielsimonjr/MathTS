@@ -40,7 +40,7 @@
  * @module @danielsimonjr/mathts-core/internal (wasm-loader)
  */
 
-import type { WasmManifest } from './types/wasm-loader.js';
+import type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
 export type { WasmManifest };
 
 const ALGO = 'sha384';
@@ -223,4 +223,93 @@ export async function defaultWasmLocation(
   }
   // No package root found (exotic embedding): fall back to meta-relative wasm/.
   return join(dirname(fileURLToPath(metaUrl)), 'wasm', wasmFile);
+}
+
+/**
+ * Shared load / instantiate orchestration for the two package-local
+ * `WasmLoader` singletons (`functions` and `matrix`). Subclasses keep their own
+ * `WasmModule` ABI type, path resolution, and the Node/browser load arms that
+ * call {@link verifyWasmIntegrity} before compile/instantiate (G45–G47).
+ */
+export abstract class WasmModuleLoader<TModule> {
+  protected wasmModule: TModule | null = null;
+  protected compiledModule: WebAssembly.Module | null = null;
+  protected loading: Promise<TModule> | null = null;
+  protected isNode: boolean;
+  protected lastMetrics: LoadingMetrics | null = null;
+
+  protected constructor() {
+    this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+  }
+
+  /**
+   * Load the WASM module (cached; concurrent callers share one in-flight promise).
+   */
+  public async load(wasmPath?: string): Promise<TModule> {
+    if (this.wasmModule) {
+      return this.wasmModule;
+    }
+
+    if (this.loading) {
+      return this.loading;
+    }
+
+    // Clear the in-flight promise however it settles. Keeping a rejected one
+    // would hand the same failure to every later call, so one bad path (or a
+    // transient fetch error) would disable WASM for the rest of the process.
+    this.loading = this.loadModule(wasmPath);
+    try {
+      this.wasmModule = await this.loading;
+    } catch (error) {
+      // Drop a module that compiled but failed to instantiate, too: the next
+      // load() would reuse it instead of reading (and verifying) its own binary.
+      this.compiledModule = null;
+      throw error;
+    } finally {
+      this.loading = null;
+    }
+    return this.wasmModule;
+  }
+
+  private async loadModule(wasmPath?: string): Promise<TModule> {
+    const path = wasmPath || (await this.getDefaultWasmPath());
+    const totalStart = performance.now();
+
+    // If precompiled, use cached module
+    if (this.compiledModule) {
+      const instStart = performance.now();
+      const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+      this.lastMetrics = {
+        fileReadMs: 0,
+        compileMs: 0,
+        instantiateMs: performance.now() - instStart,
+        totalMs: performance.now() - totalStart,
+        fromCache: true,
+      };
+      return instance.exports as unknown as TModule;
+    }
+
+    if (this.isNode) {
+      return this.loadNodeWasm(path, totalStart);
+    }
+    return this.loadBrowserWasm(path, totalStart);
+  }
+
+  protected abstract getDefaultWasmPath(): Promise<string>;
+  protected abstract loadNodeWasm(path: string, totalStart: number): Promise<TModule>;
+  protected abstract loadBrowserWasm(path: string, totalStart: number): Promise<TModule>;
+
+  protected getImports(): WebAssembly.Imports {
+    return {
+      env: {
+        abort: (msg: number, file: number, line: number, column: number) => {
+          console.error('WASM abort', { msg, file, line, column });
+          throw new Error('WASM abort');
+        },
+        seed: () => Date.now(),
+      },
+      Math: Math as unknown as WebAssembly.ModuleImports,
+      Date: Date as unknown as WebAssembly.ModuleImports,
+    };
+  }
 }

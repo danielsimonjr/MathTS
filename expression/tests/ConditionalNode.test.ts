@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { createConditionalNode } from '../src/node/ConditionalNode.js';
+import { createOperatorNode } from '../src/node/OperatorNode.js';
 import type { MathNode } from '../src/node/Node.js';
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
@@ -10,6 +11,12 @@ const Node = createNode({ mathWithTransform });
 const isBounded = (v: unknown): boolean => Number.isFinite(Number(v));
 const ConstantNode = createConstantNode({ Node, isBounded });
 const ConditionalNode = createConditionalNode({ Node });
+const OperatorNode = createOperatorNode({ Node });
+
+const PAREN_OPEN = '<span class="math-parenthesis math-round-parenthesis">(</span>';
+const PAREN_CLOSE = '<span class="math-parenthesis math-round-parenthesis">)</span>';
+const COND_Q = '<span class="math-operator math-conditional-operator">?</span>';
+const COND_COLON = '<span class="math-operator math-conditional-operator">:</span>';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function makeConst(v: unknown) {
@@ -163,6 +170,69 @@ describe('ConditionalNode - clone', () => {
     expect(cloned.condition).toBe(cond);
     expect(cloned.trueExpr).toBe(yes);
     expect(cloned.falseExpr).toBe(no);
+  });
+});
+
+describe('ConditionalNode - render oracle (clone G15)', () => {
+  it('toString exact: numeric branches', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toString()).toBe('1 ? 2 : 3');
+  });
+
+  it('toHTML exact: numeric branches', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toHTML()).toBe(
+      '<span class="math-number">1</span><span class="math-operator math-conditional-operator">?</span><span class="math-number">2</span><span class="math-operator math-conditional-operator">:</span><span class="math-number">3</span>'
+    );
+  });
+
+  it('toHTML exact: boolean condition', () => {
+    const node = new ConditionalNode(makeConst(true), makeConst(1), makeConst(0));
+    expect(node.toHTML()).toBe(
+      '<span class="math-boolean">true</span><span class="math-operator math-conditional-operator">?</span><span class="math-number">1</span><span class="math-operator math-conditional-operator">:</span><span class="math-number">0</span>'
+    );
+  });
+
+  it('toString exact: parenthesis all wraps each constant branch', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toString({ parenthesis: 'all' })).toBe('(1) ? (2) : (3)');
+  });
+
+  it('toHTML exact: parenthesis all wraps each branch in round-paren spans', () => {
+    const node = new ConditionalNode(makeConst(1), makeConst(2), makeConst(3));
+    expect(node.toHTML({ parenthesis: 'all' })).toBe(
+      PAREN_OPEN +
+        '<span class="math-number">1</span>' +
+        PAREN_CLOSE +
+        COND_Q +
+        PAREN_OPEN +
+        '<span class="math-number">2</span>' +
+        PAREN_CLOSE +
+        COND_COLON +
+        PAREN_OPEN +
+        '<span class="math-number">3</span>' +
+        PAREN_CLOSE
+    );
+  });
+
+  it('toString exact: OperatorNode condition is always parenthesized', () => {
+    const add = new OperatorNode('+', 'add', [makeConst(1), makeConst(2)]);
+    const node = new ConditionalNode(add, makeConst(3), makeConst(4));
+    expect(node.toString()).toBe('(1 + 2) ? 3 : 4');
+  });
+
+  it('toHTML exact: OperatorNode condition wrapped in round-paren spans', () => {
+    const add = new OperatorNode('+', 'add', [makeConst(1), makeConst(2)]);
+    const node = new ConditionalNode(add, makeConst(3), makeConst(4));
+    expect(node.toHTML()).toBe(
+      PAREN_OPEN +
+        add.toHTML() +
+        PAREN_CLOSE +
+        COND_Q +
+        '<span class="math-number">3</span>' +
+        COND_COLON +
+        '<span class="math-number">4</span>'
+    );
   });
 });
 

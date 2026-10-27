@@ -155,7 +155,8 @@ export const DEFAULT_CONFIG
 export class MathjsError, IndexError, DimensionError, DimensionMismatchError, UnitParseError
 
 // Subpath: @danielsimonjr/mathts-core/internal — cold shared utils (is/number/object/array/
-// collection/map/string/customs/switch), the WASM loader, and shared types. NOT on the browser-safe `.` entry.
+// collection/map/string/customs/switch), WASM integrity + WasmModuleLoader, and shared types.
+// NOT on the browser-safe `.` entry.
 ```
 
 Hot-path type guards (`is.ts`) are deliberately kept **local** to each package (V8 won't inline across module
@@ -181,8 +182,9 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 ```
 
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
-factory layer routes to (the "prefer the accelerated primitive" pattern). Depends on `core`, `parallel`,
-`gpu`.
+factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
+`transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
+`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -408,5 +410,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2009  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8096  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2017  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8104  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

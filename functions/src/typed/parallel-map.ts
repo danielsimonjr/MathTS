@@ -3,6 +3,11 @@
  *
  * `kernelSource` and `mapArray` were previously duplicated verbatim in
  * `typed/special.ts` and `typed/distributions.ts`; they now live here once.
+ * `mapBinaryF64` centralizes the shared sequential/worker loop for binary
+ * `Float64Array` typed overloads in signal (FFT magnitude/power).
+ * Unary Float64Array overloads keep per-function inlined `Math.*` loops:
+ * a shared callback (`mapUnaryFloat64`) was measured megamorphic and
+ * 56–643% slower on the n<50k sequential path (see PR #454 review).
  *
  * Both helpers run on the MAIN THREAD (they build the kernel source string and
  * dispatch it), so they may freely import — they are never themselves
@@ -12,7 +17,7 @@
  * @packageDocumentation
  */
 
-import { computePool } from '@danielsimonjr/mathts-parallel';
+import { computePool, type OpName } from '@danielsimonjr/mathts-parallel';
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -41,5 +46,25 @@ export async function mapArray(
   }
   const out = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) out[i] = scalar(x[i]);
+  return out;
+}
+
+/**
+ * Binary Float64Array map (e.g. FFT magnitude/power). Optional `parallelOp` selects
+ * the per-op threshold (defaults to the global `thresholdElements` gate).
+ */
+export async function mapBinaryF64(
+  a: Float64Array,
+  b: Float64Array,
+  scalar: (x: f64, y: f64) => f64,
+  kernel: string,
+  parallelOp?: OpName
+): Promise<Float64Array> {
+  if (computePool.shouldParallelize(a.length, parallelOp)) {
+    const r = await computePool.applyKernel2(a, b, kernel);
+    return r.result;
+  }
+  const out = new Float64Array(a.length);
+  for (let i = 0; i < a.length; i++) out[i] = scalar(a[i], b[i]);
   return out;
 }

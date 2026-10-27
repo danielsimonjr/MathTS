@@ -253,10 +253,14 @@ utilities (`clone`, `memoize`, `deepStrictEqual`, `arraySize`, `resize`, `reshap
 and unit factory internals.
 
 **WASM integrity helpers** (JS side of the SHA-384 manifest security invariant),
-in `core/src/wasm-loader.ts` and surfaced via `core/internal`:
+in `core/src/wasm-loader.ts` and surfaced via `core/internal` (not the `.` entry):
 `sha384OfBuffer(buffer)`, `verifyWasmIntegrity(buffer, wasmPath, options?)`,
 `loadWasmManifest(wasmPath)`, `resolvePackagedWasm(metaUrl, wasmFile)`,
-`defaultWasmLocation(metaUrl, wasmFile, opts?)`. Types `WasmManifest`, `LoadingMetrics`.
+`defaultWasmLocation(metaUrl, wasmFile, opts?)`. Abstract class
+`WasmModuleLoader<TModule>` holds the shared `load` / cached `loadModule` /
+`getImports` orchestration; each package's `WasmLoader` subclasses it and keeps
+the Node/browser arms that call `verifyWasmIntegrity`. Types `WasmManifest`,
+`LoadingMetrics`.
 
 ---
 
@@ -287,22 +291,23 @@ primitives the rest of the monorepo routes through. Depends on `core`,
 
 Standalone functions (`DenseMatrix → DenseMatrix`), not methods:
 
-| Function                | Result / Notes                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `matMul(A, B)`          | `number[][]` — dense multiply without a `DenseMatrix` wrapper (`matrix/src/operations/index.ts`)                    |
-| `lu(A)`                 | `LUResult{L,U,P}` — Doolittle w/ partial pivoting                                                                   |
-| `qr(A, opts?)`          | `QRResult{Q,R}` — Gram-Schmidt w/ re-orthogonalization; `mode: 'reduced'\|'full'`                                   |
-| `cholesky(A)`           | `CholeskyResult{L}` — right-looking, SPD only                                                                       |
-| `svd(matrix, options?)` | `SVDResult{U,S,V,rank}` — Golub-Reinsch; plus `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro` |
-| `eig(matrix, options?)` | `EigResult{values,vectors,vectorsIm,isSymmetric}` — QR w/ implicit shifts; plus `eigvals`, `powerIteration`         |
-| `matrixExpm(A)`         | Scaling-and-squaring + Padé-13 (Higham 2005)                                                                        |
-| `matrixLogm(A, opts?)`  | Schur-Padé inverse scaling-and-squaring (Higham 2008)                                                               |
-| `matrixSqrtm(A, opts?)` | Symmetric-eig (SPD) or Björck-Hammarling / Newton fallback                                                          |
-| `matrixSchur(A, opts?)` | `SchurResult{Q,T}` — Householder→Hessenberg + Francis double-shift                                                  |
-| `qrPivoted(A, opts?)`   | `QRPivotedResult{Q,R,P,rank}` — Businger-Golub rank-revealing                                                       |
-| `lq`/`rq`/`ql(A)`       | Derived from `qr()` via flip/transpose                                                                              |
-| `condest(A, p?)`        | Hager/Higham 1-norm condition estimate (O(n²)/iter)                                                                 |
-| `pinv(A, opts?)`        | Exported as `matrixPinv` — Moore-Penrose via full SVD + rcond                                                       |
+| Function                  | Result / Notes                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `matMul(A, B)`            | `number[][]` — dense multiply without a `DenseMatrix` wrapper (`matrix/src/operations/index.ts`)                    |
+| `transposeNestedArray(A)` | `number[][]` — nested-array transpose (public name of `common.transpose`; typed `transpose` is DenseMatrix)         |
+| `lu(A)`                   | `LUResult{L,U,P}` — Doolittle w/ partial pivoting                                                                   |
+| `qr(A, opts?)`            | `QRResult{Q,R}` — Gram-Schmidt w/ re-orthogonalization; `mode: 'reduced'\|'full'`                                   |
+| `cholesky(A)`             | `CholeskyResult{L}` — right-looking, SPD only                                                                       |
+| `svd(matrix, options?)`   | `SVDResult{U,S,V,rank}` — Golub-Reinsch; plus `singularValues`, `pinv`, `lowRankApprox`, `cond`, `norm2`, `normFro` |
+| `eig(matrix, options?)`   | `EigResult{values,vectors,vectorsIm,isSymmetric}` — QR w/ implicit shifts; plus `eigvals`, `powerIteration`         |
+| `matrixExpm(A)`           | Scaling-and-squaring + Padé-13 (Higham 2005)                                                                        |
+| `matrixLogm(A, opts?)`    | Schur-Padé inverse scaling-and-squaring (Higham 2008)                                                               |
+| `matrixSqrtm(A, opts?)`   | Symmetric-eig (SPD) or Björck-Hammarling / Newton fallback                                                          |
+| `matrixSchur(A, opts?)`   | `SchurResult{Q,T}` — Householder→Hessenberg + Francis double-shift                                                  |
+| `qrPivoted(A, opts?)`     | `QRPivotedResult{Q,R,P,rank}` — Businger-Golub rank-revealing                                                       |
+| `lq`/`rq`/`ql(A)`         | Derived from `qr()` via flip/transpose                                                                              |
+| `condest(A, p?)`          | Hager/Higham 1-norm condition estimate (O(n²)/iter)                                                                 |
+| `pinv(A, opts?)`          | Exported as `matrixPinv` — Moore-Penrose via full SVD + rcond                                                       |
 
 `eigWasm`/`eigvalsWasm`/`spectralRadiusWasm`/`svdWasm` are `Promise`-returning
 compat shims that delegate to the sync JS functions — the AS Jacobi/Hessenberg
@@ -1155,5 +1160,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8096  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2009  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8104  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2017  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

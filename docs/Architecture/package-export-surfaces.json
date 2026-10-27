@@ -392,6 +392,7 @@
       "createSymbolNode"
     ],
     "autograd": [
+      "assertSameShape",
       "derivative",
       "DualTensor",
       "forwardGrad",
@@ -817,7 +818,8 @@
       "verifyWasmIntegrity",
       "VERSION",
       "warnOnce",
-      "WasmManifest"
+      "WasmManifest",
+      "WasmModuleLoader"
     ],
     "evaluator": ["compile", "CompiledExpression", "compileExpression", "createEvaluate", "Scope"],
     "expression": [
@@ -1113,6 +1115,7 @@
       "importDocs",
       "indexDocs",
       "IndexError",
+      "IndexLike",
       "InfinityDocs",
       "initial",
       "inlineOperator",
@@ -2896,6 +2899,7 @@
       "mannWhitneyTest",
       "map",
       "mapArray",
+      "mapBinaryF64",
       "mapObject",
       "mapSlices",
       "MASS_PROPERTY_SHAPES",
@@ -3828,6 +3832,7 @@
       "LUResult",
       "luSolve",
       "matAdd",
+      "matInv",
       "matMul",
       "matrix",
       "Matrix",
@@ -3956,6 +3961,7 @@
       "TransferRequest",
       "TransferResult",
       "transpose",
+      "transposeNestedArray",
       "typedMatrixOperations",
       "unaryMinus",
       "verifyWasmIntegrity",
