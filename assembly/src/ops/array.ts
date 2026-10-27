@@ -5,6 +5,8 @@
  * These operations work directly on Float64Array data.
  */
 
+import { f64Add, f64Div, f64Max, f64Min, f64Mul, f64Sub } from './f64-buffer';
+
 // =============================================================================
 // Reduction Operations
 // =============================================================================
@@ -71,30 +73,14 @@ export function array_stddev(data: Float64Array): f64 {
  * Minimum value
  */
 export function array_min(data: Float64Array): f64 {
-  const len = data.length;
-  if (len == 0) return f64.NaN;
-
-  let minVal = unchecked(data[0]);
-  for (let i = 1; i < len; i++) {
-    const val = unchecked(data[i]);
-    if (val < minVal) minVal = val;
-  }
-  return minVal;
+  return f64Min(data);
 }
 
 /**
  * Maximum value
  */
 export function array_max(data: Float64Array): f64 {
-  const len = data.length;
-  if (len == 0) return f64.NaN;
-
-  let maxVal = unchecked(data[0]);
-  for (let i = 1; i < len; i++) {
-    const val = unchecked(data[i]);
-    if (val > maxVal) maxVal = val;
-  }
-  return maxVal;
+  return f64Max(data);
 }
 
 /**
@@ -195,40 +181,28 @@ export function array_dot(a: Float64Array, b: Float64Array): f64 {
  * Element-wise addition: result = a + b
  */
 export function array_add(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) + unchecked(b[i])));
-  }
+  f64Add(a, b, result);
 }
 
 /**
  * Element-wise subtraction: result = a - b
  */
 export function array_sub(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) - unchecked(b[i])));
-  }
+  f64Sub(a, b, result);
 }
 
 /**
  * Element-wise multiplication: result = a * b
  */
 export function array_mul(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) * unchecked(b[i])));
-  }
+  f64Mul(a, b, result);
 }
 
 /**
  * Element-wise division: result = a / b
  */
 export function array_div(a: Float64Array, b: Float64Array, result: Float64Array): void {
-  const len = min(min(a.length, b.length), result.length);
-  for (let i = 0; i < len; i++) {
-    unchecked((result[i] = unchecked(a[i]) / unchecked(b[i])));
-  }
+  f64Div(a, b, result);
 }
 
 /**
