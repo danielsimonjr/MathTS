@@ -8066,7 +8066,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2256
+      "loc": 2255
     },
     {
       "file": "functions/src/typed/parallel-map.ts",

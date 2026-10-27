@@ -840,6 +840,32 @@ export function curvefit(
   return x;
 }
 
+/** OLS slope + intercept on transformed coordinates (internal; not barrel-exported). */
+function linearFit(
+  xs: number[],
+  ys: number[],
+  mapX: (x: number) => number,
+  mapY: (y: number) => number,
+  finalize: (slope: number, intercept: number) => [number, number]
+): [number, number] {
+  const n = xs.length;
+  let sx = 0;
+  let sy = 0;
+  let sxx = 0;
+  let sxy = 0;
+  for (let i = 0; i < n; i++) {
+    const tx = mapX(xs[i]);
+    const ty = mapY(ys[i]);
+    sx += tx;
+    sy += ty;
+    sxx += tx * tx;
+    sxy += tx * ty;
+  }
+  const slope = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+  const intercept = (sy - slope * sx) / n;
+  return finalize(slope, intercept);
+}
+
 /**
  * Exponential fit: y = a * exp(b * x).
  *
@@ -848,22 +874,13 @@ export function curvefit(
  * @returns [a, b] coefficients
  */
 export function expfit(xs: number[], ys: number[]): [f64, f64] {
-  // Log-linearize: ln(y) = ln(a) + b*x
-  const logYs = ys.map((y) => Math.log(Math.abs(y) || 1e-15));
-  const n = xs.length;
-  let sx = 0,
-    sy = 0,
-    sxx = 0,
-    sxy = 0;
-  for (let i = 0; i < n; i++) {
-    sx += xs[i];
-    sy += logYs[i];
-    sxx += xs[i] * xs[i];
-    sxy += xs[i] * logYs[i];
-  }
-  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const lna = (sy - b * sx) / n;
-  return [Math.exp(lna), b];
+  return linearFit(
+    xs,
+    ys,
+    (x) => x,
+    (y) => Math.log(Math.abs(y) || 1e-15),
+    (b, lna) => [Math.exp(lna), b]
+  );
 }
 
 /**
@@ -874,21 +891,13 @@ export function expfit(xs: number[], ys: number[]): [f64, f64] {
  * @returns [a, b] coefficients
  */
 export function logfit(xs: number[], ys: number[]): [f64, f64] {
-  const logXs = xs.map((x) => Math.log(x));
-  const n = xs.length;
-  let sx = 0,
-    sy = 0,
-    sxx = 0,
-    sxy = 0;
-  for (let i = 0; i < n; i++) {
-    sx += logXs[i];
-    sy += ys[i];
-    sxx += logXs[i] * logXs[i];
-    sxy += logXs[i] * ys[i];
-  }
-  const a = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const b = (sy - a * sx) / n;
-  return [a, b];
+  return linearFit(
+    xs,
+    ys,
+    (x) => Math.log(x),
+    (y) => y,
+    (a, b) => [a, b]
+  );
 }
 
 /**
@@ -899,23 +908,13 @@ export function logfit(xs: number[], ys: number[]): [f64, f64] {
  * @returns [a, b] coefficients
  */
 export function powerfit(xs: number[], ys: number[]): [f64, f64] {
-  // Log-linearize: ln(y) = ln(a) + b*ln(x)
-  const logXs = xs.map((x) => Math.log(x));
-  const logYs = ys.map((y) => Math.log(y));
-  const n = xs.length;
-  let sx = 0,
-    sy = 0,
-    sxx = 0,
-    sxy = 0;
-  for (let i = 0; i < n; i++) {
-    sx += logXs[i];
-    sy += logYs[i];
-    sxx += logXs[i] * logXs[i];
-    sxy += logXs[i] * logYs[i];
-  }
-  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const lna = (sy - b * sx) / n;
-  return [Math.exp(lna), b];
+  return linearFit(
+    xs,
+    ys,
+    (x) => Math.log(x),
+    (y) => Math.log(y),
+    (b, lna) => [Math.exp(lna), b]
+  );
 }
 
 // =============================================================================
