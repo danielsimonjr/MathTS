@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1199,
+    "totalFiles": 1202,
     "totalModules": 82,
-    "totalExports": 6210
+    "totalExports": 6217
   },
   "entryPoints": [
     {
@@ -3520,6 +3520,15 @@
           {
             "file": "./gpu/builtin-shaders.js",
             "imports": ["registerBuiltinShaders"]
+          },
+          {
+            "file": "./gpu/run-shader.js",
+            "imports": [
+              "planRunShaderFromAdd",
+              "planRunShaderFromMatmul",
+              "planRunShaderFromTranspose",
+              "runShader"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -3579,6 +3588,10 @@
               "initializeGlobalGPUBackend",
               "GPUBackendOptions"
             ]
+          },
+          {
+            "file": "./gpu/gpu-or-js.js",
+            "imports": ["gpuOrJs"]
           }
         ],
         "workspaceDependencies": [
@@ -3784,6 +3797,15 @@
         "functions": ["registerBuiltinShaders"],
         "constants": ["BUILTIN_SHADERS"]
       },
+      "matrix/src/backends/gpu/gpu-or-js.ts": {
+        "description": "Route a matrix op to GPU when over the element threshold, else JS (with optional fallback).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gpuOrJs"],
+        "functions": ["gpuOrJs"]
+      },
       "matrix/src/backends/gpu/index.ts": {
         "description": "GPU Backend Exports",
         "externalDependencies": [],
@@ -3927,6 +3949,32 @@
           "TransferRequest",
           "TransferResult",
           "SyncConfig"
+        ]
+      },
+      "matrix/src/backends/gpu/run-shader.ts": {
+        "description": "Shared acquire / write / dispatch / read / release path for matrix GPU kernels.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../GPUBackend.js",
+            "imports": ["GPUBackend"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "planRunShaderFromAdd",
+          "planRunShaderFromMatmul",
+          "planRunShaderFromTranspose",
+          "runShader"
+        ],
+        "interfaces": ["RunShaderPlan"],
+        "functions": [
+          "planRunShaderFromAdd",
+          "planRunShaderFromMatmul",
+          "planRunShaderFromTranspose",
+          "runShader"
         ]
       },
       "matrix/src/backends/index.ts": {
@@ -4714,6 +4762,15 @@
         "interfaces": ["ExpmOptions"],
         "functions": ["matrixExpm"]
       },
+      "matrix/src/operations/givens.ts": {
+        "description": "Givens rotation on matrix columns (shared by Schur and SVD).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["applyGivensCols", "applyGivensRight"],
+        "functions": ["applyGivensCols", "applyGivensRight"]
+      },
       "matrix/src/operations/index.ts": {
         "description": "Matrix Operations",
         "externalDependencies": [],
@@ -5050,6 +5107,10 @@
               "applyHouseholderLeft",
               "applyHouseholderRight"
             ]
+          },
+          {
+            "file": "./givens.js",
+            "imports": ["applyGivensRight"]
           }
         ],
         "workspaceDependencies": [],
@@ -5112,6 +5173,10 @@
               "applyHouseholderLeft",
               "applyHouseholderRight"
             ]
+          },
+          {
+            "file": "./givens.js",
+            "imports": ["applyGivensCols"]
           }
         ],
         "workspaceDependencies": [],
@@ -40398,10 +40463,16 @@
   "dependencyGraph": {
     "circularDependencies": {
       "runtime": [],
-      "typeOnly": [],
-      "total": 0,
+      "typeOnly": [
+        [
+          "matrix/src/backends/GPUBackend.ts",
+          "matrix/src/backends/gpu/run-shader.ts",
+          "matrix/src/backends/GPUBackend.ts"
+        ]
+      ],
+      "total": 1,
       "runtimeCount": 0,
-      "typeOnlyCount": 0
+      "typeOnlyCount": 1
     },
     "layers": [
       {
@@ -40513,7 +40584,9 @@
           "matrix/src/backends/gpu/BatchExecutor.ts",
           "matrix/src/backends/gpu/Sync.ts",
           "matrix/src/backends/gpu/builtin-shaders.ts",
+          "matrix/src/backends/gpu/gpu-or-js.ts",
           "matrix/src/backends/gpu/index.ts",
+          "matrix/src/backends/gpu/run-shader.ts",
           "matrix/src/backends/index.ts",
           "matrix/src/backends/register-backends.ts",
           "matrix/src/backends/wasm/detect.ts",
@@ -40540,6 +40613,7 @@
           "matrix/src/operations/eig-wasm.ts",
           "matrix/src/operations/eig.ts",
           "matrix/src/operations/expm.ts",
+          "matrix/src/operations/givens.ts",
           "matrix/src/operations/index.ts",
           "matrix/src/operations/logm.ts",
           "matrix/src/operations/lu.ts",
@@ -41958,20 +42032,20 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1199,
+    "totalTypeScriptFiles": 1202,
     "totalModules": 82,
-    "totalLinesOfCode": 200733,
-    "totalExports": 6210,
+    "totalLinesOfCode": 200779,
+    "totalExports": 6217,
     "totalClasses": 59,
-    "totalInterfaces": 539,
-    "totalFunctions": 1979,
+    "totalInterfaces": 540,
+    "totalFunctions": 1986,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
     "totalReExports": 2627,
-    "totalTypeOnlyImports": 608,
+    "totalTypeOnlyImports": 609,
     "runtimeCircularDeps": 0,
-    "typeOnlyCircularDeps": 0,
+    "typeOnlyCircularDeps": 1,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0
   }

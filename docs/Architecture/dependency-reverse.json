@@ -201,10 +201,13 @@
       "matrix/src/backends/GPUBackend.ts",
       "matrix/src/backends/gpu/index.ts"
     ],
+    "matrix/src/backends/gpu/run-shader.ts": ["matrix/src/backends/GPUBackend.ts"],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
+      "matrix/src/backends/gpu/run-shader.ts",
       "matrix/src/backends/index.ts"
     ],
+    "matrix/src/backends/gpu/gpu-or-js.ts": ["matrix/src/backends/GPUMatrixBackend.ts"],
     "matrix/src/types/dense/reduction.ts": [
       "matrix/src/backends/JSBackend.ts",
       "matrix/src/types/DenseMatrix.ts"
@@ -284,6 +287,10 @@
     "matrix/src/operations/qr-pivoted.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/qr-family.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/condest.ts": ["matrix/src/operations/index.ts"],
+    "matrix/src/operations/givens.ts": [
+      "matrix/src/operations/schur.ts",
+      "matrix/src/operations/svd.ts"
+    ],
     "matrix/src/types/Matrix.ts": [
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/SparseMatrix.ts",

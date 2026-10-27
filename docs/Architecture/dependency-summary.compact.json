@@ -1,16 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1199, "e": 6210, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1202, "e": 6217, "re": 2627 },
   "s": {
-    "loc": 200733,
+    "loc": 200779,
     "cls": 59,
-    "int": 539,
-    "fn": 1979,
+    "int": 540,
+    "fn": 1986,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 608
+    "toi": 609
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": { "rt": 0, "to": 1, "rtp": [] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -241,7 +241,7 @@
       ]
     },
     "matrix/backends": {
-      "f": 18,
+      "f": 20,
       "exp": [
         "DEFAULT_BACKEND_HINTS",
         "backendRegistry",
@@ -316,7 +316,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 17,
+      "f": 18,
       "exp": [
         "cholesky",
         "eye",

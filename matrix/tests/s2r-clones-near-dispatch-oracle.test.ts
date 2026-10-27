@@ -8,6 +8,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { DenseMatrix } from '../src/types/DenseMatrix.js';
 import { GPUMatrixBackend } from '../src/backends/GPUMatrixBackend.js';
 import { destroyGlobalGPUBackend } from '../src/backends/GPUBackend.js';
+import { applyGivensCols, applyGivensRight } from '../src/operations/givens.js';
 
 /** Hand-applied Givens on columns i and k for rows [rowStart, rowEnd). */
 function givensColsHand(
@@ -29,25 +30,8 @@ function givensColsHand(
   return out;
 }
 
-/** Mirror of matrix/src/operations/svd.ts applyGivensCols (pre-merge duplicate for oracle). */
-function applyGivensColsPin(
-  A: number[][],
-  c: number,
-  s: number,
-  i: number,
-  k: number,
-  rowStart: number,
-  rowEnd: number
-): void {
-  for (let j = rowStart; j < rowEnd; j++) {
-    const temp = c * A[j][i] - s * A[j][k];
-    A[j][k] = s * A[j][i] + c * A[j][k];
-    A[j][i] = temp;
-  }
-}
-
 describe('S2R near dispatch — Givens column rotation (hand oracle)', () => {
-  it('pin implementation matches hand on 3×3', () => {
+  it('applyGivensCols matches hand on 3×3', () => {
     const A = [
       [1, 0, 2],
       [3, 0, 4],
@@ -57,7 +41,7 @@ describe('S2R near dispatch — Givens column rotation (hand oracle)', () => {
     const s = 0.8;
     const expected = givensColsHand(A, c, s, 0, 2, 0, 3);
     const work = A.map((row) => row.slice());
-    applyGivensColsPin(work, c, s, 0, 2, 0, 3);
+    applyGivensCols(work, c, s, 0, 2, 0, 3);
     expect(work).toEqual(expected);
   });
 
@@ -71,9 +55,23 @@ describe('S2R near dispatch — Givens column rotation (hand oracle)', () => {
     const s = 1 / Math.sqrt(2);
     const expected = givensColsHand(A, c, s, 0, 2, 1, 3);
     const work = A.map((row) => row.slice());
-    applyGivensColsPin(work, c, s, 0, 2, 1, 3);
+    applyGivensCols(work, c, s, 0, 2, 1, 3);
     expect(work).toEqual(expected);
     expect(work[0]).toEqual(A[0]);
+  });
+
+  it('applyGivensRight matches applyGivensCols with rowEnd = A.length', () => {
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const c = 0.8;
+    const s = 0.6;
+    const viaCols = A.map((row) => row.slice());
+    applyGivensCols(viaCols, c, s, 0, 1, 0, viaCols.length);
+    const viaRight = A.map((row) => row.slice());
+    applyGivensRight(viaRight, c, s, 0, 1, 0);
+    expect(viaRight).toEqual(viaCols);
   });
 });
 
@@ -133,16 +131,27 @@ describe('S2R near dispatch — GPUMatrixBackend async CPU fallback', () => {
   });
 });
 
-describe('S2R near dispatch — GPUBackend storage byte layout (oracle)', () => {
-  it('2×2 add/matmul/transpose f32 buffer sizes', () => {
-    const rows = 2;
-    const cols = 2;
-    const M = 2;
-    const K = 2;
-    const N = 2;
-    const b = 4;
-    expect(rows * cols * b).toBe(16);
-    expect([M * K * b, K * N * b, M * N * b]).toEqual([16, 16, 16]);
-    expect(rows * cols * b * 2).toBe(32);
+describe('S2R near dispatch — GPUBackend runShader plans (oracle)', () => {
+  it('2×2 add/matmul/transpose bind layouts and byte sizes', async () => {
+    const { planRunShaderFromAdd, planRunShaderFromMatmul, planRunShaderFromTranspose } =
+      await import('../src/backends/gpu/run-shader.js');
+    const wg: [number, number, number] = [1, 1, 1];
+    const a = new Float32Array([1, 2, 3, 4]);
+    const b = new Float32Array([5, 6, 7, 8]);
+    const addPlan = planRunShaderFromAdd(a, b, 2, 2, wg);
+    expect(addPlan.pipeline).toBe('matrixAdd');
+    expect(addPlan.bytes).toEqual([16, 16, 16]);
+    expect(addPlan.bindEntries.length).toBe(4);
+
+    const mm = planRunShaderFromMatmul(a, b, 2, 2, 2, wg);
+    expect(mm.pipeline).toBe('matmul');
+    expect(mm.bytes).toEqual([16, 16, 16]);
+    expect(new Uint32Array(mm.params.buffer)[0]).toBe(2);
+
+    const tr = planRunShaderFromTranspose(a, 2, 2, wg);
+    expect(tr.pipeline).toBe('transpose');
+    expect(tr.bytes).toEqual([16, 16]);
+    expect(tr.bindEntries.length).toBe(3);
+    expect(tr.bindEntries.some((e) => e.binding === 1 && e.bufferIndex === 1)).toBe(true);
   });
 });
