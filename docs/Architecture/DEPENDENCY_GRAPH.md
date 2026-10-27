@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 42 files
+- **functions/typed**: 43 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 487            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 488            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 477            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10006,10 +10006,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                             | Type                  |
-| ------------------- | ----------------------------------- | --------------------- |
-| `./integer-poly.js` | `trim, degree, lc, isZero, IntPoly` | Import                |
-| `./integer-poly.js` | `IntPoly`                           | Re-export (type-only) |
+| File                | Imports                                         | Type                  |
+| ------------------- | ----------------------------------------------- | --------------------- |
+| `./integer-poly.js` | `trim, degree, lc, isZero, zipIntPoly, IntPoly` | Import                |
+| `./integer-poly.js` | `IntPoly`                                       | Re-export (type-only) |
 
 **Exports:**
 
@@ -10056,7 +10056,7 @@ graph LR
 **Exports:**
 
 - Types: `IntPoly`
-- Functions: `trim`, `degree`, `lc`, `isZero`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
 
 ---
 
@@ -10341,6 +10341,7 @@ graph LR
 | `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                                                           | Import |
 | `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`                                          | Import |
 | `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD, chebBasisRow, legendreBasisRow` | Import |
+| `./normal-equations-solve.js`          | `solveAugmentedNormalEquations`                                                                                  | Import |
 
 **Exports:**
 
@@ -10377,6 +10378,14 @@ graph LR
 - Interfaces: `CholeskyResult`, `HessenbergResult`, `PolarResult`, `JordanResult`
 - Functions: `characteristicPolynomial`, `rowReduce`, `matrixRank`, `cholesky`, `hessenbergForm`, `matrixPower`, `matrixLog`, `polarDecomposition`, `jordanForm`
 - Constants: `pinv`, `cond`, `norm2`, `normFro`, `lowRankApprox`, `singularValues`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`
+
+---
+
+### `functions/src/typed/normal-equations-solve.ts` - Gaussian elimination with partial pivoting on an augmented normal-equations
+
+**Exports:**
+
+- Functions: `solveAugmentedNormalEquations`
 
 ---
 
@@ -11301,11 +11310,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                                                    | Type   |
-| ---------------------- | ---------------------------------------------------------- | ------ |
-| `../WasmLoader.js`     | `wasmLoader`                                               | Import |
-| `../bridges/common.js` | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
-| `../policy.js`         | `wasmPolicyAllows`                                         | Import |
+| File                                    | Imports                                                    | Type   |
+| --------------------------------------- | ---------------------------------------------------------- | ------ |
+| `../WasmLoader.js`                      | `wasmLoader`                                               | Import |
+| `../bridges/common.js`                  | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, RawWasm` | Import |
+| `../policy.js`                          | `wasmPolicyAllows`                                         | Import |
+| `../../typed/normal-equations-solve.js` | `solveAugmentedNormalEquations`                            | Import |
 
 **Exports:**
 
@@ -18548,7 +18558,7 @@ graph TD
         N327[dist-objects]
         N328[distributions]
         N329[euclid]
-        N330[...32 more]
+        N330[...33 more]
     end
 
     subgraph Functions/unit
@@ -18906,14 +18916,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1201   |
+| Total TypeScript Files  | 1202   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200661 |
-| Total Exports           | 6218   |
+| Total Lines of Code     | 200580 |
+| Total Exports           | 6220   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1987   |
+| Total Functions         | 1989   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 610    |

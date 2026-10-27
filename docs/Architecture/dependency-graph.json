@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1201,
+    "totalFiles": 1202,
     "totalModules": 82,
-    "totalExports": 6218
+    "totalExports": 6220
   },
   "entryPoints": [
     {
@@ -21788,7 +21788,7 @@
         "internalDependencies": [
           {
             "file": "./integer-poly.js",
-            "imports": ["trim", "degree", "lc", "isZero", "IntPoly"]
+            "imports": ["trim", "degree", "lc", "isZero", "zipIntPoly", "IntPoly"]
           },
           {
             "file": "./integer-poly.js",
@@ -21898,6 +21898,7 @@
           "degree",
           "lc",
           "isZero",
+          "zipIntPoly",
           "add",
           "sub",
           "neg",
@@ -21919,6 +21920,7 @@
           "degree",
           "lc",
           "isZero",
+          "zipIntPoly",
           "add",
           "sub",
           "neg",
@@ -22888,6 +22890,10 @@
               "chebBasisRow",
               "legendreBasisRow"
             ]
+          },
+          {
+            "file": "./normal-equations-solve.js",
+            "imports": ["solveAugmentedNormalEquations"]
           }
         ],
         "workspaceDependencies": [],
@@ -23015,6 +23021,15 @@
           "matrixLogm",
           "matrixSqrtm"
         ]
+      },
+      "functions/src/typed/normal-equations-solve.ts": {
+        "description": "Gaussian elimination with partial pivoting on an augmented normal-equations",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["solveAugmentedNormalEquations"],
+        "functions": ["solveAugmentedNormalEquations"]
       },
       "functions/src/typed/numeric.ts": {
         "description": "Typed Numerical Methods Functions",
@@ -25315,6 +25330,10 @@
           {
             "file": "../policy.js",
             "imports": ["wasmPolicyAllows"]
+          },
+          {
+            "file": "../../typed/normal-equations-solve.js",
+            "imports": ["solveAugmentedNormalEquations"]
           }
         ],
         "workspaceDependencies": [],
@@ -41243,6 +41262,7 @@
           "functions/src/typed/interpolation.ts",
           "functions/src/typed/logical.ts",
           "functions/src/typed/matrix-ops.ts",
+          "functions/src/typed/normal-equations-solve.ts",
           "functions/src/typed/numeric.ts",
           "functions/src/typed/parallel-map.ts",
           "functions/src/typed/polynomial-ideal.ts",
@@ -42025,13 +42045,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1201,
+    "totalTypeScriptFiles": 1202,
     "totalModules": 82,
-    "totalLinesOfCode": 200661,
-    "totalExports": 6218,
+    "totalLinesOfCode": 200580,
+    "totalExports": 6220,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1987,
+    "totalFunctions": 1989,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

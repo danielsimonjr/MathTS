@@ -2406,6 +2406,10 @@
       "functions/src/typed/signal.ts"
     ],
     "functions/src/wasm/interpolation/wasm-bridge.ts": ["functions/src/typed/interpolation.ts"],
+    "functions/src/typed/normal-equations-solve.ts": [
+      "functions/src/typed/interpolation.ts",
+      "functions/src/wasm/poly/wasm-bridge.ts"
+    ],
     "functions/src/numeric/rational-nullspace.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
