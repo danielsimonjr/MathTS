@@ -2877,6 +2877,7 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 | `simplifyScalar(node[, options])`          | Symbolic simplify via wired `simplify`, returning a scalar tree                  |
 | `scalarToTex(node[, options])`             | LaTeX via `Node.toTex` on `scalarToNode(node)`                                   |
 | `compileScalar(node, options)`             | Batch-evaluate a scalar node over `Float64Array` columns with per-row validity   |
+| `compileScalarGradient(node, options)`     | Same tape as `compileScalar` plus exact ∂f/∂parameter per row (`grad` layout)    |
 | `paretoFront(candidates)`                  | Pareto hall of fame (one survivor per complexity, ascending complexity)          |
 | `scoreFront(front[, { lossScale }])`       | PySR log-loss scores (`'log'` default) for a front                               |
 | `selectFrontModel(scored[, mode[, opts]])` | Pick `accuracy` / `score` / `best` champion (`ParetoFrontError` on bad input)    |
@@ -2979,7 +2980,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1096 exports).
+> `@danielsimonjr/mathts-functions` (1097 exports).
 
 ### Functions by category
 
@@ -3033,7 +3034,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (19): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (20): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

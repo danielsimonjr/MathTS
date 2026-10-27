@@ -478,6 +478,8 @@ PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expres
 | `simplifyScalar`            | `(node, options?: SimplifyOptions) => ScalarNode`                            | `simplify` on `scalarToNode`, then `nodeToScalar` |
 | `scalarToTex`               | `(node, options?: StringOptions) => string`                                  | `scalarToNode(node).toTex(options)`               |
 | `compileScalar`             | `(node, options: CompileScalarOptions) => CompiledScalar`                    | Batch tape over `Float64Array` columns            |
+| `compileScalarGradient`     | `(node, options) => CompiledScalarGradient`                                  | Same tape plus exact parameter gradients per row  |
+| `CompiledScalarGradient`    | `.evaluate(columns, params, out?)` → values, valid, `grad`                   | `grad[r*nParams+p]` is ∂f/∂param_p at row r       |
 | `paretoFront`               | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)             |
 | `scoreFront`                | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                              |
 | `selectFrontModel`          | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                               |
@@ -498,6 +500,7 @@ PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expres
 import { createSeededRng } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
+  compileScalarGradient,
   nodeToScalar,
   numericallyEquivalent,
   paretoFront,
@@ -510,6 +513,14 @@ import {
 } from '@danielsimonjr/mathts-functions';
 
 const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const linear = scalar.op('+', [
+  scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+  scalar.symbol('b'),
+]);
+const gradCompiled = compileScalarGradient(linear, { variables: ['x'], parameters: ['a', 'b'] });
+const { values, grad } = gradCompiled.evaluate([new Float64Array([3])], [2, -1]);
+values[0]; // 5
+[...grad]; // 3, 1
 const quotient = scalar.op('/', [
   scalar.symbol('a'),
   scalar.op('/', [scalar.symbol('b'), scalar.symbol('c')]),
@@ -562,7 +573,7 @@ ceil(2.1); // 3
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1096 exports).
+> `@danielsimonjr/mathts-functions` (1097 exports).
 
 ### Functions by category
 
@@ -616,7 +627,7 @@ ceil(2.1); // 3
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (19): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (20): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

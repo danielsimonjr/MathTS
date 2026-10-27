@@ -14,7 +14,7 @@ npm install @danielsimonjr/mathts-functions
 
 - Hundreds of typed functions (`add`, `sin`, `svd`-aware ops, `parallelFFT`, …).
 - A wired `parse` / `evaluate` against the full activated math scope.
-- `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw.
+- `scalar` / `evaluateScalar` — evaluate a typed scalar tree (`+ - * / ^`, `ln` → natural `log`, `log` → `log10`, and the other scalar calls). A formula string is rejected. `compileScalar` evaluates the same tree over `Float64Array` columns and marks a row invalid where `evaluateScalar` would throw. `compileScalarGradient` reuses that tape to return exact ∂f/∂parameter for each row (PySR constant fitting).
 - `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` — convert between scalar trees and wired expression nodes (no formula string); `simplifyScalar` uses the same `simplify` as the expression language.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
 - `numericallyEquivalent` — sample two scalar trees with `createSeededRng`, evaluate via `compileScalar`, compare with core `nearlyEqual`. **Numerical agreement alone never proves symbolic equivalence;** a `consistent` verdict is evidence, not proof.
@@ -23,6 +23,7 @@ npm install @danielsimonjr/mathts-functions
 import { createSeededRng } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
+  compileScalarGradient,
   numericallyEquivalent,
   paretoFront,
   scoreFront,
@@ -33,6 +34,14 @@ import {
 } from '@danielsimonjr/mathts-functions';
 
 const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+const linear = scalar.op('+', [
+  scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+  scalar.symbol('b'),
+]);
+const gradCompiled = compileScalarGradient(linear, { variables: ['x'], parameters: ['a', 'b'] });
+const { values, grad } = gradCompiled.evaluate([new Float64Array([3])], [2, -1]);
+values[0]; // 5
+[...grad]; // 3, 1 — ∂/∂a = x, ∂/∂b = 1
 const quotient = scalar.op('/', [
   scalar.symbol('a'),
   scalar.op('/', [scalar.symbol('b'), scalar.symbol('c')]),

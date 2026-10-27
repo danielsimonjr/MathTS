@@ -48,8 +48,13 @@ export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 // `log` lowers to `log10`. A formula string is rejected.
 export { evaluateScalar, scalar, ScalarEvalError } from './scalar-eval.js';
 export type { ScalarScope } from './scalar-eval.js';
-export { compileScalar } from './scalar-compile.js';
-export type { CompileScalarOptions, ScalarBatchResult, CompiledScalar } from './scalar-compile.js';
+export { compileScalar, compileScalarGradient } from './scalar-compile.js';
+export type {
+  CompileScalarOptions,
+  ScalarBatchResult,
+  CompiledScalar,
+  CompiledScalarGradient,
+} from './scalar-compile.js';
 // scalarToNode, nodeToScalar, simplifyScalar, scalarToTex are exported via export * from './factories/index.js'.
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';

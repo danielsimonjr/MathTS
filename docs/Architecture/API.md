@@ -761,6 +761,12 @@ and `scalarToTex(node, options?)` — implemented in `functions/src/scalar-node-
 exported from `functions/src/factories/index.ts` via `export *` on the package barrel.
 Types `MathNode`, `StringOptions`, and `SimplifyOptions` are re-exported for signatures.
 
+### Batch scalar compile
+
+`compileScalar` and `compileScalarGradient` (`functions/src/scalar-compile.ts`) share one
+register tape over column `Float64Array`s; the gradient entry adds one forward lane per
+fitted parameter using `DUAL_UNARY_RULES` for unary calls and explicit `^` partials.
+
 `numericallyEquivalent(a, b, options)` (`functions/src/numeric-equivalence.ts`) samples
 with `SeededRng.next`, evaluates both trees through `compileScalar`, and compares with
 core `nearlyEqual`. A `consistent` verdict is evidence, not proof of symbolic equivalence.
@@ -1124,5 +1130,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8057  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 1993  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8061  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1994  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

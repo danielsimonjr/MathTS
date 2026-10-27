@@ -76,7 +76,7 @@ The mathjs-derived factories are wired into the graph via
 ### ScalarNode toolkit, batch compile, and Pareto front (Sprint 1R)
 
 - **`expression/src/scalar-structure.ts`**: `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, and `ScalarComplexityWeights` — PySR-style canonical keys (`+`/`*` flattening; `a-b` → `a+(-1)*b`; `a/b` → `a*b^-1`; no constant-fold of `^`).
-- **`functions/src/scalar-compile.ts`**: `compileScalar` builds a register tape over column `Float64Array`s with a per-row `valid` mask; no `eval` / `new Function`; does not load WASM.
+- **`functions/src/scalar-compile.ts`**: `compileScalar` builds a register tape over column `Float64Array`s with a per-row `valid` mask; `compileScalarGradient` reuses that tape with one forward lane per fitted parameter for exact ∂f/∂param batch values; no `eval` / `new Function`; does not load WASM.
 - **`functions/src/scalar-node-bridge.ts`**: `scalarToNode`, `nodeToScalar`, `simplifyScalar`, and `scalarToTex` convert between `ScalarNode` and wired expression nodes via the factory `ConstantNode` / `SymbolNode` / `OperatorNode` / `FunctionNode` classes and `simplify` / `Node.toTex` (no formula string).
 - **`functions/src/pareto-front.ts`**: `paretoFront`, `scoreFront`, `selectFrontModel` (not `paretoDist`).
 - **`functions/src/numeric-equivalence.ts`**: `numericallyEquivalent` samples with `SeededRng.next`, evaluates both trees via `compileScalar`, compares with core `nearlyEqual`; a `consistent` verdict is evidence, not proof.
@@ -198,9 +198,9 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1993   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 350776 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8057   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1994   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 351769 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8061   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
