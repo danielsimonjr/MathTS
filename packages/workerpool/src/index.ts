@@ -2280,6 +2280,12 @@ export class MathWorkerPool {
   // Generic Parallel Operations
   // =========================================================================
 
+  /**
+   * Shared map/filter dispatch. Below threshold, `spec.sequential` runs
+   * (`data.map` / `data.filter`). Above threshold, each chunk is sent to
+   * `spec.task` with `spec.fnString` (`fn.toString()`), then concatenated in
+   * chunk order via `Promise.all(...).flat()`.
+   */
   private async runChunks<TItem, TOut extends unknown[]>(
     data: TItem[],
     options: TaskOptions | undefined,

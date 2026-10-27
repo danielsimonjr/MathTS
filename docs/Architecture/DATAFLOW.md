@@ -136,6 +136,12 @@ generated [`parallel-pairing.md`](./parallel-pairing.md) is the authoritative,
 always-current map of which functions are effectively parallelized vs
 threshold-disabled, and each op's threshold.
 
+Generic `MathWorkerPool.map` / `filter` share one `runChunks` helper. Below the
+pool threshold they call `Array#map` / `Array#filter`. Above it they dispatch
+`mapChunk` / `filterChunk` with `fn.toString()` and concatenate `Promise.all`
+results in chunk order. Typed-array kernels still chunk with `slice()` (not
+`subarray()`), so each worker owns its buffer region.
+
 ---
 
 ## 3b. WASM Bridge Interception Flow

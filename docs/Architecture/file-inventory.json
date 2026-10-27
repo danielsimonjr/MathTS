@@ -11650,7 +11650,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 36
+      "loc": 76
     },
     {
       "file": "packages/workerpool/src/compile-function-source.ts",
@@ -11671,14 +11671,14 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2533
+      "loc": 2539
     },
     {
       "file": "packages/workerpool/src/multi-index.ts",
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 27
+      "loc": 44
     },
     {
       "file": "packages/workerpool/src/worker-numerics.ts",
@@ -11741,7 +11741,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 198
+      "loc": 276
     },
     {
       "file": "packages/workerpool/tests/worker-numerics.test.ts",

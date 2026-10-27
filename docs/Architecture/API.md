@@ -92,6 +92,15 @@ threshold): `sum`, `prod`, `dot(a,b)`, `elementwise(a,b,op)`
 `TaskOptions`, `WorkerpoolCapabilities`, `WasmFeatureStatus`. Constant:
 `DEFAULT_WORKER_CONFIG`.
 
+**@internal** (for `@danielsimonjr/mathts-parallel`, not a stable public API):
+`chunkTyped`, `chunkPairTyped` (`slice`, not `subarray`, so each worker chunk
+owns its buffer), `forEachMultiIndex` (row-major; rank 0 calls `cb([])` once;
+`multi-index.ts` has no imports, so `dist/worker.js` cannot pull `core` or
+`parallel`). Generic `map` / `filter` share one `runChunks` helper: below
+threshold they call `Array#map` / `Array#filter`; above threshold they dispatch
+`mapChunk` / `filterChunk` with `fn.toString()` and concatenate `Promise.all`
+results in chunk order.
+
 ---
 
 ## @danielsimonjr/mathts-core
