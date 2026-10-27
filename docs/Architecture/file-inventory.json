@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1932,
+  "totalFiles": 1933,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 678,
+    "test": 679,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 678,
+    "tests": 679,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 50,
     "@danielsimonjr/mathts-expression": 547,
-    "@danielsimonjr/mathts-functions": 812,
+    "@danielsimonjr/mathts-functions": 813,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 100,
@@ -471,7 +471,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 88
+      "loc": 96
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -8536,6 +8536,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 786
+    },
+    {
+      "file": "functions/tests/clones-batch3-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 111
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",

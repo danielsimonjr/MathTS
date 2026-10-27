@@ -54,6 +54,14 @@ describe('create(all) statistics + rounding delegate correctly', () => {
     expect(math.floor(2.9)).toBe(2);
     expect(math.ceil(2.1)).toBe(3);
   });
+
+  it('BigNumber floor/ceil toward ±infinity at half-integers (clone batch3 G20)', () => {
+    const bn = math.bignumber as (x: number | string) => { toNumber(): number };
+    expect(math.floor(bn(2.5)).toNumber()).toBe(2);
+    expect(math.ceil(bn(2.5)).toNumber()).toBe(3);
+    expect(math.floor(bn(-2.5)).toNumber()).toBe(-3);
+    expect(math.ceil(bn(-2.5)).toNumber()).toBe(-2);
+  });
 });
 
 describe('create(all) keeps compat shims overlaid on the functions namespace', () => {
