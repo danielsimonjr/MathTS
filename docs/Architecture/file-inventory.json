@@ -4958,7 +4958,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 83
+      "loc": 76
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",

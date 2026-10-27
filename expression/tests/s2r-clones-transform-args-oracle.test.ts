@@ -29,26 +29,19 @@ describe('filter transform arg oracle', () => {
   });
 
   it('compiles the collection argument once', () => {
-    let reads = 0;
-    const scope = {
-      has(key: string): boolean {
-        return key === 'xs' || key === 'gt2';
-      },
-      get(key: string): unknown {
-        if (key === 'xs') {
-          reads += 1;
-          return [1, 2, 3, 4];
-        }
-        if (key === 'gt2') return (x: number) => x > 2;
-        return undefined;
-      },
-      set(key: string, value: unknown): void {
-        void key;
-        void value;
-      },
-    };
+    class CountingMap extends Map<string, unknown> {
+      xsReads = 0;
+      override get(key: string): unknown {
+        if (key === 'xs') this.xsReads += 1;
+        return super.get(key);
+      }
+    }
+    const scope = new CountingMap([
+      ['xs', [1, 2, 3, 4]],
+      ['gt2', (x: number) => x > 2],
+    ]);
     expect(val(evaluate('filter(xs, gt2)', scope))).toEqual([3, 4]);
-    expect(reads).toBe(1);
+    expect(scope.xsReads).toBe(1);
   });
 
   it('inline callback with no free variable throws the compileInlineExpression error', () => {
