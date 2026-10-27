@@ -123,9 +123,10 @@ describe('runWithConfig', () => {
         value: 7,
         enumerable: true,
         writable: true,
+        configurable: true,
       });
       expect((overlay as { scratch?: number }).scratch).toBe(7);
-      delete (factoryConfig as { scratch?: number }).scratch;
+      expect(delete (factoryConfig as { scratch?: number }).scratch).toBe(true);
       expect(Object.hasOwn(overlay, 'scratch')).toBe(false);
     });
     expect(Object.hasOwn(DEFAULT_CONFIG, 'scratch')).toBe(false);

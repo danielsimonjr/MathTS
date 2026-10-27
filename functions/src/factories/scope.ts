@@ -234,7 +234,7 @@ const factoryConfigProxy = new Proxy(DEFAULT_CONFIG, {
     return true;
   },
   deleteProperty(_target, prop) {
-    return delete (activeConfigSource() as unknown as Record<string | symbol, unknown>)[prop];
+    return Reflect.deleteProperty(activeConfigSource(), prop);
   },
 });
 
