@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1195, "e": 6201, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1197, "e": 6205, "re": 2627 },
   "s": {
-    "loc": 200873,
+    "loc": 200852,
     "cls": 59,
     "int": 539,
-    "fn": 1968,
+    "fn": 1972,
     "tg": 158,
     "en": 0,
     "co": 1618,
@@ -490,7 +490,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 38,
+      "f": 39,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -687,6 +687,7 @@
         "resetGpuElementwise",
         "elementwiseChainGpuDispatch",
         "elementwiseChainReduceGpuDispatch",
+        "reduceNumbers",
         "resetGpuFft",
         "fftGpuDispatch"
       ],
@@ -798,7 +799,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 25,
+      "f": 26,
       "exp": [
         "quad",
         "bfgs",
@@ -816,10 +817,10 @@
         "gaussLegendre4",
         "GL4ConvergenceError",
         "rootsLegendre",
+        "hermiteCubic",
         "interpn",
         "interval",
-        "Interval",
-        "incompleteLU"
+        "Interval"
       ],
       "cls": ["GL4ConvergenceError", "Interval"],
       "int": [
@@ -1858,10 +1859,10 @@
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
+    { "p": "utils/array.ts", "i": 0, "o": 50 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/array.ts", "i": 0, "o": 48 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 44 },
+    { "p": "utils/number.ts", "i": 0, "o": 45 },
     { "p": "utils/collection.ts", "i": 0, "o": 38 }
   ]
 }

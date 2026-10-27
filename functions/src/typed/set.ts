@@ -16,25 +16,11 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { flatten as flattenArray } from '../utils/array.js';
 
 // =============================================================================
 // Internal helpers
 // =============================================================================
-
-/** Flatten a nested array into a one-dimensional array. */
-function flattenArray(arr: unknown[]): unknown[] {
-  const result: unknown[] = [];
-  const stack = [...arr];
-  while (stack.length > 0) {
-    const item = stack.shift()!;
-    if (Array.isArray(item)) {
-      stack.unshift(...item);
-    } else {
-      result.push(item);
-    }
-  }
-  return result;
-}
 
 /**
  * Convert a value that may be either a plain `Array` or a mathjs-style `Matrix`

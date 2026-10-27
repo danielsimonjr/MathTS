@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `multiplyElementwise` share `parallelBinary`. `logm` / `sqrtm` share `common.matInv` (singular
   at `1e-15`) and `matrixSqrtNewtonInternal` (150 iters, `1e-14`, `Y0 = I`). Public names and
   behavior stay; `matInv` is not on the barrel.
+- **Sprint 2R clone batch 3 (`functions`):** factory `ceil`/`floor` share `snapNumber`/`snapBig`,
+  matrix 1/∞ norms share `_matrixNormSum`, geometry/set flatten call core `flatten`, GPU/CPU
+  reductions share `reduceNumbers`, and `solveODE`/`solveDDE` share `hermiteCubic`. `snapBig`
+  compares with core BigNumber `equals` as well as decimal.js `eq`.
 
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves

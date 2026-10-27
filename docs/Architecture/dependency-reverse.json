@@ -869,6 +869,7 @@
       "functions/src/arithmetic/log1p.ts",
       "functions/src/arithmetic/pow.ts",
       "functions/src/arithmetic/round.ts",
+      "functions/src/arithmetic/snap-to-round.ts",
       "functions/src/arithmetic/unaryPlus.ts",
       "functions/src/core/function/typed.ts",
       "functions/src/matrix/diag.ts",
@@ -1070,6 +1071,7 @@
       "functions/src/algebra/solver/utils/solveValidation.ts",
       "functions/src/arithmetic/hypot.ts",
       "functions/src/arithmetic/pow.ts",
+      "functions/src/geometry/geometry-extra.ts",
       "functions/src/matrix/column.ts",
       "functions/src/matrix/concat.ts",
       "functions/src/matrix/cross.ts",
@@ -1114,6 +1116,7 @@
       "functions/src/statistics/mode.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/type/matrix/utils/broadcast.ts",
+      "functions/src/typed/set.ts",
       "functions/src/utils/optimizeCallback.ts"
     ],
     "functions/src/utils/string.ts": [
@@ -1284,6 +1287,10 @@
       "functions/src/relational/smallerEq.ts",
       "functions/src/utils/isNegative.ts",
       "functions/src/utils/isPositive.ts"
+    ],
+    "functions/src/arithmetic/snap-to-round.ts": [
+      "functions/src/arithmetic/ceil.ts",
+      "functions/src/arithmetic/floor.ts"
     ],
     "functions/src/type/matrix/utils/matAlgo11xS0s.ts": [
       "functions/src/arithmetic/ceil.ts",
@@ -2208,6 +2215,10 @@
       "functions/src/probability/randomInt.ts",
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/stats/mvn.ts"
+    ],
+    "functions/src/numeric/hermite.ts": [
+      "functions/src/numeric/solveDDE.ts",
+      "functions/src/numeric/solveODE.ts"
     ],
     "functions/src/utils/product.ts": [
       "functions/src/plain/number/combinations.ts",

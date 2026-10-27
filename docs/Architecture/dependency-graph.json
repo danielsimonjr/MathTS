@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1195,
+    "totalFiles": 1197,
     "totalModules": 82,
-    "totalExports": 6201
+    "totalExports": 6205
   },
   "entryPoints": [
     {
@@ -7362,11 +7362,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -7692,11 +7696,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -8305,6 +8313,20 @@
         "workspaceDependencies": [],
         "exports": ["createSign"],
         "constants": ["createSign"]
+      },
+      "functions/src/arithmetic/snap-to-round.ts": {
+        "description": "Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/number.js",
+            "imports": ["nearlyEqual"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["snapNumber", "snapBig"],
+        "functions": ["snapNumber", "snapBig"]
       },
       "functions/src/arithmetic/sqrt.ts": {
         "description": "Calculate the square root of a value.",
@@ -14168,6 +14190,10 @@
           {
             "file": "../typed/set.js",
             "imports": ["setIsSubset", "setMultiplicity"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
           }
         ],
         "workspaceDependencies": [
@@ -14353,14 +14379,16 @@
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "interfaces": ["GpuChainOptions"],
         "functions": [
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "constants": ["GPU_ELEMENTWISE_OPS", "GPU_REDUCE_OPS"]
       },
@@ -16137,6 +16165,15 @@
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
       },
+      "functions/src/numeric/hermite.ts": {
+        "description": "Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hermiteCubic"],
+        "functions": ["hermiteCubic"]
+      },
       "functions/src/numeric/interpn.ts": {
         "description": "Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`",
         "externalDependencies": [],
@@ -16312,7 +16349,12 @@
         "description": "Constant-delay delay differential equation (DDE) solver via the method of steps.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["solveDDE"],
         "interfaces": ["SolveDDEOptions", "DDESolution"],
@@ -16326,6 +16368,10 @@
           {
             "file": "./numeric-jacobian.js",
             "imports": ["numericJacobian"]
+          },
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
           },
           {
             "file": "../utils/is.js",
@@ -22005,6 +22051,7 @@
             "imports": [
               "elementwiseChainGpuDispatch",
               "elementwiseChainReduceGpuDispatch",
+              "reduceNumbers",
               "GpuChainOptions",
               "GpuReduceOp"
             ]
@@ -23227,7 +23274,12 @@
         "description": "Typed Set Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -40596,6 +40648,7 @@
           "functions/src/arithmetic/pow.ts",
           "functions/src/arithmetic/round.ts",
           "functions/src/arithmetic/sign.ts",
+          "functions/src/arithmetic/snap-to-round.ts",
           "functions/src/arithmetic/sqrt.ts",
           "functions/src/arithmetic/square.ts",
           "functions/src/arithmetic/subtract.ts",
@@ -40820,6 +40873,7 @@
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-legendre4.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/hermite.ts",
           "functions/src/numeric/interpn.ts",
           "functions/src/numeric/interval.ts",
           "functions/src/numeric/krylov.ts",
@@ -41860,13 +41914,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1195,
+    "totalTypeScriptFiles": 1197,
     "totalModules": 82,
-    "totalLinesOfCode": 200873,
-    "totalExports": 6201,
+    "totalLinesOfCode": 200852,
+    "totalExports": 6205,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1968,
+    "totalFunctions": 1972,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

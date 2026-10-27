@@ -11,6 +11,7 @@
 import { matMul, svd } from '@danielsimonjr/mathts-matrix';
 import { quaternionConjugate } from '../geometry-extra.js';
 import { setIsSubset, setMultiplicity } from '../typed/set.js';
+import { flatten } from '../utils/array.js';
 
 type Quat = readonly [number, number, number, number] | readonly number[];
 
@@ -300,20 +301,6 @@ export function kdTreeRadius(points: number[][], query: number[], r: number): nu
 // =============================================================================
 // Multiset comparisons (complement `setIsSubset`/`setMultiplicity`)
 // =============================================================================
-
-function flatten(arr: unknown[]): unknown[] {
-  const result: unknown[] = [];
-  const stack = [...arr];
-  while (stack.length > 0) {
-    const item = stack.shift();
-    if (Array.isArray(item)) {
-      stack.unshift(...item);
-    } else {
-      result.push(item);
-    }
-  }
-  return result;
-}
 
 /**
  * True when every element of `b` (with multiplicity) appears in `a` — i.e.
