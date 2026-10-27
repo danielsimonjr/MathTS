@@ -30280,7 +30280,7 @@ modules:
       functions:
         - assignFactory
     expression/src/node/utils/stringSubset.ts:
-      description: Retrieve a subset of a string
+      description: Retrieve a subset of a string.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -39438,7 +39438,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1193
   totalModules: 82
-  totalLinesOfCode: 200919
+  totalLinesOfCode: 200928
   totalExports: 6190
   totalClasses: 59
   totalInterfaces: 539

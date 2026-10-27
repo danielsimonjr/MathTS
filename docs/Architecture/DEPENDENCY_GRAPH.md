@@ -15486,7 +15486,7 @@ graph LR
 
 ---
 
-### `expression/src/node/utils/stringSubset.ts` - Retrieve a subset of a string
+### `expression/src/node/utils/stringSubset.ts` - Retrieve a subset of a string.
 
 **Internal Dependencies:**
 
@@ -18777,7 +18777,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1193   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200919 |
+| Total Lines of Code     | 200928 |
 | Total Exports           | 6190   |
 | Total Re-exports        | 2622   |
 | Total Classes           | 59     |

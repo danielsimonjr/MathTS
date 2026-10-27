@@ -4104,7 +4104,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 78
+      "loc": 80
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4244,7 +4244,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 154
+      "loc": 161
     },
     {
       "file": "expression/src/operators.ts",
@@ -4664,7 +4664,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 279
+      "loc": 328
     },
     {
       "file": "expression/tests/ConstantNode.test.ts",
@@ -4923,7 +4923,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 358
+      "loc": 402
     },
     {
       "file": "expression/tests/RelationalNode.test.ts",

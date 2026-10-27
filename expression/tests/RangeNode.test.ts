@@ -24,6 +24,10 @@ function makeSym(name: string) {
   return new SymbolNode(name);
 }
 
+const PAREN_OPEN = '<span class="math-parenthesis math-round-parenthesis">(</span>';
+const PAREN_CLOSE = '<span class="math-parenthesis math-round-parenthesis">)</span>';
+const RANGE_SEP = '<span class="math-operator math-range-operator">:</span>';
+
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 describe('RangeNode - construction & identity', () => {
@@ -228,6 +232,46 @@ describe('RangeNode - render oracle (clone G16)', () => {
     const node = new RangeNode(makeConst(0), makeConst(10), makeConst(2));
     expect(node.toHTML()).toBe(
       '<span class="math-number">0</span><span class="math-operator math-range-operator">:</span><span class="math-number">2</span><span class="math-operator math-range-operator">:</span><span class="math-number">10</span>'
+    );
+  });
+
+  it('toString exact: parenthesis all wraps start:end (no step)', () => {
+    const node = new RangeNode(makeConst(1), makeConst(5));
+    expect(node.toString({ parenthesis: 'all' })).toBe('(1):(5)');
+  });
+
+  it('toString exact: parenthesis all wraps start:step:end', () => {
+    const node = new RangeNode(makeConst(0), makeConst(10), makeConst(2));
+    expect(node.toString({ parenthesis: 'all' })).toBe('(0):(2):(10)');
+  });
+
+  it('toHTML exact: parenthesis all wraps start:end (no step)', () => {
+    const node = new RangeNode(makeConst(1), makeConst(5));
+    expect(node.toHTML({ parenthesis: 'all' })).toBe(
+      PAREN_OPEN +
+        '<span class="math-number">1</span>' +
+        PAREN_CLOSE +
+        RANGE_SEP +
+        PAREN_OPEN +
+        '<span class="math-number">5</span>' +
+        PAREN_CLOSE
+    );
+  });
+
+  it('toHTML exact: parenthesis all wraps start:step:end', () => {
+    const node = new RangeNode(makeConst(0), makeConst(10), makeConst(2));
+    expect(node.toHTML({ parenthesis: 'all' })).toBe(
+      PAREN_OPEN +
+        '<span class="math-number">0</span>' +
+        PAREN_CLOSE +
+        RANGE_SEP +
+        PAREN_OPEN +
+        '<span class="math-number">2</span>' +
+        PAREN_CLOSE +
+        RANGE_SEP +
+        PAREN_OPEN +
+        '<span class="math-number">10</span>' +
+        PAREN_CLOSE
     );
   });
 });
