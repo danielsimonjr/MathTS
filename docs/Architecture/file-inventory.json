@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1936,
+  "totalFiles": 1939,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1167,
+    "build-entry": 1168,
     "test-only": 0,
     "orphan": 0,
-    "test": 682,
+    "test": 684,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1192,
-    "tests": 682,
+    "src": 1193,
+    "tests": 684,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,12 +22,12 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 26,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 20,
+    "@danielsimonjr/mathts-autograd": 22,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 547,
+    "@danielsimonjr/mathts-expression": 548,
     "@danielsimonjr/mathts-functions": 814,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -282,7 +282,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 350
+      "loc": 346
     },
     {
       "file": "autograd/src/forward-grad.ts",
@@ -313,11 +313,18 @@
       "loc": 69
     },
     {
+      "file": "autograd/src/shape.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 14
+    },
+    {
       "file": "autograd/src/tape.ts",
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2434
+      "loc": 2430
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -325,6 +332,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 140
+    },
+    {
+      "file": "autograd/tests/assert-same-shape.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 49
     },
     {
       "file": "autograd/tests/dual-elementwise-ad.test.ts",
@@ -4090,7 +4104,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 76
+      "loc": 80
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4132,7 +4146,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 355
+      "loc": 287
     },
     {
       "file": "expression/src/node/ConstantNode.ts",
@@ -4195,7 +4209,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 344
+      "loc": 330
     },
     {
       "file": "expression/src/node/RelationalNode.ts",
@@ -4230,7 +4244,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 151
+      "loc": 161
     },
     {
       "file": "expression/src/operators.ts",
@@ -4650,7 +4664,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 258
+      "loc": 328
     },
     {
       "file": "expression/tests/ConstantNode.test.ts",
@@ -4909,7 +4923,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 332
+      "loc": 402
     },
     {
       "file": "expression/tests/RelationalNode.test.ts",
@@ -4938,6 +4952,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 234
+    },
+    {
+      "file": "expression/tests/stringSubset-clone.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 35
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
@@ -6407,7 +6428,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 373
+      "loc": 343
     },
     {
       "file": "functions/src/matrix/trace.ts",

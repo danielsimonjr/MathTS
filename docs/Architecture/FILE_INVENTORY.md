@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1936
+**Total files**: 1939
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1167 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1168 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      682 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      684 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1936** |                                                                                                                |
+| **Total**     | **1939** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1192 |
-| `tests`    |   682 |
+| `src`      |  1193 |
+| `tests`    |   684 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -43,11 +43,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `(root)`                               |    51 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
-| `@danielsimonjr/mathts-autograd`       |    20 |
+| `@danielsimonjr/mathts-autograd`       |    22 |
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   547 |
+| `@danielsimonjr/mathts-expression`     |   548 |
 | `@danielsimonjr/mathts-functions`      |   814 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
@@ -108,8 +108,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/src/grad.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/index.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/reverse-grad.ts`                                                    | @danielsimonjr/mathts-autograd       | src      | build-entry |
+| `autograd/src/shape.ts`                                                           | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/src/tape.ts`                                                            | @danielsimonjr/mathts-autograd       | src      | build-entry |
 | `autograd/tests/ad-wasm-interop.test.ts`                                          | @danielsimonjr/mathts-autograd       | tests    | test        |
+| `autograd/tests/assert-same-shape.test.ts`                                        | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/dual-elementwise-ad.test.ts`                                      | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/forward-grad.test.ts`                                             | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/grad-bridge-ad.test.ts`                                           | @danielsimonjr/mathts-autograd       | tests    | test        |
@@ -769,6 +771,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/scalar-builder.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-structure.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/sandbox.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/stringSubset-clone.test.ts`                                     | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/SymbolNode.test.ts`                                             | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/toMathML.test.ts`                                               | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/types.test.ts`                                                  | @danielsimonjr/mathts-expression     | tests    | test        |

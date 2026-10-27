@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1192,
+    "totalFiles": 1193,
     "totalModules": 82,
-    "totalExports": 6188
+    "totalExports": 6192
   },
   "entryPoints": [
     {
@@ -5976,7 +5976,12 @@
         "description": "DualTensor — a Tensor + per-element tangent component for forward-mode AD.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./shape.js",
+            "imports": ["assertSameShape"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-tensor",
@@ -6111,11 +6116,25 @@
         "exports": ["reverseGrad"],
         "functions": ["reverseGrad"]
       },
+      "autograd/src/shape.ts": {
+        "description": "Shared shape guard for DualTensor and TapedTensor elementwise ops.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["assertSameShape"],
+        "functions": ["assertSameShape"]
+      },
       "autograd/src/tape.ts": {
         "description": "Tape — records the sequence of ops during a forward pass so we can",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./shape.js",
+            "imports": ["assertSameShape"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-tensor",
@@ -15670,10 +15689,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/is.js",
-            "imports": ["isIndex"]
-          },
-          {
             "file": "../utils/object.js",
             "imports": ["clone"]
           },
@@ -15704,7 +15719,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["getStringSubset"]
+          }
+        ],
         "exports": ["createSubset"],
         "constants": ["createSubset"]
       },
@@ -25621,6 +25642,11 @@
             "reExport": true
           },
           {
+            "file": "./node/utils/stringSubset.js",
+            "imports": ["getStringSubset", "setStringSubset"],
+            "reExport": true
+          },
+          {
             "file": "./scalar-builder.js",
             "imports": [
               "createScalarBuilder",
@@ -25648,6 +25674,12 @@
           {
             "file": "./node/Node.js",
             "imports": ["MathNode", "StringOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./node/utils/stringSubset.js",
+            "imports": ["IndexLike"],
             "reExport": true,
             "typeOnly": true
           },
@@ -25694,6 +25726,8 @@
           "createRangeNode",
           "createRelationalNode",
           "createSymbolNode",
+          "getStringSubset",
+          "setStringSubset",
           "createScalarBuilder",
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
@@ -25709,6 +25743,7 @@
           "scalarEquals",
           "MathNode",
           "StringOptions",
+          "IndexLike",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
@@ -25748,6 +25783,8 @@
           "createRangeNode",
           "createRelationalNode",
           "createSymbolNode",
+          "getStringSubset",
+          "setStringSubset",
           "createScalarBuilder",
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
@@ -25763,6 +25800,7 @@
           "scalarEquals",
           "MathNode",
           "StringOptions",
+          "IndexLike",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
@@ -32042,7 +32080,7 @@
         "functions": ["assignFactory"]
       },
       "expression/src/node/utils/stringSubset.ts": {
-        "description": "Retrieve a subset of a string",
+        "description": "Retrieve a subset of a string.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -40411,6 +40449,7 @@
           "autograd/src/grad.ts",
           "autograd/src/index.ts",
           "autograd/src/reverse-grad.ts",
+          "autograd/src/shape.ts",
           "autograd/src/tape.ts"
         ]
       },
@@ -41761,18 +41800,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1192,
+    "totalTypeScriptFiles": 1193,
     "totalModules": 82,
-    "totalLinesOfCode": 200969,
-    "totalExports": 6188,
+    "totalLinesOfCode": 200877,
+    "totalExports": 6192,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1963,
+    "totalFunctions": 1964,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2620,
-    "totalTypeOnlyImports": 607,
+    "totalReExports": 2623,
+    "totalTypeOnlyImports": 608,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
