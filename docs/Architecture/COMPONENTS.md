@@ -81,8 +81,12 @@ export async function initializePool(config?: Partial<WorkerPoolConfig>): Promis
 export async function terminatePool(force?: boolean): Promise<void>;
 ```
 
-Consumed only by `parallel`. Ships a `workerpool-browser-shim.ts` for the browser build (its `canUse*`
-probes are the node/browser split).
+Consumed only by `parallel`. `MathWorkerPool` chunks typed arrays with `chunkTyped` / `chunkPairTyped`
+(`slice`, not `subarray`, so each worker chunk owns its buffer region) and shares one `runChunks` helper
+for generic `map` / `filter` dispatch. `forEachMultiIndex` in `multi-index.ts` has **no imports** so
+`dist/worker.js` can use it for tensordot without pulling `core` or `parallel`; it is re-exported from
+`.` as `@internal` for `ComputePool` (PR batch 5). Ships a `workerpool-browser-shim.ts` for the browser
+build (its `canUse*` probes are the node/browser split).
 
 ### @danielsimonjr/mathts-gpu (`gpu/`)
 
@@ -151,7 +155,8 @@ export const DEFAULT_CONFIG
 export class MathjsError, IndexError, DimensionError, DimensionMismatchError, UnitParseError
 
 // Subpath: @danielsimonjr/mathts-core/internal — cold shared utils (is/number/object/array/
-// collection/map/string/customs/switch), the WASM loader, and shared types. NOT on the browser-safe `.` entry.
+// collection/map/string/customs/switch), WASM integrity + WasmModuleLoader, and shared types.
+// NOT on the browser-safe `.` entry.
 ```
 
 Hot-path type guards (`is.ts`) are deliberately kept **local** to each package (V8 won't inline across module
@@ -177,8 +182,9 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 ```
 
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
-factory layer routes to (the "prefer the accelerated primitive" pattern). Depends on `core`, `parallel`,
-`gpu`.
+factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
+`transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
+`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 
@@ -243,7 +249,7 @@ special functions. The largest package (478 src files).
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
 
 // Representative domains (each a src subtree under functions/src/):
-//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte …
+//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte · hermiteCubic …
 //   signal/      internal fft (conv) · fir · iir · spectral · wavelets
 // Public fft: factory matrix/fft.ts; parallelFFT in typed/signal.ts; shared fft-core-f64.ts; AS kernel assembly/src/ops/fft.ts
 //   stats/       fit · inference · mvn · power · timeseries
@@ -404,5 +410,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2011  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8098  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2023  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8115  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

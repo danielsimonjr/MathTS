@@ -221,12 +221,15 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   which loads the package-local `mathts-as.wasm` copy. Dispatch is AS → JS.
 - **`core/src/wasm-loader.ts`** (exported via `@danielsimonjr/mathts-core/internal`):
   the **shared** SHA-384 integrity logic (`sha384OfBuffer` / `loadWasmManifest` /
-  `verifyWasmIntegrity`) and packaged-artifact resolution
-  (`resolvePackagedWasm` / `defaultWasmLocation`) are single-sourced here; each
-  package's `wasm/integrity.ts` + `wasm/resolve.ts` re-export it and inject their
-  own `import.meta.url`. Node `fs`/`crypto` stay behind lazy dynamic `import()`, so
-  this stays off core's browser-safe `.` entry. The two `WasmLoader` **classes**
-  above remain per-package — they wrap genuinely different AssemblyScript
+  `verifyWasmIntegrity`), packaged-artifact resolution
+  (`resolvePackagedWasm` / `defaultWasmLocation`), and `WasmModuleLoader`
+  (`load` / cached `loadModule` / `getImports`) are single-sourced here; each
+  package's `wasm/integrity.ts` + `wasm/resolve.ts` re-export the integrity and
+  path helpers and inject their own `import.meta.url`. Node `fs`/`crypto` stay
+  behind lazy dynamic `import()`, so this stays off core's browser-safe `.` entry.
+  The two `WasmLoader` **classes** above remain per-package — they subclass
+  `WasmModuleLoader` and keep their Node/browser load arms (where
+  `verifyWasmIntegrity` runs) because they wrap genuinely different AssemblyScript
   allocation models (simple single-pointer vs the managed-runtime header+data
   handle).
 
@@ -375,7 +378,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2011  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2023  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

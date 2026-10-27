@@ -1,4 +1,4 @@
-import { isIndex } from '../utils/is.js';
+import { getStringSubset } from '@danielsimonjr/mathts-expression';
 import { clone } from '../utils/object.js';
 import { isEmptyIndex, validateIndex, validateIndexSourceSize } from '../utils/array.js';
 import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
@@ -208,37 +208,7 @@ export const createSubset = /* #__PURE__ */ factory(
  * @private
  */
 function _getSubstring(str: string, index: IndexLike): string {
-  if (!isIndex(index)) {
-    throw new TypeError('Invalid index: must be an Index or Index-like object');
-  }
-
-  if (isEmptyIndex(index)) {
-    return '';
-  }
-  validateIndexSourceSize(Array.from(str), index);
-
-  if (index.size().length !== 1) {
-    throw new DimensionError(index.size().length, 1);
-  }
-
-  // validate whether the range is out of range
-  const strLen = str.length;
-  validateIndex(index.min()[0], strLen);
-  validateIndex(index.max()[0], strLen);
-
-  const range = index.dimension(0);
-
-  let substr = '';
-  function callback(v: number): void {
-    substr += str.charAt(v);
-  }
-  if (Number.isInteger(range)) {
-    callback(range as number);
-  } else {
-    (range as DimensionRange).forEach(callback);
-  }
-
-  return substr;
+  return getStringSubset(str, index, 'Invalid index: must be an Index or Index-like object');
 }
 
 /**

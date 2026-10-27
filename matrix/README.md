@@ -11,7 +11,16 @@ npm install @danielsimonjr/mathts-matrix
 ## Usage
 
 ```typescript
-import { DenseMatrix, matMul, svd, eig, lu, qr, cholesky } from '@danielsimonjr/mathts-matrix';
+import {
+  DenseMatrix,
+  matMul,
+  transposeNestedArray,
+  svd,
+  eig,
+  lu,
+  qr,
+  cholesky,
+} from '@danielsimonjr/mathts-matrix';
 
 // Create a matrix from a 2D array
 const A = DenseMatrix.fromArray([
@@ -30,8 +39,9 @@ const { U, S, V, rank } = svd(A.toArray());
 const { values, vectors } = eig(A.toArray());
 const { L, U: Ulu, P } = lu(A);
 
-// Nested-array multiply (same kernel as decomposition internals)
+// Nested-array multiply / transpose (same kernels as decomposition internals)
 const C = matMul(A.toArray(), A.toArray());
+const At = transposeNestedArray(A.toArray());
 ```
 
 ### WASM matrix multiply (not `DenseMatrix.multiply`)

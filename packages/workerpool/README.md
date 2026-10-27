@@ -28,6 +28,10 @@ npm install @danielsimonjr/mathts-workerpool
 
 Subpath `@danielsimonjr/mathts-workerpool/worker` exposes the worker script bundle.
 
+`@internal` exports (for `@danielsimonjr/mathts-parallel`, not part of the stable public API):
+`chunkTyped`, `chunkPairTyped`, and `forEachMultiIndex` — slice-based typed-array chunking and
+row-major multi-index iteration shared with `dist/worker.js`.
+
 ## License
 
 MIT (c) Daniel Simon Jr.

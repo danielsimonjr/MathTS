@@ -11,6 +11,9 @@
 import { computePool, ComputePool, type ComputePoolConfig } from '@danielsimonjr/mathts-parallel';
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { BackendType } from './Backend.js';
+import { jsBackend } from './JSBackend.js';
+
+type ElementwisePoolOp = 'add' | 'subtract' | 'multiply';
 
 /**
  * Configuration for ParallelBackend
@@ -91,58 +94,21 @@ export class ParallelBackend {
    * Parallel matrix addition
    */
   async add(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
-    this.checkDimensionsMatch(a, b);
-
-    const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      // Sequential fallback
-      return a.add(b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const result = await this.pool.elementwise(aData, bData, 'add');
-    return new DenseMatrix(a.rows, a.cols, result.result);
+    return this.parallelBinary(a, b, 'add', (x, y) => x.add(y));
   }
 
   /**
    * Parallel matrix subtraction
    */
   async subtract(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
-    this.checkDimensionsMatch(a, b);
-
-    const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      return a.subtract(b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const result = await this.pool.elementwise(aData, bData, 'subtract');
-    return new DenseMatrix(a.rows, a.cols, result.result);
+    return this.parallelBinary(a, b, 'subtract', (x, y) => x.subtract(y));
   }
 
   /**
    * Parallel element-wise multiplication
    */
   async multiplyElementwise(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
-    this.checkDimensionsMatch(a, b);
-
-    const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      return a.multiplyElementwise(b);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const result = await this.pool.elementwise(aData, bData, 'multiply');
-    return new DenseMatrix(a.rows, a.cols, result.result);
+    return this.parallelBinary(a, b, 'multiply', (x, y) => x.multiplyElementwise(y));
   }
 
   /**
@@ -262,25 +228,7 @@ export class ParallelBackend {
    * Sum along an axis (sequential)
    */
   sumAxis(a: DenseMatrix, axis: 0 | 1): DenseMatrix {
-    if (axis === 0) {
-      // Sum columns: result is 1×n
-      const result = new Float64Array(a.cols);
-      for (let j = 0; j < a.cols; j++) {
-        for (let i = 0; i < a.rows; i++) {
-          result[j] += a.get(i, j);
-        }
-      }
-      return new DenseMatrix(1, a.cols, result);
-    } else {
-      // Sum rows: result is m×1
-      const result = new Float64Array(a.rows);
-      for (let i = 0; i < a.rows; i++) {
-        for (let j = 0; j < a.cols; j++) {
-          result[i] += a.get(i, j);
-        }
-      }
-      return new DenseMatrix(a.rows, 1, result);
-    }
+    return jsBackend.sumAxis(a, axis);
   }
 
   /**
@@ -343,6 +291,27 @@ export class ParallelBackend {
   // =========================================================================
   // Utility Methods
   // =========================================================================
+
+  private async parallelBinary(
+    a: DenseMatrix,
+    b: DenseMatrix,
+    op: ElementwisePoolOp,
+    sequential: (x: DenseMatrix, y: DenseMatrix) => DenseMatrix
+  ): Promise<DenseMatrix> {
+    this.checkDimensionsMatch(a, b);
+
+    const elementCount = a.rows * a.cols;
+
+    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
+      return sequential(a, b);
+    }
+
+    const aData = a.toFloat64Array();
+    const bData = b.toFloat64Array();
+
+    const result = await this.pool.elementwise(aData, bData, op);
+    return new DenseMatrix(a.rows, a.cols, result.result);
+  }
 
   private checkDimensionsMatch(a: DenseMatrix, b: DenseMatrix): void {
     if (a.rows !== b.rows || a.cols !== b.cols) {

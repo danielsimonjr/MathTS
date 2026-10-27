@@ -31,6 +31,7 @@ import {
   type SqrtmOptions,
   DenseMatrix,
   matMul as denseMatMul,
+  transposeNestedArray as transpose,
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
@@ -97,13 +98,6 @@ async function matMul(A: number[][], B: number[][]): Promise<number[][]> {
   }
 
   return denseMatMul(A, B);
-}
-
-/** Transpose a matrix. */
-function transpose(A: number[][]): number[][] {
-  const m = A.length;
-  const n = A[0].length;
-  return Array.from({ length: n }, (_, j) => Array.from({ length: m }, (_, i) => A[i][j]));
 }
 
 /** Compute trace of a square matrix. */

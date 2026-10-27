@@ -27,6 +27,8 @@ const aSquared = b.op('^', [b.symbol('a'), b.number(2)]);
 console.log(scalarEquals(aa, aSquared)); // true
 ```
 
+- `getStringSubset` / `setStringSubset` — string indexing used by accessor/assign
+  and by functions `subset` (the barrel is the only public entry).
 - AST serializers on every node: `toString()`, `toTex()` (LaTeX), `toHTML()`, and `toMathML()` (MathML).
 - Focused re-exports are also published: `@danielsimonjr/mathts-{parser,ast,evaluator}`.
 

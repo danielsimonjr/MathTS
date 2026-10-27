@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1194, "e": 6192, "re": 2619 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1199, "e": 6210, "re": 2627 },
   "s": {
-    "loc": 200905,
+    "loc": 200733,
     "cls": 59,
     "int": 539,
-    "fn": 1970,
+    "fn": 1979,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 607
+    "toi": 608
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -40,12 +40,15 @@
       "int": ["TypeDef", "ExtendedTypeDef", "ConversionDef"]
     },
     "packages/workerpool": {
-      "f": 6,
+      "f": 8,
       "exp": [
+        "chunkTyped",
+        "chunkPairTyped",
         "compileFunctionSource",
         "fftBitReverse",
         "fftFrameInPlace",
         "Transfer",
+        "forEachMultiIndex",
         "DEFAULT_WORKER_CONFIG",
         "mathWorkerPool",
         "canUseWasm",
@@ -56,12 +59,7 @@
         "createSharedFloat64Array",
         "createSharedBuffer",
         "isSharedBuffer",
-        "getCapabilities",
-        "initWorkerWasm",
-        "isWorkerWasmAvailable",
-        "getWasmFeatures",
-        "initializePool",
-        "terminatePool"
+        "getCapabilities"
       ],
       "cls": ["MathWorkerPool", "Pool", "Transfer"],
       "int": [
@@ -324,6 +322,7 @@
         "eye",
         "cloneMatrix",
         "transpose",
+        "matInv",
         "isSymmetric",
         "matMul",
         "matAdd",
@@ -338,8 +337,7 @@
         "eigWasm",
         "eigvalsWasm",
         "spectralRadiusWasm",
-        "eig",
-        "eigvals"
+        "eig"
       ],
       "int": [
         "CholeskyResult",
@@ -441,7 +439,7 @@
       ]
     },
     "autograd": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "DualTensor",
         "forwardGrad",
@@ -453,7 +451,8 @@
         "TapedTensor",
         "reverseGrad",
         "ScalarFn",
-        "NumericInput"
+        "NumericInput",
+        "assertSameShape"
       ],
       "cls": ["DualTensor", "Tape", "TapedTensor"]
     },
@@ -491,7 +490,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 38,
+      "f": 39,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -688,6 +687,7 @@
         "resetGpuElementwise",
         "elementwiseChainGpuDispatch",
         "elementwiseChainReduceGpuDispatch",
+        "reduceNumbers",
         "resetGpuFft",
         "fftGpuDispatch"
       ],
@@ -799,7 +799,7 @@
       ]
     },
     "functions/numeric": {
-      "f": 25,
+      "f": 26,
       "exp": [
         "quad",
         "bfgs",
@@ -817,10 +817,10 @@
         "gaussLegendre4",
         "GL4ConvergenceError",
         "rootsLegendre",
+        "hermiteCubic",
         "interpn",
         "interval",
-        "Interval",
-        "incompleteLU"
+        "Interval"
       ],
       "cls": ["GL4ConvergenceError", "Interval"],
       "int": [
@@ -1859,10 +1859,10 @@
     { "p": "core/config.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
+    { "p": "utils/array.ts", "i": 0, "o": 50 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
-    { "p": "utils/array.ts", "i": 0, "o": 48 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
-    { "p": "utils/number.ts", "i": 0, "o": 44 },
+    { "p": "utils/number.ts", "i": 0, "o": 45 },
     { "p": "utils/collection.ts", "i": 0, "o": 38 }
   ]
 }

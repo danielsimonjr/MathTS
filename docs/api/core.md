@@ -346,6 +346,10 @@ fromSiDimensionVector(nums); // length-10 Unit exponent vector
 
 `DUAL_UNARY_RULES` and type `DualUnaryRule` describe elementary unary ops used internally when you call public `Dual` methods such as `sin()` (`core/src/types/dual-rules.ts`). The `unary` helper is private and not part of the published API.
 
+## Internal subpath (`@danielsimonjr/mathts-core/internal`)
+
+Not on the public `.` entry (the generated index below is the `.` barrel only). WASM helpers on `/internal`: `sha384OfBuffer`, `verifyWasmIntegrity`, `loadWasmManifest`, `resolvePackagedWasm`, `defaultWasmLocation`, and abstract class `WasmModuleLoader` (shared `load` / cached `loadModule` / `getImports` for the package-local `functions` and `matrix` loaders). SHA-384 verification stays in each subclass's Node/browser load path.
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
+- **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
+  `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
+  stays on DenseMatrix). `ParallelBackend.sumAxis` delegates to `jsBackend` like GPU/WASM;
+  `JSBackend.norm` calls `reduction.norm` once (inner loop unchanged). `add` / `subtract` /
+  `multiplyElementwise` share `parallelBinary`. `logm` / `sqrtm` share `common.matInv` (singular
+  at `1e-15`) and `matrixSqrtNewtonInternal` (150 iters, `1e-14`, `Y0 = I`). Public names and
+  behavior stay; `matInv` is not on the barrel.
+- **Sprint 2R clone batch 3 (`functions`):** factory `ceil`/`floor` share `snapNumber`/`snapBig`,
+  matrix 1/∞ norms share `_matrixNormSum`, geometry/set flatten call core `flatten`, GPU/CPU
+  reductions share `reduceNumbers`, and `solveODE`/`solveDDE` share `hermiteCubic`. `snapBig`
+  compares with core BigNumber `equals` as well as decimal.js `eq`.
+
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
   `vitest`, `@vitest/browser`, `@vitest/browser-playwright` and `@vitest/coverage-v8` from `^5.0.0` to `^5.0.5`, and
@@ -31,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Exact unit scales round correctly at any magnitude and keep A→B single-rounding.** `exactScaleToNumber` uses base-2 integer rounding (fixes mis-rounds above ~1e41 and rounds subnormals on the 2^-1074 grid). Number-valued built-in units keep an exact SI reading so `toNumeric` rounds the A→B ratio once, and use it only while `value` still matches it. `exactScaleToNumber` caches repeated lookups in a memo bounded at 4096 results; `Unit.prototype.exactScale` is memoized per unit list, bringing number conversions back to roughly 1.3–2.2x their pre-0.17.0 time (they were 5–17x). Scale expressions accept parentheses (`a/(b*c)`) and whitespace.
 
 ### Documentation
+- **OVERVIEW.md `totalLinesOfCode` 354683 -> 354785.** Parenthesis-mode pins and the getStringSubset JSDoc added lines; `repo-tools check` failed on that one claim until the value moved.
 - **The Verification tables of the architecture documents carry the current whole-repository parse again.** `totalTypeScriptFiles` 1973 -> 1980, `totalExports` 8003 -> 8043 and `totalLinesOfCode` 345383 -> 348102, in the six documents that record them (`API.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`, `OVERVIEW.md`, `WASM_ACCELERATION.md`); the scalar structure toolkit, the Pareto hall of fame and `compileScalar` added source files, exports and lines, and `repo-tools check` failed on those 10 claims until the values moved.
 - **The Verification tables of the architecture documents carry the current whole-repository parse again.** `totalTypeScriptFiles` 1971 -> 1973 and `totalLinesOfCode` 344913 -> 345383, in the six documents that record them (`API.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`, `OVERVIEW.md`, `WASM_ACCELERATION.md`); the release-tag fix adds two `.mjs` files (`check-new-tag-targets.mjs` and the release script test), and `repo-tools check` failed on those 7 claims until the values moved.
 - **The Verification tables of the architecture documents carry the current whole-repository parse again.** `totalTypeScriptFiles` 1961 -> 1971, `totalExports` 7985 -> 8003 and `totalLinesOfCode` 343136 -> 344913, in the six documents that record them (`API.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`, `OVERVIEW.md`, `WASM_ACCELERATION.md`); `repo-tools check` failed on those 10 claims at the previous commit and passes now.
@@ -48,6 +63,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`ARCHITECTURE.md` no longer carries the "Activation Barriers (historical)" section.** The section listed three barriers to activating the synced factories (two `typed-function` instances, the matrix interface mismatch and missing subsystems) and called itself historical context. The "Integration Status" section above it states the current state: the synced factories are in the live graph and the type bridge and the factory bridge are in place. History belongs in this file and not in an architecture document.
 
 ### Changed
+- **Sprint 2R clone merge (G7, G15, G16, G17).** DualTensor and TapedTensor call
+  shared `assertSameShape` (the mismatch string is built only on throw).
+  ConditionalNode and RangeNode `toString` / `toHTML` share callback helpers
+  (`render` / `wrap` / join-or-separator; no `html` or `mode` flag).
+  `getStringSubset` is the one string-subset getter, exported from the
+  expression barrel; functions `subset` calls it with the functions invalid-index
+  message.
+- **workerpool `map`/`filter` share `runChunks`; Float64/Int32 chunk helpers share `chunkTyped`/`chunkPairTyped`; tensordot index walk lives in `forEachMultiIndex`.** Sprint 2R clones G61–G64. `slice` (not `subarray`) is unchanged, so each worker chunk owns its buffer. `multi-index.ts` has no imports, so `dist/worker.js` cannot pull `core` or `parallel`. Public method names stay. `ComputePool`'s copy of the walker stays until batch 5. The three helpers are exported from `.` as `@internal`.
 - **CI runs the architecture-docs gate.** `Architecture docs` is a new job of `ci.yml`. It installs `@danielsimonjr/repo-tools` at the exact version 2.2.4 and runs `repo-tools check . --docs=docs/Architecture`. The check exits 1 when an architecture document claims a count that the parse of the source does not give. No job ran it before, so the three PySR merges left the counts of six documents stale until a person ran the command. The job needs no Bun, no install of the workspace and no build, and it runs in parallel with the other jobs. Raise the pin on purpose, after a local run of the check.
 - **CI runs the `node:test` files of the query tool, the roadmap checker and the dist builtin scanner.** Three new steps of the Compile & Lint job, just before the Node 22 setup and the release script tests: `bun run docs:graph:test` (6 tests), `bun run docs:roadmap-check:test` (4 tests) and `node --test tools/test/dist-node-imports.test.mjs` (15 tests). No workflow ran these files before, so a break in the helpers behind `check:browser-safety`, in the roadmap checker or in the scanner that `smoke-dist-node.mjs` uses could not fail a check. Each file passes alone, and a one-token break of each tool turns its step red.
 - **CI runs the four tests of the dependency-graph generator.** `bun run docs:deps:test` (`bun test ./tools/create-dependency-graph/`) is a new step of the Compile & Lint job, after the export-index drift check. The files are `document-stateless`, `entry-seeding`, `wasm-build-guard` and `enumeration-order`; no workflow ran them before, so a regression of the sorted directory walks could not fail a check. The step runs the same script as a local run.

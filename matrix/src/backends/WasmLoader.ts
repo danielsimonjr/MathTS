@@ -26,7 +26,7 @@
  * the data region.
  */
 
-import type { LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
+import { WasmModuleLoader, type LoadingMetrics } from '@danielsimonjr/mathts-core/internal';
 export type { LoadingMetrics };
 
 /**
@@ -573,13 +573,8 @@ interface PoolEntry {
  * private. The loader also allocates typed arrays in the memory of the
  * module, keeps a pool of released allocations, and records loading metrics.
  */
-export class WasmLoader {
+export class WasmLoader extends WasmModuleLoader<WasmModule> {
   private static instance: WasmLoader | null = null;
-  private wasmModule: WasmModule | null = null;
-  private compiledModule: WebAssembly.Module | null = null;
-  private loading: Promise<WasmModule> | null = null;
-  private isNode: boolean;
-  private lastMetrics: LoadingMetrics | null = null;
 
   // Memory pool for AS allocations.
   private float64Pool: PoolEntry[] = [];
@@ -587,7 +582,7 @@ export class WasmLoader {
   private readonly poolSizeThreshold = 1024 * 1024; // 1MB max per pool entry
 
   private constructor() {
-    this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
+    super();
   }
 
   public static getInstance(): WasmLoader {
@@ -595,35 +590,6 @@ export class WasmLoader {
       WasmLoader.instance = new WasmLoader();
     }
     return WasmLoader.instance;
-  }
-
-  /**
-   * Load the WASM module
-   */
-  public async load(wasmPath?: string): Promise<WasmModule> {
-    if (this.wasmModule) {
-      return this.wasmModule;
-    }
-
-    if (this.loading) {
-      return this.loading;
-    }
-
-    // Clear the in-flight promise however it settles. Keeping a rejected one
-    // would hand the same failure to every later call, so one bad path (or a
-    // transient fetch error) would disable WASM for the rest of the process.
-    this.loading = this.loadModule(wasmPath);
-    try {
-      this.wasmModule = await this.loading;
-    } catch (error) {
-      // Drop a module that compiled but failed to instantiate, too: the next
-      // load() would reuse it instead of reading (and verifying) its own binary.
-      this.compiledModule = null;
-      throw error;
-    } finally {
-      this.loading = null;
-    }
-    return this.wasmModule;
   }
 
   /**
@@ -668,31 +634,6 @@ export class WasmLoader {
     };
   }
 
-  private async loadModule(wasmPath?: string): Promise<WasmModule> {
-    const path = wasmPath || (await this.getDefaultWasmPath());
-    const totalStart = performance.now();
-
-    // If precompiled, use cached module
-    if (this.compiledModule) {
-      const instStart = performance.now();
-      const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
-      this.lastMetrics = {
-        fileReadMs: 0,
-        compileMs: 0,
-        instantiateMs: performance.now() - instStart,
-        totalMs: performance.now() - totalStart,
-        fromCache: true,
-      };
-      return instance.exports as unknown as WasmModule;
-    }
-
-    if (this.isNode) {
-      return this.loadNodeWasm(path, totalStart);
-    } else {
-      return this.loadBrowserWasm(path, totalStart);
-    }
-  }
-
   /**
    * Get the WASM binary path. AssemblyScript is the sole WASM backend
    * (`mathts-as.wasm`); the legacy second toolchain was removed in the
@@ -703,7 +644,7 @@ export class WasmLoader {
    * canonical expected location is returned so the missing-binary warning is
    * actionable (see `defaultWasmLocation` in wasm/resolve.ts — B-3).
    */
-  private async getDefaultWasmPath(): Promise<string> {
+  protected override async getDefaultWasmPath(): Promise<string> {
     const wasmFile = 'mathts-as.wasm';
 
     if (this.isNode) {
@@ -721,7 +662,7 @@ export class WasmLoader {
     return defaultWasmLocation(import.meta.url, wasmFile, { browser: true });
   }
 
-  private async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
+  protected override async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
     const fs = await import('fs');
     const { promisify } = await import('util');
     const readFile = promisify(fs.readFile);
@@ -754,7 +695,7 @@ export class WasmLoader {
     return instance.exports as unknown as WasmModule;
   }
 
-  private async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
+  protected override async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
     const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
     // Look for the manifest before deciding whether to stream. If a manifest
     // exists we must materialize the buffer to compute its hash before
@@ -802,20 +743,6 @@ export class WasmLoader {
     };
 
     return instance.exports as unknown as WasmModule;
-  }
-
-  private getImports(): WebAssembly.Imports {
-    return {
-      env: {
-        abort: (msg: number, file: number, line: number, column: number) => {
-          console.error('WASM abort', { msg, file, line, column });
-          throw new Error('WASM abort');
-        },
-        seed: () => Date.now(),
-      },
-      Math: Math as unknown as WebAssembly.ModuleImports,
-      Date: Date as unknown as WebAssembly.ModuleImports,
-    };
   }
 
   /**

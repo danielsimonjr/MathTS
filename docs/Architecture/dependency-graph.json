@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1194,
+    "totalFiles": 1199,
     "totalModules": 82,
-    "totalExports": 6192
+    "totalExports": 6210
   },
   "entryPoints": [
     {
@@ -229,6 +229,15 @@
       }
     },
     "packages/workerpool": {
+      "packages/workerpool/src/chunk-typed.ts": {
+        "description": "Slice-based chunking for typed arrays passed to worker kernels.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["chunkTyped", "chunkPairTyped"],
+        "functions": ["chunkTyped", "chunkPairTyped"]
+      },
       "packages/workerpool/src/compile-function-source.ts": {
         "description": "Rebuild a function from its source text.",
         "externalDependencies": [],
@@ -262,13 +271,30 @@
             "imports": ["compileFunctionSource"]
           },
           {
+            "file": "./chunk-typed.js",
+            "imports": ["chunkPairTyped", "chunkTyped"]
+          },
+          {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./chunk-typed.js",
+            "imports": ["chunkTyped", "chunkPairTyped"],
+            "reExport": true
+          },
+          {
+            "file": "./multi-index.js",
+            "imports": ["forEachMultiIndex"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
         "exports": [
           "Transfer",
+          "chunkTyped",
+          "chunkPairTyped",
+          "forEachMultiIndex",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -288,6 +314,7 @@
           "getPoolStats",
           "MathWorkerPool"
         ],
+        "reExported": ["chunkTyped", "chunkPairTyped", "forEachMultiIndex"],
         "classes": ["MathWorkerPool"],
         "interfaces": [
           "WorkerpoolCapabilities",
@@ -317,6 +344,15 @@
         ],
         "constants": ["DEFAULT_WORKER_CONFIG", "mathWorkerPool"]
       },
+      "packages/workerpool/src/multi-index.ts": {
+        "description": "Multi-dimensional index iteration (no imports — safe for the worker bundle).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["forEachMultiIndex"],
+        "functions": ["forEachMultiIndex"]
+      },
       "packages/workerpool/src/worker-numerics.ts": {
         "description": "Worker-bundle copies of core numeric helpers.",
         "externalDependencies": [],
@@ -343,6 +379,10 @@
           {
             "file": "./fft-core.js",
             "imports": ["fftFrameInPlace"]
+          },
+          {
+            "file": "./multi-index.js",
+            "imports": ["forEachMultiIndex"]
           },
           {
             "file": "./worker-numerics.js",
@@ -1485,7 +1525,8 @@
               "loadWasmManifest",
               "verifyWasmIntegrity",
               "resolvePackagedWasm",
-              "defaultWasmLocation"
+              "defaultWasmLocation",
+              "WasmModuleLoader"
             ],
             "reExport": true
           },
@@ -1593,6 +1634,7 @@
           "verifyWasmIntegrity",
           "resolvePackagedWasm",
           "defaultWasmLocation",
+          "WasmModuleLoader",
           "format",
           "toEngineering",
           "toExponential",
@@ -1682,6 +1724,7 @@
           "verifyWasmIntegrity",
           "resolvePackagedWasm",
           "defaultWasmLocation",
+          "WasmModuleLoader",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -1962,7 +2005,7 @@
         "internalDependencies": [
           {
             "file": "./types/wasm-loader.js",
-            "imports": ["WasmManifest"],
+            "imports": ["LoadingMetrics", "WasmManifest"],
             "typeOnly": true
           }
         ],
@@ -3561,6 +3604,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "../types/dense/reduction.js",
+            "imports": ["* as reduction"]
+          },
+          {
             "file": "./Backend.js",
             "imports": ["MatrixBackend", "BackendType"],
             "typeOnly": true
@@ -3584,6 +3631,10 @@
             "file": "./Backend.js",
             "imports": ["BackendType"],
             "typeOnly": true
+          },
+          {
+            "file": "./JSBackend.js",
+            "imports": ["jsBackend"]
           }
         ],
         "workspaceDependencies": [
@@ -3659,7 +3710,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["LoadingMetrics"],
+            "imports": ["WasmModuleLoader", "LoadingMetrics"],
             "subpath": "internal"
           }
         ],
@@ -4568,6 +4619,7 @@
           "eye",
           "cloneMatrix",
           "transpose",
+          "matInv",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4583,6 +4635,7 @@
           "eye",
           "cloneMatrix",
           "transpose",
+          "matInv",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4753,7 +4806,7 @@
           },
           {
             "file": "./common.js",
-            "imports": ["matMul"],
+            "imports": ["matMul", "transpose"],
             "reExport": true
           }
         ],
@@ -4806,7 +4859,9 @@
           "RQResult",
           "QLResult",
           "condest",
-          "matMul"
+          "matMul",
+          "transposeNestedArray",
+          "transpose"
         ],
         "reExported": [
           "eig",
@@ -4855,7 +4910,8 @@
           "RQResult",
           "QLResult",
           "condest",
-          "matMul"
+          "matMul",
+          "transpose"
         ]
       },
       "matrix/src/operations/logm.ts": {
@@ -4877,7 +4933,11 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1"]
+            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1", "matInv"]
+          },
+          {
+            "file": "./sqrtm.js",
+            "imports": ["matrixSqrtNewtonInternal"]
           }
         ],
         "workspaceDependencies": [],
@@ -5016,7 +5076,7 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose"]
+            "imports": ["eye", "matMul", "transpose", "matInv"]
           }
         ],
         "workspaceDependencies": [],
@@ -5973,7 +6033,12 @@
         "description": "DualTensor — a Tensor + per-element tangent component for forward-mode AD.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./shape.js",
+            "imports": ["assertSameShape"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-tensor",
@@ -6108,11 +6173,25 @@
         "exports": ["reverseGrad"],
         "functions": ["reverseGrad"]
       },
+      "autograd/src/shape.ts": {
+        "description": "Shared shape guard for DualTensor and TapedTensor elementwise ops.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["assertSameShape"],
+        "functions": ["assertSameShape"]
+      },
       "autograd/src/tape.ts": {
         "description": "Tape — records the sequence of ops during a forward pass so we can",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./shape.js",
+            "imports": ["assertSameShape"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-tensor",
@@ -7283,11 +7362,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -7613,11 +7696,15 @@
           },
           {
             "file": "../utils/number.js",
-            "imports": ["isInteger", "nearlyEqual"]
+            "imports": ["isInteger"]
           },
           {
             "file": "../utils/bignumber/nearlyEqual.js",
             "imports": ["nearlyEqual"]
+          },
+          {
+            "file": "./snap-to-round.js",
+            "imports": ["snapBig", "snapNumber"]
           },
           {
             "file": "../type/matrix/utils/matAlgo11xS0s.js",
@@ -8226,6 +8313,20 @@
         "workspaceDependencies": [],
         "exports": ["createSign"],
         "constants": ["createSign"]
+      },
+      "functions/src/arithmetic/snap-to-round.ts": {
+        "description": "Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/number.js",
+            "imports": ["nearlyEqual"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["snapNumber", "snapBig"],
+        "functions": ["snapNumber", "snapBig"]
       },
       "functions/src/arithmetic/sqrt.ts": {
         "description": "Calculate the square root of a value.",
@@ -14089,6 +14190,10 @@
           {
             "file": "../typed/set.js",
             "imports": ["setIsSubset", "setMultiplicity"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
           }
         ],
         "workspaceDependencies": [
@@ -14274,14 +14379,16 @@
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "interfaces": ["GpuChainOptions"],
         "functions": [
           "isGpuChainSupported",
           "resetGpuElementwise",
           "elementwiseChainGpuDispatch",
-          "elementwiseChainReduceGpuDispatch"
+          "elementwiseChainReduceGpuDispatch",
+          "reduceNumbers"
         ],
         "constants": ["GPU_ELEMENTWISE_OPS", "GPU_REDUCE_OPS"]
       },
@@ -15667,10 +15774,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/is.js",
-            "imports": ["isIndex"]
-          },
-          {
             "file": "../utils/object.js",
             "imports": ["clone"]
           },
@@ -15701,7 +15804,13 @@
             "typeOnly": true
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["getStringSubset"]
+          }
+        ],
         "exports": ["createSubset"],
         "constants": ["createSubset"]
       },
@@ -16056,6 +16165,15 @@
         "interfaces": ["RootsLegendreResult"],
         "functions": ["rootsLegendre"]
       },
+      "functions/src/numeric/hermite.ts": {
+        "description": "Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["hermiteCubic"],
+        "functions": ["hermiteCubic"]
+      },
       "functions/src/numeric/interpn.ts": {
         "description": "Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`",
         "externalDependencies": [],
@@ -16231,7 +16349,12 @@
         "description": "Constant-delay delay differential equation (DDE) solver via the method of steps.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": ["solveDDE"],
         "interfaces": ["SolveDDEOptions", "DDESolution"],
@@ -16245,6 +16368,10 @@
           {
             "file": "./numeric-jacobian.js",
             "imports": ["numericJacobian"]
+          },
+          {
+            "file": "./hermite.js",
+            "imports": ["hermiteCubic"]
           },
           {
             "file": "../utils/is.js",
@@ -21950,6 +22077,7 @@
             "imports": [
               "elementwiseChainGpuDispatch",
               "elementwiseChainReduceGpuDispatch",
+              "reduceNumbers",
               "GpuChainOptions",
               "GpuReduceOp"
             ]
@@ -22779,7 +22907,8 @@
               "LogmOptions",
               "SqrtmOptions",
               "DenseMatrix",
-              "matMul"
+              "matMul",
+              "transposeNestedArray"
             ]
           },
           {
@@ -23182,7 +23311,12 @@
         "description": "Typed Set Functions",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/array.js",
+            "imports": ["flatten"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
@@ -24934,7 +25068,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["LoadingMetrics"],
+            "imports": ["WasmModuleLoader", "LoadingMetrics"],
             "subpath": "internal"
           }
         ],
@@ -25660,6 +25794,11 @@
             "reExport": true
           },
           {
+            "file": "./node/utils/stringSubset.js",
+            "imports": ["getStringSubset", "setStringSubset"],
+            "reExport": true
+          },
+          {
             "file": "./scalar-builder.js",
             "imports": [
               "createScalarBuilder",
@@ -25687,6 +25826,12 @@
           {
             "file": "./node/Node.js",
             "imports": ["MathNode", "StringOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./node/utils/stringSubset.js",
+            "imports": ["IndexLike"],
             "reExport": true,
             "typeOnly": true
           },
@@ -25733,6 +25878,8 @@
           "createRangeNode",
           "createRelationalNode",
           "createSymbolNode",
+          "getStringSubset",
+          "setStringSubset",
           "createScalarBuilder",
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
@@ -25748,6 +25895,7 @@
           "scalarEquals",
           "MathNode",
           "StringOptions",
+          "IndexLike",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
@@ -25787,6 +25935,8 @@
           "createRangeNode",
           "createRelationalNode",
           "createSymbolNode",
+          "getStringSubset",
+          "setStringSubset",
           "createScalarBuilder",
           "SCALAR_FUNCTIONS",
           "SCALAR_FUNCTION_LOWERING",
@@ -25802,6 +25952,7 @@
           "scalarEquals",
           "MathNode",
           "StringOptions",
+          "IndexLike",
           "LoweredScalarFn",
           "ScalarBuilder",
           "ScalarFunctionName",
@@ -32081,7 +32232,7 @@
         "functions": ["assignFactory"]
       },
       "expression/src/node/utils/stringSubset.ts": {
-        "description": "Retrieve a subset of a string",
+        "description": "Retrieve a subset of a string.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -40260,9 +40411,11 @@
       {
         "name": "Packages/workerpool",
         "files": [
+          "packages/workerpool/src/chunk-typed.ts",
           "packages/workerpool/src/compile-function-source.ts",
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
+          "packages/workerpool/src/multi-index.ts",
           "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
           "packages/workerpool/src/workerpool-browser-shim.ts"
@@ -40450,6 +40603,7 @@
           "autograd/src/grad.ts",
           "autograd/src/index.ts",
           "autograd/src/reverse-grad.ts",
+          "autograd/src/shape.ts",
           "autograd/src/tape.ts"
         ]
       },
@@ -40536,6 +40690,7 @@
           "functions/src/arithmetic/pow.ts",
           "functions/src/arithmetic/round.ts",
           "functions/src/arithmetic/sign.ts",
+          "functions/src/arithmetic/snap-to-round.ts",
           "functions/src/arithmetic/sqrt.ts",
           "functions/src/arithmetic/square.ts",
           "functions/src/arithmetic/subtract.ts",
@@ -40760,6 +40915,7 @@
           "functions/src/numeric/fsolve.ts",
           "functions/src/numeric/gauss-legendre4.ts",
           "functions/src/numeric/gauss-nodes.ts",
+          "functions/src/numeric/hermite.ts",
           "functions/src/numeric/interpn.ts",
           "functions/src/numeric/interval.ts",
           "functions/src/numeric/krylov.ts",
@@ -41802,18 +41958,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1194,
+    "totalTypeScriptFiles": 1199,
     "totalModules": 82,
-    "totalLinesOfCode": 200905,
-    "totalExports": 6192,
+    "totalLinesOfCode": 200733,
+    "totalExports": 6210,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1970,
+    "totalFunctions": 1979,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2619,
-    "totalTypeOnlyImports": 607,
+    "totalReExports": 2627,
+    "totalTypeOnlyImports": 608,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
