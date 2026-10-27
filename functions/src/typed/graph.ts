@@ -33,6 +33,9 @@
 
 import { mulberry32 } from '@danielsimonjr/mathts-core';
 import { aggregateRestartVectors, type RestartAggregation } from './aggregate-restart.js';
+import { CENTRALITY_WORKER_THRESHOLD, runCentralityRestarts } from './centrality-restarts.js';
+
+export { CENTRALITY_WORKER_THRESHOLD };
 
 // =============================================================================
 // adjacencyMatrix - Create adjacency matrix from edge list
@@ -430,14 +433,6 @@ export function graphDistance(adj: number[][], start: number, end: number): numb
 // =============================================================================
 
 /**
- * Minimum restart count before fanning out via Promise.all rather than running
- * sequentially.  Below this threshold restarts run one after another on the
- * current microtask, avoiding Promise scheduling overhead for the common
- * single-restart case.
- */
-export const CENTRALITY_WORKER_THRESHOLD = 4;
-
-/**
  * Shared options for centrality functions that support random-restart
  * fan-out (Slice 5.13).
  */
@@ -651,25 +646,14 @@ export async function pageRank(
     return { ranks };
   }
 
-  if (restarts < CENTRALITY_WORKER_THRESHOLD) {
-    // Below the fan-out threshold: run restarts sequentially
-    const vectors: Float64Array[] = [];
-    for (let k = 0; k < restarts; k++) {
-      const seed = _splitSeed(baseSeed, k);
-      vectors.push(_pageRankOnce(adj, d, maxIter, tol, seed === 0 ? 1 : seed));
-    }
-    return _aggregateRanks(vectors, aggregation) as PageRankResult | PageRankRestartResult;
-  }
-
-  // Fan-out path: Promise.all over N independent restarts (Option B — main thread)
-  const tasks: Promise<Float64Array>[] = [];
-  for (let k = 0; k < restarts; k++) {
-    const seed = _splitSeed(baseSeed, k);
-    const s = seed === 0 ? 1 : seed; // avoid degenerate zero seed
-    tasks.push(Promise.resolve(_pageRankOnce(adj, d, maxIter, tol, s)));
-  }
-  const vectors = await Promise.all(tasks);
-  return _aggregateRanks(vectors, aggregation) as PageRankResult | PageRankRestartResult;
+  return runCentralityRestarts(
+    restarts,
+    baseSeed,
+    _splitSeed,
+    (s) => _pageRankOnce(adj, d, maxIter, tol, s),
+    _aggregateRanks,
+    aggregation
+  ) as Promise<PageRankResult | PageRankRestartResult>;
 }
 
 // =============================================================================
@@ -859,26 +843,14 @@ export async function betweennessCentrality(
     return { centrality };
   }
 
-  if (restarts < CENTRALITY_WORKER_THRESHOLD) {
-    const vectors: Float64Array[] = [];
-    for (let k = 0; k < restarts; k++) {
-      const seed = _splitSeed(baseSeed, k);
-      vectors.push(_betweennessOnce(adj, directed, normalise, seed === 0 ? 1 : seed));
-    }
-    return _aggregateBetweenness(vectors, aggregation) as
-      BetweennessResult | BetweennessRestartResult;
-  }
-
-  // Fan-out path: Promise.all (Option B — main thread)
-  const tasks: Promise<Float64Array>[] = [];
-  for (let k = 0; k < restarts; k++) {
-    const seed = _splitSeed(baseSeed, k);
-    const s = seed === 0 ? 1 : seed;
-    tasks.push(Promise.resolve(_betweennessOnce(adj, directed, normalise, s)));
-  }
-  const vectors = await Promise.all(tasks);
-  return _aggregateBetweenness(vectors, aggregation) as
-    BetweennessResult | BetweennessRestartResult;
+  return runCentralityRestarts(
+    restarts,
+    baseSeed,
+    _splitSeed,
+    (s) => _betweennessOnce(adj, directed, normalise, s),
+    _aggregateBetweenness,
+    aggregation
+  ) as Promise<BetweennessResult | BetweennessRestartResult>;
 }
 
 // =============================================================================
@@ -1051,24 +1023,12 @@ export async function eigenvectorCentrality(
     return { centrality };
   }
 
-  if (restarts < CENTRALITY_WORKER_THRESHOLD) {
-    const vectors: Float64Array[] = [];
-    for (let k = 0; k < restarts; k++) {
-      const seed = _splitSeed(baseSeed, k);
-      vectors.push(_eigenvectorOnce(adj, maxIter, tol, seed === 0 ? 1 : seed));
-    }
-    return _aggregateEigenvector(vectors, aggregation) as
-      EigenvectorResult | EigenvectorRestartResult;
-  }
-
-  // Fan-out path: Promise.all (Option B — main thread)
-  const tasks: Promise<Float64Array>[] = [];
-  for (let k = 0; k < restarts; k++) {
-    const seed = _splitSeed(baseSeed, k);
-    const s = seed === 0 ? 1 : seed;
-    tasks.push(Promise.resolve(_eigenvectorOnce(adj, maxIter, tol, s)));
-  }
-  const vectors = await Promise.all(tasks);
-  return _aggregateEigenvector(vectors, aggregation) as
-    EigenvectorResult | EigenvectorRestartResult;
+  return runCentralityRestarts(
+    restarts,
+    baseSeed,
+    _splitSeed,
+    (s) => _eigenvectorOnce(adj, maxIter, tol, s),
+    _aggregateEigenvector,
+    aggregation
+  ) as Promise<EigenvectorResult | EigenvectorRestartResult>;
 }

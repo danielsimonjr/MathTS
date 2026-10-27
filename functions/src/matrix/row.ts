@@ -1,7 +1,6 @@
 import { factory } from '../utils/factory.js';
-import { isMatrix } from '../utils/is.js';
 import { clone } from '../utils/object.js';
-import { validateIndex } from '../utils/array.js';
+import { slice2d } from './slice-2d.js';
 
 // Type definitions
 interface Matrix {
@@ -77,18 +76,7 @@ export const createRow = /* #__PURE__ */ factory(
      * @return {Matrix}        The retrieved row
      */
     function _row(value: Matrix, row: number): Matrix {
-      // check dimensions
-      if (value.size().length !== 2) {
-        throw new Error('Only two dimensional matrix is supported');
-      }
-
-      validateIndex(row, value.size()[0]);
-
-      const columnRange = range(0, value.size()[1]);
-      const index = new Index([row], columnRange);
-      const result = value.subset(index);
-      // once config.legacySubset just return result
-      return isMatrix(result) ? (result as Matrix) : matrix([[result]]);
+      return slice2d(value, 0, row, matrix, Index, range) as Matrix;
     }
   }
 );

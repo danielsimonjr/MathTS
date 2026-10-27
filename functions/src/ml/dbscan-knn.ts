@@ -82,11 +82,25 @@ export function dbscan(points: number[][], eps: number, minPts: number): number[
   return labels;
 }
 
+/**
+ * Rank points by distance to `query` and return the first `k` indices (nearest-first).
+ * `k` is passed through to `Math.min` (negative `k` slices from the end).
+ * @internal — used by k-NN helpers and `kdTreeKNN`.
+ */
+export function rankNearest(
+  points: number[][],
+  query: number[],
+  k: number,
+  dist: (a: number[], b: number[]) => number
+): number[] {
+  const ranked = points.map((p, i) => ({ i, d: dist(p, query) }));
+  ranked.sort((a, b) => a.d - b.d);
+  return ranked.slice(0, Math.min(k, ranked.length)).map((e) => e.i);
+}
+
 /** Indices of the `k` nearest rows in `train` to `q`, sorted nearest-first. */
 function kNearestIndices(train: number[][], q: number[], k: number): number[] {
-  const dists = train.map((row, i) => ({ i, d: euclidean(row, q) }));
-  dists.sort((a, b) => a.d - b.d);
-  return dists.slice(0, Math.min(k, dists.length)).map((e) => e.i);
+  return rankNearest(train, q, k, euclidean);
 }
 
 /**

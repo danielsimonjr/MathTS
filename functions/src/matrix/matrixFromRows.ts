@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { matrixFromVectorList, vectorLength } from './from-vectors.js';
+import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
 
 // Type definitions
 type NestedArray<T = unknown> = T | NestedArray<T>[];
@@ -134,27 +135,7 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
         }
       }
 
-      entries.sort((a, b) => {
-        if (a.col !== b.col) return a.col - b.col;
-        return a.row - b.row;
-      });
-
-      const values: unknown[] = [];
-      const index: number[] = [];
-      const ptr: number[] = new Array(M + 1).fill(0);
-
-      for (let i = 0; i < entries.length; i++) {
-        ptr[entries[i].col + 1]++;
-      }
-      for (let j = 1; j <= M; j++) {
-        ptr[j] += ptr[j - 1];
-      }
-      for (let i = 0; i < entries.length; i++) {
-        values.push(entries[i].value);
-        index.push(entries[i].row);
-      }
-
-      return matrix({ values, index, ptr, size: [N, M] }, 'sparse');
+      return buildSparseCscFromEntries(entries, M, [N, M], matrix) as Matrix;
     }
 
     function _createArray(arr: unknown[]): unknown[][] {

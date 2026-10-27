@@ -289,6 +289,15 @@ and `exp(intercept)`), `solveAugmentedNormalEquations` (partial pivot, `|pivot| 
 `struveSeries` (ratio sign), `kelvinSeries` (`term0` / `denom`), `zipIntPoly`, `selectById`,
 and `fibPair` (`lucas(0)` / `lucas(1)` stay direct). The helpers are not barrel-exported.
 
+Sprint 2R clone-merge batch 7 keeps the public names `pageRank` /
+`betweennessCentrality` / `eigenvectorCentrality`, factory `column` / `row`, sparse
+`matrixFromColumns` / `matrixFromRows`, factory `fft` / `ifft`, the CAS
+`renderCoeffTimes` call sites, `kNearestIndices`, and `kdTreeKNN`. The shared bodies
+are `runCentralityRestarts` (each wrapper keeps `restarts === 1` with seed 0 and the
+`{ranks}` / `{centrality}` keys), `slice2d` (`axis` 0 is a row, `axis` 1 is a column),
+`buildSparseCscFromEntries`, `complexToInterleaved`, `renderCoeffTimes`, and
+`rankNearest` (`kdTreeKNN` passes `Math.max(0, k)` so a negative `k` stays empty).
+
 ---
 
 ## Expression & Notebook Components
@@ -442,5 +451,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2040  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8137  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2046  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8144  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

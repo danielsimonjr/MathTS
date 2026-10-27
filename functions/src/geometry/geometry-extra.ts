@@ -12,6 +12,7 @@ import { matMul, svd } from '@danielsimonjr/mathts-matrix';
 import { quaternionConjugate } from '../geometry-extra.js';
 import { setIsSubset, setMultiplicity } from '../typed/set.js';
 import { flatten } from '../utils/array.js';
+import { rankNearest } from '../ml/dbscan-knn.js';
 
 type Quat = readonly [number, number, number, number] | readonly number[];
 
@@ -279,9 +280,7 @@ function euclideanDist(a: number[], b: number[]): number {
  * kdTreeKNN([[0,0],[1,0],[5,5]], [0,0], 2)  // [0, 1]
  */
 export function kdTreeKNN(points: number[][], query: number[], k: number): number[] {
-  const ranked = points.map((p, i) => ({ i, d: euclideanDist(p, query) }));
-  ranked.sort((a, b) => a.d - b.d);
-  return ranked.slice(0, Math.max(0, Math.min(k, ranked.length))).map((e) => e.i);
+  return rankNearest(points, query, Math.max(0, k), euclideanDist);
 }
 
 /**

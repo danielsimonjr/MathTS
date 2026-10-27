@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1206, "e": 6228, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-27", "f": 1211, "e": 6235, "re": 2627 },
   "s": {
-    "loc": 200580,
+    "loc": 200592,
     "cls": 59,
     "int": 542,
-    "fn": 1997,
+    "fn": 2003,
     "tg": 158,
     "en": 0,
     "co": 1618,
-    "toi": 610
+    "toi": 612
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -567,7 +567,7 @@
       ]
     },
     "functions/cas": {
-      "f": 3,
+      "f": 4,
       "exp": [
         "detZ",
         "resultantZ",
@@ -725,9 +725,10 @@
       "exp": ["createAnd", "createNot", "createNullish", "createOr", "createXor"]
     },
     "functions/matrix": {
-      "f": 46,
+      "f": 49,
       "exp": [
         "createColumn",
+        "complexToInterleaved",
         "createConcat",
         "createCount",
         "createCross",
@@ -745,8 +746,7 @@
         "createForEach",
         "vectorLength",
         "matrixFromVectorList",
-        "createGetMatrixDataType",
-        "createIdentity"
+        "createGetMatrixDataType"
       ],
       "int": [
         "Matrix",
@@ -761,6 +761,7 @@
       "f": 6,
       "exp": [
         "dbscan",
+        "rankNearest",
         "knnClassify",
         "knnRegress",
         "glm",
@@ -1109,7 +1110,7 @@
       ]
     },
     "functions/typed": {
-      "f": 43,
+      "f": 44,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1858,11 +1859,11 @@
     { "p": "src/index.ts", "i": 143, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
-    { "p": "utils/is.ts", "i": 0, "o": 56 },
+    { "p": "utils/is.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
-    { "p": "utils/array.ts", "i": 0, "o": 50 },
     { "p": "matrix/types.ts", "i": 0, "o": 49 },
+    { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 44 },
     { "p": "utils/collection.ts", "i": 0, "o": 39 }
