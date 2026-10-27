@@ -8,11 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone-merge batch 4 (G12, G24–G25, G28–G32).** `mapSlices` uses core `_switch`; `matrixFromColumns` / `matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` / `min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`; local `Decimal` max/min share `decimalExtreme`; `ImmutableDenseMatrix` min/max share `_extreme`; `Index` min/max share `_ends`. Public names and behavior unchanged.
+- **`ComputePool` clone-merge (Sprint 2R G64–G67, batch 5).** Tensordot contraction walks import workerpool
+  `forEachMultiIndex` instead of a local copy. `dot` and `distance` share `gatedBinary` (`pairwiseDot` /
+  `scaledDistance` sequential, worker pool methods parallel); thresholds stay `'never'`. `bitAnd` / `bitOr` /
+  `bitXor` share `bitwiseBinary`; `leftShift` / `rightArithShift` / `rightLogShift` share `bitwiseShift`
+  (scalar vs array split once). Public method names and behavior stay.
+- **`functions` WASM bridge clone-merge (Sprint 2R G40–G41, G48–G50).** `chebBasisRow` and
+  `legendreBasisRow` are exported from the poly WASM bridge (not the package barrel); the JS
+  `chebyshevFit` / `legendreFit` paths call them instead of duplicate recurrences. Shared helpers
+  `asReadReturned` and `withAsTyped` back the existing `asReadReturnedF64` / `asReadReturnedI32` and
+  `withAsF64` / `withAsI32` wrappers (`heap_reset` unchanged). Sort `argsort_f64` and `rank_f64`
+  dispatch share `indexDispatch`. Public names, thresholds, and `policy.ts` are unchanged.
+- **Sprint 2R clone batch (expression + autograd):** `RelationalNode` `_toString` / `_toTex` share `renderRelational` (one precedence walk; string joins `' ' + op + ' '`, TeX uses `latexOperators` and `\left(\right)` wraps). `filterTransform` / `forEachTransform` share `prepareTransformArrayAndCallback` for collection and callback compilation (each transform still owns its `filter` / `forEach` call and `createTransformCallback` placement). `TapedTensor.max` / `min` share `scatterArgExtrema` with strict first-wins `better` comparators. Behavior and public names unchanged; oracle tests pin chained relationals, transform predicates, and extrema tie gradients.
 - **Sprint 2R clone merge (G17 set):** `setStringSubset` in `expression` is the
   single permissive string-assignment body; `functions` `_setSubstring` delegates
   to it (same pattern as `getStringSubset` / `_getSubstring` in PR #456). The
   `index.isIndex === true` guard and error strings are unchanged.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
+- **Matrix WASM alloc and parallel dense-pair clone-merge (Sprint 2R G54–G56, G59, G60).** `WASMBackend` Float64 pool growth and fresh Int32 headers share `allocHeader` (type ids 5 and 6 stay on that file). `WasmLoader` `allocateAs*` / `makeAs*` share `allocateAs` and `makeAs` (Int32 id 4 unchanged). `parallelMatrixAdd` / `Subtract` / `parallelDotMultiply` / `parallelMatrixDivide` DenseMatrix pairs route through `densePair` with per-op mismatch messages. Pool recycle and stub-heap behavior are unchanged.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
   stays on DenseMatrix). `ParallelBackend.sumAxis` delegates to `jsBackend` like GPU/WASM;
