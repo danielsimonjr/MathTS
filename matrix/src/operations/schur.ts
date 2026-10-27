@@ -22,6 +22,7 @@ import {
   applyHouseholderLeft,
   applyHouseholderRight,
 } from './common.js';
+import { applyGivensRight } from './givens.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -81,22 +82,6 @@ function applyGivensLeft(
     const temp = c * A[i][j] - s * A[k][j];
     A[k][j] = s * A[i][j] + c * A[k][j];
     A[i][j] = temp;
-  }
-}
-
-function applyGivensRight(
-  A: number[][],
-  c: number,
-  s: number,
-  i: number,
-  k: number,
-  startRow: number
-): void {
-  const m = A.length;
-  for (let j = startRow; j < m; j++) {
-    const temp = c * A[j][i] - s * A[j][k];
-    A[j][k] = s * A[j][i] + c * A[j][k];
-    A[j][i] = temp;
   }
 }
 

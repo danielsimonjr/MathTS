@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1960
+**Total files**: 1964
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       25 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1177 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1180 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      696 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      697 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1960** |                                                                                                                |
+| **Total**     | **1964** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1202 |
-| `tests`    |   696 |
+| `src`      |  1205 |
+| `tests`    |   697 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -51,7 +51,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-functions`      |   824 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   103 |
+| `@danielsimonjr/mathts-matrix`         |   107 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    39 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -1644,7 +1644,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/backends/BackendManager.ts`                                           | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/gpu/BatchExecutor.ts`                                        | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/gpu/builtin-shaders.ts`                                      | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/backends/gpu/gpu-or-js.ts`                                            | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/gpu/index.ts`                                                | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/backends/gpu/run-shader.ts`                                           | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/gpu/Sync.ts`                                                 | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/GPUBackend.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/backends/GPUMatrixBackend.ts`                                         | @danielsimonjr/mathts-matrix         | src      | build-entry |
@@ -1666,6 +1668,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/src/operations/eig-wasm.ts`                                               | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/eig.ts`                                                    | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/expm.ts`                                                   | @danielsimonjr/mathts-matrix         | src      | build-entry |
+| `matrix/src/operations/givens.ts`                                                 | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/index.ts`                                                  | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/logm.ts`                                                   | @danielsimonjr/mathts-matrix         | src      | build-entry |
 | `matrix/src/operations/lu.ts`                                                     | @danielsimonjr/mathts-matrix         | src      | build-entry |
@@ -1728,6 +1731,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/public-api-smoke.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/s2r-clones-batch3-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/s2r-clones-batch4-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/s2r-clones-near-dispatch-oracle.test.ts`                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/security/wasm-integrity.test.ts`                                    | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/security/wasm-loader-pin.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/sparse/operations.test.ts`                                          | @danielsimonjr/mathts-matrix         | tests    | test        |

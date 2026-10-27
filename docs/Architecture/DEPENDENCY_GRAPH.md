@@ -116,9 +116,9 @@ The codebase is organized into the following modules:
 - **core/numeric**: 3 files
 - **core/typed**: 3 files
 - **core/types**: 19 files
-- **matrix/backends**: 18 files
+- **matrix/backends**: 20 files
 - **matrix**: 4 files
-- **matrix/operations**: 17 files
+- **matrix/operations**: 18 files
 - **matrix/types**: 6 files
 - **tensor**: 4 files
 - **tensor/operations**: 17 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 8              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 48             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 487            | 2               |
@@ -1254,9 +1254,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                  | Type   |
-| -------------------------- | ------------------------ | ------ |
-| `./gpu/builtin-shaders.js` | `registerBuiltinShaders` | Import |
+| File                       | Imports                                                                                | Type   |
+| -------------------------- | -------------------------------------------------------------------------------------- | ------ |
+| `./gpu/builtin-shaders.js` | `registerBuiltinShaders`                                                               | Import |
+| `./gpu/run-shader.js`      | `planRunShaderFromAdd, planRunShaderFromMatmul, planRunShaderFromTranspose, runShader` | Import |
 
 **Exports:**
 
@@ -1283,6 +1284,7 @@ graph LR
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                    | Import             |
 | `./JSBackend.js`          | `jsBackend`                                                                      | Import             |
 | `./GPUBackend.js`         | `GPUBackend, getGlobalGPUBackend, initializeGlobalGPUBackend, GPUBackendOptions` | Import             |
+| `./gpu/gpu-or-js.js`      | `gpuOrJs`                                                                        | Import             |
 
 **Exports:**
 
@@ -1432,6 +1434,14 @@ graph LR
 
 ---
 
+### `matrix/src/backends/gpu/gpu-or-js.ts` - Route a matrix op to GPU when over the element threshold, else JS (with optional fallback).
+
+**Exports:**
+
+- Functions: `gpuOrJs`
+
+---
+
 ### `matrix/src/backends/gpu/index.ts` - GPU Backend Exports
 
 **Workspace Dependencies:**
@@ -1451,6 +1461,22 @@ graph LR
 **Exports:**
 
 - Re-exports: `hasWebGPU`, `isBrowser`, `getGPUAdapter`, `detectGPUCapabilities`, `isGPUSuitableForMatrixOps`, `getRecommendedWorkgroupSize`, `getMaxMatrixSize`, `GPUContext`, `getGlobalGPUContext`, `initializeGlobalGPU`, `destroyGlobalGPU`, `getGpuDevice`, `resetGpuDevice`, `BufferPool`, `ShaderManager`, `GPUAdapterInfo`, `GPUCapabilities`, `GPUContextOptions`, `GPUContextStatus`, `DeviceLostEvent`, `BufferPoolOptions`, `ShaderSource`, `PipelineConfig`, `BUILTIN_SHADERS`, `registerBuiltinShaders`, `BatchExecutor`, `BatchOperation`, `BatchOperationType`, `BatchResult`, `BatchOptions`, `SyncManager`, `createSyncManager`, `SyncStrategy`, `TransferDirection`, `TransferRequest`, `TransferResult`, `SyncConfig`
+
+---
+
+### `matrix/src/backends/gpu/run-shader.ts` - Shared acquire / write / dispatch / read / release path for matrix GPU kernels.
+
+**Workspace Dependencies:**
+
+| Package                     | Import                                  |
+| --------------------------- | --------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `BufferPool, GPUContext, ShaderManager` |
+
+**Exports:**
+
+- Interfaces: `RunShaderHost`, `RunShaderPlan`
+- Types: `ShaderBindEntry`
+- Functions: `planRunShaderFromAdd`, `planRunShaderFromMatmul`, `planRunShaderFromTranspose`, `runShader`
 
 ---
 
@@ -1716,6 +1742,14 @@ graph LR
 
 ---
 
+### `matrix/src/operations/givens.ts` - Givens rotation on matrix columns (shared by Schur and SVD).
+
+**Exports:**
+
+- Functions: `applyGivensCols`, `applyGivensRight`
+
+---
+
 ### `matrix/src/operations/index.ts` - Matrix Operations
 
 **Internal Dependencies:**
@@ -1850,6 +1884,7 @@ graph LR
 | ------------------------- | ---------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
 | `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js`             | `applyGivensRight`                                                           | Import |
 
 **Exports:**
 
@@ -1897,6 +1932,7 @@ graph LR
 | File          | Imports                                                                      | Type   |
 | ------------- | ---------------------------------------------------------------------------- | ------ |
 | `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
+| `./givens.js` | `applyGivensCols`                                                            | Import |
 
 **Exports:**
 
@@ -18174,7 +18210,7 @@ graph TD
         N50[WasmLoader]
         N51[BatchExecutor]
         N52[Sync]
-        N53[...8 more]
+        N53[...10 more]
     end
 
     subgraph Matrix
@@ -18191,11 +18227,11 @@ graph TD
         N61[eig-wasm]
         N62[eig]
         N63[expm]
-        N64[index]
-        N65[logm]
-        N66[lu]
-        N67[pinv]
-        N68[...7 more]
+        N64[givens]
+        N65[index]
+        N66[logm]
+        N67[lu]
+        N68[...8 more]
     end
 
     subgraph Matrix/types
@@ -18920,14 +18956,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1202   |
+| Total TypeScript Files  | 1205   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200585 |
-| Total Exports           | 6219   |
+| Total Lines of Code     | 200665 |
+| Total Exports           | 6226   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 540    |
-| Total Functions         | 1988   |
+| Total Interfaces        | 542    |
+| Total Functions         | 1995   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 610    |

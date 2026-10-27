@@ -356,7 +356,9 @@ plus `initializeParallelMatrix()`/`terminateParallelMatrix()`.
 
 **GPU internals**: `BUILTIN_SHADERS` (matmul/matrixAdd/matrixSub/matrixMul/scalarMul/
 transpose/sumReduce WGSL — the domain kernels registered onto the shared
-`ShaderManager` at `GPUBackend` init), `BatchExecutor`, `SyncManager`
+`ShaderManager` at `GPUBackend` init), `BatchExecutor`, `SyncManager`.
+`GPUBackend.add` / `matmul` / `transpose` dispatch through private `runShader`
+(3 storage + params uniform for add/matmul; transpose has no `b`). Not a public export.
 (+ `createSyncManager`). Re-exported from `gpu` for back-compat: `BufferPool`,
 `GPUCapabilities`, `GPUContext`, `GPUContextOptions`, `ShaderManager`,
 `destroyGlobalGPU`, `detectGPUCapabilities`, `getGlobalGPUContext`,
@@ -1164,5 +1166,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8125  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2034  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8135  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2038  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
