@@ -80,6 +80,7 @@ The mathjs-derived factories are wired into the graph via
 - **`functions/src/fit-scalar.ts`**: `fitScalarParameters` fits `ScalarNode` parameters to columnar data via `levenbergMarquardt`, `bfgs`, or `nelderMead`, using `compileScalarGradient` for residuals and (for `l2`) standard errors from \((J^\top J)^{-1}\sigma^2\); does not load WASM.
 - **`functions/src/scalar-node-bridge.ts`**: `scalarToNode`, `nodeToScalar`, `simplifyScalar`, and `scalarToTex` convert between `ScalarNode` and wired expression nodes via the factory `ConstantNode` / `SymbolNode` / `OperatorNode` / `FunctionNode` classes and `simplify` / `Node.toTex` (no formula string).
 - **`functions/src/pareto-front.ts`**: `paretoFront`, `scoreFront`, `selectFrontModel` (not `paretoDist`).
+- **`functions/src/numeric-equivalence.ts`**: `numericallyEquivalent` samples with `SeededRng.next`, evaluates both trees via `compileScalar`, compares with core `nearlyEqual`; a `consistent` verdict is evidence, not proof.
 
 ### Beyond the mathjs API surface
 
@@ -198,9 +199,9 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1994   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 352250 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8061   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1996   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 353080 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8069   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -21,7 +21,7 @@ criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af
 [#396](https://github.com/danielsimonjr/MathTS/pull/396), [#397](https://github.com/danielsimonjr/MathTS/pull/397),
 or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and the later audit was after merge). M2 is merged
 ([#440](https://github.com/danielsimonjr/MathTS/pull/440), `71f8c3ce`). M5 (`createSeededRng`/`fork`) is implemented in `core`.
-Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`) and **M7** (`fitScalarParameters`) are implemented; **M8** and sprints 2R–5R remain open. B9 for M5, M6 and M7 stays open until a review is recorded.
+Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented; sprints 2R–5R remain open. B9 for M5, M6, M7 and M8 stays open until a review is recorded.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
@@ -71,12 +71,12 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
 
 1. **Phase 1 (M2 and M5) is complete.** M2 is on `main` as
    [#440](https://github.com/danielsimonjr/MathTS/pull/440) (`71f8c3ce`). M5 is
-   `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`) and **M7**
-   (`fitScalarParameters`) are implemented; next in Phase 2 is M8. Leave §6 B9 for M5, M6
-   and M7 unchecked until a review is recorded.
+   `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`), **M7**
+   (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented; next
+   is Sprint 2R. Leave §6 B9 for M5, M6, M7 and M8 unchecked until a review is recorded.
 2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
    ticked below). Do not tick §6 B9 for M1, M3 or M4.
-3. Phase 2 (M6–M8), then Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge,
+3. **Phase 2 (M6–M8) is complete.** Next is Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge,
    `linearRegression`/`linregress`, `numericRealRoots`; LM/`svds`/`matMul` already moved
    into Sprint 1R).
 
@@ -288,8 +288,9 @@ against #412–#418. Line numbers drift; the symbol names are the stable referen
 | Physical constants                                                                     | `functions/src/type/unit/physicalConstants.ts` (CODATA-2022, each one a core `UnitInstance`)                                                                                                                                                                                                                                                                                                                                               | They carry no uncertainty field (no `uncertainty` occurrences in the file), which matters if constants become "data" (open question, §10).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Exact rational nullspace                                                               | `rationalNullspace` (`functions/src/numeric/rational-nullspace.ts:145`, re-exported through `functions/src/typed/numeric.ts`; used by UPT `src/dimensional/buckingham.ts`)                                                                                                                                                                                                                                                                 | It is the core of constant-unit solving (M10).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Seeded RNG                                                                             | `createSeededRng` / `SeededRng` in `core/src/numeric/rng.ts` (M5). `seedProbabilityRng` (global, seedrandom, `functions/src/typed/probability.ts:300`) and `createRng` (seedrandom, `functions/src/probability/util/seededRNG.ts:14`) unchanged (§9). Canonical `mulberry32` / `boxMuller` / `rowMajorStrides` in `core` (#415). Worker-bundle copy of `mulberry32` and `rowMajorStrides` in `packages/workerpool/src/worker-numerics.ts`. | Number `next()` matches `mulberry32` (ToInt32); strings are FNV-1a 32 over UTF-8; `fork` does not advance the parent. `seedProbabilityRng` / `createRng` stay seedrandom (§9). Existing `randomTensor` / hypothesis / `sampleN` / graph samplers still call `mulberry32` directly (pinned fixtures).                                                                                                                                                                                                                                                                                                                                                         |
+| Guarded numerical equivalence (**M8**)                                                 | `functions/src/numeric-equivalence.ts`, exported at `functions/src/index.ts:57` (`numericallyEquivalent`, `NumericEquivalenceError`; types `NumericEquivalenceOptions`, `NumericEquivalence`)                                                                                                                                                                                                                                              | Samples with `SeededRng.next`, evaluates both trees through `compileScalar`, compares with core `nearlyEqual` (`relTol` / `absTol`). A `consistent` verdict is evidence, never proof of symbolic equivalence. Tests: `functions/tests/numeric-equivalence.test.ts`.                                                                                                                                                                                                                                                                                                                                                                                          |
 | Parallel execution                                                                     | `parallel/src/{ComputePool,WorkerPool}.ts`; `kernelSource` (`functions/src/typed/parallel-map.ts:24`)                                                                                                                                                                                                                                                                                                                                      | `WorkerPool#execute` `timeoutMs` and hung-worker replacement are a security invariant (`AGENTS.md`). A closure cannot be posted to a worker. `kernelSource` serializes self-contained functions plus their dependencies into worker source. `workerpool` cannot import `functions` (it would cycle through `parallel`).                                                                                                                                                                                                                                                                                                                                      |
-| Search kit (grammar, enumerator, mutations, evolution loop)                            | `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` (M2), `compileScalarGradient` (M6), `fitScalarParameters` (M7). No `enumerateScalars`, `numericallyEquivalent`, `inferScalarDimension`, `frontToLatexTable`, or `solveParameterDimensions` yet.                                                                                                                                                                         | Greenfield beyond M2, built on the M1–M7 exports above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Search kit (grammar, enumerator, mutations, evolution loop)                            | `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` (M2), `compileScalarGradient` (M6), `fitScalarParameters` (M7), `numericallyEquivalent` (M8). No `enumerateScalars`, `inferScalarDimension`, `frontToLatexTable`, or `solveParameterDimensions` yet.                                                                                                                                                                    | Greenfield beyond M2, built on the M1–M8 exports above.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ---
 
@@ -305,7 +306,7 @@ against #412–#418. Line numbers drift; the symbol names are the stable referen
 | G6  | No instance-scoped, splittable seeded RNG (`createSeededRng` / `fork`). The Mulberry32 _body_ is in `core` (#415); one worker-bundle copy remains | §3 RNG row; UPT `witness-symbolic.ts` reseeds the global stream                                                                 | M5        | **Closed** (API in `core`; worker mulberry32 copy unchanged; `seedProbabilityRng` / `createRng` not migrated, §9) |
 | G7  | `levenbergMarquardt` has no analytic-Jacobian hook (exact `ScalarNode` parameter gradients: **closed** via `compileScalarGradient`, M6)           | `compileScalarGradient` (`functions/src/scalar-compile.ts`); `levenbergMarquardt` `LMOptions.jacobian`, `optimization-extra.ts` | M6, M7    | **Closed** (M6 gradients; M7 optional `jacobian` on LM)                                                           |
 | G8  | No multi-constant fit of an expression to data (PySR §2.5)                                                                                        | UPT `probe/fit.ts` fits one prefactor with `ols`                                                                                | M7        | **Closed** (`fitScalarParameters`, `functions/src/fit-scalar.ts`)                                                 |
-| G9  | No guarded numerical-equivalence check (UPT §9 level 5)                                                                                           | `symbolicEqual` is symbolic and one-sided                                                                                       | M8        | Open                                                                                                              |
+| G9  | No guarded numerical-equivalence check (UPT §9 level 5)                                                                                           | `symbolicEqual` is symbolic and one-sided                                                                                       | M8        | **Closed** (`functions/src/numeric-equivalence.ts`; `numericallyEquivalent`)                                      |
 | G10 | No dimension inference over `ScalarNode` with rational exponents, and no constant-unit solving (PySR's `[⋅]`)                                     | UPT owns `ExprNode` validation; `ScalarNode` has none                                                                           | M9, M10   | Open (conditional on UPT delegation)                                                                              |
 | G11 | No grammar / operator-set descriptor, no enumerator, no mutation / crossover operators, no evolution loop                                         | Greenfield                                                                                                                      | M11–M13   | Open (optional)                                                                                                   |
 | G12 | No front export (LaTeX table / JSON report) comparable to `sympy2latextable`                                                                      | `pysr/export_latex.py:62`                                                                                                       | M15       | Open                                                                                                              |
@@ -697,7 +698,7 @@ variable `RELEASES_ENABLED` is set to `true`.
 
 ### Phase 2 — Constant fitting and equivalence
 
-#### M6 — Exact parameter gradients of a `ScalarNode`
+#### M6 — Exact parameter gradients of a `ScalarNode` ✅ implemented
 
 - **Package:** `functions`, extending `functions/src/scalar-compile.ts` (M3). **Size:** S–M.
   **Depends on:** M3.
@@ -742,7 +743,7 @@ export function compileScalarGradient(
   - [x] Exports on the `functions` barrel: `compileScalarGradient`, type
         `CompiledScalarGradient`.
 
-#### M7 — `fitScalarParameters` (PySR-style constant optimization)
+#### M7 — `fitScalarParameters` (PySR-style constant optimization) ✅ implemented
 
 - **Package:** `functions`. **Size:** M. **Depends on:** M3, M5 and M6.
 - **Reuse (do not rebuild):** `levenbergMarquardt`, `bfgs` (accepts `grad`) and
@@ -809,7 +810,7 @@ export function fitScalarParameters(
         `FitScalarOptions`, `FitScalarResult`; `levenbergMarquardt`'s new `jacobian`
         option documented in `docs/reference/functions.md`.
 
-#### M8 — Guarded numerical equivalence
+#### M8 — Guarded numerical equivalence ✅ implemented
 
 - **Package:** `functions`. **Size:** S. **Depends on:** M3 and M5.
 - **Reuse (do not rebuild):** `compileScalar` to evaluate both trees on the samples;
@@ -848,17 +849,17 @@ export function numericallyEquivalent(
 - **Wording rule:** `consistent` is evidence, never proof. The TSDoc must say so,
   matching UPT §9 ("Numerical agreement alone never proves symbolic equivalence").
 - **Acceptance:**
-  - Finds a counterexample for `sqrt(x^2)` vs `x` on a domain that includes negatives.
-  - Reports `consistent` for `sin^2+cos^2` vs `1`.
-  - With `upToConstant`, finds the constant for `2πx` vs `x`.
-  - Reports `inconclusive` when most samples are invalid.
-  - Results are deterministic for a given RNG seed.
+  - [x] Finds a counterexample for `sqrt(x^2)` vs `x` on a domain that includes negatives.
+  - [x] Reports `consistent` for `sin^2+cos^2` vs `1`.
+  - [x] With `upToConstant`, finds the constant for `2πx` vs `x`.
+  - [x] Reports `inconclusive` when most samples are invalid.
+  - [x] Results are deterministic for a given RNG seed.
 - **Tests:** `functions/tests/numeric-equivalence.test.ts`.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: comparisons call `nearlyEqual`; samples come from `createSeededRng`;
+  - [x] B1: comparisons call `nearlyEqual`; samples come from `createSeededRng`;
         evaluation is `compileScalar`.
-  - [ ] Oracles: the four identities above, worked by hand.
-  - [ ] Exports on the `functions` barrel: `numericallyEquivalent`, types
+  - [x] Oracles: the four identities above, worked by hand.
+  - [x] Exports on the `functions` barrel: `numericallyEquivalent`, types
         `NumericEquivalenceOptions`, `NumericEquivalence`; the "evidence, not proof"
         wording in TSDoc and `docs/api/functions.md`.
 
@@ -880,7 +881,7 @@ merge, `linearRegression`/`linregress`, and `numericRealRoots`.
      `numericalDerivative`) are not Jacobians and are not part of this item. Route the
      remaining solvers through `numericJacobian`; if they need their relative forward
      step, add that step rule to `NumericJacobianOptions` instead of keeping private
-     loops. The M7 public `jacobian` option waits for that milestone.
+     loops. The M7 public `jacobian` option is implemented (`LMOptions.jacobian`).
 
   2. **`svds` vector norm** (I-5). **Done (#416).** `functions/src/numeric/svds.ts:117`
      calls core `norm2`.

@@ -44,6 +44,7 @@ ScalarNode tree (expression scalar-structure toolkit)
     compileScalarGradient residuals → levenbergMarquardt / bfgs / nelderMead → l2 SE from JᵀJ
   → CompiledScalar.evaluate(rows): per-row valid mask (no typed dispatch per row)
   → optional paretoFront / scoreFront / selectFrontModel on { loss, complexity, item } rows
+  → numericallyEquivalent (functions/numeric-equivalence.ts): SeededRng.next samples → compileScalar on both trees → nearlyEqual per valid row (consistent is evidence, not proof)
 ```
 
 `compileScalar` does not use `eval` / `new Function` and does not load WASM.
@@ -396,5 +397,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1994  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1996  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

@@ -18,12 +18,15 @@ npm install @danielsimonjr/mathts-functions
 - `levenbergMarquardt` accepts an optional analytic `jacobian` in `LMOptions`; the default remains forward-difference `numericJacobian`.
 - `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` — convert between scalar trees and wired expression nodes (no formula string); `simplifyScalar` uses the same `simplify` as the expression language.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
+- `numericallyEquivalent` — sample two scalar trees with `createSeededRng`, evaluate via `compileScalar`, compare with core `nearlyEqual`. **Numerical agreement alone never proves symbolic equivalence;** a `consistent` verdict is evidence, not proof.
 
 ```ts
+import { createSeededRng } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
   compileScalarGradient,
   fitScalarParameters,
+  numericallyEquivalent,
   paretoFront,
   scoreFront,
   selectFrontModel,
@@ -60,6 +63,13 @@ const front = paretoFront([
   { loss: 0.1, complexity: 3, item: 'x^3' },
 ]);
 selectFrontModel(scoreFront(front), 'best').item; // 'x^3'
+
+const rng = createSeededRng(1);
+const id = scalar.op('+', [
+  scalar.op('^', [scalar.call('sin', scalar.symbol('x')), scalar.number(2)]),
+  scalar.op('^', [scalar.call('cos', scalar.symbol('x')), scalar.number(2)]),
+]);
+numericallyEquivalent(id, scalar.number(1), { domain: { x: [0, 1] }, rng }).verdict; // 'consistent' — evidence, not proof
 ```
 
 - Per-domain focused entry points are also published: `@danielsimonjr/mathts-{arithmetic,trigonometry,statistics,signal}`.
