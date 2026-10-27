@@ -4965,7 +4965,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 124
+      "loc": 122
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
@@ -6442,7 +6442,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 288
     },
     {
       "file": "functions/src/matrix/trace.ts",
