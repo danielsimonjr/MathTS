@@ -1,3 +1,4 @@
+import { _switch } from '@danielsimonjr/mathts-core/internal';
 import { factory } from '../utils/factory.js';
 import { arraySize } from '../utils/array.js';
 import { isMatrix } from '../utils/is.js';
@@ -105,7 +106,7 @@ function _mapSlices(mat: unknown[], dim: number, callback: SliceCallback): unkno
     if (!Array.isArray(mat[0])) {
       return callback(mat);
     } else {
-      tran = _switch(mat);
+      tran = _switch(mat as unknown[][]);
       ret = [];
       for (i = 0; i < tran.length; i++) {
         ret[i] = _mapSlices(tran[i], dim - 1, callback);
@@ -119,25 +120,4 @@ function _mapSlices(mat: unknown[], dim: number, callback: SliceCallback): unkno
     }
     return ret;
   }
-}
-
-/**
- * Transpose a matrix
- * @param {Array} mat
- * @returns {Array} ret
- * @private
- */
-function _switch(mat: unknown[]): unknown[][] {
-  const I = mat.length;
-  const J = (mat[0] as unknown[]).length;
-  let i: number, j: number;
-  const ret: unknown[][] = [];
-  for (j = 0; j < J; j++) {
-    const tmp: unknown[] = [];
-    for (i = 0; i < I; i++) {
-      tmp.push((mat[i] as unknown[])[j]);
-    }
-    ret.push(tmp);
-  }
-  return ret;
 }

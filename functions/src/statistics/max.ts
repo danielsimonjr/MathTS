@@ -1,6 +1,6 @@
-import { deepForEach, reduce, containsCollections } from '../utils/collection.js';
+import { reduce, containsCollections } from '../utils/collection.js';
+import { reduceExtreme } from './extreme.js';
 import { factory } from '../utils/factory.js';
-import { safeNumberType } from '../utils/number.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -106,30 +106,11 @@ export const createMax = /* #__PURE__ */ factory(
      * @private
      */
     function _max(array: unknown[] | MatrixType): unknown {
-      let res: unknown;
-
-      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
-        try {
-          if (mathIsNaN(value)) {
-            res = value;
-          } else if (res === undefined || larger(value, res)) {
-            res = value;
-          }
-        } catch (err) {
-          throw improveErrorMessage(err, 'max', value);
-        }
+      return reduceExtreme(array, larger as (value: unknown, best: unknown) => unknown, 'max', {
+        isNaN: mathIsNaN,
+        numeric,
+        config,
       });
-
-      if (res === undefined) {
-        throw new Error('Cannot calculate max of an empty array');
-      }
-
-      // make sure returning numeric value: parse a string into a numeric value
-      if (typeof res === 'string') {
-        res = numeric(res, safeNumberType(res, config));
-      }
-
-      return res;
     }
   }
 );

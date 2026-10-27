@@ -171,24 +171,37 @@ class AsAllocCache {
   }
 
   private allocate(module: AsModule, length: number): AsFloat64Allocation {
-    const byteLength = length << AS_F64_ALIGN_SHIFT;
-    // Allocate + pin the data buffer (id=1 = ArrayBuffer).
-    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-    // Allocate the Float64Array header (id=5) and pin it too so the AS GC
-    // (if it ever wakes up — see comment above; today it doesn't) never
-    // reclaims it out from under us.
-    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0;
-    module.__pin(headerPtr);
-
-    // Write the header. Layout: [dataStart, dataStart, byteLength].
-    const dv = new DataView(module.memory.buffer);
-    dv.setUint32(headerPtr + 0, bufferPtr, true);
-    dv.setUint32(headerPtr + 4, bufferPtr, true);
-    dv.setUint32(headerPtr + 8, byteLength, true);
-
-    const view = new Float64Array(module.memory.buffer, bufferPtr, length);
-    return { headerPtr, bufferPtr, view, length };
+    return allocHeader(module, length, {
+      shift: AS_F64_ALIGN_SHIFT,
+      typeId: AS_ID_FLOAT64_ARRAY,
+      Ctor: Float64Array,
+    });
   }
+}
+
+type AsTypedArrayCtor = Float64ArrayConstructor | Int32ArrayConstructor;
+
+function allocHeader<T extends Float64Array | Int32Array>(
+  module: AsModule,
+  length: number,
+  opts: { shift: number; typeId: number; Ctor: AsTypedArrayCtor }
+): { headerPtr: number; bufferPtr: number; view: T; length: number } {
+  const byteLength = length << opts.shift;
+  // Allocate + pin the data buffer (id=1 = ArrayBuffer).
+  const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
+  // Allocate the typed-array header and pin it so the AS GC (if it ever wakes
+  // up — see AsAllocCache comment; today it doesn't) never reclaims it.
+  const headerPtr = module.__new(AS_HEADER_BYTES, opts.typeId) >>> 0;
+  module.__pin(headerPtr);
+
+  // Write the header. Layout: [dataStart, dataStart, byteLength].
+  const dv = new DataView(module.memory.buffer);
+  dv.setUint32(headerPtr + 0, bufferPtr, true);
+  dv.setUint32(headerPtr + 4, bufferPtr, true);
+  dv.setUint32(headerPtr + 8, byteLength, true);
+
+  const view = new opts.Ctor(module.memory.buffer, bufferPtr, length) as T;
+  return { headerPtr, bufferPtr, view, length };
 }
 
 /** Copy JS data into an existing allocation's view. */
@@ -241,16 +254,11 @@ interface AsInt32Allocation {
  * already retains for the duration of the process.
  */
 function allocAsInt32Array(module: AsModule, length: number): AsInt32Allocation {
-  const byteLength = length << AS_I32_ALIGN_SHIFT;
-  const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-  const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_INT32_ARRAY) >>> 0;
-  module.__pin(headerPtr);
-  const dv = new DataView(module.memory.buffer);
-  dv.setUint32(headerPtr + 0, bufferPtr, true);
-  dv.setUint32(headerPtr + 4, bufferPtr, true);
-  dv.setUint32(headerPtr + 8, byteLength, true);
-  const view = new Int32Array(module.memory.buffer, bufferPtr, length);
-  return { headerPtr, bufferPtr, view, length };
+  return allocHeader(module, length, {
+    shift: AS_I32_ALIGN_SHIFT,
+    typeId: AS_ID_INT32_ARRAY,
+    Ctor: Int32Array,
+  });
 }
 
 /** Copy the AS-managed Int32 buffer into a fresh JS Int32Array. */

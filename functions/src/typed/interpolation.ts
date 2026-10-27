@@ -29,6 +29,8 @@ import {
   chebFitDispatch,
   legendreFitDispatch,
   WASM_POLY_FIT_THRESHOLD,
+  chebBasisRow,
+  legendreBasisRow,
 } from '../wasm/poly/wasm-bridge.js';
 
 // =============================================================================
@@ -612,25 +614,9 @@ export function chebyshevFit(xs: number[], ys: number[], degree: number): number
   const n = xs.length;
   const k = degree + 1;
 
-  /** Build Chebyshev-T basis row. */
-  function chebRow(x: number): number[] {
-    const row: number[] = new Array(k);
-    let tPrev = 1,
-      tCurr = x;
-    row[0] = tPrev;
-    if (k > 1) row[1] = tCurr;
-    for (let j = 2; j < k; j++) {
-      const tNext = 2 * x * tCurr - tPrev;
-      row[j] = tNext;
-      tPrev = tCurr;
-      tCurr = tNext;
-    }
-    return row;
-  }
-
   const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
   for (let i = 0; i < n; i++) {
-    const row = chebRow(xs[i]);
+    const row = chebBasisRow(xs[i], k);
     for (let j = 0; j < k; j++) {
       for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
       ATA[j][k] += row[j] * ys[i];
@@ -705,25 +691,9 @@ export function legendreFit(xs: number[], ys: number[], degree: number): number[
   const n = xs.length;
   const k = degree + 1;
 
-  /** Build Legendre-P basis row. */
-  function legRow(x: number): number[] {
-    const row: number[] = new Array(k);
-    let pPrev = 1,
-      pCurr = x;
-    row[0] = pPrev;
-    if (k > 1) row[1] = pCurr;
-    for (let dn = 1; dn < k - 1; dn++) {
-      const pNext = ((2 * dn + 1) * x * pCurr - dn * pPrev) / (dn + 1);
-      row[dn + 1] = pNext;
-      pPrev = pCurr;
-      pCurr = pNext;
-    }
-    return row;
-  }
-
   const ATA: number[][] = Array.from({ length: k }, () => new Array(k + 1).fill(0));
   for (let i = 0; i < n; i++) {
-    const row = legRow(xs[i]);
+    const row = legendreBasisRow(xs[i], k);
     for (let j = 0; j < k; j++) {
       for (let l = 0; l < k; l++) ATA[j][l] += row[j] * row[l];
       ATA[j][k] += row[j] * ys[i];

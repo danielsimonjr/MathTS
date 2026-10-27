@@ -387,7 +387,7 @@ function powerBasisRow(x: number, k: number): Float64Array {
 }
 
 /** Build a Chebyshev-T basis row: [T_0(x), T_1(x), ...]. */
-function chebBasisRow(x: number, k: number): Float64Array {
+export function chebBasisRow(x: number, k: number): Float64Array {
   const row = new Float64Array(k);
   let tPrev = 1,
     tCurr = x;
@@ -403,7 +403,7 @@ function chebBasisRow(x: number, k: number): Float64Array {
 }
 
 /** Build a Legendre-P basis row: [P_0(x), P_1(x), ...]. */
-function legendreBasisRow(x: number, k: number): Float64Array {
+export function legendreBasisRow(x: number, k: number): Float64Array {
   const row = new Float64Array(k);
   let pPrev = 1,
     pCurr = x;

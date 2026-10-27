@@ -41,6 +41,19 @@ const globalConfig: Required<DecimalConfig> = {
 /**
  * Decimal class for arbitrary precision arithmetic.
  */
+function decimalExtreme(
+  values: (Decimal | number | string)[],
+  better: (a: Decimal, b: Decimal) => boolean
+): Decimal {
+  if (values.length === 0) return new Decimal(NaN);
+  let best = new Decimal(values[0]);
+  for (let i = 1; i < values.length; i++) {
+    const val = new Decimal(values[i]);
+    if (better(val, best)) best = val;
+  }
+  return best;
+}
+
 export class Decimal {
   /** Coefficient digits as array of numbers (0-9) */
   public d: number[] | null;
@@ -271,26 +284,14 @@ export class Decimal {
    * Get maximum of values
    */
   static max(...values: (Decimal | number | string)[]): Decimal {
-    if (values.length === 0) return new Decimal(NaN);
-    let max = new Decimal(values[0]);
-    for (let i = 1; i < values.length; i++) {
-      const val = new Decimal(values[i]);
-      if (val.gt(max)) max = val;
-    }
-    return max;
+    return decimalExtreme(values, (a, b) => a.gt(b));
   }
 
   /**
    * Get minimum of values
    */
   static min(...values: (Decimal | number | string)[]): Decimal {
-    if (values.length === 0) return new Decimal(NaN);
-    let min = new Decimal(values[0]);
-    for (let i = 1; i < values.length; i++) {
-      const val = new Decimal(values[i]);
-      if (val.lt(min)) min = val;
-    }
-    return min;
+    return decimalExtreme(values, (a, b) => a.lt(b));
   }
 
   /**

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1202,
+    "totalFiles": 1205,
     "totalModules": 82,
-    "totalExports": 6217
+    "totalExports": 6226
   },
   "entryPoints": [
     {
@@ -1990,7 +1990,7 @@
         "functions": ["format", "stringify", "escape", "compareText"]
       },
       "core/src/switch.ts": {
-        "description": "Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s",
+        "description": "Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -15197,6 +15197,15 @@
         "exports": ["createForEach"],
         "constants": ["createForEach"]
       },
+      "functions/src/matrix/from-vectors.ts": {
+        "description": "Return the logical length of a 1-D or 2-D column/row vector.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["vectorLength", "matrixFromVectorList"],
+        "functions": ["vectorLength", "matrixFromVectorList"]
+      },
       "functions/src/matrix/getMatrixDataType.ts": {
         "description": "Find the data type of all elements in a matrix or array,",
         "externalDependencies": [],
@@ -15387,7 +15396,14 @@
             "imports": ["TypedFunction", "Matrix", "BigNumber"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["_switch"],
+            "subpath": "internal"
+          }
+        ],
         "exports": ["createMapSlices"],
         "constants": ["createMapSlices"]
       },
@@ -15399,6 +15415,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15431,6 +15451,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "./from-vectors.js",
+            "imports": ["matrixFromVectorList", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15844,7 +15868,7 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["isEmptyIndex", "validateIndex", "validateIndexSourceSize"]
+            "imports": ["isEmptyIndex", "validateIndexSourceSize"]
           },
           {
             "file": "../utils/customs.js",
@@ -15873,7 +15897,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["getStringSubset"]
+            "imports": ["getStringSubset", "setStringSubset"]
           }
         ],
         "exports": ["createSubset"],
@@ -18588,6 +18612,38 @@
         "exports": ["createCumSum"],
         "constants": ["createCumSum"]
       },
+      "functions/src/statistics/extreme.ts": {
+        "description": "Recursively reduce an array or matrix to a single extreme value.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepForEach"]
+          },
+          {
+            "file": "../utils/number.js",
+            "imports": ["safeNumberType"]
+          },
+          {
+            "file": "./utils/improveErrorMessage.js",
+            "imports": ["improveErrorMessage"]
+          },
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          },
+          {
+            "file": "../core/config.js",
+            "imports": ["ConfigOptions"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["reduceExtreme"],
+        "functions": ["reduceExtreme"]
+      },
       "functions/src/statistics/mad.ts": {
         "description": "Compute the median absolute deviation of a matrix or a list with values.",
         "externalDependencies": [],
@@ -18622,15 +18678,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["deepForEach", "reduce", "containsCollections"]
+            "imports": ["reduce", "containsCollections"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -18720,15 +18776,15 @@
         "internalDependencies": [
           {
             "file": "../utils/collection.js",
-            "imports": ["containsCollections", "deepForEach", "reduce"]
+            "imports": ["containsCollections", "reduce"]
+          },
+          {
+            "file": "./extreme.js",
+            "imports": ["reduceExtreme"]
           },
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
-          },
-          {
-            "file": "../utils/number.js",
-            "imports": ["safeNumberType"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19237,20 +19293,12 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "../utils/string.js",
-            "imports": ["format"]
-          },
-          {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
           {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           },
           {
             "file": "../core/function/typed.js",
@@ -22901,7 +22949,9 @@
               "polyFitDispatch",
               "chebFitDispatch",
               "legendreFitDispatch",
-              "WASM_POLY_FIT_THRESHOLD"
+              "WASM_POLY_FIT_THRESHOLD",
+              "chebBasisRow",
+              "legendreBasisRow"
             ]
           }
         ],
@@ -23814,12 +23864,8 @@
             "imports": ["format"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isString"]
-          },
-          {
             "file": "../utils/print.js",
-            "imports": ["printTemplate"]
+            "imports": ["fillPrintTemplate"]
           }
         ],
         "workspaceDependencies": [
@@ -25041,12 +25087,22 @@
         "constants": ["createParseNumberWithConfig"]
       },
       "functions/src/utils/print.ts": {
-        "description": "print module",
+        "description": "Interpolate values into a string template (`$key` / `$key.nested`).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./string.js",
+            "imports": ["format"]
+          },
+          {
+            "file": "./is.js",
+            "imports": ["isString"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["printTemplate"],
+        "exports": ["printTemplate", "fillPrintTemplate"],
+        "functions": ["fillPrintTemplate"],
         "constants": ["printTemplate"]
       },
       "functions/src/utils/product.ts": {
@@ -25192,8 +25248,10 @@
           "resetScratch",
           "runUnaryPtr",
           "runChainPtr",
+          "asReadReturned",
           "asReadReturnedF64",
           "asReadReturnedI32",
+          "withAsTyped",
           "withAsF64",
           "withAsI32",
           "makeUnaryArrayDispatch"
@@ -25205,8 +25263,10 @@
           "resetScratch",
           "runUnaryPtr",
           "runChainPtr",
+          "asReadReturned",
           "asReadReturnedF64",
           "asReadReturnedI32",
+          "withAsTyped",
           "withAsF64",
           "withAsI32",
           "makeUnaryArrayDispatch"
@@ -25331,6 +25391,8 @@
           "polyDivModDispatch",
           "resultantDispatch",
           "discriminantDispatch",
+          "chebBasisRow",
+          "legendreBasisRow",
           "polyFitDispatch",
           "chebFitDispatch",
           "legendreFitDispatch",
@@ -25342,6 +25404,8 @@
           "polyDivModDispatch",
           "resultantDispatch",
           "discriminantDispatch",
+          "chebBasisRow",
+          "legendreBasisRow",
           "polyFitDispatch",
           "chebFitDispatch",
           "legendreFitDispatch",
@@ -32473,12 +32537,8 @@
             "imports": ["factory"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
-          },
-          {
-            "file": "./utils/compileInlineExpression.js",
-            "imports": ["compileInlineExpression"]
+            "file": "./utils/prepareTransformArgs.js",
+            "imports": ["prepareTransformArrayAndCallback"]
           },
           {
             "file": "./utils/transformCallback.js",
@@ -32503,12 +32563,8 @@
             "imports": ["factory"]
           },
           {
-            "file": "../utils/is.js",
-            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
-          },
-          {
-            "file": "./utils/compileInlineExpression.js",
-            "imports": ["compileInlineExpression"]
+            "file": "./utils/prepareTransformArgs.js",
+            "imports": ["prepareTransformArrayAndCallback"]
           }
         ],
         "workspaceDependencies": [],
@@ -33067,6 +33123,25 @@
         "workspaceDependencies": [],
         "exports": ["lastDimToZeroBase"],
         "functions": ["lastDimToZeroBase"]
+      },
+      "expression/src/transform/utils/prepareTransformArgs.ts": {
+        "description": "Shared tail of filter/forEach transforms: evaluate the collection argument and",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isFunctionAssignmentNode", "isSymbolNode"]
+          },
+          {
+            "file": "./compileInlineExpression.js",
+            "imports": ["compileInlineExpression"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["prepareTransformArrayAndCallback"],
+        "interfaces": ["PreparedTransformArgs"],
+        "functions": ["prepareTransformArrayAndCallback"]
       },
       "expression/src/transform/utils/transformCallback.ts": {
         "description": "Transforms the given callback function based on its type and number of arrays.",
@@ -35518,6 +35593,7 @@
             "imports": [
               "MathWorkerPool",
               "Transfer",
+              "forEachMultiIndex",
               "WorkerPoolConfig",
               "ParallelResult",
               "TaskOptions",
@@ -40926,6 +41002,7 @@
           "functions/src/matrix/filter.ts",
           "functions/src/matrix/flatten.ts",
           "functions/src/matrix/forEach.ts",
+          "functions/src/matrix/from-vectors.ts",
           "functions/src/matrix/getMatrixDataType.ts",
           "functions/src/matrix/identity.ts",
           "functions/src/matrix/ifft.ts",
@@ -41107,6 +41184,7 @@
         "files": [
           "functions/src/statistics/corr.ts",
           "functions/src/statistics/cumsum.ts",
+          "functions/src/statistics/extreme.ts",
           "functions/src/statistics/mad.ts",
           "functions/src/statistics/max.ts",
           "functions/src/statistics/mean.ts",
@@ -41809,6 +41887,7 @@
           "expression/src/transform/utils/dimToZeroBase.ts",
           "expression/src/transform/utils/errorTransform.ts",
           "expression/src/transform/utils/lastDimToZeroBase.ts",
+          "expression/src/transform/utils/prepareTransformArgs.ts",
           "expression/src/transform/utils/transformCallback.ts",
           "expression/src/transform/variance.transform.ts"
         ]
@@ -42026,18 +42105,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1202,
+    "totalTypeScriptFiles": 1205,
     "totalModules": 82,
-    "totalLinesOfCode": 200813,
-    "totalExports": 6217,
+    "totalLinesOfCode": 200665,
+    "totalExports": 6226,
     "totalClasses": 59,
-    "totalInterfaces": 541,
-    "totalFunctions": 1986,
+    "totalInterfaces": 542,
+    "totalFunctions": 1995,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
     "totalReExports": 2627,
-    "totalTypeOnlyImports": 608,
+    "totalTypeOnlyImports": 610,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
