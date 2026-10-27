@@ -19,7 +19,7 @@ export * from './typed/cas.js';
 
 // Activated mathjs leaf factory functions
 export * from './factories/index.js';
-export { config } from './config-api.js'; // GC12: runtime config accessor
+export { config, runWithConfig } from './config-api.js'; // GC12: runtime config accessor
 
 // Opt-in AssemblyScript tier. Nothing loads the WASM binary on its own; until
 // `await loadWasm()` resolves true, every function runs its JavaScript path.
@@ -349,7 +349,12 @@ export type {
 
 // Gap-analysis Wave D — named optimizers + nonlinear least squares.
 export { nelderMead, gradientDescent, levenbergMarquardt } from './optimization-extra.js';
-export type { OptimizeResult, LMResult, LMOptions } from './optimization-extra.js';
+export type {
+  OptimizeResult,
+  LMResult,
+  LMOptions,
+  NelderMeadOptions,
+} from './optimization-extra.js';
 export { fitScalarParameters } from './fit-scalar.js';
 export type { FitScalarOptions, FitScalarResult } from './fit-scalar.js';
 

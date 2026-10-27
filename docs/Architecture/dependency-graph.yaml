@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-27'
   totalFiles: 1192
   totalModules: 82
-  totalExports: 6181
+  totalExports: 6186
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3328,17 +3328,14 @@ modules:
             - jsBackend
         - file: ../config.js
           imports:
+            - DEFAULT_CONFIG
             - getConfig
             - onConfigChange
             - MatrixConfig
             - OperationType
         - file: ./register-backends.js
           imports: []
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-gpu'
-          directory: gpu
-          imports:
-            - GPU_MIN_ELEMENTS
+      workspaceDependencies: []
       exports:
         - DEFAULT_EXTENDED_HINTS
         - backendManager
@@ -4086,8 +4083,8 @@ modules:
       internalDependencies:
         - file: ./backends/Backend.js
           imports:
+            - DEFAULT_BACKEND_HINTS
             - BackendType
-          typeOnly: true
       workspaceDependencies: []
       exports:
         - DEFAULT_CONFIG
@@ -8392,17 +8389,20 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ./factories/scope.js
-          imports:
-            - factoryScope
         - file: ./core/config.js
           imports:
+            - DEFAULT_CONFIG
             - ConfigOptions
-          typeOnly: true
+        - file: ./factories/scope.js
+          imports:
+            - pushConfigOverlay
+            - popConfigOverlay
       workspaceDependencies: []
       exports:
+        - runWithConfig
         - config
       functions:
+        - runWithConfig
         - config
     functions/src/descriptive-stats.ts:
       description: Descriptive-statistics composites (Wave A of the domain gap analysis).
@@ -8718,6 +8718,7 @@ modules:
         - file: ./config-api.js
           imports:
             - config
+            - runWithConfig
           reExport: true
         - file: ./wasm/WasmLoader.js
           imports:
@@ -9453,6 +9454,7 @@ modules:
             - OptimizeResult
             - LMResult
             - LMOptions
+            - NelderMeadOptions
           reExport: true
           typeOnly: true
         - file: ./fit-scalar.js
@@ -9643,6 +9645,7 @@ modules:
             - SVDOptions
       exports:
         - config
+        - runWithConfig
         - loadWasm
         - isWasmLoaded
         - to
@@ -10024,6 +10027,7 @@ modules:
         - OptimizeResult
         - LMResult
         - LMOptions
+        - NelderMeadOptions
         - FitScalarOptions
         - FitScalarResult
         - GaussianKDEOptions
@@ -10089,6 +10093,7 @@ modules:
         - '* from ./typed/cas.js'
         - '* from ./factories/index.js'
         - config
+        - runWithConfig
         - loadWasm
         - isWasmLoaded
         - to
@@ -10470,6 +10475,7 @@ modules:
         - OptimizeResult
         - LMResult
         - LMOptions
+        - NelderMeadOptions
         - FitScalarOptions
         - FitScalarResult
         - GaussianKDEOptions
@@ -10658,7 +10664,7 @@ modules:
         - cummin
         - cumtrapz
     functions/src/optimization-extra.ts:
-      description: Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,
+      description: Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -10679,6 +10685,7 @@ modules:
         - levenbergMarquardt
       interfaces:
         - OptimizeResult
+        - NelderMeadOptions
         - LMResult
         - LMOptions
       functions:
@@ -13098,6 +13105,7 @@ modules:
         - file: ../core/config.js
           imports:
             - DEFAULT_CONFIG
+            - ConfigOptions
         - file: ./matrix-bridge.js
           imports:
             - MathJSDenseMatrix
@@ -13113,6 +13121,11 @@ modules:
             - BigNumber
       exports:
         - factoryScope
+        - pushConfigOverlay
+        - popConfigOverlay
+      functions:
+        - pushConfigOverlay
+        - popConfigOverlay
       constants:
         - factoryScope
   functions/geometry:
@@ -21301,6 +21314,7 @@ modules:
         - file: ../optimization-extra.js
           imports:
             - levenbergMarquardt
+            - nelderMead
         - file: ../numeric/rational-nullspace.js
           imports:
             - rationalNullspace
@@ -39390,16 +39404,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200869
-  totalExports: 6181
+  totalLinesOfCode: 201016
+  totalExports: 6186
   totalClasses: 59
-  totalInterfaces: 538
-  totalFunctions: 1959
+  totalInterfaces: 539
+  totalFunctions: 1962
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
-  totalReExports: 2617
-  totalTypeOnlyImports: 609
+  totalReExports: 2619
+  totalTypeOnlyImports: 607
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

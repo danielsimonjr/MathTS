@@ -3149,7 +3149,7 @@ function generateWasmPairingMarkdown(p: WasmPairing): string {
   }
   md += `\n> Notes: the \`matrix\` package backend runs the AssemblyScript binary separately from the `;
   md += `typed-API dispatch counted here. After the 2026-07 WASM audit that backend is scoped to `;
-  md += `**SIMD matmul (≥256 elems)** + the **LU/QR/Cholesky/inverse/determinant** decompositions; `;
+  md += `**SIMD matmul via \`backendManager\` (≥256 flop count)**; public \`DenseMatrix.multiply\` and \`lu\`/\`qr\`/\`cholesky\` are JS; \`WASMBackend\` dense LU/QR/Cholesky/inverse/determinant are opt-in only; `;
   md += `element-wise/transpose/reductions and eig/svd run on JS (measured 0.2–6× slower on WASM — `;
   md += `memory-bound or scalar; the eig/svd AS kernels were deleted). The elementwise transcendentals `;
   md += `(abs/sin/cos/tan/exp/log) plus the AS special/poly/sort/signal/interp kernels are the `;

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6181
+    "totalExports": 6186
   },
   "entryPoints": [
     {
@@ -3444,20 +3444,20 @@
           },
           {
             "file": "../config.js",
-            "imports": ["getConfig", "onConfigChange", "MatrixConfig", "OperationType"]
+            "imports": [
+              "DEFAULT_CONFIG",
+              "getConfig",
+              "onConfigChange",
+              "MatrixConfig",
+              "OperationType"
+            ]
           },
           {
             "file": "./register-backends.js",
             "imports": []
           }
         ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-gpu",
-            "directory": "gpu",
-            "imports": ["GPU_MIN_ELEMENTS"]
-          }
-        ],
+        "workspaceDependencies": [],
         "exports": [
           "DEFAULT_EXTENDED_HINTS",
           "backendManager",
@@ -4246,8 +4246,7 @@
         "internalDependencies": [
           {
             "file": "./backends/Backend.js",
-            "imports": ["BackendType"],
-            "typeOnly": true
+            "imports": ["DEFAULT_BACKEND_HINTS", "BackendType"]
           }
         ],
         "workspaceDependencies": [],
@@ -8935,18 +8934,17 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./factories/scope.js",
-            "imports": ["factoryScope"]
+            "file": "./core/config.js",
+            "imports": ["DEFAULT_CONFIG", "ConfigOptions"]
           },
           {
-            "file": "./core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
+            "file": "./factories/scope.js",
+            "imports": ["pushConfigOverlay", "popConfigOverlay"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["config"],
-        "functions": ["config"]
+        "exports": ["runWithConfig", "config"],
+        "functions": ["runWithConfig", "config"]
       },
       "functions/src/descriptive-stats.ts": {
         "description": "Descriptive-statistics composites (Wave A of the domain gap analysis).",
@@ -9280,7 +9278,7 @@
           },
           {
             "file": "./config-api.js",
-            "imports": ["config"],
+            "imports": ["config", "runWithConfig"],
             "reExport": true
           },
           {
@@ -10039,7 +10037,7 @@
           },
           {
             "file": "./optimization-extra.js",
-            "imports": ["OptimizeResult", "LMResult", "LMOptions"],
+            "imports": ["OptimizeResult", "LMResult", "LMOptions", "NelderMeadOptions"],
             "reExport": true,
             "typeOnly": true
           },
@@ -10237,6 +10235,7 @@
         ],
         "exports": [
           "config",
+          "runWithConfig",
           "loadWasm",
           "isWasmLoaded",
           "to",
@@ -10618,6 +10617,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -10684,6 +10684,7 @@
           "* from ./typed/cas.js",
           "* from ./factories/index.js",
           "config",
+          "runWithConfig",
           "loadWasm",
           "isWasmLoaded",
           "to",
@@ -11065,6 +11066,7 @@
           "OptimizeResult",
           "LMResult",
           "LMOptions",
+          "NelderMeadOptions",
           "FitScalarOptions",
           "FitScalarResult",
           "GaussianKDEOptions",
@@ -11268,7 +11270,7 @@
         ]
       },
       "functions/src/optimization-extra.ts": {
-        "description": "Named optimizers (Wave D / remaining). Derivative-free simplex, gradient descent,",
+        "description": "Named optimizers (Wave D / remaining). Derivative-free simplex (`nelderMead`;",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -11289,7 +11291,7 @@
           }
         ],
         "exports": ["nelderMead", "gradientDescent", "levenbergMarquardt"],
-        "interfaces": ["OptimizeResult", "LMResult", "LMOptions"],
+        "interfaces": ["OptimizeResult", "NelderMeadOptions", "LMResult", "LMOptions"],
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
       },
       "functions/src/pareto-front.ts": {
@@ -13991,7 +13993,7 @@
           },
           {
             "file": "../core/config.js",
-            "imports": ["DEFAULT_CONFIG"]
+            "imports": ["DEFAULT_CONFIG", "ConfigOptions"]
           },
           {
             "file": "./matrix-bridge.js",
@@ -14005,7 +14007,8 @@
             "imports": ["mathTyped", "Complex", "Fraction", "BigNumber"]
           }
         ],
-        "exports": ["factoryScope"],
+        "exports": ["factoryScope", "pushConfigOverlay", "popConfigOverlay"],
+        "functions": ["pushConfigOverlay", "popConfigOverlay"],
         "constants": ["factoryScope"]
       }
     },
@@ -22816,7 +22819,7 @@
           },
           {
             "file": "../optimization-extra.js",
-            "imports": ["levenbergMarquardt"]
+            "imports": ["levenbergMarquardt", "nelderMead"]
           },
           {
             "file": "../numeric/rational-nullspace.js",
@@ -41753,16 +41756,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200869,
-    "totalExports": 6181,
+    "totalLinesOfCode": 201016,
+    "totalExports": 6186,
     "totalClasses": 59,
-    "totalInterfaces": 538,
-    "totalFunctions": 1959,
+    "totalInterfaces": 539,
+    "totalFunctions": 1962,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
-    "totalReExports": 2617,
-    "totalTypeOnlyImports": 609,
+    "totalReExports": 2619,
+    "totalTypeOnlyImports": 607,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

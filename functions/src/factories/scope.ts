@@ -7,7 +7,7 @@
 
 import { mathTyped, Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 import { initTypeBridge } from '../typed/typed-bridge.js';
-import { DEFAULT_CONFIG } from '../core/config.js';
+import { DEFAULT_CONFIG, type ConfigOptions } from '../core/config.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix, createMatrixBridge } from './matrix-bridge.js';
 
 // Initialize type bridge so typed-function recognizes native types
@@ -139,13 +139,81 @@ for (const t of extraTypes) {
   }
 }
 
+/** Synchronous config overlay stack for {@link runWithConfig} (see config-api.ts). */
+const configOverlayStack: ConfigOptions[] = [];
+
+/**
+ * Predicted-false on the barrel hot path (no overlay). Accessor getters
+ * branch on this instead of walking a stack.
+ */
+let overlayActive = false;
+
+function activeConfigSource(): ConfigOptions {
+  return overlayActive ? configOverlayStack[configOverlayStack.length - 1]! : DEFAULT_CONFIG;
+}
+
+function writeConfigProp(source: object, prop: string | symbol, value: unknown): void {
+  (source as unknown as Record<string | symbol, unknown>)[prop] = value;
+}
+
+function readLiveConfig(key: string | symbol): unknown {
+  if (!overlayActive) {
+    return (DEFAULT_CONFIG as unknown as Record<string | symbol, unknown>)[key];
+  }
+  const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+  if (Object.hasOwn(overlay, key)) {
+    return (overlay as unknown as Record<string | symbol, unknown>)[key];
+  }
+  return (DEFAULT_CONFIG as unknown as Record<string | symbol, unknown>)[key];
+}
+
+/**
+ * Push/pop helpers used by `runWithConfig` in config-api.ts.
+ * @internal
+ */
+export function pushConfigOverlay(overlay: ConfigOptions): void {
+  configOverlayStack.push(overlay);
+  overlayActive = true;
+}
+
+/** @internal */
+export function popConfigOverlay(): void {
+  configOverlayStack.pop();
+  overlayActive = configOverlayStack.length > 0;
+}
+
+/**
+ * Config object factories close over — reads/writes route through the active
+ * overlay when `runWithConfig` has pushed one, else `DEFAULT_CONFIG`.
+ *
+ * Partial overlays merge with `DEFAULT_CONFIG`: a missing overlay key (e.g.
+ * `runWithConfig({ number: 'Fraction' })` then `config.matrix`) falls back to
+ * the process default. Nested `runWithConfig` calls replace the overlay; they
+ * do not stack-merge keys with the parent overlay.
+ *
+ * Accessors (not a Proxy `get` trap) are the empty-stack hot path: wrapping
+ * this object in a Proxy measured ~3× on `range()` even with no `get` trap.
+ * Known-key assignment uses the setter and writes the active overlay.
+ */
+const configView = {} as ConfigOptions;
+for (const key of Object.keys(DEFAULT_CONFIG) as (keyof ConfigOptions)[]) {
+  Object.defineProperty(configView, key, {
+    enumerable: true,
+    configurable: true,
+    get: () => readLiveConfig(key) as ConfigOptions[typeof key],
+    set: (value: ConfigOptions[typeof key]) => {
+      writeConfigProp(activeConfigSource(), key, value);
+    },
+  });
+}
+
 /**
  * The scope object passed to each factory's assertAndCreate().
  * Keys match the dependency names factories declare.
  */
 export const factoryScope: Record<string, unknown> = {
   typed: mathTyped,
-  config: DEFAULT_CONFIG,
+  config: configView,
 
   // Class constructors (uppercase) — factories use `new BigNumber(...)` etc.
   Complex,

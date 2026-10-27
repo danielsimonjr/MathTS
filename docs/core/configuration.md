@@ -97,10 +97,14 @@ Legacy matrix subset behavior (mathjs v11 and earlier). Default: `false`.
 
 ### Compat `create` / `math.config`
 
-The mathjs-compatible instance exposes `math.config` and applies options to the **shared internal** `DEFAULT_CONFIG`:
+Each mathjs-compatible instance owns its own config object. `create(all, config)` and
+`math.config(partial)` update **that instance only**; they do not write the process-wide
+`DEFAULT_CONFIG` that bare imports from `@danielsimonjr/mathts-functions` read via
+`config()` / `evaluate`.
 
 ```typescript
 import { create, all } from '@danielsimonjr/mathts-compat';
+import { evaluate } from '@danielsimonjr/mathts-functions';
 
 const math = create(all, {
   number: 'BigNumber',
@@ -108,10 +112,14 @@ const math = create(all, {
   predictable: true,
 });
 
-math.config(); // reflects the updated internal config
+math.config().number; // 'BigNumber'
+evaluate('e ^ 2'); // still a JS number (singleton unchanged)
 ```
 
-`create(all, …)` mutates the process-wide internal defaults (`number`, `precision`, `predictable`, etc.). A later `evaluate('e ^ 2')` in the same process may return `BigNumber` if `number` was set to `'BigNumber'`.
+Instance methods run under a synchronous config overlay (`runWithConfig` in
+`@danielsimonjr/mathts-functions`). Overlays are stack-based and do not survive
+`await`; nested barrel calls from inside an instance method see the instance overlay
+until that call returns.
 
 ### Direct imports
 
