@@ -117,9 +117,9 @@ describe('runWithConfig', () => {
   });
 
   it('assignment during an overlay does not define extra keys on DEFAULT_CONFIG', () => {
-    const overlay: { number: string } = { number: 'Fraction' };
+    const overlay: { number: 'Fraction' | 'BigNumber' } = { number: 'Fraction' };
     runWithConfig(overlay, () => {
-      (factoryConfig as { number: string }).number = 'BigNumber';
+      (factoryConfig as { number: 'BigNumber' }).number = 'BigNumber';
       expect(evaluate('1')).toBeInstanceOf(BigNumber);
     });
     expect(overlay.number).toBe('BigNumber');
