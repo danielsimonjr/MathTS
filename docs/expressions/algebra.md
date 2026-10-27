@@ -51,10 +51,19 @@ simplify(f, { x: parse('y + z') }).toString(); // '3 * (y + z)'
 
 `simplify(expr, scope?, options?)` accepts an options object:
 
-| Option           | Type    | Default    | Description                                                                                                         |
-| ---------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------- |
-| `exactFractions` | boolean | `true`     | Prefer exact rationals when a `fraction` helper is wired in simplification (does not rewrite every decimal literal) |
-| `context`        | object  | permissive | Algebraic properties controlling which simplifications apply                                                        |
+| Option           | Type    | Default    | Description                                                                                            |
+| ---------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------ |
+| `exactFractions` | boolean | `true`     | Convert exact decimal constants to rationals when numerator and denominator are below `fractionsLimit` |
+| `fractionsLimit` | number  | `Infinity` | Cap on \|numerator\| and denominator for `exactFractions` (default: no cap)                            |
+| `context`        | object  | permissive | Algebraic properties controlling which simplifications apply                                           |
+
+With `exactFractions: true`, `0.4 * x` becomes a multiply by the exact fraction 2/5:
+
+```typescript
+import { simplify } from '@danielsimonjr/mathts-functions';
+
+simplify('0.4 * x', {}, { exactFractions: true }).toString(); // e.g. 'x * 2 / 5'
+```
 
 **Context example** — prevent commutative simplification:
 
