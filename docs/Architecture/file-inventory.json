@@ -13246,7 +13246,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 37
     },
     {
       "file": "workbook/tests/chart-markup.test.ts",
