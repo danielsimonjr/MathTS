@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1949,
+  "totalFiles": 1950,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1174,
     "test-only": 0,
     "orphan": 0,
-    "test": 688,
+    "test": 689,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1199,
-    "tests": 688,
+    "tests": 689,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -27,7 +27,7 @@
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 548,
+    "@danielsimonjr/mathts-expression": 549,
     "@danielsimonjr/mathts-functions": 820,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -4959,6 +4959,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 35
+    },
+    {
+      "file": "expression/tests/stringSubset-set-clone.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 124
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
