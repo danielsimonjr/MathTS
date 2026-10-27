@@ -324,7 +324,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2397
+      "loc": 2405
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -4223,7 +4223,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 315
+      "loc": 314
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
@@ -4342,14 +4342,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 70
+      "loc": 67
     },
     {
       "file": "expression/src/transform/forEach.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 67
+      "loc": 64
     },
     {
       "file": "expression/src/transform/index.transform.ts",

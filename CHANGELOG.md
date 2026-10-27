@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone batch (expression + autograd):** `RelationalNode` `_toString` / `_toTex` share `renderRelational` (one precedence walk; string joins `' ' + op + ' '`, TeX uses `latexOperators` and `\left(\right)` wraps). `filterTransform` / `forEachTransform` share `prepareTransformArrayAndCallback` for collection and callback compilation (each transform still owns its `filter` / `forEach` call and `createTransformCallback` placement). `TapedTensor.max` / `min` share `scatterArgExtrema` with strict first-wins `better` comparators. Behavior and public names unchanged; oracle tests pin chained relationals, transform predicates, and extrema tie gradients.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
