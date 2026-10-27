@@ -6064,7 +6064,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 660
+      "loc": 665
     },
     {
       "file": "functions/src/linalg-extra.ts",
