@@ -186,18 +186,16 @@ describe('setStringSubset / subset string setter oracle (clone G17 set)', () => 
   });
 
   it('subset(string,set): non-string replacement is rejected by typed dispatch', () => {
+    expect(() => subset('abcd', index(1), 9 as never)).toThrow(TypeError);
     expect(() => subset('abcd', index(1), 9 as never)).toThrow(
-      new TypeError(
-        'Unexpected type of argument in function subset (expected: string, actual: number, index: 2)'
-      )
+      'Unexpected type of argument in function subset (expected: string, actual: number, index: 2)'
     );
   });
 
   it('subset(string,set): 1-element array replacement is rejected by typed dispatch', () => {
+    expect(() => subset('abcd', index(1), ['X'] as never)).toThrow(TypeError);
     expect(() => subset('abcd', index(1), ['X'] as never)).toThrow(
-      new TypeError(
-        'Unexpected type of argument in function subset (expected: string, actual: Array, index: 2)'
-      )
+      'Unexpected type of argument in function subset (expected: string, actual: Array, index: 2)'
     );
   });
 });

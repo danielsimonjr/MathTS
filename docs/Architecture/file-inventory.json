@@ -4993,7 +4993,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 204
+      "loc": 202
     },
     {
       "file": "expression/tests/SymbolNode.test.ts",
