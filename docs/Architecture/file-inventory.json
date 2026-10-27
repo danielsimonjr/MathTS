@@ -6946,7 +6946,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 877
+      "loc": 859
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -10124,7 +10124,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 398
+      "loc": 644
     },
     {
       "file": "functions/tests/scalar-compile.test.ts",

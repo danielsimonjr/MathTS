@@ -25,20 +25,6 @@ const LOWERED_UNARY_RULES: Record<LoweredScalarFn, DualUnaryRule> = {
   abs: DUAL_UNARY_RULES.abs,
 };
 
-const UNARY_IMPL: Record<LoweredScalarFn, (value: number) => number> = {
-  exp: LOWERED_UNARY_RULES.exp.primal,
-  log: LOWERED_UNARY_RULES.log.primal,
-  log10: LOWERED_UNARY_RULES.log10.primal,
-  log2: LOWERED_UNARY_RULES.log2.primal,
-  sin: LOWERED_UNARY_RULES.sin.primal,
-  cos: LOWERED_UNARY_RULES.cos.primal,
-  tan: LOWERED_UNARY_RULES.tan.primal,
-  sinh: LOWERED_UNARY_RULES.sinh.primal,
-  cosh: LOWERED_UNARY_RULES.cosh.primal,
-  tanh: LOWERED_UNARY_RULES.tanh.primal,
-  abs: LOWERED_UNARY_RULES.abs.primal,
-};
-
 type TapeInstr =
   | { readonly tag: 'const'; readonly dest: number; readonly value: number }
   | { readonly tag: 'column'; readonly dest: number; readonly index: number }
@@ -190,8 +176,10 @@ export interface CompiledScalarGradient {
   readonly variables: readonly string[];
   readonly parameters: readonly string[];
   /**
-   * Evaluate every row. Same validity mask as {@link compileScalar}; invalid
-   * rows store `NaN` in `values` and every gradient entry for that row.
+   * Evaluate every row. Invalid rows store `NaN` in `values` and every
+   * gradient entry for that row. The mask matches {@link compileScalar} except
+   * when a consumed `^` partial is not finite (a live child lane of `0^0`, or
+   * `ln` of a negative base with a live exponent): those rows are extra-invalid.
    * Throws {@link ScalarEvalError} for binding mismatches or bad `out` lengths.
    *
    * @example
@@ -242,6 +230,15 @@ function assertNoDuplicateNames(names: readonly string[], messagePrefix: string)
       throw new ScalarEvalError(`${messagePrefix} symbol '${name}' is listed more than once`);
     }
   }
+}
+
+/**
+ * M3 kept `evaluateScalar:` on unbound-symbol / unknown-fn / `^` arity so
+ * `scalar-compile.test.ts` continues to match those strings. Gradient compile
+ * uses `compileScalarGradient:` for the same conditions.
+ */
+function evalStylePrefix(messagePrefix: string): string {
+  return messagePrefix === 'compileScalar:' ? 'evaluateScalar:' : messagePrefix;
 }
 
 function copyRegisterGrad(
@@ -385,21 +382,6 @@ function runRow(
             const base = left;
             const exp = right;
             const val = scratch[instr.dest];
-            if (base === 0 && exp === 0) {
-              let liveLane = false;
-              for (let p = 0; p < nParams; p++) {
-                if (grad[leftBase + p] !== 0 || grad[rightBase + p] !== 0) {
-                  liveLane = true;
-                  break;
-                }
-              }
-              if (liveLane) {
-                valid = false;
-                scratch[instr.dest] = Number.NaN;
-                setRegisterGradNaN(grad, instr.dest, nParams);
-                break;
-              }
-            }
             for (let p = 0; p < nParams; p++) {
               let g = 0;
               const dl = grad[leftBase + p];
@@ -540,7 +522,7 @@ function bindSymbol(ctx: CompileCtx, name: string, dest: number): void {
     }
   }
   throw new ScalarEvalError(
-    `evaluateScalar: symbol '${name}' has no value (not in scope, not a numeric literal).`
+    `${evalStylePrefix(ctx.messagePrefix)} symbol '${name}' has no value (not in scope, not a numeric literal).`
   );
 }
 
@@ -557,9 +539,9 @@ function compileNode(ctx: CompileCtx, node: ScalarNode): number {
       ctx.rootReg = dest;
       return dest;
     case 'call': {
-      if (!Object.prototype.hasOwnProperty.call(UNARY_IMPL, canonical.fn)) {
+      if (!Object.prototype.hasOwnProperty.call(LOWERED_UNARY_RULES, canonical.fn)) {
         throw new ScalarEvalError(
-          `evaluateScalar: unknown scalar function '${String(canonical.fn)}'.`
+          `${evalStylePrefix(ctx.messagePrefix)} unknown scalar function '${String(canonical.fn)}'.`
         );
       }
       const argReg = compileNode(ctx, canonical.arg);
@@ -572,7 +554,7 @@ function compileNode(ctx: CompileCtx, node: ScalarNode): number {
       if (op === '^') {
         if (args.length !== 2) {
           throw new ScalarEvalError(
-            `evaluateScalar: '^' needs exactly 2 args, got ${args.length}.`
+            `${evalStylePrefix(ctx.messagePrefix)} '^' needs exactly 2 args, got ${args.length}.`
           );
         }
         const left = compileNode(ctx, args[0]);

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { MathNode, ScalarNode } from '@danielsimonjr/mathts-expression';
 import { Dual } from '@danielsimonjr/mathts-core';
 import {
@@ -36,6 +36,32 @@ describe('compileScalarGradient', () => {
     expect(() => compileScalarGradient(node, { variables: [], parameters: ['a', 'a'] })).toThrow(
       /compileScalarGradient:.*more than once/
     );
+  });
+
+  it('compile-time errors use the compileScalarGradient prefix', () => {
+    expect(() => compileScalarGradient(scalar.symbol('mystery'), { variables: [] })).toThrow(
+      /compileScalarGradient:.*mystery/
+    );
+    expect(() =>
+      compileScalarGradient(
+        {
+          kind: 'call',
+          fn: 'nope',
+          arg: { kind: 'number', value: 1 },
+        } as unknown as ScalarNode,
+        { variables: [] }
+      )
+    ).toThrow(/compileScalarGradient: unknown scalar function/);
+    expect(() =>
+      compileScalarGradient(
+        {
+          kind: 'op',
+          op: '^',
+          args: [scalar.number(1), scalar.number(2), scalar.number(3)],
+        } as ScalarNode,
+        { variables: [] }
+      )
+    ).toThrow(/compileScalarGradient: '\^' needs exactly 2 args/);
   });
 
   describe('hand closed forms', () => {
@@ -111,31 +137,28 @@ describe('compileScalarGradient', () => {
     const loweredCases: Array<{
       fn: Parameters<typeof scalar.call>[0];
       x: number;
+      primal: (x: number) => number;
       deriv: (x: number, y: number) => number;
     }> = [
-      { fn: 'exp', x: 0.5, deriv: (_x, y) => y },
-      { fn: 'ln', x: 2, deriv: (xv) => 1 / xv },
-      { fn: 'log', x: 100, deriv: (xv) => 1 / (xv * Math.LN10) },
-      { fn: 'log10', x: 1000, deriv: (xv) => 1 / (xv * Math.LN10) },
-      { fn: 'log2', x: 8, deriv: (xv) => 1 / (xv * Math.LN2) },
-      { fn: 'sin', x: 0.3, deriv: (xv) => Math.cos(xv) },
-      { fn: 'cos', x: 0.3, deriv: (xv) => -Math.sin(xv) },
-      { fn: 'tan', x: 0.2, deriv: (xv) => 1 / (Math.cos(xv) * Math.cos(xv)) },
-      { fn: 'sinh', x: 0.4, deriv: (xv) => Math.cosh(xv) },
-      { fn: 'cosh', x: 0.4, deriv: (xv) => Math.sinh(xv) },
-      { fn: 'tanh', x: 0.5, deriv: (_x, y) => 1 - y * y },
+      { fn: 'exp', x: 0.5, primal: Math.exp, deriv: (_x, y) => y },
+      { fn: 'ln', x: 2, primal: Math.log, deriv: (xv) => 1 / xv },
+      { fn: 'log', x: 100, primal: Math.log10, deriv: (xv) => 1 / (xv * Math.LN10) },
+      { fn: 'log10', x: 1000, primal: Math.log10, deriv: (xv) => 1 / (xv * Math.LN10) },
+      { fn: 'log2', x: 8, primal: Math.log2, deriv: (xv) => 1 / (xv * Math.LN2) },
+      { fn: 'sin', x: 0.3, primal: Math.sin, deriv: (xv) => Math.cos(xv) },
+      { fn: 'cos', x: 0.3, primal: Math.cos, deriv: (xv) => -Math.sin(xv) },
+      { fn: 'tan', x: 0.2, primal: Math.tan, deriv: (xv) => 1 / (Math.cos(xv) * Math.cos(xv)) },
+      { fn: 'sinh', x: 0.4, primal: Math.sinh, deriv: (xv) => Math.cosh(xv) },
+      { fn: 'cosh', x: 0.4, primal: Math.cosh, deriv: (xv) => Math.sinh(xv) },
+      { fn: 'tanh', x: 0.5, primal: Math.tanh, deriv: (_x, y) => 1 - y * y },
     ];
 
-    for (const { fn, x, deriv } of loweredCases) {
+    for (const { fn, x, primal, deriv } of loweredCases) {
       it(`lowered ${fn} at x=${x}`, () => {
         const node = scalar.call(fn, scalar.symbol('a'));
         const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
-        const primal = compileScalar(node, { variables: [], parameters: ['a'] }).evaluateRow(
-          [],
-          [x]
-        );
         const { grad } = g.evaluate([], [x]);
-        relClose(grad[0], deriv(x, primal), 1e-12);
+        relClose(grad[0], deriv(x, primal(x)), 1e-12);
       });
     }
 
@@ -265,14 +288,45 @@ describe('compileScalarGradient', () => {
       expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 
+    it('0^0 with live exp lane invalidates row', () => {
+      const node = scalar.op('^', [scalar.number(0), scalar.symbol('a')]);
+      const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
+      const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [0]);
+      expect(m3.valid[0]).toBe(1);
+      expect(m3.values[0]).toBe(1);
+      const m6 = g.evaluate([], [0]);
+      expect(m6.valid[0]).toBe(0);
+      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(Number.isNaN(m6.grad[0])).toBe(true);
+    });
+
+    it('extra-invalid ^ poisons a later + so the parent cannot resurrect', () => {
+      const node = scalar.op('+', [
+        scalar.op('^', [scalar.number(0), scalar.symbol('a')]),
+        scalar.number(1),
+      ]);
+      const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [0]);
+      expect(m3.valid[0]).toBe(1);
+      expect(m3.values[0]).toBe(2);
+      const m6 = compileScalarGradient(node, { variables: [], parameters: ['a'] }).evaluate(
+        [],
+        [0]
+      );
+      expect(m6.valid[0]).toBe(0);
+      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(Number.isNaN(m6.grad[0])).toBe(true);
+    });
+
     it('(-2)^2 with exp parameter: invalid', () => {
       const node = scalar.op('^', [scalar.number(-2), scalar.symbol('a')]);
       const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
       const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [2]);
+      expect(m3.valid[0]).toBe(1);
       expect(m3.values[0]).toBe(4);
       const m6 = g.evaluate([], [2]);
       expect(m6.valid[0]).toBe(0);
       expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 
     it('(-2)^2 with base parameter only: grad -4', () => {
@@ -290,6 +344,93 @@ describe('compileScalarGradient', () => {
       const { valid, grad } = g.evaluate([], [0]);
       expect(valid[0]).toBe(0);
       expect(Number.isNaN(grad[0])).toBe(true);
+    });
+
+    it('log10/log2 of 0 or negative invalidate', () => {
+      for (const [fn, x] of [
+        ['log', 0],
+        ['log10', -1],
+        ['log2', 0],
+        ['ln', -2],
+      ] as const) {
+        const node = scalar.call(fn, scalar.symbol('a'));
+        const m6 = compileScalarGradient(node, { variables: [], parameters: ['a'] }).evaluate(
+          [],
+          [x]
+        );
+        expect(m6.valid[0]).toBe(0);
+        expect(Number.isNaN(m6.values[0])).toBe(true);
+        expect(Number.isNaN(m6.grad[0])).toBe(true);
+      }
+    });
+
+    it('(-8)^(1/3), (-4)^0.5, 0^(-1) already invalid in M3', () => {
+      const cases: Array<{ node: ScalarNode; params: number[] }> = [
+        {
+          node: scalar.op('^', [
+            scalar.number(-8),
+            scalar.op('/', [scalar.number(1), scalar.number(3)]),
+          ]),
+          params: [],
+        },
+        {
+          node: scalar.op('^', [scalar.symbol('a'), scalar.number(1 / 3)]),
+          params: [-8],
+        },
+        {
+          node: scalar.op('^', [scalar.number(-4), scalar.number(0.5)]),
+          params: [],
+        },
+        {
+          node: scalar.op('^', [scalar.number(0), scalar.number(-1)]),
+          params: [],
+        },
+      ];
+      for (const { node, params } of cases) {
+        const options = { variables: [] as string[], parameters: params.length ? ['a'] : [] };
+        const m3 = compileScalar(node, options).evaluate([], params);
+        const m6 = compileScalarGradient(node, options).evaluate([], params);
+        expect(m3.valid[0]).toBe(0);
+        expect(m6.valid[0]).toBe(0);
+        expect(Number.isNaN(m3.values[0])).toBe(true);
+        expect(Number.isNaN(m6.values[0])).toBe(true);
+        if (params.length) expect(Number.isNaN(m6.grad[0])).toBe(true);
+      }
+    });
+
+    it('exp(800), sin(Infinity), /0, +(NaN) invalidate', () => {
+      const expNode = scalar.call('exp', scalar.symbol('a'));
+      const exp6 = compileScalarGradient(expNode, { variables: [], parameters: ['a'] }).evaluate(
+        [],
+        [800]
+      );
+      expect(exp6.valid[0]).toBe(0);
+      expect(Number.isNaN(exp6.grad[0])).toBe(true);
+
+      const sinNode = scalar.call('sin', scalar.symbol('a'));
+      const sin6 = compileScalarGradient(sinNode, { variables: [], parameters: ['a'] }).evaluate(
+        [],
+        [Number.POSITIVE_INFINITY]
+      );
+      expect(sin6.valid[0]).toBe(0);
+      expect(Number.isNaN(sin6.grad[0])).toBe(true);
+
+      const divNode = scalar.op('/', [scalar.symbol('a'), scalar.number(0)]);
+      const div6 = compileScalarGradient(divNode, { variables: [], parameters: ['a'] }).evaluate(
+        [],
+        [1]
+      );
+      expect(div6.valid[0]).toBe(0);
+      expect(Number.isNaN(div6.grad[0])).toBe(true);
+
+      const plusNode = scalar.op('+', [scalar.symbol('a')]);
+      const plus6 = compileScalarGradient(plusNode, { variables: [], parameters: ['a'] }).evaluate(
+        [],
+        [Number.NaN]
+      );
+      expect(plus6.valid[0]).toBe(0);
+      expect(Number.isNaN(plus6.values[0])).toBe(true);
+      expect(Number.isNaN(plus6.grad[0])).toBe(true);
     });
 
     it('bare parameter NaN: valid value, grad seed 1', () => {
@@ -345,6 +486,26 @@ describe('compileScalarGradient', () => {
       expect(outV[0]).toBe(12);
       expect(outG[0]).toBe(4);
     });
+
+    it('throws on out values/grad length mismatch', () => {
+      const node = scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]);
+      const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a'] });
+      const cols = [new Float64Array([4])];
+      expect(() => g.evaluate(cols, [3], { values: new Float64Array(2) })).toThrow(
+        /out values length/
+      );
+      expect(() => g.evaluate(cols, [3], { grad: new Float64Array(2) })).toThrow(/out grad length/);
+    });
+
+    it('n === 0 keeps allValid true', () => {
+      const node = scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]);
+      const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a'] });
+      const { values, valid, allValid, grad } = g.evaluate([new Float64Array(0)], [2]);
+      expect(values.length).toBe(0);
+      expect(valid.length).toBe(0);
+      expect(grad.length).toBe(0);
+      expect(allValid).toBe(true);
+    });
   });
 
   describe('bit-identity with compileScalar (non-EXTRA rows)', () => {
@@ -354,7 +515,6 @@ describe('compileScalarGradient', () => {
       options: { variables: string[]; parameters?: string[] };
       columns: Float64Array[];
       params?: number[];
-      extra?: boolean;
     }> = [
       {
         name: 'ax+b',
@@ -367,6 +527,34 @@ describe('compileScalarGradient', () => {
         params: [2, -1],
       },
       {
+        name: 'a*x*x',
+        node: scalar.op('*', [scalar.symbol('a'), scalar.symbol('x'), scalar.symbol('x')]),
+        options: { variables: ['x'], parameters: ['a'] },
+        columns: [new Float64Array([4])],
+        params: [2],
+      },
+      {
+        name: 'exp(a*x)',
+        node: scalar.call('exp', scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')])),
+        options: { variables: ['x'], parameters: ['a'] },
+        columns: [new Float64Array([2])],
+        params: [1.5],
+      },
+      {
+        name: 'sin(a)',
+        node: scalar.call('sin', scalar.symbol('a')),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [0.7],
+      },
+      {
+        name: 'a^2 at 3',
+        node: scalar.op('^', [scalar.symbol('a'), scalar.number(2)]),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [3],
+      },
+      {
         name: 'power smooth (-2)^2 base param',
         node: scalar.op('^', [scalar.symbol('a'), scalar.number(2)]),
         options: { variables: [], parameters: ['a'] },
@@ -374,10 +562,71 @@ describe('compileScalarGradient', () => {
         params: [-2],
       },
       {
+        name: '2^a',
+        node: scalar.op('^', [scalar.number(2), scalar.symbol('a')]),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [3],
+      },
+      {
+        name: '(a+x)/b',
+        node: scalar.op('/', [
+          scalar.op('+', [scalar.symbol('a'), scalar.symbol('x')]),
+          scalar.symbol('b'),
+        ]),
+        options: { variables: ['x'], parameters: ['a', 'b'] },
+        columns: [new Float64Array([2])],
+        params: [1, 3],
+      },
+      {
+        name: '0^0 constants',
+        node: scalar.op('^', [scalar.number(0), scalar.number(0)]),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [1],
+      },
+      {
+        name: 'abs(-3)',
+        node: scalar.call('abs', scalar.symbol('a')),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [-3],
+      },
+      {
+        name: 'abs(0)',
+        node: scalar.call('abs', scalar.symbol('a')),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [0],
+      },
+      {
+        name: 'bare parameter NaN',
+        node: scalar.symbol('a'),
+        options: { variables: [], parameters: ['a'] },
+        columns: [],
+        params: [Number.NaN],
+      },
+      {
         name: 'ln invalid at 0',
         node: scalar.call('ln', scalar.symbol('x')),
         options: { variables: ['x'] },
         columns: [new Float64Array([0])],
+      },
+      {
+        name: '(-8)^(1/3) already NaN',
+        node: scalar.op('^', [
+          scalar.number(-8),
+          scalar.op('/', [scalar.number(1), scalar.number(3)]),
+        ]),
+        options: { variables: [] },
+        columns: [],
+      },
+      {
+        name: 'nParams===0 x*x',
+        node: scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
+        options: { variables: ['x'], parameters: [] },
+        columns: [new Float64Array([3])],
+        params: [],
       },
     ];
 
