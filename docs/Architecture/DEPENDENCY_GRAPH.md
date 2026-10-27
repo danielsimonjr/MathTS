@@ -9744,6 +9744,7 @@ graph LR
 | ------------------------------------ | --------------------------------------- | ------ |
 | `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
+| `./parallel-map.js`                  | `mapUnaryFloat64`                       | Import |
 
 **Exports:**
 
@@ -10275,13 +10276,19 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                          | Import        |
-| -------------------------------- | ------------- |
-| `@danielsimonjr/mathts-parallel` | `computePool` |
+| Package                          | Import                |
+| -------------------------------- | --------------------- |
+| `@danielsimonjr/mathts-parallel` | `computePool, OpName` |
+
+**Internal Dependencies:**
+
+| File                                 | Imports                                       | Type   |
+| ------------------------------------ | --------------------------------------------- | ------ |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch, WasmElementwiseOp` | Import |
 
 **Exports:**
 
-- Functions: `kernelSource`, `mapArray`
+- Functions: `kernelSource`, `mapArray`, `mapUnaryFloat64`, `mapBinaryF64`
 
 ---
 
@@ -10372,6 +10379,7 @@ graph LR
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
 | `../signal/fft-core-f64.js`     | `fftCoreFloat64`                                                                                                                           | Import |
 | `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import |
+| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import |
 | `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import |
 | `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                         | Import |
 
@@ -10465,6 +10473,7 @@ graph LR
 | File                                 | Imports                    | Type   |
 | ------------------------------------ | -------------------------- | ------ |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
+| `./parallel-map.js`                  | `mapUnaryFloat64`          | Import |
 
 **Exports:**
 
@@ -18754,12 +18763,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200832 |
-| Total Exports           | 6182   |
+| Total Lines of Code     | 200692 |
+| Total Exports           | 6184   |
 | Total Re-exports        | 2618   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1959   |
+| Total Functions         | 1961   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 609    |

@@ -38,6 +38,7 @@ import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridg
 
 import { computePool, ComputePool } from '@danielsimonjr/mathts-parallel';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
+import { mapUnaryFloat64 } from './parallel-map.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -532,15 +533,8 @@ export const sign = mathTyped('sign', {
   },
 
   // Parallel array sign
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.sign(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.sign(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.sign, '(x) => Math.sign(x)'),
 });
 
 // =============================================================================
@@ -700,15 +694,8 @@ export const cbrt = mathTyped('cbrt', {
   },
 
   // Parallel array cbrt
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.cbrt(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.cbrt(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.cbrt, '(x) => Math.cbrt(x)'),
 });
 
 /**
@@ -770,17 +757,8 @@ export const log10 = mathTyped('log10', {
   BigNumber: (a: BigNumber): BigNumber => a.log10(),
 
   // Parallel array log10
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('log10', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.log10(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.log10(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.log10, '(x) => Math.log10(x)', 'log10'),
 });
 
 /**
@@ -792,17 +770,8 @@ export const log2 = mathTyped('log2', {
   BigNumber: (a: BigNumber): BigNumber => a.log2(),
 
   // Parallel array log2
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('log2', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.log2(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.log2(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.log2, '(x) => Math.log2(x)', 'log2'),
 });
 
 /**
@@ -812,17 +781,8 @@ export const log1p = mathTyped('log1p', {
   number: (a: f64): f64 => Math.log1p(a),
 
   // Parallel array log1p
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('log1p', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.log1p(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.log1p(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.log1p, '(x) => Math.log1p(x)', 'log1p'),
 });
 
 /**
@@ -832,17 +792,8 @@ export const expm1 = mathTyped('expm1', {
   number: (a: f64): f64 => Math.expm1(a),
 
   // Parallel array expm1
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('expm1', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.expm1(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.expm1(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.expm1, '(x) => Math.expm1(x)', 'expm1'),
 });
 
 // =============================================================================
@@ -866,15 +817,8 @@ export const round = mathTyped('round', {
   },
 
   // Parallel array round (round to nearest integer, matching the 'number' overload)
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.round(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.round(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.round, '(x) => Math.round(x)'),
 });
 
 /**
@@ -887,15 +831,8 @@ export const floor = mathTyped('floor', {
   Complex: (a: Complex): Complex => new Complex(Math.floor(a.re), Math.floor(a.im)),
 
   // Parallel array floor
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.floor(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.floor(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.floor, '(x) => Math.floor(x)'),
 });
 
 /**
@@ -908,15 +845,8 @@ export const ceil = mathTyped('ceil', {
   Complex: (a: Complex): Complex => new Complex(Math.ceil(a.re), Math.ceil(a.im)),
 
   // Parallel array ceil
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.ceil(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.ceil(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.ceil, '(x) => Math.ceil(x)'),
 });
 
 /**
@@ -931,15 +861,8 @@ export const fix = mathTyped('fix', {
   Complex: (a: Complex): Complex => coreFix(a) as Complex,
 
   // Parallel array fix (truncate toward zero, matching the 'number' overload)
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.trunc(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.trunc(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.trunc, '(x) => Math.trunc(x)'),
 });
 
 // =============================================================================
@@ -1194,17 +1117,8 @@ export const sinh = mathTyped('sinh', {
   BigNumber: (a: BigNumber): BigNumber => a.sinh(),
 
   // Parallel array sinh
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('sinh', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.sinh(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.sinh(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.sinh, '(x) => Math.sinh(x)', 'sinh'),
 });
 
 /**
@@ -1216,15 +1130,8 @@ export const cosh = mathTyped('cosh', {
   BigNumber: (a: BigNumber): BigNumber => a.cosh(),
 
   // Parallel array cosh
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.cosh(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.cosh(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.cosh, '(x) => Math.cosh(x)'),
 });
 
 /**
@@ -1236,17 +1143,8 @@ export const tanh = mathTyped('tanh', {
   BigNumber: (a: BigNumber): BigNumber => a.tanh(),
 
   // Parallel array tanh
-  Float64Array: async (a: Float64Array): Promise<Float64Array> => {
-    const wasm = elementwiseUnaryDispatch('tanh', a);
-    if (wasm) return wasm;
-    if (computePool.shouldParallelize(a.length)) {
-      const r = await computePool.applyKernel(a, '(x) => Math.tanh(x)');
-      return r.result;
-    }
-    const out = new Float64Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = Math.tanh(a[i]);
-    return out;
-  },
+  Float64Array: (a: Float64Array): Promise<Float64Array> =>
+    mapUnaryFloat64(a, Math.tanh, '(x) => Math.tanh(x)', 'tanh'),
 });
 
 // =============================================================================

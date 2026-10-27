@@ -3,6 +3,9 @@
  *
  * `kernelSource` and `mapArray` were previously duplicated verbatim in
  * `typed/special.ts` and `typed/distributions.ts`; they now live here once.
+ * `mapUnaryFloat64` / `mapBinaryF64` centralize the shared sequential/worker
+ * loops for unary and binary `Float64Array` typed overloads in arithmetic,
+ * trigonometry, and signal (FFT magnitude/power).
  *
  * Both helpers run on the MAIN THREAD (they build the kernel source string and
  * dispatch it), so they may freely import — they are never themselves
@@ -12,7 +15,11 @@
  * @packageDocumentation
  */
 
-import { computePool } from '@danielsimonjr/mathts-parallel';
+import { computePool, type OpName } from '@danielsimonjr/mathts-parallel';
+import {
+  elementwiseUnaryDispatch,
+  type WasmElementwiseOp,
+} from '../wasm/elementwise/wasm-bridge.js';
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -41,5 +48,43 @@ export async function mapArray(
   }
   const out = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) out[i] = scalar(x[i]);
+  return out;
+}
+
+/**
+ * Unary Float64Array map shared by typed arithmetic/trigonometry overloads.
+ * Checks an optional WASM elementwise op once, then delegates to {@link mapArray}.
+ * Worker kernels must stay byte-identical to the pre-merge `applyKernel` strings.
+ */
+export async function mapUnaryFloat64(
+  a: Float64Array,
+  scalar: (v: f64) => f64,
+  kernel: string,
+  wasmOp?: WasmElementwiseOp
+): Promise<Float64Array> {
+  if (wasmOp !== undefined) {
+    const wasm = elementwiseUnaryDispatch(wasmOp, a);
+    if (wasm) return wasm;
+  }
+  return mapArray(a, scalar, () => kernel);
+}
+
+/**
+ * Binary Float64Array map (e.g. FFT magnitude/power). Optional `parallelOp` selects
+ * the per-op threshold (defaults to the global `thresholdElements` gate).
+ */
+export async function mapBinaryF64(
+  a: Float64Array,
+  b: Float64Array,
+  scalar: (x: f64, y: f64) => f64,
+  kernel: string,
+  parallelOp?: OpName
+): Promise<Float64Array> {
+  if (computePool.shouldParallelize(a.length, parallelOp)) {
+    const r = await computePool.applyKernel2(a, b, kernel);
+    return r.result;
+  }
+  const out = new Float64Array(a.length);
+  for (let i = 0; i < a.length; i++) out[i] = scalar(a[i], b[i]);
   return out;
 }

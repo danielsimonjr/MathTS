@@ -7814,7 +7814,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1713
+      "loc": 1611
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -8003,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 46
+      "loc": 91
     },
     {
       "file": "functions/src/typed/polynomial-ideal.ts",
@@ -8038,7 +8038,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1501
+      "loc": 1490
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -8066,7 +8066,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 392
+      "loc": 320
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -10656,7 +10656,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 189
+      "loc": 179
     },
     {
       "file": "functions/tests/unit-characterization.test.ts",

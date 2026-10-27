@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6182
+    "totalExports": 6184
   },
   "entryPoints": [
     {
@@ -21041,6 +21041,10 @@
           {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch"]
+          },
+          {
+            "file": "./parallel-map.js",
+            "imports": ["mapUnaryFloat64"]
           }
         ],
         "workspaceDependencies": [
@@ -23012,16 +23016,21 @@
         "description": "Shared parallel array-evaluation helpers for the typed math surfaces.",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/elementwise/wasm-bridge.js",
+            "imports": ["elementwiseUnaryDispatch", "WasmElementwiseOp"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-parallel",
             "directory": "parallel",
-            "imports": ["computePool"]
+            "imports": ["computePool", "OpName"]
           }
         ],
-        "exports": ["kernelSource", "mapArray"],
-        "functions": ["kernelSource", "mapArray"]
+        "exports": ["kernelSource", "mapArray", "mapUnaryFloat64", "mapBinaryF64"],
+        "functions": ["kernelSource", "mapArray", "mapUnaryFloat64", "mapBinaryF64"]
       },
       "functions/src/typed/polynomial-ideal.ts": {
         "description": "Exact multivariate polynomial arithmetic + Buchberger's algorithm (B-5).",
@@ -23191,6 +23200,10 @@
           {
             "file": "../gpu/fft-gpu.js",
             "imports": ["fftGpuDispatch"]
+          },
+          {
+            "file": "./parallel-map.js",
+            "imports": ["mapBinaryF64"]
           },
           {
             "file": "../wasm/signal/wasm-bridge.js",
@@ -23599,6 +23612,10 @@
           {
             "file": "../wasm/elementwise/wasm-bridge.js",
             "imports": ["elementwiseUnaryDispatch"]
+          },
+          {
+            "file": "./parallel-map.js",
+            "imports": ["mapUnaryFloat64"]
           }
         ],
         "workspaceDependencies": [
@@ -41755,11 +41772,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200832,
-    "totalExports": 6182,
+    "totalLinesOfCode": 200692,
+    "totalExports": 6184,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1959,
+    "totalFunctions": 1961,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
