@@ -27,12 +27,28 @@ describe('a t-distribution p-value resolves the far tail', () => {
     expect(r.pValue).toBeGreaterThan(0);
     expect(r.pValue).toBeLessThan(1e-20);
     const lr = linregress(x, y);
+    // Wrapper shares slope inference with linearRegression (studentTTwoSidedP).
+    expect(lr.pValue).toBe(r.pValue);
+    expect(lr.slope).toBe(r.slope);
+    expect(lr.intercept).toBe(r.intercept);
+    expect(lr.rValue).toBe(r.rValue);
+    expect(lr.stdErr).toBe(r.stdErr);
     expect(lr.pValue).toBeGreaterThan(0);
     expect(lr.pValue).toBeLessThan(1e-20);
     // Two-sided p of |t| with ν degrees of freedom is the regularized incomplete beta
-    // I_{ν/(ν+t²)}(ν/2, 1/2); at t = 1, ν = 1 (Cauchy) that is exactly 1/2.
-    const t1 = linearRegression([0, 1, 2], [0, 1, 0]);
-    expect(t1.pValue).toBeCloseTo(1, 12); // slope 0, t = 0 → p = 1
+    // I_{ν/(ν+t²)}(ν/2, 1/2). For this (x, y), ν = 6, t ≈ 415693.92587780085, so
+    // x = ν/(ν+t²) ≈ 3.47219328695e-11. Independent oracles all give
+    // 1.30816251668737e-32: scipy.special.betainc(3, 0.5, x), 2*scipy.stats.t.sf(|t|, 6),
+    // and mpmath.betainc(3, 0.5, 0, x, regularized=True). scipy.stats.linregress reports
+    // 1.3081704512567805e-32 (relative ~6e-6; its t differs in the 8th digit because
+    // it does not use pairwise sums). The CDF form 2*(1-studentTCDF(|t|,ν)) flushes to 0.
+    expect(Math.abs(lr.pValue / 1.30816251668737e-32 - 1)).toBeLessThan(1e-12);
+    // ν = 1 (Cauchy): I_{1/(1+t²)}(1/2, 1/2) = (2/π) arctan(1/|t|). At t = 1 that is 1/2.
+    // x = [0,1,2], y = [0, 1+√3, 2] has slope 1, stderr 1, t = 1, df = 1.
+    const cauchy = linregress([0, 1, 2], [0, 1 + Math.sqrt(3), 2]);
+    expect(cauchy.pValue).toBeCloseTo(0.5, 12);
+    const t0 = linearRegression([0, 1, 2], [0, 1, 0]);
+    expect(t0.pValue).toBeCloseTo(1, 12); // slope 0, t = 0 → p = 1
   });
 
   it('ols: the same tail, and the coefficient p-values are in (0, 1)', () => {
