@@ -76,9 +76,9 @@ touches. Every milestone and every sprint has a Definition of Done (§6).
    is Sprint 2R. Leave §6 B9 for M5, M6, M7 and M8 unchecked until a review is recorded.
 2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
    ticked below). Do not tick §6 B9 for M1, M3 or M4.
-3. **Phase 2 (M6–M8) is complete.** Next is Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge,
-   `linearRegression`/`linregress`, `numericRealRoots`; LM/`svds`/`matMul` already moved
-   into Sprint 1R).
+3. **Phase 2 (M6–M8) is complete.** Next is Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge;
+   `linearRegression`/`linregress` and `numericRealRoots` consolidation done in #423; LM/`svds`/`matMul`
+   already moved into Sprint 1R).
 
 ---
 
@@ -598,8 +598,8 @@ Items 1–2 are **PR-RNG (#415)**; log-gamma, the retired erf, the nested-array 
 copies, the two Levenberg–Marquardt bodies, and `polymul`/`polyMulJS` were pulled
 forward into **PR-SPECIAL (#418)**, **PR-MATMUL (#417)**, **PR-LM (#416)**, and
 **PR-POLY (#412)**. Items 3–6 (regex, export-index gate, architecture prose, M3
-benchmark) are done (#435, #437, #438, #434). Sprint 2R's ODE/BVP/DAE Jacobians, Nelder–Mead merge,
-`linearRegression`/`linregress`, and `numericRealRoots` stay open.
+benchmark) are done (#435, #437, #438, #434). Sprint 2R's ODE/BVP/DAE Jacobians and Nelder–Mead merge stay open; `linearRegression`/`linregress`
+and `numericRealRoots` consolidation is done (#423).
 
 **Status (2026-10-24).** Merged: PR-POLY (#412), PR-SIDIM (#414, D-2: `SiDimensionVector`
 exponents are `core` `Fraction`s), PR-RNG (#415: `mulberry32`, `boxMuller` and
@@ -867,8 +867,8 @@ export function numericallyEquivalent(
 
 The two Levenberg–Marquardt bodies, `svds` `norm2`, nested-array `matMul` copies,
 log-gamma, and the retired erf were pulled forward into **PR-LM (#416)**, **PR-MATMUL
-(#417)**, and **PR-SPECIAL (#418)** and are done. Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead
-merge, `linearRegression`/`linregress`, and `numericRealRoots`.
+(#417)**, and **PR-SPECIAL (#418)** and are done. Remaining open: ODE/BVP/DAE Jacobians, `ols` `pairwiseSum`, Nelder–Mead merge.
+`linearRegression`/`linregress` and `numericRealRoots` consolidation done (#423).
 
 - **Scope:** M7 and M8 fit and compare numbers, so the numerics under them must have
   one correct implementation each.
@@ -895,9 +895,9 @@ merge, `linearRegression`/`linregress`, and `numericRealRoots`.
      NaN-for-negative contract (documented; not delegated).
   5. **Retired erf** (I-3). **Done (#418).** Hypothesis CDF and the KS kernel use
      `erfcSelfContained` / `erfcScalar`.
-  6. **Regression wrappers and root finding** (I-7). Make `linearRegression` a wrapper
-     around `linregress` (or the reverse) after a p-value parity pin; route
-     `numericRealRoots` (`functions/src/typed/cas.ts:1117`) through `findRoot`.
+  6. **Regression wrappers and root finding** (I-7). **Done (#423).** `linregress` wraps
+     `linearRegression` (p-value parity via `studentTTwoSidedP`; far-tail fix); `numericRealRoots`
+     refines brackets with `findRoot`; workerpool FFT header points at `fft-core-f64.ts`.
   7. **Two public Nelder–Mead implementations** (found while reviewing this roadmap; not
      in the audit). `nelderMead` (`functions/src/optimization-extra.ts:26`) and
      `minimize` (`functions/src/typed/numeric.ts:264`) both implement the downhill
