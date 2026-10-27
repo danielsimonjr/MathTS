@@ -232,7 +232,11 @@ export function chunkArray, calculateOptimalChunks, mergeFloat64Chunks, dispatch
 ```
 
 Depends on `workerpool` and `core` (core only for stable numeric primitives — still **not** `matrix`). The
-`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it.
+`WorkerPool` timeout/replacement plumbing is a security invariant — do not remove it. Tensordot walks
+`forEachMultiIndex` from workerpool (no local `_forEachIndex`). `dot` / `distance` share `gatedBinary`
+(`pairwiseDot` / `scaledDistance` sequential; worker methods parallel); `bitAnd` / `bitOr` / `bitXor`
+share `bitwiseBinary`; shifts share `bitwiseShift` (scalar vs array split once). Each helper passes the
+op name into `shouldParallelize` so per-op `'never'` entries govern.
 
 ---
 
@@ -249,6 +253,10 @@ special functions. The largest package (478 src files).
 //   typed/       parallel-first typed implementations (arithmetic, trigonometry, statistics, signal, cas)
 //   factories/   activated mathjs-derived factory functions (algebra, type, utils, plain, …)
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
+//                bridges/common.ts: asReadReturned / withAsTyped (f64 id 5, 8 B; i32 id 6, 4 B;
+//                finally asUnpin + heap_reset). poly chebBasisRow / legendreBasisRow also
+//                back the JS chebyshevFit / legendreFit paths. sort indexDispatch keys
+//                policy by AS export name (argsort_f64 / rank_f64).
 
 // Representative domains (each a src subtree under functions/src/):
 //   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte · hermiteCubic …
@@ -262,6 +270,13 @@ special functions. The largest package (478 src files).
 
 Compiles under `strict: true`; ships its `.d.ts` tree via `tsc -p tsconfig.dts.json` (rollup-dts can't bundle
 the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
+
+Sprint 2R clone-merge batch 4 keeps the public names `mapSlices`, `matrixFromColumns` /
+`matrixFromRows`, factory `max` / `min`, factory and typed `print`, local `Decimal.max` /
+`Decimal.min`, `ImmutableDenseMatrix.min` / `.max`, and `Index.min` / `.max`. The shared
+bodies are core `_switch` (2-D transpose), `matrixFromVectorList` / `vectorLength`,
+`reduceExtreme` (typed `larger` / `smaller`), `fillPrintTemplate`, `decimalExtreme`,
+`_extreme` (cache slot + `smaller` argument order), and `_ends`.
 
 ---
 
@@ -416,5 +431,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2027  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8117  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2033  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8125  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

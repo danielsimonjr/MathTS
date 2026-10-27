@@ -865,30 +865,39 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
   // ---- AS managed runtime (header pointers) ------------------------------
 
   private allocateAsFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
-    const byteLength = length * 8;
-
-    // Try to recycle a released pooled block that is large enough.
-    if (byteLength <= this.poolSizeThreshold) {
-      const recycled = this.acquireFromAsPool(module, this.float64Pool, byteLength);
-      if (recycled) {
-        const array = new Float64Array(module.memory.buffer, recycled.dataPtr, length);
-        return {
-          ptr: recycled.ptr,
-          dataPtr: recycled.dataPtr,
-          array,
-          length,
-        };
+    return this.allocateAs(
+      module,
+      length,
+      this.float64Pool,
+      (m, len) => this.makeAsFloat64(m, len),
+      {
+        bytes: 8,
+        Ctor: Float64Array,
       }
-    }
-    return this.makeAsFloat64(module, length);
+    );
   }
 
   private allocateAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
-    const byteLength = length * 4;
+    return this.allocateAs(module, length, this.int32Pool, (m, len) => this.makeAsInt32(m, len), {
+      bytes: 4,
+      Ctor: Int32Array,
+    });
+  }
+
+  private allocateAs<T extends Float64Array | Int32Array>(
+    module: WasmModule,
+    length: number,
+    pool: PoolEntry[],
+    make: (module: WasmModule, length: number) => Allocation<T>,
+    opts: { bytes: number; Ctor: Float64ArrayConstructor | Int32ArrayConstructor }
+  ): Allocation<T> {
+    const byteLength = length * opts.bytes;
+
+    // Try to recycle a released pooled block that is large enough.
     if (byteLength <= this.poolSizeThreshold) {
-      const recycled = this.acquireFromAsPool(module, this.int32Pool, byteLength);
+      const recycled = this.acquireFromAsPool(module, pool, byteLength);
       if (recycled) {
-        const array = new Int32Array(module.memory.buffer, recycled.dataPtr, length);
+        const array = new opts.Ctor(module.memory.buffer, recycled.dataPtr, length) as T;
         return {
           ptr: recycled.ptr,
           dataPtr: recycled.dataPtr,
@@ -897,35 +906,46 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
         };
       }
     }
-    return this.makeAsInt32(module, length);
+    return make(module, length);
   }
 
   private makeAsFloat64(module: WasmModule, length: number): Allocation<Float64Array> {
-    const byteLength = length * 8;
+    return this.makeAs(module, length, this.float64Pool, {
+      bytes: 8,
+      typeId: AS_ID_FLOAT64_ARRAY,
+      Ctor: Float64Array,
+    });
+  }
+
+  private makeAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
+    return this.makeAs(module, length, this.int32Pool, {
+      bytes: 4,
+      typeId: AS_ID_INT32_ARRAY,
+      Ctor: Int32Array,
+    });
+  }
+
+  private makeAs<T extends Float64Array | Int32Array>(
+    module: WasmModule,
+    length: number,
+    pool: PoolEntry[],
+    opts: {
+      bytes: number;
+      typeId: number;
+      Ctor: Float64ArrayConstructor | Int32ArrayConstructor;
+    }
+  ): Allocation<T> {
+    const byteLength = length * opts.bytes;
     const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_FLOAT64_ARRAY) >>> 0;
+    const headerPtr = module.__new(AS_HEADER_BYTES, opts.typeId) >>> 0;
     module.__pin(headerPtr);
     // Write header: [dataStart, dataStart, byteLength] (little-endian u32s).
     const dv = new DataView(module.memory.buffer);
     dv.setUint32(headerPtr + 0, bufferPtr, true);
     dv.setUint32(headerPtr + 4, bufferPtr, true);
     dv.setUint32(headerPtr + 8, byteLength, true);
-    const array = new Float64Array(module.memory.buffer, bufferPtr, length);
-    this.track(this.float64Pool, headerPtr, bufferPtr, byteLength);
-    return { ptr: headerPtr, dataPtr: bufferPtr, array, length };
-  }
-
-  private makeAsInt32(module: WasmModule, length: number): Allocation<Int32Array> {
-    const byteLength = length * 4;
-    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-    const headerPtr = module.__new(AS_HEADER_BYTES, AS_ID_INT32_ARRAY) >>> 0;
-    module.__pin(headerPtr);
-    const dv = new DataView(module.memory.buffer);
-    dv.setUint32(headerPtr + 0, bufferPtr, true);
-    dv.setUint32(headerPtr + 4, bufferPtr, true);
-    dv.setUint32(headerPtr + 8, byteLength, true);
-    const array = new Int32Array(module.memory.buffer, bufferPtr, length);
-    this.track(this.int32Pool, headerPtr, bufferPtr, byteLength);
+    const array = new opts.Ctor(module.memory.buffer, bufferPtr, length) as T;
+    this.track(pool, headerPtr, bufferPtr, byteLength);
     return { ptr: headerPtr, dataPtr: bufferPtr, array, length };
   }
 

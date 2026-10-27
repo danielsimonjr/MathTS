@@ -119,6 +119,10 @@ active graph reachable from `functions/src/index.ts`:
 
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. They are edited like any other source.
+Clone-merge batch 4 (Sprint 2R) shares internals across those factories without
+changing public names: `mapSlices` calls core `_switch`; `matrixFromColumns` /
+`matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` /
+`min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`.
 
 `FunctionRegistry` stores factory registrations, `createFactory` resolves
 dependencies, and the `math` singleton provides the fully configured instance.
@@ -205,7 +209,10 @@ verified to <1e-9 vs mpmath for the special-function kernels (see
   pool, and handles allocation/deallocation. It uses the AssemblyScript managed
   runtime: buffers are allocated via `__new(byteLength, id)` and typed-array
   exports take a 12-byte header pointer; callers receive an opaque `Allocation`
-  handle so they need not do pointer arithmetic.
+  handle so they need not do pointer arithmetic. The Int32 runtime type id
+  passed to `__new` is 4 here (mirrored from `assembly/build/mathts.js`) and 6
+  in `WASMBackend.ts`; Float64 is 5 in both. The two files do not share an alloc
+  helper, so those ids are not reconciled.
 - **`matrix/src/backends/WASMBackend.ts`**: The sole WASM matrix backend. It
   decides JS vs. WASM per operation (manager multiply uses flop count ≥256 from
   `DEFAULT_CONFIG`; `WASMBackend.multiply` also requires stored-element count ≥100)
@@ -378,7 +385,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2027  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2033  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

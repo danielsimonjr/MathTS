@@ -1,6 +1,6 @@
-import { containsCollections, deepForEach, reduce } from '../utils/collection.js';
+import { containsCollections, reduce } from '../utils/collection.js';
+import { reduceExtreme } from './extreme.js';
 import { factory } from '../utils/factory.js';
-import { safeNumberType } from '../utils/number.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -106,30 +106,11 @@ export const createMin = /* #__PURE__ */ factory(
      * @private
      */
     function _min(array: unknown[] | MatrixType): unknown {
-      let min: unknown;
-
-      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
-        try {
-          if (mathIsNaN(value)) {
-            min = value;
-          } else if (min === undefined || smaller(value, min)) {
-            min = value;
-          }
-        } catch (err) {
-          throw improveErrorMessage(err, 'min', value);
-        }
+      return reduceExtreme(array, smaller as (value: unknown, best: unknown) => unknown, 'min', {
+        isNaN: mathIsNaN,
+        numeric,
+        config,
       });
-
-      if (min === undefined) {
-        throw new Error('Cannot calculate min of an empty array');
-      }
-
-      // make sure returning numeric value: parse a string into a numeric value
-      if (typeof min === 'string') {
-        min = numeric(min, safeNumberType(min, config));
-      }
-
-      return min;
     }
   }
 );

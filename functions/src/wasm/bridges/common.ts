@@ -207,23 +207,81 @@ function asUnpin(mod: AsRuntime, a: AsAlloc): void {
 }
 
 /**
+ * Copy a typed array RETURNED by an AS managed kernel (a header pointer) into a
+ * fresh JS typed array. `shift` is the log2 element size (3 for f64, 2 for i32).
+ */
+export function asReadReturned<T extends Float64Array | Int32Array>(
+  mod: RawWasm,
+  headerPtr: number,
+  Ctor: typeof Float64Array | typeof Int32Array,
+  shift: number
+): T {
+  const dv = new DataView(mod.memory.buffer);
+  const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
+  const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
+  const len = byteLength >>> shift;
+  const view = new Ctor(mod.memory.buffer, dataStart, len);
+  return new Ctor(view) as T;
+}
+
+/**
  * Copy a `Float64Array` RETURNED by an AS managed kernel (a header pointer)
  * into a fresh JS `Float64Array`. Must be called before the source allocation
  * is released.
  */
 export function asReadReturnedF64(mod: RawWasm, headerPtr: number): Float64Array {
-  const dv = new DataView(mod.memory.buffer);
-  const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
-  const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
-  return new Float64Array(new Float64Array(mod.memory.buffer, dataStart, byteLength >>> 3));
+  return asReadReturned(mod, headerPtr, Float64Array, 3);
 }
 
 /** Int32Array variant of {@link asReadReturnedF64}. */
 export function asReadReturnedI32(mod: RawWasm, headerPtr: number): Int32Array {
-  const dv = new DataView(mod.memory.buffer);
-  const dataStart = dv.getUint32((headerPtr >>> 0) + 4, true);
-  const byteLength = dv.getUint32((headerPtr >>> 0) + 8, true);
-  return new Int32Array(new Int32Array(mod.memory.buffer, dataStart, byteLength >>> 2));
+  return asReadReturned(mod, headerPtr, Int32Array, 2);
+}
+
+type AsTypedCtor = new (
+  buffer: ArrayBuffer,
+  byteOffset: number,
+  length: number
+) => Float64Array | Int32Array;
+
+/**
+ * Marshal `inputs` into AS managed typed arrays, run `body`, then unpin and
+ * `heap_reset`. `body` must copy any AS-returned arrays before returning.
+ */
+export function withAsTyped<T, A extends Float64Array | Int32Array>(
+  wasm: RawWasm,
+  inputs: A[],
+  body: (mod: AsRuntime, headers: number[]) => T,
+  opts: { bytes: number; typeId: number; Ctor: AsTypedCtor }
+): T | null {
+  const mod = wasm as AsRuntime;
+  if (typeof mod.__new !== 'function' || typeof mod.__unpin !== 'function') return null;
+  const allocs: AsAlloc[] = [];
+  try {
+    const headers: number[] = [];
+    for (const arr of inputs) {
+      const a = asAllocHeader(mod, arr.length * opts.bytes, opts.typeId);
+      new opts.Ctor(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
+      allocs.push(a);
+      headers.push(a.headerPtr);
+    }
+    return body(mod, headers);
+  } catch {
+    return null;
+  } finally {
+    for (const a of allocs) {
+      try {
+        asUnpin(mod, a);
+      } catch {
+        /* ignore */
+      }
+    }
+    try {
+      resetAsHeap(mod);
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 /**
@@ -240,34 +298,11 @@ export function withAsF64<T>(
   inputs: Float64Array[],
   body: (mod: AsRuntime, headers: number[]) => T
 ): T | null {
-  const mod = wasm as AsRuntime;
-  if (typeof mod.__new !== 'function' || typeof mod.__unpin !== 'function') return null;
-  const allocs: AsAlloc[] = [];
-  try {
-    const headers: number[] = [];
-    for (const arr of inputs) {
-      const a = asAllocHeader(mod, arr.length * 8, AS_ID_FLOAT64_ARRAY);
-      new Float64Array(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
-      allocs.push(a);
-      headers.push(a.headerPtr);
-    }
-    return body(mod, headers);
-  } catch {
-    return null;
-  } finally {
-    for (const a of allocs) {
-      try {
-        asUnpin(mod, a);
-      } catch {
-        /* ignore */
-      }
-    }
-    try {
-      resetAsHeap(mod);
-    } catch {
-      /* ignore */
-    }
-  }
+  return withAsTyped(wasm, inputs, body, {
+    bytes: 8,
+    typeId: AS_ID_FLOAT64_ARRAY,
+    Ctor: Float64Array,
+  });
 }
 
 /** Int32 variant of {@link withAsF64}. */
@@ -276,34 +311,11 @@ export function withAsI32<T>(
   inputs: Int32Array[],
   body: (mod: AsRuntime, headers: number[]) => T
 ): T | null {
-  const mod = wasm as AsRuntime;
-  if (typeof mod.__new !== 'function' || typeof mod.__unpin !== 'function') return null;
-  const allocs: AsAlloc[] = [];
-  try {
-    const headers: number[] = [];
-    for (const arr of inputs) {
-      const a = asAllocHeader(mod, arr.length * 4, AS_ID_INT32_ARRAY);
-      new Int32Array(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
-      allocs.push(a);
-      headers.push(a.headerPtr);
-    }
-    return body(mod, headers);
-  } catch {
-    return null;
-  } finally {
-    for (const a of allocs) {
-      try {
-        asUnpin(mod, a);
-      } catch {
-        /* ignore */
-      }
-    }
-    try {
-      resetAsHeap(mod);
-    } catch {
-      /* ignore */
-    }
-  }
+  return withAsTyped(wasm, inputs, body, {
+    bytes: 4,
+    typeId: AS_ID_INT32_ARRAY,
+    Ctor: Int32Array,
+  });
 }
 
 /**

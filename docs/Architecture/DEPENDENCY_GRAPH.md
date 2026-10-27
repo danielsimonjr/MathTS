@@ -138,7 +138,7 @@ The codebase is organized into the following modules:
 - **functions/gpu**: 2 files
 - **functions/graph**: 3 files
 - **functions/logical**: 5 files
-- **functions/matrix**: 45 files
+- **functions/matrix**: 46 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 1 file
 - **functions/numeric**: 26 files
@@ -148,7 +148,7 @@ The codebase is organized into the following modules:
 - **functions/set**: 10 files
 - **functions/signal**: 12 files
 - **functions/special**: 9 files
-- **functions/statistics**: 14 files
+- **functions/statistics**: 15 files
 - **functions/stats**: 8 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 45             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 485            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 487            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 478            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -706,7 +706,7 @@ graph LR
 
 ---
 
-### `core/src/switch.ts` - Transpose a 2D array. Private helper used only by `core/src/collection.ts`'s
+### `core/src/switch.ts` - Transpose a 2D array. Used by `core/src/collection.ts` `_reduce` and by
 
 **Exports:**
 
@@ -6148,6 +6148,14 @@ graph LR
 
 ---
 
+### `functions/src/matrix/from-vectors.ts` - Return the logical length of a 1-D or 2-D column/row vector.
+
+**Exports:**
+
+- Functions: `vectorLength`, `matrixFromVectorList`
+
+---
+
 ### `functions/src/matrix/getMatrixDataType.ts` - Find the data type of all elements in a matrix or array,
 
 **Internal Dependencies:**
@@ -6258,6 +6266,12 @@ graph LR
 
 ### `functions/src/matrix/mapSlices.ts` - Apply a function that maps an array to a scalar
 
+**Workspace Dependencies:**
+
+| Package                      | Import    |
+| ---------------------------- | --------- |
+| `@danielsimonjr/mathts-core` | `_switch` |
+
 **Internal Dependencies:**
 
 | File                     | Imports                            | Type   |
@@ -6278,9 +6292,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports   | Type   |
-| --------------------- | --------- | ------ |
-| `../utils/factory.js` | `factory` | Import |
+| File                  | Imports                              | Type   |
+| --------------------- | ------------------------------------ | ------ |
+| `../utils/factory.js` | `factory`                            | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, vectorLength` | Import |
 
 **Exports:**
 
@@ -6307,9 +6322,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports   | Type   |
-| --------------------- | --------- | ------ |
-| `../utils/factory.js` | `factory` | Import |
+| File                  | Imports                              | Type   |
+| --------------------- | ------------------------------------ | ------ |
+| `../utils/factory.js` | `factory`                            | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, vectorLength` | Import |
 
 **Exports:**
 
@@ -8309,6 +8325,24 @@ graph LR
 
 ---
 
+### `functions/src/statistics/extreme.ts` - Recursively reduce an array or matrix to a single extreme value.
+
+**Internal Dependencies:**
+
+| File                             | Imports               | Type               |
+| -------------------------------- | --------------------- | ------------------ |
+| `../utils/collection.js`         | `deepForEach`         | Import             |
+| `../utils/number.js`             | `safeNumberType`      | Import             |
+| `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
+| `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
+| `../core/config.js`              | `ConfigOptions`       | Import (type-only) |
+
+**Exports:**
+
+- Functions: `reduceExtreme`
+
+---
+
 ### `functions/src/statistics/mad.ts` - Compute the median absolute deviation of a matrix or a list with values.
 
 **Internal Dependencies:**
@@ -8330,14 +8364,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                                    | Type               |
-| -------------------------------- | ------------------------------------------ | ------------------ |
-| `../utils/collection.js`         | `deepForEach, reduce, containsCollections` | Import             |
-| `../utils/factory.js`            | `factory`                                  | Import             |
-| `../utils/number.js`             | `safeNumberType`                           | Import             |
-| `./utils/improveErrorMessage.js` | `improveErrorMessage`                      | Import             |
-| `../core/function/typed.js`      | `TypedFunction`                            | Import (type-only) |
-| `../core/config.js`              | `ConfigOptions`                            | Import (type-only) |
+| File                             | Imports                       | Type               |
+| -------------------------------- | ----------------------------- | ------------------ |
+| `../utils/collection.js`         | `reduce, containsCollections` | Import             |
+| `./extreme.js`                   | `reduceExtreme`               | Import             |
+| `../utils/factory.js`            | `factory`                     | Import             |
+| `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
+| `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
+| `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
 
 **Exports:**
 
@@ -8385,14 +8419,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                             | Imports                                    | Type               |
-| -------------------------------- | ------------------------------------------ | ------------------ |
-| `../utils/collection.js`         | `containsCollections, deepForEach, reduce` | Import             |
-| `../utils/factory.js`            | `factory`                                  | Import             |
-| `../utils/number.js`             | `safeNumberType`                           | Import             |
-| `./utils/improveErrorMessage.js` | `improveErrorMessage`                      | Import             |
-| `../core/function/typed.js`      | `TypedFunction`                            | Import (type-only) |
-| `../core/config.js`              | `ConfigOptions`                            | Import (type-only) |
+| File                             | Imports                       | Type               |
+| -------------------------------- | ----------------------------- | ------------------ |
+| `../utils/collection.js`         | `containsCollections, reduce` | Import             |
+| `./extreme.js`                   | `reduceExtreme`               | Import             |
+| `../utils/factory.js`            | `factory`                     | Import             |
+| `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
+| `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
+| `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
 
 **Exports:**
 
@@ -8743,13 +8777,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/string.js`        | `format`        | Import             |
-| `../utils/is.js`            | `isString`      | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../utils/print.js`         | `printTemplate` | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports             | Type               |
+| --------------------------- | ------------------- | ------------------ |
+| `../utils/factory.js`       | `factory`           | Import             |
+| `../utils/print.js`         | `fillPrintTemplate` | Import             |
+| `../core/function/typed.js` | `TypedFunction`     | Import (type-only) |
 
 **Exports:**
 
@@ -10304,11 +10336,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                   | Imports                                                                          | Type   |
-| -------------------------------------- | -------------------------------------------------------------------------------- | ------ |
-| `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                           | Import |
-| `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`          | Import |
-| `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD` | Import |
+| File                                   | Imports                                                                                                          | Type   |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                                                           | Import |
+| `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`                                          | Import |
+| `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD, chebBasisRow, legendreBasisRow` | Import |
 
 **Exports:**
 
@@ -10547,11 +10579,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports         | Type   |
-| -------------------- | --------------- | ------ |
-| `../utils/string.js` | `format`        | Import |
-| `../utils/is.js`     | `isString`      | Import |
-| `../utils/print.js`  | `printTemplate` | Import |
+| File                 | Imports             | Type   |
+| -------------------- | ------------------- | ------ |
+| `../utils/string.js` | `format`            | Import |
+| `../utils/print.js`  | `fillPrintTemplate` | Import |
 
 **Exports:**
 
@@ -11079,10 +11110,18 @@ graph LR
 
 ---
 
-### `functions/src/utils/print.ts` - print module
+### `functions/src/utils/print.ts` - Interpolate values into a string template (`$key` / `$key.nested`).
+
+**Internal Dependencies:**
+
+| File          | Imports    | Type   |
+| ------------- | ---------- | ------ |
+| `./string.js` | `format`   | Import |
+| `./is.js`     | `isString` | Import |
 
 **Exports:**
 
+- Functions: `fillPrintTemplate`
 - Constants: `printTemplate`
 
 ---
@@ -11197,7 +11236,7 @@ graph LR
 
 - Interfaces: `RawWasm`
 - Types: `PtrUnaryKernel`
-- Functions: `getWasm`, `isAsWasm`, `resetScratch`, `runUnaryPtr`, `runChainPtr`, `asReadReturnedF64`, `asReadReturnedI32`, `withAsF64`, `withAsI32`, `makeUnaryArrayDispatch`
+- Functions: `getWasm`, `isAsWasm`, `resetScratch`, `runUnaryPtr`, `runChainPtr`, `asReadReturned`, `asReadReturnedF64`, `asReadReturnedI32`, `withAsTyped`, `withAsF64`, `withAsI32`, `makeUnaryArrayDispatch`
 
 ---
 
@@ -11270,7 +11309,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `polyMulJS`, `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
+- Functions: `polyMulJS`, `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `chebBasisRow`, `legendreBasisRow`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
 - Constants: `WASM_POLY_THRESHOLD`, `WASM_POLY_FIT_THRESHOLD`
 
 ---
@@ -16508,10 +16547,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                   |
-| ---------------------------------- | ---------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations, rowMajorStrides` |
-| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats`     |
+| Package                            | Import                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, norm2, pairwiseDot, scaledDistance, sumSquaredDeviations, rowMajorStrides`                |
+| `@danielsimonjr/mathts-workerpool` | `MathWorkerPool, Transfer, forEachMultiIndex, WorkerPoolConfig, ParallelResult, TaskOptions, PoolStats` |
 
 **Internal Dependencies:**
 
@@ -18001,17 +18040,17 @@ graph LR
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 244 files    | 11 files   |
-| `functions/src/core/function/typed`                    | 3 files      | 202 files  |
+| `functions/src/core/function/typed`                    | 3 files      | 203 files  |
 | `functions/src/index`                                  | 87 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
-| `functions/src/utils/is`                               | 0 files      | 57 files   |
-| `functions/src/core/config`                            | 0 files      | 55 files   |
+| `functions/src/core/config`                            | 0 files      | 56 files   |
+| `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/utils/array`                            | 0 files      | 50 files   |
 | `functions/src/type/matrix/types`                      | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 46 files   |
-| `functions/src/utils/number`                           | 0 files      | 45 files   |
-| `functions/src/utils/collection`                       | 0 files      | 38 files   |
+| `functions/src/utils/number`                           | 0 files      | 44 files   |
+| `functions/src/utils/collection`                       | 0 files      | 39 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/utils/is`                              | 0 files      | 35 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -18341,7 +18380,7 @@ graph TD
         N190[diff]
         N191[dot]
         N192[complexEigs]
-        N193[...35 more]
+        N193[...36 more]
     end
 
     subgraph Functions/ml
@@ -18454,15 +18493,15 @@ graph TD
     subgraph Functions/statistics
         N274[corr]
         N275[cumsum]
-        N276[mad]
-        N277[max]
-        N278[mean]
-        N279[median]
-        N280[min]
-        N281[mode]
-        N282[prod]
-        N283[quantileSeq]
-        N284[...4 more]
+        N276[extreme]
+        N277[mad]
+        N278[max]
+        N279[mean]
+        N280[median]
+        N281[min]
+        N282[mode]
+        N283[prod]
+        N284[...5 more]
     end
 
     subgraph Functions/stats
@@ -18881,17 +18920,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1200   |
+| Total TypeScript Files  | 1202   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200711 |
-| Total Exports           | 6211   |
+| Total Lines of Code     | 200640 |
+| Total Exports           | 6219   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 540    |
-| Total Functions         | 1980   |
+| Total Functions         | 1988   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 608    |
+| Type-only Imports       | 610    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
