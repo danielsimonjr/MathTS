@@ -1147,4 +1147,4 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
 | totalExports         | 8091  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2007  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2008  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

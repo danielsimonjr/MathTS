@@ -1,14 +1,10 @@
 # mathts-wasm — Numerical Correctness Coverage Audit
 
-> **Family `Total` column (2026-10-23):** Re-derived from `assembly/src/index.ts`
-> by counting names in each `export { … } from './…'` line (same rule as
-> `tests/audit/coverage_matrix.py`). Verified with:
-> `node -e "…"` on `assembly/src/index.ts` → **321** symbols, 25 families (see
-> table). **`Covered` / `Uncovered` are point-in-time from 2026-06-24** (old
-> 297-symbol run). Do not treat **79 covered · 218 uncovered** as covering the
-> current surface — run `python -X utf8 tests/audit/coverage_matrix.py` (rewrites
-> `tests/audit/coverage_matrix.json`) to refresh hits. P0 differential narrative
-> below is unchanged.
+> **Family counts** come from `python -X utf8 tests/audit/coverage_matrix.py` (run
+> from `assembly/`). **321** exported symbols; **120** referenced in
+> `assembly/tests/*` (plus golden fixtures where noted); **201** untested. Module
+> keys match the script (`./ops/scalar`, not the older prose family names). P0
+> differential narrative below is unchanged.
 
 Audit of the test coverage and numerical correctness of the
 `@danielsimonjr/mathts-wasm` export surface. This document is the
@@ -24,46 +20,46 @@ re-runnable scorecard; the two scripts under `tests/audit/` and
 - **Goldens**: `python -X utf8 tests/golden/generate_goldens.py`
   (mpmath 30-digit for special functions; numpy for decompositions).
 
-Last regenerated: 2026-06-24.
+Last regenerated: 2026-10-27 (`coverage_matrix.py`).
 
 ---
 
 ## 1. Coverage matrix
 
-**321 exported functions** (export-family parse, 2026-10-23). **Covered / uncovered
-counts in the last two columns are legacy (2026-06-24)** unless you re-run the
-coverage script.
+**321 exported functions** (2026-10-27 `coverage_matrix.py`). **Tested** = symbol name
+appears in an `assembly/tests/*.mjs` runner (or a golden fixture); **untested** otherwise.
+`matrix_zeros` is counted untested when used only as an alloc helper.
 
-| Family (source module)                          | Total | Covered (legacy) | Uncovered (legacy) | Method                                      |
-| ----------------------------------------------- | ----: | ---------------: | -----------------: | ------------------------------------------- |
-| `ops/scalar`                                    |    52 |               13 |             **39** | hardcoded KAT (2 inputs each)               |
-| `ops/complex-ops`                               |    44 |                0 |             **44** | —                                           |
-| `ops/matrix`                                    |    42 |                0 |             **42** | — (`matrix_zeros` is alloc-helper only)     |
-| `ops/array`                                     |    36 |                0 |             **36** | —                                           |
-| `ops/complex-array`                             |    33 |                0 |             **33** | —                                           |
-| `special` (Bessel/Airy/elliptic/Carlson/lgamma) |    20 |               18 |                  — | **differential vs mpmath** (P0; total grew) |
-| `elementwise`                                   |    18 |                — |                  — | — (family added after 2026-06-24 audit)     |
-| `ops/number-theory`                             |    11 |               11 |                  0 | KAT (exact integers)                        |
-| `ops/special` (orthogonal polys + integral fns) |     9 |                9 |                  0 | KAT, single point                           |
-| `ops/polynomial`                                |     7 |                7 |                  0 | KAT arrays + identities                     |
-| `ops/bitwise`                                   |     7 |                0 |              **7** | —                                           |
-| `poly`                                          |     7 |                0 |              **7** | —                                           |
-| `algebra/decomposition` (LU/QR/Chol/inv/det)    |     5 |                5 |                  0 | **numpy + reconstruction** (P0)             |
-| `signal` (Welch/Bartlett/Goertzel/CZT)          |     5 |                0 |              **5** | —                                           |
-| `ops/fft`                                       |     3 |                — |                  — | — (family added after 2026-06-24 audit)     |
-| `ops/signal` (window/medfilt/resample)          |     3 |                3 |                  0 | KAT                                         |
-| `ops/curvefit`                                  |     3 |                3 |                  0 | parameter recovery                          |
-| `ops/optimization`                              |     3 |                3 |                  0 | known optimum + null-space property         |
-| `sort`                                          |     3 |                0 |              **3** | —                                           |
-| `types/complex`                                 |     2 |                0 |              **2** | —                                           |
-| `ops/linalg` (RREF/charpoly)                    |     2 |                2 |                  0 | KAT                                         |
-| `ops/approx`                                    |     2 |                2 |                  0 | property + KAT                              |
-| `tridiag`                                       |     2 |                0 |              **2** | —                                           |
-| `heap`                                          |     1 |                — |                  — | — (family added after 2026-06-24 audit)     |
-| `ops/tensor`                                    |     1 |                1 |                  0 | KAT + permutation property                  |
+| Module (`export {…} from`) |   Total |  Tested | Untested |
+| -------------------------- | ------: | ------: | -------: |
+| `./ops/complex-ops`        |      44 |       0 |       44 |
+| `./ops/matrix`             |      42 |       0 |       42 |
+| `./ops/array`              |      36 |       0 |       36 |
+| `./ops/complex-array`      |      33 |       0 |       33 |
+| `./elementwise`            |      18 |       0 |       18 |
+| `./ops/bitwise`            |       7 |       0 |        7 |
+| `./poly`                   |       7 |       2 |        5 |
+| `./signal`                 |       5 |       0 |        5 |
+| `./ops/fft`                |       3 |       0 |        3 |
+| `./sort`                   |       3 |       0 |        3 |
+| `./tridiag`                |       2 |       0 |        2 |
+| `./types/complex`          |       2 |       0 |        2 |
+| `./heap`                   |       1 |       0 |        1 |
+| `./algebra/decomposition`  |       5 |       5 |        0 |
+| `./ops/approx`             |       2 |       2 |        0 |
+| `./ops/curvefit`           |       3 |       3 |        0 |
+| `./ops/linalg`             |       2 |       2 |        0 |
+| `./ops/number-theory`      |      11 |      11 |        0 |
+| `./ops/optimization`       |       3 |       3 |        0 |
+| `./ops/polynomial`         |       7 |       7 |        0 |
+| `./ops/scalar`             |      52 |      52 |        0 |
+| `./ops/signal`             |       3 |       3 |        0 |
+| `./ops/special`            |       9 |       9 |        0 |
+| `./ops/tensor`             |       1 |       1 |        0 |
+| `./special`                |      20 |      20 |        0 |
+| **TOTAL**                  | **321** | **120** |  **201** |
 
-Full per-symbol detail in `tests/audit/coverage_matrix.json` (stale until the script
-is re-run).
+Full per-symbol detail in `tests/audit/coverage_matrix.json`.
 
 ---
 

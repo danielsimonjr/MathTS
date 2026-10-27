@@ -6,9 +6,38 @@ This document presents the performance comparison between JavaScript, WebAssembl
 
 > **Note**: These results cover the AssemblyScript WASM toolchain (the sole WASM backend). For the latest JS-vs-WASM comparison, see [performance.md](./performance.md).
 
+## Live dispatch (`functions` package, after `loadWasm()`)
+
+Authoritative bands: `functions/src/wasm/policy.ts` (`wasmPolicyAllows`). Measured
+2026-09-26 on Node 22 (V8); re-measure with two runs of
+`node tools/benchmark/wasm/run-node.mjs opt-in` before changing an entry.
+
+| Policy key (AS export)                             | Band (`min` ≤ n, optional `max`) |
+| -------------------------------------------------- | -------------------------------- |
+| `array_abs_ptr`                                    | n ≥ 1_024                        |
+| `array_log10_ptr`                                  | n ≥ 1_024                        |
+| `array_sin_ptr`                                    | 1_024 ≤ n < 131_072              |
+| `array_log1p_ptr`                                  | 1_024 ≤ n < 16_384               |
+| `array_cos_ptr`                                    | n ≥ 16_384                       |
+| `array_atanh_ptr`                                  | n ≥ 16_384                       |
+| `array_log_ptr`                                    | n ≥ 16_384                       |
+| `array_sec_ptr`                                    | 16_384 ≤ n < 1_048_576           |
+| `fused_chain`                                      | n ≥ 1_024                        |
+| `poly_fit_f64`, `cheb_fit_f64`, `legendre_fit_f64` | n ≥ 1_024                        |
+| `lgamma_f64`, `sort_f64`                           | n ≥ 1_048_576                    |
+
+Kernels without a row (Bessel, Airy, elliptic, Carlson, Welch/Goertzel/chirp-Z,
+divided differences, polynomial division, bitwise, and others listed in the policy
+header) stay on JavaScript even when the module is loaded.
+
 ---
 
 ## Recreated AS-vs-JS suite (`tools/benchmark/wasm/`) — 2026-06-27
+
+> **Historical snapshot.** Bun/JSC `npm run bench:wasm` on one machine (2026-06-27).
+> Tier order and size bands below do **not** match live `wasmPolicyAllows` dispatch;
+> see [Live dispatch](#live-dispatch-functions-package-after-loadwasm) and
+> `functions/src/wasm/policy.ts`.
 
 The standalone WASM benchmark suite was recreated as an **AssemblyScript-vs-JS**
 suite. Each row is a full JS↔wasm round-trip (JS `Float64Array` in → AS kernel →
@@ -85,6 +114,10 @@ wins (~2–3x).
 - Node.js with AssemblyScript-compiled WASM modules
 - SIMD enabled for supported operations
 - Testing sizes: 100 to 100,000 elements for vectors, 10x10 to 50x50 for matrices
+
+> **Historical snapshot (pre-2026-06-27 suite).** SIMD tables and narrative below
+> predate `functions/src/wasm/policy.ts` and contradict live dispatch; kept for
+> archaeology only.
 
 ## Summary
 
