@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-25",
+  "generated": "2026-10-27",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -1761,8 +1761,10 @@
       "compareText",
       "compareUnits",
       "CompiledScalar",
+      "CompiledScalarGradient",
       "compileExpr",
       "compileScalar",
+      "compileScalarGradient",
       "CompileScalarOptions",
       "complex",
       "complexAbs",

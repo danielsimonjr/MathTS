@@ -38,7 +38,8 @@ which uses 40+ duck-typed type checks.
 ```text
 ScalarNode tree (expression scalar-structure toolkit)
   → scalarToNode (functions/scalar-node-bridge.ts) → expression Node → simplify / toTex → nodeToScalar
-  → compileScalar (functions/scalar-compile.ts): one register tape, column Float64Array bindings
+  → compileScalar / compileScalarGradient (functions/scalar-compile.ts): one register tape,
+    column Float64Array bindings; gradient adds one lane per fitted parameter
   → CompiledScalar.evaluate(rows): per-row valid mask (no typed dispatch per row)
   → optional paretoFront / scoreFront / selectFrontModel on { loss, complexity, item } rows
 ```
@@ -393,5 +394,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1991  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1992  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
