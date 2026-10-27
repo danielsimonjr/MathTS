@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1924,
+  "totalFiles": 1925,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1167,
     "test-only": 0,
     "orphan": 0,
-    "test": 670,
+    "test": 671,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1192,
-    "tests": 670,
+    "tests": 671,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -43,7 +43,7 @@
     "@danielsimonjr/mathts-tensor": 52,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
-    "@danielsimonjr/mathts-workbook": 65
+    "@danielsimonjr/mathts-workbook": 66
   },
   "files": [
     {
@@ -13064,7 +13064,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1614
+      "loc": 1620
     },
     {
       "file": "workbook/src/contract.ts",
@@ -13113,7 +13113,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 197
+      "loc": 203
     },
     {
       "file": "workbook/src/html.ts",
@@ -13127,7 +13127,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 61
+      "loc": 69
     },
     {
       "file": "workbook/src/introspect.ts",
@@ -13204,7 +13204,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 98
+      "loc": 106
     },
     {
       "file": "workbook/src/timeout-runner.ts",
@@ -13242,6 +13242,13 @@
       "loc": 144
     },
     {
+      "file": "workbook/tests/barrel-graph-tex.test.ts",
+      "package": "@danielsimonjr/mathts-workbook",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 43
+    },
+    {
       "file": "workbook/tests/chart-markup.test.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
@@ -13253,7 +13260,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 593
+      "loc": 625
     },
     {
       "file": "workbook/tests/edit.test.ts",
@@ -13421,7 +13428,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 70
+      "loc": 75
     },
     {
       "file": "workbook/tests/parser-robustness.test.ts",

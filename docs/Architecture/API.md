@@ -897,7 +897,8 @@ the single hardened parse path shared by the document parser and `data`-cell eva
 
 `buildDependencyGraph(cells)`, `topologicalSort(nodes)`, `getDependents(graph, cellId)`,
 `getAncestors(graph, id)` (transitive closure + `id`, cycle-safe), `toMermaid(graph)`
-(validated identifiers → no injection), `detectCycles(graph)`.
+(validated identifiers → no injection), `toDOT(graph)` (Graphviz `digraph deps`),
+`toTeX(doc, options?)` (standalone LaTeX or fragment body), `detectCycles(graph)`.
 
 ### Executor
 

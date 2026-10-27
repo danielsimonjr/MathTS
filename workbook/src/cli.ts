@@ -141,7 +141,13 @@ function jsonEnvelope(
     return value;
   };
   return JSON.stringify(
-    { schemaVersion: SCHEMA_VERSION, command, ok, data, problems: problems ?? [] },
+    {
+      schemaVersion: { major: SCHEMA_VERSION.major, minor: SCHEMA_VERSION.minor },
+      command,
+      ok,
+      data,
+      problems: problems ?? [],
+    },
     replacer,
     2
   );
