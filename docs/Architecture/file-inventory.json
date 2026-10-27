@@ -11048,14 +11048,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 981
+      "loc": 989
     },
     {
       "file": "matrix/src/backends/WasmLoader.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1093
+      "loc": 1107
     },
     {
       "file": "matrix/src/config.ts",
@@ -11545,7 +11545,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 202
+      "loc": 208
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",

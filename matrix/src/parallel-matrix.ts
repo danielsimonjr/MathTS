@@ -240,6 +240,26 @@ function matrixToFloat64(m: DenseMatrix): Float64Array {
 /**
  * Create DenseMatrix from flat Float64Array
  */
+type DensePairOp = (
+  dataA: Float64Array,
+  dataB: Float64Array
+) => Promise<ParallelResult<Float64Array>>;
+
+async function densePair(
+  a: DenseMatrix,
+  b: DenseMatrix,
+  op: DensePairOp,
+  mismatch: (left: DenseMatrix, right: DenseMatrix) => string
+): Promise<DenseMatrix> {
+  if (a.rows !== b.rows || a.cols !== b.cols) {
+    throw new Error(mismatch(a, b));
+  }
+  const dataA = matrixToFloat64(a);
+  const dataB = matrixToFloat64(b);
+  const result = await op(dataA, dataB);
+  return float64ToMatrix(result.result, a.rows, a.cols);
+}
+
 function float64ToMatrix(data: Float64Array, rows: i32, cols: i32): DenseMatrix {
   return new DenseMatrix(rows, cols, data);
 }
@@ -311,17 +331,14 @@ export const parallelRandom: TypedFunction = mathTyped('parallelRandom', {
  */
 export const parallelMatrixAdd: TypedFunction = mathTyped('parallelMatrixAdd', {
   // DenseMatrix + DenseMatrix - parallel execution
-  'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
-    if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(`Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`);
-    }
-
-    const dataA = matrixToFloat64(a);
-    const dataB = matrixToFloat64(b);
-
-    const result = await pAdd(dataA, dataB);
-    return float64ToMatrix(result.result, a.rows, a.cols);
-  },
+  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) =>
+    densePair(
+      a,
+      b,
+      pAdd,
+      (left, right) =>
+        `Matrix dimensions must match: ${left.rows}×${left.cols} vs ${right.rows}×${right.cols}`
+    ),
 
   // DenseMatrix + scalar - parallel execution
   'DenseMatrix, number': async (a: DenseMatrix, scalar: f64): Promise<DenseMatrix> => {
@@ -351,17 +368,14 @@ export const parallelMatrixAdd: TypedFunction = mathTyped('parallelMatrixAdd', {
  */
 export const parallelMatrixSubtract: TypedFunction = mathTyped('parallelMatrixSubtract', {
   // DenseMatrix - DenseMatrix - parallel execution
-  'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
-    if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(`Matrix dimensions must match: ${a.rows}×${a.cols} vs ${b.rows}×${b.cols}`);
-    }
-
-    const dataA = matrixToFloat64(a);
-    const dataB = matrixToFloat64(b);
-
-    const result = await pSubtract(dataA, dataB);
-    return float64ToMatrix(result.result, a.rows, a.cols);
-  },
+  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) =>
+    densePair(
+      a,
+      b,
+      pSubtract,
+      (left, right) =>
+        `Matrix dimensions must match: ${left.rows}×${left.cols} vs ${right.rows}×${right.cols}`
+    ),
 
   // DenseMatrix - scalar
   'DenseMatrix, number': async (a: DenseMatrix, scalar: f64): Promise<DenseMatrix> => {
@@ -426,17 +440,8 @@ export const parallelMatrixMultiply: TypedFunction = mathTyped('parallelMatrixMu
  * Element-wise multiplication (Hadamard product) - parallel execution
  */
 export const parallelDotMultiply: TypedFunction = mathTyped('parallelDotMultiply', {
-  'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
-    if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(`Matrix dimensions must match for element-wise multiply`);
-    }
-
-    const dataA = matrixToFloat64(a);
-    const dataB = matrixToFloat64(b);
-
-    const result = await pMultiply(dataA, dataB);
-    return float64ToMatrix(result.result, a.rows, a.cols);
-  },
+  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) =>
+    densePair(a, b, pMultiply, () => `Matrix dimensions must match for element-wise multiply`),
 
   'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
     const result = await pMultiply(a, b);
@@ -466,15 +471,8 @@ export const parallelMatrixDivide: TypedFunction = mathTyped('parallelMatrixDivi
   },
 
   // Element-wise Matrix / Matrix
-  'DenseMatrix, DenseMatrix': async (a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> => {
-    if (a.rows !== b.rows || a.cols !== b.cols) {
-      throw new Error(`Matrix dimensions must match for element-wise divide`);
-    }
-    const dataA = matrixToFloat64(a);
-    const dataB = matrixToFloat64(b);
-    const result = await pDivide(dataA, dataB);
-    return float64ToMatrix(result.result, a.rows, a.cols);
-  },
+  'DenseMatrix, DenseMatrix': (a: DenseMatrix, b: DenseMatrix) =>
+    densePair(a, b, pDivide, () => `Matrix dimensions must match for element-wise divide`),
 
   'Float64Array, Float64Array': async (a: Float64Array, b: Float64Array): Promise<Float64Array> => {
     const result = await pDivide(a, b);

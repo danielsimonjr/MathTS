@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
+- **Matrix WASM alloc and parallel dense-pair clone-merge (Sprint 2R G54–G56, G59, G60).** `WASMBackend` Float64 pool growth and fresh Int32 headers share `allocHeader` (type ids 5 and 6 stay on that file). `WasmLoader` `allocateAs*` / `makeAs*` share `allocateAs` and `makeAs` (Int32 id 4 unchanged). `parallelMatrixAdd` / `Subtract` / `parallelDotMultiply` / `parallelMatrixDivide` DenseMatrix pairs route through `densePair` with per-op mismatch messages. Pool recycle and stub-heap behavior are unchanged.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`
   stays on DenseMatrix). `ParallelBackend.sumAxis` delegates to `jsBackend` like GPU/WASM;
