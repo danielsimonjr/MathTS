@@ -247,6 +247,10 @@ special functions. The largest package (478 src files).
 //   typed/       parallel-first typed implementations (arithmetic, trigonometry, statistics, signal, cas)
 //   factories/   activated mathjs-derived factory functions (algebra, type, utils, plain, …)
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
+//                bridges/common.ts: asReadReturned / withAsTyped (f64 id 5, 8 B; i32 id 6, 4 B;
+//                finally asUnpin + heap_reset). poly chebBasisRow / legendreBasisRow also
+//                back the JS chebyshevFit / legendreFit paths. sort indexDispatch keys
+//                policy by AS export name (argsort_f64 / rank_f64).
 
 // Representative domains (each a src subtree under functions/src/):
 //   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte …

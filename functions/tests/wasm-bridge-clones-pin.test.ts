@@ -1,6 +1,6 @@
 /**
  * Pin tests for Sprint 2R clone-merge batch 8 (G40–G41, G48–G50).
- * Independent oracles — not round-trips through the code under test where avoidable.
+ * Independent oracles — not round-trips through the code under test.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -17,17 +17,17 @@ import {
   asReadReturnedF64,
   asReadReturnedI32,
   withAsF64,
+  withAsI32,
   type RawWasm,
 } from '../src/wasm/bridges/common.js';
 import {
   argsortF64Dispatch,
   rankF64Dispatch,
-  argsortF64JS,
-  rankF64JS,
+  WASM_SORT_THRESHOLD,
 } from '../src/wasm/sort/wasm-bridge.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { loadWasm } from '../src/index.js';
-import { overrideWasmPolicy } from '../src/wasm/policy.js';
+import { overrideWasmPolicy, wasmPolicyAllows } from '../src/wasm/policy.js';
 import { AS_WASM_PATH, AS_WASM_MISSING_MESSAGE } from './helpers/wasm-spy.js';
 
 function linspace(lo: number, hi: number, n: number): number[] {
@@ -36,36 +36,22 @@ function linspace(lo: number, hi: number, n: number): number[] {
   return xs;
 }
 
-/** Independent Chebyshev-T row (power basis oracle for pin comparisons). */
-function chebBasisOracle(x: number, k: number): number[] {
-  const row = new Array<number>(k);
-  let tPrev = 1;
-  let tCurr = x;
-  row[0] = tPrev;
-  if (k > 1) row[1] = tCurr;
-  for (let j = 2; j < k; j++) {
-    const tNext = 2 * x * tCurr - tPrev;
-    row[j] = tNext;
-    tPrev = tCurr;
-    tCurr = tNext;
-  }
-  return row;
+/** Closed-form Chebyshev T_n, not the three-term recurrence under test. */
+function chebClosed(x: number, n: number): number {
+  if (n === 0) return 1;
+  if (n === 1) return x;
+  if (n === 2) return 2 * x * x - 1;
+  if (n === 3) return 4 * x * x * x - 3 * x;
+  throw new Error(`chebClosed: no closed form for n=${n}`);
 }
 
-/** Independent Legendre-P row. */
-function legendreBasisOracle(x: number, k: number): number[] {
-  const row = new Array<number>(k);
-  let pPrev = 1;
-  let pCurr = x;
-  row[0] = pPrev;
-  if (k > 1) row[1] = pCurr;
-  for (let n = 1; n < k - 1; n++) {
-    const pNext = ((2 * n + 1) * x * pCurr - n * pPrev) / (n + 1);
-    row[n + 1] = pNext;
-    pPrev = pCurr;
-    pCurr = pNext;
-  }
-  return row;
+/** Closed-form Legendre P_n, not the Bonnet recurrence under test. */
+function legendreClosed(x: number, n: number): number {
+  if (n === 0) return 1;
+  if (n === 1) return x;
+  if (n === 2) return (3 * x * x - 1) / 2;
+  if (n === 3) return (5 * x * x * x - 3 * x) / 2;
+  throw new Error(`legendreClosed: no closed form for n=${n}`);
 }
 
 describe('G40/G41 — Chebyshev and Legendre basis recovery (JS path)', () => {
@@ -98,21 +84,23 @@ describe('G40/G41 — Chebyshev and Legendre basis recovery (JS path)', () => {
     expect(Math.abs(coeffs[2] - 1)).toBeLessThan(1e-8);
   });
 
-  it('chebBasisRow matches independent oracle (degree 0 and 2)', () => {
-    expect(Array.from(chebBasisRow(0.25, 1))).toEqual(chebBasisOracle(0.25, 1));
+  it('chebBasisRow matches closed-form T_0 and T_2 (and k===0 is empty)', () => {
+    expect(chebBasisRow(0.25, 0).length).toBe(0);
+    expect(Array.from(chebBasisRow(0.25, 1))).toEqual([chebClosed(0.25, 0)]);
     const x = 0.5;
     const k = 3;
     const shared = chebBasisRow(x, k);
-    const oracle = chebBasisOracle(x, k);
-    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(oracle[j], 14);
+    expect(shared.length).toBe(k);
+    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(chebClosed(x, j), 14);
   });
 
-  it('legendreBasisRow matches independent oracle at degree 2', () => {
+  it('legendreBasisRow matches closed-form P_2 (and k===0 is empty)', () => {
+    expect(legendreBasisRow(0.3, 0).length).toBe(0);
     const x = 0;
     const k = 3;
     const shared = legendreBasisRow(x, k);
-    const oracle = legendreBasisOracle(x, k);
-    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(oracle[j], 14);
+    expect(shared.length).toBe(k);
+    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(legendreClosed(x, j), 14);
   });
 });
 
@@ -173,27 +161,94 @@ describe('G48 — asReadReturned length from byteLength', () => {
   });
 });
 
-describe('G50 — argsort/rank stable ties and NaN-last (dispatch matches JS)', () => {
-  it('argsortF64Dispatch preserves stable order for equal values', () => {
+describe('G49 — withAsTyped type ids, byte sizes, finally unpin+reset', () => {
+  function mockAsRuntime(): {
+    wasm: RawWasm;
+    news: { size: number; id: number }[];
+    unpins: { count: number };
+    resets: { count: number };
+  } {
+    const buf = new ArrayBuffer(4096);
+    const news: { size: number; id: number }[] = [];
+    const unpins = { count: 0 };
+    const resets = { count: 0 };
+    let bump = 64;
+    const wasm = {
+      memory: { buffer: buf } as WebAssembly.Memory,
+      __new(size: number, id: number) {
+        news.push({ size, id });
+        const ptr = bump;
+        bump += ((size + 15) & ~15) + 16;
+        return ptr;
+      },
+      __pin(ptr: number) {
+        return ptr;
+      },
+      __unpin() {
+        unpins.count += 1;
+      },
+      heap_reset() {
+        resets.count += 1;
+      },
+    };
+    return { wasm: wasm as unknown as RawWasm, news, unpins, resets };
+  }
+
+  it('withAsF64 allocates buffer id 1 at 8 bytes/element and typed-array id 5', () => {
+    const { wasm, news } = mockAsRuntime();
+    const xs = new Float64Array([1, 2, 3]);
+    withAsF64(wasm, [xs], () => 0);
+    expect(news).toEqual([
+      { size: 24, id: 1 },
+      { size: 12, id: 5 },
+    ]);
+  });
+
+  it('withAsI32 allocates buffer id 1 at 4 bytes/element and typed-array id 6', () => {
+    const { wasm, news } = mockAsRuntime();
+    const xs = new Int32Array([1, 2, 3, 4]);
+    withAsI32(wasm, [xs], () => 0);
+    expect(news).toEqual([
+      { size: 16, id: 1 },
+      { size: 12, id: 6 },
+    ]);
+  });
+
+  it('a thrown body still unpins and heap_resets, and does not rethrow', () => {
+    const { wasm, unpins, resets } = mockAsRuntime();
+    const out = withAsF64(wasm, [new Float64Array([1])], () => {
+      throw new Error('pin');
+    });
+    expect(out).toBeNull();
+    expect(unpins.count).toBe(2);
+    expect(resets.count).toBe(1);
+  });
+});
+
+describe('G50 — argsort/rank stable ties and NaN-last (independent oracles)', () => {
+  it('argsort keeps original order for equal values', () => {
+    // values 1 at idx 1,4; 2 at 3; 3 at 0,2,5
     const data = new Float64Array([3, 1, 3, 2, 1, 3]);
-    const js = argsortF64JS(data);
-    const disp = argsortF64Dispatch(data);
-    expect(Array.from(disp)).toEqual(Array.from(js));
+    expect(Array.from(argsortF64Dispatch(data))).toEqual([1, 4, 3, 0, 2, 5]);
   });
 
-  it('rankF64Dispatch preserves stable ranks for equal values', () => {
+  it('rank is the inverse of a stable argsort for equal values', () => {
+    // argsort of [5,5,1,5,2] is [2, 4, 0, 1, 3] → rank [2, 3, 0, 4, 1]
     const data = new Float64Array([5, 5, 1, 5, 2]);
-    const js = rankF64JS(data);
-    const disp = rankF64Dispatch(data);
-    expect(Array.from(disp)).toEqual(Array.from(js));
+    expect(Array.from(rankF64Dispatch(data))).toEqual([2, 3, 0, 4, 1]);
   });
 
-  it('argsort puts NaN indices last (dispatch matches JS)', () => {
+  it('argsort puts NaN indices last, preserving NaN input order', () => {
+    // 1 at 3, 2 at 1, NaNs at 0 then 2
     const data = new Float64Array([NaN, 2, NaN, 1]);
-    const js = argsortF64JS(data);
-    const disp = argsortF64Dispatch(data);
-    expect(Array.from(disp)).toEqual(Array.from(js));
-    expect(Number.isNaN(data[js[js.length - 1]])).toBe(true);
+    expect(Array.from(argsortF64Dispatch(data))).toEqual([3, 1, 0, 2]);
+  });
+
+  it('rank_f64 stays off the public WASM path (no policy band; n≤5000 is below 16384)', () => {
+    expect(WASM_SORT_THRESHOLD).toBe(16384);
+    expect(wasmPolicyAllows('rank_f64', 5000)).toBe(false);
+    expect(wasmPolicyAllows('rank_f64', 16384)).toBe(false);
+    expect(wasmPolicyAllows('argsort_f64', 16384)).toBe(false);
   });
 });
 

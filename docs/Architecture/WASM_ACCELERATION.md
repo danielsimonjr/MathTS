@@ -106,7 +106,12 @@ whole JS-only families: they also carry WASM and/or parallel paths, and
 bitwise}/`) exist, but `poly_mul`, Welch/Bartlett PSD, tridiagonal solves,
   divided differences, and bitwise ops have **no** `policy.ts` band — they stay
   on JS even after `loadWasm()`. Only measured winners in `policy.ts` dispatch
-  to AS from the public call path.
+  to AS from the public call path. Poly Chebyshev/Legendre JS fits share
+  `chebBasisRow` / `legendreBasisRow` with the poly WASM bridge (not the package
+  barrel). Sort `argsort_f64` / `rank_f64` share `indexDispatch` (policy key is
+  the export name; `rank_f64` has no band). Managed ABI helpers `asReadReturned`
+  / `withAsTyped` take f64 as type id **5** / 8 bytes and i32 as type id **6** /
+  4 bytes; `finally` still runs `asUnpin` and `heap_reset`.
 
 ## Correctness status
 
