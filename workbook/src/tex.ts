@@ -83,7 +83,15 @@ function renderCellTex(cell: RenderCell, parse?: (expr: string) => unknown): str
   }
 }
 
-/** Render a document structure to a standalone (or fragment) LaTeX string. Never throws. */
+/**
+ * Render a document structure to a standalone (or fragment) LaTeX string. Never throws.
+ *
+ * @example Fragment body for `\input` (no preamble):
+ * ```ts
+ * import { toTeX } from '@danielsimonjr/mathts-workbook';
+ * toTeX({ cells: [{ type: 'markdown', content: 'hi' }] }, { fragment: true });
+ * ```
+ */
 export function toTeX(doc: RenderDoc, options: ToTexOptions = {}): string {
   const body = doc.cells.map((c) => renderCellTex(c, options.parse)).join('\n\n');
   if (options.fragment) return body;
