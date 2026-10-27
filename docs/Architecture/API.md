@@ -707,7 +707,9 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `typed/numeric.ts`: `findRoot`, `linsolve`, `minimize`, `maximize`, `globalMinimize`,
 `leastSquares`, `nintegrate`, `simpsons`, `interpolate`, `cspline`, `pchip`,
 `bezierCurve`, `bspline`, `loess`, `griddata`, `rbfInterpolate`,
-`curvefit`/`expfit`/`logfit`/`powerfit`, `solveODESystem`, `stiffODESolver`,
+`curvefit`/`expfit`/`logfit`/`powerfit` (`linearFit` internally; exp keeps
+`log(abs(y)||1e-15)` and `exp(intercept)`; log returns `[a,b]` with no exp),
+`solveODESystem`, `stiffODESolver`,
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
 `numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`

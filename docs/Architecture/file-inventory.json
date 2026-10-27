@@ -8612,7 +8612,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 110
+      "loc": 210
     },
     {
       "file": "functions/tests/clones-batch3-pin.test.ts",
