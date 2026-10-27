@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1943,
+  "totalFiles": 1944,
   "byDisposition": {
     "reachable": 25,
     "build-entry": 1170,
     "test-only": 0,
     "orphan": 0,
-    "test": 686,
+    "test": 687,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1195,
-    "tests": 686,
+    "tests": 687,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 548,
-    "@danielsimonjr/mathts-functions": 814,
+    "@danielsimonjr/mathts-functions": 815,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 102,
@@ -10741,6 +10741,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "functions/tests/wasm-bridge-clones-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 245
     },
     {
       "file": "functions/tests/wasm-heap-bounded.test.ts",
