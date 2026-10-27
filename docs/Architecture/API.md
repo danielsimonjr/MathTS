@@ -897,7 +897,8 @@ the single hardened parse path shared by the document parser and `data`-cell eva
 
 `buildDependencyGraph(cells)`, `topologicalSort(nodes)`, `getDependents(graph, cellId)`,
 `getAncestors(graph, id)` (transitive closure + `id`, cycle-safe), `toMermaid(graph)`
-(validated identifiers → no injection), `detectCycles(graph)`.
+(validated identifiers → no injection), `toDOT(graph)` (Graphviz `digraph deps`),
+`toTeX(doc, options?)` (standalone LaTeX or fragment body), `detectCycles(graph)`.
 
 ### Executor
 
@@ -1135,5 +1136,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8074  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 1998  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8081  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 1999  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

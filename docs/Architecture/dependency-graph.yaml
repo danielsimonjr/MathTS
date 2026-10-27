@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-27'
   totalFiles: 1192
   totalModules: 82
-  totalExports: 6172
+  totalExports: 6179
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -34363,6 +34363,7 @@ modules:
             - detectCycles
             - getAncestors
             - toMermaid
+            - toDOT
           reExport: true
         - file: ./executor.js
           imports:
@@ -34372,6 +34373,10 @@ modules:
         - file: ./formatter.js
           imports:
             - formatResult
+          reExport: true
+        - file: ./tex.js
+          imports:
+            - toTeX
           reExport: true
         - file: ./edit.js
           imports:
@@ -34416,6 +34421,19 @@ modules:
             - WorkbookEvent
             - CellResult
             - RunResult
+            - DependencyNode
+            - DependencyGraph
+          reExport: true
+          typeOnly: true
+        - file: ./tex.js
+          imports:
+            - ToTexOptions
+          reExport: true
+          typeOnly: true
+        - file: ./html.js
+          imports:
+            - RenderDoc
+            - RenderCell
           reExport: true
           typeOnly: true
         - file: ./edit.js
@@ -34448,9 +34466,11 @@ modules:
         - detectCycles
         - getAncestors
         - toMermaid
+        - toDOT
         - WorkbookExecutor
         - createExecutor
         - formatResult
+        - toTeX
         - addCell
         - editCell
         - removeCell
@@ -34474,6 +34494,11 @@ modules:
         - WorkbookEvent
         - CellResult
         - RunResult
+        - DependencyNode
+        - DependencyGraph
+        - ToTexOptions
+        - RenderDoc
+        - RenderCell
         - CellPosition
         - RemoveResult
         - MathSvgOptions
@@ -34491,9 +34516,11 @@ modules:
         - detectCycles
         - getAncestors
         - toMermaid
+        - toDOT
         - WorkbookExecutor
         - createExecutor
         - formatResult
+        - toTeX
         - addCell
         - editCell
         - removeCell
@@ -34517,6 +34544,11 @@ modules:
         - WorkbookEvent
         - CellResult
         - RunResult
+        - DependencyNode
+        - DependencyGraph
+        - ToTexOptions
+        - RenderDoc
+        - RenderCell
         - CellPosition
         - RemoveResult
         - MathSvgOptions
@@ -39322,16 +39354,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200821
-  totalExports: 6172
+  totalLinesOfCode: 200849
+  totalExports: 6179
   totalClasses: 59
   totalInterfaces: 537
   totalFunctions: 1959
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1617
-  totalReExports: 2609
-  totalTypeOnlyImports: 607
+  totalReExports: 2616
+  totalTypeOnlyImports: 609
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

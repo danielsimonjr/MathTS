@@ -41,9 +41,11 @@ import { parseWorkbook, WorkbookExecutor, createExecutor } from '@danielsimonjr/
 | `WorkbookEvent`    | `{ type: 'cell:start' \| 'cell:success' \| 'cell:error' \| 'cell:stale' \| 'workbook:complete', cellId?, output?, error?, timestamp }` |
 | `CellResult`       | `{ id, type, status: 'success' \| 'error' \| 'pass' \| 'fail', output?, error? }`                                                      |
 | `RunResult`        | `{ cells: CellResult[], ok: boolean }`                                                                                                 |
-
-`DependencyNode` / `DependencyGraph` are defined in `workbook/src/types.ts` for graph
-helpers but are **not** re-exported from the package entry (`src/index.ts`).
+| `DependencyNode`   | `{ id, dependencies, dependents }` — one cell in the reactive graph                                                                    |
+| `DependencyGraph`  | `{ nodes: Map<string, DependencyNode>, executionOrder: string[] }`                                                                     |
+| `RenderDoc`        | `{ title?, author?, cells: RenderCell[] }` — input to `toTeX`                                                                          |
+| `RenderCell`       | Discriminated union of rendered cell bodies (markdown, equation, code, …)                                                              |
+| `ToTexOptions`     | `{ parse?, fragment? }` — optional expression parser and fragment-only body                                                            |
 
 ## Parser
 
@@ -60,14 +62,26 @@ parser and `data`-cell evaluation.
 
 ## Dependency Graph
 
-| Function               | Signature                                          | Description                                       |
-| ---------------------- | -------------------------------------------------- | ------------------------------------------------- |
-| `buildDependencyGraph` | `(cells: Cell[]) => { nodes, executionOrder }`     | Build the reactive graph                          |
-| `topologicalSort`      | `(nodes: Map<string, DependencyNode>) => string[]` | Execution order (internal `DependencyNode` shape) |
-| `getDependents`        | `(graph, cellId) => string[]`                      | Direct dependents                                 |
-| `getAncestors`         | `(graph, id) => string[]`                          | Transitive dependency closure + `id` (cycle-safe) |
-| `toMermaid`            | `(graph) => string`                                | Render `graph TD` (ids validated, no injection)   |
-| `detectCycles`         | `(graph) => string[][]`                            | Cycle detection                                   |
+| Function               | Signature                                          | Description                                         |
+| ---------------------- | -------------------------------------------------- | --------------------------------------------------- |
+| `buildDependencyGraph` | `(cells: Cell[]) => { nodes, executionOrder }`     | Build the reactive graph                            |
+| `topologicalSort`      | `(nodes: Map<string, DependencyNode>) => string[]` | Execution order (internal `DependencyNode` shape)   |
+| `getDependents`        | `(graph, cellId) => string[]`                      | Direct dependents                                   |
+| `getAncestors`         | `(graph, id) => string[]`                          | Transitive dependency closure + `id` (cycle-safe)   |
+| `toMermaid`            | `(graph) => string`                                | Render `graph TD` (ids validated, no injection)     |
+| `toDOT`                | `(graph) => string`                                | Graphviz `digraph deps { … }` (same ids as Mermaid) |
+| `toTeX`                | `(doc, options?) => string`                        | Standalone LaTeX or `--fragment` body for `\input`  |
+| `detectCycles`         | `(graph) => string[][]`                            | Cycle detection                                     |
+
+`toDOT` / `toTeX` mirror the CLI `mtsw graph -f dot` and `mtsw export --format tex`
+paths. Fragment TeX omits the preamble (same as `--fragment`):
+
+```typescript
+import { buildDependencyGraph, toDOT, toTeX } from '@danielsimonjr/mathts-workbook';
+
+const dot = toDOT(buildDependencyGraph(cells));
+const fragment = toTeX({ cells: [{ type: 'markdown', content: 'hi' }] }, { fragment: true });
+```
 
 ## Executor
 
@@ -223,11 +237,11 @@ if (success && workbook) {
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-workbook` (26 exports).
+> `@danielsimonjr/mathts-workbook` (28 exports).
 
-### Functions (22)
+### Functions (24)
 
-`addCell`, `buildDependencyGraph`, `createExecutor`, `detectCellType`, `detectCycles`, `editCell`, `formatResult`, `getAncestors`, `getDependents`, `handleRequest`, `mathMLToSVG`, `moveCell`, `parseWorkbook`, `removeCell`, `renameCell`, `runWorkbookWithTimeout`, `serializeWorkbook`, `setMetadata`, `stripOutputs`, `toMermaid`, `topologicalSort`, `WorkbookTimeoutError`
+`addCell`, `buildDependencyGraph`, `createExecutor`, `detectCellType`, `detectCycles`, `editCell`, `formatResult`, `getAncestors`, `getDependents`, `handleRequest`, `mathMLToSVG`, `moveCell`, `parseWorkbook`, `removeCell`, `renameCell`, `runWorkbookWithTimeout`, `serializeWorkbook`, `setMetadata`, `stripOutputs`, `toDOT`, `toMermaid`, `topologicalSort`, `toTeX`, `WorkbookTimeoutError`
 
 ### Constants & values (2)
 

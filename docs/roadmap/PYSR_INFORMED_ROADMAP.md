@@ -1242,11 +1242,12 @@ re-decide it here if PR-POLY has already merged.
 #### Sprint 5R — Phase 5 integration and release readiness
 
 - **Scope:** reporting and output surfaces, then the last checks before the release in §7.
-  1. **Workbook public surface** (I-17). Decide whether `DependencyGraph`,
-     `DependencyNode`, `toDOT` and `toTeX` are public `workbook` API; export them or
-     document them as internal.
-  2. **`mtsw capabilities --json`** (I-11) prints `schemaVersion` as `"[Circular]"`
-     (`workbook/src/cli.ts` `jsonEnvelope` replacer vs the shared `SCHEMA_VERSION`).
+  1. **Workbook public surface** (I-17). ~~Decide whether~~ **Done:** `DependencyGraph`,
+     `DependencyNode`, `toDOT` and `toTeX` are exported from `@danielsimonjr/mathts-workbook`
+     (plus `RenderDoc` / `RenderCell` / `ToTexOptions` for `toTeX` typing).
+  2. **`mtsw capabilities --json`** (I-11). ~~prints `schemaVersion` as `"[Circular]"`~~ **Done:**
+     `jsonEnvelope` clones `schemaVersion` before stringify so nested capabilities data
+     stays `{ major, minor }`.
   3. **Runnable examples in CI** (I-14). A smoke test that runs `examples/*.ts`.
   4. **Configuration and dependency hygiene.** `create(all, config)` mutates the
      process-wide `DEFAULT_CONFIG` (I-9); the nine unused `typed-function ^4.0.0` pins are

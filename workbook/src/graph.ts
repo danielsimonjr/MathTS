@@ -136,6 +136,12 @@ export function toMermaid(graph: DependencyGraph): string {
  * Render the dependency graph as Graphviz DOT (the DOT analog of toMermaid).
  * Cell ids are validated identifiers ([A-Za-z_][A-Za-z0-9_]*), safe verbatim as
  * both node id and quoted label; no cell content appears in the output.
+ *
+ * @example
+ * ```ts
+ * import { buildDependencyGraph, toDOT } from '@danielsimonjr/mathts-workbook';
+ * toDOT(buildDependencyGraph(cells)); // digraph deps { … }
+ * ```
  */
 export function toDOT(graph: DependencyGraph): string {
   const lines: string[] = ['digraph deps {'];

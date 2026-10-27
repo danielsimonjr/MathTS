@@ -15,6 +15,8 @@ export type {
   WorkbookEvent,
   CellResult,
   RunResult,
+  DependencyNode,
+  DependencyGraph,
 } from './types.js';
 
 // Parser
@@ -28,6 +30,7 @@ export {
   detectCycles,
   getAncestors,
   toMermaid,
+  toDOT,
 } from './graph.js';
 
 // Executor
@@ -35,6 +38,11 @@ export { WorkbookExecutor, createExecutor } from './executor.js';
 
 // Result formatting
 export { formatResult } from './formatter.js';
+
+// Document export (TeX; HTML helpers stay CLI-internal)
+export { toTeX } from './tex.js';
+export type { ToTexOptions } from './tex.js';
+export type { RenderDoc, RenderCell } from './html.js';
 
 // Cell mutation (pure, immutable)
 export { addCell, editCell, removeCell, moveCell, renameCell, setMetadata } from './edit.js';
