@@ -1,9 +1,9 @@
 {
   "generated": "2026-10-27",
-  "totalFiles": 1952,
+  "totalFiles": 1953,
   "byDisposition": {
     "reachable": 25,
-    "build-entry": 1174,
+    "build-entry": 1175,
     "test-only": 0,
     "orphan": 0,
     "test": 691,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1199,
+    "src": 1200,
     "tests": 691,
     "config": 29,
     "examples": 5,
@@ -27,7 +27,7 @@
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 550,
+    "@danielsimonjr/mathts-expression": 551,
     "@danielsimonjr/mathts-functions": 820,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -324,7 +324,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2430
+      "loc": 2397
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -4223,7 +4223,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 320
+      "loc": 315
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
@@ -4342,14 +4342,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 87
+      "loc": 70
     },
     {
       "file": "expression/src/transform/forEach.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 67
     },
     {
       "file": "expression/src/transform/index.transform.ts",
@@ -4490,6 +4490,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 16
+    },
+    {
+      "file": "expression/src/transform/utils/prepareTransformArgs.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 49
     },
     {
       "file": "expression/src/transform/utils/transformCallback.ts",

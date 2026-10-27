@@ -1312,6 +1312,7 @@
       "polyvalDocs",
       "powDocs",
       "powerExpandDocs",
+      "prepareTransformArrayAndCallback",
       "printDocs",
       "printTemplate",
       "processSizesWildcard",

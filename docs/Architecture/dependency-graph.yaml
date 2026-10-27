@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1199
+  totalFiles: 1200
   totalModules: 82
-  totalExports: 6210
+  totalExports: 6211
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -30606,13 +30606,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/prepareTransformArgs.js
           imports:
-            - isFunctionAssignmentNode
-            - isSymbolNode
-        - file: ./utils/compileInlineExpression.js
-          imports:
-            - compileInlineExpression
+            - prepareTransformArrayAndCallback
         - file: ./utils/transformCallback.js
           imports:
             - createTransformCallback
@@ -30632,13 +30628,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/prepareTransformArgs.js
           imports:
-            - isFunctionAssignmentNode
-            - isSymbolNode
-        - file: ./utils/compileInlineExpression.js
-          imports:
-            - compileInlineExpression
+            - prepareTransformArrayAndCallback
       workspaceDependencies: []
       exports:
         - createForEachTransform
@@ -31135,6 +31127,25 @@ modules:
         - lastDimToZeroBase
       functions:
         - lastDimToZeroBase
+    expression/src/transform/utils/prepareTransformArgs.ts:
+      description: 'Shared tail of filter/forEach transforms: evaluate the collection argument and'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isFunctionAssignmentNode
+            - isSymbolNode
+        - file: ./compileInlineExpression.js
+          imports:
+            - compileInlineExpression
+      workspaceDependencies: []
+      exports:
+        - prepareTransformArrayAndCallback
+      interfaces:
+        - PreparedTransformArgs
+      functions:
+        - prepareTransformArrayAndCallback
     expression/src/transform/utils/transformCallback.ts:
       description: Transforms the given callback function based on its type and number of arrays.
       externalDependencies: []
@@ -39437,6 +39448,7 @@ dependencyGraph:
         - expression/src/transform/utils/dimToZeroBase.ts
         - expression/src/transform/utils/errorTransform.ts
         - expression/src/transform/utils/lastDimToZeroBase.ts
+        - expression/src/transform/utils/prepareTransformArgs.ts
         - expression/src/transform/utils/transformCallback.ts
         - expression/src/transform/variance.transform.ts
     - name: Expression/utils
@@ -39608,13 +39620,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1199
+  totalTypeScriptFiles: 1200
   totalModules: 82
-  totalLinesOfCode: 200733
-  totalExports: 6210
+  totalLinesOfCode: 200710
+  totalExports: 6211
   totalClasses: 59
-  totalInterfaces: 539
-  totalFunctions: 1979
+  totalInterfaces: 540
+  totalFunctions: 1980
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
