@@ -251,6 +251,10 @@ special functions. The largest package (478 src files).
 //   typed/       parallel-first typed implementations (arithmetic, trigonometry, statistics, signal, cas)
 //   factories/   activated mathjs-derived factory functions (algebra, type, utils, plain, …)
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
+//                bridges/common.ts: asReadReturned / withAsTyped (f64 id 5, 8 B; i32 id 6, 4 B;
+//                finally asUnpin + heap_reset). poly chebBasisRow / legendreBasisRow also
+//                back the JS chebyshevFit / legendreFit paths. sort indexDispatch keys
+//                policy by AS export name (argsort_f64 / rank_f64).
 
 // Representative domains (each a src subtree under functions/src/):
 //   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte · hermiteCubic …
@@ -421,5 +425,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2028  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8119  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2029  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8123  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

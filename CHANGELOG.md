@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `scaledDistance` sequential, worker pool methods parallel); thresholds stay `'never'`. `bitAnd` / `bitOr` /
   `bitXor` share `bitwiseBinary`; `leftShift` / `rightArithShift` / `rightLogShift` share `bitwiseShift`
   (scalar vs array split once). Public method names and behavior stay.
+- **`functions` WASM bridge clone-merge (Sprint 2R G40–G41, G48–G50).** `chebBasisRow` and
+  `legendreBasisRow` are exported from the poly WASM bridge (not the package barrel); the JS
+  `chebyshevFit` / `legendreFit` paths call them instead of duplicate recurrences. Shared helpers
+  `asReadReturned` and `withAsTyped` back the existing `asReadReturnedF64` / `asReadReturnedI32` and
+  `withAsF64` / `withAsI32` wrappers (`heap_reset` unchanged). Sort `argsort_f64` and `rank_f64`
+  dispatch share `indexDispatch`. Public names, thresholds, and `policy.ts` are unchanged.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix WASM alloc and parallel dense-pair clone-merge (Sprint 2R G54–G56, G59, G60).** `WASMBackend` Float64 pool growth and fresh Int32 headers share `allocHeader` (type ids 5 and 6 stay on that file). `WasmLoader` `allocateAs*` / `makeAs*` share `allocateAs` and `makeAs` (Int32 id 4 unchanged). `parallelMatrixAdd` / `Subtract` / `parallelDotMultiply` / `parallelMatrixDivide` DenseMatrix pairs route through `densePair` with per-op mismatch messages. Pool recycle and stub-heap behavior are unchanged.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array

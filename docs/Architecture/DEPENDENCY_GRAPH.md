@@ -10336,11 +10336,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                   | Imports                                                                          | Type   |
-| -------------------------------------- | -------------------------------------------------------------------------------- | ------ |
-| `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                           | Import |
-| `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`          | Import |
-| `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD` | Import |
+| File                                   | Imports                                                                                                          | Type   |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| `../wasm/interpolation/wasm-bridge.js` | `tridiagSolveDispatch`                                                                                           | Import |
+| `../wasm/interpolation/wasm-bridge.js` | `dividedDifferenceDispatch, dividedDifferenceJS, WASM_INTERP_THRESHOLD`                                          | Import |
+| `../wasm/poly/wasm-bridge.js`          | `polyFitDispatch, chebFitDispatch, legendreFitDispatch, WASM_POLY_FIT_THRESHOLD, chebBasisRow, legendreBasisRow` | Import |
 
 **Exports:**
 
@@ -11236,7 +11236,7 @@ graph LR
 
 - Interfaces: `RawWasm`
 - Types: `PtrUnaryKernel`
-- Functions: `getWasm`, `isAsWasm`, `resetScratch`, `runUnaryPtr`, `runChainPtr`, `asReadReturnedF64`, `asReadReturnedI32`, `withAsF64`, `withAsI32`, `makeUnaryArrayDispatch`
+- Functions: `getWasm`, `isAsWasm`, `resetScratch`, `runUnaryPtr`, `runChainPtr`, `asReadReturned`, `asReadReturnedF64`, `asReadReturnedI32`, `withAsTyped`, `withAsF64`, `withAsI32`, `makeUnaryArrayDispatch`
 
 ---
 
@@ -11309,7 +11309,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `polyMulJS`, `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
+- Functions: `polyMulJS`, `polyMulDispatch`, `polyDivModDispatch`, `resultantDispatch`, `discriminantDispatch`, `chebBasisRow`, `legendreBasisRow`, `polyFitDispatch`, `chebFitDispatch`, `legendreFitDispatch`, `resetPolyWasm`
 - Constants: `WASM_POLY_THRESHOLD`, `WASM_POLY_FIT_THRESHOLD`
 
 ---
@@ -18908,12 +18908,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1201   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200689 |
-| Total Exports           | 6214   |
+| Total Lines of Code     | 200662 |
+| Total Exports           | 6218   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1983   |
+| Total Functions         | 1987   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 610    |

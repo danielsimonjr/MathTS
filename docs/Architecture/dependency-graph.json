@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1201,
     "totalModules": 82,
-    "totalExports": 6214
+    "totalExports": 6218
   },
   "entryPoints": [
     {
@@ -22884,7 +22884,9 @@
               "polyFitDispatch",
               "chebFitDispatch",
               "legendreFitDispatch",
-              "WASM_POLY_FIT_THRESHOLD"
+              "WASM_POLY_FIT_THRESHOLD",
+              "chebBasisRow",
+              "legendreBasisRow"
             ]
           }
         ],
@@ -25181,8 +25183,10 @@
           "resetScratch",
           "runUnaryPtr",
           "runChainPtr",
+          "asReadReturned",
           "asReadReturnedF64",
           "asReadReturnedI32",
+          "withAsTyped",
           "withAsF64",
           "withAsI32",
           "makeUnaryArrayDispatch"
@@ -25194,8 +25198,10 @@
           "resetScratch",
           "runUnaryPtr",
           "runChainPtr",
+          "asReadReturned",
           "asReadReturnedF64",
           "asReadReturnedI32",
+          "withAsTyped",
           "withAsF64",
           "withAsI32",
           "makeUnaryArrayDispatch"
@@ -25320,6 +25326,8 @@
           "polyDivModDispatch",
           "resultantDispatch",
           "discriminantDispatch",
+          "chebBasisRow",
+          "legendreBasisRow",
           "polyFitDispatch",
           "chebFitDispatch",
           "legendreFitDispatch",
@@ -25331,6 +25339,8 @@
           "polyDivModDispatch",
           "resultantDispatch",
           "discriminantDispatch",
+          "chebBasisRow",
+          "legendreBasisRow",
           "polyFitDispatch",
           "chebFitDispatch",
           "legendreFitDispatch",
@@ -42017,11 +42027,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1201,
     "totalModules": 82,
-    "totalLinesOfCode": 200689,
-    "totalExports": 6214,
+    "totalLinesOfCode": 200662,
+    "totalExports": 6218,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1983,
+    "totalFunctions": 1987,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
