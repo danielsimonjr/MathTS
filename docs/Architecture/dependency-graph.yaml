@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-27'
-  totalFiles: 1201
+  totalFiles: 1206
   totalModules: 82
-  totalExports: 6218
+  totalExports: 6225
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -11107,6 +11107,9 @@ modules:
             - ratFromBigint
             - RAT_ZERO
             - Rat
+        - file: ./render-coeff-times.js
+          imports:
+            - renderCoeffTimes
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -11187,6 +11190,9 @@ modules:
             - ratNormalize
             - RAT_ZERO
             - Rat
+        - file: ./render-coeff-times.js
+          imports:
+            - renderCoeffTimes
       workspaceDependencies: []
       exports:
         - ratAdd
@@ -11228,6 +11234,20 @@ modules:
         - partialFractions
         - integratePFTerm
         - integrateRationalFunction
+    functions/src/cas/render-coeff-times.ts:
+      description: Renders `coeff * rest` for CAS string output (`1`, `-1`, or `n/d*rest`).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./rat.js
+          imports:
+            - Rat
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - renderCoeffTimes
+      functions:
+        - renderCoeffTimes
   functions/combinatorics:
     functions/src/combinatorics/bellNumbers.ts:
       description: >-
@@ -13306,6 +13326,9 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ../ml/dbscan-knn.js
+          imports:
+            - rankNearest
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -13770,20 +13793,27 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
-          imports:
-            - isMatrix
         - file: ../utils/object.js
           imports:
             - clone
-        - file: ../utils/array.js
+        - file: ./slice-2d.js
           imports:
-            - validateIndex
+            - slice2d
       workspaceDependencies: []
       exports:
         - createColumn
       constants:
         - createColumn
+    functions/src/matrix/complex-to-interleaved.ts:
+      description: Convert a complex array to interleaved Float64Array [re0, im0, re1, im1, ...].
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - complexToInterleaved
+      functions:
+        - complexToInterleaved
     functions/src/matrix/concat.ts:
       description: Concatenate two or more matrices.
       externalDependencies: []
@@ -14069,6 +14099,9 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+        - file: ./complex-to-interleaved.js
+          imports:
+            - complexToInterleaved
         - file: ../utils/factory.js
           imports:
             - factory
@@ -14220,6 +14253,9 @@ modules:
         - file: ../signal/fft-core-f64.js
           imports:
             - fftCoreFloat64
+        - file: ./complex-to-interleaved.js
+          imports:
+            - complexToInterleaved
         - file: ../utils/factory.js
           imports:
             - factory
@@ -14346,6 +14382,9 @@ modules:
           imports:
             - matrixFromVectorList
             - vectorLength
+        - file: ./sparse-csc-tail.js
+          imports:
+            - buildSparseCscFromEntries
       workspaceDependencies: []
       exports:
         - createMatrixFromColumns
@@ -14380,6 +14419,9 @@ modules:
           imports:
             - matrixFromVectorList
             - vectorLength
+        - file: ./sparse-csc-tail.js
+          imports:
+            - buildSparseCscFromEntries
       workspaceDependencies: []
       exports:
         - createMatrixFromRows
@@ -14627,15 +14669,12 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
-          imports:
-            - isMatrix
         - file: ../utils/object.js
           imports:
             - clone
-        - file: ../utils/array.js
+        - file: ./slice-2d.js
           imports:
-            - validateIndex
+            - slice2d
       workspaceDependencies: []
       exports:
         - createRow
@@ -14661,6 +14700,22 @@ modules:
         - createSize
       constants:
         - createSize
+    functions/src/matrix/slice-2d.ts:
+      description: 'Extract one row (`axis: 0`) or column (`axis: 1`) from a 2-D matrix.'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../utils/array.js
+          imports:
+            - validateIndex
+        - file: ../utils/is.js
+          imports:
+            - isMatrix
+      workspaceDependencies: []
+      exports:
+        - slice2d
+      functions:
+        - slice2d
     functions/src/matrix/sort.ts:
       description: Sort the items in a matrix.
       externalDependencies: []
@@ -14681,6 +14736,16 @@ modules:
         - createSort
       constants:
         - createSort
+    functions/src/matrix/sparse-csc-tail.ts:
+      description: Sort CSC entries and build `ptr`, row `index`, and `values` (shared by
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - buildSparseCscFromEntries
+      functions:
+        - buildSparseCscFromEntries
     functions/src/matrix/sqrtm.ts:
       description: Calculate the principal square root matrix using the Denman-Beavers iterative method
       externalDependencies:
@@ -14876,10 +14941,12 @@ modules:
       workspaceDependencies: []
       exports:
         - dbscan
+        - rankNearest
         - knnClassify
         - knnRegress
       functions:
         - dbscan
+        - rankNearest
         - knnClassify
         - knnRegress
     functions/src/ml/glm.ts:
@@ -20131,6 +20198,23 @@ modules:
         - casFactor
       constants:
         - CAS_BATCH_THRESHOLD
+    functions/src/typed/centrality-restarts.ts:
+      description: Minimum restart count before fanning out via Promise.all rather than running
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./aggregate-restart.js
+          imports:
+            - RestartAggregation
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - CENTRALITY_WORKER_THRESHOLD
+        - runCentralityRestarts
+      functions:
+        - runCentralityRestarts
+      constants:
+        - CENTRALITY_WORKER_THRESHOLD
     functions/src/typed/combinatorics.ts:
       description: Extended Combinatorics Functions
       externalDependencies: []
@@ -20824,6 +20908,10 @@ modules:
           imports:
             - aggregateRestartVectors
             - RestartAggregation
+        - file: ./centrality-restarts.js
+          imports:
+            - CENTRALITY_WORKER_THRESHOLD
+            - runCentralityRestarts
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -20865,8 +20953,6 @@ modules:
         - pageRank
         - betweennessCentrality
         - eigenvectorCentrality
-      constants:
-        - CENTRALITY_WORKER_THRESHOLD
     functions/src/typed/hypothesis.ts:
       description: Statistical Hypothesis Tests
       externalDependencies: []
@@ -38597,6 +38683,7 @@ dependencyGraph:
         - functions/src/cas/layer3.ts
         - functions/src/cas/rat.ts
         - functions/src/cas/rational-integrate.ts
+        - functions/src/cas/render-coeff-times.ts
     - name: Functions/combinatorics
       files:
         - functions/src/combinatorics/bellNumbers.ts
@@ -38662,6 +38749,7 @@ dependencyGraph:
     - name: Functions/matrix
       files:
         - functions/src/matrix/column.ts
+        - functions/src/matrix/complex-to-interleaved.ts
         - functions/src/matrix/concat.ts
         - functions/src/matrix/count.ts
         - functions/src/matrix/cross.ts
@@ -38699,7 +38787,9 @@ dependencyGraph:
         - functions/src/matrix/rotationMatrix.ts
         - functions/src/matrix/row.ts
         - functions/src/matrix/size.ts
+        - functions/src/matrix/slice-2d.ts
         - functions/src/matrix/sort.ts
+        - functions/src/matrix/sparse-csc-tail.ts
         - functions/src/matrix/sqrtm.ts
         - functions/src/matrix/squeeze.ts
         - functions/src/matrix/subset.ts
@@ -38930,6 +39020,7 @@ dependencyGraph:
         - functions/src/typed/arithmetic.ts
         - functions/src/typed/bitwise.ts
         - functions/src/typed/cas.ts
+        - functions/src/typed/centrality-restarts.ts
         - functions/src/typed/combinatorics.ts
         - functions/src/typed/complex.ts
         - functions/src/typed/dist-objects.ts
@@ -39671,18 +39762,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1201
+  totalTypeScriptFiles: 1206
   totalModules: 82
-  totalLinesOfCode: 200662
-  totalExports: 6218
+  totalLinesOfCode: 200677
+  totalExports: 6225
   totalClasses: 59
   totalInterfaces: 539
-  totalFunctions: 1987
+  totalFunctions: 1993
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
   totalReExports: 2627
-  totalTypeOnlyImports: 610
+  totalTypeOnlyImports: 612
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Sprint 2R clone-merge batch 7 (`functions` graph/matrix/CAS/ML).** Centrality `pageRank` / `betweennessCentrality` / `eigenvectorCentrality` share `runCentralityRestarts` (aggregation still uses `aggregateRestartVectors`). Factory `column` / `row` share `slice2d`; sparse `matrixFromColumns` / `matrixFromRows` share `buildSparseCscFromEntries`; factory `fft` / `ifft` share `complexToInterleaved`; CAS `renderCoeffTimes` is one module for `layer3` and `rational-integrate`; `rankNearest` backs `kNearestIndices` and `kdTreeKNN` (negative `k` semantics unchanged). Public names and behavior stay.
 - **Sprint 2R clone-merge batch 4 (G12, G24–G25, G28–G32).** `mapSlices` uses core `_switch`; `matrixFromColumns` / `matrixFromRows` share `matrixFromVectorList` and `vectorLength`; factory `max` / `min` share `reduceExtreme`; factory and typed `print` share `fillPrintTemplate`; local `Decimal` max/min share `decimalExtreme`; `ImmutableDenseMatrix` min/max share `_extreme`; `Index` min/max share `_ends`. Public names and behavior unchanged.
 - **`ComputePool` clone-merge (Sprint 2R G64–G67, batch 5).** Tensordot contraction walks import workerpool
   `forEachMultiIndex` instead of a local copy. `dot` and `distance` share `gatedBinary` (`pairwiseDot` /

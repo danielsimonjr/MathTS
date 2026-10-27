@@ -25,6 +25,7 @@ import {
 } from '../typed/factorization/integer-poly.js';
 import { factorUnivariateZ } from '../typed/factorization/zassenhaus.js';
 import { ratAdd, ratSub, ratMul, ratDiv, ratFromBigint, RAT_ZERO, type Rat } from './rat.js';
+import { renderCoeffTimes } from './render-coeff-times.js';
 
 function ratEq(a: Rat, b: Rat): boolean {
   return a.num === b.num && a.den === b.den;
@@ -33,15 +34,6 @@ function ratEq(a: Rat, b: Rat): boolean {
 function joinTerms(parts: string[]): string {
   if (parts.length === 0) return '0';
   return parts.join(' + ').replace(/\+ -/g, '- ');
-}
-
-function renderCoeffTimes(r: Rat, rest: string): string {
-  const neg = r.num < 0n;
-  const absNum = neg ? -r.num : r.num;
-  const sign = neg ? '-' : '';
-  if (absNum === r.den) return `${sign}${rest}`;
-  const denPart = r.den === 1n ? '' : `/${r.den}`;
-  return `${sign}${absNum}${denPart}*${rest}`;
 }
 
 function renderPoly(p: IntPoly, v: string): string {

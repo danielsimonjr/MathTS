@@ -14,6 +14,8 @@ import { MathJSSparseMatrix, createMatrixBridge } from '../src/factories/matrix-
 import { fft, ifft } from '../src/index.js';
 import { kdTreeKNN } from '../src/geometry/geometry-extra.js';
 import { knnClassify } from '../src/ml/dbscan-knn.js';
+import { renderCoeffTimes } from '../src/cas/render-coeff-times.js';
+import { complexToInterleaved } from '../src/matrix/complex-to-interleaved.js';
 
 /** SplitMix-style seed derivation (oracle for restart scheduler). */
 function oracleSplitSeed(baseSeed: number, k: number): number {
@@ -119,10 +121,11 @@ describe('clone batch7 pin — CSC tail (G sparse from columns/rows)', () => {
 
 describe('clone batch7 pin — complexToInterleaved oracle', () => {
   it('encodes number and complex entries; rejects unsupported types', () => {
-    expect(oracleComplexToInterleaved([1, { re: 2, im: -1 }])).toEqual(
-      new Float64Array([1, 0, 2, -1])
-    );
+    const sample = [1, { re: 2, im: -1 }];
+    expect(oracleComplexToInterleaved(sample)).toEqual(new Float64Array([1, 0, 2, -1]));
+    expect(complexToInterleaved(sample, () => null)).toEqual(new Float64Array([1, 0, 2, -1]));
     expect(oracleComplexToInterleaved([1, 'x'])).toBeNull();
+    expect(complexToInterleaved([1, 'x'], () => null)).toBeNull();
   });
 
   it('factory fft/ifft accept mixed number and {re,im} on the fast path (n=64)', () => {
@@ -150,8 +153,9 @@ describe('clone batch7 pin — renderCoeffTimes string oracle', () => {
   ];
 
   for (const { num, den, rest, want } of cases) {
-    it(`oracle ${want}`, () => {
+    it(`shared helper matches oracle for ${want}`, () => {
       expect(oracleRenderCoeffTimes(num, den, rest)).toBe(want);
+      expect(renderCoeffTimes({ num, den }, rest)).toBe(want);
     });
   }
 });

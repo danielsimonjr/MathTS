@@ -33,6 +33,7 @@ import {
   RAT_ZERO,
   type Rat,
 } from './rat.js';
+import { renderCoeffTimes } from './render-coeff-times.js';
 
 export type { Rat };
 export { ratAdd, ratSub, ratMul, ratDiv, ratFromBigint };
@@ -566,23 +567,6 @@ function ratNeg(r: Rat): Rat {
 /** Renders a reduced `Rat` as a bare expression string, e.g. `3`, `-3/2`. */
 function ratToStr(r: Rat): string {
   return r.den === 1n ? `${r.num}` : `${r.num}/${r.den}`;
-}
-
-/**
- * Renders `coeff * rest` in a readable, evaluable form: `1` drops the factor,
- * `-1` becomes a leading minus, otherwise `n/d*rest` (integer denominators are
- * omitted). `rest` must be a fully-parenthesized sub-expression so operator
- * precedence is preserved (e.g. `rest = '(2*x)/(x^2 + (1))^(1)'`).
- */
-function renderCoeffTimes(r: Rat, rest: string): string {
-  const neg = r.num < 0n;
-  const absNum = neg ? -r.num : r.num;
-  const sign = neg ? '-' : '';
-  if (absNum === r.den) {
-    return `${sign}${rest}`;
-  }
-  const denPart = r.den === 1n ? '' : `/${r.den}`;
-  return `${sign}${absNum}${denPart}*${rest}`;
 }
 
 /** Renders `x - a` (`a` a `Rat` root), simplifying the sign: `x - 1`, `x + 2`, `x`. */

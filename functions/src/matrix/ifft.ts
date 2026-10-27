@@ -1,5 +1,6 @@
 import { arraySize } from '../utils/array.js';
 import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
+import { complexToInterleaved } from './complex-to-interleaved.js';
 import { factory } from '../utils/factory.js';
 import { isMatrix } from '../utils/is.js';
 
@@ -11,36 +12,6 @@ const FAST_IFFT_THRESHOLD = 64; // At least 64 elements
  */
 function isPowerOf2(n: number): boolean {
   return n > 0 && (n & (n - 1)) === 0;
-}
-
-/**
- * Convert complex array to interleaved Float64Array [re0, im0, re1, im1, ...]
- */
-function complexToInterleaved(
-  arr: unknown[],
-  _complex: (re: number, im?: number) => unknown
-): Float64Array | null {
-  const n = arr.length;
-  const result = new Float64Array(n * 2);
-  for (let i = 0; i < n; i++) {
-    const val = arr[i];
-    if (typeof val === 'number') {
-      result[i * 2] = val;
-      result[i * 2 + 1] = 0;
-    } else if (
-      val &&
-      typeof (val as { re?: unknown }).re === 'number' &&
-      typeof (val as { im?: unknown }).im === 'number'
-    ) {
-      const cval = val as { re: number; im: number };
-      result[i * 2] = cval.re;
-      result[i * 2 + 1] = cval.im;
-    } else {
-      // Unsupported type, fall back to JS
-      return null;
-    }
-  }
-  return result;
 }
 
 /**
