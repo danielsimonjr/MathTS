@@ -16765,26 +16765,29 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                                                                                       | Type                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `./parser.js`         | `parseWorkbook, serializeWorkbook, stripOutputs, detectCellType`                                                              | Re-export             |
-| `./graph.js`          | `buildDependencyGraph, topologicalSort, getDependents, detectCycles, getAncestors, toMermaid`                                 | Re-export             |
-| `./executor.js`       | `WorkbookExecutor, createExecutor`                                                                                            | Re-export             |
-| `./formatter.js`      | `formatResult`                                                                                                                | Re-export             |
-| `./edit.js`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata`                                                            | Re-export             |
-| `./contract.js`       | `SCHEMA_VERSION, VERSION`                                                                                                     | Re-export             |
-| `./session.js`        | `Session`                                                                                                                     | Re-export             |
-| `./rpc.js`            | `handleRequest`                                                                                                               | Re-export             |
-| `./svg-math.js`       | `mathMLToSVG`                                                                                                                 | Re-export             |
-| `./timeout-runner.js` | `runWorkbookWithTimeout, WorkbookTimeoutError`                                                                                | Re-export             |
-| `./types.js`          | `Workbook, Cell, CellType, ExecutionMode, WorkbookMetadata, RuntimeConfig, ParseResult, WorkbookEvent, CellResult, RunResult` | Re-export (type-only) |
-| `./edit.js`           | `CellPosition, RemoveResult`                                                                                                  | Re-export (type-only) |
-| `./svg-math.js`       | `MathSvgOptions`                                                                                                              | Re-export (type-only) |
-| `./timeout-runner.js` | `RunWorkbookWithTimeoutOptions, SerializedCellResult, SerializedRunResult`                                                    | Re-export (type-only) |
+| File                  | Imports                                                                                                                                                        | Type                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./parser.js`         | `parseWorkbook, serializeWorkbook, stripOutputs, detectCellType`                                                                                               | Re-export             |
+| `./graph.js`          | `buildDependencyGraph, topologicalSort, getDependents, detectCycles, getAncestors, toMermaid, toDOT`                                                           | Re-export             |
+| `./executor.js`       | `WorkbookExecutor, createExecutor`                                                                                                                             | Re-export             |
+| `./formatter.js`      | `formatResult`                                                                                                                                                 | Re-export             |
+| `./tex.js`            | `toTeX`                                                                                                                                                        | Re-export             |
+| `./edit.js`           | `addCell, editCell, removeCell, moveCell, renameCell, setMetadata`                                                                                             | Re-export             |
+| `./contract.js`       | `SCHEMA_VERSION, VERSION`                                                                                                                                      | Re-export             |
+| `./session.js`        | `Session`                                                                                                                                                      | Re-export             |
+| `./rpc.js`            | `handleRequest`                                                                                                                                                | Re-export             |
+| `./svg-math.js`       | `mathMLToSVG`                                                                                                                                                  | Re-export             |
+| `./timeout-runner.js` | `runWorkbookWithTimeout, WorkbookTimeoutError`                                                                                                                 | Re-export             |
+| `./types.js`          | `Workbook, Cell, CellType, ExecutionMode, WorkbookMetadata, RuntimeConfig, ParseResult, WorkbookEvent, CellResult, RunResult, DependencyNode, DependencyGraph` | Re-export (type-only) |
+| `./tex.js`            | `ToTexOptions`                                                                                                                                                 | Re-export (type-only) |
+| `./html.js`           | `RenderDoc, RenderCell`                                                                                                                                        | Re-export (type-only) |
+| `./edit.js`           | `CellPosition, RemoveResult`                                                                                                                                   | Re-export (type-only) |
+| `./svg-math.js`       | `MathSvgOptions`                                                                                                                                               | Re-export (type-only) |
+| `./timeout-runner.js` | `RunWorkbookWithTimeoutOptions, SerializedCellResult, SerializedRunResult`                                                                                     | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `detectCellType`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`, `getAncestors`, `toMermaid`, `WorkbookExecutor`, `createExecutor`, `formatResult`, `addCell`, `editCell`, `removeCell`, `moveCell`, `renameCell`, `setMetadata`, `SCHEMA_VERSION`, `VERSION`, `Session`, `handleRequest`, `mathMLToSVG`, `runWorkbookWithTimeout`, `WorkbookTimeoutError`, `Workbook`, `Cell`, `CellType`, `ExecutionMode`, `WorkbookMetadata`, `RuntimeConfig`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `CellPosition`, `RemoveResult`, `MathSvgOptions`, `RunWorkbookWithTimeoutOptions`, `SerializedCellResult`, `SerializedRunResult`
+- Re-exports: `parseWorkbook`, `serializeWorkbook`, `stripOutputs`, `detectCellType`, `buildDependencyGraph`, `topologicalSort`, `getDependents`, `detectCycles`, `getAncestors`, `toMermaid`, `toDOT`, `WorkbookExecutor`, `createExecutor`, `formatResult`, `toTeX`, `addCell`, `editCell`, `removeCell`, `moveCell`, `renameCell`, `setMetadata`, `SCHEMA_VERSION`, `VERSION`, `Session`, `handleRequest`, `mathMLToSVG`, `runWorkbookWithTimeout`, `WorkbookTimeoutError`, `Workbook`, `Cell`, `CellType`, `ExecutionMode`, `WorkbookMetadata`, `RuntimeConfig`, `ParseResult`, `WorkbookEvent`, `CellResult`, `RunResult`, `DependencyNode`, `DependencyGraph`, `ToTexOptions`, `RenderDoc`, `RenderCell`, `CellPosition`, `RemoveResult`, `MathSvgOptions`, `RunWorkbookWithTimeoutOptions`, `SerializedCellResult`, `SerializedRunResult`
 
 ---
 
@@ -18728,15 +18731,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200842 |
-| Total Exports           | 6174   |
-| Total Re-exports        | 2610   |
+| Total Lines of Code     | 200870 |
+| Total Exports           | 6181   |
+| Total Re-exports        | 2617   |
 | Total Classes           | 59     |
 | Total Interfaces        | 537    |
 | Total Functions         | 1959   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 607    |
+| Type-only Imports       | 609    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

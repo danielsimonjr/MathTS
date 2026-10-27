@@ -89,6 +89,24 @@ mtsw serve
 #   methods: open/describe/validate/graph/run/cell.*/meta.*/save/capabilities/functions/shutdown
 ```
 
+**`export --format tex` (programmatic).** The same `RenderDoc` the CLI builds for TeX
+export is available as `toTeX` from the package entry (with `RenderDoc`, `RenderCell`,
+and `ToTexOptions`). A fragment omits the LaTeX preamble — the same shape as
+`mtsw export … --format tex --fragment`:
+
+```typescript
+import { toTeX } from '@danielsimonjr/mathts-workbook';
+
+const body = toTeX(
+  { title: 'Notes', cells: [{ type: 'markdown', content: 'Energy $E=mc^2$' }] },
+  { fragment: true }
+);
+// → markdown cell text only; no \\documentclass
+```
+
+Use `buildDependencyGraph` + `toDOT` when you need Graphviz DOT instead of Mermaid
+(`mtsw graph -f dot`).
+
 **`export` (self-contained HTML).** `mtsw export <file> --format html` renders a
 notebook to a single offline `.html` with **no external requests**: markdown prose,
 **equations typeset as MathML** (rendered natively by modern browsers — Chromium ≥109,
