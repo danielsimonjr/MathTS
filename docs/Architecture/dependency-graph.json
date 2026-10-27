@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-25",
+    "lastUpdated": "2026-10-27",
     "totalFiles": 1190,
     "totalModules": 82,
-    "totalExports": 6158
+    "totalExports": 6161
   },
   "entryPoints": [
     {
@@ -9275,7 +9275,7 @@
           },
           {
             "file": "./scalar-compile.js",
-            "imports": ["compileScalar"],
+            "imports": ["compileScalar", "compileScalarGradient"],
             "reExport": true
           },
           {
@@ -9817,7 +9817,12 @@
           },
           {
             "file": "./scalar-compile.js",
-            "imports": ["CompileScalarOptions", "ScalarBatchResult", "CompiledScalar"],
+            "imports": [
+              "CompileScalarOptions",
+              "ScalarBatchResult",
+              "CompiledScalar",
+              "CompiledScalarGradient"
+            ],
             "reExport": true,
             "typeOnly": true
           },
@@ -10187,6 +10192,7 @@
           "scalar",
           "ScalarEvalError",
           "compileScalar",
+          "compileScalarGradient",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -10486,6 +10492,7 @@
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
+          "CompiledScalarGradient",
           "FrontCandidate",
           "ScoredCandidate",
           "DualFn",
@@ -10624,6 +10631,7 @@
           "scalar",
           "ScalarEvalError",
           "compileScalar",
+          "compileScalarGradient",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -10923,6 +10931,7 @@
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
+          "CompiledScalarGradient",
           "FrontCandidate",
           "ScoredCandidate",
           "DualFn",
@@ -11209,14 +11218,24 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["DUAL_UNARY_RULES", "DualUnaryRule"]
+          },
+          {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
             "imports": ["LoweredScalarFn", "ScalarNode", "ScalarOperator"]
           }
         ],
-        "exports": ["compileScalar"],
-        "interfaces": ["CompileScalarOptions", "ScalarBatchResult", "CompiledScalar"],
-        "functions": ["compileScalar"]
+        "exports": ["compileScalar", "compileScalarGradient"],
+        "interfaces": [
+          "CompileScalarOptions",
+          "ScalarBatchResult",
+          "CompiledScalar",
+          "CompiledScalarGradient"
+        ],
+        "functions": ["compileScalar", "compileScalarGradient"]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -41536,15 +41555,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1190,
     "totalModules": 82,
-    "totalLinesOfCode": 199172,
-    "totalExports": 6158,
+    "totalLinesOfCode": 199538,
+    "totalExports": 6161,
     "totalClasses": 58,
-    "totalInterfaces": 532,
-    "totalFunctions": 1956,
+    "totalInterfaces": 533,
+    "totalFunctions": 1957,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1617,
-    "totalReExports": 2599,
+    "totalReExports": 2601,
     "totalTypeOnlyImports": 605,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

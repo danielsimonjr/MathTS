@@ -7,21 +7,36 @@
  * @packageDocumentation
  */
 
+import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
 import type { LoweredScalarFn, ScalarNode, ScalarOperator } from '@danielsimonjr/mathts-expression';
 import { NUMERIC_LITERAL, ScalarEvalError } from './scalar-eval.js';
 
+const LOWERED_UNARY_RULES: Record<LoweredScalarFn, DualUnaryRule> = {
+  exp: DUAL_UNARY_RULES.exp,
+  log: DUAL_UNARY_RULES.log,
+  log10: DUAL_UNARY_RULES.log10,
+  log2: DUAL_UNARY_RULES.log2,
+  sin: DUAL_UNARY_RULES.sin,
+  cos: DUAL_UNARY_RULES.cos,
+  tan: DUAL_UNARY_RULES.tan,
+  sinh: DUAL_UNARY_RULES.sinh,
+  cosh: DUAL_UNARY_RULES.cosh,
+  tanh: DUAL_UNARY_RULES.tanh,
+  abs: DUAL_UNARY_RULES.abs,
+};
+
 const UNARY_IMPL: Record<LoweredScalarFn, (value: number) => number> = {
-  exp: Math.exp,
-  log: Math.log,
-  log10: Math.log10,
-  log2: Math.log2,
-  sin: Math.sin,
-  cos: Math.cos,
-  tan: Math.tan,
-  sinh: Math.sinh,
-  cosh: Math.cosh,
-  tanh: Math.tanh,
-  abs: Math.abs,
+  exp: LOWERED_UNARY_RULES.exp.primal,
+  log: LOWERED_UNARY_RULES.log.primal,
+  log10: LOWERED_UNARY_RULES.log10.primal,
+  log2: LOWERED_UNARY_RULES.log2.primal,
+  sin: LOWERED_UNARY_RULES.sin.primal,
+  cos: LOWERED_UNARY_RULES.cos.primal,
+  tan: LOWERED_UNARY_RULES.tan.primal,
+  sinh: LOWERED_UNARY_RULES.sinh.primal,
+  cosh: LOWERED_UNARY_RULES.cosh.primal,
+  tanh: LOWERED_UNARY_RULES.tanh.primal,
+  abs: LOWERED_UNARY_RULES.abs.primal,
 };
 
 type TapeInstr =
@@ -153,29 +168,110 @@ export interface CompiledScalar {
   evaluateRow(row: ArrayLike<number>, params?: ArrayLike<number>): number;
 }
 
+/**
+ * Batch primal values and exact parameter gradients of a compiled scalar.
+ * `grad[r * nParams + p]` is ∂f/∂`parameters[p]` at row `r`. Uses the same
+ * register tape as {@link compileScalar} with one forward lane per parameter.
+ *
+ * @example
+ * ```ts
+ * import { compileScalarGradient, scalar } from '@danielsimonjr/mathts-functions';
+ * const node = scalar.op('+', [
+ *   scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+ *   scalar.symbol('b'),
+ * ]);
+ * const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a', 'b'] });
+ * const { values, grad } = g.evaluate([new Float64Array([3])], [2, -1]);
+ * values[0]; // 5
+ * [...grad]; // 3, 1 — ∂/∂a = x, ∂/∂b = 1
+ * ```
+ */
+export interface CompiledScalarGradient {
+  readonly variables: readonly string[];
+  readonly parameters: readonly string[];
+  /**
+   * Evaluate every row. Same validity mask as {@link compileScalar}; invalid
+   * rows store `NaN` in `values` and every gradient entry for that row.
+   * Throws {@link ScalarEvalError} for binding mismatches or bad `out` lengths.
+   *
+   * @example
+   * ```ts
+   * import { compileScalarGradient, scalar } from '@danielsimonjr/mathts-functions';
+   * const node = scalar.op('+', [
+   *   scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+   *   scalar.symbol('b'),
+   * ]);
+   * const compiled = compileScalarGradient(node, {
+   *   variables: ['x'],
+   *   parameters: ['a', 'b'],
+   * });
+   * const outV = new Float64Array(1);
+   * const outG = new Float64Array(2);
+   * compiled.evaluate([new Float64Array([3])], [2, -1], { values: outV, grad: outG });
+   * outV[0]; // 5
+   * [...outG]; // 3, 1
+   * ```
+   */
+  evaluate(
+    columns: readonly Float64Array[],
+    params: ArrayLike<number>,
+    out?: { values?: Float64Array; grad?: Float64Array }
+  ): ScalarBatchResult & { readonly grad: Float64Array };
+}
+
 function isScalarNode(value: unknown): value is ScalarNode {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const kind = (value as { kind?: unknown }).kind;
   return kind === 'number' || kind === 'symbol' || kind === 'op' || kind === 'call';
 }
 
-function assertScalarNode(node: unknown): ScalarNode {
+function assertScalarNode(node: unknown, messagePrefix: string): ScalarNode {
   if (!isScalarNode(node)) {
     const kind =
       node === null || Array.isArray(node) || typeof node !== 'object'
         ? undefined
         : (node as { kind?: unknown }).kind;
-    throw new ScalarEvalError(`compileScalar: node kind '${String(kind)}' is not a ScalarNode`);
+    throw new ScalarEvalError(`${messagePrefix} node kind '${String(kind)}' is not a ScalarNode`);
   }
   return node;
 }
 
-function assertNoDuplicateNames(names: readonly string[]): void {
+function assertNoDuplicateNames(names: readonly string[], messagePrefix: string): void {
   for (const name of names) {
     if (names.indexOf(name) !== names.lastIndexOf(name)) {
-      throw new ScalarEvalError(`compileScalar: symbol '${name}' is listed more than once`);
+      throw new ScalarEvalError(`${messagePrefix} symbol '${name}' is listed more than once`);
     }
   }
+}
+
+function copyRegisterGrad(
+  grad: Float64Array,
+  srcReg: number,
+  destReg: number,
+  nParams: number
+): void {
+  const srcBase = srcReg * nParams;
+  const destBase = destReg * nParams;
+  for (let p = 0; p < nParams; p++) {
+    grad[destBase + p] = grad[srcBase + p];
+  }
+}
+
+function setRegisterGradNaN(grad: Float64Array, reg: number, nParams: number): void {
+  const base = reg * nParams;
+  for (let p = 0; p < nParams; p++) {
+    grad[base + p] = Number.NaN;
+  }
+}
+
+/** ∂/∂base for `base^exp` when the base lane is live. */
+function powBasePartial(exp: number, base: number): number {
+  return exp * Math.pow(base, exp - 1);
+}
+
+/** ∂/∂exp for `base^exp` when the exponent lane is live (`value` is `Math.pow(base, exp)`). */
+function powExpPartial(value: number, base: number): number {
+  return value * Math.log(base);
 }
 
 function isFloat64ArrayColumn(col: unknown): col is Float64Array {
@@ -222,9 +318,14 @@ function runRow(
   rootReg: number,
   columns: readonly Float64Array[],
   params: ArrayLike<number>,
-  row: number
+  row: number,
+  grad: Float64Array | undefined,
+  nParams: number
 ): { value: number; valid: boolean } {
   let valid = true;
+  if (grad !== undefined && nParams > 0) {
+    grad.fill(0);
+  }
   for (const instr of tape) {
     switch (instr.tag) {
       case 'const':
@@ -235,13 +336,36 @@ function runRow(
         break;
       case 'param':
         scratch[instr.dest] = params[instr.index] as number;
+        if (grad !== undefined && nParams > 0) {
+          const destBase = instr.dest * nParams;
+          for (let p = 0; p < nParams; p++) {
+            grad[destBase + p] = p === instr.index ? 1 : 0;
+          }
+        }
         break;
       case 'mov':
+        if (!valid) {
+          scratch[instr.dest] = Number.NaN;
+          if (grad !== undefined && nParams > 0) {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+          }
+          break;
+        }
         valid = storeChecked(scratch, instr.dest, scratch[instr.src], valid);
+        if (grad !== undefined && nParams > 0) {
+          if (valid) {
+            copyRegisterGrad(grad, instr.src, instr.dest, nParams);
+          } else {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+          }
+        }
         break;
       case 'bin': {
         if (!valid) {
           scratch[instr.dest] = Number.NaN;
+          if (grad !== undefined && nParams > 0) {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+          }
           break;
         }
         const left = scratch[instr.left];
@@ -249,15 +373,120 @@ function runRow(
         const result =
           instr.op === '^' ? Math.pow(left, right) : applyBinary(instr.op, left, right);
         valid = storeChecked(scratch, instr.dest, result, valid);
+        if (grad !== undefined && nParams > 0) {
+          if (!valid) {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+            break;
+          }
+          const destBase = instr.dest * nParams;
+          const leftBase = instr.left * nParams;
+          const rightBase = instr.right * nParams;
+          if (instr.op === '^') {
+            const base = left;
+            const exp = right;
+            const val = scratch[instr.dest];
+            if (base === 0 && exp === 0) {
+              let liveLane = false;
+              for (let p = 0; p < nParams; p++) {
+                if (grad[leftBase + p] !== 0 || grad[rightBase + p] !== 0) {
+                  liveLane = true;
+                  break;
+                }
+              }
+              if (liveLane) {
+                valid = false;
+                scratch[instr.dest] = Number.NaN;
+                setRegisterGradNaN(grad, instr.dest, nParams);
+                break;
+              }
+            }
+            for (let p = 0; p < nParams; p++) {
+              let g = 0;
+              const dl = grad[leftBase + p];
+              const dr = grad[rightBase + p];
+              if (dl !== 0) {
+                const factor = powBasePartial(exp, base);
+                if (!Number.isFinite(factor)) {
+                  valid = false;
+                  scratch[instr.dest] = Number.NaN;
+                  setRegisterGradNaN(grad, instr.dest, nParams);
+                  break;
+                }
+                g += dl * factor;
+              }
+              if (dr !== 0) {
+                const factor = powExpPartial(val, base);
+                if (!Number.isFinite(factor)) {
+                  valid = false;
+                  scratch[instr.dest] = Number.NaN;
+                  setRegisterGradNaN(grad, instr.dest, nParams);
+                  break;
+                }
+                g += dr * factor;
+              }
+              grad[destBase + p] = g;
+            }
+          } else {
+            for (let p = 0; p < nParams; p++) {
+              const gl = grad[leftBase + p];
+              const gr = grad[rightBase + p];
+              switch (instr.op) {
+                case '+':
+                  grad[destBase + p] = gl + gr;
+                  break;
+                case '-':
+                  grad[destBase + p] = gl - gr;
+                  break;
+                case '*':
+                  grad[destBase + p] = gl * right + left * gr;
+                  break;
+                case '/': {
+                  const denom = right * right;
+                  grad[destBase + p] = (gl * right - left * gr) / denom;
+                  break;
+                }
+              }
+            }
+          }
+        }
         break;
       }
       case 'unary': {
         if (!valid) {
           scratch[instr.dest] = Number.NaN;
+          if (grad !== undefined && nParams > 0) {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+          }
           break;
         }
-        const result = UNARY_IMPL[instr.fn](scratch[instr.arg]);
+        const x = scratch[instr.arg];
+        const rule = LOWERED_UNARY_RULES[instr.fn];
+        const result = rule.primal(x);
         valid = storeChecked(scratch, instr.dest, result, valid);
+        if (grad !== undefined && nParams > 0) {
+          if (!valid) {
+            setRegisterGradNaN(grad, instr.dest, nParams);
+            break;
+          }
+          const destBase = instr.dest * nParams;
+          const argBase = instr.arg * nParams;
+          const y = scratch[instr.dest];
+          for (let p = 0; p < nParams; p++) {
+            const al = grad[argBase + p];
+            if (al === 0) {
+              grad[destBase + p] = 0;
+              continue;
+            }
+            const d = rule.deriv(x, y);
+            if (!Number.isFinite(d)) {
+              valid = false;
+              scratch[instr.dest] = Number.NaN;
+              setRegisterGradNaN(grad, instr.dest, nParams);
+              break;
+            }
+            grad[destBase + p] = al * d;
+          }
+        }
         break;
       }
     }
@@ -269,6 +498,7 @@ interface CompileCtx {
   readonly variables: readonly string[];
   readonly parameters: readonly string[];
   readonly constants: Readonly<Record<string, number>>;
+  readonly messagePrefix: string;
   readonly tape: TapeInstr[];
   nextReg: number;
   rootReg: number;
@@ -284,7 +514,7 @@ function bindSymbol(ctx: CompileCtx, name: string, dest: number): void {
   const inConsts = Object.prototype.hasOwnProperty.call(ctx.constants, name);
   const hits = (inVars >= 0 ? 1 : 0) + (inParams >= 0 ? 1 : 0) + (inConsts ? 1 : 0);
   if (hits >= 2) {
-    throw new ScalarEvalError(`compileScalar: symbol '${name}' is listed more than once`);
+    throw new ScalarEvalError(`${ctx.messagePrefix} symbol '${name}' is listed more than once`);
   }
   if (inParams >= 0) {
     ctx.tape.push({ tag: 'param', dest, index: inParams });
@@ -297,7 +527,7 @@ function bindSymbol(ctx: CompileCtx, name: string, dest: number): void {
   if (inConsts) {
     const value = ctx.constants[name];
     if (typeof value !== 'number') {
-      throw new ScalarEvalError(`compileScalar: constant '${name}' is not a number`);
+      throw new ScalarEvalError(`${ctx.messagePrefix} constant '${name}' is not a number`);
     }
     ctx.tape.push({ tag: 'const', dest, value });
     return;
@@ -315,7 +545,7 @@ function bindSymbol(ctx: CompileCtx, name: string, dest: number): void {
 }
 
 function compileNode(ctx: CompileCtx, node: ScalarNode): number {
-  const canonical = assertScalarNode(node);
+  const canonical = assertScalarNode(node, ctx.messagePrefix);
   const dest = allocReg(ctx);
   switch (canonical.kind) {
     case 'number':
@@ -392,74 +622,102 @@ function compileNode(ctx: CompileCtx, node: ScalarNode): number {
  * [...compiled.evaluate([new Float64Array([2, 3])]).values]; // [4, 9]
  * ```
  */
-export function compileScalar(node: ScalarNode, options: CompileScalarOptions): CompiledScalar {
-  const canonical = assertScalarNode(node);
+function checkCompileParams(
+  params: ArrayLike<number> | undefined,
+  parameters: readonly string[],
+  messagePrefix: string
+): number[] {
+  const nParams = parameters.length;
+  if (params === undefined) {
+    if (nParams > 0) {
+      throw new ScalarEvalError(`${messagePrefix} expected ${nParams} parameters, got 0`);
+    }
+    return [];
+  }
+  if (params.length !== nParams) {
+    throw new ScalarEvalError(
+      `${messagePrefix} expected ${nParams} parameters, got ${params.length}`
+    );
+  }
+  for (let i = 0; i < nParams; i++) {
+    if (typeof params[i] !== 'number') {
+      throw new ScalarEvalError(`${messagePrefix} parameter ${i} is not a number`);
+    }
+  }
+  return params as number[];
+}
+
+function compileRowCount(
+  columns: readonly Float64Array[],
+  variables: readonly string[],
+  messagePrefix: string
+): number {
+  const nVars = variables.length;
+  if (columns.length !== nVars) {
+    throw new ScalarEvalError(`${messagePrefix} expected ${nVars} columns, got ${columns.length}`);
+  }
+  for (let i = 0; i < columns.length; i++) {
+    if (!isFloat64ArrayColumn(columns[i])) {
+      throw new ScalarEvalError(`${messagePrefix} column ${i} must be a Float64Array`);
+    }
+  }
+  if (nVars === 0) return 1;
+  const n = columns[0]!.length;
+  for (let i = 1; i < columns.length; i++) {
+    if (columns[i]!.length !== n) {
+      throw new ScalarEvalError(`${messagePrefix} columns must have the same length`);
+    }
+  }
+  return n;
+}
+
+function buildTape(
+  node: ScalarNode,
+  options: CompileScalarOptions,
+  messagePrefix: string
+): {
+  tape: readonly TapeInstr[];
+  rootReg: number;
+  nRegs: number;
+  variables: string[];
+  parameters: string[];
+} {
+  const canonical = assertScalarNode(node, messagePrefix);
   const variables = options.variables.slice();
   const parameters = (options.parameters ?? []).slice();
   const constants = options.constants ?? {};
-  assertNoDuplicateNames(variables);
-  assertNoDuplicateNames(parameters);
-
+  assertNoDuplicateNames(variables, messagePrefix);
+  assertNoDuplicateNames(parameters, messagePrefix);
   const ctx: CompileCtx = {
     variables,
     parameters,
     constants,
+    messagePrefix,
     tape: [],
     nextReg: 0,
     rootReg: 0,
   };
   compileNode(ctx, canonical);
-  const scratch = new Float64Array(ctx.nextReg);
-  const tape = ctx.tape;
-  const rootReg = ctx.rootReg;
+  return {
+    tape: ctx.tape,
+    rootReg: ctx.rootReg,
+    nRegs: ctx.nextReg,
+    variables,
+    parameters,
+  };
+}
 
-  function checkParams(params: ArrayLike<number> | undefined): Float64Array | number[] {
-    const nParams = parameters.length;
-    if (params === undefined) {
-      if (nParams > 0) {
-        throw new ScalarEvalError(`compileScalar: expected ${nParams} parameters, got 0`);
-      }
-      return [];
-    }
-    if (params.length !== nParams) {
-      throw new ScalarEvalError(
-        `compileScalar: expected ${nParams} parameters, got ${params.length}`
-      );
-    }
-    for (let i = 0; i < nParams; i++) {
-      if (typeof params[i] !== 'number') {
-        throw new ScalarEvalError(`compileScalar: parameter ${i} is not a number`);
-      }
-    }
-    return params as number[];
-  }
-
-  function rowCount(columns: readonly Float64Array[]): number {
-    const nVars = variables.length;
-    if (columns.length !== nVars) {
-      throw new ScalarEvalError(`compileScalar: expected ${nVars} columns, got ${columns.length}`);
-    }
-    for (let i = 0; i < columns.length; i++) {
-      if (!isFloat64ArrayColumn(columns[i])) {
-        throw new ScalarEvalError(`compileScalar: column ${i} must be a Float64Array`);
-      }
-    }
-    if (nVars === 0) return 1;
-    const n = columns[0]!.length;
-    for (let i = 1; i < columns.length; i++) {
-      if (columns[i]!.length !== n) {
-        throw new ScalarEvalError('compileScalar: columns must have the same length');
-      }
-    }
-    return n;
-  }
+export function compileScalar(node: ScalarNode, options: CompileScalarOptions): CompiledScalar {
+  const messagePrefix = 'compileScalar:';
+  const { tape, rootReg, nRegs, variables, parameters } = buildTape(node, options, messagePrefix);
+  const scratch = new Float64Array(nRegs);
 
   return {
     variables,
     parameters,
     evaluate(columns, params, out) {
-      const n = rowCount(columns);
-      const boundParams = checkParams(params);
+      const n = compileRowCount(columns, variables, messagePrefix);
+      const boundParams = checkCompileParams(params, parameters, messagePrefix);
       let values: Float64Array;
       if (out !== undefined) {
         if (out.length !== n) {
@@ -480,7 +738,9 @@ export function compileScalar(node: ScalarNode, options: CompileScalarOptions): 
           rootReg,
           columns,
           boundParams,
-          row
+          row,
+          undefined,
+          0
         );
         values[row] = rowValid ? value : Number.NaN;
         valid[row] = rowValid ? 1 : 0;
@@ -500,18 +760,117 @@ export function compileScalar(node: ScalarNode, options: CompileScalarOptions): 
           throw new ScalarEvalError(`compileScalar: row entry ${i} is not a number`);
         }
       }
-      const boundParams = checkParams(params);
+      const boundParams = checkCompileParams(params, parameters, messagePrefix);
       const columns: Float64Array[] = [];
       for (let i = 0; i < nVars; i++) {
         const col = new Float64Array(1);
         col[0] = row[i] as number;
         columns.push(col);
       }
-      const { value, valid: rowValid } = runRow(tape, scratch, rootReg, columns, boundParams, 0);
+      const { value, valid: rowValid } = runRow(
+        tape,
+        scratch,
+        rootReg,
+        columns,
+        boundParams,
+        0,
+        undefined,
+        0
+      );
       if (!rowValid) {
         throw new ScalarEvalError('compileScalar: row produced a non-finite value.');
       }
       return value;
+    },
+  };
+}
+
+/**
+ * Compile `node` once for batch primal values and exact parameter gradients.
+ * Shares the M3 register tape; adds one forward lane per parameter via
+ * {@link DUAL_UNARY_RULES} and explicit `^` partials. Not reentrant.
+ *
+ * @example
+ * ```ts
+ * import { compileScalarGradient, scalar } from '@danielsimonjr/mathts-functions';
+ * const node = scalar.op('+', [
+ *   scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+ *   scalar.symbol('b'),
+ * ]);
+ * const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a', 'b'] });
+ * const { values, grad } = g.evaluate([new Float64Array([3])], [2, -1]);
+ * values[0]; // 5
+ * [...grad]; // 3, 1
+ * ```
+ */
+export function compileScalarGradient(
+  node: ScalarNode,
+  options: CompileScalarOptions
+): CompiledScalarGradient {
+  const messagePrefix = 'compileScalarGradient:';
+  const { tape, rootReg, nRegs, variables, parameters } = buildTape(node, options, messagePrefix);
+  const scratch = new Float64Array(nRegs);
+  const nParams = parameters.length;
+  const gradScratch = nParams > 0 ? new Float64Array(nRegs * nParams) : new Float64Array(0);
+
+  return {
+    variables,
+    parameters,
+    evaluate(columns, params, out) {
+      const n = compileRowCount(columns, variables, messagePrefix);
+      const boundParams = checkCompileParams(params, parameters, messagePrefix);
+      let values: Float64Array;
+      if (out?.values !== undefined) {
+        if (out.values.length !== n) {
+          throw new ScalarEvalError(
+            `${messagePrefix} out values length ${out.values.length} does not match row count ${n}`
+          );
+        }
+        values = out.values;
+      } else {
+        values = new Float64Array(n);
+      }
+      let grad: Float64Array;
+      const gradLen = n * nParams;
+      if (out?.grad !== undefined) {
+        if (out.grad.length !== gradLen) {
+          throw new ScalarEvalError(
+            `${messagePrefix} out grad length ${out.grad.length} does not match ${gradLen}`
+          );
+        }
+        grad = out.grad;
+      } else {
+        grad = new Float64Array(gradLen);
+      }
+      const valid = new Uint8Array(n);
+      let allValid = true;
+      const rootBase = rootReg * nParams;
+      for (let row = 0; row < n; row++) {
+        const { value, valid: rowValid } = runRow(
+          tape,
+          scratch,
+          rootReg,
+          columns,
+          boundParams,
+          row,
+          nParams > 0 ? gradScratch : undefined,
+          nParams
+        );
+        values[row] = rowValid ? value : Number.NaN;
+        valid[row] = rowValid ? 1 : 0;
+        const gradRow = row * nParams;
+        if (rowValid && nParams > 0) {
+          for (let p = 0; p < nParams; p++) {
+            grad[gradRow + p] = gradScratch[rootBase + p];
+          }
+        } else if (nParams > 0) {
+          for (let p = 0; p < nParams; p++) {
+            grad[gradRow + p] = Number.NaN;
+          }
+        }
+        if (!rowValid) allValid = false;
+      }
+      return { values, valid, allValid, grad };
     },
   };
 }

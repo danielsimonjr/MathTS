@@ -2973,7 +2973,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1094 exports).
+> `@danielsimonjr/mathts-functions` (1095 exports).
 
 ### Functions by category
 
@@ -3027,7 +3027,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (17): `compileExpr`, `compileScalar`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (18): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `nodeToScalar`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
