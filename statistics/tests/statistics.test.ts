@@ -42,6 +42,8 @@ describe('@danielsimonjr/mathts-statistics surface', () => {
       'parallelStatMean',
       'parallelStatVariance',
       'parallelStatStd',
+      'parallelStatMAD',
+      'parallelStatMeanAD',
       'parallelStatQuantile',
       'parallelStatHistogram',
       'quickSelect',

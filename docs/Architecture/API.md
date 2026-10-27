@@ -613,12 +613,15 @@ Parallel-first primitives (the actual public names): `parallelStatSum`,
 `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`,
 `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`,
 `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`,
-`parallelStatMAD`, `parallelStatCumsum`, `parallelStatQuantile`,
+`parallelStatMAD`, `parallelStatMeanAD` (mean absolute deviation; alias of
+`parallelStatMAD`), `parallelStatCumsum`, `parallelStatQuantile`,
 `parallelStatPercentile`, `parallelStatHistogram`. Composites: `gmean`, `hmean`,
 `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`,
 `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`,
 `kendalltau`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`.
-Factory-layer plain names: `mode`, `prod`, `median`, `quantileSeq`, `corr`, `mad`.
+Factory-layer plain names: `mode`, `prod`, `median`, `quantileSeq`, `corr`, `mad`
+(median absolute deviation). `typedStatistics.mad` is the parallel **mean** AD
+(`parallelStatMAD` / `parallelStatMeanAD`), not factory `mad`.
 
 ### Statistics — inference / hypothesis tests
 
@@ -1139,5 +1142,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8082  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2000  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8084  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2002  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
