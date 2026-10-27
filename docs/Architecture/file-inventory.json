@@ -11195,7 +11195,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1078
+      "loc": 1082
     },
     {
       "file": "matrix/src/typed-operations.ts",

@@ -240,11 +240,19 @@ function matrixToFloat64(m: DenseMatrix): Float64Array {
 /**
  * Create DenseMatrix from flat Float64Array
  */
+function float64ToMatrix(data: Float64Array, rows: i32, cols: i32): DenseMatrix {
+  return new DenseMatrix(rows, cols, data);
+}
+
 type DensePairOp = (
   dataA: Float64Array,
   dataB: Float64Array
 ) => Promise<ParallelResult<Float64Array>>;
 
+/**
+ * Dense+Dense element-wise pair: size check, flatten, op, rebuild.
+ * `mismatch` is per-op so add/sub keep both shapes and hadamard/divide do not.
+ */
 async function densePair(
   a: DenseMatrix,
   b: DenseMatrix,
@@ -258,10 +266,6 @@ async function densePair(
   const dataB = matrixToFloat64(b);
   const result = await op(dataA, dataB);
   return float64ToMatrix(result.result, a.rows, a.cols);
-}
-
-function float64ToMatrix(data: Float64Array, rows: i32, cols: i32): DenseMatrix {
-  return new DenseMatrix(rows, cols, data);
 }
 
 // =============================================================================
