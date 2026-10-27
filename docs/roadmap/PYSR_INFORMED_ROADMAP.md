@@ -1031,10 +1031,9 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   1. **D-2 and the units docs.** D-2 is recorded in §10 and implemented by Sprint 1R
      item 7 (PR-SIDIM, #414); do not re-decide here. Update `docs/integration/upt.md` with
      what UPT may now delegate after #414.
-  2. **`simplify` with `exactFractions`** (I-12). `_exactFraction`
-     (`functions/src/algebra/simplifyConstant.ts:244`) reads mathjs-style `f.n` / `f.d`,
-     while `core` `Fraction` exposes `numerator` / `denominator`, so `0.4 * x` is never
-     converted. Read the `core` fields; do not add a Fraction adapter type.
+  2. **`simplify` with `exactFractions`** (I-12). **Done.** `_exactFraction` reads
+     `core` `Fraction` `numerator` / `denominator`; `0.4 * x` with `exactFractions` is
+     pinned to 2/5 by oracle test.
   3. **Constant uncertainty** (§10, question 4). Only if the owner says yes: add
      CODATA standard uncertainties to `functions/src/type/unit/physicalConstants.ts`
      so `propagateUncertainty` and M7's weights can use them.
@@ -1043,7 +1042,7 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   the exact fraction 2/5, pinned by a test; D-2 is recorded; `docs/integration/upt.md`
   matches the code.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
+  - [x] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
 
 ### Phase 4 — Search kit (optional; no new package)
@@ -1251,7 +1250,8 @@ re-decide it here if PR-POLY has already merged.
   4. **Configuration and dependency hygiene.** `create(all, config)` mutates the
      process-wide `DEFAULT_CONFIG` (I-9); the nine unused `typed-function ^4.0.0` pins are
      gone (#413) and `packages/typed-function` still has no workspace dependents (I-10);
-     the `mad` / `parallelStatMAD` naming (I-16).
+     the `mad` / `parallelStatMAD` naming (I-16). **Done (mad clause):** `parallelStatMeanAD`
+     alias, docs, and median-vs-mean oracle test; I-9 and I-10 in this item remain open.
   5. **Dead artefacts** (D-3, I-6, I-18). **Done (#413).** Deleted
      `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
      (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).

@@ -557,7 +557,19 @@ export const parallelStatCorr = mathTyped('parallelStatCorr', {
 // =============================================================================
 
 /**
- * Parallel Mean Absolute Deviation
+ * Mean absolute deviation from the arithmetic mean (divide summed |xᵢ − mean| by n).
+ *
+ * This is **not** the factory `mad`, which is the median of absolute deviations from
+ * the median. For that name use {@link mad} from the statistics factories. Alias:
+ * {@link parallelStatMeanAD}.
+ *
+ * @example
+ * ```ts
+ * import { mad, parallelStatMAD, parallelStatMeanAD } from '@danielsimonjr/mathts-functions';
+ * mad([1, 2, 3, 4, 5]); // 1 — median absolute deviation
+ * await parallelStatMAD([1, 2, 3, 4, 5]); // 1.2 — mean absolute deviation
+ * parallelStatMeanAD === parallelStatMAD; // true
+ * ```
  */
 export const parallelStatMAD = mathTyped('parallelStatMAD', {
   // Float64Array
@@ -582,6 +594,9 @@ export const parallelStatMAD = mathTyped('parallelStatMAD', {
     return parallelStatMAD(toFloat64Array(arr)) as Promise<f64>;
   },
 });
+
+/** Clearer name for {@link parallelStatMAD} (mean absolute deviation, not median `mad`). */
+export const parallelStatMeanAD = parallelStatMAD;
 
 // =============================================================================
 // Parallel Cumulative Sum
@@ -843,7 +858,9 @@ export const typedStatistics = {
   norm: parallelStatNorm,
   distance: parallelStatDistance,
   corr: parallelStatCorr,
+  /** Mean absolute deviation from the mean — not factory {@link mad} (median AD). */
   mad: parallelStatMAD,
+  meanAD: parallelStatMeanAD,
   cumsum: parallelStatCumsum,
   quantile: parallelStatQuantile,
   percentile: parallelStatPercentile,

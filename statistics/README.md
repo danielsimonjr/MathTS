@@ -26,8 +26,10 @@ npm install @danielsimonjr/mathts-statistics
   `pearsonr`, `spearman`, `spearmanr`, `kendalltau` / `kendallTau`.
 - **Parallel reductions** — `parallelStat*` helpers mirror the typed reductions on `Float64Array`;
   most op thresholds in `ComputePool` are `'never'` today (inline JS), but the API stays
-  `async`-friendly where the typed layer returns a `Promise`. `quickSelect` / `medianSelect` /
-  `minSelect` / `maxSelect` are synchronous selection utilities.
+  `async`-friendly where the typed layer returns a `Promise`. Factory `mad` is **median**
+  absolute deviation; `parallelStatMAD` / `parallelStatMeanAD` are **mean** absolute deviation
+  from the mean (not the same statistic). `quickSelect` / `medianSelect` / `minSelect` /
+  `maxSelect` are synchronous selection utilities.
 - **Regression & resampling** — `linearRegression`, `polyFit`, `linregress`, `pearsonr`,
   `spearman`, `spearmanr`, `kendalltau`, `meanCI`, `proportionCI`, `bootstrapCI`,
   `permutationTest`, `mahalanobis`, `hotellingT2`, `kmeans`, `spectralClustering`.

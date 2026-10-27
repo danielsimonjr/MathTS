@@ -1210,28 +1210,28 @@
       most op thresholds in `ComputePool` are `'never'` (inline JS). Scalar overloads
       (2–4 numbers) are synchronous.
 
-      | Function                                  | Description                                               | Accel       |
-      | ----------------------------------------- | --------------------------------------------------------- | ----------- |
-      | `parallelStatSum(a)`                      | Sum of all elements                                       | parallel†   |
-      | `parallelStatMean(a)`                     | Arithmetic mean                                           | parallel†   |
-      | `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`)              | parallel†   |
-      | `parallelStatStd(a[, type])`              | Standard deviation                                        | parallel†   |
-      | `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                                 | parallel†   |
-      | `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                                | parallel†   |
-      | `parallelStatMedian(a)`                   | Median (`sort_f64` when n ≥ 1 048 576 after `loadWasm()`) | WASM (≥1 M) |
-      | `parallelStatMode(a)`                     | Mode                                                      | —           |
-      | `parallelStatProd(a)`                     | Product                                                   | parallel†   |
-      | `parallelStatNorm(a[, p])`                | p-norm                                                    | parallel†   |
-      | `parallelStatDistance(a, b)`              | Euclidean distance                                        | parallel†   |
-      | `parallelStatCorr(a, b)`                  | Pearson correlation                                       | parallel†   |
-      | `parallelStatMAD(a)`                      | Mean absolute deviation from the mean                     | parallel†   |
-      | `parallelStatMeanAD(a)`                   | Alias of `parallelStatMAD` (same mean AD, not factory `mad`) | parallel† |
+      | Function                                  | Description                                                  | Accel       |
+      | ----------------------------------------- | ------------------------------------------------------------ | ----------- |
+      | `parallelStatSum(a)`                      | Sum of all elements                                          | parallel†   |
+      | `parallelStatMean(a)`                     | Arithmetic mean                                              | parallel†   |
+      | `parallelStatVariance(a[, type])`         | Variance (`unbiased`/`uncorrected`/`biased`)                 | parallel†   |
+      | `parallelStatStd(a[, type])`              | Standard deviation                                           | parallel†   |
+      | `parallelStatMin(a)` `parallelStatMax(a)` | Min / max                                                    | parallel†   |
+      | `parallelStatMinMax(a)`                   | `{ min, max }` in one pass                                   | parallel†   |
+      | `parallelStatMedian(a)`                   | Median (`sort_f64` when n ≥ 1 048 576 after `loadWasm()`)    | WASM (≥1 M) |
+      | `parallelStatMode(a)`                     | Mode                                                         | —           |
+      | `parallelStatProd(a)`                     | Product                                                      | parallel†   |
+      | `parallelStatNorm(a[, p])`                | p-norm                                                       | parallel†   |
+      | `parallelStatDistance(a, b)`              | Euclidean distance                                           | parallel†   |
+      | `parallelStatCorr(a, b)`                  | Pearson correlation                                          | parallel†   |
+      | `parallelStatMAD(a)`                      | Mean absolute deviation from the mean                        | parallel†   |
+      | `parallelStatMeanAD(a)`                   | Alias of `parallelStatMAD` (same mean AD, not factory `mad`) | parallel†   |
 
       Factory `mad([1, 2, 3, 4, 5])` is **1** (median absolute deviation). `parallelStatMAD` /
       `parallelStatMeanAD` on the same array are **1.2** (mean absolute deviation from the mean).
-      | `parallelStatCumsum(a)`                   | Cumulative sum                                            | —           |
-      | `parallelStatQuantile(a, q)`              | q-th quantile (0–1); uses `sort_f64` like median          | WASM (≥1 M) |
-      | `parallelStatHistogram(a, bins)`          | Histogram bin counts                                      | parallel†   |
+      | `parallelStatCumsum(a)` | Cumulative sum | — |
+      | `parallelStatQuantile(a, q)` | q-th quantile (0–1); uses `sort_f64` like median | WASM (≥1 M) |
+      | `parallelStatHistogram(a, bins)` | Histogram bin counts | parallel† |
 
       ### Selection (O(n), no full sort)
 
