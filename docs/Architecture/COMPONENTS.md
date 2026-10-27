@@ -208,6 +208,8 @@ export class TapedTensor     // reverse-mode leaf/intermediate
 ```
 
 Depends on `core`, `tensor`. Forward-mode `Dual` rules are shared from `core` (`DUAL_UNARY_RULES`).
+`TapedTensor.max` / `min` share one reverse-mode helper (`scatterArgExtrema`) with a strict
+first-wins `better` comparator (`>` vs `<`); there is no `'max'|'min'` mode string.
 
 ---
 
@@ -283,7 +285,11 @@ the graph). Depends on `core`, `matrix`, `parallel`, `expression`.
 **Batch compile / gradients / fitting / Pareto / node bridge / numeric equivalence** live in `functions` (`scalar-compile.ts` for `compileScalar` and `compileScalarGradient`, `fit-scalar.ts` for `fitScalarParameters`, `scalar-node-bridge.ts`, `pareto-front.ts`, `numeric-equivalence.ts`). `numericallyEquivalent` samples with `SeededRng.next`, evaluates via `compileScalar`, and compares with core `nearlyEqual` (`consistent` is evidence, not proof).
 
 Depends on `core`. The 477-file graph includes the full evaluator; `security/sandbox.test.ts` is the
-regression guard for safe-access.
+regression guard for safe-access. `RelationalNode` `_toString` / `_toTex` share `renderRelational`
+(one precedence walk; string joins `' ' + op + ' '`, TeX uses `latexOperators` and `\left(\right)`
+wraps). `filterTransform` / `forEachTransform` share `prepareTransformArrayAndCallback` for collection
+and callback compilation; each transform still owns its `filter` / `forEach` call and
+`createTransformCallback` placement.
 
 ### @danielsimonjr/mathts-workbook (`workbook/`)
 

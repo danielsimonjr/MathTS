@@ -380,7 +380,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 37
+      "loc": 105
     },
     {
       "file": "autograd/tests/scaffold.test.ts",
@@ -4951,14 +4951,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 41
+      "loc": 103
     },
     {
       "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 42
+      "loc": 83
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",

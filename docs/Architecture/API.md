@@ -441,7 +441,8 @@ core's shared `DUAL_UNARY_RULES`, keeping forward/reverse/scalar in lock-step.
   `backward(outputId, outputGrad)`, `getInputGrad(id)`.
 - **`class TapedTensor`** — reverse-mode node wrapping a `Tape`. `add`/`sub`/`mul`/`divide`/`scale`,
   `contract`/`matmul`/`tensordot` (with documented adjoints), reductions
-  `sum`/`mean`/`prod`/`max`/`min`/`norm`, ~26 elementary functions, `svd()`
+  `sum`/`mean`/`prod`/`max`/`min`/`norm` (`max`/`min` adjoints share `scatterArgExtrema`,
+  strict first-wins ties), ~26 elementary functions, `svd()`
   (Townsend 2016 / PyTorch `svd_backward`-equivalent, degeneracy-masked subgradient),
   `eig({symmetric})` (symmetric: Magnus & Neudecker; non-symmetric: real+diagonalizable only).
 - **`reverseGrad(fn, x, cotangent?)`** → `{value, gradient}` (VJP; default cotangent ones-like).
@@ -854,7 +855,8 @@ Node constructors: `ConstantNode(value)`, `SymbolNode(name)`, `OperatorNode(op, 
 args, implicit?, isPercentage?)` (+ `isUnary`/`isBinary`), `FunctionNode(fn, args,
 optional?)`, `AccessorNode(object, index, optionalChaining?)`, `AssignmentNode(object,
 index, value?)`, `ArrayNode`, `BlockNode`, `ConditionalNode`, `FunctionAssignmentNode`,
-`IndexNode`, `ObjectNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`. All
+`IndexNode`, `ObjectNode`, `ParenthesisNode`, `RangeNode`, `RelationalNode`
+(`_toString`/`_toTex` share `renderRelational`). All
 carry a duck-typed `isXxxNode` discriminant; the standalone compiler dispatches on
 these flags, not `instanceof`.
 
@@ -892,7 +894,8 @@ alongside `validateAst`. Regression-guarded by `expression/tests/security/sandbo
 holding a scope: `.evaluate`/`.get`/`.set`/`.clear`). Transform factories (0-based JS
 → 1-based expression-language index/dim, or added laziness): `createAndTransform`,
 `createOrTransform`, `createNullishTransform`, `createMapTransform`, `createFilterTransform`,
-`createForEachTransform`, `createSubsetTransform`, `createRangeTransform`,
+`createForEachTransform` (`filter`/`forEach` share `prepareTransformArrayAndCallback`),
+`createSubsetTransform`, `createRangeTransform`,
 `createMax`/`Min`/`Mean`/`Sum`/`Std`/`Variance`/`QuantileSeq`/`CumSum`/`Diff`Transform, and more.
 
 ---
