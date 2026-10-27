@@ -47,6 +47,7 @@ describe('functions WasmLoader — merge pins (G45–G47)', () => {
       const tampered = new Uint8Array(bytes);
       tampered[3] ^= 0xff;
       writeFileSync(wasm, tampered);
+      expect(await sha384OfBuffer(tampered)).not.toBe(expected);
       const loader = freshLoader();
       await expect(loader.load(wasm)).rejects.toThrow(/WASM integrity check failed/);
     } finally {
@@ -54,37 +55,41 @@ describe('functions WasmLoader — merge pins (G45–G47)', () => {
     }
   });
 
-  it('load() soft-warns when no manifest is beside the wasm (still attempts compile)', async () => {
-    if (!AS_WASM_PATH) return;
-    const dir = mkdtempSync(join(tmpdir(), 'mathts-fn-loader-noman-'));
-    try {
-      const wasm = join(dir, basename(AS_WASM_PATH));
-      copyFileSync(AS_WASM_PATH, wasm);
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const loader = freshLoader();
-      await loader.load(wasm);
-      expect(warn).toHaveBeenCalled();
-      expect(loader.isLoaded()).toBe(true);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
+  it.skipIf(!AS_WASM_PATH)(
+    'load() soft-warns when no manifest is beside the wasm (still attempts compile)',
+    async () => {
+      const dir = mkdtempSync(join(tmpdir(), 'mathts-fn-loader-noman-'));
+      try {
+        const wasm = join(dir, basename(AS_WASM_PATH!));
+        copyFileSync(AS_WASM_PATH!, wasm);
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const loader = freshLoader();
+        await loader.load(wasm);
+        expect(warn.mock.calls.some((c) => String(c[0]).includes('[wasm-integrity]'))).toBe(true);
+        expect(loader.isLoaded()).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
-  });
+  );
 
-  it('failed load() clears compiledModule so a later load can succeed', async () => {
-    if (!AS_WASM_PATH) return;
-    const dir = mkdtempSync(join(tmpdir(), 'mathts-fn-loader-unlink-'));
-    try {
-      const wasm = join(dir, 'mathts-as.wasm');
-      writeFileSync(wasm, UNLINKABLE_WASM);
-      const loader = freshLoader();
-      await expect(loader.load(wasm)).rejects.toThrow();
-      expect(loader.getCompiledModule()).toBeNull();
-      await expect(loader.load(AS_WASM_PATH)).resolves.toBeDefined();
-      expect(loader.isLoaded()).toBe(true);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
+  it.skipIf(!AS_WASM_PATH)(
+    'failed load() clears compiledModule so a later load can succeed',
+    async () => {
+      const dir = mkdtempSync(join(tmpdir(), 'mathts-fn-loader-unlink-'));
+      try {
+        const wasm = join(dir, 'mathts-as.wasm');
+        writeFileSync(wasm, UNLINKABLE_WASM);
+        const loader = freshLoader();
+        await expect(loader.load(wasm)).rejects.toThrow();
+        expect(loader.getCompiledModule()).toBeNull();
+        await expect(loader.load(AS_WASM_PATH!)).resolves.toBeDefined();
+        expect(loader.isLoaded()).toBe(true);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
-  });
+  );
 
   it("imports.env.abort throws Error('WASM abort')", () => {
     const loader = freshLoader();
@@ -103,9 +108,11 @@ describe('functions WasmLoader — merge pins (G45–G47)', () => {
     'precompile() then load() uses cached module without re-reading the file',
     async () => {
       const loader = freshLoader();
+      // Loaders wrap callback `fs.readFile` with promisify, not `fs.promises.readFile`.
       const fs = await import('node:fs');
-      const readSpy = vi.spyOn(fs.promises, 'readFile');
+      const readSpy = vi.spyOn(fs, 'readFile');
       await loader.precompile(AS_WASM_PATH!);
+      expect(readSpy).toHaveBeenCalled();
       readSpy.mockClear();
       await loader.load(AS_WASM_PATH!);
       expect(readSpy).not.toHaveBeenCalled();

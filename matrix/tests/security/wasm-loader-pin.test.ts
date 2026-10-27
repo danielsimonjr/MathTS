@@ -51,6 +51,7 @@ describe('matrix WasmLoader — merge pins (G45–G47)', () => {
       const tampered = new Uint8Array(bytes);
       tampered[3] ^= 0xff;
       writeFileSync(wasm, tampered);
+      expect(await sha384OfBuffer(tampered)).not.toBe(expected);
       const loader = freshLoader();
       await expect(loader.load(wasm)).rejects.toThrow(/WASM integrity check failed/);
     } finally {
@@ -66,7 +67,7 @@ describe('matrix WasmLoader — merge pins (G45–G47)', () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const loader = freshLoader();
       await loader.load(wasm);
-      expect(warn).toHaveBeenCalled();
+      expect(warn.mock.calls.some((c) => String(c[0]).includes('[wasm-integrity]'))).toBe(true);
       expect(loader.isLoaded()).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -108,9 +109,11 @@ describe('matrix WasmLoader — merge pins (G45–G47)', () => {
     'precompile() then load() uses cached module without re-reading the file',
     async () => {
       const loader = freshLoader();
+      // Loaders wrap callback `fs.readFile` with promisify, not `fs.promises.readFile`.
       const fs = await import('node:fs');
-      const readSpy = vi.spyOn(fs.promises, 'readFile');
+      const readSpy = vi.spyOn(fs, 'readFile');
       await loader.precompile(asWasmPath);
+      expect(readSpy).toHaveBeenCalled();
       readSpy.mockClear();
       await loader.load(asWasmPath);
       expect(readSpy).not.toHaveBeenCalled();
