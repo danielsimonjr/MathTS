@@ -18,22 +18,27 @@ import { pushConfigOverlay, popConfigOverlay } from './factories/scope.js';
 /**
  * Run `fn` while factories see `overlay` merged on the config proxy stack.
  *
- * Nested calls push additional overlays; the stack is restored in `finally`, including
- * when `fn` throws. Overlays are **synchronous only**: if `fn` returns a Promise and
- * config is read after an `await`, the overlay is already popped and reads fall back
- * to `DEFAULT_CONFIG`.
+ * Missing overlay keys fall back to `DEFAULT_CONFIG` (so
+ * `runWithConfig({ number: 'Fraction' }, …)` still uses the default `matrix`).
+ * Nested calls **replace** the overlay (they do not stack-merge with the parent);
+ * the stack is restored in `finally`, including when `fn` throws.
  *
- * A barrel-level `evaluate` invoked from inside an overlay still sees that overlay
- * until the outer `runWithConfig` returns (same-turn re-entry).
+ * Overlays are **synchronous only**. `runWithConfig` pops before the return
+ * value is used: if `fn` returns a Promise, any config read in a `.then` /
+ * `await` continuation sees `DEFAULT_CONFIG`, not the overlay. Do not wrap
+ * async work and expect the overlay to survive the tick.
+ *
+ * `config()` always reads and writes `DEFAULT_CONFIG` directly, even while an
+ * overlay is active. A barrel-level `evaluate` invoked from inside an overlay
+ * still sees that overlay until the outer `runWithConfig` returns (same-turn
+ * re-entry).
  *
  * @example
  * ```ts
  * import { config, runWithConfig, evaluate } from '@danielsimonjr/mathts-functions';
  *
- * runWithConfig({ number: 'Fraction' }, () => {
- *   expect(evaluate('1/2').s).toBe(1);
- * });
- * expect(config().number).toBe('number');
+ * const half = runWithConfig({ number: 'Fraction' }, () => evaluate('1/2'));
+ * // half is a Fraction; config().number is still 'number'
  * ```
  */
 export function runWithConfig<T>(overlay: Partial<ConfigOptions>, fn: () => T): T {

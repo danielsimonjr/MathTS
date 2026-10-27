@@ -183,19 +183,60 @@ export interface MathInstance {
  * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
  * ```
  */
+function copyFunctionSurface(
+  from: (...args: unknown[]) => unknown,
+  to: (...args: unknown[]) => unknown
+): void {
+  Object.defineProperty(to, 'name', { value: from.name, configurable: true });
+  Object.defineProperty(to, 'length', { value: from.length, configurable: true });
+  try {
+    Object.setPrototypeOf(to, Object.getPrototypeOf(from));
+  } catch {
+    // exotic functions may refuse a prototype swap
+  }
+  const proto = Object.getOwnPropertyDescriptor(from, 'prototype');
+  if (proto) {
+    try {
+      Object.defineProperty(to, 'prototype', proto);
+    } catch {
+      try {
+        (to as { prototype: unknown }).prototype = (from as { prototype: unknown }).prototype;
+      } catch {
+        // class `.prototype` can be non-writable; instanceof still works if
+        // Reflect.construct uses `from` as newTarget when the wrapper is used.
+      }
+    }
+  }
+  for (const key of Reflect.ownKeys(from)) {
+    if (key === 'length' || key === 'name' || key === 'prototype') continue;
+    if (Object.prototype.hasOwnProperty.call(to, key)) continue;
+    const desc = Object.getOwnPropertyDescriptor(from, key);
+    if (!desc) continue;
+    try {
+      Object.defineProperty(to, key, desc);
+    } catch {
+      // skip non-configurable exotic keys (caller/arguments)
+    }
+  }
+}
+
 function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
   currentConfig: MathJSConfig
 ): T {
   const wrapped = function (this: unknown, ...args: unknown[]) {
+    const construct = new.target;
     return mathFunctions.runWithConfig(currentConfig, () => {
-      if (new.target) {
-        return Reflect.construct(fn, args, new.target);
+      if (construct) {
+        // Use `fn` as newTarget when the caller wrote `new wrapper(...)` so
+        // the instance's [[Prototype]] is `fn.prototype` (instanceof works).
+        // Preserve a subclass newTarget (`class X extends wrapper`).
+        return Reflect.construct(fn, args, construct === wrapped ? fn : construct);
       }
       return fn.apply(this, args);
     });
   };
-  Object.defineProperty(wrapped, 'name', { value: fn.name, configurable: true });
+  copyFunctionSurface(fn, wrapped);
   return wrapped as T;
 }
 

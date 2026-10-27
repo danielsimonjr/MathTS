@@ -3,6 +3,9 @@ import { create, all } from '../src/index.js';
 import {
   config as barrelConfig,
   evaluate as barrelEvaluate,
+  sin as barrelSin,
+  divide as barrelDivide,
+  Interval,
 } from '@danielsimonjr/mathts-functions';
 import { BigNumber, Fraction } from '@danielsimonjr/mathts-core';
 
@@ -69,5 +72,32 @@ describe('create(all, config) instance isolation (#425)', () => {
     expect(a.config().precision).toBe(128);
     expect(b.config().precision).not.toBe(128);
     expect(barrelConfig().precision).toBe(barrelBefore);
+    // Overlay does not call BigNumber.config; process-wide decimal precision
+    // stays on the BigNumber singleton (plan risk, I-9).
+  });
+
+  it('wrapped methods keep typed-function metadata and constructability', () => {
+    const math = create(all);
+    type TypedFn = { name: string; length: number; signatures?: unknown };
+
+    // Independent oracle: the unwrapped functions-barrel `sin` / `divide`.
+    expect((math.sin as TypedFn).name).toBe((barrelSin as TypedFn).name);
+    expect((math.sin as TypedFn).length).toBe((barrelSin as TypedFn).length);
+    expect((math.sin as TypedFn).signatures).toBe((barrelSin as TypedFn).signatures);
+    expect((math.divide as TypedFn).signatures).toBe((barrelDivide as TypedFn).signatures);
+
+    const Ctor = math.Interval as typeof Interval;
+    const iv = new Ctor(0, 1);
+    expect(iv).toBeInstanceOf(Interval);
+    expect(iv.lo).toBe(0);
+    expect(iv.hi).toBe(1);
+  });
+
+  it('chain looks up wrapped methods (post-wrap) without leaking barrel config', () => {
+    const a = create(all, { number: 'Fraction' });
+    expect(a.chain(3).add(4).done()).toBe(7);
+    type EvaluateFn = (expr: string) => unknown;
+    expect((a.evaluate as EvaluateFn)('1/2')).toBeInstanceOf(Fraction);
+    expect(typeof barrelEvaluate('1/2')).toBe('number');
   });
 });

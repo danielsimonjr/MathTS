@@ -142,10 +142,25 @@ for (const t of extraTypes) {
 /** Synchronous config overlay stack for {@link runWithConfig} (see config-api.ts). */
 const configOverlayStack: ConfigOptions[] = [];
 
+/**
+ * Predicted-false on the barrel hot path (no overlay). Kept as a boolean so the
+ * proxy `get` trap is a single well-predicted branch plus a direct property
+ * read of `DEFAULT_CONFIG` — `Reflect.get(..., receiver)` plus an overlay
+ * lookup on every `config.matrix` access was a measurable regression on
+ * `range` / `evaluate`.
+ */
+let overlayActive = false;
+
 function activeConfigSource(): ConfigOptions {
-  return configOverlayStack.length > 0
-    ? configOverlayStack[configOverlayStack.length - 1]!
-    : DEFAULT_CONFIG;
+  return overlayActive ? configOverlayStack[configOverlayStack.length - 1]! : DEFAULT_CONFIG;
+}
+
+function readConfigProp(source: object, prop: string | symbol): unknown {
+  return (source as unknown as Record<string | symbol, unknown>)[prop];
+}
+
+function writeConfigProp(source: object, prop: string | symbol, value: unknown): void {
+  (source as unknown as Record<string | symbol, unknown>)[prop] = value;
 }
 
 /**
@@ -154,44 +169,72 @@ function activeConfigSource(): ConfigOptions {
  */
 export function pushConfigOverlay(overlay: ConfigOptions): void {
   configOverlayStack.push(overlay);
+  overlayActive = true;
 }
 
 /** @internal */
 export function popConfigOverlay(): void {
   configOverlayStack.pop();
+  overlayActive = configOverlayStack.length > 0;
 }
 
 /**
  * Config object factories close over — reads/writes route through the active
  * overlay when `runWithConfig` has pushed one, else `DEFAULT_CONFIG`.
+ *
+ * Partial overlays merge with `DEFAULT_CONFIG`: a missing overlay key (e.g.
+ * `runWithConfig({ number: 'Fraction' })` then `config.matrix`) falls back to
+ * the process default. Nested `runWithConfig` calls replace the overlay; they
+ * do not stack-merge keys with the parent overlay.
  */
 const factoryConfigProxy = new Proxy(DEFAULT_CONFIG, {
-  get(_target, prop, receiver) {
-    return Reflect.get(activeConfigSource(), prop, receiver);
-  },
-  set(_target, prop, value, receiver) {
-    return Reflect.set(activeConfigSource(), prop, value, receiver);
-  },
-  has(_target, prop) {
-    const active = activeConfigSource();
-    if (prop in active) return true;
-    return configOverlayStack.length > 0 && prop in DEFAULT_CONFIG;
-  },
-  ownKeys() {
-    const active = activeConfigSource();
-    if (configOverlayStack.length === 0) {
-      return Reflect.ownKeys(DEFAULT_CONFIG);
+  get(target, prop) {
+    if (!overlayActive) {
+      return readConfigProp(target, prop);
     }
-    return [...new Set([...Reflect.ownKeys(DEFAULT_CONFIG), ...Reflect.ownKeys(active)])];
-  },
-  getOwnPropertyDescriptor(_target, prop) {
-    const active = activeConfigSource();
-    const desc = Object.getOwnPropertyDescriptor(active, prop);
-    if (desc) return desc;
-    if (configOverlayStack.length > 0) {
-      return Object.getOwnPropertyDescriptor(DEFAULT_CONFIG, prop);
+    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+    if (Object.hasOwn(overlay, prop)) {
+      return readConfigProp(overlay, prop);
     }
-    return undefined;
+    return readConfigProp(target, prop);
+  },
+  set(_target, prop, value) {
+    writeConfigProp(activeConfigSource(), prop, value);
+    return true;
+  },
+  has(target, prop) {
+    if (!overlayActive) return prop in target;
+    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+    return Object.hasOwn(overlay, prop) || prop in target;
+  },
+  ownKeys(target) {
+    if (!overlayActive) return Reflect.ownKeys(target);
+    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+    return [...new Set([...Reflect.ownKeys(target), ...Reflect.ownKeys(overlay)])];
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    if (!overlayActive) {
+      return Object.getOwnPropertyDescriptor(target, prop);
+    }
+    const overlay = configOverlayStack[configOverlayStack.length - 1]!;
+    if (Object.hasOwn(overlay, prop)) {
+      const desc = Object.getOwnPropertyDescriptor(overlay, prop);
+      if (!desc) return undefined;
+      // Extra overlay keys (e.g. compat `epsilon`) are not on the target;
+      // Proxy invariants require those descriptors to be configurable.
+      if (!Object.hasOwn(target, prop)) {
+        return { ...desc, configurable: true };
+      }
+      return desc;
+    }
+    return Object.getOwnPropertyDescriptor(target, prop);
+  },
+  defineProperty(_target, prop, descriptor) {
+    Object.defineProperty(activeConfigSource(), prop, descriptor);
+    return true;
+  },
+  deleteProperty(_target, prop) {
+    return delete (activeConfigSource() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });
 

@@ -74,6 +74,10 @@ describe('create(all) keeps compat shims overlaid on the functions namespace', (
 
 describe('config is independent per instance', () => {
   it('each create(all) instance keeps its own config (#425)', () => {
+    // Independent oracle: mathjs `create(all)` instances do not share config
+    // (https://mathjs.org/docs/core/configuration.html). Audit I-9 / #425:
+    // `create(all, config)` must not write the process-wide functions singleton,
+    // so sibling instances keep distinct `precision` values.
     const a = create(all);
     const b = create(all);
     a.config({ precision: 99 });

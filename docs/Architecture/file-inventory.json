@@ -429,7 +429,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 365
+      "loc": 406
     },
     {
       "file": "compat/src/shims.ts",
@@ -471,7 +471,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 84
+      "loc": 88
     },
     {
       "file": "compat/tests/gap-config-behavior.test.ts",
@@ -485,7 +485,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 74
+      "loc": 104
     },
     {
       "file": "compat/tests/matrix-array-ops.test.ts",
@@ -5812,7 +5812,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 61
+      "loc": 66
     },
     {
       "file": "functions/src/core/config.ts",
@@ -5917,7 +5917,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 239
+      "loc": 282
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -10166,7 +10166,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 34
+      "loc": 135
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
