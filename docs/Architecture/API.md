@@ -697,7 +697,8 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
 `numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`
-and `solveDAE` for forward finite-difference Jacobians), `newton`/`secant`/`halley`,
+and `solveDAE` for forward finite-difference Jacobians), `hermiteCubic` (shared dense
+output for `solveODE` events and `solveDDE`), `newton`/`secant`/`halley`,
 `fsolve`/`root` (core `norm2` in the line search), Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`
 (core `norm2`), `eigsh` (Lanczos, core `norm2`),
 `thomasSolve`/`solveBanded`/`toeplitzSolve`/`ldl`, `funm`/`cosm`/`sinm`,

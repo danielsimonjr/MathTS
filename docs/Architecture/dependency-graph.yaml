@@ -7799,7 +7799,7 @@ modules:
       constants:
         - createSign
     functions/src/arithmetic/snap-to-round.ts:
-      description: snap-to-round module
+      description: Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -15039,7 +15039,7 @@ modules:
       functions:
         - rootsLegendre
     functions/src/numeric/hermite.ts:
-      description: Cubic-Hermite interpolation on `[ta, tb]` (internal; shared by DDE/ODE solvers).
+      description: Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
@@ -39452,7 +39452,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1194
   totalModules: 82
-  totalLinesOfCode: 200943
+  totalLinesOfCode: 200999
   totalExports: 6190
   totalClasses: 59
   totalInterfaces: 539

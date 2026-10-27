@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Sprint 2R clone batch 3 (`functions`):** factory `ceil`/`floor` share `snapNumber`/`snapBig`,
+  matrix 1/∞ norms share `_matrixNormSum`, geometry/set flatten call core `flatten`, GPU/CPU
+  reductions share `reduceNumbers`, and `solveODE`/`solveDDE` share `hermiteCubic`. `snapBig`
+  compares with core BigNumber `equals` as well as decimal.js `eq`.
+
 ### Fixed
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
   `vitest`, `@vitest/browser`, `@vitest/browser-playwright` and `@vitest/coverage-v8` from `^5.0.0` to `^5.0.5`, and

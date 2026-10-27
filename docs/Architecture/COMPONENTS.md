@@ -243,7 +243,7 @@ special functions. The largest package (478 src files).
 //   wasm/        JS-side *Dispatch bridges + WasmLoader (backend is assembly/src)
 
 // Representative domains (each a src subtree under functions/src/):
-//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte …
+//   numeric/     fsolve · minimize · quad · bspline · krylov · eigsh · interpn · monte · hermiteCubic …
 //   signal/      internal fft (conv) · fir · iir · spectral · wavelets
 // Public fft: factory matrix/fft.ts; parallelFFT in typed/signal.ts; shared fft-core-f64.ts; AS kernel assembly/src/ops/fft.ts
 //   stats/       fit · inference · mvn · power · timeseries

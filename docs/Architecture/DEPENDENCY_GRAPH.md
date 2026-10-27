@@ -3784,7 +3784,7 @@ graph LR
 
 ---
 
-### `functions/src/arithmetic/snap-to-round.ts` - snap-to-round module
+### `functions/src/arithmetic/snap-to-round.ts` - Shared nearlyEqual snap for scalar ceil/floor (`toward` is `Math.ceil` or `Math.floor`).
 
 **Internal Dependencies:**
 
@@ -6829,7 +6829,7 @@ graph LR
 
 ---
 
-### `functions/src/numeric/hermite.ts` - Cubic-Hermite interpolation on `[ta, tb]` (internal; shared by DDE/ODE solvers).
+### `functions/src/numeric/hermite.ts` - Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,
 
 **Exports:**
 
@@ -18787,7 +18787,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1194   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200943 |
+| Total Lines of Code     | 200999 |
 | Total Exports           | 6190   |
 | Total Re-exports        | 2619   |
 | Total Classes           | 59     |

@@ -5602,7 +5602,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 35
+      "loc": 74
     },
     {
       "file": "functions/src/arithmetic/sqrt.ts",
@@ -6568,7 +6568,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 23
+      "loc": 40
     },
     {
       "file": "functions/src/numeric/interpn.ts",
@@ -8556,7 +8556,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 111
+      "loc": 251
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",

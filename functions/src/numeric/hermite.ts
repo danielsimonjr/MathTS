@@ -1,5 +1,22 @@
 /**
- * Cubic-Hermite interpolation on `[ta, tb]` (internal; shared by DDE/ODE solvers).
+ * Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,
+ * using the endpoint states `ya`, `yb` and endpoint derivatives
+ * `fa = f(ta, ya)`, `fb = f(tb, yb)`. C¹ and O(h⁴) accurate, so an event root
+ * located on it matches the true crossing to well under the solver `tol`.
+ * Shared by `solveDDE` and `solveODE` (internal; not a public export).
+ *
+ * @param ta - Left endpoint of the step.
+ * @param tb - Right endpoint of the step.
+ * @param ya - State at `ta`.
+ * @param yb - State at `tb`.
+ * @param fa - Derivative at `ta`.
+ * @param fb - Derivative at `tb`.
+ * @param t - Query time in `[ta, tb]` (or either side; `h === 0` yields `ya`).
+ * @returns Interpolated state at `t`.
+ *
+ * @example
+ * // y(t)=t³ on [0,1]: ya=0, yb=1, fa=0, fb=3 → midpoint 0.125
+ * hermiteCubic(0, 1, [0], [1], [0], [3], 0.5) // [0.125]
  */
 export function hermiteCubic(
   ta: number,
