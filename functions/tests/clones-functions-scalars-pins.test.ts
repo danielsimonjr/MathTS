@@ -16,6 +16,7 @@ import {
   type PageRankRestartResult,
   type BetweennessRestartResult,
 } from '../src/index.js';
+import { aggregateRestartVectors } from '../src/typed/graph.js';
 
 /** Independent round-before-Euclid oracle (iltGcd semantics). */
 function roundEuclidOracle(a: number, b: number): number {
@@ -121,6 +122,9 @@ describe('G39 — aggregateRestartVectors (mean + population std)', () => {
   it('oracle on two fixed vectors', () => {
     expect(oracle.mean).toEqual([2.5, 3.5, 4.5]);
     expect(oracle.std).toEqual([1.5, 1.5, 1.5]);
+    const merged = aggregateRestartVectors(vectors, 'all');
+    expect([...merged.mean]).toEqual(oracle.mean);
+    expect([...merged.std!]).toEqual(oracle.std);
   });
 
   it('pageRank aggregation=all matches pinned restartStats (path graph, 2 restarts)', async () => {

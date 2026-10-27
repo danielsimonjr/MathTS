@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-27",
-    "totalFiles": 1192,
+    "totalFiles": 1193,
     "totalModules": 82,
-    "totalExports": 6187
+    "totalExports": 6192
   },
   "entryPoints": [
     {
@@ -21036,6 +21036,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
+          {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
@@ -21252,6 +21256,10 @@
             "imports": ["parse", "evaluate"]
           },
           {
+            "file": "./euclid.js",
+            "imports": ["euclidSnap"]
+          },
+          {
             "file": "./polynomial-ideal.js",
             "imports": ["polyFromExpression", "buchberger", "polyToString"]
           },
@@ -21447,7 +21455,7 @@
         "internalDependencies": [
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma"]
+            "imports": ["_lgamma", "betaincClosedScalar", "chooseScalar", "gammaincScalar"]
           },
           {
             "file": "./special.js",
@@ -21579,6 +21587,15 @@
           "noncentralChi2PDF",
           "typedDistributions"
         ]
+      },
+      "functions/src/typed/euclid.ts": {
+        "description": "Euclidean GCD with a caller-chosen integer snap (floor vs round).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["euclidSnap"],
+        "functions": ["euclidSnap"]
       },
       "functions/src/typed/factorization/finite-field.ts": {
         "description": "Dense univariate polynomial arithmetic over the finite field 𝔽_p, backed",
@@ -22066,6 +22083,7 @@
           "topologicalSort",
           "isConnected",
           "graphDistance",
+          "aggregateRestartVectors",
           "pageRank",
           "betweennessCentrality",
           "eigenvectorCentrality"
@@ -22091,6 +22109,7 @@
           "topologicalSort",
           "isConnected",
           "graphDistance",
+          "aggregateRestartVectors",
           "pageRank",
           "betweennessCentrality",
           "eigenvectorCentrality"
@@ -22108,7 +22127,13 @@
           },
           {
             "file": "../wasm/special/scalars.js",
-            "imports": ["_lgamma", "erfcSelfContained"]
+            "imports": [
+              "_lgamma",
+              "betaincClosedScalar",
+              "chooseScalar",
+              "erfcSelfContained",
+              "gammaincScalar"
+            ]
           },
           {
             "file": "./special.js",
@@ -24419,7 +24444,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createIsPrime"],
+        "exports": ["createIsPrime", "trialPrime"],
+        "functions": ["trialPrime", "trialPrime", "trialPrime"],
         "constants": ["createIsPrime"]
       },
       "functions/src/utils/isZero.ts": {
@@ -25242,6 +25268,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -25271,6 +25299,8 @@
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "betaincClosedScalar",
+          "chooseScalar",
           "gammaincScalar",
           "gammaincpScalar",
           "betaincScalar",
@@ -40957,6 +40987,7 @@
           "functions/src/typed/complex.ts",
           "functions/src/typed/dist-objects.ts",
           "functions/src/typed/distributions.ts",
+          "functions/src/typed/euclid.ts",
           "functions/src/typed/factorization/finite-field.ts",
           "functions/src/typed/factorization/hensel.ts",
           "functions/src/typed/factorization/index.ts",
@@ -41758,13 +41789,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1192,
+    "totalTypeScriptFiles": 1193,
     "totalModules": 82,
-    "totalLinesOfCode": 201024,
-    "totalExports": 6187,
+    "totalLinesOfCode": 200899,
+    "totalExports": 6192,
     "totalClasses": 59,
     "totalInterfaces": 539,
-    "totalFunctions": 1963,
+    "totalFunctions": 1970,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

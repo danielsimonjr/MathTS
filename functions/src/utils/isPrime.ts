@@ -26,6 +26,41 @@ interface IsPrimeDependencies {
   typed: TypedFunction;
 }
 
+export type TrialPrimeConsts<T> = { zero: T; one: T; two: T; three: T; five: T; six: T };
+
+function trialPrimeNumber(x: number, c: TrialPrimeConsts<number>): boolean {
+  if (x <= c.three) return x > c.one;
+  if (x % c.two === c.zero || x % c.three === c.zero) return false;
+  for (let i = c.five; i * i <= x; i += c.six) {
+    if (x % i === c.zero || x % (i + c.two) === c.zero) return false;
+  }
+  return true;
+}
+
+function trialPrimeBigint(x: bigint, c: TrialPrimeConsts<bigint>): boolean {
+  if (x <= c.three) return x > c.one;
+  if (x % c.two === c.zero || x % c.three === c.zero) return false;
+  for (let i = c.five; i * i <= x; i += c.six) {
+    if (x % i === c.zero || x % (i + c.two) === c.zero) return false;
+  }
+  return true;
+}
+
+/** Trial-division primality test; `c` supplies typed literals (no mixed-type loop). */
+export function trialPrime(x: number, c: TrialPrimeConsts<number>): boolean;
+export function trialPrime(x: bigint, c: TrialPrimeConsts<bigint>): boolean;
+export function trialPrime(
+  x: number | bigint,
+  c: TrialPrimeConsts<number> | TrialPrimeConsts<bigint>
+): boolean {
+  return typeof x === 'number'
+    ? trialPrimeNumber(x, c as TrialPrimeConsts<number>)
+    : trialPrimeBigint(x, c as TrialPrimeConsts<bigint>);
+}
+
+const NUMBER_TRIAL = { zero: 0, one: 1, two: 2, three: 3, five: 5, six: 6 };
+const BIGINT_TRIAL = { zero: 0n, one: 1n, two: 2n, three: 3n, five: 5n, six: 6n };
+
 const name = 'isPrime';
 const dependencies = ['typed'];
 
@@ -62,35 +97,9 @@ export const createIsPrime = /* #__PURE__ */ factory(
      *                    Throws an error in case of an unknown data type.
      */
     return typed(name, {
-      number: function (x: number): boolean {
-        if (x <= 3) {
-          return x > 1;
-        }
-        if (x % 2 === 0 || x % 3 === 0) {
-          return false;
-        }
-        for (let i = 5; i * i <= x; i += 6) {
-          if (x % i === 0 || x % (i + 2) === 0) {
-            return false;
-          }
-        }
-        return true;
-      },
+      number: (x: number): boolean => trialPrimeNumber(x, NUMBER_TRIAL),
 
-      bigint: function (x: bigint): boolean {
-        if (x <= 3n) {
-          return x > 1n;
-        }
-        if (x % 2n === 0n || x % 3n === 0n) {
-          return false;
-        }
-        for (let i = 5n; i * i <= x; i += 6n) {
-          if (x % i === 0n || x % (i + 2n) === 0n) {
-            return false;
-          }
-        }
-        return true;
-      },
+      bigint: (x: bigint): boolean => trialPrimeBigint(x, BIGINT_TRIAL),
 
       BigNumber: function (n: BigNumberType): boolean {
         if (n.lessThanOrEqual(3)) return n.gt(1);

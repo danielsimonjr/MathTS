@@ -477,14 +477,16 @@ function _splitSeed(baseSeed: number, k: number): number {
   return ((baseSeed ^ (((k * 0x9e3779b9) | 0) >>> 0)) >>> 0) | 0;
 }
 
+type RestartAggregation = 'mean' | 'all';
+
 /**
- * Aggregate an array of rank vectors: compute element-wise mean and std.
- * @internal
+ * Element-wise mean and population std across restart vectors.
+ * @internal — not re-exported from the package barrel.
  */
-function _aggregateRanks(
+export function aggregateRestartVectors(
   vectors: Float64Array[],
-  aggregation: 'mean' | 'all'
-): PageRankResult | PageRankRestartResult {
+  aggregation: RestartAggregation
+): { mean: Float64Array; std?: Float64Array } {
   const n = vectors[0].length;
   const count = vectors.length;
 
@@ -495,7 +497,7 @@ function _aggregateRanks(
   for (let i = 0; i < n; i++) mean[i] /= count;
 
   if (aggregation === 'mean') {
-    return { ranks: mean };
+    return { mean };
   }
 
   const std = new Float64Array(n);
@@ -507,10 +509,21 @@ function _aggregateRanks(
   }
   for (let i = 0; i < n; i++) std[i] = Math.sqrt(std[i] / count);
 
+  return { mean, std };
+}
+
+function _aggregateRanks(
+  vectors: Float64Array[],
+  aggregation: RestartAggregation
+): PageRankResult | PageRankRestartResult {
+  const { mean, std } = aggregateRestartVectors(vectors, aggregation);
+  if (aggregation === 'mean') {
+    return { ranks: mean };
+  }
   return {
     ranks: mean,
     ranksPerRestart: vectors,
-    restartStats: { mean, std },
+    restartStats: { mean, std: std! },
   };
 }
 
@@ -833,40 +846,18 @@ function _betweennessOnce(
   return cb;
 }
 
-/**
- * Aggregate betweenness restart vectors into a result.
- * @internal
- */
 function _aggregateBetweenness(
   vectors: Float64Array[],
-  aggregation: 'mean' | 'all'
+  aggregation: RestartAggregation
 ): BetweennessResult | BetweennessRestartResult {
-  const n = vectors[0].length;
-  const count = vectors.length;
-
-  const mean = new Float64Array(n);
-  for (const v of vectors) {
-    for (let i = 0; i < n; i++) mean[i] += v[i];
-  }
-  for (let i = 0; i < n; i++) mean[i] /= count;
-
+  const { mean, std } = aggregateRestartVectors(vectors, aggregation);
   if (aggregation === 'mean') {
     return { centrality: mean };
   }
-
-  const std = new Float64Array(n);
-  for (const v of vectors) {
-    for (let i = 0; i < n; i++) {
-      const d = v[i] - mean[i];
-      std[i] += d * d;
-    }
-  }
-  for (let i = 0; i < n; i++) std[i] = Math.sqrt(std[i] / count);
-
   return {
     centrality: mean,
     centralityPerRestart: vectors,
-    restartStats: { mean, std },
+    restartStats: { mean, std: std! },
   };
 }
 

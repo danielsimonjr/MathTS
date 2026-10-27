@@ -2301,6 +2301,10 @@
       "functions/src/typed/interpolation.ts"
     ],
     "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/typed/euclid.ts": [
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/wasm/elementwise/wasm-bridge.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/fused.ts",
