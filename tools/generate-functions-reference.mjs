@@ -124,6 +124,7 @@ const DOMAIN_SUPPLEMENT = {
     'physicsScope',
     'compileScalar',
     'compileScalarGradient',
+    'fitScalarParameters',
     'scalarToNode',
     'nodeToScalar',
     'simplifyScalar',
