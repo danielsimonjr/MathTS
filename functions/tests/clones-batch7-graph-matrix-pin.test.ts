@@ -18,7 +18,7 @@ import {
   CENTRALITY_WORKER_THRESHOLD as HELPER_THRESHOLD,
   runCentralityRestarts,
 } from '../src/typed/centrality-restarts.js';
-import { column, row, matrix, matrixFromColumns, matrixFromRows } from '../src/factories/index.js';
+import { column, row, matrixFromColumns, matrixFromRows } from '../src/factories/index.js';
 import { MathJSSparseMatrix, createMatrixBridge } from '../src/factories/matrix-bridge.js';
 import { fft, ifft } from '../src/index.js';
 import { kdTreeKNN } from '../src/geometry/geometry-extra.js';
@@ -191,14 +191,41 @@ describe('clone batch7 pin — column/row slice (slice2d)', () => {
     expectError(() => column(m, -1), IndexError, 'Index out of range (-1 < 0)');
   });
 
-  it('sparse and dense 2×2 yield the same column/row values', () => {
-    const dense = matrix(m) as MatrixLike;
-    const sparse = matrix(m, 'sparse') as MatrixLike;
-    const asValue = (x: unknown): unknown => (x as MatrixLike).valueOf?.() ?? x;
-    expect(asValue(column(dense, 1))).toEqual([[2], [4]]);
-    expect(asValue(column(sparse, 1))).toEqual([[2], [4]]);
-    expect(asValue(row(dense, 1))).toEqual([[3, 4]]);
-    expect(asValue(row(sparse, 1))).toEqual([[3, 4]]);
+  it('subset matrix result is returned as-is; a scalar is wrapped as [[value]]', () => {
+    class FakeIndex {
+      args: unknown[];
+      constructor(...args: unknown[]) {
+        this.args = args;
+      }
+    }
+    class FakeMatrix {
+      size(): number[] {
+        return [2, 1];
+      }
+      subset(): unknown {
+        return 0;
+      }
+    }
+    Object.defineProperty(FakeMatrix.prototype, 'isMatrix', { value: true });
+    const wrapped: unknown[][][] = [];
+    const wrap = (data: unknown[][]) => {
+      wrapped.push(data);
+      return data;
+    };
+    const matrixResult = new FakeMatrix();
+    const asMatrix: MatrixLike = {
+      size: () => [2, 2],
+      subset: () => matrixResult,
+    };
+    expect(slice2d(asMatrix, 1, 0, wrap, FakeIndex, (a, b) => ({ a, b }))).toBe(matrixResult);
+    expect(wrapped).toEqual([]);
+
+    const asScalar: MatrixLike = {
+      size: () => [2, 2],
+      subset: () => 4,
+    };
+    expect(slice2d(asScalar, 1, 1, wrap, FakeIndex, (a, b) => ({ a, b }))).toEqual([[4]]);
+    expect(wrapped).toEqual([[[4]]]);
   });
 });
 
