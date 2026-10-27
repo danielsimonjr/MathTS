@@ -1,10 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  BUN_AUDIT_ARGS,
-  classifyAttempt,
-  runAuditWithRetry,
-} from './bun-audit-retry.mjs';
+import { BUN_AUDIT_ARGS, classifyAttempt, runAuditWithRetry } from './bun-audit-retry.mjs';
 
 test('BUN_AUDIT_ARGS keeps the high floor', () => {
   assert.deepEqual(BUN_AUDIT_ARGS, ['audit', '--audit-level=high']);
@@ -17,7 +13,7 @@ test('classify: exit 0 is ok', () => {
 test('classify: advisory stderr without outage pattern is advisory', () => {
   assert.equal(
     classifyAttempt({ exitCode: 1, stderr: '1 high severity vulnerability found' }),
-    'advisory',
+    'advisory'
   );
 });
 
@@ -25,16 +21,50 @@ test('classify: 503 in stderr is outage', () => {
   assert.equal(classifyAttempt({ exitCode: 1, stderr: 'HTTP 503 Service Unavailable' }), 'outage');
 });
 
+test('classify: bun-native ConnectionRefused and DNSResolveFailed are outage', () => {
+  assert.equal(
+    classifyAttempt({
+      exitCode: 1,
+      stderr:
+        'error: POST https://registry.npmjs.org/-/npm/v1/security/advisories/bulk - ConnectionRefused',
+    }),
+    'outage'
+  );
+  assert.equal(
+    classifyAttempt({
+      exitCode: 1,
+      stderr:
+        'error: POST https://registry.npmjs.org/-/npm/v1/security/advisories/bulk - DNSResolveFailed',
+    }),
+    'outage'
+  );
+});
+
 test('classify: timeout and spawn errors are outage', () => {
   assert.equal(classifyAttempt({ exitCode: null, stderr: '', timedOut: true }), 'outage');
   assert.equal(
     classifyAttempt({ exitCode: null, stderr: 'spawn ENOENT', spawnError: new Error('ENOENT') }),
-    'outage',
+    'outage'
   );
+});
+
+test('classify: timedOut wins over exit 0', () => {
+  assert.equal(classifyAttempt({ exitCode: 0, stderr: '', timedOut: true }), 'outage');
 });
 
 test('classify: unknown non-zero exit without outage pattern is advisory (conservative)', () => {
   assert.equal(classifyAttempt({ exitCode: 2, stderr: 'internal parser failure' }), 'advisory');
+});
+
+test('classify: 503 in advisory stdout is not an outage', () => {
+  assert.equal(
+    classifyAttempt({
+      exitCode: 1,
+      stdout: 'CVE-2024-50379 lodash prototype pollution',
+      stderr: '1 high severity vulnerability found',
+    }),
+    'advisory'
+  );
 });
 
 test('success on first attempt spawns once', async () => {
@@ -115,4 +145,33 @@ test('unknown failure does not retry', async () => {
   });
   assert.equal(code, 1);
   assert.equal(calls, 1);
+});
+
+test('advisory stdout is forwarded and not retried into a pass', async () => {
+  let calls = 0;
+  const chunks = [];
+  const origWrite = process.stdout.write.bind(process.stdout);
+  process.stdout.write = (chunk, ...rest) => {
+    chunks.push(String(chunk));
+    return origWrite(chunk, ...rest);
+  };
+  try {
+    const code = await runAuditWithRetry({
+      backoffMs: [0, 0],
+      runOnce: async () => {
+        calls++;
+        if (calls > 1) return { exitCode: 0, stderr: '' };
+        return {
+          exitCode: 1,
+          stdout: 'high: lodash prototype pollution\n',
+          stderr: '',
+        };
+      },
+    });
+    assert.equal(code, 1);
+    assert.equal(calls, 1);
+    assert.match(chunks.join(''), /high: lodash prototype pollution/);
+  } finally {
+    process.stdout.write = origWrite;
+  }
 });

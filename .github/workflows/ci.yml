@@ -108,7 +108,7 @@ jobs:
       # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker,
       # the scanner that `smoke-dist-node.mjs` uses to find a Node builtin in a built browser
       # entry is tested without a build, and the docs dist-freshness preflight uses its own
-      # fixtures. The first two run under `bun test` through their root scripts. The last two
+      # fixtures. The first two run under `bun test` through their root scripts. The last three
       # are direct `node --test`, as the other `tools/test` files are. They sit just before
       # the Node 22 setup below, so none of them sees that Node.
       - name: Dependency-graph query tests
