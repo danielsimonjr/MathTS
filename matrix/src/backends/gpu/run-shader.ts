@@ -2,9 +2,19 @@
  * Shared acquire / write / dispatch / read / release path for matrix GPU kernels.
  */
 
-import type { GPUBackend } from '../GPUBackend.js';
+import type { BufferPool, GPUContext, ShaderManager } from '@danielsimonjr/mathts-gpu';
 
 export type ShaderBindEntry = { binding: number; bufferIndex: number };
+
+/**
+ * Structural host for {@link runShader}. Kept local so this module does not
+ * import GPUBackend (that import was a type-only cycle).
+ */
+export interface RunShaderHost {
+  getContext(): GPUContext;
+  getBufferPool(): BufferPool;
+  getShaderManager(): ShaderManager;
+}
 
 export interface RunShaderPlan {
   pipeline: string;
@@ -93,44 +103,72 @@ export function planRunShaderFromTranspose(
 }
 
 /**
- * Run a compute shader described by `plan` on an initialized {@link GPUBackend}.
+ * Run a compute shader described by `plan` on an initialized GPU backend host.
+ * Buffers are released on both success and throw (the pre-extract bodies only
+ * released after a successful readback).
  */
-export async function runShader(backend: GPUBackend, plan: RunShaderPlan): Promise<Float32Array> {
+export async function runShader(
+  backend: RunShaderHost,
+  plan: RunShaderPlan
+): Promise<Float32Array> {
   const ctx = backend.getContext();
   const pool = backend.getBufferPool();
   const shaders = backend.getShaderManager();
 
-  const storageBuffers = plan.bytes.map((byteSize, idx) =>
-    pool.acquireStorageBuffer(
-      byteSize,
-      plan.storageLabels[idx] ?? `storage-${idx}`,
-      true,
-      idx !== plan.resultBufferIndex
-    )
-  );
+  const storageBuffers: GPUBuffer[] = [];
+  let bufferParams: GPUBuffer | undefined;
+  try {
+    for (let idx = 0; idx < plan.bytes.length; idx++) {
+      const byteSize = plan.bytes[idx];
+      if (byteSize === undefined) {
+        throw new Error(`runShader: missing byte size at index ${idx}`);
+      }
+      storageBuffers.push(
+        pool.acquireStorageBuffer(
+          byteSize,
+          plan.storageLabels[idx] ?? `storage-${idx}`,
+          true,
+          idx !== plan.resultBufferIndex
+        )
+      );
+    }
 
-  const bufferParams = pool.acquireUniformBuffer(UNIFORM_BYTES, 'params');
-  for (let i = 0; i < plan.writes.length; i++) {
-    ctx.writeBuffer(storageBuffers[i], plan.writes[i]);
+    bufferParams = pool.acquireUniformBuffer(UNIFORM_BYTES, 'params');
+    for (let i = 0; i < plan.writes.length; i++) {
+      const target = storageBuffers[i];
+      const payload = plan.writes[i];
+      if (target === undefined || payload === undefined) {
+        throw new Error(`runShader: missing write target at index ${i}`);
+      }
+      ctx.writeBuffer(target, payload);
+    }
+    ctx.writeBuffer(bufferParams, plan.params);
+
+    const pipeline = shaders.getRegisteredPipeline(plan.pipeline);
+
+    const bindResources = plan.bindEntries.map((entry) => {
+      const buffer = entry.bufferIndex === -1 ? bufferParams : storageBuffers[entry.bufferIndex];
+      if (buffer === undefined) {
+        throw new Error(`runShader: missing buffer for binding ${entry.binding}`);
+      }
+      return { binding: entry.binding, resource: { buffer } };
+    });
+
+    const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), bindResources);
+    ctx.dispatchCompute(pipeline, [bindGroup], plan.workgroups);
+
+    const resultBuf = storageBuffers[plan.resultBufferIndex];
+    if (resultBuf === undefined) {
+      throw new Error(`runShader: missing result buffer at index ${plan.resultBufferIndex}`);
+    }
+    const resultData = await ctx.readBuffer(resultBuf);
+    return new Float32Array(resultData);
+  } finally {
+    for (const buf of storageBuffers) {
+      pool.release(buf);
+    }
+    if (bufferParams !== undefined) {
+      pool.release(bufferParams);
+    }
   }
-  ctx.writeBuffer(bufferParams, plan.params);
-
-  const pipeline = shaders.getRegisteredPipeline(plan.pipeline);
-
-  const bindResources = plan.bindEntries.map((entry) => {
-    const buffer = entry.bufferIndex === -1 ? bufferParams : storageBuffers[entry.bufferIndex];
-    return { binding: entry.binding, resource: { buffer } };
-  });
-
-  const bindGroup = ctx.createBindGroup(pipeline.getBindGroupLayout(0), bindResources);
-  ctx.dispatchCompute(pipeline, [bindGroup], plan.workgroups);
-
-  const resultData = await ctx.readBuffer(storageBuffers[plan.resultBufferIndex]);
-
-  for (const buf of storageBuffers) {
-    pool.release(buf);
-  }
-  pool.release(bufferParams);
-
-  return new Float32Array(resultData);
 }

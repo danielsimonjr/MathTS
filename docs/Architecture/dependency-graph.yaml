@@ -3824,18 +3824,21 @@ modules:
       description: Shared acquire / write / dispatch / read / release path for matrix GPU kernels.
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ../GPUBackend.js
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-gpu'
+          directory: gpu
           imports:
-            - GPUBackend
-          typeOnly: true
-      workspaceDependencies: []
+            - BufferPool
+            - GPUContext
+            - ShaderManager
       exports:
         - planRunShaderFromAdd
         - planRunShaderFromMatmul
         - planRunShaderFromTranspose
         - runShader
       interfaces:
+        - RunShaderHost
         - RunShaderPlan
       functions:
         - planRunShaderFromAdd
@@ -38298,13 +38301,10 @@ modules:
 dependencyGraph:
   circularDependencies:
     runtime: []
-    typeOnly:
-      - - matrix/src/backends/GPUBackend.ts
-        - matrix/src/backends/gpu/run-shader.ts
-        - matrix/src/backends/GPUBackend.ts
-    total: 1
+    typeOnly: []
+    total: 0
     runtimeCount: 0
-    typeOnlyCount: 1
+    typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
       files:
@@ -39675,17 +39675,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1202
   totalModules: 82
-  totalLinesOfCode: 200779
+  totalLinesOfCode: 200813
   totalExports: 6217
   totalClasses: 59
-  totalInterfaces: 540
+  totalInterfaces: 541
   totalFunctions: 1986
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
   totalReExports: 2627
-  totalTypeOnlyImports: 609
+  totalTypeOnlyImports: 608
   runtimeCircularDeps: 0
-  typeOnlyCircularDeps: 1
+  typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

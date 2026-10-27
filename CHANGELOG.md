@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Sprint 2R near-clone batch 3 (`matrix`):** `GPUBackend` `add` / `matmul` / `transpose` share `runShader`; `GPUMatrixBackend` `addAsync` / `scaleAsync` / `multiplyAsync` share `gpuOrJs` around `shouldUseGPU` and `executeWithFallback`; Schur and SVD share `applyGivensCols` in `matrix/src/operations/givens.ts` (`applyGivensRight` is a thin wrapper). Public names and behavior stay; sync `scale` is unchanged.
+- **Sprint 2R near-clone batch 3 (`matrix`):** `GPUBackend` `add` / `matmul` / `transpose` share `runShader`; `GPUMatrixBackend` `addAsync` / `scaleAsync` / `multiplyAsync` share `gpuOrJs` around `shouldUseGPU` and `executeWithFallback`; Schur and SVD share `applyGivensCols` in `matrix/src/operations/givens.ts` (`applyGivensRight` is a thin wrapper). Public names and behavior stay; sync `scale` is unchanged. `runShader` takes a structural host (no `GPUBackend` import, so no type-only cycle) and releases acquired buffers when a write/dispatch/read throws.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`

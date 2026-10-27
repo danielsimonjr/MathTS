@@ -356,7 +356,9 @@ plus `initializeParallelMatrix()`/`terminateParallelMatrix()`.
 
 **GPU internals**: `BUILTIN_SHADERS` (matmul/matrixAdd/matrixSub/matrixMul/scalarMul/
 transpose/sumReduce WGSL — the domain kernels registered onto the shared
-`ShaderManager` at `GPUBackend` init), `BatchExecutor`, `SyncManager`
+`ShaderManager` at `GPUBackend` init), `BatchExecutor`, `SyncManager`.
+`GPUBackend.add` / `matmul` / `transpose` dispatch through private `runShader`
+(3 storage + params uniform for add/matmul; transpose has no `b`). Not a public export.
 (+ `createSyncManager`). Re-exported from `gpu` for back-compat: `BufferPool`,
 `GPUCapabilities`, `GPUContext`, `GPUContextOptions`, `ShaderManager`,
 `destroyGlobalGPU`, `detectGPUCapabilities`, `getGlobalGPUContext`,

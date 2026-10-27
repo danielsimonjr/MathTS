@@ -1466,15 +1466,15 @@ graph LR
 
 ### `matrix/src/backends/gpu/run-shader.ts` - Shared acquire / write / dispatch / read / release path for matrix GPU kernels.
 
-**Internal Dependencies:**
+**Workspace Dependencies:**
 
-| File               | Imports      | Type               |
-| ------------------ | ------------ | ------------------ |
-| `../GPUBackend.js` | `GPUBackend` | Import (type-only) |
+| Package                     | Import                                  |
+| --------------------------- | --------------------------------------- |
+| `@danielsimonjr/mathts-gpu` | `BufferPool, GPUContext, ShaderManager` |
 
 **Exports:**
 
-- Interfaces: `RunShaderPlan`
+- Interfaces: `RunShaderHost`, `RunShaderPlan`
 - Types: `ShaderBindEntry`
 - Functions: `planRunShaderFromAdd`, `planRunShaderFromMatmul`, `planRunShaderFromTranspose`, `runShader`
 
@@ -18067,17 +18067,7 @@ graph LR
 
 ## Circular Dependency Analysis
 
-**1 circular dependencies detected:**
-
-- **Runtime cycles**: 0 (require attention)
-- **Type-only cycles**: 1 (safe, no runtime impact)
-
-### Type-Only Circular Dependencies
-
-These cycles only involve type imports and are safe (erased at runtime):
-
-- matrix/src/backends/GPUBackend.ts -> matrix/src/backends/gpu/run-shader.ts -> matrix/src/backends/GPUBackend.ts
-
+**No circular dependencies detected.**
 ---
 
 <a id="visual-dependency-graph"></a>
@@ -18915,16 +18905,16 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1202   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200779 |
+| Total Lines of Code     | 200813 |
 | Total Exports           | 6217   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 540    |
+| Total Interfaces        | 541    |
 | Total Functions         | 1986   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
-| Type-only Imports       | 609    |
+| Type-only Imports       | 608    |
 | Runtime Circular Deps   | 0      |
-| Type-only Circular Deps | 1      |
+| Type-only Circular Deps | 0      |
 
 ---

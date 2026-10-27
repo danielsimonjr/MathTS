@@ -204,7 +204,6 @@
     "matrix/src/backends/gpu/run-shader.ts": ["matrix/src/backends/GPUBackend.ts"],
     "matrix/src/backends/GPUBackend.ts": [
       "matrix/src/backends/GPUMatrixBackend.ts",
-      "matrix/src/backends/gpu/run-shader.ts",
       "matrix/src/backends/index.ts"
     ],
     "matrix/src/backends/gpu/gpu-or-js.ts": ["matrix/src/backends/GPUMatrixBackend.ts"],

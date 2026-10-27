@@ -184,7 +184,10 @@ export class WasmLoader           // per-package loader (SHA-384 verify via core
 Decompositions (`matrix/src/operations/*`) are the maintained, oracle-pinned primitives that the `functions`
 factory layer routes to (the "prefer the accelerated primitive" pattern). Nested-array helpers `matMul` and
 `transposeNestedArray` (`operations/common.ts`) are on the package barrel so `functions` can import them;
-`matInv` stays internal to the package. Depends on `core`, `parallel`, `gpu`.
+`matInv` stays internal to the package. `GPUBackend.add` / `matmul` / `transpose` share an internal
+`runShader` helper (`backends/gpu/run-shader.ts`; not on the barrel). `GPUMatrixBackend.addAsync` /
+`scaleAsync` / `multiplyAsync` share `gpuOrJs`; the sync `scale` path stays on JS. Schur and SVD share
+`applyGivensCols` (`operations/givens.ts`; not on the barrel). Depends on `core`, `parallel`, `gpu`.
 
 ### @danielsimonjr/mathts-tensor (`tensor/`)
 

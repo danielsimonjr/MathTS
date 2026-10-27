@@ -11020,7 +11020,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 138
+      "loc": 175
     },
     {
       "file": "matrix/src/backends/gpu/Sync.ts",
@@ -11034,7 +11034,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 361
+      "loc": 358
     },
     {
       "file": "matrix/src/backends/GPUMatrixBackend.ts",
@@ -11608,7 +11608,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 161
+      "loc": 363
     },
     {
       "file": "matrix/tests/security/wasm-integrity.test.ts",
