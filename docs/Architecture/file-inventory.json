@@ -8003,7 +8003,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 760
+      "loc": 730
     },
     {
       "file": "functions/src/typed/logical.ts",
@@ -8381,7 +8381,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 337
+      "loc": 345
     },
     {
       "file": "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -8437,7 +8437,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 173
+      "loc": 167
     },
     {
       "file": "functions/src/wasm/special/scalars.ts",
@@ -10747,7 +10747,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 245
+      "loc": 250
     },
     {
       "file": "functions/tests/wasm-heap-bounded.test.ts",

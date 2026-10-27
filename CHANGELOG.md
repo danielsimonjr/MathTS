@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **`functions` WASM bridge clone-merge (Sprint 2R G40–G41, G48–G50).** `chebBasisRow` and
+  `legendreBasisRow` are exported from the poly WASM bridge (not the package barrel); the JS
+  `chebyshevFit` / `legendreFit` paths call them instead of duplicate recurrences. Shared helpers
+  `asReadReturned` and `withAsTyped` back the existing `asReadReturnedF64` / `asReadReturnedI32` and
+  `withAsF64` / `withAsI32` wrappers (`heap_reset` unchanged). Sort `argsort_f64` and `rank_f64`
+  dispatch share `indexDispatch`. Public names, thresholds, and `policy.ts` are unchanged.
 - **`functions` and `matrix` WASM loaders share `WasmModuleLoader` on `@danielsimonjr/mathts-core/internal`.** `load`, cached `loadModule`, and `getImports` move to `core/src/wasm-loader.ts`. Each package keeps its `WasmLoader` subclass and the Node/browser arms that call `verifyWasmIntegrity` before compile/instantiate. The class is not on core's `.` entry.
 - **Matrix backend clone-merge (Sprint 2R G42, G51–G53, G57, G58).** `functions` nested-array
   `transpose` now calls matrix `transposeNestedArray` (`common.transpose`; the typed `transpose`

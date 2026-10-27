@@ -10,6 +10,8 @@ import {
   legendreFitDispatch,
   WASM_POLY_FIT_THRESHOLD,
   resetPolyWasm,
+  chebBasisRow,
+  legendreBasisRow,
 } from '../src/wasm/poly/wasm-bridge.js';
 import {
   asReadReturnedF64,
@@ -96,18 +98,21 @@ describe('G40/G41 — Chebyshev and Legendre basis recovery (JS path)', () => {
     expect(Math.abs(coeffs[2] - 1)).toBeLessThan(1e-8);
   });
 
-  it('independent Chebyshev basis oracle: T_2(0.5) = -0.5', () => {
-    const row = chebBasisOracle(0.5, 3);
-    expect(row[0]).toBe(1);
-    expect(row[1]).toBe(0.5);
-    expect(row[2]).toBeCloseTo(-0.5, 14);
+  it('chebBasisRow matches independent oracle (degree 0 and 2)', () => {
+    expect(Array.from(chebBasisRow(0.25, 1))).toEqual(chebBasisOracle(0.25, 1));
+    const x = 0.5;
+    const k = 3;
+    const shared = chebBasisRow(x, k);
+    const oracle = chebBasisOracle(x, k);
+    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(oracle[j], 14);
   });
 
-  it('independent Legendre basis oracle: P_2(0) = -0.5', () => {
-    const row = legendreBasisOracle(0, 3);
-    expect(row[0]).toBe(1);
-    expect(row[1]).toBe(0);
-    expect(row[2]).toBeCloseTo(-0.5, 14);
+  it('legendreBasisRow matches independent oracle at degree 2', () => {
+    const x = 0;
+    const k = 3;
+    const shared = legendreBasisRow(x, k);
+    const oracle = legendreBasisOracle(x, k);
+    for (let j = 0; j < k; j++) expect(shared[j]).toBeCloseTo(oracle[j], 14);
   });
 });
 

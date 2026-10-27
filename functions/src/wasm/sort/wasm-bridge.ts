@@ -125,23 +125,29 @@ export function sortF64Dispatch(data: Float64Array): Float64Array {
  * yields the identical permutation to the JS stable sort on tie-heavy input
  * (verified Phase 6). Falls back to JS when wasm is unavailable / on any error.
  */
-export function argsortF64Dispatch(data: Float64Array): Int32Array {
+function indexDispatch(
+  data: Float64Array,
+  cfg: { exportName: string; js: (d: Float64Array) => Int32Array }
+): Int32Array {
   const n = data.length;
-  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows('argsort_f64', n)) {
+  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows(cfg.exportName, n)) {
     const wasm = getWasm() as unknown as RawWasm | null;
     if (wasm && isAsWasm(wasm)) {
       try {
-        // AS managed ABI: argsort_f64(data) -> Int32Array of indices.
-        const idx = withAsF64(wasm, [data], (mod, [h]) =>
-          asReadReturnedI32(mod, (mod['argsort_f64'] as (d: number) => number)(h))
+        const out = withAsF64(wasm, [data], (mod, [h]) =>
+          asReadReturnedI32(mod, (mod[cfg.exportName] as (d: number) => number)(h))
         );
-        if (idx && idx.length === n) return idx;
+        if (out && out.length === n) return out;
       } catch {
         // fall through
       }
     }
   }
-  return argsortF64JS(data);
+  return cfg.js(data);
+}
+
+export function argsortF64Dispatch(data: Float64Array): Int32Array {
+  return indexDispatch(data, { exportName: 'argsort_f64', js: argsortF64JS });
 }
 
 /**
@@ -153,20 +159,5 @@ export function argsortF64Dispatch(data: Float64Array): Int32Array {
  * Phase 6). Falls back to JS when wasm is unavailable / on any error.
  */
 export function rankF64Dispatch(data: Float64Array): Int32Array {
-  const n = data.length;
-  if (n >= WASM_SORT_THRESHOLD && wasmPolicyAllows('rank_f64', n)) {
-    const wasm = getWasm() as unknown as RawWasm | null;
-    if (wasm && isAsWasm(wasm)) {
-      try {
-        // AS managed ABI: rank_f64(data) -> Int32Array of ranks.
-        const ranks = withAsF64(wasm, [data], (mod, [h]) =>
-          asReadReturnedI32(mod, (mod['rank_f64'] as (d: number) => number)(h))
-        );
-        if (ranks && ranks.length === n) return ranks;
-      } catch {
-        // fall through
-      }
-    }
-  }
-  return rankF64JS(data);
+  return indexDispatch(data, { exportName: 'rank_f64', js: rankF64JS });
 }
