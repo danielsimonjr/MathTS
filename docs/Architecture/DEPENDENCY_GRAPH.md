@@ -9744,7 +9744,6 @@ graph LR
 | ------------------------------------ | --------------------------------------- | ------ |
 | `../factories/matrix-bridge.js`      | `MathJSDenseMatrix, MathJSSparseMatrix` | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`              | Import |
-| `./parallel-map.js`                  | `mapUnaryFloat64`                       | Import |
 
 **Exports:**
 
@@ -10280,15 +10279,9 @@ graph LR
 | -------------------------------- | --------------------- |
 | `@danielsimonjr/mathts-parallel` | `computePool, OpName` |
 
-**Internal Dependencies:**
-
-| File                                 | Imports                                       | Type   |
-| ------------------------------------ | --------------------------------------------- | ------ |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch, WasmElementwiseOp` | Import |
-
 **Exports:**
 
-- Functions: `kernelSource`, `mapArray`, `mapUnaryFloat64`, `mapBinaryF64`
+- Functions: `kernelSource`, `mapArray`, `mapBinaryF64`
 
 ---
 
@@ -10473,7 +10466,6 @@ graph LR
 | File                                 | Imports                    | Type   |
 | ------------------------------------ | -------------------------- | ------ |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch` | Import |
-| `./parallel-map.js`                  | `mapUnaryFloat64`          | Import |
 
 **Exports:**
 
@@ -18763,12 +18755,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1192   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200686 |
-| Total Exports           | 6184   |
+| Total Lines of Code     | 200840 |
+| Total Exports           | 6183   |
 | Total Re-exports        | 2618   |
 | Total Classes           | 59     |
 | Total Interfaces        | 539    |
-| Total Functions         | 1961   |
+| Total Functions         | 1960   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 609    |

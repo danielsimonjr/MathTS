@@ -2899,7 +2899,6 @@
       "mapBinaryF64",
       "mapObject",
       "mapSlices",
-      "mapUnaryFloat64",
       "MASS_PROPERTY_SHAPES",
       "massProperties",
       "MassProperties2D",

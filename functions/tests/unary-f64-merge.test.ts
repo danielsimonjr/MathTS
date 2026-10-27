@@ -1,7 +1,9 @@
 /**
- * Pin tests for unary Float64Array overload consolidation (G33/G34/G43).
- * Independent oracles: Math.* on plain scalars / hand loops — never round-trip
- * through the implementation under test beyond the typed dispatch entry.
+ * Pin tests for unary Float64Array overloads (G33/G34/G43).
+ * The shared-callback merge was skipped after a mixed-process ABBA bench
+ * showed a megamorphic sequential-path regression; these pins still guard
+ * NaN / -0 / empty / Infinity against independent Math.* oracles — never a
+ * round-trip through the implementation under test beyond typed dispatch.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';

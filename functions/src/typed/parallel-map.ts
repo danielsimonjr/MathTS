@@ -3,9 +3,11 @@
  *
  * `kernelSource` and `mapArray` were previously duplicated verbatim in
  * `typed/special.ts` and `typed/distributions.ts`; they now live here once.
- * `mapUnaryFloat64` / `mapBinaryF64` centralize the shared sequential/worker
- * loops for unary and binary `Float64Array` typed overloads in arithmetic,
- * trigonometry, and signal (FFT magnitude/power).
+ * `mapBinaryF64` centralizes the shared sequential/worker loop for binary
+ * `Float64Array` typed overloads in signal (FFT magnitude/power).
+ * Unary Float64Array overloads keep per-function inlined `Math.*` loops:
+ * a shared callback (`mapUnaryFloat64`) was measured megamorphic and
+ * 56–643% slower on the n<50k sequential path (see PR #454 review).
  *
  * Both helpers run on the MAIN THREAD (they build the kernel source string and
  * dispatch it), so they may freely import — they are never themselves
@@ -16,10 +18,6 @@
  */
 
 import { computePool, type OpName } from '@danielsimonjr/mathts-parallel';
-import {
-  elementwiseUnaryDispatch,
-  type WasmElementwiseOp,
-} from '../wasm/elementwise/wasm-bridge.js';
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -49,24 +47,6 @@ export async function mapArray(
   const out = new Float64Array(x.length);
   for (let i = 0; i < x.length; i++) out[i] = scalar(x[i]);
   return out;
-}
-
-/**
- * Unary Float64Array map shared by typed arithmetic/trigonometry overloads.
- * Checks an optional WASM elementwise op once, then delegates to {@link mapArray}.
- * Worker kernels must stay byte-identical to the pre-merge `applyKernel` strings.
- */
-export async function mapUnaryFloat64(
-  a: Float64Array,
-  scalar: (v: f64) => f64,
-  kernel: string,
-  wasmOp?: WasmElementwiseOp
-): Promise<Float64Array> {
-  if (wasmOp !== undefined) {
-    const wasm = elementwiseUnaryDispatch(wasmOp, a);
-    if (wasm) return wasm;
-  }
-  return mapArray(a, scalar, () => kernel);
 }
 
 /**

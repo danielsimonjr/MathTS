@@ -1,10 +1,10 @@
 {
   "generated": "2026-10-27",
   "total": 219,
-  "parallelizedCount": 91,
-  "effectiveCount": 60,
+  "parallelizedCount": 113,
+  "effectiveCount": 82,
   "disabledCount": 31,
-  "nonParallelCount": 128,
+  "nonParallelCount": 106,
   "globalThreshold": 50000,
   "thresholdsResolved": true,
   "parallelized": [
@@ -14,6 +14,20 @@
       "ops": ["abs"],
       "thresholds": ["never"],
       "effectiveness": "disabled"
+    },
+    {
+      "name": "acos",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "acosh",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
     },
     {
       "name": "add",
@@ -32,6 +46,34 @@
     {
       "name": "airyBi",
       "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "asin",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "asinh",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "atan",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "atanh",
+      "file": "trigonometry.ts",
       "ops": ["applyKernel"],
       "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
@@ -149,6 +191,20 @@
       "effectiveness": "disabled"
     },
     {
+      "name": "cbrt",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "ceil",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
       "name": "chebyshevT",
       "file": "special.ts",
       "ops": ["applyKernel"],
@@ -163,8 +219,29 @@
       "effectiveness": "disabled"
     },
     {
+      "name": "cosh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
       "name": "cosIntegral",
       "file": "special.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "cot",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "csc",
+      "file": "trigonometry.ts",
       "ops": ["applyKernel"],
       "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
@@ -240,6 +317,13 @@
       "effectiveness": "effective"
     },
     {
+      "name": "expm1",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
       "name": "exponentialCDF",
       "file": "distributions.ts",
       "ops": ["applyKernel"],
@@ -249,6 +333,20 @@
     {
       "name": "exponentialPDF",
       "file": "distributions.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "fix",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "floor",
+      "file": "arithmetic.ts",
       "ops": ["applyKernel"],
       "thresholds": ["50000 (global kernel)"],
       "effectiveness": "effective"
@@ -336,6 +434,27 @@
       "ops": ["log"],
       "thresholds": ["never"],
       "effectiveness": "disabled"
+    },
+    {
+      "name": "log10",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "log1p",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "log2",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
     },
     {
       "name": "logIntegral",
@@ -576,11 +695,39 @@
       "effectiveness": "disabled"
     },
     {
+      "name": "round",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sec",
+      "file": "trigonometry.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
+      "name": "sign",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
       "name": "sin",
       "file": "trigonometry.ts",
       "ops": ["sin"],
       "thresholds": ["never"],
       "effectiveness": "disabled"
+    },
+    {
+      "name": "sinh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
     },
     {
       "name": "sinIntegral",
@@ -632,6 +779,13 @@
       "effectiveness": "disabled"
     },
     {
+      "name": "tanh",
+      "file": "arithmetic.ts",
+      "ops": ["applyKernel"],
+      "thresholds": ["50000 (global kernel)"],
+      "effectiveness": "effective"
+    },
+    {
       "name": "unaryMinus",
       "file": "arithmetic.ts",
       "ops": ["negate"],
@@ -647,18 +801,12 @@
     }
   ],
   "nonParallel": [
-    "acos",
-    "acosh",
     "acot",
     "acsc",
     "and",
     "arg",
     "asec",
-    "asin",
-    "asinh",
-    "atan",
     "atan2",
-    "atanh",
     "bernoulli",
     "betaPDF",
     "bin",
@@ -667,8 +815,6 @@
     "carlsonRF",
     "carlsonRJ",
     "carmichaelLambda",
-    "cbrt",
-    "ceil",
     "chineseRemainder",
     "combinations",
     "combinationsWithRep",
@@ -678,9 +824,6 @@
     "compareUnits",
     "cond",
     "conj",
-    "cosh",
-    "cot",
-    "csc",
     "deepEqual",
     "divisorSigma",
     "divisors",
@@ -693,11 +836,8 @@
     "equalScalar",
     "equalText",
     "eulerPhi",
-    "expm1",
     "fallingFactorial",
     "fibonacci",
-    "fix",
-    "floor",
     "format",
     "fsum",
     "gammaPDF",
@@ -712,9 +852,6 @@
     "larger",
     "largerEq",
     "lcm",
-    "log10",
-    "log1p",
-    "log2",
     "lowRankApprox",
     "lucas",
     "lucasL",
@@ -747,8 +884,6 @@
     "randomInt",
     "re",
     "risingFactorial",
-    "round",
-    "sec",
     "setCartesian",
     "setDifference",
     "setDistinct",
@@ -759,14 +894,11 @@
     "setSize",
     "setSymDifference",
     "setUnion",
-    "sign",
     "singularValues",
-    "sinh",
     "smaller",
     "smallerEq",
     "studentTPDF",
     "subfactorial",
-    "tanh",
     "to",
     "toBest",
     "toDegrees",
@@ -794,8 +926,14 @@
       "threshold": "50000 (global kernel)",
       "active": true,
       "functions": [
+        "acos",
+        "acosh",
         "airyAi",
         "airyBi",
+        "asin",
+        "asinh",
+        "atan",
+        "atanh",
         "bernoulliPMF",
         "besselI",
         "besselJ",
@@ -808,8 +946,13 @@
         "beta",
         "betainc",
         "binomialPMF",
+        "cbrt",
+        "ceil",
         "chebyshevT",
         "cosIntegral",
+        "cosh",
+        "cot",
+        "csc",
         "cube",
         "digamma",
         "ellipticE",
@@ -817,8 +960,11 @@
         "erfc",
         "erfi",
         "expIntegralEi",
+        "expm1",
         "exponentialCDF",
         "exponentialPDF",
+        "fix",
+        "floor",
         "fresnelC",
         "fresnelS",
         "gammainc",
@@ -829,6 +975,9 @@
         "lambertW",
         "legendreP",
         "lgamma",
+        "log10",
+        "log1p",
+        "log2",
         "logIntegral",
         "max",
         "min",
@@ -853,7 +1002,12 @@
         "parallelStatVariance",
         "parallelXCorr",
         "poissonPMF",
-        "sinIntegral"
+        "round",
+        "sec",
+        "sign",
+        "sinIntegral",
+        "sinh",
+        "tanh"
       ]
     },
     {
@@ -1195,9 +1349,9 @@
   ],
   "byFile": {
     "arithmetic.ts": {
-      "effective": 4,
+      "effective": 17,
       "disabled": 15,
-      "none": 27
+      "none": 14
     },
     "bitwise.ts": {
       "effective": 0,
@@ -1265,9 +1419,9 @@
       "none": 5
     },
     "trigonometry.ts": {
-      "effective": 0,
+      "effective": 9,
       "disabled": 3,
-      "none": 16
+      "none": 7
     },
     "unit.ts": {
       "effective": 0,
