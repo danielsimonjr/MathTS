@@ -8423,6 +8423,7 @@ modules:
         - file: ./regression-extra.js
           imports:
             - fitLine
+            - linearRegression
         - file: ./typed/distributions.js
           imports:
             - normalCDF
@@ -14791,6 +14792,11 @@ modules:
           imports:
             - studentTTwoSidedP
       workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - pairwiseDot
+            - sumSquaredDeviations
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
@@ -14924,7 +14930,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - eigsh
       interfaces:
@@ -14944,7 +14954,11 @@ modules:
         - file: ../typed/numeric.js
           imports:
             - linsolve
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - root
         - fsolve
@@ -15017,7 +15031,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - norm2
       exports:
         - incompleteLU
         - incompleteCholesky
@@ -15121,6 +15139,7 @@ modules:
       exports:
         - numericJacobian
       interfaces:
+        - NumericJacobianStepRule
         - NumericJacobianOptions
       functions:
         - numericJacobian
@@ -15187,6 +15206,9 @@ modules:
         - file: ./solveODE.js
           imports:
             - _factorSolver
+        - file: ./numeric-jacobian.js
+          imports:
+            - numericJacobian
       workspaceDependencies: []
       exports:
         - solveDAE
@@ -15214,6 +15236,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./numeric-jacobian.js
+          imports:
+            - numericJacobian
         - file: ../utils/is.js
           imports:
             - isUnit
@@ -19818,6 +19843,9 @@ modules:
           imports:
             - numericJacobian
             - VectorField
+        - file: ./numeric.js
+          imports:
+            - findRoot
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -21265,6 +21293,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../numeric/numeric-jacobian.js
+          imports:
+            - numericJacobian
         - file: ../numeric/solveODE.js
           imports:
             - rosenbrockSolve
@@ -39364,10 +39395,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1192
   totalModules: 82
-  totalLinesOfCode: 200829
+  totalLinesOfCode: 200832
   totalExports: 6182
   totalClasses: 59
-  totalInterfaces: 538
+  totalInterfaces: 539
   totalFunctions: 1959
   totalTypeGuards: 158
   totalEnums: 0

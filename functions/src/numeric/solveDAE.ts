@@ -54,6 +54,7 @@
  */
 
 import { _factorSolver } from './solveODE.js';
+import { numericJacobian } from './numeric-jacobian.js';
 
 /** Differential forcing `y' = f(t, y, z)`. Returns the `y'` vector (a scalar is accepted for 1-D y). */
 export type DAEDifferential = (t: number, y: number[], z: number[]) => number[] | number;
@@ -226,15 +227,11 @@ function _solveAlgebraic(
         `solveDAE: the constraint g must return ${na} value(s) (matching z0); got ${g0.length}`
       );
     }
-    // FD Jacobian ∂g/∂z (na×na)
-    const J: number[][] = Array.from({ length: na }, () => new Array<number>(na));
-    for (let j = 0; j < na; j++) {
-      const eps = Math.max(1e-8, 1e-7 * Math.abs(z[j]));
-      const zp = z.slice();
-      zp[j] += eps;
-      const gp = _evalArr(g, t, y, zp);
-      for (let i = 0; i < na; i++) J[i][j] = (gp[i] - g0[i]) / eps;
-    }
+    const J = numericJacobian((zp) => _evalArr(g, t, y, zp), z, {
+      scheme: 'forward',
+      step: { rel: 1e-7, floor: 1e-8 },
+      f0: g0,
+    });
     const dz = _denseSolve(
       J,
       g0.map((v) => -v)
@@ -401,16 +398,11 @@ export function solveDAE(
       }
       return J;
     }
-    // Finite-difference the residual column by column (captures c0·w and f/g together).
-    const J: number[][] = Array.from({ length: n }, () => new Array<number>(n));
-    for (let col = 0; col < n; col++) {
-      const eps = Math.max(1e-8, 1e-7 * Math.abs(wc[col]));
-      const wp = wc.slice();
-      wp[col] += eps;
-      const Rp = residual(wp);
-      for (let row = 0; row < n; row++) J[row][col] = (Rp[row] - R0[row]) / eps;
-    }
-    return J;
+    return numericJacobian(residual, wc, {
+      scheme: 'forward',
+      step: { rel: 1e-7, floor: 1e-8 },
+      f0: R0,
+    });
   }
 
   let iter = 0;

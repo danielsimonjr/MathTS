@@ -774,6 +774,11 @@ describe('CAS: Solver — enhanced (equations, complex, closed-form)', () => {
     const roots = solve('exp(x) - 2', 'x');
     expect(roots.some((r) => typeof r === 'number' && Math.abs(r - Math.log(2)) < 1e-4)).toBe(true);
   });
+  it('finds sin(x) = 1/2 near π/6 (numeric fallback)', () => {
+    const roots = solve('sin(x) - 0.5', 'x');
+    const pi6 = Math.PI / 6;
+    expect(roots.some((r) => typeof r === 'number' && Math.abs(r - pi6) < 1e-6)).toBe(true);
+  });
   it('throws on multiple = signs', () => {
     expect(() => solve('x = 1 = 2', 'x')).toThrow();
   });

@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { quad } from '../numeric/adaptive-quad.js';
 import { levenbergMarquardt, nelderMead } from '../optimization-extra.js';
@@ -1188,7 +1189,6 @@ export function solveBVP(
   // Use simple Newton iteration, starting from the caller's guess (defaults
   // to the zero vector, matching the original hardcoded n=2 behavior).
   const s = y0Guess.slice();
-  const delta = 1e-7;
 
   for (let iter = 0; iter < 50; iter++) {
     const r = shoot(s);
@@ -1196,17 +1196,7 @@ export function solveBVP(
     for (const ri of r) maxR = Math.max(maxR, Math.abs(ri));
     if (maxR < 1e-8) break;
 
-    // Numerical Jacobian
-    const J: number[][] = [];
-    for (let i = 0; i < n; i++) {
-      J[i] = [];
-      for (let j = 0; j < n; j++) {
-        const sp = s.slice();
-        sp[j] += delta;
-        const rp = shoot(sp);
-        J[i][j] = (rp[i] - r[i]) / delta;
-      }
-    }
+    const J = numericJacobian(shoot, s, { h: 1e-7, scheme: 'forward', f0: r });
 
     try {
       const ds = linsolve(
