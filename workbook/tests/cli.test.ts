@@ -165,6 +165,9 @@ describe('cli capabilities / templates', () => {
   it('capabilities --json reports features and cell types', async () => {
     const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
     expect(env.command).toBe('capabilities');
+    expect(env.schemaVersion).toEqual({ major: 1, minor: 0 });
+    expect(env.data.schemaVersion).toEqual({ major: 1, minor: 0 });
+    expect(env.data.schemaVersion).not.toBe('[Circular]');
     expect(env.data.features.json).toBe(true);
     expect(env.data.cellTypes.supported).toContain('code');
   });
@@ -190,6 +193,35 @@ describe('cli graph has no --json', () => {
     const r = await dispatch(['graph', fixture(PASSING)]);
     expect(r.exitCode).toBe(0);
     expect(r.stdout).toContain('checkA: [a]');
+  });
+});
+
+const SCHEMA_V = { major: 1, minor: 0 };
+
+describe('cli json envelope schemaVersion', () => {
+  it.each([
+    ['capabilities', ['capabilities', '--json'] as string[]],
+    ['templates', ['templates', '--json']],
+    ['functions', ['functions', '--json']],
+  ])('%s --json envelope schemaVersion is a literal object', async (name, args) => {
+    const env = JSON.parse((await dispatch(args)).stdout);
+    expect(env.schemaVersion).toEqual(SCHEMA_V);
+    if (name === 'capabilities') {
+      expect(env.data.schemaVersion).toEqual(SCHEMA_V);
+      expect(typeof env.data.schemaVersion).toBe('object');
+    }
+  });
+
+  it('workbook-backed --json commands use the same envelope schemaVersion', async () => {
+    const path = fixture(PASSING);
+    for (const args of [
+      ['validate', path, '--json'],
+      ['describe', path, '--json'],
+      ['run', path, '--json'],
+    ]) {
+      const env = JSON.parse((await dispatch(args)).stdout);
+      expect(env.schemaVersion).toEqual(SCHEMA_V);
+    }
   });
 });
 

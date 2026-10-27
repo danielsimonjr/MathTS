@@ -1240,11 +1240,12 @@ re-decide it here if PR-POLY has already merged.
 #### Sprint 5R — Phase 5 integration and release readiness
 
 - **Scope:** reporting and output surfaces, then the last checks before the release in §7.
-  1. **Workbook public surface** (I-17). Decide whether `DependencyGraph`,
-     `DependencyNode`, `toDOT` and `toTeX` are public `workbook` API; export them or
-     document them as internal.
-  2. **`mtsw capabilities --json`** (I-11) prints `schemaVersion` as `"[Circular]"`
-     (`workbook/src/cli.ts` `jsonEnvelope` replacer vs the shared `SCHEMA_VERSION`).
+  1. **Workbook public surface** (I-17). ~~Decide whether~~ **Done:** `DependencyGraph`,
+     `DependencyNode`, `toDOT` and `toTeX` are exported from `@danielsimonjr/mathts-workbook`
+     (plus `RenderDoc` / `RenderCell` / `ToTexOptions` for `toTeX` typing).
+  2. **`mtsw capabilities --json`** (I-11). ~~prints `schemaVersion` as `"[Circular]"`~~ **Done:**
+     `jsonEnvelope` clones `schemaVersion` before stringify so nested capabilities data
+     stays `{ major, minor }`.
   3. **Runnable examples in CI** (I-14). A smoke test that runs `examples/*.ts`.
   4. **Configuration and dependency hygiene.** `create(all, config)` mutates the
      process-wide `DEFAULT_CONFIG` (I-9); the nine unused `typed-function ^4.0.0` pins are
@@ -1253,8 +1254,8 @@ re-decide it here if PR-POLY has already merged.
   5. **Dead artefacts** (D-3, I-6, I-18). **Done (#413).** Deleted
      `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
      (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).
-  6. **CI audit step** (I-1). Retry `bun audit` on a registry outage, keep
-     `--audit-level=high`, fail on a real advisory.
+  6. **CI audit step** (I-1). **Done (#421).** Retry `bun audit` on a registry outage via
+     `tools/test/bun-audit-retry.mjs`, keep `--audit-level=high`, fail on a real advisory.
   7. **Roadmap close-out.** Every milestone and sprint box in this file ticked or the
      item moved to §9; `CHANGELOG.md` entries; this file's status line set to "complete,
      ready to release".

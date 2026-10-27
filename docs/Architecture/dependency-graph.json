@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-27",
     "totalFiles": 1192,
     "totalModules": 82,
-    "totalExports": 6172
+    "totalExports": 6179
   },
   "entryPoints": [
     {
@@ -36474,7 +36474,8 @@
               "getDependents",
               "detectCycles",
               "getAncestors",
-              "toMermaid"
+              "toMermaid",
+              "toDOT"
             ],
             "reExport": true
           },
@@ -36486,6 +36487,11 @@
           {
             "file": "./formatter.js",
             "imports": ["formatResult"],
+            "reExport": true
+          },
+          {
+            "file": "./tex.js",
+            "imports": ["toTeX"],
             "reExport": true
           },
           {
@@ -36537,8 +36543,22 @@
               "ParseResult",
               "WorkbookEvent",
               "CellResult",
-              "RunResult"
+              "RunResult",
+              "DependencyNode",
+              "DependencyGraph"
             ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./tex.js",
+            "imports": ["ToTexOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./html.js",
+            "imports": ["RenderDoc", "RenderCell"],
             "reExport": true,
             "typeOnly": true
           },
@@ -36577,9 +36597,11 @@
           "detectCycles",
           "getAncestors",
           "toMermaid",
+          "toDOT",
           "WorkbookExecutor",
           "createExecutor",
           "formatResult",
+          "toTeX",
           "addCell",
           "editCell",
           "removeCell",
@@ -36603,6 +36625,11 @@
           "WorkbookEvent",
           "CellResult",
           "RunResult",
+          "DependencyNode",
+          "DependencyGraph",
+          "ToTexOptions",
+          "RenderDoc",
+          "RenderCell",
           "CellPosition",
           "RemoveResult",
           "MathSvgOptions",
@@ -36621,9 +36648,11 @@
           "detectCycles",
           "getAncestors",
           "toMermaid",
+          "toDOT",
           "WorkbookExecutor",
           "createExecutor",
           "formatResult",
+          "toTeX",
           "addCell",
           "editCell",
           "removeCell",
@@ -36647,6 +36676,11 @@
           "WorkbookEvent",
           "CellResult",
           "RunResult",
+          "DependencyNode",
+          "DependencyGraph",
+          "ToTexOptions",
+          "RenderDoc",
+          "RenderCell",
           "CellPosition",
           "RemoveResult",
           "MathSvgOptions",
@@ -41710,16 +41744,16 @@
   "statistics": {
     "totalTypeScriptFiles": 1192,
     "totalModules": 82,
-    "totalLinesOfCode": 200823,
-    "totalExports": 6172,
+    "totalLinesOfCode": 200851,
+    "totalExports": 6179,
     "totalClasses": 59,
     "totalInterfaces": 538,
     "totalFunctions": 1959,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1617,
-    "totalReExports": 2609,
-    "totalTypeOnlyImports": 607,
+    "totalReExports": 2616,
+    "totalTypeOnlyImports": 609,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

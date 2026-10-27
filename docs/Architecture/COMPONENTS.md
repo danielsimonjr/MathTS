@@ -288,8 +288,8 @@ export class WorkbookExecutor      // runCell / runAll (event stream) · runRepo
 export class Session
 export class WorkbookTimeoutError
 
-export function buildDependencyGraph, topologicalSort, detectCycles, toMermaid
-export interface Workbook, Cell, CellResult, RunResult, RuntimeConfig
+export function buildDependencyGraph, topologicalSort, detectCycles, toMermaid, toDOT, toTeX
+export interface Workbook, Cell, CellResult, RunResult, RuntimeConfig, DependencyGraph
 ```
 
 Ships an `mtsw` CLI (`run`/`validate`/`graph`) as a second entry point. Depends on `core`, `functions`,
@@ -399,5 +399,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 1997  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8070  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2000  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8082  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

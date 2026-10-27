@@ -47,6 +47,11 @@ describe('workbook/src/index.ts – package entry smoke test', () => {
     expect(typeof wb.detectCellType).toBe('function');
   });
 
+  it('exports toDOT and toTeX on the public barrel', () => {
+    expect(typeof wb.toDOT).toBe('function');
+    expect(typeof wb.toTeX).toBe('function');
+  });
+
   it('exports getAncestors and the SCHEMA_VERSION contract constant', () => {
     expect(typeof wb.getAncestors).toBe('function');
     expect(wb.SCHEMA_VERSION).toEqual({ major: 1, minor: 0 });

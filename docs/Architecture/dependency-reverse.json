@@ -3959,11 +3959,12 @@
     ],
     "workbook/src/html.ts": [
       "workbook/src/cli.ts",
+      "workbook/src/index.ts",
       "workbook/src/ipynb.ts",
       "workbook/src/pdf.ts",
       "workbook/src/tex.ts"
     ],
-    "workbook/src/tex.ts": ["workbook/src/cli.ts", "workbook/src/pdf.ts"],
+    "workbook/src/tex.ts": ["workbook/src/cli.ts", "workbook/src/index.ts", "workbook/src/pdf.ts"],
     "workbook/src/pdf.ts": ["workbook/src/cli.ts"],
     "workbook/src/ipynb.ts": ["workbook/src/cli.ts"],
     "workbook/src/timeout-runner.ts": ["workbook/src/cli.ts", "workbook/src/index.ts"],
