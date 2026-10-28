@@ -572,24 +572,7 @@ export class SparseMatrix extends Matrix<number> {
    */
   multiplyElementwise(other: Matrix<number>): SparseMatrix {
     this.checkDimensionsMatch(other);
-
-    const entries: Array<{ row: number; col: number; value: number }> = [];
-
-    // Only non-zeros in this matrix can produce non-zeros
-    for (let i = 0; i < this.rows; i++) {
-      const start = this._rowPointers[i];
-      const end = this._rowPointers[i + 1];
-
-      for (let j = start; j < end; j++) {
-        const col = this._colIndices[j];
-        const product = this._data[j] * other.get(i, col);
-        if (product !== 0) {
-          entries.push({ row: i, col, value: product });
-        }
-      }
-    }
-
-    return SparseMatrix.fromCOO(this.rows, this.cols, entries);
+    return this.mapNonZeros((value, row, col) => value * other.get(row, col));
   }
 
   /**

@@ -13,7 +13,7 @@ import { DenseMatrix } from '../types/DenseMatrix.js';
 import type { BackendType } from './Backend.js';
 import { jsBackend } from './JSBackend.js';
 
-type ElementwisePoolOp = 'add' | 'subtract' | 'multiply';
+type ElementwisePoolOp = 'add' | 'subtract' | 'multiply' | 'divide';
 
 /**
  * Configuration for ParallelBackend
@@ -115,25 +115,7 @@ export class ParallelBackend {
    * Parallel element-wise division
    */
   async divideElementwise(a: DenseMatrix, b: DenseMatrix): Promise<DenseMatrix> {
-    this.checkDimensionsMatch(a, b);
-
-    const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      const result = new Float64Array(a.rows * a.cols);
-      for (let i = 0; i < a.rows; i++) {
-        for (let j = 0; j < a.cols; j++) {
-          result[i * a.cols + j] = a.get(i, j) / b.get(i, j);
-        }
-      }
-      return new DenseMatrix(a.rows, a.cols, result);
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-
-    const result = await this.pool.elementwise(aData, bData, 'divide');
-    return new DenseMatrix(a.rows, a.cols, result.result);
+    return this.parallelBinary(a, b, 'divide', (x, y) => jsBackend.divideElementwise(x, y));
   }
 
   /**
@@ -141,14 +123,15 @@ export class ParallelBackend {
    */
   async scale(a: DenseMatrix, scalar: number): Promise<DenseMatrix> {
     const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      return a.scale(scalar);
-    }
-
-    const aData = a.toFloat64Array();
-    const result = await this.pool.scale(aData, scalar);
-    return new DenseMatrix(a.rows, a.cols, result.result);
+    return this.whenParallel(
+      elementCount,
+      () => a.scale(scalar),
+      async () => {
+        const aData = a.toFloat64Array();
+        const result = await this.pool.scale(aData, scalar);
+        return new DenseMatrix(a.rows, a.cols, result.result);
+      }
+    );
   }
 
   /**
@@ -177,16 +160,18 @@ export class ParallelBackend {
 
     const resultSize = a.rows * b.cols;
 
-    if (!this.shouldParallelize(resultSize) || !this.isReady()) {
-      return a.multiply(b);
-    }
+    return this.whenParallel(
+      resultSize,
+      () => a.multiply(b),
+      async () => {
+        const aData = a.toFloat64Array();
+        const bData = b.toFloat64Array();
 
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
+        const result = await this.pool.matmul(aData, a.rows, a.cols, bData, b.cols);
 
-    const result = await this.pool.matmul(aData, a.rows, a.cols, bData, b.cols);
-
-    return new DenseMatrix(a.rows, b.cols, result.result);
+        return new DenseMatrix(a.rows, b.cols, result.result);
+      }
+    );
   }
 
   /**
@@ -194,15 +179,16 @@ export class ParallelBackend {
    */
   async transpose(a: DenseMatrix): Promise<DenseMatrix> {
     const elementCount = a.rows * a.cols;
+    return this.whenParallel(
+      elementCount,
+      () => a.transpose(),
+      async () => {
+        const aData = a.toFloat64Array();
+        const result = await this.pool.transpose(aData, a.rows, a.cols);
 
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      return a.transpose();
-    }
-
-    const aData = a.toFloat64Array();
-    const result = await this.pool.transpose(aData, a.rows, a.cols);
-
-    return new DenseMatrix(a.cols, a.rows, result.result);
+        return new DenseMatrix(a.cols, a.rows, result.result);
+      }
+    );
   }
 
   // =========================================================================
@@ -214,14 +200,15 @@ export class ParallelBackend {
    */
   async sum(a: DenseMatrix): Promise<number> {
     const elementCount = a.rows * a.cols;
-
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      return a.sum();
-    }
-
-    const aData = a.toFloat64Array();
-    const result = await this.pool.sum(aData);
-    return result.result;
+    return this.whenParallel(
+      elementCount,
+      () => a.sum(),
+      async () => {
+        const aData = a.toFloat64Array();
+        const result = await this.pool.sum(aData);
+        return result.result;
+      }
+    );
   }
 
   /**
@@ -251,20 +238,16 @@ export class ParallelBackend {
 
     const elementCount = a.length;
 
-    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
-      let sum = 0;
-      const aValues = Array.from(a.values());
-      const bValues = Array.from(b.values());
-      for (let i = 0; i < aValues.length; i++) {
-        sum += aValues[i] * bValues[i];
+    return this.whenParallel(
+      elementCount,
+      () => jsBackend.dot(a, b),
+      async () => {
+        const aData = a.toFloat64Array();
+        const bData = b.toFloat64Array();
+        const result = await this.pool.dot(aData, bData);
+        return result.result;
       }
-      return sum;
-    }
-
-    const aData = a.toFloat64Array();
-    const bData = b.toFloat64Array();
-    const result = await this.pool.dot(aData, bData);
-    return result.result;
+    );
   }
 
   // =========================================================================
@@ -291,6 +274,21 @@ export class ParallelBackend {
   // =========================================================================
   // Utility Methods
   // =========================================================================
+
+  /**
+   * Run the parallel worker path when the pool is ready and the matrix is large enough;
+   * otherwise delegate to the sequential implementation (bit-identical for small matrices).
+   */
+  private async whenParallel<T>(
+    elementCount: number,
+    sequential: () => T | Promise<T>,
+    parallel: () => Promise<T>
+  ): Promise<T> {
+    if (!this.shouldParallelize(elementCount) || !this.isReady()) {
+      return sequential();
+    }
+    return parallel();
+  }
 
   private async parallelBinary(
     a: DenseMatrix,

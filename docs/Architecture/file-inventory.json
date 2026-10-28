@@ -11223,7 +11223,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 340
+      "loc": 338
     },
     {
       "file": "matrix/src/backends/register-backends.ts",
@@ -11468,7 +11468,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 920
+      "loc": 903
     },
     {
       "file": "matrix/tests/backends/Backend.test.ts",
