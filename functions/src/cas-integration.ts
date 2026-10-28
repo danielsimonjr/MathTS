@@ -38,7 +38,7 @@
 import { parse as _parseRaw } from './factories/evaluate.js';
 import { evaluate as _evaluateRaw } from './factories/evaluate.js';
 import { apart, variables } from './typed/algebra.js';
-import { polyFromExpression } from './typed/polynomial-ideal.js';
+import { polyFromExpression, polyToDenseCoefficients } from './typed/polynomial-ideal.js';
 import { integrateRationalFunction } from './cas/rational-integrate.js';
 
 interface Node {
@@ -264,12 +264,7 @@ function flattenMul(raw: Node): Node[] {
 
 /** Parse a single-variable polynomial string to dense ascending coefficients. */
 function polyDenseFromStr(s: string, x: string): number[] {
-  const poly = polyFromExpression(s, [x]); // throws if not a polynomial in x
-  let maxPow = 0;
-  for (const t of poly) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of poly) dense[t.powers[0]] += t.coeff;
-  return dense;
+  return polyToDenseCoefficients(polyFromExpression(s, [x])); // throws if not a polynomial in x
 }
 
 /** Derivative of a dense ascending-coefficient polynomial. */
