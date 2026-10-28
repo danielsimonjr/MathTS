@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1214,
+    "totalFiles": 1215,
     "totalModules": 82,
-    "totalExports": 6245
+    "totalExports": 6246
   },
   "entryPoints": [
     {
@@ -23968,6 +23968,15 @@
           "typedStatistics"
         ]
       },
+      "functions/src/typed/string-derivative.ts": {
+        "description": "Symbolic derivative of a sum of additive terms (split on `' + '`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["derivativeOfAdditiveTerms"],
+        "functions": ["derivativeOfAdditiveTerms"]
+      },
       "functions/src/typed/string.ts": {
         "description": "Typed String Formatting Functions",
         "externalDependencies": [],
@@ -41510,6 +41519,7 @@
           "functions/src/typed/signal.ts",
           "functions/src/typed/special.ts",
           "functions/src/typed/statistics.ts",
+          "functions/src/typed/string-derivative.ts",
           "functions/src/typed/string.ts",
           "functions/src/typed/trigonometry.ts",
           "functions/src/typed/typed-bridge.ts",
@@ -42287,13 +42297,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1214,
+    "totalTypeScriptFiles": 1215,
     "totalModules": 82,
-    "totalLinesOfCode": 200624,
-    "totalExports": 6245,
+    "totalLinesOfCode": 200703,
+    "totalExports": 6246,
     "totalClasses": 59,
     "totalInterfaces": 542,
-    "totalFunctions": 2013,
+    "totalFunctions": 2014,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

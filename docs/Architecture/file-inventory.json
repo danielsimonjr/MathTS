@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1982,
+  "totalFiles": 1984,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1188,
+    "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 706,
+    "test": 707,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1214,
-    "tests": 706,
+    "src": 1215,
+    "tests": 707,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 834,
+    "@danielsimonjr/mathts-functions": 836,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 107,
@@ -8230,6 +8230,13 @@
       "loc": 888
     },
     {
+      "file": "functions/src/typed/string-derivative.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 79
+    },
+    {
       "file": "functions/src/typed/string.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -8725,6 +8732,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 357
+    },
+    {
+      "file": "functions/tests/clones-cas-string-kernels-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 127
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
