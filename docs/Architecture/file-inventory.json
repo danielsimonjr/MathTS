@@ -8738,7 +8738,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 184
+      "loc": 186
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",

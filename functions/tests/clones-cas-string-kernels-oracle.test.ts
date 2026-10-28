@@ -49,10 +49,10 @@ describe('clone oracle — foldIntegerRange (summation / symbolicProduct)', () =
 
   it('non-numeric bound throws', () => {
     expect(() => summation('k', 'k', 1, 'n' as unknown as number)).toThrow(
-      'summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound "n", upper bound 3)'
+      'summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound 1, upper bound "n")'
     );
-    expect(() => symbolicProduct('k', 'k', 1, 'n' as unknown as number)).toThrow(
-      'symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound 1, upper bound "n")'
+    expect(() => symbolicProduct('k', 'k', 'n' as unknown as number, 3)).toThrow(
+      'symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound "n", upper bound 3)'
     );
   });
 
