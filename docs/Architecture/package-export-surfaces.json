@@ -4145,6 +4145,7 @@
       "ElementwiseOptions",
       "ExecOptions",
       "ExecutionMode",
+      "gemmRows",
       "leftShift",
       "MapOptions",
       "MatmulOptions",
