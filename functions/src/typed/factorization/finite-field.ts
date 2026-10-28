@@ -9,7 +9,15 @@
  * (`functions/src/typed/factorization/`) and is `bigint`-only by design.
  */
 
-import { trim, degree, lc, isZero, zipIntPoly, type IntPoly } from './integer-poly.js';
+import {
+  trim,
+  degree,
+  lc,
+  isZero,
+  zipIntPoly,
+  schoolbookMul,
+  type IntPoly,
+} from './integer-poly.js';
 
 export type { IntPoly } from './integer-poly.js';
 
@@ -39,20 +47,7 @@ export function subP(a: IntPoly, b: IntPoly, p: bigint): IntPoly {
 
 /** `a * b` over 𝔽_p via schoolbook convolution, coefficients in `[0, p)`. */
 export function mulP(a: IntPoly, b: IntPoly, p: bigint): IntPoly {
-  const ta = trim(a);
-  const tb = trim(b);
-  if (ta.length === 0 || tb.length === 0) {
-    return [];
-  }
-  const out: bigint[] = new Array<bigint>(ta.length + tb.length - 1).fill(0n);
-  for (let i = 0; i < ta.length; i += 1) {
-    const ai = ta[i];
-    if (ai === 0n) continue;
-    for (let j = 0; j < tb.length; j += 1) {
-      out[i + j] = modP(out[i + j] + ai * tb[j], p);
-    }
-  }
-  return trim(out);
+  return schoolbookMul(a, b, (acc, ai, bj) => modP(acc + ai * bj, p));
 }
 
 /**

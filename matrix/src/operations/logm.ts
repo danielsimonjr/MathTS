@@ -19,7 +19,16 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
-import { eye, matMul, transpose, matScale, normInf, norm1, matInv } from './common.js';
+import {
+  eye,
+  matMul,
+  transpose,
+  matScale,
+  normInf,
+  norm1,
+  matInv,
+  gaussJordanContinue,
+} from './common.js';
 import { matrixSqrtNewtonInternal } from './sqrtm.js';
 
 // ---------------------------------------------------------------------------
@@ -62,30 +71,7 @@ const GL16_WEIGHTS = [
 function solveCol(M: number[][], b: number[]): number[] {
   const n = M.length;
   const Aug = M.map((row, i) => [...row, b[i]]);
-
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(Aug[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(Aug[row][col]) > maxVal) {
-        maxVal = Math.abs(Aug[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [Aug[col], Aug[maxRow]] = [Aug[maxRow], Aug[col]];
-
-    const pivot = Aug[col][col];
-    if (Math.abs(pivot) < 1e-30) continue;
-
-    for (let j = col; j <= n; j++) Aug[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const f = Aug[row][col];
-      if (f === 0) continue;
-      for (let j = col; j <= n; j++) Aug[row][j] -= f * Aug[col][j];
-    }
-  }
-
+  gaussJordanContinue(Aug, n, 1e-30);
   return Aug.map((row) => row[n]);
 }
 

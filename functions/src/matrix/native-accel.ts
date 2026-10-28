@@ -23,15 +23,23 @@ import { Complex } from '@danielsimonjr/mathts-core';
  *  conversion overhead isn't worth it and the well-tested factory path runs. */
 export const NATIVE_MATRIX_THRESHOLD = 8;
 
-/** True for a square `number[][]` of side ≥ NATIVE_MATRIX_THRESHOLD. */
-export function isLargeNumericSquare(a: unknown): a is number[][] {
-  if (!Array.isArray(a) || a.length < NATIVE_MATRIX_THRESHOLD) return false;
+/**
+ * True when `a` is a square `number[][]` with side length at least `minSide`.
+ * @internal Shared scan for native fast-path gating (`minSide` is the only setting).
+ */
+function isNumericSquareAtLeast(a: unknown, minSide: number): a is number[][] {
+  if (!Array.isArray(a) || a.length < minSide) return false;
   const n = a.length;
   for (const row of a) {
     if (!Array.isArray(row) || row.length !== n) return false;
     for (let j = 0; j < n; j++) if (typeof row[j] !== 'number') return false;
   }
   return true;
+}
+
+/** True for a square `number[][]` of side ≥ NATIVE_MATRIX_THRESHOLD. */
+export function isLargeNumericSquare(a: unknown): a is number[][] {
+  return isNumericSquareAtLeast(a, NATIVE_MATRIX_THRESHOLD);
 }
 
 /** Sign of a permutation given as an image array P (P[i] = source row of output row i). */
@@ -123,13 +131,7 @@ const EIG_IM_TOL = 1e-10;
 
 /** True for a square `number[][]` of any size ≥ 1. */
 export function isNumericSquare(a: unknown): a is number[][] {
-  if (!Array.isArray(a) || a.length === 0) return false;
-  const n = a.length;
-  for (const row of a) {
-    if (!Array.isArray(row) || row.length !== n) return false;
-    for (let j = 0; j < n; j++) if (typeof row[j] !== 'number') return false;
-  }
-  return true;
+  return isNumericSquareAtLeast(a, 1);
 }
 
 /**

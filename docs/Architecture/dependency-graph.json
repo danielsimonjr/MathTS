@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1213,
+    "totalFiles": 1215,
     "totalModules": 82,
-    "totalExports": 6244
+    "totalExports": 6251
   },
   "entryPoints": [
     {
@@ -4668,6 +4668,7 @@
           "cloneMatrix",
           "transpose",
           "matInv",
+          "gaussJordanContinue",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4684,6 +4685,7 @@
           "cloneMatrix",
           "transpose",
           "matInv",
+          "gaussJordanContinue",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4754,7 +4756,15 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "matAdd", "matSub", "matScale", "norm1"]
+            "imports": [
+              "eye",
+              "matMul",
+              "matAdd",
+              "matSub",
+              "matScale",
+              "norm1",
+              "gaussJordanContinue"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -4768,8 +4778,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["applyGivensCols", "applyGivensRight"],
-        "functions": ["applyGivensCols", "applyGivensRight"]
+        "exports": ["givensRotation", "applyGivensCols", "applyGivensRight"],
+        "functions": ["givensRotation", "applyGivensCols", "applyGivensRight"]
       },
       "matrix/src/operations/index.ts": {
         "description": "Matrix Operations",
@@ -4990,7 +5000,16 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1", "matInv"]
+            "imports": [
+              "eye",
+              "matMul",
+              "transpose",
+              "matScale",
+              "normInf",
+              "norm1",
+              "matInv",
+              "gaussJordanContinue"
+            ]
           },
           {
             "file": "./sqrtm.js",
@@ -5110,7 +5129,7 @@
           },
           {
             "file": "./givens.js",
-            "imports": ["applyGivensRight"]
+            "imports": ["applyGivensRight", "givensRotation"]
           }
         ],
         "workspaceDependencies": [],
@@ -5176,7 +5195,7 @@
           },
           {
             "file": "./givens.js",
-            "imports": ["applyGivensCols"]
+            "imports": ["applyGivensCols", "givensRotation"]
           }
         ],
         "workspaceDependencies": [],
@@ -15234,13 +15253,18 @@
         "constants": ["createForEach"]
       },
       "functions/src/matrix/from-vectors.ts": {
-        "description": "Return the logical length of a 1-D or 2-D column/row vector.",
+        "description": "Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./sparse-csc-tail.js",
+            "imports": ["buildSparseCscFromEntries"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["vectorLength", "matrixFromVectorList"],
-        "functions": ["vectorLength", "matrixFromVectorList"]
+        "exports": ["sparseMatrixFromVectors", "vectorLength", "matrixFromVectorList"],
+        "functions": ["sparseMatrixFromVectors", "vectorLength", "matrixFromVectorList"]
       },
       "functions/src/matrix/getMatrixDataType.ts": {
         "description": "Find the data type of all elements in a matrix or array,",
@@ -15458,11 +15482,7 @@
           },
           {
             "file": "./from-vectors.js",
-            "imports": ["matrixFromVectorList", "vectorLength"]
-          },
-          {
-            "file": "./sparse-csc-tail.js",
-            "imports": ["buildSparseCscFromEntries"]
+            "imports": ["matrixFromVectorList", "sparseMatrixFromVectors", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15498,11 +15518,7 @@
           },
           {
             "file": "./from-vectors.js",
-            "imports": ["matrixFromVectorList", "vectorLength"]
-          },
-          {
-            "file": "./sparse-csc-tail.js",
-            "imports": ["buildSparseCscFromEntries"]
+            "imports": ["matrixFromVectorList", "sparseMatrixFromVectors", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -16179,7 +16195,12 @@
         "description": "Number-theory fills — closes gaps left by the existing combinatorics/number-theory",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../wasm/special/scalars.js",
+            "imports": ["chooseScalar"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": [
           "continuedFraction",
@@ -17004,6 +17025,16 @@
         "exports": ["createBernoulli"],
         "constants": ["createBernoulli"]
       },
+      "functions/src/probability/bigint-binomial.ts": {
+        "description": "Shared BigNumber binomial product `C(total, choose)` via the short multiplicative",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["isPositiveInteger", "binomialProductBigNumber"],
+        "interfaces": ["BigNumberBinomialType"],
+        "functions": ["isPositiveInteger", "binomialProductBigNumber"]
+      },
       "functions/src/probability/combinations.ts": {
         "description": "Compute the number of ways of picking `k` unordered outcomes from `n`",
         "externalDependencies": [],
@@ -17021,6 +17052,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./bigint-binomial.js",
+            "imports": ["binomialProductBigNumber", "isPositiveInteger", "BigNumberBinomialType"]
           }
         ],
         "workspaceDependencies": [],
@@ -17048,6 +17083,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "./bigint-binomial.js",
+            "imports": ["binomialProductBigNumber", "isPositiveInteger", "BigNumberBinomialType"]
           }
         ],
         "workspaceDependencies": [],
@@ -21947,7 +21986,7 @@
         "internalDependencies": [
           {
             "file": "./integer-poly.js",
-            "imports": ["trim", "degree", "lc", "isZero", "zipIntPoly", "IntPoly"]
+            "imports": ["trim", "degree", "lc", "isZero", "zipIntPoly", "schoolbookMul", "IntPoly"]
           },
           {
             "file": "./integer-poly.js",
@@ -22061,6 +22100,7 @@
           "add",
           "sub",
           "neg",
+          "schoolbookMul",
           "mul",
           "scalarMul",
           "equals",
@@ -22083,6 +22123,7 @@
           "add",
           "sub",
           "neg",
+          "schoolbookMul",
           "mul",
           "scalarMul",
           "equals",
@@ -35755,6 +35796,10 @@
           {
             "file": "./WorkerPool.js",
             "imports": ["WorkerPool"]
+          },
+          {
+            "file": "./gemm-rows.js",
+            "imports": ["gemmRows"]
           }
         ],
         "workspaceDependencies": [],
@@ -35770,6 +35815,15 @@
         "workspaceDependencies": [],
         "exports": ["WorkerPool"],
         "classes": ["WorkerPool"]
+      },
+      "parallel/src/gemm-rows.ts": {
+        "description": "Row-block dense matrix multiply (ijk inner-k product). Shared by the main",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gemmRows"],
+        "functions": ["gemmRows"]
       },
       "parallel/src/index.ts": {
         "description": "WebWorker parallelization for MathTS computations.",
@@ -36088,7 +36142,12 @@
         "description": "Matrix Worker for parallel computation",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./gemm-rows.js",
+            "imports": ["gemmRows"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": []
       }
@@ -41258,6 +41317,7 @@
         "name": "Functions/probability",
         "files": [
           "functions/src/probability/bernoulli.ts",
+          "functions/src/probability/bigint-binomial.ts",
           "functions/src/probability/combinations.ts",
           "functions/src/probability/combinationsWithRep.ts",
           "functions/src/probability/factorial.ts",
@@ -42118,6 +42178,7 @@
           "parallel/src/ComputePool.ts",
           "parallel/src/ParallelMatrix.ts",
           "parallel/src/WorkerPool.ts",
+          "parallel/src/gemm-rows.ts",
           "parallel/src/index.ts",
           "parallel/src/matrix.worker.ts"
         ]
@@ -42268,14 +42329,14 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1213,
+    "totalTypeScriptFiles": 1215,
     "totalModules": 82,
-    "totalLinesOfCode": 200636,
-    "totalExports": 6244,
+    "totalLinesOfCode": 200598,
+    "totalExports": 6251,
     "totalClasses": 59,
-    "totalInterfaces": 542,
-    "totalFunctions": 2012,
-    "totalTypeGuards": 158,
+    "totalInterfaces": 543,
+    "totalFunctions": 2019,
+    "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,
     "totalReExports": 2627,

@@ -12,6 +12,8 @@
  * @packageDocumentation
  */
 
+import { chooseScalar } from '../wasm/special/scalars.js';
+
 // =============================================================================
 // continuedFraction — simple continued fraction expansion
 // =============================================================================
@@ -52,13 +54,7 @@ export function continuedFraction(x: number, maxTerms = 20): number[] {
 
 /** Exact binomial coefficient `C(n, k)` for small non-negative integers. */
 function binomialExact(n: number, k: number): number {
-  if (k < 0 || k > n) return 0;
-  const kk = Math.min(k, n - k);
-  let result = 1;
-  for (let i = 0; i < kk; i++) {
-    result = (result * (n - i)) / (i + 1);
-  }
-  return Math.round(result);
+  return Math.round(chooseScalar(n, k));
 }
 
 /**

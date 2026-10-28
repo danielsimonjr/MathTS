@@ -211,20 +211,38 @@ export const createIndexClass = /* #__PURE__ */ factory(
       }
 
       /**
+       * Walk `_dimensions`, mapping scalar entries (number or string) and
+       * ranges / matrix dimensions separately. Replaces the former `size` loop
+       * and `_ends` pick-walk; not part of `IndexInterface`.
+       * @private
+       */
+      mapDimensions<T>(
+        onScalar: (scalar: number | string) => T,
+        onRange: (range: RangeInterface | ImmutableDenseMatrix) => T
+      ): T[] {
+        const values: T[] = [];
+
+        for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
+          const d = this._dimensions[i];
+          values[i] =
+            isString(d) || isNumber(d)
+              ? onScalar(d as number | string)
+              : onRange(d as RangeInterface | ImmutableDenseMatrix);
+        }
+
+        return values;
+      }
+
+      /**
        * Retrieve the size of the index, the number of elements for each dimension.
        * @memberof Index
        * @returns {number[]} size
        */
       size(): number[] {
-        const size: number[] = [];
-
-        for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const d = this._dimensions[i];
-          size[i] =
-            isString(d) || isNumber(d) ? 1 : (d as RangeInterface | ImmutableDenseMatrix).size()[0];
-        }
-
-        return size;
+        return this.mapDimensions(
+          () => 1,
+          (range) => range.size()[0]
+        );
       }
 
       /**
@@ -233,7 +251,10 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} max
        */
       max(): (number | string | undefined)[] {
-        return this._ends((range) => range.max());
+        return this.mapDimensions(
+          (scalar) => scalar,
+          (range) => (range as RangeInterface).max()
+        );
       }
 
       /**
@@ -242,25 +263,10 @@ export const createIndexClass = /* #__PURE__ */ factory(
        * @returns {number[]} min
        */
       min(): (number | string | undefined)[] {
-        return this._ends((range) => range.min());
-      }
-
-      /**
-       * Per-dimension min or max (scalar dimensions returned as-is).
-       * @private
-       */
-      _ends(pick: (range: RangeInterface) => number | undefined): (number | string | undefined)[] {
-        const values: (number | string | undefined)[] = [];
-
-        for (let i = 0, ii = this._dimensions.length; i < ii; i++) {
-          const range = this._dimensions[i];
-          values[i] =
-            isString(range) || isNumber(range)
-              ? (range as number | string)
-              : pick(range as RangeInterface);
-        }
-
-        return values;
+        return this.mapDimensions(
+          (scalar) => scalar,
+          (range) => (range as RangeInterface).min()
+        );
       }
 
       /**

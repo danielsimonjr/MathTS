@@ -1686,6 +1686,7 @@
     ],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/distribution-functions.ts",
+      "functions/src/numbertheory/extra.ts",
       "functions/src/signal/iir-design.ts",
       "functions/src/special/niche.ts",
       "functions/src/special/wave-functions.ts",
@@ -2213,11 +2214,8 @@
       "functions/src/matrix/forEach.ts",
       "functions/src/matrix/map.ts"
     ],
+    "functions/src/matrix/sparse-csc-tail.ts": ["functions/src/matrix/from-vectors.ts"],
     "functions/src/matrix/from-vectors.ts": [
-      "functions/src/matrix/matrixFromColumns.ts",
-      "functions/src/matrix/matrixFromRows.ts"
-    ],
-    "functions/src/matrix/sparse-csc-tail.ts": [
       "functions/src/matrix/matrixFromColumns.ts",
       "functions/src/matrix/matrixFromRows.ts"
     ],
@@ -2270,6 +2268,10 @@
     ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/probability/bigint-binomial.ts": [
+      "functions/src/probability/combinations.ts",
+      "functions/src/probability/combinationsWithRep.ts"
+    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"
@@ -3957,6 +3959,10 @@
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts"],
+    "parallel/src/gemm-rows.ts": [
+      "parallel/src/ParallelMatrix.ts",
+      "parallel/src/matrix.worker.ts"
+    ],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",
       "parallel/src/operations/elementwise.ts",
