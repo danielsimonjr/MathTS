@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-28'
-  totalFiles: 1214
+  totalFiles: 1215
   totalModules: 82
-  totalExports: 6245
+  totalExports: 6248
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15109,7 +15109,10 @@ modules:
       description: Number-theory fills — closes gaps left by the existing combinatorics/number-theory
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - chooseScalar
       workspaceDependencies: []
       exports:
         - continuedFraction
@@ -15989,6 +15992,20 @@ modules:
         - createBernoulli
       constants:
         - createBernoulli
+    functions/src/probability/bigint-binomial.ts:
+      description: Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - isPositiveInteger
+        - binomialProductBigNumber
+      interfaces:
+        - BigNumberBinomialType
+      functions:
+        - isPositiveInteger
+        - binomialProductBigNumber
     functions/src/probability/combinations.ts:
       description: Compute the number of ways of picking `k` unordered outcomes from `n`
       externalDependencies: []
@@ -16004,6 +16021,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./bigint-binomial.js
+          imports:
+            - binomialProductBigNumber
+            - isPositiveInteger
+            - BigNumberBinomialType
       workspaceDependencies: []
       exports:
         - createCombinations
@@ -16027,6 +16049,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./bigint-binomial.js
+          imports:
+            - binomialProductBigNumber
+            - isPositiveInteger
+            - BigNumberBinomialType
       workspaceDependencies: []
       exports:
         - createCombinationsWithRep
@@ -20514,6 +20541,7 @@ modules:
             - lc
             - isZero
             - zipIntPoly
+            - schoolbookMul
             - IntPoly
         - file: ./integer-poly.js
           imports:
@@ -20629,6 +20657,7 @@ modules:
         - add
         - sub
         - neg
+        - schoolbookMul
         - mul
         - scalarMul
         - equals
@@ -20650,6 +20679,7 @@ modules:
         - add
         - sub
         - neg
+        - schoolbookMul
         - mul
         - scalarMul
         - equals
@@ -39021,6 +39051,7 @@ dependencyGraph:
     - name: Functions/probability
       files:
         - functions/src/probability/bernoulli.ts
+        - functions/src/probability/bigint-binomial.ts
         - functions/src/probability/combinations.ts
         - functions/src/probability/combinationsWithRep.ts
         - functions/src/probability/factorial.ts
@@ -39937,14 +39968,14 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1214
+  totalTypeScriptFiles: 1215
   totalModules: 82
-  totalLinesOfCode: 200624
-  totalExports: 6245
+  totalLinesOfCode: 200606
+  totalExports: 6248
   totalClasses: 59
-  totalInterfaces: 542
-  totalFunctions: 2013
-  totalTypeGuards: 158
+  totalInterfaces: 543
+  totalFunctions: 2016
+  totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1618
   totalReExports: 2627

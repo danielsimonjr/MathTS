@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1214, "e": 6245, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1215, "e": 6248, "re": 2627 },
   "s": {
-    "loc": 200624,
+    "loc": 200606,
     "cls": 59,
-    "int": 542,
-    "fn": 2013,
-    "tg": 158,
+    "int": 543,
+    "fn": 2016,
+    "tg": 159,
     "en": 0,
     "co": 1618,
     "toi": 612
@@ -863,9 +863,11 @@
       ]
     },
     "functions/probability": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "createBernoulli",
+        "isPositiveInteger",
+        "binomialProductBigNumber",
         "createCombinations",
         "createCombinationsWithRep",
         "createFactorial",
@@ -882,7 +884,8 @@
         "gammaSampleRng",
         "randomMatrix",
         "createRng"
-      ]
+      ],
+      "int": ["BigNumberBinomialType"]
     },
     "functions/relational": {
       "f": 13,
