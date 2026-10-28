@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1987,
+  "totalFiles": 1993,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1189,
+    "build-entry": 1191,
     "test-only": 0,
     "orphan": 0,
-    "test": 710,
+    "test": 714,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1215,
-    "tests": 710,
+    "src": 1217,
+    "tests": 714,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 838,
+    "@danielsimonjr/mathts-functions": 842,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 108,
+    "@danielsimonjr/mathts-matrix": 110,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 16,
@@ -6036,7 +6036,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 82
+      "loc": 78
+    },
+    {
+      "file": "functions/src/geometry/circumcircle.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 27
     },
     {
       "file": "functions/src/geometry/delaunay.ts",
@@ -6106,7 +6113,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 74
+      "loc": 70
     },
     {
       "file": "functions/src/gpu/elementwise-gpu.ts",
@@ -6603,7 +6610,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 269
+      "loc": 274
     },
     {
       "file": "functions/src/numbertheory/extra.ts",
@@ -7478,7 +7485,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 298
+      "loc": 297
     },
     {
       "file": "functions/src/stats/multivariate-sampling.ts",
@@ -7968,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1829
+      "loc": 1765
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7989,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2855
+      "loc": 2817
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -8017,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1345
+      "loc": 1339
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -8108,7 +8115,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1095
+      "loc": 1108
     },
     {
       "file": "functions/src/typed/gpu.ts",
@@ -8220,7 +8227,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1497
+      "loc": 1495
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -8235,6 +8242,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 888
+    },
+    {
+      "file": "functions/src/typed/string-derivative.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 84
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -8734,6 +8748,13 @@
       "loc": 357
     },
     {
+      "file": "functions/tests/clones-cas-string-kernels-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 186
+    },
+    {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -8949,6 +8970,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 94
+    },
+    {
+      "file": "functions/tests/dist-objects-sampleN-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 137
     },
     {
       "file": "functions/tests/dist-objects.test.ts",
@@ -9704,7 +9732,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 245
+      "loc": 321
     },
     {
       "file": "functions/tests/geometry-delaunay-oracle.test.ts",
@@ -9753,7 +9781,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 376
+      "loc": 400
     },
     {
       "file": "functions/tests/geometry/intersect.test.ts",
@@ -9851,7 +9879,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 329
+      "loc": 439
     },
     {
       "file": "functions/tests/helpers/gpu-hardware.ts",
@@ -9900,7 +9928,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 58
+      "loc": 107
     },
     {
       "file": "functions/tests/integration.test.ts",
@@ -10397,7 +10425,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 27
+      "loc": 85
     },
     {
       "file": "functions/tests/remez-pm.test.ts",
@@ -11251,7 +11279,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 340
+      "loc": 342
     },
     {
       "file": "matrix/src/backends/register-backends.ts",
@@ -11496,7 +11524,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 920
+      "loc": 923
     },
     {
       "file": "matrix/tests/backends/Backend.test.ts",
@@ -11511,6 +11539,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 525
+    },
+    {
+      "file": "matrix/tests/backends/ParallelBackend-fallback-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "matrix/tests/backends/ParallelBackend.test.ts",
@@ -11826,6 +11861,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "matrix/tests/sparse/multiplyElementwise-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 101
     },
     {
       "file": "matrix/tests/sparse/operations.test.ts",

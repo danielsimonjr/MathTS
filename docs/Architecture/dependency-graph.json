@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1215,
+    "totalFiles": 1217,
     "totalModules": 82,
-    "totalExports": 6251
+    "totalExports": 6253
   },
   "entryPoints": [
     {
@@ -14229,12 +14229,25 @@
           {
             "file": "./delaunay.js",
             "imports": ["delaunay"]
+          },
+          {
+            "file": "./circumcircle.js",
+            "imports": ["circumcircle"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["alphaShape"],
         "interfaces": ["AlphaShapeResult"],
         "functions": ["alphaShape"]
+      },
+      "functions/src/geometry/circumcircle.ts": {
+        "description": "Shared 2-D circumcircle computation for geometry consumers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["circumcircle"],
+        "functions": ["circumcircle"]
       },
       "functions/src/geometry/delaunay.ts": {
         "description": "Delaunay triangulation (2-D) — part of the computational-geometry engine.",
@@ -14454,6 +14467,10 @@
           {
             "file": "./delaunay.js",
             "imports": ["delaunay"]
+          },
+          {
+            "file": "./circumcircle.js",
+            "imports": ["circumcircle"]
           }
         ],
         "workspaceDependencies": [],
@@ -21314,6 +21331,10 @@
           {
             "file": "./factorization/integer-poly.js",
             "imports": ["polyGcdZ"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           }
         ],
         "workspaceDependencies": [],
@@ -21632,6 +21653,10 @@
           {
             "file": "./algebra.js",
             "imports": ["expand", "factor"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           },
           {
             "file": "../factories/index.js",
@@ -24008,6 +24033,15 @@
           "parallelStatHistogram",
           "typedStatistics"
         ]
+      },
+      "functions/src/typed/string-derivative.ts": {
+        "description": "Symbolic derivative of a sum of additive terms (split on `' + '`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["derivativeOfAdditiveTerms"],
+        "functions": ["derivativeOfAdditiveTerms"]
       },
       "functions/src/typed/string.ts": {
         "description": "Typed String Formatting Functions",
@@ -41164,6 +41198,7 @@
         "name": "Functions/geometry",
         "files": [
           "functions/src/geometry/alpha-shape.ts",
+          "functions/src/geometry/circumcircle.ts",
           "functions/src/geometry/delaunay.ts",
           "functions/src/geometry/distance.ts",
           "functions/src/geometry/geometry-extra.ts",
@@ -41552,6 +41587,7 @@
           "functions/src/typed/signal.ts",
           "functions/src/typed/special.ts",
           "functions/src/typed/statistics.ts",
+          "functions/src/typed/string-derivative.ts",
           "functions/src/typed/string.ts",
           "functions/src/typed/trigonometry.ts",
           "functions/src/typed/typed-bridge.ts",
@@ -42329,13 +42365,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1215,
+    "totalTypeScriptFiles": 1217,
     "totalModules": 82,
-    "totalLinesOfCode": 200630,
-    "totalExports": 6251,
+    "totalLinesOfCode": 200645,
+    "totalExports": 6253,
     "totalClasses": 59,
     "totalInterfaces": 543,
-    "totalFunctions": 2019,
+    "totalFunctions": 2021,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

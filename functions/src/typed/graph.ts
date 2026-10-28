@@ -78,6 +78,40 @@ export function adjacencyMatrix(
 }
 
 // =============================================================================
+// Dijkstra scan (shared by shortestPath / graphDistance)
+// =============================================================================
+
+/**
+ * O(V²) Dijkstra from `start` on a non-negative adjacency matrix.
+ *
+ * Only edges with `adj[u][v] > 0` relax; `prev` is always filled for tie-free
+ * reconstruction by {@link shortestPath}.
+ */
+function dijkstraScan(adj: number[][], start: number): { dist: number[]; prev: number[] } {
+  const n = adj.length;
+  const dist = new Array(n).fill(Infinity);
+  const prev = new Array(n).fill(-1);
+  const visited = new Array(n).fill(false);
+  dist[start] = 0;
+
+  for (let i = 0; i < n; i++) {
+    let u = -1;
+    for (let v = 0; v < n; v++) {
+      if (!visited[v] && (u === -1 || dist[v] < dist[u])) u = v;
+    }
+    if (u === -1 || dist[u] === Infinity) break;
+    visited[u] = true;
+    for (let v = 0; v < n; v++) {
+      if (adj[u][v] > 0 && dist[u] + adj[u][v] < dist[v]) {
+        dist[v] = dist[u] + adj[u][v];
+        prev[v] = u;
+      }
+    }
+  }
+  return { dist, prev };
+}
+
+// =============================================================================
 // shortestPath - Dijkstra's Algorithm
 // =============================================================================
 
@@ -105,25 +139,7 @@ export function shortestPath(adj: number[][], start: number, end: number): numbe
   }
   if (start === end) return [start];
 
-  const dist = new Array(n).fill(Infinity);
-  const prev = new Array(n).fill(-1);
-  const visited = new Array(n).fill(false);
-  dist[start] = 0;
-
-  for (let i = 0; i < n; i++) {
-    let u = -1;
-    for (let v = 0; v < n; v++) {
-      if (!visited[v] && (u === -1 || dist[v] < dist[u])) u = v;
-    }
-    if (u === -1 || dist[u] === Infinity) break;
-    visited[u] = true;
-    for (let v = 0; v < n; v++) {
-      if (adj[u][v] > 0 && dist[u] + adj[u][v] < dist[v]) {
-        dist[v] = dist[u] + adj[u][v];
-        prev[v] = u;
-      }
-    }
-  }
+  const { prev } = dijkstraScan(adj, start);
 
   // Reconstruct path
   const path: number[] = [];
@@ -408,23 +424,7 @@ export function graphDistance(adj: number[][], start: number, end: number): numb
   }
   if (start === end) return 0;
 
-  const dist = new Array(n).fill(Infinity);
-  const visited = new Array(n).fill(false);
-  dist[start] = 0;
-
-  for (let i = 0; i < n; i++) {
-    let u = -1;
-    for (let v = 0; v < n; v++) {
-      if (!visited[v] && (u === -1 || dist[v] < dist[u])) u = v;
-    }
-    if (u === -1 || dist[u] === Infinity) break;
-    visited[u] = true;
-    for (let v = 0; v < n; v++) {
-      if (adj[u][v] > 0 && dist[u] + adj[u][v] < dist[v]) {
-        dist[v] = dist[u] + adj[u][v];
-      }
-    }
-  }
+  const { dist } = dijkstraScan(adj, start);
   return dist[end];
 }
 
