@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1218,
     "totalModules": 82,
-    "totalExports": 6255
+    "totalExports": 6258
   },
   "entryPoints": [
     {
@@ -23840,8 +23840,11 @@
               "besselYScalar",
               "airyUCoeffs",
               "airyAsymPQ",
+              "airyPowerSeries",
+              "airyScalar",
               "airyAiScalar",
               "airyBiScalar",
+              "incompleteBetaFraction",
               "ellipticKScalar",
               "ellipticECompleteScalar"
             ]
@@ -25755,10 +25758,13 @@
           "ellipticECompleteScalar",
           "airyUCoeffs",
           "airyAsymPQ",
+          "airyPowerSeries",
+          "airyScalar",
           "airyAiScalar",
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "incompleteBetaFraction",
           "betaincClosedScalar",
           "chooseScalar",
           "gammaincScalar",
@@ -25786,10 +25792,13 @@
           "ellipticECompleteScalar",
           "airyUCoeffs",
           "airyAsymPQ",
+          "airyPowerSeries",
+          "airyScalar",
           "airyAiScalar",
           "airyBiScalar",
           "factorial",
           "betaScalar",
+          "incompleteBetaFraction",
           "betaincClosedScalar",
           "chooseScalar",
           "gammaincScalar",
@@ -42408,11 +42417,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1218,
     "totalModules": 82,
-    "totalLinesOfCode": 200721,
-    "totalExports": 6255,
+    "totalLinesOfCode": 200693,
+    "totalExports": 6258,
     "totalClasses": 59,
     "totalInterfaces": 545,
-    "totalFunctions": 2023,
+    "totalFunctions": 2026,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

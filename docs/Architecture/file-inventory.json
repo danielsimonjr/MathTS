@@ -8248,7 +8248,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1449
+      "loc": 1458
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -8626,7 +8626,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 757
+      "loc": 720
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -10019,7 +10019,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 174
     },
     {
       "file": "functions/tests/krylov-preconditioners.test.ts",
@@ -10621,7 +10621,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 197
+      "loc": 106
     },
     {
       "file": "functions/tests/special.test.ts",
