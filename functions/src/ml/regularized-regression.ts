@@ -190,6 +190,33 @@ function coordinateDescent(
 }
 
 /**
+ * Center, standardize, run coordinate descent with given L1/L2 penalties, and
+ * map coefficients back to the original predictor scale. Shared by `lasso` and
+ * `elasticNet`; penalty weights are already scaled (`l1`, `l2`).
+ */
+function finishPenalized(
+  X: number[][],
+  y: number[],
+  n: number,
+  p: number,
+  l1: number,
+  l2: number,
+  opts?: CoordinateDescentOptions
+): RegularizedRegressionResult {
+  const useIntercept = opts?.intercept !== false;
+  const maxIter = opts?.maxIter ?? 1000;
+  const tol = opts?.tol ?? 1e-7;
+
+  const { Xc, yc, xMean, yMean } = center(X, y, n, p, useIntercept);
+  const { Xs, scale } = standardize(Xc, n, p);
+
+  const betaStd = coordinateDescent(Xs, yc, n, p, l1, l2, maxIter, tol);
+  const coefficients = betaStd.map((b, j) => b / scale[j]);
+  const intercept = useIntercept ? yMean - dot(xMean, coefficients) : 0;
+  return { coefficients, intercept };
+}
+
+/**
  * Lasso regression (L1-penalized least squares) via cyclic coordinate descent
  * with soft-thresholding on standardized columns. Unlike ridge, large enough
  * penalties drive coefficients to exactly 0 (sparse solutions). The intercept
@@ -212,17 +239,7 @@ export function lasso(
 ): RegularizedRegressionResult {
   const { n, p } = validate(X, y, 'lasso');
   if (alpha < 0) throw new Error('lasso: alpha must be non-negative');
-  const useIntercept = opts?.intercept !== false;
-  const maxIter = opts?.maxIter ?? 1000;
-  const tol = opts?.tol ?? 1e-7;
-
-  const { Xc, yc, xMean, yMean } = center(X, y, n, p, useIntercept);
-  const { Xs, scale } = standardize(Xc, n, p);
-
-  const betaStd = coordinateDescent(Xs, yc, n, p, alpha, 0, maxIter, tol);
-  const coefficients = betaStd.map((b, j) => b / scale[j]);
-  const intercept = useIntercept ? yMean - dot(xMean, coefficients) : 0;
-  return { coefficients, intercept };
+  return finishPenalized(X, y, n, p, alpha, 0, opts);
 }
 
 /**
@@ -252,17 +269,5 @@ export function elasticNet(
   const { n, p } = validate(X, y, 'elasticNet');
   if (alpha < 0) throw new Error('elasticNet: alpha must be non-negative');
   if (l1Ratio < 0 || l1Ratio > 1) throw new Error('elasticNet: l1Ratio must be in [0, 1]');
-  const useIntercept = opts?.intercept !== false;
-  const maxIter = opts?.maxIter ?? 1000;
-  const tol = opts?.tol ?? 1e-7;
-
-  const { Xc, yc, xMean, yMean } = center(X, y, n, p, useIntercept);
-  const { Xs, scale } = standardize(Xc, n, p);
-
-  const l1 = alpha * l1Ratio;
-  const l2 = alpha * (1 - l1Ratio);
-  const betaStd = coordinateDescent(Xs, yc, n, p, l1, l2, maxIter, tol);
-  const coefficients = betaStd.map((b, j) => b / scale[j]);
-  const intercept = useIntercept ? yMean - dot(xMean, coefficients) : 0;
-  return { coefficients, intercept };
+  return finishPenalized(X, y, n, p, alpha * l1Ratio, alpha * (1 - l1Ratio), opts);
 }

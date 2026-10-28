@@ -239,13 +239,7 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       _sampleNDispatch('normal', [mu, sigma], n, opts, (count, rng) => {
         const out = new Float64Array(count);
         for (let i = 0; i < count; i++) {
-          const u1 = rng();
-          const u2 = rng();
-          out[i] =
-            mu +
-            sigma *
-              Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) *
-              Math.cos(2 * Math.PI * u2);
+          out[i] = mu + sigma * normalSampleRng(rng);
         }
         return out;
       }),
@@ -466,10 +460,7 @@ export function chiSquaredDist(k: number): Distribution {
         for (let j = 0; j < count; j++) {
           let sum = 0;
           for (let i = 0; i < k; i++) {
-            const u1 = rng();
-            const u2 = rng();
-            const z =
-              Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+            const z = normalSampleRng(rng);
             sum += z * z;
           }
           out[j] = sum;
@@ -693,11 +684,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       _sampleNDispatch(null, [], n, opts, (count, rng) => {
         const out = new Float64Array(count);
         for (let i = 0; i < count; i++) {
-          const u1 = rng();
-          const u2 = rng();
-          const z =
-            Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
-          out[i] = Math.exp(mu + sigma * z);
+          out[i] = Math.exp(mu + sigma * normalSampleRng(rng));
         }
         return out;
       }),
@@ -827,10 +814,7 @@ export function tDist(nu: f64): Distribution {
       _sampleNDispatch('studentT', [nu], n, opts, (count, rng) => {
         const out = new Float64Array(count);
         for (let i = 0; i < count; i++) {
-          const u1 = rng();
-          const u2 = rng();
-          const z =
-            Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) * Math.cos(2 * Math.PI * u2);
+          const z = normalSampleRng(rng);
           const chi = _gammaRandomRng(nu / 2, rng) * 2;
           out[i] = z / Math.sqrt(chi / nu);
         }

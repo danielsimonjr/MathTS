@@ -6603,7 +6603,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 269
+      "loc": 274
     },
     {
       "file": "functions/src/numbertheory/extra.ts",
@@ -7478,7 +7478,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 298
+      "loc": 297
     },
     {
       "file": "functions/src/stats/multivariate-sampling.ts",
@@ -8017,7 +8017,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1345
+      "loc": 1329
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -8941,7 +8941,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 110
     },
     {
       "file": "functions/tests/dist-objects.test.ts",
@@ -9893,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 90
+      "loc": 92
     },
     {
       "file": "functions/tests/integration.test.ts",
@@ -10390,7 +10390,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 91
+      "loc": 82
     },
     {
       "file": "functions/tests/remez-pm.test.ts",
