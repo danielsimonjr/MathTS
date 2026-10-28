@@ -13414,7 +13414,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1620
+      "loc": 1624
     },
     {
       "file": "workbook/src/contract.ts",
@@ -13463,7 +13463,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 203
+      "loc": 219
     },
     {
       "file": "workbook/src/html.ts",
@@ -13610,7 +13610,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 681
+      "loc": 676
     },
     {
       "file": "workbook/tests/edit.test.ts",
