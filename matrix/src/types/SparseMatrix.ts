@@ -569,6 +569,9 @@ export class SparseMatrix extends Matrix<number> {
 
   /**
    * Element-wise multiplication (Hadamard product)
+   *
+   * The CSR walk stays inlined rather than `mapNonZeros(v => v * other.get(...))`:
+   * that extra per-nnz callback was >10% slower at 2000×2000 with nnz≈40k.
    */
   multiplyElementwise(other: Matrix<number>): SparseMatrix {
     this.checkDimensionsMatch(other);

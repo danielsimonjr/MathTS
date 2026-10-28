@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1986,
+  "totalFiles": 1988,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 709,
+    "test": 711,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1215,
-    "tests": 709,
+    "tests": 711,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 837,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 108,
+    "@danielsimonjr/mathts-matrix": 110,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 16,
@@ -11244,7 +11244,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 340
+      "loc": 342
     },
     {
       "file": "matrix/src/backends/register-backends.ts",
@@ -11489,7 +11489,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 920
+      "loc": 923
     },
     {
       "file": "matrix/tests/backends/Backend.test.ts",
@@ -11504,6 +11504,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 525
+    },
+    {
+      "file": "matrix/tests/backends/ParallelBackend-fallback-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "matrix/tests/backends/ParallelBackend.test.ts",
@@ -11819,6 +11826,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 130
+    },
+    {
+      "file": "matrix/tests/sparse/multiplyElementwise-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 101
     },
     {
       "file": "matrix/tests/sparse/operations.test.ts",
