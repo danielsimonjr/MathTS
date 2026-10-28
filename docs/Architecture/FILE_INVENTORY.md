@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1994
+**Total files**: 1996
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1191 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1192 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      715 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      716 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1994** |                                                                                                                |
+| **Total**     | **1996** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1217 |
-| `tests`    |   715 |
+| `src`      |  1218 |
+| `tests`    |   716 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -58,7 +58,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-plot`           |    46 |
 | `@danielsimonjr/mathts-signal`         |     3 |
 | `@danielsimonjr/mathts-statistics`     |     3 |
-| `@danielsimonjr/mathts-tensor`         |    52 |
+| `@danielsimonjr/mathts-tensor`         |    54 |
 | `@danielsimonjr/mathts-trigonometry`   |     3 |
 | `@danielsimonjr/mathts-typed-function` |     4 |
 | `@danielsimonjr/mathts-units`          |     3 |
@@ -1908,6 +1908,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tensor/src/operations/pinv.ts`                                                   | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/qr.ts`                                                     | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/random.ts`                                                 | @danielsimonjr/mathts-tensor         | src      | build-entry |
+| `tensor/src/operations/reshape-axes.ts`                                           | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/roll.ts`                                                   | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/scatter.ts`                                                | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/operations/slice.ts`                                                  | @danielsimonjr/mathts-tensor         | src      | build-entry |
@@ -1916,6 +1917,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `tensor/src/operations/svd.ts`                                                    | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/src/Tensor.ts`                                                            | @danielsimonjr/mathts-tensor         | src      | build-entry |
 | `tensor/tests/broadcasting.test.ts`                                               | @danielsimonjr/mathts-tensor         | tests    | test        |
+| `tensor/tests/clones-batch-g-oracle.test.ts`                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/contraction-sequence.test.ts`                                       | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/Index.test.ts`                                                      | @danielsimonjr/mathts-tensor         | tests    | test        |
 | `tensor/tests/operations/cholesky.test.ts`                                        | @danielsimonjr/mathts-tensor         | tests    | test        |

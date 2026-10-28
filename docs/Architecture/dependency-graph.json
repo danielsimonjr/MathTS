@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1217,
+    "totalFiles": 1218,
     "totalModules": 82,
-    "totalExports": 6253
+    "totalExports": 6254
   },
   "entryPoints": [
     {
@@ -5778,6 +5778,10 @@
           {
             "file": "../Tensor.js",
             "imports": ["Tensor"]
+          },
+          {
+            "file": "./reshape-axes.js",
+            "imports": ["reshapeByRowAxes"]
           }
         ],
         "workspaceDependencies": [
@@ -5980,6 +5984,21 @@
         "interfaces": ["RandomTensorOpts"],
         "functions": ["randomTensor"]
       },
+      "tensor/src/operations/reshape-axes.ts": {
+        "description": "Shared axis validation and 2-D matricisation for tensor eig / SVD prep.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../Tensor.js",
+            "imports": ["Tensor"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["reshapeByRowAxes"],
+        "interfaces": ["ReshapeByRowAxesMessages", "ReshapeByRowAxesResult"],
+        "functions": ["reshapeByRowAxes"]
+      },
       "tensor/src/operations/roll.ts": {
         "description": "roll — cyclic shift along given axes.",
         "externalDependencies": [],
@@ -6093,6 +6112,10 @@
           {
             "file": "../Tensor.js",
             "imports": ["Tensor"]
+          },
+          {
+            "file": "./reshape-axes.js",
+            "imports": ["reshapeByRowAxes"]
           }
         ],
         "workspaceDependencies": [
@@ -40979,6 +41002,7 @@
           "tensor/src/operations/pinv.ts",
           "tensor/src/operations/qr.ts",
           "tensor/src/operations/random.ts",
+          "tensor/src/operations/reshape-axes.ts",
           "tensor/src/operations/roll.ts",
           "tensor/src/operations/scatter.ts",
           "tensor/src/operations/slice.ts",
@@ -42365,13 +42389,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1217,
+    "totalTypeScriptFiles": 1218,
     "totalModules": 82,
-    "totalLinesOfCode": 200646,
-    "totalExports": 6253,
+    "totalLinesOfCode": 200687,
+    "totalExports": 6254,
     "totalClasses": 59,
-    "totalInterfaces": 543,
-    "totalFunctions": 2021,
+    "totalInterfaces": 545,
+    "totalFunctions": 2022,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

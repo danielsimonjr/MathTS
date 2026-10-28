@@ -18,6 +18,7 @@
 import { Tensor } from '../Tensor.js';
 import { svd, svdWasm } from '@danielsimonjr/mathts-matrix';
 import type { SVDResult } from '@danielsimonjr/mathts-matrix';
+import { reshapeByRowAxes } from './reshape-axes.js';
 
 /** Configures the truncation (maximum dimension and cutoff) for `tensorSvd`. */
 export interface TensorSvdOpts {
@@ -61,40 +62,12 @@ interface SvdPrep {
 
 /** Validate axes, permute, and reshape to the 2-D matrix the SVD routine wants. */
 function prepareSvdMatrix(t: Tensor, rowAxes: ReadonlyArray<number>): SvdPrep {
-  const rank = t.shape.length;
-
-  for (const ax of rowAxes) {
-    if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
-      throw new RangeError(
-        `tensorSvd: rowAxes contains invalid axis ${ax} for tensor of rank ${rank}`
-      );
-    }
-  }
-
-  const rowSet = new Set(rowAxes);
-  const colAxes: number[] = [];
-  for (let i = 0; i < rank; i++) {
-    if (!rowSet.has(i)) colAxes.push(i);
-  }
-
-  if (colAxes.length === 0) {
-    throw new Error('tensorSvd: rowAxes covers all axes — at least one axis must remain for V');
-  }
-  if (rowAxes.length === 0) {
-    throw new Error('tensorSvd: rowAxes is empty — at least one axis must be assigned to U');
-  }
-
-  const perm = [...rowAxes, ...colAxes];
-  const permuted = t.transpose(perm);
-
-  const rowDims = rowAxes.map((ax) => t.shape[ax]);
-  const colDims = colAxes.map((ax) => t.shape[ax]);
-  const numRows = rowDims.reduce((a, b) => a * b, 1);
-  const numCols = colDims.reduce((a, b) => a * b, 1);
-
-  const matrix: number[][] = Array.from({ length: numRows }, (_, i) =>
-    Array.from({ length: numCols }, (_, j) => permuted.data[i * numCols + j])
-  );
+  const { matrix, rowDims, colDims, numRows, numCols } = reshapeByRowAxes(t, rowAxes, {
+    badAxis: (ax, rank) =>
+      `tensorSvd: rowAxes contains invalid axis ${ax} for tensor of rank ${rank}`,
+    noColAxis: 'tensorSvd: rowAxes covers all axes — at least one axis must remain for V',
+    noRowAxis: 'tensorSvd: rowAxes is empty — at least one axis must be assigned to U',
+  });
 
   return { matrix, rowDims, colDims, numRows, numCols };
 }
