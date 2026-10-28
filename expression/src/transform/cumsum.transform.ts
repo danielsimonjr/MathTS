@@ -1,6 +1,6 @@
-import { isBigNumber, isCollection, isNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { errorTransform } from './utils/errorTransform.js';
+import { lastDimToZeroBase } from './utils/lastDimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
@@ -12,10 +12,10 @@ interface Dependencies {
 }
 
 /**
- * Attach a transform function to math.sum
+ * Attach a transform function to math.cumsum
  * Adds a property transform containing the transform function.
  *
- * This transform changed the last `dim` parameter of function sum
+ * This transform changes the last `dim` parameter of function cumsum
  * from one-based to zero based
  */
 const name = 'cumsum';
@@ -27,15 +27,7 @@ export const createCumSumTransform = /* #__PURE__ */ factory(
   ({ typed, cumsum }: Dependencies) => {
     return typed(name, {
       '...any': function (args: unknown[]): unknown {
-        // change last argument dim from one-based to zero-based
-        if (args.length === 2 && isCollection(args[0])) {
-          const dim = args[1];
-          if (isNumber(dim)) {
-            args[1] = dim - 1;
-          } else if (isBigNumber(dim)) {
-            args[1] = (dim as unknown as { minus(n: number): unknown }).minus(1);
-          }
-        }
+        args = lastDimToZeroBase(args);
 
         try {
           return cumsum(...args);

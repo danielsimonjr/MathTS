@@ -46,3 +46,29 @@ export function prepareTransformArrayAndCallback(
 
   return { x, callback, callbackArity };
 }
+
+/**
+ * Shared filter/forEach transform body: arity 0/1 delegate to `op`; otherwise
+ * compile the collection and callback via {@link prepareTransformArrayAndCallback}.
+ */
+export function applyArrayCallbackTransform(
+  args: TransformArgNode[],
+  math: Record<string, unknown>,
+  scope: Map<string, unknown>,
+  op: (...args: unknown[]) => unknown,
+  transformCallback: (callback: unknown, arity: number) => unknown
+): unknown {
+  if (args.length === 0) {
+    return op();
+  }
+
+  const x: unknown = args[0];
+
+  if (args.length === 1) {
+    return op(x);
+  }
+
+  const prepared = prepareTransformArrayAndCallback(args, math, scope);
+
+  return op(prepared.x, transformCallback(prepared.callback, prepared.callbackArity));
+}

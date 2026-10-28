@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1976
+**Total files**: 1977
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1186 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1187 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |      702 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1976** |                                                                                                                |
+| **Total**     | **1977** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,7 +32,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1212 |
+| `src`      |  1213 |
 | `tests`    |   702 |
 | `tools`    |    28 |
 
@@ -47,7 +47,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   554 |
+| `@danielsimonjr/mathts-expression`     |   555 |
 | `@danielsimonjr/mathts-functions`      |   833 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
@@ -707,6 +707,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/src/transform/utils/errorTransform.ts`                                | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/lastDimToZeroBase.ts`                             | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/prepareTransformArgs.ts`                          | @danielsimonjr/mathts-expression     | src      | build-entry |
+| `expression/src/transform/utils/shortCircuitBinary.ts`                            | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/transformCallback.ts`                             | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/variance.transform.ts`                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/types.ts`                                                         | @danielsimonjr/mathts-expression     | src      | build-entry |

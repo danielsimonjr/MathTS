@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { isCollection } from '../utils/is.js';
+import { evalShortCircuitBinary } from './utils/shortCircuitBinary.js';
 
 interface Node {
   compile(): CompiledExpression;
@@ -26,17 +26,15 @@ export const createBitAndTransform = /* #__PURE__ */ factory(
   dependencies,
   ({ bitAnd }: Dependencies) => {
     function bitAndTransform(args: Node[], _math: unknown, scope: unknown): unknown {
-      const condition1 = args[0].compile().evaluate(scope);
-      if (!isCollection(condition1)) {
-        if (isNaN(condition1 as number)) {
-          return NaN;
+      return evalShortCircuitBinary(args, scope, bitAnd, (left) => {
+        if (isNaN(left as number)) {
+          return { take: true, value: NaN };
         }
-        if (condition1 === 0 || condition1 === false) {
-          return 0;
+        if (left === 0 || left === false) {
+          return { take: true, value: 0 };
         }
-      }
-      const condition2 = args[1].compile().evaluate(scope);
-      return bitAnd(condition1, condition2);
+        return { take: false };
+      });
     }
 
     bitAndTransform.rawArgs = true;
