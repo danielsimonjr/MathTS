@@ -4,6 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import * as MatrixPublic from '../../src/index.js';
+import * as OperationsPublic from '../../src/operations/index.js';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 import { schurInternal } from '../../src/operations/schur.js';
 import { matrixExpm } from '../../src/operations/expm.js';
@@ -155,6 +157,15 @@ function residualSqrt(Y: number[][], A: number[][]): number {
 // Tests
 // ---------------------------------------------------------------------------
 
+describe('clone batch A — helpers stay off the barrels', () => {
+  it('does not re-export gaussJordanContinue / givensRotation / newtonSqrtUpdate', () => {
+    for (const name of ['gaussJordanContinue', 'givensRotation', 'newtonSqrtUpdate'] as const) {
+      expect(Object.hasOwn(MatrixPublic, name)).toBe(false);
+      expect(Object.hasOwn(OperationsPublic, name)).toBe(false);
+    }
+  });
+});
+
 describe('clone batch A — givensRotation (M1)', () => {
   it('matches oracle and c² + s² = 1 on snapshot table', () => {
     for (const row of GIVENS_SNAPSHOT) {
@@ -165,6 +176,8 @@ describe('clone batch A — givensRotation (M1)', () => {
       expect(c).toBe(o.c);
       expect(s).toBe(o.s);
       expect(c * c + s * s).toBeCloseTo(1, 14);
+      // Zeroing identity of [c, -s; s, c], not [c, s; -s, c].
+      expect(s * row.a + c * row.b).toBeCloseTo(0, 14);
     }
   });
 });
@@ -188,6 +201,14 @@ describe('clone batch A — Schur QR single-shift chase (M2)', () => {
 
   it('Schur form matches pre-consolidation snapshots (positive discriminant)', () => {
     const { Q, H } = schurInternal(Apos);
+    // Pre-change (main) values: already-triangular A is a no-op Schur.
+    expect(Q).toEqual([
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ]);
+    expect(H).toEqual(Apos);
     const Qt = transposeArr(Q);
     const recon = matMulArr(matMulArr(Q, H), Qt);
     expect(frobDiffArr(recon, Apos)).toBeLessThan(1e-9);
@@ -196,6 +217,19 @@ describe('clone batch A — Schur QR single-shift chase (M2)', () => {
 
   it('Schur form matches pre-consolidation snapshots (negative discriminant shift branch)', () => {
     const { Q, H } = schurInternal(AnegDisc);
+    // Pre-change (main) Q/T — sign of Q[:,1] is part of the Givens contract.
+    expect(Q).toEqual([
+      [1, 0, 0, 0],
+      [0, -1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ]);
+    expect(H).toEqual([
+      [0, -1, 0, 0],
+      [1, 0, 0, 0],
+      [0, 0, 2, 1],
+      [0, 0, -1, 2],
+    ]);
     const Qt = transposeArr(Q);
     const recon = matMulArr(matMulArr(Q, H), Qt);
     expect(frobDiffArr(recon, AnegDisc)).toBeLessThan(1e-8);
