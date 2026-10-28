@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1992,
+  "totalFiles": 1993,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1191,
     "test-only": 0,
     "orphan": 0,
-    "test": 713,
+    "test": 714,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1217,
-    "tests": 713,
+    "tests": 714,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 841,
+    "@danielsimonjr/mathts-functions": 842,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 110,
@@ -6757,7 +6757,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 191
+      "loc": 203
     },
     {
       "file": "functions/src/numeric/propagate-uncertainty.ts",
@@ -7205,7 +7205,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 335
+      "loc": 347
     },
     {
       "file": "functions/src/signal/conv.ts",
@@ -8227,7 +8227,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1484
+      "loc": 1495
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -8774,6 +8774,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 321
+    },
+    {
+      "file": "functions/tests/clones-functions-shells-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 177
     },
     {
       "file": "functions/tests/clones-shapes-oracle.test.ts",

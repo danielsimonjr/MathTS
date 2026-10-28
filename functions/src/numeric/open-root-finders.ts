@@ -26,6 +26,39 @@ function centralDiff2(f: (x: f64) => f64, x: f64): f64 {
 }
 
 /**
+ * Shared open-method iteration: evaluate f, test |f| and step size, apply `step`.
+ *
+ * @param f - Function whose root is sought
+ * @param x0 - Initial guess
+ * @param tol - Absolute tolerance
+ * @param maxIter - Maximum iterations
+ * @param name - Method name for non-convergence errors (`newton`, `halley`, …)
+ * @param step - Returns the Newton/Halley step increment (already f/f′ or Halley form)
+ */
+function iterateRoot(
+  f: (x: f64) => f64,
+  x0: f64,
+  tol: f64,
+  maxIter: i32,
+  name: string,
+  step: (x: f64, fx: f64) => f64
+): f64 {
+  let x = x0;
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    const fx = f(x);
+    if (Math.abs(fx) < tol) return x;
+
+    const dx = step(x, fx);
+    const xNext = x - dx;
+    if (Math.abs(dx) < tol) return xNext;
+    x = xNext;
+  }
+
+  throw new Error(`${name}: failed to converge within ${maxIter} iterations`);
+}
+
+/**
  * Options for Newton's method.
  */
 export interface NewtonOptions {
@@ -57,24 +90,13 @@ export function newton(f: (x: f64) => f64, x0: f64, opts?: NewtonOptions): f64 {
   const tol = opts?.tol ?? 1e-12;
   const maxIter = opts?.maxIter ?? 100;
 
-  let x = x0;
-
-  for (let iter = 0; iter < maxIter; iter++) {
-    const fx = f(x);
-    if (Math.abs(fx) < tol) return x;
-
+  return iterateRoot(f, x0, tol, maxIter, 'newton', (x, fx) => {
     const dfx = fprime ? fprime(x) : centralDiff1(f, x);
     if (Math.abs(dfx) < 1e-300) {
       throw new Error('newton: derivative near zero — cannot continue');
     }
-
-    const dx = fx / dfx;
-    const xNext = x - dx;
-    if (Math.abs(dx) < tol) return xNext;
-    x = xNext;
-  }
-
-  throw new Error(`newton: failed to converge within ${maxIter} iterations`);
+    return fx / dfx;
+  });
 }
 
 /**
@@ -166,12 +188,7 @@ export function halley(f: (x: f64) => f64, x0: f64, opts?: HalleyOptions): f64 {
   const tol = opts?.tol ?? 1e-12;
   const maxIter = opts?.maxIter ?? 100;
 
-  let x = x0;
-
-  for (let iter = 0; iter < maxIter; iter++) {
-    const fx = f(x);
-    if (Math.abs(fx) < tol) return x;
-
+  return iterateRoot(f, x0, tol, maxIter, 'halley', (x, fx) => {
     const dfx = fprime ? fprime(x) : centralDiff1(f, x);
     const d2fx = fprime2 ? fprime2(x) : centralDiff2(f, x);
 
@@ -180,11 +197,6 @@ export function halley(f: (x: f64) => f64, x0: f64, opts?: HalleyOptions): f64 {
       throw new Error('halley: denominator near zero — cannot continue');
     }
 
-    const dx = (2 * fx * dfx) / denom;
-    const xNext = x - dx;
-    if (Math.abs(dx) < tol) return xNext;
-    x = xNext;
-  }
-
-  throw new Error(`halley: failed to converge within ${maxIter} iterations`);
+    return (2 * fx * dfx) / denom;
+  });
 }
