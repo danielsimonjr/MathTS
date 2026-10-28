@@ -20,6 +20,7 @@ import {
 } from '../wasm/poly/wasm-bridge.js';
 import {
   polyFromExpression,
+  polyToDenseCoefficients,
   buchberger,
   normalize as normalizePoly,
   polyToString as idealPolyToString,
@@ -576,11 +577,7 @@ function isNearInt(c: number): boolean {
  *  ascending coefficient array (index = power) — this file's `number[]`
  *  polynomial convention. */
 function polyToDense(p: Poly): number[] {
-  let maxPow = 0;
-  for (const t of p) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of p) dense[t.powers[0]] += t.coeff;
-  return trimPoly(dense);
+  return trimPoly(polyToDenseCoefficients(p));
 }
 
 /** Convert a dense ascending coefficient array back to a single-variable `Poly`. */

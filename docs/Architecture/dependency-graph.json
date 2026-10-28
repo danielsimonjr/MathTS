@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1212,
     "totalModules": 82,
-    "totalExports": 6243
+    "totalExports": 6244
   },
   "entryPoints": [
     {
@@ -9083,7 +9083,7 @@
           },
           {
             "file": "./typed/polynomial-ideal.js",
-            "imports": ["polyFromExpression"]
+            "imports": ["polyFromExpression", "polyToDenseCoefficients"]
           },
           {
             "file": "./cas/rational-integrate.js",
@@ -11846,7 +11846,7 @@
         "internalDependencies": [
           {
             "file": "../typed/polynomial-ideal.js",
-            "imports": ["polyFromExpression", "Poly"]
+            "imports": ["polyFromExpression", "polyToDenseCoefficients", "Poly"]
           },
           {
             "file": "../typed/factorization/integer-poly.js",
@@ -21274,7 +21274,14 @@
           },
           {
             "file": "./polynomial-ideal.js",
-            "imports": ["polyFromExpression", "buchberger", "normalize", "polyToString", "Poly"]
+            "imports": [
+              "polyFromExpression",
+              "polyToDenseCoefficients",
+              "buchberger",
+              "normalize",
+              "polyToString",
+              "Poly"
+            ]
           },
           {
             "file": "./factorization/index.js",
@@ -22025,7 +22032,7 @@
         "internalDependencies": [
           {
             "file": "../polynomial-ideal.js",
-            "imports": ["polyFromExpression", "Poly"]
+            "imports": ["polyFromExpression", "polyToDenseCoefficients", "Poly"]
           },
           {
             "file": "./integer-poly.js",
@@ -23441,6 +23448,7 @@
           "polyNeg",
           "polySub",
           "polyMul",
+          "polyToDenseCoefficients",
           "polyFromExpression",
           "polyReduce",
           "buchberger",
@@ -23455,6 +23463,7 @@
           "polyNeg",
           "polySub",
           "polyMul",
+          "polyToDenseCoefficients",
           "polyFromExpression",
           "polyReduce",
           "buchberger",
@@ -42265,11 +42274,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1212,
     "totalModules": 82,
-    "totalLinesOfCode": 200568,
-    "totalExports": 6243,
+    "totalLinesOfCode": 200566,
+    "totalExports": 6244,
     "totalClasses": 59,
     "totalInterfaces": 542,
-    "totalFunctions": 2011,
+    "totalFunctions": 2012,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,
