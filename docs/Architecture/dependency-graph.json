@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1212,
+    "totalFiles": 1213,
     "totalModules": 82,
-    "totalExports": 6241
+    "totalExports": 6242
   },
   "entryPoints": [
     {
@@ -35732,6 +35732,10 @@
           {
             "file": "./WorkerPool.js",
             "imports": ["WorkerPool"]
+          },
+          {
+            "file": "./gemm-rows.js",
+            "imports": ["gemmRows"]
           }
         ],
         "workspaceDependencies": [],
@@ -35747,6 +35751,15 @@
         "workspaceDependencies": [],
         "exports": ["WorkerPool"],
         "classes": ["WorkerPool"]
+      },
+      "parallel/src/gemm-rows.ts": {
+        "description": "Row-block dense matrix multiply (ikj). Shared by the main thread sequential",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["gemmRows"],
+        "functions": ["gemmRows"]
       },
       "parallel/src/index.ts": {
         "description": "WebWorker parallelization for MathTS computations.",
@@ -36065,7 +36078,12 @@
         "description": "Matrix Worker for parallel computation",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./gemm-rows.js",
+            "imports": ["gemmRows"]
+          }
+        ],
         "workspaceDependencies": [],
         "exports": []
       }
@@ -42094,6 +42112,7 @@
           "parallel/src/ComputePool.ts",
           "parallel/src/ParallelMatrix.ts",
           "parallel/src/WorkerPool.ts",
+          "parallel/src/gemm-rows.ts",
           "parallel/src/index.ts",
           "parallel/src/matrix.worker.ts"
         ]
@@ -42244,13 +42263,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1212,
+    "totalTypeScriptFiles": 1213,
     "totalModules": 82,
-    "totalLinesOfCode": 200596,
-    "totalExports": 6241,
+    "totalLinesOfCode": 200580,
+    "totalExports": 6242,
     "totalClasses": 59,
     "totalInterfaces": 542,
-    "totalFunctions": 2009,
+    "totalFunctions": 2010,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

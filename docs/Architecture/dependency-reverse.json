@@ -3954,6 +3954,10 @@
     ],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts"],
+    "parallel/src/gemm-rows.ts": [
+      "parallel/src/ParallelMatrix.ts",
+      "parallel/src/matrix.worker.ts"
+    ],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",
       "parallel/src/operations/elementwise.ts",

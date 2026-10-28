@@ -66,6 +66,84 @@ const DEFAULT_CHUNK_OPTIONS: Required<ChunkOptions> = {
  * @param options - Chunking options
  * @returns Optimal number of chunks
  */
+/**
+ * Plan contiguous index ranges for chunking without materializing slices.
+ *
+ * @param totalElements - Length of the source collection
+ * @param options - Chunking options (balanced, min/max chunk counts, etc.)
+ * @param unbalancedChunkMin - Minimum fixed chunk size in the unbalanced path
+ *   (`Math.max(unbalancedChunkMin, ceil(n / numChunks))`). Pass `minChunkSize`
+ *   for {@link chunkFloat64Array} and `0` for {@link chunkArray}.
+ * @returns Metadata for each chunk; empty when `totalElements === 0`
+ */
+function planChunks(
+  totalElements: number,
+  options: ChunkOptions = {},
+  unbalancedChunkMin: number = 0
+): ChunkInfo[] {
+  const { balanced } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
+
+  if (totalElements === 0) {
+    return [];
+  }
+
+  const numChunks = calculateOptimalChunks(totalElements, options);
+
+  if (numChunks <= 1) {
+    return [
+      {
+        startIndex: 0,
+        endIndex: totalElements,
+        length: totalElements,
+        chunkIndex: 0,
+      },
+    ];
+  }
+
+  const chunkInfo: ChunkInfo[] = [];
+
+  if (balanced) {
+    const baseChunkSize = Math.floor(totalElements / numChunks);
+    const remainder = totalElements % numChunks;
+
+    let currentIndex = 0;
+    for (let i = 0; i < numChunks; i++) {
+      const thisChunkSize = baseChunkSize + (i < remainder ? 1 : 0);
+      const endIndex = currentIndex + thisChunkSize;
+
+      chunkInfo.push({
+        startIndex: currentIndex,
+        endIndex,
+        length: thisChunkSize,
+        chunkIndex: i,
+      });
+
+      currentIndex = endIndex;
+    }
+  } else {
+    const chunkSize = Math.max(unbalancedChunkMin, Math.ceil(totalElements / numChunks));
+
+    let currentIndex = 0;
+    let chunkIndex = 0;
+    while (currentIndex < totalElements) {
+      const endIndex = Math.min(currentIndex + chunkSize, totalElements);
+      const thisChunkSize = endIndex - currentIndex;
+
+      chunkInfo.push({
+        startIndex: currentIndex,
+        endIndex,
+        length: thisChunkSize,
+        chunkIndex,
+      });
+
+      currentIndex = endIndex;
+      chunkIndex++;
+    }
+  }
+
+  return chunkInfo;
+}
+
 export function calculateOptimalChunks(totalElements: number, options: ChunkOptions = {}): number {
   const { minChunkSize, maxChunks, targetChunkSize } = {
     ...DEFAULT_CHUNK_OPTIONS,
@@ -95,7 +173,7 @@ export function chunkFloat64Array(
   data: Float64Array,
   options: ChunkOptions = {}
 ): ChunkResult<Float64Array> {
-  const { minChunkSize, balanced } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
+  const { minChunkSize } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
   const totalElements = data.length;
 
   if (totalElements === 0) {
@@ -107,70 +185,18 @@ export function chunkFloat64Array(
     };
   }
 
-  const numChunks = calculateOptimalChunks(totalElements, options);
+  const chunkInfo = planChunks(totalElements, options, minChunkSize);
 
-  if (numChunks <= 1) {
+  if (chunkInfo.length === 1) {
     return {
       chunks: [data],
-      chunkInfo: [
-        {
-          startIndex: 0,
-          endIndex: totalElements,
-          length: totalElements,
-          chunkIndex: 0,
-        },
-      ],
+      chunkInfo,
       totalElements,
       numChunks: 1,
     };
   }
 
-  const chunks: Float64Array[] = [];
-  const chunkInfo: ChunkInfo[] = [];
-
-  if (balanced) {
-    // Divide evenly
-    const baseChunkSize = Math.floor(totalElements / numChunks);
-    const remainder = totalElements % numChunks;
-
-    let currentIndex = 0;
-    for (let i = 0; i < numChunks; i++) {
-      // Distribute remainder evenly
-      const thisChunkSize = baseChunkSize + (i < remainder ? 1 : 0);
-      const endIndex = currentIndex + thisChunkSize;
-
-      chunks.push(data.subarray(currentIndex, endIndex));
-      chunkInfo.push({
-        startIndex: currentIndex,
-        endIndex,
-        length: thisChunkSize,
-        chunkIndex: i,
-      });
-
-      currentIndex = endIndex;
-    }
-  } else {
-    // Use fixed chunk size
-    const chunkSize = Math.max(minChunkSize, Math.ceil(totalElements / numChunks));
-
-    let currentIndex = 0;
-    let chunkIndex = 0;
-    while (currentIndex < totalElements) {
-      const endIndex = Math.min(currentIndex + chunkSize, totalElements);
-      const thisChunkSize = endIndex - currentIndex;
-
-      chunks.push(data.subarray(currentIndex, endIndex));
-      chunkInfo.push({
-        startIndex: currentIndex,
-        endIndex,
-        length: thisChunkSize,
-        chunkIndex,
-      });
-
-      currentIndex = endIndex;
-      chunkIndex++;
-    }
-  }
+  const chunks = chunkInfo.map((info) => data.subarray(info.startIndex, info.endIndex));
 
   return {
     chunks,
@@ -188,7 +214,6 @@ export function chunkFloat64Array(
  * @returns Chunked data with metadata
  */
 export function chunkArray<T>(data: T[], options: ChunkOptions = {}): ChunkResult<T[]> {
-  const { balanced } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
   const totalElements = data.length;
 
   if (totalElements === 0) {
@@ -200,67 +225,18 @@ export function chunkArray<T>(data: T[], options: ChunkOptions = {}): ChunkResul
     };
   }
 
-  const numChunks = calculateOptimalChunks(totalElements, options);
+  const chunkInfo = planChunks(totalElements, options, 0);
 
-  if (numChunks <= 1) {
+  if (chunkInfo.length === 1) {
     return {
       chunks: [data],
-      chunkInfo: [
-        {
-          startIndex: 0,
-          endIndex: totalElements,
-          length: totalElements,
-          chunkIndex: 0,
-        },
-      ],
+      chunkInfo,
       totalElements,
       numChunks: 1,
     };
   }
 
-  const chunks: T[][] = [];
-  const chunkInfo: ChunkInfo[] = [];
-
-  if (balanced) {
-    const baseChunkSize = Math.floor(totalElements / numChunks);
-    const remainder = totalElements % numChunks;
-
-    let currentIndex = 0;
-    for (let i = 0; i < numChunks; i++) {
-      const thisChunkSize = baseChunkSize + (i < remainder ? 1 : 0);
-      const endIndex = currentIndex + thisChunkSize;
-
-      chunks.push(data.slice(currentIndex, endIndex));
-      chunkInfo.push({
-        startIndex: currentIndex,
-        endIndex,
-        length: thisChunkSize,
-        chunkIndex: i,
-      });
-
-      currentIndex = endIndex;
-    }
-  } else {
-    const chunkSize = Math.ceil(totalElements / numChunks);
-
-    let currentIndex = 0;
-    let chunkIndex = 0;
-    while (currentIndex < totalElements) {
-      const endIndex = Math.min(currentIndex + chunkSize, totalElements);
-      const thisChunkSize = endIndex - currentIndex;
-
-      chunks.push(data.slice(currentIndex, endIndex));
-      chunkInfo.push({
-        startIndex: currentIndex,
-        endIndex,
-        length: thisChunkSize,
-        chunkIndex,
-      });
-
-      currentIndex = endIndex;
-      chunkIndex++;
-    }
-  }
+  const chunks = chunkInfo.map((info) => data.slice(info.startIndex, info.endIndex));
 
   return {
     chunks,
