@@ -278,12 +278,16 @@ export class ParallelBackend {
   /**
    * Run the parallel worker path when the pool is ready and the matrix is large enough;
    * otherwise delegate to the sequential implementation (bit-identical for small matrices).
+   *
+   * Intentionally not `async`: a sequential throw or plain `T` must settle on the same
+   * tick as the inlined `if (!shouldParallelize || !isReady) return sequential()` this
+   * replaced. Callers are already `async` and flatten a returned `Promise<T>`.
    */
-  private async whenParallel<T>(
+  private whenParallel<T>(
     elementCount: number,
     sequential: () => T | Promise<T>,
     parallel: () => Promise<T>
-  ): Promise<T> {
+  ): T | Promise<T> {
     if (!this.shouldParallelize(elementCount) || !this.isReady()) {
       return sequential();
     }
