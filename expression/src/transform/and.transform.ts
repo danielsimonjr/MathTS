@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { isCollection } from '../utils/is.js';
+import { evalShortCircuitBinary } from './utils/shortCircuitBinary.js';
 
 interface Node {
   compile(): CompiledExpression;
@@ -26,12 +26,9 @@ export const createAndTransform = /* #__PURE__ */ factory(
   dependencies,
   ({ and }: Dependencies) => {
     function andTransform(args: Node[], _math: unknown, scope: unknown): unknown {
-      const condition1 = args[0].compile().evaluate(scope);
-      if (!isCollection(condition1) && !and(condition1, true)) {
-        return false;
-      }
-      const condition2 = args[1].compile().evaluate(scope);
-      return and(condition1, condition2);
+      return evalShortCircuitBinary(args, scope, and, (left) =>
+        !and(left, true) ? { take: true, value: false } : { take: false }
+      );
     }
 
     andTransform.rawArgs = true;

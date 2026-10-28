@@ -8,7 +8,7 @@
       "TRUE_DUPLICATE": 0,
       "DISPATCH_VARIANT": 17,
       "ALIAS_DELEGATION": 7,
-      "ALLOWLISTED": 226
+      "ALLOWLISTED": 227
     },
     "typeByTag": {
       "TRUE_DUPLICATE": 0,
@@ -4354,6 +4354,27 @@
         {
           "file": "functions/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
+      "name": "isPositiveInteger",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "functions/src/probability/bigint-binomial.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
+          "file": "packages/typed-function/src/index.ts",
+          "package": "@danielsimonjr/mathts-typed-function",
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "hot-path, V8 inlining, kept local per project-all-libraries-build-on-core"

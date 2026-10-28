@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-28'
-  totalFiles: 1212
+  totalFiles: 1215
   totalModules: 82
-  totalExports: 6244
+  totalExports: 6250
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15117,7 +15117,10 @@ modules:
       description: Number-theory fills — closes gaps left by the existing combinatorics/number-theory
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../wasm/special/scalars.js
+          imports:
+            - chooseScalar
       workspaceDependencies: []
       exports:
         - continuedFraction
@@ -15997,6 +16000,20 @@ modules:
         - createBernoulli
       constants:
         - createBernoulli
+    functions/src/probability/bigint-binomial.ts:
+      description: Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - isPositiveInteger
+        - binomialProductBigNumber
+      interfaces:
+        - BigNumberBinomialType
+      functions:
+        - isPositiveInteger
+        - binomialProductBigNumber
     functions/src/probability/combinations.ts:
       description: Compute the number of ways of picking `k` unordered outcomes from `n`
       externalDependencies: []
@@ -16012,6 +16029,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./bigint-binomial.js
+          imports:
+            - binomialProductBigNumber
+            - isPositiveInteger
+            - BigNumberBinomialType
       workspaceDependencies: []
       exports:
         - createCombinations
@@ -16035,6 +16057,11 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ./bigint-binomial.js
+          imports:
+            - binomialProductBigNumber
+            - isPositiveInteger
+            - BigNumberBinomialType
       workspaceDependencies: []
       exports:
         - createCombinationsWithRep
@@ -20522,6 +20549,7 @@ modules:
             - lc
             - isZero
             - zipIntPoly
+            - schoolbookMul
             - IntPoly
         - file: ./integer-poly.js
           imports:
@@ -20637,6 +20665,7 @@ modules:
         - add
         - sub
         - neg
+        - schoolbookMul
         - mul
         - scalarMul
         - equals
@@ -20658,6 +20687,7 @@ modules:
         - add
         - sub
         - neg
+        - schoolbookMul
         - mul
         - scalarMul
         - equals
@@ -30720,9 +30750,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createAndTransform
@@ -30736,9 +30766,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createBitAndTransform
@@ -30752,9 +30782,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createBitOrTransform
@@ -30800,21 +30830,19 @@ modules:
       constants:
         - createConcatTransform
     expression/src/transform/cumsum.transform.ts:
-      description: Attach a transform function to math.sum
+      description: Attach a transform function to math.cumsum
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isBigNumber
-            - isCollection
-            - isNumber
         - file: ../utils/factory.js
           imports:
             - factory
         - file: ./utils/errorTransform.js
           imports:
             - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
       workspaceDependencies: []
       exports:
         - createCumSumTransform
@@ -30849,7 +30877,7 @@ modules:
             - factory
         - file: ./utils/prepareTransformArgs.js
           imports:
-            - prepareTransformArrayAndCallback
+            - applyArrayCallbackTransform
         - file: ./utils/transformCallback.js
           imports:
             - createTransformCallback
@@ -30871,7 +30899,7 @@ modules:
             - factory
         - file: ./utils/prepareTransformArgs.js
           imports:
-            - prepareTransformArrayAndCallback
+            - applyArrayCallbackTransform
       workspaceDependencies: []
       exports:
         - createForEachTransform
@@ -31090,10 +31118,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/dimToZeroBase.js
           imports:
-            - isBigNumber
-            - isNumber
+            - dimToZeroBase
+            - isNumberOrBigNumber
       workspaceDependencies: []
       exports:
         - createMapSlicesTransform
@@ -31180,9 +31208,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createOrTransform
@@ -31323,7 +31351,7 @@ modules:
       functions:
         - compileInlineExpression
     expression/src/transform/utils/dimToZeroBase.ts:
-      description: Change last argument dim from one-based to zero-based.
+      description: Convert a one-based dimension to zero-based.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -31383,10 +31411,25 @@ modules:
       workspaceDependencies: []
       exports:
         - prepareTransformArrayAndCallback
+        - applyArrayCallbackTransform
       interfaces:
         - PreparedTransformArgs
       functions:
         - prepareTransformArrayAndCallback
+        - applyArrayCallbackTransform
+    expression/src/transform/utils/shortCircuitBinary.ts:
+      description: 'Evaluate a lazy binary operator transform: compile/evaluate the left arg'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - evalShortCircuitBinary
+      functions:
+        - evalShortCircuitBinary
     expression/src/transform/utils/transformCallback.ts:
       description: Transforms the given callback function based on its type and number of arrays.
       externalDependencies: []
@@ -33717,6 +33760,9 @@ modules:
         - file: ./WorkerPool.js
           imports:
             - WorkerPool
+        - file: ./gemm-rows.js
+          imports:
+            - gemmRows
       workspaceDependencies: []
       exports:
         - ParallelMatrix
@@ -33735,6 +33781,16 @@ modules:
         - WorkerPool
       classes:
         - WorkerPool
+    parallel/src/gemm-rows.ts:
+      description: Row-block dense matrix multiply (ijk inner-k product). Shared by the main
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - gemmRows
+      functions:
+        - gemmRows
     parallel/src/index.ts:
       description: WebWorker parallelization for MathTS computations.
       externalDependencies: []
@@ -34036,7 +34092,10 @@ modules:
       description: Matrix Worker for parallel computation
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./gemm-rows.js
+          imports:
+            - gemmRows
       workspaceDependencies: []
       exports: []
   parallel/operations:
@@ -39000,6 +39059,7 @@ dependencyGraph:
     - name: Functions/probability
       files:
         - functions/src/probability/bernoulli.ts
+        - functions/src/probability/bigint-binomial.ts
         - functions/src/probability/combinations.ts
         - functions/src/probability/combinationsWithRep.ts
         - functions/src/probability/factorial.ts
@@ -39742,6 +39802,7 @@ dependencyGraph:
         - expression/src/transform/utils/errorTransform.ts
         - expression/src/transform/utils/lastDimToZeroBase.ts
         - expression/src/transform/utils/prepareTransformArgs.ts
+        - expression/src/transform/utils/shortCircuitBinary.ts
         - expression/src/transform/utils/transformCallback.ts
         - expression/src/transform/variance.transform.ts
     - name: Expression/utils
@@ -39794,6 +39855,7 @@ dependencyGraph:
         - parallel/src/ComputePool.ts
         - parallel/src/ParallelMatrix.ts
         - parallel/src/WorkerPool.ts
+        - parallel/src/gemm-rows.ts
         - parallel/src/index.ts
         - parallel/src/matrix.worker.ts
     - name: Parallel/operations
@@ -39914,14 +39976,14 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1212
+  totalTypeScriptFiles: 1215
   totalModules: 82
-  totalLinesOfCode: 200566
-  totalExports: 6244
+  totalLinesOfCode: 200578
+  totalExports: 6250
   totalClasses: 59
-  totalInterfaces: 542
-  totalFunctions: 2012
-  totalTypeGuards: 158
+  totalInterfaces: 543
+  totalFunctions: 2018
+  totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1618
   totalReExports: 2627
