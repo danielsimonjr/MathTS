@@ -431,10 +431,59 @@ export function airyAsymPQ(zeta: f64): { p: f64; q: f64 } {
 }
 
 /**
- * Airy power-series partial sums `f` and `g` on |x| ≤ 5 (DLMF §9.2.2).
- * Shared by Ai and Bi; the caller applies `Ai(0) f ± Ai'(0) g` (or the Bi variant).
+ * Evaluate Ai(x) (`combine === 0`) or Bi(x) (`combine === 1`).
+ *
+ * Numeric settings only — no per-call object or closure — so a `kernelSource`
+ * worker kernel stays allocation-free and self-contained (function declarations
+ * cannot close over a module-level kind object). Closed-form combines stay the
+ * historical expressions (not rewritten as `a + (-1)*b`) so the values stay
+ * bit-identical to the pre-merge scalars.
+ *
+ * @param signStep - running-sign multiplier in the positive u_k sum (Ai −1, Bi +1)
+ * @param expSign - exponent sign on ζ (Ai −1, Bi +1)
+ * @param denomScale - √π denominator scale (Ai 2, Bi 1)
+ * @param combine - 0 = Ai closed forms, 1 = Bi closed forms
  */
-export function airyPowerSeries(x: f64): { f: f64; g: f64 } {
+export function airyScalar(
+  x: f64,
+  signStep: number,
+  expSign: number,
+  denomScale: number,
+  combine: number
+): f64 {
+  // 5.0 keeps the golden points x = +/-5 on the (accurate) series side.
+  const XBIG = 5.0;
+  const AI0 = 0.35502805388781723926;
+  const AI_PRIME0 = 0.25881940379280679841;
+  if (x > XBIG) {
+    const xp = Math.pow(x, 0.25);
+    const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
+    let p = 0.0,
+      zk = 1.0,
+      sign = 1.0,
+      prevMag = Infinity;
+    for (const uk of airyUCoeffs()) {
+      const t = uk / zk;
+      if (Math.abs(t) > prevMag) break;
+      prevMag = Math.abs(t);
+      p += sign * t;
+      zk *= zeta;
+      sign *= signStep;
+    }
+    return (Math.exp(expSign * zeta) * p) / (denomScale * Math.sqrt(Math.PI) * xp);
+  }
+  if (x < -XBIG) {
+    const ax = Math.abs(x);
+    const axp = Math.pow(ax, 0.25);
+    const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
+    const theta = zeta - Math.PI / 4.0;
+    const { p, q } = airyAsymPQ(zeta);
+    const num =
+      combine === 0
+        ? Math.cos(theta) * p + Math.sin(theta) * q
+        : -Math.sin(theta) * p + Math.cos(theta) * q;
+    return num / (Math.sqrt(Math.PI) * axp);
+  }
   const x3 = x * x * x;
   let f = 1.0,
     g = x,
@@ -457,78 +506,20 @@ export function airyPowerSeries(x: f64): { f: f64; g: f64 } {
     g += dg;
     if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
   }
-  return { f, g };
-}
-
-/** Region-specific Airy settings (Ai vs Bi); built inline in each wrapper for worker serialization. */
-export type AiryScalarKind = {
-  signStep: -1 | 1;
-  expSign: -1 | 1;
-  denomScale: number;
-  negCombine: (theta: f64, p: f64, q: f64) => f64;
-  seriesCombine: (f: f64, g: f64) => f64;
-};
-
-/**
- * Evaluate Ai(x) or Bi(x) from a kind object (three-region: positive asymptotic,
- * oscillatory for x < -5, power series on [-5, 5]). Not exported from the package barrel.
- */
-export function airyScalar(x: f64, kind: AiryScalarKind): f64 {
-  // 5.0 keeps the golden points x = +/-5 on the (accurate) series side.
-  const XBIG = 5.0;
-  if (x > XBIG) {
-    const xp = Math.pow(x, 0.25);
-    const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
-    let p = 0.0,
-      zk = 1.0,
-      sign = 1.0,
-      prevMag = Infinity;
-    for (const uk of airyUCoeffs()) {
-      const t = uk / zk;
-      if (Math.abs(t) > prevMag) break;
-      prevMag = Math.abs(t);
-      p += sign * t;
-      zk *= zeta;
-      sign *= kind.signStep;
-    }
-    return (Math.exp(kind.expSign * zeta) * p) / (kind.denomScale * Math.sqrt(Math.PI) * xp);
+  if (combine === 0) {
+    return AI0 * f - AI_PRIME0 * g;
   }
-  if (x < -XBIG) {
-    const ax = Math.abs(x);
-    const axp = Math.pow(ax, 0.25);
-    const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-    const theta = zeta - Math.PI / 4.0;
-    const { p, q } = airyAsymPQ(zeta);
-    return kind.negCombine(theta, p, q) / (Math.sqrt(Math.PI) * axp);
-  }
-  const { f, g } = airyPowerSeries(x);
-  return kind.seriesCombine(f, g);
+  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
 }
 
 /** Airy function of the first kind Ai(x). */
 export function airyAiScalar(x: f64): f64 {
-  const AI0 = 0.35502805388781723926;
-  const AI_PRIME0 = 0.25881940379280679841;
-  return airyScalar(x, {
-    signStep: -1,
-    expSign: -1,
-    denomScale: 2.0,
-    negCombine: (theta, p, q) => Math.cos(theta) * p + Math.sin(theta) * q,
-    seriesCombine: (f, g) => AI0 * f - AI_PRIME0 * g,
-  });
+  return airyScalar(x, -1, -1, 2.0, 0);
 }
 
 /** Airy function of the second kind Bi(x). */
 export function airyBiScalar(x: f64): f64 {
-  const AI0 = 0.35502805388781723926;
-  const AI_PRIME0 = 0.25881940379280679841;
-  return airyScalar(x, {
-    signStep: 1,
-    expSign: 1,
-    denomScale: 1.0,
-    negCombine: (theta, p, q) => -Math.sin(theta) * p + Math.cos(theta) * q,
-    seriesCombine: (f, g) => Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g),
-  });
+  return airyScalar(x, 1, 1, 1.0, 1);
 }
 
 // =============================================================================

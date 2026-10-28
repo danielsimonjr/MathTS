@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1218,
     "totalModules": 82,
-    "totalExports": 6258
+    "totalExports": 6257
   },
   "entryPoints": [
     {
@@ -23840,7 +23840,6 @@
               "besselYScalar",
               "airyUCoeffs",
               "airyAsymPQ",
-              "airyPowerSeries",
               "airyScalar",
               "airyAiScalar",
               "airyBiScalar",
@@ -25758,7 +25757,6 @@
           "ellipticECompleteScalar",
           "airyUCoeffs",
           "airyAsymPQ",
-          "airyPowerSeries",
           "airyScalar",
           "airyAiScalar",
           "airyBiScalar",
@@ -25792,7 +25790,6 @@
           "ellipticECompleteScalar",
           "airyUCoeffs",
           "airyAsymPQ",
-          "airyPowerSeries",
           "airyScalar",
           "airyAiScalar",
           "airyBiScalar",
@@ -42417,11 +42414,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1218,
     "totalModules": 82,
-    "totalLinesOfCode": 200693,
-    "totalExports": 6258,
+    "totalLinesOfCode": 200679,
+    "totalExports": 6257,
     "totalClasses": 59,
     "totalInterfaces": 545,
-    "totalFunctions": 2026,
+    "totalFunctions": 2025,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

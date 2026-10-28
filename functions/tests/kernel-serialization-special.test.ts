@@ -7,7 +7,6 @@ import {
   normalCDFScalar,
   airyUCoeffs,
   airyAsymPQ,
-  airyPowerSeries,
   airyScalar,
   airyAiScalar,
   airyBiScalar,
@@ -107,11 +106,14 @@ describe('kernelSource serialization — Airy Ai / Bi', () => {
 
   it('airyAi worker kernel resolves callees and matches scalar', () => {
     const src = kernelSource(
-      [airyUCoeffs, airyAsymPQ, airyPowerSeries, airyScalar, airyAiScalar],
+      [airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar],
       '(x) => airyAiScalar(x)'
     );
     expect(src).toContain('airyScalar');
-    expect(src).toContain('airyPowerSeries');
+    expect(src).not.toContain('airyPowerSeries');
+    // Numeric settings only — a per-call kind object + closures was a ~30% series-path loss.
+    expect(airyAiScalar.toString()).toMatch(/airyScalar\(x,\s*-1,\s*-1,\s*2(?:\.0)?,\s*0\)/);
+    expect(airyAiScalar.toString()).not.toContain('=>');
     const fn = evalKernel(src);
     for (const x of pinX) {
       expect(Object.is(fn(x), airyAiScalar(x))).toBe(true);
@@ -120,9 +122,11 @@ describe('kernelSource serialization — Airy Ai / Bi', () => {
 
   it('airyBi worker kernel resolves callees and matches scalar', () => {
     const src = kernelSource(
-      [airyUCoeffs, airyAsymPQ, airyPowerSeries, airyScalar, airyBiScalar],
+      [airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar],
       '(x) => airyBiScalar(x)'
     );
+    expect(airyBiScalar.toString()).toMatch(/airyScalar\(x,\s*1,\s*1,\s*1(?:\.0)?,\s*1\)/);
+    expect(airyBiScalar.toString()).not.toContain('=>');
     const fn = evalKernel(src);
     for (const x of pinX) {
       expect(Object.is(fn(x), airyBiScalar(x))).toBe(true);
