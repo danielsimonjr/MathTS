@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1218,
     "totalModules": 82,
-    "totalExports": 6254
+    "totalExports": 6255
   },
   "entryPoints": [
     {
@@ -31994,6 +31994,10 @@
             "file": "./Node.js",
             "imports": ["MathNode", "StringOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["mapChildArray"]
           }
         ],
         "workspaceDependencies": [],
@@ -32227,6 +32231,10 @@
             "file": "./Node.js",
             "imports": ["MathNode", "StringOptions"],
             "typeOnly": true
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["mapChildArray"]
           }
         ],
         "workspaceDependencies": [],
@@ -32270,6 +32278,10 @@
             "file": "./Node.js",
             "imports": ["MathNode"],
             "typeOnly": true
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["mapChildArray"]
           }
         ],
         "workspaceDependencies": [],
@@ -32313,8 +32325,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["createNode"],
+        "exports": ["createNode", "mapChildArray"],
         "interfaces": ["CompiledExpression", "StringOptions"],
+        "functions": ["mapChildArray"],
         "constants": ["createNode"]
       },
       "expression/src/node/ObjectNode.ts": {
@@ -32397,6 +32410,10 @@
             "file": "./Node.js",
             "imports": ["MathNode"],
             "typeOnly": true
+          },
+          {
+            "file": "./Node.js",
+            "imports": ["mapChildArray"]
           }
         ],
         "workspaceDependencies": [],
@@ -42391,11 +42408,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1218,
     "totalModules": 82,
-    "totalLinesOfCode": 200705,
-    "totalExports": 6254,
+    "totalLinesOfCode": 200721,
+    "totalExports": 6255,
     "totalClasses": 59,
     "totalInterfaces": 545,
-    "totalFunctions": 2022,
+    "totalFunctions": 2023,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

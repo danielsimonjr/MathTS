@@ -8,6 +8,7 @@ import { latexOperators } from '../utils/latex.js';
 import { escapeMathML, inlineOperator, parenthesizeLower } from '../utils/mathml.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode } from './Node.js';
+import { mapChildArray } from './Node.js';
 
 // Type definitions
 
@@ -492,10 +493,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
       map(
         callback: (child: MathNode, path: string, parent: OperatorNode) => MathNode
       ): OperatorNode {
-        const args: MathNode[] = [];
-        for (let i = 0; i < this.args.length; i++) {
-          args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
-        }
+        const args = mapChildArray(this, this.args, 'args', callback);
         return new OperatorNode(this.op, this.fn, args, this.implicit, this.isPercentage);
       }
 

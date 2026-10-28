@@ -12,6 +12,7 @@ import {
 } from '../utils/is.js';
 import { escape } from '../utils/string.js';
 import type { MathNode } from './Node.js';
+import { mapChildArray } from './Node.js';
 
 // Type definitions
 
@@ -173,11 +174,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
        * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: IndexNode) => MathNode): IndexNode {
-        const dimensions: MathNode[] = [];
-        for (let i = 0; i < this.dimensions.length; i++) {
-          dimensions[i] = this._ifNode(callback(this.dimensions[i], 'dimensions[' + i + ']', this));
-        }
-
+        const dimensions = mapChildArray(this, this.dimensions, 'dimensions', callback);
         return new IndexNode(dimensions, this.dotNotation);
       }
 
