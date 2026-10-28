@@ -9676,7 +9676,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 245
+      "loc": 309
     },
     {
       "file": "functions/tests/geometry-delaunay-oracle.test.ts",
@@ -9725,7 +9725,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 376
+      "loc": 400
     },
     {
       "file": "functions/tests/geometry/intersect.test.ts",
@@ -9823,7 +9823,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 329
+      "loc": 432
     },
     {
       "file": "functions/tests/helpers/gpu-hardware.ts",
