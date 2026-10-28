@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1993,
+  "totalFiles": 1994,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1191,
     "test-only": 0,
     "orphan": 0,
-    "test": 714,
+    "test": 715,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1217,
-    "tests": 714,
+    "tests": 715,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 23,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 94,
+    "@danielsimonjr/mathts-core": 95,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
@@ -1109,6 +1109,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 442
+    },
+    {
+      "file": "core/tests/types/core-exact-clones-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 82
     },
     {
       "file": "core/tests/types/exact-scale-registry-parse.test.ts",

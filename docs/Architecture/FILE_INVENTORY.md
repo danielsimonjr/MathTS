@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1993
+**Total files**: 1994
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1191 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      714 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      715 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1993** |                                                                                                                |
+| **Total**     | **1994** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1217 |
-| `tests`    |   714 |
+| `tests`    |   715 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    23 |
 | `@danielsimonjr/mathts-compat`         |    16 |
-| `@danielsimonjr/mathts-core`           |    94 |
+| `@danielsimonjr/mathts-core`           |    95 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   555 |
 | `@danielsimonjr/mathts-functions`      |   842 |
@@ -222,6 +222,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/bignumber.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex-coverage.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex.test.ts`                                                | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/core-exact-clones-oracle.test.ts`                               | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/exact-scale-registry-parse.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/exact-scale-review.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/fraction-coverage.test.ts`                                      | @danielsimonjr/mathts-core           | tests    | test        |
