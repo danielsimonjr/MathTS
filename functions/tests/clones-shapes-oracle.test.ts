@@ -5,7 +5,14 @@
 
 import { describe, it, expect } from 'vitest';
 import { Complex } from '@danielsimonjr/mathts-core';
-import { matrixFromColumns, matrixFromRows, index, range, matrix } from '../src/factories/index.js';
+import {
+  matrixFromColumns,
+  matrixFromRows,
+  index,
+  range,
+  matrix,
+  bignumber,
+} from '../src/factories/index.js';
 import { factoryScope } from '../src/factories/scope.js';
 import { createIndexClass } from '../src/type/matrix/MatrixIndex.js';
 import { matrixFromVectorList } from '../src/matrix/from-vectors.js';
@@ -20,6 +27,8 @@ type SparseMatrix = {
   size(): number[];
   toArray(): unknown;
   _values?: unknown[];
+  _index?: number[];
+  _ptr?: number[];
 };
 
 describe('M1 — sparseMatrixFromVectors (matrixFromColumns / Rows)', () => {
@@ -47,12 +56,16 @@ describe('M1 — sparseMatrixFromVectors (matrixFromColumns / Rows)', () => {
     expect(fromRows.size()).toEqual([2, 3]);
   });
 
-  it('omits explicit zeros in sparse assembly', () => {
+  it('omits explicit zeros in sparse assembly (CSC values/index/ptr)', () => {
     const result = matrixFromColumns(
       matrix([[1], [0], [3]], 'sparse'),
       matrix([[0], [2], [0]], 'sparse')
     ) as SparseMatrix;
+    // Independent CSC oracle: entries (0,0,1), (2,0,3), (1,1,2) sorted col then row.
     expect(result._values).toEqual([1, 3, 2]);
+    expect(result._index).toEqual([0, 2, 1]);
+    expect(result._ptr).toEqual([0, 2, 3]);
+    expect(result.size()).toEqual([3, 2]);
   });
 
   it('sparse columns: column-vector and row-vector Matrix inputs (row vector transposed)', () => {
@@ -91,6 +104,16 @@ describe('M1 — sparseMatrixFromVectors (matrixFromColumns / Rows)', () => {
     const c1 = matrix([[0], [2]], 'sparse');
     const result = matrixFromColumns(c0, c1) as SparseMatrix;
     expect(result._values).toEqual([NaN, 2]);
+  });
+
+  it('omits -0 like 0 and keeps ±Infinity', () => {
+    const result = matrixFromColumns(
+      matrix([[-0], [Infinity]], 'sparse'),
+      matrix([[-Infinity], [0]], 'sparse')
+    ) as SparseMatrix;
+    expect(result._values).toEqual([Infinity, -Infinity]);
+    expect(result._index).toEqual([1, 0]);
+    expect(result._ptr).toEqual([0, 1, 2]);
   });
 
   it('single sparse column vector', () => {
@@ -145,10 +168,82 @@ describe('M13 — Index dimension walk (size / min / max)', () => {
     expect(idx.min()).toEqual([]);
     expect(idx.max()).toEqual([]);
   });
+
+  it('negative-step range: size is the count, min/max are the extreme values', () => {
+    // range(5, 1, -1) → 5, 4, 3, 2
+    const idx = index(range(5, 1, -1)) as {
+      size(): number[];
+      min(): (number | undefined)[];
+      max(): (number | undefined)[];
+    };
+    expect(idx.size()).toEqual([4]);
+    expect(idx.min()).toEqual([2]);
+    expect(idx.max()).toEqual([5]);
+  });
+
+  it('empty ranges yield size 0 and undefined min/max', () => {
+    const empty = index(range(1, 1)) as {
+      size(): number[];
+      min(): (number | undefined)[];
+      max(): (number | undefined)[];
+    };
+    expect(empty.size()).toEqual([0]);
+    expect(empty.min()).toEqual([undefined]);
+    expect(empty.max()).toEqual([undefined]);
+    const backward = index(range(5, 1)) as {
+      size(): number[];
+      min(): (number | undefined)[];
+      max(): (number | undefined)[];
+    };
+    expect(backward.size()).toEqual([0]);
+    expect(backward.min()).toEqual([undefined]);
+    expect(backward.max()).toEqual([undefined]);
+  });
+
+  it('zero-based and one-based scalar dimensions stay as stored', () => {
+    const zero = index(0) as {
+      size(): number[];
+      min(): (number | string | undefined)[];
+      max(): (number | string | undefined)[];
+    };
+    expect(zero.size()).toEqual([1]);
+    expect(zero.min()).toEqual([0]);
+    expect(zero.max()).toEqual([0]);
+    const one = index(1) as {
+      size(): number[];
+      min(): (number | string | undefined)[];
+      max(): (number | string | undefined)[];
+    };
+    expect(one.size()).toEqual([1]);
+    expect(one.min()).toEqual([1]);
+    expect(one.max()).toEqual([1]);
+  });
+
+  it('matrix/array dimension: size is the set length, min/max are set extremes', () => {
+    const idx = index([2, 0, 5]) as {
+      size(): number[];
+      min(): (number | undefined)[];
+      max(): (number | undefined)[];
+    };
+    expect(idx.size()).toEqual([3]);
+    expect(idx.min()).toEqual([0]);
+    expect(idx.max()).toEqual([5]);
+  });
+
+  it('BigNumber scalar is converted to number by index(); min/max/size treat it as a scalar', () => {
+    const idx = index(bignumber(7)) as {
+      size(): number[];
+      min(): (number | undefined)[];
+      max(): (number | undefined)[];
+    };
+    expect(idx.size()).toEqual([1]);
+    expect(idx.min()).toEqual([7]);
+    expect(idx.max()).toEqual([7]);
+  });
 });
 
 describe('M17 — numeric-square predicates (minSide 1 vs 8)', () => {
-  const mk = (n: number) =>
+  const mk = (n: number): number[][] =>
     Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
 
   it('NATIVE_MATRIX_THRESHOLD is 8', () => {
@@ -187,5 +282,29 @@ describe('M17 — numeric-square predicates (minSide 1 vs 8)', () => {
     expect(isNumericSquare([[1, 2], [3]])).toBe(false);
     expect(isLargeNumericSquare(null)).toBe(false);
     expect(isNumericSquare('not')).toBe(false);
+  });
+
+  it('numeric means typeof === "number": NaN and Infinity pass, BigNumber/Complex fail', () => {
+    expect(isNumericSquare([[NaN]])).toBe(true);
+    expect(isNumericSquare([[Infinity]])).toBe(true);
+    expect(isNumericSquare([[-0]])).toBe(true);
+    expect(isNumericSquare([[bignumber(1)]])).toBe(false);
+    expect(isLargeNumericSquare([[bignumber(1)]])).toBe(false);
+    const eightWithBn = mk(8);
+    (eightWithBn as unknown[][])[0][0] = bignumber(1);
+    expect(isNumericSquare(eightWithBn)).toBe(false);
+    expect(isLargeNumericSquare(eightWithBn)).toBe(false);
+  });
+
+  it('non-square rectangular arrays fail both predicates, including large-enough sides', () => {
+    expect(
+      isNumericSquare([
+        [1, 2, 3],
+        [4, 5, 6],
+      ])
+    ).toBe(false);
+    const eightBySeven = Array.from({ length: 8 }, () => Array.from({ length: 7 }, () => 1));
+    expect(isNumericSquare(eightBySeven)).toBe(false);
+    expect(isLargeNumericSquare(eightBySeven)).toBe(false);
   });
 });

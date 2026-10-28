@@ -211,7 +211,9 @@ export const createIndexClass = /* #__PURE__ */ factory(
       }
 
       /**
-       * Walk `_dimensions`, mapping scalar entries and ranges separately.
+       * Walk `_dimensions`, mapping scalar entries (number or string) and
+       * ranges / matrix dimensions separately. Replaces the former `size` loop
+       * and `_ends` pick-walk; not part of `IndexInterface`.
        * @private
        */
       mapDimensions<T>(

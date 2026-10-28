@@ -14246,7 +14246,7 @@ modules:
       constants:
         - createForEach
     functions/src/matrix/from-vectors.ts:
-      description: Return the logical length of a 1-D or 2-D column/row vector.
+      description: Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -39909,7 +39909,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1212
   totalModules: 82
-  totalLinesOfCode: 200581
+  totalLinesOfCode: 200589
   totalExports: 6243
   totalClasses: 59
   totalInterfaces: 542

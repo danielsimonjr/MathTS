@@ -6209,7 +6209,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/from-vectors.ts` - Return the logical length of a 1-D or 2-D column/row vector.
+### `functions/src/matrix/from-vectors.ts` - Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
 
 **Internal Dependencies:**
 
@@ -19059,7 +19059,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1212   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200581 |
+| Total Lines of Code     | 200589 |
 | Total Exports           | 6243   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |

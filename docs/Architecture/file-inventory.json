@@ -6323,7 +6323,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 165
+      "loc": 171
     },
     {
       "file": "functions/src/matrix/getMatrixDataType.ts",
@@ -7765,7 +7765,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 426
+      "loc": 428
     },
     {
       "file": "functions/src/type/matrix/Spa.ts",
@@ -8724,7 +8724,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 192
+      "loc": 311
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",
