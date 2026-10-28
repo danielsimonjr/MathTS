@@ -220,4 +220,70 @@ describe('TapedTensor sum/mean backward oracle — Object.is vs independent scat
     expect(() => leaf.sum(-1)).toThrow(/axis -1 out of range/);
     expect(() => leaf.mean(-1)).toThrow(/axis -1 out of range/);
   });
+
+  it('same leaf used twice accumulates with += (sum+sum is 2× a single sum)', () => {
+    const data = new Float64Array([1, -0, 3, 4]);
+    const shape = [2, 2];
+    const tape = new Tape();
+    const { id } = tape.allocate(data.length);
+    const leaf = new TapedTensor(shape, new Float64Array(data), tape, id);
+    const out = leaf.sum().add(leaf.sum());
+    tape.backward(out.id, new Float64Array([1]));
+    const twice = tape.getInputGrad(id)!;
+    assertGradObjectIs(twice, new Float64Array([2, 2, 2, 2]), 'sum+sum +=');
+  });
+
+  it('4-D every-axis subset Object.is vs oracle, keepDims both, subnormals', () => {
+    const shape = [2, 1, 3, 2];
+    const data = new Float64Array(Tensor.sizeOf(shape));
+    const min = Number.MIN_VALUE;
+    for (let i = 0; i < data.length; i++) data[i] = i % 2 === 0 ? min : -min;
+    const rank = shape.length;
+    for (let mask = 0; mask < 1 << rank; mask++) {
+      const axes: number[] = [];
+      for (let i = 0; i < rank; i++) if (mask & (1 << i)) axes.push(i);
+      const axis: number | number[] | undefined =
+        axes.length === 0 ? [] : axes.length === 1 ? axes[0] : axes;
+      for (const keepDims of [false, true]) {
+        const primal = new Tensor(shape, data);
+        const outT = primal.sum(axis, { keepDims });
+        const upstream = new Float64Array(outT.data.length).fill(1);
+        const expected = oracleReducedScatter(shape, upstream, outT.shape, axis, keepDims, 'sum');
+        const actual = runTapeBackward(data, shape, 'sum', axis, keepDims, upstream);
+        assertGradObjectIs(actual, expected, `4d mask=${mask} keep=${keepDims}`);
+      }
+    }
+  });
+
+  it('grad slot longer than primal leaves extra elements at 0 (old primal.length bound)', () => {
+    const shape = [2, 3];
+    const data = new Float64Array([1, 2, 3, 4, 5, 6]);
+    const tape = new Tape();
+    const { id } = tape.allocate(8);
+    const leaf = new TapedTensor(shape, data, tape, id);
+    const out = leaf.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = tape.getInputGrad(id)!;
+    expect(grad.length).toBe(8);
+    for (let i = 0; i < 6; i++) {
+      expect(Object.is(grad[i], 1)).toBe(true);
+    }
+    expect(Object.is(grad[6], 0)).toBe(true);
+    expect(Object.is(grad[7], 0)).toBe(true);
+  });
+
+  it('grad slot shorter than primal writes the prefix and ignores the rest', () => {
+    const shape = [2, 3];
+    const data = new Float64Array([1, 2, 3, 4, 5, 6]);
+    const tape = new Tape();
+    const { id } = tape.allocate(4);
+    const leaf = new TapedTensor(shape, data, tape, id);
+    const out = leaf.sum();
+    tape.backward(out.id, new Float64Array([1]));
+    const grad = tape.getInputGrad(id)!;
+    expect(grad.length).toBe(4);
+    for (let i = 0; i < 4; i++) {
+      expect(Object.is(grad[i], 1)).toBe(true);
+    }
+  });
 });
