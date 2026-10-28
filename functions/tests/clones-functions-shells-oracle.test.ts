@@ -3,11 +3,18 @@
  * band quadratic root map). Values pinned before shared helpers land.
  */
 import { describe, it, expect } from 'vitest';
+import { Complex } from '@danielsimonjr/mathts-core';
 import { welchPSD, bartlettPSD, newton, halley, butter } from '../src/index.js';
+import { analogToDigital } from '../src/signal-filter-extra.js';
 
 const arrCloseTo = (a: number[], b: number[], d = 10) => {
   expect(a).toHaveLength(b.length);
   a.forEach((v, i) => expect(v).toBeCloseTo(b[i], d));
+};
+
+const arrObjectIs = (a: number[], b: number[]) => {
+  expect(a).toHaveLength(b.length);
+  a.forEach((v, i) => expect(Object.is(v, b[i])).toBe(true));
 };
 
 describe('M7 — welchPSD / bartlettPSD result shell', () => {
@@ -106,8 +113,12 @@ describe('Newton / Halley iterateRoot oracle', () => {
   });
 
   it('NaN from f is not swallowed', () => {
-    expect(() => newton(() => NaN, 1, { maxIter: 5 })).toThrow();
-    expect(() => halley(() => NaN, 1, { maxIter: 5 })).toThrow();
+    expect(() => newton(() => NaN, 1, { maxIter: 5 })).toThrow(
+      'newton: failed to converge within 5 iterations'
+    );
+    expect(() => halley(() => NaN, 1, { maxIter: 5 })).toThrow(
+      'halley: failed to converge within 5 iterations'
+    );
   });
 });
 
@@ -115,19 +126,51 @@ describe('Newton / Halley iterateRoot oracle', () => {
 describe('band quadratic root map (via butter bandpass/bandstop)', () => {
   it('butter(1,[0.25,0.35],bandpass) matches scipy-era oracle', () => {
     const { b, a } = butter(1, [0.25, 0.35], 'bandpass');
-    arrCloseTo(b, [0.13672873599731955, 0, -0.13672873599731955]);
-    arrCloseTo(a, [1, -1.0274862967460152, 0.7265425280053606]);
+    arrObjectIs(b, [0.13672873599731955, 0, -0.13672873599731955]);
+    arrObjectIs(a, [1, -1.0274862967460152, 0.7265425280053606]);
   });
 
   it('butter(1,[0.25,0.35],bandstop) matches scipy-era oracle', () => {
     const { b, a } = butter(1, [0.25, 0.35], 'bandstop');
-    arrCloseTo(b, [0.8632712640026804, -1.0274862967460152, 0.8632712640026802]);
-    arrCloseTo(a, [1, -1.0274862967460152, 0.7265425280053606]);
+    arrObjectIs(b, [0.8632712640026804, -1.0274862967460152, 0.8632712640026802]);
+    arrObjectIs(a, [1, -1.0274862967460152, 0.7265425280053606]);
   });
 
   it('bandpass and bandstop share the same denominator for equal Wn', () => {
     const bp = butter(2, [0.2, 0.4], 'bandpass');
     const bs = butter(2, [0.2, 0.4], 'bandstop');
     arrCloseTo(bp.a, bs.a, 12);
+  });
+
+  it('bandstop divides a zero at the origin (cDiv by r=0 → Inf → NaN b)', () => {
+    const proto = {
+      z: [new Complex(0, 0)],
+      p: [new Complex(-1, 0), new Complex(-2, 0)],
+      k: 1,
+    };
+    const { b, a } = analogToDigital(proto, [0.25, 0.35], 'bandstop');
+    expect(b).toHaveLength(5);
+    expect(b.every((v) => Number.isNaN(v))).toBe(true);
+    arrObjectIs(
+      a,
+      [1, -2.1303705805284734, 2.7129789871061423, -1.677982658309819, 0.619913672162793]
+    );
+  });
+
+  it('bandpass maps a zero at the origin to finite quadratic roots', () => {
+    const proto = {
+      z: [new Complex(0, 0)],
+      p: [new Complex(-1, 0), new Complex(-2, 0)],
+      k: 1,
+    };
+    const { b, a } = analogToDigital(proto, [0.25, 0.35], 'bandpass');
+    arrObjectIs(
+      b,
+      [0.10383654869632251, -0.12358876674776055, 0, 0.12358876674776056, -0.10383654869632249]
+    );
+    arrObjectIs(
+      a,
+      [1, -1.9313838267442702, 2.1741542843538535, -1.1898512262577061, 0.37698070782206455]
+    );
   });
 });
