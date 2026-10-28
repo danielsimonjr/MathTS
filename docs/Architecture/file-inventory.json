@@ -7961,7 +7961,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1829
+      "loc": 1765
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7982,7 +7982,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2855
+      "loc": 2806
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",

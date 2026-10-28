@@ -21275,6 +21275,10 @@
           {
             "file": "./factorization/integer-poly.js",
             "imports": ["polyGcdZ"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           }
         ],
         "workspaceDependencies": [],
@@ -21593,6 +21597,10 @@
           {
             "file": "./algebra.js",
             "imports": ["expand", "factor"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           },
           {
             "file": "../factories/index.js",
@@ -42299,7 +42307,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1215,
     "totalModules": 82,
-    "totalLinesOfCode": 200703,
+    "totalLinesOfCode": 200590,
     "totalExports": 6246,
     "totalClasses": 59,
     "totalInterfaces": 542,
