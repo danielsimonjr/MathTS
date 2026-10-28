@@ -8024,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 223
+      "loc": 219
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -10229,7 +10229,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 156
+      "loc": 177
     },
     {
       "file": "functions/tests/polygamma-orthopoly.test.ts",

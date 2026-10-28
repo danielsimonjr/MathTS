@@ -6,9 +6,13 @@ import {
 } from '../src/typed/polynomial-ideal.js';
 import { parseRationalFunction } from '../src/cas/rational-integrate.js';
 import { factorPolynomialUnivariate } from '../src/typed/factorization/index.js';
-import { symbolicIntegral } from '../src/index.js';
+import { symbolicIntegral } from '../src/cas-integration.js';
 
-/** Independent oracle for the shared dense fill (no trimming). */
+/**
+ * Independent dense-fill oracle (the pre-consolidation loop). Expected values
+ * in these tests are literals; this is only a second check that the helper
+ * still matches that algorithm.
+ */
 function polyToDenseFillOracle(p: Poly): number[] {
   let maxPow = 0;
   for (const t of p) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
@@ -31,44 +35,14 @@ function trimPolyFactorizationOracle(coeffs: number[]): number[] {
   return coeffs.slice(0, n);
 }
 
-/** Legacy fill bodies (pre-consolidation) must match the oracle. */
-function legacyFillPolyDenseFromStr(s: string, x: string): number[] {
-  const poly = polyFromExpression(s, [x]);
-  let maxPow = 0;
-  for (const t of poly) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of poly) dense[t.powers[0]] += t.coeff;
-  return dense;
-}
-
-function legacyFillDenseFromPoly(p: Poly): number[] {
-  let maxPow = 0;
-  for (const t of p) {
-    maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  }
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of p) {
-    dense[t.powers[0]] += t.coeff;
-  }
-  return dense;
-}
-
-function legacyAlgebraPolyToDense(p: Poly): number[] {
-  return trimPolyExactOracle(legacyFillDenseFromPoly(p));
-}
-
-function legacyFactorizationPolyToDense(p: Poly): number[] {
-  return trimPolyFactorizationOracle(legacyFillDenseFromPoly(p));
-}
-
-describe('polyToDense coefficient fill — shared oracle', () => {
+describe('polyToDenseCoefficients — hardcoded fill', () => {
   it('empty Poly yields [0]', () => {
-    expect(polyToDenseFillOracle([])).toEqual([0]);
+    expect(polyToDenseCoefficients([])).toEqual([0]);
   });
 
   it('x^2 + 1 is sparse ascending [1, 0, 1]', () => {
     const p = polyFromExpression('x^2 + 1', ['x']);
-    expect(polyToDenseFillOracle(p)).toEqual([1, 0, 1]);
+    expect(polyToDenseCoefficients(p)).toEqual([1, 0, 1]);
   });
 
   it('accumulates like terms on the same power', () => {
@@ -77,10 +51,51 @@ describe('polyToDense coefficient fill — shared oracle', () => {
       { coeff: 2, powers: [2] },
       { coeff: -1, powers: [0] },
     ];
-    expect(polyToDenseFillOracle(p)).toEqual([-1, 0, 3]);
+    expect(polyToDenseCoefficients(p)).toEqual([-1, 0, 3]);
   });
 
-  it('shared helper and legacy fill paths match the oracle', () => {
+  it('constant term only', () => {
+    expect(polyToDenseCoefficients([{ coeff: 5, powers: [0] }])).toEqual([5]);
+  });
+
+  it('3*x^2 - x is [0, -1, 3]', () => {
+    const p = polyFromExpression('3*x^2 - x', ['x']);
+    expect(polyToDenseCoefficients(p)).toEqual([0, -1, 3]);
+  });
+
+  it('does not mutate the input Poly', () => {
+    const p: Poly = [{ coeff: 1, powers: [1] }];
+    polyToDenseCoefficients(p);
+    expect(p).toEqual([{ coeff: 1, powers: [1] }]);
+  });
+
+  it('does not trim trailing exact zeros or tiny coefficients', () => {
+    const withZero: Poly = [
+      { coeff: 1, powers: [1] },
+      { coeff: 0, powers: [2] },
+    ];
+    expect(polyToDenseCoefficients(withZero)).toEqual([0, 1, 0]);
+
+    const tiny: Poly = [{ coeff: 1e-12, powers: [0] }];
+    expect(polyToDenseCoefficients(tiny)).toEqual([1e-12]);
+  });
+
+  it('cancellation that leaves a trailing exact zero stays untrimmed', () => {
+    const p: Poly = [
+      { coeff: 0.5, powers: [3] },
+      { coeff: -0.5, powers: [3] },
+      { coeff: 2, powers: [1] },
+    ];
+    expect(polyToDenseCoefficients(p)).toEqual([0, 2, 0, 0]);
+  });
+
+  it('NaN coefficient is preserved at that power', () => {
+    const out = polyToDenseCoefficients([{ coeff: NaN, powers: [0] }]);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toBeNaN();
+  });
+
+  it('matches the independent fill oracle', () => {
     const cases: Poly[] = [
       [],
       polyFromExpression('x^2 + 1', ['x']),
@@ -92,15 +107,8 @@ describe('polyToDense coefficient fill — shared oracle', () => {
       ],
     ];
     for (const p of cases) {
-      const oracle = polyToDenseFillOracle(p);
-      expect(polyToDenseCoefficients(p)).toEqual(oracle);
-      expect(legacyFillDenseFromPoly(p)).toEqual(oracle);
-      expect(legacyAlgebraPolyToDense(p)).toEqual(trimPolyExactOracle(oracle));
-      expect(legacyFactorizationPolyToDense(p)).toEqual(trimPolyFactorizationOracle(oracle));
+      expect(polyToDenseCoefficients(p)).toEqual(polyToDenseFillOracle(p));
     }
-    expect(legacyFillPolyDenseFromStr('x^2 + 1', 'x')).toEqual(
-      polyToDenseCoefficients(polyFromExpression('x^2 + 1', ['x']))
-    );
   });
 });
 
@@ -110,22 +118,26 @@ describe('polyToDense trimming stays caller-specific', () => {
       { coeff: 1, powers: [1] },
       { coeff: 0, powers: [2] },
     ];
-    const filled = polyToDenseFillOracle(p);
+    const filled = polyToDenseCoefficients(p);
     expect(filled).toEqual([0, 1, 0]);
     expect(trimPolyExactOracle(filled)).toEqual([0, 1]);
     expect(trimPolyFactorizationOracle(filled)).toEqual([0, 1]);
+
+    const tiny: Poly = [{ coeff: 1e-12, powers: [0] }];
+    expect(trimPolyExactOracle(polyToDenseCoefficients(tiny))).toEqual([1e-12]);
   });
 
   it('factorization drops trailing |c| < 1e-9 and may return []', () => {
     const tinyTrail: Poly = [{ coeff: 1e-12, powers: [0] }];
-    expect(trimPolyFactorizationOracle(polyToDenseFillOracle(tinyTrail))).toEqual([]);
-    expect(trimPolyExactOracle(polyToDenseFillOracle(tinyTrail))).toEqual([1e-12]);
+    expect(trimPolyFactorizationOracle(polyToDenseCoefficients(tinyTrail))).toEqual([]);
+    expect(trimPolyExactOracle(polyToDenseCoefficients(tinyTrail))).toEqual([1e-12]);
 
     const mixed: Poly = [
       { coeff: 1, powers: [0] },
       { coeff: 1e-12, powers: [1] },
     ];
-    const filled = polyToDenseFillOracle(mixed);
+    const filled = polyToDenseCoefficients(mixed);
+    expect(filled).toEqual([1, 1e-12]);
     expect(trimPolyExactOracle(filled)).toEqual([1, 1e-12]);
     expect(trimPolyFactorizationOracle(filled)).toEqual([1]);
   });
@@ -137,14 +149,23 @@ describe('polyToDense trimming stays caller-specific', () => {
   });
 
   it('non-polynomial string still throws from polyFromExpression', () => {
-    expect(() => polyFromExpression('sin(x)', ['x'])).toThrow();
-    expect(() => legacyFillPolyDenseFromStr('sin(x)', 'x')).toThrow();
+    expect(() => polyFromExpression('sin(x)', ['x'])).toThrow(
+      "polynomial parse: unknown symbol 'sin' (declared variables: x) (at position 3 in 'sin(x)')"
+    );
+    expect(() => polyToDenseCoefficients(polyFromExpression('sin(x)', ['x']))).toThrow(
+      "polynomial parse: unknown symbol 'sin' (declared variables: x) (at position 3 in 'sin(x)')"
+    );
   });
 });
 
 describe('polyToDense — integration smoke (unchanged behavior)', () => {
   it('factorization still factors x^2 - 1', () => {
     expect(factorPolynomialUnivariate('x^2 - 1', 'x')).toBe('(x - 1)*(x + 1)');
+  });
+
+  it('factorization 1e-9 trim makes a tiny high-degree term look constant', () => {
+    // 5e-10 survives polyFromExpression (EPS 1e-10) then factorization drops |c| < 1e-9.
+    expect(factorPolynomialUnivariate('1 + 5e-10*x^2', 'x')).toBeNull();
   });
 
   it('symbolicIntegral by-parts path still works for x*exp(x)', () => {
