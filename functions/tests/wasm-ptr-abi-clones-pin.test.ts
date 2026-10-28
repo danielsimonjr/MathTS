@@ -113,7 +113,7 @@ describe('M11 — runChainPtr pointer ABI (mock memory)', () => {
     const expected = Float64Array.from(xs, (x) => x * x + 1);
     const out = runChainPtr(mem, [square, addOne], xs);
     expect(out).not.toBeNull();
-    expect(Array.from(out!)).toEqual(expected);
+    expect(Array.from(out!)).toEqual(Array.from(expected));
   });
 
   it('n = 0 with an empty chain returns empty output', () => {
