@@ -13,7 +13,7 @@
  * (`functions/src/typed/factorization/`).
  */
 
-import { polyFromExpression, type Poly } from '../polynomial-ideal.js';
+import { polyFromExpression, polyToDenseCoefficients, type Poly } from '../polynomial-ideal.js';
 import { degree, type IntPoly } from './integer-poly.js';
 import { factorUnivariateZ } from './zassenhaus.js';
 import { fromAlgebraExpr, toAlgebraString } from './multi-poly.js';
@@ -29,10 +29,7 @@ const INT_TOLERANCE = 1e-7;
  * cycle).
  */
 function polyToDense(p: Poly): number[] {
-  let maxPow = 0;
-  for (const t of p) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of p) dense[t.powers[0]] += t.coeff;
+  const dense = polyToDenseCoefficients(p);
   let n = dense.length;
   while (n > 0 && Math.abs(dense[n - 1]) < 1e-9) n -= 1;
   return dense.slice(0, n);

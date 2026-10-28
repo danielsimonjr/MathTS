@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1976
+**Total files**: 1980
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1187 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1188 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      701 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      704 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1976** |                                                                                                                |
+| **Total**     | **1980** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1213 |
-| `tests`    |   701 |
+| `src`      |  1214 |
+| `tests`    |   704 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -47,8 +47,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |    94 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   552 |
-| `@danielsimonjr/mathts-functions`      |   835 |
+| `@danielsimonjr/mathts-expression`     |   555 |
+| `@danielsimonjr/mathts-functions`      |   836 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   107 |
@@ -707,6 +707,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/src/transform/utils/errorTransform.ts`                                | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/lastDimToZeroBase.ts`                             | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/prepareTransformArgs.ts`                          | @danielsimonjr/mathts-expression     | src      | build-entry |
+| `expression/src/transform/utils/shortCircuitBinary.ts`                            | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/utils/transformCallback.ts`                             | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/variance.transform.ts`                                  | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/types.ts`                                                         | @danielsimonjr/mathts-expression     | src      | build-entry |
@@ -771,7 +772,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/public-api-smoke.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/RangeNode.test.ts`                                              | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/RelationalNode.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/s2r-clones-dim-transform-oracle.test.ts`                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/s2r-clones-relational-render-oracle.test.ts`                    | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/s2r-clones-short-circuit-oracle.test.ts`                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/s2r-clones-transform-args-oracle.test.ts`                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-builder.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-structure.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -1526,6 +1529,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/physical-constants.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/physics-mode.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/poly-as-wasm.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/poly-to-dense-coefficients.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polygamma-orthopoly.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polynomial-gcd-exact.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/propagate-uncertainty.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-28'
-  totalFiles: 1213
+  totalFiles: 1214
   totalModules: 82
-  totalExports: 6244
+  totalExports: 6247
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8522,6 +8522,7 @@ modules:
         - file: ./typed/polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
         - file: ./cas/rational-integrate.js
           imports:
             - integrateRationalFunction
@@ -11229,6 +11230,7 @@ modules:
         - file: ../typed/polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - Poly
         - file: ../typed/factorization/integer-poly.js
           imports:
@@ -19871,6 +19873,7 @@ modules:
         - file: ./polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - buchberger
             - normalize
             - polyToString
@@ -20611,6 +20614,7 @@ modules:
         - file: ../polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - Poly
         - file: ./integer-poly.js
           imports:
@@ -21927,6 +21931,7 @@ modules:
         - polyNeg
         - polySub
         - polyMul
+        - polyToDenseCoefficients
         - polyFromExpression
         - polyReduce
         - buchberger
@@ -21942,6 +21947,7 @@ modules:
         - polyNeg
         - polySub
         - polyMul
+        - polyToDenseCoefficients
         - polyFromExpression
         - polyReduce
         - buchberger
@@ -30736,9 +30742,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createAndTransform
@@ -30752,9 +30758,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createBitAndTransform
@@ -30768,9 +30774,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createBitOrTransform
@@ -30816,21 +30822,19 @@ modules:
       constants:
         - createConcatTransform
     expression/src/transform/cumsum.transform.ts:
-      description: Attach a transform function to math.sum
+      description: Attach a transform function to math.cumsum
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
-        - file: ../utils/is.js
-          imports:
-            - isBigNumber
-            - isCollection
-            - isNumber
         - file: ../utils/factory.js
           imports:
             - factory
         - file: ./utils/errorTransform.js
           imports:
             - errorTransform
+        - file: ./utils/lastDimToZeroBase.js
+          imports:
+            - lastDimToZeroBase
       workspaceDependencies: []
       exports:
         - createCumSumTransform
@@ -30865,7 +30869,7 @@ modules:
             - factory
         - file: ./utils/prepareTransformArgs.js
           imports:
-            - prepareTransformArrayAndCallback
+            - applyArrayCallbackTransform
         - file: ./utils/transformCallback.js
           imports:
             - createTransformCallback
@@ -30887,7 +30891,7 @@ modules:
             - factory
         - file: ./utils/prepareTransformArgs.js
           imports:
-            - prepareTransformArrayAndCallback
+            - applyArrayCallbackTransform
       workspaceDependencies: []
       exports:
         - createForEachTransform
@@ -31106,10 +31110,10 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/dimToZeroBase.js
           imports:
-            - isBigNumber
-            - isNumber
+            - dimToZeroBase
+            - isNumberOrBigNumber
       workspaceDependencies: []
       exports:
         - createMapSlicesTransform
@@ -31196,9 +31200,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
-        - file: ../utils/is.js
+        - file: ./utils/shortCircuitBinary.js
           imports:
-            - isCollection
+            - evalShortCircuitBinary
       workspaceDependencies: []
       exports:
         - createOrTransform
@@ -31339,7 +31343,7 @@ modules:
       functions:
         - compileInlineExpression
     expression/src/transform/utils/dimToZeroBase.ts:
-      description: Change last argument dim from one-based to zero-based.
+      description: Convert a one-based dimension to zero-based.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -31399,10 +31403,25 @@ modules:
       workspaceDependencies: []
       exports:
         - prepareTransformArrayAndCallback
+        - applyArrayCallbackTransform
       interfaces:
         - PreparedTransformArgs
       functions:
         - prepareTransformArrayAndCallback
+        - applyArrayCallbackTransform
+    expression/src/transform/utils/shortCircuitBinary.ts:
+      description: 'Evaluate a lazy binary operator transform: compile/evaluate the left arg'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../utils/is.js
+          imports:
+            - isCollection
+      workspaceDependencies: []
+      exports:
+        - evalShortCircuitBinary
+      functions:
+        - evalShortCircuitBinary
     expression/src/transform/utils/transformCallback.ts:
       description: Transforms the given callback function based on its type and number of arrays.
       externalDependencies: []
@@ -39759,6 +39778,7 @@ dependencyGraph:
         - expression/src/transform/utils/errorTransform.ts
         - expression/src/transform/utils/lastDimToZeroBase.ts
         - expression/src/transform/utils/prepareTransformArgs.ts
+        - expression/src/transform/utils/shortCircuitBinary.ts
         - expression/src/transform/utils/transformCallback.ts
         - expression/src/transform/variance.transform.ts
     - name: Expression/utils
@@ -39931,13 +39951,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1213
+  totalTypeScriptFiles: 1214
   totalModules: 82
-  totalLinesOfCode: 200578
-  totalExports: 6244
+  totalLinesOfCode: 200613
+  totalExports: 6247
   totalClasses: 59
   totalInterfaces: 543
-  totalFunctions: 2012
+  totalFunctions: 2015
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1618
