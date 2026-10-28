@@ -16,10 +16,11 @@
  *
  * The AS managed runtime allocates buffers via `__new(byteLength, id)` and
  * its typed-array exports expect a 12-byte *header* pointer (id=5 for
- * Float64Array, id=4 for Int32Array). The header holds
+ * Float64Array, id=6 for Int32Array — see `assembly/build/mathts.js`
+ * `__lowerTypedArray` and `wasm/as-typed-array.ts`). The header holds
  * [dataStart, dataStart, byteLength] in little-endian u32s. The data block
  * (id=1 = ArrayBuffer) is allocated separately; we pin both so the GC can't
- * reclaim them.
+ * reclaim them. Class id 4 in this binary is `Complex`, not Int32Array.
  *
  * Callers receive an opaque `Allocation` handle whose `.ptr` is the header
  * pointer to pass to the WASM function and whose `.array` is a JS view over

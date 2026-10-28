@@ -9,12 +9,33 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WasmLoader } from '../../src/backends/WasmLoader.js';
 import { createWASMBackend } from '../../src/backends/WASMBackend.js';
+import {
+  AS_ID_ARRAY_BUFFER,
+  AS_ID_FLOAT64_ARRAY,
+  AS_ID_INT32_ARRAY,
+} from '../../src/backends/wasm/as-typed-array.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const asWasmPath = path.resolve(here, '../../dist/wasm/mathts-as.wasm');
+const asGluePath = path.resolve(here, '../../../assembly/build/mathts.js');
 
 it('the AS wasm binary is present (a missing binary fails here, not as a silent skip)', () => {
   expect(fs.existsSync(asWasmPath), `build the AS binary: ${asWasmPath}`).toBe(true);
+});
+
+it('shared AS class ids match assembly/build/mathts.js lowering (Int32Array is 6, not 4)', () => {
+  expect(fs.existsSync(asGluePath), `build the AS glue: ${asGluePath}`).toBe(true);
+  const glue = fs.readFileSync(asGluePath, 'utf8');
+  const f64 = glue.match(/__lowerTypedArray\(Float64Array, (\d+),/);
+  const i32 = glue.match(/__lowerTypedArray\(Int32Array, (\d+),/);
+  expect(f64, 'Float64Array lowering present in glue').not.toBeNull();
+  expect(i32, 'Int32Array lowering present in glue').not.toBeNull();
+  expect(Number(f64![1])).toBe(5);
+  expect(Number(i32![1])).toBe(6);
+  expect(glue).not.toMatch(/__lowerTypedArray\(Int32Array, 4,/);
+  expect(AS_ID_ARRAY_BUFFER).toBe(1);
+  expect(AS_ID_FLOAT64_ARRAY).toBe(Number(f64![1]));
+  expect(AS_ID_INT32_ARRAY).toBe(Number(i32![1]));
 });
 
 /** Independent read of the 12-byte AS header: [dataStart, dataStart, byteLength] LE u32. */
@@ -28,6 +49,11 @@ function readAsHeader(
     dataStart1: dv.getUint32(headerPtr + 4, true),
     byteLength: dv.getUint32(headerPtr + 8, true),
   };
+}
+
+/** AS stub runtime stores the class id at payload-8 (`~lib/rt/stub/__new` in mathts.wat). */
+function readAsRtId(buffer: ArrayBuffer, headerPtr: number): number {
+  return new DataView(buffer).getUint32(headerPtr - 8, true);
 }
 
 describe('M7 — WasmLoader makeAs header bytes', () => {
@@ -52,6 +78,7 @@ describe('M7 — WasmLoader makeAs header bytes', () => {
     expect(h.byteLength).toBe(length * 8);
     expect(h.dataStart0).toBe(alloc.dataPtr);
     expect(h.dataStart1).toBe(alloc.dataPtr);
+    expect(readAsRtId(mem, alloc.ptr)).toBe(AS_ID_FLOAT64_ARRAY);
     loader.release(alloc.ptr, true);
   });
 
@@ -64,6 +91,7 @@ describe('M7 — WasmLoader makeAs header bytes', () => {
     expect(h.byteLength).toBe(length * 4);
     expect(h.dataStart0).toBe(alloc.dataPtr);
     expect(h.dataStart1).toBe(alloc.dataPtr);
+    expect(readAsRtId(mem, alloc.ptr)).toBe(AS_ID_INT32_ARRAY);
     loader.release(alloc.ptr, false);
   });
 });
@@ -111,6 +139,7 @@ describe('M7 — WASMBackend allocHeader header bytes', () => {
     expect(hf.byteLength).toBe(nF << 3);
     expect(hf.dataStart0).toBe(f64.bufferPtr);
     expect(hf.dataStart1).toBe(f64.bufferPtr);
+    expect(readAsRtId(mem, f64.headerPtr)).toBe(AS_ID_FLOAT64_ARRAY);
 
     const nI = 6;
     const i32 = priv.int32Cache.acquire(priv.wasmModule, nI);
@@ -118,6 +147,7 @@ describe('M7 — WASMBackend allocHeader header bytes', () => {
     expect(hi.byteLength).toBe(nI << 2);
     expect(hi.dataStart0).toBe(i32.bufferPtr);
     expect(hi.dataStart1).toBe(i32.bufferPtr);
+    expect(readAsRtId(mem, i32.headerPtr)).toBe(AS_ID_INT32_ARRAY);
 
     priv.allocCache.release(f64);
     priv.int32Cache.release(i32);
