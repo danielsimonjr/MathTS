@@ -23,4 +23,62 @@ describe('regularized regression', () => {
     const r = elasticNet([[1], [2], [3], [4]], [2, 4, 6, 8], 0.1, 0.5);
     expect(Number.isFinite(r.coefficients[0])).toBe(true);
   });
+
+  const design = [
+    [1, 0],
+    [2, 1],
+    [3, 0],
+    [4, 2],
+  ];
+  const response = [1, 3, 2, 7];
+
+  it('lasso(X,y,alpha) matches elasticNet(X,y,alpha,1)', () => {
+    const a = 0.05;
+    const l = lasso(design, response, a);
+    const e = elasticNet(design, response, a, 1);
+    expect(l.coefficients).toEqual(e.coefficients);
+    expect(l.intercept).toBeCloseTo(e.intercept, 12);
+  });
+
+  it('lasso and elasticNet with alpha=0 agree on small design', () => {
+    const l = lasso(design, response, 0);
+    const e = elasticNet(design, response, 0, 0.5);
+    expect(l.coefficients[0]).toBeCloseTo(e.coefficients[0], 10);
+    expect(l.coefficients[1]).toBeCloseTo(e.coefficients[1], 10);
+  });
+
+  it('elasticNet l1Ratio=0 stays finite (coordinate ridge)', () => {
+    const r = elasticNet(design, response, 0.01, 0);
+    expect(Number.isFinite(r.coefficients[0])).toBe(true);
+    expect(Number.isFinite(r.coefficients[1])).toBe(true);
+  });
+
+  it('lasso intercept:false keeps intercept 0', () => {
+    const r = lasso(design, response, 0.01, { intercept: false });
+    expect(r.intercept).toBe(0);
+    // Recorded from main before the finishPenalized extract.
+    expect(r.coefficients[0]).toBe(0.6994975154446825);
+    expect(r.coefficients[1]).toBe(1.998768901133135);
+  });
+
+  it('validation errors keep lasso:/elasticNet: prefixes', () => {
+    expect(() => lasso([], [1], 0)).toThrow('lasso: empty design matrix');
+    expect(() => elasticNet([], [1], 0, 0.5)).toThrow('elasticNet: empty design matrix');
+    expect(() => lasso([[1]], [1, 2], 0)).toThrow('lasso: length mismatch (X has 1 rows, y has 2)');
+    expect(() => lasso(design, response, -1)).toThrow('lasso: alpha must be non-negative');
+    expect(() => elasticNet(design, response, -1, 0.5)).toThrow(
+      'elasticNet: alpha must be non-negative'
+    );
+    expect(() => elasticNet(design, response, 0.1, -0.1)).toThrow(
+      'elasticNet: l1Ratio must be in [0, 1]'
+    );
+    expect(() => elasticNet(design, response, 0.1, 1.1)).toThrow(
+      'elasticNet: l1Ratio must be in [0, 1]'
+    );
+  });
+
+  it('NaN in y propagates through lasso (intercept NaN)', () => {
+    const r = lasso([[1], [2]], [1, NaN], 0.01);
+    expect(Number.isNaN(r.intercept)).toBe(true);
+  });
 });

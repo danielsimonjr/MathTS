@@ -1270,6 +1270,25 @@ export function correlate(a: number[], b: number[]): number[] {
 // =============================================================================
 
 /**
+ * Pack a one-sided PSD array and normalized frequency grid for Welch/Bartlett exports.
+ *
+ * @param signal - Input samples (coerced to Float64Array by callers)
+ * @param frameLength - FFT frame length used as the frequency normalizer
+ * @param compute - Kernel that returns the PSD buffer for the given samples and frame
+ */
+function packPsd(
+  signal: Float64Array,
+  frameLength: i32,
+  compute: (samples: Float64Array, frameLen: i32) => Float64Array
+): { psd: number[]; frequencies: number[]; frameLength: number } {
+  const psdArr = compute(signal, frameLength);
+  const nfft = frameLength;
+  const psd = Array.from(psdArr);
+  const frequencies = Array.from({ length: psdArr.length }, (_, i) => i / nfft);
+  return { psd, frequencies, frameLength };
+}
+
+/**
  * Welch's overlapped-segment-averaging Power Spectral Density.
  *
  * Welch PSD measures slower on WASM than JS (`functions/src/wasm/policy.ts` header);
@@ -1288,11 +1307,7 @@ export function welchPSD(
   const overlap: i32 = opts?.overlap ?? Math.floor(frameLength / 2);
   const window = opts?.window ?? 'hann';
 
-  const psdArr = welchPSDDispatch(samples, frameLength, overlap, window);
-  const nfft = frameLength;
-  const psd = Array.from(psdArr);
-  const frequencies = Array.from({ length: psdArr.length }, (_, i) => i / nfft);
-  return { psd, frequencies, frameLength };
+  return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
 }
 
 /**
@@ -1311,11 +1326,7 @@ export function bartlettPSD(
   const samples = signal instanceof Float64Array ? signal : new Float64Array(signal);
   const frameLength: i32 = opts?.frameLength ?? 256;
 
-  const psdArr = bartlettPSDDispatch(samples, frameLength);
-  const nfft = frameLength;
-  const psd = Array.from(psdArr);
-  const frequencies = Array.from({ length: psdArr.length }, (_, i) => i / nfft);
-  return { psd, frequencies, frameLength };
+  return packPsd(samples, frameLength, (s, fl) => bartlettPSDDispatch(s, fl));
 }
 
 /**

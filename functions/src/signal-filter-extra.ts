@@ -207,16 +207,29 @@ function lp2hpZpk(z: Complex[], p: Complex[], k: number, wo: number): AnalogProt
   return { z: zHp, p: p.map((pv) => cDiv(woC, pv)), k: k * cDiv(prodZ, prodP).re };
 }
 
+/**
+ * Lowpass-to-band quadratic root map shared by bandpass and bandstop transforms.
+ * Each input root r yields r ± sqrt(r² − wo²); `sqrt` is evaluated twice per root
+ * to preserve the legacy rounding order.
+ *
+ * @param mapped - Prototype roots after the band-specific real scaling (lp or hp)
+ * @param wo2 - Squared center frequency ω₀² as a complex on the real axis
+ */
+function bandQuadraticRoots(mapped: Complex[], wo2: Complex): Complex[] {
+  const plus = mapped.map((r) => cAdd(r, cSub(cMul(r, r), wo2).sqrt()));
+  const minus = mapped.map((r) => cSub(r, cSub(cMul(r, r), wo2).sqrt()));
+  return plus.concat(minus);
+}
+
 /** s → (s² + wo²)/(s·bw) (scipy `lp2bp_zpk`, "wideband" transform). */
 function lp2bpZpk(z: Complex[], p: Complex[], k: number, wo: number, bw: number): AnalogProto {
   const degree = relativeDegree(z, p);
   const wo2 = new Complex(wo * wo, 0);
-  const shift = (roots: Complex[]): Complex[] => {
-    const lp = roots.map((r) => cScale(r, bw / 2));
-    const plus = lp.map((r) => cAdd(r, cSub(cMul(r, r), wo2).sqrt()));
-    const minus = lp.map((r) => cSub(r, cSub(cMul(r, r), wo2).sqrt()));
-    return plus.concat(minus);
-  };
+  const shift = (roots: Complex[]): Complex[] =>
+    bandQuadraticRoots(
+      roots.map((r) => cScale(r, bw / 2)),
+      wo2
+    );
   const zBp = shift(z);
   for (let i = 0; i < degree; i++) zBp.push(new Complex(0, 0));
   return { z: zBp, p: shift(p), k: k * Math.pow(bw, degree) };
@@ -227,12 +240,11 @@ function lp2bsZpk(z: Complex[], p: Complex[], k: number, wo: number, bw: number)
   const degree = relativeDegree(z, p);
   const wo2 = new Complex(wo * wo, 0);
   const bw2 = new Complex(bw / 2, 0);
-  const shift = (roots: Complex[]): Complex[] => {
-    const hp = roots.map((r) => cDiv(bw2, r));
-    const plus = hp.map((r) => cAdd(r, cSub(cMul(r, r), wo2).sqrt()));
-    const minus = hp.map((r) => cSub(r, cSub(cMul(r, r), wo2).sqrt()));
-    return plus.concat(minus);
-  };
+  const shift = (roots: Complex[]): Complex[] =>
+    bandQuadraticRoots(
+      roots.map((r) => cDiv(bw2, r)),
+      wo2
+    );
   const zBs = shift(z);
   for (let i = 0; i < degree; i++) zBs.push(new Complex(0, wo));
   for (let i = 0; i < degree; i++) zBs.push(new Complex(0, -wo));
