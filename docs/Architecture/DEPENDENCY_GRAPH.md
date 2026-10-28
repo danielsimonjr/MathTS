@@ -16174,7 +16174,7 @@ graph LR
 
 ---
 
-### `expression/src/transform/utils/dimToZeroBase.ts` - Change last argument dim from one-based to zero-based.
+### `expression/src/transform/utils/dimToZeroBase.ts` - Convert a one-based dimension to zero-based.
 
 **Internal Dependencies:**
 
@@ -16233,7 +16233,7 @@ graph LR
 
 ---
 
-### `expression/src/transform/utils/shortCircuitBinary.ts` - Evaluate a lazy binary operator transform: compile/evaluate the left arg,
+### `expression/src/transform/utils/shortCircuitBinary.ts` - Evaluate a lazy binary operator transform: compile/evaluate the left arg
 
 **Internal Dependencies:**
 
@@ -19070,7 +19070,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1213   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200615 |
+| Total Lines of Code     | 200633 |
 | Total Exports           | 6243   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |

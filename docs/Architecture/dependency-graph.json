@@ -33188,7 +33188,7 @@
         "functions": ["compileInlineExpression"]
       },
       "expression/src/transform/utils/dimToZeroBase.ts": {
-        "description": "Change last argument dim from one-based to zero-based.",
+        "description": "Convert a one-based dimension to zero-based.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -33253,7 +33253,7 @@
         "functions": ["prepareTransformArrayAndCallback", "applyArrayCallbackTransform"]
       },
       "expression/src/transform/utils/shortCircuitBinary.ts": {
-        "description": "Evaluate a lazy binary operator transform: compile/evaluate the left arg,",
+        "description": "Evaluate a lazy binary operator transform: compile/evaluate the left arg",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -42261,7 +42261,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1213,
     "totalModules": 82,
-    "totalLinesOfCode": 200615,
+    "totalLinesOfCode": 200633,
     "totalExports": 6243,
     "totalClasses": 59,
     "totalInterfaces": 542,

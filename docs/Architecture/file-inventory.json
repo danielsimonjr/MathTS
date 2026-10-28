@@ -4482,7 +4482,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 22
+      "loc": 39
     },
     {
       "file": "expression/src/transform/utils/errorTransform.ts",
@@ -4503,7 +4503,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 75
+      "loc": 76
     },
     {
       "file": "expression/src/transform/utils/shortCircuitBinary.ts",
@@ -4965,7 +4965,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 66
+      "loc": 144
     },
     {
       "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
@@ -4979,14 +4979,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 144
+      "loc": 174
     },
     {
       "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 108
+      "loc": 182
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",
