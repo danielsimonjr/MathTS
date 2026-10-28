@@ -1,11 +1,11 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1212, "e": 6243, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1215, "e": 6251, "re": 2627 },
   "s": {
-    "loc": 200589,
+    "loc": 200573,
     "cls": 59,
-    "int": 542,
-    "fn": 2011,
-    "tg": 158,
+    "int": 543,
+    "fn": 2019,
+    "tg": 159,
     "en": 0,
     "co": 1618,
     "toi": 612
@@ -323,6 +323,7 @@
         "cloneMatrix",
         "transpose",
         "matInv",
+        "gaussJordanContinue",
         "isSymmetric",
         "matMul",
         "matAdd",
@@ -336,8 +337,7 @@
         "condest",
         "eigWasm",
         "eigvalsWasm",
-        "spectralRadiusWasm",
-        "eig"
+        "spectralRadiusWasm"
       ],
       "int": [
         "CholeskyResult",
@@ -863,9 +863,11 @@
       ]
     },
     "functions/probability": {
-      "f": 15,
+      "f": 16,
       "exp": [
         "createBernoulli",
+        "isPositiveInteger",
+        "binomialProductBigNumber",
         "createCombinations",
         "createCombinationsWithRep",
         "createFactorial",
@@ -882,7 +884,8 @@
         "gammaSampleRng",
         "randomMatrix",
         "createRng"
-      ]
+      ],
+      "int": ["BigNumberBinomialType"]
     },
     "functions/relational": {
       "f": 13,
@@ -1303,7 +1306,7 @@
       "int": ["CompiledExpression", "StringOptions", "IndexLike"]
     },
     "expression/transform": {
-      "f": 32,
+      "f": 33,
       "exp": [
         "createAndTransform",
         "createBitAndTransform",
@@ -1581,7 +1584,7 @@
       ]
     },
     "parallel": {
-      "f": 5,
+      "f": 6,
       "exp": [
         "Transfer",
         "DEFAULT_THRESHOLD_BY_OP",
@@ -1592,11 +1595,11 @@
         "ComputePool",
         "ParallelMatrix",
         "WorkerPool",
+        "gemmRows",
         "parallelMatmul",
         "parallelMatvec",
         "parallelTranspose",
-        "parallelOuter",
-        "parallelDot"
+        "parallelOuter"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": ["ComputePoolConfig", "ParallelResult", "MatrixData", "ParallelConfig"]

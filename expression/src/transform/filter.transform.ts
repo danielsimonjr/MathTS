@@ -1,9 +1,14 @@
 import { factory } from '../utils/factory.js';
-import { prepareTransformArrayAndCallback } from './utils/prepareTransformArgs.js';
+import { applyArrayCallbackTransform } from './utils/prepareTransformArgs.js';
 import { createTransformCallback } from './utils/transformCallback.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
+}
+
+interface TransformFunction {
+  (args: Node[], math: unknown, scope: unknown): unknown;
+  rawArgs?: boolean;
 }
 
 interface Node {
@@ -12,11 +17,6 @@ interface Node {
 
 interface CompiledExpression {
   evaluate(scope: unknown): unknown;
-}
-
-interface TransformFunction {
-  (args: Node[], math: unknown, scope: unknown): unknown;
-  rawArgs?: boolean;
 }
 
 interface Dependencies {
@@ -38,25 +38,16 @@ export const createFilterTransform = /* #__PURE__ */ factory(
      * This transform adds support for equations as test function for math.filter,
      * so you can do something like 'filter([3, -2, 5], x > 0)'.
      */
+    const transformCallback = createTransformCallback({ typed });
+
     function filterTransform(args: Node[], math: unknown, scope: unknown): unknown {
-      const transformCallback = createTransformCallback({ typed });
-
-      if (args.length === 0) {
-        return filter();
-      }
-      let x: unknown = args[0];
-
-      if (args.length === 1) {
-        return filter(x);
-      }
-
-      const prepared = prepareTransformArrayAndCallback(
-        args as Node[],
+      return applyArrayCallbackTransform(
+        args,
         math as Record<string, unknown>,
-        scope as Map<string, unknown>
+        scope as Map<string, unknown>,
+        filter,
+        transformCallback
       );
-
-      return filter(prepared.x, transformCallback(prepared.callback, prepared.callbackArity));
     }
     filterTransform.rawArgs = true;
 

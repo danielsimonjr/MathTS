@@ -100,6 +100,41 @@ export function matInv(A: number[][]): number[][] | null {
 }
 
 /**
+ * In-place Gauss–Jordan elimination on an augmented matrix. Partial pivoting;
+ * columns whose pivot satisfies `|pivot| < pivotTol` are skipped (no row scale);
+ * zero elimination factors are skipped. Used by `matSolve` and `solveCol` with
+ * different tolerances and RHS widths.
+ *
+ * @internal
+ */
+export function gaussJordanContinue(aug: number[][], n: number, pivotTol: number): void {
+  const width = aug[0].length;
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    let maxVal = Math.abs(aug[col][col]);
+    for (let row = col + 1; row < n; row++) {
+      if (Math.abs(aug[row][col]) > maxVal) {
+        maxVal = Math.abs(aug[row][col]);
+        maxRow = row;
+      }
+    }
+    if (maxRow !== col) [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+
+    const pivot = aug[col][col];
+    if (Math.abs(pivot) < pivotTol) continue;
+
+    for (let j = col; j < width; j++) aug[col][j] /= pivot;
+
+    for (let row = 0; row < n; row++) {
+      if (row === col) continue;
+      const factor = aug[row][col];
+      if (factor === 0) continue;
+      for (let j = col; j < width; j++) aug[row][j] -= factor * aug[col][j];
+    }
+  }
+}
+
+/**
  * Check if a matrix is symmetric to within tolerance.
  * Returns true for empty matrices; false for non-square matrices.
  */

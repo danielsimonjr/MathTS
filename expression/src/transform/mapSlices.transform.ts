@@ -1,6 +1,6 @@
 import { errorTransform } from './utils/errorTransform.js';
 import { factory } from '../utils/factory.js';
-import { isBigNumber, isNumber } from '../utils/is.js';
+import { dimToZeroBase, isNumberOrBigNumber } from './utils/dimToZeroBase.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
@@ -18,7 +18,7 @@ const dependencies = ['typed', 'mapSlices'];
  * Attach a transform function to math.mapSlices
  * Adds a property transform containing the transform function.
  *
- * This transform changed the last `dim` parameter of function mapSlices
+ * This transform changes the second `dim` argument of function mapSlices
  * from one-based to zero based
  */
 export const createMapSlicesTransform = /* #__PURE__ */ factory(
@@ -28,13 +28,9 @@ export const createMapSlicesTransform = /* #__PURE__ */ factory(
     // @see: comment of concat itself
     return typed('mapSlices', {
       '...any': function (args: unknown[]): unknown {
-        // change dim from one-based to zero-based
         const dim = args[1];
-
-        if (isNumber(dim)) {
-          args[1] = dim - 1;
-        } else if (isBigNumber(dim)) {
-          args[1] = (dim as unknown as { minus(n: number): unknown }).minus(1);
+        if (isNumberOrBigNumber(dim)) {
+          args[1] = dimToZeroBase(dim);
         }
 
         try {

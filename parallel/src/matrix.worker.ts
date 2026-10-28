@@ -1,3 +1,5 @@
+import { gemmRows } from './gemm-rows.js';
+
 /**
  * Matrix Worker for parallel computation
  * Handles matrix operations in a separate thread.
@@ -156,17 +158,7 @@ function multiplyTask(task: MultiplyPayload): Float64Array {
   const { aData, aCols, bData, bCols, startRow, endRow } = task;
   const rowCount = endRow - startRow;
   const out = new Float64Array(rowCount * bCols);
-
-  for (let i = startRow; i < endRow; i++) {
-    for (let j = 0; j < bCols; j++) {
-      let sum = 0;
-      for (let k = 0; k < aCols; k++) {
-        sum += aData[i * aCols + k] * bData[k * bCols + j];
-      }
-      out[(i - startRow) * bCols + j] = sum;
-    }
-  }
-
+  gemmRows(aData, aCols, bData, bCols, startRow, endRow, out, startRow);
   return out;
 }
 
@@ -270,4 +262,4 @@ if (isNode) {
   self.onmessage = handleMessage;
 }
 
-export {}; // Make this a module
+// Make this a module
