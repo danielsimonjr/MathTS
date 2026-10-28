@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1996,
+  "totalFiles": 1997,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1192,
     "test-only": 0,
     "orphan": 0,
-    "test": 716,
+    "test": 717,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1218,
-    "tests": 716,
+    "tests": 717,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 23,
+    "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 95,
     "@danielsimonjr/mathts-evaluator": 3,
@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2405
+      "loc": 2423
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -388,6 +388,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 105
+    },
+    {
+      "file": "autograd/tests/s2r-clones-reduce-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 290
     },
     {
       "file": "autograd/tests/scaffold.test.ts",
