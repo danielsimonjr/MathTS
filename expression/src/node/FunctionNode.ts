@@ -13,6 +13,7 @@ import { factory } from '../utils/factory.js';
 import { defaultTemplate, latexFunctions } from '../utils/latex.js';
 import { toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
+import { mapChildArray } from './Node.js';
 
 const name = 'FunctionNode';
 const dependencies = ['math', 'Node', 'SymbolNode'];
@@ -420,10 +421,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): FunctionNode {
         const fn = this._ifNode(callback(this.fn, 'fn', this));
-        const args: MathNode[] = [];
-        for (let i = 0; i < this.args.length; i++) {
-          args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
-        }
+        const args = mapChildArray(this, this.args, 'args', callback);
         return new FunctionNode(fn, args);
       }
 

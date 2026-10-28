@@ -516,3 +516,28 @@ export const createNode = /* #__PURE__ */ factory(
  * The instance type of the `Node` class that `createNode` makes.
  */
 export type MathNode = InstanceType<ReturnType<typeof createNode>>;
+
+/**
+ * Map each entry in a node's child array through a callback, using `parent._ifNode`
+ * so invalid callback results throw the same `TypeError` as the node `map` methods.
+ * Used by `IndexNode`, `OperatorNode`, `FunctionNode`, and `ArrayNode` (not exported
+ * from the package barrel).
+ *
+ * @param parent - Node instance supplying `_ifNode`
+ * @param children - Child nodes to map (not mutated)
+ * @param pathPrefix - Path segment before the index, e.g. `'dimensions'` or `'args'`
+ * @param callback - Receives each child, full path (`prefix + '[' + i + ']'`), and parent
+ * @returns New array of mapped child nodes
+ */
+export function mapChildArray<P extends { _ifNode(node: unknown): MathNode }>(
+  parent: P,
+  children: readonly MathNode[],
+  pathPrefix: string,
+  callback: (child: MathNode, path: string, parent: P) => MathNode
+): MathNode[] {
+  const out: MathNode[] = [];
+  for (let i = 0; i < children.length; i++) {
+    out[i] = parent._ifNode(callback(children[i], pathPrefix + '[' + i + ']', parent));
+  }
+  return out;
+}

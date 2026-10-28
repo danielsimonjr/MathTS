@@ -2,6 +2,7 @@ import { isArrayNode, isNode } from '../utils/is.js';
 import { map } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode, StringOptions } from './Node.js';
+import { mapChildArray } from './Node.js';
 
 const name = 'ArrayNode';
 const dependencies = ['Node'];
@@ -102,10 +103,7 @@ export const createArrayNode = /* #__PURE__ */ factory(
        * @returns Returns a transformed copy of the node
        */
       map(callback: (child: MathNode, path: string, parent: MathNode) => MathNode): ArrayNode {
-        const items: MathNode[] = [];
-        for (let i = 0; i < this.items.length; i++) {
-          items[i] = this._ifNode(callback(this.items[i], 'items[' + i + ']', this));
-        }
+        const items = mapChildArray(this, this.items, 'items', callback);
         return new ArrayNode(items);
       }
 
