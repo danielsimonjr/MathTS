@@ -109,6 +109,38 @@ export function getAncestors(graph: DependencyGraph, id: string): string[] {
   return graph.executionOrder.filter((nodeId) => result.has(nodeId));
 }
 
+/** Line templates for {@link renderDependencyGraph} (Mermaid vs Graphviz DOT). */
+interface GraphTextFormat {
+  header: string;
+  node: (id: string) => string;
+  edge: (dep: string, id: string) => string;
+  footer?: string;
+}
+
+/**
+ * Shared dependency-graph text renderer: header, one node line per map key, then
+ * one edge line per `(dep → cell)` dependency, optional footer, joined with `\n`.
+ */
+function renderDependencyGraph(graph: DependencyGraph, format: GraphTextFormat): string {
+  const lines: string[] = [format.header];
+
+  for (const id of graph.nodes.keys()) {
+    lines.push(format.node(id));
+  }
+
+  for (const [id, node] of graph.nodes) {
+    for (const dep of node.dependencies) {
+      lines.push(format.edge(dep, id));
+    }
+  }
+
+  if (format.footer !== undefined) {
+    lines.push(format.footer);
+  }
+
+  return lines.join('\n');
+}
+
 /**
  * Render the dependency graph as a Mermaid `graph TD` diagram.
  *
@@ -117,19 +149,11 @@ export function getAncestors(graph: DependencyGraph, id: string): string[] {
  * syntax injection is impossible and no cell content appears in the output.
  */
 export function toMermaid(graph: DependencyGraph): string {
-  const lines: string[] = ['graph TD'];
-
-  for (const id of graph.nodes.keys()) {
-    lines.push(`  ${id}["${id}"]`);
-  }
-
-  for (const [id, node] of graph.nodes) {
-    for (const dep of node.dependencies) {
-      lines.push(`  ${dep} --> ${id}`);
-    }
-  }
-
-  return lines.join('\n');
+  return renderDependencyGraph(graph, {
+    header: 'graph TD',
+    node: (id) => `  ${id}["${id}"]`,
+    edge: (dep, id) => `  ${dep} --> ${id}`,
+  });
 }
 
 /**
@@ -144,20 +168,12 @@ export function toMermaid(graph: DependencyGraph): string {
  * ```
  */
 export function toDOT(graph: DependencyGraph): string {
-  const lines: string[] = ['digraph deps {'];
-
-  for (const id of graph.nodes.keys()) {
-    lines.push(`  ${id} [label="${id}"];`);
-  }
-
-  for (const [id, node] of graph.nodes) {
-    for (const dep of node.dependencies) {
-      lines.push(`  ${dep} -> ${id};`);
-    }
-  }
-
-  lines.push('}');
-  return lines.join('\n');
+  return renderDependencyGraph(graph, {
+    header: 'digraph deps {',
+    node: (id) => `  ${id} [label="${id}"];`,
+    edge: (dep, id) => `  ${dep} -> ${id};`,
+    footer: '}',
+  });
 }
 
 /**

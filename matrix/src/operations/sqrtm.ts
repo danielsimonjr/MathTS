@@ -127,6 +127,27 @@ function sqrtmSymmetric(A: number[][]): number[][] {
 // ---------------------------------------------------------------------------
 
 /**
+ * One Newton square-root update `Y' = (Y + A Y⁻¹) / 2` and the max entrywise
+ * change `‖Y' − Y‖_∞`. Returns `null` when `Y` is singular (`matInv` fails).
+ */
+function newtonSqrtUpdate(A: number[][], Y: number[][]): { next: number[][]; diff: number } | null {
+  const n = A.length;
+  const Yinv = matInv(Y);
+  if (Yinv === null) return null;
+
+  const AYinv = matMul(A, Yinv);
+  const next = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (Y[i][j] + AYinv[i][j]) / 2)
+  );
+
+  let diff = 0;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) diff = Math.max(diff, Math.abs(next[i][j] - Y[i][j]));
+
+  return { next, diff };
+}
+
+/**
  * Square root via Newton iteration: Y_{k+1} = (Y_k + A * Y_k^{-1}) / 2.
  * Starting point: Y_0 = I.
  * Converges for matrices with no eigenvalues on the negative real axis.
@@ -138,20 +159,10 @@ function sqrtmNewton(A: number[][]): number[][] | null {
   let Y = eye(n); // better starting point than A for near-I
 
   for (let iter = 0; iter < 150; iter++) {
-    const Yinv = matInv(Y);
-    if (Yinv === null) return null; // Y singular
-
-    const AYinv = matMul(A, Yinv);
-    const Ynew = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => (Y[i][j] + AYinv[i][j]) / 2)
-    );
-
-    let diff = 0;
-    for (let i = 0; i < n; i++)
-      for (let j = 0; j < n; j++) diff = Math.max(diff, Math.abs(Ynew[i][j] - Y[i][j]));
-
-    Y = Ynew;
-    if (diff < 1e-13) return Y;
+    const step = newtonSqrtUpdate(A, Y);
+    if (step === null) return null;
+    Y = step.next;
+    if (step.diff < 1e-13) return Y;
   }
 
   // Check convergence: does Y * Y ≈ A?
@@ -511,20 +522,10 @@ export function matrixSqrtNewtonInternal(A: number[][]): number[][] {
   let Y = eye(n);
 
   for (let iter = 0; iter < 150; iter++) {
-    const Yinv = matInv(Y);
-    if (Yinv === null) break;
-
-    const AYinv = matMul(A, Yinv);
-    const Ynew = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => (Y[i][j] + AYinv[i][j]) / 2)
-    );
-
-    let diff = 0;
-    for (let i = 0; i < n; i++)
-      for (let j = 0; j < n; j++) diff = Math.max(diff, Math.abs(Ynew[i][j] - Y[i][j]));
-
-    Y = Ynew;
-    if (diff < 1e-14) break;
+    const step = newtonSqrtUpdate(A, Y);
+    if (step === null) break;
+    Y = step.next;
+    if (step.diff < 1e-14) break;
   }
 
   return Y;

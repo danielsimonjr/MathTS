@@ -22,7 +22,7 @@ import {
   applyHouseholderLeft,
   applyHouseholderRight,
 } from './common.js';
-import { applyGivensRight } from './givens.js';
+import { applyGivensRight, givensRotation } from './givens.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -55,18 +55,6 @@ function hessenbergReduce(A: number[][]): { H: number[][]; Q: number[][] } {
   for (let i = 0; i < n; i++) for (let j = 0; j < i - 1; j++) H[i][j] = 0;
 
   return { H, Q };
-}
-
-function givensParams(a: number, b: number): { c: number; s: number } {
-  if (b === 0) return { c: 1, s: 0 };
-  if (Math.abs(b) > Math.abs(a)) {
-    const t = -a / b;
-    const s = 1 / Math.sqrt(1 + t * t);
-    return { c: s * t, s };
-  }
-  const t = -b / a;
-  const c = 1 / Math.sqrt(1 + t * t);
-  return { c, s: c * t };
 }
 
 function applyGivensLeft(
@@ -105,19 +93,7 @@ function qrStepSingle(H: number[][], Q: number[][], start: number, end: number):
     shift = d;
   }
 
-  let x = H[start][start] - shift;
-  let y = H[start + 1][start];
-
-  for (let k = start; k < end; k++) {
-    const { c: gc, s: gs } = givensParams(x, y);
-    applyGivensLeft(H, gc, gs, k, k + 1, Math.max(0, k - 1));
-    applyGivensRight(H, gc, gs, k, k + 1, 0);
-    applyGivensRight(Q, gc, gs, k, k + 1, 0);
-    if (k < end - 1) {
-      x = H[k + 1][k];
-      y = H[k + 2][k];
-    }
-  }
+  qrStepSingleShift(H, Q, start, end, shift);
 }
 
 function qrStepDouble(H: number[][], Q: number[][], start: number, end: number): void {
@@ -175,7 +151,7 @@ function qrStepDouble(H: number[][], Q: number[][], start: number, end: number):
     if (k < end - 2) z = H[k + 3][k];
   }
 
-  const { c: gc, s: gs } = givensParams(x, y);
+  const { c: gc, s: gs } = givensRotation(x, y);
   applyGivensLeft(H, gc, gs, end - 1, end, end - 2);
   applyGivensRight(H, gc, gs, end - 1, end, 0);
   applyGivensRight(Q, gc, gs, end - 1, end, 0);
@@ -197,7 +173,7 @@ function qrStepSingleShift(
   let x = H[start][start] - shift;
   let y = H[start + 1][start];
   for (let k = start; k < end; k++) {
-    const { c: gc, s: gs } = givensParams(x, y);
+    const { c: gc, s: gs } = givensRotation(x, y);
     applyGivensLeft(H, gc, gs, k, k + 1, Math.max(0, k - 1));
     applyGivensRight(H, gc, gs, k, k + 1, 0);
     applyGivensRight(Q, gc, gs, k, k + 1, 0);
