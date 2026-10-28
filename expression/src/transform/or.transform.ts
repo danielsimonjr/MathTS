@@ -1,5 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { isCollection } from '../utils/is.js';
+import { evalShortCircuitBinary } from './utils/shortCircuitBinary.js';
 
 interface Node {
   compile(): CompiledExpression;
@@ -26,12 +26,9 @@ export const createOrTransform = /* #__PURE__ */ factory(
   dependencies,
   ({ or }: Dependencies) => {
     function orTransform(args: Node[], _math: unknown, scope: unknown): unknown {
-      const condition1 = args[0].compile().evaluate(scope);
-      if (!isCollection(condition1) && or(condition1, false)) {
-        return true;
-      }
-      const condition2 = args[1].compile().evaluate(scope);
-      return or(condition1, condition2);
+      return evalShortCircuitBinary(args, scope, or, (left) =>
+        or(left, false) ? { take: true, value: true } : { take: false }
+      );
     }
 
     orTransform.rawArgs = true;

@@ -117,6 +117,19 @@ function polyPow(a: Poly, n: number, nVars: number): Poly {
 // integer literals. Anything else throws — no fabricated coefficients.
 
 /**
+ * Dense ascending coefficients (index = power) for a single-variable {@link Poly}.
+ * Uses `powers[0]` as the exponent and accumulates like terms with `+=`.
+ * Does not trim trailing zeros — callers apply their own trimming policy.
+ */
+export function polyToDenseCoefficients(p: Poly): number[] {
+  let maxPow = 0;
+  for (const t of p) maxPow = Math.max(maxPow, t.powers[0] ?? 0);
+  const dense = new Array<number>(maxPow + 1).fill(0);
+  for (const t of p) dense[t.powers[0]] += t.coeff;
+  return dense;
+}
+
+/**
  * Convert a polynomial expression string to a {@link Poly} over `vars` — exactly.
  * Supports numeric constants, the given variables, `+ − * / ^`, unary minus and
  * parentheses, with `/` restricted to nonzero numeric-constant divisors and `^`

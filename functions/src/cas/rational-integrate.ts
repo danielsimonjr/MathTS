@@ -14,7 +14,11 @@
  * fractions, and per-factor closed-form integration on top of this module.
  */
 
-import { polyFromExpression, type Poly } from '../typed/polynomial-ideal.js';
+import {
+  polyFromExpression,
+  polyToDenseCoefficients,
+  type Poly,
+} from '../typed/polynomial-ideal.js';
 import {
   trim as trimIntPoly,
   mul as mulIntPoly,
@@ -160,15 +164,7 @@ function splitTopLevelDivision(expr: string): { numerStr: string; denomStr: stri
 
 /** Dense ascending coefficients (index = power) of a single-variable `Poly`. */
 function denseFromPoly(p: Poly): number[] {
-  let maxPow = 0;
-  for (const t of p) {
-    maxPow = Math.max(maxPow, t.powers[0] ?? 0);
-  }
-  const dense = new Array<number>(maxPow + 1).fill(0);
-  for (const t of p) {
-    dense[t.powers[0]] += t.coeff;
-  }
-  return dense;
+  return polyToDenseCoefficients(p);
 }
 
 const INT_EPS = 1e-7;

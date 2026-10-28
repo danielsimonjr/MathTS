@@ -164,7 +164,7 @@ The codebase is organized into the following modules:
 - **expression/evaluator**: 2 files
 - **expression/function**: 1 file
 - **expression/node**: 19 files
-- **expression/transform**: 32 files
+- **expression/transform**: 33 files
 - **expression/utils**: 13 files
 - **parser**: 1 file
 - **units**: 1 file
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 493            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 478            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4219,13 +4219,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                     | Type   |
-| ----------------------------- | --------------------------- | ------ |
-| `./factories/evaluate.js`     | `parse`                     | Import |
-| `./factories/evaluate.js`     | `evaluate`                  | Import |
-| `./typed/algebra.js`          | `apart, variables`          | Import |
-| `./typed/polynomial-ideal.js` | `polyFromExpression`        | Import |
-| `./cas/rational-integrate.js` | `integrateRationalFunction` | Import |
+| File                          | Imports                                       | Type   |
+| ----------------------------- | --------------------------------------------- | ------ |
+| `./factories/evaluate.js`     | `parse`                                       | Import |
+| `./factories/evaluate.js`     | `evaluate`                                    | Import |
+| `./typed/algebra.js`          | `apart, variables`                            | Import |
+| `./typed/polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients` | Import |
+| `./cas/rational-integrate.js` | `integrateRationalFunction`                   | Import |
 
 **Exports:**
 
@@ -4862,7 +4862,7 @@ graph LR
 
 | File                                     | Imports                                                                      | Type   |
 | ---------------------------------------- | ---------------------------------------------------------------------------- | ------ |
-| `../typed/polynomial-ideal.js`           | `polyFromExpression, Poly`                                                   | Import |
+| `../typed/polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, Poly`                          | Import |
 | `../typed/factorization/integer-poly.js` | `trim, mul, exactDivide, IntPoly`                                            | Import |
 | `../typed/factorization/zassenhaus.js`   | `factorUnivariateZ`                                                          | Import |
 | `./layer3.js`                            | `integrateLayer3`                                                            | Import |
@@ -9917,7 +9917,7 @@ graph LR
 | File                              | Imports                                                                                                        | Type   |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------ |
 | `../wasm/poly/wasm-bridge.js`     | `polyMulDispatch, polyMulJS, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
-| `./polynomial-ideal.js`           | `polyFromExpression, buchberger, normalize, polyToString, Poly`                                                | Import |
+| `./polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, buchberger, normalize, polyToString, Poly`                       | Import |
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                                    | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                                     | Import |
 
@@ -10138,13 +10138,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                                           | Type   |
-| ------------------------ | ------------------------------------------------- | ------ |
-| `../polynomial-ideal.js` | `polyFromExpression, Poly`                        | Import |
-| `./integer-poly.js`      | `degree, IntPoly`                                 | Import |
-| `./zassenhaus.js`        | `factorUnivariateZ`                               | Import |
-| `./multi-poly.js`        | `fromAlgebraExpr, toAlgebraString`                | Import |
-| `./kronecker-factor.js`  | `factorMultivariateKronecker, MultiFactorization` | Import |
+| File                     | Imports                                             | Type   |
+| ------------------------ | --------------------------------------------------- | ------ |
+| `../polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients, Poly` | Import |
+| `./integer-poly.js`      | `degree, IntPoly`                                   | Import |
+| `./zassenhaus.js`        | `factorUnivariateZ`                                 | Import |
+| `./multi-poly.js`        | `fromAlgebraExpr, toAlgebraString`                  | Import |
+| `./kronecker-factor.js`  | `factorMultivariateKronecker, MultiFactorization`   | Import |
 
 **Exports:**
 
@@ -10535,7 +10535,7 @@ graph LR
 - Classes: `DivisorGeobucket`
 - Interfaces: `Term`
 - Types: `Poly`
-- Functions: `normalize`, `polyAdd`, `polyNeg`, `polySub`, `polyMul`, `polyFromExpression`, `polyReduce`, `buchberger`, `polyToString`
+- Functions: `normalize`, `polyAdd`, `polyNeg`, `polySub`, `polyMul`, `polyToDenseCoefficients`, `polyFromExpression`, `polyReduce`, `buchberger`, `polyToString`
 
 ---
 
@@ -15751,10 +15751,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports        | Type   |
-| --------------------- | -------------- | ------ |
-| `../utils/factory.js` | `factory`      | Import |
-| `../utils/is.js`      | `isCollection` | Import |
+| File                            | Imports                  | Type   |
+| ------------------------------- | ------------------------ | ------ |
+| `../utils/factory.js`           | `factory`                | Import |
+| `./utils/shortCircuitBinary.js` | `evalShortCircuitBinary` | Import |
 
 **Exports:**
 
@@ -15766,10 +15766,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports        | Type   |
-| --------------------- | -------------- | ------ |
-| `../utils/factory.js` | `factory`      | Import |
-| `../utils/is.js`      | `isCollection` | Import |
+| File                            | Imports                  | Type   |
+| ------------------------------- | ------------------------ | ------ |
+| `../utils/factory.js`           | `factory`                | Import |
+| `./utils/shortCircuitBinary.js` | `evalShortCircuitBinary` | Import |
 
 **Exports:**
 
@@ -15781,10 +15781,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports        | Type   |
-| --------------------- | -------------- | ------ |
-| `../utils/factory.js` | `factory`      | Import |
-| `../utils/is.js`      | `isCollection` | Import |
+| File                            | Imports                  | Type   |
+| ------------------------------- | ------------------------ | ------ |
+| `../utils/factory.js`           | `factory`                | Import |
+| `./utils/shortCircuitBinary.js` | `evalShortCircuitBinary` | Import |
 
 **Exports:**
 
@@ -15824,15 +15824,15 @@ graph LR
 
 ---
 
-### `expression/src/transform/cumsum.transform.ts` - Attach a transform function to math.sum
+### `expression/src/transform/cumsum.transform.ts` - Attach a transform function to math.cumsum
 
 **Internal Dependencies:**
 
-| File                        | Imports                               | Type   |
-| --------------------------- | ------------------------------------- | ------ |
-| `../utils/is.js`            | `isBigNumber, isCollection, isNumber` | Import |
-| `../utils/factory.js`       | `factory`                             | Import |
-| `./utils/errorTransform.js` | `errorTransform`                      | Import |
+| File                           | Imports             | Type   |
+| ------------------------------ | ------------------- | ------ |
+| `../utils/factory.js`          | `factory`           | Import |
+| `./utils/errorTransform.js`    | `errorTransform`    | Import |
+| `./utils/lastDimToZeroBase.js` | `lastDimToZeroBase` | Import |
 
 **Exports:**
 
@@ -15860,11 +15860,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                              | Imports                            | Type   |
-| --------------------------------- | ---------------------------------- | ------ |
-| `../utils/factory.js`             | `factory`                          | Import |
-| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
-| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
+| File                              | Imports                       | Type   |
+| --------------------------------- | ----------------------------- | ------ |
+| `../utils/factory.js`             | `factory`                     | Import |
+| `./utils/prepareTransformArgs.js` | `applyArrayCallbackTransform` | Import |
+| `./utils/transformCallback.js`    | `createTransformCallback`     | Import |
 
 **Exports:**
 
@@ -15876,11 +15876,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                              | Imports                            | Type   |
-| --------------------------------- | ---------------------------------- | ------ |
-| `./utils/transformCallback.js`    | `createTransformCallback`          | Import |
-| `../utils/factory.js`             | `factory`                          | Import |
-| `./utils/prepareTransformArgs.js` | `prepareTransformArrayAndCallback` | Import |
+| File                              | Imports                       | Type   |
+| --------------------------------- | ----------------------------- | ------ |
+| `./utils/transformCallback.js`    | `createTransformCallback`     | Import |
+| `../utils/factory.js`             | `factory`                     | Import |
+| `./utils/prepareTransformArgs.js` | `applyArrayCallbackTransform` | Import |
 
 **Exports:**
 
@@ -15962,11 +15962,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                 | Type   |
-| --------------------------- | ----------------------- | ------ |
-| `./utils/errorTransform.js` | `errorTransform`        | Import |
-| `../utils/factory.js`       | `factory`               | Import |
-| `../utils/is.js`            | `isBigNumber, isNumber` | Import |
+| File                        | Imports                              | Type   |
+| --------------------------- | ------------------------------------ | ------ |
+| `./utils/errorTransform.js` | `errorTransform`                     | Import |
+| `../utils/factory.js`       | `factory`                            | Import |
+| `./utils/dimToZeroBase.js`  | `dimToZeroBase, isNumberOrBigNumber` | Import |
 
 **Exports:**
 
@@ -16041,10 +16041,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports        | Type   |
-| --------------------- | -------------- | ------ |
-| `../utils/factory.js` | `factory`      | Import |
-| `../utils/is.js`      | `isCollection` | Import |
+| File                            | Imports                  | Type   |
+| ------------------------------- | ------------------------ | ------ |
+| `../utils/factory.js`           | `factory`                | Import |
+| `./utils/shortCircuitBinary.js` | `evalShortCircuitBinary` | Import |
 
 **Exports:**
 
@@ -16174,7 +16174,7 @@ graph LR
 
 ---
 
-### `expression/src/transform/utils/dimToZeroBase.ts` - Change last argument dim from one-based to zero-based.
+### `expression/src/transform/utils/dimToZeroBase.ts` - Convert a one-based dimension to zero-based.
 
 **Internal Dependencies:**
 
@@ -16229,7 +16229,22 @@ graph LR
 **Exports:**
 
 - Interfaces: `PreparedTransformArgs`
-- Functions: `prepareTransformArrayAndCallback`
+- Functions: `prepareTransformArrayAndCallback`, `applyArrayCallbackTransform`
+
+---
+
+### `expression/src/transform/utils/shortCircuitBinary.ts` - Evaluate a lazy binary operator transform: compile/evaluate the left arg
+
+**Internal Dependencies:**
+
+| File                | Imports        | Type   |
+| ------------------- | -------------- | ------ |
+| `../../utils/is.js` | `isCollection` | Import |
+
+**Exports:**
+
+- Types: `Absorb`
+- Functions: `evalShortCircuitBinary`
 
 ---
 
@@ -18199,10 +18214,10 @@ graph LR
 | `functions/src/utils/number`                           | 0 files      | 44 files   |
 | `functions/src/utils/collection`                       | 0 files      | 39 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
-| `expression/src/utils/is`                              | 0 files      | 35 files   |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/index`                                 | 31 files     | 0 files    |
 | `functions/src/typed/index`                            | 28 files     | 2 files    |
+| `expression/src/utils/is`                              | 0 files      | 30 files   |
 | `functions/src/utils/object`                           | 0 files      | 28 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `expression/src/node/Node`                             | 6 files      | 20 files   |
@@ -18816,7 +18831,7 @@ graph TD
         N401[filter.transform]
         N402[forEach.transform]
         N403[index.transform]
-        N404[...22 more]
+        N404[...23 more]
     end
 
     subgraph Expression/utils
@@ -19069,14 +19084,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1213   |
+| Total TypeScript Files  | 1214   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200589 |
-| Total Exports           | 6242   |
+| Total Lines of Code     | 200624 |
+| Total Exports           | 6245   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 542    |
-| Total Functions         | 2010   |
+| Total Functions         | 2013   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
