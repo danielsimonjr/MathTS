@@ -39,12 +39,14 @@ function legacyBnCoerce(x: BigNumberBinomialType | number): bigint {
 
 function legacyBn(value: number | bigint): LegacyBn {
   const n = typeof value === 'bigint' ? value : BigInt(value);
-  function LegacyBigNumberCtor(v: number): LegacyBn {
-    return legacyBn(BigInt(v));
+  class LegacyBigNumberCtor {
+    constructor(v: number) {
+      return legacyBn(BigInt(v));
+    }
   }
   const self: LegacyBn = {
     __v: n,
-    constructor: LegacyBigNumberCtor,
+    constructor: LegacyBigNumberCtor as unknown as BigNumberBinomialType['constructor'],
     minus(x) {
       return legacyBn(n - legacyBnCoerce(x));
     },
@@ -72,19 +74,24 @@ function legacyBn(value: number | bigint): LegacyBn {
       return n >= legacyBnCoerce(x);
     },
     isInteger: () => true,
-    toString: () => n.toString(),
   };
   return self;
 }
 
 describe('binomialProductBigNumber', () => {
   it('C(7, 5) = 21 and C(60, 30) above 2^53', () => {
-    expect(String(binomialProductBigNumber(legacyBn(7), legacyBn(5)))).toBe('21');
-    expect(String(binomialProductBigNumber(legacyBn(60), legacyBn(30)))).toBe('118264581564861424');
+    expect((binomialProductBigNumber(legacyBn(7), legacyBn(5)) as LegacyBn).__v.toString()).toBe(
+      '21'
+    );
+    expect((binomialProductBigNumber(legacyBn(60), legacyBn(30)) as LegacyBn).__v.toString()).toBe(
+      '118264581564861424'
+    );
   });
 
   it('with-rep total n+k-1: C(5+3-1, 3)', () => {
-    expect(String(binomialProductBigNumber(legacyBn(7), legacyBn(3)))).toBe('35');
+    expect((binomialProductBigNumber(legacyBn(7), legacyBn(3)) as LegacyBn).__v.toString()).toBe(
+      '35'
+    );
   });
 });
 

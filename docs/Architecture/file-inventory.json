@@ -6883,7 +6883,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 54
+      "loc": 51
     },
     {
       "file": "functions/src/probability/combinations.ts",
@@ -8724,7 +8724,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 155
+      "loc": 160
     },
     {
       "file": "functions/tests/clones-functions-scalars-pins.test.ts",
