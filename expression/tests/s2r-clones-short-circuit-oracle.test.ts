@@ -44,10 +44,14 @@ describe('and / or transform short-circuit oracle', () => {
     expect(sideCalls(scope)).toBe(0);
   });
 
-  it('true and 2 matches and(true, 2) and evaluates the right operand', () => {
+  it('true and 2 matches and(true, 2)', () => {
+    expect(evaluate('true and 2')).toBe(and(true, 2));
+  });
+
+  it('true and side() evaluates the right operand', () => {
     const scope = makeScope();
-    expect(evaluate('true and 2', scope)).toBe(and(true, 2));
-    expect(sideCalls(scope)).toBe(0);
+    expect(evaluate('true and side()', scope)).toBe(true);
+    expect(sideCalls(scope)).toBe(1);
   });
 
   it('true or side() does not call side and yields true', () => {
@@ -57,16 +61,29 @@ describe('and / or transform short-circuit oracle', () => {
   });
 
   it('false or 3 matches or(false, 3)', () => {
-    const scope = makeScope();
-    expect(evaluate('false or 3', scope)).toBe(or(false, 3));
+    expect(evaluate('false or 3')).toBe(true);
+    expect(evaluate('false or 3')).toBe(or(false, 3));
   });
 
   it('element-wise collections evaluate both sides for and', () => {
+    const scope = makeScope();
+    expect(val(evaluate('[0, 1] and side()', scope))).toEqual([false, true]);
+    expect(sideCalls(scope)).toBe(1);
     expect(val(evaluate('[0, 1] and [1, 0]'))).toEqual(val(and([0, 1], [1, 0])));
   });
 
   it('element-wise collections evaluate both sides for or', () => {
+    const scope = makeScope();
+    expect(val(evaluate('[0, 1] or side()', scope))).toEqual([true, true]);
+    expect(sideCalls(scope)).toBe(1);
     expect(val(evaluate('[0, 1] or [1, 0]'))).toEqual(val(or([0, 1], [1, 0])));
+  });
+
+  it('matrix left operand is a collection so the right side still runs', () => {
+    const scope = makeScope();
+    scope.set('M', evaluate('matrix([0, 1])'));
+    expect(val(evaluate('M and side()', scope))).toEqual([false, true]);
+    expect(sideCalls(scope)).toBe(1);
   });
 });
 
@@ -124,8 +141,20 @@ describe('bitAnd / bitOr transform short-circuit oracle', () => {
   });
 
   it('element-wise collections evaluate both sides for bitAnd and bitOr', () => {
-    expect(val(evaluate('[0, 3] & [1, 1]'))).toEqual(val([0, 1]));
-    expect(val(evaluate('[0, 3] | [1, 1]'))).toEqual(val([1, 3]));
+    const andScope = makeScope();
+    expect(val(evaluate('[0, 3] & side()', andScope))).toEqual([0, 3]);
+    expect(sideCalls(andScope)).toBe(1);
+    const orScope = makeScope();
+    expect(val(evaluate('[0, 3] | side()', orScope))).toEqual([99, 99]);
+    expect(sideCalls(orScope)).toBe(1);
+    expect(val(evaluate('[0, 3] & [1, 1]'))).toEqual([0, 1]);
+    expect(val(evaluate('[0, 3] | [1, 1]'))).toEqual([1, 3]);
+  });
+
+  it('1 | side() does not absorb so the right operand runs', () => {
+    const scope = makeScope();
+    expect(evaluate('1 | side()', scope)).toBe(99);
+    expect(sideCalls(scope)).toBe(1);
   });
 
   it('right operand that throws is reached only when absorb does not take', () => {
@@ -139,5 +168,6 @@ describe('bitAnd / bitOr transform short-circuit oracle', () => {
     ]);
     expect(() => evaluate('true and boom()', scope)).toThrow('boom');
     expect(evaluate('false and boom()', scope)).toBe(false);
+    expect(() => evaluate('[0, 1] and boom()', scope)).toThrow('boom');
   });
 });

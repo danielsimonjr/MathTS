@@ -8,8 +8,10 @@ interface EvalNode {
 export type Absorb = { readonly take: false } | { readonly take: true; readonly value: unknown };
 
 /**
- * Evaluate a lazy binary operator transform: compile/evaluate the left arg,
- * optionally return early via `absorb`, then evaluate the right and call `op`.
+ * Evaluate a lazy binary operator transform: compile/evaluate the left arg
+ * with `scope`, optionally return early via `absorb` when the left value is
+ * not a collection (so the right arg is never compiled/evaluated), otherwise
+ * evaluate the right arg with the same `scope` and call `op`.
  */
 export function evalShortCircuitBinary(
   args: EvalNode[],

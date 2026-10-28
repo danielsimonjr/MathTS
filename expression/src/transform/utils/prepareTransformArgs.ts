@@ -48,8 +48,9 @@ export function prepareTransformArrayAndCallback(
 }
 
 /**
- * Shared filter/forEach transform body: arity 0/1 delegate to `op`; otherwise
- * compile the collection and callback via {@link prepareTransformArrayAndCallback}.
+ * Shared filter/forEach transform body: arity 0 calls `op()`; arity 1 passes
+ * the raw node (not a compiled value) to `op`; otherwise compile the collection
+ * and callback via {@link prepareTransformArrayAndCallback}.
  */
 export function applyArrayCallbackTransform(
   args: TransformArgNode[],

@@ -8,6 +8,7 @@ import { evaluate } from '../../functions/src/factories/evaluate.js';
 import { factoryScope } from '../../functions/src/factories/scope.js';
 import { createFilterTransform } from '../src/transform/filter.transform.js';
 import { createForEachTransform } from '../src/transform/forEach.transform.js';
+import { applyArrayCallbackTransform } from '../src/transform/utils/prepareTransformArgs.js';
 
 const U = { unsafe: true };
 
@@ -103,5 +104,78 @@ describe('forEach transform arg oracle', () => {
       factoryScope as Parameters<typeof createForEachTransform>[0]
     );
     expect(forEachTransform.rawArgs).toBe(true);
+  });
+
+  it('filter callback with three parameters receives collection.length', () => {
+    const seen: unknown[] = [];
+    const scope = new Map<string, unknown>([
+      [
+        'record',
+        (x: number, i: unknown, arr: { length: number }) => {
+          seen.push({ x, i, len: arr.length });
+          return true;
+        },
+      ],
+    ]);
+    expect(val(evaluate('filter([5, 6], record)', scope, U))).toEqual([5, 6]);
+    expect(seen).toEqual([
+      { x: 5, i: [1], len: 2 },
+      { x: 6, i: [2], len: 2 },
+    ]);
+  });
+
+  it('matrix input with a scope-symbol callback keeps elements above threshold', () => {
+    const scope = new Map<string, unknown>([
+      ['M', evaluate('matrix([1, 2, 3, 4])')],
+      ['gt2', (x: number) => x > 2],
+    ]);
+    expect(val(evaluate('filter(M, gt2)', scope))).toEqual([3, 4]);
+  });
+});
+
+describe('applyArrayCallbackTransform arity 0/1', () => {
+  it('arity 0 calls op with no arguments', () => {
+    const calls: unknown[][] = [];
+    const result = applyArrayCallbackTransform(
+      [],
+      {},
+      new Map(),
+      (...args: unknown[]) => {
+        calls.push(args);
+        return 'zero';
+      },
+      () => {
+        throw new Error('must not wrap callback');
+      }
+    );
+    expect(result).toBe('zero');
+    expect(calls).toEqual([[]]);
+  });
+
+  it('arity 1 passes the raw node to op and does not compile a callback', () => {
+    const node = {
+      compile() {
+        throw new Error('must not compile the collection node');
+      },
+    };
+    const calls: unknown[][] = [];
+    const result = applyArrayCallbackTransform(
+      [node],
+      {},
+      new Map(),
+      (...args: unknown[]) => {
+        calls.push(args);
+        return 'passthrough';
+      },
+      () => {
+        throw new Error('must not wrap callback');
+      }
+    );
+    expect(result).toBe('passthrough');
+    expect(calls).toEqual([[node]]);
+  });
+
+  it('evaluate filter of a one-argument collection still receives the raw node', () => {
+    expect(() => evaluate('filter([1, 2, 3])')).toThrow(/actual: Node \| ArrayNode/);
   });
 });
