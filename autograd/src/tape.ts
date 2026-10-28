@@ -1688,6 +1688,13 @@ export class TapedTensor {
  * to its reduced output slot and accumulate `outputGrad[outFlat]`, optionally
  * divided by `divideBy` (mean uses `/ N` for bit-identical rounding vs `* (1/N)`).
  * Sum omits `divideBy` and adds the upstream gradient unchanged (no extra ×1).
+ *
+ * `divideBy` is a numeric setting, not a per-element mode flag: the undefined
+ * vs number choice is taken once, outside the element loop, so sum's add stays
+ * a monomorphic `+=` (no `/ 1`). The loop bound is `∏ inputShape`, which equals
+ * the pre-merge `this.primal.length` whenever forward `toPrimalTensor()` succeeded
+ * — not `thisGradSlot.length`, which can be longer or shorter if `Tape.allocate`
+ * was given a size that does not match the primal.
  */
 function addReducedBroadcast(
   thisGradSlot: Float64Array,
@@ -1698,12 +1705,37 @@ function addReducedBroadcast(
   outStrides: ReadonlyArray<number>,
   divideBy?: number
 ): void {
-  const inputSize = thisGradSlot.length;
-  const inCoords = new Array<number>(inputShape.length).fill(0);
+  let inputSize = 1;
+  for (let i = 0; i < inputShape.length; i++) inputSize *= inputShape[i];
+  const rank = inputShape.length;
+  const inCoords = new Array<number>(rank).fill(0);
+
+  if (divideBy === undefined) {
+    for (let n = 0; n < inputSize; n++) {
+      let outFlat = 0;
+      let outDim = 0;
+      for (let k = 0; k < rank; k++) {
+        if (axisSet.has(k)) {
+          if (keepDims) outDim++;
+        } else {
+          outFlat += inCoords[k] * outStrides[outDim];
+          outDim++;
+        }
+      }
+      thisGradSlot[n] += outputGrad[outFlat];
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++inCoords[k] < inputShape[k]) break;
+        inCoords[k] = 0;
+      }
+    }
+    return;
+  }
+
+  const nReduce = divideBy;
   for (let n = 0; n < inputSize; n++) {
     let outFlat = 0;
     let outDim = 0;
-    for (let k = 0; k < inputShape.length; k++) {
+    for (let k = 0; k < rank; k++) {
       if (axisSet.has(k)) {
         if (keepDims) outDim++;
       } else {
@@ -1711,12 +1743,8 @@ function addReducedBroadcast(
         outDim++;
       }
     }
-    if (divideBy !== undefined) {
-      thisGradSlot[n] += outputGrad[outFlat] / divideBy;
-    } else {
-      thisGradSlot[n] += outputGrad[outFlat];
-    }
-    for (let k = inputShape.length - 1; k >= 0; k--) {
+    thisGradSlot[n] += outputGrad[outFlat] / nReduce;
+    for (let k = rank - 1; k >= 0; k--) {
       if (++inCoords[k] < inputShape[k]) break;
       inCoords[k] = 0;
     }
