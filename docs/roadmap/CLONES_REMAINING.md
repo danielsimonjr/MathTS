@@ -20,13 +20,13 @@ repo-tools clones . --src <each workspace package src folder> --out=<relative pa
 | Exact groups                    | 68                    | 12                           | 12                         | 12                      |
 | Units inside exact groups       | 161                   | 43                           | 43                         | 43                      |
 | Near pairs                      | 857                   | 638                          | 638                        | 583                     |
-| Near pairs, jStruct 0.9 or more | 192                   | 115                          | 115 (112 at 0.9+)          | 112                     |
-| Near pairs, jStruct 0.8 to 0.9  | 180                   | 165                          | 165 (164 at 0.8-0.9)       | 164                     |
+| Near pairs, jStruct 0.9 or more | 192                   | 115                          | 115                        | 112                     |
+| Near pairs, jStruct 0.8 to 0.9  | 180                   | 165                          | 165                        | 164                     |
 
 The #473 columns come from `repo-tools clones` run twice with the same flags (every workspace `src` folder,
 tool defaults, output outside the repo), at `b1ca0a62` and at `37c0fd44` (the main commit after the last
 merge of the sprint). The "Start of #473" column repeats the Sprint 2R figures because `b1ca0a62` only added
-the roadmap doc.
+the roadmap doc (and a CHANGELOG line).
 
 The unit total fell by less than the merged-body count because each shared helper is itself a unit and the
 new oracle tests are not scanned. Net effect of the 19 sprint PRs: 26 fewer units (2635 to 2609), 55 fewer
@@ -36,8 +36,9 @@ files the plans named: `bigint-binomial.ts`, `shortCircuitBinary.ts`, `gemm-rows
 
 ## What the #473 sprint merged
 
-Each item is one shared helper with the named public functions kept as thin wrappers (no public name or
-behavior change). Every PR carries oracle tests written against the unchanged code and a recorded review.
+Each PR extracts shared helper(s), with the named public functions kept as thin wrappers (no public
+name or behavior change). Every PR carries oracle tests written against the unchanged code and a
+recorded review.
 
 | PR   | Area       | Merged                                                                          |
 | ---- | ---------- | ------------------------------------------------------------------------------- |
@@ -96,7 +97,7 @@ unary overloads whose merge PR #454 measured and reverted). They are not a parti
 
 ### Skipped in the #473 sprint (one line each)
 
-Decided after reading both bodies; the first four were also tried and reverted or blocked by a measurement.
+Decided after reading both bodies; the first two were also tried and reverted or blocked by a measurement.
 
 - `SparseMatrix` `multiplyElementwise` against `mapNonZeros`: bit-identical, but the extra per-nonzero callback measured +12.4% (2000x2000, about 40k nonzeros) and +4.4% (500x500) in warm ABBA, so the inlined CSR walk stays (tried in #481, reverted in review).
 - `functions` `matrixInverse` against `matrix` `matInv`: bit-identical for finite input, but `matInv` skips a zero elimination factor while `matrixInverse` multiplies it, so an Infinity/NaN entry gives NaN in one and a finite value in the other; merging would change `matrixPower` on non-finite input.
