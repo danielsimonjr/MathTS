@@ -4553,6 +4553,7 @@
       "PadOptions",
       "randomTensor",
       "RandomTensorOpts",
+      "reshapeByRowAxes",
       "roll",
       "scatter",
       "ScatterOpts",

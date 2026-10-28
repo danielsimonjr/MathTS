@@ -121,7 +121,7 @@ The codebase is organized into the following modules:
 - **matrix/operations**: 18 files
 - **matrix/types**: 6 files
 - **tensor**: 4 files
-- **tensor/operations**: 17 files
+- **tensor/operations**: 18 files
 - **autograd**: 7 files
 - **functions/algebra**: 45 files
 - **functions/arithmetic**: 39 files
@@ -202,7 +202,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 8              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 48             | 1               |
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
-| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
+| `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 496            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
@@ -2195,9 +2195,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports  | Type   |
-| -------------- | -------- | ------ |
-| `../Tensor.js` | `Tensor` | Import |
+| File                | Imports            | Type   |
+| ------------------- | ------------------ | ------ |
+| `../Tensor.js`      | `Tensor`           | Import |
+| `./reshape-axes.js` | `reshapeByRowAxes` | Import |
 
 **Exports:**
 
@@ -2358,6 +2359,21 @@ graph LR
 
 ---
 
+### `tensor/src/operations/reshape-axes.ts` - Shared axis validation and 2-D matricisation for tensor eig / SVD prep.
+
+**Internal Dependencies:**
+
+| File           | Imports  | Type   |
+| -------------- | -------- | ------ |
+| `../Tensor.js` | `Tensor` | Import |
+
+**Exports:**
+
+- Interfaces: `ReshapeByRowAxesMessages`, `ReshapeByRowAxesResult`
+- Functions: `reshapeByRowAxes`
+
+---
+
 ### `tensor/src/operations/roll.ts` - roll — cyclic shift along given axes.
 
 **Internal Dependencies:**
@@ -2455,9 +2471,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File           | Imports  | Type   |
-| -------------- | -------- | ------ |
-| `../Tensor.js` | `Tensor` | Import |
+| File                | Imports            | Type   |
+| ------------------- | ------------------ | ------ |
+| `../Tensor.js`      | `Tensor`           | Import |
+| `./reshape-axes.js` | `reshapeByRowAxes` | Import |
 
 **Exports:**
 
@@ -18265,8 +18282,8 @@ graph LR
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `matrix/src/types/DenseMatrix`                         | 3 files      | 21 files   |
+| `tensor/src/Tensor`                                    | 1 file       | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
-| `tensor/src/Tensor`                                    | 1 file       | 19 files   |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `core/src/internal`                                    | 19 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
@@ -18428,7 +18445,7 @@ graph TD
         N86[pad]
         N87[pinv]
         N88[qr]
-        N89[...7 more]
+        N89[...8 more]
     end
 
     subgraph Autograd
@@ -19125,14 +19142,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1217   |
+| Total TypeScript Files  | 1218   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200645 |
-| Total Exports           | 6253   |
+| Total Lines of Code     | 200686 |
+| Total Exports           | 6254   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 543    |
-| Total Functions         | 2021   |
+| Total Interfaces        | 545    |
+| Total Functions         | 2022   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
