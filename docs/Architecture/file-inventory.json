@@ -13610,7 +13610,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 676
+      "loc": 679
     },
     {
       "file": "workbook/tests/edit.test.ts",

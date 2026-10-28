@@ -206,11 +206,14 @@ describe('cli capabilities / templates', () => {
     expect(r.exitCode).toBe(0);
   });
 
-  it('templates text mode lists name - description (JSON data as oracle)', () => {
-    const json = JSON.parse(templatesCommand(['--json']).stdout);
-    const expected = json.data.templates
-      .map((t: { name: string; description: string }) => `${t.name} - ${t.description}`)
-      .join('\n');
+  it('templates text mode lists name - description (hardcoded oracle)', () => {
+    // Insertion order of TEMPLATES in cli.ts (basic, empty, chart). Independent of
+    // templatesCommand so JSON and text cannot drift together unnoticed.
+    const expected = [
+      'basic - Markdown intro + a code cell + a passing test cell',
+      'empty - A blank workbook (no cells)',
+      'chart - A line chart over two data cells (visualization example)',
+    ].join('\n');
     const r = templatesCommand([]);
     expect(r.stdout).toBe(expected);
     expect(r.stderr).toBe('');
