@@ -1,7 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { normalCDF } from '../src/index.js';
+import { airyAi, airyBi, betainc, normalCDF } from '../src/index.js';
 import { erfcScalar } from '../src/typed/special.js';
-import { erfcSelfContained, _lgamma, normalCDFScalar } from '../src/wasm/special/scalars.js';
+import {
+  erfcSelfContained,
+  _lgamma,
+  normalCDFScalar,
+  airyUCoeffs,
+  airyAsymPQ,
+  airyScalar,
+  airyAiScalar,
+  airyBiScalar,
+  incompleteBetaFraction,
+  betaincScalar,
+} from '../src/wasm/special/scalars.js';
 import { kernelSource } from '../src/typed/parallel-map.js';
 
 /** Evaluate a `kernelSource` bundle the same way workers do. */
@@ -87,5 +98,80 @@ describe('erfc / normal CDF oracle constants', () => {
     expect(cdf(3)).toBeCloseTo(0.9986501019683699, 14);
     // mpmath Φ(8) = 0.9999999999999993779; libm = 0.9999999999999993
     expect(cdf(8)).toBeCloseTo(0.9999999999999993, 14);
+  });
+});
+
+describe('kernelSource serialization — Airy Ai / Bi', () => {
+  const pinX = [0, 1, -1, 5, -5, 20, -20] as const;
+
+  it('airyAi worker kernel resolves callees and matches scalar', () => {
+    const src = kernelSource(
+      [airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar],
+      '(x) => airyAiScalar(x)'
+    );
+    expect(src).toContain('airyScalar');
+    expect(src).not.toContain('airyPowerSeries');
+    // Numeric settings only — a per-call kind object + closures was a ~30% series-path loss.
+    expect(airyAiScalar.toString()).toMatch(/airyScalar\(x,\s*-1,\s*-1,\s*2(?:\.0)?,\s*0\)/);
+    expect(airyAiScalar.toString()).not.toContain('=>');
+    const fn = evalKernel(src);
+    for (const x of pinX) {
+      expect(Object.is(fn(x), airyAiScalar(x))).toBe(true);
+    }
+  });
+
+  it('airyBi worker kernel resolves callees and matches scalar', () => {
+    const src = kernelSource(
+      [airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar],
+      '(x) => airyBiScalar(x)'
+    );
+    expect(airyBiScalar.toString()).toMatch(/airyScalar\(x,\s*1,\s*1,\s*1(?:\.0)?,\s*1\)/);
+    expect(airyBiScalar.toString()).not.toContain('=>');
+    const fn = evalKernel(src);
+    for (const x of pinX) {
+      expect(Object.is(fn(x), airyBiScalar(x))).toBe(true);
+    }
+  });
+
+  it('airyAi Float64Array worker path matches scalar', async () => {
+    const xs = new Float64Array(pinX);
+    const parallel = (await airyAi(xs)) as Float64Array;
+    for (let i = 0; i < xs.length; i++) {
+      expect(Object.is(parallel[i]!, airyAiScalar(xs[i]!))).toBe(true);
+    }
+  });
+
+  it('airyBi Float64Array worker path matches scalar', async () => {
+    const xs = new Float64Array(pinX);
+    const parallel = (await airyBi(xs)) as Float64Array;
+    for (let i = 0; i < xs.length; i++) {
+      expect(Object.is(parallel[i]!, airyBiScalar(xs[i]!))).toBe(true);
+    }
+  });
+});
+
+describe('kernelSource serialization — betainc', () => {
+  it('betainc worker kernel contains incompleteBetaFraction and matches scalar', () => {
+    const a = 2;
+    const b = 5;
+    const src = kernelSource(
+      [_lgamma, incompleteBetaFraction, betaincScalar],
+      `(x) => betaincScalar(${a}, ${b}, x)`
+    );
+    expect(src).toContain('incompleteBetaFraction');
+    const fn = evalKernel(src);
+    for (const x of [0.1, 0.3, 0.8]) {
+      expect(Object.is(fn(x), betaincScalar(a, b, x))).toBe(true);
+    }
+  });
+
+  it('betainc Float64Array worker path matches scalar', async () => {
+    const a = 2;
+    const b = 5;
+    const xs = new Float64Array([0.1, 0.3, 0.8]);
+    const parallel = (await betainc(a, b, xs)) as Float64Array;
+    for (let i = 0; i < xs.length; i++) {
+      expect(Object.is(parallel[i]!, betaincScalar(a, b, xs[i]!))).toBe(true);
+    }
   });
 });

@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1999,
+  "totalFiles": 2000,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1193,
     "test-only": 0,
     "orphan": 0,
-    "test": 718,
+    "test": 719,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1219,
-    "tests": 718,
+    "tests": 719,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 842,
+    "@danielsimonjr/mathts-functions": 843,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -8248,7 +8248,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1449
+      "loc": 1455
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -8626,7 +8626,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 757
+      "loc": 709
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -8682,7 +8682,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 15
+      "loc": 132
     },
     {
       "file": "functions/tests/bfgs.test.ts",
@@ -10019,7 +10019,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 178
     },
     {
       "file": "functions/tests/krylov-preconditioners.test.ts",
@@ -10615,6 +10615,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 352
+    },
+    {
+      "file": "functions/tests/special-scalars-airy-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 122
     },
     {
       "file": "functions/tests/special.test.ts",

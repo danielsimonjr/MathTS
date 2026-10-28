@@ -42,8 +42,10 @@ import {
   besselYScalar,
   airyUCoeffs,
   airyAsymPQ,
+  airyScalar,
   airyAiScalar,
   airyBiScalar,
+  incompleteBetaFraction,
   ellipticKScalar,
   ellipticECompleteScalar,
 } from '../wasm/special/scalars.js';
@@ -693,7 +695,11 @@ export const betainc = mathTyped('betainc', {
     mapArray(
       x,
       (v) => betaincScalar(a, b, v),
-      () => kernelSource([_lgamma, betaincScalar], `(x) => betaincScalar(${a}, ${b}, x)`)
+      () =>
+        kernelSource(
+          [_lgamma, incompleteBetaFraction, betaincScalar],
+          `(x) => betaincScalar(${a}, ${b}, x)`
+        )
     ),
 });
 
@@ -1199,7 +1205,7 @@ export const airyAi = mathTyped('airyAi', {
       return Promise.resolve(airyAiDispatch(x));
     }
     return mapArray(x, airyAiScalar, () =>
-      kernelSource([airyUCoeffs, airyAsymPQ, airyAiScalar], '(x) => airyAiScalar(x)')
+      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar], '(x) => airyAiScalar(x)')
     );
   },
 });
@@ -1225,7 +1231,7 @@ export const airyBi = mathTyped('airyBi', {
       return Promise.resolve(airyBiDispatch(x));
     }
     return mapArray(x, airyBiScalar, () =>
-      kernelSource([airyUCoeffs, airyAsymPQ, airyBiScalar], '(x) => airyBiScalar(x)')
+      kernelSource([airyUCoeffs, airyAsymPQ, airyScalar, airyBiScalar], '(x) => airyBiScalar(x)')
     );
   },
 });

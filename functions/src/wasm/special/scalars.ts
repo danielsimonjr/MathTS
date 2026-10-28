@@ -430,15 +430,32 @@ export function airyAsymPQ(zeta: f64): { p: f64; q: f64 } {
   return { p, q };
 }
 
-/** Airy function of the first kind Ai(x). */
-export function airyAiScalar(x: f64): f64 {
-  // 5.0 keeps the golden points x = +/-5 on the (accurate) series side; the
-  // asymptotic uses the corrected AIRY_U coefficients.
+/**
+ * Evaluate Ai(x) (`combine === 0`) or Bi(x) (`combine === 1`).
+ *
+ * Numeric settings only — no per-call object or closure — so a `kernelSource`
+ * worker kernel stays allocation-free and self-contained (function declarations
+ * cannot close over a module-level kind object). Closed-form combines stay the
+ * historical expressions (not rewritten as `a + (-1)*b`) so the values stay
+ * bit-identical to the pre-merge scalars.
+ *
+ * @param signStep - running-sign multiplier in the positive u_k sum (Ai −1, Bi +1)
+ * @param expSign - exponent sign on ζ (Ai −1, Bi +1)
+ * @param denomScale - √π denominator scale (Ai 2, Bi 1)
+ * @param combine - 0 = Ai closed forms, 1 = Bi closed forms
+ */
+export function airyScalar(
+  x: f64,
+  signStep: number,
+  expSign: number,
+  denomScale: number,
+  combine: number
+): f64 {
+  // 5.0 keeps the golden points x = +/-5 on the (accurate) series side.
   const XBIG = 5.0;
   const AI0 = 0.35502805388781723926;
   const AI_PRIME0 = 0.25881940379280679841;
   if (x > XBIG) {
-    // Ai(x) ~ e^{-zeta}/(2 sqrt(pi) x^{1/4}) Sum (-1)^k u_k / zeta^k.
     const xp = Math.pow(x, 0.25);
     const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
     let p = 0.0,
@@ -451,21 +468,22 @@ export function airyAiScalar(x: f64): f64 {
       prevMag = Math.abs(t);
       p += sign * t;
       zk *= zeta;
-      sign = -sign;
+      sign *= signStep;
     }
-    return (Math.exp(-zeta) * p) / (2.0 * Math.sqrt(Math.PI) * xp);
+    return (Math.exp(expSign * zeta) * p) / (denomScale * Math.sqrt(Math.PI) * xp);
   }
   if (x < -XBIG) {
-    // Oscillatory asymptotic (DLMF §9.7.9):
-    //   Ai(-z) = π^{-1/2} z^{-1/4} ( cos(ζ-π/4)·P(ζ) + sin(ζ-π/4)·Q(ζ) )
     const ax = Math.abs(x);
     const axp = Math.pow(ax, 0.25);
     const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
     const theta = zeta - Math.PI / 4.0;
     const { p, q } = airyAsymPQ(zeta);
-    return (Math.cos(theta) * p + Math.sin(theta) * q) / (Math.sqrt(Math.PI) * axp);
+    const num =
+      combine === 0
+        ? Math.cos(theta) * p + Math.sin(theta) * q
+        : -Math.sin(theta) * p + Math.cos(theta) * q;
+    return num / (Math.sqrt(Math.PI) * axp);
   }
-  // Power series
   const x3 = x * x * x;
   let f = 1.0,
     g = x,
@@ -488,63 +506,20 @@ export function airyAiScalar(x: f64): f64 {
     g += dg;
     if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
   }
-  return AI0 * f - AI_PRIME0 * g;
+  if (combine === 0) {
+    return AI0 * f - AI_PRIME0 * g;
+  }
+  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
+}
+
+/** Airy function of the first kind Ai(x). */
+export function airyAiScalar(x: f64): f64 {
+  return airyScalar(x, -1, -1, 2.0, 0);
 }
 
 /** Airy function of the second kind Bi(x). */
 export function airyBiScalar(x: f64): f64 {
-  const XBIG = 5.0;
-  const AI0 = 0.35502805388781723926;
-  const AI_PRIME0 = 0.25881940379280679841;
-  if (x > XBIG) {
-    // Bi(x) ~ e^{zeta}/(sqrt(pi) x^{1/4}) Sum u_k / zeta^k.
-    const xp = Math.pow(x, 0.25);
-    const zeta = (2.0 / 3.0) * x * Math.sqrt(x);
-    let p = 0.0,
-      zk = 1.0,
-      prevMag = Infinity;
-    for (const uk of airyUCoeffs()) {
-      const t = uk / zk;
-      if (Math.abs(t) > prevMag) break;
-      prevMag = Math.abs(t);
-      p += t;
-      zk *= zeta;
-    }
-    return (Math.exp(zeta) * p) / (Math.sqrt(Math.PI) * xp);
-  }
-  if (x < -XBIG) {
-    // Oscillatory asymptotic (DLMF §9.7.10):
-    //   Bi(-z) = π^{-1/2} z^{-1/4} ( -sin(ζ-π/4)·P(ζ) + cos(ζ-π/4)·Q(ζ) )
-    const ax = Math.abs(x);
-    const axp = Math.pow(ax, 0.25);
-    const zeta = (2.0 / 3.0) * ax * Math.sqrt(ax);
-    const theta = zeta - Math.PI / 4.0;
-    const { p, q } = airyAsymPQ(zeta);
-    return (-Math.sin(theta) * p + Math.cos(theta) * q) / (Math.sqrt(Math.PI) * axp);
-  }
-  const x3 = x * x * x;
-  let f = 1.0,
-    g = x,
-    fTerm = 1.0,
-    gTerm = x;
-  let factF = 1.0,
-    factG = 1.0,
-    prodF = 1.0,
-    prodG = 1.0;
-  for (let k = 1; k <= 30; k++) {
-    factF *= (3 * k - 2) * (3 * k - 1) * (3 * k);
-    factG *= (3 * k - 1) * (3 * k) * (3 * k + 1);
-    prodF *= 3 * k - 2;
-    prodG *= 3 * k - 1;
-    fTerm *= x3;
-    gTerm *= x3;
-    const df = (fTerm * prodF) / factF,
-      dg = (gTerm * prodG) / factG;
-    f += df;
-    g += dg;
-    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
-  }
-  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
+  return airyScalar(x, 1, 1, 1.0, 1);
 }
 
 // =============================================================================
@@ -571,18 +546,10 @@ export function betaScalar(a: f64, b: f64): f64 {
 }
 
 /**
- * Regularized incomplete beta I_x(a,b) with closed domain [0,1] (out-of-range → 0/1).
- * Argument order matches dist-objects/hypothesis call sites: (x, a, b).
- * @internal — not re-exported from special.ts or the package barrel.
+ * Lentz continued-fraction kernel for the regularized incomplete beta on (0, 1),
+ * on the side that does not use the symmetry flip. Caller supplies domain policy.
  */
-export function betaincClosedScalar(x: f64, a: f64, b: f64): f64 {
-  if (x <= 0) return 0;
-  if (x >= 1) return 1;
-
-  if (x > (a + 1) / (a + b + 2)) {
-    return 1 - betaincClosedScalar(1 - x, b, a);
-  }
-
+export function incompleteBetaFraction(a: f64, b: f64, x: f64): f64 {
   const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
   const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
 
@@ -613,6 +580,22 @@ export function betaincClosedScalar(x: f64, a: f64, b: f64): f64 {
     if (Math.abs(delta - 1) < 1e-14) break;
   }
   return front * f;
+}
+
+/**
+ * Regularized incomplete beta I_x(a,b) with closed domain [0,1] (out-of-range → 0/1).
+ * Argument order matches dist-objects/hypothesis call sites: (x, a, b).
+ * @internal — not re-exported from special.ts or the package barrel.
+ */
+export function betaincClosedScalar(x: f64, a: f64, b: f64): f64 {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+
+  if (x > (a + 1) / (a + b + 2)) {
+    return 1 - betaincClosedScalar(1 - x, b, a);
+  }
+
+  return incompleteBetaFraction(a, b, x);
 }
 
 /**
@@ -706,38 +689,7 @@ export function betaincScalar(a: f64, b: f64, x: f64): f64 {
     return 1 - betaincScalar(b, a, 1 - x);
   }
 
-  const lnBeta = _lgamma(a) + _lgamma(b) - _lgamma(a + b);
-  const front = Math.exp(Math.log(x) * a + Math.log(1 - x) * b - lnBeta) / a;
-
-  let f: number;
-  let c = 1;
-  let d = 1 - ((a + b) * x) / (a + 1);
-  if (Math.abs(d) < 1e-30) d = 1e-30;
-  d = 1 / d;
-  f = d;
-
-  for (let m = 1; m <= 200; m++) {
-    let num = (m * (b - m) * x) / ((a + 2 * m - 1) * (a + 2 * m));
-    d = 1 + num * d;
-    if (Math.abs(d) < 1e-30) d = 1e-30;
-    c = 1 + num / c;
-    if (Math.abs(c) < 1e-30) c = 1e-30;
-    d = 1 / d;
-    f *= d * c;
-
-    num = (-(a + m) * (a + b + m) * x) / ((a + 2 * m) * (a + 2 * m + 1));
-    d = 1 + num * d;
-    if (Math.abs(d) < 1e-30) d = 1e-30;
-    c = 1 + num / c;
-    if (Math.abs(c) < 1e-30) c = 1e-30;
-    d = 1 / d;
-    const delta = d * c;
-    f *= delta;
-
-    if (Math.abs(delta - 1) < 1e-14) break;
-  }
-
-  return front * f;
+  return incompleteBetaFraction(a, b, x);
 }
 
 /** Modified Bessel function of the first kind, I_n(x). */
