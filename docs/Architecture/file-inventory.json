@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1985,
+  "totalFiles": 1986,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 708,
+    "test": 709,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1215,
-    "tests": 708,
+    "tests": 709,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 836,
+    "@danielsimonjr/mathts-functions": 837,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 108,
@@ -8937,6 +8937,13 @@
       "loc": 94
     },
     {
+      "file": "functions/tests/dist-objects-sampleN-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 117
+    },
+    {
       "file": "functions/tests/dist-objects.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9886,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 58
+      "loc": 90
     },
     {
       "file": "functions/tests/integration.test.ts",
@@ -10383,7 +10390,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 27
+      "loc": 91
     },
     {
       "file": "functions/tests/remez-pm.test.ts",
