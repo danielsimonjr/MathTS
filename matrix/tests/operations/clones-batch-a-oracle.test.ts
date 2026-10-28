@@ -8,6 +8,8 @@ import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 import { schurInternal } from '../../src/operations/schur.js';
 import { matrixExpm } from '../../src/operations/expm.js';
 import { matrixSqrtm, matrixSqrtNewtonInternal } from '../../src/operations/sqrtm.js';
+import { givensRotation } from '../../src/operations/givens.js';
+import { gaussJordanContinue } from '../../src/operations/common.js';
 
 // ---------------------------------------------------------------------------
 // M1 — independent Givens oracle (bit-for-bit with legacy schur/svd copies)
@@ -69,6 +71,20 @@ function referenceMatSolve(M: number[][], N: number[][]): number[][] {
   }
 
   return Aug.map((row) => row.slice(n));
+}
+
+function matSolveViaHelper(M: number[][], N: number[][]): number[][] {
+  const n = M.length;
+  const Aug: number[][] = M.map((row, i) => [...row, ...N[i]]);
+  gaussJordanContinue(Aug, n, 1e-15);
+  return Aug.map((row) => row.slice(n));
+}
+
+function solveColViaHelper(M: number[][], b: number[]): number[] {
+  const n = M.length;
+  const Aug = M.map((row, i) => [...row, b[i]]);
+  gaussJordanContinue(Aug, n, 1e-30);
+  return Aug.map((row) => row[n]);
 }
 
 function referenceSolveCol(M: number[][], b: number[]): number[] {
@@ -140,12 +156,15 @@ function residualSqrt(Y: number[][], A: number[][]): number {
 // ---------------------------------------------------------------------------
 
 describe('clone batch A — givensRotation (M1)', () => {
-  it('oracle table is orthonormal (pre-refactor snapshot)', () => {
+  it('matches oracle and c² + s² = 1 on snapshot table', () => {
     for (const row of GIVENS_SNAPSHOT) {
+      const { c, s } = givensRotation(row.a, row.b);
+      expect(c).toBeCloseTo(row.c, 15);
+      expect(s).toBeCloseTo(row.s, 15);
       const o = oracleGivensRotation(row.a, row.b);
-      expect(o.c).toBeCloseTo(row.c, 15);
-      expect(o.s).toBeCloseTo(row.s, 15);
-      expect(o.c * o.c + o.s * o.s).toBeCloseTo(1, 14);
+      expect(c).toBe(o.c);
+      expect(s).toBe(o.s);
+      expect(c * c + s * s).toBeCloseTo(1, 14);
     }
   });
 });
@@ -191,27 +210,41 @@ describe('clone batch A — gaussJordanContinue wrappers (M3)', () => {
     [0, 0, 1, 4],
   ];
 
-  it('reference matSolve / solveCol fixtures (oracle baseline)', () => {
+  it('matSolve helper matches reference on well-conditioned 4×4', () => {
     const rhs2 = [
       [1, 0],
       [0, 1],
       [0, 0],
       [0, 0],
     ];
+    const got = matSolveViaHelper(wellCond, rhs2);
     const ref = referenceMatSolve(wellCond, rhs2);
-    expect(ref.length).toBe(4);
-    expect(Number.isFinite(ref[0][0])).toBe(true);
+    expect(frobDiffArr(got, ref)).toBe(0);
+  });
 
+  it('solveCol eliminates tiny pivot while matSolve skips it', () => {
     const M = [
       [1e-20, 0],
       [0, 2],
     ];
     const b = [1, 4];
     const colRef = referenceSolveCol(M, b);
+    const colGot = solveColViaHelper(M, b);
+    expect(colGot[0]).toBe(colRef[0]);
     const matRef = referenceMatSolve(M, [[b[0]], [b[1]]]);
-    expect(colRef[0]).toBeGreaterThan(1e15);
     expect(matRef[0][0]).toBeCloseTo(1, 10);
-    expect(matRef[1][0]).toBeCloseTo(2, 10);
+    expect(colRef[0]).toBeGreaterThan(1e15);
+  });
+
+  it('zero factor row and n = 1', () => {
+    const M = [
+      [2, 1],
+      [0, 0],
+    ];
+    const b = [3, 5];
+    expect(solveColViaHelper(M, b)).toEqual(referenceSolveCol(M, b));
+    expect(solveColViaHelper([[4]], [8])).toEqual([2]);
+    expect(matSolveViaHelper([[4]], [[8]])).toEqual([[2]]);
   });
 
   it('matrixExpm returns finite result on well-conditioned sample', () => {

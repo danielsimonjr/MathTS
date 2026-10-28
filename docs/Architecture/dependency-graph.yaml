@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-28'
   totalFiles: 1212
   totalModules: 82
-  totalExports: 6241
+  totalExports: 6243
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4482,6 +4482,7 @@ modules:
         - cloneMatrix
         - transpose
         - matInv
+        - gaussJordanContinue
         - isSymmetric
         - matMul
         - matAdd
@@ -4497,6 +4498,7 @@ modules:
         - cloneMatrix
         - transpose
         - matInv
+        - gaussJordanContinue
         - isSymmetric
         - matMul
         - matAdd
@@ -4581,6 +4583,7 @@ modules:
             - matSub
             - matScale
             - norm1
+            - gaussJordanContinue
       workspaceDependencies: []
       exports:
         - matrixExpm
@@ -4595,9 +4598,11 @@ modules:
       internalDependencies: []
       workspaceDependencies: []
       exports:
+        - givensRotation
         - applyGivensCols
         - applyGivensRight
       functions:
+        - givensRotation
         - applyGivensCols
         - applyGivensRight
     matrix/src/operations/index.ts:
@@ -4826,6 +4831,7 @@ modules:
             - normInf
             - norm1
             - matInv
+            - gaussJordanContinue
         - file: ./sqrtm.js
           imports:
             - matrixSqrtNewtonInternal
@@ -4951,6 +4957,7 @@ modules:
         - file: ./givens.js
           imports:
             - applyGivensRight
+            - givensRotation
       workspaceDependencies: []
       exports:
         - matrixSchur
@@ -5020,6 +5027,7 @@ modules:
         - file: ./givens.js
           imports:
             - applyGivensCols
+            - givensRotation
       workspaceDependencies: []
       exports:
         - svd
@@ -39902,11 +39910,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1212
   totalModules: 82
-  totalLinesOfCode: 200596
-  totalExports: 6241
+  totalLinesOfCode: 200568
+  totalExports: 6243
   totalClasses: 59
   totalInterfaces: 542
-  totalFunctions: 2009
+  totalFunctions: 2011
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618

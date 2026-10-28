@@ -1678,7 +1678,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 
 ---
 
@@ -1730,10 +1730,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                        | Type   |
-| ------------------------- | ---------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                  | Import |
-| `./common.js`             | `eye, matMul, matAdd, matSub, matScale, norm1` | Import |
+| File                      | Imports                                                             | Type   |
+| ------------------------- | ------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                       | Import |
+| `./common.js`             | `eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue` | Import |
 
 **Exports:**
 
@@ -1746,7 +1746,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `applyGivensCols`, `applyGivensRight`
+- Functions: `givensRotation`, `applyGivensCols`, `applyGivensRight`
 
 ---
 
@@ -1783,13 +1783,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                    | Type   |
-| ------------------------- | ---------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                              | Import |
-| `./eig.js`                | `eig`                                                      | Import |
-| `./schur.js`              | `schurInternal`                                            | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                 | Import |
+| File                      | Imports                                                                         | Type   |
+| ------------------------- | ------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                   | Import |
+| `./eig.js`                | `eig`                                                                           | Import |
+| `./schur.js`              | `schurInternal`                                                                 | Import |
+| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue` | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                      | Import |
 
 **Exports:**
 
@@ -1884,7 +1884,7 @@ graph LR
 | ------------------------- | ---------------------------------------------------------------------------- | ------ |
 | `../types/DenseMatrix.js` | `DenseMatrix`                                                                | Import |
 | `./common.js`             | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
-| `./givens.js`             | `applyGivensRight`                                                           | Import |
+| `./givens.js`             | `applyGivensRight, givensRotation`                                           | Import |
 
 **Exports:**
 
@@ -1932,7 +1932,7 @@ graph LR
 | File          | Imports                                                                      | Type   |
 | ------------- | ---------------------------------------------------------------------------- | ------ |
 | `./common.js` | `eye, cloneMatrix, householder, applyHouseholderLeft, applyHouseholderRight` | Import |
-| `./givens.js` | `applyGivensCols`                                                            | Import |
+| `./givens.js` | `applyGivensCols, givensRotation`                                            | Import |
 
 **Exports:**
 
@@ -19055,12 +19055,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1212   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200596 |
-| Total Exports           | 6241   |
+| Total Lines of Code     | 200568 |
+| Total Exports           | 6243   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 542    |
-| Total Functions         | 2009   |
+| Total Functions         | 2011   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

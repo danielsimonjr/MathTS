@@ -16,7 +16,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
-import { eye, matMul, matAdd, matSub, matScale, norm1 } from './common.js';
+import { eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Padé-13 coefficients (Higham 2005, Table 1 / Algorithm 10.20)
@@ -37,36 +37,8 @@ const B = [
 /** Solve linear system M*X = N via Gauss-Jordan elimination (returns X). */
 function matSolve(M: number[][], N: number[][]): number[][] {
   const n = M.length;
-  const cols = N[0].length;
-
-  // Augmented matrix [M | N]
   const Aug: number[][] = M.map((row, i) => [...row, ...N[i]]);
-
-  for (let col = 0; col < n; col++) {
-    // Partial pivoting
-    let maxRow = col;
-    let maxVal = Math.abs(Aug[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(Aug[row][col]) > maxVal) {
-        maxVal = Math.abs(Aug[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [Aug[col], Aug[maxRow]] = [Aug[maxRow], Aug[col]];
-
-    const pivot = Aug[col][col];
-    if (Math.abs(pivot) < 1e-15) continue;
-
-    for (let j = col; j < n + cols; j++) Aug[col][j] /= pivot;
-
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const factor = Aug[row][col];
-      if (factor === 0) continue;
-      for (let j = col; j < n + cols; j++) Aug[row][j] -= factor * Aug[col][j];
-    }
-  }
-
+  gaussJordanContinue(Aug, n, 1e-15);
   return Aug.map((row) => row.slice(n));
 }
 

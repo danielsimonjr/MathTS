@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1212,
     "totalModules": 82,
-    "totalExports": 6241
+    "totalExports": 6243
   },
   "entryPoints": [
     {
@@ -4668,6 +4668,7 @@
           "cloneMatrix",
           "transpose",
           "matInv",
+          "gaussJordanContinue",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4684,6 +4685,7 @@
           "cloneMatrix",
           "transpose",
           "matInv",
+          "gaussJordanContinue",
           "isSymmetric",
           "matMul",
           "matAdd",
@@ -4754,7 +4756,15 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "matAdd", "matSub", "matScale", "norm1"]
+            "imports": [
+              "eye",
+              "matMul",
+              "matAdd",
+              "matSub",
+              "matScale",
+              "norm1",
+              "gaussJordanContinue"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -4768,8 +4778,8 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["applyGivensCols", "applyGivensRight"],
-        "functions": ["applyGivensCols", "applyGivensRight"]
+        "exports": ["givensRotation", "applyGivensCols", "applyGivensRight"],
+        "functions": ["givensRotation", "applyGivensCols", "applyGivensRight"]
       },
       "matrix/src/operations/index.ts": {
         "description": "Matrix Operations",
@@ -4990,7 +5000,16 @@
           },
           {
             "file": "./common.js",
-            "imports": ["eye", "matMul", "transpose", "matScale", "normInf", "norm1", "matInv"]
+            "imports": [
+              "eye",
+              "matMul",
+              "transpose",
+              "matScale",
+              "normInf",
+              "norm1",
+              "matInv",
+              "gaussJordanContinue"
+            ]
           },
           {
             "file": "./sqrtm.js",
@@ -5110,7 +5129,7 @@
           },
           {
             "file": "./givens.js",
-            "imports": ["applyGivensRight"]
+            "imports": ["applyGivensRight", "givensRotation"]
           }
         ],
         "workspaceDependencies": [],
@@ -5176,7 +5195,7 @@
           },
           {
             "file": "./givens.js",
-            "imports": ["applyGivensCols"]
+            "imports": ["applyGivensCols", "givensRotation"]
           }
         ],
         "workspaceDependencies": [],
@@ -42246,11 +42265,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1212,
     "totalModules": 82,
-    "totalLinesOfCode": 200596,
-    "totalExports": 6241,
+    "totalLinesOfCode": 200568,
+    "totalExports": 6243,
     "totalClasses": 59,
     "totalInterfaces": 542,
-    "totalFunctions": 2009,
+    "totalFunctions": 2011,
     "totalTypeGuards": 158,
     "totalEnums": 0,
     "totalConstants": 1618,

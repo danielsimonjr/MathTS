@@ -15,7 +15,7 @@ import {
   applyHouseholderLeft,
   applyHouseholderRight,
 } from './common.js';
-import { applyGivensCols } from './givens.js';
+import { applyGivensCols, givensRotation } from './givens.js';
 
 /**
  * Result of SVD decomposition
@@ -112,23 +112,6 @@ function bidiagonalize(A: number[][]): { B: number[][]; U: number[][]; V: number
 }
 
 /**
- * Compute Givens rotation to zero out element
- */
-function givens(a: number, b: number): { c: number; s: number } {
-  if (b === 0) {
-    return { c: 1, s: 0 };
-  } else if (Math.abs(b) > Math.abs(a)) {
-    const t = -a / b;
-    const s = 1 / Math.sqrt(1 + t * t);
-    return { c: s * t, s };
-  } else {
-    const t = -b / a;
-    const c = 1 / Math.sqrt(1 + t * t);
-    return { c, s: c * t };
-  }
-}
-
-/**
  * Golub-Kahan SVD step (implicit zero-shift QR)
  */
 function svdStep(
@@ -165,7 +148,7 @@ function svdStep(
 
   for (let k = start; k < end; k++) {
     // Right rotation to zero g
-    const { c: cs, s: sn } = givens(f, g);
+    const { c: cs, s: sn } = givensRotation(f, g);
 
     if (k > start) {
       // The rotated value is the SIGNED quantity `cs*f - sn*g`, not its
@@ -185,7 +168,7 @@ function svdStep(
     applyGivensCols(V, cs, sn, k, k + 1, 0, V.length);
 
     // Left rotation to zero g
-    const { c: cs2, s: sn2 } = givens(f, g);
+    const { c: cs2, s: sn2 } = givensRotation(f, g);
 
     // Signed rotated value (see the e[k-1] comment above).
     d[k] = cs2 * f - sn2 * g;
@@ -221,7 +204,7 @@ function handleZero(
   if (isDiagonal) {
     // Zero on diagonal - use Givens to chase superdiagonal to zero
     for (let k = zeroIdx; k < n - 1; k++) {
-      const { c, s } = givens(d[k + 1], e[k]);
+      const { c, s } = givensRotation(d[k + 1], e[k]);
 
       d[k + 1] = c * d[k + 1] - s * e[k];
       e[k] = 0;
