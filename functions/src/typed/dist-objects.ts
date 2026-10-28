@@ -239,7 +239,17 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
       _sampleNDispatch('normal', [mu, sigma], n, opts, (count, rng) => {
         const out = new Float64Array(count);
         for (let i = 0; i < count; i++) {
-          out[i] = mu + sigma * normalSampleRng(rng);
+          // Keep the historical left-associative `mu + sigma * sqrt * cos`.
+          // `mu + sigma * normalSampleRng(rng)` is `sigma * (sqrt * cos)` and
+          // differs by 1 ULP for many (mu, sigma); chi-square / log-normal / t
+          // already bound `z` first and stay identical through the helper.
+          const u1 = rng();
+          const u2 = rng();
+          out[i] =
+            mu +
+            sigma *
+              Math.sqrt(-2 * Math.log(u1 < 1e-300 ? 1e-300 : u1)) *
+              Math.cos(2 * Math.PI * u2);
         }
         return out;
       }),

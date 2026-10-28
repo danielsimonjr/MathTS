@@ -8017,7 +8017,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1329
+      "loc": 1339
     },
     {
       "file": "functions/src/typed/distributions.ts",
@@ -8941,7 +8941,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 110
+      "loc": 140
     },
     {
       "file": "functions/tests/dist-objects.test.ts",
@@ -9893,7 +9893,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 103
     },
     {
       "file": "functions/tests/integration.test.ts",
@@ -10390,7 +10390,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 82
+      "loc": 85
     },
     {
       "file": "functions/tests/remez-pm.test.ts",

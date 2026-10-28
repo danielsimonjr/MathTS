@@ -41,8 +41,9 @@ describe('noncentral / circular / paired-categorical', () => {
     expect(() => noncentralFCDF(1, 3, 10, -1)).toThrow('noncentralFCDF: nc must be non-negative');
   });
 
-  it('NaN x yields NaN noncentral chi2 CDF', () => {
+  it('NaN x yields NaN noncentral chi2 and F CDFs', () => {
     expect(Number.isNaN(noncentralChi2CDF(NaN, 3, 2))).toBe(true);
+    expect(Number.isNaN(noncentralFCDF(NaN, 3, 10, 4))).toBe(true);
   });
 
   it('large nc still yields finite probability in [0,1]', () => {
@@ -50,6 +51,16 @@ describe('noncentral / circular / paired-categorical', () => {
     expect(p).toBeGreaterThanOrEqual(0);
     expect(p).toBeLessThanOrEqual(1);
     expect(Number.isFinite(p)).toBe(true);
+  });
+
+  it('nc past the 2000 mixture cap stays bit-identical to the old series', () => {
+    // halfNc = 2000 so `j > halfNc` never fires inside the 2000-long loop.
+    // Value recorded from main before the poissonMixture extract.
+    expect(noncentralChi2CDF(4000, 5, 4000)).toBe(0.3671535652522109);
+    const pF = noncentralFCDF(100, 3, 10, 4000);
+    expect(Number.isFinite(pF)).toBe(true);
+    expect(pF).toBeGreaterThanOrEqual(0);
+    expect(pF).toBeLessThanOrEqual(1);
   });
   it('noncentralTCDF(1.5,10,2) = 0.30479 (scipy)', () => {
     expect(noncentralTCDF(1.5, 10, 2)).toBeCloseTo(0.3047854474, 3);

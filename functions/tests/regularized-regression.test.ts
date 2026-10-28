@@ -56,6 +56,9 @@ describe('regularized regression', () => {
   it('lasso intercept:false keeps intercept 0', () => {
     const r = lasso(design, response, 0.01, { intercept: false });
     expect(r.intercept).toBe(0);
+    // Recorded from main before the finishPenalized extract.
+    expect(r.coefficients[0]).toBe(0.6994975154446825);
+    expect(r.coefficients[1]).toBe(1.998768901133135);
   });
 
   it('validation errors keep lasso:/elasticNet: prefixes', () => {
