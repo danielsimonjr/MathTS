@@ -1,3 +1,5 @@
+import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
+
 interface Matrix {
   type: string;
   storage(): string;
@@ -6,6 +8,10 @@ interface Matrix {
   clone(): Matrix;
   toArray(): unknown;
   forEach?(cb: (value: unknown, index: number[], matrix: Matrix) => void): void;
+}
+
+interface FlattenFunction {
+  (arr: unknown): unknown[];
 }
 
 interface MatrixConstructor {
@@ -26,6 +32,69 @@ interface SizeFunction {
  * Return the logical length of a 1-D or 2-D column/row vector.
  * @private
  */
+/**
+ * Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
+ * @internal Module export only — not on the package barrel.
+ */
+export function sparseMatrixFromVectors(
+  arr: Matrix[],
+  axis: 'column' | 'row',
+  size: SizeFunction,
+  flatten: FlattenFunction,
+  matrix: MatrixConstructor
+): Matrix {
+  const count = arr.length;
+  const len = vectorLength(arr[0], size);
+  const numRows = axis === 'column' ? len : count;
+  const numCols = axis === 'column' ? count : len;
+  const cscSize: [number, number] = [numRows, numCols];
+
+  const entries: { row: number; col: number; value: unknown }[] = [];
+
+  for (let j = 0; j < count; j++) {
+    const vec = arr[j];
+    const alongLen = vectorLength(vec, size);
+    if (alongLen !== len) {
+      throw new TypeError(
+        'The vectors had different length: ' + (len | 0) + ' ≠ ' + (alongLen | 0)
+      );
+    }
+
+    if (typeof vec.forEach === 'function') {
+      const s = size(vec);
+      const is1D = s.length === 1;
+      const isCol = s.length === 2 && s[1] === 1;
+
+      vec.forEach((val, idx) => {
+        let along: number;
+        if (is1D) {
+          along = idx[0];
+        } else if (isCol) {
+          along = idx[0];
+        } else {
+          along = idx[1];
+        }
+        const row = axis === 'column' ? along : j;
+        const col = axis === 'column' ? j : along;
+        if (val !== 0) {
+          entries.push({ row, col, value: val });
+        }
+      });
+    } else {
+      const f = flatten(vec);
+      for (let k = 0; k < len; k++) {
+        if (f[k] !== 0) {
+          const row = axis === 'column' ? k : j;
+          const col = axis === 'column' ? j : k;
+          entries.push({ row, col, value: f[k] });
+        }
+      }
+    }
+  }
+
+  return buildSparseCscFromEntries(entries, numCols, cscSize, matrix) as Matrix;
+}
+
 export function vectorLength(vec: unknown, size: SizeFunction): number {
   const s = size(vec);
 

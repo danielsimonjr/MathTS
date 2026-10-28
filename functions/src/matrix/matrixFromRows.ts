@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { matrixFromVectorList, vectorLength } from './from-vectors.js';
-import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
+import { matrixFromVectorList, sparseMatrixFromVectors, vectorLength } from './from-vectors.js';
 
 // Type definitions
 type NestedArray<T = unknown> = T | NestedArray<T>[];
@@ -88,55 +87,15 @@ export const createMatrixFromRows = /* #__PURE__ */ factory(
      */
     return typed(name, {
       '...': function (arr: (unknown[] | Matrix)[]): unknown[][] | Matrix {
-        return matrixFromVectorList(arr, 'row', matrix, _createSparseMatrixFromRows, _createArray);
+        return matrixFromVectorList(
+          arr,
+          'row',
+          matrix,
+          (rows) => sparseMatrixFromVectors(rows, 'row', size, flatten, matrix),
+          _createArray
+        );
       },
     });
-
-    function _createSparseMatrixFromRows(arr: Matrix[]): Matrix {
-      const N = arr.length;
-      const M = vectorLength(arr[0], size);
-
-      const entries: { row: number; col: number; value: unknown }[] = [];
-
-      for (let i = 0; i < N; i++) {
-        const rowVec = arr[i];
-        const rowLength = vectorLength(rowVec, size);
-        if (rowLength !== M) {
-          throw new TypeError(
-            'The vectors had different length: ' + (M | 0) + ' ≠ ' + (rowLength | 0)
-          );
-        }
-
-        if (typeof rowVec.forEach === 'function') {
-          const s = size(rowVec);
-          const is1D = s.length === 1;
-          const isCol = s.length === 2 && s[1] === 1;
-
-          rowVec.forEach((val, idx) => {
-            let col: number;
-            if (is1D) {
-              col = idx[0];
-            } else if (isCol) {
-              col = idx[0];
-            } else {
-              col = idx[1];
-            }
-            if (val !== 0) {
-              entries.push({ row: i, col, value: val });
-            }
-          });
-        } else {
-          const f = flatten(rowVec);
-          for (let j = 0; j < M; j++) {
-            if (f[j] !== 0) {
-              entries.push({ row: i, col: j, value: f[j] });
-            }
-          }
-        }
-      }
-
-      return buildSparseCscFromEntries(entries, M, [N, M], matrix) as Matrix;
-    }
 
     function _createArray(arr: unknown[]): unknown[][] {
       if (arr.length === 0)

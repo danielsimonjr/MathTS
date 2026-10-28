@@ -1,6 +1,5 @@
 import { factory } from '../utils/factory.js';
-import { matrixFromVectorList, vectorLength } from './from-vectors.js';
-import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
+import { matrixFromVectorList, sparseMatrixFromVectors, vectorLength } from './from-vectors.js';
 
 // Type definitions
 type NestedArray<T = unknown> = T | NestedArray<T>[];
@@ -92,57 +91,11 @@ export const createMatrixFromColumns = /* #__PURE__ */ factory(
           arr,
           'column',
           matrix,
-          _createSparseMatrixFromColumns,
+          (cols) => sparseMatrixFromVectors(cols, 'column', size, flatten, matrix),
           _createArray
         );
       },
     });
-
-    function _createSparseMatrixFromColumns(arr: Matrix[]): Matrix {
-      const M = arr.length;
-      const N = vectorLength(arr[0], size);
-
-      const entries: { row: number; col: number; value: unknown }[] = [];
-
-      for (let j = 0; j < M; j++) {
-        const colVec = arr[j];
-        const colLength = vectorLength(colVec, size);
-        if (colLength !== N) {
-          throw new TypeError(
-            'The vectors had different length: ' + (N | 0) + ' ≠ ' + (colLength | 0)
-          );
-        }
-
-        if (typeof colVec.forEach === 'function') {
-          const s = size(colVec);
-          const is1D = s.length === 1;
-          const isCol = s.length === 2 && s[1] === 1;
-
-          colVec.forEach((val, idx) => {
-            let row: number;
-            if (is1D) {
-              row = idx[0];
-            } else if (isCol) {
-              row = idx[0];
-            } else {
-              row = idx[1];
-            }
-            if (val !== 0) {
-              entries.push({ row, col: j, value: val });
-            }
-          });
-        } else {
-          const f = flatten(colVec);
-          for (let i = 0; i < N; i++) {
-            if (f[i] !== 0) {
-              entries.push({ row: i, col: j, value: f[i] });
-            }
-          }
-        }
-      }
-
-      return buildSparseCscFromEntries(entries, M, [N, M], matrix) as Matrix;
-    }
 
     function _createArray(arr: unknown[]): unknown[][] {
       if (arr.length === 0)
