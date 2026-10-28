@@ -8682,7 +8682,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 119
+      "loc": 132
     },
     {
       "file": "functions/tests/bfgs.test.ts",
@@ -10621,7 +10621,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 106
+      "loc": 122
     },
     {
       "file": "functions/tests/special.test.ts",

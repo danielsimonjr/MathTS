@@ -2,6 +2,22 @@
 import { describe, it, expect } from 'vitest';
 import { airyAiScalar, airyBiScalar } from '../src/wasm/special/scalars.js';
 
+/**
+ * V8-captured oracles are Object.is-equal on Node; Bun/JSC differs by at most
+ * 2 ULPs on a handful of oscillatory / large-Bi points. Still rejects drift.
+ */
+function eq2Ulp(got: number, expected: number): boolean {
+  if (Object.is(got, expected)) return true;
+  if (!Number.isFinite(got) || !Number.isFinite(expected)) return false;
+  const buf = new Float64Array(2);
+  buf[0] = got;
+  buf[1] = expected;
+  const bits = new BigUint64Array(buf.buffer);
+  const hi = bits[0]! > bits[1]! ? bits[0]! : bits[1]!;
+  const lo = bits[0]! > bits[1]! ? bits[1]! : bits[0]!;
+  return hi - lo <= 2n;
+}
+
 /** 61 samples x = -30, -29, …, 30 (step 1). */
 const SAMPLE_AI: readonly number[] = [
   -0.08796818845684382, -0.2287601935393778, -0.20253010076618483, 0.016723409398810982,
@@ -86,14 +102,14 @@ describe('Airy scalar oracle (pre-refactor doubles)', () => {
   it('Ai samples on [-30, 30]', () => {
     for (let i = 0; i <= 60; i++) {
       const x = -30 + i;
-      expect(Object.is(airyAiScalar(x), SAMPLE_AI[i]!)).toBe(true);
+      expect(eq2Ulp(airyAiScalar(x), SAMPLE_AI[i]!), `Ai(${x})`).toBe(true);
     }
   });
 
   it('Bi samples on [-30, 30]', () => {
     for (let i = 0; i <= 60; i++) {
       const x = -30 + i;
-      expect(Object.is(airyBiScalar(x), SAMPLE_BI[i]!)).toBe(true);
+      expect(eq2Ulp(airyBiScalar(x), SAMPLE_BI[i]!), `Bi(${x})`).toBe(true);
     }
   });
 

@@ -2,6 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { betainc } from '../src/index.js';
 import { betaincScalar, betaincClosedScalar } from '../src/wasm/special/scalars.js';
 
+/** V8-captured grid; Bun/JSC is at most 2 ULPs off on a few continued-fraction rows. */
+function eq2Ulp(got: number, expected: number): boolean {
+  if (Object.is(got, expected)) return true;
+  if (!Number.isFinite(got) || !Number.isFinite(expected)) return false;
+  const buf = new Float64Array(2);
+  buf[0] = got;
+  buf[1] = expected;
+  const bits = new BigUint64Array(buf.buffer);
+  const hi = bits[0]! > bits[1]! ? bits[0]! : bits[1]!;
+  const lo = bits[0]! > bits[1]! ? bits[1]! : bits[0]!;
+  return hi - lo <= 2n;
+}
+
 /** Grid oracle literals from pre-consolidation betaincScalar (issue #473 / PR 8). */
 const BETAINC_GRID: Array<{ a: number; b: number; x: number; v: number }> = [
   { a: 0.5, b: 0.5, x: 0.1, v: 0.20483276469913334 },
@@ -100,7 +113,7 @@ describe('betainc scalar oracle (pre-refactor)', () => {
 
   it('grid samples', () => {
     for (const { a, b, x, v } of BETAINC_GRID) {
-      expect(Object.is(betaincScalar(a, b, x), v)).toBe(true);
+      expect(eq2Ulp(betaincScalar(a, b, x), v), `betaincScalar(${a},${b},${x})`).toBe(true);
     }
   });
 });
