@@ -13610,7 +13610,7 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 625
+      "loc": 681
     },
     {
       "file": "workbook/tests/edit.test.ts",
@@ -13729,14 +13729,14 @@
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 19
+      "loc": 78
     },
     {
       "file": "workbook/tests/graph-mermaid.test.ts",
       "package": "@danielsimonjr/mathts-workbook",
       "area": "tests",
       "disposition": "test",
-      "loc": 30
+      "loc": 75
     },
     {
       "file": "workbook/tests/graph.test.ts",

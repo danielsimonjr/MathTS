@@ -2,7 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { dispatch } from '../src/cli.js';
+import { dispatch, capabilitiesCommand, functionsCommand, templatesCommand } from '../src/cli.js';
+import { capabilitiesInfo, listFunctions } from '../src/introspect.js';
+import { SCHEMA_VERSION } from '../src/contract.js';
 
 let dir: string;
 let counter = 0;
@@ -176,6 +178,55 @@ describe('cli capabilities / templates', () => {
     const env = JSON.parse((await dispatch(['templates', '--json'])).stdout);
     const names = env.data.templates.map((t: { name: string }) => t.name);
     expect(names).toContain('basic');
+  });
+
+  it('capabilities text mode matches introspection oracle (four lines)', () => {
+    const data = capabilitiesInfo();
+    const expected = [
+      `mtsw ${data.version} (schema ${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor})`,
+      `supported cells: ${data.cellTypes.supported.join(', ')}`,
+      `deferred cells: ${data.cellTypes.deferred.join(', ')}`,
+      `commands: ${data.commands.join(', ')}`,
+    ].join('\n');
+    const r = capabilitiesCommand([]);
+    expect(r.stdout).toBe(expected);
+    expect(r.stderr).toBe('');
+    expect(r.exitCode).toBe(0);
+  });
+
+  it('functions text mode matches listFunctions oracle (two lines with counts)', () => {
+    const data = listFunctions();
+    const expected = [
+      `functions (${data.functions.length}): ${data.functions.join(', ')}`,
+      `constants (${data.constants.length}): ${data.constants.join(', ')}`,
+    ].join('\n');
+    const r = functionsCommand([]);
+    expect(r.stdout).toBe(expected);
+    expect(r.stderr).toBe('');
+    expect(r.exitCode).toBe(0);
+  });
+
+  it('templates text mode lists name - description (JSON data as oracle)', () => {
+    const json = JSON.parse(templatesCommand(['--json']).stdout);
+    const expected = json.data.templates
+      .map((t: { name: string; description: string }) => `${t.name} - ${t.description}`)
+      .join('\n');
+    const r = templatesCommand([]);
+    expect(r.stdout).toBe(expected);
+    expect(r.stderr).toBe('');
+    expect(r.exitCode).toBe(0);
+  });
+
+  it('--json anywhere in args selects JSON for info commands', () => {
+    const capJson = capabilitiesCommand(['--json']).stdout;
+    expect(capabilitiesCommand(['verbose', '--json']).stdout).toBe(capJson);
+    expect(capabilitiesCommand(['--json', 'ignored']).stdout).toBe(capJson);
+
+    const fnJson = functionsCommand(['--json']).stdout;
+    expect(functionsCommand(['x', '--json']).stdout).toBe(fnJson);
+
+    const tplJson = templatesCommand(['--json']).stdout;
+    expect(templatesCommand(['--json', 'tail']).stdout).toBe(tplJson);
   });
 });
 
