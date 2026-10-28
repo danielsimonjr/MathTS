@@ -431,11 +431,7 @@ export class Tensor {
    * NaN propagates (matches NumPy default behaviour).
    */
   max(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
-    const axes = this.resolveAxes(axis);
-    const keepDims = opts?.keepDims ?? false;
-    return this.reduceAxes(axes, keepDims, -Infinity, (acc, v) =>
-      isNaN(v) ? v : isNaN(acc) ? acc : Math.max(acc, v)
-    );
+    return this.extremum(axis, opts, -Infinity, Math.max);
   }
 
   /**
@@ -443,10 +439,23 @@ export class Tensor {
    * NaN propagates (matches NumPy default behaviour).
    */
   min(axis?: number | ReadonlyArray<number>, opts?: { keepDims?: boolean }): Tensor {
+    return this.extremum(axis, opts, Infinity, Math.min);
+  }
+
+  /**
+   * Shared max/min reduction: NaN in the window wins; NaN accumulator is kept.
+   * `pick` is monomorphic within one call (`Math.max` or `Math.min`).
+   */
+  private extremum(
+    axis: number | ReadonlyArray<number> | undefined,
+    opts: { keepDims?: boolean } | undefined,
+    init: number,
+    pick: (a: number, b: number) => number
+  ): Tensor {
     const axes = this.resolveAxes(axis);
     const keepDims = opts?.keepDims ?? false;
-    return this.reduceAxes(axes, keepDims, Infinity, (acc, v) =>
-      isNaN(v) ? v : isNaN(acc) ? acc : Math.min(acc, v)
+    return this.reduceAxes(axes, keepDims, init, (acc, v) =>
+      isNaN(v) ? v : isNaN(acc) ? acc : pick(acc, v)
     );
   }
 
@@ -739,14 +748,7 @@ export class Tensor {
    * Throws if the index is not found in `axisLabels`.
    */
   axisOf(index: Index): number {
-    if (this.axisLabels === undefined) {
-      throw new Error('Tensor.axisOf: this tensor has no axisLabels');
-    }
-    const pos = this.axisLabels.findIndex((lbl) => lbl.matches(index));
-    if (pos === -1) {
-      throw new Error(`Tensor.axisOf: index ${index.toString()} not found in axisLabels`);
-    }
-    return pos;
+    return this.axisPosition(index, 'axisOf');
   }
 
   /**
@@ -755,16 +757,24 @@ export class Tensor {
    * Throws if `oldIndex` is not found.
    */
   replaceIndex(oldIndex: Index, newIndex: Index): Tensor {
-    if (this.axisLabels === undefined) {
-      throw new Error('Tensor.replaceIndex: this tensor has no axisLabels');
-    }
-    const pos = this.axisLabels.findIndex((lbl) => lbl.matches(oldIndex));
-    if (pos === -1) {
-      throw new Error(`Tensor.replaceIndex: index ${oldIndex.toString()} not found in axisLabels`);
-    }
-    const newLabels = [...this.axisLabels];
+    const pos = this.axisPosition(oldIndex, 'replaceIndex');
+    const newLabels = [...this.axisLabels!];
     newLabels[pos] = newIndex;
     return new Tensor([...this.shape], this.data.slice(), newLabels);
+  }
+
+  /**
+   * Resolve a labelled index to its axis position; error prefix matches the caller.
+   */
+  private axisPosition(index: Index, op: 'axisOf' | 'replaceIndex'): number {
+    if (this.axisLabels === undefined) {
+      throw new Error(`Tensor.${op}: this tensor has no axisLabels`);
+    }
+    const pos = this.axisLabels.findIndex((lbl) => lbl.matches(index));
+    if (pos === -1) {
+      throw new Error(`Tensor.${op}: index ${index.toString()} not found in axisLabels`);
+    }
+    return pos;
   }
 
   /**

@@ -1,9 +1,9 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1992,
+  "totalFiles": 1993,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1191,
+    "build-entry": 1192,
     "test-only": 0,
     "orphan": 0,
     "test": 713,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1217,
+    "src": 1218,
     "tests": 713,
     "config": 29,
     "examples": 5,
@@ -40,7 +40,7 @@
     "@danielsimonjr/mathts-plot": 46,
     "@danielsimonjr/mathts-signal": 3,
     "@danielsimonjr/mathts-statistics": 3,
-    "@danielsimonjr/mathts-tensor": 53,
+    "@danielsimonjr/mathts-tensor": 54,
     "@danielsimonjr/mathts-trigonometry": 3,
     "@danielsimonjr/mathts-units": 3,
     "@danielsimonjr/mathts-workbook": 66
@@ -12833,7 +12833,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 194
+      "loc": 171
     },
     {
       "file": "tensor/src/operations/flip.ts",
@@ -12892,6 +12892,13 @@
       "loc": 170
     },
     {
+      "file": "tensor/src/operations/reshape-axes.ts",
+      "package": "@danielsimonjr/mathts-tensor",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 70
+    },
+    {
       "file": "tensor/src/operations/roll.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
@@ -12931,14 +12938,14 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 207
+      "loc": 180
     },
     {
       "file": "tensor/src/Tensor.ts",
       "package": "@danielsimonjr/mathts-tensor",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 887
+      "loc": 897
     },
     {
       "file": "tensor/tests/broadcasting.test.ts",
@@ -12952,7 +12959,7 @@
       "package": "@danielsimonjr/mathts-tensor",
       "area": "tests",
       "disposition": "test",
-      "loc": 176
+      "loc": 184
     },
     {
       "file": "tensor/tests/contraction-sequence.test.ts",

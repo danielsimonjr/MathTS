@@ -21,6 +21,7 @@
 import { Tensor } from '../Tensor.js';
 import { eig as matrixEig, eigWasm } from '@danielsimonjr/mathts-matrix';
 import type { EigResult } from '@danielsimonjr/mathts-matrix';
+import { reshapeByRowAxes } from './reshape-axes.js';
 
 /** Configures the symmetry hint and eigenvector computation for `tensorEig`. */
 export interface TensorEigOpts {
@@ -59,48 +60,24 @@ function prepareEigMatrix(
   rowAxes: ReadonlyArray<number>,
   symmetricHint: boolean
 ): { matrix2D: number[][]; n: number } {
-  const rank = t.shape.length;
-
-  for (const ax of rowAxes) {
-    if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
-      throw new RangeError(
-        `tensorEig: rowAxes contains invalid axis ${ax} for tensor of rank ${rank}`
-      );
-    }
-  }
-
   const rowSet = new Set(rowAxes);
   if (rowSet.size !== rowAxes.length) {
     throw new Error('tensorEig: rowAxes contains duplicate axes');
   }
-  const colAxes: number[] = [];
-  for (let i = 0; i < rank; i++) {
-    if (!rowSet.has(i)) colAxes.push(i);
-  }
 
-  if (colAxes.length === 0) {
-    throw new Error('tensorEig: rowAxes covers all axes — at least one axis must remain');
-  }
-  if (rowAxes.length === 0) {
-    throw new Error('tensorEig: rowAxes is empty — at least one axis must be assigned');
-  }
-
-  const rowDims = rowAxes.map((ax) => t.shape[ax]);
-  const colDims = colAxes.map((ax) => t.shape[ax]);
-  const numRows = rowDims.reduce((a, b) => a * b, 1);
-  const numCols = colDims.reduce((a, b) => a * b, 1);
+  const { numRows, numCols, matrix } = reshapeByRowAxes(t, rowAxes, {
+    badAxis: (ax, rank) =>
+      `tensorEig: rowAxes contains invalid axis ${ax} for tensor of rank ${rank}`,
+    noColAxis: 'tensorEig: rowAxes covers all axes — at least one axis must remain',
+    noRowAxis: 'tensorEig: rowAxes is empty — at least one axis must be assigned',
+  });
 
   if (numRows !== numCols) {
     throw new Error(`tensorEig: reshaped matrix must be square (got ${numRows}×${numCols})`);
   }
 
-  const perm = [...rowAxes, ...colAxes];
-  const permuted = t.transpose(perm);
   const n = numRows;
-
-  const matrix2D: number[][] = Array.from({ length: n }, (_, i) =>
-    Array.from({ length: n }, (_, j) => permuted.data[i * n + j])
-  );
+  const matrix2D = matrix;
 
   // `symmetric: true` symmetrizes to guarantee the symmetric-routing path and
   // nullify FP noise that might flip the internal isSymmetric() check.

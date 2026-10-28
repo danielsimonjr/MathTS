@@ -333,6 +333,7 @@
       "tensor/src/operations/pinv.ts",
       "tensor/src/operations/qr.ts",
       "tensor/src/operations/random.ts",
+      "tensor/src/operations/reshape-axes.ts",
       "tensor/src/operations/roll.ts",
       "tensor/src/operations/scatter.ts",
       "tensor/src/operations/slice.ts",
@@ -358,6 +359,10 @@
     "tensor/src/operations/pad.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/roll.ts": ["tensor/src/index.ts"],
     "tensor/src/operations/flip.ts": ["tensor/src/index.ts"],
+    "tensor/src/operations/reshape-axes.ts": [
+      "tensor/src/operations/eig.ts",
+      "tensor/src/operations/svd.ts"
+    ],
     "autograd/src/shape.ts": ["autograd/src/dual-tensor.ts", "autograd/src/tape.ts"],
     "autograd/src/dual-tensor.ts": ["autograd/src/forward-grad.ts", "autograd/src/index.ts"],
     "autograd/src/tape.ts": [
