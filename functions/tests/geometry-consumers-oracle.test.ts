@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { voronoi } from '../src/geometry/voronoi.js';
 import { alphaShape } from '../src/geometry/alpha-shape.js';
+import { circumcircle } from '../src/geometry/circumcircle.js';
 import { sphericalVoronoi } from '../src/geometry/spherical-voronoi.js';
 import { delaunay } from '../src/geometry/delaunay.js';
 
@@ -240,5 +241,80 @@ describe('sphericalVoronoi — scipy.spatial.SphericalVoronoi oracle', () => {
         [1, 1],
       ])
     ).toThrow(/3-D/);
+  });
+});
+
+describe('circumcircle oracle (alpha-shape / Voronoi consumers)', () => {
+  /** Independent circumcenter; null when degenerate (|d| < 1e-15). */
+  function oracleCircumcenter(a: number[], b: number[], c: number[]): number[] | null {
+    const d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
+    if (Math.abs(d) < 1e-15) return null;
+    const a2 = a[0] * a[0] + a[1] * a[1];
+    const b2 = b[0] * b[0] + b[1] * b[1];
+    const c2 = c[0] * c[0] + c[1] * c[1];
+    const ux = (a2 * (b[1] - c[1]) + b2 * (c[1] - a[1]) + c2 * (a[1] - b[1])) / d;
+    const uy = (a2 * (c[0] - b[0]) + b2 * (a[0] - c[0]) + c2 * (b[0] - a[0])) / d;
+    return [ux, uy];
+  }
+
+  function oracleCircumradius(a: number[], b: number[], c: number[]): number {
+    const center = oracleCircumcenter(a, b, c);
+    if (center === null) return Infinity;
+    return Math.hypot(a[0] - center[0], a[1] - center[1]);
+  }
+
+  const rightTri = [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+  ] as number[][];
+
+  it('Voronoi vertex matches circumcenter oracle on a right triangle', () => {
+    const { vertices } = voronoi(rightTri);
+    const center = oracleCircumcenter(rightTri[0], rightTri[1], rightTri[2])!;
+    expect(vertices).toHaveLength(1);
+    expect(vertices[0][0]).toBe(center[0]);
+    expect(vertices[0][1]).toBe(center[1]);
+    expect(center[0]).toBe(0.5);
+    expect(center[1]).toBe(0.5);
+  });
+
+  it('circumradius oracle is sqrt(2)/2 on the right triangle', () => {
+    const r = oracleCircumradius(rightTri[0], rightTri[1], rightTri[2]);
+    expect(r).toBe(Math.SQRT2 / 2);
+  });
+
+  it('collinear triple is degenerate in the oracle', () => {
+    const a = [0, 0];
+    const b = [1, 0];
+    const c = [2, 0];
+    expect(oracleCircumcenter(a, b, c)).toBeNull();
+    expect(oracleCircumradius(a, b, c)).toBe(Infinity);
+  });
+
+  it('NaN coordinate makes circumcenter oracle NaN', () => {
+    const center = oracleCircumcenter([NaN, 0], [1, 0], [0, 1]);
+    expect(center).not.toBeNull();
+    expect(Number.isNaN(center![0])).toBe(true);
+  });
+
+  it('permutes (b,c,a) pins non-symmetric circumcenter coordinates', () => {
+    const a = [0, 0];
+    const b = [1, 0];
+    const c = [0, 1];
+    const perm = oracleCircumcenter(b, c, a)!;
+    expect(perm[0]).toBe(0.5);
+    expect(perm[1]).toBe(0.5);
+  });
+
+  it('shared circumcircle helper matches the oracle', () => {
+    const a = [0, 0];
+    const b = [1, 0];
+    const c = [0, 1];
+    const cc = circumcircle(a, b, c)!;
+    const center = oracleCircumcenter(a, b, c)!;
+    expect(cc.ux).toBe(center[0]);
+    expect(cc.uy).toBe(center[1]);
+    expect(circumcircle([0, 0], [1, 0], [2, 0])).toBeNull();
   });
 });

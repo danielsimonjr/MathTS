@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1215,
+    "totalFiles": 1216,
     "totalModules": 82,
-    "totalExports": 6251
+    "totalExports": 6252
   },
   "entryPoints": [
     {
@@ -14229,12 +14229,25 @@
           {
             "file": "./delaunay.js",
             "imports": ["delaunay"]
+          },
+          {
+            "file": "./circumcircle.js",
+            "imports": ["circumcircle"]
           }
         ],
         "workspaceDependencies": [],
         "exports": ["alphaShape"],
         "interfaces": ["AlphaShapeResult"],
         "functions": ["alphaShape"]
+      },
+      "functions/src/geometry/circumcircle.ts": {
+        "description": "Shared 2-D circumcircle computation for geometry consumers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["circumcircle"],
+        "functions": ["circumcircle"]
       },
       "functions/src/geometry/delaunay.ts": {
         "description": "Delaunay triangulation (2-D) — part of the computational-geometry engine.",
@@ -14454,6 +14467,10 @@
           {
             "file": "./delaunay.js",
             "imports": ["delaunay"]
+          },
+          {
+            "file": "./circumcircle.js",
+            "imports": ["circumcircle"]
           }
         ],
         "workspaceDependencies": [],
@@ -41164,6 +41181,7 @@
         "name": "Functions/geometry",
         "files": [
           "functions/src/geometry/alpha-shape.ts",
+          "functions/src/geometry/circumcircle.ts",
           "functions/src/geometry/delaunay.ts",
           "functions/src/geometry/distance.ts",
           "functions/src/geometry/geometry-extra.ts",
@@ -42329,13 +42347,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1215,
+    "totalTypeScriptFiles": 1216,
     "totalModules": 82,
-    "totalLinesOfCode": 200598,
-    "totalExports": 6251,
+    "totalLinesOfCode": 200630,
+    "totalExports": 6252,
     "totalClasses": 59,
     "totalInterfaces": 543,
-    "totalFunctions": 2019,
+    "totalFunctions": 2020,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

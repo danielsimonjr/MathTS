@@ -1753,6 +1753,7 @@
       "circstd",
       "circulant",
       "CircularOptions",
+      "circumcircle",
       "circvar",
       "clamp",
       "classicalElectronRadius",

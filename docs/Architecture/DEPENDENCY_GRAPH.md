@@ -134,7 +134,7 @@ The codebase is organized into the following modules:
 - **functions/error**: 3 files
 - **functions/expression**: 1 file
 - **functions/factories**: 4 files
-- **functions/geometry**: 11 files
+- **functions/geometry**: 12 files
 - **functions/gpu**: 2 files
 - **functions/graph**: 3 files
 - **functions/logical**: 5 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 494            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 495            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5546,14 +5546,23 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports    | Type   |
-| --------------- | ---------- | ------ |
-| `./delaunay.js` | `delaunay` | Import |
+| File                | Imports        | Type   |
+| ------------------- | -------------- | ------ |
+| `./delaunay.js`     | `delaunay`     | Import |
+| `./circumcircle.js` | `circumcircle` | Import |
 
 **Exports:**
 
 - Interfaces: `AlphaShapeResult`
 - Functions: `alphaShape`
+
+---
+
+### `functions/src/geometry/circumcircle.ts` - Shared 2-D circumcircle computation for geometry consumers.
+
+**Exports:**
+
+- Functions: `circumcircle`
 
 ---
 
@@ -5711,9 +5720,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports    | Type   |
-| --------------- | ---------- | ------ |
-| `./delaunay.js` | `delaunay` | Import |
+| File                | Imports        | Type   |
+| ------------------- | -------------- | ------ |
+| `./delaunay.js`     | `delaunay`     | Import |
+| `./circumcircle.js` | `circumcircle` | Import |
 
 **Exports:**
 
@@ -18522,16 +18532,16 @@ graph TD
 
     subgraph Functions/geometry
         N163[alpha-shape]
-        N164[delaunay]
-        N165[distance]
-        N166[geometry-extra]
-        N167[halfspace-intersection]
-        N168[hull]
-        N169[intersect]
-        N170[intersect3d]
-        N171[mass-properties]
-        N172[spherical-voronoi]
-        N173[...1 more]
+        N164[circumcircle]
+        N165[delaunay]
+        N166[distance]
+        N167[geometry-extra]
+        N168[halfspace-intersection]
+        N169[hull]
+        N170[intersect]
+        N171[intersect3d]
+        N172[mass-properties]
+        N173[...2 more]
     end
 
     subgraph Functions/gpu
@@ -19105,14 +19115,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1215   |
+| Total TypeScript Files  | 1216   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200598 |
-| Total Exports           | 6251   |
+| Total Lines of Code     | 200630 |
+| Total Exports           | 6252   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 543    |
-| Total Functions         | 2019   |
+| Total Functions         | 2020   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

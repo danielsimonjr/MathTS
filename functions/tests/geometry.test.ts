@@ -64,6 +64,22 @@ describe('angle2D', () => {
   it('should return NaN for zero vector', () => {
     expect(angle2D([0, 0], [1, 0])).toBeNaN();
   });
+
+  it('returns NaN when either vector has zero magnitude (v2)', () => {
+    expect(angle2D([1, 0], [0, 0])).toBeNaN();
+  });
+
+  it('returns NaN for NaN component (Object.is)', () => {
+    expect(Object.is(angle2D([NaN, 0], [1, 0]), NaN)).toBe(true);
+  });
+
+  it('returns NaN when a component is missing', () => {
+    expect(Object.is(angle2D([1], [1, 0]), NaN)).toBe(true);
+  });
+
+  it('ignores extra components beyond the first two', () => {
+    expect(angle2D([1, 0, 99], [0, 1, 88])).toBe(Math.PI / 2);
+  });
 });
 
 describe('angle3D', () => {
@@ -77,6 +93,14 @@ describe('angle3D', () => {
 
   it('should return pi for anti-parallel 3D vectors', () => {
     expectClose(angle3D([0, 0, 1], [0, 0, -1]), Math.PI);
+  });
+
+  it('returns NaN for zero 3D vector', () => {
+    expect(angle3D([0, 0, 0], [1, 0, 0])).toBeNaN();
+  });
+
+  it('returns NaN for NaN component (Object.is)', () => {
+    expect(Object.is(angle3D([NaN, 0, 0], [1, 0, 0]), NaN)).toBe(true);
   });
 });
 
