@@ -5,6 +5,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import { evaluate } from '../../functions/src/factories/evaluate.js';
+import { factoryScope } from '../../functions/src/factories/scope.js';
+import { createFilterTransform } from '../src/transform/filter.transform.js';
+import { createForEachTransform } from '../src/transform/forEach.transform.js';
 
 const U = { unsafe: true };
 
@@ -17,6 +20,21 @@ const val = (r: unknown): unknown => {
 describe('filter transform arg oracle', () => {
   it('inline relational predicate keeps elements above threshold', () => {
     expect(val(evaluate('filter([1, 2, 3, 4], x > 2)', undefined, U))).toEqual([3, 4]);
+  });
+
+  it('empty result when no elements pass', () => {
+    expect(val(evaluate('filter([1, 2, 3, 4], x > 10)', undefined, U))).toEqual([]);
+  });
+
+  it('empty collection yields empty array', () => {
+    expect(val(evaluate('filter([], x > 0)', undefined, U))).toEqual([]);
+  });
+
+  it('filter transform keeps rawArgs true', () => {
+    const filterTransform = createFilterTransform(
+      factoryScope as Parameters<typeof createFilterTransform>[0]
+    );
+    expect(filterTransform.rawArgs).toBe(true);
   });
 
   it('scope symbol callback matches the inline predicate', () => {
@@ -71,5 +89,19 @@ describe('forEach transform arg oracle', () => {
     const scope = new Map<string, unknown>([['record', (_x: number, i: number) => seen.push(i)]]);
     evaluate('forEach([5, 6], record)', scope);
     expect(seen).toEqual([[1], [2]]);
+  });
+
+  it('filter callback sees one-based index arrays like forEach', () => {
+    const seen: unknown[] = [];
+    const scope = new Map<string, unknown>([['record', (_x: number, i: number) => seen.push(i)]]);
+    evaluate('filter([5, 6], record)', scope, U);
+    expect(seen).toEqual([[1], [2]]);
+  });
+
+  it('forEach transform keeps rawArgs true', () => {
+    const forEachTransform = createForEachTransform(
+      factoryScope as Parameters<typeof createForEachTransform>[0]
+    );
+    expect(forEachTransform.rawArgs).toBe(true);
   });
 });

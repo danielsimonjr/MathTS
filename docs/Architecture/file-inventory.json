@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-27",
-  "totalFiles": 1974,
+  "generated": "2026-10-28",
+  "totalFiles": 1976,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1186,
     "test-only": 0,
     "orphan": 0,
-    "test": 700,
+    "test": 702,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1212,
-    "tests": 700,
+    "tests": 702,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -27,7 +27,7 @@
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 552,
+    "@danielsimonjr/mathts-expression": 554,
     "@danielsimonjr/mathts-functions": 833,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -4954,6 +4954,13 @@
       "loc": 311
     },
     {
+      "file": "expression/tests/s2r-clones-dim-transform-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 70
+    },
+    {
       "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -4961,11 +4968,18 @@
       "loc": 103
     },
     {
+      "file": "expression/tests/s2r-clones-short-circuit-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 141
+    },
+    {
       "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 76
+      "loc": 110
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",
