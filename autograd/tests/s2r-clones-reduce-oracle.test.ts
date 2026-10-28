@@ -191,7 +191,10 @@ describe('TapedTensor sum/mean backward oracle — Object.is vs independent scat
       const primal = new Tensor(shape, data);
       const outT =
         c.op === 'sum' ? primal.sum(c.axis, { keepDims }) : primal.mean(c.axis, { keepDims });
-      const upstream = new Float64Array(c.upstream ?? outT.data.length).fill(1);
+      const upstream =
+        c.upstream !== undefined
+          ? new Float64Array(c.upstream)
+          : new Float64Array(outT.data.length).fill(1);
 
       const expected = oracleReducedScatter(shape, upstream, outT.shape, c.axis, keepDims, c.op);
       const actual = runTapeBackward(data, shape, c.op, c.axis, keepDims, upstream);
