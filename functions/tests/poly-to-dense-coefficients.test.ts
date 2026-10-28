@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { polyFromExpression, type Poly } from '../src/typed/polynomial-ideal.js';
+import {
+  polyFromExpression,
+  polyToDenseCoefficients,
+  type Poly,
+} from '../src/typed/polynomial-ideal.js';
 import { parseRationalFunction } from '../src/cas/rational-integrate.js';
 import { factorPolynomialUnivariate } from '../src/typed/factorization/index.js';
 import { symbolicIntegral } from '../src/index.js';
@@ -76,7 +80,7 @@ describe('polyToDense coefficient fill — shared oracle', () => {
     expect(polyToDenseFillOracle(p)).toEqual([-1, 0, 3]);
   });
 
-  it('all four legacy fill paths match the oracle', () => {
+  it('shared helper and legacy fill paths match the oracle', () => {
     const cases: Poly[] = [
       [],
       polyFromExpression('x^2 + 1', ['x']),
@@ -89,12 +93,13 @@ describe('polyToDense coefficient fill — shared oracle', () => {
     ];
     for (const p of cases) {
       const oracle = polyToDenseFillOracle(p);
+      expect(polyToDenseCoefficients(p)).toEqual(oracle);
       expect(legacyFillDenseFromPoly(p)).toEqual(oracle);
       expect(legacyAlgebraPolyToDense(p)).toEqual(trimPolyExactOracle(oracle));
       expect(legacyFactorizationPolyToDense(p)).toEqual(trimPolyFactorizationOracle(oracle));
     }
     expect(legacyFillPolyDenseFromStr('x^2 + 1', 'x')).toEqual(
-      polyToDenseFillOracle(polyFromExpression('x^2 + 1', ['x']))
+      polyToDenseCoefficients(polyFromExpression('x^2 + 1', ['x']))
     );
   });
 });

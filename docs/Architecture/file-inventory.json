@@ -5791,7 +5791,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 416
+      "loc": 411
     },
     {
       "file": "functions/src/cas/layer3.ts",
@@ -5812,7 +5812,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 873
+      "loc": 869
     },
     {
       "file": "functions/src/cas/render-coeff-times.ts",
@@ -7940,7 +7940,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1832
+      "loc": 1829
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -8024,7 +8024,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 222
+      "loc": 223
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -8164,7 +8164,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 489
+      "loc": 502
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -10229,7 +10229,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 157
+      "loc": 156
     },
     {
       "file": "functions/tests/polygamma-orthopoly.test.ts",

@@ -4219,13 +4219,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                     | Type   |
-| ----------------------------- | --------------------------- | ------ |
-| `./factories/evaluate.js`     | `parse`                     | Import |
-| `./factories/evaluate.js`     | `evaluate`                  | Import |
-| `./typed/algebra.js`          | `apart, variables`          | Import |
-| `./typed/polynomial-ideal.js` | `polyFromExpression`        | Import |
-| `./cas/rational-integrate.js` | `integrateRationalFunction` | Import |
+| File                          | Imports                                       | Type   |
+| ----------------------------- | --------------------------------------------- | ------ |
+| `./factories/evaluate.js`     | `parse`                                       | Import |
+| `./factories/evaluate.js`     | `evaluate`                                    | Import |
+| `./typed/algebra.js`          | `apart, variables`                            | Import |
+| `./typed/polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients` | Import |
+| `./cas/rational-integrate.js` | `integrateRationalFunction`                   | Import |
 
 **Exports:**
 
@@ -4862,7 +4862,7 @@ graph LR
 
 | File                                     | Imports                                                                      | Type   |
 | ---------------------------------------- | ---------------------------------------------------------------------------- | ------ |
-| `../typed/polynomial-ideal.js`           | `polyFromExpression, Poly`                                                   | Import |
+| `../typed/polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, Poly`                          | Import |
 | `../typed/factorization/integer-poly.js` | `trim, mul, exactDivide, IntPoly`                                            | Import |
 | `../typed/factorization/zassenhaus.js`   | `factorUnivariateZ`                                                          | Import |
 | `./layer3.js`                            | `integrateLayer3`                                                            | Import |
@@ -9917,7 +9917,7 @@ graph LR
 | File                              | Imports                                                                                                        | Type   |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------ |
 | `../wasm/poly/wasm-bridge.js`     | `polyMulDispatch, polyMulJS, polyDivModDispatch, resultantDispatch, discriminantDispatch, WASM_POLY_THRESHOLD` | Import |
-| `./polynomial-ideal.js`           | `polyFromExpression, buchberger, normalize, polyToString, Poly`                                                | Import |
+| `./polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, buchberger, normalize, polyToString, Poly`                       | Import |
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                                    | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                                     | Import |
 
@@ -10138,13 +10138,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                                           | Type   |
-| ------------------------ | ------------------------------------------------- | ------ |
-| `../polynomial-ideal.js` | `polyFromExpression, Poly`                        | Import |
-| `./integer-poly.js`      | `degree, IntPoly`                                 | Import |
-| `./zassenhaus.js`        | `factorUnivariateZ`                               | Import |
-| `./multi-poly.js`        | `fromAlgebraExpr, toAlgebraString`                | Import |
-| `./kronecker-factor.js`  | `factorMultivariateKronecker, MultiFactorization` | Import |
+| File                     | Imports                                             | Type   |
+| ------------------------ | --------------------------------------------------- | ------ |
+| `../polynomial-ideal.js` | `polyFromExpression, polyToDenseCoefficients, Poly` | Import |
+| `./integer-poly.js`      | `degree, IntPoly`                                   | Import |
+| `./zassenhaus.js`        | `factorUnivariateZ`                                 | Import |
+| `./multi-poly.js`        | `fromAlgebraExpr, toAlgebraString`                  | Import |
+| `./kronecker-factor.js`  | `factorMultivariateKronecker, MultiFactorization`   | Import |
 
 **Exports:**
 
@@ -10535,7 +10535,7 @@ graph LR
 - Classes: `DivisorGeobucket`
 - Interfaces: `Term`
 - Types: `Poly`
-- Functions: `normalize`, `polyAdd`, `polyNeg`, `polySub`, `polyMul`, `polyFromExpression`, `polyReduce`, `buchberger`, `polyToString`
+- Functions: `normalize`, `polyAdd`, `polyNeg`, `polySub`, `polyMul`, `polyToDenseCoefficients`, `polyFromExpression`, `polyReduce`, `buchberger`, `polyToString`
 
 ---
 
@@ -19055,12 +19055,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1212   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200596 |
-| Total Exports           | 6241   |
+| Total Lines of Code     | 200598 |
+| Total Exports           | 6242   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 542    |
-| Total Functions         | 2009   |
+| Total Functions         | 2010   |
 | Total Type Guards       | 158    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
