@@ -29,8 +29,11 @@ export function isPositiveInteger(n: BigNumberBinomialType): boolean {
 }
 
 /**
- * Binomial coefficient `C(total, choose)` using the smaller of `choose` and
- * `total - choose` loop bounds. Keeps `result.times(...).dividedBy(i)` order.
+ * Binomial coefficient `C(total, choose)`. Same branch as the former factory
+ * loops: if `choose < total - choose`, iterate `i = 1 .. total - choose`
+ * multiplying `(choose + i) / i`; otherwise iterate `i = 1 .. choose`
+ * multiplying `(total - choose + i) / i`. Per-step order is
+ * `result.times(...).dividedBy(i)` so integer BigNumbers stay exact.
  */
 export function binomialProductBigNumber<T extends BigNumberBinomialType>(total: T, choose: T): T {
   const BigNumber = total.constructor;

@@ -6,10 +6,15 @@ import { factoryScope } from '../src/factories/scope.js';
 import { mul } from '../src/typed/factorization/integer-poly.js';
 import { mulP } from '../src/typed/factorization/finite-field.js';
 import type { IntPoly } from '../src/typed/factorization/integer-poly.js';
+import * as functionsApi from '../src/index.js';
 import { eulerNumbers } from '../src/index.js';
 import { chooseScalar } from '../src/wasm/special/scalars.js';
+import { createCombinations } from '../src/probability/combinations.js';
+import { createCombinationsWithRep } from '../src/probability/combinationsWithRep.js';
+import type { TypedFunction } from '../src/core/function/typed.js';
 import {
   binomialProductBigNumber,
+  isPositiveInteger,
   type BigNumberBinomialType,
 } from '../src/probability/bigint-binomial.js';
 const P = (...c: number[]): IntPoly => c.map(BigInt);
@@ -37,7 +42,7 @@ function legacyBnCoerce(x: BigNumberBinomialType | number): bigint {
   return typeof x === 'number' ? BigInt(x) : (x as LegacyBn).__v;
 }
 
-function legacyBn(value: number | bigint): LegacyBn {
+function legacyBn(value: number | bigint, integer = true): LegacyBn {
   const n = typeof value === 'bigint' ? value : BigInt(value);
   class LegacyBigNumberCtor {
     constructor(v: number) {
@@ -73,10 +78,46 @@ function legacyBn(value: number | bigint): LegacyBn {
     gte(x) {
       return n >= legacyBnCoerce(x);
     },
-    isInteger: () => true,
+    isInteger: () => integer,
   };
   return self;
 }
+
+function stubTyped(
+  _name: string,
+  signatures: Record<string, (...args: never[]) => unknown>
+): (n: unknown, k: unknown) => unknown {
+  return (n: unknown, k: unknown) => {
+    const key = typeof n === 'number' ? 'number, number' : 'BigNumber, BigNumber';
+    return signatures[key](n as never, k as never);
+  };
+}
+
+const combinationsBn = createCombinations({
+  typed: stubTyped as unknown as TypedFunction,
+}) as unknown as (n: BigNumberBinomialType, k: BigNumberBinomialType) => LegacyBn;
+
+const combinationsWithRepBn = createCombinationsWithRep({
+  typed: stubTyped as unknown as TypedFunction,
+}) as unknown as (n: BigNumberBinomialType, k: BigNumberBinomialType) => LegacyBn;
+
+describe('helpers stay off the package barrel', () => {
+  it('does not export binomialProductBigNumber, schoolbookMul, isPositiveInteger, chooseScalar', () => {
+    expect('binomialProductBigNumber' in functionsApi).toBe(false);
+    expect('schoolbookMul' in functionsApi).toBe(false);
+    expect('isPositiveInteger' in functionsApi).toBe(false);
+    expect('chooseScalar' in functionsApi).toBe(false);
+  });
+});
+
+describe('isPositiveInteger (shared by both factories)', () => {
+  it('treats 0 as allowed (non-negative), rejects negatives and non-integers', () => {
+    expect(isPositiveInteger(legacyBn(0))).toBe(true);
+    expect(isPositiveInteger(legacyBn(1))).toBe(true);
+    expect(isPositiveInteger(legacyBn(-1))).toBe(false);
+    expect(isPositiveInteger(legacyBn(2, false))).toBe(false);
+  });
+});
 
 describe('binomialProductBigNumber', () => {
   it('C(7, 5) = 21 and C(60, 30) above 2^53', () => {
@@ -88,9 +129,60 @@ describe('binomialProductBigNumber', () => {
     );
   });
 
+  it('C(0, 0) = 1, C(5, 0) = 1, C(5, 1) = 5', () => {
+    expect((binomialProductBigNumber(legacyBn(0), legacyBn(0)) as LegacyBn).__v.toString()).toBe(
+      '1'
+    );
+    expect((binomialProductBigNumber(legacyBn(5), legacyBn(0)) as LegacyBn).__v.toString()).toBe(
+      '1'
+    );
+    expect((binomialProductBigNumber(legacyBn(5), legacyBn(1)) as LegacyBn).__v.toString()).toBe(
+      '5'
+    );
+  });
+
   it('with-rep total n+k-1: C(5+3-1, 3)', () => {
     expect((binomialProductBigNumber(legacyBn(7), legacyBn(3)) as LegacyBn).__v.toString()).toBe(
       '35'
+    );
+  });
+});
+
+describe('combinations / combinationsWithRep BigNumber factories', () => {
+  it('C(7, 5) = 21 through the combinations factory', () => {
+    expect(combinationsBn(legacyBn(7), legacyBn(5)).__v.toString()).toBe('21');
+  });
+
+  it('throws the combinations error strings', () => {
+    expect(() => combinationsBn(legacyBn(-1), legacyBn(0))).toThrow(TypeError);
+    expect(() => combinationsBn(legacyBn(-1), legacyBn(0))).toThrow(
+      'Positive integer value expected in function combinations'
+    );
+    expect(() => combinationsBn(legacyBn(2, false), legacyBn(1))).toThrow(
+      'Positive integer value expected in function combinations'
+    );
+    expect(() => combinationsBn(legacyBn(3), legacyBn(4))).toThrow(
+      'k must be less than n in function combinations'
+    );
+  });
+
+  it('with-rep C(n+k-1, k) for (1,0), (5,0), (5,1), (3,3)', () => {
+    expect(combinationsWithRepBn(legacyBn(1), legacyBn(0)).__v.toString()).toBe('1');
+    expect(combinationsWithRepBn(legacyBn(5), legacyBn(0)).__v.toString()).toBe('1');
+    expect(combinationsWithRepBn(legacyBn(5), legacyBn(1)).__v.toString()).toBe('5');
+    expect(combinationsWithRepBn(legacyBn(3), legacyBn(3)).__v.toString()).toBe('10');
+  });
+
+  it('throws the combinationsWithRep error strings', () => {
+    expect(() => combinationsWithRepBn(legacyBn(-1), legacyBn(1))).toThrow(TypeError);
+    expect(() => combinationsWithRepBn(legacyBn(-1), legacyBn(1))).toThrow(
+      'Positive integer value expected in function combinationsWithRep'
+    );
+    expect(() => combinationsWithRepBn(legacyBn(0), legacyBn(1))).toThrow(
+      'k must be less than or equal to n + k - 1 in function combinationsWithRep'
+    );
+    expect(() => combinationsWithRepBn(legacyBn(2, false), legacyBn(1))).toThrow(
+      'Positive integer value expected in function combinationsWithRep'
     );
   });
 });
@@ -119,6 +211,13 @@ describe('schoolbook integer multiply (mul / mulP)', () => {
     const b = P(2, 1);
     expect(mulP(a, b, p)).toEqual(mul(a, b).map((c) => ((c % p) + p) % p));
     expect(mulP(P(7, 1), P(1), p)).toEqual(P(0, 1));
+  });
+
+  it('mulP empty, p-boundary, and negative coefficients', () => {
+    expect(mulP(P(), P(1, 2), 7n)).toEqual(P());
+    expect(mulP(P(7, 14), P(1), 7n)).toEqual(P());
+    expect(mulP(P(-3, 5), P(2, -1), 7n)).toEqual(P(1, 6, 2));
+    expect(mulP(P(2, 2), P(1, 1), 2n)).toEqual(P());
   });
 
   it('mulP moderate degree matches unreduced-then-mod oracle', () => {
