@@ -1686,6 +1686,7 @@
     ],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/distribution-functions.ts",
+      "functions/src/numbertheory/extra.ts",
       "functions/src/signal/iir-design.ts",
       "functions/src/special/niche.ts",
       "functions/src/special/wave-functions.ts",
@@ -2213,11 +2214,8 @@
       "functions/src/matrix/forEach.ts",
       "functions/src/matrix/map.ts"
     ],
+    "functions/src/matrix/sparse-csc-tail.ts": ["functions/src/matrix/from-vectors.ts"],
     "functions/src/matrix/from-vectors.ts": [
-      "functions/src/matrix/matrixFromColumns.ts",
-      "functions/src/matrix/matrixFromRows.ts"
-    ],
-    "functions/src/matrix/sparse-csc-tail.ts": [
       "functions/src/matrix/matrixFromColumns.ts",
       "functions/src/matrix/matrixFromRows.ts"
     ],
@@ -2270,6 +2268,10 @@
     ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/probability/bigint-binomial.ts": [
+      "functions/src/probability/combinations.ts",
+      "functions/src/probability/combinationsWithRep.ts"
+    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"
@@ -2485,22 +2487,17 @@
       "expression/src/node/utils/stringSubset.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
-      "expression/src/transform/and.transform.ts",
-      "expression/src/transform/bitAnd.transform.ts",
-      "expression/src/transform/bitOr.transform.ts",
       "expression/src/transform/column.transform.ts",
       "expression/src/transform/concat.transform.ts",
-      "expression/src/transform/cumsum.transform.ts",
       "expression/src/transform/index.transform.ts",
       "expression/src/transform/map.transform.ts",
-      "expression/src/transform/mapSlices.transform.ts",
       "expression/src/transform/nullish.transform.ts",
-      "expression/src/transform/or.transform.ts",
       "expression/src/transform/row.transform.ts",
       "expression/src/transform/utils/compileInlineExpression.ts",
       "expression/src/transform/utils/dimToZeroBase.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts",
-      "expression/src/transform/utils/prepareTransformArgs.ts"
+      "expression/src/transform/utils/prepareTransformArgs.ts",
+      "expression/src/transform/utils/shortCircuitBinary.ts"
     ],
     "expression/src/utils/object.ts": [
       "expression/src/Help.ts",
@@ -3899,7 +3896,14 @@
       "expression/src/transform/variance.transform.ts"
     ],
     "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
+    "expression/src/transform/utils/shortCircuitBinary.ts": [
+      "expression/src/transform/and.transform.ts",
+      "expression/src/transform/bitAnd.transform.ts",
+      "expression/src/transform/bitOr.transform.ts",
+      "expression/src/transform/or.transform.ts"
+    ],
     "expression/src/transform/utils/lastDimToZeroBase.ts": [
+      "expression/src/transform/cumsum.transform.ts",
       "expression/src/transform/diff.transform.ts",
       "expression/src/transform/max.transform.ts",
       "expression/src/transform/mean.transform.ts",
@@ -3947,13 +3951,18 @@
       "expression/src/transform/map.transform.ts",
       "expression/src/transform/utils/prepareTransformArgs.ts"
     ],
-    "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
-    "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "expression/src/transform/utils/dimToZeroBase.ts": [
+      "expression/src/transform/mapSlices.transform.ts",
       "expression/src/transform/utils/lastDimToZeroBase.ts"
     ],
+    "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
+    "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts"],
+    "parallel/src/gemm-rows.ts": [
+      "parallel/src/ParallelMatrix.ts",
+      "parallel/src/matrix.worker.ts"
+    ],
     "parallel/src/ComputePool.ts": [
       "parallel/src/index.ts",
       "parallel/src/operations/elementwise.ts",

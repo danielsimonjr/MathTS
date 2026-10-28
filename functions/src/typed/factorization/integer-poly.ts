@@ -74,8 +74,15 @@ export function neg(a: IntPoly): IntPoly {
   return a.map((c) => -c);
 }
 
-/** `a * b` via the schoolbook convolution, trimmed. */
-export function mul(a: IntPoly, b: IntPoly): IntPoly {
+/**
+ * Schoolbook polynomial multiply over ℤ, with a per-coefficient `mix` callback
+ * (plain addition for `mul`, modular reduction for `mulP`).
+ */
+export function schoolbookMul(
+  a: IntPoly,
+  b: IntPoly,
+  mix: (acc: bigint, ai: bigint, bj: bigint) => bigint
+): IntPoly {
   const ta = trim(a);
   const tb = trim(b);
   if (ta.length === 0 || tb.length === 0) {
@@ -86,10 +93,15 @@ export function mul(a: IntPoly, b: IntPoly): IntPoly {
     const ai = ta[i];
     if (ai === 0n) continue;
     for (let j = 0; j < tb.length; j += 1) {
-      out[i + j] += ai * tb[j];
+      out[i + j] = mix(out[i + j], ai, tb[j]);
     }
   }
   return trim(out);
+}
+
+/** `a * b` via the schoolbook convolution, trimmed. */
+export function mul(a: IntPoly, b: IntPoly): IntPoly {
+  return schoolbookMul(a, b, (acc, ai, bj) => acc + ai * bj);
 }
 
 /** `p * k` for a scalar `k: bigint`, trimmed. */
