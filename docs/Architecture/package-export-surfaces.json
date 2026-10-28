@@ -3198,6 +3198,7 @@
       "polynomialRoot",
       "polyReduce",
       "polySub",
+      "polyToDenseCoefficients",
       "polyToString",
       "polyval",
       "popConfigOverlay",

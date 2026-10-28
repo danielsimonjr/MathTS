@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-28'
   totalFiles: 1213
   totalModules: 82
-  totalExports: 6243
+  totalExports: 6244
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8522,6 +8522,7 @@ modules:
         - file: ./typed/polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
         - file: ./cas/rational-integrate.js
           imports:
             - integrateRationalFunction
@@ -11229,6 +11230,7 @@ modules:
         - file: ../typed/polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - Poly
         - file: ../typed/factorization/integer-poly.js
           imports:
@@ -19844,6 +19846,7 @@ modules:
         - file: ./polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - buchberger
             - normalize
             - polyToString
@@ -20583,6 +20586,7 @@ modules:
         - file: ../polynomial-ideal.js
           imports:
             - polyFromExpression
+            - polyToDenseCoefficients
             - Poly
         - file: ./integer-poly.js
           imports:
@@ -21897,6 +21901,7 @@ modules:
         - polyNeg
         - polySub
         - polyMul
+        - polyToDenseCoefficients
         - polyFromExpression
         - polyReduce
         - buchberger
@@ -21912,6 +21917,7 @@ modules:
         - polyNeg
         - polySub
         - polyMul
+        - polyToDenseCoefficients
         - polyFromExpression
         - polyReduce
         - buchberger
@@ -39916,11 +39922,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1213
   totalModules: 82
-  totalLinesOfCode: 200633
-  totalExports: 6243
+  totalLinesOfCode: 200631
+  totalExports: 6244
   totalClasses: 59
   totalInterfaces: 542
-  totalFunctions: 2011
+  totalFunctions: 2012
   totalTypeGuards: 158
   totalEnums: 0
   totalConstants: 1618
