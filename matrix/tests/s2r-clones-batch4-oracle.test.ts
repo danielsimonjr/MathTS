@@ -33,16 +33,14 @@ function readHeaderWords(
   };
 }
 
-describe('S2R batch4 — AS Int32 type ids stay file-local', () => {
-  it('Float64 is 5 in both files; Int32 is 4 in WasmLoader and 6 in WASMBackend', () => {
+describe('S2R batch4 — AS type ids from shared helper', () => {
+  it('WASMBackend and WasmLoader import AS ids from wasm/as-typed-array.ts', () => {
     const loaderSrc = fs.readFileSync(wasmLoaderSrc, 'utf8');
     const backendSrc = fs.readFileSync(wasmBackendSrc, 'utf8');
-    expect(loaderSrc).toMatch(/const AS_ID_FLOAT64_ARRAY = 5;/);
-    expect(backendSrc).toMatch(/const AS_ID_FLOAT64_ARRAY = 5;/);
-    expect(loaderSrc).toMatch(/const AS_ID_INT32_ARRAY = 4;/);
-    expect(backendSrc).toMatch(/const AS_ID_INT32_ARRAY = 6;/);
-    expect(loaderSrc).not.toMatch(/\ballocHeader\b/);
-    expect(backendSrc).not.toMatch(/\ballocateAs\b/);
+    expect(loaderSrc).toMatch(/from '\.\/wasm\/as-typed-array\.js'/);
+    expect(backendSrc).toMatch(/from '\.\/wasm\/as-typed-array\.js'/);
+    expect(loaderSrc).not.toMatch(/const AS_ID_FLOAT64_ARRAY =/);
+    expect(backendSrc).not.toMatch(/const AS_ID_FLOAT64_ARRAY =/);
   });
 });
 

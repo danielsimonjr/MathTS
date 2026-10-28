@@ -518,15 +518,7 @@ export interface WasmModule {
   memory: WebAssembly.Memory;
 }
 
-/**
- * AssemblyScript managed-runtime ID constants. Mirrored from
- * `assembly/build/mathts.js`; do not change without verifying against the
- * generated AS metadata.
- */
-const AS_ID_ARRAY_BUFFER = 1;
-const AS_ID_INT32_ARRAY = 4;
-const AS_ID_FLOAT64_ARRAY = 5;
-const AS_HEADER_BYTES = 12;
+import { AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView } from './wasm/as-typed-array.js';
 
 /**
  * Opaque allocation handle returned by `allocateFloat64Array` and friends.
@@ -936,15 +928,17 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
     }
   ): Allocation<T> {
     const byteLength = length * opts.bytes;
-    const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-    const headerPtr = module.__new(AS_HEADER_BYTES, opts.typeId) >>> 0;
-    module.__pin(headerPtr);
-    // Write header: [dataStart, dataStart, byteLength] (little-endian u32s).
-    const dv = new DataView(module.memory.buffer);
-    dv.setUint32(headerPtr + 0, bufferPtr, true);
-    dv.setUint32(headerPtr + 4, bufferPtr, true);
-    dv.setUint32(headerPtr + 8, byteLength, true);
-    const array = new opts.Ctor(module.memory.buffer, bufferPtr, length) as T;
+    const {
+      headerPtr,
+      bufferPtr,
+      view: array,
+    } = allocAsTypedView(
+      module,
+      byteLength,
+      length,
+      opts.typeId,
+      opts.Ctor as unknown as new (b: ArrayBuffer, o: number, l: number) => T
+    );
     this.track(pool, headerPtr, bufferPtr, byteLength);
     return { ptr: headerPtr, dataPtr: bufferPtr, array, length };
   }
