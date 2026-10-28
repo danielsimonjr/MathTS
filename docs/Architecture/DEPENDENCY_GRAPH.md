@@ -134,7 +134,7 @@ The codebase is organized into the following modules:
 - **functions/error**: 3 files
 - **functions/expression**: 1 file
 - **functions/factories**: 4 files
-- **functions/geometry**: 11 files
+- **functions/geometry**: 12 files
 - **functions/gpu**: 2 files
 - **functions/graph**: 3 files
 - **functions/logical**: 5 files
@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 44 files
+- **functions/typed**: 45 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 494            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 496            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5546,14 +5546,23 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports    | Type   |
-| --------------- | ---------- | ------ |
-| `./delaunay.js` | `delaunay` | Import |
+| File                | Imports        | Type   |
+| ------------------- | -------------- | ------ |
+| `./delaunay.js`     | `delaunay`     | Import |
+| `./circumcircle.js` | `circumcircle` | Import |
 
 **Exports:**
 
 - Interfaces: `AlphaShapeResult`
 - Functions: `alphaShape`
+
+---
+
+### `functions/src/geometry/circumcircle.ts` - Shared 2-D circumcircle computation for geometry consumers.
+
+**Exports:**
+
+- Functions: `circumcircle`
 
 ---
 
@@ -5711,9 +5720,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File            | Imports    | Type   |
-| --------------- | ---------- | ------ |
-| `./delaunay.js` | `delaunay` | Import |
+| File                | Imports        | Type   |
+| ------------------- | -------------- | ------ |
+| `./delaunay.js`     | `delaunay`     | Import |
+| `./circumcircle.js` | `circumcircle` | Import |
 
 **Exports:**
 
@@ -6209,11 +6219,17 @@ graph LR
 
 ---
 
-### `functions/src/matrix/from-vectors.ts` - Return the logical length of a 1-D or 2-D column/row vector.
+### `functions/src/matrix/from-vectors.ts` - Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
+
+**Internal Dependencies:**
+
+| File                   | Imports                     | Type   |
+| ---------------------- | --------------------------- | ------ |
+| `./sparse-csc-tail.js` | `buildSparseCscFromEntries` | Import |
 
 **Exports:**
 
-- Functions: `vectorLength`, `matrixFromVectorList`
+- Functions: `sparseMatrixFromVectors`, `vectorLength`, `matrixFromVectorList`
 
 ---
 
@@ -6354,11 +6370,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                              | Type   |
-| ---------------------- | ------------------------------------ | ------ |
-| `../utils/factory.js`  | `factory`                            | Import |
-| `./from-vectors.js`    | `matrixFromVectorList, vectorLength` | Import |
-| `./sparse-csc-tail.js` | `buildSparseCscFromEntries`          | Import |
+| File                  | Imports                                                       | Type   |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| `../utils/factory.js` | `factory`                                                     | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, sparseMatrixFromVectors, vectorLength` | Import |
 
 **Exports:**
 
@@ -6385,11 +6400,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                              | Type   |
-| ---------------------- | ------------------------------------ | ------ |
-| `../utils/factory.js`  | `factory`                            | Import |
-| `./from-vectors.js`    | `matrixFromVectorList, vectorLength` | Import |
-| `./sparse-csc-tail.js` | `buildSparseCscFromEntries`          | Import |
+| File                  | Imports                                                       | Type   |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| `../utils/factory.js` | `factory`                                                     | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, sparseMatrixFromVectors, vectorLength` | Import |
 
 **Exports:**
 
@@ -9937,6 +9951,7 @@ graph LR
 | `./polynomial-ideal.js`           | `polyFromExpression, polyToDenseCoefficients, buchberger, normalize, polyToString, Poly`                       | Import |
 | `./factorization/index.js`        | `factorPolynomialUnivariate, cleanUnivariatePoly, factorMultivariateString`                                    | Import |
 | `./factorization/integer-poly.js` | `polyGcdZ`                                                                                                     | Import |
+| `./string-derivative.js`          | `derivativeOfAdditiveTerms`                                                                                    | Import |
 
 **Exports:**
 
@@ -10011,6 +10026,7 @@ graph LR
 | `./euclid.js`                    | `euclidSnap`                                   | Import |
 | `./polynomial-ideal.js`          | `polyFromExpression, buchberger, polyToString` | Import |
 | `./algebra.js`                   | `expand, factor`                               | Import |
+| `./string-derivative.js`         | `derivativeOfAdditiveTerms`                    | Import |
 | `../factories/index.js`          | `polynomialRoot`                               | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                 | Import |
 | `./numeric.js`                   | `findRoot`                                     | Import |
@@ -10693,6 +10709,14 @@ graph LR
 - Types: `NormalizationType`
 - Functions: `parallelStatPercentile`, `quickSelect`, `medianSelect`, `minSelect`, `maxSelect`, `initializeStatistics`, `terminateStatistics`
 - Constants: `parallelStatSum`, `parallelStatMean`, `parallelStatVariance`, `parallelStatStd`, `parallelStatMin`, `parallelStatMax`, `parallelStatMinMax`, `parallelStatMedian`, `parallelStatMode`, `parallelStatProd`, `parallelStatNorm`, `parallelStatDistance`, `parallelStatCorr`, `parallelStatMAD`, `parallelStatMeanAD`, `parallelStatCumsum`, `parallelStatQuantile`, `parallelStatHistogram`, `typedStatistics`
+
+---
+
+### `functions/src/typed/string-derivative.ts` - Symbolic derivative of a sum of additive terms (split on `' + '`).
+
+**Exports:**
+
+- Functions: `derivativeOfAdditiveTerms`
 
 ---
 
@@ -18518,16 +18542,16 @@ graph TD
 
     subgraph Functions/geometry
         N163[alpha-shape]
-        N164[delaunay]
-        N165[distance]
-        N166[geometry-extra]
-        N167[halfspace-intersection]
-        N168[hull]
-        N169[intersect]
-        N170[intersect3d]
-        N171[mass-properties]
-        N172[spherical-voronoi]
-        N173[...1 more]
+        N164[circumcircle]
+        N165[delaunay]
+        N166[distance]
+        N167[geometry-extra]
+        N168[halfspace-intersection]
+        N169[hull]
+        N170[intersect]
+        N171[intersect3d]
+        N172[mass-properties]
+        N173[...2 more]
     end
 
     subgraph Functions/gpu
@@ -18742,7 +18766,7 @@ graph TD
         N328[complex]
         N329[dist-objects]
         N330[distributions]
-        N331[...34 more]
+        N331[...35 more]
     end
 
     subgraph Functions/unit
@@ -19101,14 +19125,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1215   |
+| Total TypeScript Files  | 1217   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200576 |
-| Total Exports           | 6250   |
+| Total Lines of Code     | 200610 |
+| Total Exports           | 6253   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 543    |
-| Total Functions         | 2018   |
+| Total Functions         | 2021   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

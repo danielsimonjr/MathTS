@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1215, "e": 6250, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1217, "e": 6253, "re": 2627 },
   "s": {
-    "loc": 200576,
+    "loc": 200610,
     "cls": 59,
     "int": 543,
-    "fn": 2018,
+    "fn": 2021,
     "tg": 159,
     "en": 0,
     "co": 1618,
@@ -642,9 +642,10 @@
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
     },
     "functions/geometry": {
-      "f": 11,
+      "f": 12,
       "exp": [
         "alphaShape",
+        "circumcircle",
         "delaunay",
         "createDistance",
         "quaternionInverse",
@@ -662,8 +663,7 @@
         "setDisjoint",
         "halfspaceIntersection",
         "convexHull",
-        "createIntersect",
-        "rayTriangleIntersect"
+        "createIntersect"
       ],
       "int": [
         "AlphaShapeResult",
@@ -744,9 +744,9 @@
         "createFilter",
         "createFlatten",
         "createForEach",
+        "sparseMatrixFromVectors",
         "vectorLength",
-        "matrixFromVectorList",
-        "createGetMatrixDataType"
+        "matrixFromVectorList"
       ],
       "int": [
         "Matrix",
@@ -1113,7 +1113,7 @@
       ]
     },
     "functions/typed": {
-      "f": 44,
+      "f": 45,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",

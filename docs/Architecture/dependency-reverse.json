@@ -2179,6 +2179,10 @@
       "functions/src/factories/scope.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/geometry/circumcircle.ts": [
+      "functions/src/geometry/alpha-shape.ts",
+      "functions/src/geometry/voronoi.ts"
+    ],
     "functions/src/typed/geometry.ts": [
       "functions/src/geometry/delaunay.ts",
       "functions/src/geometry/hull.ts",
@@ -2214,11 +2218,8 @@
       "functions/src/matrix/forEach.ts",
       "functions/src/matrix/map.ts"
     ],
+    "functions/src/matrix/sparse-csc-tail.ts": ["functions/src/matrix/from-vectors.ts"],
     "functions/src/matrix/from-vectors.ts": [
-      "functions/src/matrix/matrixFromColumns.ts",
-      "functions/src/matrix/matrixFromRows.ts"
-    ],
-    "functions/src/matrix/sparse-csc-tail.ts": [
       "functions/src/matrix/matrixFromColumns.ts",
       "functions/src/matrix/matrixFromRows.ts"
     ],
@@ -2364,6 +2365,10 @@
       "functions/src/typed/interpolation.ts"
     ],
     "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/typed/string-derivative.ts": [
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/typed/euclid.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"

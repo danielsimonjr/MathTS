@@ -30,6 +30,7 @@ import {
 // Real polynomial/rational CAS engines — casExpand/casFactor delegate to these
 // (they were formerly crude string-manipulation stubs).
 import { expand as algebraExpand, factor as algebraFactor } from './algebra.js';
+import { derivativeOfAdditiveTerms } from './string-derivative.js';
 
 import { Complex } from '@danielsimonjr/mathts-core';
 // Reuse the Algebra closed-form root finder for degree ≤ 3 (linear/quadratic/
@@ -692,6 +693,34 @@ const laplaceTable: LaplaceEntry[] = [
   },
 ];
 
+type TransformTableEntry = {
+  pattern: RegExp;
+  transform: (match: RegExpMatchArray, a: string, b: string) => string;
+};
+
+/**
+ * Walk a transform lookup table: substitute {@code patternVar} into each
+ * anchored pattern and return the first matching transform result.
+ */
+function firstTransformHit(
+  trimmed: string,
+  patternVar: string,
+  table: TransformTableEntry[],
+  argA: string,
+  argB: string
+): string | undefined {
+  const escapedVar = patternVar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const entry of table) {
+    const patternStr = entry.pattern.source.replace(/__VAR__/g, escapedVar);
+    const regex = new RegExp(`^${patternStr}$`);
+    const match = trimmed.match(regex);
+    if (match) {
+      return entry.transform(match, argA, argB);
+    }
+  }
+  return undefined;
+}
+
 /**
  * Compute the Laplace transform of an expression.
  *
@@ -712,17 +741,9 @@ const laplaceTable: LaplaceEntry[] = [
 export function laplace(expr: string, t: string, s: string): string {
   const trimmed = expr.trim();
 
-  for (const entry of laplaceTable) {
-    // Replace __VAR__ placeholder with the actual variable name
-    const patternStr = entry.pattern.source.replace(
-      /__VAR__/g,
-      t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
-    const regex = new RegExp(`^${patternStr}$`);
-    const match = trimmed.match(regex);
-    if (match) {
-      return entry.transform(match, t, s);
-    }
+  const hit = firstTransformHit(trimmed, t, laplaceTable, t, s);
+  if (hit !== undefined) {
+    return hit;
   }
 
   // Constant (no t variable)
@@ -812,16 +833,9 @@ const inverseLaplaceTable: InverseLaplaceEntry[] = [
 export function inverseLaplace(expr: string, s: string, t: string): string {
   const trimmed = expr.trim();
 
-  for (const entry of inverseLaplaceTable) {
-    const patternStr = entry.pattern.source.replace(
-      /__VAR__/g,
-      s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
-    const regex = new RegExp(`^${patternStr}$`);
-    const match = trimmed.match(regex);
-    if (match) {
-      return entry.transform(match, s, t);
-    }
+  const hit = firstTransformHit(trimmed, s, inverseLaplaceTable, s, t);
+  if (hit !== undefined) {
+    return hit;
   }
 
   return `L^-1{${trimmed}}(${t})`;
@@ -1291,6 +1305,41 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
 }
 
 /**
+ * Fold {@code evalAt(expr, varName, k)} for {@code k = a, a+1, …} while
+ * {@code k <= b} (non-integer bounds still step by 1 from {@code a}).
+ *
+ * {@code a > b} returns {@code identity} without calling {@code evalAt}.
+ * Finite-bound checks run first so {@code NaN} and {@code Infinity} throw.
+ *
+ * @param identity - Left identity of {@code op} (0 for sum, 1 for product)
+ * @param op - Combining operator; applied once per visited k
+ * @param fnName - Prefix for the finite-bounds error
+ */
+function foldIntegerRange(
+  expr: string,
+  varName: string,
+  a: number,
+  b: number,
+  identity: number,
+  op: (acc: number, term: number) => number,
+  fnName: string
+): f64 {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    throw new Error(
+      `${fnName}: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
+    );
+  }
+  if (a > b) {
+    return identity;
+  }
+  let acc = identity;
+  for (let k = a; k <= b; k++) {
+    acc = op(acc, evalAt(expr, varName, k));
+  }
+  return acc;
+}
+
+/**
  * Compute a finite numerical summation.
  *
  * Evaluates expr at each integer k from a to b (inclusive) and accumulates
@@ -1310,17 +1359,7 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
  * summation('1', 'k', 1, 50)      // => 50
  */
 export function summation(expr: string, varName: string, a: number, b: number): f64 {
-  if (!Number.isFinite(a) || !Number.isFinite(b)) {
-    throw new Error(
-      `summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
-    );
-  }
-  // Direct numerical summation (always correct for finite sums)
-  let sum: f64 = 0;
-  for (let k = a; k <= b; k++) {
-    sum += evalAt(expr, varName, k);
-  }
-  return sum;
+  return foldIntegerRange(expr, varName, a, b, 0, (acc, v) => acc + v, 'summation');
 }
 
 /**
@@ -1339,16 +1378,7 @@ export function summation(expr: string, varName: string, a: number, b: number): 
  * symbolicProduct('2*k', 'k', 1, 4)  // => 384
  */
 export function symbolicProduct(expr: string, varName: string, a: number, b: number): f64 {
-  if (!Number.isFinite(a) || !Number.isFinite(b)) {
-    throw new Error(
-      `symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound ${JSON.stringify(a)}, upper bound ${JSON.stringify(b)})`
-    );
-  }
-  let product: f64 = 1;
-  for (let k = a; k <= b; k++) {
-    product *= evalAt(expr, varName, k);
-  }
-  return product;
+  return foldIntegerRange(expr, varName, a, b, 1, (acc, v) => acc * v, 'symbolicProduct');
 }
 
 // =============================================================================
@@ -2571,75 +2601,7 @@ function _combineLikeTerms(expr: string): string {
  */
 function _casDerivativeOne(expr: string, variable: string): string {
   if (expr.indexOf(variable) === -1) return '0';
-
-  const terms = expr.split(/\s*\+\s*/);
-  const derivedTerms: string[] = [];
-
-  const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
-  const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
-
-  for (const term of terms) {
-    const t = term.trim();
-
-    if (t.indexOf(variable) === -1) {
-      derivedTerms.push('0');
-      continue;
-    }
-
-    // c*var^n
-    const powerMatch = t.match(powerRe);
-    if (powerMatch) {
-      const coeff =
-        powerMatch[1] === '' || powerMatch[1] === undefined ? 1 : parseFloat(powerMatch[1]);
-      const n = parseInt(powerMatch[2], 10);
-      if (n === 0) {
-        derivedTerms.push('0');
-      } else if (n === 1) {
-        derivedTerms.push(String(coeff));
-      } else {
-        derivedTerms.push(coeff * n + '*' + variable + '^' + (n - 1));
-      }
-      continue;
-    }
-
-    // c*var (linear)
-    const linearMatch = t.match(linearRe);
-    if (linearMatch) {
-      const coeff = linearMatch[1] === '' ? 1 : parseFloat(linearMatch[1]);
-      derivedTerms.push(String(coeff));
-      continue;
-    }
-
-    // var alone
-    if (t === variable) {
-      derivedTerms.push('1');
-      continue;
-    }
-
-    if (t === 'sin(' + variable + ')') {
-      derivedTerms.push('cos(' + variable + ')');
-      continue;
-    }
-
-    if (t === 'cos(' + variable + ')') {
-      derivedTerms.push('-sin(' + variable + ')');
-      continue;
-    }
-
-    if (t === 'exp(' + variable + ')') {
-      derivedTerms.push('exp(' + variable + ')');
-      continue;
-    }
-
-    if (t === 'ln(' + variable + ')') {
-      derivedTerms.push('1/' + variable);
-      continue;
-    }
-
-    derivedTerms.push('d/d' + variable + '(' + t + ')');
-  }
-
-  return derivedTerms.join(' + ');
+  return derivativeOfAdditiveTerms(expr, variable);
 }
 
 // ---------------------------------------------------------------------------

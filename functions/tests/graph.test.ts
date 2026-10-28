@@ -121,6 +121,69 @@ describe('Graph Theory', () => {
     it('should throw for out of bounds', () => {
       expect(() => shortestPath([[0]], -1, 0)).toThrow();
     });
+
+    it('throws shortestPath-specific message when end is out of bounds', () => {
+      expect(() =>
+        shortestPath(
+          [
+            [0, 1],
+            [1, 0],
+          ],
+          0,
+          2
+        )
+      ).toThrow('shortestPath: start or end out of bounds');
+    });
+
+    it('throws on empty graph', () => {
+      expect(() => shortestPath([], 0, 0)).toThrow('shortestPath: start or end out of bounds');
+    });
+
+    it('ignores zero-weight edges', () => {
+      const adj = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+      expect(shortestPath(adj, 0, 2)).toEqual([]);
+    });
+
+    it('ignores negative edge weights', () => {
+      const adj = [
+        [0, -5, 0],
+        [-5, 0, 1],
+        [0, 1, 0],
+      ];
+      expect(shortestPath(adj, 0, 2)).toEqual([]);
+    });
+
+    it('does not relax through NaN edge weight', () => {
+      const adj = [
+        [0, NaN, 0],
+        [NaN, 0, 0],
+        [0, 0, 0],
+      ];
+      expect(shortestPath(adj, 0, 2)).toEqual([]);
+    });
+
+    it('first-wins predecessor tie keeps path [0, 1, 3]', () => {
+      const adj = [
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [0, 1, 1, 0],
+      ];
+      expect(shortestPath(adj, 0, 3)).toEqual([0, 1, 3]);
+    });
+
+    it('returns empty when middle node is disconnected', () => {
+      const adj = [
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 0, 0],
+      ];
+      expect(shortestPath(adj, 0, 2)).toEqual([]);
+    });
   });
 
   // ===========================================================================
@@ -323,6 +386,53 @@ describe('Graph Theory', () => {
         [10, 1, 0],
       ];
       expect(graphDistance(adj, 0, 2)).toBe(2); // 0->1->2
+    });
+
+    it('throws graphDistance-specific message when start is out of bounds', () => {
+      expect(() => graphDistance([[0]], -1, 0)).toThrow(
+        'graphDistance: start or end out of bounds'
+      );
+    });
+
+    it('throws on empty graph', () => {
+      expect(() => graphDistance([], 0, 0)).toThrow('graphDistance: start or end out of bounds');
+    });
+
+    it('ignores zero-weight edges', () => {
+      const adj = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+      ];
+      expect(graphDistance(adj, 0, 2)).toBe(Infinity);
+    });
+
+    it('ignores negative edge weights', () => {
+      const adj = [
+        [0, -3, 0],
+        [-3, 0, 2],
+        [0, 2, 0],
+      ];
+      expect(graphDistance(adj, 0, 2)).toBe(Infinity);
+    });
+
+    it('does not relax through NaN edge weight', () => {
+      const adj = [
+        [0, NaN, 0],
+        [NaN, 0, 0],
+        [0, 0, 0],
+      ];
+      expect(graphDistance(adj, 0, 2)).toBe(Infinity);
+    });
+
+    it('matches shortestPath weight on first-wins tie graph', () => {
+      const adj = [
+        [0, 1, 1, 0],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [0, 1, 1, 0],
+      ];
+      expect(graphDistance(adj, 0, 3)).toBe(2);
     });
   });
 });

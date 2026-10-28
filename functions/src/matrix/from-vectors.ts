@@ -1,3 +1,5 @@
+import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
+
 interface Matrix {
   type: string;
   storage(): string;
@@ -6,6 +8,10 @@ interface Matrix {
   clone(): Matrix;
   toArray(): unknown;
   forEach?(cb: (value: unknown, index: number[], matrix: Matrix) => void): void;
+}
+
+interface FlattenFunction {
+  (arr: unknown): unknown[];
 }
 
 interface MatrixConstructor {
@@ -20,6 +26,75 @@ interface MatrixConstructor {
 
 interface SizeFunction {
   (arr: unknown): number[];
+}
+
+/**
+ * Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
+ * Resolves `axis` once so the entry loop does not re-test the string.
+ * Length-mismatch text, zero-skip (`val !== 0`, so NaN is kept), and CSC
+ * assembly match the former `_createSparseMatrixFromColumns` / `…FromRows`.
+ * @internal Module export only — not on the package barrel.
+ * @param arr Column or row vectors (caller guarantees `arr.length >= 1`).
+ * @param axis `'column'` → shape `[len, count]`; `'row'` → `[count, len]`.
+ */
+export function sparseMatrixFromVectors(
+  arr: Matrix[],
+  axis: 'column' | 'row',
+  size: SizeFunction,
+  flatten: FlattenFunction,
+  matrix: MatrixConstructor
+): Matrix {
+  const count = arr.length;
+  const len = vectorLength(arr[0], size);
+  const isColumn = axis === 'column';
+  const numRows = isColumn ? len : count;
+  const numCols = isColumn ? count : len;
+  const cscSize: [number, number] = [numRows, numCols];
+
+  const entries: { row: number; col: number; value: unknown }[] = [];
+
+  for (let j = 0; j < count; j++) {
+    const vec = arr[j];
+    const alongLen = vectorLength(vec, size);
+    if (alongLen !== len) {
+      throw new TypeError(
+        'The vectors had different length: ' + (len | 0) + ' ≠ ' + (alongLen | 0)
+      );
+    }
+
+    if (typeof vec.forEach === 'function') {
+      const s = size(vec);
+      const is1D = s.length === 1;
+      const isCol = s.length === 2 && s[1] === 1;
+
+      vec.forEach((val, idx) => {
+        let along: number;
+        if (is1D) {
+          along = idx[0];
+        } else if (isCol) {
+          along = idx[0];
+        } else {
+          along = idx[1];
+        }
+        const row = isColumn ? along : j;
+        const col = isColumn ? j : along;
+        if (val !== 0) {
+          entries.push({ row, col, value: val });
+        }
+      });
+    } else {
+      const f = flatten(vec);
+      for (let k = 0; k < len; k++) {
+        if (f[k] !== 0) {
+          const row = isColumn ? k : j;
+          const col = isColumn ? j : k;
+          entries.push({ row, col, value: f[k] });
+        }
+      }
+    }
+  }
+
+  return buildSparseCscFromEntries(entries, numCols, cscSize, matrix) as Matrix;
 }
 
 /**
