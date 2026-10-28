@@ -7982,7 +7982,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2806
+      "loc": 2817
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -8234,7 +8234,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 79
+      "loc": 84
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -8738,7 +8738,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 127
+      "loc": 184
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",

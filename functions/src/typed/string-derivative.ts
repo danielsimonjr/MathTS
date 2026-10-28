@@ -5,6 +5,12 @@
  * Does not apply the “no variable in whole expression → `'0'`” shortcut; callers
  * handle that when needed.
  *
+ * Power/linear {@link RegExp}s are built per term, and only after that term
+ * contains {@code variable}. Hoisting them (as `_casDerivativeOne` used to)
+ * throws `SyntaxError` for a regex-metacharacter variable even when no term
+ * contains it — `symbolicPartialDerivative('1 + 2', '*')` must stay `'0 + 0'`.
+ * {@code variable} is still interpolated raw, matching both callers.
+ *
  * @param expr - Expression treated as a sum of terms
  * @param variable - Differentiation variable (interpolated raw into RegExp)
  * @returns Derivative string with terms joined by `' + '`
@@ -12,9 +18,6 @@
 export function derivativeOfAdditiveTerms(expr: string, variable: string): string {
   const terms = expr.split(/\s*\+\s*/);
   const derivedTerms: string[] = [];
-
-  const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
-  const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
 
   for (const term of terms) {
     const t = term.trim();
@@ -24,6 +27,8 @@ export function derivativeOfAdditiveTerms(expr: string, variable: string): strin
       continue;
     }
 
+    const powerRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '\\^(\\d+)$');
+    const linearRe = new RegExp('^(-?\\d*\\.?\\d*)\\s*\\*?\\s*' + variable + '$');
     const powerMatch = t.match(powerRe);
     if (powerMatch) {
       const coeff =

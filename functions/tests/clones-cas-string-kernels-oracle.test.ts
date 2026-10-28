@@ -27,20 +27,47 @@ describe('clone oracle — foldIntegerRange (summation / symbolicProduct)', () =
     expect(symbolicProduct('k', 'k', 1.5, 3.5)).toBe(1.5 * 2.5 * 3.5);
   });
 
-  it('NaN bound throws with function name prefix', () => {
-    expect(() => summation('k', 'k', NaN, 3)).toThrow(/^summation:/);
-    expect(() => symbolicProduct('k', 'k', 1, NaN)).toThrow(/^symbolicProduct:/);
+  it('NaN bound throws Error with JSON.stringify(NaN) === null in the message', () => {
+    expect(() => summation('k', 'k', NaN, 3)).toThrow(Error);
+    expect(() => summation('k', 'k', NaN, 3)).toThrow(
+      'summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound null, upper bound 3)'
+    );
+    expect(() => symbolicProduct('k', 'k', 1, NaN)).toThrow(Error);
+    expect(() => symbolicProduct('k', 'k', 1, NaN)).toThrow(
+      'symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound 1, upper bound null)'
+    );
   });
 
-  it('Infinity bound throws with function name prefix', () => {
-    expect(() => summation('k', 'k', 1, Infinity)).toThrow(/^summation:/);
-    expect(() => symbolicProduct('k', 'k', -Infinity, 2)).toThrow(/^symbolicProduct:/);
+  it('Infinity bound throws Error with JSON.stringify(Infinity) === null in the message', () => {
+    expect(() => summation('k', 'k', 1, Infinity)).toThrow(
+      'summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound 1, upper bound null)'
+    );
+    expect(() => symbolicProduct('k', 'k', -Infinity, 2)).toThrow(
+      'symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound null, upper bound 2)'
+    );
   });
 
   it('non-numeric bound throws', () => {
-    expect(() => summation('k', 'k', 1, 'n' as unknown as number)).toThrow(/^summation:/);
+    expect(() => summation('k', 'k', 1, 'n' as unknown as number)).toThrow(
+      'summation: bounds must be finite numbers (symbolic bounds are not supported; got lower bound "n", upper bound 3)'
+    );
     expect(() => symbolicProduct('k', 'k', 1, 'n' as unknown as number)).toThrow(
-      /^symbolicProduct:/
+      'symbolicProduct: bounds must be finite numbers (symbolic bounds are not supported; got lower bound 1, upper bound "n")'
+    );
+  });
+
+  it('a > b does not call evalAt (malformed expr still returns identity)', () => {
+    expect(summation('((((', 'k', 5, 4)).toBe(0);
+    expect(symbolicProduct('((((', 'k', 5, 4)).toBe(1);
+    expect(summation('not_a_fn(k)', 'k', 1e15, 1e15 - 1)).toBe(0);
+  });
+
+  it('a === b still evaluates once and a throwing term still throws', () => {
+    expect(() => summation('((((', 'k', 2, 2)).toThrow(SyntaxError);
+    expect(() => summation('((((', 'k', 2, 2)).toThrow('Unexpected end of expression (char 5)');
+    expect(() => symbolicProduct('not_a_fn(k)', 'k', 1, 3)).toThrow(Error);
+    expect(() => symbolicProduct('not_a_fn(k)', 'k', 1, 3)).toThrow(
+      'Undefined function "not_a_fn"'
     );
   });
 });
@@ -88,6 +115,30 @@ describe('clone oracle — string derivative (symbolicPartialDerivative / casDer
   it('variable name that is a regex metacharacter (unchanged behavior)', () => {
     expect(symbolicPartialDerivative('a', 'a')).toBe('1');
     expect(casDerivative('a.b', 'a')).toBe('d/da(a.b)');
+    // No term contains the metachar: must not construct the term regexes
+    // (hoisting them threw SyntaxError; old symbolicPartialDerivative returned zeros).
+    expect(symbolicPartialDerivative('1 + 2', '*')).toBe('0 + 0');
+    expect(symbolicPartialDerivative('x^2', '*')).toBe('0');
+    expect(symbolicPartialDerivative('x^2', '(')).toBe('0');
+    expect(casDerivative('1 + 2', '*')).toBe('0');
+    // A term that does contain the metachar still builds the raw RegExp and throws.
+    expect(() => symbolicPartialDerivative('sin(x)', '(')).toThrow(SyntaxError);
+  });
+
+  it('parentheses, nested functions, unary minus, products, x vs y, whitespace', () => {
+    expect(symbolicPartialDerivative('(x + 1)', 'x')).toBe('d/dx((x) + 0');
+    expect(symbolicPartialDerivative('sin(x + y)', 'x')).toBe('d/dx(sin(x) + 0');
+    expect(symbolicPartialDerivative('sin(cos(x))', 'x')).toBe('d/dx(sin(cos(x)))');
+    expect(symbolicPartialDerivative('-x', 'x')).toBe('NaN');
+    expect(symbolicPartialDerivative('-2*x', 'x')).toBe('-2');
+    expect(symbolicPartialDerivative('2*x*y', 'x')).toBe('d/dx(2*x*y)');
+    expect(symbolicPartialDerivative('x^2 + y^2', 'y')).toBe('0 + 2*y^1');
+    expect(symbolicPartialDerivative('x^2 + y^2', 'x')).toBe('2*x^1 + 0');
+    expect(symbolicPartialDerivative('  x^2  +  3  ', 'x')).toBe('2*x^1 + 0');
+    expect(symbolicPartialDerivative('sin(x)+cos(x)', 'x')).toBe('cos(x) + -sin(x)');
+    expect(symbolicPartialDerivative('.5*x', 'x')).toBe('0.5');
+    expect(casDerivative('(x + 1)', 'x')).toBe('d/dx((x) + 0');
+    expect(casDerivative('sin(cos(x))', 'x')).toBe('d/dx(sin(cos(x)))');
   });
 
   it('casDerivative array overload returns per-element derivatives', async () => {
@@ -122,5 +173,13 @@ describe('clone oracle — Laplace table walk (laplace / inverseLaplace)', () =>
   it('inverse Laplace of constant not in table stays placeholder (no c/s fallback)', () => {
     expect(inverseLaplace('5', 's', 't')).toBe('L^-1{5}(t)');
     expect(laplace('5', 't', 's')).toBe('5/s');
+  });
+
+  it('regex metacharacter variable is escaped (today’s match behavior)', () => {
+    expect(laplace('1', '.', 's')).toBe('1/s');
+    expect(laplace('.', '.', 's')).toBe('1/s^2');
+    expect(laplace('sin(.)', '.', 's')).toBe('1/(s^2 + 1)');
+    expect(inverseLaplace('1/.', '.', 't')).toBe('1');
+    expect(laplace('1', '*', 's')).toBe('1/s');
   });
 });

@@ -1305,23 +1305,15 @@ export function implicitDiff(expr: string, x: string, y: string, scope: Record<s
 }
 
 /**
- * Compute a finite numerical summation.
+ * Fold {@code evalAt(expr, varName, k)} for {@code k = a, a+1, …} while
+ * {@code k <= b} (non-integer bounds still step by 1 from {@code a}).
  *
- * Evaluates expr at each integer k from a to b (inclusive) and accumulates
- * the sum. Both bounds must be finite numbers; there is no symbolic or
- * closed-form (e.g. Faulhaber) path — a non-numeric bound throws rather
- * than silently returning 0.
+ * {@code a > b} returns {@code identity} without calling {@code evalAt}.
+ * Finite-bound checks run first so {@code NaN} and {@code Infinity} throw.
  *
- * @param expr - Expression to sum (function of varName)
- * @param varName - Summation index variable
- * @param a - Lower bound (finite integer)
- * @param b - Upper bound (finite integer)
- * @returns Sum value
- *
- * @example
- * summation('k', 'k', 1, 100)     // => 5050
- * summation('k^2', 'k', 1, 10)    // => 385
- * summation('1', 'k', 1, 50)      // => 50
+ * @param identity - Left identity of {@code op} (0 for sum, 1 for product)
+ * @param op - Combining operator; applied once per visited k
+ * @param fnName - Prefix for the finite-bounds error
  */
 function foldIntegerRange(
   expr: string,
@@ -1347,6 +1339,25 @@ function foldIntegerRange(
   return acc;
 }
 
+/**
+ * Compute a finite numerical summation.
+ *
+ * Evaluates expr at each integer k from a to b (inclusive) and accumulates
+ * the sum. Both bounds must be finite numbers; there is no symbolic or
+ * closed-form (e.g. Faulhaber) path — a non-numeric bound throws rather
+ * than silently returning 0.
+ *
+ * @param expr - Expression to sum (function of varName)
+ * @param varName - Summation index variable
+ * @param a - Lower bound (finite integer)
+ * @param b - Upper bound (finite integer)
+ * @returns Sum value
+ *
+ * @example
+ * summation('k', 'k', 1, 100)     // => 5050
+ * summation('k^2', 'k', 1, 10)    // => 385
+ * summation('1', 'k', 1, 50)      // => 50
+ */
 export function summation(expr: string, varName: string, a: number, b: number): f64 {
   return foldIntegerRange(expr, varName, a, b, 0, (acc, v) => acc + v, 'summation');
 }
