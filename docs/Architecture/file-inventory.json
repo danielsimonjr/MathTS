@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1984,
+  "totalFiles": 1985,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 707,
+    "test": 708,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1215,
-    "tests": 707,
+    "tests": 708,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 836,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 107,
+    "@danielsimonjr/mathts-matrix": 108,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 16,
@@ -11314,7 +11314,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 298
+      "loc": 333
     },
     {
       "file": "matrix/src/operations/condest.ts",
@@ -11342,14 +11342,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 199
+      "loc": 171
     },
     {
       "file": "matrix/src/operations/givens.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 36
+      "loc": 55
     },
     {
       "file": "matrix/src/operations/index.ts",
@@ -11363,7 +11363,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 425
+      "loc": 411
     },
     {
       "file": "matrix/src/operations/lu.ts",
@@ -11405,14 +11405,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 431
+      "loc": 407
     },
     {
       "file": "matrix/src/operations/sqrtm.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 532
+      "loc": 533
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -11426,7 +11426,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 676
+      "loc": 659
     },
     {
       "file": "matrix/src/parallel-matrix.ts",
@@ -11665,6 +11665,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 197
+    },
+    {
+      "file": "matrix/tests/operations/clones-batch-a-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 329
     },
     {
       "file": "matrix/tests/operations/common.test.ts",
