@@ -24,6 +24,27 @@ type i32 = number;
 // =============================================================================
 
 /**
+ * Angle (radians) between two vectors using the first `n` components.
+ *
+ * Summation order matches the former unrolled dot and magnitude sums so NaN
+ * propagation and zero-length detection stay identical.
+ */
+function angleBetween(v1: number[], v2: number[], n: number): f64 {
+  let dot: f64 = 0;
+  let mag1Sq: f64 = 0;
+  let mag2Sq: f64 = 0;
+  for (let i = 0; i < n; i++) {
+    dot += v1[i] * v2[i];
+    mag1Sq += v1[i] ** 2;
+    mag2Sq += v2[i] ** 2;
+  }
+  const mag1: f64 = Math.sqrt(mag1Sq);
+  const mag2: f64 = Math.sqrt(mag2Sq);
+  if (mag1 === 0 || mag2 === 0) return NaN;
+  return Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2))));
+}
+
+/**
  * Compute the angle (in radians) between two 2D vectors.
  *
  * @param v1 - First 2D vector
@@ -31,11 +52,7 @@ type i32 = number;
  * @returns Angle in radians [0, pi]
  */
 export function angle2D(v1: number[], v2: number[]): f64 {
-  const dot: f64 = v1[0] * v2[0] + v1[1] * v2[1];
-  const mag1: f64 = Math.sqrt(v1[0] ** 2 + v1[1] ** 2);
-  const mag2: f64 = Math.sqrt(v2[0] ** 2 + v2[1] ** 2);
-  if (mag1 === 0 || mag2 === 0) return NaN;
-  return Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2))));
+  return angleBetween(v1, v2, 2);
 }
 
 /**
@@ -46,11 +63,7 @@ export function angle2D(v1: number[], v2: number[]): f64 {
  * @returns Angle in radians [0, pi]
  */
 export function angle3D(v1: number[], v2: number[]): f64 {
-  const dot: f64 = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-  const mag1: f64 = Math.sqrt(v1[0] ** 2 + v1[1] ** 2 + v1[2] ** 2);
-  const mag2: f64 = Math.sqrt(v2[0] ** 2 + v2[1] ** 2 + v2[2] ** 2);
-  if (mag1 === 0 || mag2 === 0) return NaN;
-  return Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2))));
+  return angleBetween(v1, v2, 3);
 }
 
 // =============================================================================

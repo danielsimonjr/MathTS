@@ -2178,6 +2178,10 @@
       "functions/src/factories/scope.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/geometry/circumcircle.ts": [
+      "functions/src/geometry/alpha-shape.ts",
+      "functions/src/geometry/voronoi.ts"
+    ],
     "functions/src/typed/geometry.ts": [
       "functions/src/geometry/delaunay.ts",
       "functions/src/geometry/hull.ts",

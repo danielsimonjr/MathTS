@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { voronoi } from '../src/geometry/voronoi.js';
 import { alphaShape } from '../src/geometry/alpha-shape.js';
+import { circumcircle } from '../src/geometry/circumcircle.js';
 import { sphericalVoronoi } from '../src/geometry/spherical-voronoi.js';
 import { delaunay } from '../src/geometry/delaunay.js';
 
@@ -304,5 +305,16 @@ describe('circumcircle oracle (alpha-shape / Voronoi consumers)', () => {
     const perm = oracleCircumcenter(b, c, a)!;
     expect(perm[0]).toBe(0.5);
     expect(perm[1]).toBe(0.5);
+  });
+
+  it('shared circumcircle helper matches the oracle', () => {
+    const a = [0, 0];
+    const b = [1, 0];
+    const c = [0, 1];
+    const cc = circumcircle(a, b, c)!;
+    const center = oracleCircumcenter(a, b, c)!;
+    expect(cc.ux).toBe(center[0]);
+    expect(cc.uy).toBe(center[1]);
+    expect(circumcircle([0, 0], [1, 0], [2, 0])).toBeNull();
   });
 });
