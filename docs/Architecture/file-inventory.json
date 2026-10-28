@@ -6750,7 +6750,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 191
+      "loc": 203
     },
     {
       "file": "functions/src/numeric/propagate-uncertainty.ts",
@@ -7198,7 +7198,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 335
+      "loc": 347
     },
     {
       "file": "functions/src/signal/conv.ts",
@@ -8220,7 +8220,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1484
+      "loc": 1497
     },
     {
       "file": "functions/src/typed/special.ts",
