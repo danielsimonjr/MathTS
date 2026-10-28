@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1986,
+  "totalFiles": 1987,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 709,
+    "test": 710,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1215,
-    "tests": 709,
+    "tests": 710,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 837,
+    "@danielsimonjr/mathts-functions": 838,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 108,
@@ -8753,6 +8753,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 321
+    },
+    {
+      "file": "functions/tests/clones-functions-shells-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 134
     },
     {
       "file": "functions/tests/clones-shapes-oracle.test.ts",
