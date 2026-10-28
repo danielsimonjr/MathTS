@@ -1,5 +1,6 @@
 /**
- * Oracle for sparse Hadamard (M8): independent loop over stored entries of the left operand.
+ * Oracle for sparse Hadamard: independent loop over stored entries of the left operand.
+ * M8 (delegate to mapNonZeros) was reverted — the public method keeps the inlined CSR walk.
  */
 import { describe, it, expect } from 'vitest';
 import { SparseMatrix } from '../../src/types/SparseMatrix.js';
