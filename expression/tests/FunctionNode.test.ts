@@ -185,8 +185,44 @@ describe('FunctionNode - map', () => {
     expect(mapped.fn).toBe(fnSym);
   });
 
-  it('throws if callback returns non-Node', () => {
+  it('passes exact paths fn, args[0], and args[1]', () => {
+    const fnSym = makeSym('add');
+    const a0 = makeConst(1);
+    const a1 = makeConst(2);
+    const node = new FunctionNode(fnSym, [a0, a1]);
+    const paths: string[] = [];
+    node.map((child, path) => {
+      paths.push(path);
+      return child;
+    });
+    expect(paths).toEqual(['fn', 'args[0]', 'args[1]']);
+  });
+
+  it('does not call callback for empty args except fn and does not mutate args', () => {
+    const fnSym = makeSym('f');
+    const node = new FunctionNode(fnSym, []);
+    const paths: string[] = [];
+    const mapped = node.map((child, path) => {
+      paths.push(path);
+      return child;
+    });
+    expect(paths).toEqual(['fn']);
+    expect(mapped.args).toEqual([]);
+    expect(mapped.fn).toBe(fnSym);
+    expect(node.args).toEqual([]);
+  });
+
+  it('does not mutate the original args array', () => {
+    const args = [makeConst(1), makeConst(2)];
+    const node = new FunctionNode(makeSym('f'), args);
+    node.map(() => makeConst(99));
+    expect(args[0].value).toBe(1);
+    expect(args[1].value).toBe(2);
+  });
+
+  it('throws TypeError if callback returns non-Node', () => {
     const node = new FunctionNode(makeSym('f'), [makeConst(1)]);
+    expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(TypeError);
     expect(() => node.map(() => ({ notANode: true }) as unknown as MathNode)).toThrow(
       'Callback function must return a Node'
     );

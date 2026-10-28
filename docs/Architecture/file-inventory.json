@@ -4650,7 +4650,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 263
+      "loc": 298
     },
     {
       "file": "expression/tests/assign.test.ts",
@@ -4769,7 +4769,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 323
+      "loc": 359
     },
     {
       "file": "expression/tests/Help-config.test.ts",
@@ -4804,7 +4804,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 275
+      "loc": 311
     },
     {
       "file": "expression/tests/is-guards-local.test.ts",
@@ -4895,7 +4895,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 341
+      "loc": 379
     },
     {
       "file": "expression/tests/operators.test.ts",
