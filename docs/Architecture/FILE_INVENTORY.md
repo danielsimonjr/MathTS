@@ -4,13 +4,13 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-10-27 (by tools/create-dependency-graph)
+**Generated**: 2026-10-28 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 1974
+**Total files**: 1977
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1186 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      700 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      703 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **1974** |                                                                                                                |
+| **Total**     | **1977** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1212 |
-| `tests`    |   700 |
+| `tests`    |   703 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -53,7 +53,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   107 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
-| `@danielsimonjr/mathts-parallel`       |    39 |
+| `@danielsimonjr/mathts-parallel`       |    42 |
 | `@danielsimonjr/mathts-parser`         |     3 |
 | `@danielsimonjr/mathts-plot`           |    46 |
 | `@danielsimonjr/mathts-signal`         |     3 |
@@ -1798,6 +1798,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/tests/chunk.test.ts`                                                    | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.coverage.test.ts`                                     | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ComputePool.test.ts`                                              | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/gemm-rows-oracle.test.ts`                                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/operations-index.test.ts`                                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/operations/elementwise.test.ts`                                   | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/operations/map-extended.test.ts`                                  | @danielsimonjr/mathts-parallel       | tests    | test        |
@@ -1809,10 +1810,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/tests/package-index.test.ts`                                            | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ParallelMatrix.parallel.test.ts`                                  | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ParallelMatrix.test.ts`                                           | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/ParallelMatrix.threshold-oracle.test.ts`                          | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/public-api-smoke.test.ts`                                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/s2r-clones-compute-batch5-oracle.test.ts`                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies-index.test.ts`                                         | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/chunk-extended.test.ts`                                | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/strategies/chunk-plan-oracle.test.ts`                             | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-consolidation.test.ts`                       | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-extended.test.ts`                            | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/WorkerPool.test.ts`                                               | @danielsimonjr/mathts-parallel       | tests    | test        |
