@@ -145,8 +145,44 @@ describe('IndexNode - map', () => {
     expect(mapped.dotNotation).toBe(false);
   });
 
-  it('throws when callback returns non-node', () => {
+  it('passes exact dimension paths dimensions[0] and dimensions[1]', () => {
+    const d0 = makeConst(1);
+    const d1 = makeConst(2);
+    const node = new IndexNode([d0, d1]);
+    const paths: string[] = [];
+    node.map((child, path) => {
+      paths.push(path);
+      return child;
+    });
+    expect(paths).toEqual(['dimensions[0]', 'dimensions[1]']);
+  });
+
+  it('does not call callback when dimensions is empty and preserves dotNotation', () => {
+    const node = new IndexNode([]);
+    let calls = 0;
+    const mapped = node.map((child, _path) => {
+      calls++;
+      return child;
+    });
+    expect(calls).toBe(0);
+    expect(mapped.dimensions).toEqual([]);
+    expect(mapped.dotNotation).toBe(false);
+    expect(mapped).not.toBe(node);
+  });
+
+  it('does not mutate the original dimensions array', () => {
+    const dims = [makeConst(1), makeConst(2)];
+    const node = new IndexNode(dims);
+    node.map(() => makeConst(99));
+    expect(dims[0].value).toBe(1);
+    expect(dims[1].value).toBe(2);
+  });
+
+  it('throws TypeError when callback returns non-node', () => {
     const node = new IndexNode([makeConst(0)]);
+    expect(() =>
+      node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(TypeError);
     expect(() =>
       node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
     ).toThrow('Callback function must return a Node');

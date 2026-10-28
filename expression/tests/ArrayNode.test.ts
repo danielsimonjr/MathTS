@@ -140,8 +140,43 @@ describe('ArrayNode - map', () => {
     expect(mapped.items[1]).toBe(replacement);
   });
 
-  it('throws if callback returns non-Node', () => {
+  it('passes exact item paths items[0] and items[1]', () => {
+    const c1 = makeConst(1);
+    const c2 = makeConst(2);
+    const node = new ArrayNode([c1, c2]);
+    const paths: string[] = [];
+    node.map((child, path) => {
+      paths.push(path);
+      return child;
+    });
+    expect(paths).toEqual(['items[0]', 'items[1]']);
+  });
+
+  it('does not call callback when items is empty', () => {
+    const node = new ArrayNode([]);
+    let calls = 0;
+    const mapped = node.map((child) => {
+      calls++;
+      return child;
+    });
+    expect(calls).toBe(0);
+    expect(mapped.items).toEqual([]);
+    expect(mapped).not.toBe(node);
+  });
+
+  it('does not mutate the original items array', () => {
+    const items = [makeConst(1), makeConst(2)];
+    const node = new ArrayNode(items);
+    node.map(() => makeConst(99));
+    expect(items[0].value).toBe(1);
+    expect(items[1].value).toBe(2);
+  });
+
+  it('throws TypeError if callback returns non-Node', () => {
     const node = new ArrayNode([makeConst(1)]);
+    expect(() =>
+      node.map(() => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(TypeError);
     expect(() =>
       node.map(() => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
     ).toThrow('Callback function must return a Node');

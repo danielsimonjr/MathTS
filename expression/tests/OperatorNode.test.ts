@@ -186,8 +186,46 @@ describe('OperatorNode - map', () => {
     expect(mapped.fn).toBe('add');
   });
 
-  it('throws when callback returns non-node', () => {
+  it('passes exact arg paths args[0] and args[1]', () => {
+    const a = makeConst(1);
+    const b = makeConst(2);
+    const node = makeOp('+', 'add', [a, b]);
+    const paths: string[] = [];
+    node.map((child, path) => {
+      paths.push(path);
+      return child;
+    });
+    expect(paths).toEqual(['args[0]', 'args[1]']);
+  });
+
+  it('does not call callback when args is empty and copies op, fn, implicit, isPercentage', () => {
+    const node = new OperatorNode('!', 'factorial', [], false, true);
+    let calls = 0;
+    const mapped = node.map((child, _path) => {
+      calls++;
+      return child;
+    });
+    expect(calls).toBe(0);
+    expect(mapped.args).toEqual([]);
+    expect(mapped.op).toBe('!');
+    expect(mapped.fn).toBe('factorial');
+    expect(mapped.implicit).toBe(false);
+    expect(mapped.isPercentage).toBe(true);
+  });
+
+  it('does not mutate the original args array', () => {
+    const args = [makeConst(1), makeConst(2)];
+    const node = makeOp('+', 'add', args);
+    node.map(() => makeConst(99));
+    expect(args[0].value).toBe(1);
+    expect(args[1].value).toBe(2);
+  });
+
+  it('throws TypeError when callback returns non-node', () => {
     const node = makeOp('+', 'add', [makeConst(1), makeConst(2)]);
+    expect(() =>
+      node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
+    ).toThrow(TypeError);
     expect(() =>
       node.map((_child) => ({ notANode: true }) as unknown as ReturnType<typeof makeConst>)
     ).toThrow('Callback function must return a Node');

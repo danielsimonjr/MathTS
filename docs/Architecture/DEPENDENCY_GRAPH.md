@@ -15472,6 +15472,7 @@ graph LR
 | `../utils/array.js`   | `map`                     | Import             |
 | `../utils/factory.js` | `factory`                 | Import             |
 | `./Node.js`           | `MathNode, StringOptions` | Import (type-only) |
+| `./Node.js`           | `mapChildArray`           | Import             |
 
 **Exports:**
 
@@ -15590,6 +15591,7 @@ graph LR
 | `../utils/latex.js`   | `defaultTemplate, latexFunctions`                                             | Import             |
 | `../utils/mathml.js`  | `toMathMLSymbol`                                                              | Import             |
 | `./Node.js`           | `MathNode, StringOptions`                                                     | Import (type-only) |
+| `./Node.js`           | `mapChildArray`                                                               | Import             |
 
 **Exports:**
 
@@ -15609,6 +15611,7 @@ graph LR
 | `../utils/is.js`      | `isArray, isConstantNode, isMatrix, isNode, isString, isSymbolNode, typeOf` | Import             |
 | `../utils/string.js`  | `escape`                                                                    | Import             |
 | `./Node.js`           | `MathNode`                                                                  | Import (type-only) |
+| `./Node.js`           | `mapChildArray`                                                             | Import             |
 
 **Exports:**
 
@@ -15633,6 +15636,7 @@ graph LR
 
 - Interfaces: `CompiledExpression`, `StringOptions`
 - Types: `MathNode`
+- Functions: `mapChildArray`
 - Constants: `createNode`
 
 ---
@@ -15672,6 +15676,7 @@ graph LR
 | `../utils/mathml.js`  | `escapeMathML, inlineOperator, parenthesizeLower`                | Import             |
 | `../utils/factory.js` | `factory`                                                        | Import             |
 | `./Node.js`           | `MathNode`                                                       | Import (type-only) |
+| `./Node.js`           | `mapChildArray`                                                  | Import             |
 
 **Exports:**
 
@@ -19144,12 +19149,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1218   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200687 |
-| Total Exports           | 6254   |
+| Total Lines of Code     | 200703 |
+| Total Exports           | 6255   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 545    |
-| Total Functions         | 2022   |
+| Total Functions         | 2023   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
