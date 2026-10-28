@@ -477,45 +477,15 @@ export class TapedTensor {
     const outT = primalT.sum(axis, opts);
 
     const inputShape = [...this.shape];
-    const inputSize = this.primal.length;
     const keepDims = opts?.keepDims ?? false;
     const axes = _resolveAxes(axis, this.shape.length);
     const axisSet = new Set(axes);
 
     const thisGradSlot = this.tape.getInputGrad(this.id)!;
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
-      // Build strides for the output shape (which may be keepDims or reduced).
       const outShape = [...outT.shape];
       const outStrides = Tensor.rowMajorStrides(outShape);
-      const inStrides = Tensor.rowMajorStrides(inputShape);
-
-      // For each input element, compute the corresponding output flat index.
-      const inCoords = new Array<number>(inputShape.length).fill(0);
-      for (let n = 0; n < inputSize; n++) {
-        // Compute output coords from input coords.
-        let outFlat = 0;
-        let outDim = 0;
-        for (let k = 0; k < inputShape.length; k++) {
-          if (axisSet.has(k)) {
-            if (keepDims) {
-              // The output dim is 1 (size-1 kept), coordinate is always 0.
-              outDim++;
-            }
-            // else: skip this axis in the output
-          } else {
-            outFlat += inCoords[k] * outStrides[outDim];
-            outDim++;
-          }
-        }
-        thisGradSlot[n] += outputGrad[outFlat];
-
-        // Advance inCoords.
-        for (let k = inputShape.length - 1; k >= 0; k--) {
-          if (++inCoords[k] < inputShape[k]) break;
-          inCoords[k] = 0;
-        }
-      }
-      void inStrides; // used implicitly via n loop
+      addReducedBroadcast(thisGradSlot, outputGrad, inputShape, axisSet, keepDims, outStrides);
     });
 
     return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
@@ -532,7 +502,6 @@ export class TapedTensor {
     const outT = primalT.mean(axis, opts);
 
     const inputShape = [...this.shape];
-    const inputSize = this.primal.length;
     const keepDims = opts?.keepDims ?? false;
     const axes = _resolveAxes(axis, this.shape.length);
     const axisSet = new Set(axes);
@@ -544,26 +513,7 @@ export class TapedTensor {
     const { id } = this.tape.record([this.id], outT.data.length, (outputGrad) => {
       const outShape = [...outT.shape];
       const outStrides = Tensor.rowMajorStrides(outShape);
-
-      const inCoords = new Array<number>(inputShape.length).fill(0);
-      for (let n = 0; n < inputSize; n++) {
-        let outFlat = 0;
-        let outDim = 0;
-        for (let k = 0; k < inputShape.length; k++) {
-          if (axisSet.has(k)) {
-            if (keepDims) outDim++;
-          } else {
-            outFlat += inCoords[k] * outStrides[outDim];
-            outDim++;
-          }
-        }
-        thisGradSlot[n] += outputGrad[outFlat] / N;
-
-        for (let k = inputShape.length - 1; k >= 0; k--) {
-          if (++inCoords[k] < inputShape[k]) break;
-          inCoords[k] = 0;
-        }
-      }
+      addReducedBroadcast(thisGradSlot, outputGrad, inputShape, axisSet, keepDims, outStrides, N);
     });
 
     return new TapedTensor([...outT.shape], new Float64Array(outT.data), this.tape, id);
@@ -1732,6 +1682,46 @@ export class TapedTensor {
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+/**
+ * Reverse-mode adjoint scatter for sum/mean reductions: map each input flat index
+ * to its reduced output slot and accumulate `outputGrad[outFlat]`, optionally
+ * divided by `divideBy` (mean uses `/ N` for bit-identical rounding vs `* (1/N)`).
+ * Sum omits `divideBy` and adds the upstream gradient unchanged (no extra ×1).
+ */
+function addReducedBroadcast(
+  thisGradSlot: Float64Array,
+  outputGrad: Float64Array,
+  inputShape: ReadonlyArray<number>,
+  axisSet: Set<number>,
+  keepDims: boolean,
+  outStrides: ReadonlyArray<number>,
+  divideBy?: number
+): void {
+  const inputSize = thisGradSlot.length;
+  const inCoords = new Array<number>(inputShape.length).fill(0);
+  for (let n = 0; n < inputSize; n++) {
+    let outFlat = 0;
+    let outDim = 0;
+    for (let k = 0; k < inputShape.length; k++) {
+      if (axisSet.has(k)) {
+        if (keepDims) outDim++;
+      } else {
+        outFlat += inCoords[k] * outStrides[outDim];
+        outDim++;
+      }
+    }
+    if (divideBy !== undefined) {
+      thisGradSlot[n] += outputGrad[outFlat] / divideBy;
+    } else {
+      thisGradSlot[n] += outputGrad[outFlat];
+    }
+    for (let k = inputShape.length - 1; k >= 0; k--) {
+      if (++inCoords[k] < inputShape[k]) break;
+      inCoords[k] = 0;
+    }
+  }
+}
 
 /**
  * Reverse-mode adjoint for max/min reductions: scatter output gradient to the
