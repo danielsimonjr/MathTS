@@ -83,29 +83,16 @@ export function resetScratch(): void {
 
 /**
  * Apply a single pointer-ABI unary kernel over `xs` via the scratch region.
- * One copy-in, one copy-out. Returns `null` on any failure (caller falls back
- * to JS). Never throws.
+ * Thin wrapper: one-kernel chains use {@link runChainPtr} (one copy-in/out, same
+ * ping-pong buffers). Returns `null` on any failure (caller falls back to JS).
+ * Never throws.
  */
 export function runUnaryPtr(
   mem: WebAssembly.Memory,
   fn: PtrUnaryKernel,
   xs: Float64Array
 ): Float64Array | null {
-  const n = xs.length;
-  try {
-    const need = 2 * n * 8; // input + output, f64
-    const base = ensureScratch(mem, need);
-    const inOff = base;
-    const outOff = base + n * 8;
-    // Re-acquire views after ensureScratch: mem.grow detaches the prior buffer.
-    new Float64Array(mem.buffer, inOff, n).set(xs);
-    fn(inOff, outOff, n);
-    const result = new Float64Array(n);
-    result.set(new Float64Array(mem.buffer, outOff, n));
-    return result;
-  } catch {
-    return null;
-  }
+  return runChainPtr(mem, [fn], xs);
 }
 
 /**
