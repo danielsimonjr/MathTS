@@ -4,6 +4,7 @@
  */
 
 import { WorkerPool } from './WorkerPool.js';
+import { gemmRows } from './gemm-rows.js';
 
 /**
  * Describes a matrix as a flat row-major buffer and its dimensions.
@@ -150,6 +151,61 @@ export class ParallelMatrix {
   }
 
   /**
+   * Split `[0, size)` across workers, run a block producer, and scatter slices
+   * into a dense result buffer.
+   */
+  private static async scatterBlocks(
+    size: number,
+    run: (start: number, end: number) => Promise<Float64Array>
+  ): Promise<Float64Array> {
+    const pool = this.getWorkerPool();
+    const blocks = Math.max(1, Math.min(pool.workerCount, size));
+    const chunkSize = Math.ceil(size / blocks);
+
+    const result = new Float64Array(size);
+    const tasks: Promise<{ start: number; block: Float64Array }>[] = [];
+    for (let i = 0; i < blocks; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, size);
+
+      if (start >= size) break;
+
+      tasks.push(run(start, end).then((block) => ({ start, block })));
+    }
+
+    const blockResults = await Promise.all(tasks);
+    for (const { start, block } of blockResults) {
+      result.set(block, start);
+    }
+    return result;
+  }
+
+  /**
+   * Split `[0, size)` across workers and sum numeric partial results.
+   */
+  private static async sumBlocks(
+    size: number,
+    run: (start: number, end: number) => Promise<number>
+  ): Promise<number> {
+    const pool = this.getWorkerPool();
+    const blocks = Math.max(1, Math.min(pool.workerCount, size));
+    const chunkSize = Math.ceil(size / blocks);
+
+    const tasks: Promise<number>[] = [];
+    for (let i = 0; i < blocks; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, size);
+
+      if (start >= size) break;
+
+      tasks.push(run(start, end));
+    }
+
+    const partials = await Promise.all(tasks);
+    return partials.reduce((acc, v) => acc + v, 0);
+  }
+
+  /**
    * Parallel matrix multiplication: C = A * B
    * Divides work across multiple workers by rows of A. Each worker returns its
    * computed row block, which is copied into the result buffer.
@@ -217,21 +273,11 @@ export class ParallelMatrix {
     aRows: number,
     aCols: number,
     bData: number[] | Float64Array,
-    bRows: number,
+    _bRows: number,
     bCols: number
   ): Float64Array {
     const result = new Float64Array(aRows * bCols);
-
-    for (let i = 0; i < aRows; i++) {
-      for (let j = 0; j < bCols; j++) {
-        let sum = 0;
-        for (let k = 0; k < aCols; k++) {
-          sum += aData[i * aCols + k] * bData[k * bCols + j];
-        }
-        result[i * bCols + j] = sum;
-      }
-    }
-
+    gemmRows(aData, aCols, bData, bCols, 0, aRows, result, 0);
     return result;
   }
 
@@ -257,38 +303,18 @@ export class ParallelMatrix {
     }
 
     const pool = this.getWorkerPool();
-    const blocks = Math.max(1, Math.min(pool.workerCount, size));
-    const chunkSize = Math.ceil(size / blocks);
-
     const aShared = this.toSharedBuffer(aData);
     const bShared = this.toSharedBuffer(bData);
-    const result = new Float64Array(size);
 
-    const tasks: Promise<{ start: number; block: Float64Array }>[] = [];
-    for (let i = 0; i < blocks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, size);
-
-      if (start >= size) break;
-
-      tasks.push(
-        pool
-          .execute<unknown, Float64Array>({
-            operation,
-            aData: aShared,
-            bData: bShared,
-            start,
-            end,
-          })
-          .then((block) => ({ start, block }))
-      );
-    }
-
-    const blockResults = await Promise.all(tasks);
-    for (const { start, block } of blockResults) {
-      result.set(block, start);
-    }
-    return result;
+    return this.scatterBlocks(size, (start, end) =>
+      pool.execute<unknown, Float64Array>({
+        operation,
+        aData: aShared,
+        bData: bShared,
+        start,
+        end,
+      })
+    );
   }
 
   /**
@@ -343,37 +369,17 @@ export class ParallelMatrix {
     }
 
     const pool = this.getWorkerPool();
-    const blocks = Math.max(1, Math.min(pool.workerCount, size));
-    const chunkSize = Math.ceil(size / blocks);
-
     const aShared = this.toSharedBuffer(aData);
-    const result = new Float64Array(size);
 
-    const tasks: Promise<{ start: number; block: Float64Array }>[] = [];
-    for (let i = 0; i < blocks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, size);
-
-      if (start >= size) break;
-
-      tasks.push(
-        pool
-          .execute<unknown, Float64Array>({
-            operation: 'scale',
-            aData: aShared,
-            scalar,
-            start,
-            end,
-          })
-          .then((block) => ({ start, block }))
-      );
-    }
-
-    const blockResults = await Promise.all(tasks);
-    for (const { start, block } of blockResults) {
-      result.set(block, start);
-    }
-    return result;
+    return this.scatterBlocks(size, (start, end) =>
+      pool.execute<unknown, Float64Array>({
+        operation: 'scale',
+        aData: aShared,
+        scalar,
+        start,
+        end,
+      })
+    );
   }
 
   /**
@@ -395,32 +401,18 @@ export class ParallelMatrix {
     }
 
     const pool = this.getWorkerPool();
-    const blocks = Math.max(1, Math.min(pool.workerCount, size));
-    const chunkSize = Math.ceil(size / blocks);
-
     const aShared = this.toSharedBuffer(aData);
     const bShared = this.toSharedBuffer(bData);
 
-    const tasks: Promise<number>[] = [];
-    for (let i = 0; i < blocks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, size);
-
-      if (start >= size) break;
-
-      tasks.push(
-        pool.execute<unknown, number>({
-          operation: 'dot',
-          aData: aShared,
-          bData: bShared,
-          start,
-          end,
-        })
-      );
-    }
-
-    const partials = await Promise.all(tasks);
-    return partials.reduce((acc, v) => acc + v, 0);
+    return this.sumBlocks(size, (start, end) =>
+      pool.execute<unknown, number>({
+        operation: 'dot',
+        aData: aShared,
+        bData: bShared,
+        start,
+        end,
+      })
+    );
   }
 
   /**
@@ -438,30 +430,16 @@ export class ParallelMatrix {
     }
 
     const pool = this.getWorkerPool();
-    const blocks = Math.max(1, Math.min(pool.workerCount, size));
-    const chunkSize = Math.ceil(size / blocks);
-
     const aShared = this.toSharedBuffer(aData);
 
-    const tasks: Promise<number>[] = [];
-    for (let i = 0; i < blocks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, size);
-
-      if (start >= size) break;
-
-      tasks.push(
-        pool.execute<unknown, number>({
-          operation: 'sum',
-          aData: aShared,
-          start,
-          end,
-        })
-      );
-    }
-
-    const partials = await Promise.all(tasks);
-    return partials.reduce((acc, v) => acc + v, 0);
+    return this.sumBlocks(size, (start, end) =>
+      pool.execute<unknown, number>({
+        operation: 'sum',
+        aData: aShared,
+        start,
+        end,
+      })
+    );
   }
 
   /**
