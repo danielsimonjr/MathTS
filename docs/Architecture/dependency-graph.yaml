@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-28'
-  totalFiles: 1218
+  totalFiles: 1219
   totalModules: 82
-  totalExports: 6255
+  totalExports: 6262
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3561,6 +3561,13 @@ modules:
           imports:
             - detectWasmFeatures
             - WasmFeatures
+        - file: ./wasm/as-typed-array.js
+          imports:
+            - AS_F64_ALIGN_SHIFT
+            - AS_I32_ALIGN_SHIFT
+            - AS_ID_FLOAT64_ARRAY
+            - AS_ID_INT32_ARRAY
+            - allocAsTypedView
         - file: ./wasm/resolve.js
           imports: []
           typeOnly: true
@@ -3585,6 +3592,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./wasm/as-typed-array.js
+          imports:
+            - AS_ID_FLOAT64_ARRAY
+            - AS_ID_INT32_ARRAY
+            - allocAsTypedView
         - file: ./wasm/integrity.js
           imports: []
           typeOnly: true
@@ -4075,6 +4087,31 @@ modules:
             - wasmBackend
       workspaceDependencies: []
       exports: []
+    matrix/src/backends/wasm/as-typed-array.ts:
+      description: Shared AssemblyScript managed-runtime allocation for typed arrays.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - AS_ID_ARRAY_BUFFER
+        - AS_ID_FLOAT64_ARRAY
+        - AS_ID_INT32_ARRAY
+        - AS_HEADER_BYTES
+        - AS_F64_ALIGN_SHIFT
+        - AS_I32_ALIGN_SHIFT
+        - allocAsTypedView
+      interfaces:
+        - AsRuntime
+      functions:
+        - allocAsTypedView
+      constants:
+        - AS_ID_ARRAY_BUFFER
+        - AS_ID_FLOAT64_ARRAY
+        - AS_ID_INT32_ARRAY
+        - AS_HEADER_BYTES
+        - AS_F64_ALIGN_SHIFT
+        - AS_I32_ALIGN_SHIFT
     matrix/src/backends/wasm/detect.ts:
       description: WASM Feature Detection
       externalDependencies: []
@@ -38759,6 +38796,7 @@ dependencyGraph:
         - matrix/src/backends/gpu/run-shader.ts
         - matrix/src/backends/index.ts
         - matrix/src/backends/register-backends.ts
+        - matrix/src/backends/wasm/as-typed-array.ts
         - matrix/src/backends/wasm/detect.ts
         - matrix/src/backends/wasm/index.ts
         - matrix/src/backends/wasm/integrity.ts
@@ -40049,16 +40087,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1218
+  totalTypeScriptFiles: 1219
   totalModules: 82
-  totalLinesOfCode: 200721
-  totalExports: 6255
+  totalLinesOfCode: 200769
+  totalExports: 6262
   totalClasses: 59
-  totalInterfaces: 545
-  totalFunctions: 2023
+  totalInterfaces: 546
+  totalFunctions: 2024
   totalTypeGuards: 159
   totalEnums: 0
-  totalConstants: 1618
+  totalConstants: 1624
   totalReExports: 2627
   totalTypeOnlyImports: 612
   runtimeCircularDeps: 0

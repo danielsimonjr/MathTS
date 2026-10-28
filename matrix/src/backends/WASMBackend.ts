@@ -106,13 +106,13 @@ interface AsModule {
   matrix_determinant?: (aHdr: number, n: number, workHdr: number) => number;
 }
 
-/** AssemblyScript runtime-info IDs (extracted from `assembly/build/mathts.js`). */
-const AS_ID_ARRAY_BUFFER = 1;
-const AS_ID_FLOAT64_ARRAY = 5;
-const AS_ID_INT32_ARRAY = 6;
-const AS_F64_ALIGN_SHIFT = 3; // log2(8 bytes/f64)
-const AS_I32_ALIGN_SHIFT = 2; // log2(4 bytes/i32)
-const AS_HEADER_BYTES = 12;
+import {
+  AS_F64_ALIGN_SHIFT,
+  AS_I32_ALIGN_SHIFT,
+  AS_ID_FLOAT64_ARRAY,
+  AS_ID_INT32_ARRAY,
+  allocAsTypedView,
+} from './wasm/as-typed-array.js';
 
 /**
  * AssemblyScript-managed Float64Array allocation handle.
@@ -187,20 +187,13 @@ function allocHeader<T extends Float64Array | Int32Array>(
   opts: { shift: number; typeId: number; Ctor: AsTypedArrayCtor }
 ): { headerPtr: number; bufferPtr: number; view: T; length: number } {
   const byteLength = length << opts.shift;
-  // Allocate + pin the data buffer (id=1 = ArrayBuffer).
-  const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-  // Allocate the typed-array header and pin it so the AS GC (if it ever wakes
-  // up — see AsAllocCache comment; today it doesn't) never reclaims it.
-  const headerPtr = module.__new(AS_HEADER_BYTES, opts.typeId) >>> 0;
-  module.__pin(headerPtr);
-
-  // Write the header. Layout: [dataStart, dataStart, byteLength].
-  const dv = new DataView(module.memory.buffer);
-  dv.setUint32(headerPtr + 0, bufferPtr, true);
-  dv.setUint32(headerPtr + 4, bufferPtr, true);
-  dv.setUint32(headerPtr + 8, byteLength, true);
-
-  const view = new opts.Ctor(module.memory.buffer, bufferPtr, length) as T;
+  const { headerPtr, bufferPtr, view } = allocAsTypedView(
+    module,
+    byteLength,
+    length,
+    opts.typeId,
+    opts.Ctor as unknown as new (b: ArrayBuffer, o: number, l: number) => T
+  );
   return { headerPtr, bufferPtr, view, length };
 }
 

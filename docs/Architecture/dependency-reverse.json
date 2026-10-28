@@ -215,6 +215,10 @@
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/backends/wasm/index.ts"
     ],
+    "matrix/src/backends/wasm/as-typed-array.ts": [
+      "matrix/src/backends/WASMBackend.ts",
+      "matrix/src/backends/WasmLoader.ts"
+    ],
     "matrix/src/backends/wasm/resolve.ts": [
       "matrix/src/backends/WASMBackend.ts",
       "matrix/src/backends/WasmLoader.ts"
