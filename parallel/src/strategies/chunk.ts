@@ -60,13 +60,6 @@ const DEFAULT_CHUNK_OPTIONS: Required<ChunkOptions> = {
 };
 
 /**
- * Calculate optimal number of chunks for a given array size
- *
- * @param totalElements - Total number of elements
- * @param options - Chunking options
- * @returns Optimal number of chunks
- */
-/**
  * Plan contiguous index ranges for chunking without materializing slices.
  *
  * @param totalElements - Length of the source collection
@@ -144,6 +137,13 @@ function planChunks(
   return chunkInfo;
 }
 
+/**
+ * Calculate optimal number of chunks for a given array size
+ *
+ * @param totalElements - Total number of elements
+ * @param options - Chunking options
+ * @returns Optimal number of chunks
+ */
 export function calculateOptimalChunks(totalElements: number, options: ChunkOptions = {}): number {
   const { minChunkSize, maxChunks, targetChunkSize } = {
     ...DEFAULT_CHUNK_OPTIONS,
@@ -185,9 +185,14 @@ export function chunkFloat64Array(
     };
   }
 
+  // Identity shortcut keys off planned count, not materialized length: when
+  // `calculateOptimalChunks` returns `> 1` the unbalanced path can still emit a
+  // single range (minChunkSize >= n), and main returned `data.subarray(...)`
+  // rather than `data` itself.
+  const planned = calculateOptimalChunks(totalElements, options);
   const chunkInfo = planChunks(totalElements, options, minChunkSize);
 
-  if (chunkInfo.length === 1) {
+  if (planned <= 1) {
     return {
       chunks: [data],
       chunkInfo,
@@ -225,9 +230,12 @@ export function chunkArray<T>(data: T[], options: ChunkOptions = {}): ChunkResul
     };
   }
 
+  // Same planned-count gate as {@link chunkFloat64Array}: a collapsed
+  // unbalanced range must `slice` (copy) rather than alias `data`.
+  const planned = calculateOptimalChunks(totalElements, options);
   const chunkInfo = planChunks(totalElements, options, 0);
 
-  if (chunkInfo.length === 1) {
+  if (planned <= 1) {
     return {
       chunks: [data],
       chunkInfo,

@@ -198,4 +198,76 @@ describe('chunk planning oracle (pre-merge pin)', () => {
       }
     }
   });
+
+  it('identity shortcut is `chunks[0] === data` only when planned count is <= 1', () => {
+    const f64 = new Float64Array([1, 2, 3, 4, 5]);
+    const arr = [1, 2, 3, 4, 5];
+    const smallF = chunkFloat64Array(f64, { minChunkSize: 1000 });
+    const smallA = chunkArray(arr, { minChunkSize: 1000 });
+    expect(smallF.chunks[0]).toBe(f64);
+    expect(smallA.chunks[0]).toBe(arr);
+    expect(smallF.chunkInfo).toEqual([{ startIndex: 0, endIndex: 5, length: 5, chunkIndex: 0 }]);
+  });
+
+  it('collapsed unbalanced Float64 range uses subarray, not identity', () => {
+    // planned = min(4, ceil(100/10)) = 4, but minChunkSize 1000 >= n so one range.
+    const data = new Float64Array(100);
+    for (let i = 0; i < 100; i++) data[i] = i;
+    const result = chunkFloat64Array(data, {
+      minChunkSize: 1000,
+      maxChunks: 4,
+      targetChunkSize: 10,
+      balanced: false,
+    });
+    expect(result.numChunks).toBe(1);
+    expect(result.chunkInfo).toEqual([
+      { startIndex: 0, endIndex: 100, length: 100, chunkIndex: 0 },
+    ]);
+    expect(result.chunks[0]).not.toBe(data);
+    expect(result.chunks[0].buffer).toBe(data.buffer);
+    expect(Array.from(result.chunks[0])).toEqual(Array.from(data));
+  });
+
+  it('collapsed unbalanced array range uses slice copy, not identity', () => {
+    // minChunkSize 0 → floor(1/0)=Infinity → planned min(4, Infinity)=4; one slice.
+    const data = [7];
+    const result = chunkArray(data, { minChunkSize: 0, maxChunks: 4, balanced: false });
+    expect(result.numChunks).toBe(1);
+    expect(result.chunkInfo).toEqual([{ startIndex: 0, endIndex: 1, length: 1, chunkIndex: 0 }]);
+    expect(result.chunks[0]).not.toBe(data);
+    expect(result.chunks[0]).toEqual([7]);
+  });
+
+  it('non-integer options keep main-era boundaries', () => {
+    const n = 10;
+    const opts: ChunkOptions = {
+      minChunkSize: 25,
+      maxChunks: 3.7,
+      targetChunkSize: 0.5,
+      balanced: true,
+    };
+    const f64 = new Float64Array(n);
+    for (let i = 0; i < n; i++) f64[i] = i;
+    const arr = Array.from({ length: n }, (_, i) => i);
+    const expected = [
+      { startIndex: 0, endIndex: 3, length: 3, chunkIndex: 0 },
+      { startIndex: 3, endIndex: 6, length: 3, chunkIndex: 1 },
+      { startIndex: 6, endIndex: 9, length: 3, chunkIndex: 2 },
+      { startIndex: 9, endIndex: 11, length: 2, chunkIndex: 3 },
+    ];
+    expect(chunkFloat64Array(f64, opts).chunkInfo).toEqual(expected);
+    expect(chunkArray(arr, opts).chunkInfo).toEqual(expected);
+
+    const unbal: ChunkOptions = { ...opts, balanced: false };
+    expect(chunkFloat64Array(f64, unbal).chunkInfo).toEqual([
+      { startIndex: 0, endIndex: 10, length: 10, chunkIndex: 0 },
+    ]);
+    expect(chunkFloat64Array(f64, unbal).chunks[0]).not.toBe(f64);
+    expect(chunkArray(arr, unbal).chunkInfo).toEqual([
+      { startIndex: 0, endIndex: 3, length: 3, chunkIndex: 0 },
+      { startIndex: 3, endIndex: 6, length: 3, chunkIndex: 1 },
+      { startIndex: 6, endIndex: 9, length: 3, chunkIndex: 2 },
+      { startIndex: 9, endIndex: 10, length: 1, chunkIndex: 3 },
+    ]);
+  });
 });

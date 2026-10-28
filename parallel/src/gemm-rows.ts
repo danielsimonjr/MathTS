@@ -1,6 +1,7 @@
 /**
- * Row-block dense matrix multiply (ikj). Shared by the main thread sequential
- * path and worker row tasks; no package dependencies so the worker bundle stays lean.
+ * Row-block dense matrix multiply (ijk inner-k product). Shared by the main
+ * thread sequential path and worker row tasks; no package dependencies so the
+ * worker bundle stays lean.
  */
 
 /**

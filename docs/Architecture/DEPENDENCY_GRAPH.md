@@ -16703,7 +16703,7 @@ graph LR
 
 ---
 
-### `parallel/src/gemm-rows.ts` - Row-block dense matrix multiply (ikj). Shared by the main thread sequential
+### `parallel/src/gemm-rows.ts` - Row-block dense matrix multiply (ijk inner-k product). Shared by the main
 
 **Exports:**
 
@@ -19071,7 +19071,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1213   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200580 |
+| Total Lines of Code     | 200589 |
 | Total Exports           | 6242   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
