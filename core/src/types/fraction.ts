@@ -344,33 +344,32 @@ export class Fraction implements IFraction {
   // ============================================================
 
   /**
-   * Addition: a/b + c/d = (ad + bc) / bd
+   * Shared add/subtract core: same-denominator or cross-multiply, with a bigint combiner.
    */
-  add(other: Scalar): Fraction {
+  private addSub(other: Scalar, combine: (a: bigint, b: bigint) => bigint): Fraction {
     if (other instanceof Fraction) {
       if (this.denominator === other.denominator) {
-        return new Fraction(this.numerator + other.numerator, this.denominator);
+        return new Fraction(combine(this.numerator, other.numerator), this.denominator);
       }
-      const num = this.numerator * other.denominator + other.numerator * this.denominator;
+      const num = combine(this.numerator * other.denominator, other.numerator * this.denominator);
       const den = this.denominator * other.denominator;
       return new Fraction(num, den);
     }
-    return this.add(Fraction.fromNumber(Number(other.valueOf())));
+    return this.addSub(Fraction.fromNumber(Number(other.valueOf())), combine);
+  }
+
+  /**
+   * Addition: a/b + c/d = (ad + bc) / bd
+   */
+  add(other: Scalar): Fraction {
+    return this.addSub(other, (a, b) => a + b);
   }
 
   /**
    * Subtraction: a/b - c/d = (ad - bc) / bd
    */
   subtract(other: Scalar): Fraction {
-    if (other instanceof Fraction) {
-      if (this.denominator === other.denominator) {
-        return new Fraction(this.numerator - other.numerator, this.denominator);
-      }
-      const num = this.numerator * other.denominator - other.numerator * this.denominator;
-      const den = this.denominator * other.denominator;
-      return new Fraction(num, den);
-    }
-    return this.subtract(Fraction.fromNumber(Number(other.valueOf())));
+    return this.addSub(other, (a, b) => a - b);
   }
 
   /**
