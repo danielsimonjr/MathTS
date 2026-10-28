@@ -1423,18 +1423,27 @@ export class BigNumber implements MathTSValue {
     return reduced;
   }
 
-  /** Taylor series for sin(x), assumes x is in [-PI, PI] */
-  private _sinTaylor(): BigNumber {
+  /**
+   * Alternating even-power Taylor loop: term ← −term·x²/denom(n), stop when sum is stable.
+   * @param initialTerm - seed for the running term (also the first series contribution path for sin)
+   * @param initialSum - partial sum before the n = 1 step
+   * @param denom - factorial-style divisor; n only runs to precision + 20 so products stay in safe integer range
+   */
+  private _alternatingEvenTaylor(
+    initialTerm: BigNumber,
+    initialSum: BigNumber,
+    denom: (n: number) => number
+  ): BigNumber {
     const precision = globalConfig.precision;
-    let term = this.clone();
-    let sum = this.clone();
+    let term = initialTerm;
+    let sum = initialSum;
     const xSquared = this.multiply(this);
     const maxIter = precision + 20;
 
     for (let n = 1; n <= maxIter; n++) {
       term = term
         .multiply(xSquared)
-        .divide(BigNumber.fromNumber(2 * n * (2 * n + 1)))
+        .divide(BigNumber.fromNumber(denom(n)))
         .negate();
       const newSum = sum.add(term);
       if (sum.equals(newSum)) break;
@@ -1444,25 +1453,18 @@ export class BigNumber implements MathTSValue {
     return sum.roundToPrecision(precision);
   }
 
+  /** Taylor series for sin(x), assumes x is in [-PI, PI] */
+  private _sinTaylor(): BigNumber {
+    return this._alternatingEvenTaylor(this.clone(), this.clone(), (n) => 2 * n * (2 * n + 1));
+  }
+
   /** Taylor series for cos(x), assumes x is in [-PI, PI] */
   private _cosTaylor(): BigNumber {
-    const precision = globalConfig.precision;
-    let term = BigNumber.fromNumber(1);
-    let sum = BigNumber.fromNumber(1);
-    const xSquared = this.multiply(this);
-    const maxIter = precision + 20;
-
-    for (let n = 1; n <= maxIter; n++) {
-      term = term
-        .multiply(xSquared)
-        .divide(BigNumber.fromNumber((2 * n - 1) * (2 * n)))
-        .negate();
-      const newSum = sum.add(term);
-      if (sum.equals(newSum)) break;
-      sum = newSum;
-    }
-
-    return sum.roundToPrecision(precision);
+    return this._alternatingEvenTaylor(
+      BigNumber.fromNumber(1),
+      BigNumber.fromNumber(1),
+      (n) => (2 * n - 1) * (2 * n)
+    );
   }
 
   /** Taylor series for atan(x), assumes |x| <= 0.5 */
