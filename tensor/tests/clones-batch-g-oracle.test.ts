@@ -64,6 +64,30 @@ describe('clone batch G — M13 max/min oracle', () => {
     expect(t.max(0).data[0]).toBe(7);
     expect(t.min(1).data[0]).toBe(7);
   });
+
+  it('empty tensor max is -Infinity and min is Infinity', () => {
+    const empty = new Tensor([0], new Float64Array(0));
+    expect(empty.max().data[0]).toBe(-Infinity);
+    expect(empty.min().data[0]).toBe(Infinity);
+  });
+
+  it('reducing a 0-size axis fills with the identity', () => {
+    const t = new Tensor([2, 0], new Float64Array(0));
+    expect([...t.max(1).shape]).toEqual([2]);
+    expect(t.max(1).data[0]).toBe(-Infinity);
+    expect(t.max(1).data[1]).toBe(-Infinity);
+    expect(t.min(1).data[0]).toBe(Infinity);
+    expect(t.min(1).data[1]).toBe(Infinity);
+  });
+
+  it('max prefers +0 over -0; min prefers -0 over +0', () => {
+    const negThenPos = new Tensor([2], new Float64Array([-0, 0]));
+    expect(Object.is(negThenPos.max().data[0], 0)).toBe(true);
+    expect(Object.is(negThenPos.min().data[0], -0)).toBe(true);
+    const posThenNeg = new Tensor([2], new Float64Array([0, -0]));
+    expect(Object.is(posThenNeg.max().data[0], 0)).toBe(true);
+    expect(Object.is(posThenNeg.min().data[0], -0)).toBe(true);
+  });
 });
 
 describe('clone batch G — M14 axis lookup oracle', () => {
@@ -121,6 +145,28 @@ describe('clone batch G — M15 eig/SVD matrix prep oracle', () => {
       [2, 2]
     );
     expect(() => tensorEig(t, [0, 0])).toThrow('tensorEig: rowAxes contains duplicate axes');
+  });
+
+  it('duplicate out-of-range rowAxes is RangeError (invalid), not duplicate', () => {
+    const t = Tensor.fromNested(
+      [
+        [1, 0],
+        [0, 1],
+      ],
+      [2, 2]
+    );
+    expect(() => tensorEig(t, [5, 5])).toThrow(RangeError);
+    expect(() => tensorEig(t, [5, 5])).toThrow(
+      'tensorEig: rowAxes contains invalid axis 5 for tensor of rank 2'
+    );
+    expect(() => tensorEig(t, [-1, -1])).toThrow(RangeError);
+    expect(() => tensorEig(t, [-1, -1])).toThrow(
+      'tensorEig: rowAxes contains invalid axis -1 for tensor of rank 2'
+    );
+    expect(() => tensorSvd(t, [5, 5])).toThrow(RangeError);
+    expect(() => tensorSvd(t, [5, 5])).toThrow(
+      'tensorSvd: rowAxes contains invalid axis 5 for tensor of rank 2'
+    );
   });
 
   it('tensorEig rejects non-square reshape; tensorSvd accepts the same partition', () => {

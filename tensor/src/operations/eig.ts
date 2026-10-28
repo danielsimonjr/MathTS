@@ -60,6 +60,17 @@ function prepareEigMatrix(
   rowAxes: ReadonlyArray<number>,
   symmetricHint: boolean
 ): { matrix2D: number[][]; n: number } {
+  const rank = t.shape.length;
+  // Range-check each axis before the duplicate test so a repeated out-of-range
+  // index (e.g. `[5, 5]`) still throws RangeError, matching the old order.
+  for (const ax of rowAxes) {
+    if (!Number.isInteger(ax) || ax < 0 || ax >= rank) {
+      throw new RangeError(
+        `tensorEig: rowAxes contains invalid axis ${ax} for tensor of rank ${rank}`
+      );
+    }
+  }
+
   const rowSet = new Set(rowAxes);
   if (rowSet.size !== rowAxes.length) {
     throw new Error('tensorEig: rowAxes contains duplicate axes');
