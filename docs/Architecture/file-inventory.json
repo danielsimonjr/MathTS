@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1999,
+  "totalFiles": 2000,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1193,
     "test-only": 0,
     "orphan": 0,
-    "test": 718,
+    "test": 719,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1219,
-    "tests": 718,
+    "tests": 719,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 842,
+    "@danielsimonjr/mathts-functions": 843,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -11028,6 +11028,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 141
+    },
+    {
+      "file": "functions/tests/wasm-ptr-abi-clones-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 159
     },
     {
       "file": "functions/tests/wasm-resolve.test.ts",
