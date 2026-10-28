@@ -15,6 +15,25 @@ import { besselIScalar } from '../wasm/special/scalars.js';
 const TWO_PI = 2 * Math.PI;
 
 /**
+ * Poisson-weighted mixture over index `j` with rate `nc/2` (log-domain weights).
+ * Used by the noncentral chi-square and F CDFs; `term(j)` supplies each component.
+ */
+function poissonMixture(nc: number, term: (j: number) => number): number {
+  const halfNc = nc / 2;
+  let sum = 0;
+  let poissonCum = 0;
+  let logWeight = -halfNc;
+  for (let j = 0; j < 2000; j++) {
+    const weight = Math.exp(logWeight);
+    sum += weight * term(j);
+    poissonCum += weight;
+    if (j > halfNc && 1 - poissonCum < 1e-12) break;
+    logWeight += Math.log(halfNc) - Math.log(j + 1);
+  }
+  return sum;
+}
+
+/**
  * Noncentral chi-squared CDF via the Poisson-mixture representation:
  *
  *   F(x; k, λ) = Σ_{j=0}^∞ Pois(j; λ/2) · chiSquaredCDF(x, k + 2j)
@@ -30,18 +49,7 @@ export function noncentralChi2CDF(x: number, df: number, nc: number): number {
   if (nc < 0) throw new Error('noncentralChi2CDF: nc must be non-negative');
   if (x <= 0) return 0;
 
-  const halfNc = nc / 2;
-  let sum = 0;
-  let poissonCum = 0;
-  let logWeight = -halfNc; // log Pois(0; halfNc)
-  for (let j = 0; j < 2000; j++) {
-    const weight = Math.exp(logWeight);
-    sum += weight * chiSquaredCDF(x, df + 2 * j);
-    poissonCum += weight;
-    if (j > halfNc && 1 - poissonCum < 1e-12) break;
-    logWeight += Math.log(halfNc) - Math.log(j + 1);
-  }
-  return sum;
+  return poissonMixture(nc, (j) => chiSquaredCDF(x, df + 2 * j));
 }
 
 /**
@@ -60,19 +68,10 @@ export function noncentralFCDF(x: number, dfn: number, dfd: number, nc: number):
   if (nc < 0) throw new Error('noncentralFCDF: nc must be non-negative');
   if (x <= 0) return 0;
 
-  const halfNc = nc / 2;
-  let sum = 0;
-  let poissonCum = 0;
-  let logWeight = -halfNc;
-  for (let j = 0; j < 2000; j++) {
-    const weight = Math.exp(logWeight);
+  return poissonMixture(nc, (j) => {
     const dfnj = dfn + 2 * j;
-    sum += weight * fCDF((x * dfn) / dfnj, dfnj, dfd);
-    poissonCum += weight;
-    if (j > halfNc && 1 - poissonCum < 1e-12) break;
-    logWeight += Math.log(halfNc) - Math.log(j + 1);
-  }
-  return sum;
+    return fCDF((x * dfn) / dfnj, dfnj, dfd);
+  });
 }
 
 /**
