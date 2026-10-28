@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1216,
+    "totalFiles": 1217,
     "totalModules": 82,
-    "totalExports": 6252
+    "totalExports": 6253
   },
   "entryPoints": [
     {
@@ -21331,6 +21331,10 @@
           {
             "file": "./factorization/integer-poly.js",
             "imports": ["polyGcdZ"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           }
         ],
         "workspaceDependencies": [],
@@ -21649,6 +21653,10 @@
           {
             "file": "./algebra.js",
             "imports": ["expand", "factor"]
+          },
+          {
+            "file": "./string-derivative.js",
+            "imports": ["derivativeOfAdditiveTerms"]
           },
           {
             "file": "../factories/index.js",
@@ -24025,6 +24033,15 @@
           "parallelStatHistogram",
           "typedStatistics"
         ]
+      },
+      "functions/src/typed/string-derivative.ts": {
+        "description": "Symbolic derivative of a sum of additive terms (split on `' + '`).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["derivativeOfAdditiveTerms"],
+        "functions": ["derivativeOfAdditiveTerms"]
       },
       "functions/src/typed/string.ts": {
         "description": "Typed String Formatting Functions",
@@ -41570,6 +41587,7 @@
           "functions/src/typed/signal.ts",
           "functions/src/typed/special.ts",
           "functions/src/typed/statistics.ts",
+          "functions/src/typed/string-derivative.ts",
           "functions/src/typed/string.ts",
           "functions/src/typed/trigonometry.ts",
           "functions/src/typed/typed-bridge.ts",
@@ -42347,13 +42365,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1216,
+    "totalTypeScriptFiles": 1217,
     "totalModules": 82,
-    "totalLinesOfCode": 200630,
-    "totalExports": 6252,
+    "totalLinesOfCode": 200612,
+    "totalExports": 6253,
     "totalClasses": 59,
     "totalInterfaces": 543,
-    "totalFunctions": 2020,
+    "totalFunctions": 2021,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

@@ -2365,6 +2365,10 @@
       "functions/src/typed/interpolation.ts"
     ],
     "functions/src/typed/factorization/index.ts": ["functions/src/typed/algebra.ts"],
+    "functions/src/typed/string-derivative.ts": [
+      "functions/src/typed/algebra.ts",
+      "functions/src/typed/cas.ts"
+    ],
     "functions/src/typed/euclid.ts": [
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/cas.ts"

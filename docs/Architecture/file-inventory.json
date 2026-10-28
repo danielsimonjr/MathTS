@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1989,
+  "totalFiles": 1991,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1190,
+    "build-entry": 1191,
     "test-only": 0,
     "orphan": 0,
-    "test": 711,
+    "test": 712,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1216,
-    "tests": 711,
+    "src": 1217,
+    "tests": 712,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 838,
+    "@danielsimonjr/mathts-functions": 840,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 110,
@@ -7975,7 +7975,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1829
+      "loc": 1765
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -7996,7 +7996,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2855
+      "loc": 2817
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -8242,6 +8242,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 888
+    },
+    {
+      "file": "functions/src/typed/string-derivative.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 84
     },
     {
       "file": "functions/src/typed/string.ts",
@@ -8739,6 +8746,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 357
+    },
+    {
+      "file": "functions/tests/clones-cas-string-kernels-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 186
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",

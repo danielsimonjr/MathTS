@@ -2259,6 +2259,7 @@
       "dependencies",
       "derivative",
       "derivativeAt",
+      "derivativeOfAdditiveTerms",
       "describe",
       "DescribeResult",
       "det",
