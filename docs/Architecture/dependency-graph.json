@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-28",
     "totalFiles": 1215,
     "totalModules": 82,
-    "totalExports": 6250
+    "totalExports": 6251
   },
   "entryPoints": [
     {
@@ -15253,13 +15253,18 @@
         "constants": ["createForEach"]
       },
       "functions/src/matrix/from-vectors.ts": {
-        "description": "Return the logical length of a 1-D or 2-D column/row vector.",
+        "description": "Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./sparse-csc-tail.js",
+            "imports": ["buildSparseCscFromEntries"]
+          }
+        ],
         "workspaceDependencies": [],
-        "exports": ["vectorLength", "matrixFromVectorList"],
-        "functions": ["vectorLength", "matrixFromVectorList"]
+        "exports": ["sparseMatrixFromVectors", "vectorLength", "matrixFromVectorList"],
+        "functions": ["sparseMatrixFromVectors", "vectorLength", "matrixFromVectorList"]
       },
       "functions/src/matrix/getMatrixDataType.ts": {
         "description": "Find the data type of all elements in a matrix or array,",
@@ -15477,11 +15482,7 @@
           },
           {
             "file": "./from-vectors.js",
-            "imports": ["matrixFromVectorList", "vectorLength"]
-          },
-          {
-            "file": "./sparse-csc-tail.js",
-            "imports": ["buildSparseCscFromEntries"]
+            "imports": ["matrixFromVectorList", "sparseMatrixFromVectors", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -15517,11 +15518,7 @@
           },
           {
             "file": "./from-vectors.js",
-            "imports": ["matrixFromVectorList", "vectorLength"]
-          },
-          {
-            "file": "./sparse-csc-tail.js",
-            "imports": ["buildSparseCscFromEntries"]
+            "imports": ["matrixFromVectorList", "sparseMatrixFromVectors", "vectorLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -42334,11 +42331,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1215,
     "totalModules": 82,
-    "totalLinesOfCode": 200578,
-    "totalExports": 6250,
+    "totalLinesOfCode": 200573,
+    "totalExports": 6251,
     "totalClasses": 59,
     "totalInterfaces": 543,
-    "totalFunctions": 2018,
+    "totalFunctions": 2019,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1618,

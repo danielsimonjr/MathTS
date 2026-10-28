@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1215, "e": 6250, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1215, "e": 6251, "re": 2627 },
   "s": {
-    "loc": 200578,
+    "loc": 200573,
     "cls": 59,
     "int": 543,
-    "fn": 2018,
+    "fn": 2019,
     "tg": 159,
     "en": 0,
     "co": 1618,
@@ -744,9 +744,9 @@
         "createFilter",
         "createFlatten",
         "createForEach",
+        "sparseMatrixFromVectors",
         "vectorLength",
-        "matrixFromVectorList",
-        "createGetMatrixDataType"
+        "matrixFromVectorList"
       ],
       "int": [
         "Matrix",

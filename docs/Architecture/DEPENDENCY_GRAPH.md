@@ -6209,11 +6209,17 @@ graph LR
 
 ---
 
-### `functions/src/matrix/from-vectors.ts` - Return the logical length of a 1-D or 2-D column/row vector.
+### `functions/src/matrix/from-vectors.ts` - Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
+
+**Internal Dependencies:**
+
+| File                   | Imports                     | Type   |
+| ---------------------- | --------------------------- | ------ |
+| `./sparse-csc-tail.js` | `buildSparseCscFromEntries` | Import |
 
 **Exports:**
 
-- Functions: `vectorLength`, `matrixFromVectorList`
+- Functions: `sparseMatrixFromVectors`, `vectorLength`, `matrixFromVectorList`
 
 ---
 
@@ -6354,11 +6360,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                              | Type   |
-| ---------------------- | ------------------------------------ | ------ |
-| `../utils/factory.js`  | `factory`                            | Import |
-| `./from-vectors.js`    | `matrixFromVectorList, vectorLength` | Import |
-| `./sparse-csc-tail.js` | `buildSparseCscFromEntries`          | Import |
+| File                  | Imports                                                       | Type   |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| `../utils/factory.js` | `factory`                                                     | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, sparseMatrixFromVectors, vectorLength` | Import |
 
 **Exports:**
 
@@ -6385,11 +6390,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                   | Imports                              | Type   |
-| ---------------------- | ------------------------------------ | ------ |
-| `../utils/factory.js`  | `factory`                            | Import |
-| `./from-vectors.js`    | `matrixFromVectorList, vectorLength` | Import |
-| `./sparse-csc-tail.js` | `buildSparseCscFromEntries`          | Import |
+| File                  | Imports                                                       | Type   |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| `../utils/factory.js` | `factory`                                                     | Import |
+| `./from-vectors.js`   | `matrixFromVectorList, sparseMatrixFromVectors, vectorLength` | Import |
 
 **Exports:**
 
@@ -19103,12 +19107,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1215   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200578 |
-| Total Exports           | 6250   |
+| Total Lines of Code     | 200573 |
+| Total Exports           | 6251   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 543    |
-| Total Functions         | 2018   |
+| Total Functions         | 2019   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

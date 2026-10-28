@@ -2214,11 +2214,8 @@
       "functions/src/matrix/forEach.ts",
       "functions/src/matrix/map.ts"
     ],
+    "functions/src/matrix/sparse-csc-tail.ts": ["functions/src/matrix/from-vectors.ts"],
     "functions/src/matrix/from-vectors.ts": [
-      "functions/src/matrix/matrixFromColumns.ts",
-      "functions/src/matrix/matrixFromRows.ts"
-    ],
-    "functions/src/matrix/sparse-csc-tail.ts": [
       "functions/src/matrix/matrixFromColumns.ts",
       "functions/src/matrix/matrixFromRows.ts"
     ],

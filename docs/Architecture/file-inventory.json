@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1985,
+  "totalFiles": 1986,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1189,
     "test-only": 0,
     "orphan": 0,
-    "test": 708,
+    "test": 709,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1215,
-    "tests": 708,
+    "tests": 709,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 836,
+    "@danielsimonjr/mathts-functions": 837,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 108,
@@ -6344,7 +6344,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 96
+      "loc": 171
     },
     {
       "file": "functions/src/matrix/getMatrixDataType.ts",
@@ -6400,7 +6400,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 180
+      "loc": 133
     },
     {
       "file": "functions/src/matrix/matrixFromFunction.ts",
@@ -6414,14 +6414,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 163
+      "loc": 122
     },
     {
       "file": "functions/src/matrix/native-accel.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 174
+      "loc": 176
     },
     {
       "file": "functions/src/matrix/ones.ts",
@@ -7793,7 +7793,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 422
+      "loc": 428
     },
     {
       "file": "functions/src/type/matrix/Spa.ts",
@@ -8753,6 +8753,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 321
+    },
+    {
+      "file": "functions/tests/clones-shapes-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 311
     },
     {
       "file": "functions/tests/combinatorics-extended.test.ts",

@@ -3467,6 +3467,7 @@
       "sosfilt",
       "SpaceCoefficient",
       "sparse",
+      "sparseMatrixFromVectors",
       "spearman",
       "spearmanr",
       "spectralClustering",
