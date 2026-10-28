@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 2000,
+  "totalFiles": 2001,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1193,
     "test-only": 0,
     "orphan": 0,
-    "test": 719,
+    "test": 720,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1219,
-    "tests": 719,
+    "tests": 720,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 843,
+    "@danielsimonjr/mathts-functions": 844,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -8563,7 +8563,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 349
+      "loc": 336
     },
     {
       "file": "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -11035,6 +11035,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 141
+    },
+    {
+      "file": "functions/tests/wasm-ptr-abi-clones-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 159
     },
     {
       "file": "functions/tests/wasm-resolve.test.ts",
