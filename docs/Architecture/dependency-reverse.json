@@ -1686,6 +1686,7 @@
     ],
     "functions/src/wasm/special/scalars.ts": [
       "functions/src/distribution-functions.ts",
+      "functions/src/numbertheory/extra.ts",
       "functions/src/signal/iir-design.ts",
       "functions/src/special/niche.ts",
       "functions/src/special/wave-functions.ts",
@@ -2270,6 +2271,10 @@
     ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
+    "functions/src/probability/bigint-binomial.ts": [
+      "functions/src/probability/combinations.ts",
+      "functions/src/probability/combinationsWithRep.ts"
+    ],
     "functions/src/probability/util/randomMatrix.ts": [
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts"

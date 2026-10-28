@@ -8,6 +8,10 @@ import { mulP } from '../src/typed/factorization/finite-field.js';
 import type { IntPoly } from '../src/typed/factorization/integer-poly.js';
 import { eulerNumbers } from '../src/index.js';
 import { chooseScalar } from '../src/wasm/special/scalars.js';
+import {
+  binomialProductBigNumber,
+  type BigNumberBinomialType,
+} from '../src/probability/bigint-binomial.js';
 const P = (...c: number[]): IntPoly => c.map(BigInt);
 
 /** Independent exact binomial via bigint (oracle for rounded float path). */
@@ -24,6 +28,63 @@ function binomialBigInt(n: bigint, k: bigint): bigint {
 describe('combinations factory number path (unchanged)', () => {
   it('C(7, 5) = 21', () => {
     expect((factoryScope.combinations as (n: number, k: number) => number)(7, 5)).toBe(21);
+  });
+});
+
+type LegacyBn = BigNumberBinomialType & { __v: bigint };
+
+function legacyBnCoerce(x: BigNumberBinomialType | number): bigint {
+  return typeof x === 'number' ? BigInt(x) : (x as LegacyBn).__v;
+}
+
+function legacyBn(value: number | bigint): LegacyBn {
+  const n = typeof value === 'bigint' ? value : BigInt(value);
+  function LegacyBigNumberCtor(v: number): LegacyBn {
+    return legacyBn(BigInt(v));
+  }
+  const self: LegacyBn = {
+    __v: n,
+    constructor: LegacyBigNumberCtor,
+    minus(x) {
+      return legacyBn(n - legacyBnCoerce(x));
+    },
+    plus(x) {
+      return legacyBn(n + legacyBnCoerce(x));
+    },
+    times(x) {
+      return legacyBn(n * legacyBnCoerce(x));
+    },
+    dividedBy(x) {
+      const d = legacyBnCoerce(x);
+      if (n % d !== 0n) throw new Error('not divisible');
+      return legacyBn(n / d);
+    },
+    lt(x) {
+      return n < legacyBnCoerce(x);
+    },
+    gt(x) {
+      return n > legacyBnCoerce(x);
+    },
+    lte(x) {
+      return n <= legacyBnCoerce(x);
+    },
+    gte(x) {
+      return n >= legacyBnCoerce(x);
+    },
+    isInteger: () => true,
+    toString: () => n.toString(),
+  };
+  return self;
+}
+
+describe('binomialProductBigNumber', () => {
+  it('C(7, 5) = 21 and C(60, 30) above 2^53', () => {
+    expect(String(binomialProductBigNumber(legacyBn(7), legacyBn(5)))).toBe('21');
+    expect(String(binomialProductBigNumber(legacyBn(60), legacyBn(30)))).toBe('118264581564861424');
+  });
+
+  it('with-rep total n+k-1: C(5+3-1, 3)', () => {
+    expect(String(binomialProductBigNumber(legacyBn(7), legacyBn(3)))).toBe('35');
   });
 });
 

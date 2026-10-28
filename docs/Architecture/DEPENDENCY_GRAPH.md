@@ -143,7 +143,7 @@ The codebase is organized into the following modules:
 - **functions/numbertheory**: 1 file
 - **functions/numeric**: 26 files
 - **functions/plain**: 10 files
-- **functions/probability**: 15 files
+- **functions/probability**: 16 files
 - **functions/relational**: 13 files
 - **functions/set**: 10 files
 - **functions/signal**: 12 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 21             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 493            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 494            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 478            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -6858,6 +6858,12 @@ graph LR
 
 ### `functions/src/numbertheory/extra.ts` - Number-theory fills — closes gaps left by the existing combinatorics/number-theory
 
+**Internal Dependencies:**
+
+| File                         | Imports        | Type   |
+| ---------------------------- | -------------- | ------ |
+| `../wasm/special/scalars.js` | `chooseScalar` | Import |
+
 **Exports:**
 
 - Functions: `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `combinationsGen`, `permutationsGen`
@@ -7393,15 +7399,25 @@ graph LR
 
 ---
 
+### `functions/src/probability/bigint-binomial.ts` - Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
+
+**Exports:**
+
+- Interfaces: `BigNumberBinomialType`
+- Functions: `isPositiveInteger`, `binomialProductBigNumber`
+
+---
+
 ### `functions/src/probability/combinations.ts` - Compute the number of ways of picking `k` unordered outcomes from `n`
 
 **Internal Dependencies:**
 
-| File                              | Imports              | Type               |
-| --------------------------------- | -------------------- | ------------------ |
-| `../utils/factory.js`             | `factory`            | Import             |
-| `../plain/number/combinations.js` | `combinationsNumber` | Import             |
-| `../core/function/typed.js`       | `TypedFunction`      | Import (type-only) |
+| File                              | Imports                                                              | Type               |
+| --------------------------------- | -------------------------------------------------------------------- | ------------------ |
+| `../utils/factory.js`             | `factory`                                                            | Import             |
+| `../plain/number/combinations.js` | `combinationsNumber`                                                 | Import             |
+| `../core/function/typed.js`       | `TypedFunction`                                                      | Import (type-only) |
+| `./bigint-binomial.js`            | `binomialProductBigNumber, isPositiveInteger, BigNumberBinomialType` | Import             |
 
 **Exports:**
 
@@ -7413,12 +7429,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../utils/number.js`        | `isInteger`     | Import             |
-| `../utils/product.js`       | `product`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                        | Imports                                                              | Type               |
+| --------------------------- | -------------------------------------------------------------------- | ------------------ |
+| `../utils/factory.js`       | `factory`                                                            | Import             |
+| `../utils/number.js`        | `isInteger`                                                          | Import             |
+| `../utils/product.js`       | `product`                                                            | Import             |
+| `../core/function/typed.js` | `TypedFunction`                                                      | Import (type-only) |
+| `./bigint-binomial.js`      | `binomialProductBigNumber, isPositiveInteger, BigNumberBinomialType` | Import             |
 
 **Exports:**
 
@@ -10107,10 +10124,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                                         | Type                  |
-| ------------------- | ----------------------------------------------- | --------------------- |
-| `./integer-poly.js` | `trim, degree, lc, isZero, zipIntPoly, IntPoly` | Import                |
-| `./integer-poly.js` | `IntPoly`                                       | Re-export (type-only) |
+| File                | Imports                                                        | Type                  |
+| ------------------- | -------------------------------------------------------------- | --------------------- |
+| `./integer-poly.js` | `trim, degree, lc, isZero, zipIntPoly, schoolbookMul, IntPoly` | Import                |
+| `./integer-poly.js` | `IntPoly`                                                      | Re-export (type-only) |
 
 **Exports:**
 
@@ -10157,7 +10174,7 @@ graph LR
 **Exports:**
 
 - Types: `IntPoly`
-- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `schoolbookMul`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
 
 ---
 
@@ -18558,16 +18575,16 @@ graph TD
 
     subgraph Functions/probability
         N223[bernoulli]
-        N224[combinations]
-        N225[combinationsWithRep]
-        N226[factorial]
-        N227[gamma]
-        N228[kldivergence]
-        N229[lgamma]
-        N230[multinomial]
-        N231[permutations]
-        N232[pickRandom]
-        N233[...5 more]
+        N224[bigint-binomial]
+        N225[combinations]
+        N226[combinationsWithRep]
+        N227[factorial]
+        N228[gamma]
+        N229[kldivergence]
+        N230[lgamma]
+        N231[multinomial]
+        N232[permutations]
+        N233[...6 more]
     end
 
     subgraph Functions/relational
@@ -19053,15 +19070,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1212   |
+| Total TypeScript Files  | 1213   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200596 |
-| Total Exports           | 6241   |
+| Total Lines of Code     | 200578 |
+| Total Exports           | 6244   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 542    |
-| Total Functions         | 2009   |
-| Total Type Guards       | 158    |
+| Total Interfaces        | 543    |
+| Total Functions         | 2012   |
+| Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
 | Runtime Circular Deps   | 0      |
