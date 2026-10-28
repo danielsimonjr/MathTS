@@ -116,7 +116,7 @@ The codebase is organized into the following modules:
 - **core/numeric**: 3 files
 - **core/typed**: 3 files
 - **core/types**: 19 files
-- **matrix/backends**: 20 files
+- **matrix/backends**: 21 files
 - **matrix**: 4 files
 - **matrix/operations**: 18 files
 - **matrix/types**: 6 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 8              | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 48             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 48             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 49             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 496            | 2               |
@@ -1341,14 +1341,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                            | Type               |
-| ------------------------- | ---------------------------------- | ------------------ |
-| `./Backend.js`            | `MatrixBackend, BackendType`       | Import (type-only) |
-| `../types/DenseMatrix.js` | `DenseMatrix`                      | Import             |
-| `./JSBackend.js`          | `jsBackend`                        | Import             |
-| `./wasm/detect.js`        | `detectWasmFeatures, WasmFeatures` | Import             |
-| `./wasm/resolve.js`       | ``                                 | Import (type-only) |
-| `./wasm/integrity.js`     | ``                                 | Import (type-only) |
+| File                       | Imports                                                                                            | Type               |
+| -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------ |
+| `./Backend.js`             | `MatrixBackend, BackendType`                                                                       | Import (type-only) |
+| `../types/DenseMatrix.js`  | `DenseMatrix`                                                                                      | Import             |
+| `./JSBackend.js`           | `jsBackend`                                                                                        | Import             |
+| `./wasm/detect.js`         | `detectWasmFeatures, WasmFeatures`                                                                 | Import             |
+| `./wasm/as-typed-array.js` | `AS_F64_ALIGN_SHIFT, AS_I32_ALIGN_SHIFT, AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView` | Import             |
+| `./wasm/resolve.js`        | ``                                                                                                 | Import (type-only) |
+| `./wasm/integrity.js`      | ``                                                                                                 | Import (type-only) |
 
 **Exports:**
 
@@ -1369,10 +1370,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports | Type               |
-| --------------------- | ------- | ------------------ |
-| `./wasm/integrity.js` | ``      | Import (type-only) |
-| `./wasm/resolve.js`   | ``      | Import (type-only) |
+| File                       | Imports                                                    | Type               |
+| -------------------------- | ---------------------------------------------------------- | ------------------ |
+| `./wasm/as-typed-array.js` | `AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView` | Import             |
+| `./wasm/integrity.js`      | ``                                                         | Import (type-only) |
+| `./wasm/resolve.js`        | ``                                                         | Import (type-only) |
 
 **Exports:**
 
@@ -1515,6 +1517,16 @@ graph LR
 | `./Backend.js`     | `backendRegistry` | Import |
 | `./JSBackend.js`   | `jsBackend`       | Import |
 | `./WASMBackend.js` | `wasmBackend`     | Import |
+
+---
+
+### `matrix/src/backends/wasm/as-typed-array.ts` - Shared AssemblyScript managed-runtime allocation for typed arrays.
+
+**Exports:**
+
+- Interfaces: `AsRuntime`
+- Functions: `allocAsTypedView`
+- Constants: `AS_ID_ARRAY_BUFFER`, `AS_ID_FLOAT64_ARRAY`, `AS_ID_INT32_ARRAY`, `AS_HEADER_BYTES`, `AS_F64_ALIGN_SHIFT`, `AS_I32_ALIGN_SHIFT`
 
 ---
 
@@ -18399,7 +18411,7 @@ graph TD
         N50[WasmLoader]
         N51[BatchExecutor]
         N52[Sync]
-        N53[...10 more]
+        N53[...11 more]
     end
 
     subgraph Matrix
@@ -19147,14 +19159,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1218   |
+| Total TypeScript Files  | 1219   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200679 |
-| Total Exports           | 6257   |
+| Total Lines of Code     | 200727 |
+| Total Exports           | 6264   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
-| Total Interfaces        | 545    |
-| Total Functions         | 2025   |
+| Total Interfaces        | 546    |
+| Total Functions         | 2026   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |

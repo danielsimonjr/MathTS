@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-28",
-    "totalFiles": 1218,
+    "totalFiles": 1219,
     "totalModules": 82,
-    "totalExports": 6257
+    "totalExports": 6264
   },
   "entryPoints": [
     {
@@ -3686,6 +3686,16 @@
             "imports": ["detectWasmFeatures", "WasmFeatures"]
           },
           {
+            "file": "./wasm/as-typed-array.js",
+            "imports": [
+              "AS_F64_ALIGN_SHIFT",
+              "AS_I32_ALIGN_SHIFT",
+              "AS_ID_FLOAT64_ARRAY",
+              "AS_ID_INT32_ARRAY",
+              "allocAsTypedView"
+            ]
+          },
+          {
             "file": "./wasm/resolve.js",
             "imports": [],
             "typeOnly": true
@@ -3708,6 +3718,10 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
+          {
+            "file": "./wasm/as-typed-array.js",
+            "imports": ["AS_ID_FLOAT64_ARRAY", "AS_ID_INT32_ARRAY", "allocAsTypedView"]
+          },
           {
             "file": "./wasm/integrity.js",
             "imports": [],
@@ -4230,6 +4244,32 @@
         ],
         "workspaceDependencies": [],
         "exports": []
+      },
+      "matrix/src/backends/wasm/as-typed-array.ts": {
+        "description": "Shared AssemblyScript managed-runtime allocation for typed arrays.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": [
+          "AS_ID_ARRAY_BUFFER",
+          "AS_ID_FLOAT64_ARRAY",
+          "AS_ID_INT32_ARRAY",
+          "AS_HEADER_BYTES",
+          "AS_F64_ALIGN_SHIFT",
+          "AS_I32_ALIGN_SHIFT",
+          "allocAsTypedView"
+        ],
+        "interfaces": ["AsRuntime"],
+        "functions": ["allocAsTypedView"],
+        "constants": [
+          "AS_ID_ARRAY_BUFFER",
+          "AS_ID_FLOAT64_ARRAY",
+          "AS_ID_INT32_ARRAY",
+          "AS_HEADER_BYTES",
+          "AS_F64_ALIGN_SHIFT",
+          "AS_I32_ALIGN_SHIFT"
+        ]
       },
       "matrix/src/backends/wasm/detect.ts": {
         "description": "WASM Feature Detection",
@@ -40953,6 +40993,7 @@
           "matrix/src/backends/gpu/run-shader.ts",
           "matrix/src/backends/index.ts",
           "matrix/src/backends/register-backends.ts",
+          "matrix/src/backends/wasm/as-typed-array.ts",
           "matrix/src/backends/wasm/detect.ts",
           "matrix/src/backends/wasm/index.ts",
           "matrix/src/backends/wasm/integrity.ts",
@@ -42412,16 +42453,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1218,
+    "totalTypeScriptFiles": 1219,
     "totalModules": 82,
-    "totalLinesOfCode": 200679,
-    "totalExports": 6257,
+    "totalLinesOfCode": 200727,
+    "totalExports": 6264,
     "totalClasses": 59,
-    "totalInterfaces": 545,
-    "totalFunctions": 2025,
+    "totalInterfaces": 546,
+    "totalFunctions": 2026,
     "totalTypeGuards": 159,
     "totalEnums": 0,
-    "totalConstants": 1618,
+    "totalConstants": 1624,
     "totalReExports": 2627,
     "totalTypeOnlyImports": 612,
     "runtimeCircularDeps": 0,
