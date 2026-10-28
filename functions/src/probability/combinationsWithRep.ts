@@ -2,23 +2,11 @@ import { factory } from '../utils/factory.js';
 import { isInteger } from '../utils/number.js';
 import { product } from '../utils/product.js';
 import type { TypedFunction } from '../core/function/typed.js';
-
-// Type definitions for combinationsWithRep
-interface BigNumberType {
-  constructor: BigNumberConstructor;
-  minus(n: BigNumberType | number): BigNumberType;
-  plus(n: BigNumberType | number): BigNumberType;
-  times(n: BigNumberType | number): BigNumberType;
-  dividedBy(n: BigNumberType | number): BigNumberType;
-  lt(n: BigNumberType | number): boolean;
-  lte(n: BigNumberType | number): boolean;
-  gte(n: BigNumberType | number): boolean;
-  isInteger(): boolean;
-}
-
-interface BigNumberConstructor {
-  new (value: number): BigNumberType;
-}
+import {
+  binomialProductBigNumber,
+  isPositiveInteger,
+  type BigNumberBinomialType,
+} from './bigint-binomial.js';
 
 interface CombinationsWithRepDependencies {
   typed: TypedFunction;
@@ -74,12 +62,9 @@ export const createCombinationsWithRep = /* #__PURE__ */ factory(
         return prodrange / product(1, n - 1);
       },
 
-      'BigNumber, BigNumber': function (n: BigNumberType, k: BigNumberType): BigNumberType {
+      'BigNumber, BigNumber': function (n: BigNumberBinomialType, k: BigNumberBinomialType) {
         const BigNumber = n.constructor;
-        let result: BigNumberType;
-        let i: BigNumberType;
         const one = new BigNumber(1);
-        const nMinusOne = n.minus(one);
 
         if (!isPositiveInteger(n) || !isPositiveInteger(k)) {
           throw new TypeError('Positive integer value expected in function combinationsWithRep');
@@ -90,28 +75,8 @@ export const createCombinationsWithRep = /* #__PURE__ */ factory(
           );
         }
 
-        result = one;
-        if (k.lt(nMinusOne)) {
-          for (i = one; i.lte(nMinusOne); i = i.plus(one)) {
-            result = result.times(k.plus(i)).dividedBy(i);
-          }
-        } else {
-          for (i = one; i.lte(k); i = i.plus(one)) {
-            result = result.times(nMinusOne.plus(i)).dividedBy(i);
-          }
-        }
-
-        return result;
+        return binomialProductBigNumber(n.plus(k).minus(1), k);
       },
     });
   }
 );
-
-/**
- * Test whether BigNumber n is a positive integer
- * @param {BigNumber} n
- * @returns {boolean} isPositiveInteger
- */
-function isPositiveInteger(n: BigNumberType): boolean {
-  return n.isInteger() && n.gte(0);
-}

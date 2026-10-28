@@ -578,6 +578,22 @@ export function describeCommand(args: string[]): CommandResult {
 }
 
 /**
+ * Shared `--json` vs human-text dispatch for introspection CLI commands
+ * (`capabilities`, `functions`, `templates`). Uses substring `--json` detection.
+ */
+function renderInfoCommand(
+  args: string[],
+  command: string,
+  data: unknown,
+  lines: readonly string[]
+): CommandResult {
+  if (args.includes('--json')) {
+    return { stdout: jsonEnvelope(command, true, data, []), stderr: '', exitCode: 0 };
+  }
+  return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+}
+
+/**
  * Print the CLI version, the schema version, the supported and deferred cell types,
  * and the command list (`mtsw capabilities`).
  *
@@ -586,16 +602,13 @@ export function describeCommand(args: string[]): CommandResult {
  */
 export function capabilitiesCommand(args: string[]): CommandResult {
   const data = capabilitiesInfo();
-  if (args.includes('--json')) {
-    return { stdout: jsonEnvelope('capabilities', true, data, []), stderr: '', exitCode: 0 };
-  }
   const lines = [
     `mtsw ${data.version} (schema ${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor})`,
     `supported cells: ${data.cellTypes.supported.join(', ')}`,
     `deferred cells: ${data.cellTypes.deferred.join(', ')}`,
     `commands: ${data.commands.join(', ')}`,
   ];
-  return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+  return renderInfoCommand(args, 'capabilities', data, lines);
 }
 
 /**
@@ -609,14 +622,8 @@ export function templatesCommand(args: string[]): CommandResult {
     name,
     description: t.description,
   }));
-  if (args.includes('--json')) {
-    return { stdout: jsonEnvelope('templates', true, { templates }, []), stderr: '', exitCode: 0 };
-  }
-  return {
-    stdout: templates.map((t) => `${t.name} - ${t.description}`).join('\n'),
-    stderr: '',
-    exitCode: 0,
-  };
+  const lines = templates.map((t) => `${t.name} - ${t.description}`);
+  return renderInfoCommand(args, 'templates', { templates }, lines);
 }
 
 /**
@@ -628,14 +635,11 @@ export function templatesCommand(args: string[]): CommandResult {
  */
 export function functionsCommand(args: string[]): CommandResult {
   const data = listFunctions();
-  if (args.includes('--json')) {
-    return { stdout: jsonEnvelope('functions', true, data, []), stderr: '', exitCode: 0 };
-  }
   const lines = [
     `functions (${data.functions.length}): ${data.functions.join(', ')}`,
     `constants (${data.constants.length}): ${data.constants.join(', ')}`,
   ];
-  return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+  return renderInfoCommand(args, 'functions', data, lines);
 }
 
 /**
