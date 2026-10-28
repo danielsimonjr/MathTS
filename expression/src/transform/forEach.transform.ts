@@ -1,6 +1,6 @@
 import { createTransformCallback } from './utils/transformCallback.js';
 import { factory } from '../utils/factory.js';
-import { prepareTransformArrayAndCallback } from './utils/prepareTransformArgs.js';
+import { applyArrayCallbackTransform } from './utils/prepareTransformArgs.js';
 
 interface TypedFunction<T = unknown> {
   (...args: unknown[]): T;
@@ -38,23 +38,15 @@ export const createForEachTransform = /* #__PURE__ */ factory(
      * This transform creates a one-based index instead of a zero-based index
      */
     const transformCallback = createTransformCallback({ typed });
+
     function forEachTransform(args: Node[], math: unknown, scope: unknown): unknown {
-      if (args.length === 0) {
-        return forEach();
-      }
-      let x: unknown = args[0];
-
-      if (args.length === 1) {
-        return forEach(x);
-      }
-
-      const prepared = prepareTransformArrayAndCallback(
-        args as Node[],
+      return applyArrayCallbackTransform(
+        args,
         math as Record<string, unknown>,
-        scope as Map<string, unknown>
+        scope as Map<string, unknown>,
+        forEach,
+        transformCallback
       );
-
-      return forEach(prepared.x, transformCallback(prepared.callback, prepared.callbackArity));
     }
     forEachTransform.rawArgs = true;
     return forEachTransform as TransformFunction;

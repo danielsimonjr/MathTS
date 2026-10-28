@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-28",
-  "totalFiles": 1975,
+  "totalFiles": 1978,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1186,
+    "build-entry": 1187,
     "test-only": 0,
     "orphan": 0,
-    "test": 701,
+    "test": 703,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1212,
-    "tests": 701,
+    "src": 1213,
+    "tests": 703,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -27,7 +27,7 @@
     "@danielsimonjr/mathts-core": 94,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 552,
+    "@danielsimonjr/mathts-expression": 555,
     "@danielsimonjr/mathts-functions": 834,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -4300,21 +4300,21 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 43
+      "loc": 40
     },
     {
       "file": "expression/src/transform/bitAnd.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 48
+      "loc": 46
     },
     {
       "file": "expression/src/transform/bitOr.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 51
+      "loc": 49
     },
     {
       "file": "expression/src/transform/column.transform.ts",
@@ -4335,7 +4335,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 50
+      "loc": 42
     },
     {
       "file": "expression/src/transform/diff.transform.ts",
@@ -4349,14 +4349,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 67
+      "loc": 58
     },
     {
       "file": "expression/src/transform/forEach.transform.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 64
+      "loc": 56
     },
     {
       "file": "expression/src/transform/index.transform.ts",
@@ -4384,7 +4384,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 50
+      "loc": 46
     },
     {
       "file": "expression/src/transform/max.transform.ts",
@@ -4419,7 +4419,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 43
+      "loc": 40
     },
     {
       "file": "expression/src/transform/print.transform.ts",
@@ -4482,7 +4482,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 22
+      "loc": 39
     },
     {
       "file": "expression/src/transform/utils/errorTransform.ts",
@@ -4503,7 +4503,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 49
+      "loc": 76
+    },
+    {
+      "file": "expression/src/transform/utils/shortCircuitBinary.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 32
     },
     {
       "file": "expression/src/transform/utils/transformCallback.ts",
@@ -4954,6 +4961,13 @@
       "loc": 311
     },
     {
+      "file": "expression/tests/s2r-clones-dim-transform-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 144
+    },
+    {
       "file": "expression/tests/s2r-clones-relational-render-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -4961,11 +4975,18 @@
       "loc": 103
     },
     {
+      "file": "expression/tests/s2r-clones-short-circuit-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 174
+    },
+    {
       "file": "expression/tests/s2r-clones-transform-args-oracle.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 76
+      "loc": 182
     },
     {
       "file": "expression/tests/scalar-builder.test.ts",
