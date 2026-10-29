@@ -12084,7 +12084,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2539
+      "loc": 2515
     },
     {
       "file": "packages/workerpool/src/multi-index.ts",

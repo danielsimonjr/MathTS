@@ -762,19 +762,20 @@ export class MathWorkerPool {
   // Array Operations
   // =========================================================================
 
-  /**
-   * Parallel sum of array elements
-   */
-  async sum(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+  private async reduceScalar(
+    data: Float64Array,
+    options: TaskOptions | undefined,
+    spec: {
+      sequential: () => number;
+      task: 'sumChunk' | 'prodChunk' | 'normChunk';
+      reducePartials: (parts: number[]) => number;
+    }
+  ): Promise<ParallelResult<number>> {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      let total = 0;
-      for (let i = 0; i < data.length; i++) {
-        total += data[i];
-      }
       return {
-        result: total,
+        result: spec.sequential(),
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -785,14 +786,12 @@ export class MathWorkerPool {
     const chunks = this.chunkFloat64Array(data, options?.chunkSize);
     const stats = this.stats();
 
-    const partialSums = await Promise.all(
-      chunks.map((chunk) => this.exec<number>('sumChunk', [chunk.buffer, 0, chunk.length]))
+    const partials = await Promise.all(
+      chunks.map((chunk) => this.exec<number>(spec.task, [chunk.buffer, 0, chunk.length]))
     );
 
-    const result = partialSums.reduce((a, b) => a + b, 0);
-
     return {
-      result,
+      result: spec.reducePartials(partials),
       duration: performance.now() - start,
       chunks: chunks.length,
       parallelized: true,
@@ -801,41 +800,37 @@ export class MathWorkerPool {
   }
 
   /**
+   * Parallel sum of array elements
+   */
+  async sum(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+    return this.reduceScalar(data, options, {
+      sequential: () => {
+        let total = 0;
+        for (let i = 0; i < data.length; i++) {
+          total += data[i];
+        }
+        return total;
+      },
+      task: 'sumChunk',
+      reducePartials: (parts) => parts.reduce((a, b) => a + b, 0),
+    });
+  }
+
+  /**
    * Parallel product of array elements
    */
   async prod(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      let total = 1;
-      for (let i = 0; i < data.length; i++) {
-        total *= data[i];
-      }
-      return {
-        result: total,
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
-    const stats = this.stats();
-
-    const partialProds = await Promise.all(
-      chunks.map((chunk) => this.exec<number>('prodChunk', [chunk.buffer, 0, chunk.length]))
-    );
-
-    const result = partialProds.reduce((a, b) => a * b, 1);
-
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    return this.reduceScalar(data, options, {
+      sequential: () => {
+        let total = 1;
+        for (let i = 0; i < data.length; i++) {
+          total *= data[i];
+        }
+        return total;
+      },
+      task: 'prodChunk',
+      reducePartials: (parts) => parts.reduce((a, b) => a * b, 1),
+    });
   }
 
   /**
@@ -1493,38 +1488,17 @@ export class MathWorkerPool {
    * Compute norm (Euclidean length) in parallel
    */
   async norm(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      let sumSq = 0;
-      for (let i = 0; i < data.length; i++) {
-        sumSq += data[i] * data[i];
-      }
-      return {
-        result: Math.sqrt(sumSq),
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
-    const stats = this.stats();
-
-    const partialNorms = await Promise.all(
-      chunks.map((chunk) => this.exec<number>('normChunk', [chunk.buffer, 0, chunk.length]))
-    );
-
-    const sumSq = partialNorms.reduce((a, b) => a + b, 0);
-
-    return {
-      result: Math.sqrt(sumSq),
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    return this.reduceScalar(data, options, {
+      sequential: () => {
+        let sumSq = 0;
+        for (let i = 0; i < data.length; i++) {
+          sumSq += data[i] * data[i];
+        }
+        return Math.sqrt(sumSq);
+      },
+      task: 'normChunk',
+      reducePartials: (parts) => Math.sqrt(parts.reduce((a, b) => a + b, 0)),
+    });
   }
 
   /**
