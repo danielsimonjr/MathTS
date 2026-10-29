@@ -122,13 +122,13 @@
     "core/src/collection.ts": ["core/src/internal.ts"],
     "core/src/map.ts": ["core/src/internal.ts"],
     "core/src/wasm-loader.ts": ["core/src/internal.ts"],
-    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",
       "core/src/types/unit/dependencies.ts",
       "core/src/types/unit/index.ts"
     ],
+    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/customs.ts": ["core/src/map.ts"],
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
@@ -1383,6 +1383,7 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
       "functions/src/relational/unequal.ts",
+      "functions/src/set/flatten-pair.ts",
       "functions/src/set/setCartesian.ts",
       "functions/src/set/setDifference.ts",
       "functions/src/set/setIntersect.ts",
@@ -2299,6 +2300,10 @@
       "functions/src/relational/smallerEq.ts"
     ],
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
+    "functions/src/set/flatten-pair.ts": [
+      "functions/src/set/setSymDifference.ts",
+      "functions/src/set/setUnion.ts"
+    ],
     "functions/src/signal/fft.ts": [
       "functions/src/signal/conv.ts",
       "functions/src/signal/fft-helpers.ts",
@@ -2414,6 +2419,9 @@
       "functions/src/typed/factorization/kronecker.ts"
     ],
     "functions/src/typed/factorization/kronecker-factor.ts": [
+      "functions/src/typed/factorization/index.ts"
+    ],
+    "functions/src/typed/factorization/render-univariate.ts": [
       "functions/src/typed/factorization/index.ts"
     ],
     "functions/src/typed/factorization/kronecker.ts": [

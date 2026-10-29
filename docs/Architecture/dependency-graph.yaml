@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-29'
-  totalFiles: 1219
+  totalFiles: 1223
   totalModules: 82
-  totalExports: 6267
+  totalExports: 6325
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1476,6 +1476,37 @@ modules:
             - MathJsConfig
           reExport: true
           typeOnly: true
+        - file: ./types/unit/unit-types.js
+          imports:
+            - ComplexValue
+            - ComplexConstructor
+            - BigNumberConstructor
+            - FractionConstructor
+            - FractionValue
+            - Numeric
+            - PrefixDef
+            - PrefixTable
+            - BaseUnitDef
+            - UnitDef
+            - UnitComponent
+            - UnitSystemEntry
+            - UnitSystem
+            - UnitJSON
+            - ConverterFn
+            - TypeConverters
+            - ParseOptions
+            - UnitFormatOptions
+            - CreateUnitOptions
+            - CreateUnitDefObject
+            - UnitConfig
+            - SubtractScalar
+            - ScalarBinaryOp
+            - ScalarUnaryOp
+            - UnitDependencies
+            - UnitInstance
+            - UnitConstructor
+          reExport: true
+          typeOnly: true
         - file: ./array.js
           imports:
             - NestedArray
@@ -1486,11 +1517,6 @@ modules:
           imports:
             - LoadingMetrics
             - WasmManifest
-          reExport: true
-          typeOnly: true
-        - file: ./types/unit/unit-types.js
-          imports:
-            - '*'
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -1578,6 +1604,33 @@ modules:
         - MemoizedFunction
         - ConfigOptions
         - MathJsConfig
+        - ComplexValue
+        - ComplexConstructor
+        - BigNumberConstructor
+        - FractionConstructor
+        - FractionValue
+        - Numeric
+        - PrefixDef
+        - PrefixTable
+        - BaseUnitDef
+        - UnitDef
+        - UnitComponent
+        - UnitSystemEntry
+        - UnitSystem
+        - UnitJSON
+        - ConverterFn
+        - TypeConverters
+        - ParseOptions
+        - UnitFormatOptions
+        - CreateUnitOptions
+        - CreateUnitDefObject
+        - UnitConfig
+        - SubtractScalar
+        - ScalarBinaryOp
+        - ScalarUnaryOp
+        - UnitDependencies
+        - UnitInstance
+        - UnitConstructor
         - NestedArray
         - IdentifiedValue
         - LoadingMetrics
@@ -1659,11 +1712,37 @@ modules:
         - MemoizedFunction
         - ConfigOptions
         - MathJsConfig
+        - ComplexValue
+        - ComplexConstructor
+        - BigNumberConstructor
+        - FractionConstructor
+        - FractionValue
+        - Numeric
+        - PrefixDef
+        - PrefixTable
+        - BaseUnitDef
+        - UnitDef
+        - UnitComponent
+        - UnitSystemEntry
+        - UnitSystem
+        - UnitJSON
+        - ConverterFn
+        - TypeConverters
+        - ParseOptions
+        - UnitFormatOptions
+        - CreateUnitOptions
+        - CreateUnitDefObject
+        - UnitConfig
+        - SubtractScalar
+        - ScalarBinaryOp
+        - ScalarUnaryOp
+        - UnitDependencies
+        - UnitInstance
+        - UnitConstructor
         - NestedArray
         - IdentifiedValue
         - LoadingMetrics
         - WasmManifest
-        - type * from ./types/unit/unit-types.js
     core/src/is.ts:
       description: Shape of a BigNumber value that the duck-typing guards in this module read.
       externalDependencies: []
@@ -2849,6 +2928,38 @@ modules:
             - unitPrefixExactScale
             - getUnitPrefix
           reExport: true
+        - file: ./unit-types.js
+          imports:
+            - BigNumberValue
+            - ComplexValue
+            - ComplexConstructor
+            - BigNumberConstructor
+            - FractionConstructor
+            - FractionValue
+            - Numeric
+            - PrefixDef
+            - PrefixTable
+            - BaseUnitDef
+            - UnitDef
+            - UnitComponent
+            - UnitSystemEntry
+            - UnitSystem
+            - UnitJSON
+            - ConverterFn
+            - TypeConverters
+            - ParseOptions
+            - UnitFormatOptions
+            - CreateUnitOptions
+            - CreateUnitDefObject
+            - UnitConfig
+            - SubtractScalar
+            - ScalarBinaryOp
+            - ScalarUnaryOp
+            - UnitDependencies
+            - UnitInstance
+            - UnitConstructor
+          reExport: true
+          typeOnly: true
         - file: ./exact-scale.js
           imports:
             - ExactScale
@@ -2862,11 +2973,6 @@ modules:
             - UnitBaseKey
             - UnitPrefixSetKey
             - UnitPrefix
-          reExport: true
-          typeOnly: true
-        - file: ./unit-types.js
-          imports:
-            - '*'
           reExport: true
           typeOnly: true
       workspaceDependencies: []
@@ -2907,6 +3013,34 @@ modules:
         - unitPrefixExactScale
         - getUnitPrefix
         - Unit
+        - BigNumberValue
+        - ComplexValue
+        - ComplexConstructor
+        - BigNumberConstructor
+        - FractionConstructor
+        - FractionValue
+        - Numeric
+        - PrefixDef
+        - PrefixTable
+        - BaseUnitDef
+        - UnitDef
+        - UnitComponent
+        - UnitSystemEntry
+        - UnitSystem
+        - UnitJSON
+        - ConverterFn
+        - TypeConverters
+        - ParseOptions
+        - UnitFormatOptions
+        - CreateUnitOptions
+        - CreateUnitDefObject
+        - UnitConfig
+        - SubtractScalar
+        - ScalarBinaryOp
+        - ScalarUnaryOp
+        - UnitDependencies
+        - UnitInstance
+        - UnitConstructor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -2950,6 +3084,34 @@ modules:
         - UNIT_PREFIX_SETS
         - unitPrefixExactScale
         - getUnitPrefix
+        - BigNumberValue
+        - ComplexValue
+        - ComplexConstructor
+        - BigNumberConstructor
+        - FractionConstructor
+        - FractionValue
+        - Numeric
+        - PrefixDef
+        - PrefixTable
+        - BaseUnitDef
+        - UnitDef
+        - UnitComponent
+        - UnitSystemEntry
+        - UnitSystem
+        - UnitJSON
+        - ConverterFn
+        - TypeConverters
+        - ParseOptions
+        - UnitFormatOptions
+        - CreateUnitOptions
+        - CreateUnitDefObject
+        - UnitConfig
+        - SubtractScalar
+        - ScalarBinaryOp
+        - ScalarUnaryOp
+        - UnitDependencies
+        - UnitInstance
+        - UnitConstructor
         - ExactScale
         - IrrationalName
         - IrrationalPowers
@@ -2957,7 +3119,6 @@ modules:
         - UnitBaseKey
         - UnitPrefixSetKey
         - UnitPrefix
-        - type * from ./unit-types.js
       constants:
         - Unit
     core/src/types/unit/unit-table.ts:
@@ -4929,6 +5090,7 @@ modules:
             - qr
       workspaceDependencies: []
       exports:
+        - flipDense
         - lq
         - rq
         - ql
@@ -4937,6 +5099,7 @@ modules:
         - RQResult
         - QLResult
       functions:
+        - flipDense
         - lq
         - rq
         - ql
@@ -16860,6 +17023,28 @@ modules:
         - createUnequal
         - createUnequalNumber
   functions/set:
+    functions/src/set/flatten-pair.ts:
+      description: Shared empty-set flatten preamble for multiset union and symmetric difference.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/index.js
+          imports:
+            - MathArray
+            - Matrix
+            - MathNumericType
+          typeOnly: true
+        - file: ../type/matrix/types.js
+          imports:
+            - IndexInterface
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - flattenSetPair
+      interfaces:
+        - FlattenSetPairDeps
+      functions:
+        - flattenSetPair
     functions/src/set/setCartesian.ts:
       description: Create the cartesian product of two (multi)sets.
       externalDependencies: []
@@ -17069,6 +17254,9 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ./flatten-pair.js
+          imports:
+            - flattenSetPair
         - file: ../utils/factory.js
           imports:
             - factory
@@ -17099,6 +17287,9 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ./flatten-pair.js
+          imports:
+            - flattenSetPair
         - file: ../utils/factory.js
           imports:
             - factory
@@ -20730,6 +20921,9 @@ modules:
           imports:
             - factorMultivariateKronecker
             - MultiFactorization
+        - file: ./render-univariate.js
+          imports:
+            - renderDescendingUnivariate
       workspaceDependencies: []
       exports:
         - cleanUnivariatePoly
@@ -20906,6 +21100,18 @@ modules:
         - multiExactDivide
         - fromAlgebraExpr
         - toAlgebraString
+    functions/src/typed/factorization/render-univariate.ts:
+      description: Descending-power univariate printer shared by number and bigint coefficient paths.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - renderDescendingUnivariate
+      interfaces:
+        - UnivariateTerm
+      functions:
+        - renderDescendingUnivariate
     functions/src/typed/factorization/square-free.ts:
       description: Yun's square-free decomposition over ℤ.
       externalDependencies: []
@@ -32252,10 +32458,6 @@ modules:
             - getAssociativity
             - isAssociativeWith
             - getOperator
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - '*'
       exports:
         - createParse
         - createParserClass
@@ -32308,6 +32510,18 @@ modules:
         - getAssociativity
         - isAssociativeWith
         - getOperator
+    parser/src/re-export-types.d.ts:
+      description: re-export-types.d module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - '*'
+      exports: []
+      reExported:
         - type * from @danielsimonjr/mathts-expression
   units:
     units/src/index.ts:
@@ -32650,10 +32864,6 @@ modules:
             - createRangeNode
             - createRelationalNode
             - createSymbolNode
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - '*'
       exports:
         - createNode
         - createAccessorNode
@@ -32688,6 +32898,18 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
+    ast/src/re-export-types.d.ts:
+      description: re-export-types.d module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - '*'
+      exports: []
+      reExported:
         - type * from @danielsimonjr/mathts-expression
   evaluator:
     evaluator/src/index.ts:
@@ -39220,6 +39442,7 @@ dependencyGraph:
         - functions/src/relational/unequal.ts
     - name: Functions/set
       files:
+        - functions/src/set/flatten-pair.ts
         - functions/src/set/setCartesian.ts
         - functions/src/set/setDifference.ts
         - functions/src/set/setDistinct.ts
@@ -39371,6 +39594,7 @@ dependencyGraph:
         - functions/src/typed/factorization/kronecker-factor.ts
         - functions/src/typed/factorization/kronecker.ts
         - functions/src/typed/factorization/multi-poly.ts
+        - functions/src/typed/factorization/render-univariate.ts
         - functions/src/typed/factorization/square-free.ts
         - functions/src/typed/factorization/zassenhaus.ts
         - functions/src/typed/fused.ts
@@ -39953,6 +40177,7 @@ dependencyGraph:
     - name: Parser
       files:
         - parser/src/index.ts
+        - parser/src/re-export-types.d.ts
     - name: Units
       files:
         - units/src/index.ts
@@ -39962,6 +40187,7 @@ dependencyGraph:
     - name: Ast
       files:
         - ast/src/index.ts
+        - ast/src/re-export-types.d.ts
     - name: Evaluator
       files:
         - evaluator/src/index.ts
@@ -40106,18 +40332,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1219
+  totalTypeScriptFiles: 1223
   totalModules: 82
-  totalLinesOfCode: 200722
-  totalExports: 6267
+  totalLinesOfCode: 200785
+  totalExports: 6325
   totalClasses: 59
-  totalInterfaces: 546
-  totalFunctions: 2029
+  totalInterfaces: 548
+  totalFunctions: 2032
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1624
-  totalReExports: 2627
-  totalTypeOnlyImports: 612
+  totalReExports: 2680
+  totalTypeOnlyImports: 614
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

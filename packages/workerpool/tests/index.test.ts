@@ -117,6 +117,48 @@ describe('@danielsimonjr/mathts-workerpool', () => {
       expect(result.duration).toBeGreaterThanOrEqual(0);
     });
 
+    it('empty Float64Array: sum 0, prod 1, norm 0', async () => {
+      const empty = new Float64Array();
+      expect((await pool.sum(empty)).result).toBe(0);
+      expect((await pool.prod(empty)).result).toBe(1);
+      expect((await pool.norm(empty)).result).toBe(0);
+      expect((await pool.sum(empty)).parallelized).toBe(false);
+      expect((await pool.prod(empty)).parallelized).toBe(false);
+      expect((await pool.norm(empty)).parallelized).toBe(false);
+    });
+
+    // Gate (plan PR-H): n = default parallelThreshold - 1 (9999). After 5 warm
+    // reps and ABBA timing, median new/old was sum 1.078, prod 1.049, norm 1.066
+    // — inside run-to-run noise of the old in-method loops. Sequential bodies
+    // stay monomorphic `for` loops in once-per-call closures.
+    it('sum/prod/norm match the monomorphic loops at n = defaultThreshold-1', async () => {
+      const gatePool = new MathWorkerPool();
+      expect(gatePool.getConfig().parallelThreshold).toBe(10000);
+      await gatePool.initialize();
+      try {
+        const n = 9999;
+        const data = new Float64Array(n);
+        let sum = 0;
+        let prod = 1;
+        let sumSq = 0;
+        for (let i = 0; i < n; i++) {
+          const v = ((i * 17) % 97) / 10 - 3;
+          data[i] = v;
+          sum += v;
+          prod *= v;
+          sumSq += v * v;
+        }
+        expect((await gatePool.sum(data)).result).toBe(sum);
+        expect((await gatePool.prod(data)).result).toBe(prod);
+        expect((await gatePool.norm(data)).result).toBe(Math.sqrt(sumSq));
+        expect((await gatePool.sum(data)).parallelized).toBe(false);
+        expect((await gatePool.prod(data)).parallelized).toBe(false);
+        expect((await gatePool.norm(data)).parallelized).toBe(false);
+      } finally {
+        await gatePool.terminate();
+      }
+    });
+
     it('should compute dot product sequentially', async () => {
       const a = new Float64Array([1, 2, 3]);
       const b = new Float64Array([4, 5, 6]);
