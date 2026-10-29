@@ -67,6 +67,21 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
       return parenthesis === 'all' || (exprPrecedence !== null && exprPrecedence <= precedence);
     }
 
+    function renderAssignment(
+      node: AssignmentNode,
+      options: StringOptions | undefined,
+      render: (child: MathNode, renderOptions?: StringOptions) => string,
+      markup: { paren: (value: string) => string; eq: string }
+    ): string {
+      const object = render(node.object, options);
+      const index = node.index ? render(node.index, options) : '';
+      let value = render(node.value, options);
+      if (needParenthesis(node, options && options.parenthesis, options && options.implicit)) {
+        value = markup.paren(value);
+      }
+      return object + index + markup.eq + value;
+    }
+
     class AssignmentNode extends Node {
       object: MathNode;
       index: IndexNodeChild | null; // IndexNode | null
@@ -300,14 +315,10 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @param options
        */
       _toString(options?: StringOptions): string {
-        const object = this.object.toString(options);
-        const index = this.index ? this.index.toString(options) : '';
-        let value = this.value.toString(options);
-        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
-          value = '(' + value + ')';
-        }
-
-        return object + index + ' = ' + value;
+        return renderAssignment(this, options, (node, opts) => node.toString(opts), {
+          paren: (value) => '(' + value + ')',
+          eq: ' = ',
+        });
       }
 
       /**
@@ -347,23 +358,15 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
        * @param options
        */
       _toHTML(options?: StringOptions): string {
-        const object = this.object.toHTML(options);
-        const index = this.index ? this.index.toHTML(options) : '';
-        let value = this.value.toHTML(options);
-        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
-          value =
+        return renderAssignment(this, options, (node, opts) => node.toHTML(opts), {
+          paren: (value) =>
             '<span class="math-paranthesis math-round-parenthesis">(</span>' +
             value +
-            '<span class="math-paranthesis math-round-parenthesis">)</span>';
-        }
-
-        return (
-          object +
-          index +
-          '<span class="math-operator math-assignment-operator ' +
-          'math-variable-assignment-operator math-binary-operator">=</span>' +
-          value
-        );
+            '<span class="math-paranthesis math-round-parenthesis">)</span>',
+          eq:
+            '<span class="math-operator math-assignment-operator ' +
+            'math-variable-assignment-operator math-binary-operator">=</span>',
+        });
       }
 
       /**
@@ -381,14 +384,10 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
       }
 
       _toTex(options?: StringOptions): string {
-        const object = this.object.toTex(options);
-        const index = this.index ? this.index.toTex(options) : '';
-        let value = this.value.toTex(options);
-        if (needParenthesis(this, options && options.parenthesis, options && options.implicit)) {
-          value = `\\left(${value}\\right)`;
-        }
-
-        return object + index + '=' + value;
+        return renderAssignment(this, options, (node, opts) => node.toTex(opts), {
+          paren: (value) => `\\left(${value}\\right)`,
+          eq: '=',
+        });
       }
     }
 
