@@ -1383,6 +1383,7 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
       "functions/src/relational/unequal.ts",
+      "functions/src/set/flatten-pair.ts",
       "functions/src/set/setCartesian.ts",
       "functions/src/set/setDifference.ts",
       "functions/src/set/setIntersect.ts",
@@ -2299,6 +2300,10 @@
       "functions/src/relational/smallerEq.ts"
     ],
     "functions/src/utils/complex.ts": ["functions/src/relational/equalScalar.ts"],
+    "functions/src/set/flatten-pair.ts": [
+      "functions/src/set/setSymDifference.ts",
+      "functions/src/set/setUnion.ts"
+    ],
     "functions/src/signal/fft.ts": [
       "functions/src/signal/conv.ts",
       "functions/src/signal/fft-helpers.ts",
