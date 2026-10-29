@@ -3838,6 +3838,7 @@
       "ExpmOptions",
       "ExtendedBackendHints",
       "eye",
+      "flipDense",
       "forceBackend",
       "gaussJordanContinue",
       "gaussJordanSolve",

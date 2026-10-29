@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-29'
   totalFiles: 1219
   totalModules: 82
-  totalExports: 6267
+  totalExports: 6268
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4929,6 +4929,7 @@ modules:
             - qr
       workspaceDependencies: []
       exports:
+        - flipDense
         - lq
         - rq
         - ql
@@ -4937,6 +4938,7 @@ modules:
         - RQResult
         - QLResult
       functions:
+        - flipDense
         - lq
         - rq
         - ql
@@ -40109,10 +40111,10 @@ statistics:
   totalTypeScriptFiles: 1219
   totalModules: 82
   totalLinesOfCode: 200742
-  totalExports: 6267
+  totalExports: 6268
   totalClasses: 59
   totalInterfaces: 546
-  totalFunctions: 2029
+  totalFunctions: 2030
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1624

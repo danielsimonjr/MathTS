@@ -50,7 +50,7 @@ export interface QLResult {
 }
 
 /** Reverse rows (axis 0) or columns (axis 1) of a dense matrix copy. */
-function flipDense(M: DenseMatrix, axis: 0 | 1): DenseMatrix {
+export function flipDense(M: DenseMatrix, axis: 0 | 1): DenseMatrix {
   const m = M.rows;
   const n = M.cols;
   const src = M.toFloat64Array();
