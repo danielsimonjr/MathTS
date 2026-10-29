@@ -571,25 +571,29 @@ export class Fraction implements IFraction {
    * Floor: largest integer ≤ this
    */
   floor(): Fraction {
-    if (this.denominator === 1n) {
-      return this;
-    }
-    const quot = this.numerator / this.denominator;
-    if (this.numerator >= 0n || this.numerator % this.denominator === 0n) {
-      return new Fraction(quot, 1n);
-    }
-    return new Fraction(quot - 1n, 1n);
+    return this.truncBound('floor');
   }
 
   /**
    * Ceiling: smallest integer ≥ this
    */
   ceil(): Fraction {
+    return this.truncBound('ceil');
+  }
+
+  private truncBound(toward: 'floor' | 'ceil'): Fraction {
     if (this.denominator === 1n) {
       return this;
     }
     const quot = this.numerator / this.denominator;
-    if (this.numerator <= 0n || this.numerator % this.denominator === 0n) {
+    const exact = this.numerator % this.denominator === 0n;
+    if (toward === 'floor') {
+      if (this.numerator >= 0n || exact) {
+        return new Fraction(quot, 1n);
+      }
+      return new Fraction(quot - 1n, 1n);
+    }
+    if (this.numerator <= 0n || exact) {
       return new Fraction(quot, 1n);
     }
     return new Fraction(quot + 1n, 1n);

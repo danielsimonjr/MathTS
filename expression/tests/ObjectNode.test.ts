@@ -137,11 +137,7 @@ describe('ObjectNode - clone', () => {
 describe('ObjectNode - toString', () => {
   it('formats as {key: value} notation', () => {
     const node = new ObjectNode({ x: makeConst(1) });
-    const str = node.toString();
-    expect(str).toContain('x');
-    expect(str).toContain('1');
-    expect(str.startsWith('{')).toBe(true);
-    expect(str.endsWith('}')).toBe(true);
+    expect(node.toString()).toBe('{"x": 1}');
   });
 
   it('formats empty object as {}', () => {
@@ -153,26 +149,31 @@ describe('ObjectNode - toString', () => {
 describe('ObjectNode - toHTML', () => {
   it('contains curly parenthesis spans', () => {
     const node = new ObjectNode({ x: makeConst(1) });
-    const html = node.toHTML();
-    expect(html).toContain('math-curly-parenthesis');
-    expect(html).toContain('math-property');
-    expect(html).toContain('x');
+    expect(node.toHTML()).toBe(
+      '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
+        '<span class="math-symbol math-property">x</span>' +
+        '<span class="math-operator math-assignment-operator ' +
+        'math-property-assignment-operator math-binary-operator">:</span>' +
+        '<span class="math-number">1</span>' +
+        '<span class="math-parenthesis math-curly-parenthesis">}</span>'
+    );
   });
 
   it('empty ObjectNode renders curly braces', () => {
     const node = new ObjectNode({});
-    const html = node.toHTML();
-    expect(html).toContain('math-curly-parenthesis');
+    expect(node.toHTML()).toBe(
+      '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
+        '<span class="math-parenthesis math-curly-parenthesis">}</span>'
+    );
   });
 });
 
 describe('ObjectNode - toTex', () => {
   it('returns a LaTeX string with array environment', () => {
     const node = new ObjectNode({ x: makeConst(1) });
-    const tex = node.toTex();
-    expect(tex).toContain('\\left\\{');
-    expect(tex).toContain('\\end{array}');
-    expect(tex).toContain('x');
+    expect(node.toTex()).toBe(
+      '\\left\\{\\begin{array}{ll}\\mathbf{x:} & 1\\\\\\end{array}\\right\\}'
+    );
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderFactor } from '../../src/typed/factorization/index.js';
+import { renderFactor, cleanUnivariatePoly } from '../../src/typed/factorization/index.js';
 
 describe('renderFactor — bigint-exact rendering (no Number() fidelity loss)', () => {
   it('renders a degree>=2 factor coefficient exceeding 2^53 exactly', () => {
@@ -17,5 +17,9 @@ describe('renderFactor — bigint-exact rendering (no Number() fidelity loss)', 
     expect(renderFactor([-1n, 0n, 2n], 'x')).toBe('(2*x^2 - 1)');
     // degree-1 factors still go through renderLinearFactor unchanged.
     expect(renderFactor([-1n, 1n], 'x')).toBe('(x - 1)');
+  });
+
+  it('cleanUnivariatePoly still rounds float coefficients for display', () => {
+    expect(cleanUnivariatePoly([1.6, 0], 'x')).toBe('2');
   });
 });

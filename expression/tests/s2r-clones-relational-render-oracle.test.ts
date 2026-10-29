@@ -12,11 +12,13 @@ import { parse } from './helpers/bootstrap.js';
 function relational(expr: string): {
   isRelationalNode?: boolean;
   toString: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
+  toHTML: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
   toTex: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
 } {
   const node = parse(expr) as {
     isRelationalNode?: boolean;
     toString: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
+    toHTML: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
     toTex: (options?: { parenthesis?: 'keep' | 'auto' | 'all' }) => string;
   };
   expect(node.isRelationalNode).toBe(true);
@@ -98,5 +100,44 @@ describe('RelationalNode render oracle — parenthesis keep vs auto', () => {
 
   it('toTex auto drops the ParenthesisNode wrapper', () => {
     expect(relational('(a + b) < c < d').toTex({ parenthesis: 'auto' })).toBe(' a+ b< c< d');
+  });
+});
+
+describe('RelationalNode render oracle — HTML chain', () => {
+  const op = (glyph: string): string =>
+    '<span class="math-operator math-binary-operator math-explicit-binary-operator">' +
+    glyph +
+    '</span>';
+  const wrap = (inner: string): string =>
+    '<span class="math-parenthesis math-round-parenthesis">(</span>' +
+    inner +
+    '<span class="math-parenthesis math-round-parenthesis">)</span>';
+  const sym = (name: string): string => '<span class="math-symbol">' + name + '</span>';
+  const num = (value: string): string => '<span class="math-number">' + value + '</span>';
+
+  it('toHTML keep: a < b <= c', () => {
+    expect(relational('a < b <= c').toHTML()).toBe(
+      sym('a') + op('&lt;') + sym('b') + op('&lt;=') + sym('c')
+    );
+  });
+
+  it('toHTML all wraps every operand including symbols', () => {
+    expect(relational('a < b <= c').toHTML({ parenthesis: 'all' })).toBe(
+      wrap(sym('a')) + op('&lt;') + wrap(sym('b')) + op('&lt;=') + wrap(sym('c'))
+    );
+  });
+
+  it('toHTML keep: add binds tighter than relational, so 1 + 2 is not wrapped', () => {
+    const addHtml = num('1') + op('+') + num('2');
+    expect(relational('1 + 2 < 3 < 4').toHTML()).toBe(
+      addHtml + op('&lt;') + num('3') + op('&lt;') + num('4')
+    );
+  });
+
+  it('toHTML all wraps every RelationalNode operand, including the add subtree', () => {
+    const addHtml = num('1') + op('+') + num('2');
+    expect(relational('1 + 2 < 3 < 4').toHTML({ parenthesis: 'all' })).toBe(
+      wrap(addHtml) + op('&lt;') + wrap(num('3')) + op('&lt;') + wrap(num('4'))
+    );
   });
 });

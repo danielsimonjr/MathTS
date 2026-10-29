@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1219, "e": 6267, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1223, "e": 6325, "re": 2680 },
   "s": {
-    "loc": 200714,
+    "loc": 200801,
     "cls": 59,
-    "int": 546,
-    "fn": 2029,
+    "int": 548,
+    "fn": 2032,
     "tg": 159,
     "en": 0,
     "co": 1624,
-    "toi": 612
+    "toi": 614
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -914,8 +914,9 @@
       ]
     },
     "functions/set": {
-      "f": 10,
+      "f": 11,
       "exp": [
+        "flattenSetPair",
         "createSetCartesian",
         "createSetDifference",
         "createSetDistinct",
@@ -926,7 +927,8 @@
         "createSetSize",
         "createSetSymDifference",
         "createSetUnion"
-      ]
+      ],
+      "int": ["FlattenSetPairDeps"]
     },
     "functions/signal": {
       "f": 12,
@@ -1114,7 +1116,7 @@
       ]
     },
     "functions/typed": {
-      "f": 45,
+      "f": 46,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1143,12 +1145,12 @@
         "Distribution",
         "MultivariateDistribution",
         "MultiPoly",
+        "UnivariateTerm",
         "SquareFreeFactor",
         "KDTreeNode",
         "CentralityRestartOptions",
         "PageRankOptions",
-        "PageRankResult",
-        "PageRankRestartResult"
+        "PageRankResult"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
@@ -1360,7 +1362,7 @@
       ]
     },
     "parser": {
-      "f": 1,
+      "f": 2,
       "exp": [
         "createParse",
         "createParserClass",
@@ -1435,7 +1437,7 @@
       ]
     },
     "ast": {
-      "f": 1,
+      "f": 2,
       "exp": [
         "createNode",
         "createAccessorNode",
@@ -1866,7 +1868,7 @@
     { "p": "utils/is.ts", "i": 0, "o": 55 },
     { "p": "typed/index.ts", "i": 52, "o": 2 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
-    { "p": "matrix/types.ts", "i": 0, "o": 49 },
+    { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 44 },
