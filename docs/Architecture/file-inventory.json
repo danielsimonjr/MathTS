@@ -5252,7 +5252,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 291
     },
     {
       "file": "functions/src/algebra/simplify/wildcards.ts",

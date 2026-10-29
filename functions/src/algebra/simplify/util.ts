@@ -196,11 +196,12 @@ export const createUtil = /* #__PURE__ */ factory(
     }
 
     /**
-     *  Unflatten all flattened operators to a right-heavy binary tree.
+     * Unflatten flattened associative operators to a left- or right-heavy tree.
      */
-    function unflattenr(
+    function unflatten(
       node: MathNode & { args?: MathNode[] },
-      context: OperatorContext = defaultContext
+      context: OperatorContext,
+      side: 'left' | 'right'
     ): void {
       if (!node.args || node.args.length === 0) {
         return;
@@ -208,15 +209,33 @@ export const createUtil = /* #__PURE__ */ factory(
       const makeNode = createMakeNodeFunction(node as unknown as MakeNodeArg);
       const l = node.args.length;
       for (let i = 0; i < l; i++) {
-        unflattenr(node.args[i] as MathNode & { args?: MathNode[] }, context);
+        unflatten(node.args[i] as MathNode & { args?: MathNode[] }, context, side);
       }
       if (l > 2 && isAssociative(node, context)) {
-        let curnode = node.args.pop()!;
-        while (node.args.length > 0) {
-          curnode = makeNode([node.args.pop()!, curnode]);
+        if (side === 'right') {
+          let curnode = node.args.pop()!;
+          while (node.args.length > 0) {
+            curnode = makeNode([node.args.pop()!, curnode]);
+          }
+          node.args = (curnode as OpNodeLike).args;
+        } else {
+          let curnode = node.args.shift()!;
+          while (node.args.length > 0) {
+            curnode = makeNode([curnode, node.args.shift()!]);
+          }
+          node.args = (curnode as OpNodeLike).args;
         }
-        node.args = (curnode as OpNodeLike).args;
       }
+    }
+
+    /**
+     *  Unflatten all flattened operators to a right-heavy binary tree.
+     */
+    function unflattenr(
+      node: MathNode & { args?: MathNode[] },
+      context: OperatorContext = defaultContext
+    ): void {
+      unflatten(node, context, 'right');
     }
 
     /**
@@ -226,21 +245,7 @@ export const createUtil = /* #__PURE__ */ factory(
       node: MathNode & { args?: MathNode[] },
       context: OperatorContext = defaultContext
     ): void {
-      if (!node.args || node.args.length === 0) {
-        return;
-      }
-      const makeNode = createMakeNodeFunction(node as unknown as MakeNodeArg);
-      const l = node.args.length;
-      for (let i = 0; i < l; i++) {
-        unflattenl(node.args[i] as MathNode & { args?: MathNode[] }, context);
-      }
-      if (l > 2 && isAssociative(node, context)) {
-        let curnode = node.args.shift()!;
-        while (node.args.length > 0) {
-          curnode = makeNode([curnode, node.args.shift()!]);
-        }
-        node.args = (curnode as OpNodeLike).args;
-      }
+      unflatten(node, context, 'left');
     }
 
     function createMakeNodeFunction(
