@@ -393,7 +393,7 @@ function _airyAsymptoteNeg(x: f64, isAi: bool): f64 {
     : (-Math.sin(theta) * P + Math.cos(theta) * Q) / (sp * axp);
 }
 
-function _airyAiSeries(x: f64): f64 {
+function _airySeries(x: f64, combine: i32): f64 {
   const x3: f64 = x * x * x;
   let f: f64 = 1.0;
   let g: f64 = x;
@@ -417,34 +417,18 @@ function _airyAiSeries(x: f64): f64 {
     g += dg;
     if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
   }
-  return AI0 * f - AI_PRIME0 * g;
+  if (combine == 0) {
+    return AI0 * f - AI_PRIME0 * g;
+  }
+  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
+}
+
+function _airyAiSeries(x: f64): f64 {
+  return _airySeries(x, 0);
 }
 
 function _airyBiSeries(x: f64): f64 {
-  const x3: f64 = x * x * x;
-  let f: f64 = 1.0;
-  let g: f64 = x;
-  let fTerm: f64 = 1.0;
-  let gTerm: f64 = x;
-  let factF: f64 = 1.0;
-  let factG: f64 = 1.0;
-  let prodF: f64 = 1.0;
-  let prodG: f64 = 1.0;
-  for (let k: i32 = 1; k <= 30; k++) {
-    const kf: f64 = <f64>k;
-    factF *= (3.0 * kf - 2.0) * (3.0 * kf - 1.0) * (3.0 * kf);
-    factG *= (3.0 * kf - 1.0) * (3.0 * kf) * (3.0 * kf + 1.0);
-    prodF *= 3.0 * kf - 2.0;
-    prodG *= 3.0 * kf - 1.0;
-    fTerm *= x3;
-    gTerm *= x3;
-    const df: f64 = fTerm * prodF / factF;
-    const dg: f64 = gTerm * prodG / factG;
-    f += df;
-    g += dg;
-    if (Math.abs(df) < Math.abs(f) * 1e-16 && Math.abs(dg) < Math.abs(g) * 1e-16) break;
-  }
-  return Math.sqrt(3.0) * (AI0 * f + AI_PRIME0 * g);
+  return _airySeries(x, 1);
 }
 
 function _airyAi(x: f64): f64 {

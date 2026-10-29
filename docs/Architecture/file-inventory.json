@@ -247,7 +247,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 871
+      "loc": 855
     },
     {
       "file": "assembly/src/tridiag.ts",
