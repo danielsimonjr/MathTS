@@ -1176,7 +1176,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 > `FILE_INVENTORY.md` and `unused-analysis.md` in this directory give the reachability figures. The
 > repository generator writes them (`npm run docs:deps:full`), and the gate does not check them.
 
-| Claim                | Value | Source                                                                                                       |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8181  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2077  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| Claim                | Value | Source |
+| -------------------- | ----- | ------ |
+| totalExports         | 8183  |        | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2078  |        | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
