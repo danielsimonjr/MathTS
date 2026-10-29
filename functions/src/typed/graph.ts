@@ -598,6 +598,21 @@ function _pageRankOnce(
   return rank;
 }
 
+async function dispatchCentrality(
+  opts: CentralityRestartOptions | undefined,
+  once: (seed: number) => Float64Array,
+  aggregate: (vectors: Float64Array[], aggregation: RestartAggregation) => unknown,
+  packSingle: (value: Float64Array) => object
+): Promise<unknown> {
+  const restarts = opts?.restarts ?? 1;
+  const baseSeed = opts?.restartSeed ?? 0;
+  const aggregation = opts?.aggregation ?? 'mean';
+  if (restarts === 1) {
+    return packSingle(once(0));
+  }
+  return runCentralityRestarts(restarts, baseSeed, _splitSeed, once, aggregate, aggregation);
+}
+
 /**
  * Compute PageRank centrality for each node in a directed graph.
  *
@@ -636,23 +651,11 @@ export async function pageRank(
   const d = opts?.dampingFactor ?? 0.85;
   const maxIter = opts?.maxIter ?? 100;
   const tol = opts?.tol ?? 1e-6;
-  const restarts = opts?.restarts ?? 1;
-  const baseSeed = opts?.restartSeed ?? 0;
-  const aggregation = opts?.aggregation ?? 'mean';
-
-  if (restarts === 1) {
-    // Single-restart fast path: uniform initialisation (seed=0)
-    const ranks = _pageRankOnce(adj, d, maxIter, tol, 0);
-    return { ranks };
-  }
-
-  return runCentralityRestarts(
-    restarts,
-    baseSeed,
-    _splitSeed,
-    (s) => _pageRankOnce(adj, d, maxIter, tol, s),
+  return dispatchCentrality(
+    opts,
+    (seed) => _pageRankOnce(adj, d, maxIter, tol, seed),
     _aggregateRanks,
-    aggregation
+    (ranks) => ({ ranks })
   ) as Promise<PageRankResult | PageRankRestartResult>;
 }
 
@@ -834,22 +837,11 @@ export async function betweennessCentrality(
 ): Promise<BetweennessResult | BetweennessRestartResult> {
   const directed = opts?.directed ?? false;
   const normalise = opts?.normalized ?? opts?.normalise ?? true;
-  const restarts = opts?.restarts ?? 1;
-  const baseSeed = opts?.restartSeed ?? 0;
-  const aggregation = opts?.aggregation ?? 'mean';
-
-  if (restarts === 1) {
-    const centrality = _betweennessOnce(adj, directed, normalise, 0);
-    return { centrality };
-  }
-
-  return runCentralityRestarts(
-    restarts,
-    baseSeed,
-    _splitSeed,
-    (s) => _betweennessOnce(adj, directed, normalise, s),
+  return dispatchCentrality(
+    opts,
+    (seed) => _betweennessOnce(adj, directed, normalise, seed),
     _aggregateBetweenness,
-    aggregation
+    (centrality) => ({ centrality })
   ) as Promise<BetweennessResult | BetweennessRestartResult>;
 }
 
@@ -1014,21 +1006,10 @@ export async function eigenvectorCentrality(
 ): Promise<EigenvectorResult | EigenvectorRestartResult> {
   const maxIter = opts?.maxIter ?? 100;
   const tol = opts?.tol ?? 1e-6;
-  const restarts = opts?.restarts ?? 1;
-  const baseSeed = opts?.restartSeed ?? 0;
-  const aggregation = opts?.aggregation ?? 'mean';
-
-  if (restarts === 1) {
-    const centrality = _eigenvectorOnce(adj, maxIter, tol, 0);
-    return { centrality };
-  }
-
-  return runCentralityRestarts(
-    restarts,
-    baseSeed,
-    _splitSeed,
-    (s) => _eigenvectorOnce(adj, maxIter, tol, s),
+  return dispatchCentrality(
+    opts,
+    (seed) => _eigenvectorOnce(adj, maxIter, tol, seed),
     _aggregateEigenvector,
-    aggregation
+    (centrality) => ({ centrality })
   ) as Promise<EigenvectorResult | EigenvectorRestartResult>;
 }
