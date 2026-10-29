@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 701
+      "loc": 705
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -1143,7 +1143,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 162
+      "loc": 170
     },
     {
       "file": "core/tests/types/fraction-from-number-cap.test.ts",

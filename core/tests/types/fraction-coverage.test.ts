@@ -134,6 +134,14 @@ describe('Fraction (coverage supplement)', () => {
       expect(new Fraction(7n, 2n).floor().equals(new Fraction(3n, 1n))).toBe(true);
       expect(new Fraction(7n, 2n).ceil().equals(new Fraction(4n, 1n))).toBe(true);
       expect(new Fraction(-7n, 2n).floor().equals(new Fraction(-4n, 1n))).toBe(true);
+      expect(new Fraction(-7n, 2n).ceil().equals(new Fraction(-3n, 1n))).toBe(true);
+      expect(new Fraction(-7n, 3n).floor().equals(new Fraction(-3n, 1n))).toBe(true);
+      expect(new Fraction(-7n, 3n).ceil().equals(new Fraction(-2n, 1n))).toBe(true);
+    });
+    it('denominator 1n returns the same instance', () => {
+      const f = new Fraction(-4n, 1n);
+      expect(f.floor()).toBe(f);
+      expect(f.ceil()).toBe(f);
     });
   });
 
