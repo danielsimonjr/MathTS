@@ -166,10 +166,10 @@ The codebase is organized into the following modules:
 - **expression/node**: 19 files
 - **expression/transform**: 33 files
 - **expression/utils**: 13 files
-- **parser**: 1 file
+- **parser**: 2 files
 - **units**: 1 file
 - **numbers**: 1 file
-- **ast**: 1 file
+- **ast**: 2 files
 - **evaluator**: 1 file
 - **linalg**: 1 file
 - **arithmetic**: 1 file
@@ -206,10 +206,10 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 496            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
-| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
+| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
-| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
+| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-evaluator` (`evaluator/`)                    | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-linalg` (`linalg/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-arithmetic` (`arithmetic/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
@@ -16564,6 +16564,20 @@ graph LR
 
 ---
 
+### `parser/src/re-export-types.d.ts` - re-export-types.d module
+
+**Workspace Dependencies:**
+
+| Package                            | Import |
+| ---------------------------------- | ------ |
+| `@danielsimonjr/mathts-expression` | `*`    |
+
+**Exports:**
+
+- Re-exports: `type * from @danielsimonjr/mathts-expression`
+
+---
+
 <a id="units-dependencies"></a>
 
 ## Units Dependencies
@@ -16617,6 +16631,20 @@ graph LR
 **Exports:**
 
 - Re-exports: `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+
+---
+
+### `ast/src/re-export-types.d.ts` - re-export-types.d module
+
+**Workspace Dependencies:**
+
+| Package                            | Import |
+| ---------------------------------- | ------ |
+| `@danielsimonjr/mathts-expression` | `*`    |
+
+**Exports:**
+
+- Re-exports: `type * from @danielsimonjr/mathts-expression`
 
 ---
 
@@ -18929,153 +18957,155 @@ graph TD
 
     subgraph Parser
         N416[index]
+        N417[re-export-types.d]
     end
 
     subgraph Units
-        N417[index]
-    end
-
-    subgraph Numbers
         N418[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N419[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N420[index]
+        N421[re-export-types.d]
     end
 
-    subgraph Linalg
-        N421[index]
-    end
-
-    subgraph Arithmetic
+    subgraph Evaluator
         N422[index]
     end
 
-    subgraph Trigonometry
+    subgraph Linalg
         N423[index]
     end
 
-    subgraph Statistics
+    subgraph Arithmetic
         N424[index]
     end
 
-    subgraph Signal
+    subgraph Trigonometry
         N425[index]
     end
 
+    subgraph Statistics
+        N426[index]
+    end
+
+    subgraph Signal
+        N427[index]
+    end
+
     subgraph Parallel
-        N426[ComputePool]
-        N427[ParallelMatrix]
-        N428[WorkerPool]
-        N429[gemm-rows]
-        N430[index]
-        N431[matrix.worker]
+        N428[ComputePool]
+        N429[ParallelMatrix]
+        N430[WorkerPool]
+        N431[gemm-rows]
+        N432[index]
+        N433[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N432[elementwise]
-        N433[index]
-        N434[map]
-        N435[matmul]
-        N436[reduce]
+        N434[elementwise]
+        N435[index]
+        N436[map]
+        N437[matmul]
+        N438[reduce]
     end
 
     subgraph Parallel/ops
-        N437[bitwise]
+        N439[bitwise]
     end
 
     subgraph Parallel/strategies
-        N438[chunk]
-        N439[index]
-        N440[threshold]
+        N440[chunk]
+        N441[index]
+        N442[threshold]
     end
 
     subgraph Workbook
-        N441[cli]
-        N442[contract]
-        N443[doc]
-        N444[edit]
-        N445[executor]
-        N446[formatter]
-        N447[fs-atomic]
-        N448[graph]
-        N449[html]
-        N450[index]
-        N451[...15 more]
+        N443[cli]
+        N444[contract]
+        N445[doc]
+        N446[edit]
+        N447[executor]
+        N448[formatter]
+        N449[fs-atomic]
+        N450[graph]
+        N451[html]
+        N452[index]
+        N453[...15 more]
     end
 
     subgraph Assembly/algebra
-        N452[decomposition]
+        N454[decomposition]
     end
 
     subgraph Assembly
-        N453[elementwise]
-        N454[heap]
-        N455[index]
-        N456[poly]
-        N457[signal]
-        N458[sort]
-        N459[special]
-        N460[tridiag]
+        N455[elementwise]
+        N456[heap]
+        N457[index]
+        N458[poly]
+        N459[signal]
+        N460[sort]
+        N461[special]
+        N462[tridiag]
     end
 
     subgraph Assembly/ops
-        N461[approx]
-        N462[array]
-        N463[bitwise]
-        N464[complex-array]
-        N465[complex-ops]
-        N466[curvefit]
-        N467[f64-buffer]
-        N468[fft]
-        N469[linalg]
-        N470[matrix]
-        N471[...7 more]
+        N463[approx]
+        N464[array]
+        N465[bitwise]
+        N466[complex-array]
+        N467[complex-ops]
+        N468[curvefit]
+        N469[f64-buffer]
+        N470[fft]
+        N471[linalg]
+        N472[matrix]
+        N473[...7 more]
     end
 
     subgraph Assembly/types
-        N472[complex]
+        N474[complex]
     end
 
     subgraph Compat
-        N473[chain]
-        N474[index]
-        N475[shims]
+        N475[chain]
+        N476[index]
+        N477[shims]
     end
 
     subgraph Gpu
-        N476[BufferPool]
-        N477[GPUContext]
-        N478[ShaderManager]
-        N479[detect]
-        N480[device]
-        N481[flag]
-        N482[index]
-        N483[serialize]
+        N478[BufferPool]
+        N479[GPUContext]
+        N480[ShaderManager]
+        N481[detect]
+        N482[device]
+        N483[flag]
+        N484[index]
+        N485[serialize]
     end
 
     subgraph Plot
-        N484[coerce]
-        N485[contour]
-        N486[emit]
-        N487[frame]
-        N488[heatmap]
-        N489[histogram]
-        N490[index]
-        N491[marks2d]
-        N492[overlay]
-        N493[palette]
-        N494[...8 more]
+        N486[coerce]
+        N487[contour]
+        N488[emit]
+        N489[frame]
+        N490[heatmap]
+        N491[histogram]
+        N492[index]
+        N493[marks2d]
+        N494[overlay]
+        N495[palette]
+        N496[...8 more]
     end
 
     subgraph Plot/three
-        N495[points3d]
-        N496[project]
-        N497[surface]
+        N497[points3d]
+        N498[project]
+        N499[surface]
     end
 
     N4 --> N2
@@ -19163,11 +19193,11 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1219   |
+| Total TypeScript Files  | 1221   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200786 |
+| Total Lines of Code     | 200775 |
 | Total Exports           | 6322   |
-| Total Re-exports        | 2678   |
+| Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 546    |
 | Total Functions         | 2029   |

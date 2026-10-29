@@ -3,7 +3,7 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-29",
-    "totalFiles": 1219,
+    "totalFiles": 1221,
     "totalModules": 82,
     "totalExports": 6322
   },
@@ -34396,6 +34396,21 @@
           "isAssociativeWith",
           "getOperator"
         ]
+      },
+      "parser/src/re-export-types.d.ts": {
+        "description": "re-export-types.d module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["*"]
+          }
+        ],
+        "exports": [],
+        "reExported": ["type * from @danielsimonjr/mathts-expression"]
       }
     },
     "units": {
@@ -34795,6 +34810,21 @@
           "createRelationalNode",
           "createSymbolNode"
         ]
+      },
+      "ast/src/re-export-types.d.ts": {
+        "description": "re-export-types.d module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["*"]
+          }
+        ],
+        "exports": [],
+        "reExported": ["type * from @danielsimonjr/mathts-expression"]
       }
     },
     "evaluator": {
@@ -42421,7 +42451,7 @@
       },
       {
         "name": "Parser",
-        "files": ["parser/src/index.ts"]
+        "files": ["parser/src/index.ts", "parser/src/re-export-types.d.ts"]
       },
       {
         "name": "Units",
@@ -42433,7 +42463,7 @@
       },
       {
         "name": "Ast",
-        "files": ["ast/src/index.ts"]
+        "files": ["ast/src/index.ts", "ast/src/re-export-types.d.ts"]
       },
       {
         "name": "Evaluator",
@@ -42616,9 +42646,9 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1219,
+    "totalTypeScriptFiles": 1221,
     "totalModules": 82,
-    "totalLinesOfCode": 200786,
+    "totalLinesOfCode": 200775,
     "totalExports": 6322,
     "totalClasses": 59,
     "totalInterfaces": 546,
@@ -42626,7 +42656,7 @@
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1624,
-    "totalReExports": 2678,
+    "totalReExports": 2680,
     "totalTypeOnlyImports": 612,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
