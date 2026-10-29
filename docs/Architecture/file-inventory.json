@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 701
+      "loc": 705
     },
     {
       "file": "core/src/types/interfaces.ts",
