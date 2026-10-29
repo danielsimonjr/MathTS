@@ -122,13 +122,13 @@
     "core/src/collection.ts": ["core/src/internal.ts"],
     "core/src/map.ts": ["core/src/internal.ts"],
     "core/src/wasm-loader.ts": ["core/src/internal.ts"],
-    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/types/unit/unit-types.ts": [
       "core/src/internal.ts",
       "core/src/types/unit/Unit.ts",
       "core/src/types/unit/dependencies.ts",
       "core/src/types/unit/index.ts"
     ],
+    "core/src/types/wasm-loader.ts": ["core/src/internal.ts", "core/src/wasm-loader.ts"],
     "core/src/customs.ts": ["core/src/map.ts"],
     "core/src/typed/mathts-typed.ts": ["core/src/factory/factory.ts", "core/src/typed/index.ts"],
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],

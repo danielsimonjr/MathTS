@@ -166,10 +166,10 @@ The codebase is organized into the following modules:
 - **expression/node**: 19 files
 - **expression/transform**: 33 files
 - **expression/utils**: 13 files
-- **parser**: 1 file
+- **parser**: 2 files
 - **units**: 1 file
 - **numbers**: 1 file
-- **ast**: 1 file
+- **ast**: 2 files
 - **evaluator**: 1 file
 - **linalg**: 1 file
 - **arithmetic**: 1 file
@@ -206,10 +206,10 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 497            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
-| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
+| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
-| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
+| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-evaluator` (`evaluator/`)                    | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-linalg` (`linalg/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-arithmetic` (`arithmetic/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
@@ -591,34 +591,34 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                                                                                                                                                                                                                                                                                                                                   | Type                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `./is.js`                    | `*`                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
-| `./number.js`                | `*`                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
-| `./object.js`                | `*`                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
-| `./factory.js`               | `*`                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
-| `./shared.js`                | `hasOwnProperty, endsWith, warnOnce, memoize`                                                                                                                                                                                                                                                                                                                             | Re-export             |
-| `./config.js`                | `DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
-| `./error/MathjsError.js`     | `MathjsError`                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
-| `./error/DimensionError.js`  | `DimensionError`                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
-| `./error/IndexError.js`      | `IndexError, createIndexError`                                                                                                                                                                                                                                                                                                                                            | Re-export             |
-| `./string.js`                | `format, stringify, escape, compareText, GeneralFormatOptions`                                                                                                                                                                                                                                                                                                            | Re-export             |
-| `./bignumber-formatter.js`   | `format, toEngineering, toExponential, toFixed, BigNumberValue`                                                                                                                                                                                                                                                                                                           | Re-export             |
-| `./types/unit/index.js`      | `createUnitClass, unitDependencies, Unit`                                                                                                                                                                                                                                                                                                                                 | Re-export             |
-| `./array.js`                 | `arraySize, validate, validateIndexSourceSize, validateIndex, isEmptyIndex, resize, reshape, processSizesWildcard, squeeze, unsqueeze, flatten, map, forEach, filter, filterRegExp, join, identify, generalize, getArrayDataType, last, initial, concat, broadcastSizes, checkBroadcastingRules, broadcastTo, broadcastArrays, stretch, get, deepMap, deepForEach, clone` | Re-export             |
-| `./collection.js`            | `containsCollections, deepMap, deepForEach, reduce, scatter`                                                                                                                                                                                                                                                                                                              | Re-export             |
-| `./switch.js`                | `_switch`                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
-| `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                     | Re-export             |
-| `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                       | Re-export             |
-| `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
-| `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./array.js`                 | `NestedArray, IdentifiedValue`                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./types/wasm-loader.js`     | `LoadingMetrics, WasmManifest`                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./types/unit/unit-types.js` | `*`                                                                                                                                                                                                                                                                                                                                                                       | Re-export (type-only) |
+| File                         | Imports                                                                                                                                                                                                                                                                                                                                                                                                                     | Type                  |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./is.js`                    | `*`                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./number.js`                | `*`                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./object.js`                | `*`                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./factory.js`               | `*`                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./shared.js`                | `hasOwnProperty, endsWith, warnOnce, memoize`                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
+| `./config.js`                | `DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
+| `./error/MathjsError.js`     | `MathjsError`                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
+| `./error/DimensionError.js`  | `DimensionError`                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
+| `./error/IndexError.js`      | `IndexError, createIndexError`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./string.js`                | `format, stringify, escape, compareText, GeneralFormatOptions`                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./bignumber-formatter.js`   | `format, toEngineering, toExponential, toFixed, BigNumberValue`                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
+| `./types/unit/index.js`      | `createUnitClass, unitDependencies, Unit`                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
+| `./array.js`                 | `arraySize, validate, validateIndexSourceSize, validateIndex, isEmptyIndex, resize, reshape, processSizesWildcard, squeeze, unsqueeze, flatten, map, forEach, filter, filterRegExp, join, identify, generalize, getArrayDataType, last, initial, concat, broadcastSizes, checkBroadcastingRules, broadcastTo, broadcastArrays, stretch, get, deepMap, deepForEach, clone`                                                   | Re-export             |
+| `./collection.js`            | `containsCollections, deepMap, deepForEach, reduce, scatter`                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
+| `./switch.js`                | `_switch`                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
+| `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                                                                       | Re-export             |
+| `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
+| `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
+| `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
+| `./array.js`                 | `NestedArray, IdentifiedValue`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./types/wasm-loader.js`     | `LoadingMetrics, WasmManifest`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `type * from ./types/unit/unit-types.js`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -1078,23 +1078,23 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports                                                                                                                                                                                                                                                                                                                                                                                                         | Type                  |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `./Unit.js`         | `createUnitClass`                                                                                                                                                                                                                                                                                                                                                                                               | Import                |
-| `./dependencies.js` | `unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                              | Import                |
-| `./unit-types.js`   | `UnitConstructor`                                                                                                                                                                                                                                                                                                                                                                                               | Import (type-only)    |
-| `./Unit.js`         | `createUnitClass`                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
-| `./dependencies.js` | `unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
-| `./exact-scale.js`  | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression` | Re-export             |
-| `./unit-table.js`   | `NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix`                                                                                                                                                                                                             | Re-export             |
-| `./exact-scale.js`  | `ExactScale, IrrationalName, IrrationalPowers`                                                                                                                                                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./unit-table.js`   | `UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./unit-types.js`   | `*`                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| File                | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                     | Type                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `./Unit.js`         | `createUnitClass`                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
+| `./dependencies.js` | `unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                                                          | Import                |
+| `./unit-types.js`   | `UnitConstructor`                                                                                                                                                                                                                                                                                                                                                                                                                           | Import (type-only)    |
+| `./Unit.js`         | `createUnitClass`                                                                                                                                                                                                                                                                                                                                                                                                                           | Re-export             |
+| `./dependencies.js` | `unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
+| `./exact-scale.js`  | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression`                             | Re-export             |
+| `./unit-table.js`   | `NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix`                                                                                                                                                                                                                                         | Re-export             |
+| `./unit-types.js`   | `BigNumberValue, ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
+| `./exact-scale.js`  | `ExactScale, IrrationalName, IrrationalPowers`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./unit-table.js`   | `UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
 
 **Exports:**
 
 - Constants: `Unit`
-- Re-exports: `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `type * from ./unit-types.js`
+- Re-exports: `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `BigNumberValue`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`
 
 ---
 
@@ -16575,11 +16575,24 @@ graph LR
 | Package                            | Import                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-expression` | `createParse, createParserClass, createParser, createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode, keywords, properties, getPrecedence, getAssociativity, isAssociativeWith, getOperator` |
-| `@danielsimonjr/mathts-expression` | `*`                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 **Exports:**
 
-- Re-exports: `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`, `type * from @danielsimonjr/mathts-expression`
+- Re-exports: `createParse`, `createParserClass`, `createParser`, `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `keywords`, `properties`, `getPrecedence`, `getAssociativity`, `isAssociativeWith`, `getOperator`
+
+---
+
+### `parser/src/re-export-types.d.ts` - re-export-types.d module
+
+**Workspace Dependencies:**
+
+| Package                            | Import |
+| ---------------------------------- | ------ |
+| `@danielsimonjr/mathts-expression` | `*`    |
+
+**Exports:**
+
+- Re-exports: `type * from @danielsimonjr/mathts-expression`
 
 ---
 
@@ -16632,11 +16645,24 @@ graph LR
 | Package                            | Import                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-expression` | `createNode, createAccessorNode, createArrayNode, createAssignmentNode, createBlockNode, createConditionalNode, createConstantNode, createFunctionAssignmentNode, createFunctionNode, createIndexNode, createObjectNode, createOperatorNode, createParenthesisNode, createRangeNode, createRelationalNode, createSymbolNode` |
-| `@danielsimonjr/mathts-expression` | `*`                                                                                                                                                                                                                                                                                                                          |
 
 **Exports:**
 
-- Re-exports: `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`, `type * from @danielsimonjr/mathts-expression`
+- Re-exports: `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
+
+---
+
+### `ast/src/re-export-types.d.ts` - re-export-types.d module
+
+**Workspace Dependencies:**
+
+| Package                            | Import |
+| ---------------------------------- | ------ |
+| `@danielsimonjr/mathts-expression` | `*`    |
+
+**Exports:**
+
+- Re-exports: `type * from @danielsimonjr/mathts-expression`
 
 ---
 
@@ -18950,153 +18976,155 @@ graph TD
 
     subgraph Parser
         N417[index]
+        N418[re-export-types.d]
     end
 
     subgraph Units
-        N418[index]
-    end
-
-    subgraph Numbers
         N419[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N420[index]
     end
 
-    subgraph Evaluator
+    subgraph Ast
         N421[index]
+        N422[re-export-types.d]
     end
 
-    subgraph Linalg
-        N422[index]
-    end
-
-    subgraph Arithmetic
+    subgraph Evaluator
         N423[index]
     end
 
-    subgraph Trigonometry
+    subgraph Linalg
         N424[index]
     end
 
-    subgraph Statistics
+    subgraph Arithmetic
         N425[index]
     end
 
-    subgraph Signal
+    subgraph Trigonometry
         N426[index]
     end
 
+    subgraph Statistics
+        N427[index]
+    end
+
+    subgraph Signal
+        N428[index]
+    end
+
     subgraph Parallel
-        N427[ComputePool]
-        N428[ParallelMatrix]
-        N429[WorkerPool]
-        N430[gemm-rows]
-        N431[index]
-        N432[matrix.worker]
+        N429[ComputePool]
+        N430[ParallelMatrix]
+        N431[WorkerPool]
+        N432[gemm-rows]
+        N433[index]
+        N434[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N433[elementwise]
-        N434[index]
-        N435[map]
-        N436[matmul]
-        N437[reduce]
+        N435[elementwise]
+        N436[index]
+        N437[map]
+        N438[matmul]
+        N439[reduce]
     end
 
     subgraph Parallel/ops
-        N438[bitwise]
+        N440[bitwise]
     end
 
     subgraph Parallel/strategies
-        N439[chunk]
-        N440[index]
-        N441[threshold]
+        N441[chunk]
+        N442[index]
+        N443[threshold]
     end
 
     subgraph Workbook
-        N442[cli]
-        N443[contract]
-        N444[doc]
-        N445[edit]
-        N446[executor]
-        N447[formatter]
-        N448[fs-atomic]
-        N449[graph]
-        N450[html]
-        N451[index]
-        N452[...15 more]
+        N444[cli]
+        N445[contract]
+        N446[doc]
+        N447[edit]
+        N448[executor]
+        N449[formatter]
+        N450[fs-atomic]
+        N451[graph]
+        N452[html]
+        N453[index]
+        N454[...15 more]
     end
 
     subgraph Assembly/algebra
-        N453[decomposition]
+        N455[decomposition]
     end
 
     subgraph Assembly
-        N454[elementwise]
-        N455[heap]
-        N456[index]
-        N457[poly]
-        N458[signal]
-        N459[sort]
-        N460[special]
-        N461[tridiag]
+        N456[elementwise]
+        N457[heap]
+        N458[index]
+        N459[poly]
+        N460[signal]
+        N461[sort]
+        N462[special]
+        N463[tridiag]
     end
 
     subgraph Assembly/ops
-        N462[approx]
-        N463[array]
-        N464[bitwise]
-        N465[complex-array]
-        N466[complex-ops]
-        N467[curvefit]
-        N468[f64-buffer]
-        N469[fft]
-        N470[linalg]
-        N471[matrix]
-        N472[...7 more]
+        N464[approx]
+        N465[array]
+        N466[bitwise]
+        N467[complex-array]
+        N468[complex-ops]
+        N469[curvefit]
+        N470[f64-buffer]
+        N471[fft]
+        N472[linalg]
+        N473[matrix]
+        N474[...7 more]
     end
 
     subgraph Assembly/types
-        N473[complex]
+        N475[complex]
     end
 
     subgraph Compat
-        N474[chain]
-        N475[index]
-        N476[shims]
+        N476[chain]
+        N477[index]
+        N478[shims]
     end
 
     subgraph Gpu
-        N477[BufferPool]
-        N478[GPUContext]
-        N479[ShaderManager]
-        N480[detect]
-        N481[device]
-        N482[flag]
-        N483[index]
-        N484[serialize]
+        N479[BufferPool]
+        N480[GPUContext]
+        N481[ShaderManager]
+        N482[detect]
+        N483[device]
+        N484[flag]
+        N485[index]
+        N486[serialize]
     end
 
     subgraph Plot
-        N485[coerce]
-        N486[contour]
-        N487[emit]
-        N488[frame]
-        N489[heatmap]
-        N490[histogram]
-        N491[index]
-        N492[marks2d]
-        N493[overlay]
-        N494[palette]
-        N495[...8 more]
+        N487[coerce]
+        N488[contour]
+        N489[emit]
+        N490[frame]
+        N491[heatmap]
+        N492[histogram]
+        N493[index]
+        N494[marks2d]
+        N495[overlay]
+        N496[palette]
+        N497[...8 more]
     end
 
     subgraph Plot/three
-        N496[points3d]
-        N497[project]
-        N498[surface]
+        N498[points3d]
+        N499[project]
+        N500[surface]
     end
 
     N4 --> N2
@@ -19184,11 +19212,11 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1220   |
+| Total TypeScript Files  | 1222   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200770 |
-| Total Exports           | 6268   |
-| Total Re-exports        | 2627   |
+| Total Lines of Code     | 200807 |
+| Total Exports           | 6323   |
+| Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 547    |
 | Total Functions         | 2030   |
