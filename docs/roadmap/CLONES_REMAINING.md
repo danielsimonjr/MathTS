@@ -34,6 +34,46 @@ near pair appeared. The 12 exact groups are the same recorded skips. The follow-
 jStruct 0.9 or more: 112, 0.8 to 0.9: 164, 0.7 to 0.8: 91 (was 93), 0.6 to 0.7: 181 (was 189),
 below 0.6 by containment: 25 (unchanged). 112 + 164 + 91 + 181 + 25 = 573.
 
+## CLONES refactor plan PRs (A–I)
+
+Contract: `docs/plans/CLONES_REFACTOR_PLAN.md` (planning PR #495). Implementation branches are
+`cursor/clones-pr-*-73c0` off `156e4ea8` (`main`). Each carries a patch changeset; numeric behavior
+is unchanged. Re-measure with `repo-tools clones` after the stack lands on `main` (do not commit reports).
+
+| PR  | Branch                    | GitHub PR | Pairs retired (plan)                        |
+| --- | ------------------------- | --------- | ------------------------------------------- |
+| A   | `cursor/clones-pr-a-73c0` | #497      | 4 (expression printers)                     |
+| B   | `cursor/clones-pr-b-73c0` | #498      | 1 exact (`setUnion` / `setSymDifference`)   |
+| C   | `cursor/clones-pr-c-73c0` | #500      | 1 (`unflattenl` / `unflattenr`)             |
+| D   | `cursor/clones-pr-d-73c0` | #502      | 1 (`cleanUnivariatePoly` / `renderIntPoly`) |
+| E   | `cursor/clones-pr-e-73c0` | #503      | 3 (centrality dispatch)                     |
+| F   | `cursor/clones-pr-f-73c0` | #501      | 1 (`Fraction.floor` / `ceil`)               |
+| G   | `cursor/clones-pr-g-73c0` | #499      | 1 (`flipRows` / `flipCols`)                 |
+| H   | `cursor/clones-pr-h-73c0` | #504      | up to 3 (worker `sum` / `prod` / `norm`)    |
+| I   | `cursor/clones-pr-i-73c0` | #505      | 1 (AS Airy series)                          |
+
+Parse-error cleanup (not a merge PR): #496 (`cursor/clones-parse-errors-73c0`).
+
+**Measured on `156e4ea8` before merges** (`repo-tools clones` 2.3.0, same `--src` as above,
+`--out=tools/.clone-out`, not committed): `files=1219`, `parseErrors=5`, `units(minNodes=50)=2604`,
+`exact groups=12` (43 units), `near pairs=573` (112 + 164 + 91 + 181 + 25).
+
+**After parse-error cleanup (#496) on `cursor/clones-parse-errors-73c0`:** `parseErrors=0`; clone
+counts unchanged (`near pairs=573`, same bands).
+
+**Isolated branch re-measures (2.3.0, same flags; each branch off `156e4ea8`, not a merged stack):**
+
+| Branch / PR                           | Near pairs                     | Δ vs `156e4ea8` | Notes                                                       |
+| ------------------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------- |
+| #497 PR-A (expression printers)       | (re-run on green merge order)  | −4 plan         | not re-run in isolation here                                |
+| #498 PR-B                             | (exact group, not a near pair) | −1 exact group  | `setUnion`/`setSymDifference` exact group drops when merged |
+| #505 PR-I (`cursor/clones-pr-i-73c0`) | 572                            | −1              | 0.8–0.9 band 163 vs 164; `parseErrors=5` until #496 lands   |
+
+**Expected after full A–I + #496 merge (plan accounting):** 16 near pairs and the
+`setUnion`/`setSymDifference` exact group retired → **557 near pairs**, **11 exact groups** (42 units),
+assuming PR-H removes the three worker scalar pairings under the 50-node threshold. Re-run
+`repo-tools clones` on `main` once the PR stack is merged to replace this projection.
+
 The unit total fell by less than the merged-body count because each shared helper is itself a unit and the
 new oracle tests are not scanned. Net effect of the 19 sprint PRs: 26 fewer units (2635 to 2609), 55 fewer
 near pairs (638 to 583), the exact groups unchanged (all 12 are recorded skips), and 7 new `src` files (the
