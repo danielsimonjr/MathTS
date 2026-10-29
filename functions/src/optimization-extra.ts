@@ -6,7 +6,7 @@
  */
 import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
-import { numericJacobian } from './numeric/numeric-jacobian.js';
+import { centralDifferenceGradient, numericJacobian } from './numeric/numeric-jacobian.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
@@ -129,7 +129,9 @@ export function nelderMead(
 
 /**
  * Gradient-descent minimization with optional backtracking line search. `grad` may
- * be supplied; otherwise a central-difference gradient is used.
+ * be supplied; otherwise a central-difference gradient with constant step `1e-6`
+ * is used ({@link centralDifferenceGradient}). That step is not the
+ * `max(1, |x_i|) · cbrt(eps)` step `bfgs` uses.
  */
 export function gradientDescent(
   f: (x: number[]) => number,
@@ -137,20 +139,8 @@ export function gradientDescent(
   opts: { grad?: (x: number[]) => number[]; rate?: number; maxIter?: number; tol?: number } = {}
 ): OptimizeResult {
   const { rate = 0.1, maxIter = 10000, tol = 1e-8 } = opts;
-  const n = x0.length;
-  const numGrad = (x: number[]): number[] => {
-    const h = 1e-6;
-    const g = new Array<number>(n);
-    for (let i = 0; i < n; i++) {
-      const xp = x.slice();
-      const xm = x.slice();
-      xp[i] += h;
-      xm[i] -= h;
-      g[i] = (f(xp) - f(xm)) / (2 * h);
-    }
-    return g;
-  };
-  const grad = opts.grad ?? numGrad;
+  const grad =
+    opts.grad ?? ((x: number[]): number[] => centralDifferenceGradient(f, x, () => 1e-6));
   let x = Array.from(x0);
   let iter = 0;
   for (; iter < maxIter; iter++) {

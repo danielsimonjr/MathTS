@@ -877,19 +877,15 @@ export async function jordanForm(A: number[][]): Promise<JordanResult> {
   return { J, P };
 }
 
-/** Compute rank for internal use (avoids circular dependency). */
+/**
+ * Rank used by the Jordan-form null-space walk.
+ *
+ * The old body counted nonzero rows of `rowReduce` the same way as
+ * {@link matrixRank} (one increment per row that holds an entry above `tol`).
+ * Both live in this file, so the second copy delegates.
+ */
 function matrixRankInternal(A: number[][], tol: f64): i32 {
-  const rref = rowReduce(A, tol);
-  let r = 0;
-  for (let i = 0; i < rref.length; i++) {
-    for (let j = 0; j < rref[i].length; j++) {
-      if (Math.abs(rref[i][j]) > tol) {
-        r++;
-        break;
-      }
-    }
-  }
-  return r;
+  return matrixRank(A, tol);
 }
 
 /** Build Jordan blocks for a repeated eigenvalue. */

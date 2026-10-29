@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-28'
+  lastUpdated: '2026-10-29'
   totalFiles: 1219
   totalModules: 82
-  totalExports: 6264
+  totalExports: 6267
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -4519,6 +4519,7 @@ modules:
         - cloneMatrix
         - transpose
         - matInv
+        - gaussJordanSolve
         - gaussJordanContinue
         - isSymmetric
         - matMul
@@ -4535,6 +4536,7 @@ modules:
         - cloneMatrix
         - transpose
         - matInv
+        - gaussJordanSolve
         - gaussJordanContinue
         - isSymmetric
         - matMul
@@ -5025,6 +5027,7 @@ modules:
             - matMul
             - transpose
             - matInv
+            - gaussJordanSolve
       workspaceDependencies: []
       exports:
         - matrixSqrtm
@@ -10907,6 +10910,7 @@ modules:
             - inv
         - file: ./numeric/numeric-jacobian.js
           imports:
+            - centralDifferenceGradient
             - numericJacobian
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
@@ -15236,7 +15240,10 @@ modules:
       description: 'BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ./numeric-jacobian.js
+          imports:
+            - centralDifferenceGradient
       workspaceDependencies: []
       exports:
         - bfgs
@@ -15510,11 +15517,13 @@ modules:
       workspaceDependencies: []
       exports:
         - numericJacobian
+        - centralDifferenceGradient
       interfaces:
         - NumericJacobianStepRule
         - NumericJacobianOptions
       functions:
         - numericJacobian
+        - centralDifferenceGradient
     functions/src/numeric/open-root-finders.ts:
       description: Open (non-bracketing) scalar root-finders.
       externalDependencies: []
@@ -20808,6 +20817,7 @@ modules:
         - file: ./zassenhaus.js
           imports:
             - factorUnivariateZ
+            - indexCombinations
         - file: ./integer-poly.js
           imports:
             - mul
@@ -22291,6 +22301,7 @@ modules:
             - betaScalar
             - gammaincScalar
             - gammaincpScalar
+            - upperGammaQ
             - betaincScalar
             - besselIScalar
             - besselHankel
@@ -24148,6 +24159,7 @@ modules:
         - incompleteBetaFraction
         - betaincClosedScalar
         - chooseScalar
+        - upperGammaQ
         - gammaincScalar
         - gammaincpScalar
         - betaincScalar
@@ -24180,6 +24192,7 @@ modules:
         - incompleteBetaFraction
         - betaincClosedScalar
         - chooseScalar
+        - upperGammaQ
         - gammaincScalar
         - gammaincpScalar
         - betaincScalar
@@ -40095,11 +40108,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1219
   totalModules: 82
-  totalLinesOfCode: 200714
-  totalExports: 6264
+  totalLinesOfCode: 200738
+  totalExports: 6267
   totalClasses: 59
   totalInterfaces: 546
-  totalFunctions: 2026
+  totalFunctions: 2029
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1624

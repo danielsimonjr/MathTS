@@ -38,7 +38,7 @@ import {
   type MultiPoly,
 } from './multi-poly.js';
 import { substitutionBases, substitute, substitutedDegree, backSubstitute } from './kronecker.js';
-import { factorUnivariateZ } from './zassenhaus.js';
+import { factorUnivariateZ, indexCombinations } from './zassenhaus.js';
 import { mul, type IntPoly } from './integer-poly.js';
 
 /** Complete multivariate factorization: `p = constant · ∏ factorsᵢ^multᵢ`. */
@@ -65,30 +65,13 @@ function log(message: string): void {
   console.warn(message);
 }
 
-/** Yields every size-`s` subset of `{0, …, n-1}` as an index array. */
+/**
+ * Yields every size-`s` subset of `{0, …, n-1}`.
+ * Same lexicographic generator as the Zassenhaus recombination walk
+ * ({@link indexCombinations}).
+ */
 function* subsetsOfSize(n: number, s: number): Generator<number[]> {
-  if (s === 0) {
-    yield [];
-    return;
-  }
-  if (s > n) {
-    return;
-  }
-  const idx = Array.from({ length: s }, (_, i) => i);
-  for (;;) {
-    yield idx.slice();
-    let i = s - 1;
-    while (i >= 0 && idx[i] === n - s + i) {
-      i -= 1;
-    }
-    if (i < 0) {
-      return;
-    }
-    idx[i] += 1;
-    for (let j = i + 1; j < s; j += 1) {
-      idx[j] = idx[j - 1] + 1;
-    }
-  }
+  yield* indexCombinations(n, s);
 }
 
 /** Removes the given pool indices in-place (descending, so splices don't shift). */

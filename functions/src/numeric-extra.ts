@@ -83,28 +83,35 @@ export function cumprod(x: Vec): number[] {
   return out;
 }
 
-/** Cumulative maximum (running max). */
-export function cummax(x: Vec): number[] {
+/**
+ * Prefix extreme. `replace(value, extreme)` is true when `value` should
+ * become the running extreme. `cummax` uses `>` and seed `-Infinity`;
+ * `cummin` uses `<` and seed `Infinity`. A NaN never replaces the extreme,
+ * because those relational operators are already false for NaN.
+ */
+function cumulativeExtreme(
+  x: Vec,
+  seed: number,
+  replace: (value: number, extreme: number) => boolean
+): number[] {
   const a = toArr(x);
   const out = new Array<number>(a.length);
-  let m = -Infinity;
+  let extreme = seed;
   for (let i = 0; i < a.length; i++) {
-    if (a[i] > m) m = a[i];
-    out[i] = m;
+    if (replace(a[i], extreme)) extreme = a[i];
+    out[i] = extreme;
   }
   return out;
 }
 
+/** Cumulative maximum (running max). */
+export function cummax(x: Vec): number[] {
+  return cumulativeExtreme(x, -Infinity, (value, extreme) => value > extreme);
+}
+
 /** Cumulative minimum (running min). */
 export function cummin(x: Vec): number[] {
-  const a = toArr(x);
-  const out = new Array<number>(a.length);
-  let m = Infinity;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] < m) m = a[i];
-    out[i] = m;
-  }
-  return out;
+  return cumulativeExtreme(x, Infinity, (value, extreme) => value < extreme);
 }
 
 /**

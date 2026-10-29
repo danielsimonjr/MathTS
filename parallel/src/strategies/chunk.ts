@@ -163,19 +163,21 @@ export function calculateOptimalChunks(totalElements: number, options: ChunkOpti
 }
 
 /**
- * Chunk a Float64Array into multiple smaller arrays
+ * Split a sequence after {@link planChunks}.
  *
- * @param data - The array to chunk
- * @param options - Chunking options
- * @returns Chunked data with metadata
+ * `chunkFloat64Array` passes the configured `minChunkSize` and materializes
+ * with `subarray` (a view). `chunkArray` passes `0` and materializes with
+ * `slice` (a copy). When the planned chunk count is 1, both return `whole`
+ * itself. The view-versus-copy choice is the `materialize` callback, not a
+ * boolean mode.
  */
-export function chunkFloat64Array(
-  data: Float64Array,
-  options: ChunkOptions = {}
-): ChunkResult<Float64Array> {
-  const { minChunkSize } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
-  const totalElements = data.length;
-
+function assembleChunks<T>(
+  totalElements: number,
+  options: ChunkOptions,
+  minChunkSizeForPlan: number,
+  whole: T,
+  materialize: (start: number, end: number) => T
+): ChunkResult<T> {
   if (totalElements === 0) {
     return {
       chunks: [],
@@ -187,21 +189,21 @@ export function chunkFloat64Array(
 
   // Identity shortcut keys off planned count, not materialized length: when
   // `calculateOptimalChunks` returns `> 1` the unbalanced path can still emit a
-  // single range (minChunkSize >= n), and main returned `data.subarray(...)`
-  // rather than `data` itself.
+  // single range (minChunkSize >= n), and the Float64 path must return `whole`
+  // rather than a subarray of it.
   const planned = calculateOptimalChunks(totalElements, options);
-  const chunkInfo = planChunks(totalElements, options, minChunkSize);
+  const chunkInfo = planChunks(totalElements, options, minChunkSizeForPlan);
 
   if (planned <= 1) {
     return {
-      chunks: [data],
+      chunks: [whole],
       chunkInfo,
       totalElements,
       numChunks: 1,
     };
   }
 
-  const chunks = chunkInfo.map((info) => data.subarray(info.startIndex, info.endIndex));
+  const chunks = chunkInfo.map((info) => materialize(info.startIndex, info.endIndex));
 
   return {
     chunks,
@@ -212,46 +214,38 @@ export function chunkFloat64Array(
 }
 
 /**
- * Chunk a generic array into multiple smaller arrays
+ * Chunk a Float64Array into multiple smaller arrays.
+ *
+ * Split ranges are views (`subarray`). A single planned chunk returns `data`
+ * itself.
+ *
+ * @param data - The array to chunk
+ * @param options - Chunking options
+ * @returns Chunked data with metadata
+ */
+export function chunkFloat64Array(
+  data: Float64Array,
+  options: ChunkOptions = {}
+): ChunkResult<Float64Array> {
+  const { minChunkSize } = { ...DEFAULT_CHUNK_OPTIONS, ...options };
+  return assembleChunks(data.length, options, minChunkSize, data, (start, end) =>
+    data.subarray(start, end)
+  );
+}
+
+/**
+ * Chunk a generic array into multiple smaller arrays.
+ *
+ * Split ranges are copies (`slice`). A single planned chunk returns `data`
+ * itself. `planChunks` is called with minimum size 0, which is not the
+ * Float64 default.
  *
  * @param data - The array to chunk
  * @param options - Chunking options
  * @returns Chunked data with metadata
  */
 export function chunkArray<T>(data: T[], options: ChunkOptions = {}): ChunkResult<T[]> {
-  const totalElements = data.length;
-
-  if (totalElements === 0) {
-    return {
-      chunks: [],
-      chunkInfo: [],
-      totalElements: 0,
-      numChunks: 0,
-    };
-  }
-
-  // Same planned-count gate as {@link chunkFloat64Array}: a collapsed
-  // unbalanced range must `slice` (copy) rather than alias `data`.
-  const planned = calculateOptimalChunks(totalElements, options);
-  const chunkInfo = planChunks(totalElements, options, 0);
-
-  if (planned <= 1) {
-    return {
-      chunks: [data],
-      chunkInfo,
-      totalElements,
-      numChunks: 1,
-    };
-  }
-
-  const chunks = chunkInfo.map((info) => data.slice(info.startIndex, info.endIndex));
-
-  return {
-    chunks,
-    chunkInfo,
-    totalElements,
-    numChunks: chunks.length,
-  };
+  return assembleChunks(data.length, options, 0, data, (start, end) => data.slice(start, end));
 }
 
 /**

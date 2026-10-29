@@ -66,10 +66,42 @@ export function transpose(A: number[][]): number[][] {
  */
 export function matInv(A: number[][]): number[][] | null {
   const n = A.length;
-  const M = A.map((row, i) => {
-    const r = new Array(2 * n).fill(0);
+  const identity = Array.from({ length: n }, (_, i) => {
+    const row = new Array<number>(n).fill(0);
+    row[i] = 1;
+    return row;
+  });
+  return gaussJordanSolve(A, identity);
+}
+
+/**
+ * Solve `A X = B` by Gauss–Jordan elimination with partial pivoting.
+ *
+ * `rhs[row]` is one row of `B` (one column, or the identity). Returns `null`
+ * when a pivot satisfies `|pivot| < 1e-15`. A zero elimination factor is
+ * skipped. Columns to the left of the pivot are already eliminated and are
+ * not rewritten; the returned right-hand block matches a loop that rewrites
+ * those columns too (checked on random systems before this helper replaced
+ * the two copies).
+ *
+ * `matInv` passes the identity. `sqrtm`'s column solver passes one column.
+ * {@link gaussJordanContinue} is a different policy: it skips a tiny pivot
+ * instead of returning null, and its cutoff is a parameter.
+ *
+ * @param a - Square coefficient matrix. Not modified.
+ * @param rhs - Right-hand side, one array per row, each of the same width.
+ * @returns `X` with the same shape as `rhs`, or `null` when `A` is singular
+ *   at the 1e-15 pivot cutoff. An empty `a` returns an empty array.
+ */
+export function gaussJordanSolve(a: number[][], rhs: number[][]): number[][] | null {
+  const n = a.length;
+  if (n === 0) return [];
+  const width = rhs[0]?.length ?? 0;
+  const M = a.map((row, i) => {
+    const r = new Array<number>(n + width);
     for (let j = 0; j < n; j++) r[j] = row[j];
-    r[n + i] = 1;
+    const b = rhs[i] ?? [];
+    for (let j = 0; j < width; j++) r[n + j] = b[j] ?? 0;
     return r;
   });
 
@@ -85,14 +117,14 @@ export function matInv(A: number[][]): number[][] | null {
     if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
 
     const pivot = M[col][col];
-    if (Math.abs(pivot) < 1e-15) return null; // singular
+    if (Math.abs(pivot) < 1e-15) return null;
 
-    for (let j = 0; j < 2 * n; j++) M[col][j] /= pivot;
+    for (let j = col; j < n + width; j++) M[col][j] /= pivot;
     for (let row = 0; row < n; row++) {
       if (row === col) continue;
       const f = M[row][col];
       if (f === 0) continue;
-      for (let j = 0; j < 2 * n; j++) M[row][j] -= f * M[col][j];
+      for (let j = col; j < n + width; j++) M[row][j] -= f * M[col][j];
     }
   }
 

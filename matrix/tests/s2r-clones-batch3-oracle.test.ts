@@ -8,7 +8,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { ComputePool } from '@danielsimonjr/mathts-parallel';
-import { transpose, matInv } from '../src/operations/common.js';
+import { transpose, matInv, gaussJordanSolve } from '../src/operations/common.js';
 import { matrixSqrtNewtonInternal } from '../src/operations/sqrtm.js';
 import { matrixLogm } from '../src/operations/logm.js';
 import { jsBackend } from '../src/backends/JSBackend.js';
@@ -218,6 +218,36 @@ describe('S2R batch3 — matInv (G57 oracle)', () => {
     expect(inv).not.toBeNull();
     expect(Math.abs(inv![0][0] / 1e15 - 1)).toBeLessThan(1e-10);
     expect(inv![1][1]).toBeCloseTo(1, 10);
+  });
+});
+
+describe('gaussJordanSolve — shared by matInv and the sqrtm column solver', () => {
+  it('returns [] for an empty system and does not mutate A', () => {
+    expect(gaussJordanSolve([], [])).toEqual([]);
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const before = A.map((row) => row.slice());
+    const x = gaussJordanSolve(A, [[5], [11]]);
+    expect(A).toEqual(before);
+    expect(x).not.toBeNull();
+    // x + 2y = 5, 3x + 4y = 11 → x = 1, y = 2.
+    expect(x![0][0]).toBeCloseTo(1, 12);
+    expect(x![1][0]).toBeCloseTo(2, 12);
+  });
+
+  it('returns null on a zero pivot and matches matInv on the identity', () => {
+    expect(gaussJordanSolve([[0]], [[1]])).toBeNull();
+    const A = [
+      [1, 2],
+      [3, 4],
+    ];
+    const inv = gaussJordanSolve(A, [
+      [1, 0],
+      [0, 1],
+    ]);
+    expect(inv).toEqual(matInv(A));
   });
 });
 

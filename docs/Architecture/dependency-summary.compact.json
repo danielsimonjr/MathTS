@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-28", "f": 1219, "e": 6264, "re": 2627 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1219, "e": 6267, "re": 2627 },
   "s": {
-    "loc": 200714,
+    "loc": 200738,
     "cls": 59,
     "int": 546,
-    "fn": 2026,
+    "fn": 2029,
     "tg": 159,
     "en": 0,
     "co": 1624,
@@ -323,6 +323,7 @@
         "cloneMatrix",
         "transpose",
         "matInv",
+        "gaussJordanSolve",
         "gaussJordanContinue",
         "isSymmetric",
         "matMul",
@@ -336,8 +337,7 @@
         "applyHouseholderRight",
         "condest",
         "eigWasm",
-        "eigvalsWasm",
-        "spectralRadiusWasm"
+        "eigvalsWasm"
       ],
       "int": [
         "CholeskyResult",

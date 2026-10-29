@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-28",
+  "generated": "2026-10-29",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1767,6 +1767,7 @@
     "functions/src/linalg-svd-extra.ts": ["functions/src/index.ts"],
     "functions/src/numeric/numeric-jacobian.ts": [
       "functions/src/index.ts",
+      "functions/src/numeric/bfgs.ts",
       "functions/src/numeric/fsolve.ts",
       "functions/src/numeric/solveDAE.ts",
       "functions/src/numeric/solveODE.ts",

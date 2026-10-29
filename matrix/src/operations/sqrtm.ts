@@ -22,7 +22,7 @@
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
 import { schurInternal } from './schur.js';
-import { eye, matMul, transpose, matInv } from './common.js';
+import { eye, matMul, transpose, matInv, gaussJordanSolve } from './common.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -360,35 +360,17 @@ function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
   return U;
 }
 
-/** Gaussian elimination with partial pivoting. Returns null on singular system. */
+/**
+ * One-column Gauss–Jordan solve. Same 1e-15 singular cutoff and zero-factor
+ * skip as {@link matInv}; both call {@link gaussJordanSolve}.
+ */
 function solveLinearSystem(A: number[][], b: number[]): number[] | null {
-  const n = A.length;
-  const Aug = A.map((row, i) => [...row, b[i]]);
-
-  for (let col = 0; col < n; col++) {
-    let maxRow = col;
-    let maxVal = Math.abs(Aug[col][col]);
-    for (let row = col + 1; row < n; row++) {
-      if (Math.abs(Aug[row][col]) > maxVal) {
-        maxVal = Math.abs(Aug[row][col]);
-        maxRow = row;
-      }
-    }
-    if (maxRow !== col) [Aug[col], Aug[maxRow]] = [Aug[maxRow], Aug[col]];
-
-    const pivot = Aug[col][col];
-    if (Math.abs(pivot) < 1e-15) return null;
-
-    for (let j = col; j <= n; j++) Aug[col][j] /= pivot;
-    for (let row = 0; row < n; row++) {
-      if (row === col) continue;
-      const f = Aug[row][col];
-      if (f === 0) continue;
-      for (let j = col; j <= n; j++) Aug[row][j] -= f * Aug[col][j];
-    }
-  }
-
-  return Aug.map((row) => row[n]);
+  const solved = gaussJordanSolve(
+    A,
+    b.map((value) => [value])
+  );
+  if (solved === null) return null;
+  return solved.map((row) => row[0]);
 }
 
 /**

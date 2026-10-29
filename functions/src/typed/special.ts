@@ -27,6 +27,7 @@ import {
   betaScalar,
   gammaincScalar,
   gammaincpScalar,
+  upperGammaQ,
   betaincScalar,
   besselIScalar,
   besselHankel,
@@ -659,7 +660,7 @@ export const gammainc = mathTyped('gammainc', {
     mapArray(
       x,
       (v) => gammaincScalar(a, v),
-      () => kernelSource([_lgamma, gammaincScalar], `(x) => gammaincScalar(${a}, x)`)
+      () => kernelSource([_lgamma, upperGammaQ, gammaincScalar], `(x) => gammaincScalar(${a}, x)`)
     ),
 });
 
@@ -677,7 +678,10 @@ export const gammaincp = mathTyped('gammaincp', {
       x,
       (v) => gammaincpScalar(a, v),
       () =>
-        kernelSource([_lgamma, gammaincScalar, gammaincpScalar], `(x) => gammaincpScalar(${a}, x)`)
+        kernelSource(
+          [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
+          `(x) => gammaincpScalar(${a}, x)`
+        )
     ),
 });
 

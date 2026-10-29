@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-28",
+  "generated": "2026-10-29",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -1723,6 +1723,7 @@
       "cbrtNumber",
       "cDiv",
       "ceil",
+      "centralDifferenceGradient",
       "CENTRALITY_WORKER_THRESHOLD",
       "centroid",
       "cg",
@@ -3635,6 +3636,7 @@
       "unkey",
       "unsqueeze",
       "unwrapPhase",
+      "upperGammaQ",
       "usolve",
       "usolveAll",
       "vacuumImpedance",
@@ -3838,6 +3840,7 @@
       "eye",
       "forceBackend",
       "gaussJordanContinue",
+      "gaussJordanSolve",
       "getCachedFeatures",
       "getConfig",
       "getGlobalGPUBackend",

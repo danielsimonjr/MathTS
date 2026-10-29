@@ -26,6 +26,8 @@
  * @packageDocumentation
  */
 
+import { centralDifferenceGradient } from './numeric-jacobian.js';
+
 type f64 = number;
 
 /** Options for {@link bfgs}. */
@@ -62,19 +64,13 @@ export interface BfgsResult {
 /** Cube root of the IEEE-754 double machine epsilon — the standard central-difference step scale. */
 const CBRT_EPS = Math.cbrt(2.220446049250313e-16);
 
-/** Local central-difference gradient (self-contained; no shared-state step cache). */
+/**
+ * Central-difference gradient with step `max(1, |x_i|) · cbrt(machine eps)`.
+ * The shared loop is {@link centralDifferenceGradient}. `gradientDescent`
+ * uses the same helper with a constant `1e-6` step.
+ */
 function numericGradient(f: (x: number[]) => number, x: number[]): number[] {
-  const n = x.length;
-  const g = new Array<number>(n);
-  for (let i = 0; i < n; i++) {
-    const h = Math.max(1, Math.abs(x[i])) * CBRT_EPS;
-    const xp = x.slice();
-    const xm = x.slice();
-    xp[i] += h;
-    xm[i] -= h;
-    g[i] = (f(xp) - f(xm)) / (2 * h);
-  }
-  return g;
+  return centralDifferenceGradient(f, x, (xi) => Math.max(1, Math.abs(xi)) * CBRT_EPS);
 }
 
 function clipToBounds(x: number[], bounds: [f64, f64][] | undefined): number[] {
