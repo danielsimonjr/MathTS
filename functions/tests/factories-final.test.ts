@@ -5,6 +5,7 @@
  * algebra, statistics, set operations, signal processing, and more.
  */
 import { describe, it, expect } from 'vitest';
+import { factoryScope } from '../src/factories/scope.js';
 
 // set ops moved from factories/ to typed/ — import from the typed layer
 import {
@@ -334,5 +335,42 @@ describe('Tier 16-18: Advanced linear algebra', () => {
 
   it('lyap should be a function', () => {
     expect(typeof lyap).toBe('function');
+  });
+});
+
+describe('simplifyUtil unflatten left/right', () => {
+  type UnflattenNode = Parameters<typeof simplifyUtil.unflattenr>[0];
+  type OperatorNodeCtor = new (op: string, fn: string, args: UnflattenNode[]) => UnflattenNode;
+  type SymbolNodeCtor = new (name: string) => UnflattenNode;
+
+  const OperatorNode = factoryScope.OperatorNode as OperatorNodeCtor;
+  const SymbolNode = factoryScope.SymbolNode as SymbolNodeCtor;
+
+  function flatAdd(...names: string[]): UnflattenNode {
+    return new OperatorNode(
+      '+',
+      'add',
+      names.map((name) => new SymbolNode(name))
+    );
+  }
+
+  function tree(node: UnflattenNode): unknown {
+    const args = node.args;
+    if (!args || args.length === 0) {
+      return node.toString();
+    }
+    return args.map((child) => tree(child as UnflattenNode));
+  }
+
+  it('unflattenr builds a right-heavy tree for four associative addends', () => {
+    const node = flatAdd('a', 'b', 'c', 'd');
+    simplifyUtil.unflattenr(node);
+    expect(tree(node)).toEqual(['a', ['b', ['c', 'd']]]);
+  });
+
+  it('unflattenl builds a left-heavy tree for four associative addends', () => {
+    const node = flatAdd('a', 'b', 'c', 'd');
+    simplifyUtil.unflattenl(node);
+    expect(tree(node)).toEqual([[['a', 'b'], 'c'], 'd']);
   });
 });
