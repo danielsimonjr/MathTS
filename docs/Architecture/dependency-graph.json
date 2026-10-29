@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-29",
     "totalFiles": 1219,
     "totalModules": 82,
-    "totalExports": 6267
+    "totalExports": 6322
   },
   "entryPoints": [
     {
@@ -1543,6 +1543,40 @@
             "typeOnly": true
           },
           {
+            "file": "./types/unit/unit-types.js",
+            "imports": [
+              "ComplexValue",
+              "ComplexConstructor",
+              "BigNumberConstructor",
+              "FractionConstructor",
+              "FractionValue",
+              "Numeric",
+              "PrefixDef",
+              "PrefixTable",
+              "BaseUnitDef",
+              "UnitDef",
+              "UnitComponent",
+              "UnitSystemEntry",
+              "UnitSystem",
+              "UnitJSON",
+              "ConverterFn",
+              "TypeConverters",
+              "ParseOptions",
+              "UnitFormatOptions",
+              "CreateUnitOptions",
+              "CreateUnitDefObject",
+              "UnitConfig",
+              "SubtractScalar",
+              "ScalarBinaryOp",
+              "ScalarUnaryOp",
+              "UnitDependencies",
+              "UnitInstance",
+              "UnitConstructor"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./array.js",
             "imports": ["NestedArray", "IdentifiedValue"],
             "reExport": true,
@@ -1551,12 +1585,6 @@
           {
             "file": "./types/wasm-loader.js",
             "imports": ["LoadingMetrics", "WasmManifest"],
-            "reExport": true,
-            "typeOnly": true
-          },
-          {
-            "file": "./types/unit/unit-types.js",
-            "imports": ["*"],
             "reExport": true,
             "typeOnly": true
           }
@@ -1646,6 +1674,33 @@
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
+          "ComplexValue",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "FractionValue",
+          "Numeric",
+          "PrefixDef",
+          "PrefixTable",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitSystem",
+          "UnitJSON",
+          "ConverterFn",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "SubtractScalar",
+          "ScalarBinaryOp",
+          "ScalarUnaryOp",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor",
           "NestedArray",
           "IdentifiedValue",
           "LoadingMetrics",
@@ -1728,11 +1783,37 @@
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
+          "ComplexValue",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "FractionValue",
+          "Numeric",
+          "PrefixDef",
+          "PrefixTable",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitSystem",
+          "UnitJSON",
+          "ConverterFn",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "SubtractScalar",
+          "ScalarBinaryOp",
+          "ScalarUnaryOp",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor",
           "NestedArray",
           "IdentifiedValue",
           "LoadingMetrics",
-          "WasmManifest",
-          "type * from ./types/unit/unit-types.js"
+          "WasmManifest"
         ]
       },
       "core/src/is.ts": {
@@ -2951,6 +3032,41 @@
             "reExport": true
           },
           {
+            "file": "./unit-types.js",
+            "imports": [
+              "BigNumberValue",
+              "ComplexValue",
+              "ComplexConstructor",
+              "BigNumberConstructor",
+              "FractionConstructor",
+              "FractionValue",
+              "Numeric",
+              "PrefixDef",
+              "PrefixTable",
+              "BaseUnitDef",
+              "UnitDef",
+              "UnitComponent",
+              "UnitSystemEntry",
+              "UnitSystem",
+              "UnitJSON",
+              "ConverterFn",
+              "TypeConverters",
+              "ParseOptions",
+              "UnitFormatOptions",
+              "CreateUnitOptions",
+              "CreateUnitDefObject",
+              "UnitConfig",
+              "SubtractScalar",
+              "ScalarBinaryOp",
+              "ScalarUnaryOp",
+              "UnitDependencies",
+              "UnitInstance",
+              "UnitConstructor"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./exact-scale.js",
             "imports": ["ExactScale", "IrrationalName", "IrrationalPowers"],
             "reExport": true,
@@ -2959,12 +3075,6 @@
           {
             "file": "./unit-table.js",
             "imports": ["UnitRow", "UnitBaseKey", "UnitPrefixSetKey", "UnitPrefix"],
-            "reExport": true,
-            "typeOnly": true
-          },
-          {
-            "file": "./unit-types.js",
-            "imports": ["*"],
             "reExport": true,
             "typeOnly": true
           }
@@ -3007,6 +3117,34 @@
           "unitPrefixExactScale",
           "getUnitPrefix",
           "Unit",
+          "BigNumberValue",
+          "ComplexValue",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "FractionValue",
+          "Numeric",
+          "PrefixDef",
+          "PrefixTable",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitSystem",
+          "UnitJSON",
+          "ConverterFn",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "SubtractScalar",
+          "ScalarBinaryOp",
+          "ScalarUnaryOp",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
@@ -3051,14 +3189,41 @@
           "UNIT_PREFIX_SETS",
           "unitPrefixExactScale",
           "getUnitPrefix",
+          "BigNumberValue",
+          "ComplexValue",
+          "ComplexConstructor",
+          "BigNumberConstructor",
+          "FractionConstructor",
+          "FractionValue",
+          "Numeric",
+          "PrefixDef",
+          "PrefixTable",
+          "BaseUnitDef",
+          "UnitDef",
+          "UnitComponent",
+          "UnitSystemEntry",
+          "UnitSystem",
+          "UnitJSON",
+          "ConverterFn",
+          "TypeConverters",
+          "ParseOptions",
+          "UnitFormatOptions",
+          "CreateUnitOptions",
+          "CreateUnitDefObject",
+          "UnitConfig",
+          "SubtractScalar",
+          "ScalarBinaryOp",
+          "ScalarUnaryOp",
+          "UnitDependencies",
+          "UnitInstance",
+          "UnitConstructor",
           "ExactScale",
           "IrrationalName",
           "IrrationalPowers",
           "UnitRow",
           "UnitBaseKey",
           "UnitPrefixSetKey",
-          "UnitPrefix",
-          "type * from ./unit-types.js"
+          "UnitPrefix"
         ],
         "constants": ["Unit"]
       },
@@ -34175,11 +34340,6 @@
               "isAssociativeWith",
               "getOperator"
             ]
-          },
-          {
-            "package": "@danielsimonjr/mathts-expression",
-            "directory": "expression",
-            "imports": ["*"]
           }
         ],
         "exports": [
@@ -34234,8 +34394,7 @@
           "getPrecedence",
           "getAssociativity",
           "isAssociativeWith",
-          "getOperator",
-          "type * from @danielsimonjr/mathts-expression"
+          "getOperator"
         ]
       }
     },
@@ -34598,11 +34757,6 @@
               "createRelationalNode",
               "createSymbolNode"
             ]
-          },
-          {
-            "package": "@danielsimonjr/mathts-expression",
-            "directory": "expression",
-            "imports": ["*"]
           }
         ],
         "exports": [
@@ -34639,8 +34793,7 @@
           "createParenthesisNode",
           "createRangeNode",
           "createRelationalNode",
-          "createSymbolNode",
-          "type * from @danielsimonjr/mathts-expression"
+          "createSymbolNode"
         ]
       }
     },
@@ -42465,15 +42618,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1219,
     "totalModules": 82,
-    "totalLinesOfCode": 200738,
-    "totalExports": 6267,
+    "totalLinesOfCode": 200786,
+    "totalExports": 6322,
     "totalClasses": 59,
     "totalInterfaces": 546,
     "totalFunctions": 2029,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1624,
-    "totalReExports": 2627,
+    "totalReExports": 2678,
     "totalTypeOnlyImports": 612,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
