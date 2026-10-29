@@ -83,7 +83,35 @@ export {
 
 // Unit factory type contract (relocated here as the Unit merges into core; consumed
 // by the mathjs-derived Unit while it still lives in the functions package).
-export type * from './types/unit/unit-types.js';
+export type {
+  ComplexValue,
+  ComplexConstructor,
+  BigNumberConstructor,
+  FractionConstructor,
+  FractionValue,
+  Numeric,
+  PrefixDef,
+  PrefixTable,
+  BaseUnitDef,
+  UnitDef,
+  UnitComponent,
+  UnitSystemEntry,
+  UnitSystem,
+  UnitJSON,
+  ConverterFn,
+  TypeConverters,
+  ParseOptions,
+  UnitFormatOptions,
+  CreateUnitOptions,
+  CreateUnitDefObject,
+  UnitConfig,
+  SubtractScalar,
+  ScalarBinaryOp,
+  ScalarUnaryOp,
+  UnitDependencies,
+  UnitInstance,
+  UnitConstructor,
+} from './types/unit/unit-types.js';
 
 // The relocated, feature-complete Unit — the factory, its core-wired dependency
 // bundle, and a ready-instantiated class — for the functions package to adopt as it

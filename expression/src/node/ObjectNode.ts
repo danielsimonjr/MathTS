@@ -28,6 +28,21 @@ export const createObjectNode = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ Node }: Dependencies) => {
+    function renderObjectEntries(
+      properties: Record<string, MathNode>,
+      entry: (key: string, node: MathNode) => string,
+      separator: string,
+      wrap: (joined: string) => string
+    ): string {
+      const entries: string[] = [];
+      for (const key in properties) {
+        if (hasOwnProperty(properties, key)) {
+          entries.push(entry(key, properties[key]));
+        }
+      }
+      return wrap(entries.join(separator));
+    }
+
     class ObjectNode extends Node {
       properties: Record<string, MathNode>;
 
@@ -160,13 +175,12 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @override
        */
       _toString(options?: StringOptions): string {
-        const entries: string[] = [];
-        for (const key in this.properties) {
-          if (hasOwnProperty(this.properties, key)) {
-            entries.push(stringify(key) + ': ' + this.properties[key].toString(options));
-          }
-        }
-        return '{' + entries.join(', ') + '}';
+        return renderObjectEntries(
+          this.properties,
+          (key, node) => stringify(key) + ': ' + node.toString(options),
+          ', ',
+          (joined) => '{' + joined + '}'
+        );
       }
 
       /**
@@ -196,24 +210,21 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @override
        */
       _toHTML(options?: StringOptions): string {
-        const entries: string[] = [];
-        for (const key in this.properties) {
-          if (hasOwnProperty(this.properties, key)) {
-            entries.push(
-              '<span class="math-symbol math-property">' +
-                escape(key) +
-                '</span>' +
-                '<span class="math-operator math-assignment-operator ' +
-                'math-property-assignment-operator math-binary-operator">' +
-                ':</span>' +
-                this.properties[key].toHTML(options)
-            );
-          }
-        }
-        return (
-          '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
-          entries.join('<span class="math-separator">,</span>') +
-          '<span class="math-parenthesis math-curly-parenthesis">}</span>'
+        return renderObjectEntries(
+          this.properties,
+          (key, node) =>
+            '<span class="math-symbol math-property">' +
+            escape(key) +
+            '</span>' +
+            '<span class="math-operator math-assignment-operator ' +
+            'math-property-assignment-operator math-binary-operator">' +
+            ':</span>' +
+            node.toHTML(options),
+          '<span class="math-separator">,</span>',
+          (joined) =>
+            '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
+            joined +
+            '<span class="math-parenthesis math-curly-parenthesis">}</span>'
         );
       }
 
@@ -223,16 +234,12 @@ export const createObjectNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toTex(options?: StringOptions): string {
-        const entries: string[] = [];
-        for (const key in this.properties) {
-          if (hasOwnProperty(this.properties, key)) {
-            entries.push(
-              '\\mathbf{' + key + ':} & ' + this.properties[key].toTex(options) + '\\\\'
-            );
-          }
-        }
-        const tex = '\\left\\{\\begin{array}{ll}' + entries.join('\n') + '\\end{array}\\right\\}';
-        return tex;
+        return renderObjectEntries(
+          this.properties,
+          (key, node) => '\\mathbf{' + key + ':} & ' + node.toTex(options) + '\\\\',
+          '\n',
+          (joined) => '\\left\\{\\begin{array}{ll}' + joined + '\\end{array}\\right\\}'
+        );
       }
     }
 

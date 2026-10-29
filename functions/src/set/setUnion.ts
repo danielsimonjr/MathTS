@@ -1,4 +1,5 @@
 import { flatten } from '../utils/array.js';
+import { flattenSetPair } from './flatten-pair.js';
 import { factory } from '../utils/factory.js';
 import type { MathArray, Matrix, MathNumericType } from '../../types/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -66,15 +67,13 @@ export const createSetUnion = /* #__PURE__ */ factory(
         a1: MathArray | Matrix,
         a2: MathArray | Matrix
       ): MathNumericType[] | Matrix {
-        if (subset(size(a1), new Index(0)) === 0) {
-          // if any of them is empty, return the other one
-          return flatten(a2 as MathNumericType[]);
-        } else if (subset(size(a2), new Index(0)) === 0) {
-          return flatten(a1 as MathNumericType[]);
-        }
-        const b1 = flatten(a1 as MathNumericType[]);
-        const b2 = flatten(a2 as MathNumericType[]);
-        return concat(setSymDifference(b1, b2), setIntersect(b1, b2)) as MathNumericType[] | Matrix;
+        return flattenSetPair(
+          a1,
+          a2,
+          { size, subset, Index, flatten },
+          (b1, b2) =>
+            concat(setSymDifference(b1, b2), setIntersect(b1, b2)) as MathNumericType[] | Matrix
+        );
       },
     });
   }

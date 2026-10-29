@@ -29,6 +29,3 @@ export {
   createRelationalNode,
   createSymbolNode,
 } from '@danielsimonjr/mathts-expression';
-
-// Re-export the type surface (AST node types, etc.)
-export type * from '@danielsimonjr/mathts-expression';

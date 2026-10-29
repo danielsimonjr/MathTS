@@ -53,6 +53,3 @@ export {
   isAssociativeWith,
   getOperator,
 } from '@danielsimonjr/mathts-expression';
-
-// Re-export the type surface (AST node types, parser/operator types, etc.)
-export type * from '@danielsimonjr/mathts-expression';

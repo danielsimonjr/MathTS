@@ -12,7 +12,36 @@ import type { UnitConstructor } from './unit-types.js';
 
 export { createUnitClass } from './Unit.js';
 export { unitDependencies } from './dependencies.js';
-export type * from './unit-types.js';
+export type {
+  BigNumberValue,
+  ComplexValue,
+  ComplexConstructor,
+  BigNumberConstructor,
+  FractionConstructor,
+  FractionValue,
+  Numeric,
+  PrefixDef,
+  PrefixTable,
+  BaseUnitDef,
+  UnitDef,
+  UnitComponent,
+  UnitSystemEntry,
+  UnitSystem,
+  UnitJSON,
+  ConverterFn,
+  TypeConverters,
+  ParseOptions,
+  UnitFormatOptions,
+  CreateUnitOptions,
+  CreateUnitDefObject,
+  UnitConfig,
+  SubtractScalar,
+  ScalarBinaryOp,
+  ScalarUnaryOp,
+  UnitDependencies,
+  UnitInstance,
+  UnitConstructor,
+} from './unit-types.js';
 export {
   UNIT_EXACT_SCALE,
   PI_EXACT_SCALE,
