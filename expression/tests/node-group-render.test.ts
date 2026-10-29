@@ -216,23 +216,43 @@ describe('AssignmentNode — rendering', () => {
 
   it('toTex of assignment, with and without parens', () => {
     const node = new AssignmentNode(s('a'), op('+', 'add', [c(1), c(2)]));
-    expect(node.toTex()).toContain('=');
-    const tex = node.toTex({ parenthesis: 'all' });
-    expect(tex).toContain('\\left(');
-    expect(tex).toContain('\\right)');
+    expect(node.toTex()).toBe(' a=1+2');
+    expect(node.toTex({ parenthesis: 'all' })).toBe(' a=\\left(1+2\\right)');
   });
 
   it('toHTML of assignment, with and without parens', () => {
     const node = new AssignmentNode(s('a'), op('+', 'add', [c(1), c(2)]));
-    expect(node.toHTML()).toContain('math-assignment-operator');
-    expect(node.toHTML({ parenthesis: 'all' })).toContain('math-round-parenthesis');
+    const eq =
+      '<span class="math-operator math-assignment-operator ' +
+      'math-variable-assignment-operator math-binary-operator">=</span>';
+    const valueHtml =
+      '<span class="math-number">1</span>' +
+      '<span class="math-operator math-binary-operator math-explicit-binary-operator">+</span>' +
+      '<span class="math-number">2</span>';
+    expect(node.toHTML()).toBe('<span class="math-symbol">a</span>' + eq + valueHtml);
+    expect(node.toHTML({ parenthesis: 'all' })).toBe(
+      '<span class="math-symbol">a</span>' +
+        eq +
+        '<span class="math-paranthesis math-round-parenthesis">(</span>' +
+        valueHtml +
+        '<span class="math-paranthesis math-round-parenthesis">)</span>'
+    );
   });
 
   it('renders the index for an object-property assignment', () => {
     const node = new AssignmentNode(s('a'), dotIndex('b'), c(2));
+    const eq =
+      '<span class="math-operator math-assignment-operator ' +
+      'math-variable-assignment-operator math-binary-operator">=</span>';
     expect(node.toString()).toBe('a.b = 2');
-    expect(node.toHTML()).toContain('math-property');
-    expect(node.toTex()).toContain('.b');
+    expect(node.toHTML()).toBe(
+      '<span class="math-symbol">a</span>' +
+        '<span class="math-operator math-accessor-operator">.</span>' +
+        '<span class="math-symbol math-property">b</span>' +
+        eq +
+        '<span class="math-number">2</span>'
+    );
+    expect(node.toTex()).toBe(' a.b=2');
   });
 });
 
