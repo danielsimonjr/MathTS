@@ -12105,7 +12105,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2539
+      "loc": 2513
     },
     {
       "file": "packages/workerpool/src/multi-index.ts",
@@ -12161,7 +12161,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "tests",
       "disposition": "test",
-      "loc": 601
+      "loc": 643
     },
     {
       "file": "packages/workerpool/tests/parallel-dispatch.test.ts",
