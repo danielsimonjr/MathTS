@@ -2416,6 +2416,9 @@
     "functions/src/typed/factorization/kronecker-factor.ts": [
       "functions/src/typed/factorization/index.ts"
     ],
+    "functions/src/typed/factorization/render-univariate.ts": [
+      "functions/src/typed/factorization/index.ts"
+    ],
     "functions/src/typed/factorization/kronecker.ts": [
       "functions/src/typed/factorization/kronecker-factor.ts"
     ],

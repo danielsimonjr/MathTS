@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2002
+**Total files**: 2003
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1193 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1194 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
 | `test`        |      721 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2002** |                                                                                                                |
+| **Total**     | **2003** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,7 +32,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1219 |
+| `src`      |  1220 |
 | `tests`    |   721 |
 | `tools`    |    28 |
 
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |    95 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   555 |
-| `@danielsimonjr/mathts-functions`      |   845 |
+| `@danielsimonjr/mathts-functions`      |   846 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   112 |
@@ -1221,6 +1221,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/typed/factorization/kronecker-factor.ts`                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/factorization/kronecker.ts`                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/factorization/multi-poly.ts`                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/typed/factorization/render-univariate.ts`                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/factorization/square-free.ts`                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/factorization/zassenhaus.ts`                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/typed/fused.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |

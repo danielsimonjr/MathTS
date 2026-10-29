@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-29",
-    "totalFiles": 1219,
+    "totalFiles": 1220,
     "totalModules": 82,
-    "totalExports": 6267
+    "totalExports": 6268
   },
   "entryPoints": [
     {
@@ -22164,6 +22164,10 @@
           {
             "file": "./kronecker-factor.js",
             "imports": ["factorMultivariateKronecker", "MultiFactorization"]
+          },
+          {
+            "file": "./render-univariate.js",
+            "imports": ["renderDescendingUnivariate"]
           }
         ],
         "workspaceDependencies": [],
@@ -22344,6 +22348,16 @@
           "fromAlgebraExpr",
           "toAlgebraString"
         ]
+      },
+      "functions/src/typed/factorization/render-univariate.ts": {
+        "description": "Descending-power univariate printer shared by number and bigint coefficient paths.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["renderDescendingUnivariate"],
+        "interfaces": ["UnivariateTerm"],
+        "functions": ["renderDescendingUnivariate"]
       },
       "functions/src/typed/factorization/square-free.ts": {
         "description": "Yun's square-free decomposition over ℤ.",
@@ -41663,6 +41677,7 @@
           "functions/src/typed/factorization/kronecker-factor.ts",
           "functions/src/typed/factorization/kronecker.ts",
           "functions/src/typed/factorization/multi-poly.ts",
+          "functions/src/typed/factorization/render-univariate.ts",
           "functions/src/typed/factorization/square-free.ts",
           "functions/src/typed/factorization/zassenhaus.ts",
           "functions/src/typed/fused.ts",
@@ -42463,13 +42478,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1219,
+    "totalTypeScriptFiles": 1220,
     "totalModules": 82,
-    "totalLinesOfCode": 200738,
-    "totalExports": 6267,
+    "totalLinesOfCode": 200756,
+    "totalExports": 6268,
     "totalClasses": 59,
-    "totalInterfaces": 546,
-    "totalFunctions": 2029,
+    "totalInterfaces": 547,
+    "totalFunctions": 2030,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1624,
