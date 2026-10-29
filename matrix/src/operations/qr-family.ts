@@ -49,32 +49,36 @@ export interface QLResult {
   L: DenseMatrix;
 }
 
-/** Reverse the row order of `M`. */
-function flipRows(M: DenseMatrix): DenseMatrix {
+/** Reverse rows (axis 0) or columns (axis 1) of a dense matrix copy. */
+function flipDense(M: DenseMatrix, axis: 0 | 1): DenseMatrix {
   const m = M.rows;
   const n = M.cols;
   const src = M.toFloat64Array();
   const data = new Float64Array(m * n);
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      data[i * n + j] = src[(m - 1 - i) * n + j];
+  if (axis === 0) {
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        data[i * n + j] = src[(m - 1 - i) * n + j];
+      }
+    }
+  } else {
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        data[i * n + j] = src[i * n + (n - 1 - j)];
+      }
     }
   }
   return new DenseMatrix(m, n, data);
 }
 
+/** Reverse the row order of `M`. */
+function flipRows(M: DenseMatrix): DenseMatrix {
+  return flipDense(M, 0);
+}
+
 /** Reverse the column order of `M`. */
 function flipCols(M: DenseMatrix): DenseMatrix {
-  const m = M.rows;
-  const n = M.cols;
-  const src = M.toFloat64Array();
-  const data = new Float64Array(m * n);
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      data[i * n + j] = src[i * n + (n - 1 - j)];
-    }
-  }
-  return new DenseMatrix(m, n, data);
+  return flipDense(M, 1);
 }
 
 /**

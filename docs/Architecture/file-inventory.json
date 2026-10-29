@@ -11468,7 +11468,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 112
+      "loc": 116
     },
     {
       "file": "matrix/src/operations/qr-pivoted.ts",
