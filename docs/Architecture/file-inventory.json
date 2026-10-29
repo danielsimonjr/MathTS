@@ -4160,7 +4160,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 399
+      "loc": 398
     },
     {
       "file": "expression/src/node/BlockNode.ts",
@@ -4216,7 +4216,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 250
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
@@ -4244,7 +4244,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 314
+      "loc": 293
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
