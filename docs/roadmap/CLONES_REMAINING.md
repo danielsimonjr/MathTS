@@ -63,11 +63,11 @@ counts unchanged (`near pairs=573`, same bands).
 
 **Isolated branch re-measures (2.3.0, same flags; each branch off `156e4ea8`, not a merged stack):**
 
-| Branch / PR                           | Near pairs                    | Δ vs `156e4ea8`                                             | Notes                                                     |
-| ------------------------------------- | ----------------------------- | ----------------------------------------------------------- | --------------------------------------------------------- |
-| #497 PR-A (expression printers)       | (re-run on green merge order) | −4 plan                                                     | not re-run in isolation here                              |
-| #498 PR-B                             | −1 exact group                | `setUnion`/`setSymDifference` exact group drops when merged |
-| #505 PR-I (`cursor/clones-pr-i-73c0`) | 572                           | −1                                                          | 0.8–0.9 band 163 vs 164; `parseErrors=5` until #496 lands |
+| Branch / PR                           | Near pairs                     | Δ vs `156e4ea8` | Notes                                                       |
+| ------------------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------- |
+| #497 PR-A (expression printers)       | (re-run on green merge order)  | −4 plan         | not re-run in isolation here                                |
+| #498 PR-B                             | (exact group, not a near pair) | −1 exact group  | `setUnion`/`setSymDifference` exact group drops when merged |
+| #505 PR-I (`cursor/clones-pr-i-73c0`) | 572                            | −1              | 0.8–0.9 band 163 vs 164; `parseErrors=5` until #496 lands   |
 
 **Expected after full A–I + #496 merge (plan accounting):** 16 near pairs and the
 `setUnion`/`setSymDifference` exact group retired → **557 near pairs**, **11 exact groups** (42 units),
