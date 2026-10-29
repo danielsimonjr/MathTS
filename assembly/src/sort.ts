@@ -33,7 +33,6 @@
 // ---------------------------------------------------------------------------
 
 /** Returns negative if a < b, 0 if a == b, positive if a > b. NaN > finite. */
-@inline
 function cmpNanLast(a: f64, b: f64): i32 {
   // Both finite / equal?
   if (a < b) return -1;
@@ -52,15 +51,13 @@ function cmpNanLast(a: f64, b: f64): i32 {
  * indices (the contents of the permutation array), which are unique, so this is
  * a strict total order (it never returns 0 for distinct elements).
  */
-@inline
 function cmpIdxStable(data: Float64Array, ia: i32, ib: i32): i32 {
   const c: i32 = cmpNanLast(data[ia], data[ib]);
   if (c != 0) return c;
   return ia < ib ? -1 : (ia > ib ? 1 : 0);
 }
 
-/** ⌊log2 n⌋ for the introsort depth limit (n ≥ 1). */
-@inline
+/** Floor log2 n for the introsort depth limit (n >= 1). */
 function ilog2(n: i32): i32 {
   let v: i32 = n;
   let r: i32 = 0;
@@ -76,7 +73,6 @@ function ilog2(n: i32): i32 {
 // ---------------------------------------------------------------------------
 
 /** Median (by NaN-last order) of three f64 values — the 3-way pivot. */
-@inline
 function _median3(a: f64, b: f64, c: f64): f64 {
   if (cmpNanLast(a, b) < 0) {
     if (cmpNanLast(b, c) < 0) return b;
@@ -177,7 +173,6 @@ function _introsort(arr: Float64Array, lo: i32, hi: i32, depth: i32): void {
 // ---------------------------------------------------------------------------
 
 /** Median index (by the stable comparator) of three positions — returns the pivot key. */
-@inline
 function _median3Idx(data: Float64Array, idx: Int32Array, a: i32, b: i32, c: i32): i32 {
   const ia: i32 = idx[a];
   const ib: i32 = idx[b];

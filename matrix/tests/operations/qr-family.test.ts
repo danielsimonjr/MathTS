@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ql, lq, rq } from '../../src/operations/qr-family.js';
+import { ql, lq, rq, flipDense } from '../../src/operations/qr-family.js';
 import { DenseMatrix } from '../../src/types/DenseMatrix.js';
 
 /** Multiply two DenseMatrices and return a plain 2D array. */
@@ -336,5 +336,54 @@ describe('rq (RQ decomposition)', () => {
     expect(R.cols).toBe(0);
     expect(Q.rows).toBe(0);
     expect(Q.cols).toBe(0);
+  });
+});
+
+describe('flipDense axis oracle', () => {
+  function expectedFlip(src: Float64Array, m: number, n: number, axis: 0 | 1): Float64Array {
+    const out = new Float64Array(m * n);
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        out[i * n + j] = axis === 0 ? src[(m - 1 - i) * n + j] : src[i * n + (n - 1 - j)];
+      }
+    }
+    return out;
+  }
+
+  function expectFlip(rows: number[][], axis: 0 | 1): void {
+    const A = DenseMatrix.fromArray(rows);
+    const got = flipDense(A, axis).toFloat64Array();
+    const want = expectedFlip(A.toFloat64Array(), A.rows, A.cols, axis);
+    expect(Array.from(got)).toEqual(Array.from(want));
+  }
+
+  it('row-reverses a non-square matrix with (m-1-i)*n+j', () => {
+    expectFlip(
+      [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+      0
+    );
+  });
+
+  it('column-reverses a non-square matrix with i*n+(n-1-j)', () => {
+    expectFlip(
+      [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+      1
+    );
+  });
+
+  it('row-reverses a 1xn row and an mx1 column', () => {
+    expectFlip([[10, 20, 30, 40]], 0);
+    expectFlip([[1], [2], [3]], 0);
+  });
+
+  it('column-reverses a 1xn row and an mx1 column', () => {
+    expectFlip([[10, 20, 30, 40]], 1);
+    expectFlip([[1], [2], [3]], 1);
   });
 });
