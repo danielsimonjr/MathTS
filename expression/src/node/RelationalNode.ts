@@ -240,42 +240,21 @@ export const createRelationalNode = /* #__PURE__ */ factory(
        * @returns str
        */
       _toHTML(options?: StringOptions): string {
-        const parenthesis = options && options.parenthesis ? options.parenthesis : 'keep';
-        // `this` is the RelationalNode being rendered (a registered operator),
-        // so its precedence is never null; only params may lack a precedence.
-        const precedence = getPrecedence(
+        return renderRelational(
           this,
-          parenthesis,
-          (options && options.implicit) || 'hide',
-          undefined
-        ) as number;
-
-        const paramStrings = this.params.map(function (p: MathNode, _index: number): string {
-          const paramPrecedence = getPrecedence(
-            p,
-            parenthesis,
-            (options && options.implicit) || 'hide',
-            undefined
-          );
-          return parenthesis === 'all' ||
-            (paramPrecedence !== null && paramPrecedence <= precedence)
-            ? '<span class="math-parenthesis math-round-parenthesis">(</span>' +
-                p.toHTML(options) +
-                '<span class="math-parenthesis math-round-parenthesis">)</span>'
-            : p.toHTML(options);
-        });
-
-        let ret = paramStrings[0];
-        for (let i = 0; i < this.conditionals.length; i++) {
-          ret +=
+          options,
+          (param) => param.toHTML(options),
+          (inner) =>
+            '<span class="math-parenthesis math-round-parenthesis">(</span>' +
+            inner +
+            '<span class="math-parenthesis math-round-parenthesis">)</span>',
+          (conditional, rhs) =>
             '<span class="math-operator math-binary-operator ' +
             'math-explicit-binary-operator">' +
-            escape(operatorMap[this.conditionals[i]]) +
+            escape(operatorMap[conditional]) +
             '</span>' +
-            paramStrings[i + 1];
-        }
-
-        return ret;
+            rhs
+        );
       }
 
       /**

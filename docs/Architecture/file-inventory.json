@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-29",
-  "totalFiles": 2003,
+  "totalFiles": 2005,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1194,
+    "build-entry": 1195,
     "test-only": 0,
     "orphan": 0,
-    "test": 721,
+    "test": 722,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1220,
-    "tests": 721,
+    "src": 1221,
+    "tests": 722,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 555,
-    "@danielsimonjr/mathts-functions": 846,
+    "@danielsimonjr/mathts-functions": 848,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -240,7 +240,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 319
+      "loc": 314
     },
     {
       "file": "assembly/src/special.ts",
@@ -268,7 +268,7 @@
       "package": "@danielsimonjr/mathts-ast",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 35
+      "loc": 32
     },
     {
       "file": "ast/tests/ast.test.ts",
@@ -667,7 +667,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 183
+      "loc": 211
     },
     {
       "file": "core/src/is.ts",
@@ -793,7 +793,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 701
+      "loc": 705
     },
     {
       "file": "core/src/types/interfaces.ts",
@@ -863,7 +863,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 60
+      "loc": 89
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
@@ -1143,7 +1143,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 162
+      "loc": 170
     },
     {
       "file": "core/tests/types/fraction-from-number-cap.test.ts",
@@ -4160,7 +4160,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 399
+      "loc": 398
     },
     {
       "file": "expression/src/node/BlockNode.ts",
@@ -4216,7 +4216,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 243
+      "loc": 250
     },
     {
       "file": "expression/src/node/OperatorNode.ts",
@@ -4244,7 +4244,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 314
+      "loc": 293
     },
     {
       "file": "expression/src/node/SymbolNode.ts",
@@ -4846,7 +4846,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 779
+      "loc": 799
     },
     {
       "file": "expression/tests/node-markdown.test.ts",
@@ -4867,7 +4867,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 232
+      "loc": 233
     },
     {
       "file": "expression/tests/OperatorNode-compile.test.ts",
@@ -4986,7 +4986,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 144
     },
     {
       "file": "expression/tests/s2r-clones-short-circuit-oracle.test.ts",
@@ -5252,7 +5252,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 291
     },
     {
       "file": "functions/src/algebra/simplify/wildcards.ts",
@@ -7145,6 +7145,13 @@
       "loc": 371
     },
     {
+      "file": "functions/src/set/flatten-pair.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 34
+    },
+    {
       "file": "functions/src/set/setCartesian.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -7205,14 +7212,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 65
+      "loc": 64
     },
     {
       "file": "functions/src/set/setUnion.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 82
+      "loc": 81
     },
     {
       "file": "functions/src/signal-filter-extra.ts",
@@ -8073,7 +8080,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 202
+      "loc": 210
     },
     {
       "file": "functions/src/typed/factorization/integer-poly.ts",
@@ -9102,7 +9109,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 339
+      "loc": 377
     },
     {
       "file": "functions/tests/factories-leaf.test.ts",
@@ -10526,6 +10533,13 @@
       "loc": 129
     },
     {
+      "file": "functions/tests/set-flatten-pair.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 175
+    },
+    {
       "file": "functions/tests/signal-as-wasm.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11475,7 +11489,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 112
+      "loc": 116
     },
     {
       "file": "matrix/src/operations/qr-pivoted.ts",
@@ -11839,7 +11853,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 341
+      "loc": 390
     },
     {
       "file": "matrix/tests/operations/qr.test.ts",
@@ -12483,7 +12497,7 @@
       "package": "@danielsimonjr/mathts-parser",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 59
+      "loc": 56
     },
     {
       "file": "parser/tests/parser.test.ts",
