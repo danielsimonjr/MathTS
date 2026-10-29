@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-29",
-    "totalFiles": 1219,
+    "totalFiles": 1220,
     "totalModules": 82,
-    "totalExports": 6267
+    "totalExports": 6268
   },
   "entryPoints": [
     {
@@ -17990,6 +17990,27 @@
       }
     },
     "functions/set": {
+      "functions/src/set/flatten-pair.ts": {
+        "description": "Shared empty-set flatten preamble for multiset union and symmetric difference.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/index.js",
+            "imports": ["MathArray", "Matrix", "MathNumericType"],
+            "typeOnly": true
+          },
+          {
+            "file": "../type/matrix/types.js",
+            "imports": ["IndexInterface"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["flattenSetPair"],
+        "interfaces": ["FlattenSetPairDeps"],
+        "functions": ["flattenSetPair"]
+      },
       "functions/src/set/setCartesian.ts": {
         "description": "Create the cartesian product of two (multi)sets.",
         "externalDependencies": [],
@@ -18214,6 +18235,10 @@
             "imports": ["flatten"]
           },
           {
+            "file": "./flatten-pair.js",
+            "imports": ["flattenSetPair"]
+          },
+          {
             "file": "../utils/factory.js",
             "imports": ["factory"]
           },
@@ -18245,6 +18270,10 @@
           {
             "file": "../utils/array.js",
             "imports": ["flatten"]
+          },
+          {
+            "file": "./flatten-pair.js",
+            "imports": ["flattenSetPair"]
           },
           {
             "file": "../utils/factory.js",
@@ -41488,6 +41517,7 @@
       {
         "name": "Functions/set",
         "files": [
+          "functions/src/set/flatten-pair.ts",
           "functions/src/set/setCartesian.ts",
           "functions/src/set/setDifference.ts",
           "functions/src/set/setDistinct.ts",
@@ -42463,18 +42493,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1219,
+    "totalTypeScriptFiles": 1220,
     "totalModules": 82,
-    "totalLinesOfCode": 200738,
-    "totalExports": 6267,
+    "totalLinesOfCode": 200770,
+    "totalExports": 6268,
     "totalClasses": 59,
-    "totalInterfaces": 546,
-    "totalFunctions": 2029,
+    "totalInterfaces": 547,
+    "totalFunctions": 2030,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1624,
     "totalReExports": 2627,
-    "totalTypeOnlyImports": 612,
+    "totalTypeOnlyImports": 614,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
