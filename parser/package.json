@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && cp src/re-export-types.d.ts dist/re-export-types.d.ts && printf '\\nexport type * from \"./re-export-types.js\";\\n' >> dist/index.d.ts",
-    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json\"",
+    "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && cp src/re-export-types.d.ts dist/re-export-types.d.ts && printf '\\nexport type * from \\\"./re-export-types.js\\\";\\n' >> dist/index.d.ts\"",
     "test": "bun test",
     "test:watch": "vitest",
     "test:coverage": "bun test --coverage",
