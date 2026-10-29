@@ -15,7 +15,7 @@ describe('flattenSetPair (setUnion / setSymDifference factory handlers)', () => 
   });
 
   it('overlap matches documented concat lines', () => {
-    expect(setUnion([1, 2, 3, 4], [3, 4, 5, 6]).sort()).toEqual([1, 2, 3, 4, 5, 6]);
+    expect((setUnion([1, 2, 3, 4], [3, 4, 5, 6]) as number[]).sort()).toEqual([1, 2, 3, 4, 5, 6]);
     const sym = setSymDifference([1, 2, 3, 4], [3, 4, 5, 6]) as number[];
     expect(sym.sort()).toEqual([1, 2, 5, 6]);
   });
