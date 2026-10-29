@@ -499,7 +499,11 @@ Standalone bitwise (in-process chunked, synchronous, `Int32Array`): `bitAnd`, `b
 
 `calculateOptimalChunks`, `chunkFloat64Array`, `chunkArray`, `mergeFloat64Chunks`,
 `mergeArrayChunks`, `shouldParallelize` (exported as `shouldChunkParallelize`),
-`partitionRange`, `partition2D`. `class ThresholdDispatcher` (+ `thresholdDispatcher`)
+`partitionRange`, `partition2D`. `chunkFloat64Array` and `chunkArray` both call
+one assembler: the Float64 path plans with the configured minimum size and
+returns `subarray` views, and the generic path plans with minimum size 0 and
+returns `slice` copies. A single planned chunk still returns the input itself.
+`class ThresholdDispatcher` (+ `thresholdDispatcher`)
 — coarser category-level dispatch (`OperationCategory`): `getThreshold`/`setThresholds`/`getThresholds`,
 `dispatch`, `shouldParallelize`, `calculateChunks`.
 
@@ -716,7 +720,11 @@ decompositions routed to matrix-package primitives: `qr`, `lup`, `slu`.
 `solveBVP`, `odeAdaptiveStep`, `eventDetection`, `rank`, `nullspace`, `residue`,
 `chebyshevApprox`, `padeApproximant`, `quadprog`, `linprog`, `solvePDE`. The
 `numeric/` package modules: `numericJacobian` (also used by `solveBVP`, stiff `solveODE`
-and `solveDAE` for forward finite-difference Jacobians), `hermiteCubic` (shared dense
+and `solveDAE` for forward finite-difference Jacobians) and `centralDifferenceGradient`
+(the scalar central-difference loop shared by `bfgs`, step `max(1, |x_i|) · cbrt(Number.EPSILON)`,
+and `gradientDescent`, constant step `1e-6`). `numericJacobian` keeps its own loop:
+it is vector-valued, it has a forward scheme, and its default step uses `cbrt(2.22e-16)`.
+`hermiteCubic` (shared dense
 output for `solveODE` events and `solveDDE`), `newton`/`secant`/`halley`,
 `fsolve`/`root` (core `norm2` in the line search), Krylov solvers `cg`/`minres`/`gmres`/`bicgstab`
 (core `norm2`), `eigsh` (Lanczos, core `norm2`),
@@ -1170,5 +1178,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalExports         | 8178  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalTypeScriptFiles | 2076  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8181  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2077  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

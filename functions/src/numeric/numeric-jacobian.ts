@@ -116,3 +116,38 @@ export function numericJacobian(
 
   return J;
 }
+
+/**
+ * Central-difference gradient of a scalar `f: ℝⁿ → ℝ`.
+ *
+ * Coordinate `i` uses the step `stepAt(x[i])`, which the caller must make
+ * non-zero. {@link bfgs} passes `max(1, |x_i|) · cbrt(Number.EPSILON)`.
+ * `gradientDescent` passes the constant `1e-6`. Both stay thin wrappers.
+ *
+ * {@link numericJacobian} does not call this helper. It is vector-valued,
+ * it also implements a forward scheme, and its default step uses
+ * `cbrt(2.22e-16)` rather than full `Number.EPSILON`. Folding those into
+ * one function would change one of the two step policies.
+ *
+ * @param f - Scalar objective. Receives a mutable copy of the point.
+ * @param x - Point at which to differentiate. The input is not modified.
+ * @param stepAt - Per-coordinate step. Receives `x[i]`.
+ * @returns A new array `g` with `g[i] = (f(x + h e_i) − f(x − h e_i)) / (2h)`.
+ */
+export function centralDifferenceGradient(
+  f: (x: number[]) => number,
+  x: readonly number[],
+  stepAt: (coordinate: number) => number
+): number[] {
+  const n = x.length;
+  const g = new Array<number>(n);
+  for (let i = 0; i < n; i++) {
+    const h = stepAt(x[i]);
+    const xp = x.slice();
+    const xm = x.slice();
+    xp[i] += h;
+    xm[i] -= h;
+    g[i] = (f(xp) - f(xm)) / (2 * h);
+  }
+  return g;
+}

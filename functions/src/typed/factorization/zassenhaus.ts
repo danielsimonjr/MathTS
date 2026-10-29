@@ -136,11 +136,18 @@ function powAtLeast(p: bigint, bound: bigint): bigint {
   return pk;
 }
 
-/** Yields every size-`k` subset of `[0, n)` as an index array. */
-function* combinations(n: number, k: number): Generator<number[]> {
+/**
+ * Yields every size-`k` subset of `{0, …, n-1}` as an index array, in
+ * lexicographic order. `k < 0` or `k > n` yields nothing. `k === 0` yields
+ * one empty array.
+ *
+ * The Kronecker factorizer's subset walk is this same generator. The binomial
+ * `combinations(n, k)` in `typed/probability.ts` is a count, not this iterator.
+ */
+export function* indexCombinations(n: number, k: number): Generator<number[]> {
   if (k < 0 || k > n) return;
   const idx = Array.from({ length: k }, (_, i) => i);
-  while (true) {
+  for (;;) {
     yield idx.slice();
     let i = k - 1;
     while (i >= 0 && idx[i] === n - k + i) {
@@ -152,6 +159,11 @@ function* combinations(n: number, k: number): Generator<number[]> {
       idx[j] = idx[j - 1] + 1;
     }
   }
+}
+
+/** Yields every size-`k` subset of `[0, n)` as an index array. */
+function* combinations(n: number, k: number): Generator<number[]> {
+  yield* indexCombinations(n, k);
 }
 
 /**

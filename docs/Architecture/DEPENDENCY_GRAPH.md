@@ -1690,7 +1690,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 
 ---
 
@@ -1909,12 +1909,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                          | Type   |
-| ------------------------- | -------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                    | Import |
-| `./eig.js`                | `eig`                            | Import |
-| `./schur.js`              | `schurInternal`                  | Import |
-| `./common.js`             | `eye, matMul, transpose, matInv` | Import |
+| File                      | Imports                                            | Type   |
+| ------------------------- | -------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                      | Import |
+| `./eig.js`                | `eig`                                              | Import |
+| `./schur.js`              | `schurInternal`                                    | Import |
+| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve` | Import |
 
 **Exports:**
 
@@ -4672,10 +4672,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports           | Type   |
-| ------------------------------- | ----------------- | ------ |
-| `./factories/index.js`          | `inv`             | Import |
-| `./numeric/numeric-jacobian.js` | `numericJacobian` | Import |
+| File                            | Imports                                      | Type   |
+| ------------------------------- | -------------------------------------------- | ------ |
+| `./factories/index.js`          | `inv`                                        | Import |
+| `./numeric/numeric-jacobian.js` | `centralDifferenceGradient, numericJacobian` | Import |
 
 **Exports:**
 
@@ -6928,6 +6928,12 @@ graph LR
 
 ### `functions/src/numeric/bfgs.ts` - BFGS quasi-Newton minimization of `f: ℝⁿ → ℝ`.
 
+**Internal Dependencies:**
+
+| File                    | Imports                     | Type   |
+| ----------------------- | --------------------------- | ------ |
+| `./numeric-jacobian.js` | `centralDifferenceGradient` | Import |
+
 **Exports:**
 
 - Interfaces: `BfgsOptions`, `BfgsResult`
@@ -7135,7 +7141,7 @@ graph LR
 
 - Interfaces: `NumericJacobianStepRule`, `NumericJacobianOptions`
 - Types: `VectorField`
-- Functions: `numericJacobian`
+- Functions: `numericJacobian`, `centralDifferenceGradient`
 
 ---
 
@@ -10231,7 +10237,7 @@ graph LR
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `./multi-poly.js`   | `degreeIn, totalDegree, isZero, equals, integerContentMP, primitivePartMP, leadingTerm, canonicalCompare, multiExactDivide, MultiPoly` | Import |
 | `./kronecker.js`    | `substitutionBases, substitute, substitutedDegree, backSubstitute`                                                                     | Import |
-| `./zassenhaus.js`   | `factorUnivariateZ`                                                                                                                    | Import |
+| `./zassenhaus.js`   | `factorUnivariateZ, indexCombinations`                                                                                                 | Import |
 | `./integer-poly.js` | `mul, IntPoly`                                                                                                                         | Import |
 
 **Exports:**
@@ -10709,7 +10715,7 @@ graph LR
 | `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
 | `./parallel-map.js`                  | `mapArray, kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                                                                                                | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                                                                                   | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
@@ -11546,7 +11552,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -19161,12 +19167,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1219   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200714 |
-| Total Exports           | 6264   |
+| Total Lines of Code     | 200738 |
+| Total Exports           | 6267   |
 | Total Re-exports        | 2627   |
 | Total Classes           | 59     |
 | Total Interfaces        | 546    |
-| Total Functions         | 2026   |
+| Total Functions         | 2029   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 612    |
