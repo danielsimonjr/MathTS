@@ -5252,7 +5252,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 286
+      "loc": 291
     },
     {
       "file": "functions/src/algebra/simplify/wildcards.ts",
@@ -9102,7 +9102,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 339
+      "loc": 377
     },
     {
       "file": "functions/tests/factories-leaf.test.ts",
