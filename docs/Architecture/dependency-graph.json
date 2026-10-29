@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-29",
     "totalFiles": 1222,
     "totalModules": 82,
-    "totalExports": 6323
+    "totalExports": 6324
   },
   "entryPoints": [
     {
@@ -5277,9 +5277,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["lq", "rq", "ql"],
+        "exports": ["flipDense", "lq", "rq", "ql"],
         "interfaces": ["LQResult", "RQResult", "QLResult"],
-        "functions": ["lq", "rq", "ql"]
+        "functions": ["flipDense", "lq", "rq", "ql"]
       },
       "matrix/src/operations/qr-pivoted.ts": {
         "description": "Rank-Revealing Pivoted QR Decomposition (Businger-Golub column pivoting)",
@@ -42678,11 +42678,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1222,
     "totalModules": 82,
-    "totalLinesOfCode": 200807,
-    "totalExports": 6323,
+    "totalLinesOfCode": 200811,
+    "totalExports": 6324,
     "totalClasses": 59,
     "totalInterfaces": 547,
-    "totalFunctions": 2030,
+    "totalFunctions": 2031,
     "totalTypeGuards": 159,
     "totalEnums": 0,
     "totalConstants": 1624,

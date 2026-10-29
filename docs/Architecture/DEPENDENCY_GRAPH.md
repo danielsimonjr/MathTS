@@ -1853,7 +1853,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `LQResult`, `RQResult`, `QLResult`
-- Functions: `lq`, `rq`, `ql`
+- Functions: `flipDense`, `lq`, `rq`, `ql`
 
 ---
 
@@ -19214,12 +19214,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1222   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200807 |
-| Total Exports           | 6323   |
+| Total Lines of Code     | 200811 |
+| Total Exports           | 6324   |
 | Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 547    |
-| Total Functions         | 2030   |
+| Total Functions         | 2031   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 614    |
