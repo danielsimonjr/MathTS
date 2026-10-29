@@ -5,8 +5,7 @@
  * algebra, statistics, set operations, signal processing, and more.
  */
 import { describe, it, expect } from 'vitest';
-import { createNode, createOperatorNode, createSymbolNode } from '@danielsimonjr/mathts-expression';
-import type { MathNode } from '@danielsimonjr/mathts-expression';
+import { factoryScope } from '../src/factories/scope.js';
 
 // set ops moved from factories/ to typed/ — import from the typed layer
 import {
@@ -340,16 +339,14 @@ describe('Tier 16-18: Advanced linear algebra', () => {
 });
 
 describe('simplifyUtil unflatten left/right', () => {
-  const mathScope: Record<string, unknown> = {};
-  const Node = createNode({ mathWithTransform: mathScope });
-  const OperatorNode = createOperatorNode({ Node });
-  const SymbolNode = createSymbolNode({ math: mathScope, Node });
-  const util = simplifyUtil as {
-    unflattenl: (node: MathNode) => void;
-    unflattenr: (node: MathNode) => void;
-  };
+  type UnflattenNode = Parameters<typeof simplifyUtil.unflattenr>[0];
+  type OperatorNodeCtor = new (op: string, fn: string, args: UnflattenNode[]) => UnflattenNode;
+  type SymbolNodeCtor = new (name: string) => UnflattenNode;
 
-  function flatAdd(...names: string[]): MathNode {
+  const OperatorNode = factoryScope.OperatorNode as OperatorNodeCtor;
+  const SymbolNode = factoryScope.SymbolNode as SymbolNodeCtor;
+
+  function flatAdd(...names: string[]): UnflattenNode {
     return new OperatorNode(
       '+',
       'add',
@@ -357,23 +354,23 @@ describe('simplifyUtil unflatten left/right', () => {
     );
   }
 
-  function tree(node: MathNode): unknown {
-    const args = (node as { args?: MathNode[] }).args;
+  function tree(node: UnflattenNode): unknown {
+    const args = node.args;
     if (!args || args.length === 0) {
       return node.toString();
     }
-    return args.map((child) => tree(child));
+    return args.map((child) => tree(child as UnflattenNode));
   }
 
   it('unflattenr builds a right-heavy tree for four associative addends', () => {
     const node = flatAdd('a', 'b', 'c', 'd');
-    util.unflattenr(node);
+    simplifyUtil.unflattenr(node);
     expect(tree(node)).toEqual(['a', ['b', ['c', 'd']]]);
   });
 
   it('unflattenl builds a left-heavy tree for four associative addends', () => {
     const node = flatAdd('a', 'b', 'c', 'd');
-    util.unflattenl(node);
+    simplifyUtil.unflattenl(node);
     expect(tree(node)).toEqual([[['a', 'b'], 'c'], 'd']);
   });
 });
