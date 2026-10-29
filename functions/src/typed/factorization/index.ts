@@ -18,6 +18,7 @@ import { degree, type IntPoly } from './integer-poly.js';
 import { factorUnivariateZ } from './zassenhaus.js';
 import { fromAlgebraExpr, toAlgebraString } from './multi-poly.js';
 import { factorMultivariateKronecker, type MultiFactorization } from './kronecker-factor.js';
+import { renderDescendingUnivariate } from './render-univariate.js';
 
 /** Absolute tolerance for treating a parsed float coefficient as an integer. */
 const INT_TOLERANCE = 1e-7;
@@ -43,25 +44,20 @@ function polyToDense(p: Poly): number[] {
  * `algebra.ts` can render an unfactorable higher-degree remainder consistently.
  */
 export function cleanUnivariatePoly(coeffs: number[], v: string): string {
-  const parts: string[] = [];
-  for (let i = coeffs.length - 1; i >= 0; i -= 1) {
-    const c = Math.round(coeffs[i]);
-    if (c === 0) continue;
-    const abs = Math.abs(c);
-    let term: string;
-    if (i === 0) {
-      term = String(abs);
-    } else {
-      const varPart = i === 1 ? v : `${v}^${i}`;
-      term = abs === 1 ? varPart : `${abs}*${varPart}`;
-    }
-    if (parts.length === 0) {
-      parts.push(c < 0 ? `-${term}` : term);
-    } else {
-      parts.push(c < 0 ? '-' : '+', term);
-    }
-  }
-  return parts.length === 0 ? '0' : parts.join(' ');
+  return renderDescendingUnivariate(
+    coeffs.length,
+    (i) => {
+      const c = Math.round(coeffs[i]);
+      const abs = Math.abs(c);
+      return {
+        zero: c === 0,
+        negative: c < 0,
+        absText: String(abs),
+        absIsOne: abs === 1,
+      };
+    },
+    v
+  );
 }
 
 /**
@@ -87,25 +83,20 @@ function renderLinearFactor(poly: IntPoly, v: string): string {
  * trimmed by construction.
  */
 function renderIntPoly(coeffs: IntPoly, v: string): string {
-  const parts: string[] = [];
-  for (let i = coeffs.length - 1; i >= 0; i -= 1) {
-    const c = coeffs[i];
-    if (c === 0n) continue;
-    const abs = c < 0n ? -c : c;
-    let term: string;
-    if (i === 0) {
-      term = abs.toString();
-    } else {
-      const varPart = i === 1 ? v : `${v}^${i}`;
-      term = abs === 1n ? varPart : `${abs}*${varPart}`;
-    }
-    if (parts.length === 0) {
-      parts.push(c < 0n ? `-${term}` : term);
-    } else {
-      parts.push(c < 0n ? '-' : '+', term);
-    }
-  }
-  return parts.length === 0 ? '0' : parts.join(' ');
+  return renderDescendingUnivariate(
+    coeffs.length,
+    (i) => {
+      const c = coeffs[i];
+      const abs = c < 0n ? -c : c;
+      return {
+        zero: c === 0n,
+        negative: c < 0n,
+        absText: abs.toString(),
+        absIsOne: abs === 1n,
+      };
+    },
+    v
+  );
 }
 
 /**

@@ -3326,6 +3326,7 @@
       "remezExchange",
       "RemezType",
       "renderCoeffTimes",
+      "renderDescendingUnivariate",
       "renderFactor",
       "replacer",
       "resample",

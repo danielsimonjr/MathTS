@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-29'
-  totalFiles: 1222
+  totalFiles: 1223
   totalModules: 82
-  totalExports: 6324
+  totalExports: 6325
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -20921,6 +20921,9 @@ modules:
           imports:
             - factorMultivariateKronecker
             - MultiFactorization
+        - file: ./render-univariate.js
+          imports:
+            - renderDescendingUnivariate
       workspaceDependencies: []
       exports:
         - cleanUnivariatePoly
@@ -21097,6 +21100,18 @@ modules:
         - multiExactDivide
         - fromAlgebraExpr
         - toAlgebraString
+    functions/src/typed/factorization/render-univariate.ts:
+      description: Descending-power univariate printer shared by number and bigint coefficient paths.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - renderDescendingUnivariate
+      interfaces:
+        - UnivariateTerm
+      functions:
+        - renderDescendingUnivariate
     functions/src/typed/factorization/square-free.ts:
       description: Yun's square-free decomposition over ℤ.
       externalDependencies: []
@@ -39579,6 +39594,7 @@ dependencyGraph:
         - functions/src/typed/factorization/kronecker-factor.ts
         - functions/src/typed/factorization/kronecker.ts
         - functions/src/typed/factorization/multi-poly.ts
+        - functions/src/typed/factorization/render-univariate.ts
         - functions/src/typed/factorization/square-free.ts
         - functions/src/typed/factorization/zassenhaus.ts
         - functions/src/typed/fused.ts
@@ -40316,13 +40332,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1222
+  totalTypeScriptFiles: 1223
   totalModules: 82
-  totalLinesOfCode: 200820
-  totalExports: 6324
+  totalLinesOfCode: 200846
+  totalExports: 6325
   totalClasses: 59
-  totalInterfaces: 547
-  totalFunctions: 2031
+  totalInterfaces: 548
+  totalFunctions: 2032
   totalTypeGuards: 159
   totalEnums: 0
   totalConstants: 1624

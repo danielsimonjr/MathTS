@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1222, "e": 6324, "re": 2680 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1223, "e": 6325, "re": 2680 },
   "s": {
-    "loc": 200820,
+    "loc": 200846,
     "cls": 59,
-    "int": 547,
-    "fn": 2031,
+    "int": 548,
+    "fn": 2032,
     "tg": 159,
     "en": 0,
     "co": 1624,
@@ -1116,7 +1116,7 @@
       ]
     },
     "functions/typed": {
-      "f": 45,
+      "f": 46,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1145,12 +1145,12 @@
         "Distribution",
         "MultivariateDistribution",
         "MultiPoly",
+        "UnivariateTerm",
         "SquareFreeFactor",
         "KDTreeNode",
         "CentralityRestartOptions",
         "PageRankOptions",
-        "PageRankResult",
-        "PageRankRestartResult"
+        "PageRankResult"
       ]
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },

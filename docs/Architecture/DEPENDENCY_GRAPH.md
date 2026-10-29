@@ -153,7 +153,7 @@ The codebase is organized into the following modules:
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
-- **functions/typed**: 45 files
+- **functions/typed**: 46 files
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 49             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 497            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 498            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -10231,6 +10231,7 @@ graph LR
 | `./zassenhaus.js`        | `factorUnivariateZ`                                 | Import |
 | `./multi-poly.js`        | `fromAlgebraExpr, toAlgebraString`                  | Import |
 | `./kronecker-factor.js`  | `factorMultivariateKronecker, MultiFactorization`   | Import |
+| `./render-univariate.js` | `renderDescendingUnivariate`                        | Import |
 
 **Exports:**
 
@@ -10293,6 +10294,15 @@ graph LR
 
 - Interfaces: `MultiPoly`
 - Functions: `key`, `unkey`, `fromTerms`, `degreeIn`, `totalDegree`, `isZero`, `equals`, `addMP`, `subMP`, `mulMP`, `negMP`, `canonicalCompare`, `leadingTerm`, `integerContentMP`, `primitivePartMP`, `multiExactDivide`, `fromAlgebraExpr`, `toAlgebraString`
+
+---
+
+### `functions/src/typed/factorization/render-univariate.ts` - Descending-power univariate printer shared by number and bigint coefficient paths.
+
+**Exports:**
+
+- Interfaces: `UnivariateTerm`
+- Functions: `renderDescendingUnivariate`
 
 ---
 
@@ -18851,7 +18861,7 @@ graph TD
         N329[complex]
         N330[dist-objects]
         N331[distributions]
-        N332[...35 more]
+        N332[...36 more]
     end
 
     subgraph Functions/unit
@@ -19212,14 +19222,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1222   |
+| Total TypeScript Files  | 1223   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200820 |
-| Total Exports           | 6324   |
+| Total Lines of Code     | 200846 |
+| Total Exports           | 6325   |
 | Total Re-exports        | 2680   |
 | Total Classes           | 59     |
-| Total Interfaces        | 547    |
-| Total Functions         | 2031   |
+| Total Interfaces        | 548    |
+| Total Functions         | 2032   |
 | Total Type Guards       | 159    |
 | Total Enums             | 0      |
 | Type-only Imports       | 614    |
