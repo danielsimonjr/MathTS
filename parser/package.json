@@ -19,7 +19,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json",
+    "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && printf '\\nexport type * from \"./re-export-types.js\";\\n' >> dist/index.d.ts",
     "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json\"",
     "test": "bun test",
     "test:watch": "vitest",
@@ -28,7 +28,7 @@
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",
     "clean": "rm -rf dist",
-    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json"
+    "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && printf '\\nexport type * from \"./re-export-types.js\";\\n' >> dist/index.d.ts"
   },
   "tsdown": {
     "fixedExtension": false,

@@ -240,7 +240,7 @@
       "package": "@danielsimonjr/mathts-wasm",
       "area": "src",
       "disposition": "reachable",
-      "loc": 319
+      "loc": 314
     },
     {
       "file": "assembly/src/special.ts",
@@ -268,7 +268,7 @@
       "package": "@danielsimonjr/mathts-ast",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 35
+      "loc": 33
     },
     {
       "file": "ast/tests/ast.test.ts",
@@ -667,7 +667,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 183
+      "loc": 211
     },
     {
       "file": "core/src/is.ts",
@@ -863,7 +863,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 60
+      "loc": 89
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
@@ -12476,7 +12476,7 @@
       "package": "@danielsimonjr/mathts-parser",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 59
+      "loc": 57
     },
     {
       "file": "parser/tests/parser.test.ts",
