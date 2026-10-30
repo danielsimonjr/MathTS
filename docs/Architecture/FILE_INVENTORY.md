@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2033
+**Total files**: 2034
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1203 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      742 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      743 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2033** |                                                                                                                |
+| **Total**     | **2034** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1229 |
-| `tests`    |   742 |
+| `tests`    |   743 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -53,7 +53,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   112 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
-| `@danielsimonjr/mathts-parallel`       |    43 |
+| `@danielsimonjr/mathts-parallel`       |    44 |
 | `@danielsimonjr/mathts-parser`         |     3 |
 | `@danielsimonjr/mathts-plot`           |    46 |
 | `@danielsimonjr/mathts-signal`         |     3 |
@@ -939,7 +939,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/factories/matrix-bridge.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/factories/scope.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/fit-scalar.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
-| `functions/src/front-export.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry-extra.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/alpha-shape.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/circumcircle.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1096,6 +1095,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/relational/smallerEq.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/relational/unequal.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/scalar-batch-parallel.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/scalar-batch-task.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/scalar-batch.worker.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/scalar-compile.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/scalar-dimension.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1418,7 +1418,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/fixtures/dedup-bucketB-slice2/functions-map-original.ts`         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fixtures/dedup-bucketB-slice2/functions-switch-original.ts`      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/forward-mode-ad.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/front-export.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fsolve.test.ts`                                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-algebra-cas-oracle.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-besselk-precision-oracle.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1589,6 +1588,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/scalar-eval.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-mutate.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-node-bridge.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/scalar-search-parallel.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/scalar-search.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-integrity.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-loader-pin.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1871,6 +1871,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `parallel/tests/strategies/chunk-plan-oracle.test.ts`                             | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-consolidation.test.ts`                       | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/strategies/threshold-extended.test.ts`                            | @danielsimonjr/mathts-parallel       | tests    | test        |
+| `parallel/tests/WorkerPool.lifecycle.test.ts`                                     | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/WorkerPool.test.ts`                                               | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/WorkerPool.timeout.test.ts`                                       | @danielsimonjr/mathts-parallel       | tests    | test        |
 | `parallel/tests/ws2-gated-ops.test.ts`                                            | @danielsimonjr/mathts-parallel       | tests    | test        |

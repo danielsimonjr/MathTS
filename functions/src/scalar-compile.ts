@@ -666,11 +666,11 @@ export function evaluateScalarTape(
   params: ArrayLike<number>,
   parameters: readonly string[],
   messagePrefix: string,
-  out?: Float64Array
+  out?: Float64Array,
+  scratch: Float64Array = new Float64Array(nRegs)
 ): ScalarBatchResult {
   const n = compileRowCount(columns, variables, messagePrefix);
   const boundParams = checkCompileParams(params, parameters, messagePrefix);
-  const scratch = new Float64Array(nRegs);
   let values: Float64Array;
   if (out !== undefined) {
     if (out.length !== n) {
@@ -756,7 +756,8 @@ export function compileScalar(node: ScalarNode, options: CompileScalarOptions): 
         params ?? [],
         parameters,
         messagePrefix,
-        out
+        out,
+        scratch
       );
     },
     evaluateRow(row, params) {

@@ -160,12 +160,11 @@ export function scalarGrammarAccepts(grammar: ScalarGrammar, node: ScalarNode): 
   if (!nodeStructureOk(grammar, node)) {
     return false;
   }
-  const size = scalarSize(node);
-  if (size > grammar.maxSize) {
+  if (!(scalarSize(node) <= grammar.maxSize)) {
     return false;
   }
   const maxDepth = grammar.maxDepth;
-  if (maxDepth !== undefined && scalarDepth(node) > maxDepth) {
+  if (maxDepth !== undefined && !(scalarDepth(node) <= maxDepth)) {
     return false;
   }
   if (grammar.argumentLimits !== undefined) {
@@ -185,60 +184,108 @@ export function scalarGrammarAccepts(grammar: ScalarGrammar, node: ScalarNode): 
   return true;
 }
 
+/** A candidate that may serve as a child of a larger tree. */
+interface PooledNode {
+  readonly node: ScalarNode;
+  readonly size: number;
+}
+
+/** Read the abort signal and the clock once per this many candidates between yields. */
+const INTERRUPT_CHECK_INTERVAL = 128;
+
+function assertEnumerationInputs(grammar: ScalarGrammar, budget: EnumerationBudget): void {
+  if (Number.isNaN(grammar.maxSize)) {
+    throw new RangeError('enumerateScalars: grammar.maxSize must not be NaN');
+  }
+  if (grammar.maxDepth !== undefined && Number.isNaN(grammar.maxDepth)) {
+    throw new RangeError('enumerateScalars: grammar.maxDepth must not be NaN');
+  }
+  if (Number.isNaN(budget.maxCandidates) || budget.maxCandidates < 0) {
+    throw new RangeError('enumerateScalars: budget.maxCandidates must be a number >= 0');
+  }
+  if (budget.maxWallClockMs !== undefined && Number.isNaN(budget.maxWallClockMs)) {
+    throw new RangeError('enumerateScalars: budget.maxWallClockMs must not be NaN');
+  }
+}
+
 /**
  * Yields distinct scalar trees in non-decreasing {@link scalarSize}, deduplicated
  * by {@link scalarCanonicalKey}. Visit order is deterministic and does not use a RNG.
+ *
+ * The abort signal and the wall clock are read before every yield and also every
+ * {@link INTERRUPT_CHECK_INTERVAL} candidates that produce no yield, so a grammar
+ * whose `admit` rejects almost everything still stops when asked.
  */
 export function* enumerateScalars(
   grammar: ScalarGrammar,
   budget: EnumerationBudget,
   signal?: AbortSignal
 ): Generator<ScalarNode, EnumerationStop> {
+  assertEnumerationInputs(grammar, budget);
   const b = createScalarBuilder();
   const yieldedKeys = new Set<string>();
-  const usable: ScalarNode[] = [];
+  const pooledKeys = new Set<string>();
+  const pool: PooledNode[] = [];
+  const bySize: PooledNode[][] = [];
   let yieldCount = 0;
+  let sinceCheck = 0;
   const start = performance.now();
   const admitMonotone = grammar.admitMonotone === true;
 
-  const stopBeforeYield = (): EnumerationStop | null => {
+  const interrupted = (): EnumerationStop | null => {
     if (signal?.aborted) {
       return 'cancelled';
     }
     if (budget.maxWallClockMs !== undefined && performance.now() - start >= budget.maxWallClockMs) {
       return 'time-limit';
     }
-    if (yieldCount >= budget.maxCandidates) {
-      return 'candidate-limit';
-    }
     return null;
   };
 
-  const consider = function* (node: ScalarNode): Generator<ScalarNode, EnumerationStop | 'ok'> {
+  const addToPool = (node: ScalarNode, size: number, key: string): void => {
+    if (pooledKeys.has(key)) {
+      return;
+    }
+    pooledKeys.add(key);
+    const entry: PooledNode = { node, size };
+    pool.push(entry);
+    (bySize[size] ??= []).push(entry);
+  };
+
+  const consider = function* (
+    node: ScalarNode,
+    size: number
+  ): Generator<ScalarNode, EnumerationStop | 'ok'> {
+    sinceCheck += 1;
+    if (sinceCheck >= INTERRUPT_CHECK_INTERVAL) {
+      sinceCheck = 0;
+      const stop = interrupted();
+      if (stop !== null) {
+        return stop;
+      }
+    }
     if (!scalarGrammarAccepts(grammar, node)) {
       return 'ok';
     }
-
     const key = scalarCanonicalKey(node);
-    const admitOk = grammar.admit === undefined || grammar.admit(node);
-    const childOk = !admitMonotone || admitOk;
-
-    if (childOk && !yieldedKeys.has(key)) {
-      usable.push(node);
-    }
-
     if (yieldedKeys.has(key)) {
       return 'ok';
     }
+
+    const admitOk = grammar.admit === undefined || grammar.admit(node);
     if (!admitOk) {
+      if (!admitMonotone) {
+        addToPool(node, size, key);
+      }
       return 'ok';
     }
 
-    const stop = stopBeforeYield();
+    const stop = interrupted() ?? (yieldCount >= budget.maxCandidates ? 'candidate-limit' : null);
     if (stop !== null) {
       return stop;
     }
-
+    sinceCheck = 0;
+    addToPool(node, size, key);
     yieldedKeys.add(key);
     yieldCount += 1;
     yield node;
@@ -247,42 +294,38 @@ export function* enumerateScalars(
 
   for (let size = 1; size <= grammar.maxSize; size += 1) {
     if (size === 1) {
+      const leaves: ScalarNode[] = [];
       for (const name of grammar.variables) {
-        const stop = yield* consider(b.symbol(name));
+        leaves.push(b.symbol(name));
+      }
+      for (const name of grammar.parameters ?? []) {
+        leaves.push(b.symbol(name));
+      }
+      for (const value of grammar.literals ?? []) {
+        leaves.push(b.number(value));
+      }
+      for (const leaf of leaves) {
+        const stop = yield* consider(leaf, 1);
         if (stop !== 'ok') {
           return stop;
-        }
-      }
-      const parameters = grammar.parameters;
-      if (parameters !== undefined) {
-        for (const name of parameters) {
-          const stop = yield* consider(b.symbol(name));
-          if (stop !== 'ok') {
-            return stop;
-          }
-        }
-      }
-      const literals = grammar.literals;
-      if (literals !== undefined) {
-        for (const value of literals) {
-          const stop = yield* consider(b.number(value));
-          if (stop !== 'ok') {
-            return stop;
-          }
         }
       }
       continue;
     }
 
+    // Only entries of size <= size - 1 exist when this size starts; the ones this
+    // loop adds have size `size` and cannot be a child of a size-`size` tree.
+    const poolAtStart = pool.length;
+
     for (const op of grammar.binary) {
-      for (let i = 0; i < usable.length; i += 1) {
-        for (let j = 0; j < usable.length; j += 1) {
-          const left = usable[i]!;
-          const right = usable[j]!;
-          if (scalarSize(left) + scalarSize(right) + 1 !== size) {
-            continue;
-          }
-          const stop = yield* consider(b.op(op, [left, right]));
+      for (let i = 0; i < poolAtStart; i += 1) {
+        const left = pool[i]!;
+        const rightSize = size - 1 - left.size;
+        if (rightSize < 1) {
+          continue;
+        }
+        for (const right of bySize[rightSize] ?? []) {
+          const stop = yield* consider(b.op(op, [left.node, right.node]), size);
           if (stop !== 'ok') {
             return stop;
           }
@@ -291,12 +334,8 @@ export function* enumerateScalars(
     }
 
     for (const fn of grammar.unary) {
-      for (let i = 0; i < usable.length; i += 1) {
-        const arg = usable[i]!;
-        if (scalarSize(arg) + 1 !== size) {
-          continue;
-        }
-        const stop = yield* consider({ kind: 'call', fn, arg });
+      for (const arg of bySize[size - 1] ?? []) {
+        const stop = yield* consider({ kind: 'call', fn, arg: arg.node }, size);
         if (stop !== 'ok') {
           return stop;
         }

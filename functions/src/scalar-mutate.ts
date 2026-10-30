@@ -8,6 +8,7 @@ import {
   createScalarBuilder,
   mapScalar,
   scalarGrammarAccepts,
+  type LoweredScalarFn,
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
@@ -65,29 +66,28 @@ type Path = readonly number[];
 
 const builder = createScalarBuilder();
 
-function cloneNode(node: ScalarNode): ScalarNode {
-  if (node.kind === 'number' || node.kind === 'symbol') {
-    return node;
-  }
+function childrenOf(node: ScalarNode): readonly ScalarNode[] {
   if (node.kind === 'call') {
-    return { kind: 'call', fn: node.fn, arg: cloneNode(node.arg) };
+    return [node.arg];
   }
-  return { kind: 'op', op: node.op, args: node.args.map(cloneNode) };
+  if (node.kind === 'op') {
+    return node.args;
+  }
+  return [];
 }
 
+/**
+ * Paths are child indices from the root: `op.args[i]` is index `i`, and a call's
+ * argument is index `0`. A call must own a path step, or a node under `sin(...)`
+ * would share the path of the call itself.
+ */
 function collectPaths(node: ScalarNode, predicate: (n: ScalarNode, path: Path) => boolean): Path[] {
   const out: Path[] = [];
   function walk(n: ScalarNode, path: Path): void {
     if (predicate(n, path)) {
       out.push(path);
     }
-    if (n.kind === 'call') {
-      walk(n.arg, path);
-    } else if (n.kind === 'op') {
-      for (let i = 0; i < n.args.length; i++) {
-        walk(n.args[i], [...path, i]);
-      }
-    }
+    childrenOf(n).forEach((child, i) => walk(child, [...path, i]));
   }
   walk(node, []);
   return out;
@@ -96,10 +96,11 @@ function collectPaths(node: ScalarNode, predicate: (n: ScalarNode, path: Path) =
 function nodeAt(root: ScalarNode, path: Path): ScalarNode {
   let cur = root;
   for (const idx of path) {
-    if (cur.kind !== 'op') {
+    const child = childrenOf(cur)[idx];
+    if (child === undefined) {
       throw new Error('invalid path');
     }
-    cur = cur.args[idx];
+    cur = child;
   }
   return cur;
 }
@@ -108,14 +109,25 @@ function replaceAt(root: ScalarNode, path: Path, replacement: ScalarNode): Scala
   if (path.length === 0) {
     return replacement;
   }
+  const [head, ...rest] = path;
+  if (root.kind === 'call') {
+    return { kind: 'call', fn: root.fn, arg: replaceAt(root.arg, rest, replacement) };
+  }
   if (root.kind !== 'op') {
     return root;
   }
-  const [head, ...rest] = path;
   const newArgs = root.args.map((child, i) =>
     i === head ? replaceAt(child, rest, replacement) : child
   );
   return { kind: 'op', op: root.op, args: newArgs };
+}
+
+/**
+ * A call node over `arg`. `fn` is already a lowered MathTS name, so the builder's
+ * `call` is not used: it would lower `log` (natural) to `log10` a second time.
+ */
+function callNode(fn: LoweredScalarFn, arg: ScalarNode): ScalarNode {
+  return { kind: 'call', fn, arg };
 }
 
 function leafNames(grammar: ScalarGrammar): string[] {
@@ -141,8 +153,12 @@ function accepts(grammar: ScalarGrammar, node: ScalarNode): boolean {
   return scalarGrammarAccepts(grammar, node);
 }
 
-/** Returns the input unchanged. Does not consume `rng`. */
-export function identity(
+/**
+ * Returns the input unchanged. Does not consume `rng`. The weight key is `identity`
+ * (PySR's `do_nothing`); the export carries a longer name because
+ * `@danielsimonjr/mathts-functions` already exports the matrix `identity`.
+ */
+export function identityMutation(
   node: ScalarNode,
   _rng?: SeededRng,
   _ctx?: ScalarMutationContext
@@ -181,8 +197,14 @@ export function mutateOperator(
   rng: SeededRng,
   ctx: ScalarMutationContext
 ): ScalarNode | null {
-  const opPaths = collectPaths(node, (n) => n.kind === 'op' && ctx.grammar.binary.length > 0);
-  const callPaths = collectPaths(node, (n) => n.kind === 'call' && ctx.grammar.unary.length > 0);
+  const opPaths = collectPaths(
+    node,
+    (n) => n.kind === 'op' && ctx.grammar.binary.some((op) => op !== n.op)
+  );
+  const callPaths = collectPaths(
+    node,
+    (n) => n.kind === 'call' && ctx.grammar.unary.some((fn) => fn !== n.fn)
+  );
   const choices: { path: Path; kind: 'op' | 'call' }[] = [
     ...opPaths.map((path) => ({ path, kind: 'op' as const })),
     ...callPaths.map((path) => ({ path, kind: 'call' as const })),
@@ -194,20 +216,14 @@ export function mutateOperator(
   const current = nodeAt(node, pick.path);
   if (pick.kind === 'op' && current.kind === 'op') {
     const alts = ctx.grammar.binary.filter((op) => op !== current.op);
-    if (alts.length === 0) {
-      return null;
-    }
     const op = alts[rng.nextInt(alts.length)];
     const next = replaceAt(node, pick.path, { kind: 'op', op, args: current.args });
     return accepts(ctx.grammar, next) ? next : null;
   }
   if (pick.kind === 'call' && current.kind === 'call') {
     const alts = ctx.grammar.unary.filter((fn) => fn !== current.fn);
-    if (alts.length === 0) {
-      return null;
-    }
     const fn = alts[rng.nextInt(alts.length)];
-    const next = replaceAt(node, pick.path, { kind: 'call', fn, arg: current.arg });
+    const next = replaceAt(node, pick.path, callNode(fn, current.arg));
     return accepts(ctx.grammar, next) ? next : null;
   }
   return null;
@@ -245,7 +261,7 @@ export function mutateFeature(
 export function swapOperands(
   node: ScalarNode,
   rng: SeededRng,
-  _ctx: ScalarMutationContext
+  ctx: ScalarMutationContext
 ): ScalarNode | null {
   const paths = collectPaths(node, (n) => n.kind === 'op' && n.args.length === 2);
   if (paths.length === 0) {
@@ -261,7 +277,7 @@ export function swapOperands(
     op: current.op,
     args: [current.args[1], current.args[0]],
   });
-  return next;
+  return accepts(ctx.grammar, next) ? next : null;
 }
 
 /** Replace a subtree with a binary op or unary call over it and a new leaf. */
@@ -281,7 +297,7 @@ export function addNode(
   let replacement: ScalarNode;
   if (useCall) {
     const fn = ctx.grammar.unary[rng.nextInt(ctx.grammar.unary.length)];
-    replacement = builder.call(fn, cloneNode(subtree));
+    replacement = callNode(fn, subtree);
   } else {
     if (ctx.grammar.binary.length === 0) {
       return null;
@@ -289,70 +305,52 @@ export function addNode(
     const op = ctx.grammar.binary[rng.nextInt(ctx.grammar.binary.length)];
     const leaf = drawLeaf(ctx.grammar, rng);
     const leftFirst = rng.next() < 0.5;
-    replacement = leftFirst
-      ? builder.op(op, [cloneNode(subtree), leaf])
-      : builder.op(op, [leaf, cloneNode(subtree)]);
+    replacement = leftFirst ? builder.op(op, [subtree, leaf]) : builder.op(op, [leaf, subtree]);
   }
   const next = replaceAt(node, path, replacement);
   return accepts(ctx.grammar, next) ? next : null;
 }
 
-/** Insert a binary operator between a parent and one child. */
+/**
+ * Insert a binary operator between a parent (an operator or a call) and one of
+ * its children. A single-node tree has no parent edge and returns `null`.
+ */
 export function insertNode(
   node: ScalarNode,
   rng: SeededRng,
   ctx: ScalarMutationContext
 ): ScalarNode | null {
-  if (node.kind !== 'op' || ctx.grammar.binary.length === 0) {
+  if (ctx.grammar.binary.length === 0) {
     return null;
   }
-  const edges: { path: Path; childIndex: number }[] = [];
-  function walk(n: ScalarNode, path: Path): void {
-    if (n.kind === 'op' && n.args.length === 2) {
-      edges.push({ path, childIndex: 0 });
-      edges.push({ path, childIndex: 1 });
-    }
-    if (n.kind === 'call') {
-      walk(n.arg, path);
-    } else if (n.kind === 'op') {
-      for (let i = 0; i < n.args.length; i++) {
-        walk(n.args[i], [...path, i]);
-      }
-    }
-  }
-  walk(node, []);
+  const edges: { parentPath: Path; childIndex: number }[] = [];
+  collectPaths(node, (n, path) => {
+    childrenOf(n).forEach((_child, childIndex) => edges.push({ parentPath: path, childIndex }));
+    return false;
+  });
   if (edges.length === 0) {
     return null;
   }
   const edge = edges[rng.nextInt(edges.length)];
-  const parent = nodeAt(node, edge.path);
-  if (parent.kind !== 'op') {
-    return null;
-  }
-  const child = parent.args[edge.childIndex];
+  const childPath = [...edge.parentPath, edge.childIndex];
+  const child = nodeAt(node, childPath);
   const op = ctx.grammar.binary[rng.nextInt(ctx.grammar.binary.length)];
   const leaf = drawLeaf(ctx.grammar, rng);
   const inner = rng.next() < 0.5 ? builder.op(op, [child, leaf]) : builder.op(op, [leaf, child]);
-  const newArgs = parent.args.map((c, i) => (i === edge.childIndex ? inner : c));
-  const next = replaceAt(node, edge.path, { kind: 'op', op: parent.op, args: newArgs });
+  const next = replaceAt(node, childPath, inner);
   return accepts(ctx.grammar, next) ? next : null;
 }
 
-/** Replace a binary operator with one of its children. */
+/**
+ * Replace a binary operator with one of its children. A tree that is a single
+ * node has no operator to delete and returns `null`.
+ */
 export function deleteNode(
   node: ScalarNode,
   rng: SeededRng,
   ctx: ScalarMutationContext
 ): ScalarNode | null {
-  const paths = collectPaths(
-    node,
-    (n, path) => n.kind === 'op' && n.args.length === 2 && path.length > 0
-  );
-  const rootBinaries = collectPaths(
-    node,
-    (n, path) => n.kind === 'op' && n.args.length === 2 && path.length === 0
-  );
-  const candidates = [...paths, ...rootBinaries];
+  const candidates = collectPaths(node, (n) => n.kind === 'op' && n.args.length === 2);
   if (candidates.length === 0) {
     return null;
   }
@@ -361,11 +359,7 @@ export function deleteNode(
   if (current.kind !== 'op' || current.args.length !== 2) {
     return null;
   }
-  const child = current.args[rng.nextInt(2)];
-  if (path.length === 0) {
-    return accepts(ctx.grammar, child) ? child : null;
-  }
-  const next = replaceAt(node, path, child);
+  const next = replaceAt(node, path, current.args[rng.nextInt(2)]);
   return accepts(ctx.grammar, next) ? next : null;
 }
 
@@ -421,7 +415,12 @@ export function rotateTree(
   if (current.kind !== 'op') {
     return null;
   }
-  const rotated = rng.next() < 0.5 ? rotateLeft(current) : rotateRight(current);
+  // The coin picks a direction; when only the other one is possible at this
+  // node, that one is used instead of failing a mutation that has a valid result.
+  const rotated =
+    rng.next() < 0.5
+      ? (rotateLeft(current) ?? rotateRight(current))
+      : (rotateRight(current) ?? rotateLeft(current));
   if (rotated === null) {
     return null;
   }
@@ -441,7 +440,7 @@ function growRandomTree(grammar: ScalarGrammar, rng: SeededRng, maxSize: number)
     }
     if (canUnary && (!canBinary || rng.next() < 0.35)) {
       const fn = grammar.unary[rng.nextInt(grammar.unary.length)];
-      return builder.call(fn, grow(remaining - 1));
+      return callNode(fn, grow(remaining - 1));
     }
     const op = grammar.binary[rng.nextInt(grammar.binary.length)];
     const leftSize = 1 + rng.nextInt(remaining - 2);
@@ -463,7 +462,10 @@ export function randomizeTree(
   ctx: ScalarMutationContext
 ): ScalarNode | null {
   void node;
-  const next = growRandomTree(ctx.grammar, rng, ctx.grammar.maxSize);
+  if (!(ctx.grammar.maxSize >= 1)) {
+    return null;
+  }
+  const next = growRandomTree(ctx.grammar, rng, Math.floor(ctx.grammar.maxSize));
   return accepts(ctx.grammar, next) ? next : null;
 }
 
@@ -535,7 +537,7 @@ export function crossoverSubtrees(
     return null;
   }
   const lp = leftPaths[rng.nextInt(leftPaths.length)];
-  const donor = cloneNode(nodeAt(right, rightPaths[rng.nextInt(rightPaths.length)]));
+  const donor = nodeAt(right, rightPaths[rng.nextInt(rightPaths.length)]);
   const next = replaceAt(left, lp, donor);
   return accepts(ctx.grammar, next) ? next : null;
 }
@@ -545,15 +547,36 @@ export function drawMutationOperator(
   rng: SeededRng,
   weights: Readonly<Record<MutationWeightKey, number>> = DEFAULT_MUTATION_WEIGHTS
 ): MutationWeightKey {
-  const sum = MUTATION_DRAW_ORDER.reduce((s, k) => s + weights[k], 0);
+  const sum = totalMutationWeight(weights);
   let u = rng.next() * sum;
+  let lastPositive: MutationWeightKey = MUTATION_DRAW_ORDER[0];
   for (const key of MUTATION_DRAW_ORDER) {
+    if (weights[key] === 0) {
+      continue;
+    }
+    lastPositive = key;
     u -= weights[key];
-    if (u <= 0) {
+    if (u < 0) {
       return key;
     }
   }
-  return MUTATION_DRAW_ORDER[MUTATION_DRAW_ORDER.length - 1];
+  // Rounding in the running subtraction can leave u at 0 after the last weight.
+  return lastPositive;
+}
+
+function totalMutationWeight(weights: Readonly<Record<MutationWeightKey, number>>): number {
+  let sum = 0;
+  for (const key of MUTATION_DRAW_ORDER) {
+    const w = weights[key];
+    if (typeof w !== 'number' || !Number.isFinite(w) || w < 0) {
+      throw new RangeError(`mutation weight '${key}' must be a finite number >= 0, got ${w}`);
+    }
+    sum += w;
+  }
+  if (!(sum > 0)) {
+    throw new RangeError('mutation weights must have a positive sum');
+  }
+  return sum;
 }
 
 const OPERATOR_BY_KEY: Record<MutationWeightKey, ScalarMutationOperator> = {
@@ -561,7 +584,7 @@ const OPERATOR_BY_KEY: Record<MutationWeightKey, ScalarMutationOperator> = {
   addNode,
   deleteNode,
   mutateOperator,
-  identity,
+  identity: identityMutation,
   swapOperands,
   mutateFeature,
   mutateConstant,
@@ -574,6 +597,7 @@ const OPERATOR_BY_KEY: Record<MutationWeightKey, ScalarMutationOperator> = {
 export function weightedMutation(
   weights: Readonly<Record<MutationWeightKey, number>> = DEFAULT_MUTATION_WEIGHTS
 ): ScalarMutationOperator {
+  totalMutationWeight(weights);
   return (node, rng, ctx) => {
     const key = drawMutationOperator(rng, weights);
     return OPERATOR_BY_KEY[key](node, rng, ctx);
