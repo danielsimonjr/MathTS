@@ -6253,7 +6253,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 654
+      "loc": 566
     },
     {
       "file": "functions/src/gpu/fft-gpu.ts",

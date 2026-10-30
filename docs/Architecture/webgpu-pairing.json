@@ -1,6 +1,6 @@
 {
   "generated": "2026-10-30",
-  "status": "9 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
+  "status": "7 standalone function(s) route to WebGPU; 2 of 219 typed-dispatch functions do — see the note in webgpu-pairing.md for why that number is deliberately small.",
   "total": 219,
   "gpuAcceleratedCount": 2,
   "noneCount": 217,
@@ -303,20 +303,8 @@
       "none": 2
     }
   },
-  "standaloneAcceleratedCount": 9,
+  "standaloneAcceleratedCount": 7,
   "standaloneAccelerated": [
-    {
-      "name": "elementwiseChainGpuDispatch",
-      "file": "gpu/elementwise-gpu.ts",
-      "routing": "gpu",
-      "markers": ["getGpuDevice"]
-    },
-    {
-      "name": "elementwiseChainReduceGpuDispatch",
-      "file": "gpu/elementwise-gpu.ts",
-      "routing": "gpu",
-      "markers": ["getGpuDevice"]
-    },
     {
       "name": "fftGpuDispatch",
       "file": "gpu/fft-gpu.ts",
