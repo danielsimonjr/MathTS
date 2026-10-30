@@ -607,6 +607,8 @@ Merge worker results by candidate index on the caller. A parallel front equals t
 
 `evaluateScalarPopulation` accepts `pool?: Pick<WorkerPool, 'execute'>` so a test can pass a fake. The default constructs `new WorkerPool(scriptUrl)`. The fake records `timeoutMs` and returns the serial `compileScalar` values. The public `searchScalars` options gain `parallel?: { timeoutMs?: number; pool?: ... }`. When `parallel` is omitted, evaluation stays on the caller thread (PR 7 and PR 8 tests stay serial).
 
+**Decided.** The search sends only the first scoring of each generation to the workers (trees with the parameters they inherited). The refit of a tree's parameters and every random draw stay on the caller thread, in input order, which is what makes a parallel run equal the serial run. `timeoutMs` must be positive: `WorkerPool.execute` treats `0` as "no timeout", and the plan makes the timeout path the security invariant, so `0` is a `RangeError`. A pool the search starts is terminated when the generator ends or is closed; a pool the caller passes is the caller's. The 100-row threshold is the M3 table's `n` where the tape beats the interpreter on the caller thread; that table did not time a worker round trip, so the comment says so and no speed-up is claimed. `WorkerPool` also gets two fixes the plan relies on: a task that waits in the queue times out, and `terminate()` stops a worker that was still starting.
+
 ### Tests
 
 - `functions/tests/scalar-batch-parallel.test.ts` imports the source. Rows 99: the fake `execute` is not called, values match `compileScalar`. Rows 100: `execute` is called with `30_000` as the third argument, values match `compileScalar`. `SCALAR_PARALLEL_MIN_ROWS` is 100.
@@ -622,6 +624,7 @@ Merge worker results by candidate index on the caller. A parallel front equals t
 | `functions/src/scalar-compile.ts`                   | **Change.** Lift `evaluateScalarTape`. Do not export it from the package barrel (the worker imports the file).                  |
 | `functions/src/scalar-batch.worker.ts`              | **Add.** Message loop. Calls `evaluateScalarTape`.                                                                              |
 | `functions/src/scalar-batch-parallel.ts`            | **Add.** Threshold, resolver, `evaluateScalarPopulation`.                                                                       |
+| `functions/src/scalar-batch-task.ts`                | **Add.** The worker message types and `runScalarBatchTask`, which the worker entry, the dispatcher and the tests share.         |
 | `functions/src/scalar-search.ts`                    | **Change.** Optional `parallel` option.                                                                                         |
 | `functions/package.json`                            | **Change.** The three tsdown scripts, as above. No `"version"` edit.                                                            |
 | `functions/tests/scalar-batch-parallel.test.ts`     | **Add.**                                                                                                                        |

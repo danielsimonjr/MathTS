@@ -45,6 +45,7 @@ export class WorkerPool {
   private maxWorkers: number;
   private workerScript: string;
   private isNode: boolean;
+  private terminated = false;
 
   constructor(workerScript: string, maxWorkers?: number) {
     this.workerScript = workerScript;
@@ -63,6 +64,12 @@ export class WorkerPool {
   private async initialize(): Promise<void> {
     for (let i = 0; i < this.maxWorkers; i++) {
       const worker = await this.createWorker();
+      if (this.terminated) {
+        // terminate() ran while this worker was starting; it is not in `workers`, so
+        // nothing else would ever stop it.
+        worker.terminate();
+        return;
+      }
       this.workers.push(worker);
       this.availableWorkers.push(worker);
       // A task may have been submitted (and queued) before this worker
@@ -142,6 +149,7 @@ export class WorkerPool {
     for (const [id, task] of this.activeTasks) {
       if (this.workers.includes(worker)) {
         this.activeTasks.delete(id);
+        this.clearTaskTimer(task);
         task.reject(new Error(`Worker error: ${error.message}`));
       }
     }
@@ -178,6 +186,14 @@ export class WorkerPool {
    * worker, and reject the task.
    */
   private async handleTaskTimeout(task: WorkerTask, timeoutMs: number): Promise<void> {
+    const queuedAt = this.taskQueue.indexOf(task);
+    if (queuedAt >= 0) {
+      // No worker ever picked this task up (all busy, or none has started). It must still
+      // fail on time, and it must not run later with its timer gone.
+      this.taskQueue.splice(queuedAt, 1);
+      task.reject(new Error(`Worker task timed out after ${timeoutMs}ms`));
+      return;
+    }
     if (!this.activeTasks.has(task.id)) return; // already resolved
     this.activeTasks.delete(task.id);
 
@@ -195,6 +211,11 @@ export class WorkerPool {
       // Spawn a replacement so the pool keeps its capacity.
       try {
         const replacement = await this.createWorker();
+        if (this.terminated) {
+          replacement.terminate();
+          task.reject(new Error(`Worker task timed out after ${timeoutMs}ms`));
+          return;
+        }
         this.workers.push(replacement);
         this.availableWorkers.push(replacement);
         this.processQueue();
@@ -223,6 +244,10 @@ export class WorkerPool {
     timeoutMs?: number
   ): Promise<R> {
     return new Promise<R>((resolve, reject) => {
+      if (this.terminated) {
+        reject(new Error('WorkerPool terminated'));
+        return;
+      }
       // The pool stores tasks heterogeneously (WorkerTask<unknown, unknown>);
       // the worker reply is opaque, so narrow it back to R at this boundary.
       const task: WorkerTask = {
@@ -254,14 +279,17 @@ export class WorkerPool {
   }
 
   public async terminate(): Promise<void> {
+    this.terminated = true;
     // Cancel all pending tasks
     for (const task of this.taskQueue) {
+      this.clearTaskTimer(task);
       task.reject(new Error('WorkerPool terminated'));
     }
     this.taskQueue = [];
 
     // Cancel all active tasks
     for (const task of this.activeTasks.values()) {
+      this.clearTaskTimer(task);
       task.reject(new Error('WorkerPool terminated'));
     }
     this.activeTasks.clear();
@@ -272,6 +300,13 @@ export class WorkerPool {
     }
     this.workers = [];
     this.availableWorkers = [];
+  }
+
+  private clearTaskTimer(task: WorkerTask): void {
+    if (task.timeoutHandle !== undefined) {
+      clearTimeout(task.timeoutHandle);
+      task.timeoutHandle = undefined;
+    }
   }
 
   public get activeTaskCount(): number {

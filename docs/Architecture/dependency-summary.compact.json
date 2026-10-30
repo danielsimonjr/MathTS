@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1228, "e": 6388, "re": 2714 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1231, "e": 6400, "re": 2716 },
   "s": {
-    "loc": 203240,
+    "loc": 203742,
     "cls": 60,
-    "int": 557,
-    "fn": 2060,
+    "int": 565,
+    "fn": 2067,
     "tg": 161,
     "en": 0,
-    "co": 1630,
-    "toi": 618
+    "co": 1633,
+    "toi": 619
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -530,7 +530,7 @@
       ]
     },
     "functions": {
-      "f": 28,
+      "f": 31,
       "exp": [
         "gradient",
         "hessian",
@@ -1612,8 +1612,7 @@
         "gemmRows",
         "parallelMatmul",
         "parallelMatvec",
-        "parallelTranspose",
-        "parallelOuter"
+        "parallelTranspose"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": ["ComputePoolConfig", "ParallelResult", "MatrixData", "ParallelConfig"]
@@ -1873,7 +1872,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 11 },
     { "p": "function/typed.ts", "i": 3, "o": 203 },
-    { "p": "src/index.ts", "i": 149, "o": 0 },
+    { "p": "src/index.ts", "i": 150, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 55 },

@@ -1718,6 +1718,8 @@
       "functions/src/fit-scalar.ts",
       "functions/src/index.ts",
       "functions/src/numeric-equivalence.ts",
+      "functions/src/scalar-batch-parallel.ts",
+      "functions/src/scalar-batch-task.ts",
       "functions/src/scalar-search.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
@@ -1882,9 +1884,17 @@
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-batch-parallel.ts": [
+      "functions/src/index.ts",
+      "functions/src/scalar-search.ts"
+    ],
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/scalar-batch-task.ts": [
+      "functions/src/scalar-batch-parallel.ts",
+      "functions/src/scalar-batch.worker.ts"
     ],
     "functions/src/numeric/rational-nullspace.ts": [
       "functions/src/scalar-dimension.ts",
@@ -4004,7 +4014,7 @@
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
-    "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts"],
+    "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts", "parallel/src/index.ts"],
     "parallel/src/gemm-rows.ts": [
       "parallel/src/ParallelMatrix.ts",
       "parallel/src/matrix.worker.ts"

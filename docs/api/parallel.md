@@ -320,7 +320,7 @@ const tiny = new Float64Array([1, 2, 3]);
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-parallel` (67 exports).
+> `@danielsimonjr/mathts-parallel` (68 exports).
 
 ### Functions (60)
 
@@ -330,8 +330,8 @@ const tiny = new Float64Array([1, 2, 3]);
 
 `computePool`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `DEFAULT_THRESHOLDS`, `thresholdDispatcher`
 
-### Classes & types (2)
+### Classes & types (3)
 
-`ComputePool`, `ThresholdDispatcher`
+`ComputePool`, `ThresholdDispatcher`, `WorkerPool`
 
 <!-- END GENERATED EXPORT INDEX -->

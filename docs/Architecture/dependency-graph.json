@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1228,
+    "totalFiles": 1231,
     "totalModules": 82,
-    "totalExports": 6388
+    "totalExports": 6400
   },
   "entryPoints": [
     {
@@ -10356,6 +10356,12 @@
             "typeOnly": true
           },
           {
+            "file": "./scalar-batch-parallel.js",
+            "imports": ["ScalarPopulationParallelOptions"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["FrontCandidate", "ScoredCandidate"],
             "reExport": true,
@@ -11070,6 +11076,7 @@
           "ScalarSearchResult",
           "ScalarSearchStopReason",
           "SearchProgress",
+          "ScalarPopulationParallelOptions",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -11548,6 +11555,7 @@
           "ScalarSearchResult",
           "ScalarSearchStopReason",
           "SearchProgress",
+          "ScalarPopulationParallelOptions",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -11873,6 +11881,93 @@
         "interfaces": ["LineFit", "LinregressResult"],
         "functions": ["fitLine", "linearRegression"]
       },
+      "functions/src/scalar-batch-parallel.ts": {
+        "description": "Evaluates many scalar trees over shared columns, on worker threads when asked to (M14).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-compile.js",
+            "imports": ["buildTape", "compileScalar", "CompileScalarOptions", "ScalarBatchResult"]
+          },
+          {
+            "file": "./scalar-batch-task.js",
+            "imports": [
+              "SCALAR_BATCH_MESSAGE_PREFIX",
+              "ScalarBatchTask",
+              "ScalarBatchTaskItem",
+              "ScalarBatchTaskResult"
+            ]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-parallel",
+            "directory": "parallel",
+            "imports": ["WorkerPool"]
+          }
+        ],
+        "exports": [
+          "SCALAR_PARALLEL_MIN_ROWS",
+          "DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS",
+          "resolveScalarBatchWorkerScript",
+          "createScalarBatchPool",
+          "resolveParallelTimeout",
+          "evaluateScalarPopulation"
+        ],
+        "interfaces": [
+          "ScalarPopulationParallelOptions",
+          "ScalarPopulationEvalItem",
+          "EvaluateScalarPopulationOptions",
+          "ScalarPopulationEvalResult"
+        ],
+        "functions": [
+          "resolveScalarBatchWorkerScript",
+          "createScalarBatchPool",
+          "resolveParallelTimeout",
+          "evaluateScalarPopulation"
+        ],
+        "constants": ["SCALAR_PARALLEL_MIN_ROWS", "DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS"]
+      },
+      "functions/src/scalar-batch-task.ts": {
+        "description": "The unit of work that crosses to a scalar batch worker (M14), and the function that",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-compile.js",
+            "imports": ["evaluateScalarTape", "buildTape"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["SCALAR_BATCH_MESSAGE_PREFIX", "runScalarBatchTask"],
+        "interfaces": [
+          "ScalarBatchTaskItem",
+          "ScalarBatchTask",
+          "ScalarBatchTaskRow",
+          "ScalarBatchTaskResult"
+        ],
+        "functions": ["runScalarBatchTask"],
+        "constants": ["SCALAR_BATCH_MESSAGE_PREFIX"]
+      },
+      "functions/src/scalar-batch.worker.ts": {
+        "description": "Worker entry for parallel {@link evaluateScalarPopulation} (M14). Built as its own",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-batch-task.js",
+            "imports": ["runScalarBatchTask", "ScalarBatchTask"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": []
+      },
       "functions/src/scalar-compile.ts": {
         "description": "Batch evaluation of {@link ScalarNode} trees over `Float64Array` columns.",
         "externalDependencies": [],
@@ -11895,14 +11990,43 @@
             "imports": ["LoweredScalarFn", "ScalarNode", "ScalarOperator"]
           }
         ],
-        "exports": ["compileScalar", "compileScalarGradient"],
+        "exports": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"],
         "interfaces": [
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient"
         ],
-        "functions": ["compileScalar", "compileScalarGradient"]
+        "functions": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"]
+      },
+      "functions/src/scalar-dimension.ts": {
+        "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./numeric/rational-nullspace.js",
+            "imports": ["rationalNullspace"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Fraction", "SI_DIMENSION_LENGTH", "SiDimensionVector"]
+          }
+        ],
+        "exports": ["inferScalarDimension", "solveParameterDimensions"],
+        "functions": ["inferScalarDimension", "solveParameterDimensions"]
       },
       "functions/src/scalar-dimension.ts": {
         "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
@@ -12096,8 +12220,17 @@
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ScoredCandidate"]
           },
           {
+            "file": "./scalar-batch-parallel.js",
+            "imports": [
+              "createScalarBatchPool",
+              "evaluateScalarPopulation",
+              "resolveParallelTimeout",
+              "ScalarPopulationParallelOptions"
+            ]
+          },
+          {
             "file": "./scalar-compile.js",
-            "imports": ["compileScalar"]
+            "imports": ["compileScalar", "ScalarBatchResult"]
           },
           {
             "file": "./scalar-mutate.js",
@@ -12109,6 +12242,11 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["pairwiseSum", "SeededRng"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-parallel",
+            "directory": "parallel",
+            "imports": ["WorkerPool"]
           },
           {
             "package": "@danielsimonjr/mathts-expression",
@@ -36554,6 +36692,11 @@
             "reExport": true
           },
           {
+            "file": "./WorkerPool.js",
+            "imports": ["WorkerPool"],
+            "reExport": true
+          },
+          {
             "file": "./operations/index.js",
             "imports": [
               "parallelMatmul",
@@ -36679,6 +36822,7 @@
           "DEFAULT_POOL_CONFIG",
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
+          "WorkerPool",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -36767,6 +36911,7 @@
           "DEFAULT_POOL_CONFIG",
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
+          "WorkerPool",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -41807,6 +41952,9 @@
           "functions/src/optimization-extra.ts",
           "functions/src/pareto-front.ts",
           "functions/src/regression-extra.ts",
+          "functions/src/scalar-batch-parallel.ts",
+          "functions/src/scalar-batch-task.ts",
+          "functions/src/scalar-batch.worker.ts",
           "functions/src/scalar-compile.ts",
           "functions/src/scalar-dimension.ts",
           "functions/src/scalar-eval.ts",
@@ -43051,18 +43199,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1228,
+    "totalTypeScriptFiles": 1231,
     "totalModules": 82,
-    "totalLinesOfCode": 203240,
-    "totalExports": 6388,
+    "totalLinesOfCode": 203742,
+    "totalExports": 6400,
     "totalClasses": 60,
-    "totalInterfaces": 557,
-    "totalFunctions": 2060,
+    "totalInterfaces": 565,
+    "totalFunctions": 2067,
     "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1630,
-    "totalReExports": 2714,
-    "totalTypeOnlyImports": 618,
+    "totalConstants": 1633,
+    "totalReExports": 2716,
+    "totalTypeOnlyImports": 619,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

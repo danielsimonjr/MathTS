@@ -85,6 +85,7 @@ export type {
   ScalarSearchStopReason,
   SearchProgress,
 } from './scalar-search.js';
+export type { ScalarPopulationParallelOptions } from './scalar-batch-parallel.js';
 // scalarToNode, nodeToScalar, simplifyScalar, scalarToTex are exported via export * from './factories/index.js'.
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';

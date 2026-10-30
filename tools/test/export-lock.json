@@ -2764,6 +2764,9 @@
       "ScalarMutationOperator": {
         "kind": "type"
       },
+      "ScalarPopulationParallelOptions": {
+        "kind": "type"
+      },
       "ScalarScope": {
         "kind": "type"
       },
@@ -8423,6 +8426,9 @@
         "kind": "function"
       },
       "Transfer": {
+        "kind": "function"
+      },
+      "WorkerPool": {
         "kind": "function"
       },
       "bitAnd": {

@@ -14,6 +14,7 @@
  */
 
 import { pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
   scalarCanonicalKey,
@@ -24,7 +25,13 @@ import {
 } from '@danielsimonjr/mathts-expression';
 import { fitScalarParameters } from './fit-scalar.js';
 import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
-import { compileScalar } from './scalar-compile.js';
+import {
+  createScalarBatchPool,
+  evaluateScalarPopulation,
+  resolveParallelTimeout,
+  type ScalarPopulationParallelOptions,
+} from './scalar-batch-parallel.js';
+import { compileScalar, type ScalarBatchResult } from './scalar-compile.js';
 import { weightedMutation, type ScalarMutationContext } from './scalar-mutate.js';
 
 /** Columnar regression target for {@link searchScalars}. */
@@ -90,6 +97,16 @@ export interface ScalarSearchOptions {
   readonly adaptiveParsimony?: boolean;
   /** Strength of the adaptive-parsimony penalty. Default 1040 (PySR). */
   readonly adaptiveParsimonyScaling?: number;
+  /**
+   * Evaluate every generation's trees on worker threads (M14) once `observed` has at least
+   * 100 rows; below that, and when omitted, evaluation stays on the caller thread. The
+   * workers return the values the caller thread would compute, bit for bit, and parameter
+   * refits and every random draw stay on the caller thread, so a parallel run equals the
+   * serial run for the same seed. `timeoutMs` (default 30000, must be positive) bounds each
+   * worker call. A `pool` you pass is yours to terminate; without one the search starts a
+   * pool when it first needs it and terminates it when the generator finishes or is closed.
+   */
+  readonly parallel?: ScalarPopulationParallelOptions;
 }
 
 /** One progress event; `status` is always `'fitted'`. */
@@ -262,6 +279,14 @@ interface Scored {
   readonly validRows: number;
 }
 
+function scoreBatch(batch: ScalarBatchResult, observed: Float64Array): Scored {
+  let validRows = 0;
+  for (let i = 0; i < batch.valid.length; i += 1) {
+    validRows += batch.valid[i]!;
+  }
+  return { loss: sumSquaredLoss(batch.values, batch.valid, observed), validRows };
+}
+
 function scoreOnProblem(
   node: ScalarNode,
   problem: ScalarSearchProblem,
@@ -269,12 +294,35 @@ function scoreOnProblem(
   parameters: Float64Array
 ): Scored {
   const compiled = compileScalar(node, { variables: problem.variables, parameters: names });
-  const batch = compiled.evaluate(problem.columns, parameters);
-  let validRows = 0;
-  for (let i = 0; i < batch.valid.length; i += 1) {
-    validRows += batch.valid[i]!;
-  }
-  return { loss: sumSquaredLoss(batch.values, batch.valid, problem.observed), validRows };
+  return scoreBatch(compiled.evaluate(problem.columns, parameters), problem.observed);
+}
+
+/** Scores trees, each with the parameters it inherited; the i-th result is for the i-th tree. */
+type ScoreTrees = (
+  nodes: readonly ScalarNode[],
+  inherited: readonly Float64Array[]
+) => Promise<Scored[]>;
+
+function scoreOnCallerThread(problem: ScalarSearchProblem, names: readonly string[]): ScoreTrees {
+  return async (nodes, inherited) =>
+    nodes.map((node, i) => scoreOnProblem(node, problem, names, inherited[i]!));
+}
+
+function scoreOnWorkers(
+  problem: ScalarSearchProblem,
+  names: readonly string[],
+  parallel: ScalarPopulationParallelOptions
+): ScoreTrees {
+  return async (nodes, inherited) => {
+    const results = await evaluateScalarPopulation({
+      variables: problem.variables,
+      parameters: names,
+      columns: problem.columns,
+      items: nodes.map((node, index) => ({ index, node, params: inherited[index]! })),
+      parallel,
+    });
+    return results.map((result) => scoreBatch(result.batch, problem.observed));
+  };
 }
 
 function individual(node: ScalarNode, loss: number, parameters: Float64Array): EvaluatedIndividual {
@@ -288,23 +336,50 @@ function individual(node: ScalarNode, loss: number, parameters: Float64Array): E
 }
 
 /**
+ * The scorer for a search: the caller thread without `parallel`, workers with it. The
+ * default pool is made through `startPool` the first time workers are needed, so a search
+ * over fewer rows than the dispatch threshold never starts a thread.
+ */
+function scoreTrees(
+  problem: ScalarSearchProblem,
+  names: readonly string[],
+  parallel: ScalarPopulationParallelOptions | undefined,
+  startPool: () => WorkerPool
+): ScoreTrees {
+  if (parallel === undefined) {
+    return scoreOnCallerThread(problem, names);
+  }
+  return scoreOnWorkers(problem, names, {
+    timeoutMs: resolveParallelTimeout(parallel.timeoutMs),
+    pool: parallel.pool ?? {
+      execute: <T, R>(data: T, transferables?: Transferable[], timeoutMs?: number) =>
+        startPool().execute<T, R>(data, transferables, timeoutMs),
+    },
+  });
+}
+
+/**
  * Evaluates `nodes` (each with the parameters it inherited), then, with
  * probability `optimizeProbability` and in input order, refits the parameters of
- * a tree on the caller thread. The refit starts from the inherited values.
+ * a tree on the caller thread. The refit starts from the inherited values. Only the
+ * first scoring can run on workers; every random draw is made here, in input order,
+ * whichever thread did the scoring.
  */
-function evaluateNodes(
+async function evaluateNodes(
   nodes: readonly ScalarNode[],
   inherited: readonly Float64Array[],
+  score: ScoreTrees,
   problem: ScalarSearchProblem,
   names: readonly string[],
   optimizeProbability: number,
   rng: SeededRng
-): EvaluatedIndividual[] {
+): Promise<EvaluatedIndividual[]> {
+  const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
   for (let i = 0; i < nodes.length; i += 1) {
     const node = nodes[i]!;
     let parameters = inherited[i]!;
-    const first = scoreOnProblem(node, problem, names, parameters);
+    const first = firsts[i]!;
     let loss = first.loss;
     if (names.length > 0 && first.validRows > 0 && rng.next() < optimizeProbability) {
       const fit = fitScalarParameters(node, problem.columns, problem.observed, problem.variables, {
@@ -566,137 +641,149 @@ export async function* searchScalars(
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
-  const mutate = weightedMutation();
-  const populations = options.populations ?? 1;
-  const multiIsland = populations > 1;
-  const annealing = options.annealing ?? multiIsland;
-  const parsimony =
-    (options.adaptiveParsimony ?? multiIsland)
-      ? {
-          frequency: new ComplexityFrequency(),
-          scaling: options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING,
-        }
-      : undefined;
-  const fractionReplaced = options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED;
-  const migrationRng = options.rng.fork('migration');
-  let temperature = annealing ? (options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE) : 1;
+  let ownedPool: WorkerPool | undefined;
+  const score = scoreTrees(problem, names, options.parallel, () => {
+    ownedPool ??= createScalarBatchPool();
+    return ownedPool;
+  });
+  try {
+    const mutate = weightedMutation();
+    const populations = options.populations ?? 1;
+    const multiIsland = populations > 1;
+    const annealing = options.annealing ?? multiIsland;
+    const parsimony =
+      (options.adaptiveParsimony ?? multiIsland)
+        ? {
+            frequency: new ComplexityFrequency(),
+            scaling: options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING,
+          }
+        : undefined;
+    const fractionReplaced = options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED;
+    const migrationRng = options.rng.fork('migration');
+    let temperature = annealing ? (options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE) : 1;
 
-  let evaluations = 0;
-  const hallOfFame = new HallOfFame();
+    let evaluations = 0;
+    const hallOfFame = new HallOfFame();
 
-  const trees = initialTrees(
-    options.grammar,
-    options.seeds,
-    Math.min(populationSize * populations, budget)
-  );
-  if (trees.length === 0 && budget >= 1) {
-    throw new RangeError('searchScalars: the grammar admits no tree');
-  }
-
-  // The initial trees are dealt round-robin, so every island gets a share of the small
-  // ones. An island that would get none (fewer trees than islands) is dropped.
-  const islands: Island[] = [];
-  for (let index = 0; index < populations; index += 1) {
-    const mine = trees.filter((_, t) => t % populations === index);
-    if (mine.length === 0) {
-      continue;
-    }
-    // One island draws from the 'population' stream, which is what makes
-    // `populations: 1` the same search as M13a.
-    const rng = options.rng.fork(multiIsland ? `island:${index}` : 'population');
-    const population = evaluateNodes(
-      mine,
-      mine.map(() => defaultParameters(names.length)),
-      problem,
-      names,
-      optimizeProbability,
-      rng
+    const trees = initialTrees(
+      options.grammar,
+      options.seeds,
+      Math.min(populationSize * populations, budget)
     );
-    evaluations += population.length;
-    for (const ind of population) {
-      hallOfFame.add(ind);
-      parsimony?.frequency.record(ind.complexity);
+    if (trees.length === 0 && budget >= 1) {
+      throw new RangeError('searchScalars: the grammar admits no tree');
     }
-    islands.push({ rng, population });
-  }
 
-  const report = (): SearchProgress => {
-    const { front, fittedParameters } = hallOfFame.front();
-    return {
-      status: 'fitted',
-      evaluations,
-      front,
-      parameterNames: names,
-      fittedParameters,
-      selected: pickSelected(front, options.modelSelection),
-    };
-  };
-
-  yield report();
-
-  while (evaluations < budget) {
-    const mutationCtx: ScalarMutationContext = {
-      grammar: options.grammar,
-      perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
-      temperature,
-    };
-    for (const island of islands) {
-      const offspringCount = Math.min(populationSize, budget - evaluations);
-      if (offspringCount <= 0) {
-        break;
+    // The initial trees are dealt round-robin, so every island gets a share of the small
+    // ones. An island that would get none (fewer trees than islands) is dropped.
+    const islands: Island[] = [];
+    for (let index = 0; index < populations; index += 1) {
+      const mine = trees.filter((_, t) => t % populations === index);
+      if (mine.length === 0) {
+        continue;
       }
-      const nodes: ScalarNode[] = [];
-      const inherited: Float64Array[] = [];
-      for (let i = 0; i < offspringCount; i += 1) {
-        const parent = tournamentSelect(
-          island.population,
-          island.rng,
-          tournamentSize,
-          tournamentP,
-          parsimony
-        );
-        let child: ScalarNode | null = null;
-        for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
-          child = mutate(parent.node, island.rng, mutationCtx);
-        }
-        nodes.push(child ?? parent.node);
-        inherited.push(new Float64Array(parent.parameters));
-      }
-      const offspring = evaluateNodes(
-        nodes,
-        inherited,
+      // One island draws from the 'population' stream, which is what makes
+      // `populations: 1` the same search as M13a.
+      const rng = options.rng.fork(multiIsland ? `island:${index}` : 'population');
+      const population = await evaluateNodes(
+        mine,
+        mine.map(() => defaultParameters(names.length)),
+        score,
         problem,
         names,
         optimizeProbability,
-        island.rng
+        rng
       );
-      evaluations += offspring.length;
-      for (const ind of offspring) {
+      evaluations += population.length;
+      for (const ind of population) {
         hallOfFame.add(ind);
         parsimony?.frequency.record(ind.complexity);
       }
-      island.population = truncateDistinct([...island.population, ...offspring], populationSize);
+      islands.push({ rng, population });
     }
-    // After the last evaluation nothing breeds again, so migrating would change nothing.
-    if (evaluations < budget) {
-      migrateIslands(islands, fractionReplaced, migrationRng);
-    }
-    if (annealing) {
-      temperature *= TEMPERATURE_DECAY;
-    }
+
+    const report = (): SearchProgress => {
+      const { front, fittedParameters } = hallOfFame.front();
+      return {
+        status: 'fitted',
+        evaluations,
+        front,
+        parameterNames: names,
+        fittedParameters,
+        selected: pickSelected(front, options.modelSelection),
+      };
+    };
 
     yield report();
-    await Promise.resolve();
-  }
 
-  const last = report();
-  return {
-    front: last.front,
-    parameterNames: names,
-    fittedParameters: last.fittedParameters,
-    stopReason: candidatesBind ? 'max-candidates' : 'max-evaluations',
-    evaluations,
-    seed: options.rng.seed,
-    selected: last.selected,
-  };
+    while (evaluations < budget) {
+      const mutationCtx: ScalarMutationContext = {
+        grammar: options.grammar,
+        perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
+        temperature,
+      };
+      for (const island of islands) {
+        const offspringCount = Math.min(populationSize, budget - evaluations);
+        if (offspringCount <= 0) {
+          break;
+        }
+        const nodes: ScalarNode[] = [];
+        const inherited: Float64Array[] = [];
+        for (let i = 0; i < offspringCount; i += 1) {
+          const parent = tournamentSelect(
+            island.population,
+            island.rng,
+            tournamentSize,
+            tournamentP,
+            parsimony
+          );
+          let child: ScalarNode | null = null;
+          for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
+            child = mutate(parent.node, island.rng, mutationCtx);
+          }
+          nodes.push(child ?? parent.node);
+          inherited.push(new Float64Array(parent.parameters));
+        }
+        const offspring = await evaluateNodes(
+          nodes,
+          inherited,
+          score,
+          problem,
+          names,
+          optimizeProbability,
+          island.rng
+        );
+        evaluations += offspring.length;
+        for (const ind of offspring) {
+          hallOfFame.add(ind);
+          parsimony?.frequency.record(ind.complexity);
+        }
+        island.population = truncateDistinct([...island.population, ...offspring], populationSize);
+      }
+      // After the last evaluation nothing breeds again, so migrating would change nothing.
+      if (evaluations < budget) {
+        migrateIslands(islands, fractionReplaced, migrationRng);
+      }
+      if (annealing) {
+        temperature *= TEMPERATURE_DECAY;
+      }
+
+      yield report();
+      await Promise.resolve();
+    }
+
+    const last = report();
+    return {
+      front: last.front,
+      parameterNames: names,
+      fittedParameters: last.fittedParameters,
+      stopReason: candidatesBind ? 'max-candidates' : 'max-evaluations',
+      evaluations,
+      seed: options.rng.seed,
+      selected: last.selected,
+    };
+  } finally {
+    // A generator that is closed early lands here too, so no worker outlives its search.
+    await ownedPool?.terminate();
+  }
 }
