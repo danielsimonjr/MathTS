@@ -17,9 +17,10 @@ merged ([#412](https://github.com/danielsimonjr/MathTS/pull/412)–[#418](https:
 [#434](https://github.com/danielsimonjr/MathTS/pull/434)–[#438](https://github.com/danielsimonjr/MathTS/pull/438)); **exit
 criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af`, pre-#415, pinned in
 `tensor/tests/operations/random.test.ts`, `functions/tests/typed-hypothesis-bootstrap.test.ts`,
-`functions/tests/typed-dist-objects-workers.test.ts`, `functions/tests/typed-graph-workers.test.ts`). §6 B9 for M1, M3 and M4 stays **Partly** (no review was recorded on
+`functions/tests/typed-dist-objects-workers.test.ts`, `functions/tests/typed-graph-workers.test.ts`). §6 B9 for M1, M3 and M4 is **Yes**: no review was recorded on
 [#396](https://github.com/danielsimonjr/MathTS/pull/396), [#397](https://github.com/danielsimonjr/MathTS/pull/397),
-or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and the later audit was after merge). M2 is merged
+or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and claude-sonnet-5-5 recorded it on
+[#519](https://github.com/danielsimonjr/MathTS/pull/519). M2 is merged
 ([#440](https://github.com/danielsimonjr/MathTS/pull/440), `71f8c3ce`). M5 (`createSeededRng`/`fork`) is implemented in `core`.
 Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented; sprints 2R–5R remain open. B9 for M5, M6, M7 and M8 stays open until a review is recorded.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
@@ -79,8 +80,8 @@ is a clone-reduction loop, not a milestone.
    (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. Leave §6 B9
    for M5, M6, M7 and M8 unchecked until a review is recorded.
 2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
-   ticked below). §6 B9 for M1, M3 and M4 stays Partly until PR 1 of
-   [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) records the review.
+   ticked below). §6 B9 for M1, M3 and M4 is Yes: PR 1 of
+   [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) ([#519](https://github.com/danielsimonjr/MathTS/pull/519)) records the review.
 3. **Phase 2 (M6–M8) is complete.** Sprint 2R's code items are done (ODE/BVP/DAE Jacobians,
    Nelder–Mead merge, `linearRegression`/`linregress` and `numericRealRoots` in #423; LM/`svds`/`matMul`
    moved into Sprint 1R). Its two unchecked DoD boxes stay as they are.
@@ -405,8 +406,10 @@ of the base checklist and every specific box is ticked in its pull request, with
 ### DoD audit of the merged milestones
 
 M1, M3 and M4 merged before this checklist existed. The 2026-10-22 audit checked them
-against it. B1–B8 are Yes. B9 stays Partly: no review was recorded on #396, #397, or #395, and the
-later audit was after merge. Do not tick B9.
+against it. B1–B8 are Yes. B9 was Partly: no review was recorded on #396, #397, or #395, and the
+later audit was after merge. claude-sonnet-5-5 recorded the review on
+[#519](https://github.com/danielsimonjr/MathTS/pull/519) (see **Recorded review** below), so B9
+is Yes for M1, M3 and M4. B9 for M2 and M5–M8 stays open: that review did not cover them.
 
 | Box | M1 (#396, #407)                                                                                                                       | M3 (#397)                                                                                     | M4 (#395)                                                              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -418,7 +421,34 @@ later audit was after merge. Do not tick B9.
 | B6  | Yes on `origin/main` at the audit baseline.                                                                                           | Yes.                                                                                          | Yes.                                                                   |
 | B7  | Yes. `.changeset/scalar-structure-m1.md`, `.changeset/scalar-complexity-own-weights.md`.                                              | Yes. `.changeset/scalar-compile-m3.md`.                                                       | Yes. `.changeset/pareto-front-m4.md`.                                  |
 | B8  | Yes. PR checks green.                                                                                                                 | Yes.                                                                                          | Yes.                                                                   |
-| B9  | Partly. GitHub records no review on #396; the audit reviewed it after merge and found the gap fixed in #407.                          | Partly. No review recorded on #397; audited after merge.                                      | Partly. No review recorded on #395; audited after merge.               |
+| B9  | Yes. claude-sonnet-5-5 re-ran the four commands above on #519. GitHub recorded no review on #396; #407 fixed the gap the audit found. | Yes. Same re-run on #519; scalar-compile (22 tests) and the parity test pass.                 | Yes. Same re-run on #519; pareto-front (17 tests) pass.                |
+
+### Recorded review (Phases 3–5 PR 1, [#519](https://github.com/danielsimonjr/MathTS/pull/519))
+
+Reviewer: **claude-sonnet-5-5**, 2026-10-30, on the head of #519. Each file runs under its own
+package's vitest config. The repo-root config (`vitest.config.ts`) includes only
+`tests/integration/**` and `tests/wasm/**`, so `bunx vitest run expression/tests/…` and
+`bunx vitest run functions/tests/…` from the repo root exit 1 with "No test files found". The
+protocol therefore reads:
+
+```bash
+(cd expression && bunx vitest run tests/scalar-structure.test.ts)      # 15 passed
+bunx vitest run tests/integration/scalar-canonical-parity.test.ts      # 11 passed
+(cd functions && bunx vitest run tests/scalar-compile.test.ts)         # 22 passed
+(cd functions && bunx vitest run tests/pareto-front.test.ts)           # 17 passed
+```
+
+Greps and reads on the same head:
+
+- `hasOwnProperty` is the own-key helper at `expression/src/scalar-structure.ts:208`
+  (`ownWeight`, imported from `./utils/object.js`); the weight lookup of a symbol named
+  `constructor` or `toString` falls back to the default.
+- `forEachScalar` is the one visitor: `scalarSize`, `scalarComplexity` and `scalarSymbols` call
+  it. `scalarDepth` (a max-fold) and `mapScalar` (an immutable rebuild) are the only other
+  recursions, and neither is a second visitor.
+- `paretoDist` is not called from `functions/src/pareto-front.ts` (grep: no match). It is the
+  unrelated Pareto distribution object in `functions/src/typed/dist-objects.ts`.
+- `functions/src/scalar-compile.ts` imports `NUMERIC_LITERAL` from `scalar-eval.ts`.
 
 ---
 
@@ -475,11 +505,13 @@ each algorithm.
   are folded; `^` is never reordered; `call` keys use the lowered name.
 - **DoD:** base checklist + the following specifics. The audit table in §6 records the
   status. B4 `@example`, architecture prose (item 5) and the export-index gate (item 4,
-  #437) are done; B9 stays open for the merged PRs.
+  #437) are done; B9 is recorded in #519.
   - [x] Key invariant under `+` / `*` permutation; `a/(b/c)`, `a*c/b` and `(c*a)*b^-1`
         share one key; `x-y` and `y-x` differ.
   - [x] Value parity with `evaluateScalar` (`tests/integration/scalar-canonical-parity.test.ts`).
   - [x] A symbol named `constructor` or `toString` gets the default weight (#407).
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#519](https://github.com/danielsimonjr/MathTS/pull/519)
+        (`scalar-structure.test.ts` 15 and `scalar-canonical-parity.test.ts` 11 passed).
 
 #### M2 — `ScalarNode` ↔ expression `Node` bridge ✅ implemented
 
@@ -536,7 +568,9 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   throw at compile time. A row is invalid exactly where `evaluateScalar` throws.
 - **DoD:** base checklist + the following specifics. The §6 audit table records the
   status. B1 (`NUMERIC_LITERAL`, item 3), B4 and B5 (item 5) and the M3 benchmark
-  (item 6) are done; B9 stays open for the merged PRs.
+  (item 6) are done; B9 is recorded in #519.
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#519](https://github.com/danielsimonjr/MathTS/pull/519)
+        (`scalar-compile.test.ts` 22 passed).
   - [x] Bit-for-bit parity with `evaluateScalar` on valid rows; `valid = 0` exactly on the
         rows where it throws.
   - [x] `out` reuse: the returned `values` is `out` itself.
@@ -557,6 +591,8 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   `score`, `best`), and `ParetoFrontError`.
 - **DoD:** base checklist + the following specifics. The §6 audit table records the
   status. B4 `@example` and B5 architecture prose are done (item 5).
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#519](https://github.com/danielsimonjr/MathTS/pull/519)
+        (`pareto-front.test.ts` 17 passed; `paretoDist` is not called from `pareto-front.ts`).
   - [x] Scores of a hand-worked five-candidate front, including the `+∞` row and the first
         row scoring 0.
   - [x] Every selection mode, including the fallback to `accuracy` without scores.
@@ -683,8 +719,8 @@ variable `RELEASES_ENABLED` is set to `true`.
   - One `rowMajorStrides` body outside `workerpool`; one `NUMERIC_LITERAL`.
   - `docs:functions:check` fails when an `expression`, `workbook` or `plot` export is
     missing from its API page.
-  - The §6 audit table for M1, M3 and M4 has every box ticked except B9 for the merged
-    PRs.
+  - The §6 audit table for M1, M3 and M4 has every box ticked; B9 was recorded in
+    [#519](https://github.com/danielsimonjr/MathTS/pull/519).
   - The M3 benchmark (`evaluateScalar` per row vs `compileScalar`) is committed under
     `tools/benchmark/wasm/scalar.bench.ts` and has been run twice on Node per the
     `AGENTS.md` rules. This closes M3's open benchmark box and is the input M14 depends
