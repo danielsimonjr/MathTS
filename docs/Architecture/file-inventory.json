@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2021,
+  "totalFiles": 2023,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1197,
+    "build-entry": 1198,
     "test-only": 0,
     "orphan": 0,
-    "test": 736,
+    "test": 737,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1223,
-    "tests": 736,
+    "src": 1224,
+    "tests": 737,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -27,7 +27,7 @@
     "@danielsimonjr/mathts-core": 102,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 559,
+    "@danielsimonjr/mathts-expression": 561,
     "@danielsimonjr/mathts-functions": 853,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -4181,7 +4181,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 80
+      "loc": 82
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4357,6 +4357,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 237
+    },
+    {
+      "file": "expression/src/scalar-enumerate.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 348
     },
     {
       "file": "expression/src/scalar-structure.ts",
@@ -5071,6 +5078,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 106
+    },
+    {
+      "file": "expression/tests/scalar-enumerate.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 329
     },
     {
       "file": "expression/tests/scalar-structure.test.ts",

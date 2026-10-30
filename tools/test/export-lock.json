@@ -6092,6 +6092,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6123,6 +6129,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -6293,6 +6302,9 @@
       "embeddedDocs": {
         "kind": "object"
       },
+      "enumerateScalars": {
+        "kind": "function"
+      },
       "escapeMathML": {
         "kind": "function"
       },
@@ -6342,6 +6354,9 @@
         "kind": "function"
       },
       "scalarEquals": {
+        "kind": "function"
+      },
+      "scalarGrammarAccepts": {
         "kind": "function"
       },
       "scalarSize": {
@@ -6363,6 +6378,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6394,6 +6415,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -6564,6 +6588,9 @@
       "embeddedDocs": {
         "kind": "type"
       },
+      "enumerateScalars": {
+        "kind": "type"
+      },
       "escapeMathML": {
         "kind": "type"
       },
@@ -6613,6 +6640,9 @@
         "kind": "type"
       },
       "scalarEquals": {
+        "kind": "type"
+      },
+      "scalarGrammarAccepts": {
         "kind": "type"
       },
       "scalarSize": {
@@ -6927,6 +6957,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6958,6 +6994,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -7128,6 +7167,9 @@
       "embeddedDocs": {
         "kind": "type"
       },
+      "enumerateScalars": {
+        "kind": "type"
+      },
       "escapeMathML": {
         "kind": "type"
       },
@@ -7177,6 +7219,9 @@
         "kind": "type"
       },
       "scalarEquals": {
+        "kind": "type"
+      },
+      "scalarGrammarAccepts": {
         "kind": "type"
       },
       "scalarSize": {

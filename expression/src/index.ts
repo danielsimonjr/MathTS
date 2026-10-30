@@ -72,6 +72,8 @@ export {
   scalarEquals,
 } from './scalar-structure.js';
 export type { ScalarComplexityWeights } from './scalar-structure.js';
+export { enumerateScalars, scalarGrammarAccepts } from './scalar-enumerate.js';
+export type { EnumerationBudget, EnumerationStop, ScalarGrammar } from './scalar-enumerate.js';
 
 // Expression-language transforms (1-based indices/dims, lazy logical operators).
 // Each factory takes its base function as an injected dependency; hosts assemble

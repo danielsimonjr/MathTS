@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1225,
+    "totalFiles": 1226,
     "totalModules": 82,
-    "totalExports": 6338
+    "totalExports": 6344
   },
   "entryPoints": [
     {
@@ -26502,6 +26502,11 @@
             "reExport": true
           },
           {
+            "file": "./scalar-enumerate.js",
+            "imports": ["enumerateScalars", "scalarGrammarAccepts"],
+            "reExport": true
+          },
+          {
             "file": "./node/Node.js",
             "imports": ["MathNode", "StringOptions"],
             "reExport": true,
@@ -26528,6 +26533,12 @@
           {
             "file": "./scalar-structure.js",
             "imports": ["ScalarComplexityWeights"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./scalar-enumerate.js",
+            "imports": ["EnumerationBudget", "EnumerationStop", "ScalarGrammar"],
             "reExport": true,
             "typeOnly": true
           }
@@ -26571,6 +26582,8 @@
           "scalarCanonical",
           "scalarCanonicalKey",
           "scalarEquals",
+          "enumerateScalars",
+          "scalarGrammarAccepts",
           "MathNode",
           "StringOptions",
           "IndexLike",
@@ -26579,7 +26592,10 @@
           "ScalarFunctionName",
           "ScalarNode",
           "ScalarOperator",
-          "ScalarComplexityWeights"
+          "ScalarComplexityWeights",
+          "EnumerationBudget",
+          "EnumerationStop",
+          "ScalarGrammar"
         ],
         "reExported": [
           "* from ./types.js",
@@ -26628,6 +26644,8 @@
           "scalarCanonical",
           "scalarCanonicalKey",
           "scalarEquals",
+          "enumerateScalars",
+          "scalarGrammarAccepts",
           "MathNode",
           "StringOptions",
           "IndexLike",
@@ -26636,7 +26654,10 @@
           "ScalarFunctionName",
           "ScalarNode",
           "ScalarOperator",
-          "ScalarComplexityWeights"
+          "ScalarComplexityWeights",
+          "EnumerationBudget",
+          "EnumerationStop",
+          "ScalarGrammar"
         ]
       },
       "expression/src/keywords.ts": {
@@ -26764,6 +26785,29 @@
         "interfaces": ["ScalarBuilder"],
         "functions": ["createScalarBuilder"],
         "constants": ["SCALAR_FUNCTION_LOWERING", "SCALAR_FUNCTIONS"]
+      },
+      "expression/src/scalar-enumerate.ts": {
+        "description": "Deterministic bounded enumeration of {@link ScalarNode} trees from a",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-builder.js",
+            "imports": ["createScalarBuilder", "LoweredScalarFn", "ScalarNode", "ScalarOperator"]
+          },
+          {
+            "file": "./scalar-structure.js",
+            "imports": ["forEachScalar", "scalarCanonicalKey", "scalarDepth", "scalarSize"]
+          },
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["scalarGrammarAccepts"],
+        "interfaces": ["ScalarGrammar", "EnumerationBudget"],
+        "functions": ["scalarGrammarAccepts"]
       },
       "expression/src/scalar-structure.ts": {
         "description": "Structural utilities over {@link ScalarNode}: traversal, metrics, and",
@@ -42093,6 +42137,7 @@
           "expression/src/operators.ts",
           "expression/src/parse.ts",
           "expression/src/scalar-builder.ts",
+          "expression/src/scalar-enumerate.ts",
           "expression/src/scalar-structure.ts",
           "expression/src/types.ts"
         ]
@@ -42793,18 +42838,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1225,
+    "totalTypeScriptFiles": 1226,
     "totalModules": 82,
-    "totalLinesOfCode": 201551,
-    "totalExports": 6338,
+    "totalLinesOfCode": 201901,
+    "totalExports": 6344,
     "totalClasses": 59,
-    "totalInterfaces": 548,
-    "totalFunctions": 2042,
+    "totalInterfaces": 550,
+    "totalFunctions": 2043,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1628,
-    "totalReExports": 2685,
-    "totalTypeOnlyImports": 615,
+    "totalReExports": 2690,
+    "totalTypeOnlyImports": 616,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

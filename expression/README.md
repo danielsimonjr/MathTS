@@ -19,6 +19,7 @@ npm install @danielsimonjr/mathts-expression
 - `compile` / `createEvaluate` / `compileExpression` — evaluate expressions.
 - `createScalarBuilder` — build a scalar node tree (`number`, `symbol`, `op`, `call`, `from`). `ln` lowers to natural `log` and `log` lowers to `log10`. A formula string is rejected. Evaluate with `evaluateScalar` from `@danielsimonjr/mathts-functions`.
 - `scalarCanonical` / `scalarCanonicalKey` / `scalarSize` / `scalarDepth` / `scalarComplexity` / `scalarSymbols` — structural toolkit for an existing `ScalarNode`. The canonical key flattens `+` and `*`, rewrites `-` and `/`, and does not fold `2^3` to `8`.
+- `enumerateScalars` / `scalarGrammarAccepts` — deterministic size-ordered enumeration of scalar trees from a grammar, with deduplication by `scalarCanonicalKey`. It is a generator that returns an `EnumerationStop` reason (`exhausted-space`, `candidate-limit`, `time-limit`, `cancelled`). `budget.maxCandidates`, `budget.maxWallClockMs`, and an `AbortSignal` end it; the wall clock and the signal are checked every 128 candidates considered, so a grammar that yields few trees still stops promptly.
 
 ```ts
 import { createScalarBuilder, scalarEquals } from '@danielsimonjr/mathts-expression';
