@@ -90,6 +90,27 @@ function fuzzParse(input: string): void {
   }
 }
 
+describe('parse fuzz helpers are not vacuous', () => {
+  it('walks real nodes, classifies arithmetic, and compiles it to a value', () => {
+    const node = parse('1 + 2 * 3');
+    expect(countNodes(node)).toBeGreaterThanOrEqual(5);
+    expect(isArithmeticAst(node)).toBe(true);
+    expect(compile(node as MathNode, emptyCompileScope).evaluate()).toBe(7);
+  });
+
+  it('refuses to classify symbols, calls, and assignments as arithmetic', () => {
+    for (const text of ['x + 1', 'f(1)', 'a = 1']) {
+      expect(isArithmeticAst(parse(text))).toBe(false);
+    }
+  });
+
+  it('the nesting boundary is exact: below the cap parses, at the cap is a SyntaxError', () => {
+    const wrap = (k: number) => '('.repeat(k) + '1' + ')'.repeat(k);
+    expect(() => parse(wrap(MAX_PARSE_NESTING - 1))).not.toThrow();
+    expect(() => parse(wrap(MAX_PARSE_NESTING))).toThrow(SyntaxError);
+  });
+});
+
 describe('parse fuzz (security)', () => {
   it('arbitrary UTF-16 strings: parse ok or throws SyntaxError/Error, never RangeError', () => {
     fc.assert(

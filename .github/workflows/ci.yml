@@ -173,7 +173,9 @@ jobs:
         run: bunx turbo build --filter=@danielsimonjr/mathts-functions
 
       - name: Sprint baseline fingerprints
-        run: node tools/benchmarks/sprint-baseline.mjs --check
+        run: |
+          node --test tools/test/sprint-baseline.test.mjs
+          node tools/benchmarks/sprint-baseline.mjs --check
 
   test:
     name: Test

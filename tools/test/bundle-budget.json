@@ -1,120 +1,147 @@
 {
-  "note": "Bytes of bun run build output, before build:prod. A change beyond the tolerance updates this file in the same PR.",
+  "note": "Bytes of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A change beyond the tolerance updates this file in the same PR.",
   "tolerance": {
     "bytes": 512,
     "ratio": 0.01
   },
   "files": {
-    "ackages/typed-function/dist/index.js": 4532,
-    "ackages/workerpool/dist/index.js": 42621,
-    "ackages/workerpool/dist/worker.js": 16144,
-    "ore/dist/index.js": 36375,
-    "ore/dist/internal.js": 37568,
-    "atrix/dist/index.js": 190209,
+    "packages/typed-function/dist/index.js": 4532,
+    "packages/workerpool/dist/index.js": 44769,
+    "packages/workerpool/dist/worker.js": 18292,
+    "core/dist/index.js": 200000,
+    "core/dist/internal.js": 201193,
+    "matrix/dist/index.js": 190209,
     "matrix/dist/wasm/mathts-as.wasm": 62490,
-    "ensor/dist/index.js": 72541,
-    "utograd/dist/index.js": 55366,
-    "unctions/dist/index.js": 1502524,
+    "tensor/dist/index.js": 72541,
+    "autograd/dist/index.js": 55366,
+    "functions/dist/index.js": 1502524,
     "functions/dist/wasm/mathts-as.wasm": 62490,
-    "xpression/dist/index.js": 334113,
-    "arser/dist/index.js": 500,
-    "nits/dist/index.js": 951,
-    "umbers/dist/index.js": 377,
-    "st/dist/index.js": 367,
-    "valuator/dist/index.js": 95,
-    "inalg/dist/index.js": 272,
-    "rithmetic/dist/index.js": 376,
-    "rigonometry/dist/index.js": 192,
-    "tatistics/dist/index.js": 2477,
-    "ignal/dist/index.js": 484,
-    "arallel/dist/index.js": 37121,
-    "orkbook/dist/index.js": 1763,
-    "ssembly/build/mathts.js": 93112,
-    "ssembly/build/mathts.wasm": 62490,
-    "ssembly/build/mathts-debug.wasm": 122381,
-    "ompat/dist/index.js": 12650,
-    "pu/dist/index.js": 16332,
-    "lot/dist/index.js": 32394,
-    "lot/dist/render-file.js": 5057
+    "expression/dist/index.js": 334113,
+    "parser/dist/index.js": 500,
+    "units/dist/index.js": 951,
+    "numbers/dist/index.js": 377,
+    "ast/dist/index.js": 367,
+    "evaluator/dist/index.js": 95,
+    "linalg/dist/index.js": 272,
+    "arithmetic/dist/index.js": 376,
+    "trigonometry/dist/index.js": 192,
+    "statistics/dist/index.js": 2477,
+    "signal/dist/index.js": 484,
+    "parallel/dist/index.js": 37121,
+    "workbook/dist/index.js": 47522,
+    "assembly/build/mathts.js": 93112,
+    "assembly/build/mathts.wasm": 62490,
+    "assembly/build/mathts-debug.wasm": 122381,
+    "compat/dist/index.js": 12650,
+    "gpu/dist/index.js": 16332,
+    "plot/dist/index.js": 32394,
+    "plot/dist/render-file.js": 5057
   },
   "entries": {
-    "ackages/typed-function/dist/index.js::buildSignature": {
+    "packages/typed-function/dist/index.js": {
+      "export": "NoMatchingSignatureError",
       "treeShake": true
     },
-    "ackages/workerpool/dist/index.js::canUseSharedMemory": {
+    "packages/workerpool/dist/index.js": {
+      "export": "MathWorkerPool",
       "treeShake": false
     },
-    "ore/dist/index.js::abs": {
+    "core/dist/index.js": {
+      "export": "BigNumber",
       "treeShake": false,
       "sentinel": "kilogram",
       "sentinelPresent": true
     },
-    "ore/dist/internal.js::_switch": {
-      "treeShake": false,
-      "sentinel": "kilogram",
-      "sentinelPresent": true
-    },
-    "ensor/dist/index.js::concatenate": {
-      "treeShake": false
-    },
-    "utograd/dist/index.js::derivative": {
-      "treeShake": false
-    },
-    "unctions/dist/index.js::acf": {
-      "treeShake": false
-    },
-    "xpression/dist/index.js::createAccessorNode": {
+    "core/dist/internal.js": {
+      "export": "CoreUnit",
       "treeShake": true
     },
-    "arser/dist/index.js::createAccessorNode": {
-      "treeShake": false
-    },
-    "nits/dist/index.js::addExactScales": {
-      "treeShake": false
-    },
-    "umbers/dist/index.js::BigNumber": {
-      "treeShake": false
-    },
-    "st/dist/index.js::createAccessorNode": {
-      "treeShake": false
-    },
-    "valuator/dist/index.js::compile": {
-      "treeShake": false
-    },
-    "inalg/dist/index.js::cholesky": {
-      "treeShake": false
-    },
-    "rithmetic/dist/index.js::abs": {
-      "treeShake": false
-    },
-    "rigonometry/dist/index.js::acos": {
-      "treeShake": false
-    },
-    "tatistics/dist/index.js::acf": {
-      "treeShake": false
-    },
-    "ignal/dist/index.js::autoCorrelation": {
-      "treeShake": false
-    },
-    "arallel/dist/index.js::bitAnd": {
-      "treeShake": false
-    },
-    "orkbook/dist/index.js::addCell": {
-      "treeShake": false
-    },
-    "ssembly/build/mathts.js::__collect": {
+    "matrix/dist/index.js": {
+      "export": "BackendManager",
       "treeShake": true
     },
-    "ompat/dist/index.js::BigNumber": {
-      "treeShake": false
-    },
-    "pu/dist/index.js::BufferPool": {
+    "tensor/dist/index.js": {
+      "export": "Index",
       "treeShake": true
     },
-    "lot/dist/index.js::area": {
+    "autograd/dist/index.js": {
+      "export": "DualTensor",
+      "treeShake": true
+    },
+    "functions/dist/index.js": {
+      "export": "Chain",
+      "treeShake": true
+    },
+    "expression/dist/index.js": {
+      "export": "ScalarBuildError",
+      "treeShake": true
+    },
+    "parser/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "units/dist/index.js": {
+      "export": "DimensionMismatchError",
+      "treeShake": true
+    },
+    "numbers/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": true
+    },
+    "ast/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "evaluator/dist/index.js": {
+      "export": "compile",
+      "treeShake": true
+    },
+    "linalg/dist/index.js": {
+      "export": "cholesky",
+      "treeShake": true
+    },
+    "arithmetic/dist/index.js": {
+      "export": "abs",
+      "treeShake": true
+    },
+    "trigonometry/dist/index.js": {
+      "export": "acos",
+      "treeShake": true
+    },
+    "statistics/dist/index.js": {
+      "export": "acf",
+      "treeShake": true
+    },
+    "signal/dist/index.js": {
+      "export": "autoCorrelation",
+      "treeShake": true
+    },
+    "parallel/dist/index.js": {
+      "export": "ComputePool",
+      "treeShake": true
+    },
+    "workbook/dist/index.js": {
+      "export": "Session",
+      "treeShake": true
+    },
+    "assembly/build/mathts.js": {
+      "export": "__collect",
       "treeShake": false
     },
-    "lot/dist/render-file.js::hasTool": {
+    "compat/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": true
+    },
+    "gpu/dist/index.js": {
+      "export": "BufferPool",
+      "treeShake": true
+    },
+    "plot/dist/index.js": {
+      "export": "area",
+      "treeShake": true
+    },
+    "plot/dist/render-file.js": {
+      "export": "PlotRenderError",
       "treeShake": true
     }
   }
