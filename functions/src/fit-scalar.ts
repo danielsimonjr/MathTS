@@ -547,44 +547,47 @@ export function fitScalarParameters(
     return cols.map((col) => 2 * pairwiseDot(rVec, col));
   }
 
-  function gradL1(_x: number[], batch: EvalBatch): number[] {
-    const g = new Array<number>(freeIdx.length).fill(0);
+  function gradRobust(_x: number[], batch: EvalBatch, loss: 'l1' | 'huber'): number[] {
+    const mRows = frozenRows.length;
+    const r = new Array<number>(mRows);
+    const ws = new Array<number>(mRows);
+    for (let j = 0; j < mRows; j++) {
+      const row = frozenRows[j];
+      if (!rowActive(row, batch)) {
+        return freeIdx.map(() => Number.POSITIVE_INFINITY);
+      }
+      r[j] = batch.values[row] - observed[row];
+    }
+    if (loss === 'l1') {
+      for (let j = 0; j < mRows; j++) {
+        const row = frozenRows[j];
+        ws[j] = wAt(row) * (r[j] === 0 ? 0 : Math.sign(r[j]));
+      }
+    } else {
+      for (let j = 0; j < mRows; j++) {
+        const row = frozenRows[j];
+        ws[j] = wAt(row) * (2 * Math.max(-1, Math.min(1, r[j])));
+      }
+    }
+    const g = new Array<number>(freeIdx.length);
     for (let fi = 0; fi < freeIdx.length; fi++) {
       const pi = freeIdx[fi];
       const terms: number[] = [];
-      for (const row of frozenRows) {
-        if (!rowActive(row, batch)) {
-          return freeIdx.map(() => Number.POSITIVE_INFINITY);
-        }
-        const pred = batch.values[row];
-        const diff = pred - observed[row];
-        const s = diff === 0 ? 0 : Math.sign(diff);
-        const w = wAt(row);
-        terms.push(w * s * batch.grad[row * p + pi]);
+      for (let j = 0; j < mRows; j++) {
+        const row = frozenRows[j];
+        terms.push(ws[j] * batch.grad[row * p + pi]);
       }
       g[fi] = pairwiseSum(terms);
     }
     return g;
   }
 
-  function gradHuber(_x: number[], batch: EvalBatch): number[] {
-    const g = new Array<number>(freeIdx.length).fill(0);
+  function scatterFreeGrad(gFree: number[]): number[] {
+    const gFull = new Array<number>(p).fill(0);
     for (let fi = 0; fi < freeIdx.length; fi++) {
-      const pi = freeIdx[fi];
-      const terms: number[] = [];
-      for (const row of frozenRows) {
-        if (!rowActive(row, batch)) {
-          return freeIdx.map(() => Number.POSITIVE_INFINITY);
-        }
-        const pred = batch.values[row];
-        const a = pred - observed[row];
-        const psi = 2 * Math.max(-1, Math.min(1, a));
-        const w = wAt(row);
-        terms.push(w * psi * batch.grad[row * p + pi]);
-      }
-      g[fi] = pairwiseSum(terms);
+      gFull[freeIdx[fi]] = gFree[fi];
     }
-    return g;
+    return gFull;
   }
 
   function xFromFreeZ(z: number[]): Float64Array {
@@ -644,35 +647,11 @@ export function fitScalarParameters(
       };
       const gradFn =
         lossTag === 'l2'
-          ? (xv: number[]) => {
-              const batch = evaluateAt(xv);
-              const gFree = gradL2(xv, batch);
-              const gFull = new Array<number>(p).fill(0);
-              for (let fi = 0; fi < freeIdx.length; fi++) {
-                gFull[freeIdx[fi]] = gFree[fi];
-              }
-              return gFull;
-            }
+          ? (xv: number[]) => scatterFreeGrad(gradL2(xv, evaluateAt(xv)))
           : lossTag === 'l1'
-            ? (xv: number[]) => {
-                const batch = evaluateAt(xv);
-                const gFree = gradL1(xv, batch);
-                const gFull = new Array<number>(p).fill(0);
-                for (let fi = 0; fi < freeIdx.length; fi++) {
-                  gFull[freeIdx[fi]] = gFree[fi];
-                }
-                return gFull;
-              }
+            ? (xv: number[]) => scatterFreeGrad(gradRobust(xv, evaluateAt(xv), 'l1'))
             : lossTag === 'huber'
-              ? (xv: number[]) => {
-                  const batch = evaluateAt(xv);
-                  const gFree = gradHuber(xv, batch);
-                  const gFull = new Array<number>(p).fill(0);
-                  for (let fi = 0; fi < freeIdx.length; fi++) {
-                    gFull[freeIdx[fi]] = gFree[fi];
-                  }
-                  return gFull;
-                }
+              ? (xv: number[]) => scatterFreeGrad(gradRobust(xv, evaluateAt(xv), 'huber'))
               : undefined;
 
       const opts: {

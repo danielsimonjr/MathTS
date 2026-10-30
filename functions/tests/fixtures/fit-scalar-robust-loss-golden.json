@@ -1,0 +1,7 @@
+{
+  "l1_zero": { "parameters": [1], "loss": 0, "validRows": 3 },
+  "l1_weighted": { "parameters": [2], "loss": 0, "validRows": 3 },
+  "huber_zero": { "parameters": [1], "loss": 0, "validRows": 3 },
+  "huber_clamp": { "parameters": [0.25], "loss": 8.75, "validRows": 3 },
+  "huber_weighted": { "parameters": [2], "loss": 0, "validRows": 3 }
+}
