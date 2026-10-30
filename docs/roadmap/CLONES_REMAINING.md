@@ -129,9 +129,8 @@ A member marked "text-identical" shares its `textHash` with another member of th
    - `expression/src/utils/is.ts:291 isBigNumber` (text-identical)
    - `functions/src/utils/is.ts:226 isBigNumber` (text-identical)
 10. 2 units, 93 nodes each:
-
-- `functions/src/scalar-mutate.ts:366 rotateLeft`
-- `functions/src/scalar-mutate.ts:381 rotateRight`
+    - `functions/src/scalar-mutate.ts:366 rotateLeft`
+    - `functions/src/scalar-mutate.ts:381 rotateRight`
 
 ## Text-identical groups (4)
 
