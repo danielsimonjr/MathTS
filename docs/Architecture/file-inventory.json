@@ -1024,7 +1024,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 98
     },
     {
       "file": "core/tests/public-api-smoke.test.ts",
@@ -10810,7 +10810,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 121
+      "loc": 114
     },
     {
       "file": "functions/tests/timeseries.test.ts",
