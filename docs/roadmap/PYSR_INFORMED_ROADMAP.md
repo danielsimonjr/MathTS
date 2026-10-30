@@ -1090,6 +1090,11 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
 - **DoD:** base checklist + the following specifics:
   - [x] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
+  - [x] Exit: `docs/integration/upt.md` documents `inferScalarDimension` and
+        `solveParameterDimensions` with `Fraction` exponents on `SiDimensionVector`
+        (PYSR Phases 3–5 PR 4, [#523](https://github.com/danielsimonjr/MathTS/pull/523));
+        Q2 (tensor dimensional analysis) is unchanged. Item 3 (constant uncertainty) stays
+        not done: `physicalConstants.ts` has no `uncertainty` field.
 
 ### Phase 4 — Search kit (no new package)
 

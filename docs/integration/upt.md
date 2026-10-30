@@ -41,7 +41,13 @@ is the AssemblyScript-backed WASM backend).
 (`scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey` in `expression/src/scalar-structure.ts`).
 `@danielsimonjr/mathts-functions` exports `scalar` (a builder), `evaluateScalar`, M3
 `compileScalar` (`functions/src/scalar-compile.ts`), and M4 `paretoFront` /
-`scoreFront` / `selectFrontModel` (`functions/src/pareto-front.ts`). Roadmap and plans:
+`scoreFront` / `selectFrontModel` (`functions/src/pareto-front.ts`). Phase 3 dimension
+analysis (MathTS [#414](https://github.com/danielsimonjr/MathTS/pull/414) and the
+[`PYSR_PHASES_3_5_PLAN`](../plans/PYSR_PHASES_3_5_PLAN.md) M9–M10 PRs) adds
+`inferScalarDimension` and `solveParameterDimensions` on the functions barrel; SI
+exponents are exact `Fraction`s on `SiDimensionVector` (`core/src/types/si-dimension-vector.ts`).
+Both walk a `ScalarNode` only. [Q2](#q2-whats-the-dimensional-analysis-story-at-the-tensor-level)
+is unchanged: dimensional analysis of `Tensor` stays in UPT. Roadmap and plans:
 [`../roadmap/PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md),
 [`../plans/PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md),
 [`../plans/PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md),
@@ -123,7 +129,8 @@ round-trip work on it.
 primitive — rank-N, `Float64Array`-backed, unit-free. Dimensional
 analysis is a UPT-layer concern; the proposal itself acknowledges this
 under §1.3 ("not dimensional analysis on Tensor — this remains a UPT-
-only layer").
+only layer"). The scalar-tree functions named under "Scalar ExprNode evaluation"
+above do not change that answer; they never see a `Tensor`.
 
 If a future MathTS version wants to add dimensional analysis, the
 natural shape is a thin wrapper type — `UnitTensor` or `DimensionalTensor`
