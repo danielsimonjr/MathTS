@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-30'
-  totalFiles: 1231
+  totalFiles: 1232
   totalModules: 82
-  totalExports: 6400
+  totalExports: 6408
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8995,6 +8995,37 @@ modules:
         - FitScalarResult
       functions:
         - fitScalarParameters
+    functions/src/front-export.ts:
+      description: LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./factories/index.js
+          imports:
+            - scalarToTex
+        - file: ./pareto-front.js
+          imports:
+            - ScoredCandidate
+          typeOnly: true
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - ScalarNode
+        - package: '@danielsimonjr/mathts-expression'
+          directory: expression
+          imports:
+            - scalarCanonicalKey
+      exports:
+        - frontToLatexTable
+        - frontToJson
+      interfaces:
+        - FrontJsonRow
+        - FrontJson
+        - FrontLatexTableOptions
+      functions:
+        - frontToLatexTable
+        - frontToJson
     functions/src/geometry-extra.ts:
       description: Geodesy / spherical-geometry connectors (Wave C / bridge C7).
       externalDependencies: []
@@ -9193,6 +9224,11 @@ modules:
             - scoreFront
             - selectFrontModel
             - ParetoFrontError
+          reExport: true
+        - file: ./front-export.js
+          imports:
+            - frontToJson
+            - frontToLatexTable
           reExport: true
         - file: ./numeric-equivalence.js
           imports:
@@ -9764,6 +9800,14 @@ modules:
             - ScoredCandidate
           reExport: true
           typeOnly: true
+        - file: ./front-export.js
+          imports:
+            - FrontJson
+            - FrontJsonNumber
+            - FrontJsonRow
+            - FrontLatexTableOptions
+          reExport: true
+          typeOnly: true
         - file: ./numeric-equivalence.js
           imports:
             - NumericEquivalenceOptions
@@ -10151,6 +10195,8 @@ modules:
         - scoreFront
         - selectFrontModel
         - ParetoFrontError
+        - frontToJson
+        - frontToLatexTable
         - numericallyEquivalent
         - NumericEquivalenceError
         - inferScalarDimension
@@ -10463,6 +10509,10 @@ modules:
         - ScalarPopulationParallelOptions
         - FrontCandidate
         - ScoredCandidate
+        - FrontJson
+        - FrontJsonNumber
+        - FrontJsonRow
+        - FrontLatexTableOptions
         - NumericEquivalenceOptions
         - NumericEquivalence
         - DimensionInference
@@ -10629,6 +10679,8 @@ modules:
         - scoreFront
         - selectFrontModel
         - ParetoFrontError
+        - frontToJson
+        - frontToLatexTable
         - numericallyEquivalent
         - NumericEquivalenceError
         - inferScalarDimension
@@ -10941,6 +10993,10 @@ modules:
         - ScalarPopulationParallelOptions
         - FrontCandidate
         - ScoredCandidate
+        - FrontJson
+        - FrontJsonNumber
+        - FrontJsonRow
+        - FrontLatexTableOptions
         - NumericEquivalenceOptions
         - NumericEquivalence
         - DimensionInference
@@ -39665,6 +39721,7 @@ dependencyGraph:
         - functions/src/descriptive-stats.ts
         - functions/src/distribution-functions.ts
         - functions/src/fit-scalar.ts
+        - functions/src/front-export.ts
         - functions/src/geometry-extra.ts
         - functions/src/grad-forward.ts
         - functions/src/help.ts
@@ -40787,18 +40844,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1231
+  totalTypeScriptFiles: 1232
   totalModules: 82
-  totalLinesOfCode: 203742
-  totalExports: 6400
+  totalLinesOfCode: 203899
+  totalExports: 6408
   totalClasses: 60
-  totalInterfaces: 565
-  totalFunctions: 2067
+  totalInterfaces: 568
+  totalFunctions: 2069
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1633
-  totalReExports: 2716
-  totalTypeOnlyImports: 619
+  totalReExports: 2722
+  totalTypeOnlyImports: 621
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

@@ -90,6 +90,13 @@ export type { ScalarPopulationParallelOptions } from './scalar-batch-parallel.js
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';
 export type { FrontCandidate, ScoredCandidate } from './pareto-front.js';
+export { frontToJson, frontToLatexTable } from './front-export.js';
+export type {
+  FrontJson,
+  FrontJsonNumber,
+  FrontJsonRow,
+  FrontLatexTableOptions,
+} from './front-export.js';
 export { numericallyEquivalent, NumericEquivalenceError } from './numeric-equivalence.js';
 export type { NumericEquivalenceOptions, NumericEquivalence } from './numeric-equivalence.js';
 export { inferScalarDimension, solveParameterDimensions } from './scalar-dimension.js';

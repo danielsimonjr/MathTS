@@ -1639,6 +1639,7 @@
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/fit-scalar.ts",
+      "functions/src/front-export.ts",
       "functions/src/index.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
@@ -1722,6 +1723,11 @@
       "functions/src/scalar-batch-task.ts",
       "functions/src/scalar-search.ts"
     ],
+    "functions/src/pareto-front.ts": [
+      "functions/src/front-export.ts",
+      "functions/src/index.ts",
+      "functions/src/scalar-search.ts"
+    ],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
       "functions/src/scalar-eval.ts",
@@ -1763,7 +1769,7 @@
     ],
     "functions/src/scalar-mutate.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
     "functions/src/scalar-search.ts": ["functions/src/index.ts"],
-    "functions/src/pareto-front.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
+    "functions/src/front-export.ts": ["functions/src/index.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
     "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],

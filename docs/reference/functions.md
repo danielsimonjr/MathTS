@@ -2991,7 +2991,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1118 exports).
+> `@danielsimonjr/mathts-functions` (1120 exports).
 
 ### Functions by category
 
@@ -3045,7 +3045,7 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (37): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
+**Expression Evaluation** (39): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `frontToJson`, `frontToLatexTable`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 

@@ -675,31 +675,35 @@ Docs-only bar, unless a grep failed and a header comment changed. No changeset f
 
 ### LaTeX
 
-One `tabular` with columns complexity, loss, score, equation, in that order, plus a header row. Loss and score use `toPrecision` when `options.precision` is set; the default precision is 6. A `null` score is an empty cell. `Infinity` is `\infty`.
+One `tabular` with columns complexity, loss, score, equation, in that order, plus a header row. Loss and score use `toPrecision(precision)`; the default precision is 6, and `precision` must be an integer from 1 to 100 (`RangeError` otherwise). A `null` score is an empty cell. `Infinity` is `$\infty$` and `-Infinity` is `$-\infty$`. A row whose complexity is not finite throws `RangeError`.
 
-The test's expected document is one string literal. Formula cells inside it are the strings already pinned in `functions/tests/scalar-node-bridge.test.ts`:
+**Decided (review):** every equation cell is `$` + `scalarToTex` + `$`. A `tabular` cell is text mode, and `\cdot`, `\frac`, `\sin` and `\infty` are math-only, so the bare cells that an earlier draft pinned stop `pdflatex` with `! Missing $ inserted.` for any formula that has a `*`, a `/`, a call or `^`, and for any infinite score. Checked with `pdflatex` (texlive-latex-base): the bare table fails, and the wrapped table, with `\sin`, `\frac`, `x_1`, `${ x}^{2}$`, `3.00000e-16` and `$\infty$`, compiles. `frontToLatexTable` takes only `precision`: the sketch's `variables` option had no effect, because `Node.toTex` reads no such key, so it is gone.
 
-| Tree       | `scalarToTex` |
-| ---------- | ------------- |
-| symbol `x` | ` x`          |
-| `a + b`    | ` a+ b`       |
-| `a * b`    | ` a\cdot b`   |
+The test's expected document is one string literal (`String.raw`). Formula cells inside it are the strings already pinned in `functions/tests/scalar-node-bridge.test.ts`, each in math mode:
+
+| Tree       | `scalarToTex` | cell          |
+| ---------- | ------------- | ------------- |
+| symbol `x` | ` x`          | `$ x$`        |
+| `a + b`    | ` a+ b`       | `$ a+ b$`     |
+| `a * b`    | ` a\cdot b`   | `$ a\cdot b$` |
 
 Three rows, complexities 1, 3, and 3, losses `0.5`, `0.25`, and `0.125`, scores `0`, a finite score, and `null` (build the `null` with `scoreFront(..., { lossScale: 'linear' })` on a one-row front, or pass a `ScoredCandidate` whose `score` is `null`). The literal includes those tex strings. The test does not call `frontToLatexTable` to build the expected value.
 
 ### JSON
 
-`frontToJson` returns `{ schemaVersion: 1, rows: [{ complexity, loss, score, key, tex }] }`. `key` equals `scalarCanonicalKey(item)`. For symbol `x` the key is `{"k":"s","v":"x"}` (`expression/src/scalar-structure.ts` encodes a symbol as `{ k: 's', v: name }`). The test pins that string. `JSON.parse` of the serialized value restores the same keys. `tex` equals `scalarToTex(item)`.
+`frontToJson(scored)` returns `{ schemaVersion: 1, rows: [{ complexity, loss, score, key, tex }] }`. `key` equals `scalarCanonicalKey(item)`. For symbol `x` the key is `{"k":"s","v":"x"}` (`expression/src/scalar-structure.ts` encodes a symbol as `{ k: 's', v: name }`). The test pins that string. `JSON.parse` of the serialized value restores the same keys. `tex` equals `scalarToTex(item)`, without the table's `$`.
+
+**Decided (review):** the report equals `JSON.parse(JSON.stringify(report))`. `JSON.stringify` writes `Infinity` and `NaN` as `null`, and an exact fit (loss 0) has score `Infinity` (`scoreFront`), which would then read as the linear scale's `null`. A non-finite `loss` or `score` is therefore the string `'Infinity'`, `'-Infinity'` or `'NaN'` (type `FrontJsonNumber`); a finite value stays a number, and `null` stays the linear-scale score. A row whose complexity is not finite throws `RangeError`.
 
 ### Files
 
-| Path                                   | Action                                                                  |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| `functions/src/front-export.ts`        | **Add.**                                                                |
-| `functions/src/index.ts`               | **Change.** Export `frontToLatexTable`, `frontToJson`, and `FrontJson`. |
-| `functions/tests/front-export.test.ts` | **Add.**                                                                |
-| README, reference, `DOMAIN_SUPPLEMENT` | **Change.**                                                             |
-| `.changeset/front-export-m15.md`       | **Add.** `minor` on `@danielsimonjr/mathts-functions`.                  |
+| Path                                   | Action                                                                                                                                         |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `functions/src/front-export.ts`        | **Add.**                                                                                                                                       |
+| `functions/src/index.ts`               | **Change.** Export `frontToLatexTable`, `frontToJson`, and the types `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`. |
+| `functions/tests/front-export.test.ts` | **Add.**                                                                                                                                       |
+| README, reference, `DOMAIN_SUPPLEMENT` | **Change.**                                                                                                                                    |
+| `.changeset/front-export-m15.md`       | **Add.** `minor` on `@danielsimonjr/mathts-functions`.                                                                                         |
 
 ### CI
 

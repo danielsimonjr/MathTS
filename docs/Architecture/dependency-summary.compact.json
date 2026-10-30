@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1231, "e": 6400, "re": 2716 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1232, "e": 6408, "re": 2722 },
   "s": {
-    "loc": 203742,
+    "loc": 203899,
     "cls": 60,
-    "int": 565,
-    "fn": 2067,
+    "int": 568,
+    "fn": 2069,
     "tg": 161,
     "en": 0,
     "co": 1633,
-    "toi": 619
+    "toi": 621
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -530,7 +530,7 @@
       ]
     },
     "functions": {
-      "f": 31,
+      "f": 32,
       "exp": [
         "gradient",
         "hessian",
@@ -568,8 +568,8 @@
         "HistogramResult",
         "FitScalarOptions",
         "FitScalarResult",
-        "FTestResult",
-        "JarqueBeraResult"
+        "FrontJsonRow",
+        "FrontJson"
       ]
     },
     "functions/cas": {
@@ -1870,9 +1870,9 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 246, "o": 11 },
+    { "p": "factories/index.ts", "i": 246, "o": 12 },
     { "p": "function/typed.ts", "i": 3, "o": 203 },
-    { "p": "src/index.ts", "i": 150, "o": 0 },
+    { "p": "src/index.ts", "i": 152, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 55 },

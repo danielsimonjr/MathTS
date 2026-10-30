@@ -2356,6 +2356,18 @@
       "FrontCandidate": {
         "kind": "type"
       },
+      "FrontJson": {
+        "kind": "type"
+      },
+      "FrontJsonNumber": {
+        "kind": "type"
+      },
+      "FrontJsonRow": {
+        "kind": "type"
+      },
+      "FrontLatexTableOptions": {
+        "kind": "type"
+      },
       "FsolveOptions": {
         "kind": "type"
       },
@@ -4094,6 +4106,12 @@
         "kind": "function"
       },
       "friedmanTest": {
+        "kind": "function"
+      },
+      "frontToJson": {
+        "kind": "function"
+      },
+      "frontToLatexTable": {
         "kind": "function"
       },
       "fsolve": {

@@ -1298,9 +1298,13 @@ re-decide it here if PR-POLY has already merged.
   adding a LaTeX table writer, check whether `workbook`'s `toTeX`
   (`workbook/src/tex.ts:87`, not on the `workbook` barrel today) or `plot`'s `toTikZ`
   can render the table. No SymPy, JAX or PyTorch exporter (§9).
-- **API sketch:** `frontToLatexTable(scored, { variables, precision })` (cf.
+- **API sketch:** `frontToLatexTable(scored, { precision })` (cf.
   `pysr/export_latex.py` `sympy2latextable`) and `frontToJson(scored)`, a stable
-  schema that includes canonical keys.
+  schema that includes canonical keys. **Decided (review):** no `variables` option
+  (`Node.toTex` reads none); equation cells are `$` + `scalarToTex` + `$` because a
+  `tabular` cell is text mode and the bare cells do not compile; a non-finite `loss` or
+  `score` in the JSON is the string `'Infinity'`, `'-Infinity'` or `'NaN'`, because
+  `JSON.stringify` would write `null`, the linear-scale score. See PR 11 of the plan.
 - **Acceptance:** the LaTeX output is pinned as strings, and the JSON round trip
   restores identical keys.
 - **DoD:** base checklist + the following specifics:
