@@ -208,3 +208,5 @@ export {
   defaultWasmLocation,
   WasmModuleLoader,
 } from './wasm-loader.js';
+
+export { allocAsHeader } from './wasm-as-header.js';

@@ -7,6 +7,8 @@
  * exported from the package barrel.
  */
 
+import { allocAsHeader } from '@danielsimonjr/mathts-core/internal';
+
 /** Minimal AS runtime surface needed to allocate managed typed arrays. */
 export interface AsRuntime {
   __new: (size: number, id: number) => number;
@@ -18,8 +20,6 @@ export interface AsRuntime {
 export const AS_ID_ARRAY_BUFFER = 1;
 export const AS_ID_FLOAT64_ARRAY = 5;
 export const AS_ID_INT32_ARRAY = 6;
-/** AS typed-array header is { buffer, dataStart, byteLength } = 3 × u32. */
-export const AS_HEADER_BYTES = 12;
 export const AS_F64_ALIGN_SHIFT = 3;
 export const AS_I32_ALIGN_SHIFT = 2;
 
@@ -45,14 +45,7 @@ export function allocAsTypedView<T extends Float64Array | Int32Array>(
   byteLength: number;
   length: number;
 } {
-  const bufferPtr = module.__pin(module.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0;
-  const headerPtr = module.__new(AS_HEADER_BYTES, typeId) >>> 0;
-  module.__pin(headerPtr);
-
-  const dv = new DataView(module.memory.buffer);
-  dv.setUint32(headerPtr + 0, bufferPtr, true);
-  dv.setUint32(headerPtr + 4, bufferPtr, true);
-  dv.setUint32(headerPtr + 8, byteLength, true);
+  const { headerPtr, bufferPtr } = allocAsHeader(module, byteLength, typeId);
 
   const view = new Ctor(module.memory.buffer, bufferPtr, length) as T;
   return { headerPtr, bufferPtr, view, byteLength, length };

@@ -990,6 +990,9 @@
       "WasmManifest": {
         "kind": "type"
       },
+      "allocAsHeader": {
+        "kind": "function"
+      },
       "WasmModuleLoader": {
         "kind": "function"
       },

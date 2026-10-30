@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1233,
+    "totalFiles": 1234,
     "totalModules": 82,
-    "totalExports": 6409
+    "totalExports": 6410
   },
   "entryPoints": [
     {
@@ -1567,6 +1567,11 @@
             "reExport": true
           },
           {
+            "file": "./wasm-as-header.js",
+            "imports": ["allocAsHeader"],
+            "reExport": true
+          },
+          {
             "file": "./shared.js",
             "imports": ["MemoizedFunction"],
             "reExport": true,
@@ -1699,6 +1704,7 @@
           "resolvePackagedWasm",
           "defaultWasmLocation",
           "WasmModuleLoader",
+          "allocAsHeader",
           "format",
           "toEngineering",
           "toExponential",
@@ -1816,6 +1822,7 @@
           "resolvePackagedWasm",
           "defaultWasmLocation",
           "WasmModuleLoader",
+          "allocAsHeader",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -2121,6 +2128,16 @@
         "workspaceDependencies": [],
         "exports": ["_switch"],
         "functions": ["_switch"]
+      },
+      "core/src/wasm-as-header.ts": {
+        "description": "AssemblyScript managed ArrayBuffer + typed-array header allocation.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["allocAsHeader"],
+        "interfaces": ["AsHeaderRuntime"],
+        "functions": ["allocAsHeader"]
       },
       "core/src/wasm-loader.ts": {
         "description": "Shared WASM-loader runtime logic — SHA-384 integrity verification + packaged",
@@ -4458,12 +4475,18 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["allocAsHeader"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
           "AS_ID_ARRAY_BUFFER",
           "AS_ID_FLOAT64_ARRAY",
           "AS_ID_INT32_ARRAY",
-          "AS_HEADER_BYTES",
           "AS_F64_ALIGN_SHIFT",
           "AS_I32_ALIGN_SHIFT",
           "allocAsTypedView"
@@ -4474,7 +4497,6 @@
           "AS_ID_ARRAY_BUFFER",
           "AS_ID_FLOAT64_ARRAY",
           "AS_ID_INT32_ARRAY",
-          "AS_HEADER_BYTES",
           "AS_F64_ALIGN_SHIFT",
           "AS_I32_ALIGN_SHIFT"
         ]
@@ -26178,7 +26200,14 @@
             "imports": ["wasmPolicyAllows"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["allocAsHeader"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
           "getWasm",
           "isAsWasm",
@@ -41703,6 +41732,7 @@
           "core/src/shared.ts",
           "core/src/string.ts",
           "core/src/switch.ts",
+          "core/src/wasm-as-header.ts",
           "core/src/wasm-loader.ts"
         ]
       },
@@ -43248,17 +43278,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1233,
+    "totalTypeScriptFiles": 1234,
     "totalModules": 82,
-    "totalLinesOfCode": 203685,
-    "totalExports": 6409,
+    "totalLinesOfCode": 203695,
+    "totalExports": 6410,
     "totalClasses": 60,
-    "totalInterfaces": 568,
-    "totalFunctions": 2069,
+    "totalInterfaces": 569,
+    "totalFunctions": 2070,
     "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1633,
-    "totalReExports": 2723,
+    "totalConstants": 1632,
+    "totalReExports": 2724,
     "totalTypeOnlyImports": 621,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

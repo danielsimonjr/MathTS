@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2052,
+  "totalFiles": 2056,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1205,
+    "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 759,
+    "test": 762,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1231,
-    "tests": 759,
+    "src": 1232,
+    "tests": 762,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,14 +24,14 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 103,
+    "@danielsimonjr/mathts-core": 105,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 872,
+    "@danielsimonjr/mathts-functions": 873,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 112,
+    "@danielsimonjr/mathts-matrix": 113,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 22,
@@ -667,7 +667,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 211
+      "loc": 213
     },
     {
       "file": "core/src/is.ts",
@@ -894,11 +894,25 @@
       "loc": 37
     },
     {
+      "file": "core/src/wasm-as-header.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 29
+    },
+    {
       "file": "core/src/wasm-loader.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
       "loc": 316
+    },
+    {
+      "file": "core/tests/alloc-as-header-pin.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
     },
     {
       "file": "core/tests/arithmetic/scalar.test.ts",
@@ -8724,7 +8738,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 336
+      "loc": 322
     },
     {
       "file": "functions/src/wasm/elementwise/wasm-bridge.ts",
@@ -11303,6 +11317,13 @@
       "loc": 67
     },
     {
+      "file": "functions/tests/wasm-as-alloc-order-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
+    },
+    {
       "file": "functions/tests/wasm-bridge-clones-pin.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11615,7 +11636,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 60
+      "loc": 53
     },
     {
       "file": "matrix/src/backends/wasm/detect.ts",
@@ -11854,6 +11875,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 923
+    },
+    {
+      "file": "matrix/tests/backends/as-alloc-typed-view-pin.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 80
     },
     {
       "file": "matrix/tests/backends/as-typed-array-header.test.ts",
