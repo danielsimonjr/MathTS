@@ -2455,3 +2455,4 @@ export type { Pool, PoolOptions, ExecOptions, PoolStats };
 export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
 /** @internal */
 export { forEachMultiIndex } from './multi-index.js';
+export { tensordotRange } from './tensordot-range.js';
