@@ -706,25 +706,22 @@ export class MathWorkerPool {
     this._completionTimestamps = this._completionTimestamps.filter((t) => t >= windowStart);
   }
 
-  /**
-   * Execute a method in the worker pool
-   */
-  async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
+  private async _timedExec<T>(
+    target: string,
+    params: unknown[],
+    execOptions: ExecOptions | undefined,
+    options: TaskOptions | undefined
+  ): Promise<T> {
     if (!this.pool) {
       throw new Error('WorkerPool not initialized. Call initialize() first.');
     }
-
-    const execOptions: ExecOptions = {
-      on: options?.on,
-      transfer: options?.transfer,
-    };
 
     const timeout = options?.taskTimeout ?? this.config.taskTimeout;
     const execStart = performance.now();
 
     try {
       const result = await (this.pool
-        .exec<T>(method, params, execOptions)
+        .exec<T>(target, params, execOptions)
         .timeout(timeout) as Promise<T>);
       this._recordExecution(performance.now() - execStart, false);
       return result;
@@ -735,27 +732,22 @@ export class MathWorkerPool {
   }
 
   /**
+   * Execute a method in the worker pool
+   */
+  async exec<T>(method: string, params: unknown[], options?: TaskOptions): Promise<T> {
+    return this._timedExec<T>(
+      method,
+      params,
+      { on: options?.on, transfer: options?.transfer },
+      options
+    );
+  }
+
+  /**
    * Execute a function directly (for simple parallelization)
    */
   async execFunction<T, R>(fn: (arg: T) => R, arg: T, options?: TaskOptions): Promise<R> {
-    if (!this.pool) {
-      throw new Error('WorkerPool not initialized. Call initialize() first.');
-    }
-
-    const timeout = options?.taskTimeout ?? this.config.taskTimeout;
-    const execStart = performance.now();
-
-    try {
-      // Use workerpool's ability to execute functions directly
-      const result = await (this.pool
-        .exec<R>(fn as unknown as string, [arg])
-        .timeout(timeout) as Promise<R>);
-      this._recordExecution(performance.now() - execStart, false);
-      return result;
-    } catch (err) {
-      this._recordExecution(performance.now() - execStart, true);
-      throw err;
-    }
+    return this._timedExec<R>(fn as unknown as string, [arg], undefined, options);
   }
 
   // =========================================================================
