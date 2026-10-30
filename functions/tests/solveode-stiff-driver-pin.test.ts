@@ -70,7 +70,7 @@ describe('rodasSolve driver pins', () => {
 
   it('counts f evaluations in a predictable way', () => {
     let calls = 0;
-    const f = (t: number, y: number[]): number[] => {
+    const f = (t: unknown, y: unknown): number[] => {
       calls++;
       return stiffScalar(t, y);
     };
