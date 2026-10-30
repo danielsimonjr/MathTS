@@ -382,14 +382,6 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
   };
 }
 
-// =============================================================================
-// tensordot kernel helpers (used by sequential path and exported for tests)
-// =============================================================================
-
-/**
- * Multi-index to flat index using precomputed strides.
- * @internal
- */
 /**
  * ComputePool for parallel MathTS operations
  *
