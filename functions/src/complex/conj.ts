@@ -56,7 +56,7 @@ export const createConj = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix =>
-            deepMap(x as unknown[], self) as unknown[] | Matrix
+            deepMap(x, self) as unknown[] | Matrix
       ),
     });
   }

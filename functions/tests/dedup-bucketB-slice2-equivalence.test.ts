@@ -770,7 +770,7 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
         },
         {
           name: 'core',
-          fn: (a: number[]) => coreDeepMap(a, (v: number) => v + 1),
+          fn: (a: number[]) => coreDeepMap(a, (v: number) => v + 1) as number[],
         },
       ],
       fc.tuple(fc.array(fc.double({ noNaN: true, min: -50, max: 50 }), { maxLength: 6 }))
@@ -836,12 +836,13 @@ describe('collection utils — containsCollections / deepMap / deepForEach (arra
         },
         {
           name: 'core',
-          fn: tryCall((a: number[][], dim: number) =>
-            coreReduce(
-              asDeclared<number[]>(a),
-              dim,
-              (acc: number, v: number) => (acc as number) + v
-            )
+          fn: tryCall(
+            (a: number[][], dim: number) =>
+              coreReduce(
+                asDeclared<number[]>(a),
+                dim,
+                (acc: number, v: number) => (acc as number) + v
+              ) as number[]
           ),
         },
       ],

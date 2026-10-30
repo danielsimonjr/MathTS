@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2009,
+  "totalFiles": 2010,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1196,
     "test-only": 0,
     "orphan": 0,
-    "test": 725,
+    "test": 726,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1222,
-    "tests": 725,
+    "tests": 726,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 97,
+    "@danielsimonjr/mathts-core": 98,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 557,
@@ -590,7 +590,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 255
+      "loc": 302
     },
     {
       "file": "core/src/config.ts",
@@ -927,6 +927,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 204
+    },
+    {
+      "file": "core/tests/collection-nested.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 128
     },
     {
       "file": "core/tests/config.test.ts",
@@ -4307,7 +4314,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2048
+      "loc": 2045
     },
     {
       "file": "expression/src/Parser.ts",
@@ -5112,7 +5119,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 120
     },
     {
       "file": "expression/tests/utils-customs.test.ts",
@@ -5539,7 +5546,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 297
+      "loc": 296
     },
     {
       "file": "functions/src/arithmetic/cube.ts",
@@ -5602,14 +5609,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 272
+      "loc": 271
     },
     {
       "file": "functions/src/arithmetic/floor.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 301
+      "loc": 300
     },
     {
       "file": "functions/src/arithmetic/gcd.ts",
@@ -5714,7 +5721,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 342
     },
     {
       "file": "functions/src/arithmetic/sign.ts",
@@ -9011,7 +9018,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 1141
+      "loc": 1142
     },
     {
       "file": "functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts",

@@ -556,6 +556,7 @@ modules:
             - DimensionError
         - file: ./array.js
           imports:
+            - NestedArray
             - arraySize
             - deepMap
             - deepForEach
@@ -573,6 +574,12 @@ modules:
         - containsCollections
         - deepForEach
         - deepMap
+        - deepMap
+        - deepMap
+        - deepMap
+        - deepMap
+        - reduce
+        - reduce
         - reduce
         - scatter
     core/src/config.ts:
@@ -40369,11 +40376,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1224
   totalModules: 82
-  totalLinesOfCode: 200932
+  totalLinesOfCode: 200972
   totalExports: 6331
   totalClasses: 59
   totalInterfaces: 548
-  totalFunctions: 2034
+  totalFunctions: 2040
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1628

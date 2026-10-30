@@ -71,7 +71,7 @@ export const createMax = /* #__PURE__ */ factory(
         dim: number | { valueOf(): number }
       ): unknown {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        return reduce(array as Parameters<typeof reduce>[0], dimValue, _largest);
+        return reduce(array, dimValue, _largest);
       },
 
       // max(a, b, c, d, ...)

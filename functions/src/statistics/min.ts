@@ -71,7 +71,7 @@ export const createMin = /* #__PURE__ */ factory(
         dim: number | { valueOf(): number }
       ): unknown {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        return reduce(array as Parameters<typeof reduce>[0], dimValue, _smallest);
+        return reduce(array, dimValue, _smallest);
       },
 
       // min(a, b, c, d, ...)

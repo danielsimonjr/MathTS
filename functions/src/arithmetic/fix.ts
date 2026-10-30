@@ -206,8 +206,7 @@ export const createFix = /* #__PURE__ */ factory(
             unit: UnitType
           ): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x as unknown[], (value) => self(value, n, unit), true) as
-              unknown[] | Matrix;
+            return deepMap(x, (value) => self(value, n, unit), true) as unknown[] | Matrix;
           }
       ),
 
@@ -221,7 +220,7 @@ export const createFix = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x as unknown[], self, true) as unknown[] | Matrix;
+            return deepMap(x, self, true) as unknown[] | Matrix;
           }
       ),
 
@@ -229,7 +228,7 @@ export const createFix = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: unknown[] | Matrix, n: number | BigNumberType): unknown[] | Matrix => {
             // deep map collection, skip zeros since fix(0) = 0
-            return deepMap(x as unknown[], (i) => self(i, n), true) as unknown[] | Matrix;
+            return deepMap(x, (i) => self(i, n), true) as unknown[] | Matrix;
           }
       ),
 

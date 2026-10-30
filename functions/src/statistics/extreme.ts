@@ -27,7 +27,7 @@ export function reduceExtreme(
   const { isNaN: mathIsNaN, numeric, config } = deps;
   let res: unknown;
 
-  deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
+  deepForEach(array, function (value: unknown) {
     try {
       if (mathIsNaN(value)) {
         res = value;

@@ -203,14 +203,11 @@ export const createParse = /* #__PURE__ */ factory(
       const extraNodes = options.nodes !== undefined ? options.nodes : {};
 
       // parse an array or matrix with expressions
-      return deepMap(
-        expressions as Parameters<typeof deepMap>[0],
-        function (elem: unknown): MathNode {
-          if (typeof elem !== 'string') throw new TypeError('String expected');
+      return deepMap(expressions, function (elem: unknown): MathNode {
+        if (typeof elem !== 'string') throw new TypeError('String expected');
 
-          return parseStart(elem, extraNodes);
-        }
-      );
+        return parseStart(elem, extraNodes);
+      });
     }
 
     // map with all delimiters

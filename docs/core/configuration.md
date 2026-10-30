@@ -129,6 +129,8 @@ Override `MathTSConfig` at startup by spreading `DEFAULT_CONFIG` from the main e
 
 `@danielsimonjr/mathts-core/internal` also exports tree helpers (`deepMap`, `deepForEach`, `reduce`), formatting (`format`, `formatGeneric`, `formatBigNumber`), factory utilities (`factory`, `sortFactories`), error types (`DimensionError`, `IndexError`, `MathjsError`), safe property accessors, and WASM manifest helpers. Prefer the main entry for public types and `mathTyped`; use `./internal` only when you need these mathjs-compat or tooling surfaces.
 
+Those collection helpers accept nested arrays as well as matrices: `deepMap` / `deepForEach` recurse into nested structure, and `reduce` of a one-dimensional array along dimension 0 returns a scalar (not a one-element array). With `skipZeros: true`, `deepMap` leaves numeric zeros as the original value.
+
 `clone`, `extend`, `mapObject`, and `deepFlatten` on `./internal` skip an own `__proto__` key (the only key a plain assignment cannot store as data; `JSON.parse` produces it) and copy every other key, including `name`, `length` and `constructor`. `deepExtend` additionally skips every name that sits on `Object.prototype` or `Function.prototype`, because it reads through the key before recursing. `Unit.createUnit` throws `unsafe unit name` for the same names.
 
 ## TypeScript types
