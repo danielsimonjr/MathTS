@@ -257,11 +257,13 @@ export function mutateFeature(
   return accepts(ctx.grammar, next) ? next : null;
 }
 
-/** Swap the two operands of one binary operator. */
-export function swapOperands(
+type OpNode = Extract<ScalarNode, { kind: 'op' }>;
+
+function replaceBinaryOp(
   node: ScalarNode,
   rng: SeededRng,
-  ctx: ScalarMutationContext
+  ctx: ScalarMutationContext,
+  replacement: (current: OpNode) => ScalarNode
 ): ScalarNode | null {
   const paths = collectPaths(node, (n) => n.kind === 'op' && n.args.length === 2);
   if (paths.length === 0) {
@@ -272,12 +274,21 @@ export function swapOperands(
   if (current.kind !== 'op' || current.args.length !== 2) {
     return null;
   }
-  const next = replaceAt(node, path, {
-    kind: 'op',
-    op: current.op,
-    args: [current.args[1], current.args[0]],
-  });
+  const next = replaceAt(node, path, replacement(current));
   return accepts(ctx.grammar, next) ? next : null;
+}
+
+/** Swap the two operands of one binary operator. */
+export function swapOperands(
+  node: ScalarNode,
+  rng: SeededRng,
+  ctx: ScalarMutationContext
+): ScalarNode | null {
+  return replaceBinaryOp(node, rng, ctx, (c) => ({
+    kind: 'op',
+    op: c.op,
+    args: [c.args[1], c.args[0]],
+  }));
 }
 
 /** Replace a subtree with a binary op or unary call over it and a new leaf. */
@@ -350,47 +361,24 @@ export function deleteNode(
   rng: SeededRng,
   ctx: ScalarMutationContext
 ): ScalarNode | null {
-  const candidates = collectPaths(node, (n) => n.kind === 'op' && n.args.length === 2);
-  if (candidates.length === 0) {
-    return null;
-  }
-  const path = candidates[rng.nextInt(candidates.length)];
-  const current = nodeAt(node, path);
-  if (current.kind !== 'op' || current.args.length !== 2) {
-    return null;
-  }
-  const next = replaceAt(node, path, current.args[rng.nextInt(2)]);
-  return accepts(ctx.grammar, next) ? next : null;
+  return replaceBinaryOp(node, rng, ctx, (c) => c.args[rng.nextInt(2)]);
 }
 
-function rotateLeft(opNode: ScalarNode): ScalarNode | null {
+function rotateAt(opNode: ScalarNode, side: 0 | 1): ScalarNode | null {
   if (opNode.kind !== 'op' || opNode.args.length !== 2) {
     return null;
   }
-  const left = opNode.args[0];
-  const right = opNode.args[1];
-  if (left.kind !== 'op' || left.args.length !== 2) {
+  const pivot = opNode.args[side];
+  const other = opNode.args[1 - side];
+  if (pivot.kind !== 'op' || pivot.args.length !== 2) {
     return null;
   }
-  const a = left.args[0];
-  const b = left.args[1];
-  const newRight = builder.op(opNode.op, [b, right]);
-  return builder.op(left.op, [a, newRight]);
-}
-
-function rotateRight(opNode: ScalarNode): ScalarNode | null {
-  if (opNode.kind !== 'op' || opNode.args.length !== 2) {
-    return null;
+  if (side === 0) {
+    const inner = builder.op(opNode.op, [pivot.args[1], other]);
+    return builder.op(pivot.op, [pivot.args[0], inner]);
   }
-  const left = opNode.args[0];
-  const right = opNode.args[1];
-  if (right.kind !== 'op' || right.args.length !== 2) {
-    return null;
-  }
-  const b = right.args[0];
-  const c = right.args[1];
-  const newLeft = builder.op(opNode.op, [left, b]);
-  return builder.op(right.op, [newLeft, c]);
+  const inner = builder.op(opNode.op, [other, pivot.args[0]]);
+  return builder.op(pivot.op, [inner, pivot.args[1]]);
 }
 
 /** One left or right rotation at a nested binary node. */
@@ -417,10 +405,8 @@ export function rotateTree(
   }
   // The coin picks a direction; when only the other one is possible at this
   // node, that one is used instead of failing a mutation that has a valid result.
-  const rotated =
-    rng.next() < 0.5
-      ? (rotateLeft(current) ?? rotateRight(current))
-      : (rotateRight(current) ?? rotateLeft(current));
+  const first = rng.next() < 0.5 ? 0 : 1;
+  const rotated = rotateAt(current, first as 0 | 1) ?? rotateAt(current, first === 0 ? 1 : 0);
   if (rotated === null) {
     return null;
   }
