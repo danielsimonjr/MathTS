@@ -1459,6 +1459,63 @@ for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
 **Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
 merge PR #398. The loop is part of the release gate.
 
+### Phase 6 and up: clone-reduction loop
+
+This phase is not a PySR milestone. It starts after Phase 5's close-out
+([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 12). It repeats until
+the clone report is clean. There is no grok planner on this loop.
+
+Each phase N (6, 7, …) is four steps, in order:
+
+1. **Measure.** composer-2.5 runs `repo-tools clones` and writes
+   [`docs/roadmap/CLONES_REMAINING.md`](./CLONES_REMAINING.md) from that run (counts,
+   exact groups, near pairs, the commit SHA). The ledger names the tool version. It
+   does not mark pairs MERGE or KEEP. Do not commit `inventory.jsonl` or `clones.json`.
+2. **Plan.** claude-opus-5-5 (effort xhigh) reviews that ledger and writes
+   `docs/plans/CLONES_PHASE_<N>_PLAN.md`. The plan marks each pair MERGE or KEEP, with
+   a reason a later reader can check. Opus does not implement the merges.
+3. **Build.** composer-2.5 implements that plan, one small PR at a time, and stops.
+4. **Review.** claude-sonnet-5-5 (effort xhigh) re-runs the tests, greps for a second
+   copy of any algorithm the PR claims to share, and fixes what it finds.
+
+Then phase N+1 starts at step 1 on the merge commit. A phase that merged code is not
+the last phase.
+
+**Clean** means the opus plan for that phase lists no MERGE pair. Every remaining pair
+is KEEP, or the tool reported no pairs. The ledger for that clean phase was measured
+after the previous phase's merges were on `main`. A KEEP that the dependency graph
+forces stays KEEP: the worker-bundle copies of `mulberry32` and `rowMajorStrides` in
+`packages/workerpool/src/worker-numerics.ts` are the standing example (`workerpool`
+cannot import `core`).
+
+**Tool.** `@danielsimonjr/repo-tools` **2.3.0**, the version recorded in
+[`docs/plans/CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md). The CI pin
+`REPO_TOOLS_VERSION: 2.2.4` in `.github/workflows/ci.yml` is for `repo-tools check`.
+Do not change it in a clone phase.
+
+From the repo root, with the tool installed outside the repo:
+
+```bash
+repo-tools clones . --src \
+  packages/typed-function/src packages/workerpool/src \
+  core/src matrix/src tensor/src autograd/src functions/src expression/src \
+  parser/src units/src numbers/src ast/src evaluator/src linalg/src \
+  arithmetic/src trigonometry/src statistics/src signal/src \
+  parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
+  --out=../tmp/clones-phase-N
+```
+
+`--src` is one flag. It takes every following argument until the next flag. `--out`
+is relative to the repo root and its parent must be writable. An absolute path is
+rejected.
+
+[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md) is the historical plan
+for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
+`CLONES_REMAINING.md` with the new measurement and adds its own plan file.
+
+**Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
+merge PR #398. The loop is part of the release gate.
+
 ---
 
 ## 9. Explicitly out of scope (non-decisions)
