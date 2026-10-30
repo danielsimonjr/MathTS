@@ -4,17 +4,13 @@
  *   bunx turbo build --filter=@danielsimonjr/mathts-functions
  *   node tools/benchmarks/sprint-baseline.mjs
  *   node tools/benchmarks/sprint-baseline.mjs --check
+ *   node tools/benchmarks/sprint-baseline.mjs --runs 2 > docs/benchmarks/core-sprint-baseline.json
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
-import {
-  BigNumber,
-  Complex,
-  Fraction,
-  sumSquaredDeviations,
-} from '@danielsimonjr/mathts-core';
+import { BigNumber, Complex, Fraction, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import { clone, deepMap } from '@danielsimonjr/mathts-core/internal';
 import { compileExpr, evaluate, parse } from '@danielsimonjr/mathts-functions';
 
@@ -29,7 +25,12 @@ const BASELINE_PATH = join(
   'core-sprint-baseline.json'
 );
 
-/** @param {number} ms @returns {number} */
+/**
+ * Median wall time of {@link TIMED_REPS} reps of `iterations` calls, after {@link WARMUP} warm-up calls.
+ * @param {() => unknown} fn
+ * @param {number} iterations
+ * @returns {number}
+ */
 export function medianMs(fn, iterations) {
   for (let i = 0; i < WARMUP; i++) {
     fn();
@@ -56,9 +57,12 @@ export function spellFingerprint(value) {
     });
   }
   if (value instanceof Fraction) {
+    if (typeof value.numerator !== 'bigint' || typeof value.denominator !== 'bigint') {
+      throw new TypeError('Fraction numerator/denominator are not bigint');
+    }
     return JSON.stringify({
-      n: String(value.n),
-      d: String(value.d),
+      n: String(value.numerator),
+      d: String(value.denominator),
     });
   }
   if (value instanceof BigNumber) {
@@ -95,9 +99,7 @@ function buildCases() {
   for (let i = 0; i < xs.length; i++) {
     xs[i] = 1e6 + (i % 97) / 97;
   }
-  const nested100 = Array.from({ length: 100 }, () =>
-    Array.from({ length: 100 }, (_, j) => j)
-  );
+  const nested100 = Array.from({ length: 100 }, () => Array.from({ length: 100 }, (_, j) => j));
   const cloneNested = makeNestedCloneObject(20);
 
   /** @type {{ name: string, iterations: number, run: () => unknown, fingerprint?: () => string }[]} */
@@ -178,8 +180,7 @@ function buildCases() {
       name: 'deep-map-nested',
       iterations: 200,
       run: () => deepMap(nested100, (x) => x + 1),
-      fingerprint: () =>
-        spellFingerprint(deepMap(nested100, (x) => x + 1)),
+      fingerprint: () => spellFingerprint(deepMap(nested100, (x) => x + 1)),
     },
     {
       name: 'clone-nested',
@@ -195,40 +196,39 @@ function buildCases() {
     },
     {
       name: 'parse-arithmetic',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('1+2*3'),
       fingerprint: () => spellFingerprint(evaluate('1+2*3')),
     },
     {
       name: 'parse-pythagoras',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('sqrt(3^2 + 4^2)'),
       fingerprint: () => spellFingerprint(evaluate('sqrt(3^2 + 4^2)')),
     },
     {
       name: 'parse-trig',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('sin(1)+cos(2)'),
       fingerprint: () => spellFingerprint(evaluate('sin(1)+cos(2)')),
     },
     {
       name: 'parse-object',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('{a: 1, b: 2+3}'),
       fingerprint: () => spellFingerprint(evaluate('{a: 1, b: 2+3}')),
     },
     {
       name: 'parse-matrix',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('[[1, 2], [3, 4]]'),
       fingerprint: () => spellFingerprint(evaluate('[[1, 2], [3, 4]]')),
     },
     {
       name: 'parse-nested',
-      iterations: 1,
+      iterations: 2_000,
       run: () => parse('('.repeat(20) + '1' + ')'.repeat(20)),
-      fingerprint: () =>
-        spellFingerprint(evaluate('('.repeat(20) + '1' + ')'.repeat(20))),
+      fingerprint: () => spellFingerprint(evaluate('('.repeat(20) + '1' + ')'.repeat(20))),
     },
     {
       name: 'eval-arithmetic',
@@ -275,8 +275,8 @@ export function runSuite(cases) {
   for (const c of cases) {
     const fpFn = c.fingerprint ?? (() => spellFingerprint(c.run()));
     const fp = fpFn();
-    if (fp === undefined || fp === null) {
-      throw new Error(`fingerprint null for ${c.name}`);
+    if (fp === undefined || fp === null || fp.includes('undefined')) {
+      throw new Error(`fingerprint empty for ${c.name}: ${fp}`);
     }
     fingerprints[c.name] = fp;
 
@@ -339,14 +339,34 @@ function checkMode() {
 }
 
 function printMode() {
-  const { fingerprints, medianMsByCase, controlRatio } = runSuite(buildCases());
+  const flag = process.argv.indexOf('--runs');
+  const runCount = flag >= 0 ? Number(process.argv[flag + 1]) : 1;
+  if (!Number.isInteger(runCount) || runCount < 1) {
+    throw new Error('--runs needs a positive integer');
+  }
+  const cases = buildCases();
+  /** @type {{ medianMs: Record<string, number>, controlRatio: number }[]} */
+  const runs = [];
+  /** @type {Record<string, string>} */
+  let fingerprints = {};
+  for (let r = 0; r < runCount; r++) {
+    const result = runSuite(cases);
+    if (r > 0 && JSON.stringify(result.fingerprints) !== JSON.stringify(fingerprints)) {
+      throw new Error('fingerprints differ between runs');
+    }
+    fingerprints = result.fingerprints;
+    runs.push({
+      medianMs: result.medianMsByCase,
+      controlRatio: result.controlRatio,
+    });
+  }
   const payload = {
     node: process.version,
     platform: process.platform,
     arch: process.arch,
     command: 'node tools/benchmarks/sprint-baseline.mjs',
     note: 'Timings are one machine. Fingerprints are the contract. Not a speedup claim.',
-    runs: [{ medianMs: medianMsByCase, controlRatio }],
+    runs,
     fingerprints,
   };
   console.log(JSON.stringify(payload, null, 2));
