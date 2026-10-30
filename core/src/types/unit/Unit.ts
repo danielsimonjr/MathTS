@@ -1,7 +1,7 @@
 import { isComplex, isUnit, typeOf } from '../../is.js';
 import { factory } from '../../factory.js';
 import { clone } from '../../object.js';
-import { memoize, endsWith, hasOwnProperty, warnOnce } from '../../shared.js';
+import { memoize, endsWith, hasOwnProperty, warnOnce, isPollutingKey } from '../../shared.js';
 import { BIGNUMBER_PI } from '../bignumber.js';
 import type {
   BaseUnitDef,
@@ -2595,6 +2595,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
       let lastUnit: UnitInstance | undefined;
       for (const key in obj) {
         if (hasOwnProperty(obj, key)) {
+          if (isPollutingKey(key)) {
+            throw new TypeError(`unsafe unit name '${key}'`);
+          }
           lastUnit = Unit.createUnitSingle(key, obj[key]);
         }
       }

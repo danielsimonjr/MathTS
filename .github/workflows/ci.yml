@@ -109,6 +109,11 @@ jobs:
         # (`tools/test/bun-audit-retry.mjs`); a real high+ advisory still fails on first try.
         run: node tools/test/bun-audit-retry.mjs
 
+      - name: Runtime dependency lock
+        run: |
+          node --test tools/test/check-runtime-deps.test.mjs
+          node tools/test/check-runtime-deps.mjs
+
       # Tool tests that no workflow used to run. `check:browser-safety` is the query
       # tool's `--check-browser-safety` mode, `docs:roadmap-check` is the roadmap checker,
       # the scanner that `smoke-dist-node.mjs` uses to find a Node builtin in a built browser

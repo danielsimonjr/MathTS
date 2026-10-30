@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-29",
+  "generated": "2026-10-30",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -2701,6 +2701,11 @@
       "expression/src/node/SymbolNode.ts",
       "expression/src/node/utils/access.ts",
       "expression/src/node/utils/assign.ts",
+      "expression/src/parse.ts"
+    ],
+    "expression/src/limits.ts": [
+      "expression/src/compiler/compile.ts",
+      "expression/src/evaluator/evaluate.ts",
       "expression/src/parse.ts"
     ],
     "expression/src/compiler/compile.ts": [

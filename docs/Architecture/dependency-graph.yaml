@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-29'
-  totalFiles: 1223
+  lastUpdated: '2026-10-30'
+  totalFiles: 1224
   totalModules: 82
-  totalExports: 6325
+  totalExports: 6331
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1924,6 +1924,8 @@ modules:
         - file: ./shared.js
           imports:
             - hasOwnProperty
+            - isPollutingKey
+            - isPrototypeKey
       workspaceDependencies: []
       exports:
         - hasOwnProperty
@@ -1965,12 +1967,16 @@ modules:
       exports:
         - warnOnce
         - hasOwnProperty
+        - isPollutingKey
+        - isPrototypeKey
         - endsWith
         - memoize
       interfaces:
         - MemoizedFunction
       functions:
         - hasOwnProperty
+        - isPollutingKey
+        - isPrototypeKey
         - endsWith
         - memoize
       constants:
@@ -2677,6 +2683,7 @@ modules:
             - endsWith
             - hasOwnProperty
             - warnOnce
+            - isPollutingKey
         - file: ../bignumber.js
           imports:
             - BIGNUMBER_PI
@@ -24861,6 +24868,22 @@ modules:
         - keywords
       constants:
         - keywords
+    expression/src/limits.ts:
+      description: Caps for untrusted expression text and hand-built trees.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - MAX_EXPRESSION_LENGTH
+        - MAX_PARSE_NESTING
+        - MAX_COMPILE_DEPTH
+        - MAX_PARSE_RECURSION
+      constants:
+        - MAX_EXPRESSION_LENGTH
+        - MAX_PARSE_NESTING
+        - MAX_COMPILE_DEPTH
+        - MAX_PARSE_RECURSION
     expression/src/operators.ts:
       description: Metadata for a single operator/node identifier in the precedence table.
       externalDependencies: []
@@ -24922,6 +24945,11 @@ modules:
         - file: ./utils/customs.js
           imports:
             - setSafeProperty
+        - file: ./limits.js
+          imports:
+            - MAX_EXPRESSION_LENGTH
+            - MAX_PARSE_NESTING
+            - MAX_PARSE_RECURSION
         - file: ./node/Node.js
           imports:
             - MathNode
@@ -25010,6 +25038,9 @@ modules:
             - getSafeProperty
             - setSafeProperty
             - getSafeMethod
+        - file: ../limits.js
+          imports:
+            - MAX_COMPILE_DEPTH
         - file: ../node/Node.js
           imports:
             - MathNode
@@ -30411,6 +30442,9 @@ modules:
         - file: ../compiler/compile.js
           imports:
             - compile
+        - file: ../limits.js
+          imports:
+            - MAX_COMPILE_DEPTH
         - file: ../compiler/compile.js
           imports:
             - CompiledExpression
@@ -39683,6 +39717,7 @@ dependencyGraph:
         - expression/src/Parser.ts
         - expression/src/index.ts
         - expression/src/keywords.ts
+        - expression/src/limits.ts
         - expression/src/operators.ts
         - expression/src/parse.ts
         - expression/src/scalar-builder.ts
@@ -40332,16 +40367,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1223
+  totalTypeScriptFiles: 1224
   totalModules: 82
-  totalLinesOfCode: 200785
-  totalExports: 6325
+  totalLinesOfCode: 200932
+  totalExports: 6331
   totalClasses: 59
   totalInterfaces: 548
-  totalFunctions: 2032
-  totalTypeGuards: 159
+  totalFunctions: 2034
+  totalTypeGuards: 161
   totalEnums: 0
-  totalConstants: 1624
+  totalConstants: 1628
   totalReExports: 2680
   totalTypeOnlyImports: 614
   runtimeCircularDeps: 0

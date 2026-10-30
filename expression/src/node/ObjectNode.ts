@@ -147,8 +147,12 @@ export const createObjectNode = /* #__PURE__ */ factory(
         const properties: Record<string, MathNode> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
-            properties[key] = this._ifNode(
-              callback(this.properties[key], 'properties[' + stringify(key) + ']', this)
+            setSafeProperty(
+              properties,
+              key,
+              this._ifNode(
+                callback(this.properties[key], 'properties[' + stringify(key) + ']', this)
+              )
             );
           }
         }
@@ -162,7 +166,7 @@ export const createObjectNode = /* #__PURE__ */ factory(
         const properties: Record<string, MathNode> = {};
         for (const key in this.properties) {
           if (hasOwnProperty(this.properties, key)) {
-            properties[key] = this.properties[key];
+            setSafeProperty(properties, key, this.properties[key]);
           }
         }
         return new ObjectNode(properties);

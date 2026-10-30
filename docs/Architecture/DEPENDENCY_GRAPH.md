@@ -157,7 +157,7 @@ The codebase is organized into the following modules:
 - **functions/unit**: 2 files
 - **functions/utils**: 34 files
 - **functions/wasm**: 13 files
-- **expression**: 9 files
+- **expression**: 10 files
 - **expression/compiler**: 2 files
 - **expression/embeddedDocs**: 398 files
 - **expression/error**: 2 files
@@ -205,7 +205,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 498            | 2               |
-| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 479            | 0               |
+| `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 480            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -668,10 +668,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                 | Type   |
-| ------------- | ----------------------- | ------ |
-| `./is.js`     | `isBigNumber, isObject` | Import |
-| `./shared.js` | `hasOwnProperty`        | Import |
+| File          | Imports                                          | Type   |
+| ------------- | ------------------------------------------------ | ------ |
+| `./is.js`     | `isBigNumber, isObject`                          | Import |
+| `./shared.js` | `hasOwnProperty, isPollutingKey, isPrototypeKey` | Import |
 
 **Exports:**
 
@@ -684,7 +684,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `MemoizedFunction`
-- Functions: `hasOwnProperty`, `endsWith`, `memoize`
+- Functions: `hasOwnProperty`, `isPollutingKey`, `isPrototypeKey`, `endsWith`, `memoize`
 - Constants: `warnOnce`
 
 ---
@@ -1021,7 +1021,7 @@ graph LR
 | `../../is.js`      | `isComplex, isUnit, typeOf`                                                                                                                                                                                                                                                                                     | Import             |
 | `../../factory.js` | `factory`                                                                                                                                                                                                                                                                                                       | Import             |
 | `../../object.js`  | `clone`                                                                                                                                                                                                                                                                                                         | Import             |
-| `../../shared.js`  | `memoize, endsWith, hasOwnProperty, warnOnce`                                                                                                                                                                                                                                                                   | Import             |
+| `../../shared.js`  | `memoize, endsWith, hasOwnProperty, warnOnce, isPollutingKey`                                                                                                                                                                                                                                                   | Import             |
 | `../bignumber.js`  | `BIGNUMBER_PI`                                                                                                                                                                                                                                                                                                  | Import             |
 | `./unit-types.js`  | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` | Import (type-only) |
 | `./errors.js`      | `DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                        | Import             |
@@ -11695,6 +11695,14 @@ graph LR
 
 ---
 
+### `expression/src/limits.ts` - Caps for untrusted expression text and hand-built trees.
+
+**Exports:**
+
+- Constants: `MAX_EXPRESSION_LENGTH`, `MAX_PARSE_NESTING`, `MAX_COMPILE_DEPTH`, `MAX_PARSE_RECURSION`
+
+---
+
 ### `expression/src/operators.ts` - Metadata for a single operator/node identifier in the precedence table.
 
 **Internal Dependencies:**
@@ -11726,6 +11734,7 @@ graph LR
 | `./utils/number.js`     | `NumberTypeConfig`                                                                        | Import (type-only) |
 | `./utils/object.js`     | `hasOwnProperty`                                                                          | Import             |
 | `./utils/customs.js`    | `setSafeProperty`                                                                         | Import             |
+| `./limits.js`           | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
 | `./node/Node.js`        | `MathNode`                                                                                | Import (type-only) |
 
 **Exports:**
@@ -11782,6 +11791,7 @@ graph LR
 | --------------------- | ------------------------------------------------- | ------------------ |
 | `../utils/map.js`     | `ObjectWrappingMap`                               | Import             |
 | `../utils/customs.js` | `getSafeProperty, setSafeProperty, getSafeMethod` | Import             |
+| `../limits.js`        | `MAX_COMPILE_DEPTH`                               | Import             |
 | `../node/Node.js`     | `MathNode`                                        | Import (type-only) |
 
 **Exports:**
@@ -15444,6 +15454,7 @@ graph LR
 | File                     | Imports                     | Type               |
 | ------------------------ | --------------------------- | ------------------ |
 | `../compiler/compile.js` | `compile`                   | Import             |
+| `../limits.js`           | `MAX_COMPILE_DEPTH`         | Import             |
 | `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
 | `../node/Node.js`        | `MathNode`                  | Import (type-only) |
 
@@ -18902,239 +18913,240 @@ graph TD
         N358[Parser]
         N359[index]
         N360[keywords]
-        N361[operators]
-        N362[parse]
-        N363[scalar-builder]
-        N364[scalar-structure]
-        N365[types]
+        N361[limits]
+        N362[operators]
+        N363[parse]
+        N364[scalar-builder]
+        N365[scalar-structure]
+        N366[types]
     end
 
     subgraph Expression/compiler
-        N366[compile]
-        N367[index]
+        N367[compile]
+        N368[index]
     end
 
     subgraph Expression/embeddedDocs
-        N368[Infinity]
-        N369[LN10]
-        N370[LN2]
-        N371[LOG10E]
-        N372[LOG2E]
-        N373[NaN]
-        N374[SQRT1_2]
-        N375[SQRT2]
-        N376[e]
-        N377[false]
-        N378[...388 more]
+        N369[Infinity]
+        N370[LN10]
+        N371[LN2]
+        N372[LOG10E]
+        N373[LOG2E]
+        N374[NaN]
+        N375[SQRT1_2]
+        N376[SQRT2]
+        N377[e]
+        N378[false]
+        N379[...388 more]
     end
 
     subgraph Expression/error
-        N379[DimensionError]
-        N380[IndexError]
+        N380[DimensionError]
+        N381[IndexError]
     end
 
     subgraph Expression/evaluator
-        N381[evaluate]
-        N382[index]
+        N382[evaluate]
+        N383[index]
     end
 
     subgraph Expression/function
-        N383[parser]
+        N384[parser]
     end
 
     subgraph Expression/node
-        N384[AccessorNode]
-        N385[ArrayNode]
-        N386[AssignmentNode]
-        N387[BlockNode]
-        N388[ConditionalNode]
-        N389[ConstantNode]
-        N390[FunctionAssignmentNode]
-        N391[FunctionNode]
-        N392[IndexNode]
-        N393[Node]
-        N394[...9 more]
+        N385[AccessorNode]
+        N386[ArrayNode]
+        N387[AssignmentNode]
+        N388[BlockNode]
+        N389[ConditionalNode]
+        N390[ConstantNode]
+        N391[FunctionAssignmentNode]
+        N392[FunctionNode]
+        N393[IndexNode]
+        N394[Node]
+        N395[...9 more]
     end
 
     subgraph Expression/transform
-        N395[and.transform]
-        N396[bitAnd.transform]
-        N397[bitOr.transform]
-        N398[column.transform]
-        N399[concat.transform]
-        N400[cumsum.transform]
-        N401[diff.transform]
-        N402[filter.transform]
-        N403[forEach.transform]
-        N404[index.transform]
-        N405[...23 more]
+        N396[and.transform]
+        N397[bitAnd.transform]
+        N398[bitOr.transform]
+        N399[column.transform]
+        N400[concat.transform]
+        N401[cumsum.transform]
+        N402[diff.transform]
+        N403[filter.transform]
+        N404[forEach.transform]
+        N405[index.transform]
+        N406[...23 more]
     end
 
     subgraph Expression/utils
-        N406[array]
-        N407[collection]
-        N408[customs]
-        N409[factory]
-        N410[is]
-        N411[latex]
-        N412[map]
-        N413[mathml]
-        N414[number]
-        N415[object]
-        N416[...3 more]
+        N407[array]
+        N408[collection]
+        N409[customs]
+        N410[factory]
+        N411[is]
+        N412[latex]
+        N413[map]
+        N414[mathml]
+        N415[number]
+        N416[object]
+        N417[...3 more]
     end
 
     subgraph Parser
-        N417[index]
-        N418[re-export-types.d]
+        N418[index]
+        N419[re-export-types.d]
     end
 
     subgraph Units
-        N419[index]
-    end
-
-    subgraph Numbers
         N420[index]
     end
 
-    subgraph Ast
+    subgraph Numbers
         N421[index]
-        N422[re-export-types.d]
+    end
+
+    subgraph Ast
+        N422[index]
+        N423[re-export-types.d]
     end
 
     subgraph Evaluator
-        N423[index]
-    end
-
-    subgraph Linalg
         N424[index]
     end
 
-    subgraph Arithmetic
+    subgraph Linalg
         N425[index]
     end
 
-    subgraph Trigonometry
+    subgraph Arithmetic
         N426[index]
     end
 
-    subgraph Statistics
+    subgraph Trigonometry
         N427[index]
     end
 
-    subgraph Signal
+    subgraph Statistics
         N428[index]
     end
 
+    subgraph Signal
+        N429[index]
+    end
+
     subgraph Parallel
-        N429[ComputePool]
-        N430[ParallelMatrix]
-        N431[WorkerPool]
-        N432[gemm-rows]
-        N433[index]
-        N434[matrix.worker]
+        N430[ComputePool]
+        N431[ParallelMatrix]
+        N432[WorkerPool]
+        N433[gemm-rows]
+        N434[index]
+        N435[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N435[elementwise]
-        N436[index]
-        N437[map]
-        N438[matmul]
-        N439[reduce]
+        N436[elementwise]
+        N437[index]
+        N438[map]
+        N439[matmul]
+        N440[reduce]
     end
 
     subgraph Parallel/ops
-        N440[bitwise]
+        N441[bitwise]
     end
 
     subgraph Parallel/strategies
-        N441[chunk]
-        N442[index]
-        N443[threshold]
+        N442[chunk]
+        N443[index]
+        N444[threshold]
     end
 
     subgraph Workbook
-        N444[cli]
-        N445[contract]
-        N446[doc]
-        N447[edit]
-        N448[executor]
-        N449[formatter]
-        N450[fs-atomic]
-        N451[graph]
-        N452[html]
-        N453[index]
-        N454[...15 more]
+        N445[cli]
+        N446[contract]
+        N447[doc]
+        N448[edit]
+        N449[executor]
+        N450[formatter]
+        N451[fs-atomic]
+        N452[graph]
+        N453[html]
+        N454[index]
+        N455[...15 more]
     end
 
     subgraph Assembly/algebra
-        N455[decomposition]
+        N456[decomposition]
     end
 
     subgraph Assembly
-        N456[elementwise]
-        N457[heap]
-        N458[index]
-        N459[poly]
-        N460[signal]
-        N461[sort]
-        N462[special]
-        N463[tridiag]
+        N457[elementwise]
+        N458[heap]
+        N459[index]
+        N460[poly]
+        N461[signal]
+        N462[sort]
+        N463[special]
+        N464[tridiag]
     end
 
     subgraph Assembly/ops
-        N464[approx]
-        N465[array]
-        N466[bitwise]
-        N467[complex-array]
-        N468[complex-ops]
-        N469[curvefit]
-        N470[f64-buffer]
-        N471[fft]
-        N472[linalg]
-        N473[matrix]
-        N474[...7 more]
+        N465[approx]
+        N466[array]
+        N467[bitwise]
+        N468[complex-array]
+        N469[complex-ops]
+        N470[curvefit]
+        N471[f64-buffer]
+        N472[fft]
+        N473[linalg]
+        N474[matrix]
+        N475[...7 more]
     end
 
     subgraph Assembly/types
-        N475[complex]
+        N476[complex]
     end
 
     subgraph Compat
-        N476[chain]
-        N477[index]
-        N478[shims]
+        N477[chain]
+        N478[index]
+        N479[shims]
     end
 
     subgraph Gpu
-        N479[BufferPool]
-        N480[GPUContext]
-        N481[ShaderManager]
-        N482[detect]
-        N483[device]
-        N484[flag]
-        N485[index]
-        N486[serialize]
+        N480[BufferPool]
+        N481[GPUContext]
+        N482[ShaderManager]
+        N483[detect]
+        N484[device]
+        N485[flag]
+        N486[index]
+        N487[serialize]
     end
 
     subgraph Plot
-        N487[coerce]
-        N488[contour]
-        N489[emit]
-        N490[frame]
-        N491[heatmap]
-        N492[histogram]
-        N493[index]
-        N494[marks2d]
-        N495[overlay]
-        N496[palette]
-        N497[...8 more]
+        N488[coerce]
+        N489[contour]
+        N490[emit]
+        N491[frame]
+        N492[heatmap]
+        N493[histogram]
+        N494[index]
+        N495[marks2d]
+        N496[overlay]
+        N497[palette]
+        N498[...8 more]
     end
 
     subgraph Plot/three
-        N498[points3d]
-        N499[project]
-        N500[surface]
+        N499[points3d]
+        N500[project]
+        N501[surface]
     end
 
     N4 --> N2
@@ -19222,15 +19234,15 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1223   |
+| Total TypeScript Files  | 1224   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200785 |
-| Total Exports           | 6325   |
+| Total Lines of Code     | 200932 |
+| Total Exports           | 6331   |
 | Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 548    |
-| Total Functions         | 2032   |
-| Total Type Guards       | 159    |
+| Total Functions         | 2034   |
+| Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 614    |
 | Runtime Circular Deps   | 0      |
