@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2019,
+  "totalFiles": 2033,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1196,
+    "build-entry": 1203,
     "test-only": 0,
     "orphan": 0,
-    "test": 735,
+    "test": 742,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1222,
-    "tests": 735,
+    "src": 1229,
+    "tests": 742,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -26,9 +26,9 @@
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 102,
     "@danielsimonjr/mathts-evaluator": 3,
-    "(root)": 51,
-    "@danielsimonjr/mathts-expression": 559,
-    "@danielsimonjr/mathts-functions": 851,
+    "(root)": 52,
+    "@danielsimonjr/mathts-expression": 561,
+    "@danielsimonjr/mathts-functions": 862,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -4181,7 +4181,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 80
+      "loc": 82
     },
     {
       "file": "expression/src/keywords.ts",
@@ -4357,6 +4357,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 237
+    },
+    {
+      "file": "expression/src/scalar-enumerate.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 309
     },
     {
       "file": "expression/src/scalar-structure.ts",
@@ -5071,6 +5078,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 106
+    },
+    {
+      "file": "expression/tests/scalar-enumerate.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 101
     },
     {
       "file": "expression/tests/scalar-structure.test.ts",
@@ -6114,6 +6128,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 850
+    },
+    {
+      "file": "functions/src/front-export.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 104
     },
     {
       "file": "functions/src/geometry-extra.ts",
@@ -7201,11 +7222,32 @@
       "loc": 155
     },
     {
+      "file": "functions/src/scalar-batch-parallel.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 220
+    },
+    {
+      "file": "functions/src/scalar-batch.worker.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 108
+    },
+    {
       "file": "functions/src/scalar-compile.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 859
+      "loc": 888
+    },
+    {
+      "file": "functions/src/scalar-dimension.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 521
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -7215,11 +7257,25 @@
       "loc": 185
     },
     {
+      "file": "functions/src/scalar-mutate.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 582
+    },
+    {
       "file": "functions/src/scalar-node-bridge.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
       "loc": 371
+    },
+    {
+      "file": "functions/src/scalar-search.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 498
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -9427,6 +9483,13 @@
       "loc": 102
     },
     {
+      "file": "functions/tests/front-export.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 83
+    },
+    {
       "file": "functions/tests/fsolve.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10568,6 +10631,13 @@
       "loc": 156
     },
     {
+      "file": "functions/tests/scalar-batch-parallel.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 86
+    },
+    {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10582,6 +10652,13 @@
       "loc": 609
     },
     {
+      "file": "functions/tests/scalar-dimension.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 215
+    },
+    {
       "file": "functions/tests/scalar-eval.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10589,11 +10666,25 @@
       "loc": 131
     },
     {
+      "file": "functions/tests/scalar-mutate.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 232
+    },
+    {
       "file": "functions/tests/scalar-node-bridge.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 619
+    },
+    {
+      "file": "functions/tests/scalar-search.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 197
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",
@@ -12308,7 +12399,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 145
+      "loc": 147
     },
     {
       "file": "parallel/src/matrix.worker.ts",
@@ -13429,6 +13520,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 85
+    },
+    {
+      "file": "tests/integration/scalar-search-parallel.test.ts",
+      "package": "(root)",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 68
     },
     {
       "file": "tests/wasm/parallel-processing.test.ts",

@@ -1407,6 +1407,41 @@
       "tag": "ALLOWLISTED"
     },
     {
+      "name": "identity",
+      "category": "constant+function",
+      "definers": [
+        {
+          "file": "compat/src/shims.ts",
+          "package": "@danielsimonjr/mathts-compat",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
+        },
+        {
+          "file": "functions/src/factories/index.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
+        },
+        {
+          "file": "functions/src/scalar-mutate.ts",
+          "package": "@danielsimonjr/mathts-functions",
+          "public": true,
+          "tag": "ALLOWLISTED",
+          "reason": "PySR M12 mutation operator `identity(node)` returns the same ScalarNode; not the matrix-identity factory (`functions/src/factories/index.ts`), compat shim, or typed matrix `identity` dispatch (`matrix/src/typed-operations.ts`)."
+        },
+        {
+          "file": "matrix/src/typed-operations.ts",
+          "package": "@danielsimonjr/mathts-matrix",
+          "public": true,
+          "tag": "DISPATCH_VARIANT"
+        }
+      ],
+      "canonicalHint": "AMBIGUOUS",
+      "tag": "ALLOWLISTED"
+    },
+    {
       "name": "isUnit",
       "category": "constant+function",
       "definers": [
@@ -1671,34 +1706,6 @@
           "public": true,
           "tag": "ALLOWLISTED",
           "reason": "Bucket-D domain-FFT split: functions/src/signal/fft.ts (left canonical) is the public Complex-object FFT toolkit; functions/src/factories/index.ts is the mathjs `fft`/`ifft` factory wrapper (assembly/src/ops/fft.ts is allowlisted via assembly/src/**). Matrix fft-wasm bridge removed in PR-DELETE. 2026-07 dedup campaign, closing tail slice."
-        }
-      ],
-      "canonicalHint": "AMBIGUOUS",
-      "tag": "ALLOWLISTED"
-    },
-    {
-      "name": "identity",
-      "category": "constant+function",
-      "definers": [
-        {
-          "file": "compat/src/shims.ts",
-          "package": "@danielsimonjr/mathts-compat",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
-        },
-        {
-          "file": "functions/src/factories/index.ts",
-          "package": "@danielsimonjr/mathts-functions",
-          "public": true,
-          "tag": "ALLOWLISTED",
-          "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
-        },
-        {
-          "file": "matrix/src/typed-operations.ts",
-          "package": "@danielsimonjr/mathts-matrix",
-          "public": true,
-          "tag": "DISPATCH_VARIANT"
         }
       ],
       "canonicalHint": "AMBIGUOUS",

@@ -397,6 +397,7 @@
       "functions/src/matrix/subset.ts",
       "functions/src/matrix/trace.ts",
       "functions/src/matrix/transpose.ts",
+      "functions/src/scalar-dimension.ts",
       "functions/src/type/chain/Chain.ts",
       "functions/src/type/matrix/ImmutableDenseMatrix.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
@@ -1638,6 +1639,7 @@
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/fit-scalar.ts",
+      "functions/src/front-export.ts",
       "functions/src/index.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
@@ -1716,7 +1718,15 @@
     "functions/src/scalar-compile.ts": [
       "functions/src/fit-scalar.ts",
       "functions/src/index.ts",
-      "functions/src/numeric-equivalence.ts"
+      "functions/src/numeric-equivalence.ts",
+      "functions/src/scalar-batch-parallel.ts",
+      "functions/src/scalar-batch.worker.ts",
+      "functions/src/scalar-search.ts"
+    ],
+    "functions/src/pareto-front.ts": [
+      "functions/src/front-export.ts",
+      "functions/src/index.ts",
+      "functions/src/scalar-search.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
@@ -1754,9 +1764,9 @@
     "functions/src/scalar-eval.ts": [
       "functions/src/index.ts",
       "functions/src/numeric-equivalence.ts",
-      "functions/src/scalar-compile.ts"
+      "functions/src/scalar-compile.ts",
+      "functions/src/scalar-mutate.ts"
     ],
-    "functions/src/pareto-front.ts": ["functions/src/index.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
@@ -1803,7 +1813,7 @@
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/fit-scalar.ts": ["functions/src/index.ts"],
+    "functions/src/fit-scalar.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": [
       "functions/src/geometry/geometry-extra.ts",
@@ -1880,6 +1890,12 @@
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
     ],
+    "functions/src/numeric/rational-nullspace.ts": [
+      "functions/src/scalar-dimension.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/scalar-batch-parallel.ts": ["functions/src/scalar-search.ts"],
+    "functions/src/scalar-mutate.ts": ["functions/src/scalar-search.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/typed/factorization/integer-poly.ts": [
@@ -2466,7 +2482,6 @@
       "functions/src/typed/interpolation.ts",
       "functions/src/wasm/poly/wasm-bridge.ts"
     ],
-    "functions/src/numeric/rational-nullspace.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
@@ -2532,6 +2547,7 @@
       "expression/src/node/ObjectNode.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
+      "expression/src/scalar-enumerate.ts",
       "expression/src/scalar-structure.ts",
       "expression/src/utils/customs.ts",
       "expression/src/utils/factory.ts",
@@ -2684,9 +2700,14 @@
     ],
     "expression/src/scalar-builder.ts": [
       "expression/src/index.ts",
+      "expression/src/scalar-enumerate.ts",
       "expression/src/scalar-structure.ts"
     ],
-    "expression/src/scalar-structure.ts": ["expression/src/index.ts"],
+    "expression/src/scalar-structure.ts": [
+      "expression/src/index.ts",
+      "expression/src/scalar-enumerate.ts"
+    ],
+    "expression/src/scalar-enumerate.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/utils/customs.ts": [
@@ -3989,7 +4010,7 @@
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
-    "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts"],
+    "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts", "parallel/src/index.ts"],
     "parallel/src/gemm-rows.ts": [
       "parallel/src/ParallelMatrix.ts",
       "parallel/src/matrix.worker.ts"
