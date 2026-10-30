@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-29",
+  "generated": "2026-10-30",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -672,6 +672,7 @@
       "isObject",
       "isObjectWrappingMap",
       "isOptionalDependency",
+      "isPollutingKey",
       "isPowZeroAtInfinity",
       "isRange",
       "isRationalScale",
@@ -1275,6 +1276,9 @@
       "matrixFromColumnsDocs",
       "matrixFromFunctionDocs",
       "matrixFromRowsDocs",
+      "MAX_COMPILE_DEPTH",
+      "MAX_EXPRESSION_LENGTH",
+      "MAX_PARSE_NESTING",
       "maxDocs",
       "meanDocs",
       "medianDocs",

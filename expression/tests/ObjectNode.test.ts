@@ -121,6 +121,18 @@ describe('ObjectNode - map', () => {
       'Callback function must return a Node'
     );
   });
+
+  it('rejects an own __proto__ key (prototype pollution)', () => {
+    const node = new ObjectNode({});
+    Object.defineProperty(node.properties, '__proto__', {
+      value: makeConst(1),
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+    expect(() => node.map((child) => child)).toThrow(/No access to property/);
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
+  });
 });
 
 describe('ObjectNode - clone', () => {
@@ -131,6 +143,18 @@ describe('ObjectNode - clone', () => {
     expect(cloned).not.toBe(node);
     expect(cloned.properties.a).toBe(a);
     expect(cloned.type).toBe('ObjectNode');
+  });
+
+  it('rejects an own __proto__ key when cloning', () => {
+    const node = new ObjectNode({});
+    Object.defineProperty(node.properties, '__proto__', {
+      value: makeConst(1),
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+    expect(() => node.clone()).toThrow(/No access to property/);
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
   });
 });
 

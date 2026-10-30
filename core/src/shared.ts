@@ -13,6 +13,11 @@ export function hasOwnProperty(object: unknown, property: string): boolean {
   return !!object && Object.hasOwnProperty.call(object, property);
 }
 
+/** True for keys whose assignment changes [[Prototype]] or writes through it. */
+export function isPollutingKey(prop: string): boolean {
+  return prop in Object.prototype || prop in Function.prototype;
+}
+
 /**
  * True when `text` ends with `search`. (Equivalent to `String.prototype.endsWith`;
  * kept as a named helper so relocated modules read the same as their mathjs origin.)

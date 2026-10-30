@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-29", "f": 1223, "e": 6325, "re": 2680 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1224, "e": 6329, "re": 2680 },
   "s": {
-    "loc": 200785,
+    "loc": 200856,
     "cls": 59,
     "int": 548,
-    "fn": 2032,
-    "tg": 159,
+    "fn": 2033,
+    "tg": 160,
     "en": 0,
-    "co": 1624,
+    "co": 1627,
     "toi": 614
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -1219,7 +1219,7 @@
       "int": ["WasmModule", "RawWasm", "WasmBand"]
     },
     "expression": {
-      "f": 9,
+      "f": 10,
       "exp": [
         "createHelpClass",
         "createParserClass",

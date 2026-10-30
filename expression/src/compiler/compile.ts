@@ -14,6 +14,7 @@
 
 import { ObjectWrappingMap } from '../utils/map.js';
 import { getSafeProperty, setSafeProperty, getSafeMethod } from '../utils/customs.js';
+import { MAX_COMPILE_DEPTH } from '../limits.js';
 import type { MathNode } from '../node/Node.js';
 
 /**
@@ -84,7 +85,7 @@ interface ObjectPropertyIndex {
  */
 export function compile(node: MathNode, mathScope: Record<string, unknown>): CompiledExpression {
   // Pre-compile the node tree into a closure
-  const evalFn = compileNode(node, mathScope, {});
+  const evalFn = compileNode(node, mathScope, {}, 0);
 
   return {
     evaluate(userScope?: Record<string, unknown> | Scope): unknown {
@@ -118,8 +119,13 @@ type EvalFunction = (scope: Scope, args: Record<string, unknown>, context: unkno
 function compileNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
+  if (depth >= MAX_COMPILE_DEPTH) {
+    throw new Error(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`);
+  }
+  const nextDepth = depth + 1;
   const n = node as MathNode & NodeFlags & { content?: MathNode };
   if (n.isConstantNode) {
     return compileConstantNode(node);
@@ -128,43 +134,43 @@ function compileNode(
     return compileSymbolNode(node, math, argNames);
   }
   if (n.isOperatorNode) {
-    return compileOperatorNode(node, math, argNames);
+    return compileOperatorNode(node, math, argNames, nextDepth);
   }
   if (n.isFunctionNode) {
-    return compileFunctionNode(node, math, argNames);
+    return compileFunctionNode(node, math, argNames, nextDepth);
   }
   if (n.isParenthesisNode) {
-    return compileNode(n.content as MathNode, math, argNames);
+    return compileNode(n.content as MathNode, math, argNames, nextDepth);
   }
   if (n.isArrayNode) {
-    return compileArrayNode(node, math, argNames);
+    return compileArrayNode(node, math, argNames, nextDepth);
   }
   if (n.isAssignmentNode) {
-    return compileAssignmentNode(node, math, argNames);
+    return compileAssignmentNode(node, math, argNames, nextDepth);
   }
   if (n.isBlockNode) {
-    return compileBlockNode(node, math, argNames);
+    return compileBlockNode(node, math, argNames, nextDepth);
   }
   if (n.isConditionalNode) {
-    return compileConditionalNode(node, math, argNames);
+    return compileConditionalNode(node, math, argNames, nextDepth);
   }
   if (n.isObjectNode) {
-    return compileObjectNode(node, math, argNames);
+    return compileObjectNode(node, math, argNames, nextDepth);
   }
   if (n.isRangeNode) {
-    return compileRangeNode(node, math, argNames);
+    return compileRangeNode(node, math, argNames, nextDepth);
   }
   if (n.isRelationalNode) {
-    return compileRelationalNode(node, math, argNames);
+    return compileRelationalNode(node, math, argNames, nextDepth);
   }
   if (n.isFunctionAssignmentNode) {
-    return compileFunctionAssignmentNode(node, math, argNames);
+    return compileFunctionAssignmentNode(node, math, argNames, nextDepth);
   }
   if (n.isAccessorNode) {
-    return compileAccessorNode(node, math, argNames);
+    return compileAccessorNode(node, math, argNames, nextDepth);
   }
   if (n.isIndexNode) {
-    return compileIndexNode(node, math, argNames);
+    return compileIndexNode(node, math, argNames, nextDepth);
   }
 
   throw new Error(`Unknown node type: ${node.type || node.constructor?.name}`);
@@ -242,7 +248,8 @@ function compileSymbolNode(
 function compileOperatorNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const opNode = node as MathNode & { fn: string; args: MathNode[] };
   const fnName: string = opNode.fn;
@@ -263,7 +270,9 @@ function compileOperatorNode(
     };
   }
 
-  const evalArgs: EvalFunction[] = opNode.args.map((arg) => compileNode(arg, math, argNames));
+  const evalArgs: EvalFunction[] = opNode.args.map((arg) =>
+    compileNode(arg, math, argNames, depth)
+  );
 
   // Optimize for common arity
   if (evalArgs.length === 1) {
@@ -298,7 +307,8 @@ function compileOperatorNode(
 function compileFunctionNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const fnNodeOuter = node as MathNode & {
     args: MathNode[];
@@ -329,7 +339,7 @@ function compileFunctionNode(
         const shadow = scope.has(name) ? scope.get(name) : undefined;
         if (typeof shadow === 'function' && (shadow as { rawArgs?: boolean }).rawArgs !== true) {
           const values = rawNodes.map((rn) =>
-            compileNode(rn, math, argNames)(scope, {}, undefined)
+            compileNode(rn, math, argNames, depth)(scope, {}, undefined)
           );
           return (shadow as MathFunction)(...values);
         }
@@ -338,7 +348,7 @@ function compileFunctionNode(
     }
 
     const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) =>
-      compileNode(arg, math, argNames)
+      compileNode(arg, math, argNames, depth)
     );
 
     const resolveFn = (scope: Scope): MathFunction => {
@@ -409,9 +419,9 @@ function compileFunctionNode(
     fnNode.index.isObjectProperty()
   ) {
     const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) =>
-      compileNode(arg, math, argNames)
+      compileNode(arg, math, argNames, depth)
     );
-    const evalObject = compileNode(fnNode.object as MathNode, math, argNames);
+    const evalObject = compileNode(fnNode.object as MathNode, math, argNames, depth);
     const methodName: string = fnNode.index.getObjectProperty!();
     return function evalFunctionNode(
       scope: Scope,
@@ -429,8 +439,10 @@ function compileFunctionNode(
   }
 
   // General fallback (computed accessor, etc.)
-  const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) => compileNode(arg, math, argNames));
-  const evalFn = compileNode(fnNode, math, argNames);
+  const evalArgs: EvalFunction[] = fnNodeOuter.args.map((arg) =>
+    compileNode(arg, math, argNames, depth)
+  );
+  const evalFn = compileNode(fnNode, math, argNames, depth);
   return function evalFunctionNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const fn = evalFn(scope, args, context);
     if (typeof fn !== 'function') {
@@ -444,10 +456,11 @@ function compileFunctionNode(
 function compileArrayNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const items = (node as MathNode & { items: MathNode[] }).items;
-  const evalItems: EvalFunction[] = items.map((item) => compileNode(item, math, argNames));
+  const evalItems: EvalFunction[] = items.map((item) => compileNode(item, math, argNames, depth));
   return function evalArrayNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     return evalItems.map((e) => e(scope, args, context));
   };
@@ -456,7 +469,8 @@ function compileArrayNode(
 function compileAssignmentNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const asgNode = node as MathNode & {
     value: MathNode;
@@ -470,7 +484,7 @@ function compileAssignmentNode(
       index?: MathNode & ObjectPropertyIndex;
     };
   };
-  const evalValue = compileNode(asgNode.value, math, argNames);
+  const evalValue = compileNode(asgNode.value, math, argNames, depth);
 
   if (asgNode.object && asgNode.object.isSymbolNode && !asgNode.index) {
     // Simple variable assignment: x = 5
@@ -488,7 +502,7 @@ function compileAssignmentNode(
 
   if (asgNode.object && asgNode.object.isAccessorNode) {
     // Property assignment: obj.prop = value
-    const evalObject = compileNode(asgNode.object.object as MathNode, math, argNames);
+    const evalObject = compileNode(asgNode.object.object as MathNode, math, argNames, depth);
     if (asgNode.object.index && asgNode.object.index.isObjectProperty!()) {
       const prop = asgNode.object.index.getObjectProperty!();
       return function evalAssignmentNode(
@@ -524,12 +538,13 @@ function compileAssignmentNode(
 function compileBlockNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const blocks = (node as MathNode & { blocks: Array<{ node: MathNode; visible: boolean }> })
     .blocks;
   const evalBlocks = blocks.map((block) => ({
-    evaluate: compileNode(block.node, math, argNames),
+    evaluate: compileNode(block.node, math, argNames, depth),
     visible: block.visible,
   }));
 
@@ -551,16 +566,17 @@ function compileBlockNode(
 function compileConditionalNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const condNode = node as MathNode & {
     condition: MathNode;
     trueExpr: MathNode;
     falseExpr: MathNode;
   };
-  const evalCondition = compileNode(condNode.condition, math, argNames);
-  const evalTrueExpr = compileNode(condNode.trueExpr, math, argNames);
-  const evalFalseExpr = compileNode(condNode.falseExpr, math, argNames);
+  const evalCondition = compileNode(condNode.condition, math, argNames, depth);
+  const evalTrueExpr = compileNode(condNode.trueExpr, math, argNames, depth);
+  const evalFalseExpr = compileNode(condNode.falseExpr, math, argNames, depth);
 
   return function evalConditionalNode(
     scope: Scope,
@@ -577,13 +593,14 @@ function compileConditionalNode(
 function compileObjectNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const properties = (node as MathNode & { properties: Record<string, MathNode> }).properties;
   const keys = Object.keys(properties);
   const evalProps: Array<{ key: string; evaluate: EvalFunction }> = keys.map((key) => ({
     key,
-    evaluate: compileNode(properties[key], math, argNames),
+    evaluate: compileNode(properties[key], math, argNames, depth),
   }));
 
   return function evalObjectNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
@@ -600,7 +617,8 @@ function compileObjectNode(
 function compileRangeNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const rangeFn = math.range as MathFunction | undefined;
   if (!rangeFn) {
@@ -608,11 +626,11 @@ function compileRangeNode(
   }
 
   const rngNode = node as MathNode & { start: MathNode; end: MathNode; step?: MathNode };
-  const evalStart = compileNode(rngNode.start, math, argNames);
-  const evalEnd = compileNode(rngNode.end, math, argNames);
+  const evalStart = compileNode(rngNode.start, math, argNames, depth);
+  const evalEnd = compileNode(rngNode.end, math, argNames, depth);
 
   if (rngNode.step) {
-    const evalStep = compileNode(rngNode.step, math, argNames);
+    const evalStep = compileNode(rngNode.step, math, argNames, depth);
     return function evalRangeNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
       return rangeFn(
         evalStart(scope, args, context),
@@ -630,10 +648,11 @@ function compileRangeNode(
 function compileRelationalNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const relNode = node as MathNode & { params: MathNode[]; conditionals: string[] };
-  const compiled: EvalFunction[] = relNode.params.map((p) => compileNode(p, math, argNames));
+  const compiled: EvalFunction[] = relNode.params.map((p) => compileNode(p, math, argNames, depth));
   const conditionals: string[] = relNode.conditionals;
 
   return function evalRelationalNode(
@@ -662,7 +681,8 @@ function compileRelationalNode(
 function compileFunctionAssignmentNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const faNode = node as MathNode & { params: string[]; expr: MathNode; name: string };
   const childArgNames: Record<string, boolean> = Object.create(argNames);
@@ -670,7 +690,7 @@ function compileFunctionAssignmentNode(
     childArgNames[param] = true;
   }
 
-  const evalExpr = compileNode(faNode.expr, math, childArgNames);
+  const evalExpr = compileNode(faNode.expr, math, childArgNames, depth);
   const name: string = faNode.name;
   const params: string[] = faNode.params;
 
@@ -695,14 +715,15 @@ function compileFunctionAssignmentNode(
 function compileAccessorNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const accNode = node as MathNode & {
     object: MathNode;
     optionalChaining?: boolean;
     index: MathNode & ObjectPropertyIndex;
   };
-  const evalObject = compileNode(accNode.object, math, argNames);
+  const evalObject = compileNode(accNode.object, math, argNames, depth);
 
   if (accNode.index && accNode.index.isObjectProperty && accNode.index.isObjectProperty()) {
     const prop = accNode.index.getObjectProperty!();
@@ -720,7 +741,7 @@ function compileAccessorNode(
   }
 
   // Array/matrix indexing
-  const evalIndex = compileNode(accNode.index, math, argNames);
+  const evalIndex = compileNode(accNode.index, math, argNames, depth);
   return function evalAccessorNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const object = evalObject(scope, args, context);
     if (accNode.optionalChaining && object == null) return undefined;
@@ -743,7 +764,8 @@ function compileAccessorNode(
 function compileIndexNode(
   node: MathNode,
   math: Record<string, unknown>,
-  argNames: Record<string, boolean>
+  argNames: Record<string, boolean>,
+  depth: number
 ): EvalFunction {
   const dimensionNodes = (node as MathNode & { dimensions: MathNode[] }).dimensions;
   // `end` support (mathjs parity): inside dimension i of `A[...]`, the symbol
@@ -762,9 +784,9 @@ function compileIndexNode(
     if (usesEnd[i]) {
       const childArgNames: Record<string, boolean> = Object.create(argNames);
       childArgNames.end = true;
-      return compileNode(dim, math, childArgNames);
+      return compileNode(dim, math, childArgNames, depth);
     }
-    return compileNode(dim, math, argNames);
+    return compileNode(dim, math, argNames, depth);
   });
   const anyEnd = usesEnd.some((n) => n > 0);
 

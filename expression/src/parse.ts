@@ -12,6 +12,7 @@ import { safeNumberType } from './utils/number.js';
 import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
 import { setSafeProperty } from './utils/customs.js';
+import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING } from './limits.js';
 import type { MathNode } from './node/Node.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
@@ -178,12 +179,18 @@ export const createParse = /* #__PURE__ */ factory(
      */
     const parse = typed(name, {
       string: function (expression: string): MathNode {
+        if (expression.length > MAX_EXPRESSION_LENGTH) {
+          throw new SyntaxError(`expression exceeds ${MAX_EXPRESSION_LENGTH} characters`);
+        }
         return parseStart(expression, {});
       },
       'Array | Matrix': function (expressions: unknown) {
         return parseMultiple(expressions, {});
       },
       'string, Object': function (expression: string, options: ParseOptions): MathNode {
+        if (expression.length > MAX_EXPRESSION_LENGTH) {
+          throw new SyntaxError(`expression exceeds ${MAX_EXPRESSION_LENGTH} characters`);
+        }
         const extraNodes = options.nodes !== undefined ? options.nodes : {};
 
         return parseStart(expression, extraNodes);
@@ -570,6 +577,9 @@ export const createParse = /* #__PURE__ */ factory(
      * New line characters will be ignored until closeParams(state) is called
      */
     function openParams(state: ParserState): void {
+      if (state.nestingLevel >= MAX_PARSE_NESTING - 1) {
+        throw createSyntaxError(state, 'expression exceeds nesting limit');
+      }
       state.nestingLevel++;
     }
 

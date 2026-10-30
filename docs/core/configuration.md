@@ -129,6 +129,8 @@ Override `MathTSConfig` at startup by spreading `DEFAULT_CONFIG` from the main e
 
 `@danielsimonjr/mathts-core/internal` also exports tree helpers (`deepMap`, `deepForEach`, `reduce`), formatting (`format`, `formatGeneric`, `formatBigNumber`), factory utilities (`factory`, `sortFactories`), error types (`DimensionError`, `IndexError`, `MathjsError`), safe property accessors, and WASM manifest helpers. Prefer the main entry for public types and `mathTyped`; use `./internal` only when you need these mathjs-compat or tooling surfaces.
 
+`clone`, `extend`, `mapObject`, and `deepFlatten` on `./internal` skip own keys whose names sit on `Object.prototype` or `Function.prototype` (the same rule `deepExtend` already used). Polluting keys are omitted from copies rather than assigned.
+
 ## TypeScript types
 
 ```typescript

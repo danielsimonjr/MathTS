@@ -54,6 +54,19 @@ If `math.subset` is present (the functions-wired evaluator), indexing goes throu
 
 Regression-guarded by `expression/tests/security/sandbox.test.ts`.
 
+**Expression size and depth caps** (constants in `expression/src/limits.ts`, not exported
+from the package root and not wired to `ConfigOptions`):
+
+| Limit                   | Value                  | Failure                                                                      |
+| ----------------------- | ---------------------- | ---------------------------------------------------------------------------- |
+| `MAX_EXPRESSION_LENGTH` | 1_000_000 characters   | `SyntaxError`: `expression exceeds 1000000 characters` (before tokenization) |
+| `MAX_PARSE_NESTING`     | 125 parenthesis levels | `SyntaxError`: `expression exceeds nesting limit (char …)`                   |
+| `MAX_COMPILE_DEPTH`     | 512 AST nodes deep     | `Error`: `expression exceeds compile depth 512`                              |
+
+Object literal keys from user text still throw at parse time for `{__proto__: …}`.
+Hand-built `ObjectNode` values use the same `setSafeProperty` checks in `map` and
+`clone`. Regression-guarded by `expression/tests/security/limits.test.ts`.
+
 A **second, independent** layer is `evaluator/evaluate.ts`'s `validateAst` — an
 AST-shape rejection before compile (see [`createEvaluate`](#compilation--evaluation)).
 The two layers are complementary: `validateAst` blocks whole classes of

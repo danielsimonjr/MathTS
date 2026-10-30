@@ -4,6 +4,8 @@ Expression parser & evaluator for [MathTS](https://github.com/danielsimonjr/math
 
 The expression engine for MathTS: a parser (string → AST), an AST node set, a compiler, and an evaluator. Includes a sandbox (`getSafeProperty` / `getSafeMethod`) for safe property access.
 
+**Limits on untrusted strings:** max length **1,000,000** characters, max parenthesis nesting **125**, max compile depth **512** (see `expression/tests/security/limits.test.ts` and `docs/api/expression.md`).
+
 ## Install
 
 ```sh

@@ -49,7 +49,6 @@ function sentinelForPackage(pkgName) {
  * @returns {import('./bundle-budget.json')}
  */
 export function measureBudget() {
-  const exportLock = JSON.parse(readFileSync(EXPORT_LOCK_PATH, 'utf8'));
   /** @type {Record<string, number>} */
   const files = {};
   /** @type {Record<string, { treeShake: boolean, sentinel?: string, sentinelPresent?: boolean }>} */

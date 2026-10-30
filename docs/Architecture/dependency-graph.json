@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-29",
-    "totalFiles": 1223,
+    "lastUpdated": "2026-10-30",
+    "totalFiles": 1224,
     "totalModules": 82,
-    "totalExports": 6325
+    "totalExports": 6329
   },
   "entryPoints": [
     {
@@ -1999,7 +1999,7 @@
           },
           {
             "file": "./shared.js",
-            "imports": ["hasOwnProperty"]
+            "imports": ["hasOwnProperty", "isPollutingKey"]
           }
         ],
         "workspaceDependencies": [],
@@ -2043,9 +2043,9 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["warnOnce", "hasOwnProperty", "endsWith", "memoize"],
+        "exports": ["warnOnce", "hasOwnProperty", "isPollutingKey", "endsWith", "memoize"],
         "interfaces": ["MemoizedFunction"],
-        "functions": ["hasOwnProperty", "endsWith", "memoize"],
+        "functions": ["hasOwnProperty", "isPollutingKey", "endsWith", "memoize"],
         "constants": ["warnOnce"]
       },
       "core/src/string.ts": {
@@ -2747,7 +2747,7 @@
           },
           {
             "file": "../../shared.js",
-            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce"]
+            "imports": ["memoize", "endsWith", "hasOwnProperty", "warnOnce", "isPollutingKey"]
           },
           {
             "file": "../bignumber.js",
@@ -26579,6 +26579,15 @@
         "exports": ["keywords"],
         "constants": ["keywords"]
       },
+      "expression/src/limits.ts": {
+        "description": "Caps for untrusted expression text and hand-built trees.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING", "MAX_COMPILE_DEPTH"],
+        "constants": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING", "MAX_COMPILE_DEPTH"]
+      },
       "expression/src/operators.ts": {
         "description": "Metadata for a single operator/node identifier in the precedence table.",
         "externalDependencies": [],
@@ -26645,6 +26654,10 @@
           {
             "file": "./utils/customs.js",
             "imports": ["setSafeProperty"]
+          },
+          {
+            "file": "./limits.js",
+            "imports": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING"]
           },
           {
             "file": "./node/Node.js",
@@ -26740,6 +26753,10 @@
           {
             "file": "../utils/customs.js",
             "imports": ["getSafeProperty", "setSafeProperty", "getSafeMethod"]
+          },
+          {
+            "file": "../limits.js",
+            "imports": ["MAX_COMPILE_DEPTH"]
           },
           {
             "file": "../node/Node.js",
@@ -41988,6 +42005,7 @@
           "expression/src/Parser.ts",
           "expression/src/index.ts",
           "expression/src/keywords.ts",
+          "expression/src/limits.ts",
           "expression/src/operators.ts",
           "expression/src/parse.ts",
           "expression/src/scalar-builder.ts",
@@ -42691,16 +42709,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1223,
+    "totalTypeScriptFiles": 1224,
     "totalModules": 82,
-    "totalLinesOfCode": 200785,
-    "totalExports": 6325,
+    "totalLinesOfCode": 200856,
+    "totalExports": 6329,
     "totalClasses": 59,
     "totalInterfaces": 548,
-    "totalFunctions": 2032,
-    "totalTypeGuards": 159,
+    "totalFunctions": 2033,
+    "totalTypeGuards": 160,
     "totalEnums": 0,
-    "totalConstants": 1624,
+    "totalConstants": 1627,
     "totalReExports": 2680,
     "totalTypeOnlyImports": 614,
     "runtimeCircularDeps": 0,
