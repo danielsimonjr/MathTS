@@ -653,7 +653,56 @@ function compileRowCount(
   return n;
 }
 
-function buildTape(
+/**
+ * Run a compiled register tape over every row. Shared by {@link compileScalar} and the
+ * scalar batch worker (M14); not re-exported from the package barrel.
+ */
+export function evaluateScalarTape(
+  tape: readonly TapeInstr[],
+  rootReg: number,
+  nRegs: number,
+  columns: readonly Float64Array[],
+  variables: readonly string[],
+  params: ArrayLike<number>,
+  parameters: readonly string[],
+  messagePrefix: string,
+  out?: Float64Array
+): ScalarBatchResult {
+  const n = compileRowCount(columns, variables, messagePrefix);
+  const boundParams = checkCompileParams(params, parameters, messagePrefix);
+  const scratch = new Float64Array(nRegs);
+  let values: Float64Array;
+  if (out !== undefined) {
+    if (out.length !== n) {
+      throw new ScalarEvalError(
+        `${messagePrefix} out length ${out.length} does not match row count ${n}`
+      );
+    }
+    values = out;
+  } else {
+    values = new Float64Array(n);
+  }
+  const valid = new Uint8Array(n);
+  let allValid = true;
+  for (let row = 0; row < n; row++) {
+    const { value, valid: rowValid } = runRow(
+      tape,
+      scratch,
+      rootReg,
+      columns,
+      boundParams,
+      row,
+      undefined,
+      0
+    );
+    values[row] = rowValid ? value : Number.NaN;
+    valid[row] = rowValid ? 1 : 0;
+    if (!rowValid) allValid = false;
+  }
+  return { values, valid, allValid };
+}
+
+export function buildTape(
   node: ScalarNode,
   options: CompileScalarOptions,
   messagePrefix: string
@@ -698,37 +747,17 @@ export function compileScalar(node: ScalarNode, options: CompileScalarOptions): 
     variables,
     parameters,
     evaluate(columns, params, out) {
-      const n = compileRowCount(columns, variables, messagePrefix);
-      const boundParams = checkCompileParams(params, parameters, messagePrefix);
-      let values: Float64Array;
-      if (out !== undefined) {
-        if (out.length !== n) {
-          throw new ScalarEvalError(
-            `compileScalar: out length ${out.length} does not match row count ${n}`
-          );
-        }
-        values = out;
-      } else {
-        values = new Float64Array(n);
-      }
-      const valid = new Uint8Array(n);
-      let allValid = true;
-      for (let row = 0; row < n; row++) {
-        const { value, valid: rowValid } = runRow(
-          tape,
-          scratch,
-          rootReg,
-          columns,
-          boundParams,
-          row,
-          undefined,
-          0
-        );
-        values[row] = rowValid ? value : Number.NaN;
-        valid[row] = rowValid ? 1 : 0;
-        if (!rowValid) allValid = false;
-      }
-      return { values, valid, allValid };
+      return evaluateScalarTape(
+        tape,
+        rootReg,
+        nRegs,
+        columns,
+        variables,
+        params ?? [],
+        parameters,
+        messagePrefix,
+        out
+      );
     },
     evaluateRow(row, params) {
       const nVars = variables.length;

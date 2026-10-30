@@ -20,6 +20,8 @@ export {
   resolveOpThreshold,
 } from './ComputePool.js';
 
+export { WorkerPool } from './WorkerPool.js';
+
 export type { ComputePoolConfig, ParallelResult, OpName, OpThreshold } from './ComputePool.js';
 
 // =============================================================================
