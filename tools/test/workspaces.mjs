@@ -11,15 +11,16 @@ export const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 /**
  * List the workspace package directories, relative to the repository root.
+ * @param {string} [root] repository root; defaults to this checkout (tests pass a fixture)
  * @returns {string[]} directories such as `core` or `packages/workerpool`, in manifest order.
  */
-export function workspaceDirs() {
-  const rootPkg = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8'));
+export function workspaceDirs(root = repoRoot) {
+  const rootPkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   return rootPkg.workspaces.flatMap((entry) => {
     if (!entry.endsWith('/*')) return [entry];
     const parent = entry.slice(0, -2);
-    return readdirSync(join(repoRoot, parent), { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(join(repoRoot, parent, d.name, 'package.json')))
+    return readdirSync(join(root, parent), { withFileTypes: true })
+      .filter((d) => d.isDirectory() && existsSync(join(root, parent, d.name, 'package.json')))
       .map((d) => `${parent}/${d.name}`)
       .sort();
   });
