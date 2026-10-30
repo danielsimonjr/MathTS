@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2044,
+  "totalFiles": 2045,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1204,
     "test-only": 0,
     "orphan": 0,
-    "test": 752,
+    "test": 753,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1230,
-    "tests": 752,
+    "tests": 753,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 102,
+    "@danielsimonjr/mathts-core": 103,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 754
+      "loc": 749
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -941,6 +941,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 151
+    },
+    {
+      "file": "core/tests/complex-tan-family-pin.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 174
     },
     {
       "file": "core/tests/config.test.ts",

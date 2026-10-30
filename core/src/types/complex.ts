@@ -8,6 +8,27 @@ import type { Scalar, IComplex } from './interfaces.js';
 /** Beyond this, `cosh`/`sinh` of the argument is within a factor e^-700 of overflowing to Infinity. */
 const HYPERBOLIC_OVERFLOW_ARG = 700;
 
+function tanFamily(t: number, h: number, cot: boolean, hyperbolic: boolean): Complex {
+  let s: number;
+  let q: number;
+  if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
+    s = 2 * Math.sin(t) * Math.exp(-Math.abs(h));
+    q = Math.sign(h);
+  } else {
+    const d = cot ? Math.cosh(h) - Math.cos(t) : Math.cos(t) + Math.cosh(h);
+    s = Math.sin(t) / d;
+    q = Math.sinh(h) / d;
+  }
+  if (cot) {
+    if (hyperbolic) {
+      s = -s;
+    } else {
+      q = -q;
+    }
+  }
+  return hyperbolic ? new Complex(q, s) : new Complex(s, q);
+}
+
 /**
  * Check if a value is a Complex number
  */
@@ -481,28 +502,14 @@ export class Complex implements IComplex {
    * Closed form — no intermediate `sin`/`cos` Complex allocations.
    */
   tan(): Complex {
-    const x2 = this.re * 2;
-    const y2 = this.im * 2;
-    if (Math.abs(y2) > HYPERBOLIC_OVERFLOW_ARG) {
-      // cosh/sinh(2y) overflow to ±Infinity and the quotient becomes NaN. Past this point
-      // 1/cosh(2y) = 2e^-|2y| and tanh(2y) = ±1 to double precision, so use those limits.
-      return new Complex(2 * Math.sin(x2) * Math.exp(-Math.abs(y2)), Math.sign(y2));
-    }
-    const d = Math.cos(x2) + Math.cosh(y2);
-    return new Complex(Math.sin(x2) / d, Math.sinh(y2) / d);
+    return tanFamily(this.re * 2, this.im * 2, false, false);
   }
 
   /**
    * Cotangent: cot(x+iy) = (sin 2x − i sinh 2y) / (cosh 2y − cos 2x)
    */
   cot(): Complex {
-    const x2 = this.re * 2;
-    const y2 = this.im * 2;
-    if (Math.abs(y2) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(2 * Math.sin(x2) * Math.exp(-Math.abs(y2)), -Math.sign(y2));
-    }
-    const d = Math.cosh(y2) - Math.cos(x2);
-    return new Complex(Math.sin(x2) / d, -Math.sinh(y2) / d);
+    return tanFamily(this.re * 2, this.im * 2, true, false);
   }
 
   /**
@@ -547,26 +554,14 @@ export class Complex implements IComplex {
    * Hyperbolic tangent: tanh(x+iy) = (sinh 2x + i sin 2y) / (cosh 2x + cos 2y)
    */
   tanh(): Complex {
-    const x2 = this.re * 2;
-    const y2 = this.im * 2;
-    if (Math.abs(x2) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(Math.sign(x2), 2 * Math.sin(y2) * Math.exp(-Math.abs(x2)));
-    }
-    const d = Math.cosh(x2) + Math.cos(y2);
-    return new Complex(Math.sinh(x2) / d, Math.sin(y2) / d);
+    return tanFamily(this.im * 2, this.re * 2, false, true);
   }
 
   /**
    * Hyperbolic cotangent: coth(x+iy) = (sinh 2x − i sin 2y) / (cosh 2x − cos 2y)
    */
   coth(): Complex {
-    const x2 = this.re * 2;
-    const y2 = this.im * 2;
-    if (Math.abs(x2) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(Math.sign(x2), -2 * Math.sin(y2) * Math.exp(-Math.abs(x2)));
-    }
-    const d = Math.cosh(x2) - Math.cos(y2);
-    return new Complex(Math.sinh(x2) / d, -Math.sin(y2) / d);
+    return tanFamily(this.im * 2, this.re * 2, true, true);
   }
 
   /**
