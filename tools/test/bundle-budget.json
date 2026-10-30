@@ -6,10 +6,10 @@
   },
   "files": {
     "packages/typed-function/dist/index.js": 4532,
-    "packages/workerpool/dist/index.js": 46934,
+    "packages/workerpool/dist/index.js": 46089,
     "packages/workerpool/dist/worker.js": 18557,
-    "core/dist/index.js": 200370,
-    "core/dist/internal.js": 201563,
+    "core/dist/index.js": 200000,
+    "core/dist/internal.js": 201193,
     "matrix/dist/index.js": 190209,
     "matrix/dist/wasm/mathts-as.wasm": 62490,
     "tensor/dist/index.js": 72541,
