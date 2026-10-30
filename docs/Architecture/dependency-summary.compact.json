@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1231, "e": 6363, "re": 2686 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1226, "e": 6344, "re": 2690 },
   "s": {
-    "loc": 203364,
+    "loc": 201901,
     "cls": 59,
-    "int": 563,
-    "fn": 2063,
+    "int": 550,
+    "fn": 2043,
     "tg": 161,
     "en": 0,
-    "co": 1631,
+    "co": 1628,
     "toi": 616
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
@@ -530,7 +530,7 @@
       ]
     },
     "functions": {
-      "f": 31,
+      "f": 26,
       "exp": [
         "gradient",
         "hessian",
@@ -563,8 +563,8 @@
         "HistogramResult",
         "FitScalarOptions",
         "FitScalarResult",
-        "FrontJsonRow",
-        "FrontJson"
+        "FTestResult",
+        "JarqueBeraResult"
       ]
     },
     "functions/cas": {
@@ -1607,7 +1607,8 @@
         "gemmRows",
         "parallelMatmul",
         "parallelMatvec",
-        "parallelTranspose"
+        "parallelTranspose",
+        "parallelOuter"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
       "int": ["ComputePoolConfig", "ParallelResult", "MatrixData", "ParallelConfig"]
@@ -1865,9 +1866,9 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 246, "o": 12 },
+    { "p": "factories/index.ts", "i": 246, "o": 11 },
     { "p": "function/typed.ts", "i": 3, "o": 203 },
-    { "p": "src/index.ts", "i": 143, "o": 0 },
+    { "p": "src/index.ts", "i": 145, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 55 },
