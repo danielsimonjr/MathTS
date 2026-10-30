@@ -41,7 +41,12 @@ is the AssemblyScript-backed WASM backend).
 (`scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey` in `expression/src/scalar-structure.ts`).
 `@danielsimonjr/mathts-functions` exports `scalar` (a builder), `evaluateScalar`, M3
 `compileScalar` (`functions/src/scalar-compile.ts`), and M4 `paretoFront` /
-`scoreFront` / `selectFrontModel` (`functions/src/pareto-front.ts`). Roadmap and plans:
+`scoreFront` / `selectFrontModel` (`functions/src/pareto-front.ts`). Phase 3 dimension
+analysis (MathTS [#414](https://github.com/danielsimonjr/MathTS/pull/414) and the
+[`PYSR_PHASES_3_5_PLAN`](../plans/PYSR_PHASES_3_5_PLAN.md) M9–M10 PRs) adds
+`inferScalarDimension` and `solveParameterDimensions` on the functions barrel; SI
+exponents are exact `Fraction`s on `SiDimensionVector` (`core/src/types/si-dimension-vector.ts`).
+Roadmap and plans:
 [`../roadmap/PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md),
 [`../plans/PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md),
 [`../plans/PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md),
