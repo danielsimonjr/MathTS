@@ -1,778 +1,779 @@
-# Remaining clone pairs after the #473 sprint
+# Clone ledger — Phase 6 measurement
 
-Tracking list for the look-alike functions that Sprint 2R, the #473 sprint, and the #473 follow-up
-(`repo-tools clones`) did not merge, and why. The 12 exact groups below were read against the report;
-skip reasons are pinned to file headers or tests. The appendix lists every near pair from the follow-up's
-final run. Re-run the tool before picking a pair up:
+Measured on `main` at `40466a97` (`docs(roadmap): Sprint 5R close-out (PySR PR 12) (#528)`), with
+`@danielsimonjr/repo-tools` **2.3.0** (`repo-tools clones`) and the tool defaults. This file is a
+measurement only. It does not mark any pair MERGE or KEEP; the Phase 6 verdicts are in
+[`docs/plans/CLONES_PHASE_6_PLAN.md`](../plans/CLONES_PHASE_6_PLAN.md). The procedure is the
+"Phase 6 and up: clone-reduction loop" section of
+[`PYSR_INFORMED_ROADMAP.md`](./PYSR_INFORMED_ROADMAP.md). The previous ledger and its verdicts are in
+git history at `bf90a00e` and in the historical
+[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md).
+
+**Tool version.** `repo-tools` 2.2.4, the `REPO_TOOLS_VERSION` pin in `.github/workflows/ci.yml`, has no
+`clones` subcommand (`repo-tools: unknown subcommand or option 'clones'`); its subcommands are `map`,
+`depgraph`, `check`, `docs`, `chunk`, `compress`, `query`, and `ste`. That pin is for
+`repo-tools check . --docs=docs/Architecture` and is unchanged. No `package.json` script or CI job runs
+`clones`; the roadmap command below is the canonical invocation. Two runs on the same tree wrote
+byte-identical `inventory.jsonl` and `clones.json`. Neither report is committed.
+
+## Command
+
+From the repo root, with the tool installed outside the repo (`npm install @danielsimonjr/repo-tools@2.3.0`
+in a scratch directory):
 
 ```bash
-repo-tools clones . --src <each workspace package src folder> --out=<relative path outside the repo>
+repo-tools clones . --src \
+  packages/typed-function/src packages/workerpool/src \
+  core/src matrix/src tensor/src autograd/src functions/src expression/src \
+  parser/src units/src numbers/src ast/src evaluator/src linalg/src \
+  arithmetic/src trigonometry/src statistics/src signal/src \
+  parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
+  --out=../tmp/clones-phase-6
 ```
 
-`--src` is every workspace `src` folder (the 24 packages, including `packages/typed-function/src` and
-`packages/workerpool/src`). Do not commit the tool's reports.
+Output:
+
+```
+files=1230 parseErrors=0 units(minNodes=50)=2653
+nodes p50=109 p90=327 p99=827 max=3705
+exact groups=10 (units in them=39) text-identical groups=4
+near pairs=553 by jStruct: 0.9 or more: 109, 0.8 to 0.9: 159, 0.7 to 0.8: 90, 0.6 to 0.7: 171, below 0.6 (containment): 24
+units by folder: assembly/src=150 autograd/src=51 compat/src=9 core/src=227 expression/src=157 functions/src=1564 gpu/src=14 matrix/src=190 packages/typed-function=2 packages/workerpool=62 parallel/src=51 plot/src=36 tensor/src=58 workbook/src=82
+```
+
+| Flag                | Value |
+| ------------------- | ----- |
+| `--min-nodes`       | 50    |
+| `--shingle`         | 6     |
+| `--near`            | 0.6   |
+| `--containment`     | 0.9   |
+| `--containment-min` | 20    |
+| `--rare`            | 60    |
+| `--min-shared`      | 3     |
+
+`109 + 159 + 90 + 171 + 24 = 553`.
 
 ## Counts
 
-| Measure                         | Baseline (`b24e3ec2`) | After Sprint 2R (`4f1d0fc6`) | Start of #473 (`b1ca0a62`) | After #473 (`37c0fd44`) | After this follow-up |
-| ------------------------------- | --------------------- | ---------------------------- | -------------------------- | ----------------------- | -------------------- |
-| Files scanned                   | 1192                  | 1212                         | 1212                       | 1219                    | 1219                 |
-| Units (at least 50 nodes)       | 2714                  | 2635                         | 2635                       | 2609                    | 2604                 |
-| Exact groups                    | 68                    | 12                           | 12                         | 12                      | 12                   |
-| Units inside exact groups       | 161                   | 43                           | 43                         | 43                      | 43                   |
-| Near pairs                      | 857                   | 638                          | 638                        | 583                     | 573                  |
-| Near pairs, jStruct 0.9 or more | 192                   | 115                          | 115                        | 112                     | 112                  |
-| Near pairs, jStruct 0.8 to 0.9  | 180                   | 165                          | 165                        | 164                     | 164                  |
+Every column is the same command with the same flags, run on a `git archive` export of that commit.
 
-The #473 columns come from `repo-tools clones` run twice with the same flags (every workspace `src` folder,
-tool defaults, output outside the repo), at `b1ca0a62` and at `37c0fd44` (the main commit after the last
-merge of the sprint). The "Start of #473" column repeats the Sprint 2R figures because `b1ca0a62` only added
-the roadmap doc (and a CHANGELOG line). The follow-up column uses those same flags on the tree of this
-change (parent `d87cfb7b`, which is `37c0fd44` plus the #493 doc commit). Reports were written outside the
-repo and are not committed. Of the 583 near pairs at `d87cfb7b`, 10 left the report and 573 remain. No new
-near pair appeared. The 12 exact groups are the same recorded skips. The follow-up bands are
-jStruct 0.9 or more: 112, 0.8 to 0.9: 164, 0.7 to 0.8: 91 (was 93), 0.6 to 0.7: 181 (was 189),
-below 0.6 by containment: 25 (unchanged). 112 + 164 + 91 + 181 + 25 = 573.
+| Measure                                                 | `156e4ea8` | `bf90a00e` | `655ffb3a` | `40466a97` |
+| ------------------------------------------------------- | ---------: | ---------: | ---------: | ---------: |
+| Files scanned                                           |       1219 |       1221 |       1222 |       1230 |
+| Parse errors                                            |          5 |          0 |          0 |          0 |
+| Units (at least 50 nodes)                               |       2604 |       2594 |       2594 |       2653 |
+| Exact groups                                            |         12 |         11 |          9 |         10 |
+| Units inside exact groups                               |         43 |         41 |         37 |         39 |
+| Text-identical groups                                   |          4 |          4 |          4 |          4 |
+| Near pairs                                              |        573 |        549 |        551 |        553 |
+| Near pairs, jStruct 0.9 or more                         |        112 |        110 |        108 |        109 |
+| Near pairs, jStruct 0.8 to 0.9                          |        164 |        158 |        159 |        159 |
+| Near pairs, jStruct 0.7 to 0.8                          |         91 |         89 |         90 |         90 |
+| Near pairs, jStruct 0.6 to 0.7                          |        181 |        168 |        170 |        171 |
+| Near pairs, jStruct below 0.6 (reported by containment) |         25 |         24 |         24 |         24 |
 
-## CLONES refactor plan PRs (A–I)
+- `156e4ea8`: Tree reviewed by `CLONES_REFACTOR_PLAN.md`.
+- `bf90a00e`: After clone PRs A–I (#497–#505) and #496.
+- `655ffb3a`: After the core sprint (#507–#517).
+- `40466a97`: This ledger: after PySR PRs 1–12 (#519–#530).
 
-Contract: `docs/plans/CLONES_REFACTOR_PLAN.md` (planning PR #495). Implementation branches are
-`cursor/clones-pr-*-73c0` off `156e4ea8` (`main`). Each carries a patch changeset; numeric behavior
-is unchanged. Re-measure with `repo-tools clones` after the stack lands on `main` (do not commit reports).
+## Exact groups (10)
 
-| PR  | Branch                    | GitHub PR | Pairs retired (plan)                        |
-| --- | ------------------------- | --------- | ------------------------------------------- |
-| A   | `cursor/clones-pr-a-73c0` | #497      | 4 (expression printers)                     |
-| B   | `cursor/clones-pr-b-73c0` | #498      | 1 exact (`setUnion` / `setSymDifference`)   |
-| C   | `cursor/clones-pr-c-73c0` | #500      | 1 (`unflattenl` / `unflattenr`)             |
-| D   | `cursor/clones-pr-d-73c0` | #502      | 1 (`cleanUnivariatePoly` / `renderIntPoly`) |
-| E   | `cursor/clones-pr-e-73c0` | #503      | 3 (centrality dispatch)                     |
-| F   | `cursor/clones-pr-f-73c0` | #501      | 1 (`Fraction.floor` / `ceil`)               |
-| G   | `cursor/clones-pr-g-73c0` | #499      | 1 (`flipRows` / `flipCols`)                 |
-| H   | `cursor/clones-pr-h-73c0` | #504      | up to 3 (worker `sum` / `prod` / `norm`)    |
-| I   | `cursor/clones-pr-i-73c0` | #505      | 1 (AS Airy series)                          |
+Same normalized structure (`exactHash`). Each group is also reported as near pairs at `jStruct` 1.
+A member marked "text-identical" shares its `textHash` with another member of the group.
 
-Parse-error cleanup (not a merge PR): #496 (`cursor/clones-parse-errors-73c0`).
+1. 11 units, 62 nodes each:
+   - `functions/src/typed/arithmetic.ts:536 Float64Array`, the `sign` overload
+   - `functions/src/typed/arithmetic.ts:704 Float64Array`, the `cbrt` overload
+   - `functions/src/typed/arithmetic.ts:870 Float64Array`, the `round` overload
+   - `functions/src/typed/arithmetic.ts:891 Float64Array`, the `floor` overload
+   - `functions/src/typed/arithmetic.ts:912 Float64Array`, the `ceil` overload
+   - `functions/src/typed/arithmetic.ts:935 Float64Array`, the `fix` overload
+   - `functions/src/typed/arithmetic.ts:1211 Float64Array`, the `cosh` overload
+   - `functions/src/typed/trigonometry.ts:170 Float64Array`, the `asin` overload
+   - `functions/src/typed/trigonometry.ts:195 Float64Array`, the `acos` overload
+   - `functions/src/typed/trigonometry.ts:279 Float64Array`, the `asinh` overload
+   - `functions/src/typed/trigonometry.ts:299 Float64Array`, the `acosh` overload
+2. 8 units, 74 nodes each:
+   - `functions/src/typed/arithmetic.ts:774 Float64Array`, the `log10` overload
+   - `functions/src/typed/arithmetic.ts:796 Float64Array`, the `log2` overload
+   - `functions/src/typed/arithmetic.ts:816 Float64Array`, the `log1p` overload
+   - `functions/src/typed/arithmetic.ts:836 Float64Array`, the `expm1` overload
+   - `functions/src/typed/arithmetic.ts:1189 Float64Array`, the `sinh` overload
+   - `functions/src/typed/arithmetic.ts:1231 Float64Array`, the `tanh` overload
+   - `functions/src/typed/trigonometry.ts:215 Float64Array`, the `atan` overload
+   - `functions/src/typed/trigonometry.ts:319 Float64Array`, the `atanh` overload
+3. 3 units, 176 nodes each:
+   - `autograd/src/tape.ts:2302 _batchedMatmul`
+   - `autograd/src/tape.ts:2345 _batchedMatmulGradA`
+   - `autograd/src/tape.ts:2388 _batchedMatmulGradB`
+4. 3 units, 70 nodes each:
+   - `core/src/customs.ts:113 isSafeMethod` (text-identical)
+   - `expression/src/utils/customs.ts:104 isSafeMethod`
+   - `functions/src/utils/customs.ts:102 isSafeMethod` (text-identical)
+5. 3 units, 69 nodes each:
+   - `core/src/factory.ts:83 factory`
+   - `expression/src/utils/factory.ts:94 factory` (text-identical)
+   - `functions/src/utils/factory.ts:104 factory` (text-identical)
+6. 3 units, 76 nodes each:
+   - `functions/src/typed/trigonometry.ts:94 Float64Array`, the `csc` overload
+   - `functions/src/typed/trigonometry.ts:116 Float64Array`, the `sec` overload
+   - `functions/src/typed/trigonometry.ts:138 Float64Array`, the `cot` overload
+7. 2 units, 148 nodes each:
+   - `assembly/src/special.ts:617 _carlsonRC`
+   - `functions/src/wasm/special/wasm-bridge.ts:278 _carlsonRC`
+8. 2 units, 71 nodes each:
+   - `core/src/numeric/rng.ts:27 mulberry32` (text-identical)
+   - `packages/workerpool/src/worker-numerics.ts:42 _workerMulberry32` (text-identical)
+9. 2 units, 77 nodes each:
+   - `expression/src/utils/is.ts:291 isBigNumber` (text-identical)
+   - `functions/src/utils/is.ts:226 isBigNumber` (text-identical)
+10. 2 units, 93 nodes each:
 
-**Measured on `156e4ea8` before merges** (`repo-tools clones` 2.3.0, same `--src` as above,
-`--out=tools/.clone-out`, not committed): `files=1219`, `parseErrors=5`, `units(minNodes=50)=2604`,
-`exact groups=12` (43 units), `near pairs=573` (112 + 164 + 91 + 181 + 25).
+- `functions/src/scalar-mutate.ts:366 rotateLeft`
+- `functions/src/scalar-mutate.ts:381 rotateRight`
 
-**After parse-error cleanup (#496) on `cursor/clones-parse-errors-73c0`:** `parseErrors=0`; clone
-counts unchanged (`near pairs=573`, same bands).
+## Text-identical groups (4)
 
-**Isolated branch re-measures (2.3.0, same flags; each branch off `156e4ea8`, not a merged stack):**
+- `core/src/customs.ts:113 isSafeMethod` = `functions/src/utils/customs.ts:102 isSafeMethod`
+- `core/src/numeric/rng.ts:27 mulberry32` = `packages/workerpool/src/worker-numerics.ts:42 _workerMulberry32`
+- `expression/src/utils/factory.ts:94 factory` = `functions/src/utils/factory.ts:104 factory`
+- `expression/src/utils/is.ts:291 isBigNumber` = `functions/src/utils/is.ts:226 isBigNumber`
 
-| Branch / PR                           | Near pairs                     | Δ vs `156e4ea8` | Notes                                                       |
-| ------------------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------- |
-| #497 PR-A (expression printers)       | (re-run on green merge order)  | −4 plan         | not re-run in isolation here                                |
-| #498 PR-B                             | (exact group, not a near pair) | −1 exact group  | `setUnion`/`setSymDifference` exact group drops when merged |
-| #505 PR-I (`cursor/clones-pr-i-73c0`) | 572                            | −1              | 0.8–0.9 band 163 vs 164; `parseErrors=5` until #496 lands   |
+## Changes since `156e4ea8`
 
-**Expected after full A–I + #496 merge (plan accounting):** 16 near pairs and the
-`setUnion`/`setSymDifference` exact group retired → **557 near pairs**, **11 exact groups** (42 units),
-assuming PR-H removes the three worker scalar pairings under the 50-node threshold. Re-run
-`repo-tools clones` on `main` once the PR stack is merged to replace this projection.
+`156e4ea8` is the tree whose pairs `CLONES_REFACTOR_PLAN.md` marked. Units are matched by file, container,
+name, kind, and ordinal, so a moved line number is not a change.
 
-The unit total fell by less than the merged-body count because each shared helper is itself a unit and the
-new oracle tests are not scanned. Net effect of the 19 sprint PRs: 26 fewer units (2635 to 2609), 55 fewer
-near pairs (638 to 583), the exact groups unchanged (all 12 are recorded skips), and 7 new `src` files (the
-files the plans named: `bigint-binomial.ts`, `shortCircuitBinary.ts`, `gemm-rows.ts`, `string-derivative.ts`,
-`circumcircle.ts`, `reshape-axes.ts`, `as-typed-array.ts`).
+- Near pairs: 573 then, 553 now. 25 left the report, 5 appeared,
+  and 548 are carried. 5 carried pairs have a unit whose text changed.
+- Exact groups: 12 then, 10 now. 3 left, 1 appeared.
 
-## What the #473 sprint merged
+Exact groups that left:
 
-Each PR extracts shared helper(s), with the named public functions kept as thin wrappers (no public
-name or behavior change). Every PR carries oracle tests written against the unchanged code and a
-recorded review.
+- `core/src/types/complex.ts` `cot`, `core/src/types/complex.ts` `coth`
+- `core/src/types/complex.ts` `tan`, `core/src/types/complex.ts` `tanh`
+- `functions/src/set/setSymDifference.ts` `Array | Matrix, Array | Matrix`, `functions/src/set/setUnion.ts` `Array | Matrix, Array | Matrix`
 
-| PR   | Area       | Merged                                                                          |
-| ---- | ---------- | ------------------------------------------------------------------------------- |
-| #474 | functions  | dense polynomial coefficient fill (`polyToDenseCoefficients`)                   |
-| #475 | expression | filter/forEach, cumsum/mapSlices, and/or/bitAnd/bitOr transforms                |
-| #476 | matrix     | Givens rotation, single-shift QR chase, Gauss-Jordan continue, Newton sqrt step |
-| #477 | functions  | BigNumber binomial product, schoolbook multiply, `binomialExact`                |
-| #478 | parallel   | chunk planning, block scatter/sum, row-block gemm shared with the worker        |
-| #479 | functions  | sparse-from-vectors builder, `Index` dimension walk, numeric-square predicate   |
-| #480 | workbook   | graph text render (`toMermaid`/`toDOT`), info CLI command dispatch              |
-| #481 | matrix     | `ParallelBackend` fallbacks and one parallel-guard helper                       |
-| #482 | functions  | Dijkstra scan, `angleBetween`, circumcircle helper                              |
-| #483 | functions  | CAS integer-range fold, string derivative walk, transform-table walk            |
-| #484 | functions  | lasso/elastic-net shell, noncentral Poisson mixture, `sampleN` normals          |
-| #485 | functions  | PSD result pack, Newton/Halley loop, band quadratic roots                       |
-| #486 | tensor     | max/min reducer, axis lookup, eig/SVD axis prep                                 |
-| #487 | core       | `Fraction` add/subtract core, BigNumber sin/cos Taylor loop                     |
-| #488 | expression | child-array loop of the node `map` methods                                      |
-| #489 | autograd   | taped `sum`/`mean` backward scatter                                             |
-| #490 | matrix     | AssemblyScript typed-array header allocation                                    |
-| #491 | functions  | Airy Ai/Bi evaluator, incomplete-beta continued fraction                        |
-| #492 | functions  | `runUnaryPtr` delegates to `runChainPtr`                                        |
+Exact groups that appeared:
 
-Review caught real defects before merge in most of these, for example a lost `BigNumber` sub in the
-transforms (#475), identity-copy aliasing in the chunk planner (#478), a regex that threw for metacharacter
-variables (#483), multiply associativity in seeded normals (#484), a wrong axis-error type (#486), an
-over-sized tape slot (#489) and a per-call allocation that made Airy 30% slower (#491). The wasm header merge
-(#490) also retired a stale `WasmLoader` Int32Array class id (4, which is `Complex` in the shipped binary;
-the production path already used 6).
+- `functions/src/scalar-mutate.ts:366 rotateLeft`, `functions/src/scalar-mutate.ts:381 rotateRight`
 
-## Exact groups still reported (12)
+### Near pairs that left the report (25)
 
-| Group                                                                                                                    | Why it stays                                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AS `_carlsonRC` and JS `_carlsonRC`                                                                                      | A cross-language mirror: the JS fallback must stay and AssemblyScript cannot import a TypeScript package.                                                                                       |
-| `autograd/src/tape.ts` `_batchedMatmul`, `_batchedMatmulGradA`, `_batchedMatmulGradB`                                    | Three different contractions (`A@B`, `dY@Bᵀ`, `Aᵀ@dY`) with different m/k/n sources and offsets. A stride gemm would sit on the tape hot path.                                                  |
-| `isSafeMethod` in core, expression, functions                                                                            | Sandbox predicate; the expression and functions copies are canonical by design and the core copy is not on `internal`.                                                                          |
-| `factory` in core, expression, functions                                                                                 | The bodies match but the generics do not: core's `Record<string, unknown>` constraint breaks the expression and functions call sites (comment in both `factory.ts` files).                      |
-| `mulberry32` and `_workerMulberry32`                                                                                     | `dist/worker.js` cannot import core (externalized dependency, the bundle would pull the core barrel). `packages/workerpool/tests/worker-numerics.test.ts` pins parity.                          |
-| Complex `tan` / `tanh`, `cot` / `coth`                                                                                   | Different formulas (`sin/cos` against `sinh/cosh`, and which doubled part feeds which); a four-callback helper on a four-line method is longer than the bodies.                                 |
-| `isBigNumber` in expression and functions                                                                                | Local guards on purpose: a cross-module re-export measured about 40% slower on the Tukey path; `expression/tests/is-guards-local.test.ts` and `functions/tests/is-guards-local.test.ts` pin it. |
-| `setSymDifference` / `setUnion` handlers                                                                                 | The empty-set preamble matches, but the result is `concat(diff, diff)` against `concat(symDiff, intersect)`.                                                                                    |
-| 11, 8 and 3 unary `Float64Array` overloads in `typed/arithmetic.ts` and `typed/trigonometry.ts` (3 groups, 22 overloads) | Merged-loop prototype measured 56% to 643% slower on the sub-threshold sequential path (megamorphic call site in a shared hot loop, PR #454). Each overload keeps its own inline loop.          |
+Line numbers are from `156e4ea8`.
 
-## What this follow-up merged
+- `functions/src/set/setSymDifference.ts:48 Array | Matrix, Array | Matrix` ↔ `functions/src/set/setUnion.ts:65 Array | Matrix, Array | Matrix` (j 1.000) — first unit removed, second unit removed
+- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.915) — second unit removed
+- `expression/src/node/AssignmentNode.ts:302 _toString` ↔ `expression/src/node/AssignmentNode.ts:349 _toHTML` (j 0.869) — first unit removed, second unit removed
+- `assembly/src/special.ts:396 _airyAiSeries` ↔ `assembly/src/special.ts:423 _airyBiSeries` (j 0.863) — first unit removed, second unit removed
+- `functions/src/typed/graph.ts:831 betweennessCentrality` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.818) — first unit removed, second unit removed
+- `functions/src/algebra/simplify/util.ts:201 unflattenr` ↔ `functions/src/algebra/simplify/util.ts:225 unflattenl` (j 0.802) — first unit removed, second unit removed
+- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:831 betweennessCentrality` (j 0.754) — second unit removed
+- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.726)
+- `matrix/src/operations/qr-family.ts:53 flipRows` ↔ `matrix/src/operations/qr-family.ts:67 flipCols` (j 0.716) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:1148 bitwiseNot` (j 0.692)
+- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1148 bitwiseNot` (j 0.692)
+- `expression/src/node/AssignmentNode.ts:302 _toString` ↔ `expression/src/node/AssignmentNode.ts:383 _toTex` (j 0.687) — first unit removed, second unit removed
+- `functions/src/typed/factorization/index.ts:45 cleanUnivariatePoly` ↔ `functions/src/typed/factorization/index.ts:89 renderIntPoly` (j 0.662)
+- `packages/workerpool/src/index.ts:844 dot` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.661)
+- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:960 scale` (j 0.655)
+- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:960 scale` (j 0.655)
+- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:844 dot` (j 0.642)
+- `core/src/types/fraction.ts:573 floor` ↔ `core/src/types/fraction.ts:587 ceil` (j 0.630) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:1659 applyKernel` (j 0.627)
+- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1659 applyKernel` (j 0.627)
+- `expression/src/node/AssignmentNode.ts:349 _toHTML` ↔ `expression/src/node/AssignmentNode.ts:383 _toTex` (j 0.620) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:1148 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.619)
+- `packages/workerpool/src/index.ts:1495 norm` ↔ `packages/workerpool/src/index.ts:1533 distance` (j 0.618)
+- `expression/src/node/ObjectNode.ts:162 _toString` ↔ `expression/src/node/ObjectNode.ts:198 _toHTML` (j 0.606) — first unit removed, second unit removed
+- `matrix/src/operations/qr-family.ts:67 flipCols` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.515) — first unit removed
 
-Core-touching pairs were read first. All 24 were already recorded skips (exact copies, measured hot paths,
-or different formulas). None of those reasons changed, and none of those pairs was merged.
+### Near pairs that appeared (5)
 
-Each merge below keeps the public name and the numeric result. The shared function is the algorithm; the
-old names are thin wrappers. A boolean mode flag was not added.
+- `functions/src/scalar-mutate.ts:366 rotateLeft` ↔ `functions/src/scalar-mutate.ts:381 rotateRight` (j 1.000) — first unit new, second unit new
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:498 cot` (j 0.683)
+- `packages/workerpool/src/index.ts:765 reduceScalar` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.664) — first unit new
+- `functions/src/scalar-mutate.ts:261 swapOperands` ↔ `functions/src/scalar-mutate.ts:348 deleteNode` (j 0.649) — first unit new, second unit new
+- `core/src/types/complex.ts:549 tanh` ↔ `core/src/types/complex.ts:562 coth` (j 0.636)
 
-| Shared function                           | Wrappers                                             | Why one function is enough                                                                                                                                                                                                        |
-| ----------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gaussJordanSolve` (`matrix` `common.ts`) | `matInv`, `sqrtm` `solveLinearSystem`                | Same Gauss–Jordan elimination, same `\|pivot\| < 1e-15` null return, same zero-factor skip. The right-hand side is the identity or one column.                                                                                    |
-| `centralDifferenceGradient`               | `bfgs` numeric step, `gradientDescent`               | Same central difference. The step is `max(1, \|x_i\|) · cbrt(Number.EPSILON)` or the constant `1e-6`. `numericJacobian` stays separate: it is vector-valued, it has a forward scheme, and its default step uses `cbrt(2.22e-16)`. |
-| `matrixRank`                              | `matrixRankInternal`                                 | Same nonzero-row count of `rowReduce`. The second copy was in the same file.                                                                                                                                                      |
-| `indexCombinations`                       | Zassenhaus `combinations`, Kronecker `subsetsOfSize` | Same lexicographic index generator. The public `combinations(n, k)` count is a different function.                                                                                                                                |
-| `cumulativeExtreme`                       | `cummax`, `cummin`                                   | Same prefix scan. The comparison is `>` with seed `-Infinity`, or `<` with seed `Infinity`. NaN still does not replace the extreme.                                                                                               |
-| `upperGammaQ`                             | `gammaincScalar`, `gammaincpScalar`                  | Same modified Lentz fraction. The break stays `1e-14` for P and `1e-15` for Q. Worker `kernelSource` lists the helper.                                                                                                            |
-| `assembleChunks`                          | `chunkFloat64Array`, `chunkArray`                    | Same plan. Float64 uses `subarray` and the configured minimum size. Arrays use `slice` and minimum size 0. A single planned chunk still returns the input itself.                                                                 |
+### Carried pairs whose text changed (5)
 
-`gaussJordanContinue` was not folded into `gaussJordanSolve`: it skips a tiny pivot instead of returning
-null, and the cutoff is a parameter (`1e-15` in `expm`, `1e-30` in `logm`). Katz `_solveLinearSystem`
-throws below `1e-14` instead of returning null. `matrixInverse` still multiplies a zero elimination factor,
-so an Infinity or NaN entry can disagree with `matInv`; that pair left the report only because `matInv` is
-now a short wrapper.
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:549 tanh` (j 1.000 → 0.803); changed: `tan`, `tanh`
+- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:822 prod` (j 0.846 → 0.710); changed: `sum`, `prod`
+- `core/src/types/complex.ts:498 cot` ↔ `core/src/types/complex.ts:562 coth` (j 1.000 → 0.706); changed: `cot`, `coth`
+- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:1490 norm` (j 0.813 → 0.610); changed: `sum`, `norm`
+- `expression/src/compiler/compile.ts:307 compileFunctionNode` ↔ `expression/src/compiler/compile.ts:456 compileArrayNode` (j 0.103 → 0.105); changed: `compileFunctionNode`, `compileArrayNode`
 
-## Near pairs not merged
+## Near pairs (553)
 
-573 near pairs remain. The class bullets below are the skips carried forward from the #473 sprint. The
-appendix is the partition: every remaining near pair is one bullet there.
+Every pair the run reported, in bands by `jStruct`, highest first. `contain` is the containment score and
+`names` is `jNames`. Line numbers are the function start lines at `40466a97`.
 
-- **AssemblyScript.** Same reason as the exact AS group: editing the source rebuilds the binary. The JS twins are the fallback, not a second copy to delete. After Sprint 2R: 22 AS–JS pairs (one is the exact `_carlsonRC` group) and 74 AS–AS pairs.
-- **Layering.** `packages/workerpool` cannot import `core`, `parallel` or `functions`: `gammaSampleRng` / `_workerGammaRandom`, `tensordotChunkKernel` / `tensordotChunk`, `fftCoreFloat64` / `fftFrameInPlace` (`mulberry32` is the exact-group case). `applyKernelChunk` / `applyKernel2Chunk` and `bitwiseChunk` / `bitwiseScalarChunk` are same-file arity splits, not a layering skip.
-- **Security (3).** `functions` and `matrix` `WasmLoader` `precompile`, `loadNodeWasm`, `loadBrowserWasm`: import object, path resolution and the integrity import differ; folding them risks the SHA-384 gate.
-- **Measured hot paths.** `workerpool` `sum` / `prod` / `norm` / `scale` / `bitwiseNot` / `applyKernel`, `JSBackend` `add` / `subtract` / `multiplyElementwise` / `divideElementwise`, `DualTensor` `add` / `sub`, `norm2` against `scaledDistance`, `neumaierSum` against `neumaierCumsum`, `isBigNumber` (core still pairs with the expression and functions locals at jStruct 0.86).
-- **Different jobs.** A merge would need a mode flag or would change behavior: `lsolveAll` / `usolveAll` substitutions, `unflattenl` / `unflattenr`, `_xgcdBigNumber` / `_xgcdFraction`, `chainGpuDispatchImpl` against `chainReduceGpuDispatchImpl` (the error-scope LIFO makes a shared template a silent-zero risk), `AssignmentNode` `_toString` / `_toHTML`, the `tape.ts` `log` / `exp` / `sqrt` / `sin` / `cos` adjoints, `makeILU0` / `makeIC0`, `logm` `solveCol` against `sqrtm` `solveLinearSystem`, `solveDAE` `_denseSolve` against `solveODE` `_inlineLuSolve`, `inverse` against `choleskyDecomposition`. `argsortF64Dispatch` and `rankF64Dispatch` already share `indexDispatch`; `sortF64Dispatch` stays separate (in-place `Float64Array` vs a new `Int32Array`).
-- **Unary `Float64Array` overloads.** The 22 overloads above remain as inlined `Math.*` loops (PR #454). A merge needs a per-kernel build step (code generation) so each overload keeps a monomorphic loop; that is a design change, not a refactor.
+### jStruct 0.9 or more (109)
 
-### Skipped in the #473 sprint (one line each)
+- `assembly/src/special.ts:617 _carlsonRC` ↔ `functions/src/wasm/special/wasm-bridge.ts:278 _carlsonRC` (j 1.000, contain 1.000, names 1.000)
+- `autograd/src/tape.ts:2302 _batchedMatmul` ↔ `autograd/src/tape.ts:2345 _batchedMatmulGradA` (j 1.000, contain 1.000, names 0.630)
+- `autograd/src/tape.ts:2302 _batchedMatmul` ↔ `autograd/src/tape.ts:2388 _batchedMatmulGradB` (j 1.000, contain 1.000, names 0.630)
+- `autograd/src/tape.ts:2345 _batchedMatmulGradA` ↔ `autograd/src/tape.ts:2388 _batchedMatmulGradB` (j 1.000, contain 1.000, names 0.630)
+- `core/src/customs.ts:113 isSafeMethod` ↔ `expression/src/utils/customs.ts:104 isSafeMethod` (j 1.000, contain 1.000, names 1.000)
+- `core/src/customs.ts:113 isSafeMethod` ↔ `functions/src/utils/customs.ts:102 isSafeMethod` (j 1.000, contain 1.000, names 1.000)
+- `core/src/factory.ts:83 factory` ↔ `expression/src/utils/factory.ts:94 factory` (j 1.000, contain 1.000, names 1.000)
+- `core/src/factory.ts:83 factory` ↔ `functions/src/utils/factory.ts:104 factory` (j 1.000, contain 1.000, names 1.000)
+- `core/src/numeric/rng.ts:27 mulberry32` ↔ `packages/workerpool/src/worker-numerics.ts:42 _workerMulberry32` (j 1.000, contain 1.000, names 1.000)
+- `expression/src/utils/customs.ts:104 isSafeMethod` ↔ `functions/src/utils/customs.ts:102 isSafeMethod` (j 1.000, contain 1.000, names 1.000)
+- `expression/src/utils/factory.ts:94 factory` ↔ `functions/src/utils/factory.ts:104 factory` (j 1.000, contain 1.000, names 1.000)
+- `expression/src/utils/is.ts:291 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 1.000, contain 1.000, names 1.000)
+- `functions/src/scalar-mutate.ts:366 rotateLeft` ↔ `functions/src/scalar-mutate.ts:381 rotateRight` (j 1.000, contain 1.000, names 0.692)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
+- `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
+- `matrix/src/backends/wasm/detect.ts:60 detectSIMD` ↔ `matrix/src/backends/wasm/detect.ts:115 detectBulkMemory` (j 1.000, contain 1.000, names 0.500)
+- `packages/workerpool/src/worker.ts:770 tensordotChunk` ↔ `parallel/src/ComputePool.ts:413 tensordotChunkKernel` (j 0.971, contain 0.990, names 0.828)
+- `functions/src/wasm/WasmLoader.ts:368 loadNodeWasm` ↔ `matrix/src/backends/WasmLoader.ts:658 loadNodeWasm` (j 0.952, contain 0.990, names 1.000)
+- `functions/src/wasm/WasmLoader.ts:400 loadBrowserWasm` ↔ `matrix/src/backends/WasmLoader.ts:691 loadBrowserWasm` (j 0.919, contain 0.993, names 1.000)
+- `matrix/src/backends/JSBackend.ts:123 abs` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.917, contain 1.000, names 0.818)
+- `assembly/src/special.ts:709 _carlsonRJ` ↔ `functions/src/wasm/special/wasm-bridge.ts:379 _carlsonRJ` (j 0.915, contain 0.959, names 0.971)
+- `assembly/src/special.ts:783 _ellipticPiIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:459 _ellipticPiIncomplete` (j 0.909, contain 0.952, names 1.000)
+- `assembly/src/sort.ts:116 _heapsort` ↔ `assembly/src/sort.ts:217 _heapsortIdx` (j 0.905, contain 0.957, names 0.545)
+- `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:858 cos` (j 0.900, contain 0.952, names 0.889)
+- `matrix/src/backends/GPUMatrixBackend.ts:183 addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:282 multiplyAsync` (j 0.900, contain 0.953, names 0.875)
 
-Decided after reading both bodies; the first two were also tried and reverted or blocked by a measurement.
+### jStruct 0.8 to 0.9 (159)
 
-- `SparseMatrix` `multiplyElementwise` against `mapNonZeros`: bit-identical, but the extra per-nonzero callback measured +12.4% (2000x2000, about 40k nonzeros) and +4.4% (500x500) in warm ABBA, so the inlined CSR walk stays (tried in #481, reverted in review).
-- `functions` `matrixInverse` against `matrix` `matInv`: bit-identical for finite input, but `matInv` skips a zero elimination factor while `matrixInverse` multiplies it, so an Infinity/NaN entry gives NaN in one and a finite value in the other; merging would change `matrixPower` on non-finite input.
-- PageRank, betweenness and eigenvector centrality already share `runCentralityRestarts`; the kernels differ and one base would branch on the result field (`ranks` vs `centrality`).
-- `_denseSolve`, `_inlineLuSolve` and `solveLinearSystem` differ in pivot cutoff (1e-300, none, 1e-14) and singular policy; one solver would mode-switch on the stiff-step hot path.
-- `lsolve`/`usolve` (and the `*All` forms): forward and backward substitution walk the triangle in opposite directions, including the sparse CSC pointer walk; a direction flag is a mode switch in the elimination loop.
-- L1 and Huber gradients share the row loop but use different influence functions; a callback in that loop is the megamorphic hot-loop pattern PR #454 measured as a loss. NNLS gradients: one fuses `Aᵀ(b−Ax)` in a loop, the other materializes `r` first, so a merge changes rounding.
-- Welch/Bartlett WASM dispatches, `polyMulDispatch`/`resultantDispatch`, `tridiagSolveDispatch`/`dividedDifferenceDispatch`, `runBinaryBitwiseWasm`/`runUnaryBitwiseWasm`: only the WASM-or-JS shell matches; the exports, argument lists, ABIs and result types differ and `withAsF64` already holds the marshalling.
-- Bessel J0/J1 and Fresnel C/S series: different term divisors, recurrence factors and seeds; folding needs a mode switch in the series loop.
-- `transpose` against `matadd`, `norm1` (`Math.max` propagates NaN, the `>` update does not), `flipRows`/`flipCols`/`transposeSquare`, `sinh`/`tanh`, `Fraction` `floor`/`ceil`, `logm` `validateEigenvalues`/`logmEig`: different index maps or formulas; the overlap is the loop shell.
-- JSBackend `{add, subtract, multiplyElementwise, divideElementwise, scale, abs, transpose}`, `Tensor` `add`/`sub`, tape `add`/`sub`/`mul`, `pairwiseSum`/`pairwiseDot`, the scalar arithmetic ladder (`addScalar` and friends), `recursiveMapWithIndex`/`recursiveMap`, `_reduce`/`_mapSlices`: measured or documented hot loops where a callback or mode branch is the known loss pattern.
-- `condest` `luSolve`/`luSolveTranspose`, `sqrtmSymmetric`/`sqrtmGeneral`, `expm` `matSolve` and the other Gauss-Jordan variants (singular policy and pivot cutoffs 1e-15, 1e-30, 1e-14 differ), autograd eig/SVD backward pairs, `forwardSub`/`backSub`, Givens `applyGivensCols`/`applyGivensLeft`: different algorithms or opposite index axes.
-- GPU `addAsync`/`scaleAsync`/`multiplyAsync` and `planRunShaderFromAdd`/`planRunShaderFromTranspose`: different kernels and bind layouts (`gpuOrJs` and `RunShaderPlan` are already the shared parts); `detectSIMD`/`detectBulkMemory` differ only in the feature bytes.
-- `_atanTaylor` against the new `_alternatingEvenTaylor`: arctan divides a copy of the term and does not fold the divisor back into `term`.
-- Expression: `parseShift`/`parseLeftHandOperators` (binary infix against postfix unary), `AssignmentNode` `_toString`/`_toHTML`/`_toTex` and `ObjectNode` `_toString`/`_toHTML` (different markup per output kind), `compileFunctionNode`/`compileArrayNode` (the sandbox accessor path stays).
-- `autograd` `_matmulMNK` against `parallel` `multiplySequential`: autograd must not depend on parallel.
-- `core` `getImports` against `matrix` `loadAsModule`: the second is the integrity-checked instantiate path.
+- `assembly/src/special.ts:772 _ellipticEIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:448 _ellipticEIncomplete` (j 0.898, contain 0.946, names 1.000)
+- `functions/src/probability/util/gammaSample.ts:24 gammaSampleRng` ↔ `packages/workerpool/src/worker.ts:850 _workerGammaRandom` (j 0.891, contain 0.946, names 0.733)
+- `packages/workerpool/src/worker.ts:250 applyKernelChunk` ↔ `packages/workerpool/src/worker.ts:271 applyKernel2Chunk` (j 0.889, contain 1.000, names 0.643)
+- `functions/src/gpu/elementwise-gpu.ts:307 chainGpuDispatchImpl` ↔ `functions/src/gpu/elementwise-gpu.ts:499 chainReduceGpuDispatchImpl` (j 0.888, contain 0.972, names 0.860)
+- `functions/src/numeric/krylov.ts:223 makeILU0` ↔ `functions/src/numeric/krylov.ts:244 makeIC0` (j 0.887, contain 0.949, names 0.800)
+- `core/src/numeric/stable.ts:132 norm2` ↔ `core/src/numeric/stable.ts:222 scaledDistance` (j 0.881, contain 0.957, names 0.611)
+- `assembly/src/special.ts:667 _carlsonRD` ↔ `functions/src/wasm/special/wasm-bridge.ts:329 _carlsonRD` (j 0.877, contain 0.934, names 1.000)
+- `functions/src/wasm/WasmLoader.ts:306 precompile` ↔ `matrix/src/backends/WasmLoader.ts:592 precompile` (j 0.877, contain 0.965, names 1.000)
+- `matrix/src/backends/GPUMatrixBackend.ts:183 addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:242 scaleAsync` (j 0.875, contain 0.963, names 0.792)
+- `autograd/src/tape.ts:475 sum` ↔ `autograd/src/tape.ts:500 mean` (j 0.874, contain 1.000, names 0.818)
+- `matrix/src/backends/WASMBackend.ts:779 inverse` ↔ `matrix/src/backends/WASMBackend.ts:894 choleskyDecomposition` (j 0.873, contain 0.976, names 0.667)
+- `assembly/src/special.ts:762 _ellipticFIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:438 _ellipticFIncomplete` (j 0.872, contain 0.932, names 1.000)
+- `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` (j 0.872, contain 0.983, names 0.857)
+- `functions/src/algebra/solver/lsolveAll.ts:149 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:149 _denseBackwardSubstitution` (j 0.869, contain 0.942, names 1.000)
+- `functions/src/algebra/solver/lsolveAll.ts:218 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:218 _sparseBackwardSubstitution` (j 0.867, contain 0.958, names 1.000)
+- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1143 bitwiseNot` (j 0.862, contain 0.932, names 0.735)
+- `core/src/is.ts:155 isBigNumber` ↔ `expression/src/utils/is.ts:291 isBigNumber` (j 0.861, contain 0.939, names 1.000)
+- `core/src/is.ts:155 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 0.861, contain 0.939, names 1.000)
+- `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:165 complex_array_scale_complex` (j 0.855, contain 0.973, names 0.667)
+- `assembly/src/sort.ts:98 _siftDown` ↔ `assembly/src/sort.ts:200 _siftDownIdx` (j 0.852, contain 0.920, names 0.545)
+- `assembly/src/special.ts:544 _ellipticK` ↔ `functions/src/wasm/special/scalars.ts:333 ellipticKScalar` (j 0.849, contain 0.918, names 1.000)
+- `functions/src/arithmetic/xgcd.ts:99 _xgcdBigNumber` ↔ `functions/src/arithmetic/xgcd.ts:153 _xgcdFraction` (j 0.846, contain 0.917, names 0.529)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842, contain 0.928, names 0.867)
+- `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:60 subtract` (j 0.840, contain 0.913, names 1.000)
+- `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` (j 0.840, contain 0.913, names 1.000)
+- `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:92 divideElementwise` (j 0.840, contain 0.913, names 1.000)
+- `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` (j 0.840, contain 0.913, names 1.000)
+- `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:92 divideElementwise` (j 0.840, contain 0.913, names 1.000)
+- `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:92 divideElementwise` (j 0.840, contain 0.913, names 1.000)
+- `assembly/src/special.ts:640 _carlsonRF` ↔ `functions/src/wasm/special/wasm-bridge.ts:301 _carlsonRF` (j 0.839, contain 0.916, names 1.000)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:836 sin` (j 0.832, contain 0.913, names 0.737)
+- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.832, contain 0.933, names 0.879)
+- `assembly/src/ops/special.ts:79 erfi` ↔ `functions/src/typed/special.ts:111 erfiScalar` (j 0.829, contain 0.932, names 0.900)
+- `assembly/src/special.ts:101 _besselHankel` ↔ `functions/src/wasm/special/scalars.ts:132 besselHankel` (j 0.829, contain 0.906, names 1.000)
+- `core/src/numeric/stable.ts:103 neumaierSum` ↔ `core/src/numeric/stable.ts:373 neumaierCumsum` (j 0.829, contain 0.935, names 0.900)
+- `autograd/src/tape.ts:133 add` ↔ `autograd/src/tape.ts:148 sub` (j 0.828, contain 0.914, names 1.000)
+- `autograd/src/dual-tensor.ts:77 add` ↔ `autograd/src/dual-tensor.ts:89 sub` (j 0.826, contain 0.905, names 1.000)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.825, contain 0.913, names 0.778)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.823, contain 0.921, names 0.778)
+- `assembly/src/ops/polynomial.ts:140 resultantValue` ↔ `assembly/src/poly.ts:98 sylvesterDet` (j 0.821, contain 0.948, names 0.650)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:817 exp` (j 0.821, contain 0.911, names 0.778)
+- `assembly/src/sort.ts:85 _insertionSort` ↔ `assembly/src/sort.ts:188 _insertionSortIdx` (j 0.820, contain 0.909, names 0.500)
+- `assembly/src/ops/polynomial.ts:87 determinant` ↔ `assembly/src/poly.ts:60 detSquare` (j 0.818, contain 0.992, names 0.706)
+- `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:614 matrix_gemv` (j 0.814, contain 0.980, names 0.375)
+- `packages/workerpool/src/worker.ts:311 bitwiseChunk` ↔ `packages/workerpool/src/worker.ts:353 bitwiseScalarChunk` (j 0.812, contain 0.920, names 0.538)
+- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.810, contain 0.925, names 0.694)
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:549 tanh` (j 0.803, contain 0.924, names 1.000)
+- `assembly/src/ops/array.ts:89 array_argmin` ↔ `assembly/src/ops/array.ts:109 array_argmax` (j 0.800, contain 0.889, names 0.600)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:774 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:774 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
+- `functions/src/typed/trigonometry.ts:299 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
 
-## Known follow-ups found during review
+### jStruct 0.7 to 0.8 (90)
 
-- `matrix` `GPUBackend.add` / `matmul` / `transpose` go through `runShader` but still do not use `serializeGpu` or a validation error scope, so a WebGPU validation error would read back zeros (same behavior as before the `runShader` extraction; AGENTS.md "WGSL gotchas").
-- `core` `deepMap` / `deepForEach` / `reduce` typing for nested arrays (CLAUDE.md "Known Issues") is still open.
+- `assembly/src/ops/special.ts:117 sinIntegral` ↔ `functions/src/typed/special.ts:437 sinIntegralScalar` (j 0.798, contain 0.908, names 0.889)
+- `assembly/src/special.ts:143 _besselJ1Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.797, contain 0.917, names 0.875)
+- `matrix/src/operations/condest.ts:18 luSolve` ↔ `matrix/src/operations/condest.ts:47 luSolveTranspose` (j 0.794, contain 0.885, names 0.714)
+- `matrix/src/backends/GPUMatrixBackend.ts:242 scaleAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:282 multiplyAsync` (j 0.785, contain 0.912, names 0.760)
+- `matrix/src/operations/givens.ts:28 applyGivensCols` ↔ `matrix/src/operations/schur.ts:60 applyGivensLeft` (j 0.783, contain 0.973, names 0.583)
+- `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:235 complex_array_abs_squared` (j 0.780, contain 0.902, names 0.889)
+- `assembly/src/special.ts:129 _besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:164 besselJ0Series` (j 0.778, contain 0.907, names 0.875)
+- `functions/src/algebra/solver/lsolve.ts:134 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:134 _denseBackwardSubstitution` (j 0.774, contain 0.882, names 1.000)
+- `functions/src/fit-scalar.ts:550 gradL1` ↔ `functions/src/fit-scalar.ts:570 gradHuber` (j 0.770, contain 0.884, names 0.781)
+- `assembly/src/ops/f64-buffer.ts:7 f64Min` ↔ `assembly/src/ops/f64-buffer.ts:21 f64Max` (j 0.769, contain 0.870, names 0.800)
+- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:1985 matvec` (j 0.766, contain 0.895, names 0.755)
+- `packages/workerpool/src/index.ts:839 dot` ↔ `packages/workerpool/src/index.ts:1507 distance` (j 0.764, contain 0.887, names 0.865)
+- `assembly/src/ops/curvefit.ts:31 logfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.762, contain 0.869, names 0.800)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:44 f64Sub` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:44 f64Sub` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/f64-buffer.ts:53 f64Mul` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760, contain 0.864, names 1.000)
+- `assembly/src/ops/complex-array.ts:223 complex_array_arg` ↔ `assembly/src/ops/complex-array.ts:235 complex_array_abs_squared` (j 0.759, contain 0.863, names 0.800)
+- `assembly/src/special.ts:564 _ellipticE` ↔ `functions/src/wasm/special/scalars.ts:355 ellipticECompleteScalar` (j 0.759, contain 0.885, names 0.941)
+- `assembly/src/ops/special.ts:93 expIntegralEi` ↔ `functions/src/typed/special.ts:455 expIntegralEiScalar` (j 0.758, contain 0.883, names 0.909)
+- `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `autograd/src/tape.ts:2049 _eigGeneralBackward` (j 0.757, contain 0.927, names 0.571)
+- `assembly/src/sort.ts:130 _introsort` ↔ `assembly/src/sort.ts:235 _introsortIdx` (j 0.756, contain 0.861, names 0.393)
+- `tensor/src/Tensor.ts:161 add` ↔ `tensor/src/Tensor.ts:172 sub` (j 0.755, contain 0.860, names 1.000)
+- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:1847 distanceMatrix` (j 0.754, contain 0.880, names 0.760)
+- `assembly/src/ops/curvefit.ts:6 expfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.752, contain 0.926, names 0.857)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:836 sin` (j 0.752, contain 0.871, names 0.737)
+- `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:223 complex_array_arg` (j 0.750, contain 0.882, names 0.727)
+- `functions/src/wasm/signal/wasm-bridge.ts:332 welchPSDDispatch` ↔ `functions/src/wasm/signal/wasm-bridge.ts:369 bartlettPSDDispatch` (j 0.750, contain 0.908, names 0.700)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:858 cos` (j 0.748, contain 0.864, names 0.737)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:858 cos` (j 0.746, contain 0.871, names 0.737)
+- `functions/src/wasm/poly/wasm-bridge.ts:109 polyMulDispatch` ↔ `functions/src/wasm/poly/wasm-bridge.ts:266 resultantDispatch` (j 0.745, contain 0.864, names 0.458)
+- `parallel/src/ParallelMatrix.ts:388 dotProduct` ↔ `parallel/src/ParallelMatrix.ts:421 sum` (j 0.744, contain 0.918, names 0.875)
+- `functions/src/algebra/solver/lsolve.ts:184 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:188 _sparseBackwardSubstitution` (j 0.742, contain 0.872, names 0.973)
+- `matrix/src/backends/gpu/run-shader.ts:32 planRunShaderFromAdd` ↔ `matrix/src/backends/gpu/run-shader.ts:82 planRunShaderFromTranspose` (j 0.742, contain 0.868, names 0.938)
+- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.738, contain 0.926, names 0.763)
+- `packages/workerpool/src/index.ts:1633 applyKernel` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.732, contain 0.924, names 0.744)
+- `expression/src/parse.ts:1031 parseShift` ↔ `expression/src/parse.ts:1441 parseLeftHandOperators` (j 0.731, contain 0.851, names 0.643)
+- `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728, contain 0.886, names 0.483)
+- `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728, contain 0.937, names 0.429)
+- `assembly/src/signal.ts:236 goertzel_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:93 goertzelJS` (j 0.727, contain 0.860, names 0.833)
+- `functions/src/wasm/bridges/common.ts:180 asAllocHeader` ↔ `matrix/src/backends/wasm/as-typed-array.ts:35 allocAsTypedView` (j 0.727, contain 0.923, names 0.722)
+- `functions/src/numeric/control-equations.ts:79 transpose` ↔ `functions/src/numeric/control-equations.ts:87 matadd` (j 0.724, contain 0.913, names 0.636)
+- `matrix/src/backends/JSBackend.ts:108 scale` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.723, contain 0.855, names 0.900)
+- `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:880 tan` (j 0.720, contain 0.865, names 0.842)
+- `assembly/src/special.ts:129 _besselJ0Series` ↔ `assembly/src/special.ts:143 _besselJ1Series` (j 0.718, contain 0.879, names 1.000)
+- `assembly/src/ops/matrix.ts:204 matrix_multiply` ↔ `assembly/src/ops/matrix.ts:583 matrix_gemm` (j 0.714, contain 0.833, names 0.300)
+- `autograd/src/tape.ts:858 cos` ↔ `autograd/src/tape.ts:880 tan` (j 0.714, contain 0.857, names 0.750)
+- `functions/src/wasm/interpolation/wasm-bridge.ts:117 tridiagSolveDispatch` ↔ `functions/src/wasm/interpolation/wasm-bridge.ts:206 dividedDifferenceDispatch` (j 0.714, contain 0.878, names 0.385)
+- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:822 prod` (j 0.710, contain 0.831, names 1.000)
+- `core/src/types/complex.ts:498 cot` ↔ `core/src/types/complex.ts:562 coth` (j 0.706, contain 0.833, names 1.000)
+- `matrix/src/backends/ParallelBackend.ts:180 transpose` ↔ `matrix/src/backends/ParallelBackend.ts:201 sum` (j 0.705, contain 0.915, names 0.750)
+- `assembly/src/ops/complex-array.ts:267 complex_array_exp` ↔ `assembly/src/ops/complex-array.ts:298 complex_array_sqrt` (j 0.703, contain 0.959, names 0.650)
+- `assembly/src/poly.ts:331 cheb_fit_f64` ↔ `assembly/src/poly.ts:373 legendre_fit_f64` (j 0.703, contain 0.895, names 0.696)
+- `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:108 scale` (j 0.703, contain 0.912, names 0.750)
+- `autograd/src/tape.ts:1583 _eigSymmetric` ↔ `autograd/src/tape.ts:1617 _eigGeneral` (j 0.702, contain 0.949, names 0.667)
+- `functions/src/wasm/bitwise/wasm-bridge.ts:78 runBinaryBitwiseWasm` ↔ `functions/src/wasm/bitwise/wasm-bridge.ts:103 runUnaryBitwiseWasm` (j 0.701, contain 0.861, names 0.800)
+- `functions/src/wasm/special/scalars.ts:164 besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.701, contain 0.870, names 1.000)
+- `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:203 gradient` (j 0.700, contain 0.949, names 0.800)
 
-## Appendix: every final near pair
+### jStruct 0.6 to 0.7 (171)
 
-The final `repo-tools clones` run reports 573 near pairs. This appendix lists each one.
-Core-touching pairs come first (24). The rest follow by `jStruct`, high first.
-A pair from an exact group is also a near pair at `jStruct` 1; its reason is the exact-group reason.
-`j` is `jStruct`. Line numbers are the start line of the function in this tree.
+- `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
+- `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
+- `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
+- `matrix/src/backends/JSBackend.ts:92 divideElementwise` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
+- `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:922 square` (j 0.690, contain 0.870, names 0.867)
+- `core/src/collection.ts:183 _reduce` ↔ `functions/src/matrix/mapSlices.ts:100 _mapSlices` (j 0.688, contain 0.877, names 0.769)
+- `matrix/src/backends/ParallelBackend.ts:124 scale` ↔ `matrix/src/backends/ParallelBackend.ts:180 transpose` (j 0.687, contain 0.821, names 0.769)
+- `core/src/numeric/stable.ts:46 pairwiseSum` ↔ `core/src/numeric/stable.ts:167 pairwiseDot` (j 0.686, contain 0.850, names 0.762)
+- `matrix/src/operations/sqrtm.ts:91 sqrtmSymmetric` ↔ `matrix/src/operations/sqrtm.ts:185 sqrtmGeneral` (j 0.686, contain 0.923, names 0.700)
+- `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.685, contain 0.817, names 0.737)
+- `packages/workerpool/src/index.ts:712 exec` ↔ `packages/workerpool/src/index.ts:740 execFunction` (j 0.684, contain 0.893, names 0.650)
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:498 cot` (j 0.683, contain 0.848, names 1.000)
+- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.682, contain 0.855, names 0.892)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:660 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.681, contain 0.825, names 0.833)
+- `autograd/src/tape.ts:858 cos` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.680, contain 0.810, names 0.737)
+- `functions/src/typed/special.ts:487 fresnelCScalar` ↔ `functions/src/typed/special.ts:509 fresnelSScalar` (j 0.680, contain 0.837, names 1.000)
+- `packages/workerpool/src/index.ts:2263 runChunks` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.680, contain 0.870, names 0.649)
+- `functions/src/numeric/solveODE.ts:465 rosenbrockSolve` ↔ `functions/src/numeric/solveODE.ts:613 rodasSolve` (j 0.678, contain 0.814, names 0.513)
+- `functions/src/matrix/subset.ts:240 _getObjectProperty` ↔ `functions/src/matrix/subset.ts:265 _setObjectProperty` (j 0.677, contain 0.875, names 0.600)
+- `functions/src/signal/fft-core-f64.ts:43 fftCoreFloat64` ↔ `packages/workerpool/src/fft-core.ts:35 fftFrameInPlace` (j 0.677, contain 0.828, names 0.763)
+- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.674, contain 0.884, names 0.610)
+- `assembly/src/special.ts:158 _besselY0Series` ↔ `functions/src/wasm/special/scalars.ts:195 besselY0Series` (j 0.672, contain 0.821, names 0.688)
+- `functions/src/numeric/control-equations.ts:113 norm1` ↔ `matrix/src/operations/common.ts:255 norm1` (j 0.672, contain 0.811, names 0.615)
+- `matrix/src/backends/JSBackend.ts:108 scale` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.671, contain 0.825, names 0.750)
+- `matrix/src/backends/ParallelBackend.ts:124 scale` ↔ `matrix/src/backends/ParallelBackend.ts:158 multiply` (j 0.671, contain 0.911, names 0.500)
+- `functions/src/numeric/open-root-finders.ts:88 newton` ↔ `functions/src/numeric/open-root-finders.ts:185 halley` (j 0.670, contain 0.924, names 0.778)
+- `functions/src/special/erf.ts:105 erfc2` ↔ `functions/src/special/erf.ts:129 erfc3` (j 0.669, contain 0.879, names 0.929)
+- `assembly/src/ops/complex-array.ts:165 complex_array_scale_complex` ↔ `assembly/src/ops/complex-array.ts:283 complex_array_log` (j 0.667, contain 0.849, names 0.625)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:922 square` (j 0.667, contain 0.812, names 0.875)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:1051 _unaryElementwise` (j 0.667, contain 0.804, names 0.650)
+- `matrix/src/parallel-matrix.ts:415 DenseMatrix, DenseMatrix` ↔ `matrix/src/parallel-matrix.ts:937 DenseMatrix, DenseMatrix` (j 0.667, contain 0.868, names 0.375)
+- `packages/workerpool/src/index.ts:1556 unary` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.665, contain 0.847, names 0.769)
+- `packages/workerpool/src/index.ts:765 reduceScalar` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.664, contain 0.805, names 0.735)
+- `assembly/src/signal.ts:274 chirp_z_transform_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:223 chirpZTransformJS` (j 0.663, contain 0.810, names 0.800)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662, contain 0.895, names 0.733)
+- `functions/src/utils/bignumber/bitwise.ts:434 rightArithShiftBigNumber` ↔ `functions/src/utils/bignumber/bitwise.ts:484 rightLogShiftBigNumber` (j 0.662, contain 0.864, names 0.810)
+- `matrix/src/backends/ParallelBackend.ts:158 multiply` ↔ `matrix/src/backends/ParallelBackend.ts:180 transpose` (j 0.662, contain 0.895, names 0.529)
+- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.662, contain 0.806, names 0.714)
+- `functions/src/typed/normal-equations-solve.ts:8 solveAugmentedNormalEquations` ↔ `functions/src/typed/numeric.ts:196 linsolve` (j 0.661, contain 0.897, names 0.524)
+- `functions/src/ml/ols.ts:73 invertUnscaled` ↔ `functions/src/typed/matrix-ops.ts:490 matrixInverse` (j 0.658, contain 0.798, names 0.667)
+- `core/src/types/bignumber.ts:1432 _alternatingEvenTaylor` ↔ `core/src/types/bignumber.ts:1471 _atanTaylor` (j 0.657, contain 0.807, names 0.762)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:880 tan` (j 0.656, contain 0.832, names 0.700)
+- `functions/src/ml/ols.ts:73 invertUnscaled` ↔ `functions/src/typed/hypothesis.ts:2039 _matInverse` (j 0.656, contain 0.827, names 0.739)
+- `functions/src/type/local/Decimal.ts:349 plus` ↔ `functions/src/type/local/Decimal.ts:388 minus` (j 0.656, contain 0.841, names 0.808)
+- `assembly/src/special.ts:179 _besselY1Series` ↔ `functions/src/wasm/special/scalars.ts:217 besselY1Series` (j 0.655, contain 0.805, names 0.647)
+- `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
+- `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
+- `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
+- `matrix/src/backends/JSBackend.ts:92 divideElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
+- `packages/workerpool/src/index.ts:839 dot` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.654, contain 0.833, names 0.725)
+- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.654, contain 0.858, names 0.578)
+- `packages/workerpool/src/index.ts:1012 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1081 bitwiseScalar` (j 0.654, contain 0.847, names 0.757)
+- `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:817 exp` (j 0.653, contain 0.837, names 0.765)
+- `functions/src/typed/signal.ts:578 dct` ↔ `functions/src/typed/signal.ts:622 dst` (j 0.652, contain 0.829, names 0.833)
+- `functions/src/special/spheroidal.ts:159 spheroidalAngular` ↔ `functions/src/special/spheroidal.ts:234 spheroidalAngularContinued` (j 0.651, contain 0.944, names 0.667)
+- `autograd/src/tape.ts:880 tan` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.649, contain 0.810, names 0.700)
+- `autograd/src/tape.ts:880 tan` ↔ `autograd/src/tape.ts:1001 reciprocal` (j 0.649, contain 0.810, names 0.650)
+- `functions/src/scalar-mutate.ts:261 swapOperands` ↔ `functions/src/scalar-mutate.ts:348 deleteNode` (j 0.649, contain 0.847, names 0.842)
+- `functions/src/stats/gaussian-process.ts:101 forwardSolve` ↔ `functions/src/stats/gaussian-process.ts:113 backSolveTranspose` (j 0.649, contain 0.857, names 1.000)
+- `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:137 complex_array_div` (j 0.647, contain 0.815, names 0.929)
+- `matrix/src/types/SparseMatrix.ts:576 multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:878 mapNonZeros` (j 0.645, contain 0.831, names 0.727)
+- `core/src/types/bignumber.ts:1100 sinh` ↔ `core/src/types/bignumber.ts:1126 tanh` (j 0.642, contain 0.843, names 0.917)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:1022 abs` (j 0.640, contain 0.845, names 0.700)
+- `functions/src/numeric/solveODE.ts:1613 _rk23` ↔ `functions/src/numeric/solveODE.ts:1634 _rk45` (j 0.639, contain 0.885, names 1.000)
+- `assembly/src/signal.ts:50 _fftInterleaved` ↔ `functions/src/wasm/signal/wasm-bridge.ts:110 _fftInterleavedJS` (j 0.638, contain 0.787, names 0.882)
+- `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:1022 abs` (j 0.637, contain 0.851, names 0.789)
+- `matrix/src/backends/WASMBackend.ts:574 luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:779 inverse` (j 0.637, contain 0.921, names 0.500)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.636, contain 0.795, names 0.800)
+- `core/src/types/complex.ts:549 tanh` ↔ `core/src/types/complex.ts:562 coth` (j 0.636, contain 0.789, names 1.000)
+- `matrix/src/types/SparseMatrix.ts:576 multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:601 multiply` (j 0.636, contain 0.882, names 0.615)
+- `assembly/src/ops/matrix.ts:297 vector_matrix_multiply` ↔ `assembly/src/ops/matrix.ts:441 matrix_sum_cols` (j 0.633, contain 0.864, names 0.636)
+- `functions/src/typed/integration.ts:389 gaussQuadSerial` ↔ `packages/workerpool/src/worker.ts:966 integrateChunk` (j 0.632, contain 0.782, names 0.412)
+- `functions/src/special/spheroidal.ts:35 ferrersP` ↔ `functions/src/special/spheroidal.ts:212 ferrersPContinued` (j 0.631, contain 0.795, names 0.857)
+- `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:922 square` (j 0.630, contain 0.777, names 0.765)
+- `functions/src/typed/arithmetic.ts:1013 number, number` ↔ `functions/src/typed/arithmetic.ts:1028 bigint, bigint` (j 0.630, contain 0.895, names 0.778)
+- `assembly/src/poly.ts:293 poly_fit_f64` ↔ `assembly/src/poly.ts:331 cheb_fit_f64` (j 0.629, contain 0.862, names 0.800)
+- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.629, contain 0.772, names 0.600)
+- `functions/src/numeric/krylov.ts:197 incompleteCholesky` ↔ `functions/src/typed/dist-objects.ts:1281 _cholesky` (j 0.628, contain 0.860, names 0.632)
+- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1012 bitwiseBinary` (j 0.627, contain 0.791, names 0.838)
+- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.626, contain 0.866, names 0.650)
+- `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:422 matrix_sum_rows` (j 0.625, contain 0.833, names 0.727)
+- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:2059 outer` (j 0.625, contain 0.780, names 0.886)
+- `autograd/src/tape.ts:133 add` ↔ `autograd/src/tape.ts:202 mul` (j 0.624, contain 0.888, names 0.842)
+- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:66 subtractScalar` (j 0.623, contain 0.768, names 0.818)
+- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:77 multiplyScalar` (j 0.623, contain 0.768, names 0.818)
+- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623, contain 0.768, names 0.818)
+- `core/src/arithmetic/scalar.ts:66 subtractScalar` ↔ `core/src/arithmetic/scalar.ts:77 multiplyScalar` (j 0.623, contain 0.768, names 0.818)
+- `core/src/arithmetic/scalar.ts:66 subtractScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623, contain 0.768, names 0.818)
+- `core/src/arithmetic/scalar.ts:77 multiplyScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623, contain 0.768, names 0.818)
+- `assembly/src/ops/curvefit.ts:6 expfit` ↔ `assembly/src/ops/curvefit.ts:31 logfit` (j 0.622, contain 0.832, names 0.682)
+- `assembly/src/ops/special.ts:43 laguerreL` ↔ `assembly/src/ops/special.ts:60 legendreP` (j 0.621, contain 0.787, names 1.000)
+- `autograd/src/tape.ts:903 sqrt` ↔ `autograd/src/tape.ts:922 square` (j 0.620, contain 0.769, names 0.765)
+- `functions/src/type/matrix/utils/matAlgo13xDD.ts:120 _iterate` ↔ `functions/src/type/matrix/utils/matAlgo14xDs.ts:101 _iterate` (j 0.618, contain 0.825, names 0.917)
+- `autograd/src/tape.ts:1428 svd` ↔ `autograd/src/tape.ts:1583 _eigSymmetric` (j 0.617, contain 0.852, names 0.400)
+- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.617, contain 0.864, names 0.625)
+- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.616, contain 0.809, names 0.686)
+- `functions/src/signal/wavelets.ts:86 rickerWavelet` ↔ `functions/src/signal/wavelets.ts:99 morletWavelet` (j 0.615, contain 0.766, names 0.750)
+- `parallel/src/ParallelMatrix.ts:288 elementwise` ↔ `parallel/src/ParallelMatrix.ts:356 scale` (j 0.615, contain 0.798, names 0.789)
+- `core/src/array.ts:985 recursiveMapWithIndex` ↔ `core/src/array.ts:1003 recursiveMap` (j 0.614, contain 0.896, names 0.615)
+- `packages/workerpool/src/index.ts:1012 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.612, contain 0.823, names 0.750)
+- `functions/src/typed/arithmetic.ts:1343 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1366 Float64Array` (j 0.610, contain 0.766, names 0.800)
+- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:1490 norm` (j 0.610, contain 0.847, names 0.750)
+- `matrix/src/backends/WASMBackend.ts:574 luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:894 choleskyDecomposition` (j 0.609, contain 0.945, names 0.512)
+- `packages/workerpool/src/index.ts:1847 distanceMatrix` ↔ `packages/workerpool/src/index.ts:1985 matvec` (j 0.609, contain 0.763, names 0.755)
+- `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:798 log` (j 0.608, contain 0.793, names 0.765)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.607, contain 0.773, names 0.800)
+- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.607, contain 0.773, names 0.800)
+- `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:836 sin` (j 0.607, contain 0.804, names 0.722)
+- `functions/src/matrix/eigs/realSymmetric.ts:102 diag` ↔ `functions/src/matrix/eigs/realSymmetric.ts:134 diagBig` (j 0.604, contain 0.768, names 0.586)
+- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/parallel-map.ts:56 mapBinaryF64` (j 0.603, contain 0.772, names 0.529)
+- `functions/src/numeric/krylov.ts:287 cg` ↔ `functions/src/numeric/krylov.ts:530 bicgstab` (j 0.602, contain 0.904, names 0.673)
+- `tensor/src/operations/solve.ts:81 forwardSub` ↔ `tensor/src/operations/solve.ts:102 backSub` (j 0.602, contain 0.877, names 0.667)
+- `assembly/src/ops/special.ts:11 chebyshevT` ↔ `assembly/src/ops/special.ts:60 legendreP` (j 0.600, contain 0.836, names 0.909)
 
-### Core-touching pairs
+### jStruct below 0.6 (reported by containment) (24)
 
-- `core/src/customs.ts:113 isSafeMethod` ↔ `expression/src/utils/customs.ts:104 isSafeMethod` (j 1.000) — recorded: core isSafeMethod and expression isSafeMethod are the same sandbox predicate (ghosted method, safeNativeMethods, Object/Function.prototype); the expression copy is canonical by design and the core copy is not on internal.
-- `core/src/customs.ts:113 isSafeMethod` ↔ `functions/src/utils/customs.ts:102 isSafeMethod` (j 1.000) — recorded: core isSafeMethod and functions isSafeMethod are the same sandbox predicate; the functions copy is canonical by design and the core copy is not on internal.
-- `core/src/factory.ts:83 factory` ↔ `expression/src/utils/factory.ts:94 factory` (j 1.000) — recorded: core factory and expression factory bodies match (pickShallow, assertDependencies, attach meta), but core's TDeps extends Record<string, unknown> breaks the expression call sites, as the comment in expression factory.ts says.
-- `core/src/factory.ts:83 factory` ↔ `functions/src/utils/factory.ts:104 factory` (j 1.000) — recorded: core factory and functions factory bodies match, but core's Record<string, unknown> constraint breaks the functions call sites, as the comment in functions factory.ts says.
-- `core/src/numeric/rng.ts:27 mulberry32` ↔ `packages/workerpool/src/worker-numerics.ts:42 _workerMulberry32` (j 1.000) — recorded: mulberry32 and _workerMulberry32 are the same Mulberry32 closure, but dist/worker.js cannot import core (the bundle would pull the core barrel); worker-numerics.test.ts pins parity.
-- `core/src/types/complex.ts:480 Complex.tan` ↔ `core/src/types/complex.ts:538 Complex.tanh` (j 1.000) — recorded: Complex.tan is (sin 2x + i sinh 2y)/(cos 2x + cosh 2y) while Complex.tanh is (sinh 2x + i sin 2y)/(cosh 2x + cos 2y); a four-callback helper is longer than the four-line methods.
-- `core/src/types/complex.ts:490 Complex.cot` ↔ `core/src/types/complex.ts:548 Complex.coth` (j 1.000) — recorded: Complex.cot is (sin 2x − i sinh 2y)/(cosh 2y − cos 2x) while Complex.coth is (sinh 2x − i sin 2y)/(cosh 2x − cos 2y); which doubled part feeds sin versus sinh differs.
-- `core/src/numeric/stable.ts:132 norm2` ↔ `core/src/numeric/stable.ts:222 scaledDistance` (j 0.881) — recorded: norm2's dnrm2 loop scales one vector's entries, while scaledDistance scales the residual a[i]−b[i] before the same sum-of-squares update; both are documented hot loops.
-- `core/src/is.ts:155 isBigNumber` ↔ `expression/src/utils/is.ts:291 isBigNumber` (j 0.861) — recorded: core isBigNumber and expression isBigNumber are the same isBigNumber-plus-isDecimal duck test, but the expression local stays (measured slower as a cross-module guard; core still pairs with that local at jStruct 0.86).
-- `core/src/is.ts:155 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 0.861) — recorded: core isBigNumber and functions isBigNumber match, but the functions local stays as a hot-path guard; core still pairs with the expression and functions locals at jStruct 0.86.
-- `core/src/numeric/stable.ts:103 neumaierSum` ↔ `core/src/numeric/stable.ts:373 neumaierCumsum` (j 0.829) — recorded: neumaierSum returns one compensated total (sum+c), while neumaierCumsum writes every prefix out[i]=sum+c; the pair is a documented hot path and the jobs differ (one total versus a prefix scan).
-- `core/src/collection.ts:136 _reduce` ↔ `functions/src/matrix/mapSlices.ts:100 _mapSlices` (j 0.688) — recorded: core _reduce folds a callback along one dimension and returns a scalar at a flat leaf; _mapSlices invokes its callback on the whole slice when dim<=0. CLONES_REMAINING lists them as hot loops where a callback or mode branch is the known loss.
-- `core/src/numeric/stable.ts:46 pairwiseSum` ↔ `core/src/numeric/stable.ts:167 pairwiseDot` (j 0.686) — recorded: pairwiseSum adds eight lanes of one array; pairwiseDot adds a[i]*b[i] from two arrays, with the same block recursion. CLONES_REMAINING keeps them as separate hot loops; a multiply mode in the leaf is the known loss.
-- `core/src/types/bignumber.ts:1432 BigNumber._alternatingEvenTaylor` ↔ `core/src/types/bignumber.ts:1471 BigNumber._atanTaylor` (j 0.657) — recorded: _atanTaylor divides a copy of the term by (2n+1) and does not store that divisor back into term; _alternatingEvenTaylor folds divide(denom(n)) and negate into term. CLONES_REMAINING records that arctan does not fold the divisor back into term.
-- `core/src/types/bignumber.ts:1100 BigNumber.sinh` ↔ `core/src/types/bignumber.ts:1126 BigNumber.tanh` (j 0.642) — recorded: BigNumber.sinh returns (e^x - e^{-x})/2 and passes infinities through; tanh returns (e^x - e^{-x})/(e^x + e^{-x}) and maps infinities to the sign. CLONES_REMAINING: different formulas; the overlap is the exp pair.
-- `core/src/types/fraction.ts:573 Fraction.floor` ↔ `core/src/types/fraction.ts:587 Fraction.ceil` (j 0.630) — recorded: Fraction.floor and Fraction.ceil differ by the remainder adjustment (quot-1 when the value is negative and not integral, quot+1 when positive); the overlap is the shell.
-- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:66 subtractScalar` (j 0.623) — recorded: the scalar arithmetic ladder (addScalar and subtractScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x+y versus x-y and the promoted methods are .add versus .subtract.
-- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:77 multiplyScalar` (j 0.623) — recorded: the scalar arithmetic ladder (addScalar and multiplyScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x+y versus x*y and the promoted methods are .add versus .multiply.
-- `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623) — recorded: the scalar arithmetic ladder (addScalar and divideScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x+y versus x/y and the promoted methods are .add versus .divide.
-- `core/src/arithmetic/scalar.ts:66 subtractScalar` ↔ `core/src/arithmetic/scalar.ts:77 multiplyScalar` (j 0.623) — recorded: the scalar arithmetic ladder (subtractScalar and multiplyScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x-y versus x*y and the promoted methods are .subtract versus .multiply.
-- `core/src/arithmetic/scalar.ts:66 subtractScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623) — recorded: the scalar arithmetic ladder (subtractScalar and divideScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x-y versus x/y and the promoted methods are .subtract versus .divide.
-- `core/src/arithmetic/scalar.ts:77 multiplyScalar` ↔ `core/src/arithmetic/scalar.ts:88 divideScalar` (j 0.623) — recorded: the scalar arithmetic ladder (multiplyScalar and divideScalar) is a documented hot path where a callback or mode branch is the known loss; the number/bigint arms are x*y versus x/y and the promoted methods are .multiply versus .divide.
-- `core/src/array.ts:985 recursiveMapWithIndex` ↔ `core/src/array.ts:1003 recursiveMap` (j 0.614) — recorded: recursiveMapWithIndex and recursiveMap are documented hot loops where a callback or mode branch is the known loss; the index walk passes index.slice(0, depth) and the root array, while recursiveMap calls the unary callback.
-- `core/src/wasm-loader.ts:302 WasmModuleLoader.getImports` ↔ `matrix/src/backends/WASMBackend.ts:404 WASMBackend.loadAsModule` (j 0.232) — recorded: core WasmModuleLoader.getImports only builds the env/Math/Date import object; matrix WASMBackend.loadAsModule is the integrity-checked instantiate path (verifyWasmIntegrity, then compile or instantiateStreaming).
-
-### Every other near pair
-
-- `assembly/src/special.ts:633 _carlsonRC` ↔ `functions/src/wasm/special/wasm-bridge.ts:278 _carlsonRC` (j 1.000) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `autograd/src/tape.ts:2302 _batchedMatmul` ↔ `autograd/src/tape.ts:2345 _batchedMatmulGradA` (j 1.000) — recorded: _batchedMatmul contracts A@B (Y[i,j] += A[i,q]*B[q,j]) while _batchedMatmulGradA contracts dY@Bᵀ (dA[i,q] += dY[i,j]*B[q,j]) with different m/k/n sources; a shared stride gemm would sit on the tape hot path.
-- `autograd/src/tape.ts:2302 _batchedMatmul` ↔ `autograd/src/tape.ts:2388 _batchedMatmulGradB` (j 1.000) — recorded: _batchedMatmul contracts A@B while _batchedMatmulGradB contracts Aᵀ@dY (dB[q,j] += A[i,q]*dY[i,j]) with different offsets and loop order; a shared gemm would sit on the tape hot path.
-- `autograd/src/tape.ts:2345 _batchedMatmulGradA` ↔ `autograd/src/tape.ts:2388 _batchedMatmulGradB` (j 1.000) — recorded: _batchedMatmulGradA writes dA[i,q] from dY and Bᵀ while _batchedMatmulGradB writes dB[q,j] from Aᵀ and dY; the three contractions stay separate because a shared gemm is on the tape hot path.
-- `expression/src/utils/customs.ts:104 isSafeMethod` ↔ `functions/src/utils/customs.ts:102 isSafeMethod` (j 1.000) — recorded: expression isSafeMethod (method typed unknown) and functions isSafeMethod (method typed string) are local sandbox copies kept canonical in each package; the core copy is not the one to share.
-- `expression/src/utils/factory.ts:94 factory` ↔ `functions/src/utils/factory.ts:104 factory` (j 1.000) — recorded: expression factory and functions factory bodies match but the generics do not (expression TDeps extends object; functions TDeps extends Record<string, any>), the same reason the core factory cannot replace either.
-- `expression/src/utils/is.ts:291 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 1.000) — recorded: expression isBigNumber and functions isBigNumber are the same isBigNumber/isDecimal duck test kept local on purpose; a cross-module re-export measured about 40% slower on the Tukey path and the is-guards-local tests pin it.
-- `functions/src/set/setSymDifference.ts:48 Array | Matrix, Array | Matrix` ↔ `functions/src/set/setUnion.ts:65 Array | Matrix, Array | Matrix` (j 1.000) — recorded: the setSymDifference and setUnion Array|Matrix handlers share the empty-set flatten preamble, but the result is concat(setDifference, setDifference) against concat(setSymDifference, setIntersect).
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `matrix/src/backends/wasm/detect.ts:60 detectSIMD` ↔ `matrix/src/backends/wasm/detect.ts:115 detectBulkMemory` (j 1.000) — recorded: detectSIMD and detectBulkMemory only share testWasmFeature; the probe bytes differ (v128.const i32x4 versus memory.copy).
-- `packages/workerpool/src/worker.ts:770 tensordotChunk` ↔ `parallel/src/ComputePool.ts:413 tensordotChunkKernel` (j 0.971) — recorded: tensordotChunk and tensordotChunkKernel run the same free/contracted-axis accumulation, but workerpool cannot import parallel.
-- `functions/src/wasm/WasmLoader.ts:368 WasmLoader.loadNodeWasm` ↔ `matrix/src/backends/WasmLoader.ts:658 WasmLoader.loadNodeWasm` (j 0.952) — recorded: functions WasmLoader.loadNodeWasm statically calls verifyWasmIntegrity then instantiate(getImports()), while matrix WasmLoader.loadNodeWasm dynamically imports ./wasm/integrity.js; folding them risks the SHA-384 gate.
-- `functions/src/wasm/WasmLoader.ts:400 WasmLoader.loadBrowserWasm` ↔ `matrix/src/backends/WasmLoader.ts:691 WasmLoader.loadBrowserWasm` (j 0.919) — recorded: functions and matrix WasmLoader.loadBrowserWasm both gate streaming on a missing manifest, but the integrity import and getImports() object differ; folding them risks the SHA-384 gate.
-- `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.917) — recorded: JSBackend.abs writes Math.abs into a same-shape matrix while JSBackend.transpose writes result[j*rows+i] and swaps dimensions; both sit in the documented JSBackend hot-loop set where a shared callback is the known loss.
-- `assembly/src/special.ts:725 _carlsonRJ` ↔ `functions/src/wasm/special/wasm-bridge.ts:379 _carlsonRJ` (j 0.915) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.915) — recorded: pageRank calls _pageRankOnce (damping, returns ranks) and eigenvectorCentrality calls _eigenvectorOnce (power iteration, returns centrality); they already share runCentralityRestarts and one base would branch on the result field.
-- `assembly/src/special.ts:799 _ellipticPiIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:459 _ellipticPiIncomplete` (j 0.909) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `assembly/src/sort.ts:120 _heapsort` ↔ `assembly/src/sort.ts:222 _heapsortIdx` (j 0.905) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:836 TapedTensor.sin` ↔ `autograd/src/tape.ts:858 TapedTensor.cos` (j 0.900) — recorded: TapedTensor.sin's adjoint is dY*cos(x) and TapedTensor.cos's adjoint is −dY*sin(x); the tape.ts transcendental adjoints stay separate rather than mode-switching.
-- `matrix/src/backends/GPUMatrixBackend.ts:183 GPUMatrixBackend.addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:282 GPUMatrixBackend.multiplyAsync` (j 0.900) — recorded: GPUMatrixBackend.addAsync uploads two matrices to backend.add (same rows/cols) while multiplyAsync uploads two matrices to backend.matmul (a.rows, a.cols, b.cols); gpuOrJs is already shared and the kernels differ.
-- `assembly/src/special.ts:788 _ellipticEIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:448 _ellipticEIncomplete` (j 0.898) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/probability/util/gammaSample.ts:24 gammaSampleRng` ↔ `packages/workerpool/src/worker.ts:850 _workerGammaRandom` (j 0.891) — recorded: gammaSampleRng and _workerGammaRandom are the same Marsaglia–Tsang loop (alpha<1 boost, then the 0.0331/log accept tests), but workerpool cannot import functions.
-- `packages/workerpool/src/worker.ts:250 applyKernelChunk` ↔ `packages/workerpool/src/worker.ts:271 applyKernel2Chunk` (j 0.889) — recorded: applyKernelChunk evals a unary (x)=>number on one buffer and applyKernel2Chunk evals a binary (a,b)=>number on two buffers; the doc treats this same-file arity split as not a layering skip and not one kernel.
-- `functions/src/gpu/elementwise-gpu.ts:307 chainGpuDispatchImpl` ↔ `functions/src/gpu/elementwise-gpu.ts:499 chainReduceGpuDispatchImpl` (j 0.888) — recorded: chainGpuDispatchImpl returns a Float32Array elementwise chain while chainReduceGpuDispatchImpl also allocates partials and returns one reduced number; a shared template risks the per-device error-scope LIFO silent-zero failure.
-- `functions/src/numeric/krylov.ts:223 makeILU0` ↔ `functions/src/numeric/krylov.ts:244 makeIC0` (j 0.887) — recorded: makeILU0 applies U⁻¹(L⁻¹r) with a unit lower diagonal (y[i]=s, then divide by U[i][i]), while makeIC0 applies L⁻ᵀ(L⁻¹r) and divides by L[i][i] on both the forward and transpose sweeps.
-- `assembly/src/special.ts:683 _carlsonRD` ↔ `functions/src/wasm/special/wasm-bridge.ts:329 _carlsonRD` (j 0.877) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/wasm/WasmLoader.ts:306 WasmLoader.precompile` ↔ `matrix/src/backends/WasmLoader.ts:592 WasmLoader.precompile` (j 0.877) — recorded: functions WasmLoader.precompile uses the module-level verifyWasmIntegrity, while matrix WasmLoader.precompile dynamically imports ./wasm/integrity.js; path resolution and the integrity import differ, so folding them risks the SHA-384 gate.
-- `matrix/src/backends/GPUMatrixBackend.ts:183 GPUMatrixBackend.addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:242 GPUMatrixBackend.scaleAsync` (j 0.875) — recorded: GPUMatrixBackend.addAsync calls backend.add on two buffers while scaleAsync calls backend.scale on one buffer plus a scalar; bind layouts differ and gpuOrJs is already the shared part.
-- `autograd/src/tape.ts:475 TapedTensor.sum` ↔ `autograd/src/tape.ts:500 TapedTensor.mean` (j 0.874) — different job: TapedTensor.sum broadcasts dY unchanged through addReducedBroadcast, while TapedTensor.mean divides that broadcast by N (product of the reduced-axis sizes) and the forward calls are primal.sum versus primal.mean.
-- `matrix/src/backends/WASMBackend.ts:779 WASMBackend.inverse` ↔ `matrix/src/backends/WASMBackend.ts:894 WASMBackend.choleskyDecomposition` (j 0.873) — recorded: WASMBackend.inverse calls matrix_inverse with n*n result plus n*n+n scratch and returns {inverse, singular}, while choleskyDecomposition calls matrix_cholesky into one L buffer and returns {l, positiveDefinite}.
-- `assembly/src/special.ts:778 _ellipticFIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:438 _ellipticFIncomplete` (j 0.872) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` (j 0.872) — recorded: solveDAE _denseSolve returns a NaN vector when the pivot is below 1e-300, while solveODE _inlineLuSolve has no cutoff and divides by the pivot anyway; one solver would mode-switch on the stiff-step hot path.
-- `expression/src/node/AssignmentNode.ts:302 AssignmentNode._toString` ↔ `expression/src/node/AssignmentNode.ts:349 AssignmentNode._toHTML` (j 0.869) — recorded: AssignmentNode._toString joins object, index, and value with a plain " = " and parentheses, while _toHTML wraps the same parts in math-paranthesis and math-assignment-operator spans.
-- `functions/src/algebra/solver/lsolveAll.ts:149 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:149 _denseBackwardSubstitution` (j 0.869) — recorded: lsolveAll _denseForwardSubstitution walks columns 0..n-1 and updates j from i+1 upward, while usolveAll _denseBackwardSubstitution walks columns n-1..0 and updates j from i-1 downward; a direction flag is a mode switch in the elimination loop.
-- `functions/src/algebra/solver/lsolveAll.ts:218 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:218 _sparseBackwardSubstitution` (j 0.867) — recorded: lsolveAll _sparseForwardSubstitution keeps CSC entries with row J>i scanning the column upward, while usolveAll _sparseBackwardSubstitution keeps J<i scanning from the bottom of the column.
-- `assembly/src/special.ts:396 _airyAiSeries` ↔ `assembly/src/special.ts:423 _airyBiSeries` (j 0.863) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` ↔ `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` (j 0.862) — recorded: MathWorkerPool.scale multiplies a Float64Array by a scalar via scaleChunk, while bitwiseNot applies ~ to an Int32Array via bitwiseNotChunk; both are documented workerpool hot paths.
-- `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:165 complex_array_scale_complex` (j 0.855) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/sort.ts:102 _siftDown` ↔ `assembly/src/sort.ts:205 _siftDownIdx` (j 0.852) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/special.ts:560 _ellipticK` ↔ `functions/src/wasm/special/scalars.ts:333 ellipticKScalar` (j 0.849) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/arithmetic/xgcd.ts:99 _xgcdBigNumber` ↔ `functions/src/arithmetic/xgcd.ts:153 _xgcdFraction` (j 0.846) — recorded: _xgcdBigNumber runs extended Euclid with BigNumber div/mod/minus/times/lt/neg, while _xgcdFraction uses Fraction divide/mod/subtract/multiply/lessThan/negate; one base would mode-switch the arithmetic.
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:806 MathWorkerPool.prod` (j 0.846) — recorded: MathWorkerPool.sum adds sumChunk partials starting from 0, while prod multiplies prodChunk partials starting from 1; both are documented workerpool hot paths.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.842) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `matrix/src/backends/JSBackend.ts:44 JSBackend.add` ↔ `matrix/src/backends/JSBackend.ts:60 JSBackend.subtract` (j 0.840) — recorded: JSBackend.add and JSBackend.subtract share the dense i,j loop but store a.get+b.get versus a.get-b.get; a callback there is the documented JSBackend elementwise hot-path loss.
-- `matrix/src/backends/JSBackend.ts:44 JSBackend.add` ↔ `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` (j 0.840) — recorded: JSBackend.add stores a sum and JSBackend.multiplyElementwise stores a product in the same dense i,j loop; a callback there is the documented JSBackend elementwise hot-path loss.
-- `matrix/src/backends/JSBackend.ts:44 JSBackend.add` ↔ `matrix/src/backends/JSBackend.ts:92 JSBackend.divideElementwise` (j 0.840) — recorded: JSBackend.add stores a sum and JSBackend.divideElementwise stores a quotient in the same dense i,j loop; a callback there is the documented JSBackend elementwise hot-path loss.
-- `matrix/src/backends/JSBackend.ts:60 JSBackend.subtract` ↔ `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` (j 0.840) — recorded: JSBackend.subtract stores a difference and JSBackend.multiplyElementwise stores a product in the same dense i,j loop; a callback there is the documented JSBackend elementwise hot-path loss.
-- `matrix/src/backends/JSBackend.ts:60 JSBackend.subtract` ↔ `matrix/src/backends/JSBackend.ts:92 JSBackend.divideElementwise` (j 0.840) — recorded: JSBackend.subtract stores a difference and JSBackend.divideElementwise stores a quotient in the same dense i,j loop; a callback there is the documented JSBackend elementwise hot-path loss.
-- `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:92 JSBackend.divideElementwise` (j 0.840) — recorded: JSBackend.multiplyElementwise stores a product and JSBackend.divideElementwise stores a quotient in the same dense i,j loop; a callback there is the documented JSBackend elementwise hot-path loss.
-- `assembly/src/special.ts:656 _carlsonRF` ↔ `functions/src/wasm/special/wasm-bridge.ts:301 _carlsonRF` (j 0.839) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:836 TapedTensor.sin` (j 0.832) — recorded: TapedTensor.exp's adjoint multiplies dY by the cached exp(x), while TapedTensor.sin's adjoint multiplies dY by a separately cached cos(x).
-- `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` ↔ `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` (j 0.832) — recorded: MathWorkerPool.scale multiplies by a numeric scalar via scaleChunk, while applyKernel evals a caller source string via applyKernelChunk; both are documented workerpool hot paths, so a shared callback is the known loss.
-- `assembly/src/ops/special.ts:79 erfi` ↔ `functions/src/typed/special.ts:111 erfiScalar` (j 0.829) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `assembly/src/special.ts:101 _besselHankel` ↔ `functions/src/wasm/special/scalars.ts:132 besselHankel` (j 0.829) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `autograd/src/tape.ts:133 TapedTensor.add` ↔ `autograd/src/tape.ts:148 TapedTensor.sub` (j 0.828) — recorded: TapedTensor.add adds outputGrad into both input slots, while TapedTensor.sub adds it to the left slot and subtracts it from the right; tape add/sub are documented hot loops.
-- `autograd/src/dual-tensor.ts:77 DualTensor.add` ↔ `autograd/src/dual-tensor.ts:89 DualTensor.sub` (j 0.826) — recorded: DualTensor.add writes primal and tangent sums in one Float64Array loop, while DualTensor.sub writes the differences; DualTensor add/sub is a documented hot path.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:903 TapedTensor.sqrt` (j 0.825) — recorded: TapedTensor.exp's adjoint is dY*exp(x) from the cached output, while TapedTensor.sqrt's adjoint is dY/(2*sqrt(x)).
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:903 TapedTensor.sqrt` (j 0.823) — recorded: TapedTensor.log's adjoint is dY/x from the captured primal, while TapedTensor.sqrt's adjoint is dY/(2*sqrt(x)) from the cached output.
-- `assembly/src/ops/polynomial.ts:140 resultantValue` ↔ `assembly/src/poly.ts:98 sylvesterDet` (j 0.821) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:817 TapedTensor.exp` (j 0.821) — recorded: TapedTensor.log's adjoint divides dY by the input, while TapedTensor.exp's adjoint multiplies dY by the cached exp(x).
-- `assembly/src/sort.ts:89 _insertionSort` ↔ `assembly/src/sort.ts:193 _insertionSortIdx` (j 0.820) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/polynomial.ts:87 determinant` ↔ `assembly/src/poly.ts:60 detSquare` (j 0.818) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/typed/graph.ts:831 betweennessCentrality` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.818) — recorded: betweennessCentrality runs Brandes via _betweennessOnce and eigenvectorCentrality runs power iteration via _eigenvectorOnce; they already share runCentralityRestarts and the kernels differ.
-- `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:614 matrix_gemv` (j 0.814) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:1495 MathWorkerPool.norm` (j 0.813) — recorded: MathWorkerPool.sum reduces sumChunk totals, while norm sums normChunk squares and returns Math.sqrt; both are documented workerpool hot paths.
-- `packages/workerpool/src/worker.ts:311 bitwiseChunk` ↔ `packages/workerpool/src/worker.ts:353 bitwiseScalarChunk` (j 0.812) — recorded: bitwiseChunk applies an Int32 op between two arrays (a[i] op b[i]) and bitwiseScalarChunk applies the same op codes against one scalar; the doc calls this a same-file arity split, not a layering skip.
-- `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` ↔ `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` (j 0.810) — recorded: MathWorkerPool.bitwiseNot is an Int32 bitwise-not via bitwiseNotChunk, while applyKernel is a Float64 caller-source unary via applyKernelChunk; both are documented workerpool hot paths.
-- `functions/src/algebra/simplify/util.ts:201 unflattenr` ↔ `functions/src/algebra/simplify/util.ts:225 unflattenl` (j 0.802) — recorded: unflattenr pops arguments into a right-heavy tree (makeNode([popped, curnode])) and unflattenl shifts them into a left-heavy tree (makeNode([curnode, shifted])).
-- `assembly/src/ops/array.ts:89 array_argmin` ↔ `assembly/src/ops/array.ts:109 array_argmax` (j 0.800) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:774 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:774 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:816 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:836 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:796 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:816 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:836 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1189 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1189 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1231 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1231 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:170 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:215 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:195 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:299 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `assembly/src/ops/special.ts:117 sinIntegral` ↔ `functions/src/typed/special.ts:437 sinIntegralScalar` (j 0.798) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `assembly/src/special.ts:143 _besselJ1Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.797) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `matrix/src/operations/condest.ts:18 luSolve` ↔ `matrix/src/operations/condest.ts:47 luSolveTranspose` (j 0.794) — recorded: condest luSolve permutes b then does unit-lower forward and upper back substitution, while luSolveTranspose does Uᵀ forward (dividing by the diagonal), Lᵀ back, then unpermutes; opposite index axes.
-- `matrix/src/backends/GPUMatrixBackend.ts:242 GPUMatrixBackend.scaleAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:282 GPUMatrixBackend.multiplyAsync` (j 0.785) — recorded: GPUMatrixBackend.scaleAsync calls backend.scale(one buffer, scalar) while multiplyAsync calls backend.matmul(two buffers, a.rows, a.cols, b.cols); kernels and bind layouts differ.
-- `matrix/src/operations/givens.ts:28 applyGivensCols` ↔ `matrix/src/operations/schur.ts:60 applyGivensLeft` (j 0.783) — recorded: applyGivensCols rotates columns i and k down rows (A[j][i], A[j][k]), while schur applyGivensLeft rotates rows i and k across columns (A[i][j], A[k][j]).
-- `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:235 complex_array_abs_squared` (j 0.780) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/special.ts:129 _besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:164 besselJ0Series` (j 0.778) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/algebra/solver/lsolve.ts:134 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:134 _denseBackwardSubstitution` (j 0.774) — recorded: lsolve _denseForwardSubstitution walks columns upward, throws when the pivot is zero, and updates later rows, while usolve _denseBackwardSubstitution walks columns downward and updates earlier rows.
-- `functions/src/fit-scalar.ts:550 gradL1` ↔ `functions/src/fit-scalar.ts:570 gradHuber` (j 0.770) — recorded: gradL1's per-row influence is sign(pred−observed) (0 at a zero residual) and gradHuber's is 2*clamp(residual, −1, 1); a callback in that row loop is the megamorphic loss PR #454 measured.
-- `assembly/src/ops/f64-buffer.ts:7 f64Min` ↔ `assembly/src/ops/f64-buffer.ts:21 f64Max` (j 0.769) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `packages/workerpool/src/index.ts:1198 MathWorkerPool.matmul` ↔ `packages/workerpool/src/index.ts:2011 MathWorkerPool.matvec` (j 0.766) — different job: MathWorkerPool.matmul is a three-loop A·B into an aRows*bCols buffer via matmulRows, while matvec checks cols===vector.length and does a two-loop row·vector via matvecRows; only the row-block stitch matches.
-- `packages/workerpool/src/index.ts:844 MathWorkerPool.dot` ↔ `packages/workerpool/src/index.ts:1533 MathWorkerPool.distance` (j 0.764) — different job: MathWorkerPool.dot sums a[i]*b[i] through dotChunk, while distance sums (a[i]−b[i])² through distanceChunk and returns Math.sqrt of that total.
-- `assembly/src/ops/curvefit.ts:31 logfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.762) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:35 f64Add` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:44 f64Sub` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:44 f64Sub` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/f64-buffer.ts:53 f64Mul` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.760) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/complex-array.ts:223 complex_array_arg` ↔ `assembly/src/ops/complex-array.ts:235 complex_array_abs_squared` (j 0.759) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/special.ts:580 _ellipticE` ↔ `functions/src/wasm/special/scalars.ts:355 ellipticECompleteScalar` (j 0.759) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `assembly/src/ops/special.ts:93 expIntegralEi` ↔ `functions/src/typed/special.ts:455 expIntegralEiScalar` (j 0.758) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `autograd/src/tape.ts:2049 _eigGeneralBackward` (j 0.757) — recorded: _eigSymBackward forms dA=(U M Uᵀ + transpose)/2 from Uᵀ dU, while _eigGeneralBackward also subtracts the VᵀV column-norm gauge from Vᵀ dV and returns V⁻ᵀ M Vᵀ; one formula would drop the symmetrizer or the gauge.
-- `assembly/src/sort.ts:134 _introsort` ↔ `assembly/src/sort.ts:240 _introsortIdx` (j 0.756) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `tensor/src/Tensor.ts:161 Tensor.add` ↔ `tensor/src/Tensor.ts:172 Tensor.sub` (j 0.755) — recorded: Tensor.add and Tensor.sub share the scalar, same-shape, and broadcast shells, but the scalar loops and the elementwise callbacks are x+y versus x−y; a callback on that Float64Array loop is the documented hot-path loss.
-- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:831 betweennessCentrality` (j 0.754) — recorded: pageRank returns {ranks} from _pageRankOnce (damping factor) and betweennessCentrality returns {centrality} from _betweennessOnce (Brandes); they already share runCentralityRestarts and one base would branch on the result field.
-- `packages/workerpool/src/index.ts:1198 MathWorkerPool.matmul` ↔ `packages/workerpool/src/index.ts:1873 MathWorkerPool.distanceMatrix` (j 0.754) — different job: MathWorkerPool.matmul writes A·B dot products through matmulRows, while distanceMatrix writes all-pairs sqrt((p_i−p_j)²) through distanceMatrixRowsChunk; only the per-worker row-block stitch matches.
-- `assembly/src/ops/curvefit.ts:6 expfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.752) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:836 TapedTensor.sin` (j 0.752) — recorded: TapedTensor.log's adjoint is dY/x and TapedTensor.sin's adjoint is dY*cos(x), with sin also caching a separate cosine buffer.
-- `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:223 complex_array_arg` (j 0.750) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/wasm/signal/wasm-bridge.ts:332 welchPSDDispatch` ↔ `functions/src/wasm/signal/wasm-bridge.ts:369 bartlettPSDDispatch` (j 0.750) — recorded: welchPSDDispatch calls welch_psd_f64(samples, frameLength, overlap, window code) and falls back to welchPSDJS, while bartlettPSDDispatch calls bartlett_psd_f64(samples, frameLength) with no overlap and falls back to bartlettPSDJS; only the WASM-or-JS shell matches.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:858 TapedTensor.cos` (j 0.748) — recorded: TapedTensor.exp's adjoint multiplies dY by the cached exp(x), while TapedTensor.cos's adjoint multiplies −dY by a cached sin(x).
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:858 TapedTensor.cos` (j 0.746) — recorded: TapedTensor.log's adjoint divides dY by the primal, while TapedTensor.cos's adjoint multiplies −dY by a cached sin(x).
-- `functions/src/wasm/poly/wasm-bridge.ts:109 polyMulDispatch` ↔ `functions/src/wasm/poly/wasm-bridge.ts:266 resultantDispatch` (j 0.745) — recorded: polyMulDispatch calls poly_mul_f64 and returns a Float64Array (JS fallback polyMulJS), while resultantDispatch calls poly_resultant_f64 and returns a number (JS fallback resultantJS); ABIs and result types differ and withAsF64 already holds the marshalling.
-- `parallel/src/ParallelMatrix.ts:388 ParallelMatrix.dotProduct` ↔ `parallel/src/ParallelMatrix.ts:421 ParallelMatrix.sum` (j 0.744) — different job: ParallelMatrix.dotProduct sums a[i]*b[i] and dispatches worker operation 'dot' on two buffers, while ParallelMatrix.sum sums a[i] and dispatches operation 'sum' on one buffer; the shouldUseParallel/sumBlocks shell is shared and the formulas are not.
-- `functions/src/algebra/solver/lsolve.ts:184 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:188 _sparseBackwardSubstitution` (j 0.742) — recorded: lsolve _sparseForwardSubstitution keeps CSC entries with row i>j while scanning the column upward and throws on a zero pivot, while usolve _sparseBackwardSubstitution keeps row i<j while scanning downward.
-- `matrix/src/backends/gpu/run-shader.ts:32 planRunShaderFromAdd` ↔ `matrix/src/backends/gpu/run-shader.ts:82 planRunShaderFromTranspose` (j 0.742) — recorded: planRunShaderFromAdd selects the matrixAdd pipeline, two input writes, and a four-binding layout, while planRunShaderFromTranspose selects the transpose pipeline, one input write, and a three-binding layout; RunShaderPlan is already the shared type.
-- `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` ↔ `packages/workerpool/src/index.ts:1582 MathWorkerPool.unary` (j 0.738) — hot path: MathWorkerPool.scale's sequential loop is the documented workerpool scale hot path (result[i]=data[i]*scalar, then scaleChunk), while unary switches among abs/sqrt/exp/log/sin/cos/tan/negate/square and dispatches unaryChunk; folding them would put that switch on the scale loop.
-- `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.732) — different job: MathWorkerPool.applyKernel compiles a unary source and maps one Float64Array through applyKernelChunk; applyKernel2 checks equal lengths and maps a pair through applyKernel2Chunk. One body would branch on arity, chunk helper, and worker task.
-- `expression/src/parse.ts:1003 parseShift` ↔ `expression/src/parse.ts:1404 parseLeftHandOperators` (j 0.731) — recorded: parseShift builds binary infix OperatorNodes for <<, >>, and >>> (two operands from parseConversion); parseLeftHandOperators builds postfix unary factorial and ctranspose (one operand, then parseAccessors). CLONES_REMAINING keeps them separate because one is binary infix and the other is postfix unary.
-- `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728) — recorded: solveDAE _denseSolve returns a NaN vector when |pivot|<1e-300 and does not skip a zero factor; fir-smoothing solveLinearSystem throws at |pivot|<1e-14 and skips a zero factor. CLONES_REMAINING: _denseSolve, _inlineLuSolve, and solveLinearSystem differ in pivot cutoff (1e-300, none, 1e-14) and singular policy.
-- `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728) — recorded: solveODE _inlineLuSolve has no pivot cutoff (it divides by the pivot even when it is zero) and does not skip a zero factor; fir-smoothing solveLinearSystem throws at |pivot|<1e-14 and skips a zero factor. CLONES_REMAINING groups these with _denseSolve: cutoffs 1e-300, none, and 1e-14, with different singular policies.
-- `assembly/src/signal.ts:236 goertzel_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:93 goertzelJS` (j 0.727) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/wasm/bridges/common.ts:180 asAllocHeader` ↔ `matrix/src/backends/wasm/as-typed-array.ts:35 allocAsTypedView` (j 0.727) — different job: asAllocHeader only pins an AssemblyScript buffer and header and writes the three-word header; allocAsTypedView does that and also builds a typed-array view on the wasm memory. A shared helper would branch on whether to construct the view, and always constructing it would keep a view the functions path does not allocate.
-- `packages/workerpool/src/index.ts:806 MathWorkerPool.prod` ↔ `packages/workerpool/src/index.ts:1495 MathWorkerPool.norm` (j 0.726) — recorded: MathWorkerPool.prod (seed 1, prodChunk, product of partials) and norm (sum of squares, normChunk, then sqrt) are both listed measured hot paths. A shared callback or op switch would sit on those sequential loops.
-- `functions/src/numeric/control-equations.ts:79 transpose` ↔ `functions/src/numeric/control-equations.ts:87 matadd` (j 0.724) — recorded: control-equations transpose stores T[j][i]=A[i][j]; matadd stores C[i][j]=A[i][j]+s*B[i][j]. CLONES_REMAINING: different index maps and formulas; the overlap is the loop shell.
-- `matrix/src/backends/JSBackend.ts:108 JSBackend.scale` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.723) — recorded: JSBackend.scale writes a.get(i,j)*scalar in row-major order and keeps the shape; transpose writes a.get(i,j) at j*rows+i and swaps the shape. CLONES_REMAINING keeps the JSBackend elementwise and transpose loops inlined because a callback or mode branch is the measured loss.
-- `autograd/src/tape.ts:836 TapedTensor.sin` ↔ `autograd/src/tape.ts:880 TapedTensor.tan` (j 0.720) — different job: TapedTensor.sin's adjoint is dY*cos(x), with cos cached in the forward loop; tan's adjoint is dY/cos(x)^2. Same tape-node shell, different formulas, so one base needs a per-op derivative branch.
-- `assembly/src/special.ts:129 _besselJ0Series` ↔ `assembly/src/special.ts:143 _besselJ1Series` (j 0.718) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `matrix/src/operations/qr-family.ts:53 flipRows` ↔ `matrix/src/operations/qr-family.ts:67 flipCols` (j 0.716) — recorded: flipRows copies src[(m-1-i)*n+j] (reverse rows); flipCols copies src[i*n+(n-1-j)] (reverse columns). CLONES_REMAINING: different index maps; the overlap is the loop shell.
-- `assembly/src/ops/matrix.ts:204 matrix_multiply` ↔ `assembly/src/ops/matrix.ts:583 matrix_gemm` (j 0.714) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:858 TapedTensor.cos` ↔ `autograd/src/tape.ts:880 TapedTensor.tan` (j 0.714) — different job: TapedTensor.cos's adjoint is -dY*sin(x); tan's adjoint is dY/cos(x)^2. Merging the tape nodes needs a mode switch on the derivative.
-- `functions/src/wasm/interpolation/wasm-bridge.ts:117 tridiagSolveDispatch` ↔ `functions/src/wasm/interpolation/wasm-bridge.ts:206 dividedDifferenceDispatch` (j 0.714) — recorded: tridiagSolveDispatch calls tridiag_solve_f64 with four arrays and falls back to the Thomas algorithm; dividedDifferenceDispatch calls divided_difference_f64 with two arrays and falls back to Newton coefficients, which throw RangeError on duplicate x. CLONES_REMAINING: only the WASM-or-JS shell matches; exports, ABIs, and result types differ, and withAsF64 already holds the marshalling.
-- `matrix/src/backends/ParallelBackend.ts:180 ParallelBackend.transpose` ↔ `matrix/src/backends/ParallelBackend.ts:201 ParallelBackend.sum` (j 0.705) — false match: ParallelBackend.transpose and sum share whenParallel, but transpose calls pool.transpose and returns a swapped-shape matrix while sum calls pool.sum and returns a scalar. The jobs differ.
-- `assembly/src/ops/complex-array.ts:267 complex_array_exp` ↔ `assembly/src/ops/complex-array.ts:298 complex_array_sqrt` (j 0.703) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/poly.ts:331 cheb_fit_f64` ↔ `assembly/src/poly.ts:373 legendre_fit_f64` (j 0.703) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:108 JSBackend.scale` (j 0.703) — recorded: JSBackend.multiplyElementwise writes a.get(i,j)*b.get(i,j) after a dimension check; scale writes a.get(i,j)*scalar and takes no second matrix. Both are in the JSBackend hot-loop set that stays inlined.
-- `autograd/src/tape.ts:1583 TapedTensor._eigSymmetric` ↔ `autograd/src/tape.ts:1617 TapedTensor._eigGeneral` (j 0.702) — recorded: TapedTensor._eigSymmetric backprops with _eigSymBackward after symmetric tensorEig; _eigGeneral rejects a nonzero imaginary eigenvalue, inverts V only when cond_inf(V)<=1e14, and calls _eigGeneralBackward. CLONES_REMAINING skips autograd eig backward pairs because the algorithms differ.
-- `functions/src/wasm/bitwise/wasm-bridge.ts:78 runBinaryBitwiseWasm` ↔ `functions/src/wasm/bitwise/wasm-bridge.ts:103 runUnaryBitwiseWasm` (j 0.701) — recorded: runBinaryBitwiseWasm requires equal lengths and calls a 3-argument *_i32_array(a, b, result); runUnaryBitwiseWasm calls a 2-argument *_i32_array(a, result) for bitNot. CLONES_REMAINING: only the WASM shell matches; argument lists and ABIs differ.
-- `functions/src/wasm/special/scalars.ts:164 besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.701) — recorded: besselJ0Series updates term *= z/(k*k) and returns the sum; besselJ1Series updates term _= z/(k_(k+1)) and returns 0.5*x*sum. CLONES_REMAINING: different term divisors and seeds; folding needs a mode switch in the series loop.
-- `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:203 gradient` (j 0.700) — recorded: the nnls gradient fuses A^T(b-Ax) as A[i][j]*(b[i]-Ax[i]); the lsqBounded gradient materializes r[i]=Ax[i]-b[i] and then accumulates A[i][j]*r[i], the opposite sign. CLONES_REMAINING: one fuses the residual and the other materializes r first, so a merge changes rounding.
-- `matrix/src/backends/JSBackend.ts:44 JSBackend.add` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.699) — recorded: JSBackend.add writes a.get(i,j)+b.get(i,j) into the same shape; transpose writes a.get(i,j) at j*rows+i and swaps the shape. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:60 JSBackend.subtract` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.699) — recorded: JSBackend.subtract writes a.get(i,j)-b.get(i,j); transpose reindexes to j*rows+i and swaps the shape. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.699) — recorded: JSBackend.multiplyElementwise writes a product in row-major order; transpose reindexes to j*rows+i and swaps the shape. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:92 JSBackend.divideElementwise` ↔ `matrix/src/backends/JSBackend.ts:177 JSBackend.transpose` (j 0.699) — recorded: JSBackend.divideElementwise writes a.get(i,j)/b.get(i,j); transpose reindexes and swaps the shape. Both stay in the inlined JSBackend hot-loop set.
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` (j 0.692) — recorded: MathWorkerPool.sum reduces with + through sumChunk to a number; bitwiseNot writes ~a[i] into an Int32Array through bitwiseNotChunk. Both are listed workerpool measured hot paths, and a shared op switch would sit on those loops.
-- `packages/workerpool/src/index.ts:806 MathWorkerPool.prod` ↔ `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` (j 0.692) — recorded: MathWorkerPool.prod reduces with * (seed 1) through prodChunk; bitwiseNot writes ~a[i] through bitwiseNotChunk. Both are listed workerpool measured hot paths.
-- `autograd/src/tape.ts:230 TapedTensor.scale` ↔ `autograd/src/tape.ts:922 TapedTensor.square` (j 0.690) — different job: TapedTensor.scale's forward is x*k and its adjoint is dY*k; square's forward is x*x and its adjoint is dY*2*x. Same tape-node shell, different formulas, so one base needs an op branch on the tape arithmetic loop.
-- `expression/src/node/AssignmentNode.ts:302 AssignmentNode._toString` ↔ `expression/src/node/AssignmentNode.ts:383 AssignmentNode._toTex` (j 0.687) — recorded: AssignmentNode._toString parenthesizes with parentheses and joins with ' = '; _toTex parenthesizes with \left( \right) and joins with '='. CLONES_REMAINING: different markup per output kind.
-- `matrix/src/backends/ParallelBackend.ts:124 ParallelBackend.scale` ↔ `matrix/src/backends/ParallelBackend.ts:180 ParallelBackend.transpose` (j 0.687) — false match: ParallelBackend.scale calls pool.scale and keeps the shape; transpose calls pool.transpose and returns cols-by-rows. Only the whenParallel shell matches.
-- `matrix/src/operations/sqrtm.ts:91 sqrtmSymmetric` ↔ `matrix/src/operations/sqrtm.ts:185 sqrtmGeneral` (j 0.686) — recorded: sqrtmSymmetric symmetrizes, rejects re < -1e-8, and falls back to Q*sqrt(D)*Q^T after Gram-Schmidt; sqrtmGeneral rejects |im|>1e-7 and re < -1e-7, then uses Q*sqrt(D)*Q^-1 and throws if Q is singular. CLONES_REMAINING: different algorithms.
-- `autograd/src/tape.ts:836 TapedTensor.sin` ↔ `autograd/src/tape.ts:903 TapedTensor.sqrt` (j 0.685) — recorded: TapedTensor.sin's adjoint is dY*cos(x); sqrt's adjoint is dY/(2*y) with y cached from Math.sqrt. CLONES_REMAINING lists the tape sin and sqrt adjoints among the nodes that would need a mode flag.
-- `packages/workerpool/src/index.ts:712 MathWorkerPool.exec` ↔ `packages/workerpool/src/index.ts:740 MathWorkerPool.execFunction` (j 0.684) — different job: MathWorkerPool.exec runs a named method with a params array and optional transfer/on; execFunction runs a function value with a single argument and does not pass a transfer list. One body would branch on string method versus function.
-- `packages/workerpool/src/index.ts:892 MathWorkerPool.elementwise` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.682) — different job: elementwise switches on add, subtract, multiply, or divide and calls elementwiseChunk; applyKernel2 compiles an arbitrary binary source and calls applyKernel2Chunk. The per-element operation and the worker task differ.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:660 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:912 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:935 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1211 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.681) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `autograd/src/tape.ts:858 TapedTensor.cos` ↔ `autograd/src/tape.ts:903 TapedTensor.sqrt` (j 0.680) — recorded: TapedTensor.cos's adjoint is -dY*sin(x); sqrt's adjoint is dY/(2*y). CLONES_REMAINING lists those tape adjoints as different jobs that would need a mode flag.
-- `functions/src/typed/special.ts:487 fresnelCScalar` ↔ `functions/src/typed/special.ts:509 fresnelSScalar` (j 0.680) — recorded: fresnelCScalar seeds the sum at |x| and multiplies by ((-(pi/2)^2*x^4)/(2n(2n-1)))*(4n-3)/(4n+1); fresnelSScalar seeds (pi/2*|x|^3)/3 and uses denominators (2n+1)*(2n) and (4n-1)/(4n+3). CLONES_REMAINING: different recurrence factors and seeds.
-- `packages/workerpool/src/index.ts:2289 MathWorkerPool.runChunks` ↔ `packages/workerpool/src/index.ts:2345 MathWorkerPool.reduce` (j 0.680) — different job: runChunks dispatches mapChunk or filterChunk and concatenates with flat(); reduce dispatches reduceChunk from the same initial value, then folds partials with fn(acc, partial) as if each partial were an element. The combine step is a different algorithm.
-- `functions/src/numeric/solveODE.ts:465 rosenbrockSolve` ↔ `functions/src/numeric/solveODE.ts:613 rodasSolve` (j 0.678) — different job: rosenbrockSolve is 3-stage ode23s with W = I - h*gamma*J, error (h/6)*(k1-2*k2+k3), and step exponent 1/3; rodasSolve is 6-stage RODAS with E = I/(gamma*h) - J, df/dt terms, error equal to k6, and step exponent 1/4. One body would be a tableau mode switch.
-- `functions/src/matrix/subset.ts:240 _getObjectProperty` ↔ `functions/src/matrix/subset.ts:265 _setObjectProperty` (j 0.677) — different job: _getObjectProperty reads one string key through getSafeProperty and returns undefined for an empty index; _setObjectProperty clones the object and writes through setSafeProperty, returning the original object for an empty index. Read versus write, and the empty-index results differ.
-- `functions/src/signal/fft-core-f64.ts:43 fftCoreFloat64` ↔ `packages/workerpool/src/fft-core.ts:35 fftFrameInPlace` (j 0.677) — recorded: fftCoreFloat64 allocates new real/imag arrays and scatters the bit-reversal; fftFrameInPlace swaps within an offset frame. CLONES_REMAINING: workerpool cannot import functions, so this FFT copy stays local.
-- `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` ↔ `packages/workerpool/src/index.ts:1582 MathWorkerPool.unary` (j 0.674) — different job: bitwiseNot writes ~a[i] on an Int32Array through bitwiseNotChunk; unary switches nine Float64 Math operations (abs, sqrt, exp, log, sin, cos, tan, negate, square) through unaryChunk. The dtypes, kernels, and worker tasks differ.
-- `assembly/src/special.ts:158 _besselY0Series` ↔ `functions/src/wasm/special/scalars.ts:195 besselY0Series` (j 0.672) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/numeric/control-equations.ts:113 norm1` ↔ `matrix/src/operations/common.ts:255 norm1` (j 0.672) — recorded: control-equations norm1 updates the column-sum max with Math.max, which propagates NaN; matrix norm1 updates with colSum > maxColSum, which does not. CLONES_REMAINING records that NaN difference.
-- `matrix/src/backends/JSBackend.ts:108 JSBackend.scale` ↔ `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` (j 0.671) — recorded: JSBackend.scale multiplies by a scalar; abs writes Math.abs(a.get(i,j)). Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/ParallelBackend.ts:124 ParallelBackend.scale` ↔ `matrix/src/backends/ParallelBackend.ts:158 ParallelBackend.multiply` (j 0.671) — false match: ParallelBackend.scale calls pool.scale on one matrix; multiply checks matmul dimensions and calls pool.matmul. Only the whenParallel shell matches.
-- `functions/src/numeric/open-root-finders.ts:88 newton` ↔ `functions/src/numeric/open-root-finders.ts:185 halley` (j 0.670) — different job: newton's correction is f/f' (analytic or one central difference); halley's correction is 2*f*f'/(2*(f')^2 - f*f''), with a second derivative. iterateRoot is already shared, and folding the corrections needs a mode switch.
-- `functions/src/special/erf.ts:105 erfc2` ↔ `functions/src/special/erf.ts:129 erfc3` (j 0.669) — different job: erfc2 evaluates a degree-7 rational in y from coefficient row P[1]/Q[1]; erfc3 evaluates a degree-4 rational in 1/y^2 from P[2]/Q[2] and then (SQRPI - result)/y. Both finish with the split exp(-ysq^2)*exp(-del), but the approximants cover different |x| bands.
-- `assembly/src/ops/complex-array.ts:165 complex_array_scale_complex` ↔ `assembly/src/ops/complex-array.ts:283 complex_array_log` (j 0.667) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:922 TapedTensor.square` (j 0.667) — different job: TapedTensor.log's forward is Math.log and its adjoint is dY/x; square's forward is x*x and its adjoint is dY*2*x. Same tape-node shell, different formulas.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:1051 TapedTensor._unaryElementwise` (j 0.667) — hot path: TapedTensor.exp inlines Math.exp and multiplies the adjoint by the cached output; _unaryElementwise calls primalFn and localGrad callbacks on every element. Putting exp on that callback is the tape/DualTensor hot-loop loss.
-- `matrix/src/parallel-matrix.ts:415 DenseMatrix, DenseMatrix` ↔ `matrix/src/parallel-matrix.ts:937 DenseMatrix, DenseMatrix` (j 0.667) — different job: the parallelMatrixMultiply DenseMatrix,DenseMatrix handler checks a.cols !== b.rows and calls pMatmul, returning shape (a.rows, b.cols); the parallelMatrixMatvec handler requires a column vector and calls pMatvec, returning shape (rows, 1). Matrix product versus matrix-vector product.
-- `packages/workerpool/src/index.ts:1582 MathWorkerPool.unary` ↔ `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` (j 0.665) — different job: unary applies one of nine Float64 Math ops through unaryChunk; applyKernel compiles a caller source string and calls applyKernelChunk. A fixed kernel switch versus an arbitrary function.
-- `assembly/src/signal.ts:274 chirp_z_transform_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:223 chirpZTransformJS` (j 0.663) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/factorization/index.ts:45 cleanUnivariatePoly` ↔ `functions/src/typed/factorization/index.ts:89 renderIntPoly` (j 0.662) — different job: cleanUnivariatePoly rounds number coefficients with Math.round before printing; renderIntPoly prints bigint coefficients exactly and must not convert through Number, because Hensel coefficients can exceed 2^53. A shared printer would branch on numeric type, and rounding would change the bigint path.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:94 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:116 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `functions/src/utils/bignumber/bitwise.ts:434 rightArithShiftBigNumber` ↔ `functions/src/utils/bignumber/bitwise.ts:484 rightLogShiftBigNumber` (j 0.662) — different job: rightArithShiftBigNumber floor-divides by 2^y and maps an infinite shift of a negative to -1; rightLogShiftBigNumber first reduces a negative to its unsigned residue mod 2^32 and maps an infinite shift of a negative to NaN. The special cases and the negative-input formula differ.
-- `matrix/src/backends/ParallelBackend.ts:158 ParallelBackend.multiply` ↔ `matrix/src/backends/ParallelBackend.ts:180 ParallelBackend.transpose` (j 0.662) — false match: ParallelBackend.multiply checks matmul dimensions and calls pool.matmul; transpose calls pool.transpose and swaps the shape. Only the whenParallel shell matches.
-- `packages/workerpool/src/index.ts:2210 MathWorkerPool.sort` ↔ `packages/workerpool/src/index.ts:2345 MathWorkerPool.reduce` (j 0.662) — different job: sort sorts each chunk and then kWayMerge; reduce reduces each chunk from the same initial value and then folds the partials with the reducer. Sorted-run merge versus a second reduce.
-- `functions/src/typed/normal-equations-solve.ts:8 solveAugmentedNormalEquations` ↔ `functions/src/typed/numeric.ts:196 linsolve` (j 0.661) — behavior change: solveAugmentedNormalEquations mutates a pre-augmented matrix and returns null when |pivot| < 1e-14; linsolve copies A and b, rejects a non-square system, and throws when |pivot| < 1e-15. Pivot cutoff, singular policy, and in-place mutation differ.
-- `packages/workerpool/src/index.ts:844 MathWorkerPool.dot` ↔ `packages/workerpool/src/index.ts:1495 MathWorkerPool.norm` (j 0.661) — different job: MathWorkerPool.dot sums a[i]*b[i] through dotChunk to a scalar; norm sums squares through normChunk and returns the square root. The formulas differ, so a shared reduction would branch on the kernel.
-- `functions/src/ml/ols.ts:73 invertUnscaled` ↔ `functions/src/typed/matrix-ops.ts:490 matrixInverse` (j 0.658) — behavior change: invertUnscaled throws when |pivot| < 1e-12 and skips a zero elimination factor; matrixInverse throws when |pivot| < 1e-15 and always multiplies the factor, so a zero factor times a non-finite pivot row becomes NaN only in matrixInverse.
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:880 TapedTensor.tan` (j 0.656) — different job: TapedTensor.log's adjoint is dY/x; tan's adjoint is dY/cos(x)^2, with cos cached beside Math.tan. Different derivative formulas on the same tape-node shell.
-- `functions/src/ml/ols.ts:73 invertUnscaled` ↔ `functions/src/typed/hypothesis.ts:2039 _matInverse` (j 0.656) — behavior change: invertUnscaled throws below 1e-12 and skips a zero factor; _matInverse throws below 1e-15 and always applies the factor, so 0 times a non-finite pivot row is NaN only in _matInverse.
-- `functions/src/type/local/Decimal.ts:349 Decimal.plus` ↔ `functions/src/type/local/Decimal.ts:388 Decimal.minus` (j 0.656) — different job: Decimal.plus adds aligned bigint digit coefficients and, for opposite signs, delegates to minus; minus subtracts, negates a non-finite subtrahend, and flips the result sign when the difference is negative. Add versus subtract, including those sign rules, is a mode switch.
-- `assembly/src/special.ts:179 _besselY1Series` ↔ `functions/src/wasm/special/scalars.ts:217 besselY1Series` (j 0.655) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` (j 0.655) — recorded: MathWorkerPool.sum reduces with + through sumChunk to a number; scale writes data[i]*scalar through scaleChunk into a Float64Array. Both are listed workerpool measured hot paths.
-- `packages/workerpool/src/index.ts:806 MathWorkerPool.prod` ↔ `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` (j 0.655) — recorded: MathWorkerPool.prod reduces with * through prodChunk; scale writes data[i]*scalar through scaleChunk. Both are listed workerpool measured hot paths, and the result is a scalar versus an array.
-- `matrix/src/backends/JSBackend.ts:44 JSBackend.add` ↔ `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` (j 0.654) — recorded: JSBackend.add writes a sum of two matrices; abs writes Math.abs of one matrix. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:60 JSBackend.subtract` ↔ `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` (j 0.654) — recorded: JSBackend.subtract writes a difference; abs writes Math.abs. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:76 JSBackend.multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` (j 0.654) — recorded: JSBackend.multiplyElementwise writes a product; abs writes Math.abs. Both stay in the inlined JSBackend hot-loop set.
-- `matrix/src/backends/JSBackend.ts:92 JSBackend.divideElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 JSBackend.abs` (j 0.654) — recorded: JSBackend.divideElementwise writes a quotient; abs writes Math.abs. Both stay in the inlined JSBackend hot-loop set.
-- `packages/workerpool/src/index.ts:844 MathWorkerPool.dot` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.654) — different job: MathWorkerPool.dot reduces a[i]*b[i] through dotChunk to a scalar; applyKernel2 writes a compiled binary fn(a[i], b[i]) through applyKernel2Chunk into a Float64Array. A reduction versus a caller-supplied map.
-- `packages/workerpool/src/index.ts:892 MathWorkerPool.elementwise` ↔ `packages/workerpool/src/index.ts:1582 MathWorkerPool.unary` (j 0.654) — different job: elementwise switches four Float64 binary ops through elementwiseChunk; unary switches nine Float64 unary Math ops through unaryChunk. Arity and operator sets differ, so one loop would mode-switch.
-- `packages/workerpool/src/index.ts:1017 MathWorkerPool.bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1086 MathWorkerPool.bitwiseScalar` (j 0.654) — different job: bitwiseBinary requires equal Int32Array lengths, pairs chunks, and calls bitwiseChunk; bitwiseScalar applies the same six ops against one number and calls bitwiseScalarChunk. Array versus scalar is an arity branch in the op loops, and the worker entries differ.
-- `autograd/src/tape.ts:230 TapedTensor.scale` ↔ `autograd/src/tape.ts:817 TapedTensor.exp` (j 0.653) — different job: TapedTensor.scale multiplies by a constant (adjoint scales by k); exp applies Math.exp (adjoint multiplies by the cached exp). Different formulas on the tape elementwise shell.
-- `functions/src/typed/signal.ts:578 dct` ↔ `functions/src/typed/signal.ts:622 dst` (j 0.652) — different job: dct (DCT-II) accumulates x[n]_cos(pi/N_(n+0.5)_k) and scales k=0 by sqrt(1/N) and other k by sqrt(2/N); dst (DST-II) accumulates x[n]*sin(pi/N*(n+0.5)_(k+1)) and always scales by sqrt(2/N). The trig kernel and the k=0 scale differ.
-- `functions/src/special/spheroidal.ts:159 spheroidalAngular` ↔ `functions/src/special/spheroidal.ts:234 spheroidalAngularContinued` (j 0.651) — different job: spheroidalAngular sums Ferrers P on eta in [-1,1] and rescales at 0 (m=0) or 0.5; spheroidalAngularContinued sums the real |x|>1 continuation and rescales at 1.2. The basis function and the reference abscissa differ, so one series would mode-switch.
-- `autograd/src/tape.ts:880 TapedTensor.tan` ↔ `autograd/src/tape.ts:903 TapedTensor.sqrt` (j 0.649) — different job: TapedTensor.tan's adjoint is dY/cos(x)^2; sqrt's adjoint is dY/(2*sqrt(x)). Different derivative formulas.
-- `autograd/src/tape.ts:880 TapedTensor.tan` ↔ `autograd/src/tape.ts:1001 TapedTensor.reciprocal` (j 0.649) — different job: TapedTensor.tan's adjoint is dY/cos(x)^2; reciprocal's forward is 1/x and its adjoint is -dY/x^2. Different formulas.
-- `functions/src/stats/gaussian-process.ts:101 forwardSolve` ↔ `functions/src/stats/gaussian-process.ts:113 backSolveTranspose` (j 0.649) — different job: forwardSolve walks i upward and subtracts L[i][j]*x[j] for j<i; backSolveTranspose walks i downward and subtracts L[j][i]*x[j] for j>i. Opposite triangle directions, so a direction flag is a mode switch in the substitution loop.
-- `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:137 complex_array_div` (j 0.647) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `matrix/src/types/SparseMatrix.ts:576 SparseMatrix.multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:878 SparseMatrix.mapNonZeros` (j 0.645) — recorded: SparseMatrix.multiplyElementwise inlines value*other.get(i, col) on the CSR walk; mapNonZeros applies a per-nonzero callback. The callback measured +12.4% at 2000x2000 (about 40k nonzeros) and +4.4% at 500x500, so the inlined walk stays (tried in #481, reverted in review).
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:844 MathWorkerPool.dot` (j 0.642) — hot path: MathWorkerPool.sum is a documented workerpool reduction (inlined total += data[i], kernel sumChunk); MathWorkerPool.dot sums a[i]*b[i] via chunkPairFloat64Array and dotChunk. A shared loop would mode-switch the formula and kernel on that sum path.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:1022 TapedTensor.abs` (j 0.640) — different job: TapedTensor.exp's adjoint is dY*exp(x) using the cached primal output; TapedTensor.abs's adjoint is dY*sign(x) with subgradient 0 at exact zero. The tape.record shell matches, but one base would branch on the local derivative.
-- `functions/src/numeric/solveODE.ts:1613 _rk23` ↔ `functions/src/numeric/solveODE.ts:1634 _rk45` (j 0.639) — different job: _rk23 installs the Bogacki–Shampine 3(2) Butcher tableau (4 stages) and _rk45 installs Dormand–Prince 5(4) (7 stages, different a/c/b/bp); both already call _rk, so folding the wrappers is a method switch over coefficients.
-- `assembly/src/signal.ts:50 _fftInterleaved` ↔ `functions/src/wasm/signal/wasm-bridge.ts:110 _fftInterleavedJS` (j 0.638) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `autograd/src/tape.ts:798 TapedTensor.log` ↔ `autograd/src/tape.ts:1022 TapedTensor.abs` (j 0.637) — different job: TapedTensor.log's adjoint is dY/x; TapedTensor.abs's adjoint is dY*sign(x) with subgradient 0 at exact zero. Same unary tape shell, different formulas.
-- `matrix/src/backends/WASMBackend.ts:574 WASMBackend.luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:779 WASMBackend.inverse` (j 0.637) — different job: WASMBackend.luDecomposition calls matrix_lu_decompose and recombines separate L and U into {lu, perm, singular}; WASMBackend.inverse calls matrix_inverse with an n*n+n work buffer and returns {inverse, singular}. Exports and result fields differ.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.636) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `matrix/src/types/SparseMatrix.ts:576 SparseMatrix.multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:601 SparseMatrix.multiply` (j 0.636) — different job: SparseMatrix.multiplyElementwise is a Hadamard product over stored CSR nonzeros (value * other.get(row, col), drop zeros); SparseMatrix.multiply is a sparse-by-dense dot summed over each output column. The CSR walk is only the shell.
-- `assembly/src/ops/matrix.ts:297 vector_matrix_multiply` ↔ `assembly/src/ops/matrix.ts:441 matrix_sum_cols` (j 0.633) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/typed/integration.ts:389 gaussQuadSerial` ↔ `packages/workerpool/src/worker.ts:966 integrateChunk` (j 0.632) — layering: gaussQuadSerial in functions evaluates a closure against GL_NODES[order]; integrateChunk is a workerpool task that compileFunctionSource's a stringified integrand. workerpool cannot import functions, so the quadrature loop stays in the worker.
-- `functions/src/special/spheroidal.ts:35 ferrersP` ↔ `functions/src/special/spheroidal.ts:212 ferrersPContinued` (j 0.631) — different job: ferrersP seeds P_m^m with sqrt(max(0, 1-x^2)) and the Ferrers factor (-fact); ferrersPContinued uses sqrt(|x^2-1|) and drops that sign (+fact). The three-term recurrence matches, but a merge needs a branch for the seed.
-- `autograd/src/tape.ts:817 TapedTensor.exp` ↔ `autograd/src/tape.ts:922 TapedTensor.square` (j 0.630) — different job: TapedTensor.exp's adjoint multiplies dY by the cached exp(x); TapedTensor.square's adjoint multiplies dY by 2x. Same tape.record shell, different local derivatives.
-- `functions/src/typed/arithmetic.ts:1013 number, number` ↔ `functions/src/typed/arithmetic.ts:1028 bigint, bigint` (j 0.630) — different job: xgcd's number, number overload floors both inputs and uses Math.floor division; the bigint, bigint overload uses truncating BigInt division with no floor. One body would mode-switch the arithmetic and would change non-integer number inputs.
-- `assembly/src/poly.ts:293 poly_fit_f64` ↔ `assembly/src/poly.ts:331 cheb_fit_f64` (j 0.629) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:704 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:870 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:891 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:912 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:935 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/arithmetic.ts:1211 Float64Array` ↔ `functions/src/typed/parallel-map.ts:38 mapArray` (j 0.629) — hot path: cosh's Float64Array overload keeps an inlined Math.cosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:170 Float64Array` (j 0.629) — hot path: acosh's Float64Array overload keeps an inlined Math.acosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:195 Float64Array` (j 0.629) — hot path: acosh's Float64Array overload keeps an inlined Math.acosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.629) — hot path: acosh's Float64Array overload keeps an inlined Math.acosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.629) — hot path: acosh's Float64Array overload keeps an inlined Math.acosh loop; mapArray applies a scalar callback then applyKernel. PR #454 measured that shared unary callback 56% to 643% slower on the sub-threshold path, so the overload stays monomorphic.
-- `functions/src/numeric/krylov.ts:197 incompleteCholesky` ↔ `functions/src/typed/dist-objects.ts:1281 _cholesky` (j 0.628) — different job: incompleteCholesky is IC(0): it skips entries outside sparsityPattern, throws on a non-positive pivot, and returns {L}. _cholesky is dense lower Cholesky for multivariateNormal and throws 'covariance is not positive-definite'. A pattern flag would fill different entries.
-- `packages/workerpool/src/index.ts:768 MathWorkerPool.sum` ↔ `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` (j 0.627) — hot path: MathWorkerPool.sum is the documented inlined += reduction (sumChunk, scalar result); MathWorkerPool.applyKernel compiles a unary callback and returns a Float64Array via applyKernelChunk. Sharing the shell would put that callback on the sum loop.
-- `packages/workerpool/src/index.ts:806 MathWorkerPool.prod` ↔ `packages/workerpool/src/index.ts:1659 MathWorkerPool.applyKernel` (j 0.627) — hot path: MathWorkerPool.prod is the documented inlined product reduction (identity 1, prodChunk); MathWorkerPool.applyKernel maps a compiled unary callback to a Float64Array. A shared loop would put that callback on the prod path.
-- `packages/workerpool/src/index.ts:892 MathWorkerPool.elementwise` ↔ `packages/workerpool/src/index.ts:1017 MathWorkerPool.bitwiseBinary` (j 0.627) — different job: MathWorkerPool.elementwise is Float64 add/sub/mul/div via elementwiseChunk and combineArrayBuffers; MathWorkerPool.bitwiseBinary is Int32 bitAnd/bitOr/bitXor/shifts via bitwiseChunk and combineInt32Buffers. Element type, operators, and worker kernels differ.
-- `packages/workerpool/src/index.ts:960 MathWorkerPool.scale` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.626) — hot path: MathWorkerPool.scale is the documented inlined data[i]*scalar loop (scaleChunk); MathWorkerPool.applyKernel2 compiles a binary Float64 callback (applyKernel2Chunk). Folding them puts that callback on the scale path.
-- `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:422 matrix_sum_rows` (j 0.625) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `packages/workerpool/src/index.ts:1198 MathWorkerPool.matmul` ↔ `packages/workerpool/src/index.ts:2085 MathWorkerPool.outer` (j 0.625) — different job: MathWorkerPool.matmul is an ijk contraction (inner dimension aCols, worker matmulRows); MathWorkerPool.outer writes a[i]*b[j] with no reduction (outerProductRows). The row-block dispatch is only the shell.
-- `autograd/src/tape.ts:133 TapedTensor.add` ↔ `autograd/src/tape.ts:202 TapedTensor.mul` (j 0.624) — recorded: tape add/mul are documented hot loops where a callback or mode branch is the known loss; TapedTensor.add's adjoint adds dY into both slots, while TapedTensor.mul multiplies by the other primal and has a separate aliased 2a path.
-- `assembly/src/ops/curvefit.ts:6 expfit` ↔ `assembly/src/ops/curvefit.ts:31 logfit` (j 0.622) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/special.ts:43 laguerreL` ↔ `assembly/src/ops/special.ts:60 legendreP` (j 0.621) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:903 TapedTensor.sqrt` ↔ `autograd/src/tape.ts:922 TapedTensor.square` (j 0.620) — different job: TapedTensor.sqrt's adjoint is dY/(2*sqrt(x)) from the cached output; TapedTensor.square's adjoint is dY*2x from the cached input. Same record shell, different local derivatives.
-- `expression/src/node/AssignmentNode.ts:349 AssignmentNode._toHTML` ↔ `expression/src/node/AssignmentNode.ts:383 AssignmentNode._toTex` (j 0.620) — recorded: AssignmentNode._toHTML and AssignmentNode._toTex use different markup per output kind (HTML assignment and parenthesis spans versus TeX \\left(\\right)).
-- `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` ↔ `packages/workerpool/src/index.ts:1495 MathWorkerPool.norm` (j 0.619) — hot path: MathWorkerPool.bitwiseNot is the documented inlined Int32 ~ loop (bitwiseNotChunk); MathWorkerPool.norm is the documented sum-of-squares-then-sqrt reduction (normChunk). A shared dispatcher would mode-branch both hot loops.
-- `functions/src/type/matrix/utils/matAlgo13xDD.ts:120 _iterate` ↔ `functions/src/type/matrix/utils/matAlgo14xDs.ts:101 _iterate` (j 0.618) — different job: matAlgo13xDD._iterate applies f(a[i], b[i]) at the leaf of a dense-dense walk; matAlgo14xDs._iterate applies f(a[i], scalar) or f(scalar, a[i]) when inverse is set. One walker would mode-switch on scalar-versus-array and operand order.
-- `packages/workerpool/src/index.ts:1495 MathWorkerPool.norm` ↔ `packages/workerpool/src/index.ts:1533 MathWorkerPool.distance` (j 0.618) — hot path: MathWorkerPool.norm is the documented unary sum-of-squares reduction; MathWorkerPool.distance sums (a[i]-b[i])^2 over a chunk pair (distanceChunk) before the sqrt. Merging replaces the norm loop with a two-array mode branch.
-- `autograd/src/tape.ts:1428 TapedTensor.svd` ↔ `autograd/src/tape.ts:1583 TapedTensor._eigSymmetric` (j 0.617) — different job: TapedTensor.svd returns {U, S, V} from tensorSvd and defers dA to _svdBackward; TapedTensor._eigSymmetric returns {eigvals, eigvecs} from symmetric tensorEig and defers dA to _eigSymBackward. Result fields and factorizations differ.
-- `packages/workerpool/src/index.ts:1148 MathWorkerPool.bitwiseNot` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.617) — hot path: MathWorkerPool.bitwiseNot is the documented inlined Int32 ~ loop; MathWorkerPool.applyKernel2 compiles a binary Float64 callback. Sharing the chunk shell would put that callback or an op-kind branch on bitwiseNot.
-- `packages/workerpool/src/index.ts:2210 MathWorkerPool.sort` ↔ `packages/workerpool/src/index.ts:2289 MathWorkerPool.runChunks` (j 0.616) — different job: MathWorkerPool.sort chunk-sorts then kWayMerge's the runs; MathWorkerPool.runChunks map/filters via spec.sequential or mapChunk/filterChunk and concatenates with flat(). The parallel shell matches; the combine step does not.
-- `functions/src/signal/wavelets.ts:86 rickerWavelet` ↔ `functions/src/signal/wavelets.ts:99 morletWavelet` (j 0.615) — different job: rickerWavelet is the normalized Mexican hat (2/sqrt(3*scale)_pi^0.25)_(1-t^2)*exp(-t^2/2); morletWavelet is (1/sqrt(scale)*pi^0.25)*cos(5t)*exp(-t^2/2). Same centered sampling loop, different formulas.
-- `parallel/src/ParallelMatrix.ts:288 ParallelMatrix.elementwise` ↔ `parallel/src/ParallelMatrix.ts:356 ParallelMatrix.scale` (j 0.615) — different job: ParallelMatrix.elementwise maps a binary callback over two shared buffers (worker ops add/subtract/elementMultiply); ParallelMatrix.scale is an inlined a[i]*scalar with a one-buffer 'scale' task. Folding scale into the callback is a mode branch on that sequential loop.
-- `packages/workerpool/src/index.ts:1017 MathWorkerPool.bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1709 MathWorkerPool.applyKernel2` (j 0.612) — different job: MathWorkerPool.bitwiseBinary switches six Int32 bitwise ops and combineInt32Buffers; MathWorkerPool.applyKernel2 compiles one binary Float64 callback and combineArrayBuffers. Same chunk-pair shell, different element types and kernels, so a merge is an op-family mode switch.
-- `functions/src/typed/arithmetic.ts:1343 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1366 Float64Array` (j 0.610) — recorded: unary Float64Array overload. PR #454 measured a shared loop 56% to 643% slower on the sub-threshold path, so each overload keeps its own inline `Math.*` loop.
-- `matrix/src/backends/WASMBackend.ts:574 WASMBackend.luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:894 WASMBackend.choleskyDecomposition` (j 0.609) — different job: WASMBackend.luDecomposition calls matrix_lu_decompose, recombines L below the diagonal with U on and above, and returns {lu, perm, singular}; WASMBackend.choleskyDecomposition calls matrix_cholesky and returns {l, positiveDefinite}. Kernels and failure flags differ.
-- `packages/workerpool/src/index.ts:1873 MathWorkerPool.distanceMatrix` ↔ `packages/workerpool/src/index.ts:2011 MathWorkerPool.matvec` (j 0.609) — different job: MathWorkerPool.distanceMatrix writes sqrt of summed squared coordinate differences for every point pair; MathWorkerPool.matvec is a matrix-vector dot per row. Both split rows across workers, but the inner formula differs.
-- `autograd/src/tape.ts:230 TapedTensor.scale` ↔ `autograd/src/tape.ts:798 TapedTensor.log` (j 0.608) — different job: TapedTensor.scale's adjoint multiplies dY by the constant k; TapedTensor.log's adjoint divides dY by the captured x. Same unary tape shell, different formulas.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:66 leftShift_i32_array` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:77 rightArithShift_i32_array` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:44 f64Sub` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:53 f64Mul` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:62 f64Div` (j 0.607) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `autograd/src/tape.ts:230 TapedTensor.scale` ↔ `autograd/src/tape.ts:836 TapedTensor.sin` (j 0.607) — different job: TapedTensor.scale's adjoint is dY*k; TapedTensor.sin's adjoint is dY*cos(x) with a cosine cached beside the sine. Same unary tape shell, different derivatives.
-- `expression/src/node/ObjectNode.ts:162 ObjectNode._toString` ↔ `expression/src/node/ObjectNode.ts:198 ObjectNode._toHTML` (j 0.606) — recorded: ObjectNode._toString and ObjectNode._toHTML use different markup per output kind (plain {key: value} joined by commas versus HTML property, assignment, and separator spans).
-- `functions/src/matrix/eigs/realSymmetric.ts:102 diag` ↔ `functions/src/matrix/eigs/realSymmetric.ts:134 diagBig` (j 0.604) — different job: diag runs Jacobi in number arithmetic (getTheta uses relTol and pi/4, then x1/Sij1); diagBig uses BigNumber comparisons (bigGte and getThetaBig's acos/4) and x1Big/Sij1Big. One loop would mode-switch every arithmetic call, and the angle cutoffs are not the same formula.
-- `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/parallel-map.ts:56 mapBinaryF64` (j 0.603) — different job: mapArray is a unary Float64 callback dispatched through applyKernel; mapBinaryF64 is a two-array callback through applyKernel2 with an optional per-op threshold. Combining them is an arity mode switch in the sequential loop.
-- `functions/src/numeric/krylov.ts:287 cg` ↔ `functions/src/numeric/krylov.ts:530 bicgstab` (j 0.602) — different job: cg updates one residual with alpha = (r·z)/(p·Ap) and beta = (r_new·z)/(r·z) for SPD systems; bicgstab keeps rho, alpha, omega, and a shadow residual rHat0, with two matvecs per step and extra 1e-300 breaks, for nonsymmetric A. One Krylov loop would mode-switch the recurrence.
-- `tensor/src/operations/solve.ts:81 forwardSub` ↔ `tensor/src/operations/solve.ts:102 backSub` (j 0.602) — recorded: forwardSub and backSub walk the triangle in opposite directions (unit-lower forward substitution with no diagonal divide versus upper back-substitution dividing by U[i,i]).
-- `assembly/src/ops/special.ts:11 chebyshevT` ↔ `assembly/src/ops/special.ts:60 legendreP` (j 0.600) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/matrix/eigs/realSymmetric.ts:208 Sij1Big` ↔ `functions/src/matrix/eigs/realSymmetric.ts:226 x1Big` (j 0.596) — different job: Sij1Big only rotates eigenvector columns i and j by BigNumber cos/sin; x1Big also rebuilds the diagonal from c^2, s^2, and 2cs, zeros Hij[i][j], and re-parses cos/sin through bignumber(toString()). The column mix is the shared shell; the matrix update is a different formula.
-- `functions/src/matrix/eigs/realSymmetric.ts:190 Sij1` ↔ `functions/src/matrix/eigs/realSymmetric.ts:269 x1` (j 0.577) — different job: Sij1 rotates eigenvector columns by cos/sin; x1 also writes Aii/Ajj = c^2*Hii ∓ 2cs*Hij + s^2*Hjj, zeros the (i,j) pair, and skips k===i and k===j on the write-back. Same rotation shell, different Jacobi update.
-- `functions/src/probability/bernoulli.ts:83 bigint | Fraction` ↔ `functions/src/probability/bernoulli.ts:92 BigNumber` (j 0.556) — different job: the bernoulli bigint|Fraction handler calls _bernoulli with a stable Fraction cache; the BigNumber handler clears bigCache when config.precision changes. A shared overload would need a precision-reset branch that must not run for Fraction.
-- `matrix/src/operations/qr-family.ts:67 flipCols` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.515) — recorded: flipCols and transposeSquare are different index maps (column reversal src[i*n+(n-1-j)] versus transpose out[j*n+i]); the overlap is the loop shell.
-- `assembly/src/ops/polynomial.ts:87 determinant` ↔ `functions/src/wasm/poly/wasm-bridge.ts:174 resultantJS` (j 0.486) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/typed/aggregate-restart.ts:12 aggregateRestartVectors` ↔ `functions/src/typed/graph.ts:936 _aggregateEigenvector` (j 0.474) — different job: aggregateRestartVectors means the raw restart vectors and optionally returns {mean, std}; _aggregateEigenvector first sign-aligns each vector to the reference (flip when dot < 0), renormalizes the mean when its norm exceeds 1e-15, and returns centrality, centralityPerRestart, and restartStats. One base would branch on those result fields.
-- `assembly/src/special.ts:242 _besselJn` ↔ `assembly/src/special.ts:286 _besselYn` (j 0.407) — recorded: AssemblyScript/AssemblyScript pair. The score ignores literals, so the shared shape is the loop or series shell; the operator or the coefficients differ, and a shared body would rebuild the binary.
-- `functions/src/graph/traversal-centrality.ts:44 bfs` ↔ `functions/src/graph/traversal-centrality.ts:89 visit` (j 0.400) — different job: bfs drains a queue so neighbors leave in FIFO order; visit is the recursive DFS helper inside dfs (mark, append, recurse). They share only the finite-and-nonzero neighbor test.
-- `functions/src/wasm/special/scalars.ts:265 besselJScalar` ↔ `functions/src/wasm/special/scalars.ts:311 besselYScalar` (j 0.397) — different job: besselJScalar uses upward recurrence when |x|>n and Miller's backward recurrence otherwise, and returns 0 for |x|<1e-15; besselYScalar returns NaN for x<=0 and only runs the upward recurrence from Y0/Y1. The step matches; the stability strategy and domain policy do not.
-- `functions/src/typed/algebra.ts:1560 fullSimplify` ↔ `functions/src/typed/cas.ts:2490 _casSimplifyOne` (j 0.375) — different job: fullSimplify stops after the 1*, +0, x^0, x^1, and 0* rewrites plus reduce(); _casSimplifyOne also _evalNumeric's a pure-numeric string, runs _combineLikeTerms, and returns '0' for an empty result. Merging would add those passes to fullSimplify or drop them from the CAS kernel.
-- `matrix/src/operations/logm.ts:234 validateEigenvalues` ↔ `matrix/src/operations/logm.ts:264 logmEig` (j 0.350) — recorded: logm validateEigenvalues and logmEig differ in formulas (validateEigenvalues only rejects im>1e-8 or re<=1e-14; logmEig rejects re<=0 and builds Q*diag(log lambda)*Q^{-1}); the overlap is the eigenvalue scan.
-- `assembly/src/elementwise.ts:34 _erfSeries` ↔ `functions/src/wasm/special/scalars.ts:69 erfcSelfContained` (j 0.335) — recorded: AssemblyScript/JavaScript mirror. The JS body is the fallback. AssemblyScript cannot import a TypeScript package, and editing the AssemblyScript source rebuilds the binary.
-- `functions/src/numeric/control-equations.ts:172 vecRowMajor` ↔ `matrix/src/operations/expm.ts:139 matrixExpm` (j 0.247) — false match: vecRowMajor flattens a square number[][] in row-major order; matrixExpm is scaling-and-squaring Padé-13 (norm1 against theta_13, pade13, repeated squaring). The score is the final n-by-n copy loop inside expm.
-- `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.221) — false match: _eigSymBackward assembles the symmetric-eig adjoint (F_ij = 1/(lambda_j-lambda_i) masked at REL_TOL 1e-10, then (dA+dA^T)/2); transposeSquare only swaps indices of an n-by-n buffer. The shared shape is that double loop.
-- `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.220) — recorded: NNLS gradients: the nnls gradient fuses A^T(b-Ax) in one loop, while lsqBounded materializes r = Ax-b first and then A^T r, so a merge changes rounding.
-- `functions/src/numeric/bfgs.ts:92 matVec` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.194) — false match: bfgs matVec is a square dense H·v product; lsqBounded is the bound-constrained least-squares iteration (clip, gradient, objective). matVec's nested product is contained in the solver, not the same job.
-- `matrix/src/backends/WASMBackend.ts:574 WASMBackend.luDecomposition` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.176) — false match: WASMBackend.luDecomposition dispatches matrix_lu_decompose and recombines L and U; transposeSquare swaps indices of one n-by-n buffer. The recombine's i,j loop is the shared shell.
-- `autograd/src/tape.ts:1830 _svdBackward` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.138) — false match: _svdBackward builds the SVD adjoint (REL_TOL 1e-10 masks on s_j-s_i and s_j+s_i, plus rectangular 1/s terms) and only incidentally transposes Vt to V; transposeSquare is just that index swap.
-- `matrix/src/operations/qr.ts:44 qr` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.116) — false match: qr is classical Gram-Schmidt with one reorthogonalization (reduced versus full Q); transposeSquare is an n-by-n index swap. Column copies inside qr share the loop shape only.
-- `expression/src/compiler/compile.ts:298 compileFunctionNode` ↔ `expression/src/compiler/compile.ts:444 compileArrayNode` (j 0.103) — recorded: compileFunctionNode and compileArrayNode: the sandbox accessor path stays. compileFunctionNode resolves symbol and accessor calls; compileArrayNode only maps already-compiled item evaluators.
-- `tensor/src/operations/cholesky.ts:45 transposeSquare` ↔ `tensor/src/operations/solve.ts:127 tensorSolve` (j 0.074) — false match: transposeSquare swaps an n-by-n buffer; tensorSolve selects row axes and solves A·x = b by LU. The transpose helper's loop is contained in the solver's index walks.
-- `matrix/src/operations/eig.ts:158 eigGeneral` ↔ `parallel/src/gemm-rows.ts:19 gemmRows` (j 0.036) — false match: eigGeneral is the general Hessenberg/QR eigensolver (orthesGeneral, then the QR sweep); gemmRows is an ijk row-block product. A matmul-shaped update inside the eigensolver matches the small kernel's shell.
-- `matrix/src/operations/eig.ts:158 eigGeneral` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.025) — false match: eigGeneral is the full general eigensolver; transposeSquare is an n-by-n index swap whose double loop is contained in eigGeneral's matrix updates.
-- `functions/src/geometry/intersect.ts:272 _intersect3dHelper` ↔ `functions/src/matrix/eigs/complexEigs.ts:66 createComplexEigs` (j 0.022) — false match: _intersect3dHelper evaluates one scalar (a-b)_(c-d)+(e-f)_(g-h)+(i-j)*(k-l); createComplexEigs is the non-symmetric eigenvalue factory. Erased scalar add/multiply calls inside that factory produce the score.
+- `functions/src/matrix/eigs/realSymmetric.ts:208 Sij1Big` ↔ `functions/src/matrix/eigs/realSymmetric.ts:226 x1Big` (j 0.596, contain 0.942, names 0.533)
+- `functions/src/matrix/eigs/realSymmetric.ts:190 Sij1` ↔ `functions/src/matrix/eigs/realSymmetric.ts:269 x1` (j 0.577, contain 0.953, names 0.565)
+- `functions/src/probability/bernoulli.ts:83 bigint | Fraction` ↔ `functions/src/probability/bernoulli.ts:92 BigNumber` (j 0.556, contain 1.000, names 0.529)
+- `assembly/src/ops/polynomial.ts:87 determinant` ↔ `functions/src/wasm/poly/wasm-bridge.ts:174 resultantJS` (j 0.486, contain 0.945, names 0.429)
+- `functions/src/typed/aggregate-restart.ts:12 aggregateRestartVectors` ↔ `functions/src/typed/graph.ts:928 _aggregateEigenvector` (j 0.474, contain 0.929, names 0.591)
+- `assembly/src/special.ts:242 _besselJn` ↔ `assembly/src/special.ts:286 _besselYn` (j 0.407, contain 0.929, names 0.208)
+- `functions/src/graph/traversal-centrality.ts:44 bfs` ↔ `functions/src/graph/traversal-centrality.ts:89 visit` (j 0.400, contain 0.920, names 0.529)
+- `functions/src/wasm/special/scalars.ts:265 besselJScalar` ↔ `functions/src/wasm/special/scalars.ts:311 besselYScalar` (j 0.397, contain 0.906, names 0.231)
+- `functions/src/typed/algebra.ts:1560 fullSimplify` ↔ `functions/src/typed/cas.ts:2490 _casSimplifyOne` (j 0.375, contain 0.913, names 0.250)
+- `matrix/src/operations/logm.ts:234 validateEigenvalues` ↔ `matrix/src/operations/logm.ts:264 logmEig` (j 0.350, contain 0.913, names 0.455)
+- `assembly/src/elementwise.ts:34 _erfSeries` ↔ `functions/src/wasm/special/scalars.ts:69 erfcSelfContained` (j 0.335, contain 0.957, names 0.450)
+- `functions/src/numeric/control-equations.ts:172 vecRowMajor` ↔ `matrix/src/operations/expm.ts:139 matrixExpm` (j 0.247, contain 0.902, names 0.097)
+- `core/src/wasm-loader.ts:302 getImports` ↔ `matrix/src/backends/WASMBackend.ts:404 loadAsModule` (j 0.232, contain 0.956, names 0.324)
+- `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.221, contain 0.919, names 0.174)
+- `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.220, contain 0.949, names 0.300)
+- `functions/src/numeric/bfgs.ts:92 matVec` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.194, contain 1.000, names 0.143)
+- `matrix/src/backends/WASMBackend.ts:574 luDecomposition` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.176, contain 0.919, names 0.100)
+- `autograd/src/tape.ts:1830 _svdBackward` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.138, contain 0.919, names 0.100)
+- `matrix/src/operations/qr.ts:44 qr` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.116, contain 0.919, names 0.114)
+- `expression/src/compiler/compile.ts:307 compileFunctionNode` ↔ `expression/src/compiler/compile.ts:456 compileArrayNode` (j 0.105, contain 0.921, names 0.182)
+- `tensor/src/operations/cholesky.ts:45 transposeSquare` ↔ `tensor/src/operations/solve.ts:127 tensorSolve` (j 0.074, contain 0.919, names 0.049)
+- `matrix/src/operations/eig.ts:158 eigGeneral` ↔ `parallel/src/gemm-rows.ts:19 gemmRows` (j 0.036, contain 0.907, names 0.040)
+- `matrix/src/operations/eig.ts:158 eigGeneral` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.025, contain 0.919, names 0.043)
+- `functions/src/geometry/intersect.ts:272 _intersect3dHelper` ↔ `functions/src/matrix/eigs/complexEigs.ts:66 createComplexEigs` (j 0.022, contain 0.958, names 0.098)
