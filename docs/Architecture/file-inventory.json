@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2058,
+  "totalFiles": 2059,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 764,
+    "test": 765,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1232,
-    "tests": 764,
+    "tests": 765,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 874,
+    "@danielsimonjr/mathts-functions": 875,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 114,
@@ -906,13 +906,6 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 439
-    },
-    {
-      "file": "core/tests/alloc-as-header-pin.test.ts",
-      "package": "@danielsimonjr/mathts-core",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 139
     },
     {
       "file": "core/tests/alloc-as-header-pin.test.ts",
@@ -6260,7 +6253,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 654
+      "loc": 632
     },
     {
       "file": "functions/src/gpu/fft-gpu.ts",
@@ -10041,6 +10034,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 143
+    },
+    {
+      "file": "functions/tests/gpu-chain-lifecycle-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 543
     },
     {
       "file": "functions/tests/gpu-dispatch-overhead.browser.test.ts",
