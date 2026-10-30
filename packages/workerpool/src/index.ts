@@ -754,7 +754,7 @@ export class MathWorkerPool {
   // Array Operations
   // =========================================================================
 
-  private async reduceScalar(
+  private reduceScalar(
     data: Float64Array,
     options: TaskOptions | undefined,
     spec: {
@@ -763,32 +763,12 @@ export class MathWorkerPool {
       reducePartials: (parts: number[]) => number;
     }
   ): Promise<ParallelResult<number>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      return {
-        result: spec.sequential(),
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
-    const chunks = this.chunkFloat64Array(data, options?.chunkSize);
-    const stats = this.stats();
-
-    const partials = await Promise.all(
-      chunks.map((chunk) => this.exec<number>(spec.task, [chunk.buffer, 0, chunk.length]))
-    );
-
-    return {
-      result: spec.reducePartials(partials),
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    return this.runParallel(data.length, options, {
+      sequential: spec.sequential,
+      chunks: () => this.chunkFloat64Array(data, options?.chunkSize),
+      send: (chunk) => this.exec<number>(spec.task, [chunk.buffer, 0, chunk.length]),
+      combine: spec.reducePartials,
+    });
   }
 
   /**
@@ -2178,38 +2158,13 @@ export class MathWorkerPool {
     compare?: (a: T, b: T) => number,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      const result = [...data].sort(compare);
-      return {
-        result,
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
     const chunkSize = options?.chunkSize ?? this.config.chunkSize;
-    const chunks = this.chunkArray(data, chunkSize);
-    const stats = this.stats();
-
-    // Sort each chunk in parallel
-    const sortedChunks = await Promise.all(
-      chunks.map((chunk) => this.exec<T[]>('sortChunk', [chunk, compare?.toString()]))
-    );
-
-    // Merge sorted chunks (k-way merge)
-    const result = this.kWayMerge(sortedChunks, compare);
-
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    return this.runParallel(data.length, options, {
+      sequential: () => [...data].sort(compare),
+      chunks: () => this.chunkArray(data, chunkSize),
+      send: (chunk) => this.exec<T[]>('sortChunk', [chunk, compare?.toString()]),
+      combine: (parts) => this.kWayMerge(parts, compare),
+    });
   }
 
   /**
@@ -2246,24 +2201,19 @@ export class MathWorkerPool {
   // Generic Parallel Operations
   // =========================================================================
 
-  /**
-   * Shared map/filter dispatch. Below threshold, `spec.sequential` runs
-   * (`data.map` / `data.filter`). Above threshold, each chunk is sent to
-   * `spec.task` with `spec.fnString` (`fn.toString()`), then concatenated in
-   * chunk order via `Promise.all(...).flat()`.
-   */
-  private async runChunks<TItem, TOut extends unknown[]>(
-    data: TItem[],
+  private async runParallel<TChunk, TPart, TOut>(
+    length: number,
     options: TaskOptions | undefined,
     spec: {
       sequential: () => TOut;
-      task: 'mapChunk' | 'filterChunk';
-      fnString: string;
+      chunks: () => TChunk[];
+      send: (chunk: TChunk) => Promise<TPart>;
+      combine: (parts: TPart[]) => TOut;
     }
   ): Promise<ParallelResult<TOut>> {
     const start = performance.now();
 
-    if (!this.shouldParallelize(data.length, options)) {
+    if (!this.shouldParallelize(length, options)) {
       return {
         result: spec.sequential(),
         duration: performance.now() - start,
@@ -2273,21 +2223,37 @@ export class MathWorkerPool {
       };
     }
 
-    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
-    const chunks = this.chunkArray(data, chunkSize);
+    const chunks = spec.chunks();
     const stats = this.stats();
-
-    const results = await Promise.all(
-      chunks.map((chunk) => this.exec<TOut[number][]>(spec.task, [chunk, spec.fnString]))
-    );
+    const parts = await Promise.all(chunks.map((chunk) => spec.send(chunk)));
 
     return {
-      result: results.flat() as TOut,
+      result: spec.combine(parts),
       duration: performance.now() - start,
       chunks: chunks.length,
       parallelized: true,
       workersUsed: Math.min(chunks.length, stats.totalWorkers),
     };
+  }
+
+  /**
+   * `map` and `filter` send each array chunk to a worker method that takes the chunk and the
+   * function source, and join the returned chunks in order.
+   */
+  private runArrayChunks<T, R>(
+    data: T[],
+    options: TaskOptions | undefined,
+    method: 'mapChunk' | 'filterChunk',
+    fnString: string,
+    sequential: () => R[]
+  ): Promise<ParallelResult<R[]>> {
+    const chunkSize = options?.chunkSize ?? this.config.chunkSize;
+    return this.runParallel(data.length, options, {
+      sequential,
+      chunks: () => this.chunkArray(data, chunkSize),
+      send: (chunk) => this.exec<R[]>(method, [chunk, fnString]),
+      combine: (parts) => parts.flat(),
+    });
   }
 
   /**
@@ -2298,11 +2264,7 @@ export class MathWorkerPool {
     fn: (item: T) => R,
     options?: TaskOptions
   ): Promise<ParallelResult<R[]>> {
-    return this.runChunks(data, options, {
-      sequential: () => data.map(fn),
-      task: 'mapChunk',
-      fnString: fn.toString(),
-    });
+    return this.runArrayChunks(data, options, 'mapChunk', fn.toString(), () => data.map(fn));
   }
 
   /**
@@ -2314,41 +2276,14 @@ export class MathWorkerPool {
     initial: R,
     options?: TaskOptions
   ): Promise<ParallelResult<R>> {
-    const start = performance.now();
-
-    if (!this.shouldParallelize(data.length, options)) {
-      return {
-        result: data.reduce(fn, initial),
-        duration: performance.now() - start,
-        chunks: 1,
-        parallelized: false,
-        workersUsed: 0,
-      };
-    }
-
-    // For parallel reduce, we map chunks first then reduce sequentially
     const chunkSize = options?.chunkSize ?? this.config.chunkSize;
-    const chunks = this.chunkArray(data, chunkSize);
-    const stats = this.stats();
-
-    // Reduce each chunk in parallel
-    const partialResults = await Promise.all(
-      chunks.map((chunk) => this.exec<R>('reduceChunk', [chunk, fn.toString(), initial]))
-    );
-
-    // Final sequential reduction of partial results
-    const result = partialResults.reduce(
-      (acc, partial) => fn(acc, partial as unknown as T),
-      initial
-    );
-
-    return {
-      result,
-      duration: performance.now() - start,
-      chunks: chunks.length,
-      parallelized: true,
-      workersUsed: Math.min(chunks.length, stats.totalWorkers),
-    };
+    const fnString = fn.toString();
+    return this.runParallel(data.length, options, {
+      sequential: () => data.reduce(fn, initial),
+      chunks: () => this.chunkArray(data, chunkSize),
+      send: (chunk) => this.exec<R>('reduceChunk', [chunk, fnString, initial]),
+      combine: (parts) => parts.reduce((acc, partial) => fn(acc, partial as unknown as T), initial),
+    });
   }
 
   /**
@@ -2359,11 +2294,9 @@ export class MathWorkerPool {
     predicate: (item: T) => boolean,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
-    return this.runChunks(data, options, {
-      sequential: () => data.filter(predicate),
-      task: 'filterChunk',
-      fnString: predicate.toString(),
-    });
+    return this.runArrayChunks(data, options, 'filterChunk', predicate.toString(), () =>
+      data.filter(predicate)
+    );
   }
 
   // =========================================================================

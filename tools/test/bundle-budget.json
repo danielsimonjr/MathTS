@@ -6,7 +6,7 @@
   },
   "files": {
     "packages/typed-function/dist/index.js": 4532,
-    "packages/workerpool/dist/index.js": 44769,
+    "packages/workerpool/dist/index.js": 43585,
     "packages/workerpool/dist/worker.js": 18292,
     "core/dist/index.js": 200000,
     "core/dist/internal.js": 201193,
