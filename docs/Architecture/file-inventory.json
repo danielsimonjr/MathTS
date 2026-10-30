@@ -7268,7 +7268,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 593
+      "loc": 592
     },
     {
       "file": "functions/src/scalar-node-bridge.ts",
@@ -10677,7 +10677,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 509
+      "loc": 746
     },
     {
       "file": "functions/tests/scalar-node-bridge.test.ts",
