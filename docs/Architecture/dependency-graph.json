@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1231,
+    "totalFiles": 1228,
     "totalModules": 82,
-    "totalExports": 6363
+    "totalExports": 6384
   },
   "entryPoints": [
     {
@@ -9565,37 +9565,6 @@
         "interfaces": ["FitScalarOptions", "FitScalarResult"],
         "functions": ["fitScalarParameters"]
       },
-      "functions/src/front-export.ts": {
-        "description": "LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./factories/index.js",
-            "imports": ["scalarToTex"]
-          },
-          {
-            "file": "./pareto-front.js",
-            "imports": ["ScoredCandidate"],
-            "typeOnly": true
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-expression",
-            "directory": "expression",
-            "imports": ["ScalarNode", "StringOptions"]
-          },
-          {
-            "package": "@danielsimonjr/mathts-expression",
-            "directory": "expression",
-            "imports": ["scalarCanonicalKey"]
-          }
-        ],
-        "exports": ["frontToLatexTable", "frontToJson"],
-        "interfaces": ["FrontJsonRow", "FrontJson", "FrontLatexTableOptions"],
-        "functions": ["frontToLatexTable", "frontToJson"]
-      },
       "functions/src/geometry-extra.ts": {
         "description": "Geodesy / spherical-geometry connectors (Wave C / bridge C7).",
         "externalDependencies": [],
@@ -9780,6 +9749,32 @@
             "reExport": true
           },
           {
+            "file": "./scalar-mutate.js",
+            "imports": [
+              "addNode",
+              "crossoverSubtrees",
+              "DEFAULT_MUTATION_WEIGHTS",
+              "deleteNode",
+              "identityMutation",
+              "insertNode",
+              "mutateConstant",
+              "mutateFeature",
+              "mutateOperator",
+              "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+              "randomizeTree",
+              "rotateTree",
+              "simplifyConstants",
+              "swapOperands",
+              "weightedMutation"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./scalar-search.js",
+            "imports": ["searchScalars"],
+            "reExport": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
             "reExport": true
@@ -9787,6 +9782,11 @@
           {
             "file": "./numeric-equivalence.js",
             "imports": ["numericallyEquivalent", "NumericEquivalenceError"],
+            "reExport": true
+          },
+          {
+            "file": "./scalar-dimension.js",
+            "imports": ["inferScalarDimension", "solveParameterDimensions"],
             "reExport": true
           },
           {
@@ -10338,6 +10338,24 @@
             "typeOnly": true
           },
           {
+            "file": "./scalar-mutate.js",
+            "imports": ["MutationWeightKey", "ScalarMutationContext", "ScalarMutationOperator"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./scalar-search.js",
+            "imports": [
+              "ScalarSearchOptions",
+              "ScalarSearchProblem",
+              "ScalarSearchResult",
+              "ScalarSearchStopReason",
+              "SearchProgress"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["FrontCandidate", "ScoredCandidate"],
             "reExport": true,
@@ -10346,6 +10364,12 @@
           {
             "file": "./numeric-equivalence.js",
             "imports": ["NumericEquivalenceOptions", "NumericEquivalence"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./scalar-dimension.js",
+            "imports": ["DimensionInference", "ParameterDimensionResult", "RationalDimension"],
             "reExport": true,
             "typeOnly": true
           },
@@ -10717,12 +10741,30 @@
           "ScalarEvalError",
           "compileScalar",
           "compileScalarGradient",
+          "addNode",
+          "crossoverSubtrees",
+          "DEFAULT_MUTATION_WEIGHTS",
+          "deleteNode",
+          "identityMutation",
+          "insertNode",
+          "mutateConstant",
+          "mutateFeature",
+          "mutateOperator",
+          "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+          "randomizeTree",
+          "rotateTree",
+          "simplifyConstants",
+          "swapOperands",
+          "weightedMutation",
+          "searchScalars",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
           "ParetoFrontError",
           "numericallyEquivalent",
           "NumericEquivalenceError",
+          "inferScalarDimension",
+          "solveParameterDimensions",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -11020,10 +11062,21 @@
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient",
+          "MutationWeightKey",
+          "ScalarMutationContext",
+          "ScalarMutationOperator",
+          "ScalarSearchOptions",
+          "ScalarSearchProblem",
+          "ScalarSearchResult",
+          "ScalarSearchStopReason",
+          "SearchProgress",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
           "NumericEquivalence",
+          "DimensionInference",
+          "ParameterDimensionResult",
+          "RationalDimension",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11166,12 +11219,30 @@
           "ScalarEvalError",
           "compileScalar",
           "compileScalarGradient",
+          "addNode",
+          "crossoverSubtrees",
+          "DEFAULT_MUTATION_WEIGHTS",
+          "deleteNode",
+          "identityMutation",
+          "insertNode",
+          "mutateConstant",
+          "mutateFeature",
+          "mutateOperator",
+          "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+          "randomizeTree",
+          "rotateTree",
+          "simplifyConstants",
+          "swapOperands",
+          "weightedMutation",
+          "searchScalars",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
           "ParetoFrontError",
           "numericallyEquivalent",
           "NumericEquivalenceError",
+          "inferScalarDimension",
+          "solveParameterDimensions",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -11469,10 +11540,21 @@
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient",
+          "MutationWeightKey",
+          "ScalarMutationContext",
+          "ScalarMutationOperator",
+          "ScalarSearchOptions",
+          "ScalarSearchProblem",
+          "ScalarSearchResult",
+          "ScalarSearchStopReason",
+          "SearchProgress",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
           "NumericEquivalence",
+          "DimensionInference",
+          "ParameterDimensionResult",
+          "RationalDimension",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11791,55 +11873,6 @@
         "interfaces": ["LineFit", "LinregressResult"],
         "functions": ["fitLine", "linearRegression"]
       },
-      "functions/src/scalar-batch-parallel.ts": {
-        "description": "Parallel batch evaluation of scalar populations over shared columns (M14).",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./scalar-compile.js",
-            "imports": ["buildTape", "compileScalar", "CompileScalarOptions", "ScalarBatchResult"]
-          }
-        ],
-        "workspaceDependencies": [
-          {
-            "package": "@danielsimonjr/mathts-expression",
-            "directory": "expression",
-            "imports": ["ScalarNode"]
-          },
-          {
-            "package": "@danielsimonjr/mathts-parallel",
-            "directory": "parallel",
-            "imports": ["WorkerPool"]
-          }
-        ],
-        "exports": [
-          "SCALAR_PARALLEL_MIN_ROWS",
-          "resolveScalarBatchWorkerScript",
-          "evaluateScalarPopulation"
-        ],
-        "interfaces": [
-          "ScalarPopulationEvalItem",
-          "ScalarPopulationParallelOptions",
-          "EvaluateScalarPopulationOptions",
-          "ScalarPopulationEvalResult"
-        ],
-        "functions": ["resolveScalarBatchWorkerScript", "evaluateScalarPopulation"],
-        "constants": ["SCALAR_PARALLEL_MIN_ROWS"]
-      },
-      "functions/src/scalar-batch.worker.ts": {
-        "description": "Web worker entry for parallel {@link evaluateScalarPopulation} (M14).",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./scalar-compile.js",
-            "imports": ["evaluateScalarTape"]
-          }
-        ],
-        "workspaceDependencies": [],
-        "exports": []
-      },
       "functions/src/scalar-compile.ts": {
         "description": "Batch evaluation of {@link ScalarNode} trees over `Float64Array` columns.",
         "externalDependencies": [],
@@ -11862,14 +11895,14 @@
             "imports": ["LoweredScalarFn", "ScalarNode", "ScalarOperator"]
           }
         ],
-        "exports": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"],
+        "exports": ["compileScalar", "compileScalarGradient"],
         "interfaces": [
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient"
         ],
-        "functions": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"]
+        "functions": ["compileScalar", "compileScalarGradient"]
       },
       "functions/src/scalar-dimension.ts": {
         "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
@@ -11964,6 +11997,7 @@
               "createScalarBuilder",
               "mapScalar",
               "scalarGrammarAccepts",
+              "LoweredScalarFn",
               "ScalarGrammar",
               "ScalarNode"
             ]
@@ -11977,7 +12011,7 @@
         "exports": [
           "MUTATE_CONSTANT_NEGATE_PROBABILITY",
           "DEFAULT_MUTATION_WEIGHTS",
-          "identity",
+          "identityMutation",
           "mutateConstant",
           "mutateOperator",
           "mutateFeature",
@@ -11994,7 +12028,7 @@
         ],
         "interfaces": ["ScalarMutationContext"],
         "functions": [
-          "identity",
+          "identityMutation",
           "mutateConstant",
           "mutateOperator",
           "mutateFeature",
@@ -12049,17 +12083,13 @@
         "functions": ["createScalarNodeBridge"]
       },
       "functions/src/scalar-search.ts": {
-        "description": "PySR-style regularized evolution over {@link ScalarNode} trees (M13).",
+        "description": "PySR-style evolutionary search over {@link ScalarNode} trees (M13).",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
           {
             "file": "./fit-scalar.js",
             "imports": ["fitScalarParameters"]
-          },
-          {
-            "file": "./scalar-batch-parallel.js",
-            "imports": ["evaluateScalarPopulation", "ScalarPopulationParallelOptions"]
           },
           {
             "file": "./pareto-front.js",
@@ -12085,22 +12115,17 @@
             "directory": "expression",
             "imports": [
               "enumerateScalars",
+              "scalarCanonicalKey",
               "scalarComplexity",
               "scalarGrammarAccepts",
               "ScalarGrammar",
               "ScalarNode"
             ]
-          },
-          {
-            "package": "@danielsimonjr/mathts-parallel",
-            "directory": "parallel",
-            "imports": ["WorkerPool"]
           }
         ],
         "exports": [],
         "interfaces": [
           "ScalarSearchProblem",
-          "ScalarSearchParallelOptions",
           "ScalarSearchOptions",
           "SearchProgress",
           "ScalarSearchResult"
@@ -36525,11 +36550,6 @@
             "reExport": true
           },
           {
-            "file": "./WorkerPool.js",
-            "imports": ["WorkerPool"],
-            "reExport": true
-          },
-          {
             "file": "./operations/index.js",
             "imports": [
               "parallelMatmul",
@@ -36655,7 +36675,6 @@
           "DEFAULT_POOL_CONFIG",
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
-          "WorkerPool",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -36744,7 +36763,6 @@
           "DEFAULT_POOL_CONFIG",
           "DEFAULT_THRESHOLD_BY_OP",
           "resolveOpThreshold",
-          "WorkerPool",
           "parallelMatmul",
           "parallelMatvec",
           "parallelTranspose",
@@ -41773,7 +41791,6 @@
           "functions/src/descriptive-stats.ts",
           "functions/src/distribution-functions.ts",
           "functions/src/fit-scalar.ts",
-          "functions/src/front-export.ts",
           "functions/src/geometry-extra.ts",
           "functions/src/grad-forward.ts",
           "functions/src/help.ts",
@@ -41786,8 +41803,6 @@
           "functions/src/optimization-extra.ts",
           "functions/src/pareto-front.ts",
           "functions/src/regression-extra.ts",
-          "functions/src/scalar-batch-parallel.ts",
-          "functions/src/scalar-batch.worker.ts",
           "functions/src/scalar-compile.ts",
           "functions/src/scalar-dimension.ts",
           "functions/src/scalar-eval.ts",
@@ -43032,18 +43047,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1231,
+    "totalTypeScriptFiles": 1228,
     "totalModules": 82,
-    "totalLinesOfCode": 203364,
-    "totalExports": 6363,
+    "totalLinesOfCode": 203034,
+    "totalExports": 6384,
     "totalClasses": 59,
-    "totalInterfaces": 563,
-    "totalFunctions": 2063,
+    "totalInterfaces": 555,
+    "totalFunctions": 2057,
     "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1631,
-    "totalReExports": 2686,
-    "totalTypeOnlyImports": 616,
+    "totalConstants": 1630,
+    "totalReExports": 2714,
+    "totalTypeOnlyImports": 618,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

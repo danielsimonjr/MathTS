@@ -115,7 +115,7 @@ Every PR:
 - Changeset (`.changeset/*.md`) for every touched published package, `minor` for a new export, `patch` for a behavior fix. No version bump in `package.json`. Docs-only PRs have no changeset.
 - No tag, release, or publish. PR #398 stays untouched.
 
-Package tests go through turbo so `dist/` is fresh: `bunx turbo test --filter=@danielsimonjr/mathts-functions` (and the same for `expression` and `parallel`). One file from the repo root: `bunx vitest run <path>`.
+Package tests go through turbo so `dist/` is fresh: `bunx turbo test --filter=@danielsimonjr/mathts-functions` (and the same for `expression` and `parallel`). One file: run vitest from the package that owns it (`cd functions && bunx vitest run tests/<file>`; the same for `expression`, `parallel`). The repo-root `vitest.config.ts` includes only `tests/integration/**` and `tests/wasm/**`, so `bunx vitest run functions/tests/<file>` from the repo root exits 1 with "No test files found". Files under the root `tests/integration/` run from the repo root.
 
 ## PR 1 — Record the review of M1, M3, and M4
 
@@ -129,13 +129,13 @@ M2, M5, M6, M7, and M8 keep their B9 boxes open. This PR does not review them.
 
 ### Work
 
-The reviewer re-runs, from the repo root:
+The reviewer re-runs these four commands. Three of the four files belong to a package, so each runs under that package's vitest config; only the integration file runs from the repo root (the root config includes only `tests/integration/**` and `tests/wasm/**`, and the plain `bunx vitest run expression/tests/…` form exits 1 with "No test files found"):
 
 ```bash
-bunx vitest run expression/tests/scalar-structure.test.ts
+(cd expression && bunx vitest run tests/scalar-structure.test.ts)
 bunx vitest run tests/integration/scalar-canonical-parity.test.ts
-bunx vitest run functions/tests/scalar-compile.test.ts
-bunx vitest run functions/tests/pareto-front.test.ts
+(cd functions && bunx vitest run tests/scalar-compile.test.ts)
+(cd functions && bunx vitest run tests/pareto-front.test.ts)
 ```
 
 The reviewer greps `expression/src/scalar-structure.ts` for `hasOwnProperty` (the own-key helper at line 208) and confirms there is one walker. The reviewer confirms `paretoDist` is not called from `functions/src/pareto-front.ts`.
@@ -334,7 +334,7 @@ Same as PR 2.
 ### Work
 
 1. In `docs/integration/upt.md`, under the Scalar ExprNode section, add that `inferScalarDimension` and `solveParameterDimensions` are MathTS exports and that their exponents are `Fraction`s on `SiDimensionVector` (`#414`). State that Q2 is unchanged: dimensional analysis of `Tensor` stays in UPT.
-2. Run `bunx vitest run functions/tests/simplify-exact-fractions.test.ts`. Do not edit `simplifyConstant.ts`.
+2. Run `(cd functions && bunx vitest run tests/simplify-exact-fractions.test.ts)`. Do not edit `simplifyConstant.ts`.
 3. Leave §10 question 4 unanswered. Do not edit `physicalConstants.ts`.
 
 ### Files
@@ -489,6 +489,8 @@ Sum of the table is `8.512392`. The picker draws `next()`, multiplies by that su
 
 `crossoverSubtrees` is not in the default weights. It is a separate export.
 
+The `identity` operator is exported as `identityMutation`: `functions/src/index.ts` re-exports `./factories/index.js` with `export *`, and an explicit `identity` export would replace the package's matrix `identity` for every consumer. The weight key stays `identity`.
+
 ### Tests
 
 `functions/tests/scalar-mutate.test.ts`.
@@ -595,7 +597,7 @@ The worker file is `functions/src/scalar-batch.worker.ts`. It is a second tsdown
 
 Resolve the script with `new URL('./scalar-batch.worker.js', import.meta.url)` from the built module. No `node:fs`, no `node:url`, no `require`. The parallel-equals-serial test imports `@danielsimonjr/mathts-functions` (the built `dist`) so that URL is the sibling of `dist/index.js`.
 
-Dispatch constant `SCALAR_PARALLEL_MIN_ROWS = 100` in `functions/src/scalar-batch-parallel.ts`, with a comment that cites the M3 section of `docs/BENCHMARK_RESULTS.md`. The comparison is in the function that chooses the path, not only in the comment. Below 100 rows, `compileScalar` on the caller thread and the pool is not called. At 100 or more, `pool.execute(payload, transferables, timeoutMs)`.
+Dispatch constant `SCALAR_PARALLEL_MIN_ROWS = 100` in `functions/src/scalar-batch-parallel.ts`, with a comment that cites the M3 section of `docs/BENCHMARK_RESULTS.md`. That section compares `compileScalar` with per-row `evaluateScalar` on one thread; it did not time a worker round trip. The comment says so: 100 rows is the smallest size at which the compiled batch beats per-row evaluation, used here as a floor for the opt-in worker path, not a measured worker crossover. The comment carries no speedup number. The comparison is in the function that chooses the path, not only in the comment. Below 100 rows, `compileScalar` on the caller thread and the pool is not called. At 100 or more, `pool.execute(payload, transferables, timeoutMs)`.
 
 `timeoutMs` is required on the options object the search passes. Default `30_000`. The third argument of `execute` is that number. Omitting it is a bug (the security invariant is the timeout path).
 

@@ -493,11 +493,6 @@
       "reason": "mathjs factory-layer reimplementations (the `math.create({...})` plugin escape-hatch) of the core primitives in core/src/arithmetic/scalar.ts / core/src/array.ts. The scalar arith ops (add/subtract/multiply/divideScalar) + isNumeric are the SAME semantics as core and are guarded functions≡core≡oracle by functions/tests/gap-factory-core-parity.test.ts; the array ops (concat/filter/flatten/forEach/map/reshape/resize/squeeze) are the mathjs Matrix-aware factory contracts over core's pure-array primitives (oracle-pinned in the same test); `number` is distinct-by-contract (functions parses strings/units, core coerces a NumericScalar). core stays canonical. NOTE (surfaced): the deeper 'collapse the factory layer into typed' ADR is an open call — allowlist-with-parity is the interim divergence guard, not a resolution. 2026-07 dedup campaign, closing tail slice."
     },
     {
-      "names": ["identity"],
-      "filesGlob": ["functions/src/scalar-mutate.ts"],
-      "reason": "PySR M12 mutation operator `identity(node)` returns the same ScalarNode; not the matrix-identity factory (`functions/src/factories/index.ts`), compat shim, or typed matrix `identity` dispatch (`matrix/src/typed-operations.ts`)."
-    },
-    {
       "names": ["zeros", "ones", "size", "matrix", "identity", "bignumber", "fraction", "sparse"],
       "filesGlob": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
       "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
