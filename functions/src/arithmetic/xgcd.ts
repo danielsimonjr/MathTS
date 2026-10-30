@@ -5,19 +5,19 @@ import { xgcdNumber } from '../plain/number/index.js';
 
 // Type definitions for xgcd
 interface BigNumberType {
-  isInt(): boolean;
+  isInteger(): boolean;
   isZero(): boolean;
-  lt(other: BigNumberType): boolean;
-  neg(): BigNumberType;
-  div(other: BigNumberType): BigNumberType;
+  lessThan(other: BigNumberType): boolean;
+  negate(): BigNumberType;
+  divide(other: BigNumberType): BigNumberType;
   mod(other: BigNumberType): BigNumberType;
   floor(): BigNumberType;
-  minus(other: BigNumberType): BigNumberType;
+  subtract(other: BigNumberType): BigNumberType;
   times(other: BigNumberType): BigNumberType;
 }
 
 interface BigNumberConstructor {
-  new (value: number): BigNumberType;
+  fromNumber(value: number): BigNumberType;
 }
 
 interface FractionType {
@@ -44,8 +44,20 @@ interface XgcdDependencies {
   Fraction?: FractionConstructor;
 }
 
+interface XgcdRing<T> {
+  from(v: 0 | 1): T;
+  isInt(v: T): boolean;
+  floorDiv(a: T, b: T): T;
+  minus(a: T, b: T): T;
+  times(a: T, b: T): T;
+  lt(a: T, b: T): boolean;
+  neg(a: T): T;
+}
+
 const name = 'xgcd';
 const dependencies = ['typed', 'config', 'matrix', 'BigNumber', '?Fraction'];
+
+const XGCD_INTEGER_MSG = 'Parameters in function xgcd must be integer numbers';
 
 export const createXgcd = /* #__PURE__ */ factory(
   name,
@@ -74,6 +86,16 @@ export const createXgcd = /* #__PURE__ */ factory(
      * @return {Array}              Returns an array containing 3 integers `[div, m, n]`
      *                              where `div = gcd(a, b)` and `a*m + b*n = div`
      */
+    const bigNumberRing: XgcdRing<BigNumberType> = {
+      from: (v) => BigNumber.fromNumber(v),
+      isInt: (v) => v.isInteger(),
+      floorDiv: (a, b) => a.divide(b).floor(),
+      minus: (a, b) => a.subtract(b),
+      times: (a, b) => a.times(b),
+      lt: (a, b) => a.lessThan(b),
+      neg: (a) => a.negate(),
+    };
+
     const typedSignatures: Record<string, unknown> = {
       'number, number': function (a: number, b: number): unknown {
         const res = xgcdNumber(a, b);
@@ -89,110 +111,72 @@ export const createXgcd = /* #__PURE__ */ factory(
 
     return typed(name, typedSignatures) as TypedFunction;
 
-    /**
-     * Calculate xgcd for two BigNumbers
-     * @param {BigNumber} a
-     * @param {BigNumber} b
-     * @return {BigNumber[]} result
-     * @private
-     */
-    function _xgcdBigNumber(a: BigNumberType, b: BigNumberType): unknown {
+    function _xgcdRing<T extends { isZero(): boolean; mod(b: T): T }>(
+      ring: XgcdRing<T>,
+      a: T,
+      b: T
+    ): unknown {
       // source: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-      let // used to swap two variables
-        t: BigNumberType;
+      let t: T;
+      let q: T;
+      let r: T;
 
-      let // quotient
-        q: BigNumberType;
+      const zero = ring.from(0);
+      const one = ring.from(1);
+      let x: T = zero;
+      let lastx: T = one;
+      let y: T = one;
+      let lasty: T = zero;
 
-      let // remainder
-        r: BigNumberType;
-
-      const zero = new BigNumber(0);
-      const one = new BigNumber(1);
-      let x: BigNumberType = zero;
-      let lastx: BigNumberType = one;
-      let y: BigNumberType = one;
-      let lasty: BigNumberType = zero;
-
-      if (!a.isInt() || !b.isInt()) {
-        throw new Error('Parameters in function xgcd must be integer numbers');
+      if (!ring.isInt(a) || !ring.isInt(b)) {
+        throw new Error(XGCD_INTEGER_MSG);
       }
 
       while (!b.isZero()) {
-        q = a.div(b).floor();
+        q = ring.floorDiv(a, b);
         r = a.mod(b);
 
         t = x;
-        x = lastx.minus(q.times(x));
+        x = ring.minus(lastx, ring.times(q, x));
         lastx = t;
 
         t = y;
-        y = lasty.minus(q.times(y));
+        y = ring.minus(lasty, ring.times(q, y));
         lasty = t;
 
         a = b;
         b = r;
       }
 
-      let res: (BigNumberType | number)[];
-      if (a.lt(zero)) {
-        res = [a.neg(), lastx.neg(), lasty.neg()];
+      let res: (T | number)[];
+      if (ring.lt(a, zero)) {
+        res = [ring.neg(a), ring.neg(lastx), ring.neg(lasty)];
       } else {
         res = [a, !a.isZero() ? lastx : 0, lasty];
       }
       return config.matrix === 'Array' ? res : matrix(res);
     }
 
-    /**
-     * Calculate xgcd for two Fractions
-     * @param {Fraction} a
-     * @param {Fraction} b
-     * @return {Fraction[]} result
-     * @private
-     */
+    function _xgcdBigNumber(a: BigNumberType, b: BigNumberType): unknown {
+      return _xgcdRing(bigNumberRing, a, b);
+    }
+
     function _xgcdFraction(a: FractionType, b: FractionType): unknown {
       if (!Fraction) {
         throw new Error('Fraction is not available');
       }
 
-      let t: FractionType;
-      let q: FractionType;
-      let r: FractionType;
+      const fractionRing: XgcdRing<FractionType> = {
+        from: (v) => new Fraction(v),
+        isInt: (v) => v.isInteger(),
+        floorDiv: (a, b) => a.divide(b).floor(),
+        minus: (a, b) => a.subtract(b),
+        times: (a, b) => a.multiply(b),
+        lt: (a, b) => a.lessThan(b),
+        neg: (a) => a.negate(),
+      };
 
-      const zero = new Fraction(0);
-      const one = new Fraction(1);
-      let x: FractionType = zero;
-      let lastx: FractionType = one;
-      let y: FractionType = one;
-      let lasty: FractionType = zero;
-
-      if (!a.isInteger() || !b.isInteger()) {
-        throw new Error('Parameters in function xgcd must be integer numbers');
-      }
-
-      while (!b.isZero()) {
-        q = a.divide(b).floor();
-        r = a.mod(b);
-
-        t = x;
-        x = lastx.subtract(q.multiply(x));
-        lastx = t;
-
-        t = y;
-        y = lasty.subtract(q.multiply(y));
-        lasty = t;
-
-        a = b;
-        b = r;
-      }
-
-      let res: (FractionType | number)[];
-      if (a.lessThan(zero)) {
-        res = [a.negate(), lastx.negate(), lasty.negate()];
-      } else {
-        res = [a, !a.isZero() ? lastx : 0, lasty];
-      }
-      return config.matrix === 'Array' ? res : matrix(res);
+      return _xgcdRing(fractionRing, a, b);
     }
   }
 );
