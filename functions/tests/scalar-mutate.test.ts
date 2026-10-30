@@ -375,6 +375,52 @@ describe('grammar and call-name fidelity', () => {
     }
   });
 
+  it('rotateTree golden: only left rotation applies', () => {
+    const tree = b.op('+', [b.op('*', [b.symbol('x'), b.symbol('y')]), b.symbol('c')]);
+    const expected = b.op('*', [b.symbol('x'), b.op('+', [b.symbol('y'), b.symbol('c')])]);
+    expect(key(rotateTree(tree, stubRng({ nextInt: [0], next: [0.75] }), ctx))).toBe(key(expected));
+  });
+
+  it('rotateTree golden: both directions at the same node', () => {
+    const tree = b.op('+', [
+      b.op('*', [b.symbol('x'), b.symbol('y')]),
+      b.op('*', [b.symbol('x'), b.symbol('c')]),
+    ]);
+    const leftFirst = b.op('*', [
+      b.symbol('x'),
+      b.op('+', [b.symbol('y'), b.op('*', [b.symbol('x'), b.symbol('c')])]),
+    ]);
+    const rightFirst = b.op('*', [
+      b.op('+', [b.op('*', [b.symbol('x'), b.symbol('y')]), b.symbol('x')]),
+      b.symbol('c'),
+    ]);
+    expect(key(rotateTree(tree, stubRng({ nextInt: [0], next: [0.25] }), ctx))).toBe(
+      key(leftFirst)
+    );
+    expect(key(rotateTree(tree, stubRng({ nextInt: [0], next: [0.75] }), ctx))).toBe(
+      key(rightFirst)
+    );
+  });
+
+  it('deleteNode keeps the child chosen by the second nextInt draw', () => {
+    const tree = b.op('+', [b.symbol('x'), b.symbol('y')]);
+    expect(key(deleteNode(tree, stubRng({ nextInt: [0, 0] }), ctx))).toBe(key(b.symbol('x')));
+    expect(key(deleteNode(tree, stubRng({ nextInt: [0, 1] }), ctx))).toBe(key(b.symbol('y')));
+  });
+
+  it('swapOperands swaps subtraction and division operands', () => {
+    const divGrammar: ScalarGrammar = { ...testGrammar, binary: ['-', '/'] };
+    const minusTree = b.op('-', [b.symbol('x'), b.symbol('y')]);
+    const divTree = b.op('/', [b.symbol('x'), b.symbol('y')]);
+    const minusCtx = { ...ctx, grammar: divGrammar };
+    expect(key(swapOperands(minusTree, stubRng({ nextInt: [0] }), minusCtx))).toBe(
+      key(b.op('-', [b.symbol('y'), b.symbol('x')]))
+    );
+    expect(key(swapOperands(divTree, stubRng({ nextInt: [0] }), minusCtx))).toBe(
+      key(b.op('/', [b.symbol('y'), b.symbol('x')]))
+    );
+  });
+
   it('mutations do not modify their input', () => {
     const tree = b.call('sin', b.op('+', [b.symbol('x'), b.number(2)]));
     const frozen = JSON.stringify(tree);
