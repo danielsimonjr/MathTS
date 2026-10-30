@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2036,
+  "totalFiles": 2037,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1204,
     "test-only": 0,
     "orphan": 0,
-    "test": 744,
+    "test": 745,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1230,
-    "tests": 744,
+    "tests": 745,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 864,
+    "@danielsimonjr/mathts-functions": 865,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -5847,7 +5847,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 199
+      "loc": 183
     },
     {
       "file": "functions/src/bitwise/bitAnd.ts",
@@ -7268,7 +7268,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 593
+      "loc": 592
     },
     {
       "file": "functions/src/scalar-node-bridge.ts",
@@ -10677,7 +10677,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 509
+      "loc": 519
     },
     {
       "file": "functions/tests/scalar-node-bridge.test.ts",
@@ -11301,6 +11301,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 81
+    },
+    {
+      "file": "functions/tests/xgcd-factory-ring.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 136
     },
     {
       "file": "functions/vitest.config.ts",
