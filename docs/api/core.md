@@ -350,6 +350,8 @@ fromSiDimensionVector(nums); // length-10 Unit exponent vector
 
 Not on the public `.` entry (the generated index below is the `.` barrel only). WASM helpers on `/internal`: `sha384OfBuffer`, `verifyWasmIntegrity`, `loadWasmManifest`, `resolvePackagedWasm`, `defaultWasmLocation`, and abstract class `WasmModuleLoader` (shared `load` / cached `loadModule` / `getImports` for the package-local `functions` and `matrix` loaders). SHA-384 verification stays in each subclass's Node/browser load path.
 
+Tree helpers (`clone`, `extend`, `mapObject`, `deepExtend`, `deepFlatten`, `deepMap`, `deepForEach`, `reduce`) skip own keys whose names sit on `Object.prototype` so copies cannot retarget the result prototype (see `docs/core/configuration.md`). Nested arrays and matrices share typed overloads on `deepMap` / `reduce` (`NestedArray<T>` from `/internal`).
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->

@@ -723,7 +723,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 93
+      "loc": 98
     },
     {
       "file": "core/src/string.ts",
@@ -1150,7 +1150,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 94
     },
     {
       "file": "core/tests/types/complex.test.ts",
@@ -10733,7 +10733,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 48
     },
     {
       "file": "functions/tests/special-scalars-airy-oracle.test.ts",

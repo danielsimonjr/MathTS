@@ -131,7 +131,7 @@ Override `MathTSConfig` at startup by spreading `DEFAULT_CONFIG` from the main e
 
 Those collection helpers accept nested arrays as well as matrices: `deepMap` / `deepForEach` recurse into nested structure, and `reduce` of a one-dimensional array along dimension 0 returns a scalar (not a one-element array). With `skipZeros: true`, `deepMap` leaves numeric zeros as the original value.
 
-`clone`, `extend`, `mapObject`, and `deepFlatten` on `./internal` skip own keys whose names sit on `Object.prototype` or `Function.prototype` (the same rule `deepExtend` already used). Polluting keys are omitted from copies rather than assigned.
+`clone`, `extend`, `mapObject`, and `deepFlatten` on `./internal` skip own keys whose names sit on `Object.prototype` (the same rule `deepExtend` already used). Polluting keys are omitted from copies rather than assigned.
 
 ## TypeScript types
 
