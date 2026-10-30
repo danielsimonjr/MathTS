@@ -1,0 +1,121 @@
+{
+  "note": "Bytes of bun run build output, before build:prod. A change beyond the tolerance updates this file in the same PR.",
+  "tolerance": {
+    "bytes": 512,
+    "ratio": 0.01
+  },
+  "files": {
+    "ackages/typed-function/dist/index.js": 4532,
+    "ackages/workerpool/dist/index.js": 42621,
+    "ackages/workerpool/dist/worker.js": 16144,
+    "ore/dist/index.js": 36375,
+    "ore/dist/internal.js": 37568,
+    "atrix/dist/index.js": 190209,
+    "matrix/dist/wasm/mathts-as.wasm": 62490,
+    "ensor/dist/index.js": 72541,
+    "utograd/dist/index.js": 55366,
+    "unctions/dist/index.js": 1502524,
+    "functions/dist/wasm/mathts-as.wasm": 62490,
+    "xpression/dist/index.js": 334113,
+    "arser/dist/index.js": 500,
+    "nits/dist/index.js": 951,
+    "umbers/dist/index.js": 377,
+    "st/dist/index.js": 367,
+    "valuator/dist/index.js": 95,
+    "inalg/dist/index.js": 272,
+    "rithmetic/dist/index.js": 376,
+    "rigonometry/dist/index.js": 192,
+    "tatistics/dist/index.js": 2477,
+    "ignal/dist/index.js": 484,
+    "arallel/dist/index.js": 37121,
+    "orkbook/dist/index.js": 1763,
+    "ssembly/build/mathts.js": 93112,
+    "ssembly/build/mathts.wasm": 62490,
+    "ssembly/build/mathts-debug.wasm": 122381,
+    "ompat/dist/index.js": 12650,
+    "pu/dist/index.js": 16332,
+    "lot/dist/index.js": 32394,
+    "lot/dist/render-file.js": 5057
+  },
+  "entries": {
+    "ackages/typed-function/dist/index.js::buildSignature": {
+      "treeShake": true
+    },
+    "ackages/workerpool/dist/index.js::canUseSharedMemory": {
+      "treeShake": false
+    },
+    "ore/dist/index.js::abs": {
+      "treeShake": false,
+      "sentinel": "kilogram",
+      "sentinelPresent": true
+    },
+    "ore/dist/internal.js::_switch": {
+      "treeShake": false,
+      "sentinel": "kilogram",
+      "sentinelPresent": true
+    },
+    "ensor/dist/index.js::concatenate": {
+      "treeShake": false
+    },
+    "utograd/dist/index.js::derivative": {
+      "treeShake": false
+    },
+    "unctions/dist/index.js::acf": {
+      "treeShake": false
+    },
+    "xpression/dist/index.js::createAccessorNode": {
+      "treeShake": true
+    },
+    "arser/dist/index.js::createAccessorNode": {
+      "treeShake": false
+    },
+    "nits/dist/index.js::addExactScales": {
+      "treeShake": false
+    },
+    "umbers/dist/index.js::BigNumber": {
+      "treeShake": false
+    },
+    "st/dist/index.js::createAccessorNode": {
+      "treeShake": false
+    },
+    "valuator/dist/index.js::compile": {
+      "treeShake": false
+    },
+    "inalg/dist/index.js::cholesky": {
+      "treeShake": false
+    },
+    "rithmetic/dist/index.js::abs": {
+      "treeShake": false
+    },
+    "rigonometry/dist/index.js::acos": {
+      "treeShake": false
+    },
+    "tatistics/dist/index.js::acf": {
+      "treeShake": false
+    },
+    "ignal/dist/index.js::autoCorrelation": {
+      "treeShake": false
+    },
+    "arallel/dist/index.js::bitAnd": {
+      "treeShake": false
+    },
+    "orkbook/dist/index.js::addCell": {
+      "treeShake": false
+    },
+    "ssembly/build/mathts.js::__collect": {
+      "treeShake": true
+    },
+    "ompat/dist/index.js::BigNumber": {
+      "treeShake": false
+    },
+    "pu/dist/index.js::BufferPool": {
+      "treeShake": true
+    },
+    "lot/dist/index.js::area": {
+      "treeShake": false
+    },
+    "lot/dist/render-file.js::hasTool": {
+      "treeShake": true
+    }
+  }
+}
