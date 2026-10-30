@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { parse } from '@danielsimonjr/mathts-functions';
+import { evaluate, parse } from '@danielsimonjr/mathts-functions';
 import { compile } from '../../src/compiler/compile.js';
-import { MAX_COMPILE_DEPTH, MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING } from '../../src/limits.js';
+import {
+  MAX_COMPILE_DEPTH,
+  MAX_EXPRESSION_LENGTH,
+  MAX_PARSE_NESTING,
+  MAX_PARSE_RECURSION,
+} from '../../src/limits.js';
 import type { MathNode } from '../../src/node/Node.js';
 
 /**
@@ -62,5 +67,46 @@ describe('expression security limits', () => {
       new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
     );
     expect(() => compile(parenthesisChain(MAX_COMPILE_DEPTH), {})).not.toThrow(RangeError);
+  });
+
+  it('keeps the recursion cap above what MAX_PARSE_NESTING parenthesis levels need', () => {
+    const okDepth = MAX_PARSE_NESTING - 1;
+    // a parenthesis level re-enters assignment and unary once each: 2 per level
+    expect(MAX_PARSE_RECURSION).toBeGreaterThanOrEqual(2 * okDepth);
+    expect(() => parse('('.repeat(okDepth) + '1' + ')'.repeat(okDepth))).not.toThrow();
+  });
+
+  it.each([
+    ['unary minus', '-'.repeat(20_000) + '1'],
+    ['not', 'not '.repeat(10_000) + '1'],
+    ['power', '1' + '^1'.repeat(20_000)],
+    ['conditional', '1?'.repeat(10_000) + '1' + ':1'.repeat(10_000)],
+    ['assignment', 'a='.repeat(10_000) + '1'],
+  ])('rejects a %s chain with SyntaxError, not a stack overflow', (_name, text) => {
+    expect(() => parse(text)).toThrow(SyntaxError);
+    expect(() => parse(text)).toThrow(/nesting limit/);
+  });
+
+  it('still parses a unary chain and a power chain just under the recursion cap', () => {
+    expect(() => parse('-'.repeat(100) + '1')).not.toThrow();
+    expect(() => parse('1' + '^1'.repeat(100))).not.toThrow();
+  });
+
+  it.each([
+    ['sum', '1' + '+1'.repeat(MAX_COMPILE_DEPTH * 4)],
+    ['factorial', '1' + '!'.repeat(MAX_COMPILE_DEPTH * 4)],
+    ['accessor', 'a' + '.b'.repeat(MAX_COMPILE_DEPTH * 4)],
+  ])('evaluate rejects a left-deep %s with the compile-depth error, quickly', (_name, text) => {
+    // Before the validator carried a depth, it absorbed the RangeError and re-walked the subtree,
+    // so the work doubled at every overflowing level and this call did not return.
+    const started = Date.now();
+    expect(() => evaluate(text, { a: {} })).toThrow(
+      new RegExp(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`)
+    );
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
+  it('evaluate still accepts a long sum under the compile-depth cap', () => {
+    expect(evaluate('1' + '+1'.repeat(MAX_COMPILE_DEPTH / 2))).toBe(MAX_COMPILE_DEPTH / 2 + 1);
   });
 });
