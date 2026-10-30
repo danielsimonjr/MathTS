@@ -12350,7 +12350,7 @@
       "package": "@danielsimonjr/mathts-workerpool",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2459
+      "loc": 2451
     },
     {
       "file": "packages/workerpool/src/multi-index.ts",
