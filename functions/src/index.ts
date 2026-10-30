@@ -77,6 +77,14 @@ export type {
   ScalarMutationContext,
   ScalarMutationOperator,
 } from './scalar-mutate.js';
+export { searchScalars } from './scalar-search.js';
+export type {
+  ScalarSearchOptions,
+  ScalarSearchProblem,
+  ScalarSearchResult,
+  ScalarSearchStopReason,
+  SearchProgress,
+} from './scalar-search.js';
 // scalarToNode, nodeToScalar, simplifyScalar, scalarToTex are exported via export * from './factories/index.js'.
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';

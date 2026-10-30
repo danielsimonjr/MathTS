@@ -2767,7 +2767,22 @@
       "ScalarScope": {
         "kind": "type"
       },
+      "ScalarSearchOptions": {
+        "kind": "type"
+      },
+      "ScalarSearchProblem": {
+        "kind": "type"
+      },
+      "ScalarSearchResult": {
+        "kind": "type"
+      },
+      "ScalarSearchStopReason": {
+        "kind": "type"
+      },
       "ScoredCandidate": {
+        "kind": "type"
+      },
+      "SearchProgress": {
         "kind": "type"
       },
       "SecantOptions": {
@@ -5540,6 +5555,9 @@
         "kind": "function"
       },
       "scoreFront": {
+        "kind": "function"
+      },
+      "searchScalars": {
         "kind": "function"
       },
       "sec": {

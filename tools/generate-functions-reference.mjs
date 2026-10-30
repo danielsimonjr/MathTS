@@ -158,6 +158,12 @@ const DOMAIN_SUPPLEMENT = {
     'MutationWeightKey',
     'ScalarMutationContext',
     'ScalarMutationOperator',
+    'searchScalars',
+    'ScalarSearchOptions',
+    'ScalarSearchProblem',
+    'ScalarSearchResult',
+    'ScalarSearchStopReason',
+    'SearchProgress',
   ],
   'Parallel Execution Model': [
     'getComputePool', 'initializePool', 'initializeSignal', 'initializeStatistics',

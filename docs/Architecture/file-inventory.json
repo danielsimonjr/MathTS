@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2025,
+  "totalFiles": 2027,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1199,
+    "build-entry": 1200,
     "test-only": 0,
     "orphan": 0,
-    "test": 738,
+    "test": 739,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1225,
-    "tests": 738,
+    "src": 1226,
+    "tests": 739,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 855,
+    "@danielsimonjr/mathts-functions": 857,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -6281,7 +6281,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 693
+      "loc": 701
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7248,6 +7248,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 371
+    },
+    {
+      "file": "functions/src/scalar-search.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 497
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -10636,6 +10643,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 619
+    },
+    {
+      "file": "functions/tests/scalar-search.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 480
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1227,
+    "totalFiles": 1228,
     "totalModules": 82,
-    "totalExports": 6378
+    "totalExports": 6384
   },
   "entryPoints": [
     {
@@ -9770,6 +9770,11 @@
             "reExport": true
           },
           {
+            "file": "./scalar-search.js",
+            "imports": ["searchScalars"],
+            "reExport": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
             "reExport": true
@@ -10339,6 +10344,18 @@
             "typeOnly": true
           },
           {
+            "file": "./scalar-search.js",
+            "imports": [
+              "ScalarSearchOptions",
+              "ScalarSearchProblem",
+              "ScalarSearchResult",
+              "ScalarSearchStopReason",
+              "SearchProgress"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["FrontCandidate", "ScoredCandidate"],
             "reExport": true,
@@ -10739,6 +10756,7 @@
           "simplifyConstants",
           "swapOperands",
           "weightedMutation",
+          "searchScalars",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -11047,6 +11065,11 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarSearchOptions",
+          "ScalarSearchProblem",
+          "ScalarSearchResult",
+          "ScalarSearchStopReason",
+          "SearchProgress",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -11211,6 +11234,7 @@
           "simplifyConstants",
           "swapOperands",
           "weightedMutation",
+          "searchScalars",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -11519,6 +11543,11 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarSearchOptions",
+          "ScalarSearchProblem",
+          "ScalarSearchResult",
+          "ScalarSearchStopReason",
+          "SearchProgress",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -12052,6 +12081,55 @@
         "exports": ["createScalarNodeBridge"],
         "interfaces": ["ScalarNodeBridgeDeps"],
         "functions": ["createScalarNodeBridge"]
+      },
+      "functions/src/scalar-search.ts": {
+        "description": "PySR-style evolutionary search over {@link ScalarNode} trees (M13).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./fit-scalar.js",
+            "imports": ["fitScalarParameters"]
+          },
+          {
+            "file": "./pareto-front.js",
+            "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ScoredCandidate"]
+          },
+          {
+            "file": "./scalar-compile.js",
+            "imports": ["compileScalar"]
+          },
+          {
+            "file": "./scalar-mutate.js",
+            "imports": ["weightedMutation", "ScalarMutationContext"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["pairwiseSum", "SeededRng"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": [
+              "enumerateScalars",
+              "scalarCanonicalKey",
+              "scalarComplexity",
+              "scalarGrammarAccepts",
+              "ScalarGrammar",
+              "ScalarNode"
+            ]
+          }
+        ],
+        "exports": [],
+        "interfaces": [
+          "ScalarSearchProblem",
+          "ScalarSearchOptions",
+          "SearchProgress",
+          "ScalarSearchResult"
+        ]
       },
       "functions/src/signal-filter-extra.ts": {
         "description": "Digital filter design + application (Wave D / remaining). FIR window design",
@@ -41730,6 +41808,7 @@
           "functions/src/scalar-eval.ts",
           "functions/src/scalar-mutate.ts",
           "functions/src/scalar-node-bridge.ts",
+          "functions/src/scalar-search.ts",
           "functions/src/signal-filter-extra.ts",
           "functions/src/timeseries-extra.ts",
           "functions/src/types.ts"
@@ -42968,18 +43047,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1227,
+    "totalTypeScriptFiles": 1228,
     "totalModules": 82,
-    "totalLinesOfCode": 202529,
-    "totalExports": 6378,
+    "totalLinesOfCode": 203034,
+    "totalExports": 6384,
     "totalClasses": 59,
-    "totalInterfaces": 551,
+    "totalInterfaces": 555,
     "totalFunctions": 2057,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1630,
-    "totalReExports": 2708,
-    "totalTypeOnlyImports": 617,
+    "totalReExports": 2714,
+    "totalTypeOnlyImports": 618,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

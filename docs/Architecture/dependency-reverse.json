@@ -1717,7 +1717,8 @@
     "functions/src/scalar-compile.ts": [
       "functions/src/fit-scalar.ts",
       "functions/src/index.ts",
-      "functions/src/numeric-equivalence.ts"
+      "functions/src/numeric-equivalence.ts",
+      "functions/src/scalar-search.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
       "functions/src/geometry-extra.ts",
@@ -1758,8 +1759,9 @@
       "functions/src/scalar-compile.ts",
       "functions/src/scalar-mutate.ts"
     ],
-    "functions/src/scalar-mutate.ts": ["functions/src/index.ts"],
-    "functions/src/pareto-front.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-mutate.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
+    "functions/src/scalar-search.ts": ["functions/src/index.ts"],
+    "functions/src/pareto-front.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
     "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
@@ -1807,7 +1809,7 @@
     "functions/src/ml/ols.ts": ["functions/src/index.ts", "functions/src/stats/timeseries.ts"],
     "functions/src/ml/regularized-regression.ts": ["functions/src/index.ts"],
     "functions/src/ml/logistic-regression.ts": ["functions/src/index.ts"],
-    "functions/src/fit-scalar.ts": ["functions/src/index.ts"],
+    "functions/src/fit-scalar.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
     "functions/src/clustering-extra.ts": ["functions/src/index.ts"],
     "functions/src/ml/dbscan-knn.ts": [
       "functions/src/geometry/geometry-extra.ts",
