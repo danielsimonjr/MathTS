@@ -40,7 +40,7 @@ function bfgsFit(loss: 'l1' | 'huber', x: Float64Array, y: Float64Array, weights
 describe('fit-scalar robust loss BFGS pins', () => {
   it('L1: zero residual at a=1', () => {
     const r = bfgsFit('l1', new Float64Array([1, 2, 3]), new Float64Array([1, 2, 3]));
-    expect(r.parameters).toEqual(golden.l1_zero.parameters);
+    expect(Array.from(r.parameters)).toEqual(golden.l1_zero.parameters);
     expect(r.loss).toBe(golden.l1_zero.loss);
     expect(r.validRows).toBe(golden.l1_zero.validRows);
   });
@@ -52,13 +52,13 @@ describe('fit-scalar robust loss BFGS pins', () => {
       new Float64Array([2, 4, 6]),
       new Float64Array([1, 2, 1])
     );
-    expect(r.parameters).toEqual(golden.l1_weighted.parameters);
+    expect(Array.from(r.parameters)).toEqual(golden.l1_weighted.parameters);
     expect(r.loss).toBe(golden.l1_weighted.loss);
   });
 
   it('Huber: zero residual', () => {
     const r = bfgsFit('huber', new Float64Array([1, 2, 3]), new Float64Array([1, 2, 3]));
-    expect(r.parameters).toEqual(golden.huber_zero.parameters);
+    expect(Array.from(r.parameters)).toEqual(golden.huber_zero.parameters);
     expect(r.loss).toBe(golden.huber_zero.loss);
   });
 
@@ -75,7 +75,7 @@ describe('fit-scalar robust loss BFGS pins', () => {
       new Float64Array([2, 4, 6]),
       new Float64Array([1, 2, 1])
     );
-    expect(r.parameters).toEqual(golden.huber_weighted.parameters);
+    expect(Array.from(r.parameters)).toEqual(golden.huber_weighted.parameters);
     expect(r.loss).toBe(golden.huber_weighted.loss);
   });
 
