@@ -19,6 +19,7 @@ npm install @danielsimonjr/mathts-functions
 - `minimize` (Nelder–Mead) delegates to `nelderMead` with an absolute simplex step; `nelderMead` keeps relative defaults for `fitScalarParameters`.
 - `scalarToNode` / `nodeToScalar` / `simplifyScalar` / `scalarToTex` — convert between scalar trees and wired expression nodes (no formula string); `simplifyScalar` uses the same `simplify` as the expression language.
 - `paretoFront` / `scoreFront` / `selectFrontModel` — hall of fame per complexity, PySR log-loss scores, and `accuracy` / `score` / `best` selection.
+- `inferScalarDimension` / `solveParameterDimensions` — SI dimension of a scalar tree with exact `Fraction` exponents on `SiDimensionVector` (`[L,M,T,I,Θ,N,J]`), or one of four named violations with the path of the failing node (`add-mismatch`, `transcendental-arg-not-dimensionless`, `non-literal-exponent-on-dimensional-base`, `unknown-symbol`). `solveParameterDimensions` solves the dimension of each unknown parameter (PySR's `[⋅]` constants) from the equations the tree implies (`+` operands agree, transcendental arguments are dimensionless, the root equals `target`), exactly via `rationalNullspace`; it returns `solved`, `underdetermined`, or `inconsistent`.
 - `numericallyEquivalent` — sample two scalar trees with `createSeededRng`, evaluate via `compileScalar`, compare with core `nearlyEqual`. **Numerical agreement alone never proves symbolic equivalence;** a `consistent` verdict is evidence, not proof.
 
 ```ts
