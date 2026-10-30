@@ -1,0 +1,272 @@
+[
+  {
+    "id": "array_abs_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "array_log10_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "array_sin_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "array_sin_ptr"
+  },
+  {
+    "id": "array_log1p_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "log1p"
+  },
+  {
+    "id": "array_cos_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "array_atanh_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "array_log_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "array_sec_ptr",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseUnaryDispatch"
+  },
+  {
+    "id": "fused_chain",
+    "tier": "wasm",
+    "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
+    "symbol": "elementwiseChainDispatch"
+  },
+  {
+    "id": "poly_fit_f64",
+    "tier": "wasm",
+    "test": "functions/tests/typed-cas-fit-wasm.test.ts",
+    "symbol": "poly_fit_f64"
+  },
+  {
+    "id": "cheb_fit_f64",
+    "tier": "wasm",
+    "test": "functions/tests/typed-cas-fit-wasm.test.ts",
+    "symbol": "cheb_fit_f64"
+  },
+  {
+    "id": "legendre_fit_f64",
+    "tier": "wasm",
+    "test": "functions/tests/typed-cas-fit-wasm.test.ts",
+    "symbol": "legendre_fit_f64"
+  },
+  {
+    "id": "lgamma_f64",
+    "tier": "wasm",
+    "test": "functions/tests/special-as-wasm.test.ts",
+    "symbol": "lgamma_f64"
+  },
+  {
+    "id": "sort_f64",
+    "tier": "wasm",
+    "test": "functions/tests/sort-as-wasm.test.ts",
+    "symbol": "sort_f64"
+  },
+  {
+    "id": "multiply",
+    "tier": "matrix-wasm",
+    "test": "matrix/tests/wasm/operations.test.ts",
+    "symbol": "jsBackend.multiply"
+  },
+  {
+    "id": "abs",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "abs"
+  },
+  {
+    "id": "sin",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "sin"
+  },
+  {
+    "id": "cos",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "cos"
+  },
+  {
+    "id": "tan",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "tan"
+  },
+  {
+    "id": "exp",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "exp"
+  },
+  {
+    "id": "atan",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "atan"
+  },
+  {
+    "id": "sinh",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "sinh"
+  },
+  {
+    "id": "tanh",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "tanh"
+  },
+  {
+    "id": "log",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "log"
+  },
+  {
+    "id": "log2",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "log2"
+  },
+  {
+    "id": "log10",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "log10"
+  },
+  {
+    "id": "atanh",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "atanh"
+  },
+  {
+    "id": "sec",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "sec"
+  },
+  {
+    "id": "csc",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "csc"
+  },
+  {
+    "id": "cot",
+    "tier": "gpu",
+    "test": "functions/tests/gpu-elementwise.browser.test.ts",
+    "symbol": "cot"
+  },
+  {
+    "id": "exec",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.exec"
+  },
+  {
+    "id": "prod",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.prod"
+  },
+  {
+    "id": "pow",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.pow"
+  },
+  {
+    "id": "sign",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.sign"
+  },
+  {
+    "id": "applyKernel",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.applyKernel"
+  },
+  {
+    "id": "applyKernel2",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.applyKernel2"
+  },
+  {
+    "id": "tensordot",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.tensordot"
+  },
+  {
+    "id": "integrateFanOut",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.integrateFanOut"
+  },
+  {
+    "id": "distributionSampleFanOut",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.distributionSampleFanOut"
+  },
+  {
+    "id": "fftBatch",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.fftBatch"
+  },
+  {
+    "id": "distanceMatrix",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.distanceMatrix"
+  },
+  {
+    "id": "bitOr",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.bitOr"
+  },
+  {
+    "id": "bitXor",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.bitXor"
+  },
+  {
+    "id": "rightArithShift",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.rightArithShift"
+  },
+  {
+    "id": "rightLogShift",
+    "tier": "parallel",
+    "test": "parallel/tests/ComputePool.coverage.test.ts",
+    "symbol": "pool.rightLogShift"
+  }
+]
