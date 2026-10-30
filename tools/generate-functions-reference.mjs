@@ -135,6 +135,11 @@ const DOMAIN_SUPPLEMENT = {
     'ParetoFrontError',
     'numericallyEquivalent',
     'NumericEquivalenceError',
+    'inferScalarDimension',
+    'solveParameterDimensions',
+    'RationalDimension',
+    'DimensionInference',
+    'ParameterDimensionResult',
   ],
   'Parallel Execution Model': [
     'getComputePool', 'initializePool', 'initializeSignal', 'initializeStatistics',
