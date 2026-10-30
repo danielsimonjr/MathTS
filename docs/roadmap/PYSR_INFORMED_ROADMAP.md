@@ -1272,8 +1272,21 @@ re-decide it here if PR-POLY has already merged.
   `workerpool` layering copy; one dense JS polynomial convolution; one matrix threshold
   table that the code reads; no threshold in a comment that `policy.ts` contradicts.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracles: existing FFT and `polymul` fixtures pass under Sprint 2R's
+  - [x] Oracles: existing FFT and `polymul` fixtures pass under Sprint 2R's
         test-expectation rule; any new threshold backed by two committed Node runs.
+        Evidence (checked at this PR's head): `git diff origin/main` on
+        `functions/tests/{fft-factory-correctness,fft-helpers,poly-as-wasm,typed-algebra-wasm,algebra}.test.ts`
+        and `packages/workerpool/tests/fft-core.test.ts` is empty, and all of them pass
+        (171 `functions` tests, 17 `workerpool` tests). Item 1: the `expression/src/scalar-enumerate.ts`
+        header records the placement and `bun run docs:graph -- cycles`. Item 2: the header of
+        `packages/workerpool/src/fft-core.ts` (lines 8 and 32) names
+        `functions/src/signal/fft-core-f64.ts`; `matrix/src/backends/wasm/fft-wasm.ts` is gone. Item 3:
+        `functions/src/typed/algebra.ts:259` calls `polyMulJS`. Item 4: `matrix/src/config.ts:102`
+        (`DEFAULT_CONFIG`). The one new threshold is `SCALAR_PARALLEL_MIN_ROWS = 100`
+        (`functions/src/scalar-batch-parallel.ts:37`, used at lines 193 and 211); it comes from the two
+        committed Node runs of `docs/BENCHMARK_RESULTS.md` § "`evaluateScalar` vs `compileScalar`".
+        Those runs time the tape against the interpreter on the caller thread. No worker round trip
+        was timed, so M14 makes no speed-up claim for the pool.
 
 ### Phase 5 — Reporting
 

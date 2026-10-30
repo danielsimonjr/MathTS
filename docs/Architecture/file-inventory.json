@@ -7250,13 +7250,6 @@
       "loc": 556
     },
     {
-      "file": "functions/src/scalar-dimension.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "src",
-      "disposition": "build-entry",
-      "loc": 556
-    },
-    {
       "file": "functions/src/scalar-eval.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
