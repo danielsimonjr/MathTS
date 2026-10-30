@@ -8,6 +8,7 @@
  */
 
 import { compile } from '../compiler/compile.js';
+import { MAX_COMPILE_DEPTH } from '../limits.js';
 import type { CompiledExpression, Scope } from '../compiler/compile.js';
 import type { MathNode } from '../node/Node.js';
 
@@ -50,9 +51,14 @@ const FORBIDDEN_FUNCTIONS: ReadonlySet<string> = new Set([
  *
  * Caller can opt out with `{ unsafe: true }`.
  */
-function validateAst(node: unknown): void {
+function validateAst(node: unknown, depth = 0): void {
   if (node === null || node === undefined || typeof node !== 'object') {
     return;
+  }
+  // The walk runs before compile, so it enforces the same depth cap: a left-deep chain such as
+  // `1+1+...+1` is built iteratively by the parser and can be far deeper than compile accepts.
+  if (depth >= MAX_COMPILE_DEPTH) {
+    throw new Error(`expression exceeds compile depth ${MAX_COMPILE_DEPTH}`);
   }
 
   const n = node as Record<string, unknown>;
@@ -87,11 +93,21 @@ function validateAst(node: unknown): void {
   // nodes don't, so fall back to walking known relational/structural fields.
   if (typeof n.forEach === 'function') {
     try {
-      (n.forEach as (callback: (child: unknown) => void) => void)((child) => validateAst(child));
+      (n.forEach as (callback: (child: unknown) => void) => void)((child) =>
+        validateAst(child, depth + 1)
+      );
       return;
     } catch (err) {
-      // Re-throw security errors; absorb forEach incompatibilities.
-      if (err instanceof Error && err.message.startsWith('Security:')) throw err;
+      // Re-throw security and limit errors; absorb forEach incompatibilities. A RangeError must
+      // not be absorbed: the fallback below re-walks the subtree, so every stack overflow at depth
+      // d doubled the work and a 2,000-term sum ran for minutes.
+      if (
+        err instanceof RangeError ||
+        (err instanceof Error &&
+          (err.message.startsWith('Security:') || err.message.startsWith('expression exceeds')))
+      ) {
+        throw err;
+      }
     }
   }
 
@@ -110,18 +126,18 @@ function validateAst(node: unknown): void {
     'end',
     'step',
   ]) {
-    if (key in n) validateAst(n[key]);
+    if (key in n) validateAst(n[key], depth + 1);
   }
   for (const key of ['args', 'items', 'params']) {
     const arr = n[key];
-    if (Array.isArray(arr)) for (const child of arr) validateAst(child);
+    if (Array.isArray(arr)) for (const child of arr) validateAst(child, depth + 1);
   }
   if (Array.isArray(n.blocks)) {
-    for (const b of n.blocks) validateAst(b && (b as { node?: unknown }).node);
+    for (const b of n.blocks) validateAst(b && (b as { node?: unknown }).node, depth + 1);
   }
   if (n.properties && typeof n.properties === 'object') {
     const properties = n.properties as Record<string, unknown>;
-    for (const k of Object.keys(properties)) validateAst(properties[k]);
+    for (const k of Object.keys(properties)) validateAst(properties[k], depth + 1);
   }
 }
 

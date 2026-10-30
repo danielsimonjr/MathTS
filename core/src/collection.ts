@@ -67,10 +67,6 @@ export function containsCollections(array: unknown[]): boolean {
 export function deepForEach<T>(
   array: NestedArray<T> | Matrix<T>,
   callback: (value: T) => void
-): void;
-export function deepForEach<T>(
-  array: NestedArray<T> | Matrix<T>,
-  callback: (value: T) => void
 ): void {
   if (isMatrixInstance(array)) {
     (array as unknown as Matrix<T>).forEach((x) => callback(x), false, true);

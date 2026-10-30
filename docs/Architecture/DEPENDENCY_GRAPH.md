@@ -492,7 +492,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `containsCollections`, `deepForEach`, `deepForEach`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `reduce`, `reduce`, `reduce`, `scatter`
+- Functions: `containsCollections`, `deepForEach`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `reduce`, `reduce`, `reduce`, `scatter`
 
 ---
 
@@ -668,10 +668,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File          | Imports                          | Type   |
-| ------------- | -------------------------------- | ------ |
-| `./is.js`     | `isBigNumber, isObject`          | Import |
-| `./shared.js` | `hasOwnProperty, isPollutingKey` | Import |
+| File          | Imports                                          | Type   |
+| ------------- | ------------------------------------------------ | ------ |
+| `./is.js`     | `isBigNumber, isObject`                          | Import |
+| `./shared.js` | `hasOwnProperty, isPollutingKey, isPrototypeKey` | Import |
 
 **Exports:**
 
@@ -684,7 +684,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `MemoizedFunction`
-- Functions: `hasOwnProperty`, `isPollutingKey`, `endsWith`, `memoize`
+- Functions: `hasOwnProperty`, `isPollutingKey`, `isPrototypeKey`, `endsWith`, `memoize`
 - Constants: `warnOnce`
 
 ---
@@ -11699,7 +11699,7 @@ graph LR
 
 **Exports:**
 
-- Constants: `MAX_EXPRESSION_LENGTH`, `MAX_PARSE_NESTING`, `MAX_COMPILE_DEPTH`
+- Constants: `MAX_EXPRESSION_LENGTH`, `MAX_PARSE_NESTING`, `MAX_COMPILE_DEPTH`, `MAX_PARSE_RECURSION`
 
 ---
 
@@ -11734,7 +11734,7 @@ graph LR
 | `./utils/number.js`     | `NumberTypeConfig`                                                                        | Import (type-only) |
 | `./utils/object.js`     | `hasOwnProperty`                                                                          | Import             |
 | `./utils/customs.js`    | `setSafeProperty`                                                                         | Import             |
-| `./limits.js`           | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING`                                                | Import             |
+| `./limits.js`           | `MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION`                           | Import             |
 | `./node/Node.js`        | `MathNode`                                                                                | Import (type-only) |
 
 **Exports:**
@@ -15454,6 +15454,7 @@ graph LR
 | File                     | Imports                     | Type               |
 | ------------------------ | --------------------------- | ------------------ |
 | `../compiler/compile.js` | `compile`                   | Import             |
+| `../limits.js`           | `MAX_COMPILE_DEPTH`         | Import             |
 | `../compiler/compile.js` | `CompiledExpression, Scope` | Import (type-only) |
 | `../node/Node.js`        | `MathNode`                  | Import (type-only) |
 
@@ -19235,13 +19236,13 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1224   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200900 |
-| Total Exports           | 6329   |
+| Total Lines of Code     | 200989 |
+| Total Exports           | 6331   |
 | Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 548    |
 | Total Functions         | 2040   |
-| Total Type Guards       | 160    |
+| Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 614    |
 | Runtime Circular Deps   | 0      |
