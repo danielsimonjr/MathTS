@@ -915,6 +915,13 @@
       "loc": 139
     },
     {
+      "file": "core/tests/alloc-as-header-pin.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
+    },
+    {
       "file": "core/tests/arithmetic/scalar.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
