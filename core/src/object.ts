@@ -8,7 +8,7 @@ import { hasOwnProperty, isPollutingKey } from './shared.js';
  *
  * Can clone any primitive type, array, and object.
  * If x has a function clone, this function will be invoked to clone the object.
- * Own keys whose names sit on `Object.prototype` (such as `__proto__` or
+ * Own keys on `Object.prototype` or `Function.prototype` (such as `__proto__` or
  * `constructor`) are skipped so the result keeps the ordinary object prototype.
  *
  * @param x
@@ -60,7 +60,7 @@ export function clone<T>(x: T): T {
 
 /**
  * Apply map to all properties of an object.
- * Skips keys on `Object.prototype` (see {@link isPollutingKey}).
+ * Skips keys on `Object.prototype` or `Function.prototype` (see {@link isPollutingKey}).
  *
  * @param object
  * @param callback

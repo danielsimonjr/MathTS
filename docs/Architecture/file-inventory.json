@@ -723,7 +723,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 98
+      "loc": 95
     },
     {
       "file": "core/src/string.ts",

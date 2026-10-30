@@ -14,13 +14,10 @@ export function hasOwnProperty(object: unknown, property: string): boolean {
 }
 
 /**
- * True for keys whose assignment on a plain object can mutate the prototype chain
- * or write through `Object.prototype` (for example `__proto__` or `constructor`).
- * Function.prototype names such as `name` are safe as own data keys and are not
- * treated as polluting here (contrast `isSafeProperty` in sandbox helpers).
+ * True for keys whose assignment changes [[Prototype]] or writes through it.
  */
 export function isPollutingKey(prop: string): boolean {
-  return prop in Object.prototype;
+  return prop in Object.prototype || prop in Function.prototype;
 }
 
 /**
