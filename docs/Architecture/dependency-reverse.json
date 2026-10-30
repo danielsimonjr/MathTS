@@ -397,6 +397,7 @@
       "functions/src/matrix/subset.ts",
       "functions/src/matrix/trace.ts",
       "functions/src/matrix/transpose.ts",
+      "functions/src/scalar-dimension.ts",
       "functions/src/type/chain/Chain.ts",
       "functions/src/type/matrix/ImmutableDenseMatrix.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
@@ -1758,6 +1759,7 @@
     ],
     "functions/src/pareto-front.ts": ["functions/src/index.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
@@ -1879,6 +1881,10 @@
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/numeric/rational-nullspace.ts": [
+      "functions/src/scalar-dimension.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
@@ -2466,7 +2472,6 @@
       "functions/src/typed/interpolation.ts",
       "functions/src/wasm/poly/wasm-bridge.ts"
     ],
-    "functions/src/numeric/rational-nullspace.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveParabolicPDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],

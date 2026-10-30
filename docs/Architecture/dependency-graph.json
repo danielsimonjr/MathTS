@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1224,
+    "totalFiles": 1225,
     "totalModules": 82,
-    "totalExports": 6331
+    "totalExports": 6338
   },
   "entryPoints": [
     {
@@ -9759,6 +9759,11 @@
             "reExport": true
           },
           {
+            "file": "./scalar-dimension.js",
+            "imports": ["inferScalarDimension", "solveParameterDimensions"],
+            "reExport": true
+          },
+          {
             "file": "./numeric/propagate-uncertainty.js",
             "imports": [
               "propagateUncertainty",
@@ -10319,6 +10324,12 @@
             "typeOnly": true
           },
           {
+            "file": "./scalar-dimension.js",
+            "imports": ["DimensionInference", "ParameterDimensionResult", "RationalDimension"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./grad-forward.js",
             "imports": ["DualFn"],
             "reExport": true,
@@ -10692,6 +10703,8 @@
           "ParetoFrontError",
           "numericallyEquivalent",
           "NumericEquivalenceError",
+          "inferScalarDimension",
+          "solveParameterDimensions",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -10993,6 +11006,9 @@
           "ScoredCandidate",
           "NumericEquivalenceOptions",
           "NumericEquivalence",
+          "DimensionInference",
+          "ParameterDimensionResult",
+          "RationalDimension",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11141,6 +11157,8 @@
           "ParetoFrontError",
           "numericallyEquivalent",
           "NumericEquivalenceError",
+          "inferScalarDimension",
+          "solveParameterDimensions",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -11442,6 +11460,9 @@
           "ScoredCandidate",
           "NumericEquivalenceOptions",
           "NumericEquivalence",
+          "DimensionInference",
+          "ParameterDimensionResult",
+          "RationalDimension",
           "DualFn",
           "LinRegressResult",
           "CorrelationTestResult",
@@ -11790,6 +11811,35 @@
           "CompiledScalarGradient"
         ],
         "functions": ["compileScalar", "compileScalarGradient"]
+      },
+      "functions/src/scalar-dimension.ts": {
+        "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./numeric/rational-nullspace.js",
+            "imports": ["rationalNullspace"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Fraction", "SI_DIMENSION_LENGTH", "SiDimensionVector"]
+          }
+        ],
+        "exports": ["inferScalarDimension", "solveParameterDimensions"],
+        "functions": ["inferScalarDimension", "solveParameterDimensions"]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -41503,6 +41553,7 @@
           "functions/src/pareto-front.ts",
           "functions/src/regression-extra.ts",
           "functions/src/scalar-compile.ts",
+          "functions/src/scalar-dimension.ts",
           "functions/src/scalar-eval.ts",
           "functions/src/scalar-node-bridge.ts",
           "functions/src/signal-filter-extra.ts",
@@ -42742,18 +42793,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1224,
+    "totalTypeScriptFiles": 1225,
     "totalModules": 82,
-    "totalLinesOfCode": 200989,
-    "totalExports": 6331,
+    "totalLinesOfCode": 201551,
+    "totalExports": 6338,
     "totalClasses": 59,
     "totalInterfaces": 548,
-    "totalFunctions": 2040,
+    "totalFunctions": 2042,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1628,
-    "totalReExports": 2680,
-    "totalTypeOnlyImports": 614,
+    "totalReExports": 2685,
+    "totalTypeOnlyImports": 615,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
