@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2042,
+  "totalFiles": 2044,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1204,
     "test-only": 0,
     "orphan": 0,
-    "test": 750,
+    "test": 752,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1230,
-    "tests": 750,
+    "tests": 752,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 870,
+    "@danielsimonjr/mathts-functions": 872,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -9427,6 +9427,13 @@
       "loc": 431
     },
     {
+      "file": "functions/tests/fit-scalar-robust-loss-extended-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
       "file": "functions/tests/fit-scalar-robust-loss-pin.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -9488,6 +9495,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 22
+    },
+    {
+      "file": "functions/tests/fixtures/fit-scalar-robust-cases.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 100
     },
     {
       "file": "functions/tests/fixtures/stiff-driver-cases.ts",

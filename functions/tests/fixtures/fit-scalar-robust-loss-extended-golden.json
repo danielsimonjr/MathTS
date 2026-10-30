@@ -1,0 +1,98 @@
+{
+  "l1: line a*x+b, one gross outlier": {
+    "parameters": [2.0000000000001097, 1.0999999999998906],
+    "loss": 19.800000000000765,
+    "converged": false,
+    "evaluations": 2916,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "l1: line a*x+b, weights, outlier": {
+    "parameters": [2, 1.1],
+    "loss": 5.674999999999998,
+    "converged": false,
+    "evaluations": 1264,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "l1: quadratic with the middle parameter fixed by bounds": {
+    "parameters": [3.475000000004019, 0.5, -3.65000000000804],
+    "loss": 21.850000000008023,
+    "converged": false,
+    "evaluations": 3981,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "l1: two variables, weights, residuals on both sides of the Huber clamp": {
+    "parameters": [1.2333333333333334, 2.233333333333303, -1.8333333333333026],
+    "loss": 8.10000000000007,
+    "converged": false,
+    "evaluations": 3208,
+    "validRows": 8,
+    "standardErrors": null
+  },
+  "l1: b*exp(a*x) undershoots the data, the step overflows, and a row goes inactive": {
+    "parameters": [0.1, 1],
+    "loss": 5.20024001100048e21,
+    "converged": false,
+    "evaluations": 77,
+    "validRows": 6,
+    "standardErrors": null
+  },
+  "l1: exact data: zero residual everywhere (L1 sign(0) is 0)": {
+    "parameters": [2, 1],
+    "loss": 0,
+    "converged": false,
+    "evaluations": 1,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "huber: line a*x+b, one gross outlier": {
+    "parameters": [2.02653927813164, 1.059660297239808],
+    "loss": 36.91728237791932,
+    "converged": true,
+    "evaluations": 18,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "huber: line a*x+b, weights, outlier": {
+    "parameters": [1.999829448532791, 1.0745878339938355],
+    "loss": 9.37717168845935,
+    "converged": true,
+    "evaluations": 29,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "huber: quadratic with the middle parameter fixed by bounds": {
+    "parameters": [3.4749999999876846, 0.5, -3.1499999998303156],
+    "loss": 36.2,
+    "converged": true,
+    "evaluations": 16,
+    "validRows": 9,
+    "standardErrors": null
+  },
+  "huber: two variables, weights, residuals on both sides of the Huber clamp": {
+    "parameters": [1.1911594203053388, 2.142898550701214, -1.8663768115944392],
+    "loss": 9.590913043478254,
+    "converged": true,
+    "evaluations": 25,
+    "validRows": 8,
+    "standardErrors": null
+  },
+  "huber: b*exp(a*x) undershoots the data, the step overflows, and a row goes inactive": {
+    "parameters": [0.1, 1],
+    "loss": 1.040048002200096e22,
+    "converged": false,
+    "evaluations": 78,
+    "validRows": 6,
+    "standardErrors": null
+  },
+  "huber: exact data: zero residual everywhere (L1 sign(0) is 0)": {
+    "parameters": [2, 1],
+    "loss": 0,
+    "converged": false,
+    "evaluations": 1,
+    "validRows": 9,
+    "standardErrors": null
+  }
+}
