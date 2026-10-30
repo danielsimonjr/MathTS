@@ -11,6 +11,7 @@
  * `makeDispatch` factory — in migration Phases 3b/3c.
  */
 
+import { allocAsHeader } from '@danielsimonjr/mathts-core/internal';
 import { wasmLoader, type WasmModule } from '../WasmLoader.js';
 import { wasmPolicyAllows } from '../policy.js';
 
@@ -143,12 +144,8 @@ export function runChainPtr(
 // managed kernel can be called correctly from the functions bridges.
 // ---------------------------------------------------------------------------
 
-/** AssemblyScript runtime type ids (see WASMBackend.ts AsAllocCache). */
-const AS_ID_ARRAY_BUFFER = 1;
 const AS_ID_FLOAT64_ARRAY = 5;
 const AS_ID_INT32_ARRAY = 6;
-/** AS typed-array header is { buffer, dataStart, byteLength } = 3 × u32. */
-const AS_HEADER_BYTES = 12;
 
 /** Minimal view of the AS managed runtime exported by the AS binary. */
 interface AsRuntime extends RawWasm {
@@ -175,17 +172,6 @@ function resetAsHeap(mod: AsRuntime): void {
 interface AsAlloc {
   headerPtr: number;
   bufferPtr: number;
-}
-
-function asAllocHeader(mod: AsRuntime, byteLength: number, typeId: number): AsAlloc {
-  const bufferPtr = (mod.__pin(mod.__new(byteLength, AS_ID_ARRAY_BUFFER)) >>> 0) as number;
-  const headerPtr = (mod.__new(AS_HEADER_BYTES, typeId) >>> 0) as number;
-  mod.__pin(headerPtr);
-  const dv = new DataView(mod.memory.buffer);
-  dv.setUint32(headerPtr + 0, bufferPtr, true); // mm info / buffer
-  dv.setUint32(headerPtr + 4, bufferPtr, true); // dataStart
-  dv.setUint32(headerPtr + 8, byteLength, true); // byteLength
-  return { headerPtr, bufferPtr };
 }
 
 function asUnpin(mod: AsRuntime, a: AsAlloc): void {
@@ -247,7 +233,7 @@ export function withAsTyped<T, A extends Float64Array | Int32Array>(
   try {
     const headers: number[] = [];
     for (const arr of inputs) {
-      const a = asAllocHeader(mod, arr.length * opts.bytes, opts.typeId);
+      const a = allocAsHeader(mod, arr.length * opts.bytes, opts.typeId);
       new opts.Ctor(mod.memory.buffer, a.bufferPtr, arr.length).set(arr);
       allocs.push(a);
       headers.push(a.headerPtr);
