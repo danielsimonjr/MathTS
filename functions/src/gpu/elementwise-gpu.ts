@@ -277,11 +277,20 @@ export function resetGpuElementwise(): void {
   resources = null;
 }
 
+/**
+ * What differs between the plain chain and the chain-plus-reduce: an optional extra pooled
+ * buffer, how the last pass's output reaches the staging buffer, and what the readback
+ * becomes. Everything else — gates on the device, the error scope, the pool, the order of
+ * every acquire and release — belongs to {@link runChainLifecycle}, so it exists once.
+ */
 interface ChainTail<T> {
   encoderLabel: 'elementwise-chain' | 'elementwise-chain-reduce';
   stagingLabel: 'chain-staging' | 'reduce-staging';
+  /** Bytes mapped back from the staging buffer: the real data, not the pool's rounded size. */
   readBytes: number;
+  /** A pooled storage buffer acquired after the ping-pong pair and before staging. */
   extra?: { label: 'reduce-partials'; bytes: number };
+  /** Record this tail's work after the last chain pass; `chainOut` is the buffer that pass wrote. */
   encode(ctx: {
     device: GPUDevice;
     shaders: ShaderManager;
@@ -290,22 +299,23 @@ interface ChainTail<T> {
     extra: GPUBuffer | undefined;
     params: GPUBuffer;
     staging: GPUBuffer;
-    workgroups: number;
   }): void;
   finish(mapped: Float32Array): T;
 }
 
+/**
+ * The one lifecycle of a fused GPU chain. Callers have already passed the gates; this owns
+ * everything from the device onward and never throws — any failure resolves `null`.
+ */
 async function runChainLifecycle<T>(
   ops: readonly string[],
   xs: Float64Array | Float32Array,
   options: GpuChainOptions | undefined,
-  tail: (sizes: { bytes: number; workgroups: number; partialBytes: number }) => ChainTail<T>
+  tail: (sizes: { bytes: number; workgroups: number }) => ChainTail<T>
 ): Promise<T | null> {
   const n = xs.length;
   const bytes = n * 4;
   const workgroups = Math.ceil(n / WORKGROUP_SIZE);
-  const partialBytes = workgroups * 4;
-  const tailSpec = tail({ bytes, workgroups, partialBytes });
 
   let res: Resources | undefined;
   let bufA: GPUBuffer | undefined;
@@ -313,26 +323,52 @@ async function runChainLifecycle<T>(
   let extra: GPUBuffer | undefined;
   let staging: GPUBuffer | undefined;
   let params: GPUBuffer | undefined;
+  // `scopePushed` is NOT redundant with `scopePopped`. `res` is assigned before the
+  // scope is pushed, and the device-limit checks below `return null` in between — so a
+  // `finally` gated only on `res` would pop a scope this call never pushed. The scope
+  // stack is per-device and LIFO, so that stray pop lands on a CONCURRENT dispatch's
+  // scope: its own pop then drains the wrong one and a real validation error goes
+  // unobserved — which is precisely the "silently returns zeros" failure the scope
+  // exists to catch. Same for a throw from the `new Float32Array(xs)` allocation.
   let scopePushed = false;
   let scopePopped = false;
 
   try {
+    const tailSpec = tail({ bytes, workgroups });
     const r = await getResources(options);
     if (!r) return null;
     res = r;
     const { device, shaders, pool } = r;
 
+    // DEVICE LIMITS — refuse rather than produce zeros.
+    //
+    // A WebGPU validation error does NOT throw: it is reported asynchronously
+    // and *invalidates the command buffer*. `submit()` then does nothing, the
+    // staging buffer keeps its spec-mandated zero-initialized contents,
+    // `mapAsync` resolves happily, and we would return an array of ZEROS as a
+    // successful result — a silently wrong answer, worse than any exception. For
+    // a reduction the zeros are a plausible-looking number.
     const limits = device.limits;
     if (workgroups > limits.maxComputeWorkgroupsPerDimension) return null;
     if (bytes > limits.maxStorageBufferBindingSize) return null;
     if (bytes > limits.maxBufferSize) return null;
-    if (tailSpec.extra && tailSpec.extra.bytes > limits.maxStorageBufferBindingSize) return null;
 
+    // `new Float32Array(f64)` — NOT `Float32Array.from(f64)`. `.from()` is the
+    // generic Array.from algorithm: it walks the source through the ArrayLike
+    // protocol and runs ToNumber per element. The constructor takes the native
+    // typed-array-to-typed-array path. Measured at n=2^20: 433ms vs 5.9ms — the
+    // `.from()` version billed a 23ms kernel at ~470ms and made the GPU look 19x
+    // slower than it is. See gpu-dispatch-overhead.browser.test.ts.
     const input = xs instanceof Float32Array ? xs : new Float32Array(xs);
 
+    // Catch any *other* validation error the limit checks don't predict.
+    // Without this, such an error would again surface as a buffer of zeros.
     device.pushErrorScope('validation');
     scopePushed = true;
 
+    // Pooled: recycled across calls, and sized >= bytes (the pool rounds up).
+    // Safe because the kernel bounds-checks against the `n` uniform, not
+    // `arrayLength`.
     bufA = pool.acquireStorageBuffer(bytes, 'chain-a', true, true);
     bufB = pool.acquireStorageBuffer(bytes, 'chain-b', true, true);
     if (tailSpec.extra) {
@@ -341,9 +377,16 @@ async function runChainLifecycle<T>(
     staging = pool.acquireStagingBuffer(tailSpec.readBytes, tailSpec.stagingLabel);
     params = pool.acquireUniformBuffer(16, 'chain-params');
 
+    // Cast: TS's ArrayBufferLike vs @webgpu/types' ArrayBuffer-only BufferSource.
     device.queue.writeBuffer(bufA, 0, input as unknown as BufferSource);
+    // IEEE bit patterns ride along in the uniform — see WGSL_IEEE for why they
+    // cannot be WGSL literals.
     device.queue.writeBuffer(params, 0, new Uint32Array([n, 0x7fc00000, 0x7f800000, 0xff800000]));
 
+    // ONE encoder for the whole chain: N compute passes (and, for a reduction, the
+    // reduce pass too), a single submit. This is the fusion — a per-op submit would pay
+    // the round-trip N times, and reading the chain back before reducing it would
+    // evaporate the whole saving.
     const encoder = device.createCommandEncoder({ label: tailSpec.encoderLabel });
 
     let src = bufA;
@@ -363,33 +406,30 @@ async function runChainLifecycle<T>(
       pass.setBindGroup(0, bindGroup);
       pass.dispatchWorkgroups(workgroups);
       pass.end();
+
+      // Ping-pong: this pass's output is the next pass's input. After k passes
+      // and k swaps, `src` is always the buffer pass k wrote — for every k.
       [src, dst] = [dst, src];
     }
 
-    tailSpec.encode({
-      device,
-      shaders,
-      encoder,
-      chainOut: src,
-      extra,
-      params,
-      staging,
-      workgroups,
-    });
-
+    tailSpec.encode({ device, shaders, encoder, chainOut: src, extra, params, staging });
     device.queue.submit([encoder.finish()]);
 
     const validationError = await device.popErrorScope();
     scopePopped = true;
+    // The work was invalidated — the readback would be zeros. Fall back.
     if (validationError) return null;
 
+    // Map only the real data: a pooled staging buffer may be larger than `readBytes`.
     await staging.mapAsync(GPUMapMode.READ, 0, tailSpec.readBytes);
     const mapped = new Float32Array(staging.getMappedRange(0, tailSpec.readBytes).slice(0));
     staging.unmap();
     return tailSpec.finish(mapped);
   } catch {
+    // Device lost, OOM, mapAsync rejection — the GPU is best-effort. Fall back.
     return null;
   } finally {
+    // Keep the error-scope stack balanced even when we threw mid-encode.
     if (res && scopePushed && !scopePopped) {
       try {
         await res.device.popErrorScope();
@@ -397,6 +437,7 @@ async function runChainLifecycle<T>(
         /* device already gone — nothing to balance */
       }
     }
+    // Return buffers to the pool rather than destroying them.
     if (res) {
       if (bufA) res.pool.release(bufA);
       if (bufB) res.pool.release(bufB);
@@ -434,19 +475,25 @@ export function elementwiseChainGpuDispatch(
   return serializeGpu(() => chainGpuDispatchImpl(ops, xs, options));
 }
 
-async function chainGpuDispatchImpl(
+/**
+ * The gates both dispatchers share. A closed gate means "fall through to another tier":
+ * the dispatchers return `null` and never throw. An explicit `gpu` option beats the
+ * process-global flag. An empty chain is declined on purpose — see the doc comment on
+ * {@link elementwiseChainReduceGpuDispatch}: a chainless reduction is a measured loss,
+ * not a gap.
+ */
+function chainGatesOpen(
   ops: readonly string[],
-  xs: Float64Array | Float32Array,
-  options?: GpuChainOptions
-): Promise<Float32Array | null> {
-  const n = xs.length;
+  n: number,
+  options: GpuChainOptions | undefined
+): boolean {
   const enabled = options?.gpu ?? isGpuEnabled();
-  if (!enabled) return null;
-  if (ops.length === 0) return null;
-  if (n < GPU_MIN_ELEMENTS) return null;
-  if (!isGpuChainSupported(ops)) return null;
+  return enabled && ops.length > 0 && n >= GPU_MIN_ELEMENTS && isGpuChainSupported(ops);
+}
 
-  return runChainLifecycle(ops, xs, options, ({ bytes }) => ({
+/** Plain chain: copy what the last pass wrote to staging, and hand the f32 values back. */
+function chainTail({ bytes }: { bytes: number }): ChainTail<Float32Array> {
+  return {
     encoderLabel: 'elementwise-chain',
     stagingLabel: 'chain-staging',
     readBytes: bytes,
@@ -454,7 +501,16 @@ async function chainGpuDispatchImpl(
       encoder.copyBufferToBuffer(chainOut, 0, staging, 0, bytes);
     },
     finish: (mapped) => mapped,
-  }));
+  };
+}
+
+async function chainGpuDispatchImpl(
+  ops: readonly string[],
+  xs: Float64Array | Float32Array,
+  options?: GpuChainOptions
+): Promise<Float32Array | null> {
+  if (!chainGatesOpen(ops, xs.length, options)) return null;
+  return runChainLifecycle(ops, xs, options, chainTail);
 }
 
 /**
@@ -509,45 +565,55 @@ export function elementwiseChainReduceGpuDispatch(
   return serializeGpu(() => chainReduceGpuDispatchImpl(ops, xs, reduce, options));
 }
 
+/** Chain plus reduction: reduce what the last pass wrote on-device, read back only the partials. */
+function reduceTail(reduce: GpuReduceOp) {
+  return ({ workgroups }: { workgroups: number }): ChainTail<number> => {
+    const partialBytes = workgroups * 4;
+    return {
+      encoderLabel: 'elementwise-chain-reduce',
+      stagingLabel: 'reduce-staging',
+      readBytes: partialBytes,
+      extra: { label: 'reduce-partials', bytes: partialBytes },
+      encode({ device, shaders, encoder, chainOut, extra: partials, params, staging }) {
+        if (!partials) throw new Error('the reduce tail was not given its partials buffer');
+        // `chainOut` is the buffer the LAST chain pass wrote (the ping-pong swaps after
+        // each op), so the reduction consumes exactly the chain's output.
+        const reducePipeline = shaders.getRegisteredPipeline(reduceKey(reduce));
+        const reduceBind = device.createBindGroup({
+          layout: reducePipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: chainOut } },
+            { binding: 1, resource: { buffer: partials } },
+            { binding: 2, resource: { buffer: params } },
+          ],
+        });
+        const reducePass = encoder.beginComputePass({ label: `reduce:${reduce}` });
+        reducePass.setPipeline(reducePipeline);
+        reducePass.setBindGroup(0, reduceBind);
+        reducePass.dispatchWorkgroups(workgroups);
+        reducePass.end();
+
+        // Only `workgroups` floats cross the bus — that is the entire point.
+        encoder.copyBufferToBuffer(partials, 0, staging, 0, partialBytes);
+      },
+      // Combine the partials in f64 on the CPU. There are n/256 of them (16,384 even
+      // at n=4M), so this costs microseconds — a second GPU pass would buy nothing
+      // and cost another round-trip. Accumulating in f64 also keeps this last step
+      // from adding f32 error on top of the kernel's.
+      finish: (parts) => reduceNumbers(parts, reduce),
+    };
+  };
+}
+
 async function chainReduceGpuDispatchImpl(
   ops: readonly string[],
   xs: Float64Array | Float32Array,
   reduce: GpuReduceOp,
   options?: GpuChainOptions
 ): Promise<number | null> {
-  const n = xs.length;
-  const enabled = options?.gpu ?? isGpuEnabled();
-  if (!enabled) return null;
-  if (ops.length === 0) return null;
-  if (n < GPU_MIN_ELEMENTS) return null;
-  if (!isGpuChainSupported(ops)) return null;
+  if (!chainGatesOpen(ops, xs.length, options)) return null;
   if (!GPU_REDUCE_OPS.includes(reduce)) return null;
-
-  return runChainLifecycle(ops, xs, options, ({ partialBytes }) => ({
-    encoderLabel: 'elementwise-chain-reduce',
-    stagingLabel: 'reduce-staging',
-    readBytes: partialBytes,
-    extra: { label: 'reduce-partials', bytes: partialBytes },
-    encode({ device, shaders, encoder, chainOut, extra, params, staging, workgroups: wg }) {
-      const partials = extra!;
-      const reducePipeline = shaders.getRegisteredPipeline(reduceKey(reduce));
-      const reduceBind = device.createBindGroup({
-        layout: reducePipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: { buffer: chainOut } },
-          { binding: 1, resource: { buffer: partials } },
-          { binding: 2, resource: { buffer: params } },
-        ],
-      });
-      const reducePass = encoder.beginComputePass({ label: `reduce:${reduce}` });
-      reducePass.setPipeline(reducePipeline);
-      reducePass.setBindGroup(0, reduceBind);
-      reducePass.dispatchWorkgroups(wg);
-      reducePass.end();
-      encoder.copyBufferToBuffer(partials, 0, staging, 0, partialBytes);
-    },
-    finish: (mapped) => reduceNumbers(mapped, reduce),
-  }));
+  return runChainLifecycle(ops, xs, options, reduceTail(reduce));
 }
 
 /** Fold partial buffers or chain output into one scalar (f64 accumulation). */
