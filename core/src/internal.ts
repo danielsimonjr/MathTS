@@ -192,13 +192,13 @@ export type { LoadingMetrics, WasmManifest } from './types/wasm-loader.js';
 // and `resolve.ts` copies formerly duplicated in functions/src/wasm/ and
 // matrix/src/backends/wasm/ (see docs/Architecture/duplicate-symbols.json). Each
 // package now re-exports these and injects its own `import.meta.url` for path
-// resolution. The SHA-384 hash-and-compare-before-instantiate is preserved
-// byte-for-byte (CLAUDE.md Security Invariant #1); guarded by both packages'
-// tests/security/wasm-integrity.test.ts. `WasmModuleLoader` holds the shared
-// load/instantiate orchestration; each package's `WasmLoader` CLASS + `wasmLoader`
-// singleton stay LOCAL — genuinely different allocation models
-// (functions: simple id=2 single-pointer; matrix: AS managed-runtime header+data
-// Allocation handle). Node fs/crypto access is via lazy dynamic import(), so this
+// resolution. The SHA-384 hash-and-compare-before-instantiate runs inside
+// `WasmModuleLoader` (`precompile`, `loadNodeWasm`, `loadBrowserWasm`) before
+// compile/instantiate (CLAUDE.md / AGENTS.md Security Invariant #1); guarded by
+// both packages' tests/security/wasm-integrity.test.ts and wasm-loader-pin tests.
+// Each package's `WasmLoader` CLASS + singleton stay LOCAL — genuinely different
+// allocation models (functions: simple id=2 single-pointer; matrix: AS managed
+// header+data). Node fs/crypto access is via lazy dynamic import(), so this
 // stays off core's browser-facing `.` entry and adds no static node: taint.
 export {
   sha384OfBuffer,

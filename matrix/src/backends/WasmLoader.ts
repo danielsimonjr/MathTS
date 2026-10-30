@@ -586,48 +586,6 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
   }
 
   /**
-   * Precompile the WASM module without instantiation
-   * Useful for build-time or startup optimization
-   */
-  public async precompile(wasmPath?: string): Promise<void> {
-    if (this.compiledModule) return;
-
-    const path = wasmPath || (await this.getDefaultWasmPath());
-    const startTime = performance.now();
-
-    const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
-
-    if (this.isNode) {
-      const fs = await import('fs');
-      const { promisify } = await import('util');
-      const readFile = promisify(fs.readFile);
-      const buffer = await readFile(path);
-      await verifyWasmIntegrity(buffer, path);
-      this.compiledModule = await WebAssembly.compile(buffer);
-    } else {
-      // Browser: streaming compile only when no manifest is present;
-      // otherwise materialize so we can verify the bytes before compile.
-      const manifest = await loadWasmManifest(path);
-      if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
-        this.compiledModule = await WebAssembly.compileStreaming(fetch(path));
-      } else {
-        const response = await fetch(path);
-        const buffer = await response.arrayBuffer();
-        await verifyWasmIntegrity(buffer, path, { manifest });
-        this.compiledModule = await WebAssembly.compile(buffer);
-      }
-    }
-
-    this.lastMetrics = {
-      fileReadMs: 0,
-      compileMs: performance.now() - startTime,
-      instantiateMs: 0,
-      totalMs: performance.now() - startTime,
-      fromCache: false,
-    };
-  }
-
-  /**
    * Get the WASM binary path. AssemblyScript is the sole WASM backend
    * (`mathts-as.wasm`); the legacy second toolchain was removed in the
    * WASM-backend migration (complete 2026-06-26).
@@ -653,89 +611,6 @@ export class WasmLoader extends WasmModuleLoader<WasmModule> {
     }
     const { defaultWasmLocation } = await import('./wasm/resolve.js');
     return defaultWasmLocation(import.meta.url, wasmFile, { browser: true });
-  }
-
-  protected override async loadNodeWasm(path: string, totalStart: number): Promise<WasmModule> {
-    const fs = await import('fs');
-    const { promisify } = await import('util');
-    const readFile = promisify(fs.readFile);
-    const { verifyWasmIntegrity } = await import('./wasm/integrity.js');
-
-    const readStart = performance.now();
-    const buffer = await readFile(path);
-    const readEnd = performance.now();
-
-    // SHA-384 integrity check against sibling wasm-manifest.json.
-    // Throws on tamper; warns and continues when manifest is absent.
-    await verifyWasmIntegrity(buffer, path);
-
-    const compileStart = performance.now();
-    this.compiledModule = await WebAssembly.compile(buffer);
-    const compileEnd = performance.now();
-
-    const instStart = performance.now();
-    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
-    const instEnd = performance.now();
-
-    this.lastMetrics = {
-      fileReadMs: readEnd - readStart,
-      compileMs: compileEnd - compileStart,
-      instantiateMs: instEnd - instStart,
-      totalMs: performance.now() - totalStart,
-      fromCache: false,
-    };
-
-    return instance.exports as unknown as WasmModule;
-  }
-
-  protected override async loadBrowserWasm(path: string, totalStart: number): Promise<WasmModule> {
-    const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
-    // Look for the manifest before deciding whether to stream. If a manifest
-    // exists we must materialize the buffer to compute its hash before
-    // compilation - streaming would let an attacker race the bytes past
-    // WebAssembly.compile without being checked.
-    const manifest = await loadWasmManifest(path);
-
-    if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
-      // No manifest -> preserve fast streaming path (legacy compat).
-      const instStart = performance.now();
-      const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
-      this.compiledModule = result.module;
-      this.lastMetrics = {
-        fileReadMs: 0, // Combined with compile in streaming
-        compileMs: 0, // Combined in streaming
-        instantiateMs: performance.now() - instStart,
-        totalMs: performance.now() - totalStart,
-        fromCache: false,
-      };
-      return result.instance.exports as unknown as WasmModule;
-    }
-
-    // Either a manifest is present (must verify) or streaming is unavailable.
-    const readStart = performance.now();
-    const response = await fetch(path);
-    const buffer = await response.arrayBuffer();
-    const readEnd = performance.now();
-
-    await verifyWasmIntegrity(buffer, path, { manifest });
-
-    const compileStart = performance.now();
-    this.compiledModule = await WebAssembly.compile(buffer);
-    const compileEnd = performance.now();
-
-    const instStart = performance.now();
-    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
-    const instEnd = performance.now();
-
-    this.lastMetrics = {
-      fileReadMs: readEnd - readStart,
-      compileMs: compileEnd - compileStart,
-      instantiateMs: instEnd - instStart,
-      totalMs: performance.now() - totalStart,
-      fromCache: false,
-    };
-
-    return instance.exports as unknown as WasmModule;
   }
 
   /**

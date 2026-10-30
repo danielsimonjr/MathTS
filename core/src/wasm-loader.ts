@@ -228,8 +228,9 @@ export async function defaultWasmLocation(
 /**
  * Shared load / instantiate orchestration for the two package-local
  * `WasmLoader` singletons (`functions` and `matrix`). Subclasses keep their own
- * `WasmModule` ABI type, path resolution, and the Node/browser load arms that
- * call {@link verifyWasmIntegrity} before compile/instantiate (G45–G47).
+ * `WasmModule` ABI type and path resolution; the Node and browser load arms
+ * (`precompile`, `loadNodeWasm`, `loadBrowserWasm`) live here and call
+ * {@link verifyWasmIntegrity} before every compile/instantiate (G45–G47, P6-10).
  */
 export abstract class WasmModuleLoader<TModule> {
   protected wasmModule: TModule | null = null;
@@ -296,8 +297,130 @@ export abstract class WasmModuleLoader<TModule> {
   }
 
   protected abstract getDefaultWasmPath(): Promise<string>;
-  protected abstract loadNodeWasm(path: string, totalStart: number): Promise<TModule>;
-  protected abstract loadBrowserWasm(path: string, totalStart: number): Promise<TModule>;
+
+  /**
+   * Precompile the WASM module without instantiation.
+   * Useful for build-time or startup optimization.
+   *
+   * Same integrity rule as `load()`: the bytes are hashed against the manifest before
+   * `WebAssembly.compile`. The browser arm streams only when no manifest exists.
+   */
+  public async precompile(wasmPath?: string): Promise<void> {
+    if (this.compiledModule) return;
+
+    const path = wasmPath || (await this.getDefaultWasmPath());
+    const startTime = performance.now();
+
+    if (this.isNode) {
+      const fs = await import('fs');
+      const { promisify } = await import('util');
+      const readFile = promisify(fs.readFile);
+      const buffer = await readFile(path);
+      await verifyWasmIntegrity(buffer, path);
+      this.compiledModule = await WebAssembly.compile(buffer);
+    } else {
+      // Streaming compile cannot be hashed first, so it is allowed only when there is
+      // no manifest to check against.
+      const manifest = await loadWasmManifest(path);
+      if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
+        this.compiledModule = await WebAssembly.compileStreaming(fetch(path));
+      } else {
+        const response = await fetch(path);
+        const buffer = await response.arrayBuffer();
+        await verifyWasmIntegrity(buffer, path, { manifest });
+        this.compiledModule = await WebAssembly.compile(buffer);
+      }
+    }
+
+    this.lastMetrics = {
+      fileReadMs: 0,
+      compileMs: performance.now() - startTime,
+      instantiateMs: 0,
+      totalMs: performance.now() - startTime,
+      fromCache: false,
+    };
+  }
+
+  protected async loadNodeWasm(path: string, totalStart: number): Promise<TModule> {
+    const fs = await import('fs');
+    const { promisify } = await import('util');
+    const readFile = promisify(fs.readFile);
+
+    const readStart = performance.now();
+    const buffer = await readFile(path);
+    const readEnd = performance.now();
+
+    // SHA-384 integrity check against sibling wasm-manifest.json.
+    // Throws on tamper; warns and continues when manifest is absent.
+    await verifyWasmIntegrity(buffer, path);
+
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
+
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
+
+    this.lastMetrics = {
+      fileReadMs: readEnd - readStart,
+      compileMs: compileEnd - compileStart,
+      instantiateMs: instEnd - instStart,
+      totalMs: performance.now() - totalStart,
+      fromCache: false,
+    };
+
+    return instance.exports as unknown as TModule;
+  }
+
+  protected async loadBrowserWasm(path: string, totalStart: number): Promise<TModule> {
+    // Look for the manifest *before* deciding whether to stream. If a
+    // manifest exists we must materialize the buffer to compute its hash
+    // before compilation — streaming would let an attacker race the
+    // bytes past WebAssembly.compile without being checked.
+    const manifest = await loadWasmManifest(path);
+
+    if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
+      // No manifest -> preserve fast streaming path (legacy compat).
+      const instStart = performance.now();
+      const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
+      this.compiledModule = result.module;
+      this.lastMetrics = {
+        fileReadMs: 0, // Combined with compile in streaming
+        compileMs: 0, // Combined in streaming
+        instantiateMs: performance.now() - instStart,
+        totalMs: performance.now() - totalStart,
+        fromCache: false,
+      };
+      return result.instance.exports as unknown as TModule;
+    }
+
+    // Manifest-present (or older browser): fetch buffer, verify, compile.
+    const readStart = performance.now();
+    const response = await fetch(path);
+    const buffer = await response.arrayBuffer();
+    const readEnd = performance.now();
+
+    await verifyWasmIntegrity(buffer, path, { manifest });
+
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
+
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
+
+    this.lastMetrics = {
+      fileReadMs: readEnd - readStart,
+      compileMs: compileEnd - compileStart,
+      instantiateMs: instEnd - instStart,
+      totalMs: performance.now() - totalStart,
+      fromCache: false,
+    };
+
+    return instance.exports as unknown as TModule;
+  }
 
   protected getImports(): WebAssembly.Imports {
     return {

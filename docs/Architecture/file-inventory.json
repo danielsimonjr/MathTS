@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2056,
+  "totalFiles": 2058,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 762,
+    "test": 764,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1232,
-    "tests": 762,
+    "tests": 764,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 873,
+    "@danielsimonjr/mathts-functions": 874,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 113,
+    "@danielsimonjr/mathts-matrix": 114,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 22,
@@ -905,7 +905,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 316
+      "loc": 439
+    },
+    {
+      "file": "core/tests/alloc-as-header-pin.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 139
     },
     {
       "file": "core/tests/alloc-as-header-pin.test.ts",
@@ -8815,7 +8822,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 545
+      "loc": 425
     },
     {
       "file": "functions/tests/acsc-asec-acot-bignumber.test.ts",
@@ -10764,6 +10771,13 @@
       "loc": 84
     },
     {
+      "file": "functions/tests/security/wasm-loader-paths-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 285
+    },
+    {
       "file": "functions/tests/security/wasm-loader-pin.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11678,7 +11692,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1108
+      "loc": 983
     },
     {
       "file": "matrix/src/config.ts",
@@ -12218,6 +12232,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 171
+    },
+    {
+      "file": "matrix/tests/security/wasm-loader-paths-pin.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 285
     },
     {
       "file": "matrix/tests/security/wasm-loader-pin.test.ts",

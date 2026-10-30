@@ -3948,11 +3948,6 @@
             "imports": ["AS_ID_FLOAT64_ARRAY", "AS_ID_INT32_ARRAY", "allocAsTypedView"]
           },
           {
-            "file": "./wasm/integrity.js",
-            "imports": [],
-            "typeOnly": true
-          },
-          {
             "file": "./wasm/resolve.js",
             "imports": [],
             "typeOnly": true
@@ -26136,10 +26131,6 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
-            "file": "./integrity.js",
-            "imports": ["verifyWasmIntegrity", "loadWasmManifest"]
-          },
-          {
             "file": "./resolve.js",
             "imports": ["resolvePackagedWasm", "defaultWasmLocation", "resolveBrowserWasm"]
           }
@@ -43280,7 +43271,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1234,
     "totalModules": 82,
-    "totalLinesOfCode": 203695,
+    "totalLinesOfCode": 203573,
     "totalExports": 6410,
     "totalClasses": 60,
     "totalInterfaces": 569,
@@ -43289,7 +43280,7 @@
     "totalEnums": 0,
     "totalConstants": 1632,
     "totalReExports": 2724,
-    "totalTypeOnlyImports": 621,
+    "totalTypeOnlyImports": 620,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
