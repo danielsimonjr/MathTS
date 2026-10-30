@@ -1,0 +1,5889 @@
+{
+  "@danielsimonjr/mathts-typed-function": {
+    ".": {
+      "buildSignature": {
+        "kind": "function"
+      },
+      "ConversionDef": {
+        "kind": "type"
+      },
+      "create": {
+        "kind": "function"
+      },
+      "createRobustSubtypeTest": {
+        "kind": "function"
+      },
+      "createRobustTypeDef": {
+        "kind": "function"
+      },
+      "createRobustTypeTest": {
+        "kind": "function"
+      },
+      "createSafeConversion": {
+        "kind": "function"
+      },
+      "createSafeConversionDef": {
+        "kind": "function"
+      },
+      "createSymbolTypeDef": {
+        "kind": "function"
+      },
+      "createSymbolTypeTest": {
+        "kind": "function"
+      },
+      "ExtendedTypeDef": {
+        "kind": "type"
+      },
+      "isArray": {
+        "kind": "function"
+      },
+      "isArrayBuffer": {
+        "kind": "function"
+      },
+      "isBigInt": {
+        "kind": "function"
+      },
+      "isBoolean": {
+        "kind": "function"
+      },
+      "isFiniteNumber": {
+        "kind": "function"
+      },
+      "isFloat32Array": {
+        "kind": "function"
+      },
+      "isFloat64Array": {
+        "kind": "function"
+      },
+      "isFunction": {
+        "kind": "function"
+      },
+      "isInt32Array": {
+        "kind": "function"
+      },
+      "isInteger": {
+        "kind": "function"
+      },
+      "isNaN": {
+        "kind": "function"
+      },
+      "isNonNegativeInteger": {
+        "kind": "function"
+      },
+      "isNull": {
+        "kind": "function"
+      },
+      "isNullOrUndefined": {
+        "kind": "function"
+      },
+      "isNumber": {
+        "kind": "function"
+      },
+      "isObject": {
+        "kind": "function"
+      },
+      "isPositiveInteger": {
+        "kind": "function"
+      },
+      "isString": {
+        "kind": "function"
+      },
+      "isTypedArray": {
+        "kind": "function"
+      },
+      "isUint32Array": {
+        "kind": "function"
+      },
+      "isUndefined": {
+        "kind": "function"
+      },
+      "NoMatchingSignatureError": {
+        "kind": "function"
+      },
+      "parseSignature": {
+        "kind": "function"
+      },
+      "SignatureMap": {
+        "kind": "type"
+      },
+      "TypeConversionError": {
+        "kind": "function"
+      },
+      "TypeConverter": {
+        "kind": "type"
+      },
+      "typed": {
+        "kind": "function"
+      },
+      "TYPED_FUNCTION_TYPE": {
+        "kind": "symbol"
+      },
+      "TypeDef": {
+        "kind": "type"
+      },
+      "TypedFunction": {
+        "kind": "type"
+      },
+      "TypeTest": {
+        "kind": "type"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-workerpool": {
+    ".": {
+      "canUseSharedMemory": {
+        "kind": "function"
+      },
+      "canUseWasm": {
+        "kind": "function"
+      },
+      "chunkPairTyped": {
+        "kind": "function"
+      },
+      "chunkTyped": {
+        "kind": "function"
+      },
+      "createSharedBuffer": {
+        "kind": "function"
+      },
+      "createSharedFloat64Array": {
+        "kind": "function"
+      },
+      "DEFAULT_WORKER_CONFIG": {
+        "kind": "object"
+      },
+      "EnhancedPoolStats": {
+        "kind": "type"
+      },
+      "ExecOptions": {
+        "kind": "type"
+      },
+      "forEachMultiIndex": {
+        "kind": "function"
+      },
+      "getCapabilities": {
+        "kind": "function"
+      },
+      "getPoolStats": {
+        "kind": "function"
+      },
+      "getWasmFeatures": {
+        "kind": "function"
+      },
+      "initializePool": {
+        "kind": "function"
+      },
+      "initWorkerWasm": {
+        "kind": "function"
+      },
+      "isSharedBuffer": {
+        "kind": "function"
+      },
+      "isWorkerWasmAvailable": {
+        "kind": "function"
+      },
+      "mathWorkerPool": {
+        "kind": "object"
+      },
+      "MathWorkerPool": {
+        "kind": "function"
+      },
+      "ParallelResult": {
+        "kind": "type"
+      },
+      "Pool": {
+        "kind": "type"
+      },
+      "PoolMetrics": {
+        "kind": "type"
+      },
+      "PoolOptions": {
+        "kind": "type"
+      },
+      "PoolStats": {
+        "kind": "type"
+      },
+      "TaskOptions": {
+        "kind": "type"
+      },
+      "terminatePool": {
+        "kind": "function"
+      },
+      "Transfer": {
+        "kind": "function"
+      },
+      "transferArrayBuffer": {
+        "kind": "function"
+      },
+      "transferFloat64": {
+        "kind": "function"
+      },
+      "transferTypedArray": {
+        "kind": "function"
+      },
+      "WasmFeatureStatus": {
+        "kind": "type"
+      },
+      "WorkerpoolCapabilities": {
+        "kind": "type"
+      },
+      "WorkerPoolConfig": {
+        "kind": "type"
+      }
+    },
+    "./worker": {}
+  },
+  "@danielsimonjr/mathts-core": {
+    ".": {
+      "abs": {
+        "kind": "function"
+      },
+      "addExactScales": {
+        "kind": "function"
+      },
+      "addScalar": {
+        "kind": "function"
+      },
+      "ALL_UNITS": {
+        "kind": "object"
+      },
+      "BackendType": {
+        "kind": "type"
+      },
+      "BASE_UNITS": {
+        "kind": "object"
+      },
+      "BEST_PREFIXES": {
+        "kind": "object"
+      },
+      "BigNumber": {
+        "kind": "function"
+      },
+      "BIGNUMBER_E": {
+        "kind": "object"
+      },
+      "BIGNUMBER_LN10": {
+        "kind": "object"
+      },
+      "BIGNUMBER_LN2": {
+        "kind": "object"
+      },
+      "BIGNUMBER_NEG_ONE": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ONE": {
+        "kind": "object"
+      },
+      "BIGNUMBER_PI": {
+        "kind": "object"
+      },
+      "BIGNUMBER_TEN": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ZERO": {
+        "kind": "object"
+      },
+      "BigNumberConfig": {
+        "kind": "type"
+      },
+      "binaryExactScale": {
+        "kind": "function"
+      },
+      "boxMuller": {
+        "kind": "function"
+      },
+      "clearExactScaleNumberCache": {
+        "kind": "function"
+      },
+      "Complex": {
+        "kind": "function"
+      },
+      "COMPLEX_NEG_ONE": {
+        "kind": "object"
+      },
+      "COMPLEX_ONE": {
+        "kind": "object"
+      },
+      "COMPLEX_ZERO": {
+        "kind": "object"
+      },
+      "ConversionDef": {
+        "kind": "type"
+      },
+      "create": {
+        "kind": "function"
+      },
+      "createFactory": {
+        "kind": "function"
+      },
+      "createMathTSTyped": {
+        "kind": "function"
+      },
+      "createRangeClass": {
+        "kind": "function"
+      },
+      "createSeededRng": {
+        "kind": "function"
+      },
+      "createTypedFunction": {
+        "kind": "function"
+      },
+      "decimalExactScale": {
+        "kind": "function"
+      },
+      "DEFAULT_CONFIG": {
+        "kind": "object"
+      },
+      "DERIVED_UNITS": {
+        "kind": "object"
+      },
+      "dim": {
+        "kind": "function"
+      },
+      "DIMENSIONLESS": {
+        "kind": "object"
+      },
+      "DimensionMismatchError": {
+        "kind": "function"
+      },
+      "Dimensions": {
+        "kind": "type"
+      },
+      "divideExactScales": {
+        "kind": "function"
+      },
+      "divideScalar": {
+        "kind": "function"
+      },
+      "Dual": {
+        "kind": "function"
+      },
+      "DUAL_UNARY_RULES": {
+        "kind": "object"
+      },
+      "DualUnaryRule": {
+        "kind": "type"
+      },
+      "DualUnaryRuleName": {
+        "kind": "type"
+      },
+      "E": {
+        "kind": "number"
+      },
+      "equal": {
+        "kind": "function"
+      },
+      "ExactScale": {
+        "kind": "type"
+      },
+      "exactScaleNumberCacheSize": {
+        "kind": "function"
+      },
+      "exactScaleOf": {
+        "kind": "function"
+      },
+      "exactScalesEqual": {
+        "kind": "function"
+      },
+      "exactScaleToNumber": {
+        "kind": "function"
+      },
+      "FactoryDependencies": {
+        "kind": "type"
+      },
+      "FactoryFunction": {
+        "kind": "type"
+      },
+      "FactoryImport": {
+        "kind": "type"
+      },
+      "fix": {
+        "kind": "function"
+      },
+      "formatExactScale": {
+        "kind": "function"
+      },
+      "Fraction": {
+        "kind": "function"
+      },
+      "FRACTION_HALF": {
+        "kind": "object"
+      },
+      "FRACTION_NEG_ONE": {
+        "kind": "object"
+      },
+      "FRACTION_ONE": {
+        "kind": "object"
+      },
+      "FRACTION_QUARTER": {
+        "kind": "object"
+      },
+      "FRACTION_THIRD": {
+        "kind": "object"
+      },
+      "FRACTION_ZERO": {
+        "kind": "object"
+      },
+      "fromSiDimensions": {
+        "kind": "function"
+      },
+      "fromSiDimensionVector": {
+        "kind": "function"
+      },
+      "FunctionRegistry": {
+        "kind": "function"
+      },
+      "getPrefix": {
+        "kind": "function"
+      },
+      "getUnitDef": {
+        "kind": "function"
+      },
+      "getUnitPrefix": {
+        "kind": "function"
+      },
+      "getUnitRow": {
+        "kind": "function"
+      },
+      "I": {
+        "kind": "object"
+      },
+      "IBigNumber": {
+        "kind": "type"
+      },
+      "IComplex": {
+        "kind": "type"
+      },
+      "IFraction": {
+        "kind": "type"
+      },
+      "IMatrix": {
+        "kind": "type"
+      },
+      "initTypedWasm": {
+        "kind": "function"
+      },
+      "IrrationalName": {
+        "kind": "type"
+      },
+      "irrationalPower": {
+        "kind": "function"
+      },
+      "IrrationalPowers": {
+        "kind": "type"
+      },
+      "isArray": {
+        "kind": "function"
+      },
+      "isBigInt": {
+        "kind": "function"
+      },
+      "isBigNumber": {
+        "kind": "function"
+      },
+      "isBoolean": {
+        "kind": "function"
+      },
+      "isComplex": {
+        "kind": "function"
+      },
+      "isDenseMatrix": {
+        "kind": "function"
+      },
+      "isDual": {
+        "kind": "function"
+      },
+      "isFraction": {
+        "kind": "function"
+      },
+      "isFunction": {
+        "kind": "function"
+      },
+      "isMatrix": {
+        "kind": "function"
+      },
+      "isNull": {
+        "kind": "function"
+      },
+      "isNumber": {
+        "kind": "function"
+      },
+      "isNumeric": {
+        "kind": "function"
+      },
+      "isObject": {
+        "kind": "function"
+      },
+      "isRationalScale": {
+        "kind": "function"
+      },
+      "isSparseMatrix": {
+        "kind": "function"
+      },
+      "isString": {
+        "kind": "function"
+      },
+      "isTypedWasmAvailable": {
+        "kind": "function"
+      },
+      "isUndefined": {
+        "kind": "function"
+      },
+      "isUnit": {
+        "kind": "function"
+      },
+      "isUnitValue": {
+        "kind": "function"
+      },
+      "LN10": {
+        "kind": "number"
+      },
+      "LN2": {
+        "kind": "number"
+      },
+      "LN2_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "LOG10E": {
+        "kind": "number"
+      },
+      "LOG2E": {
+        "kind": "number"
+      },
+      "math": {
+        "kind": "object"
+      },
+      "MATHTS_CONVERSIONS": {
+        "kind": "object"
+      },
+      "MATHTS_TYPES": {
+        "kind": "object"
+      },
+      "MathTSConfig": {
+        "kind": "type"
+      },
+      "MathTSValue": {
+        "kind": "type"
+      },
+      "mathTyped": {
+        "kind": "function"
+      },
+      "MatrixBackend": {
+        "kind": "type"
+      },
+      "MatrixDimensions": {
+        "kind": "type"
+      },
+      "mulberry32": {
+        "kind": "function"
+      },
+      "multiplyExactScales": {
+        "kind": "function"
+      },
+      "multiplyScalar": {
+        "kind": "function"
+      },
+      "NAMED_IRRATIONALS": {
+        "kind": "object"
+      },
+      "NAMED_SCALES": {
+        "kind": "object"
+      },
+      "namedExactScale": {
+        "kind": "function"
+      },
+      "namedIrrationalScale": {
+        "kind": "function"
+      },
+      "neumaierCumsum": {
+        "kind": "function"
+      },
+      "neumaierSum": {
+        "kind": "function"
+      },
+      "norm2": {
+        "kind": "function"
+      },
+      "number": {
+        "kind": "function"
+      },
+      "NumericScalar": {
+        "kind": "type"
+      },
+      "NumericType": {
+        "kind": "type"
+      },
+      "pairwiseDot": {
+        "kind": "function"
+      },
+      "pairwiseSum": {
+        "kind": "function"
+      },
+      "PHI": {
+        "kind": "number"
+      },
+      "PI": {
+        "kind": "number"
+      },
+      "PI_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "pow": {
+        "kind": "function"
+      },
+      "powerExactScale": {
+        "kind": "function"
+      },
+      "Range": {
+        "kind": "function"
+      },
+      "RangeForEachCallback": {
+        "kind": "type"
+      },
+      "RangeFormatOptions": {
+        "kind": "type"
+      },
+      "RangeJSON": {
+        "kind": "type"
+      },
+      "RangeMapCallback": {
+        "kind": "type"
+      },
+      "ratioExactScale": {
+        "kind": "function"
+      },
+      "readScaleExpression": {
+        "kind": "function"
+      },
+      "readUnitScale": {
+        "kind": "function"
+      },
+      "ReferTo": {
+        "kind": "type"
+      },
+      "ReferToSelf": {
+        "kind": "type"
+      },
+      "registerNativeTypes": {
+        "kind": "function"
+      },
+      "registry": {
+        "kind": "object"
+      },
+      "round": {
+        "kind": "function"
+      },
+      "RoundingMode": {
+        "kind": "type"
+      },
+      "rowMajorStrides": {
+        "kind": "function"
+      },
+      "Scalar": {
+        "kind": "type"
+      },
+      "scaledDistance": {
+        "kind": "function"
+      },
+      "SeededRng": {
+        "kind": "type"
+      },
+      "SI_DIMENSION_LENGTH": {
+        "kind": "number"
+      },
+      "SI_PREFIXES": {
+        "kind": "object"
+      },
+      "SiDimensionExponent": {
+        "kind": "type"
+      },
+      "SiDimensionOptions": {
+        "kind": "type"
+      },
+      "SiDimensionVector": {
+        "kind": "type"
+      },
+      "SignatureFunction": {
+        "kind": "type"
+      },
+      "SQRT1_2": {
+        "kind": "number"
+      },
+      "SQRT2": {
+        "kind": "number"
+      },
+      "subtractScalar": {
+        "kind": "function"
+      },
+      "sumSquaredDeviations": {
+        "kind": "function"
+      },
+      "TAU": {
+        "kind": "number"
+      },
+      "toSiDimensions": {
+        "kind": "function"
+      },
+      "toSiDimensionVector": {
+        "kind": "function"
+      },
+      "typed": {
+        "kind": "function"
+      },
+      "TypeDef": {
+        "kind": "type"
+      },
+      "TypedFunction": {
+        "kind": "type"
+      },
+      "TypedInstance": {
+        "kind": "type"
+      },
+      "TypeRegistry": {
+        "kind": "function"
+      },
+      "Unit": {
+        "kind": "function"
+      },
+      "UNIT_ALIASES": {
+        "kind": "object"
+      },
+      "UNIT_DIMENSION_LENGTH": {
+        "kind": "number"
+      },
+      "UNIT_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "UNIT_PREFIX_SETS": {
+        "kind": "object"
+      },
+      "UNIT_ROW_ALIASES": {
+        "kind": "object"
+      },
+      "UNIT_ROWS": {
+        "kind": "object"
+      },
+      "UnitBaseKey": {
+        "kind": "type"
+      },
+      "UnitDef": {
+        "kind": "type"
+      },
+      "UnitInstance": {
+        "kind": "type"
+      },
+      "UnitParseError": {
+        "kind": "function"
+      },
+      "UnitPrefix": {
+        "kind": "type"
+      },
+      "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "UnitPrefixSetKey": {
+        "kind": "type"
+      },
+      "UnitRow": {
+        "kind": "type"
+      },
+      "unitRowExactOffset": {
+        "kind": "function"
+      },
+      "unitRowExactScale": {
+        "kind": "function"
+      },
+      "unitRowValue": {
+        "kind": "function"
+      },
+      "VERSION": {
+        "kind": "string"
+      }
+    },
+    "./internal": {
+      "_switch": {
+        "kind": "function"
+      },
+      "arraySize": {
+        "kind": "function"
+      },
+      "assignMap": {
+        "kind": "function"
+      },
+      "BaseUnitDef": {
+        "kind": "type"
+      },
+      "BigNumberConstructor": {
+        "kind": "type"
+      },
+      "BigNumberValue": {
+        "kind": "type"
+      },
+      "broadcastArrays": {
+        "kind": "function"
+      },
+      "broadcastSizes": {
+        "kind": "function"
+      },
+      "broadcastTo": {
+        "kind": "function"
+      },
+      "checkBroadcastingRules": {
+        "kind": "function"
+      },
+      "cloneArray": {
+        "kind": "function"
+      },
+      "compareText": {
+        "kind": "function"
+      },
+      "ComplexConstructor": {
+        "kind": "type"
+      },
+      "ComplexValue": {
+        "kind": "type"
+      },
+      "concat": {
+        "kind": "function"
+      },
+      "ConfigOptions": {
+        "kind": "type"
+      },
+      "containsCollections": {
+        "kind": "function"
+      },
+      "ConverterFn": {
+        "kind": "type"
+      },
+      "CoreUnit": {
+        "kind": "function"
+      },
+      "createEmptyMap": {
+        "kind": "function"
+      },
+      "createIndexError": {
+        "kind": "function"
+      },
+      "createMap": {
+        "kind": "function"
+      },
+      "createUnitClass": {
+        "kind": "function"
+      },
+      "CreateUnitDefObject": {
+        "kind": "type"
+      },
+      "CreateUnitOptions": {
+        "kind": "type"
+      },
+      "deepForEach": {
+        "kind": "function"
+      },
+      "deepForEachArray": {
+        "kind": "function"
+      },
+      "deepMap": {
+        "kind": "function"
+      },
+      "deepMapArray": {
+        "kind": "function"
+      },
+      "DEFAULT_CONFIG": {
+        "kind": "object"
+      },
+      "defaultWasmLocation": {
+        "kind": "function"
+      },
+      "DimensionError": {
+        "kind": "function"
+      },
+      "endsWith": {
+        "kind": "function"
+      },
+      "escape": {
+        "kind": "function"
+      },
+      "filter": {
+        "kind": "function"
+      },
+      "filterRegExp": {
+        "kind": "function"
+      },
+      "flatten": {
+        "kind": "function"
+      },
+      "forEach": {
+        "kind": "function"
+      },
+      "formatBigNumber": {
+        "kind": "function"
+      },
+      "formatGeneric": {
+        "kind": "function"
+      },
+      "FractionConstructor": {
+        "kind": "type"
+      },
+      "FractionValue": {
+        "kind": "type"
+      },
+      "GeneralFormatOptions": {
+        "kind": "type"
+      },
+      "generalize": {
+        "kind": "function"
+      },
+      "getArrayDataType": {
+        "kind": "function"
+      },
+      "getArrayElement": {
+        "kind": "function"
+      },
+      "hasOwnProperty": {
+        "kind": "function"
+      },
+      "IdentifiedValue": {
+        "kind": "type"
+      },
+      "identify": {
+        "kind": "function"
+      },
+      "IndexError": {
+        "kind": "function"
+      },
+      "initial": {
+        "kind": "function"
+      },
+      "isEmptyIndex": {
+        "kind": "function"
+      },
+      "isObjectWrappingMap": {
+        "kind": "function"
+      },
+      "join": {
+        "kind": "function"
+      },
+      "last": {
+        "kind": "function"
+      },
+      "LoadingMetrics": {
+        "kind": "type"
+      },
+      "loadWasmManifest": {
+        "kind": "function"
+      },
+      "map": {
+        "kind": "function"
+      },
+      "MathJsConfig": {
+        "kind": "type"
+      },
+      "MathjsError": {
+        "kind": "function"
+      },
+      "memoize": {
+        "kind": "function"
+      },
+      "MemoizedFunction": {
+        "kind": "type"
+      },
+      "NestedArray": {
+        "kind": "type"
+      },
+      "Numeric": {
+        "kind": "type"
+      },
+      "ObjectWrappingMap": {
+        "kind": "function"
+      },
+      "ParseOptions": {
+        "kind": "type"
+      },
+      "PartitionedMap": {
+        "kind": "function"
+      },
+      "PrefixDef": {
+        "kind": "type"
+      },
+      "PrefixTable": {
+        "kind": "type"
+      },
+      "processSizesWildcard": {
+        "kind": "function"
+      },
+      "reduce": {
+        "kind": "function"
+      },
+      "reshape": {
+        "kind": "function"
+      },
+      "resize": {
+        "kind": "function"
+      },
+      "resolvePackagedWasm": {
+        "kind": "function"
+      },
+      "ScalarBinaryOp": {
+        "kind": "type"
+      },
+      "ScalarUnaryOp": {
+        "kind": "type"
+      },
+      "scatter": {
+        "kind": "function"
+      },
+      "sha384OfBuffer": {
+        "kind": "function"
+      },
+      "squeeze": {
+        "kind": "function"
+      },
+      "stretch": {
+        "kind": "function"
+      },
+      "stringify": {
+        "kind": "function"
+      },
+      "SubtractScalar": {
+        "kind": "type"
+      },
+      "toEngineeringBigNumber": {
+        "kind": "function"
+      },
+      "toExponentialBigNumber": {
+        "kind": "function"
+      },
+      "toFixedBigNumber": {
+        "kind": "function"
+      },
+      "toObject": {
+        "kind": "function"
+      },
+      "TypeConverters": {
+        "kind": "type"
+      },
+      "UnitComponent": {
+        "kind": "type"
+      },
+      "UnitConfig": {
+        "kind": "type"
+      },
+      "UnitConstructor": {
+        "kind": "type"
+      },
+      "UnitDef": {
+        "kind": "type"
+      },
+      "unitDependencies": {
+        "kind": "object"
+      },
+      "UnitDependencies": {
+        "kind": "type"
+      },
+      "UnitFormatOptions": {
+        "kind": "type"
+      },
+      "UnitInstance": {
+        "kind": "type"
+      },
+      "UnitJSON": {
+        "kind": "type"
+      },
+      "UnitSystem": {
+        "kind": "type"
+      },
+      "UnitSystemEntry": {
+        "kind": "type"
+      },
+      "unsqueeze": {
+        "kind": "function"
+      },
+      "validate": {
+        "kind": "function"
+      },
+      "validateIndex": {
+        "kind": "function"
+      },
+      "validateIndexSourceSize": {
+        "kind": "function"
+      },
+      "verifyWasmIntegrity": {
+        "kind": "function"
+      },
+      "warnOnce": {
+        "kind": "function"
+      },
+      "WasmManifest": {
+        "kind": "type"
+      },
+      "WasmModuleLoader": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-matrix": {
+    ".": {}
+  },
+  "@danielsimonjr/mathts-tensor": {
+    ".": {
+      "concatenate": {
+        "kind": "function"
+      },
+      "contractNetwork": {
+        "kind": "function"
+      },
+      "ContractNetworkOpts": {
+        "kind": "type"
+      },
+      "ContractNetworkResult": {
+        "kind": "type"
+      },
+      "EinsumSpec": {
+        "kind": "type"
+      },
+      "flip": {
+        "kind": "function"
+      },
+      "gather": {
+        "kind": "function"
+      },
+      "idx": {
+        "kind": "function"
+      },
+      "Index": {
+        "kind": "function"
+      },
+      "IndexOpts": {
+        "kind": "type"
+      },
+      "NestedArray": {
+        "kind": "type"
+      },
+      "pad": {
+        "kind": "function"
+      },
+      "PadOptions": {
+        "kind": "type"
+      },
+      "randomTensor": {
+        "kind": "function"
+      },
+      "RandomTensorOpts": {
+        "kind": "type"
+      },
+      "roll": {
+        "kind": "function"
+      },
+      "scatter": {
+        "kind": "function"
+      },
+      "ScatterOpts": {
+        "kind": "type"
+      },
+      "slice": {
+        "kind": "function"
+      },
+      "SliceRange": {
+        "kind": "type"
+      },
+      "stack": {
+        "kind": "function"
+      },
+      "StackOpts": {
+        "kind": "type"
+      },
+      "Tensor": {
+        "kind": "function"
+      },
+      "tensorCholesky": {
+        "kind": "function"
+      },
+      "TensorCholeskyOpts": {
+        "kind": "type"
+      },
+      "TensorCholeskyResult": {
+        "kind": "type"
+      },
+      "tensorEig": {
+        "kind": "function"
+      },
+      "TensorEigOpts": {
+        "kind": "type"
+      },
+      "TensorEigResult": {
+        "kind": "type"
+      },
+      "tensorEigWasm": {
+        "kind": "function"
+      },
+      "tensorKron": {
+        "kind": "function"
+      },
+      "TensorKronOpts": {
+        "kind": "type"
+      },
+      "tensorLU": {
+        "kind": "function"
+      },
+      "TensorLUOpts": {
+        "kind": "type"
+      },
+      "TensorLUResult": {
+        "kind": "type"
+      },
+      "tensorPinv": {
+        "kind": "function"
+      },
+      "TensorPinvOpts": {
+        "kind": "type"
+      },
+      "tensorQr": {
+        "kind": "function"
+      },
+      "TensorQrOpts": {
+        "kind": "type"
+      },
+      "TensorQrResult": {
+        "kind": "type"
+      },
+      "tensorSolve": {
+        "kind": "function"
+      },
+      "TensorSolveOpts": {
+        "kind": "type"
+      },
+      "TensorSolveResult": {
+        "kind": "type"
+      },
+      "tensorSvd": {
+        "kind": "function"
+      },
+      "TensorSvdOpts": {
+        "kind": "type"
+      },
+      "TensorSvdResult": {
+        "kind": "type"
+      },
+      "tensorSvdWasm": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-autograd": {
+    ".": {
+      "derivative": {
+        "kind": "function"
+      },
+      "DualTensor": {
+        "kind": "function"
+      },
+      "forwardGrad": {
+        "kind": "function"
+      },
+      "grad": {
+        "kind": "function"
+      },
+      "jacobian": {
+        "kind": "function"
+      },
+      "NumericInput": {
+        "kind": "type"
+      },
+      "reverseGrad": {
+        "kind": "function"
+      },
+      "ScalarFn": {
+        "kind": "type"
+      },
+      "Tape": {
+        "kind": "function"
+      },
+      "TapedTensor": {
+        "kind": "function"
+      },
+      "valueAndGrad": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-functions": {
+    ".": {
+      "acf": {
+        "kind": "function"
+      },
+      "adfuller": {
+        "kind": "function"
+      },
+      "AdfullerResult": {
+        "kind": "type"
+      },
+      "alphaShape": {
+        "kind": "function"
+      },
+      "AlphaShapeResult": {
+        "kind": "type"
+      },
+      "astar": {
+        "kind": "function"
+      },
+      "AStarResult": {
+        "kind": "type"
+      },
+      "barnesG": {
+        "kind": "function"
+      },
+      "bellmanFord": {
+        "kind": "function"
+      },
+      "BellmanFordResult": {
+        "kind": "type"
+      },
+      "betaCDF": {
+        "kind": "function"
+      },
+      "betaQuantile": {
+        "kind": "function"
+      },
+      "bfgs": {
+        "kind": "function"
+      },
+      "BfgsOptions": {
+        "kind": "type"
+      },
+      "BfgsResult": {
+        "kind": "type"
+      },
+      "bfs": {
+        "kind": "function"
+      },
+      "bicgstab": {
+        "kind": "function"
+      },
+      "bilinear": {
+        "kind": "function"
+      },
+      "Bound": {
+        "kind": "type"
+      },
+      "boundingBox": {
+        "kind": "function"
+      },
+      "bsplineEval": {
+        "kind": "function"
+      },
+      "bsplineFit": {
+        "kind": "function"
+      },
+      "BSplineFitOptions": {
+        "kind": "type"
+      },
+      "BSplineTuple": {
+        "kind": "type"
+      },
+      "butter": {
+        "kind": "function"
+      },
+      "buttord": {
+        "kind": "function"
+      },
+      "care": {
+        "kind": "function"
+      },
+      "cauchyCDF": {
+        "kind": "function"
+      },
+      "cauchyPDF": {
+        "kind": "function"
+      },
+      "cauchyQuantile": {
+        "kind": "function"
+      },
+      "cg": {
+        "kind": "function"
+      },
+      "cheby1": {
+        "kind": "function"
+      },
+      "cheby2": {
+        "kind": "function"
+      },
+      "chi2Contingency": {
+        "kind": "function"
+      },
+      "Chi2ContingencyOptions": {
+        "kind": "type"
+      },
+      "Chi2ContingencyResult": {
+        "kind": "type"
+      },
+      "chiSquaredCDF": {
+        "kind": "function"
+      },
+      "chiSquaredQuantile": {
+        "kind": "function"
+      },
+      "circmean": {
+        "kind": "function"
+      },
+      "circstd": {
+        "kind": "function"
+      },
+      "circulant": {
+        "kind": "function"
+      },
+      "CircularOptions": {
+        "kind": "type"
+      },
+      "circvar": {
+        "kind": "function"
+      },
+      "clamp": {
+        "kind": "function"
+      },
+      "closenessCentrality": {
+        "kind": "function"
+      },
+      "cochranQ": {
+        "kind": "function"
+      },
+      "CochranQResult": {
+        "kind": "type"
+      },
+      "coherence": {
+        "kind": "function"
+      },
+      "combinationsGen": {
+        "kind": "function"
+      },
+      "companion": {
+        "kind": "function"
+      },
+      "CompiledScalar": {
+        "kind": "type"
+      },
+      "CompiledScalarGradient": {
+        "kind": "type"
+      },
+      "compileExpr": {
+        "kind": "function"
+      },
+      "compileScalar": {
+        "kind": "function"
+      },
+      "compileScalarGradient": {
+        "kind": "function"
+      },
+      "CompileScalarOptions": {
+        "kind": "type"
+      },
+      "complexCos": {
+        "kind": "function"
+      },
+      "ComplexMatrix": {
+        "kind": "type"
+      },
+      "complexSin": {
+        "kind": "function"
+      },
+      "ComplexValue": {
+        "kind": "type"
+      },
+      "config": {
+        "kind": "function"
+      },
+      "continuedFraction": {
+        "kind": "function"
+      },
+      "convexHull": {
+        "kind": "function"
+      },
+      "ConvexHullResult": {
+        "kind": "type"
+      },
+      "CoordinateDescentOptions": {
+        "kind": "type"
+      },
+      "corrcoef": {
+        "kind": "function"
+      },
+      "CorrelationTestResult": {
+        "kind": "type"
+      },
+      "cosm": {
+        "kind": "function"
+      },
+      "coulombF": {
+        "kind": "function"
+      },
+      "coulombFG": {
+        "kind": "function"
+      },
+      "CoulombFG": {
+        "kind": "type"
+      },
+      "coulombG": {
+        "kind": "function"
+      },
+      "cov": {
+        "kind": "function"
+      },
+      "csd": {
+        "kind": "function"
+      },
+      "CsdOptions": {
+        "kind": "type"
+      },
+      "cummax": {
+        "kind": "function"
+      },
+      "cummin": {
+        "kind": "function"
+      },
+      "cumprod": {
+        "kind": "function"
+      },
+      "cumtrapz": {
+        "kind": "function"
+      },
+      "cwt": {
+        "kind": "function"
+      },
+      "dare": {
+        "kind": "function"
+      },
+      "dbscan": {
+        "kind": "function"
+      },
+      "decimate": {
+        "kind": "function"
+      },
+      "deconvolve": {
+        "kind": "function"
+      },
+      "DeconvolveResult": {
+        "kind": "type"
+      },
+      "delaunay": {
+        "kind": "function"
+      },
+      "DelaunayResult": {
+        "kind": "type"
+      },
+      "derivativeAt": {
+        "kind": "function"
+      },
+      "describe": {
+        "kind": "function"
+      },
+      "DescribeResult": {
+        "kind": "type"
+      },
+      "detrend": {
+        "kind": "function"
+      },
+      "dfs": {
+        "kind": "function"
+      },
+      "dirichletPdf": {
+        "kind": "function"
+      },
+      "dirichletSample": {
+        "kind": "function"
+      },
+      "discreteLog": {
+        "kind": "function"
+      },
+      "DistributionName": {
+        "kind": "type"
+      },
+      "dlyap": {
+        "kind": "function"
+      },
+      "DualFn": {
+        "kind": "type"
+      },
+      "durbinWatson": {
+        "kind": "function"
+      },
+      "EARTH_RADIUS_KM": {
+        "kind": "number"
+      },
+      "eigsh": {
+        "kind": "function"
+      },
+      "EigshOperatorInput": {
+        "kind": "type"
+      },
+      "EigshOptions": {
+        "kind": "type"
+      },
+      "EigshResult": {
+        "kind": "type"
+      },
+      "elasticNet": {
+        "kind": "function"
+      },
+      "ellip": {
+        "kind": "function"
+      },
+      "eulerNumbers": {
+        "kind": "function"
+      },
+      "evaluate": {
+        "kind": "function"
+      },
+      "evaluateScalar": {
+        "kind": "function"
+      },
+      "ewma": {
+        "kind": "function"
+      },
+      "fCDF": {
+        "kind": "function"
+      },
+      "ferrersP": {
+        "kind": "function"
+      },
+      "fftfreq": {
+        "kind": "function"
+      },
+      "fftn": {
+        "kind": "function"
+      },
+      "fftshift": {
+        "kind": "function"
+      },
+      "filtfilt": {
+        "kind": "function"
+      },
+      "findPeaks": {
+        "kind": "function"
+      },
+      "FindPeaksOptions": {
+        "kind": "type"
+      },
+      "firls": {
+        "kind": "function"
+      },
+      "firwin": {
+        "kind": "function"
+      },
+      "firwinBandpass": {
+        "kind": "function"
+      },
+      "fisherExact": {
+        "kind": "function"
+      },
+      "FisherExactResult": {
+        "kind": "type"
+      },
+      "fitDistribution": {
+        "kind": "function"
+      },
+      "FitDistributionResult": {
+        "kind": "type"
+      },
+      "FitScalarOptions": {
+        "kind": "type"
+      },
+      "fitScalarParameters": {
+        "kind": "function"
+      },
+      "FitScalarResult": {
+        "kind": "type"
+      },
+      "floydWarshall": {
+        "kind": "function"
+      },
+      "fQuantile": {
+        "kind": "function"
+      },
+      "FrontCandidate": {
+        "kind": "type"
+      },
+      "fsolve": {
+        "kind": "function"
+      },
+      "FsolveOptions": {
+        "kind": "type"
+      },
+      "fTest": {
+        "kind": "function"
+      },
+      "FTestResult": {
+        "kind": "type"
+      },
+      "funm": {
+        "kind": "function"
+      },
+      "gammaCDF": {
+        "kind": "function"
+      },
+      "gammaQuantile": {
+        "kind": "function"
+      },
+      "gaussianKDE": {
+        "kind": "function"
+      },
+      "GaussianKDEOptions": {
+        "kind": "type"
+      },
+      "GaussianKDEResult": {
+        "kind": "type"
+      },
+      "gaussianProcessRegression": {
+        "kind": "function"
+      },
+      "gegenbauerC": {
+        "kind": "function"
+      },
+      "generalizedEig": {
+        "kind": "function"
+      },
+      "glm": {
+        "kind": "function"
+      },
+      "GlmFamily": {
+        "kind": "type"
+      },
+      "GlmLink": {
+        "kind": "type"
+      },
+      "GlmOptions": {
+        "kind": "type"
+      },
+      "GlmResult": {
+        "kind": "type"
+      },
+      "gmean": {
+        "kind": "function"
+      },
+      "gmres": {
+        "kind": "function"
+      },
+      "GmresOptions": {
+        "kind": "type"
+      },
+      "GPKernel": {
+        "kind": "type"
+      },
+      "GPModel": {
+        "kind": "type"
+      },
+      "GPOptions": {
+        "kind": "type"
+      },
+      "GPPrediction": {
+        "kind": "type"
+      },
+      "gpRegression": {
+        "kind": "function"
+      },
+      "gradient": {
+        "kind": "function"
+      },
+      "gradientAt": {
+        "kind": "function"
+      },
+      "gradientDescent": {
+        "kind": "function"
+      },
+      "graphColoring": {
+        "kind": "function"
+      },
+      "halfspaceIntersection": {
+        "kind": "function"
+      },
+      "HalfspaceIntersectionResult": {
+        "kind": "type"
+      },
+      "halley": {
+        "kind": "function"
+      },
+      "HalleyOptions": {
+        "kind": "type"
+      },
+      "harmonicCentrality": {
+        "kind": "function"
+      },
+      "haversine": {
+        "kind": "function"
+      },
+      "help": {
+        "kind": "function"
+      },
+      "hessian": {
+        "kind": "function"
+      },
+      "histogram": {
+        "kind": "function"
+      },
+      "HistogramResult": {
+        "kind": "type"
+      },
+      "hmean": {
+        "kind": "function"
+      },
+      "hungarian": {
+        "kind": "function"
+      },
+      "HungarianResult": {
+        "kind": "type"
+      },
+      "hyp0f1": {
+        "kind": "function"
+      },
+      "hyp1f1": {
+        "kind": "function"
+      },
+      "hyp2f1": {
+        "kind": "function"
+      },
+      "idwt": {
+        "kind": "function"
+      },
+      "ifftshift": {
+        "kind": "function"
+      },
+      "incompleteCholesky": {
+        "kind": "function"
+      },
+      "incompleteLU": {
+        "kind": "function"
+      },
+      "interpn": {
+        "kind": "function"
+      },
+      "interval": {
+        "kind": "function"
+      },
+      "Interval": {
+        "kind": "function"
+      },
+      "iqr": {
+        "kind": "function"
+      },
+      "irfft": {
+        "kind": "function"
+      },
+      "isIsomorphic": {
+        "kind": "function"
+      },
+      "istft": {
+        "kind": "function"
+      },
+      "isWasmLoaded": {
+        "kind": "function"
+      },
+      "jacobiCN": {
+        "kind": "function"
+      },
+      "jacobiDN": {
+        "kind": "function"
+      },
+      "jacobiP": {
+        "kind": "function"
+      },
+      "jacobiSN": {
+        "kind": "function"
+      },
+      "jarqueBera": {
+        "kind": "function"
+      },
+      "JarqueBeraResult": {
+        "kind": "type"
+      },
+      "katzCentrality": {
+        "kind": "function"
+      },
+      "kdTreeKNN": {
+        "kind": "function"
+      },
+      "kdTreeRadius": {
+        "kind": "function"
+      },
+      "kelvinBei": {
+        "kind": "function"
+      },
+      "kelvinBer": {
+        "kind": "function"
+      },
+      "kendalltau": {
+        "kind": "function"
+      },
+      "kendallTau": {
+        "kind": "function"
+      },
+      "kendallTauTest": {
+        "kind": "function"
+      },
+      "KendallTauTestResult": {
+        "kind": "type"
+      },
+      "kmeans": {
+        "kind": "function"
+      },
+      "KMeansResult": {
+        "kind": "type"
+      },
+      "knnClassify": {
+        "kind": "function"
+      },
+      "knnRegress": {
+        "kind": "function"
+      },
+      "kroneckerSymbol": {
+        "kind": "function"
+      },
+      "KruskalResult": {
+        "kind": "type"
+      },
+      "kruskalWallis": {
+        "kind": "function"
+      },
+      "KrylovOptions": {
+        "kind": "type"
+      },
+      "KrylovResult": {
+        "kind": "type"
+      },
+      "kurtosis": {
+        "kind": "function"
+      },
+      "laplaceCDF": {
+        "kind": "function"
+      },
+      "laplacePDF": {
+        "kind": "function"
+      },
+      "laplaceQuantile": {
+        "kind": "function"
+      },
+      "laplacianMatrix": {
+        "kind": "function"
+      },
+      "lasso": {
+        "kind": "function"
+      },
+      "ldl": {
+        "kind": "function"
+      },
+      "LDLResult": {
+        "kind": "type"
+      },
+      "lerchPhi": {
+        "kind": "function"
+      },
+      "levenbergMarquardt": {
+        "kind": "function"
+      },
+      "lfilter": {
+        "kind": "function"
+      },
+      "lfilterZi": {
+        "kind": "function"
+      },
+      "LinearOperatorInput": {
+        "kind": "type"
+      },
+      "linearRegression": {
+        "kind": "function"
+      },
+      "linregress": {
+        "kind": "function"
+      },
+      "LinregressResult": {
+        "kind": "type"
+      },
+      "LinRegressResult": {
+        "kind": "type"
+      },
+      "ljungBox": {
+        "kind": "function"
+      },
+      "LjungBoxResult": {
+        "kind": "type"
+      },
+      "LMOptions": {
+        "kind": "type"
+      },
+      "LMResult": {
+        "kind": "type"
+      },
+      "loadWasm": {
+        "kind": "function"
+      },
+      "logdet": {
+        "kind": "function"
+      },
+      "logisticCDF": {
+        "kind": "function"
+      },
+      "logisticPDF": {
+        "kind": "function"
+      },
+      "logisticQuantile": {
+        "kind": "function"
+      },
+      "logisticRegression": {
+        "kind": "function"
+      },
+      "LogisticRegressionOptions": {
+        "kind": "type"
+      },
+      "LogisticRegressionResult": {
+        "kind": "type"
+      },
+      "logsumexp": {
+        "kind": "function"
+      },
+      "louvainCommunities": {
+        "kind": "function"
+      },
+      "lsqBounded": {
+        "kind": "function"
+      },
+      "LsqBoundedOptions": {
+        "kind": "type"
+      },
+      "LsqBoundedResult": {
+        "kind": "type"
+      },
+      "MASS_PROPERTY_SHAPES": {
+        "kind": "object"
+      },
+      "massProperties": {
+        "kind": "function"
+      },
+      "MassProperties2D": {
+        "kind": "type"
+      },
+      "MassProperties3D": {
+        "kind": "type"
+      },
+      "MassPropertyShape": {
+        "kind": "type"
+      },
+      "MassPropertyShapeRecord": {
+        "kind": "type"
+      },
+      "mathieuA": {
+        "kind": "function"
+      },
+      "mathieuB": {
+        "kind": "function"
+      },
+      "mathieuCe": {
+        "kind": "function"
+      },
+      "mathieuSe": {
+        "kind": "function"
+      },
+      "maxClique": {
+        "kind": "function"
+      },
+      "maxFlow": {
+        "kind": "function"
+      },
+      "MaxFlowResult": {
+        "kind": "type"
+      },
+      "mcnemar": {
+        "kind": "function"
+      },
+      "McNemarOptions": {
+        "kind": "type"
+      },
+      "McNemarResult": {
+        "kind": "type"
+      },
+      "minCut": {
+        "kind": "function"
+      },
+      "MinCutResult": {
+        "kind": "type"
+      },
+      "minimizeScalar": {
+        "kind": "function"
+      },
+      "MinimizeScalarOptions": {
+        "kind": "type"
+      },
+      "MinimizeScalarResult": {
+        "kind": "type"
+      },
+      "minres": {
+        "kind": "function"
+      },
+      "moment": {
+        "kind": "function"
+      },
+      "monteCarloIntegrate": {
+        "kind": "function"
+      },
+      "MonteCarloOptions": {
+        "kind": "type"
+      },
+      "MonteCarloResult": {
+        "kind": "type"
+      },
+      "movingAverage": {
+        "kind": "function"
+      },
+      "multipleTest": {
+        "kind": "function"
+      },
+      "MultipleTestMethod": {
+        "kind": "type"
+      },
+      "multiplicativeOrder": {
+        "kind": "function"
+      },
+      "MvnCov": {
+        "kind": "type"
+      },
+      "mvnPdf": {
+        "kind": "function"
+      },
+      "mvnSample": {
+        "kind": "function"
+      },
+      "MvnSampleOptions": {
+        "kind": "type"
+      },
+      "MvnVector": {
+        "kind": "type"
+      },
+      "NDArrayInput": {
+        "kind": "type"
+      },
+      "nelderMead": {
+        "kind": "function"
+      },
+      "NelderMeadOptions": {
+        "kind": "type"
+      },
+      "newton": {
+        "kind": "function"
+      },
+      "NewtonOptions": {
+        "kind": "type"
+      },
+      "nnls": {
+        "kind": "function"
+      },
+      "NnlsOptions": {
+        "kind": "type"
+      },
+      "NnlsResult": {
+        "kind": "type"
+      },
+      "noncentralChi2CDF": {
+        "kind": "function"
+      },
+      "noncentralFCDF": {
+        "kind": "function"
+      },
+      "noncentralTCDF": {
+        "kind": "function"
+      },
+      "normalQuantile": {
+        "kind": "function"
+      },
+      "numericallyEquivalent": {
+        "kind": "function"
+      },
+      "NumericEquivalence": {
+        "kind": "type"
+      },
+      "NumericEquivalenceError": {
+        "kind": "function"
+      },
+      "NumericEquivalenceOptions": {
+        "kind": "type"
+      },
+      "numericJacobian": {
+        "kind": "function"
+      },
+      "NumericJacobianOptions": {
+        "kind": "type"
+      },
+      "ols": {
+        "kind": "function"
+      },
+      "OlsOptions": {
+        "kind": "type"
+      },
+      "OlsResult": {
+        "kind": "type"
+      },
+      "OptimizeResult": {
+        "kind": "type"
+      },
+      "orth": {
+        "kind": "function"
+      },
+      "OrthOptions": {
+        "kind": "type"
+      },
+      "pacf": {
+        "kind": "function"
+      },
+      "parabolicCylinderD": {
+        "kind": "function"
+      },
+      "paretoFront": {
+        "kind": "function"
+      },
+      "ParetoFrontError": {
+        "kind": "function"
+      },
+      "parse": {
+        "kind": "function"
+      },
+      "parser": {
+        "kind": "function"
+      },
+      "peakWidths": {
+        "kind": "function"
+      },
+      "pearsonr": {
+        "kind": "function"
+      },
+      "permutationsGen": {
+        "kind": "function"
+      },
+      "pFq": {
+        "kind": "function"
+      },
+      "PhysicsEvaluateOptions": {
+        "kind": "type"
+      },
+      "physicsScope": {
+        "kind": "function"
+      },
+      "polygamma": {
+        "kind": "function"
+      },
+      "polylog": {
+        "kind": "function"
+      },
+      "Preconditioner": {
+        "kind": "type"
+      },
+      "primitiveRoot": {
+        "kind": "function"
+      },
+      "procrustes": {
+        "kind": "function"
+      },
+      "ProcrustesResult": {
+        "kind": "type"
+      },
+      "propagateUncertainty": {
+        "kind": "function"
+      },
+      "ptp": {
+        "kind": "function"
+      },
+      "quad": {
+        "kind": "function"
+      },
+      "QuadOptions": {
+        "kind": "type"
+      },
+      "QuadResult": {
+        "kind": "type"
+      },
+      "quaternionConjugate": {
+        "kind": "function"
+      },
+      "quaternionExp": {
+        "kind": "function"
+      },
+      "quaternionFromAxisAngle": {
+        "kind": "function"
+      },
+      "quaternionInverse": {
+        "kind": "function"
+      },
+      "quaternionLog": {
+        "kind": "function"
+      },
+      "quaternionMultiply": {
+        "kind": "function"
+      },
+      "quaternionNormalize": {
+        "kind": "function"
+      },
+      "quaternionPow": {
+        "kind": "function"
+      },
+      "quaternionRotate": {
+        "kind": "function"
+      },
+      "quaternionSlerp": {
+        "kind": "function"
+      },
+      "quaternionToEuler": {
+        "kind": "function"
+      },
+      "quaternionToRotationMatrix": {
+        "kind": "function"
+      },
+      "qz": {
+        "kind": "function"
+      },
+      "rankdata": {
+        "kind": "function"
+      },
+      "RayHit": {
+        "kind": "type"
+      },
+      "rayPlaneIntersect": {
+        "kind": "function"
+      },
+      "rayTriangleIntersect": {
+        "kind": "function"
+      },
+      "RegularizedRegressionResult": {
+        "kind": "type"
+      },
+      "remez": {
+        "kind": "function"
+      },
+      "RemezType": {
+        "kind": "type"
+      },
+      "replacer": {
+        "kind": "function"
+      },
+      "reviver": {
+        "kind": "function"
+      },
+      "rfft": {
+        "kind": "function"
+      },
+      "rfftfreq": {
+        "kind": "function"
+      },
+      "ridge": {
+        "kind": "function"
+      },
+      "RidgeOptions": {
+        "kind": "type"
+      },
+      "riemannSiegelZ": {
+        "kind": "function"
+      },
+      "root": {
+        "kind": "function"
+      },
+      "rootsLegendre": {
+        "kind": "function"
+      },
+      "RootsLegendreResult": {
+        "kind": "type"
+      },
+      "runWithConfig": {
+        "kind": "function"
+      },
+      "SampleSeedOptions": {
+        "kind": "type"
+      },
+      "savgol": {
+        "kind": "function"
+      },
+      "scalar": {
+        "kind": "object"
+      },
+      "ScalarBatchResult": {
+        "kind": "type"
+      },
+      "ScalarComplexFunction": {
+        "kind": "type"
+      },
+      "ScalarEvalError": {
+        "kind": "function"
+      },
+      "ScalarScope": {
+        "kind": "type"
+      },
+      "ScoredCandidate": {
+        "kind": "type"
+      },
+      "scoreFront": {
+        "kind": "function"
+      },
+      "secant": {
+        "kind": "function"
+      },
+      "SecantOptions": {
+        "kind": "type"
+      },
+      "SegmentClosestResult": {
+        "kind": "type"
+      },
+      "segmentSegmentClosest": {
+        "kind": "function"
+      },
+      "selectFrontModel": {
+        "kind": "function"
+      },
+      "sem": {
+        "kind": "function"
+      },
+      "setDisjoint": {
+        "kind": "function"
+      },
+      "setEqual": {
+        "kind": "function"
+      },
+      "setIsSuperset": {
+        "kind": "function"
+      },
+      "siegelZ": {
+        "kind": "function"
+      },
+      "sigmoid": {
+        "kind": "function"
+      },
+      "sinm": {
+        "kind": "function"
+      },
+      "skewness": {
+        "kind": "function"
+      },
+      "slerp": {
+        "kind": "function"
+      },
+      "softmax": {
+        "kind": "function"
+      },
+      "solveBanded": {
+        "kind": "function"
+      },
+      "sosfilt": {
+        "kind": "function"
+      },
+      "spearman": {
+        "kind": "function"
+      },
+      "spearmanr": {
+        "kind": "function"
+      },
+      "spectralClustering": {
+        "kind": "function"
+      },
+      "sphericalVoronoi": {
+        "kind": "function"
+      },
+      "SphericalVoronoiResult": {
+        "kind": "type"
+      },
+      "spheroidalAngular": {
+        "kind": "function"
+      },
+      "spheroidalCharacteristic": {
+        "kind": "function"
+      },
+      "spheroidalLambda": {
+        "kind": "function"
+      },
+      "spheroidalRadial": {
+        "kind": "function"
+      },
+      "stft": {
+        "kind": "function"
+      },
+      "StftOptions": {
+        "kind": "type"
+      },
+      "StftResult": {
+        "kind": "type"
+      },
+      "stirlingS1": {
+        "kind": "function"
+      },
+      "struveH": {
+        "kind": "function"
+      },
+      "struveL": {
+        "kind": "function"
+      },
+      "studentizedRangeCDF": {
+        "kind": "function"
+      },
+      "studentizedRangeQuantile": {
+        "kind": "function"
+      },
+      "studentTCDF": {
+        "kind": "function"
+      },
+      "studentTQuantile": {
+        "kind": "function"
+      },
+      "svd": {
+        "kind": "function"
+      },
+      "SVDOptions": {
+        "kind": "type"
+      },
+      "SVDResult": {
+        "kind": "type"
+      },
+      "svds": {
+        "kind": "function"
+      },
+      "SvdsOptions": {
+        "kind": "type"
+      },
+      "SvdsResult": {
+        "kind": "type"
+      },
+      "symbolicIntegral": {
+        "kind": "function"
+      },
+      "thomasSolve": {
+        "kind": "function"
+      },
+      "to": {
+        "kind": "function"
+      },
+      "toBest": {
+        "kind": "function"
+      },
+      "toeplitz": {
+        "kind": "function"
+      },
+      "toeplitzSolve": {
+        "kind": "function"
+      },
+      "trigamma": {
+        "kind": "function"
+      },
+      "tril": {
+        "kind": "function"
+      },
+      "trimmedMean": {
+        "kind": "function"
+      },
+      "triu": {
+        "kind": "function"
+      },
+      "tTestPower": {
+        "kind": "function"
+      },
+      "TTestPowerAlternative": {
+        "kind": "type"
+      },
+      "TTestPowerOptions": {
+        "kind": "type"
+      },
+      "TukeyComparison": {
+        "kind": "type"
+      },
+      "tukeyHSD": {
+        "kind": "function"
+      },
+      "UncertaintyExpression": {
+        "kind": "type"
+      },
+      "UncertaintyPropagationOptions": {
+        "kind": "type"
+      },
+      "UncertaintyPropagationResult": {
+        "kind": "type"
+      },
+      "valueAndDerivativeAt": {
+        "kind": "function"
+      },
+      "vander": {
+        "kind": "function"
+      },
+      "variation": {
+        "kind": "function"
+      },
+      "VectorField": {
+        "kind": "type"
+      },
+      "vonMisesPDF": {
+        "kind": "function"
+      },
+      "voronoi": {
+        "kind": "function"
+      },
+      "VoronoiResult": {
+        "kind": "type"
+      },
+      "wavedec": {
+        "kind": "function"
+      },
+      "waverec": {
+        "kind": "function"
+      },
+      "wiener": {
+        "kind": "function"
+      },
+      "wilcoxon": {
+        "kind": "function"
+      },
+      "WilcoxonResult": {
+        "kind": "type"
+      },
+      "wishartSample": {
+        "kind": "function"
+      },
+      "zpk2sos": {
+        "kind": "function"
+      },
+      "zscore": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-expression": {
+    ".": {
+      "createAccessorNode": {
+        "kind": "function"
+      },
+      "createArrayNode": {
+        "kind": "function"
+      },
+      "createAssignmentNode": {
+        "kind": "function"
+      },
+      "createBlockNode": {
+        "kind": "function"
+      },
+      "createConditionalNode": {
+        "kind": "function"
+      },
+      "createConstantNode": {
+        "kind": "function"
+      },
+      "createFunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "createFunctionNode": {
+        "kind": "function"
+      },
+      "createIndexNode": {
+        "kind": "function"
+      },
+      "createNode": {
+        "kind": "function"
+      },
+      "createObjectNode": {
+        "kind": "function"
+      },
+      "createOperatorNode": {
+        "kind": "function"
+      },
+      "createParenthesisNode": {
+        "kind": "function"
+      },
+      "createParser": {
+        "kind": "function"
+      },
+      "createRangeNode": {
+        "kind": "function"
+      },
+      "createRelationalNode": {
+        "kind": "function"
+      },
+      "createScalarBuilder": {
+        "kind": "function"
+      },
+      "createSymbolNode": {
+        "kind": "function"
+      },
+      "embeddedDocs": {
+        "kind": "object"
+      },
+      "escapeMathML": {
+        "kind": "function"
+      },
+      "forEachScalar": {
+        "kind": "function"
+      },
+      "getStringSubset": {
+        "kind": "function"
+      },
+      "IndexLike": {
+        "kind": "type"
+      },
+      "LoweredScalarFn": {
+        "kind": "type"
+      },
+      "mapScalar": {
+        "kind": "function"
+      },
+      "mathMLDocument": {
+        "kind": "function"
+      },
+      "mathMLError": {
+        "kind": "function"
+      },
+      "MathNode": {
+        "kind": "type"
+      },
+      "SCALAR_FUNCTION_LOWERING": {
+        "kind": "object"
+      },
+      "SCALAR_FUNCTIONS": {
+        "kind": "object"
+      },
+      "ScalarBuilder": {
+        "kind": "type"
+      },
+      "ScalarBuildError": {
+        "kind": "function"
+      },
+      "scalarCanonical": {
+        "kind": "function"
+      },
+      "scalarCanonicalKey": {
+        "kind": "function"
+      },
+      "scalarComplexity": {
+        "kind": "function"
+      },
+      "ScalarComplexityWeights": {
+        "kind": "type"
+      },
+      "scalarDepth": {
+        "kind": "function"
+      },
+      "scalarEquals": {
+        "kind": "function"
+      },
+      "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarNode": {
+        "kind": "type"
+      },
+      "ScalarOperator": {
+        "kind": "type"
+      },
+      "scalarSize": {
+        "kind": "function"
+      },
+      "scalarSymbols": {
+        "kind": "function"
+      },
+      "setStringSubset": {
+        "kind": "function"
+      },
+      "StringOptions": {
+        "kind": "type"
+      },
+      "toMathMLSymbol": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-parser": {
+    ".": {
+      "createAccessorNode": {
+        "kind": "function"
+      },
+      "createArrayNode": {
+        "kind": "function"
+      },
+      "createAssignmentNode": {
+        "kind": "function"
+      },
+      "createBlockNode": {
+        "kind": "function"
+      },
+      "createConditionalNode": {
+        "kind": "function"
+      },
+      "createConstantNode": {
+        "kind": "function"
+      },
+      "createFunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "createFunctionNode": {
+        "kind": "function"
+      },
+      "createIndexNode": {
+        "kind": "function"
+      },
+      "createNode": {
+        "kind": "function"
+      },
+      "createObjectNode": {
+        "kind": "function"
+      },
+      "createOperatorNode": {
+        "kind": "function"
+      },
+      "createParenthesisNode": {
+        "kind": "function"
+      },
+      "createParse": {
+        "kind": "function"
+      },
+      "createParser": {
+        "kind": "function"
+      },
+      "createParserClass": {
+        "kind": "function"
+      },
+      "createRangeNode": {
+        "kind": "function"
+      },
+      "createRelationalNode": {
+        "kind": "function"
+      },
+      "createSymbolNode": {
+        "kind": "function"
+      },
+      "getAssociativity": {
+        "kind": "function"
+      },
+      "getOperator": {
+        "kind": "function"
+      },
+      "getPrecedence": {
+        "kind": "function"
+      },
+      "isAssociativeWith": {
+        "kind": "function"
+      },
+      "keywords": {
+        "kind": "object"
+      },
+      "properties": {
+        "kind": "object"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-units": {
+    ".": {
+      "addExactScales": {
+        "kind": "function"
+      },
+      "ALL_UNITS": {
+        "kind": "object"
+      },
+      "BASE_UNITS": {
+        "kind": "object"
+      },
+      "BEST_PREFIXES": {
+        "kind": "object"
+      },
+      "binaryExactScale": {
+        "kind": "function"
+      },
+      "clearExactScaleNumberCache": {
+        "kind": "function"
+      },
+      "decimalExactScale": {
+        "kind": "function"
+      },
+      "DERIVED_UNITS": {
+        "kind": "object"
+      },
+      "dim": {
+        "kind": "function"
+      },
+      "DIMENSIONLESS": {
+        "kind": "object"
+      },
+      "DimensionMismatchError": {
+        "kind": "function"
+      },
+      "Dimensions": {
+        "kind": "type"
+      },
+      "divideExactScales": {
+        "kind": "function"
+      },
+      "ExactScale": {
+        "kind": "type"
+      },
+      "exactScaleNumberCacheSize": {
+        "kind": "function"
+      },
+      "exactScaleOf": {
+        "kind": "function"
+      },
+      "exactScalesEqual": {
+        "kind": "function"
+      },
+      "exactScaleToNumber": {
+        "kind": "function"
+      },
+      "formatExactScale": {
+        "kind": "function"
+      },
+      "fromSiDimensions": {
+        "kind": "function"
+      },
+      "fromSiDimensionVector": {
+        "kind": "function"
+      },
+      "getPrefix": {
+        "kind": "function"
+      },
+      "getUnitDef": {
+        "kind": "function"
+      },
+      "getUnitPrefix": {
+        "kind": "function"
+      },
+      "getUnitRow": {
+        "kind": "function"
+      },
+      "IrrationalName": {
+        "kind": "type"
+      },
+      "irrationalPower": {
+        "kind": "function"
+      },
+      "IrrationalPowers": {
+        "kind": "type"
+      },
+      "isRationalScale": {
+        "kind": "function"
+      },
+      "isUnit": {
+        "kind": "function"
+      },
+      "isUnitValue": {
+        "kind": "function"
+      },
+      "LN2_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "multiplyExactScales": {
+        "kind": "function"
+      },
+      "NAMED_IRRATIONALS": {
+        "kind": "object"
+      },
+      "NAMED_SCALES": {
+        "kind": "object"
+      },
+      "namedExactScale": {
+        "kind": "function"
+      },
+      "namedIrrationalScale": {
+        "kind": "function"
+      },
+      "PI_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "powerExactScale": {
+        "kind": "function"
+      },
+      "ratioExactScale": {
+        "kind": "function"
+      },
+      "readScaleExpression": {
+        "kind": "function"
+      },
+      "readUnitScale": {
+        "kind": "function"
+      },
+      "SI_DIMENSION_LENGTH": {
+        "kind": "number"
+      },
+      "SI_PREFIXES": {
+        "kind": "object"
+      },
+      "SiDimensionExponent": {
+        "kind": "type"
+      },
+      "SiDimensionOptions": {
+        "kind": "type"
+      },
+      "SiDimensionVector": {
+        "kind": "type"
+      },
+      "toSiDimensions": {
+        "kind": "function"
+      },
+      "toSiDimensionVector": {
+        "kind": "function"
+      },
+      "Unit": {
+        "kind": "function"
+      },
+      "UNIT_ALIASES": {
+        "kind": "object"
+      },
+      "UNIT_DIMENSION_LENGTH": {
+        "kind": "number"
+      },
+      "UNIT_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "UNIT_PREFIX_SETS": {
+        "kind": "object"
+      },
+      "UNIT_ROW_ALIASES": {
+        "kind": "object"
+      },
+      "UNIT_ROWS": {
+        "kind": "object"
+      },
+      "UnitBaseKey": {
+        "kind": "type"
+      },
+      "UnitDef": {
+        "kind": "type"
+      },
+      "UnitParseError": {
+        "kind": "function"
+      },
+      "UnitPrefix": {
+        "kind": "type"
+      },
+      "unitPrefixExactScale": {
+        "kind": "function"
+      },
+      "UnitPrefixSetKey": {
+        "kind": "type"
+      },
+      "UnitRow": {
+        "kind": "type"
+      },
+      "unitRowExactOffset": {
+        "kind": "function"
+      },
+      "unitRowExactScale": {
+        "kind": "function"
+      },
+      "unitRowValue": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-numbers": {
+    ".": {
+      "BigNumber": {
+        "kind": "function"
+      },
+      "BIGNUMBER_E": {
+        "kind": "object"
+      },
+      "BIGNUMBER_LN10": {
+        "kind": "object"
+      },
+      "BIGNUMBER_LN2": {
+        "kind": "object"
+      },
+      "BIGNUMBER_NEG_ONE": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ONE": {
+        "kind": "object"
+      },
+      "BIGNUMBER_PI": {
+        "kind": "object"
+      },
+      "BIGNUMBER_TEN": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ZERO": {
+        "kind": "object"
+      },
+      "BigNumberConfig": {
+        "kind": "type"
+      },
+      "Complex": {
+        "kind": "function"
+      },
+      "COMPLEX_NEG_ONE": {
+        "kind": "object"
+      },
+      "COMPLEX_ONE": {
+        "kind": "object"
+      },
+      "COMPLEX_ZERO": {
+        "kind": "object"
+      },
+      "Fraction": {
+        "kind": "function"
+      },
+      "FRACTION_HALF": {
+        "kind": "object"
+      },
+      "FRACTION_NEG_ONE": {
+        "kind": "object"
+      },
+      "FRACTION_ONE": {
+        "kind": "object"
+      },
+      "FRACTION_QUARTER": {
+        "kind": "object"
+      },
+      "FRACTION_THIRD": {
+        "kind": "object"
+      },
+      "FRACTION_ZERO": {
+        "kind": "object"
+      },
+      "I": {
+        "kind": "object"
+      },
+      "IBigNumber": {
+        "kind": "type"
+      },
+      "IComplex": {
+        "kind": "type"
+      },
+      "IFraction": {
+        "kind": "type"
+      },
+      "isBigNumber": {
+        "kind": "function"
+      },
+      "isComplex": {
+        "kind": "function"
+      },
+      "isFraction": {
+        "kind": "function"
+      },
+      "RoundingMode": {
+        "kind": "type"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-ast": {
+    ".": {
+      "createAccessorNode": {
+        "kind": "function"
+      },
+      "createArrayNode": {
+        "kind": "function"
+      },
+      "createAssignmentNode": {
+        "kind": "function"
+      },
+      "createBlockNode": {
+        "kind": "function"
+      },
+      "createConditionalNode": {
+        "kind": "function"
+      },
+      "createConstantNode": {
+        "kind": "function"
+      },
+      "createFunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "createFunctionNode": {
+        "kind": "function"
+      },
+      "createIndexNode": {
+        "kind": "function"
+      },
+      "createNode": {
+        "kind": "function"
+      },
+      "createObjectNode": {
+        "kind": "function"
+      },
+      "createOperatorNode": {
+        "kind": "function"
+      },
+      "createParenthesisNode": {
+        "kind": "function"
+      },
+      "createRangeNode": {
+        "kind": "function"
+      },
+      "createRelationalNode": {
+        "kind": "function"
+      },
+      "createSymbolNode": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-evaluator": {
+    ".": {
+      "compile": {
+        "kind": "function"
+      },
+      "CompiledExpression": {
+        "kind": "type"
+      },
+      "compileExpression": {
+        "kind": "function"
+      },
+      "createEvaluate": {
+        "kind": "function"
+      },
+      "Scope": {
+        "kind": "type"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-linalg": {
+    ".": {
+      "cholesky": {
+        "kind": "function"
+      },
+      "CholeskyResult": {
+        "kind": "type"
+      },
+      "cond": {
+        "kind": "function"
+      },
+      "eig": {
+        "kind": "function"
+      },
+      "EigOptions": {
+        "kind": "type"
+      },
+      "EigResult": {
+        "kind": "type"
+      },
+      "eigvals": {
+        "kind": "function"
+      },
+      "eigvalsWasm": {
+        "kind": "function"
+      },
+      "eigWasm": {
+        "kind": "function"
+      },
+      "ExpmOptions": {
+        "kind": "type"
+      },
+      "LogmOptions": {
+        "kind": "type"
+      },
+      "lowRankApprox": {
+        "kind": "function"
+      },
+      "lu": {
+        "kind": "function"
+      },
+      "LUResult": {
+        "kind": "type"
+      },
+      "matrixExpm": {
+        "kind": "function"
+      },
+      "matrixLogm": {
+        "kind": "function"
+      },
+      "matrixPinv": {
+        "kind": "function"
+      },
+      "matrixSchur": {
+        "kind": "function"
+      },
+      "matrixSqrtm": {
+        "kind": "function"
+      },
+      "norm2": {
+        "kind": "function"
+      },
+      "normFro": {
+        "kind": "function"
+      },
+      "pinv": {
+        "kind": "function"
+      },
+      "PinvOptions": {
+        "kind": "type"
+      },
+      "powerIteration": {
+        "kind": "function"
+      },
+      "qr": {
+        "kind": "function"
+      },
+      "QROptions": {
+        "kind": "type"
+      },
+      "QRResult": {
+        "kind": "type"
+      },
+      "SchurOptions": {
+        "kind": "type"
+      },
+      "SchurResult": {
+        "kind": "type"
+      },
+      "singularValues": {
+        "kind": "function"
+      },
+      "spectralRadiusWasm": {
+        "kind": "function"
+      },
+      "SqrtmOptions": {
+        "kind": "type"
+      },
+      "svd": {
+        "kind": "function"
+      },
+      "SVDOptions": {
+        "kind": "type"
+      },
+      "SVDResult": {
+        "kind": "type"
+      },
+      "svdWasm": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-arithmetic": {
+    ".": {
+      "abs": {
+        "kind": "function"
+      },
+      "add": {
+        "kind": "function"
+      },
+      "cbrt": {
+        "kind": "function"
+      },
+      "ceil": {
+        "kind": "function"
+      },
+      "compare": {
+        "kind": "function"
+      },
+      "cosh": {
+        "kind": "function"
+      },
+      "cube": {
+        "kind": "function"
+      },
+      "divide": {
+        "kind": "function"
+      },
+      "dot": {
+        "kind": "function"
+      },
+      "equal": {
+        "kind": "function"
+      },
+      "exp": {
+        "kind": "function"
+      },
+      "expm1": {
+        "kind": "function"
+      },
+      "fix": {
+        "kind": "function"
+      },
+      "floor": {
+        "kind": "function"
+      },
+      "gcd": {
+        "kind": "function"
+      },
+      "larger": {
+        "kind": "function"
+      },
+      "largerEq": {
+        "kind": "function"
+      },
+      "lcm": {
+        "kind": "function"
+      },
+      "log": {
+        "kind": "function"
+      },
+      "log10": {
+        "kind": "function"
+      },
+      "log1p": {
+        "kind": "function"
+      },
+      "log2": {
+        "kind": "function"
+      },
+      "max": {
+        "kind": "function"
+      },
+      "mean": {
+        "kind": "function"
+      },
+      "min": {
+        "kind": "function"
+      },
+      "mod": {
+        "kind": "function"
+      },
+      "multiply": {
+        "kind": "function"
+      },
+      "norm": {
+        "kind": "function"
+      },
+      "nthRoot": {
+        "kind": "function"
+      },
+      "pow": {
+        "kind": "function"
+      },
+      "round": {
+        "kind": "function"
+      },
+      "sign": {
+        "kind": "function"
+      },
+      "sinh": {
+        "kind": "function"
+      },
+      "smaller": {
+        "kind": "function"
+      },
+      "smallerEq": {
+        "kind": "function"
+      },
+      "sqrt": {
+        "kind": "function"
+      },
+      "square": {
+        "kind": "function"
+      },
+      "std": {
+        "kind": "function"
+      },
+      "subtract": {
+        "kind": "function"
+      },
+      "sum": {
+        "kind": "function"
+      },
+      "tanh": {
+        "kind": "function"
+      },
+      "typedArithmetic": {
+        "kind": "object"
+      },
+      "unaryMinus": {
+        "kind": "function"
+      },
+      "unaryPlus": {
+        "kind": "function"
+      },
+      "variance": {
+        "kind": "function"
+      },
+      "xgcd": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-trigonometry": {
+    ".": {
+      "acos": {
+        "kind": "function"
+      },
+      "acosh": {
+        "kind": "function"
+      },
+      "acot": {
+        "kind": "function"
+      },
+      "acsc": {
+        "kind": "function"
+      },
+      "asec": {
+        "kind": "function"
+      },
+      "asin": {
+        "kind": "function"
+      },
+      "asinh": {
+        "kind": "function"
+      },
+      "atan": {
+        "kind": "function"
+      },
+      "atan2": {
+        "kind": "function"
+      },
+      "atanh": {
+        "kind": "function"
+      },
+      "cos": {
+        "kind": "function"
+      },
+      "cot": {
+        "kind": "function"
+      },
+      "csc": {
+        "kind": "function"
+      },
+      "hypot": {
+        "kind": "function"
+      },
+      "sec": {
+        "kind": "function"
+      },
+      "sin": {
+        "kind": "function"
+      },
+      "tan": {
+        "kind": "function"
+      },
+      "toDegrees": {
+        "kind": "function"
+      },
+      "toRadians": {
+        "kind": "function"
+      },
+      "typedTrigonometry": {
+        "kind": "object"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-statistics": {
+    ".": {
+      "acf": {
+        "kind": "function"
+      },
+      "andersonDarlingTest": {
+        "kind": "function"
+      },
+      "anova": {
+        "kind": "function"
+      },
+      "anova2": {
+        "kind": "function"
+      },
+      "Anova2Effect": {
+        "kind": "type"
+      },
+      "Anova2Result": {
+        "kind": "type"
+      },
+      "bartlettTest": {
+        "kind": "function"
+      },
+      "bernoulli": {
+        "kind": "function"
+      },
+      "bernoulliPMF": {
+        "kind": "function"
+      },
+      "beta": {
+        "kind": "function"
+      },
+      "betaCDF": {
+        "kind": "function"
+      },
+      "betaDist": {
+        "kind": "function"
+      },
+      "betaPDF": {
+        "kind": "function"
+      },
+      "betaQuantile": {
+        "kind": "function"
+      },
+      "binomialDist": {
+        "kind": "function"
+      },
+      "binomialPMF": {
+        "kind": "function"
+      },
+      "binomialTest": {
+        "kind": "function"
+      },
+      "bootstrapCI": {
+        "kind": "function"
+      },
+      "BootstrapCIOptions": {
+        "kind": "type"
+      },
+      "cauchyCDF": {
+        "kind": "function"
+      },
+      "cauchyPDF": {
+        "kind": "function"
+      },
+      "cauchyQuantile": {
+        "kind": "function"
+      },
+      "chiSquaredCDF": {
+        "kind": "function"
+      },
+      "chiSquaredDist": {
+        "kind": "function"
+      },
+      "chiSquaredQuantile": {
+        "kind": "function"
+      },
+      "chiSquareTest": {
+        "kind": "function"
+      },
+      "combinations": {
+        "kind": "function"
+      },
+      "combinationsWithRep": {
+        "kind": "function"
+      },
+      "ConfidenceInterval": {
+        "kind": "type"
+      },
+      "corr": {
+        "kind": "function"
+      },
+      "corrcoef": {
+        "kind": "function"
+      },
+      "CorrelationTestResult": {
+        "kind": "type"
+      },
+      "cov": {
+        "kind": "function"
+      },
+      "cummax": {
+        "kind": "function"
+      },
+      "cummin": {
+        "kind": "function"
+      },
+      "cumprod": {
+        "kind": "function"
+      },
+      "cumsum": {
+        "kind": "function"
+      },
+      "cumtrapz": {
+        "kind": "function"
+      },
+      "dagostinoTest": {
+        "kind": "function"
+      },
+      "describe": {
+        "kind": "function"
+      },
+      "DescribeResult": {
+        "kind": "type"
+      },
+      "detrend": {
+        "kind": "function"
+      },
+      "digamma": {
+        "kind": "function"
+      },
+      "discreteUniformDist": {
+        "kind": "function"
+      },
+      "DIST_WORKER_THRESHOLD": {
+        "kind": "number"
+      },
+      "Distribution": {
+        "kind": "type"
+      },
+      "doubleFactorial": {
+        "kind": "function"
+      },
+      "entropy": {
+        "kind": "function"
+      },
+      "ewma": {
+        "kind": "function"
+      },
+      "exponentialCDF": {
+        "kind": "function"
+      },
+      "exponentialDist": {
+        "kind": "function"
+      },
+      "exponentialPDF": {
+        "kind": "function"
+      },
+      "factorial": {
+        "kind": "function"
+      },
+      "fallingFactorial": {
+        "kind": "function"
+      },
+      "fCDF": {
+        "kind": "function"
+      },
+      "fDist": {
+        "kind": "function"
+      },
+      "fisherExact": {
+        "kind": "function"
+      },
+      "fQuantile": {
+        "kind": "function"
+      },
+      "friedmanTest": {
+        "kind": "function"
+      },
+      "fTest": {
+        "kind": "function"
+      },
+      "gamma": {
+        "kind": "function"
+      },
+      "gammaCDF": {
+        "kind": "function"
+      },
+      "gammaDist": {
+        "kind": "function"
+      },
+      "gammaPDF": {
+        "kind": "function"
+      },
+      "gammaQuantile": {
+        "kind": "function"
+      },
+      "geometricPMF": {
+        "kind": "function"
+      },
+      "gmean": {
+        "kind": "function"
+      },
+      "gumbelDist": {
+        "kind": "function"
+      },
+      "histogram": {
+        "kind": "function"
+      },
+      "HistogramResult": {
+        "kind": "type"
+      },
+      "hmean": {
+        "kind": "function"
+      },
+      "HotellingResult": {
+        "kind": "type"
+      },
+      "hotellingT2": {
+        "kind": "function"
+      },
+      "hypergeometricDist": {
+        "kind": "function"
+      },
+      "invGaussDist": {
+        "kind": "function"
+      },
+      "iqr": {
+        "kind": "function"
+      },
+      "jarqueBera": {
+        "kind": "function"
+      },
+      "jsDivergence": {
+        "kind": "function"
+      },
+      "kendalltau": {
+        "kind": "function"
+      },
+      "kendallTau": {
+        "kind": "function"
+      },
+      "kldivergence": {
+        "kind": "function"
+      },
+      "kmeans": {
+        "kind": "function"
+      },
+      "kolmogorovSmirnov2Test": {
+        "kind": "function"
+      },
+      "kolmogorovSmirnovTest": {
+        "kind": "function"
+      },
+      "kruskalWallis": {
+        "kind": "function"
+      },
+      "kurtosis": {
+        "kind": "function"
+      },
+      "laplaceCDF": {
+        "kind": "function"
+      },
+      "laplacePDF": {
+        "kind": "function"
+      },
+      "laplaceQuantile": {
+        "kind": "function"
+      },
+      "leveneTest": {
+        "kind": "function"
+      },
+      "lgamma": {
+        "kind": "function"
+      },
+      "linearRegression": {
+        "kind": "function"
+      },
+      "linregress": {
+        "kind": "function"
+      },
+      "LinRegressResult": {
+        "kind": "type"
+      },
+      "logisticCDF": {
+        "kind": "function"
+      },
+      "logisticPDF": {
+        "kind": "function"
+      },
+      "logisticQuantile": {
+        "kind": "function"
+      },
+      "logNormalDist": {
+        "kind": "function"
+      },
+      "logsumexp": {
+        "kind": "function"
+      },
+      "mad": {
+        "kind": "function"
+      },
+      "mahalanobis": {
+        "kind": "function"
+      },
+      "mannWhitneyTest": {
+        "kind": "function"
+      },
+      "max": {
+        "kind": "function"
+      },
+      "maxSelect": {
+        "kind": "function"
+      },
+      "mean": {
+        "kind": "function"
+      },
+      "meanCI": {
+        "kind": "function"
+      },
+      "median": {
+        "kind": "function"
+      },
+      "medianSelect": {
+        "kind": "function"
+      },
+      "min": {
+        "kind": "function"
+      },
+      "minSelect": {
+        "kind": "function"
+      },
+      "mode": {
+        "kind": "function"
+      },
+      "moment": {
+        "kind": "function"
+      },
+      "movingAverage": {
+        "kind": "function"
+      },
+      "multinomial": {
+        "kind": "function"
+      },
+      "multipleComparison": {
+        "kind": "function"
+      },
+      "MultivariateDistribution": {
+        "kind": "type"
+      },
+      "multivariateNormal": {
+        "kind": "function"
+      },
+      "negativeBinomialDist": {
+        "kind": "function"
+      },
+      "noncentralChi2PDF": {
+        "kind": "function"
+      },
+      "normalCDF": {
+        "kind": "function"
+      },
+      "normalDist": {
+        "kind": "function"
+      },
+      "NormalityTestResult": {
+        "kind": "type"
+      },
+      "normalPDF": {
+        "kind": "function"
+      },
+      "normalQuantile": {
+        "kind": "function"
+      },
+      "parallelStatCorr": {
+        "kind": "function"
+      },
+      "parallelStatCumsum": {
+        "kind": "function"
+      },
+      "parallelStatDistance": {
+        "kind": "function"
+      },
+      "parallelStatHistogram": {
+        "kind": "function"
+      },
+      "parallelStatMAD": {
+        "kind": "function"
+      },
+      "parallelStatMax": {
+        "kind": "function"
+      },
+      "parallelStatMean": {
+        "kind": "function"
+      },
+      "parallelStatMeanAD": {
+        "kind": "function"
+      },
+      "parallelStatMedian": {
+        "kind": "function"
+      },
+      "parallelStatMin": {
+        "kind": "function"
+      },
+      "parallelStatMinMax": {
+        "kind": "function"
+      },
+      "parallelStatMode": {
+        "kind": "function"
+      },
+      "parallelStatNorm": {
+        "kind": "function"
+      },
+      "parallelStatPercentile": {
+        "kind": "function"
+      },
+      "parallelStatProd": {
+        "kind": "function"
+      },
+      "parallelStatQuantile": {
+        "kind": "function"
+      },
+      "parallelStatStd": {
+        "kind": "function"
+      },
+      "parallelStatSum": {
+        "kind": "function"
+      },
+      "parallelStatVariance": {
+        "kind": "function"
+      },
+      "paretoDist": {
+        "kind": "function"
+      },
+      "pearsonr": {
+        "kind": "function"
+      },
+      "PermutationOptions": {
+        "kind": "type"
+      },
+      "permutations": {
+        "kind": "function"
+      },
+      "permutationTest": {
+        "kind": "function"
+      },
+      "pickRandom": {
+        "kind": "function"
+      },
+      "poissonDist": {
+        "kind": "function"
+      },
+      "poissonPMF": {
+        "kind": "function"
+      },
+      "polyFit": {
+        "kind": "function"
+      },
+      "principalComponentAnalysis": {
+        "kind": "function"
+      },
+      "prod": {
+        "kind": "function"
+      },
+      "proportionCI": {
+        "kind": "function"
+      },
+      "proportionZTest": {
+        "kind": "function"
+      },
+      "ptp": {
+        "kind": "function"
+      },
+      "quantileSeq": {
+        "kind": "function"
+      },
+      "quickSelect": {
+        "kind": "function"
+      },
+      "random": {
+        "kind": "function"
+      },
+      "randomInt": {
+        "kind": "function"
+      },
+      "rankdata": {
+        "kind": "function"
+      },
+      "rayleighDist": {
+        "kind": "function"
+      },
+      "risingFactorial": {
+        "kind": "function"
+      },
+      "SampleNOptions": {
+        "kind": "type"
+      },
+      "seedProbabilityRng": {
+        "kind": "function"
+      },
+      "sem": {
+        "kind": "function"
+      },
+      "shapiroWilkTest": {
+        "kind": "function"
+      },
+      "skewness": {
+        "kind": "function"
+      },
+      "softmax": {
+        "kind": "function"
+      },
+      "spearman": {
+        "kind": "function"
+      },
+      "spearmanr": {
+        "kind": "function"
+      },
+      "spectralClustering": {
+        "kind": "function"
+      },
+      "std": {
+        "kind": "function"
+      },
+      "studentizedRangeCDF": {
+        "kind": "function"
+      },
+      "studentizedRangeQuantile": {
+        "kind": "function"
+      },
+      "studentTCDF": {
+        "kind": "function"
+      },
+      "studentTPDF": {
+        "kind": "function"
+      },
+      "studentTQuantile": {
+        "kind": "function"
+      },
+      "studentTTest": {
+        "kind": "function"
+      },
+      "studentTTestPaired": {
+        "kind": "function"
+      },
+      "subfactorial": {
+        "kind": "function"
+      },
+      "sum": {
+        "kind": "function"
+      },
+      "tDist": {
+        "kind": "function"
+      },
+      "trapzF64": {
+        "kind": "function"
+      },
+      "triangularDist": {
+        "kind": "function"
+      },
+      "trimmedMean": {
+        "kind": "function"
+      },
+      "tukeyHSD": {
+        "kind": "function"
+      },
+      "typedDistributions": {
+        "kind": "object"
+      },
+      "typedProbability": {
+        "kind": "object"
+      },
+      "typedStatistics": {
+        "kind": "object"
+      },
+      "uniformDist": {
+        "kind": "function"
+      },
+      "variance": {
+        "kind": "function"
+      },
+      "variation": {
+        "kind": "function"
+      },
+      "weibullDist": {
+        "kind": "function"
+      },
+      "wilcoxon": {
+        "kind": "function"
+      },
+      "zscore": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-signal": {
+    ".": {
+      "autoCorrelation": {
+        "kind": "function"
+      },
+      "bandpassFilter": {
+        "kind": "function"
+      },
+      "bartlettPSD": {
+        "kind": "function"
+      },
+      "chirpZTransform": {
+        "kind": "function"
+      },
+      "convolve": {
+        "kind": "function"
+      },
+      "correlate": {
+        "kind": "function"
+      },
+      "crossCorrelation": {
+        "kind": "function"
+      },
+      "dct": {
+        "kind": "function"
+      },
+      "dst": {
+        "kind": "function"
+      },
+      "dwt": {
+        "kind": "function"
+      },
+      "fourier": {
+        "kind": "function"
+      },
+      "goertzel": {
+        "kind": "function"
+      },
+      "groupDelay": {
+        "kind": "function"
+      },
+      "highpassFilter": {
+        "kind": "function"
+      },
+      "hilbertTransform": {
+        "kind": "function"
+      },
+      "idct": {
+        "kind": "function"
+      },
+      "idst": {
+        "kind": "function"
+      },
+      "invFourier": {
+        "kind": "function"
+      },
+      "lowpassFilter": {
+        "kind": "function"
+      },
+      "medfilt": {
+        "kind": "function"
+      },
+      "multiTaperPSD": {
+        "kind": "function"
+      },
+      "parallelAutoCorr": {
+        "kind": "function"
+      },
+      "parallelConv": {
+        "kind": "function"
+      },
+      "parallelFFT": {
+        "kind": "function"
+      },
+      "parallelFFTMagnitude": {
+        "kind": "function"
+      },
+      "parallelFFTPower": {
+        "kind": "function"
+      },
+      "parallelIFFT": {
+        "kind": "function"
+      },
+      "parallelXCorr": {
+        "kind": "function"
+      },
+      "periodogram": {
+        "kind": "function"
+      },
+      "resample": {
+        "kind": "function"
+      },
+      "typedSignal": {
+        "kind": "object"
+      },
+      "unwrapPhase": {
+        "kind": "function"
+      },
+      "welchPSD": {
+        "kind": "function"
+      },
+      "windowFunction": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-parallel": {
+    ".": {
+      "bitAnd": {
+        "kind": "function"
+      },
+      "bitNot": {
+        "kind": "function"
+      },
+      "bitOr": {
+        "kind": "function"
+      },
+      "BitwiseBinaryOp": {
+        "kind": "type"
+      },
+      "bitXor": {
+        "kind": "function"
+      },
+      "calculateChunks": {
+        "kind": "function"
+      },
+      "calculateOptimalChunks": {
+        "kind": "function"
+      },
+      "chunkArray": {
+        "kind": "function"
+      },
+      "chunkFloat64Array": {
+        "kind": "function"
+      },
+      "ChunkInfo": {
+        "kind": "type"
+      },
+      "ChunkOptions": {
+        "kind": "type"
+      },
+      "ChunkResult": {
+        "kind": "type"
+      },
+      "computePool": {
+        "kind": "object"
+      },
+      "ComputePool": {
+        "kind": "function"
+      },
+      "ComputePoolConfig": {
+        "kind": "type"
+      },
+      "DEFAULT_POOL_CONFIG": {
+        "kind": "object"
+      },
+      "DEFAULT_THRESHOLD_BY_OP": {
+        "kind": "object"
+      },
+      "DEFAULT_THRESHOLDS": {
+        "kind": "object"
+      },
+      "dispatch": {
+        "kind": "function"
+      },
+      "DispatchResult": {
+        "kind": "type"
+      },
+      "ElementwiseOptions": {
+        "kind": "type"
+      },
+      "ExecOptions": {
+        "kind": "type"
+      },
+      "ExecutionMode": {
+        "kind": "type"
+      },
+      "leftShift": {
+        "kind": "function"
+      },
+      "MapOptions": {
+        "kind": "type"
+      },
+      "MatmulOptions": {
+        "kind": "type"
+      },
+      "mergeArrayChunks": {
+        "kind": "function"
+      },
+      "mergeFloat64Chunks": {
+        "kind": "function"
+      },
+      "OperationCategory": {
+        "kind": "type"
+      },
+      "OpName": {
+        "kind": "type"
+      },
+      "OpThreshold": {
+        "kind": "type"
+      },
+      "parallelAbs": {
+        "kind": "function"
+      },
+      "parallelAdd": {
+        "kind": "function"
+      },
+      "parallelCos": {
+        "kind": "function"
+      },
+      "parallelCount": {
+        "kind": "function"
+      },
+      "parallelDistance": {
+        "kind": "function"
+      },
+      "parallelDivide": {
+        "kind": "function"
+      },
+      "parallelDot": {
+        "kind": "function"
+      },
+      "parallelElementwise": {
+        "kind": "function"
+      },
+      "parallelEvery": {
+        "kind": "function"
+      },
+      "parallelExp": {
+        "kind": "function"
+      },
+      "parallelFilter": {
+        "kind": "function"
+      },
+      "parallelFind": {
+        "kind": "function"
+      },
+      "parallelForEach": {
+        "kind": "function"
+      },
+      "parallelHistogram": {
+        "kind": "function"
+      },
+      "parallelLog": {
+        "kind": "function"
+      },
+      "parallelMap": {
+        "kind": "function"
+      },
+      "parallelMatmul": {
+        "kind": "function"
+      },
+      "parallelMatvec": {
+        "kind": "function"
+      },
+      "parallelMax": {
+        "kind": "function"
+      },
+      "parallelMean": {
+        "kind": "function"
+      },
+      "parallelMin": {
+        "kind": "function"
+      },
+      "parallelMinMax": {
+        "kind": "function"
+      },
+      "parallelMultiply": {
+        "kind": "function"
+      },
+      "parallelNegate": {
+        "kind": "function"
+      },
+      "parallelNorm": {
+        "kind": "function"
+      },
+      "parallelOuter": {
+        "kind": "function"
+      },
+      "parallelReduce": {
+        "kind": "function"
+      },
+      "ParallelResult": {
+        "kind": "type"
+      },
+      "parallelScale": {
+        "kind": "function"
+      },
+      "parallelSin": {
+        "kind": "function"
+      },
+      "parallelSome": {
+        "kind": "function"
+      },
+      "parallelSort": {
+        "kind": "function"
+      },
+      "parallelSqrt": {
+        "kind": "function"
+      },
+      "parallelSquare": {
+        "kind": "function"
+      },
+      "parallelStd": {
+        "kind": "function"
+      },
+      "parallelSubtract": {
+        "kind": "function"
+      },
+      "parallelSum": {
+        "kind": "function"
+      },
+      "parallelTan": {
+        "kind": "function"
+      },
+      "parallelTranspose": {
+        "kind": "function"
+      },
+      "parallelUnary": {
+        "kind": "function"
+      },
+      "parallelVariance": {
+        "kind": "function"
+      },
+      "partition2D": {
+        "kind": "function"
+      },
+      "partitionRange": {
+        "kind": "function"
+      },
+      "PoolOptions": {
+        "kind": "type"
+      },
+      "PoolStats": {
+        "kind": "type"
+      },
+      "ReduceOptions": {
+        "kind": "type"
+      },
+      "resolveOpThreshold": {
+        "kind": "function"
+      },
+      "rightArithShift": {
+        "kind": "function"
+      },
+      "rightLogShift": {
+        "kind": "function"
+      },
+      "shouldChunkParallelize": {
+        "kind": "function"
+      },
+      "shouldParallelize": {
+        "kind": "function"
+      },
+      "ThresholdConfig": {
+        "kind": "type"
+      },
+      "thresholdDispatcher": {
+        "kind": "object"
+      },
+      "ThresholdDispatcher": {
+        "kind": "function"
+      },
+      "Transfer": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-workbook": {
+    ".": {
+      "addCell": {
+        "kind": "function"
+      },
+      "buildDependencyGraph": {
+        "kind": "function"
+      },
+      "Cell": {
+        "kind": "type"
+      },
+      "CellPosition": {
+        "kind": "type"
+      },
+      "CellResult": {
+        "kind": "type"
+      },
+      "CellType": {
+        "kind": "type"
+      },
+      "createExecutor": {
+        "kind": "function"
+      },
+      "DependencyGraph": {
+        "kind": "type"
+      },
+      "DependencyNode": {
+        "kind": "type"
+      },
+      "detectCellType": {
+        "kind": "function"
+      },
+      "detectCycles": {
+        "kind": "function"
+      },
+      "editCell": {
+        "kind": "function"
+      },
+      "ExecutionMode": {
+        "kind": "type"
+      },
+      "formatResult": {
+        "kind": "function"
+      },
+      "getAncestors": {
+        "kind": "function"
+      },
+      "getDependents": {
+        "kind": "function"
+      },
+      "handleRequest": {
+        "kind": "function"
+      },
+      "mathMLToSVG": {
+        "kind": "function"
+      },
+      "MathSvgOptions": {
+        "kind": "type"
+      },
+      "moveCell": {
+        "kind": "function"
+      },
+      "ParseResult": {
+        "kind": "type"
+      },
+      "parseWorkbook": {
+        "kind": "function"
+      },
+      "removeCell": {
+        "kind": "function"
+      },
+      "RemoveResult": {
+        "kind": "type"
+      },
+      "renameCell": {
+        "kind": "function"
+      },
+      "RenderCell": {
+        "kind": "type"
+      },
+      "RenderDoc": {
+        "kind": "type"
+      },
+      "RunResult": {
+        "kind": "type"
+      },
+      "RuntimeConfig": {
+        "kind": "type"
+      },
+      "runWorkbookWithTimeout": {
+        "kind": "function"
+      },
+      "RunWorkbookWithTimeoutOptions": {
+        "kind": "type"
+      },
+      "SCHEMA_VERSION": {
+        "kind": "object"
+      },
+      "SerializedCellResult": {
+        "kind": "type"
+      },
+      "SerializedRunResult": {
+        "kind": "type"
+      },
+      "serializeWorkbook": {
+        "kind": "function"
+      },
+      "Session": {
+        "kind": "function"
+      },
+      "setMetadata": {
+        "kind": "function"
+      },
+      "stripOutputs": {
+        "kind": "function"
+      },
+      "toDOT": {
+        "kind": "function"
+      },
+      "toMermaid": {
+        "kind": "function"
+      },
+      "topologicalSort": {
+        "kind": "function"
+      },
+      "toTeX": {
+        "kind": "function"
+      },
+      "ToTexOptions": {
+        "kind": "type"
+      },
+      "VERSION": {
+        "kind": "string"
+      },
+      "Workbook": {
+        "kind": "type"
+      },
+      "WorkbookEvent": {
+        "kind": "type"
+      },
+      "WorkbookExecutor": {
+        "kind": "function"
+      },
+      "WorkbookMetadata": {
+        "kind": "type"
+      },
+      "WorkbookTimeoutError": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-wasm": {
+    ".": {
+      "__collect": {
+        "kind": "function"
+      },
+      "__new": {
+        "kind": "function"
+      },
+      "__pin": {
+        "kind": "function"
+      },
+      "__rtti_base": {
+        "kind": "object"
+      },
+      "__unpin": {
+        "kind": "function"
+      },
+      "abs_f64": {
+        "kind": "function"
+      },
+      "acos_f64": {
+        "kind": "function"
+      },
+      "acosh_f64": {
+        "kind": "function"
+      },
+      "add_f64": {
+        "kind": "function"
+      },
+      "airy_ai_f64": {
+        "kind": "function"
+      },
+      "airy_bi_f64": {
+        "kind": "function"
+      },
+      "apply_window_f64": {
+        "kind": "function"
+      },
+      "argsort_f64": {
+        "kind": "function"
+      },
+      "array_abs": {
+        "kind": "function"
+      },
+      "array_abs_ptr": {
+        "kind": "function"
+      },
+      "array_add": {
+        "kind": "function"
+      },
+      "array_add_inplace": {
+        "kind": "function"
+      },
+      "array_add_scalar": {
+        "kind": "function"
+      },
+      "array_add_scalar_inplace": {
+        "kind": "function"
+      },
+      "array_argmax": {
+        "kind": "function"
+      },
+      "array_argmin": {
+        "kind": "function"
+      },
+      "array_atan_ptr": {
+        "kind": "function"
+      },
+      "array_atanh_ptr": {
+        "kind": "function"
+      },
+      "array_axpby": {
+        "kind": "function"
+      },
+      "array_clamp_inplace": {
+        "kind": "function"
+      },
+      "array_copy": {
+        "kind": "function"
+      },
+      "array_cos": {
+        "kind": "function"
+      },
+      "array_cos_ptr": {
+        "kind": "function"
+      },
+      "array_cosine_similarity": {
+        "kind": "function"
+      },
+      "array_cot_ptr": {
+        "kind": "function"
+      },
+      "array_csc_ptr": {
+        "kind": "function"
+      },
+      "array_distance": {
+        "kind": "function"
+      },
+      "array_div": {
+        "kind": "function"
+      },
+      "array_dot": {
+        "kind": "function"
+      },
+      "array_erfc_ptr": {
+        "kind": "function"
+      },
+      "array_exp": {
+        "kind": "function"
+      },
+      "array_exp_ptr": {
+        "kind": "function"
+      },
+      "array_expm1_ptr": {
+        "kind": "function"
+      },
+      "array_fill": {
+        "kind": "function"
+      },
+      "array_log": {
+        "kind": "function"
+      },
+      "array_log_ptr": {
+        "kind": "function"
+      },
+      "array_log10_ptr": {
+        "kind": "function"
+      },
+      "array_log1p_ptr": {
+        "kind": "function"
+      },
+      "array_log2_ptr": {
+        "kind": "function"
+      },
+      "array_max": {
+        "kind": "function"
+      },
+      "array_mean": {
+        "kind": "function"
+      },
+      "array_min": {
+        "kind": "function"
+      },
+      "array_mul": {
+        "kind": "function"
+      },
+      "array_neg": {
+        "kind": "function"
+      },
+      "array_norm": {
+        "kind": "function"
+      },
+      "array_norm_l1": {
+        "kind": "function"
+      },
+      "array_norm_linf": {
+        "kind": "function"
+      },
+      "array_product": {
+        "kind": "function"
+      },
+      "array_scale": {
+        "kind": "function"
+      },
+      "array_scale_inplace": {
+        "kind": "function"
+      },
+      "array_sec_ptr": {
+        "kind": "function"
+      },
+      "array_sin": {
+        "kind": "function"
+      },
+      "array_sin_ptr": {
+        "kind": "function"
+      },
+      "array_sinh_ptr": {
+        "kind": "function"
+      },
+      "array_sqrt": {
+        "kind": "function"
+      },
+      "array_square": {
+        "kind": "function"
+      },
+      "array_stddev": {
+        "kind": "function"
+      },
+      "array_sub": {
+        "kind": "function"
+      },
+      "array_sum": {
+        "kind": "function"
+      },
+      "array_tan_ptr": {
+        "kind": "function"
+      },
+      "array_tanh_ptr": {
+        "kind": "function"
+      },
+      "array_variance": {
+        "kind": "function"
+      },
+      "asin_f64": {
+        "kind": "function"
+      },
+      "asinh_f64": {
+        "kind": "function"
+      },
+      "atan_f64": {
+        "kind": "function"
+      },
+      "atan2_f64": {
+        "kind": "function"
+      },
+      "atanh_f64": {
+        "kind": "function"
+      },
+      "bartlett_psd_f64": {
+        "kind": "function"
+      },
+      "bessel_j_f64": {
+        "kind": "function"
+      },
+      "bessel_j0_f64": {
+        "kind": "function"
+      },
+      "bessel_j1_f64": {
+        "kind": "function"
+      },
+      "bessel_jn_f64": {
+        "kind": "function"
+      },
+      "bessel_y_f64": {
+        "kind": "function"
+      },
+      "bessel_y0_f64": {
+        "kind": "function"
+      },
+      "bessel_y1_f64": {
+        "kind": "function"
+      },
+      "bessel_yn_f64": {
+        "kind": "function"
+      },
+      "bitAnd_i32_array": {
+        "kind": "function"
+      },
+      "bitNot_i32_array": {
+        "kind": "function"
+      },
+      "bitOr_i32_array": {
+        "kind": "function"
+      },
+      "bitXor_i32_array": {
+        "kind": "function"
+      },
+      "carlson_rc_f64": {
+        "kind": "function"
+      },
+      "carlson_rd_f64": {
+        "kind": "function"
+      },
+      "carlson_rf_f64": {
+        "kind": "function"
+      },
+      "carlson_rj_f64": {
+        "kind": "function"
+      },
+      "carmichaelLambda": {
+        "kind": "function"
+      },
+      "cbrt_f64": {
+        "kind": "function"
+      },
+      "ceil_f64": {
+        "kind": "function"
+      },
+      "characteristicPolynomial": {
+        "kind": "function"
+      },
+      "cheb_fit_f64": {
+        "kind": "function"
+      },
+      "chebyshevT": {
+        "kind": "function"
+      },
+      "chineseRemainder": {
+        "kind": "function"
+      },
+      "chirp_z_transform_f64": {
+        "kind": "function"
+      },
+      "clamp_f64": {
+        "kind": "function"
+      },
+      "complex": {
+        "kind": "function"
+      },
+      "complex_abs": {
+        "kind": "function"
+      },
+      "complex_abs_squared": {
+        "kind": "function"
+      },
+      "complex_acos": {
+        "kind": "function"
+      },
+      "complex_acosh": {
+        "kind": "function"
+      },
+      "complex_add": {
+        "kind": "function"
+      },
+      "complex_approx_equals": {
+        "kind": "function"
+      },
+      "complex_arg": {
+        "kind": "function"
+      },
+      "complex_array_abs": {
+        "kind": "function"
+      },
+      "complex_array_abs_squared": {
+        "kind": "function"
+      },
+      "complex_array_add": {
+        "kind": "function"
+      },
+      "complex_array_add_inplace": {
+        "kind": "function"
+      },
+      "complex_array_arg": {
+        "kind": "function"
+      },
+      "complex_array_conj": {
+        "kind": "function"
+      },
+      "complex_array_conj_inplace": {
+        "kind": "function"
+      },
+      "complex_array_copy": {
+        "kind": "function"
+      },
+      "complex_array_div": {
+        "kind": "function"
+      },
+      "complex_array_dot": {
+        "kind": "function"
+      },
+      "complex_array_exp": {
+        "kind": "function"
+      },
+      "complex_array_fill": {
+        "kind": "function"
+      },
+      "complex_array_get": {
+        "kind": "function"
+      },
+      "complex_array_get_im": {
+        "kind": "function"
+      },
+      "complex_array_get_re": {
+        "kind": "function"
+      },
+      "complex_array_imag": {
+        "kind": "function"
+      },
+      "complex_array_length": {
+        "kind": "function"
+      },
+      "complex_array_log": {
+        "kind": "function"
+      },
+      "complex_array_mean": {
+        "kind": "function"
+      },
+      "complex_array_mul": {
+        "kind": "function"
+      },
+      "complex_array_neg": {
+        "kind": "function"
+      },
+      "complex_array_norm": {
+        "kind": "function"
+      },
+      "complex_array_ones": {
+        "kind": "function"
+      },
+      "complex_array_real": {
+        "kind": "function"
+      },
+      "complex_array_scale_complex": {
+        "kind": "function"
+      },
+      "complex_array_scale_inplace": {
+        "kind": "function"
+      },
+      "complex_array_scale_real": {
+        "kind": "function"
+      },
+      "complex_array_set": {
+        "kind": "function"
+      },
+      "complex_array_set_parts": {
+        "kind": "function"
+      },
+      "complex_array_sqrt": {
+        "kind": "function"
+      },
+      "complex_array_sub": {
+        "kind": "function"
+      },
+      "complex_array_sum": {
+        "kind": "function"
+      },
+      "complex_array_zeros": {
+        "kind": "function"
+      },
+      "complex_asin": {
+        "kind": "function"
+      },
+      "complex_asinh": {
+        "kind": "function"
+      },
+      "complex_atan": {
+        "kind": "function"
+      },
+      "complex_atanh": {
+        "kind": "function"
+      },
+      "complex_axpby": {
+        "kind": "function"
+      },
+      "complex_conj": {
+        "kind": "function"
+      },
+      "complex_cos": {
+        "kind": "function"
+      },
+      "complex_cosh": {
+        "kind": "function"
+      },
+      "complex_cpow": {
+        "kind": "function"
+      },
+      "complex_cube": {
+        "kind": "function"
+      },
+      "complex_distance": {
+        "kind": "function"
+      },
+      "complex_div": {
+        "kind": "function"
+      },
+      "complex_equals": {
+        "kind": "function"
+      },
+      "complex_exp": {
+        "kind": "function"
+      },
+      "complex_from_imag": {
+        "kind": "function"
+      },
+      "complex_from_polar": {
+        "kind": "function"
+      },
+      "complex_from_real": {
+        "kind": "function"
+      },
+      "complex_is_finite": {
+        "kind": "function"
+      },
+      "complex_is_imaginary": {
+        "kind": "function"
+      },
+      "complex_is_nan": {
+        "kind": "function"
+      },
+      "complex_is_real": {
+        "kind": "function"
+      },
+      "complex_is_zero": {
+        "kind": "function"
+      },
+      "complex_log": {
+        "kind": "function"
+      },
+      "complex_log10": {
+        "kind": "function"
+      },
+      "complex_log2": {
+        "kind": "function"
+      },
+      "complex_mul": {
+        "kind": "function"
+      },
+      "complex_neg": {
+        "kind": "function"
+      },
+      "complex_pow": {
+        "kind": "function"
+      },
+      "complex_reciprocal": {
+        "kind": "function"
+      },
+      "complex_sin": {
+        "kind": "function"
+      },
+      "complex_sinh": {
+        "kind": "function"
+      },
+      "complex_sqrt": {
+        "kind": "function"
+      },
+      "complex_square": {
+        "kind": "function"
+      },
+      "complex_sub": {
+        "kind": "function"
+      },
+      "complex_tan": {
+        "kind": "function"
+      },
+      "complex_tanh": {
+        "kind": "function"
+      },
+      "complex_to_polar": {
+        "kind": "function"
+      },
+      "complexFromPolar": {
+        "kind": "function"
+      },
+      "cos_f64": {
+        "kind": "function"
+      },
+      "cosh_f64": {
+        "kind": "function"
+      },
+      "cosIntegral": {
+        "kind": "function"
+      },
+      "cube_f64": {
+        "kind": "function"
+      },
+      "discriminant": {
+        "kind": "function"
+      },
+      "div_f64": {
+        "kind": "function"
+      },
+      "divided_difference_f64": {
+        "kind": "function"
+      },
+      "divisors": {
+        "kind": "function"
+      },
+      "divisorSigma": {
+        "kind": "function"
+      },
+      "E": {
+        "kind": "object"
+      },
+      "elliptic_e_f64": {
+        "kind": "function"
+      },
+      "elliptic_e_incomplete_f64": {
+        "kind": "function"
+      },
+      "elliptic_f_incomplete_f64": {
+        "kind": "function"
+      },
+      "elliptic_k_f64": {
+        "kind": "function"
+      },
+      "elliptic_pi_incomplete_f64": {
+        "kind": "function"
+      },
+      "EPSILON": {
+        "kind": "object"
+      },
+      "erfi": {
+        "kind": "function"
+      },
+      "eulerPhi": {
+        "kind": "function"
+      },
+      "exp_f64": {
+        "kind": "function"
+      },
+      "expfit": {
+        "kind": "function"
+      },
+      "expIntegralEi": {
+        "kind": "function"
+      },
+      "expm1_f64": {
+        "kind": "function"
+      },
+      "fft": {
+        "kind": "function"
+      },
+      "floor_f64": {
+        "kind": "function"
+      },
+      "goertzel_f64": {
+        "kind": "function"
+      },
+      "harmonicNumber": {
+        "kind": "function"
+      },
+      "heap_reset": {
+        "kind": "function"
+      },
+      "hermiteH": {
+        "kind": "function"
+      },
+      "integerDigits": {
+        "kind": "function"
+      },
+      "isFinite_f64": {
+        "kind": "function"
+      },
+      "isNaN_f64": {
+        "kind": "function"
+      },
+      "jacobiSymbol": {
+        "kind": "function"
+      },
+      "laguerreL": {
+        "kind": "function"
+      },
+      "leftShift_i32_array": {
+        "kind": "function"
+      },
+      "legendre_fit_f64": {
+        "kind": "function"
+      },
+      "legendreP": {
+        "kind": "function"
+      },
+      "lgamma_f64": {
+        "kind": "function"
+      },
+      "linprog": {
+        "kind": "function"
+      },
+      "LN10": {
+        "kind": "object"
+      },
+      "LN2": {
+        "kind": "object"
+      },
+      "log_f64": {
+        "kind": "function"
+      },
+      "log10_f64": {
+        "kind": "function"
+      },
+      "LOG10E": {
+        "kind": "object"
+      },
+      "log1p_f64": {
+        "kind": "function"
+      },
+      "log2_f64": {
+        "kind": "function"
+      },
+      "LOG2E": {
+        "kind": "object"
+      },
+      "logfit": {
+        "kind": "function"
+      },
+      "logIntegral": {
+        "kind": "function"
+      },
+      "matrix_add": {
+        "kind": "function"
+      },
+      "matrix_add_inplace": {
+        "kind": "function"
+      },
+      "matrix_add_scalar": {
+        "kind": "function"
+      },
+      "matrix_add_scalar_inplace": {
+        "kind": "function"
+      },
+      "matrix_axpy": {
+        "kind": "function"
+      },
+      "matrix_cholesky": {
+        "kind": "function"
+      },
+      "matrix_copy": {
+        "kind": "function"
+      },
+      "matrix_determinant": {
+        "kind": "function"
+      },
+      "matrix_diag": {
+        "kind": "function"
+      },
+      "matrix_div_elementwise": {
+        "kind": "function"
+      },
+      "matrix_fill": {
+        "kind": "function"
+      },
+      "matrix_gemm": {
+        "kind": "function"
+      },
+      "matrix_gemv": {
+        "kind": "function"
+      },
+      "matrix_get": {
+        "kind": "function"
+      },
+      "matrix_get_col": {
+        "kind": "function"
+      },
+      "matrix_get_diag": {
+        "kind": "function"
+      },
+      "matrix_get_row": {
+        "kind": "function"
+      },
+      "matrix_identity": {
+        "kind": "function"
+      },
+      "matrix_inverse": {
+        "kind": "function"
+      },
+      "matrix_is_diagonal": {
+        "kind": "function"
+      },
+      "matrix_is_identity": {
+        "kind": "function"
+      },
+      "matrix_is_square": {
+        "kind": "function"
+      },
+      "matrix_is_symmetric": {
+        "kind": "function"
+      },
+      "matrix_lu_decompose": {
+        "kind": "function"
+      },
+      "matrix_max": {
+        "kind": "function"
+      },
+      "matrix_mean": {
+        "kind": "function"
+      },
+      "matrix_min": {
+        "kind": "function"
+      },
+      "matrix_mul_elementwise": {
+        "kind": "function"
+      },
+      "matrix_multiply": {
+        "kind": "function"
+      },
+      "matrix_multiply_simd_ptr": {
+        "kind": "function"
+      },
+      "matrix_neg": {
+        "kind": "function"
+      },
+      "matrix_norm_frobenius": {
+        "kind": "function"
+      },
+      "matrix_ones": {
+        "kind": "function"
+      },
+      "matrix_outer": {
+        "kind": "function"
+      },
+      "matrix_qr_decompose": {
+        "kind": "function"
+      },
+      "matrix_scale": {
+        "kind": "function"
+      },
+      "matrix_scale_inplace": {
+        "kind": "function"
+      },
+      "matrix_set": {
+        "kind": "function"
+      },
+      "matrix_sub": {
+        "kind": "function"
+      },
+      "matrix_sum": {
+        "kind": "function"
+      },
+      "matrix_sum_cols": {
+        "kind": "function"
+      },
+      "matrix_sum_rows": {
+        "kind": "function"
+      },
+      "matrix_trace": {
+        "kind": "function"
+      },
+      "matrix_transpose": {
+        "kind": "function"
+      },
+      "matrix_vector_multiply": {
+        "kind": "function"
+      },
+      "matrix_zeros": {
+        "kind": "function"
+      },
+      "max_f64": {
+        "kind": "function"
+      },
+      "medfilt": {
+        "kind": "function"
+      },
+      "memory": {
+        "kind": "object"
+      },
+      "min_f64": {
+        "kind": "function"
+      },
+      "mod_f64": {
+        "kind": "function"
+      },
+      "moebiusMu": {
+        "kind": "function"
+      },
+      "mul_f64": {
+        "kind": "function"
+      },
+      "neg_f64": {
+        "kind": "function"
+      },
+      "nthRoot_f64": {
+        "kind": "function"
+      },
+      "nullspace": {
+        "kind": "function"
+      },
+      "padeApproximant": {
+        "kind": "function"
+      },
+      "partitions": {
+        "kind": "function"
+      },
+      "PHI": {
+        "kind": "object"
+      },
+      "PI": {
+        "kind": "object"
+      },
+      "poly_discriminant_f64": {
+        "kind": "function"
+      },
+      "poly_div_mod_f64": {
+        "kind": "function"
+      },
+      "poly_fit_f64": {
+        "kind": "function"
+      },
+      "poly_mul_f64": {
+        "kind": "function"
+      },
+      "poly_resultant_f64": {
+        "kind": "function"
+      },
+      "polyadd": {
+        "kind": "function"
+      },
+      "polynomialGCD": {
+        "kind": "function"
+      },
+      "polynomialLCM": {
+        "kind": "function"
+      },
+      "polynomialQuotient": {
+        "kind": "function"
+      },
+      "polynomialRemainder": {
+        "kind": "function"
+      },
+      "pow_f64": {
+        "kind": "function"
+      },
+      "powerfit": {
+        "kind": "function"
+      },
+      "powerSpectrum": {
+        "kind": "function"
+      },
+      "primeFactors": {
+        "kind": "function"
+      },
+      "quadprog": {
+        "kind": "function"
+      },
+      "rank_f64": {
+        "kind": "function"
+      },
+      "resample": {
+        "kind": "function"
+      },
+      "residue": {
+        "kind": "function"
+      },
+      "resultant": {
+        "kind": "function"
+      },
+      "rfft": {
+        "kind": "function"
+      },
+      "rightArithShift_i32_array": {
+        "kind": "function"
+      },
+      "rightLogShift_i32_array": {
+        "kind": "function"
+      },
+      "round_f64": {
+        "kind": "function"
+      },
+      "rowReduce": {
+        "kind": "function"
+      },
+      "sign_f64": {
+        "kind": "function"
+      },
+      "sin_f64": {
+        "kind": "function"
+      },
+      "sinh_f64": {
+        "kind": "function"
+      },
+      "sinIntegral": {
+        "kind": "function"
+      },
+      "sort_f64": {
+        "kind": "function"
+      },
+      "sqrt_f64": {
+        "kind": "function"
+      },
+      "SQRT1_2": {
+        "kind": "object"
+      },
+      "SQRT2": {
+        "kind": "object"
+      },
+      "square_f64": {
+        "kind": "function"
+      },
+      "sub_f64": {
+        "kind": "function"
+      },
+      "tan_f64": {
+        "kind": "function"
+      },
+      "tanh_f64": {
+        "kind": "function"
+      },
+      "tensorTranspose": {
+        "kind": "function"
+      },
+      "tridiag_solve_f64": {
+        "kind": "function"
+      },
+      "trunc_f64": {
+        "kind": "function"
+      },
+      "vector_matrix_multiply": {
+        "kind": "function"
+      },
+      "welch_psd_f64": {
+        "kind": "function"
+      },
+      "windowFunction": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-compat": {
+    ".": {
+      "all": {
+        "kind": "object"
+      },
+      "BigNumber": {
+        "kind": "function"
+      },
+      "BIGNUMBER_E": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ONE": {
+        "kind": "object"
+      },
+      "BIGNUMBER_PI": {
+        "kind": "object"
+      },
+      "BIGNUMBER_ZERO": {
+        "kind": "object"
+      },
+      "Complex": {
+        "kind": "function"
+      },
+      "COMPLEX_ONE": {
+        "kind": "object"
+      },
+      "COMPLEX_ZERO": {
+        "kind": "object"
+      },
+      "computePool": {
+        "kind": "object"
+      },
+      "create": {
+        "kind": "function"
+      },
+      "DenseMatrix": {
+        "kind": "function"
+      },
+      "Fraction": {
+        "kind": "function"
+      },
+      "FRACTION_ONE": {
+        "kind": "object"
+      },
+      "FRACTION_ZERO": {
+        "kind": "object"
+      },
+      "I": {
+        "kind": "object"
+      },
+      "MathInstance": {
+        "kind": "type"
+      },
+      "MathJSConfig": {
+        "kind": "type"
+      },
+      "SparseMatrix": {
+        "kind": "function"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-gpu": {
+    ".": {
+      "BufferPool": {
+        "kind": "function"
+      },
+      "BufferPoolOptions": {
+        "kind": "type"
+      },
+      "destroyGlobalGPU": {
+        "kind": "function"
+      },
+      "detectGPUCapabilities": {
+        "kind": "function"
+      },
+      "DeviceLostEvent": {
+        "kind": "type"
+      },
+      "disableGpu": {
+        "kind": "function"
+      },
+      "enableGpu": {
+        "kind": "function"
+      },
+      "getGlobalGPUContext": {
+        "kind": "function"
+      },
+      "getGPUAdapter": {
+        "kind": "function"
+      },
+      "getGpuDevice": {
+        "kind": "function"
+      },
+      "getMaxMatrixSize": {
+        "kind": "function"
+      },
+      "getRecommendedWorkgroupSize": {
+        "kind": "function"
+      },
+      "GPU_MIN_ELEMENTS": {
+        "kind": "number"
+      },
+      "GPUAdapterInfo": {
+        "kind": "type"
+      },
+      "GPUCapabilities": {
+        "kind": "type"
+      },
+      "GPUContext": {
+        "kind": "function"
+      },
+      "GPUContextOptions": {
+        "kind": "type"
+      },
+      "GPUContextStatus": {
+        "kind": "type"
+      },
+      "hasWebGPU": {
+        "kind": "function"
+      },
+      "initializeGlobalGPU": {
+        "kind": "function"
+      },
+      "isBrowser": {
+        "kind": "function"
+      },
+      "isGpuEnabled": {
+        "kind": "function"
+      },
+      "isGPUSuitableForMatrixOps": {
+        "kind": "function"
+      },
+      "PipelineConfig": {
+        "kind": "type"
+      },
+      "resetGpuDevice": {
+        "kind": "function"
+      },
+      "serializeGpu": {
+        "kind": "function"
+      },
+      "ShaderManager": {
+        "kind": "function"
+      },
+      "ShaderSource": {
+        "kind": "type"
+      }
+    }
+  },
+  "@danielsimonjr/mathts-plot": {
+    ".": {
+      "area": {
+        "kind": "function"
+      },
+      "AxisSpec": {
+        "kind": "type"
+      },
+      "bar": {
+        "kind": "function"
+      },
+      "contour": {
+        "kind": "function"
+      },
+      "curve3d": {
+        "kind": "function"
+      },
+      "Data": {
+        "kind": "type"
+      },
+      "errorbar": {
+        "kind": "function"
+      },
+      "heatmap": {
+        "kind": "function"
+      },
+      "histogram": {
+        "kind": "function"
+      },
+      "Layer2D": {
+        "kind": "type"
+      },
+      "line": {
+        "kind": "function"
+      },
+      "overlay": {
+        "kind": "function"
+      },
+      "plot": {
+        "kind": "function"
+      },
+      "PlotOptions": {
+        "kind": "type"
+      },
+      "quiver": {
+        "kind": "function"
+      },
+      "scatter": {
+        "kind": "function"
+      },
+      "scatter3d": {
+        "kind": "function"
+      },
+      "step": {
+        "kind": "function"
+      },
+      "surface": {
+        "kind": "function"
+      },
+      "toTikZ": {
+        "kind": "function"
+      },
+      "VERSION": {
+        "kind": "string"
+      },
+      "viridis": {
+        "kind": "function"
+      }
+    },
+    "./render": {
+      "hasTool": {
+        "kind": "function"
+      },
+      "latexArgs": {
+        "kind": "function"
+      },
+      "latexToPdf": {
+        "kind": "function"
+      },
+      "PlotRenderError": {
+        "kind": "function"
+      },
+      "RenderOptions": {
+        "kind": "type"
+      },
+      "renderToFile": {
+        "kind": "function"
+      },
+      "runTool": {
+        "kind": "function"
+      }
+    }
+  }
+}
