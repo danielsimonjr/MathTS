@@ -905,7 +905,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 316
+      "loc": 421
     },
     {
       "file": "core/tests/alloc-as-header-pin.test.ts",
@@ -8815,7 +8815,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 545
+      "loc": 425
     },
     {
       "file": "functions/tests/acsc-asec-acot-bignumber.test.ts",
@@ -11636,7 +11636,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1108
+      "loc": 983
     },
     {
       "file": "matrix/src/config.ts",

@@ -276,9 +276,10 @@ From the 2026-05-01 security release. Any change touching these must preserve th
 (regression tests guard each):
 
 1. **WASM SHA-384 verification.** Canonical logic is `core/src/wasm-loader.ts`
-   (`sha384OfBuffer` / `verifyWasmIntegrity`). `functions/src/wasm/WasmLoader.ts`
-   and `matrix/src/backends/WasmLoader.ts` invoke it against `wasm-manifest.json`
-   before instantiate. Never weaken/skip — even on streaming compile. Tests:
+   (`sha384OfBuffer` / `verifyWasmIntegrity`). `WasmModuleLoader` in the same
+   module runs the compare in `precompile`, `loadNodeWasm`, and `loadBrowserWasm`
+   before compile/instantiate; `functions` and `matrix` `WasmLoader` subclasses
+   inherit that path. Never weaken/skip — even on streaming compile. Tests:
    `functions/tests/security/wasm-integrity.test.ts`,
    `matrix/tests/security/wasm-integrity.test.ts`.
 2. **Expression sandbox.** All property/method access in `expression/src/` must

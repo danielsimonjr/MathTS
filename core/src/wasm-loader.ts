@@ -296,8 +296,113 @@ export abstract class WasmModuleLoader<TModule> {
   }
 
   protected abstract getDefaultWasmPath(): Promise<string>;
-  protected abstract loadNodeWasm(path: string, totalStart: number): Promise<TModule>;
-  protected abstract loadBrowserWasm(path: string, totalStart: number): Promise<TModule>;
+
+  public async precompile(wasmPath?: string): Promise<void> {
+    if (this.compiledModule) return;
+
+    const path = wasmPath || (await this.getDefaultWasmPath());
+    const startTime = performance.now();
+
+    if (this.isNode) {
+      const fs = await import('fs');
+      const { promisify } = await import('util');
+      const readFile = promisify(fs.readFile);
+      const buffer = await readFile(path);
+      await verifyWasmIntegrity(buffer, path);
+      this.compiledModule = await WebAssembly.compile(buffer);
+    } else {
+      const manifest = await loadWasmManifest(path);
+      if (!manifest && typeof WebAssembly.compileStreaming === 'function') {
+        this.compiledModule = await WebAssembly.compileStreaming(fetch(path));
+      } else {
+        const response = await fetch(path);
+        const buffer = await response.arrayBuffer();
+        await verifyWasmIntegrity(buffer, path, { manifest });
+        this.compiledModule = await WebAssembly.compile(buffer);
+      }
+    }
+
+    this.lastMetrics = {
+      fileReadMs: 0,
+      compileMs: performance.now() - startTime,
+      instantiateMs: 0,
+      totalMs: performance.now() - startTime,
+      fromCache: false,
+    };
+  }
+
+  protected async loadNodeWasm(path: string, totalStart: number): Promise<TModule> {
+    const fs = await import('fs');
+    const { promisify } = await import('util');
+    const readFile = promisify(fs.readFile);
+
+    const readStart = performance.now();
+    const buffer = await readFile(path);
+    const readEnd = performance.now();
+
+    await verifyWasmIntegrity(buffer, path);
+
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
+
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
+
+    this.lastMetrics = {
+      fileReadMs: readEnd - readStart,
+      compileMs: compileEnd - compileStart,
+      instantiateMs: instEnd - instStart,
+      totalMs: performance.now() - totalStart,
+      fromCache: false,
+    };
+
+    return instance.exports as unknown as TModule;
+  }
+
+  protected async loadBrowserWasm(path: string, totalStart: number): Promise<TModule> {
+    const manifest = await loadWasmManifest(path);
+
+    if (!manifest && typeof WebAssembly.instantiateStreaming === 'function') {
+      const instStart = performance.now();
+      const result = await WebAssembly.instantiateStreaming(fetch(path), this.getImports());
+      this.compiledModule = result.module;
+      this.lastMetrics = {
+        fileReadMs: 0,
+        compileMs: 0,
+        instantiateMs: performance.now() - instStart,
+        totalMs: performance.now() - totalStart,
+        fromCache: false,
+      };
+      return result.instance.exports as unknown as TModule;
+    }
+
+    const readStart = performance.now();
+    const response = await fetch(path);
+    const buffer = await response.arrayBuffer();
+    const readEnd = performance.now();
+
+    await verifyWasmIntegrity(buffer, path, { manifest });
+
+    const compileStart = performance.now();
+    this.compiledModule = await WebAssembly.compile(buffer);
+    const compileEnd = performance.now();
+
+    const instStart = performance.now();
+    const instance = await WebAssembly.instantiate(this.compiledModule, this.getImports());
+    const instEnd = performance.now();
+
+    this.lastMetrics = {
+      fileReadMs: readEnd - readStart,
+      compileMs: compileEnd - compileStart,
+      instantiateMs: instEnd - instStart,
+      totalMs: performance.now() - totalStart,
+      fromCache: false,
+    };
+
+    return instance.exports as unknown as TModule;
+  }
 
   protected getImports(): WebAssembly.Imports {
     return {

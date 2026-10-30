@@ -1399,7 +1399,6 @@ graph LR
 | File                       | Imports                                                    | Type               |
 | -------------------------- | ---------------------------------------------------------- | ------------------ |
 | `./wasm/as-typed-array.js` | `AS_ID_FLOAT64_ARRAY, AS_ID_INT32_ARRAY, allocAsTypedView` | Import             |
-| `./wasm/integrity.js`      | ``                                                         | Import (type-only) |
 | `./wasm/resolve.js`        | ``                                                         | Import (type-only) |
 
 **Exports:**
@@ -11597,10 +11596,9 @@ graph LR
 
 **Internal Dependencies:**
 
-| File             | Imports                                                        | Type   |
-| ---------------- | -------------------------------------------------------------- | ------ |
-| `./integrity.js` | `verifyWasmIntegrity, loadWasmManifest`                        | Import |
-| `./resolve.js`   | `resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm` | Import |
+| File           | Imports                                                        | Type   |
+| -------------- | -------------------------------------------------------------- | ------ |
+| `./resolve.js` | `resolvePackagedWasm, defaultWasmLocation, resolveBrowserWasm` | Import |
 
 **Exports:**
 
@@ -19456,7 +19454,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1234   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203721 |
+| Total Lines of Code     | 203581 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2725   |
 | Total Classes           | 60     |
@@ -19464,7 +19462,7 @@ graph TD
 | Total Functions         | 2070   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
-| Type-only Imports       | 621    |
+| Type-only Imports       | 620    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 
