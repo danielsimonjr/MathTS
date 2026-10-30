@@ -140,6 +140,33 @@ jobs:
       - name: Release script tests
         run: node --test tools/test/ensure-package-releases.test.mjs
 
+  benchmark-baseline:
+    name: Benchmark baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build functions (pulls core + wasm)
+        run: bunx turbo build --filter=@danielsimonjr/mathts-functions
+
+      - name: Sprint baseline fingerprints
+        run: |
+          node --test tools/test/sprint-baseline.test.mjs
+          node tools/benchmarks/sprint-baseline.mjs --check
+
   test:
     name: Test
     runs-on: ubuntu-latest

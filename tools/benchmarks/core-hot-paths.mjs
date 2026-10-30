@@ -31,7 +31,10 @@ const b = new Complex(1, 2);
 const z = new Complex(0.7, 0.4);
 const fa = new Fraction(355n, 113n);
 const fb = new Fraction(22n, 7n);
-const xs = Float64Array.from({ length: 50_000 }, (_, i) => 1e6 + (i % 97) / 97);
+const xs = new Float64Array(50_000);
+for (let i = 0; i < xs.length; i++) {
+  xs[i] = 1e6 + (i % 97) / 97;
+}
 
 console.log('core hot paths (built package). Warmup', WARMUP, 'reps.\n');
 row('Complex.add', 200_000, () => a.add(b));
