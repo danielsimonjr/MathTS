@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1232,
+    "totalFiles": 1233,
     "totalModules": 82,
-    "totalExports": 6408
+    "totalExports": 6409
   },
   "entryPoints": [
     {
@@ -287,6 +287,11 @@
             "file": "./multi-index.js",
             "imports": ["forEachMultiIndex"],
             "reExport": true
+          },
+          {
+            "file": "./tensordot-range.js",
+            "imports": ["tensordotRange"],
+            "reExport": true
           }
         ],
         "workspaceDependencies": [],
@@ -295,6 +300,7 @@
           "chunkTyped",
           "chunkPairTyped",
           "forEachMultiIndex",
+          "tensordotRange",
           "DEFAULT_WORKER_CONFIG",
           "mathWorkerPool",
           "canUseWasm",
@@ -314,7 +320,7 @@
           "getPoolStats",
           "MathWorkerPool"
         ],
-        "reExported": ["chunkTyped", "chunkPairTyped", "forEachMultiIndex"],
+        "reExported": ["chunkTyped", "chunkPairTyped", "forEachMultiIndex", "tensordotRange"],
         "classes": ["MathWorkerPool"],
         "interfaces": [
           "WorkerpoolCapabilities",
@@ -353,6 +359,24 @@
         "exports": ["forEachMultiIndex"],
         "functions": ["forEachMultiIndex"]
       },
+      "packages/workerpool/src/tensordot-range.ts": {
+        "description": "Pure-JS tensordot over a contiguous range `[outStart, outEnd)` of output elements.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./multi-index.js",
+            "imports": ["forEachMultiIndex"]
+          },
+          {
+            "file": "./worker-numerics.js",
+            "imports": ["_tdRowMajorStrides"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["tensordotRange"],
+        "functions": ["tensordotRange"]
+      },
       "packages/workerpool/src/worker-numerics.ts": {
         "description": "Worker-bundle copies of core numeric helpers.",
         "externalDependencies": [],
@@ -381,12 +405,12 @@
             "imports": ["fftFrameInPlace"]
           },
           {
-            "file": "./multi-index.js",
-            "imports": ["forEachMultiIndex"]
+            "file": "./tensordot-range.js",
+            "imports": ["tensordotRange"]
           },
           {
             "file": "./worker-numerics.js",
-            "imports": ["_tdRowMajorStrides", "_workerMulberry32"]
+            "imports": ["_workerMulberry32"]
           }
         ],
         "workspaceDependencies": [],
@@ -36630,8 +36654,7 @@
               "norm2",
               "pairwiseDot",
               "scaledDistance",
-              "sumSquaredDeviations",
-              "rowMajorStrides"
+              "sumSquaredDeviations"
             ]
           },
           {
@@ -36640,7 +36663,7 @@
             "imports": [
               "MathWorkerPool",
               "Transfer",
-              "forEachMultiIndex",
+              "tensordotRange",
               "WorkerPoolConfig",
               "ParallelResult",
               "TaskOptions",
@@ -36654,12 +36677,11 @@
           "DEFAULT_POOL_CONFIG",
           "computePool",
           "resolveOpThreshold",
-          "tensordotChunkKernel",
           "ComputePool"
         ],
         "classes": ["ComputePool"],
         "interfaces": ["ComputePoolConfig", "ParallelResult"],
-        "functions": ["resolveOpThreshold", "tensordotChunkKernel"],
+        "functions": ["resolveOpThreshold"],
         "constants": ["DEFAULT_THRESHOLD_BY_OP", "DEFAULT_POOL_CONFIG", "computePool"]
       },
       "parallel/src/ParallelMatrix.ts": {
@@ -41652,6 +41674,7 @@
           "packages/workerpool/src/fft-core.ts",
           "packages/workerpool/src/index.ts",
           "packages/workerpool/src/multi-index.ts",
+          "packages/workerpool/src/tensordot-range.ts",
           "packages/workerpool/src/worker-numerics.ts",
           "packages/workerpool/src/worker.ts",
           "packages/workerpool/src/workerpool-browser-shim.ts"
@@ -43225,17 +43248,17 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1232,
+    "totalTypeScriptFiles": 1233,
     "totalModules": 82,
-    "totalLinesOfCode": 203749,
-    "totalExports": 6408,
+    "totalLinesOfCode": 203685,
+    "totalExports": 6409,
     "totalClasses": 60,
     "totalInterfaces": 568,
     "totalFunctions": 2069,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1633,
-    "totalReExports": 2722,
+    "totalReExports": 2723,
     "totalTypeOnlyImports": 621,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

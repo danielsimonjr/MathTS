@@ -194,6 +194,9 @@
       "forEachMultiIndex": {
         "kind": "function"
       },
+      "tensordotRange": {
+        "kind": "function"
+      },
       "getCapabilities": {
         "kind": "function"
       },

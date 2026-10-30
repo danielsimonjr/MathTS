@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-30'
-  totalFiles: 1232
+  totalFiles: 1233
   totalModules: 82
-  totalExports: 6408
+  totalExports: 6409
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -245,12 +245,17 @@ modules:
           imports:
             - forEachMultiIndex
           reExport: true
+        - file: ./tensordot-range.js
+          imports:
+            - tensordotRange
+          reExport: true
       workspaceDependencies: []
       exports:
         - Transfer
         - chunkTyped
         - chunkPairTyped
         - forEachMultiIndex
+        - tensordotRange
         - DEFAULT_WORKER_CONFIG
         - mathWorkerPool
         - canUseWasm
@@ -273,6 +278,7 @@ modules:
         - chunkTyped
         - chunkPairTyped
         - forEachMultiIndex
+        - tensordotRange
       classes:
         - MathWorkerPool
       interfaces:
@@ -312,6 +318,22 @@ modules:
         - forEachMultiIndex
       functions:
         - forEachMultiIndex
+    packages/workerpool/src/tensordot-range.ts:
+      description: Pure-JS tensordot over a contiguous range `[outStart, outEnd)` of output elements.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./multi-index.js
+          imports:
+            - forEachMultiIndex
+        - file: ./worker-numerics.js
+          imports:
+            - _tdRowMajorStrides
+      workspaceDependencies: []
+      exports:
+        - tensordotRange
+      functions:
+        - tensordotRange
     packages/workerpool/src/worker-numerics.ts:
       description: Worker-bundle copies of core numeric helpers.
       externalDependencies: []
@@ -338,12 +360,11 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
-        - file: ./multi-index.js
+        - file: ./tensordot-range.js
           imports:
-            - forEachMultiIndex
+            - tensordotRange
         - file: ./worker-numerics.js
           imports:
-            - _tdRowMajorStrides
             - _workerMulberry32
       workspaceDependencies: []
       exports: []
@@ -34566,13 +34587,12 @@ modules:
             - pairwiseDot
             - scaledDistance
             - sumSquaredDeviations
-            - rowMajorStrides
         - package: '@danielsimonjr/mathts-workerpool'
           directory: packages/workerpool
           imports:
             - MathWorkerPool
             - Transfer
-            - forEachMultiIndex
+            - tensordotRange
             - WorkerPoolConfig
             - ParallelResult
             - TaskOptions
@@ -34583,7 +34603,6 @@ modules:
         - DEFAULT_POOL_CONFIG
         - computePool
         - resolveOpThreshold
-        - tensordotChunkKernel
         - ComputePool
       classes:
         - ComputePool
@@ -34592,7 +34611,6 @@ modules:
         - ParallelResult
       functions:
         - resolveOpThreshold
-        - tensordotChunkKernel
       constants:
         - DEFAULT_THRESHOLD_BY_OP
         - DEFAULT_POOL_CONFIG
@@ -39457,6 +39475,7 @@ dependencyGraph:
         - packages/workerpool/src/fft-core.ts
         - packages/workerpool/src/index.ts
         - packages/workerpool/src/multi-index.ts
+        - packages/workerpool/src/tensordot-range.ts
         - packages/workerpool/src/worker-numerics.ts
         - packages/workerpool/src/worker.ts
         - packages/workerpool/src/workerpool-browser-shim.ts
@@ -40844,17 +40863,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1232
+  totalTypeScriptFiles: 1233
   totalModules: 82
-  totalLinesOfCode: 203749
-  totalExports: 6408
+  totalLinesOfCode: 203685
+  totalExports: 6409
   totalClasses: 60
   totalInterfaces: 568
   totalFunctions: 2069
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1633
-  totalReExports: 2722
+  totalReExports: 2723
   totalTypeOnlyImports: 621
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

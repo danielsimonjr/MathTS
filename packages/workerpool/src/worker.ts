@@ -9,8 +9,8 @@
 
 import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
-import { forEachMultiIndex } from './multi-index.js';
-import { _tdRowMajorStrides, _workerMulberry32 } from './worker-numerics.js';
+import { tensordotRange } from './tensordot-range.js';
+import { _workerMulberry32 } from './worker-numerics.js';
 import { worker } from 'workerpool';
 
 // =============================================================================
@@ -751,21 +751,9 @@ function quantileChunk(
 // =============================================================================
 
 /**
- * Multi-index to flat index.
- */
-function _tdFlatIndex(idx: readonly number[], strides: readonly number[]): number {
-  let flat = 0;
-  for (let i = 0; i < idx.length; i++) flat += idx[i] * strides[i];
-  return flat;
-}
-
-/**
  * Worker kernel for a contiguous slice `[outStart, outEnd)` of a tensordot
  * output. Called by `ComputePool.tensordot` when the contracted-axis volume
  * exceeds the parallelization threshold.
- *
- * Parameters mirror `ComputePool.tensordot` exactly so the caller can forward
- * its validated inputs directly.
  */
 function tensordotChunk(
   aBuffer: ArrayBuffer,
@@ -778,57 +766,17 @@ function tensordotChunk(
   outStart: number,
   outEnd: number
 ): ArrayBuffer {
-  const a = new Float64Array(aBuffer);
-  const b = new Float64Array(bBuffer);
-
-  const aStrides = _tdRowMajorStrides(aShape);
-  const bStrides = _tdRowMajorStrides(bShape);
-  const outStrides = _tdRowMajorStrides(resultShape);
-
-  const aRank = aShape.length;
-  const bRank = bShape.length;
-  const contractedSetA = new Set(axesA);
-  const contractedSetB = new Set(axesB);
-
-  const aFreeAxes: number[] = [];
-  const bFreeAxes: number[] = [];
-  for (let i = 0; i < aRank; i++) if (!contractedSetA.has(i)) aFreeAxes.push(i);
-  for (let i = 0; i < bRank; i++) if (!contractedSetB.has(i)) bFreeAxes.push(i);
-
-  const contractedSizes = axesA.map((ax: number) => aShape[ax]);
-
-  const chunkLen = outEnd - outStart;
-  const result = new Float64Array(chunkLen);
-  const outRank = resultShape.length;
-  const outIdx = new Array<number>(outRank);
-
-  for (let outFlat = outStart; outFlat < outEnd; outFlat++) {
-    let rem = outFlat;
-    for (let d = 0; d < outRank; d++) {
-      outIdx[d] = Math.floor(rem / outStrides[d]);
-      rem -= outIdx[d] * outStrides[d];
-    }
-
-    const aFreeVals = outIdx.slice(0, aFreeAxes.length);
-    const bFreeVals = outIdx.slice(aFreeAxes.length);
-
-    let acc = 0;
-    forEachMultiIndex(contractedSizes, (contractVals: number[]) => {
-      const aIdx = new Array<number>(aRank).fill(0);
-      for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
-      for (let ci = 0; ci < axesA.length; ci++) aIdx[axesA[ci]] = contractVals[ci];
-
-      const bIdx = new Array<number>(bRank).fill(0);
-      for (let fi = 0; fi < bFreeAxes.length; fi++) bIdx[bFreeAxes[fi]] = bFreeVals[fi];
-      for (let ci = 0; ci < axesB.length; ci++) bIdx[axesB[ci]] = contractVals[ci];
-
-      acc += a[_tdFlatIndex(aIdx, aStrides)] * b[_tdFlatIndex(bIdx, bStrides)];
-    });
-
-    result[outFlat - outStart] = acc;
-  }
-
-  return result.buffer;
+  return tensordotRange(
+    new Float64Array(aBuffer),
+    aShape,
+    new Float64Array(bBuffer),
+    bShape,
+    axesA,
+    axesB,
+    resultShape,
+    outStart,
+    outEnd
+  ).buffer as ArrayBuffer;
 }
 
 // =============================================================================

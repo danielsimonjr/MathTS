@@ -13,12 +13,11 @@ import {
   pairwiseDot,
   scaledDistance,
   sumSquaredDeviations,
-  rowMajorStrides as _rowMajorStrides,
 } from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
   Transfer,
-  forEachMultiIndex,
+  tensordotRange,
   type WorkerPoolConfig,
   type ParallelResult as WorkerParallelResult,
   type TaskOptions,
@@ -381,101 +380,6 @@ function toWorkerConfig(config: ComputePoolConfig): Partial<WorkerPoolConfig> {
     idleTimeout: config.workerIdleTimeout,
     taskTimeout: config.taskTimeout,
   };
-}
-
-// =============================================================================
-// tensordot kernel helpers (used by sequential path and exported for tests)
-// =============================================================================
-
-/**
- * Multi-index to flat index using precomputed strides.
- * @internal
- */
-function _flatIndex(idx: readonly number[], strides: readonly number[]): number {
-  let flat = 0;
-  for (let i = 0; i < idx.length; i++) flat += idx[i] * strides[i];
-  return flat;
-}
-
-/**
- * Pure-JS tensordot computation over a contiguous range of output elements
- * `[outStart, outEnd)`.
- *
- * This is the shared inner kernel used by both the sequential fallback path in
- * `ComputePool.tensordot` and the worker-dispatched `tensordotChunk` handler.
- * By exporting it and registering it in the worker, we keep the algorithm in
- * one place and avoid divergence.
- *
- * Contracts axis `axesA[i]` of `a` (shape `aShape`) with axis `axesB[i]` of
- * `b` (shape `bShape`). The result layout is free-A axes first, then free-B
- * axes (NumPy convention).
- */
-export function tensordotChunkKernel(
-  a: Float64Array,
-  aShape: readonly number[],
-  b: Float64Array,
-  bShape: readonly number[],
-  axesA: readonly number[],
-  axesB: readonly number[],
-  resultShape: readonly number[],
-  outStart: number,
-  outEnd: number
-): Float64Array {
-  const aStrides = _rowMajorStrides(aShape);
-  const bStrides = _rowMajorStrides(bShape);
-  const outStrides = _rowMajorStrides(resultShape);
-
-  const aRank = aShape.length;
-  const bRank = bShape.length;
-  const contractedAxesA = Array.from(axesA);
-  const contractedAxesB = Array.from(axesB);
-  const contractedSetA = new Set(contractedAxesA);
-  const contractedSetB = new Set(contractedAxesB);
-
-  const aFreeAxes: number[] = [];
-  const bFreeAxes: number[] = [];
-  for (let i = 0; i < aRank; i++) if (!contractedSetA.has(i)) aFreeAxes.push(i);
-  for (let i = 0; i < bRank; i++) if (!contractedSetB.has(i)) bFreeAxes.push(i);
-
-  const contractedSizes = contractedAxesA.map((ax) => aShape[ax]);
-
-  const chunkLen = outEnd - outStart;
-  const result = new Float64Array(chunkLen);
-
-  const outRank = resultShape.length;
-  const outIdx = new Array<number>(outRank);
-
-  for (let outFlat = outStart; outFlat < outEnd; outFlat++) {
-    // Decode flat output index to multi-index
-    let rem = outFlat;
-    for (let d = 0; d < outRank; d++) {
-      outIdx[d] = Math.floor(rem / outStrides[d]);
-      rem -= outIdx[d] * outStrides[d];
-    }
-
-    const aFreeVals = outIdx.slice(0, aFreeAxes.length);
-    const bFreeVals = outIdx.slice(aFreeAxes.length);
-
-    // Sum over contracted axes
-    let acc = 0;
-    forEachMultiIndex(contractedSizes, (contractVals) => {
-      const aIdx = new Array<number>(aRank).fill(0);
-      for (let fi = 0; fi < aFreeAxes.length; fi++) aIdx[aFreeAxes[fi]] = aFreeVals[fi];
-      for (let ci = 0; ci < contractedAxesA.length; ci++)
-        aIdx[contractedAxesA[ci]] = contractVals[ci];
-
-      const bIdx = new Array<number>(bRank).fill(0);
-      for (let fi = 0; fi < bFreeAxes.length; fi++) bIdx[bFreeAxes[fi]] = bFreeVals[fi];
-      for (let ci = 0; ci < contractedAxesB.length; ci++)
-        bIdx[contractedAxesB[ci]] = contractVals[ci];
-
-      acc += a[_flatIndex(aIdx, aStrides)] * b[_flatIndex(bIdx, bStrides)];
-    });
-
-    result[outFlat - outStart] = acc;
-  }
-
-  return result;
 }
 
 /**
@@ -1450,7 +1354,7 @@ export class ComputePool {
     const data =
       resultSize === 0
         ? new Float64Array(0)
-        : tensordotChunkKernel(a, aShape, b, bShape, axesA, axesB, resultShape, 0, resultSize);
+        : tensordotRange(a, aShape, b, bShape, axesA, axesB, resultShape, 0, resultSize);
 
     return {
       result: { data, shape: resultShape },
