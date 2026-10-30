@@ -461,5 +461,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2082  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8241  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2088  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8253  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
