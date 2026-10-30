@@ -1,0 +1,97 @@
+{
+  "note": "Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. assembly has no test:coverage script (AssemblyScript; covered by test:wasm and tests/wasm/, not this gate).",
+  "packages": {
+    "typed-function": {
+      "runner": "bun",
+      "floor": 94
+    },
+    "workerpool": {
+      "runner": "bun",
+      "floor": 65
+    },
+    "core": {
+      "runner": "bun",
+      "floor": 61
+    },
+    "matrix": {
+      "runner": "bun",
+      "floor": 84
+    },
+    "tensor": {
+      "runner": "bun",
+      "floor": 90
+    },
+    "autograd": {
+      "runner": "bun",
+      "floor": 96
+    },
+    "functions": {
+      "runner": "vitest",
+      "floor": 51
+    },
+    "expression": {
+      "runner": "bun",
+      "floor": 86
+    },
+    "parser": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "units": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "numbers": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "ast": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "evaluator": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "linalg": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "arithmetic": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "trigonometry": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "statistics": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "signal": {
+      "runner": "bun",
+      "floor": 99
+    },
+    "parallel": {
+      "runner": "bun",
+      "floor": 95
+    },
+    "workbook": {
+      "runner": "bun",
+      "floor": 57
+    },
+    "compat": {
+      "runner": "bun",
+      "floor": 97
+    },
+    "gpu": {
+      "runner": "bun",
+      "floor": 52
+    },
+    "plot": {
+      "runner": "bun",
+      "floor": 91
+    }
+  }
+}

@@ -11202,7 +11202,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "config",
       "disposition": "config",
-      "loc": 24
+      "loc": 29
     },
     {
       "file": "gpu/src/BufferPool.ts",

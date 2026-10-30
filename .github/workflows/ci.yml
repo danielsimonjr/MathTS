@@ -309,6 +309,11 @@ jobs:
       - name: Test with coverage
         run: bun run test:coverage
 
+      - name: Per-package coverage floors
+        run: |
+          node --test tools/test/check-coverage-floors.test.mjs
+          node tools/test/check-coverage-floors.mjs
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
