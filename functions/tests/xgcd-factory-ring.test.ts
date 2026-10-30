@@ -3,11 +3,11 @@
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { BigNumber, Fraction } from '@danielsimonjr/mathts-core';
-
-const bn = (n: number) => BigNumber.fromNumber(n);
 import { factory_xgcd } from '../src/factories/index.js';
 import { runWithConfig } from '../src/index.js';
 import type { Matrix } from '../src/types.js';
+
+const bn = (n: number) => BigNumber.fromNumber(n);
 
 const INTEGER_MSG = 'Parameters in function xgcd must be integer numbers';
 
@@ -15,17 +15,9 @@ afterEach(() => {
   runWithConfig({ matrix: 'Matrix' }, () => undefined);
 });
 
-function bezoutOk(
-  a: { multiply(x: unknown): { add(y: unknown): unknown } },
-  b: { multiply(x: unknown): { add(y: unknown): unknown } },
-  g: unknown,
-  x: unknown,
-  y: unknown
-): boolean {
-  return a
-    .multiply(x)
-    .add(b.multiply(y))
-    .equals(g as never);
+function bezoutOk(a: Fraction, b: Fraction, g: unknown, x: unknown, y: unknown): boolean {
+  const lhs = a.multiply(x as Fraction).add(b.multiply(y as Fraction));
+  return lhs.equals(g as Fraction);
 }
 
 function xgcdTriple(result: unknown): [unknown, unknown, unknown] {
@@ -70,14 +62,16 @@ describe('factory_xgcd BigNumber path', () => {
 
   it('honors config.matrix Array vs Matrix', () => {
     runWithConfig({ matrix: 'Array' }, () => {
-      const arr = factory_xgcd(bn(36), bn(24)) as BigNumber[];
+      const arr = factory_xgcd(bn(36), bn(24)) as unknown as BigNumber[];
       expect(Array.isArray(arr)).toBe(true);
       expect(arr.map((v) => v.valueOf())).toEqual([12, 1, -1]);
     });
     runWithConfig({ matrix: 'Matrix' }, () => {
       const mat = factory_xgcd(bn(36), bn(24)) as Matrix;
       expect(Array.isArray(mat)).toBe(false);
-      expect((mat.valueOf() as BigNumber[]).map((v) => v.valueOf())).toEqual([12, 1, -1]);
+      expect((mat.valueOf() as unknown as BigNumber[]).map((v) => v.valueOf())).toEqual([
+        12, 1, -1,
+      ]);
     });
   });
 });
@@ -87,17 +81,20 @@ describe('factory_xgcd Fraction path', () => {
     const a = new Fraction(36163);
     const b = new Fraction(21199);
     const [g, x, y] = xgcdTriple(factory_xgcd(a, b));
-    expect(g.equals(new Fraction(1247))).toBe(true);
-    expect(x.equals(new Fraction(-7))).toBe(true);
-    expect(y.equals(new Fraction(12))).toBe(true);
-    expect(bezoutOk(a, b, g, x, y)).toBe(true);
+    const gf = g as Fraction;
+    const xf = x as Fraction;
+    const yf = y as Fraction;
+    expect(gf.equals(new Fraction(1247))).toBe(true);
+    expect(xf.equals(new Fraction(-7))).toBe(true);
+    expect(yf.equals(new Fraction(12))).toBe(true);
+    expect(bezoutOk(a, b, gf, xf, yf)).toBe(true);
   });
 
   it('negative input normalizes gcd sign', () => {
     const a = new Fraction(-12);
     const b = new Fraction(18);
     const [g, x, y] = xgcdTriple(factory_xgcd(a, b));
-    expect(g.equals(new Fraction(6))).toBe(true);
+    expect((g as Fraction).equals(new Fraction(6))).toBe(true);
     expect(bezoutOk(a, b, g, x, y)).toBe(true);
   });
 
@@ -105,9 +102,9 @@ describe('factory_xgcd Fraction path', () => {
     const a = new Fraction(12);
     const b = new Fraction(0);
     const [g, x, y] = xgcdTriple(factory_xgcd(a, b));
-    expect(g.equals(new Fraction(12))).toBe(true);
-    expect(x.equals(new Fraction(1))).toBe(true);
-    expect(y.equals(new Fraction(0))).toBe(true);
+    expect((g as Fraction).equals(new Fraction(12))).toBe(true);
+    expect((x as Fraction).equals(new Fraction(1))).toBe(true);
+    expect((y as Fraction).equals(new Fraction(0))).toBe(true);
   });
 
   it('(0, 0) uses number 0 for the middle coefficient when gcd is zero', () => {
@@ -127,12 +124,12 @@ describe('factory_xgcd Fraction path', () => {
     runWithConfig({ matrix: 'Array' }, () => {
       const arr = factory_xgcd(new Fraction(36), new Fraction(24));
       expect(Array.isArray(arr)).toBe(true);
-      expect((arr as Fraction[])[0].equals(new Fraction(12))).toBe(true);
+      expect((arr as unknown as Fraction[])[0].equals(new Fraction(12))).toBe(true);
     });
     runWithConfig({ matrix: 'Matrix' }, () => {
       const mat = factory_xgcd(new Fraction(36), new Fraction(24)) as Matrix;
       expect(Array.isArray(mat)).toBe(false);
-      expect((mat.valueOf()[0] as Fraction).equals(new Fraction(12))).toBe(true);
+      expect((mat.valueOf()[0] as unknown as Fraction).equals(new Fraction(12))).toBe(true);
     });
   });
 });
