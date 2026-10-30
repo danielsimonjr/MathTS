@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2015,
+  "totalFiles": 2019,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1196,
     "test-only": 0,
     "orphan": 0,
-    "test": 731,
+    "test": 735,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1222,
-    "tests": 731,
+    "tests": 735,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 100,
+    "@danielsimonjr/mathts-core": 102,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 559,
-    "@danielsimonjr/mathts-functions": 849,
+    "@danielsimonjr/mathts-functions": 851,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 737
+      "loc": 754
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -1118,6 +1118,13 @@
       "loc": 455
     },
     {
+      "file": "core/tests/types/bignumber-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 52
+    },
+    {
       "file": "core/tests/types/bignumber-radix.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1137,6 +1144,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 280
+    },
+    {
+      "file": "core/tests/types/complex-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 114
     },
     {
       "file": "core/tests/types/complex.test.ts",
@@ -10694,6 +10708,13 @@
       "loc": 58
     },
     {
+      "file": "functions/tests/special-as-oracle.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 249
+    },
+    {
       "file": "functions/tests/special-as-wasm.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10706,6 +10727,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 352
+    },
+    {
+      "file": "functions/tests/special-oracle-inventory.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 63
     },
     {
       "file": "functions/tests/special-scalars-airy-oracle.test.ts",

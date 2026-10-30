@@ -1,0 +1,154 @@
+{
+  "erfc": {
+    "test": "functions/tests/kernel-serialization-special.test.ts",
+    "substring": "mpmath"
+  },
+  "lgamma": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "beta": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "gammainc": {
+    "test": "functions/tests/clones-same-algorithm.test.ts",
+    "substring": "closed form"
+  },
+  "digamma": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselJ0": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselJ1": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselY0": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselY1": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselJ": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselY": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselI": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "besselK": {
+    "test": "functions/tests/gap-besselk-precision-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "betainc": {
+    "test": "functions/tests/betainc-order.test.ts",
+    "substring": "mpmath"
+  },
+  "gammaincp": {
+    "test": "functions/tests/clones-same-algorithm.test.ts",
+    "substring": "closed form"
+  },
+  "ellipticK": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "DLMF"
+  },
+  "ellipticE": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "DLMF"
+  },
+  "chebyshevT": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "hermiteH": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "laguerreL": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "legendreP": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "lambertW": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "erfi": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "cosIntegral": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "sinIntegral": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "logIntegral": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "expIntegralEi": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "fresnelC": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "fresnelS": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "airyAi": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "airyBi": {
+    "test": "functions/tests/special-as-oracle.test.ts",
+    "substring": "mpmath"
+  },
+  "carlsonRC": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "carlsonRF": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "carlsonRD": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "carlsonRJ": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "ellipticF": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "ellipticEIncomplete": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  },
+  "ellipticPi": {
+    "test": "functions/tests/typed-special-carlson.test.ts",
+    "substring": "DLMF"
+  }
+}
