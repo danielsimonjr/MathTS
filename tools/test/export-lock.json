@@ -2296,6 +2296,9 @@
       "DescribeResult": {
         "kind": "type"
       },
+      "DimensionInference": {
+        "kind": "type"
+      },
       "Distribution": {
         "kind": "type"
       },
@@ -2665,6 +2668,9 @@
       "ParabolicSource": {
         "kind": "type"
       },
+      "ParameterDimensionResult": {
+        "kind": "type"
+      },
       "ParetoFrontError": {
         "kind": "function"
       },
@@ -2690,6 +2696,9 @@
         "kind": "type"
       },
       "QuadResult": {
+        "kind": "type"
+      },
+      "RationalDimension": {
         "kind": "type"
       },
       "RationalNullspaceOptions": {
@@ -4300,6 +4309,9 @@
       "indexFn": {
         "kind": "function"
       },
+      "inferScalarDimension": {
+        "kind": "function"
+      },
       "initializePool": {
         "kind": "function"
       },
@@ -5657,6 +5669,9 @@
         "kind": "function"
       },
       "solveParabolicPDE": {
+        "kind": "function"
+      },
+      "solveParameterDimensions": {
         "kind": "function"
       },
       "sort": {

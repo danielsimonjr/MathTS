@@ -168,6 +168,89 @@ describe('inferScalarDimension', () => {
   });
 });
 
+describe('inferScalarDimension edge cases', () => {
+  const length = si(1, 0, 0, 0, 0, 0, 0);
+  const time = si(0, 0, 1, 0, 0, 0, 0);
+  const none = si(0, 0, 0, 0, 0, 0, 0);
+
+  it('keeps a cube root exact: (x^3) ^ 0.3333333333333333 is a length', () => {
+    const tree = scalar.op('^', [
+      scalar.op('^', [scalar.symbol('x'), scalar.number(3)]),
+      scalar.number(0.3333333333333333),
+    ]);
+    const result = inferScalarDimension(tree, { x: length });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.dimension[0].equals(new Fraction(1n, 1n))).toBe(true);
+    }
+  });
+
+  it('checks every child of a sum, not just the first pair', () => {
+    const tree = scalar.op('+', [scalar.symbol('x'), scalar.symbol('x'), scalar.symbol('t')]);
+    expect(inferScalarDimension(tree, { x: length, t: time })).toEqual({
+      ok: false,
+      violation: 'add-mismatch',
+      path: [],
+    });
+  });
+
+  it('walks the exponent: an unknown symbol there is reported at its path', () => {
+    const tree = scalar.op('^', [scalar.number(2), scalar.symbol('n')]);
+    expect(inferScalarDimension(tree, {})).toEqual({
+      ok: false,
+      violation: 'unknown-symbol',
+      path: [1],
+    });
+  });
+
+  it('walks the exponent: a violation inside it is reported', () => {
+    const exponent = scalar.op('+', [scalar.symbol('x'), scalar.symbol('t')]);
+    const tree = scalar.op('^', [scalar.number(2), exponent]);
+    expect(inferScalarDimension(tree, { x: length, t: time })).toEqual({
+      ok: false,
+      violation: 'add-mismatch',
+      path: [1],
+    });
+  });
+
+  it('rejects a dimensional exponent even on a dimensionless base', () => {
+    const tree = scalar.op('^', [scalar.number(2), scalar.symbol('x')]);
+    expect(inferScalarDimension(tree, { x: length })).toEqual({
+      ok: false,
+      violation: 'transcendental-arg-not-dimensionless',
+      path: [],
+    });
+  });
+
+  it('accepts a dimensionless symbol exponent on a dimensionless base', () => {
+    const tree = scalar.op('^', [scalar.number(2), scalar.symbol('n')]);
+    expect(inferScalarDimension(tree, { n: none })).toEqual({ ok: true, dimension: none });
+  });
+
+  it('does not throw on a NaN or infinite literal exponent', () => {
+    for (const value of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      const dimensionlessBase = scalar.op('^', [scalar.symbol('n'), scalar.number(value)]);
+      expect(inferScalarDimension(dimensionlessBase, { n: none })).toEqual({
+        ok: true,
+        dimension: none,
+      });
+      const dimensionalBase = scalar.op('^', [scalar.symbol('x'), scalar.number(value)]);
+      expect(inferScalarDimension(dimensionalBase, { x: length })).toEqual({
+        ok: false,
+        violation: 'non-literal-exponent-on-dimensional-base',
+        path: [],
+      });
+    }
+  });
+
+  it('passes abs through and makes transcendental results dimensionless', () => {
+    const abs = scalar.call('abs', scalar.symbol('x'));
+    expect(inferScalarDimension(abs, { x: length })).toEqual({ ok: true, dimension: length });
+    const ratio = scalar.call('log', scalar.op('/', [scalar.symbol('x'), scalar.symbol('x')]));
+    expect(inferScalarDimension(ratio, { x: length })).toEqual({ ok: true, dimension: none });
+  });
+});
+
 describe('solveParameterDimensions', () => {
   const force = si(1, 1, -2, 0, 0, 0, 0);
   const kilogram = si(0, 1, 0, 0, 0, 0, 0);
@@ -210,5 +293,106 @@ describe('solveParameterDimensions', () => {
     expect(
       solveParameterDimensions(tree, { t: si(0, 0, 1, 0, 0, 0, 0) }, si(1, 0, 0, 0, 0, 0, 0), [])
     ).toEqual({ inconsistent: true });
+  });
+});
+
+describe('solveParameterDimensions equation emission', () => {
+  const length = si(1, 0, 0, 0, 0, 0, 0);
+  const time = si(0, 0, 1, 0, 0, 0, 0);
+  const none = si(0, 0, 0, 0, 0, 0, 0);
+  const force = si(1, 1, -2, 0, 0, 0, 0);
+
+  it('solves a parameter added to a length: x + c is a length', () => {
+    const tree = scalar.op('+', [scalar.symbol('x'), scalar.symbol('c')]);
+    expect(solveParameterDimensions(tree, { x: length }, length, ['c'])).toEqual({
+      solved: { c: length },
+    });
+  });
+
+  it('solves the argument of a transcendental call: sin(c * t) makes c one over time', () => {
+    const tree = scalar.call('sin', scalar.op('*', [scalar.symbol('c'), scalar.symbol('t')]));
+    expect(solveParameterDimensions(tree, { t: time }, none, ['c'])).toEqual({
+      solved: { c: si(0, 0, -1, 0, 0, 0, 0) },
+    });
+  });
+
+  it('solves exp(c) with c dimensionless', () => {
+    const tree = scalar.call('exp', scalar.symbol('c'));
+    expect(solveParameterDimensions(tree, {}, none, ['c'])).toEqual({ solved: { c: none } });
+  });
+
+  it('solves two parameters tied by a sum and the target: c1 + c2 is a force', () => {
+    const tree = scalar.op('+', [scalar.symbol('c1'), scalar.symbol('c2')]);
+    expect(solveParameterDimensions(tree, {}, force, ['c1', 'c2'])).toEqual({
+      solved: { c1: force, c2: force },
+    });
+  });
+
+  it('solves a parameter base under a symbol exponent: c ^ n is dimensionless only for c = 1', () => {
+    const tree = scalar.op('^', [scalar.symbol('c'), scalar.symbol('n')]);
+    expect(solveParameterDimensions(tree, { n: none }, none, ['c'])).toEqual({
+      solved: { c: none },
+    });
+  });
+
+  it('is inconsistent when the sum fixes the root to the wrong dimension', () => {
+    const tree = scalar.op('+', [scalar.symbol('x'), scalar.symbol('c')]);
+    expect(solveParameterDimensions(tree, { x: length }, time, ['c'])).toEqual({
+      inconsistent: true,
+    });
+  });
+
+  it('is inconsistent, not underdetermined, when two equations contradict', () => {
+    // c1*c2 must equal a length (from x) and a time (from y): no values exist,
+    // although c1 and c2 are not individually fixed.
+    const product = scalar.op('*', [scalar.symbol('c1'), scalar.symbol('c2')]);
+    const tree = scalar.op('*', [
+      scalar.op('+', [scalar.symbol('x'), product]),
+      scalar.op('+', [scalar.symbol('y'), product]),
+    ]);
+    expect(solveParameterDimensions(tree, { x: length, y: time }, none, ['c1', 'c2'])).toEqual({
+      inconsistent: true,
+    });
+  });
+
+  it('keeps the c1 * c2 pair underdetermined when the equations agree', () => {
+    const product = scalar.op('*', [scalar.symbol('c1'), scalar.symbol('c2')]);
+    const tree = scalar.op('+', [scalar.symbol('x'), product]);
+    expect(solveParameterDimensions(tree, { x: length }, length, ['c1', 'c2'])).toEqual({
+      underdetermined: ['c1', 'c2'],
+    });
+  });
+
+  it('dimensionlessOnly makes x + c inconsistent for a length', () => {
+    const tree = scalar.op('+', [scalar.symbol('x'), scalar.symbol('c')]);
+    expect(
+      solveParameterDimensions(tree, { x: length }, length, ['c'], { dimensionlessOnly: true })
+    ).toEqual({ inconsistent: true });
+  });
+
+  it('reports a symbol that is neither a dimension nor a parameter as inconsistent', () => {
+    const tree = scalar.op('+', [scalar.symbol('x'), scalar.symbol('ghost')]);
+    expect(solveParameterDimensions(tree, { x: length }, length, ['c'])).toEqual({
+      inconsistent: true,
+    });
+  });
+
+  it('walks a symbol exponent made of known dimensions', () => {
+    const tree = scalar.op('^', [scalar.number(2), scalar.symbol('x')]);
+    expect(solveParameterDimensions(tree, { x: length }, none, ['c'])).toEqual({
+      inconsistent: true,
+    });
+  });
+
+  it('returns a parameter named __proto__ as an own key', () => {
+    const tree = scalar.op('*', [scalar.symbol('M'), scalar.symbol('__proto__')]);
+    const result = solveParameterDimensions(tree, { M: si(0, 1, 0, 0, 0, 0, 0) }, force, [
+      '__proto__',
+    ]);
+    expect('solved' in result).toBe(true);
+    if ('solved' in result) {
+      expect(Object.keys(result.solved)).toEqual(['__proto__']);
+      expect(Object.getPrototypeOf(result.solved)).toBe(Object.prototype);
+    }
   });
 });
