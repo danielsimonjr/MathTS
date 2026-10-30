@@ -51,7 +51,10 @@ const TARGETS = [
 
 const norm = (s) => s.replace(/\r\n/g, '\n');
 const fmt = (arr) => arr.slice().sort((a, b) => a.localeCompare(b));
-const code = (arr) => fmt(arr).map((n) => `\`${n}\``).join(', ');
+const code = (arr) =>
+  fmt(arr)
+    .map((n) => `\`${n}\``)
+    .join(', ');
 const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
 const OTHER = 'Other exports (uncategorized)';
 
@@ -65,53 +68,177 @@ const OTHER = 'Other exports (uncategorized)';
 const DOMAIN_SUPPLEMENT = {
   Arithmetic: ['clamp', 'sigmoid'],
   'Special Functions': [
-    'carlsonRC', 'carlsonRD', 'carlsonRF', 'carlsonRJ', 'ellipticEIncomplete',
-    'ellipticF', 'ellipticPi', 'erfcScalar',
+    'carlsonRC',
+    'carlsonRD',
+    'carlsonRF',
+    'carlsonRJ',
+    'ellipticEIncomplete',
+    'ellipticF',
+    'ellipticPi',
+    'erfcScalar',
   ],
   Statistics: [
-    'acf', 'bootstrapCI', 'corrcoef', 'cov', 'cummax', 'cummin', 'cumprod', 'cumtrapz',
-    'describe', 'detrend', 'ewma', 'gmean', 'histogram', 'hmean', 'iqr', 'kendallTau',
-    'kendalltau', 'kurtosis', 'kmeans', 'linregress', 'logsumexp', 'mahalanobis', 'meanCI',
-    'moment', 'movingAverage', 'pearsonr', 'proportionCI', 'ptp', 'rankdata', 'sem',
-    'skewness', 'softmax', 'spearmanr', 'spectralClustering', 'trimmedMean', 'variation',
-    'zscore', 'linearRegression', 'parallelStatPercentile',
+    'acf',
+    'bootstrapCI',
+    'corrcoef',
+    'cov',
+    'cummax',
+    'cummin',
+    'cumprod',
+    'cumtrapz',
+    'describe',
+    'detrend',
+    'ewma',
+    'gmean',
+    'histogram',
+    'hmean',
+    'iqr',
+    'kendallTau',
+    'kendalltau',
+    'kurtosis',
+    'kmeans',
+    'linregress',
+    'logsumexp',
+    'mahalanobis',
+    'meanCI',
+    'moment',
+    'movingAverage',
+    'pearsonr',
+    'proportionCI',
+    'ptp',
+    'rankdata',
+    'sem',
+    'skewness',
+    'softmax',
+    'spearmanr',
+    'spectralClustering',
+    'trimmedMean',
+    'variation',
+    'zscore',
+    'linearRegression',
+    'parallelStatPercentile',
   ],
   'Probability Distributions': [
-    'betaCDF', 'betaPDF', 'betaQuantile', 'cauchyCDF', 'cauchyPDF', 'cauchyQuantile',
-    'chiSquaredCDF', 'chiSquaredQuantile', 'discreteUniformDist', 'fCDF', 'fQuantile',
-    'gammaCDF', 'gammaPDF', 'gammaQuantile', 'gumbelDist', 'hypergeometricDist',
-    'invGaussDist', 'laplaceCDF', 'laplacePDF', 'laplaceQuantile', 'logisticCDF',
-    'logisticPDF', 'logisticQuantile', 'multivariateNormal', 'negativeBinomialDist',
-    'noncentralChi2PDF', 'normalQuantile', 'paretoDist', 'rayleighDist', 'studentTCDF',
-    'studentTPDF', 'studentTQuantile', 'studentizedRangeCDF', 'studentizedRangeQuantile',
-    'seedProbabilityRng', 'triangularDist',
+    'betaCDF',
+    'betaPDF',
+    'betaQuantile',
+    'cauchyCDF',
+    'cauchyPDF',
+    'cauchyQuantile',
+    'chiSquaredCDF',
+    'chiSquaredQuantile',
+    'discreteUniformDist',
+    'fCDF',
+    'fQuantile',
+    'gammaCDF',
+    'gammaPDF',
+    'gammaQuantile',
+    'gumbelDist',
+    'hypergeometricDist',
+    'invGaussDist',
+    'laplaceCDF',
+    'laplacePDF',
+    'laplaceQuantile',
+    'logisticCDF',
+    'logisticPDF',
+    'logisticQuantile',
+    'multivariateNormal',
+    'negativeBinomialDist',
+    'noncentralChi2PDF',
+    'normalQuantile',
+    'paretoDist',
+    'rayleighDist',
+    'studentTCDF',
+    'studentTPDF',
+    'studentTQuantile',
+    'studentizedRangeCDF',
+    'studentizedRangeQuantile',
+    'seedProbabilityRng',
+    'triangularDist',
   ],
   'Hypothesis Tests': [
-    'andersonDarlingTest', 'anova2', 'bartlettTest', 'binomialTest', 'dagostinoTest',
-    'friedmanTest', 'fTest', 'fisherExact', 'hotellingT2', 'jarqueBera',
-    'kolmogorovSmirnov2Test', 'kruskalWallis', 'leveneTest', 'multipleComparison',
-    'permutationTest', 'proportionZTest', 'studentTTestPaired', 'tukeyHSD', 'wilcoxon',
+    'andersonDarlingTest',
+    'anova2',
+    'bartlettTest',
+    'binomialTest',
+    'dagostinoTest',
+    'friedmanTest',
+    'fTest',
+    'fisherExact',
+    'hotellingT2',
+    'jarqueBera',
+    'kolmogorovSmirnov2Test',
+    'kruskalWallis',
+    'leveneTest',
+    'multipleComparison',
+    'permutationTest',
+    'proportionZTest',
+    'studentTTestPaired',
+    'tukeyHSD',
+    'wilcoxon',
   ],
   'Signal Processing': [
-    'bartlettPSD', 'butter', 'chirpZTransform', 'filtfilt', 'firwin', 'goertzel',
-    'lfilter', 'lfilterZi', 'multiTaperPSD', 'welchPSD',
+    'bartlettPSD',
+    'butter',
+    'chirpZTransform',
+    'filtfilt',
+    'firwin',
+    'goertzel',
+    'lfilter',
+    'lfilterZi',
+    'multiTaperPSD',
+    'welchPSD',
   ],
   'Linear Algebra': [
-    'circulant', 'companion', 'generalizedEig', 'laplacianMatrix', 'logdet',
-    'lowRankApprox', 'matrixExpm', 'matrixLogm', 'matrixSqrtm', 'norm2', 'normFro',
+    'circulant',
+    'companion',
+    'generalizedEig',
+    'laplacianMatrix',
+    'logdet',
+    'lowRankApprox',
+    'matrixExpm',
+    'matrixLogm',
+    'matrixSqrtm',
+    'norm2',
+    'normFro',
     'rationalNullspace',
-    'qz', 'singularValues', 'toeplitz', 'tril', 'triu', 'vander',
+    'qz',
+    'singularValues',
+    'toeplitz',
+    'tril',
+    'triu',
+    'vander',
   ],
   Geometry: [
-    'convexHull3D', 'haversine', 'quaternionConjugate', 'quaternionFromAxisAngle',
-    'quaternionMultiply', 'quaternionNormalize', 'quaternionRotate',
-    'quaternionToRotationMatrix', 'slerp',
+    'convexHull3D',
+    'haversine',
+    'quaternionConjugate',
+    'quaternionFromAxisAngle',
+    'quaternionMultiply',
+    'quaternionNormalize',
+    'quaternionRotate',
+    'quaternionToRotationMatrix',
+    'slerp',
   ],
   'Graph Theory': ['betweennessCentrality', 'eigenvectorCentrality', 'pageRank'],
-  'Computer Algebra System (CAS)': ['casDerivative', 'casExpand', 'casFactor', 'casSimplify', 'symbolicIntegral'],
+  'Computer Algebra System (CAS)': [
+    'casDerivative',
+    'casExpand',
+    'casFactor',
+    'casSimplify',
+    'symbolicIntegral',
+  ],
   'Numerical Methods': [
-    'derivativeAt', 'gaussLegendre4', 'GL4ConvergenceError', 'gradient', 'gradientAt',
-    'gradientDescent', 'hessian', 'levenbergMarquardt', 'nelderMead', 'propagateUncertainty',
+    'derivativeAt',
+    'gaussLegendre4',
+    'GL4ConvergenceError',
+    'gradient',
+    'gradientAt',
+    'gradientDescent',
+    'hessian',
+    'levenbergMarquardt',
+    'nelderMead',
+    'propagateUncertainty',
     'valueAndDerivativeAt',
   ],
   'Interpolation & Curve Fitting': ['chebyshevFit', 'legendreFit', 'newtonInterp'],
@@ -133,12 +260,54 @@ const DOMAIN_SUPPLEMENT = {
     'scoreFront',
     'selectFrontModel',
     'ParetoFrontError',
+    'frontToLatexTable',
+    'frontToJson',
+    'FrontJson',
+    'FrontJsonNumber',
+    'FrontJsonRow',
+    'FrontLatexTableOptions',
     'numericallyEquivalent',
     'NumericEquivalenceError',
+    'inferScalarDimension',
+    'solveParameterDimensions',
+    'RationalDimension',
+    'DimensionInference',
+    'ParameterDimensionResult',
+    'addNode',
+    'crossoverSubtrees',
+    'DEFAULT_MUTATION_WEIGHTS',
+    'deleteNode',
+    'identityMutation',
+    'insertNode',
+    'mutateConstant',
+    'mutateFeature',
+    'mutateOperator',
+    'MUTATE_CONSTANT_NEGATE_PROBABILITY',
+    'randomizeTree',
+    'rotateTree',
+    'simplifyConstants',
+    'swapOperands',
+    'weightedMutation',
+    'MutationWeightKey',
+    'ScalarMutationContext',
+    'ScalarMutationOperator',
+    'searchScalars',
+    'ScalarPopulationParallelOptions',
+    'ScalarSearchOptions',
+    'ScalarSearchProblem',
+    'ScalarSearchResult',
+    'ScalarSearchStopReason',
+    'SearchProgress',
   ],
   'Parallel Execution Model': [
-    'getComputePool', 'initializePool', 'initializeSignal', 'initializeStatistics',
-    'shouldParallelize', 'terminatePool', 'terminateSignal', 'terminateStatistics',
+    'getComputePool',
+    'initializePool',
+    'initializeSignal',
+    'initializeStatistics',
+    'shouldParallelize',
+    'terminatePool',
+    'terminateSignal',
+    'terminateStatistics',
   ],
 };
 
@@ -257,7 +426,8 @@ function buildIndexBlock(mod, pkg, domains) {
   } else if (uncategorizedFns.length) {
     out += `### Functions (${uncategorizedFns.length})\n\n${code(uncategorizedFns)}\n\n`;
   }
-  if (constants.length) out += `### Constants & values (${constants.length})\n\n${code(constants)}\n\n`;
+  if (constants.length)
+    out += `### Constants & values (${constants.length})\n\n${code(constants)}\n\n`;
   if (classes.length) out += `### Classes & types (${classes.length})\n\n${code(classes)}\n\n`;
   if (factoryShadows.length) {
     out += `### Factory-shadowed (\`factory_*\`, ${factoryShadows.length})\n\n`;
@@ -399,7 +569,7 @@ export function runtimeExportNames(source) {
   const names = new Set();
   for (const m of text.matchAll(/export\s+\*\s+as\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
   for (const m of text.matchAll(
-    /export\s+(?:async\s+)?(?:const|let|var|function\*?|class|enum)\s+([A-Za-z_$][\w$]*)/g,
+    /export\s+(?:async\s+)?(?:const|let|var|function\*?|class|enum)\s+([A-Za-z_$][\w$]*)/g
   )) {
     names.add(m[1]);
   }
@@ -613,11 +783,16 @@ async function runMain() {
     for (const j of stale) {
       console.error(`${j.label} is STALE. Run \`npm run docs:functions\`.`);
       if (j.isMd) {
-        const documented = new Set([...j.prev.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+        const documented = new Set(
+          [...j.prev.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1])
+        );
         // undocumented names appear in the regenerated content but not the on-disk file
-        const wanted = new Set([...j.next.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1]));
+        const wanted = new Set(
+          [...j.next.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`/g)].map((m) => m[1])
+        );
         const missing = [...wanted].filter((n) => !documented.has(n));
-        if (missing.length) console.error(`  Undocumented names (${missing.length}): ${missing.join(', ')}`);
+        if (missing.length)
+          console.error(`  Undocumented names (${missing.length}): ${missing.join(', ')}`);
       }
     }
     if (reconcile.orphans.length) console.error(reconcileMsg);
@@ -637,8 +812,7 @@ async function runMain() {
 }
 
 const isMain =
-  process.argv[1] &&
-  resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
+  process.argv[1] && resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
 if (isMain) {
   runMain().catch((err) => {
     console.error(err);

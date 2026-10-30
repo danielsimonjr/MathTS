@@ -1,9 +1,12 @@
 /**
- * Parallel batch evaluation of scalar populations over shared columns (M14).
+ * Evaluates many scalar trees over shared columns, on worker threads when asked to (M14).
  *
- * Threshold {@link SCALAR_PARALLEL_MIN_ROWS} = 100 rows from
- * `docs/BENCHMARK_RESULTS.md` — section `evaluateScalar` vs `compileScalar`
- * (M3 batch evaluator) — 2026-10-25 (two Node runs; batch wins at n = 100).
+ * The caller opts in with `parallel`; without it every tree runs through
+ * {@link compileScalar} on the caller thread. With it, populations over at least
+ * {@link SCALAR_PARALLEL_MIN_ROWS} rows are compiled to tapes here and the tapes are
+ * evaluated by `scalar-batch.worker.js` through {@link WorkerPool.execute}, with a
+ * timeout that always applies. Both paths run the same `evaluateScalarTape`, so the values
+ * agree bit for bit.
  *
  * @packageDocumentation
  */
@@ -16,31 +19,53 @@ import {
   type CompileScalarOptions,
   type ScalarBatchResult,
 } from './scalar-compile.js';
+import {
+  SCALAR_BATCH_MESSAGE_PREFIX,
+  type ScalarBatchTask,
+  type ScalarBatchTaskItem,
+  type ScalarBatchTaskResult,
+} from './scalar-batch-task.js';
 
-/** Use worker pool when row count is at least this (see module header citation). */
+/**
+ * Smallest row count that is sent to workers. 100 is the `n` from which the M3 tape beats
+ * the per-row interpreter in every run of the `scalar` benchmark (`docs/BENCHMARK_RESULTS.md`,
+ * section "`evaluateScalar` vs `compileScalar` (M3 batch evaluator) - 2026-10-25"). That
+ * table compares the two evaluators on the caller thread; it did not time a worker round
+ * trip, so this is the plan's floor for using the pool and not a measured break-even. The
+ * pool is opt-in, and nothing here claims a speed-up.
+ */
 export const SCALAR_PARALLEL_MIN_ROWS = 100;
 
-const DEFAULT_PARALLEL_TIMEOUT_MS = 30_000;
-const COMPILE_PREFIX = 'compileScalar:';
+/** Timeout applied to every worker call when the caller does not choose one. */
+export const DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS = 30_000;
 
-/** Resolve the built worker script without Node built-ins (browser-safe). */
+/** URL of the built worker, a sibling of the module that contains this code. */
 export function resolveScalarBatchWorkerScript(): string {
-  const isNode = typeof process !== 'undefined' && !!process.versions?.node;
-  if (!isNode) {
-    return new URL('./scalar-batch.worker.js', import.meta.url).href;
-  }
-  return new URL('../dist/scalar-batch.worker.js', import.meta.url).href;
+  return new URL('./scalar-batch.worker.js', import.meta.url).href;
+}
+
+/** Starts the pool that {@link evaluateScalarPopulation} uses when it is not given one. */
+export function createScalarBatchPool(): WorkerPool {
+  return new WorkerPool(resolveScalarBatchWorkerScript());
+}
+
+/** How to run a population on workers. */
+export interface ScalarPopulationParallelOptions {
+  /**
+   * Milliseconds a worker call may take, queueing included, before it is cancelled, the
+   * worker replaced and the evaluation rejected. Must be positive: `0` would switch the
+   * pool's timeout off. Default 30000.
+   */
+  readonly timeoutMs?: number;
+  /** A pool to use, which the caller owns and terminates. Default: one for the call. */
+  readonly pool?: Pick<WorkerPool, 'execute'>;
 }
 
 export interface ScalarPopulationEvalItem {
+  /** Returned unchanged with the result. */
   readonly index: number;
   readonly node: ScalarNode;
   readonly params?: ArrayLike<number>;
-}
-
-export interface ScalarPopulationParallelOptions {
-  readonly timeoutMs?: number;
-  readonly pool?: Pick<WorkerPool, 'execute'>;
 }
 
 export interface EvaluateScalarPopulationOptions extends CompileScalarOptions {
@@ -54,18 +79,13 @@ export interface ScalarPopulationEvalResult {
   readonly batch: ScalarBatchResult;
 }
 
-let defaultPool: WorkerPool | null = null;
-
-function getDefaultPool(): WorkerPool {
-  if (!defaultPool) {
-    defaultPool = new WorkerPool(resolveScalarBatchWorkerScript());
+/** Positive, finite timeout, or a `RangeError`: a zero would silently disable the guard. */
+export function resolveParallelTimeout(timeoutMs: number | undefined): number {
+  const value = timeoutMs ?? DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS;
+  if (!(Number.isFinite(value) && value > 0)) {
+    throw new RangeError(`parallel.timeoutMs must be a finite number > 0, got ${value}`);
   }
-  return defaultPool;
-}
-
-function rowCount(columns: readonly Float64Array[], variables: readonly string[]): number {
-  if (variables.length === 0) return 1;
-  return columns[0]?.length ?? 0;
+  return value;
 }
 
 function defaultWorkerCount(): number {
@@ -75,145 +95,131 @@ function defaultWorkerCount(): number {
   return 4;
 }
 
-function partitionItems<T>(items: readonly T[], chunks: number): T[][] {
-  const n = items.length;
-  if (n === 0) return [];
-  const k = Math.min(Math.max(1, chunks), n);
+/** Splits `items` into at most `chunks` runs of consecutive items whose sizes differ by at most 1. */
+function partition<T>(items: readonly T[], chunks: number): T[][] {
+  const k = Math.min(Math.max(1, chunks), items.length);
+  const base = Math.floor(items.length / k);
+  let extra = items.length % k;
   const out: T[][] = [];
-  const base = Math.floor(n / k);
-  let rem = n % k;
   let start = 0;
-  for (let c = 0; c < k; c++) {
-    const size = base + (rem > 0 ? 1 : 0);
-    if (rem > 0) rem--;
+  for (let c = 0; c < k; c += 1) {
+    const size = base + (extra > 0 ? 1 : 0);
+    extra -= extra > 0 ? 1 : 0;
     out.push(items.slice(start, start + size));
     start += size;
   }
   return out;
 }
 
-interface WorkerItemPayload {
-  readonly candidateIndex: number;
-  readonly tape: ReturnType<typeof buildTape>['tape'];
-  readonly rootReg: number;
-  readonly nRegs: number;
-  readonly params: number[];
-  readonly parameters: readonly string[];
-}
-
-interface WorkerPayload {
-  readonly items: readonly WorkerItemPayload[];
-  readonly columns: readonly Float64Array[];
-  readonly variables: readonly string[];
-}
-
-interface WorkerResultRow {
-  readonly candidateIndex: number;
-  readonly values: Float64Array;
-  readonly valid: Uint8Array;
-  readonly allValid: boolean;
-}
-
-interface WorkerResult {
-  readonly rows: readonly WorkerResultRow[];
-}
-
 function evaluateSerial(options: EvaluateScalarPopulationOptions): ScalarPopulationEvalResult[] {
-  const compileOpts: CompileScalarOptions = {
+  const compileOptions: CompileScalarOptions = {
     variables: options.variables,
     parameters: options.parameters,
     constants: options.constants,
   };
-  return options.items.map((item) => {
-    const compiled = compileScalar(item.node, compileOpts);
-    const batch = compiled.evaluate(options.columns, item.params);
-    return { index: item.index, batch };
-  });
+  return options.items.map((item) => ({
+    index: item.index,
+    batch: compileScalar(item.node, compileOptions).evaluate(options.columns, item.params),
+  }));
 }
 
-function buildWorkerItems(
-  items: readonly ScalarPopulationEvalItem[],
-  compileOpts: CompileScalarOptions
-): WorkerItemPayload[] {
-  return items.map((item) => {
-    const { tape, rootReg, nRegs, parameters } = buildTape(item.node, compileOpts, COMPILE_PREFIX);
-    const params = item.params === undefined ? [] : (Array.from(item.params) as number[]);
-    return {
-      candidateIndex: item.index,
-      tape,
-      rootReg,
-      nRegs,
-      params,
-      parameters,
-    };
-  });
+function taskItem(
+  item: ScalarPopulationEvalItem,
+  position: number,
+  compileOptions: CompileScalarOptions
+): ScalarBatchTaskItem {
+  const { tape, rootReg, nRegs, parameters } = buildTape(
+    item.node,
+    compileOptions,
+    SCALAR_BATCH_MESSAGE_PREFIX
+  );
+  return {
+    candidateIndex: position,
+    tape,
+    rootReg,
+    nRegs,
+    params: item.params === undefined ? [] : Array.from(item.params),
+    parameters,
+  };
 }
 
-async function evaluateParallelChunk(
+async function evaluateOnPool(
   pool: Pick<WorkerPool, 'execute'>,
   timeoutMs: number,
-  payload: WorkerPayload
-): Promise<WorkerResultRow[]> {
-  const result = await pool.execute<WorkerPayload, WorkerResult>(payload, undefined, timeoutMs);
-  return [...result.rows];
-}
-
-/**
- * Evaluate many scalar trees on the same column buffers. Below
- * {@link SCALAR_PARALLEL_MIN_ROWS} rows, or when `parallel` is omitted, runs
- * {@link compileScalar} on the caller thread. At or above the threshold with
- * `parallel` set, dispatches tape batches through {@link WorkerPool.execute}.
- */
-export async function evaluateScalarPopulation(
-  options: EvaluateScalarPopulationOptions
+  options: EvaluateScalarPopulationOptions,
+  rows: number
 ): Promise<ScalarPopulationEvalResult[]> {
-  const nRows = rowCount(options.columns, options.variables);
-  const usePool =
-    options.parallel !== undefined && nRows >= SCALAR_PARALLEL_MIN_ROWS && options.items.length > 0;
-
-  if (!usePool) {
-    return evaluateSerial(options);
-  }
-
-  const timeoutMs = options.parallel!.timeoutMs ?? DEFAULT_PARALLEL_TIMEOUT_MS;
-  const pool = options.parallel!.pool ?? getDefaultPool();
-  const compileOpts: CompileScalarOptions = {
+  const compileOptions: CompileScalarOptions = {
     variables: options.variables,
     parameters: options.parameters,
     constants: options.constants,
   };
-
-  const workerItems = buildWorkerItems(options.items, compileOpts);
-  const chunks = partitionItems(workerItems, defaultWorkerCount());
-  const columns = options.columns.map((c) => new Float64Array(c));
+  const items = options.items.map((item, position) => taskItem(item, position, compileOptions));
   const variables = options.variables.slice();
-
-  const chunkResults = await Promise.all(
-    chunks.map((items) =>
-      evaluateParallelChunk(pool, timeoutMs, {
-        items,
-        columns,
-        variables,
-      })
-    )
+  const replies = await Promise.all(
+    partition(items, defaultWorkerCount()).map((chunk) => {
+      const task: ScalarBatchTask = { items: chunk, columns: options.columns, variables };
+      return pool.execute<ScalarBatchTask, ScalarBatchTaskResult>(task, undefined, timeoutMs);
+    })
   );
 
-  const merged = new Map<number, ScalarBatchResult>();
-  for (const rows of chunkResults) {
-    for (const row of rows) {
-      merged.set(row.candidateIndex, {
+  const byPosition = new Map<number, ScalarBatchResult>();
+  for (const reply of replies) {
+    for (const row of reply.rows) {
+      if (row.values.length !== rows || row.valid.length !== rows) {
+        throw new Error(
+          `evaluateScalarPopulation: worker returned ${row.values.length} values for ${rows} rows`
+        );
+      }
+      byPosition.set(row.candidateIndex, {
         values: row.values,
         valid: row.valid,
         allValid: row.allValid,
       });
     }
   }
-
-  return options.items.map((item) => {
-    const batch = merged.get(item.index);
-    if (!batch) {
-      throw new Error(`evaluateScalarPopulation: missing worker result for index ${item.index}`);
+  return options.items.map((item, position) => {
+    const batch = byPosition.get(position);
+    if (batch === undefined) {
+      throw new Error(`evaluateScalarPopulation: no worker result for item ${position}`);
     }
     return { index: item.index, batch };
   });
+}
+
+/**
+ * Evaluates every item over `columns`, in the order given.
+ *
+ * Without `parallel`, or with fewer than {@link SCALAR_PARALLEL_MIN_ROWS} rows, each tree
+ * runs on the caller thread and no pool is touched. Otherwise the trees are compiled here,
+ * split into consecutive chunks, evaluated by the workers, and put back in item order by
+ * position. A pool that was not passed in is created for the call and terminated after it.
+ *
+ * @throws {RangeError} `parallel.timeoutMs` is not a positive finite number.
+ * @throws A worker error, a timeout, or a tree that cannot be compiled.
+ */
+export async function evaluateScalarPopulation(
+  options: EvaluateScalarPopulationOptions
+): Promise<ScalarPopulationEvalResult[]> {
+  const timeoutMs =
+    options.parallel === undefined ? 0 : resolveParallelTimeout(options.parallel.timeoutMs);
+  const matched = options.columns.length === options.variables.length;
+  const rows = options.variables.length === 0 ? 1 : (options.columns[0]?.length ?? 0);
+  if (
+    options.parallel === undefined ||
+    !matched ||
+    rows < SCALAR_PARALLEL_MIN_ROWS ||
+    options.items.length === 0
+  ) {
+    return evaluateSerial(options);
+  }
+  const given = options.parallel.pool;
+  const pool = given ?? createScalarBatchPool();
+  try {
+    return await evaluateOnPool(pool, timeoutMs, options, rows);
+  } finally {
+    if (given === undefined) {
+      await (pool as WorkerPool).terminate();
+    }
+  }
 }

@@ -1,68 +1,124 @@
 /**
- * PySR-style regularized evolution over {@link ScalarNode} trees (M13).
+ * PySR-style evolutionary search over {@link ScalarNode} trees (M13).
+ *
+ * `populations` islands each evolve by tournament selection and
+ * {@link weightedMutation}. Each generation breeds `populationSize` offspring per
+ * island from tournament winners, evaluates them in one batch, and keeps the best
+ * `populationSize` distinct trees of parents and offspring (elitist truncation, not
+ * PySR's age-based replacement). After every generation the islands exchange their
+ * best trees (migration). A hall of fame shared by every island keeps the best tree
+ * per complexity; its Pareto front is reported through {@link paretoFront} and
+ * {@link scoreFront}.
  *
  * @packageDocumentation
  */
 
 import { pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
+  scalarCanonicalKey,
   scalarComplexity,
   scalarGrammarAccepts,
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
-import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import { fitScalarParameters } from './fit-scalar.js';
+import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
 import {
+  createScalarBatchPool,
   evaluateScalarPopulation,
+  resolveParallelTimeout,
   type ScalarPopulationParallelOptions,
 } from './scalar-batch-parallel.js';
-import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
-import { compileScalar } from './scalar-compile.js';
+import { compileScalar, type ScalarBatchResult } from './scalar-compile.js';
 import { weightedMutation, type ScalarMutationContext } from './scalar-mutate.js';
 
 /** Columnar regression target for {@link searchScalars}. */
 export interface ScalarSearchProblem {
+  /** Names of the input columns, in the order of `columns`. */
   readonly variables: readonly string[];
+  /** One column per variable; every column has `observed.length` rows. */
   readonly columns: readonly Float64Array[];
+  /** Target values. Must be finite. */
   readonly observed: Float64Array;
+  /** Fitted constants. Defaults to `grammar.parameters`. */
   readonly parameters?: readonly string[];
-}
-
-/** Optional worker evaluation (M14); omitted keeps evaluation on the caller thread. */
-export interface ScalarSearchParallelOptions {
-  readonly timeoutMs?: number;
-  readonly pool?: Pick<WorkerPool, 'execute'>;
 }
 
 /** Budget and evolution knobs for {@link searchScalars}. */
 export interface ScalarSearchOptions {
   readonly grammar: ScalarGrammar;
+  /** Not advanced by the search: every stream is a `fork` of it. */
   readonly rng: SeededRng;
+  /** Trees per population. Default 27. */
   readonly populationSize?: number;
+  /** Contestants per tournament. Default 15. */
   readonly tournamentSize?: number;
+  /** Chance that the best contestant wins; rank `r` wins with `p (1 - p)^r`. Default 0.982. */
   readonly tournamentP?: number;
+  /** Chance that an evaluated tree has its parameters refitted. Default 0.14. */
   readonly optimizeProbability?: number;
+  /** Cap on tree evaluations, the initial population included. */
   readonly maxEvaluations: number;
+  /** Second cap on tree evaluations, reported as `'max-candidates'`. */
   readonly maxCandidates?: number;
+  /** Trees injected into the initial population (PySR `guesses`); the grammar filters them. */
   readonly seeds?: readonly ScalarNode[];
+  /** Constant-perturbation scale handed to the mutations. Default 0.25. */
   readonly perturbationFactor?: number;
+  /** How `selected` is chosen from the front. Omitted: no selection. */
   readonly modelSelection?: 'accuracy' | 'score' | 'best';
+  /**
+   * Independent islands, each with `populationSize` trees and its own random stream
+   * (`rng.fork('island:' + index)`). Default 1, which draws from `rng.fork('population')`.
+   * Evaluations are counted across all islands.
+   */
   readonly populations?: number;
+  /**
+   * Expected share of each island replaced by another island's best trees after every
+   * generation, in [0, 1]. The count is the expectation rounded at random. Default 0.00036
+   * (PySR `fraction_replaced`).
+   */
   readonly fractionReplaced?: number;
+  /**
+   * Shrink the constant perturbation scale over the run: the mutation temperature starts
+   * at `initialTemperature` and is multiplied by 0.995 after every generation. Default:
+   * on when `populations > 1`, so a single population stays the M13a search.
+   */
   readonly annealing?: boolean;
+  /** Starting temperature when `annealing` is on. Default 3.17 (PySR `alpha`). */
   readonly initialTemperature?: number;
+  /**
+   * Rank tournament contestants by `loss * exp(adaptiveParsimonyScaling * f)`, where `f`
+   * is the share of recent evaluations that had the contestant's complexity. Crowded
+   * sizes lose, so the population explores every size. Default: on when `populations > 1`.
+   */
   readonly adaptiveParsimony?: boolean;
+  /** Strength of the adaptive-parsimony penalty. Default 1040 (PySR). */
   readonly adaptiveParsimonyScaling?: number;
-  readonly parallel?: ScalarSearchParallelOptions;
+  /**
+   * Evaluate every generation's trees on worker threads (M14) once `observed` has at least
+   * 100 rows; below that, and when omitted, evaluation stays on the caller thread. The
+   * workers return the values the caller thread would compute, bit for bit, and parameter
+   * refits and every random draw stay on the caller thread, so a parallel run equals the
+   * serial run for the same seed. `timeoutMs` (default 30000, must be positive) bounds each
+   * worker call. A `pool` you pass is yours to terminate; without one the search starts a
+   * pool when it first needs it and terminates it when the generator finishes or is closed.
+   */
+  readonly parallel?: ScalarPopulationParallelOptions;
 }
 
 /** One progress event; `status` is always `'fitted'`. */
 export interface SearchProgress {
   readonly status: 'fitted';
   readonly evaluations: number;
+  /** Pareto front of the hall of fame, ascending complexity. */
   readonly front: ScoredCandidate<ScalarNode>[];
+  /** Names that `fittedParameters` rows are ordered by. */
+  readonly parameterNames: readonly string[];
+  /** Parameter values behind each `front` row's loss; same order as `front`. */
+  readonly fittedParameters: Float64Array[];
   readonly selected?: ScoredCandidate<ScalarNode>;
 }
 
@@ -71,20 +127,18 @@ export type ScalarSearchStopReason = 'max-evaluations' | 'max-candidates';
 /** Final value of the async generator returned by {@link searchScalars}. */
 export interface ScalarSearchResult {
   readonly front: ScoredCandidate<ScalarNode>[];
+  readonly parameterNames: readonly string[];
+  readonly fittedParameters: Float64Array[];
   readonly stopReason: ScalarSearchStopReason;
   readonly evaluations: number;
   readonly seed: number;
   readonly selected?: ScoredCandidate<ScalarNode>;
 }
 
-/** @deprecated Use {@link ScalarSearchResult}. */
-export type SearchScalarsResult = ScalarSearchResult;
-
-/** @deprecated Use {@link ScalarSearchOptions}. */
-export type SearchScalarsOptions = ScalarSearchOptions;
-
-interface EvaluatedIndividual {
+/** @internal One evaluated tree; exported for the unit tests, not the package barrel. */
+export interface EvaluatedIndividual {
   readonly node: ScalarNode;
+  readonly key: string;
   readonly loss: number;
   readonly complexity: number;
   readonly parameters: Float64Array;
@@ -94,83 +148,323 @@ const DEFAULT_POPULATION_SIZE = 27;
 const DEFAULT_TOURNAMENT_SIZE = 15;
 const DEFAULT_TOURNAMENT_P = 0.982;
 const DEFAULT_OPTIMIZE_PROBABILITY = 0.14;
+const DEFAULT_PERTURBATION_FACTOR = 0.25;
 const DEFAULT_FRACTION_REPLACED = 0.00036;
 const DEFAULT_INITIAL_TEMPERATURE = 3.17;
-const DEFAULT_ADAPTIVE_PARSIMONY_SCALING = 1040;
+const DEFAULT_PARSIMONY_SCALING = 1040;
+
+/** Tries a mutation this often before an offspring falls back to a copy of its parent. */
+const MUTATION_ATTEMPTS = 10;
+
+/** The mutation temperature is multiplied by this after every generation. */
+const TEMPERATURE_DECAY = 0.995;
+
+/** Migrants are drawn from the best this-many trees of the donor island (PySR `topn`). */
+const MIGRANT_POOL = 12;
+
+/** Evaluations that the complexity frequencies remember (PySR's running window). */
+const FREQUENCY_WINDOW = 100_000;
 
 function paramNames(problem: ScalarSearchProblem, grammar: ScalarGrammar): readonly string[] {
   return problem.parameters ?? grammar.parameters ?? [];
 }
 
-function defaultParameters(n: number): Float64Array {
-  const out = new Float64Array(n);
-  out.fill(1);
-  return out;
+function positiveInteger(name: string, value: number): void {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new RangeError(`searchScalars: ${name} must be an integer >= 1, got ${value}`);
+  }
 }
 
+function probability(name: string, value: number): void {
+  if (!(value >= 0 && value <= 1)) {
+    throw new RangeError(`searchScalars: ${name} must be in [0, 1], got ${value}`);
+  }
+}
+
+function nonNegativeFinite(name: string, value: number): void {
+  if (!(Number.isFinite(value) && value >= 0)) {
+    throw new RangeError(`searchScalars: ${name} must be a finite number >= 0, got ${value}`);
+  }
+}
+
+function assertSearchInputs(
+  problem: ScalarSearchProblem,
+  options: ScalarSearchOptions,
+  populationSize: number,
+  tournamentSize: number,
+  tournamentP: number,
+  optimizeProbability: number
+): void {
+  const rows = problem.observed.length;
+  if (rows === 0) {
+    throw new RangeError('searchScalars: observed must have at least one row');
+  }
+  if (problem.columns.length !== problem.variables.length) {
+    throw new RangeError(
+      `searchScalars: ${problem.variables.length} variables but ${problem.columns.length} columns`
+    );
+  }
+  for (const column of problem.columns) {
+    if (column.length !== rows) {
+      throw new RangeError(
+        `searchScalars: a column has ${column.length} rows, observed has ${rows}`
+      );
+    }
+  }
+  for (let i = 0; i < rows; i += 1) {
+    if (!Number.isFinite(problem.observed[i])) {
+      throw new RangeError(`searchScalars: observed[${i}] is not finite`);
+    }
+  }
+  positiveInteger('populationSize', populationSize);
+  positiveInteger('tournamentSize', tournamentSize);
+  if (!(tournamentP > 0 && tournamentP <= 1)) {
+    throw new RangeError(`searchScalars: tournamentP must be in (0, 1], got ${tournamentP}`);
+  }
+  probability('optimizeProbability', optimizeProbability);
+  positiveInteger('populations', options.populations ?? 1);
+  probability('fractionReplaced', options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED);
+  nonNegativeFinite(
+    'initialTemperature',
+    options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE
+  );
+  nonNegativeFinite(
+    'adaptiveParsimonyScaling',
+    options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING
+  );
+  if (Number.isNaN(options.maxEvaluations) || options.maxEvaluations < 0) {
+    throw new RangeError(
+      `searchScalars: maxEvaluations must be a number >= 0, got ${options.maxEvaluations}`
+    );
+  }
+  if (
+    options.maxCandidates !== undefined &&
+    (Number.isNaN(options.maxCandidates) || options.maxCandidates < 0)
+  ) {
+    throw new RangeError(
+      `searchScalars: maxCandidates must be a number >= 0, got ${options.maxCandidates}`
+    );
+  }
+}
+
+function defaultParameters(n: number): Float64Array {
+  return new Float64Array(n).fill(1);
+}
+
+/** Order for losses: smaller first, `Infinity` last. Losses are never `NaN` here. */
+function compareLoss(a: number, b: number): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Sum of squared errors, or `Infinity` when any row is invalid or the sum is not
+ * finite. A candidate that cannot be evaluated on the whole data set never ranks
+ * above one that can, whatever the scale of `observed`.
+ */
 function sumSquaredLoss(values: Float64Array, valid: Uint8Array, observed: Float64Array): number {
   const terms = new Float64Array(observed.length);
   for (let i = 0; i < observed.length; i += 1) {
     if (valid[i] === 0) {
-      terms[i] = 1e8;
-    } else {
-      const d = values[i]! - observed[i]!;
-      terms[i] = d * d;
+      return Number.POSITIVE_INFINITY;
     }
+    const d = values[i]! - observed[i]!;
+    terms[i] = d * d;
   }
-  return pairwiseSum(terms);
+  const loss = pairwiseSum(terms);
+  return Number.isFinite(loss) ? loss : Number.POSITIVE_INFINITY;
 }
 
-function lossFromCompile(
+interface Scored {
+  readonly loss: number;
+  readonly validRows: number;
+}
+
+function scoreBatch(batch: ScalarBatchResult, observed: Float64Array): Scored {
+  let validRows = 0;
+  for (let i = 0; i < batch.valid.length; i += 1) {
+    validRows += batch.valid[i]!;
+  }
+  return { loss: sumSquaredLoss(batch.values, batch.valid, observed), validRows };
+}
+
+function scoreOnProblem(
   node: ScalarNode,
   problem: ScalarSearchProblem,
   names: readonly string[],
   parameters: Float64Array
-): number {
-  const compiled = compileScalar(node, {
-    variables: problem.variables,
-    parameters: names,
-  });
-  const batch = compiled.evaluate(problem.columns, parameters);
-  return sumSquaredLoss(batch.values, batch.valid, problem.observed);
+): Scored {
+  const compiled = compileScalar(node, { variables: problem.variables, parameters: names });
+  return scoreBatch(compiled.evaluate(problem.columns, parameters), problem.observed);
 }
 
-function evaluateIndividual(
-  node: ScalarNode,
+/** Scores trees, each with the parameters it inherited; the i-th result is for the i-th tree. */
+type ScoreTrees = (
+  nodes: readonly ScalarNode[],
+  inherited: readonly Float64Array[]
+) => Promise<Scored[]>;
+
+function scoreOnCallerThread(problem: ScalarSearchProblem, names: readonly string[]): ScoreTrees {
+  return async (nodes, inherited) =>
+    nodes.map((node, i) => scoreOnProblem(node, problem, names, inherited[i]!));
+}
+
+function scoreOnWorkers(
+  problem: ScalarSearchProblem,
+  names: readonly string[],
+  parallel: ScalarPopulationParallelOptions
+): ScoreTrees {
+  return async (nodes, inherited) => {
+    const results = await evaluateScalarPopulation({
+      variables: problem.variables,
+      parameters: names,
+      columns: problem.columns,
+      items: nodes.map((node, index) => ({ index, node, params: inherited[index]! })),
+      parallel,
+    });
+    return results.map((result) => scoreBatch(result.batch, problem.observed));
+  };
+}
+
+function individual(node: ScalarNode, loss: number, parameters: Float64Array): EvaluatedIndividual {
+  return {
+    node,
+    key: scalarCanonicalKey(node),
+    loss,
+    complexity: scalarComplexity(node),
+    parameters,
+  };
+}
+
+/**
+ * The scorer for a search: the caller thread without `parallel`, workers with it. The
+ * default pool is made through `startPool` the first time workers are needed, so a search
+ * over fewer rows than the dispatch threshold never starts a thread.
+ */
+function scoreTrees(
+  problem: ScalarSearchProblem,
+  names: readonly string[],
+  parallel: ScalarPopulationParallelOptions | undefined,
+  startPool: () => WorkerPool
+): ScoreTrees {
+  if (parallel === undefined) {
+    return scoreOnCallerThread(problem, names);
+  }
+  return scoreOnWorkers(problem, names, {
+    timeoutMs: resolveParallelTimeout(parallel.timeoutMs),
+    pool: parallel.pool ?? {
+      execute: <T, R>(data: T, transferables?: Transferable[], timeoutMs?: number) =>
+        startPool().execute<T, R>(data, transferables, timeoutMs),
+    },
+  });
+}
+
+/**
+ * Evaluates `nodes` (each with the parameters it inherited), then, with
+ * probability `optimizeProbability` and in input order, refits the parameters of
+ * a tree on the caller thread. The refit starts from the inherited values. Only the
+ * first scoring can run on workers; every random draw is made here, in input order,
+ * whichever thread did the scoring.
+ */
+async function evaluateNodes(
+  nodes: readonly ScalarNode[],
+  inherited: readonly Float64Array[],
+  score: ScoreTrees,
   problem: ScalarSearchProblem,
   names: readonly string[],
   optimizeProbability: number,
-  rng: SeededRng,
-  alwaysOptimize: boolean
-): EvaluatedIndividual {
-  let parameters = defaultParameters(names.length);
-  if (names.length > 0 && (alwaysOptimize || rng.next() < optimizeProbability)) {
-    const fit = fitScalarParameters(node, problem.columns, problem.observed, problem.variables, {
-      parameters: names,
-      restarts: 2,
-      maxIterations: 8,
-      rng: rng.fork('fit'),
-    });
-    parameters = fit.parameters;
+  rng: SeededRng
+): Promise<EvaluatedIndividual[]> {
+  const firsts = await score(nodes, inherited);
+  const out: EvaluatedIndividual[] = [];
+  for (let i = 0; i < nodes.length; i += 1) {
+    const node = nodes[i]!;
+    let parameters = inherited[i]!;
+    const first = firsts[i]!;
+    let loss = first.loss;
+    if (names.length > 0 && first.validRows > 0 && rng.next() < optimizeProbability) {
+      const fit = fitScalarParameters(node, problem.columns, problem.observed, problem.variables, {
+        parameters: names,
+        initial: parameters,
+        restarts: 2,
+        maxIterations: 8,
+        rng: rng.fork('fit'),
+      });
+      const fitted = scoreOnProblem(node, problem, names, fit.parameters);
+      if (fitted.loss < loss) {
+        loss = fitted.loss;
+        parameters = fit.parameters;
+      }
+    }
+    out.push(individual(node, loss, parameters));
   }
-  const loss = lossFromCompile(node, problem, names, parameters);
-  return { node, loss, complexity: scalarComplexity(node), parameters };
+  return out;
 }
 
-function tournamentSelect(
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * How often each tree size occurred among the last {@link FREQUENCY_WINDOW}
+ * evaluations, shared by every island (PySR's `RunningSearchStatistics`).
+ */
+export class ComplexityFrequency {
+  private readonly counts = new Map<number, number>();
+  private readonly ring: number[] = [];
+  private next = 0;
+
+  record(complexity: number): void {
+    if (this.ring.length < FREQUENCY_WINDOW) {
+      this.ring.push(complexity);
+    } else {
+      const evicted = this.ring[this.next]!;
+      this.counts.set(evicted, this.counts.get(evicted)! - 1);
+      this.ring[this.next] = complexity;
+      this.next = (this.next + 1) % FREQUENCY_WINDOW;
+    }
+    this.counts.set(complexity, (this.counts.get(complexity) ?? 0) + 1);
+  }
+
+  /** Share of the window with this complexity, in [0, 1]; 0 before anything is recorded. */
+  share(complexity: number): number {
+    return this.ring.length === 0 ? 0 : (this.counts.get(complexity) ?? 0) / this.ring.length;
+  }
+}
+
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * Ordering key of a contestant under adaptive parsimony: `log(loss) + scaling * share`,
+ * the logarithm of PySR's `loss * exp(scaling * share)`. Working in log space keeps the
+ * order while `exp(1040 * share)` would overflow to `Infinity` for a share above 0.68
+ * and turn a zero loss into `NaN`. A zero loss counts as the smallest positive double so
+ * that two perfect trees are still told apart by how crowded their size is.
+ */
+export function parsimonyKey(ind: EvaluatedIndividual, share: number, scaling: number): number {
+  return Math.log(Math.max(ind.loss, Number.MIN_VALUE)) + scaling * share;
+}
+
+export function tournamentSelect(
   population: readonly EvaluatedIndividual[],
   rng: SeededRng,
   tournamentSize: number,
   tournamentP: number,
-  metric: (ind: EvaluatedIndividual) => number
+  parsimony?: { readonly frequency: ComplexityFrequency; readonly scaling: number }
 ): EvaluatedIndividual {
   const n = population.length;
   const k = Math.min(tournamentSize, n);
-  const contestants: EvaluatedIndividual[] = [];
+  const drawn: EvaluatedIndividual[] = [];
   for (let i = 0; i < k; i += 1) {
-    contestants.push(population[rng.nextInt(n)]!);
+    drawn.push(population[rng.nextInt(n)]!);
   }
-  contestants.sort((a, b) => metric(a) - metric(b));
+  const contestants =
+    parsimony === undefined
+      ? drawn.sort((a, b) => compareLoss(a.loss, b.loss))
+      : drawn
+          .map((ind) => ({
+            ind,
+            key: parsimonyKey(ind, parsimony.frequency.share(ind.complexity), parsimony.scaling),
+          }))
+          .sort((a, b) => compareLoss(a.key, b.key))
+          .map((entry) => entry.ind);
   let u = rng.next();
   for (let rank = 0; rank < k; rank += 1) {
     const prob = tournamentP * (1 - tournamentP) ** rank;
@@ -182,109 +476,129 @@ function tournamentSelect(
   return contestants[k - 1]!;
 }
 
-function complexityFrequencies(population: readonly EvaluatedIndividual[]): Map<number, number> {
-  const freq = new Map<number, number>();
-  for (const ind of population) {
-    freq.set(ind.complexity, (freq.get(ind.complexity) ?? 0) + 1);
+/** The best `size` distinct trees (by structure) of `merged`, best first. */
+function truncateDistinct(merged: EvaluatedIndividual[], size: number): EvaluatedIndividual[] {
+  merged.sort((a, b) => compareLoss(a.loss, b.loss) || a.complexity - b.complexity);
+  const seen = new Set<string>();
+  const out: EvaluatedIndividual[] = [];
+  for (const ind of merged) {
+    if (out.length >= size) {
+      break;
+    }
+    if (!seen.has(ind.key)) {
+      seen.add(ind.key);
+      out.push(ind);
+    }
   }
-  return freq;
+  return out;
 }
 
-function tournamentMetric(
-  ind: EvaluatedIndividual,
-  freq: Map<number, number>,
-  popSize: number,
-  scaling: number,
-  adaptive: boolean
-): number {
-  if (!adaptive) {
-    return ind.loss;
+/** @internal One island's random stream and population. */
+export interface Island {
+  readonly rng: SeededRng;
+  /** Best first after the first generation; the initial deal is in enumeration order. */
+  population: EvaluatedIndividual[];
+}
+
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * Replaces the worst trees of every island with copies of the best trees of other
+ * islands. All donors are read before any island changes, so the order of the islands
+ * does not favour one. A tree an island already holds is not migrated into it.
+ */
+export function migrateIslands(islands: Island[], fractionReplaced: number, rng: SeededRng): void {
+  if (islands.length < 2 || fractionReplaced <= 0) {
+    return;
   }
-  const frequency = (freq.get(ind.complexity) ?? 1) / popSize;
-  return ind.loss + scaling * frequency;
-}
-
-function cloneIndividual(ind: EvaluatedIndividual): EvaluatedIndividual {
-  return {
-    node: ind.node,
-    loss: ind.loss,
-    complexity: ind.complexity,
-    parameters: new Float64Array(ind.parameters),
-  };
-}
-
-function streamRng(parent: SeededRng, populations: number, index: number): SeededRng {
-  if (populations === 1) {
-    return parent.fork('population');
+  const donors = islands.map((island) => island.population.slice(0, MIGRANT_POOL));
+  for (let i = 0; i < islands.length; i += 1) {
+    const island = islands[i]!;
+    const expected = fractionReplaced * island.population.length;
+    let count = Math.floor(expected);
+    if (rng.next() < expected - count) {
+      count += 1;
+    }
+    count = Math.min(count, island.population.length);
+    const held = new Set(island.population.map((ind) => ind.key));
+    const incoming: EvaluatedIndividual[] = [];
+    for (let m = 0; m < count; m += 1) {
+      const pick = rng.nextInt(islands.length - 1);
+      const pool = donors[pick >= i ? pick + 1 : pick]!;
+      const migrant = pool[rng.nextInt(pool.length)]!;
+      if (!held.has(migrant.key)) {
+        held.add(migrant.key);
+        incoming.push({ ...migrant, parameters: new Float64Array(migrant.parameters) });
+      }
+    }
+    if (incoming.length > 0) {
+      const survivors = island.population.slice(0, island.population.length - incoming.length);
+      island.population = truncateDistinct([...survivors, ...incoming], island.population.length);
+    }
   }
-  return parent.fork(`island:${index}`);
 }
 
+/** Seeds that the grammar accepts, then enumerated trees, up to `limit` distinct trees. */
 function initialTrees(
   grammar: ScalarGrammar,
   seeds: readonly ScalarNode[] | undefined,
-  populationSize: number,
-  maxCandidates: number | undefined,
-  rng: SeededRng
+  limit: number
 ): ScalarNode[] {
   const out: ScalarNode[] = [];
-  if (seeds !== undefined) {
-    for (const seed of seeds) {
-      if (out.length >= populationSize) {
-        break;
-      }
-      if (scalarGrammarAccepts(grammar, seed)) {
-        out.push(seed);
-      }
-    }
-  }
-  const budget = { maxCandidates: maxCandidates ?? Number.MAX_SAFE_INTEGER };
-  for (const tree of enumerateScalars(grammar, budget)) {
-    if (out.length >= populationSize) {
+  const seen = new Set<string>();
+  for (const seed of seeds ?? []) {
+    if (out.length >= limit) {
       break;
     }
-    out.push(tree);
+    const key = scalarCanonicalKey(seed);
+    if (!seen.has(key) && scalarGrammarAccepts(grammar, seed)) {
+      seen.add(key);
+      out.push(seed);
+    }
   }
-  while (out.length < populationSize) {
-    out.push(out[rng.nextInt(out.length)]!);
-  }
-  return out.slice(0, populationSize);
-}
-
-function migrateIslands(
-  islands: EvaluatedIndividual[][],
-  fractionReplaced: number,
-  rng: SeededRng
-): void {
-  const count = islands.length;
-  if (count < 2 || fractionReplaced <= 0) {
-    return;
-  }
-  for (let i = 0; i < count; i += 1) {
-    const pop = islands[i]!;
-    const replaceCount = Math.max(1, Math.floor(fractionReplaced * pop.length));
-    const worst = [...pop].sort((a, b) => b.loss - a.loss);
-    for (let r = 0; r < replaceCount; r += 1) {
-      let donorIdx = rng.nextInt(count - 1);
-      if (donorIdx >= i) {
-        donorIdx += 1;
+  if (out.length < limit) {
+    for (const tree of enumerateScalars(grammar, { maxCandidates: limit + seen.size })) {
+      if (out.length >= limit) {
+        break;
       }
-      const migrant = islands[donorIdx]![rng.nextInt(islands[donorIdx]!.length)]!;
-      const slot = pop.indexOf(worst[r]!);
-      if (slot >= 0) {
-        pop[slot] = cloneIndividual(migrant);
+      const key = scalarCanonicalKey(tree);
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(tree);
       }
     }
   }
+  return out;
 }
 
-function scoredFront(archive: readonly EvaluatedIndividual[]): ScoredCandidate<ScalarNode>[] {
-  const raw = archive.map((row) => ({
-    loss: row.loss,
-    complexity: row.complexity,
-    item: row.node,
-  }));
-  return scoreFront(paretoFront(raw));
+/** Best tree per complexity; the Pareto front is taken from these. */
+class HallOfFame {
+  private readonly byComplexity = new Map<number, EvaluatedIndividual>();
+
+  add(ind: EvaluatedIndividual): void {
+    if (!Number.isFinite(ind.loss)) {
+      return;
+    }
+    const prev = this.byComplexity.get(ind.complexity);
+    if (prev === undefined || ind.loss < prev.loss) {
+      this.byComplexity.set(ind.complexity, ind);
+    }
+  }
+
+  front(): { front: ScoredCandidate<ScalarNode>[]; fittedParameters: Float64Array[] } {
+    const rows = [...this.byComplexity.values()].map((ind) => ({
+      loss: ind.loss,
+      complexity: ind.complexity,
+      item: ind.node,
+    }));
+    const front = scoreFront(paretoFront(rows));
+    const byNode = new Map<ScalarNode, EvaluatedIndividual>();
+    for (const ind of this.byComplexity.values()) {
+      byNode.set(ind.node, ind);
+    }
+    const fittedParameters = front.map((row) => new Float64Array(byNode.get(row.item)!.parameters));
+    return { front, fittedParameters };
+  }
 }
 
 function pickSelected(
@@ -297,51 +611,15 @@ function pickSelected(
   return selectFrontModel(front, mode);
 }
 
-async function evaluateBatch(
-  nodes: readonly ScalarNode[],
-  problem: ScalarSearchProblem,
-  names: readonly string[],
-  parallel: ScalarPopulationParallelOptions | undefined,
-  startIndex: number
-): Promise<EvaluatedIndividual[]> {
-  if (nodes.length === 0) {
-    return [];
-  }
-  const defaultParams = defaultParameters(names.length);
-  if (parallel !== undefined) {
-    const items = nodes.map((node, i) => ({
-      index: startIndex + i,
-      node,
-      params: names.length > 0 ? [...defaultParams] : undefined,
-    }));
-    const results = await evaluateScalarPopulation({
-      variables: problem.variables,
-      parameters: names,
-      columns: problem.columns,
-      items,
-      parallel,
-    });
-    return results.map((row, i) => {
-      const node = nodes[i]!;
-      const loss = sumSquaredLoss(row.batch.values, row.batch.valid, problem.observed);
-      return {
-        node,
-        loss,
-        complexity: scalarComplexity(node),
-        parameters: defaultParams,
-      };
-    });
-  }
-  return nodes.map((node) => ({
-    node,
-    loss: lossFromCompile(node, problem, names, defaultParams),
-    complexity: scalarComplexity(node),
-    parameters: defaultParams,
-  }));
-}
-
 /**
- * Symbolic regression search over scalar expression trees.
+ * Symbolic regression over scalar expression trees.
+ *
+ * The generator yields one {@link SearchProgress} after the initial population
+ * and one after every generation, and returns a {@link ScalarSearchResult}.
+ * Evaluations never exceed `maxEvaluations`. `options.rng` is not advanced, so two
+ * runs with the same inputs and seed agree bit for bit.
+ *
+ * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
 export async function* searchScalars(
   problem: ScalarSearchProblem,
@@ -351,147 +629,161 @@ export async function* searchScalars(
   const tournamentSize = options.tournamentSize ?? DEFAULT_TOURNAMENT_SIZE;
   const tournamentP = options.tournamentP ?? DEFAULT_TOURNAMENT_P;
   const optimizeProbability = options.optimizeProbability ?? DEFAULT_OPTIMIZE_PROBABILITY;
-  const maxEvaluations = options.maxEvaluations;
-  const maxCandidates = options.maxCandidates;
-  const populations = options.populations ?? 1;
-  const multiIsland = populations > 1;
-  const fractionReplaced = options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED;
-  const annealingOn = multiIsland && options.annealing !== false;
-  const adaptiveOn = multiIsland && options.adaptiveParsimony !== false;
-  const adaptiveScaling = options.adaptiveParsimonyScaling ?? DEFAULT_ADAPTIVE_PARSIMONY_SCALING;
-  const perturbationFactor = options.perturbationFactor ?? 0.25;
+  assertSearchInputs(
+    problem,
+    options,
+    populationSize,
+    tournamentSize,
+    tournamentP,
+    optimizeProbability
+  );
   const names = paramNames(problem, options.grammar);
-  const alwaysOptimize = names.length > 0;
-  const mutate = weightedMutation();
-  const parallel = options.parallel;
-  let temperature = annealingOn ? (options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE) : 1;
+  const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
+  const candidatesBind =
+    options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
+  let ownedPool: WorkerPool | undefined;
+  const score = scoreTrees(problem, names, options.parallel, () => {
+    ownedPool ??= createScalarBatchPool();
+    return ownedPool;
+  });
+  try {
+    const mutate = weightedMutation();
+    const populations = options.populations ?? 1;
+    const multiIsland = populations > 1;
+    const annealing = options.annealing ?? multiIsland;
+    const parsimony =
+      (options.adaptiveParsimony ?? multiIsland)
+        ? {
+            frequency: new ComplexityFrequency(),
+            scaling: options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING,
+          }
+        : undefined;
+    const fractionReplaced = options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED;
+    const migrationRng = options.rng.fork('migration');
+    let temperature = annealing ? (options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE) : 1;
 
-  let evaluations = 0;
-  let globalIndex = 0;
-  let stopReason: ScalarSearchStopReason = 'max-evaluations';
-  const archive: EvaluatedIndividual[] = [];
-  const islandRngs: SeededRng[] = [];
-  const islands: EvaluatedIndividual[][] = [];
+    let evaluations = 0;
+    const hallOfFame = new HallOfFame();
 
-  for (let i = 0; i < populations; i += 1) {
-    islandRngs.push(streamRng(options.rng, populations, i));
-  }
-
-  for (let i = 0; i < populations; i += 1) {
     const trees = initialTrees(
       options.grammar,
       options.seeds,
-      populationSize,
-      maxCandidates,
-      islandRngs[i]!
+      Math.min(populationSize * populations, budget)
     );
-    let pop = await evaluateBatch(trees, problem, names, parallel, globalIndex);
-    globalIndex += trees.length;
-    evaluations += trees.length;
-    pop = pop.map((ind) =>
-      evaluateIndividual(
-        ind.node,
+    if (trees.length === 0 && budget >= 1) {
+      throw new RangeError('searchScalars: the grammar admits no tree');
+    }
+
+    // The initial trees are dealt round-robin, so every island gets a share of the small
+    // ones. An island that would get none (fewer trees than islands) is dropped.
+    const islands: Island[] = [];
+    for (let index = 0; index < populations; index += 1) {
+      const mine = trees.filter((_, t) => t % populations === index);
+      if (mine.length === 0) {
+        continue;
+      }
+      // One island draws from the 'population' stream, which is what makes
+      // `populations: 1` the same search as M13a.
+      const rng = options.rng.fork(multiIsland ? `island:${index}` : 'population');
+      const population = await evaluateNodes(
+        mine,
+        mine.map(() => defaultParameters(names.length)),
+        score,
         problem,
         names,
         optimizeProbability,
-        islandRngs[i]!,
-        alwaysOptimize
-      )
-    );
-    for (const ind of pop) {
-      archive.push(ind);
-    }
-    islands.push(pop);
-  }
-
-  const report = (): SearchProgress => {
-    const front = scoredFront(archive);
-    return {
-      status: 'fitted',
-      evaluations,
-      front,
-      selected: pickSelected(front, options.modelSelection),
-    };
-  };
-
-  yield report();
-
-  while (evaluations < maxEvaluations) {
-    if (maxCandidates !== undefined && evaluations >= maxCandidates) {
-      stopReason = 'max-candidates';
-      break;
-    }
-
-    for (let isl = 0; isl < populations; isl += 1) {
-      const rng = islandRngs[isl]!;
-      let pop = islands[isl]!;
-      if (pop.length === 0) {
-        continue;
-      }
-      const freq = complexityFrequencies(pop);
-      const metric = (ind: EvaluatedIndividual) =>
-        tournamentMetric(ind, freq, pop.length, adaptiveScaling, adaptiveOn);
-      const mutationCtx: ScalarMutationContext = {
-        grammar: options.grammar,
-        perturbationFactor,
-        temperature,
-      };
-      const offspringNodes: ScalarNode[] = [];
-      while (
-        offspringNodes.length < populationSize &&
-        evaluations + offspringNodes.length < maxEvaluations
-      ) {
-        if (maxCandidates !== undefined && evaluations + offspringNodes.length >= maxCandidates) {
-          break;
-        }
-        const parent = tournamentSelect(pop, rng, tournamentSize, tournamentP, metric);
-        const mutated = mutate(parent.node, rng, mutationCtx);
-        offspringNodes.push(mutated ?? parent.node);
-      }
-      if (offspringNodes.length === 0) {
-        continue;
-      }
-      let offspring = await evaluateBatch(offspringNodes, problem, names, parallel, globalIndex);
-      globalIndex += offspringNodes.length;
-      evaluations += offspringNodes.length;
-      offspring = offspring.map((ind) =>
-        evaluateIndividual(ind.node, problem, names, optimizeProbability, rng, alwaysOptimize)
+        rng
       );
-      for (const ind of offspring) {
-        archive.push(ind);
+      evaluations += population.length;
+      for (const ind of population) {
+        hallOfFame.add(ind);
+        parsimony?.frequency.record(ind.complexity);
       }
-      const merged = [...pop, ...offspring];
-      merged.sort((a, b) => a.loss - b.loss || a.complexity - b.complexity);
-      pop = merged.slice(0, populationSize);
-      islands[isl] = pop;
+      islands.push({ rng, population });
     }
 
-    if (multiIsland) {
-      migrateIslands(islands, fractionReplaced, options.rng.fork('migration'));
-    }
-    if (annealingOn) {
-      temperature *= 0.995;
-    }
+    const report = (): SearchProgress => {
+      const { front, fittedParameters } = hallOfFame.front();
+      return {
+        status: 'fitted',
+        evaluations,
+        front,
+        parameterNames: names,
+        fittedParameters,
+        selected: pickSelected(front, options.modelSelection),
+      };
+    };
 
     yield report();
 
-    if (evaluations >= maxEvaluations) {
-      stopReason = 'max-evaluations';
-      break;
-    }
-    if (maxCandidates !== undefined && evaluations >= maxCandidates) {
-      stopReason = 'max-candidates';
-      break;
-    }
-    await Promise.resolve();
-  }
+    while (evaluations < budget) {
+      const mutationCtx: ScalarMutationContext = {
+        grammar: options.grammar,
+        perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
+        temperature,
+      };
+      for (const island of islands) {
+        const offspringCount = Math.min(populationSize, budget - evaluations);
+        if (offspringCount <= 0) {
+          break;
+        }
+        const nodes: ScalarNode[] = [];
+        const inherited: Float64Array[] = [];
+        for (let i = 0; i < offspringCount; i += 1) {
+          const parent = tournamentSelect(
+            island.population,
+            island.rng,
+            tournamentSize,
+            tournamentP,
+            parsimony
+          );
+          let child: ScalarNode | null = null;
+          for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
+            child = mutate(parent.node, island.rng, mutationCtx);
+          }
+          nodes.push(child ?? parent.node);
+          inherited.push(new Float64Array(parent.parameters));
+        }
+        const offspring = await evaluateNodes(
+          nodes,
+          inherited,
+          score,
+          problem,
+          names,
+          optimizeProbability,
+          island.rng
+        );
+        evaluations += offspring.length;
+        for (const ind of offspring) {
+          hallOfFame.add(ind);
+          parsimony?.frequency.record(ind.complexity);
+        }
+        island.population = truncateDistinct([...island.population, ...offspring], populationSize);
+      }
+      // After the last evaluation nothing breeds again, so migrating would change nothing.
+      if (evaluations < budget) {
+        migrateIslands(islands, fractionReplaced, migrationRng);
+      }
+      if (annealing) {
+        temperature *= TEMPERATURE_DECAY;
+      }
 
-  const finalFront = report();
-  return {
-    front: finalFront.front,
-    stopReason,
-    evaluations,
-    seed: options.rng.seed,
-    selected: finalFront.selected,
-  };
+      yield report();
+      await Promise.resolve();
+    }
+
+    const last = report();
+    return {
+      front: last.front,
+      parameterNames: names,
+      fittedParameters: last.fittedParameters,
+      stopReason: candidatesBind ? 'max-candidates' : 'max-evaluations',
+      evaluations,
+      seed: options.rng.seed,
+      selected: last.selected,
+    };
+  } finally {
+    // A generator that is closed early lands here too, so no worker outlives its search.
+    await ownedPool?.terminate();
+  }
 }
