@@ -4817,6 +4817,29 @@ graph LR
 
 ---
 
+### `functions/src/scalar-dimension.ts` - SI dimension inference and parameter-dimension solving over {@link ScalarNode}.
+
+**Workspace Dependencies:**
+
+| Package                            | Import                                             |
+| ---------------------------------- | -------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `ScalarNode`                                       |
+| `@danielsimonjr/mathts-core`       | `Fraction, SI_DIMENSION_LENGTH, SiDimensionVector` |
+
+**Internal Dependencies:**
+
+| File                              | Imports             | Type   |
+| --------------------------------- | ------------------- | ------ |
+| `./utils/object.js`               | `hasOwnProperty`    | Import |
+| `./numeric/rational-nullspace.js` | `rationalNullspace` | Import |
+
+**Exports:**
+
+- Types: `RationalDimension`, `DimensionInference`, `ParameterDimensionResult`
+- Functions: `inferScalarDimension`, `solveParameterDimensions`
+
+---
+
 ### `functions/src/scalar-eval.ts` - Evaluate a scalar node with MathTS numeric functions.
 
 **Workspace Dependencies:**

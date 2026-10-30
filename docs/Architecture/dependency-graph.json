@@ -12028,6 +12028,35 @@
         "exports": ["inferScalarDimension", "solveParameterDimensions"],
         "functions": ["inferScalarDimension", "solveParameterDimensions"]
       },
+      "functions/src/scalar-dimension.ts": {
+        "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./utils/object.js",
+            "imports": ["hasOwnProperty"]
+          },
+          {
+            "file": "./numeric/rational-nullspace.js",
+            "imports": ["rationalNullspace"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": ["ScalarNode"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["Fraction", "SI_DIMENSION_LENGTH", "SiDimensionVector"]
+          }
+        ],
+        "exports": ["inferScalarDimension", "solveParameterDimensions"],
+        "functions": ["inferScalarDimension", "solveParameterDimensions"]
+      },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
         "externalDependencies": [],
