@@ -446,6 +446,88 @@ function _applyEvents(
   return { t: tArr, y: yArr, tEvents, yEvents };
 }
 
+function _linearlyImplicitDriver(
+  name: 'Rosenbrock' | 'RODAS',
+  f: ForcingFunction,
+  tspan: unknown[],
+  y0raw: unknown[],
+  options: ODEOptions,
+  control: { growMax: number; shrinkMin: number; exponent: number },
+  step: (
+    t: number,
+    y: number[],
+    h: number,
+    F0: number[],
+    J: number[][]
+  ) => { yNew: number[]; err: number[] }
+): { t: number[]; y: number[][] } {
+  const t0 = tspan[0] as number;
+  const tf = tspan[1] as number;
+  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
+    throw new Error(`The "${name}" stiff method requires numeric tspan`);
+  }
+  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
+    throw new Error(`The "${name}" stiff method requires plain-number state (y0)`);
+  }
+  const y0 = y0raw as number[];
+  const n = y0.length;
+  const dir = tf >= t0 ? 1 : -1;
+  const rtol = options.tol ? (options.tol as number) : 1e-4;
+  const atol = rtol * 1e-3;
+  const maxIter = options.maxIter ? options.maxIter : 100_000;
+  const span = Math.abs(tf - t0);
+
+  let t = t0;
+  let y = y0.slice();
+  let h: number;
+  if (options.firstStep) {
+    h = dir * Math.abs(options.firstStep as number);
+  } else {
+    const f0 = f(t, y) as number[];
+    const d0 = _rmsNorm(y);
+    const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
+    h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
+  }
+
+  const tOut: number[] = [t];
+  const yOut: number[][] = [y.slice()];
+  let iter = 0;
+
+  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
+    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t;
+    const F0 = _fArr(f, t, y);
+    const J = _jacobianAt(f, t, y, F0, options);
+    const { yNew, err } = step(t, y, h, F0, J);
+
+    let errNorm = 0;
+    for (let i = 0; i < n; i++) {
+      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
+      errNorm += (err[i] / sc) ** 2;
+    }
+    errNorm = Math.sqrt(errNorm / n);
+
+    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
+      t += h;
+      y = yNew;
+      tOut.push(t);
+      yOut.push(y.slice());
+    }
+    h *= Math.min(
+      control.growMax,
+      Math.max(control.shrinkMin, 0.9 * Math.pow(errNorm || 1e-10, control.exponent))
+    );
+    const maxStepR = options.maxStep as number | undefined;
+    const minStepR = options.minStep as number | undefined;
+    if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
+    else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
+    iter++;
+  }
+  if (iter >= maxIter) {
+    throw new Error('Maximum number of iterations reached, try changing options');
+  }
+  return { t: tOut, y: yOut };
+}
+
 /**
  * Rosenbrock stiff ODE solver — the linearly-implicit ode23s method (Shampine & Reichelt),
  * L-stable, with an embedded error estimate for adaptive stepping. Unlike the explicit RK23/RK45
@@ -468,88 +550,36 @@ export function rosenbrockSolve(
   y0raw: unknown[],
   options: ODEOptions = {}
 ): { t: number[]; y: number[][] } {
-  const t0 = tspan[0] as number;
-  const tf = tspan[1] as number;
-  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
-    throw new Error('The "Rosenbrock" stiff method requires numeric tspan');
-  }
-  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
-    throw new Error('The "Rosenbrock" stiff method requires plain-number state (y0)');
-  }
-  const y0 = y0raw as number[];
-  const n = y0.length;
-  const dir = tf >= t0 ? 1 : -1;
   const gamma = 1 / (2 + Math.SQRT2);
   const c32 = 6 + Math.SQRT2;
-  const rtol = options.tol ? (options.tol as number) : 1e-4;
-  const atol = rtol * 1e-3;
-  const maxIter = options.maxIter ? options.maxIter : 100_000;
-  const span = Math.abs(tf - t0);
-
-  let t = t0;
-  let y = y0.slice();
-  // Initial step: Hairer heuristic, or the user's firstStep.
-  let h: number;
-  if (options.firstStep) {
-    h = dir * Math.abs(options.firstStep as number);
-  } else {
-    const f0 = f(t, y) as number[];
-    const d0 = _rmsNorm(y);
-    const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
-    h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
-  }
-
-  const tOut: number[] = [t];
-  const yOut: number[][] = [y.slice()];
-  let iter = 0;
+  const n = (y0raw as unknown[]).length;
   const identityMinus = (J: number[][], hg: number): number[][] =>
     J.map((row, i) => row.map((v, j) => (i === j ? 1 : 0) - hg * v));
 
-  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
-    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
-    const F0 = _fArr(f, t, y);
-    const J = _jacobianAt(f, t, y, F0, options);
-    const W = identityMinus(J, h * gamma);
-    // Factor W once (matrix-package LU) and solve it against the three stage RHS.
-    const solveW = _factorSolver(W, n);
+  return _linearlyImplicitDriver(
+    'Rosenbrock',
+    f,
+    tspan,
+    y0raw,
+    options,
+    { growMax: 4, shrinkMin: 0.25, exponent: -1 / 3 },
+    (t, y, h, F0, J) => {
+      const W = identityMinus(J, h * gamma);
+      const solveW = _factorSolver(W, n);
 
-    const k1 = solveW(F0);
-    const y1 = y.map((yi, i) => yi + 0.5 * h * k1[i]);
-    const F1 = _fArr(f, t + 0.5 * h, y1);
-    const dk = solveW(F1.map((v, i) => v - k1[i]));
-    const k2 = k1.map((v, i) => v + dk[i]);
-    const yNew = y.map((yi, i) => yi + h * k2[i]);
-    const F2 = _fArr(f, t + h, yNew);
-    const k3 = solveW(F2.map((v, i) => v - c32 * (k2[i] - F1[i]) - 2 * (k1[i] - F0[i])));
+      const k1 = solveW(F0);
+      const y1 = y.map((yi, i) => yi + 0.5 * h * k1[i]);
+      const F1 = _fArr(f, t + 0.5 * h, y1);
+      const dk = solveW(F1.map((v, i) => v - k1[i]));
+      const k2 = k1.map((v, i) => v + dk[i]);
+      const yNew = y.map((yi, i) => yi + h * k2[i]);
+      const F2 = _fArr(f, t + h, yNew);
+      const k3 = solveW(F2.map((v, i) => v - c32 * (k2[i] - F1[i]) - 2 * (k1[i] - F0[i])));
 
-    // Embedded error estimate and its scaled RMS norm.
-    let errNorm = 0;
-    for (let i = 0; i < n; i++) {
-      const err = (h / 6) * (k1[i] - 2 * k2[i] + k3[i]);
-      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
-      errNorm += (err / sc) ** 2;
+      const err = k1.map((_, i) => (h / 6) * (k1[i] - 2 * k2[i] + k3[i]));
+      return { yNew, err };
     }
-    errNorm = Math.sqrt(errNorm / n);
-
-    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
-      t += h;
-      y = yNew;
-      tOut.push(t);
-      yOut.push(y.slice());
-    }
-    // Step-size control (order-2 method → exponent 1/3), clamped to avoid wild swings.
-    h *= Math.min(4, Math.max(0.25, 0.9 * Math.pow(errNorm || 1e-10, -1 / 3)));
-    // Honour the same minStep/maxStep bounds as the RK paths (magnitude, sign preserved).
-    const maxStepR = options.maxStep as number | undefined;
-    const minStepR = options.minStep as number | undefined;
-    if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
-    else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
-    iter++;
-  }
-  if (iter >= maxIter) {
-    throw new Error('Maximum number of iterations reached, try changing options');
-  }
-  return { t: tOut, y: yOut };
+  );
 }
 
 /**
@@ -616,118 +646,69 @@ export function rodasSolve(
   y0raw: unknown[],
   options: ODEOptions = {}
 ): { t: number[]; y: number[][] } {
-  const t0 = tspan[0] as number;
-  const tf = tspan[1] as number;
-  if (!(typeof t0 === 'number' && typeof tf === 'number')) {
-    throw new Error('The "RODAS" stiff method requires numeric tspan');
-  }
-  if (!(y0raw as unknown[]).every((v) => typeof v === 'number')) {
-    throw new Error('The "RODAS" stiff method requires plain-number state (y0)');
-  }
-  const y0 = y0raw as number[];
-  const n = y0.length;
-  const dir = tf >= t0 ? 1 : -1;
   const g = RODAS.gamma;
-  const rtol = options.tol ? (options.tol as number) : 1e-4;
-  const atol = rtol * 1e-3;
-  const maxIter = options.maxIter ? options.maxIter : 100_000;
-  const span = Math.abs(tf - t0);
+  const n = (y0raw as unknown[]).length;
 
-  let t = t0;
-  let y = y0.slice();
-  let h: number;
-  if (options.firstStep) {
-    h = dir * Math.abs(options.firstStep as number);
-  } else {
-    const f0 = f(t, y) as number[];
-    const d0 = _rmsNorm(y);
-    const d1 = _rmsNorm(Array.isArray(f0) ? f0 : [f0 as unknown as number]);
-    h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
-  }
+  return _linearlyImplicitDriver(
+    'RODAS',
+    f,
+    tspan,
+    y0raw,
+    options,
+    { growMax: 6, shrinkMin: 0.2, exponent: -1 / 4 },
+    (t, y, h, F0, J) => {
+      const fx = _fdTimeDerivative(f, t, y, F0);
+      const E = J.map((row, i) => row.map((v, j) => (i === j ? 1 / (g * h) : 0) - v));
+      const solveE = _factorSolver(E, n);
 
-  const tOut: number[] = [t];
-  const yOut: number[][] = [y.slice()];
-  let iter = 0;
-
-  while ((dir > 0 ? t < tf : t > tf) && iter < maxIter) {
-    if (Math.abs(h) > Math.abs(tf - t)) h = tf - t; // don't overshoot
-    const F0 = _fArr(f, t, y);
-    const J = _jacobianAt(f, t, y, F0, options);
-    const fx = _fdTimeDerivative(f, t, y, F0);
-    // Iteration matrix E = I/(γh) − J, factored once and solved against each stage RHS.
-    const E = J.map((row, i) => row.map((v, j) => (i === j ? 1 / (g * h) : 0) - v));
-    const solveE = _factorSolver(E, n);
-
-    const k1 = solveE(F0.map((v, i) => v + h * RODAS.d1 * fx[i]));
-    const g2 = y.map((yi, i) => yi + RODAS.a21 * k1[i]);
-    const f2 = _fArr(f, t + RODAS.alpha2 * h, g2);
-    const k2 = solveE(f2.map((v, i) => v + (RODAS.C21 * k1[i]) / h + h * RODAS.d2 * fx[i]));
-    const g3 = y.map((yi, i) => yi + RODAS.a31 * k1[i] + RODAS.a32 * k2[i]);
-    const f3 = _fArr(f, t + RODAS.alpha3 * h, g3);
-    const k3 = solveE(
-      f3.map((v, i) => v + (RODAS.C31 * k1[i] + RODAS.C32 * k2[i]) / h + h * RODAS.d3 * fx[i])
-    );
-    const g4 = y.map((yi, i) => yi + RODAS.a41 * k1[i] + RODAS.a42 * k2[i] + RODAS.a43 * k3[i]);
-    const f4 = _fArr(f, t + RODAS.alpha4 * h, g4);
-    const k4 = solveE(
-      f4.map(
-        (v, i) =>
-          v + (RODAS.C41 * k1[i] + RODAS.C42 * k2[i] + RODAS.C43 * k3[i]) / h + h * RODAS.d4 * fx[i]
-      )
-    );
-    const g5 = y.map(
-      (yi, i) => yi + RODAS.a51 * k1[i] + RODAS.a52 * k2[i] + RODAS.a53 * k3[i] + RODAS.a54 * k4[i]
-    );
-    const f5 = _fArr(f, t + h, g5);
-    const k5 = solveE(
-      f5.map(
-        (v, i) =>
-          v + (RODAS.C51 * k1[i] + RODAS.C52 * k2[i] + RODAS.C53 * k3[i] + RODAS.C54 * k4[i]) / h
-      )
-    );
-    // Stiffly-accurate: g6 = y + Σ a5i·ki + k5 is already the 3rd-order embedded solution.
-    const g6 = g5.map((v, i) => v + k5[i]);
-    const f6 = _fArr(f, t + h, g6);
-    const k6 = solveE(
-      f6.map(
-        (v, i) =>
-          v +
-          (RODAS.C61 * k1[i] +
-            RODAS.C62 * k2[i] +
-            RODAS.C63 * k3[i] +
-            RODAS.C64 * k4[i] +
-            RODAS.C65 * k5[i]) /
-            h
-      )
-    );
-    const yNew = g6.map((v, i) => v + k6[i]); // 4th-order solution; k6 is the error estimate.
-
-    // Embedded (order-3) error estimate is exactly k6; scaled RMS norm.
-    let errNorm = 0;
-    for (let i = 0; i < n; i++) {
-      const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
-      errNorm += (k6[i] / sc) ** 2;
+      const k1 = solveE(F0.map((v, i) => v + h * RODAS.d1 * fx[i]));
+      const g2 = y.map((yi, i) => yi + RODAS.a21 * k1[i]);
+      const f2 = _fArr(f, t + RODAS.alpha2 * h, g2);
+      const k2 = solveE(f2.map((v, i) => v + (RODAS.C21 * k1[i]) / h + h * RODAS.d2 * fx[i]));
+      const g3 = y.map((yi, i) => yi + RODAS.a31 * k1[i] + RODAS.a32 * k2[i]);
+      const f3 = _fArr(f, t + RODAS.alpha3 * h, g3);
+      const k3 = solveE(
+        f3.map((v, i) => v + (RODAS.C31 * k1[i] + RODAS.C32 * k2[i]) / h + h * RODAS.d3 * fx[i])
+      );
+      const g4 = y.map((yi, i) => yi + RODAS.a41 * k1[i] + RODAS.a42 * k2[i] + RODAS.a43 * k3[i]);
+      const f4 = _fArr(f, t + RODAS.alpha4 * h, g4);
+      const k4 = solveE(
+        f4.map(
+          (v, i) =>
+            v +
+            (RODAS.C41 * k1[i] + RODAS.C42 * k2[i] + RODAS.C43 * k3[i]) / h +
+            h * RODAS.d4 * fx[i]
+        )
+      );
+      const g5 = y.map(
+        (yi, i) =>
+          yi + RODAS.a51 * k1[i] + RODAS.a52 * k2[i] + RODAS.a53 * k3[i] + RODAS.a54 * k4[i]
+      );
+      const f5 = _fArr(f, t + h, g5);
+      const k5 = solveE(
+        f5.map(
+          (v, i) =>
+            v + (RODAS.C51 * k1[i] + RODAS.C52 * k2[i] + RODAS.C53 * k3[i] + RODAS.C54 * k4[i]) / h
+        )
+      );
+      const g6 = g5.map((v, i) => v + k5[i]);
+      const f6 = _fArr(f, t + h, g6);
+      const k6 = solveE(
+        f6.map(
+          (v, i) =>
+            v +
+            (RODAS.C61 * k1[i] +
+              RODAS.C62 * k2[i] +
+              RODAS.C63 * k3[i] +
+              RODAS.C64 * k4[i] +
+              RODAS.C65 * k5[i]) /
+              h
+        )
+      );
+      const yNew = g6.map((v, i) => v + k6[i]);
+      return { yNew, err: k6 };
     }
-    errNorm = Math.sqrt(errNorm / n);
-
-    if (errNorm <= 1 || Math.abs(h) <= 1e-14 * Math.abs(t)) {
-      t += h;
-      y = yNew;
-      tOut.push(t);
-      yOut.push(y.slice());
-    }
-    // Step-size control (order-4 method → exponent 1/4), clamped to avoid wild swings.
-    h *= Math.min(6, Math.max(0.2, 0.9 * Math.pow(errNorm || 1e-10, -1 / 4)));
-    const maxStepR = options.maxStep as number | undefined;
-    const minStepR = options.minStep as number | undefined;
-    if (maxStepR && Math.abs(h) > maxStepR) h = dir * maxStepR;
-    else if (minStepR && Math.abs(h) < minStepR) h = dir * minStepR;
-    iter++;
-  }
-  if (iter >= maxIter) {
-    throw new Error('Maximum number of iterations reached, try changing options');
-  }
-  return { t: tOut, y: yOut };
+  );
 }
 
 // =================================================================================================
