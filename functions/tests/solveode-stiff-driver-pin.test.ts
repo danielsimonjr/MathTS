@@ -17,7 +17,7 @@ const golden = JSON.parse(
   rodas: { t: number[]; y: number[][] };
 };
 
-const stiffScalar = (_t: number, y: number[]): number[] => [-1000 * y[0]];
+const stiffScalar = (_t: unknown, y: unknown): number[] => [-1000 * (y as number[])[0]];
 
 describe('rosenbrockSolve driver pins', () => {
   it('requires numeric tspan', () => {
@@ -40,7 +40,7 @@ describe('rosenbrockSolve driver pins', () => {
 
   it('counts f evaluations in a predictable way', () => {
     let calls = 0;
-    const f = (t: number, y: number[]): number[] => {
+    const f = (t: unknown, y: unknown): number[] => {
       calls++;
       return stiffScalar(t, y);
     };

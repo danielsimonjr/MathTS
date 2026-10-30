@@ -6904,7 +6904,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1792
+      "loc": 1795
     },
     {
       "file": "functions/src/numeric/solveParabolicPDE.ts",
@@ -10789,7 +10789,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 78
+      "loc": 81
     },
     {
       "file": "functions/tests/solveodesystem-fixed-step-count.test.ts",
