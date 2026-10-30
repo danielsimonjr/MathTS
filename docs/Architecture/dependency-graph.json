@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-30",
     "totalFiles": 1224,
     "totalModules": 82,
-    "totalExports": 6329
+    "totalExports": 6331
   },
   "entryPoints": [
     {
@@ -1999,7 +1999,7 @@
           },
           {
             "file": "./shared.js",
-            "imports": ["hasOwnProperty", "isPollutingKey"]
+            "imports": ["hasOwnProperty", "isPollutingKey", "isPrototypeKey"]
           }
         ],
         "workspaceDependencies": [],
@@ -2043,9 +2043,16 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["warnOnce", "hasOwnProperty", "isPollutingKey", "endsWith", "memoize"],
+        "exports": [
+          "warnOnce",
+          "hasOwnProperty",
+          "isPollutingKey",
+          "isPrototypeKey",
+          "endsWith",
+          "memoize"
+        ],
         "interfaces": ["MemoizedFunction"],
-        "functions": ["hasOwnProperty", "isPollutingKey", "endsWith", "memoize"],
+        "functions": ["hasOwnProperty", "isPollutingKey", "isPrototypeKey", "endsWith", "memoize"],
         "constants": ["warnOnce"]
       },
       "core/src/string.ts": {
@@ -26585,8 +26592,18 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING", "MAX_COMPILE_DEPTH"],
-        "constants": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING", "MAX_COMPILE_DEPTH"]
+        "exports": [
+          "MAX_EXPRESSION_LENGTH",
+          "MAX_PARSE_NESTING",
+          "MAX_COMPILE_DEPTH",
+          "MAX_PARSE_RECURSION"
+        ],
+        "constants": [
+          "MAX_EXPRESSION_LENGTH",
+          "MAX_PARSE_NESTING",
+          "MAX_COMPILE_DEPTH",
+          "MAX_PARSE_RECURSION"
+        ]
       },
       "expression/src/operators.ts": {
         "description": "Metadata for a single operator/node identifier in the precedence table.",
@@ -26657,7 +26674,7 @@
           },
           {
             "file": "./limits.js",
-            "imports": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING"]
+            "imports": ["MAX_EXPRESSION_LENGTH", "MAX_PARSE_NESTING", "MAX_PARSE_RECURSION"]
           },
           {
             "file": "./node/Node.js",
@@ -32163,6 +32180,10 @@
           {
             "file": "../compiler/compile.js",
             "imports": ["compile"]
+          },
+          {
+            "file": "../limits.js",
+            "imports": ["MAX_COMPILE_DEPTH"]
           },
           {
             "file": "../compiler/compile.js",
@@ -42711,14 +42732,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1224,
     "totalModules": 82,
-    "totalLinesOfCode": 200856,
-    "totalExports": 6329,
+    "totalLinesOfCode": 200932,
+    "totalExports": 6331,
     "totalClasses": 59,
     "totalInterfaces": 548,
-    "totalFunctions": 2033,
-    "totalTypeGuards": 160,
+    "totalFunctions": 2034,
+    "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1627,
+    "totalConstants": 1628,
     "totalReExports": 2680,
     "totalTypeOnlyImports": 614,
     "runtimeCircularDeps": 0,

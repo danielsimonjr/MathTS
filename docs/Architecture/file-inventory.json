@@ -716,14 +716,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 490
+      "loc": 492
     },
     {
       "file": "core/src/shared.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 93
+      "loc": 113
     },
     {
       "file": "core/src/string.ts",
@@ -1003,7 +1003,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 91
+      "loc": 120
     },
     {
       "file": "core/tests/public-api-smoke.test.ts",
@@ -1304,7 +1304,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 848
+      "loc": 852
     },
     {
       "file": "expression/src/compiler/index.ts",
@@ -4118,7 +4118,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 229
+      "loc": 245
     },
     {
       "file": "expression/src/evaluator/index.ts",
@@ -4160,7 +4160,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 13
+      "loc": 21
     },
     {
       "file": "expression/src/node/AccessorNode.ts",
@@ -4307,7 +4307,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2022
+      "loc": 2048
     },
     {
       "file": "expression/src/Parser.ts",
@@ -5042,7 +5042,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 71
+      "loc": 113
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",

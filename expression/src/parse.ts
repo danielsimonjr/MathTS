@@ -12,7 +12,7 @@ import { safeNumberType } from './utils/number.js';
 import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
 import { setSafeProperty } from './utils/customs.js';
-import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING } from './limits.js';
+import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
 import type { MathNode } from './node/Node.js';
 
 /** An AST node constructor injected as a factory dependency. The mathjs node
@@ -108,6 +108,7 @@ interface ParserState {
   tokenType: TOKENTYPE;
   nestingLevel: number;
   conditionalLevel: number | null;
+  recursionDepth: number;
 }
 
 interface ParseOptions {
@@ -301,6 +302,7 @@ export const createParse = /* #__PURE__ */ factory(
         tokenType: TOKENTYPE.NULL, // type of the token
         nestingLevel: 0, // level of nesting inside parameters, used to ignore newline characters
         conditionalLevel: null, // when a conditional is being parsed, the level of the conditional is stored here
+        recursionDepth: 0, // re-entries of parseAssignment and parseUnary, capped by MAX_PARSE_RECURSION
       };
     }
 
@@ -584,6 +586,16 @@ export const createParse = /* #__PURE__ */ factory(
     }
 
     /**
+     * Count one re-entry of a self-recursive grammar rule and refuse past the cap, so a chain with
+     * no parenthesis to count (`-` x 20000, `a=a=...`) ends in a SyntaxError and not a RangeError.
+     */
+    function enterRecursion(state: ParserState): void {
+      if (++state.recursionDepth > MAX_PARSE_RECURSION) {
+        throw createSyntaxError(state, 'expression exceeds nesting limit');
+      }
+    }
+
+    /**
      * Close parameters.
      * New line characters will no longer be ignored
      */
@@ -778,6 +790,15 @@ export const createParse = /* #__PURE__ */ factory(
      * @private
      */
     function parseAssignment(state: ParserState): MathNode {
+      enterRecursion(state);
+      try {
+        return parseAssignmentRule(state);
+      } finally {
+        state.recursionDepth--;
+      }
+    }
+
+    function parseAssignmentRule(state: ParserState): MathNode {
       let name: string;
       let args: string[];
       let value: MathNode;
@@ -1341,6 +1362,15 @@ export const createParse = /* #__PURE__ */ factory(
      * @private
      */
     function parseUnary(state: ParserState): MathNode {
+      enterRecursion(state);
+      try {
+        return parseUnaryRule(state);
+      } finally {
+        state.recursionDepth--;
+      }
+    }
+
+    function parseUnaryRule(state: ParserState): MathNode {
       let name: string;
       let params: MathNode[];
       let fn: string;
