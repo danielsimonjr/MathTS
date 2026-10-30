@@ -1,0 +1,148 @@
+{
+  "note": "Bytes of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A change beyond the tolerance updates this file in the same PR.",
+  "tolerance": {
+    "bytes": 512,
+    "ratio": 0.01
+  },
+  "files": {
+    "packages/typed-function/dist/index.js": 4532,
+    "packages/workerpool/dist/index.js": 44769,
+    "packages/workerpool/dist/worker.js": 18292,
+    "core/dist/index.js": 200000,
+    "core/dist/internal.js": 201193,
+    "matrix/dist/index.js": 190209,
+    "matrix/dist/wasm/mathts-as.wasm": 62490,
+    "tensor/dist/index.js": 72541,
+    "autograd/dist/index.js": 55366,
+    "functions/dist/index.js": 1502524,
+    "functions/dist/wasm/mathts-as.wasm": 62490,
+    "expression/dist/index.js": 334113,
+    "parser/dist/index.js": 500,
+    "units/dist/index.js": 951,
+    "numbers/dist/index.js": 377,
+    "ast/dist/index.js": 367,
+    "evaluator/dist/index.js": 95,
+    "linalg/dist/index.js": 272,
+    "arithmetic/dist/index.js": 376,
+    "trigonometry/dist/index.js": 192,
+    "statistics/dist/index.js": 2477,
+    "signal/dist/index.js": 484,
+    "parallel/dist/index.js": 37121,
+    "workbook/dist/index.js": 47522,
+    "assembly/build/mathts.js": 93112,
+    "assembly/build/mathts.wasm": 62490,
+    "assembly/build/mathts-debug.wasm": 122381,
+    "compat/dist/index.js": 12650,
+    "gpu/dist/index.js": 16332,
+    "plot/dist/index.js": 32394,
+    "plot/dist/render-file.js": 5057
+  },
+  "entries": {
+    "packages/typed-function/dist/index.js": {
+      "export": "NoMatchingSignatureError",
+      "treeShake": true
+    },
+    "packages/workerpool/dist/index.js": {
+      "export": "MathWorkerPool",
+      "treeShake": false
+    },
+    "core/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": false,
+      "sentinel": "kilogram",
+      "sentinelPresent": true
+    },
+    "core/dist/internal.js": {
+      "export": "CoreUnit",
+      "treeShake": true
+    },
+    "matrix/dist/index.js": {
+      "export": "BackendManager",
+      "treeShake": true
+    },
+    "tensor/dist/index.js": {
+      "export": "Index",
+      "treeShake": true
+    },
+    "autograd/dist/index.js": {
+      "export": "DualTensor",
+      "treeShake": true
+    },
+    "functions/dist/index.js": {
+      "export": "Chain",
+      "treeShake": true
+    },
+    "expression/dist/index.js": {
+      "export": "ScalarBuildError",
+      "treeShake": true
+    },
+    "parser/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "units/dist/index.js": {
+      "export": "DimensionMismatchError",
+      "treeShake": true
+    },
+    "numbers/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": true
+    },
+    "ast/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "evaluator/dist/index.js": {
+      "export": "compile",
+      "treeShake": true
+    },
+    "linalg/dist/index.js": {
+      "export": "cholesky",
+      "treeShake": true
+    },
+    "arithmetic/dist/index.js": {
+      "export": "abs",
+      "treeShake": true
+    },
+    "trigonometry/dist/index.js": {
+      "export": "acos",
+      "treeShake": true
+    },
+    "statistics/dist/index.js": {
+      "export": "acf",
+      "treeShake": true
+    },
+    "signal/dist/index.js": {
+      "export": "autoCorrelation",
+      "treeShake": true
+    },
+    "parallel/dist/index.js": {
+      "export": "ComputePool",
+      "treeShake": true
+    },
+    "workbook/dist/index.js": {
+      "export": "Session",
+      "treeShake": true
+    },
+    "assembly/build/mathts.js": {
+      "export": "__collect",
+      "treeShake": false
+    },
+    "compat/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": true
+    },
+    "gpu/dist/index.js": {
+      "export": "BufferPool",
+      "treeShake": true
+    },
+    "plot/dist/index.js": {
+      "export": "area",
+      "treeShake": true
+    },
+    "plot/dist/render-file.js": {
+      "export": "PlotRenderError",
+      "treeShake": true
+    }
+  }
+}
