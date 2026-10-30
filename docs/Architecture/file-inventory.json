@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2039,
+  "totalFiles": 2042,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1204,
     "test-only": 0,
     "orphan": 0,
-    "test": 747,
+    "test": 750,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1230,
-    "tests": 747,
+    "tests": 750,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 867,
+    "@danielsimonjr/mathts-functions": 870,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -9490,6 +9490,20 @@
       "loc": 22
     },
     {
+      "file": "functions/tests/fixtures/stiff-driver-cases.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 108
+    },
+    {
+      "file": "functions/tests/fixtures/stiff-legacy-reference.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 371
+    },
+    {
       "file": "functions/tests/forward-mode-ad.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10684,7 +10698,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 519
+      "loc": 748
     },
     {
       "file": "functions/tests/scalar-node-bridge.test.ts",
@@ -10790,6 +10804,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 190
+    },
+    {
+      "file": "functions/tests/solveode-stiff-driver-extended-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
     },
     {
       "file": "functions/tests/solveode-stiff-driver-pin.test.ts",
