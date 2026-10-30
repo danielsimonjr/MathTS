@@ -1,5 +1,5 @@
 import { isBigNumber, isObject } from './is.js';
-import { hasOwnProperty, isPollutingKey } from './shared.js';
+import { hasOwnProperty, isPollutingKey, isPrototypeKey } from './shared.js';
 
 /**
  * Clone an object
@@ -8,13 +8,15 @@ import { hasOwnProperty, isPollutingKey } from './shared.js';
  *
  * Can clone any primitive type, array, and object.
  * If x has a function clone, this function will be invoked to clone the object.
- * Own keys on `Object.prototype` or `Function.prototype` (such as `__proto__` or
- * `constructor`) are skipped so the result keeps the ordinary object prototype.
+ * An own `__proto__` key (as `JSON.parse` produces) is skipped so the result keeps the
+ * ordinary object prototype; every other key, including `name`, `length` and `constructor`,
+ * is copied as data.
  *
  * @param x
  * @return clone
  * @example
- * clone({ a: 1, __proto__: { polluted: true } }) // => { a: 1 }
+ * clone({ a: 1, name: 'x' }) // => { a: 1, name: 'x' }
+ * clone(JSON.parse('{"a":1,"__proto__":{"polluted":true}}')) // => { a: 1 }
  */
 export function clone<T>(x: T): T {
   const type = typeof x;
@@ -60,13 +62,13 @@ export function clone<T>(x: T): T {
 
 /**
  * Apply map to all properties of an object.
- * Skips keys on `Object.prototype` or `Function.prototype` (see {@link isPollutingKey}).
+ * Skips an own `__proto__` key (see {@link isPrototypeKey}); every other key is mapped.
  *
  * @param object
  * @param callback
  * @return Returns a copy of the object with mapped properties
  * @example
- * mapObject({ a: 1, __proto__: { x: 2 } }, (v) => v) // => { a: 1 }
+ * mapObject({ a: 1, name: 2 }, (v) => v * 2) // => { a: 2, name: 4 }
  */
 export function mapObject<T, U>(
   object: Record<string, T>,
@@ -75,7 +77,7 @@ export function mapObject<T, U>(
   const clone: Record<string, U> = {};
 
   for (const key in object) {
-    if (hasOwnProperty(object, key) && !isPollutingKey(key)) {
+    if (hasOwnProperty(object, key) && !isPrototypeKey(key)) {
       clone[key] = callback(object[key]);
     }
   }
@@ -85,13 +87,13 @@ export function mapObject<T, U>(
 
 /**
  * Extend object a with the properties of object b.
- * Skips polluting keys on `b` (see {@link isPollutingKey}).
+ * Skips an own `__proto__` key on `b` (see {@link isPrototypeKey}); every other key is copied.
  *
  * @param a
  * @param b
  * @return a
  * @example
- * extend({ a: 1 }, { b: 2, __proto__: { polluted: true } }) // => { a: 1, b: 2 }
+ * extend({ a: 1 }, { b: 2, name: 3 }) // => { a: 1, b: 2, name: 3 }
  */
 export function extend<T extends Record<string, unknown>, U extends Record<string, unknown>>(
   a: T,
@@ -99,7 +101,7 @@ export function extend<T extends Record<string, unknown>, U extends Record<strin
 ): T & U {
   const target = a as Record<string, unknown>;
   for (const prop in b) {
-    if (hasOwnProperty(b, prop) && !isPollutingKey(prop)) {
+    if (hasOwnProperty(b, prop) && !isPrototypeKey(prop)) {
       target[prop] = b[prop];
     }
   }
@@ -230,12 +232,12 @@ export function deepStrictEqual(a: unknown, b: unknown): boolean {
 
 /**
  * Recursively flatten a nested object.
- * Skips polluting keys and does not walk into a `__proto__` object (see {@link isPollutingKey}).
+ * Skips an own `__proto__` key, so a `__proto__` object is not walked (see {@link isPrototypeKey}).
  *
  * @param nestedObject
  * @return Returns the flattened object
  * @example
- * deepFlatten({ a: { b: 1 }, __proto__: { polluted: true } }) // => { b: 1 }
+ * deepFlatten({ a: { b: 1 }, c: 2 }) // => { b: 1, c: 2 }
  */
 export function deepFlatten(nestedObject: Record<string, unknown>): Record<string, unknown> {
   const flattenedObject: Record<string, unknown> = {};
@@ -251,7 +253,7 @@ function _deepFlatten(
   flattenedObject: Record<string, unknown>
 ): void {
   for (const prop in nestedObject) {
-    if (hasOwnProperty(nestedObject, prop) && !isPollutingKey(prop)) {
+    if (hasOwnProperty(nestedObject, prop) && !isPrototypeKey(prop)) {
       const value = nestedObject[prop];
       if (typeof value === 'object' && value !== null) {
         _deepFlatten(value as Record<string, unknown>, flattenedObject);

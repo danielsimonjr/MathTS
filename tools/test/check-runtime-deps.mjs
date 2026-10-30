@@ -17,16 +17,20 @@ const LOCK_PATH = join(repoRoot, 'tools/test/runtime-deps-lock.json');
 const FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies'];
 const writeMode = process.argv.includes('--write');
 
-/** @returns {string[]} repo-relative package.json paths (root first). */
-export function runtimeManifestPaths() {
-  return ['package.json', ...workspaceDirs().map((dir) => `${dir}/package.json`)];
+/**
+ * @param {string} [root] repository root; defaults to this checkout (tests pass a fixture)
+ * @returns {string[]} repo-relative package.json paths (root first).
+ */
+export function runtimeManifestPaths(root = repoRoot) {
+  return ['package.json', ...workspaceDirs(root).map((dir) => `${dir}/package.json`)];
 }
 
 /**
  * @param {string} relPath repo-relative path to a package.json
+ * @param {string} [root] repository root
  */
-export function readRuntimeDepFields(relPath) {
-  const pkg = JSON.parse(readFileSync(join(repoRoot, relPath), 'utf8'));
+export function readRuntimeDepFields(relPath, root = repoRoot) {
+  const pkg = JSON.parse(readFileSync(join(root, relPath), 'utf8'));
   /** @type {Record<string, Record<string, string>>} */
   const out = {};
   for (const field of FIELDS) {
@@ -40,12 +44,15 @@ export function readRuntimeDepFields(relPath) {
   return out;
 }
 
-/** @returns {Record<string, Record<string, Record<string, string>>>} */
-export function collectRuntimeDepsLock() {
+/**
+ * @param {string} [root] repository root
+ * @returns {Record<string, Record<string, Record<string, string>>>}
+ */
+export function collectRuntimeDepsLock(root = repoRoot) {
   /** @type {Record<string, Record<string, Record<string, string>>>} */
   const lock = {};
-  for (const rel of runtimeManifestPaths()) {
-    lock[rel] = readRuntimeDepFields(rel);
+  for (const rel of runtimeManifestPaths(root)) {
+    lock[rel] = readRuntimeDepFields(rel, root);
   }
   return lock;
 }
@@ -79,9 +86,7 @@ export function diffRuntimeDeps(actual, expected) {
         } else if (!(name in aSec)) {
           problems.push(`${rel} ${field}.${name} removed (was "${eSec[name]}")`);
         } else if (aSec[name] !== eSec[name]) {
-          problems.push(
-            `${rel} ${field}.${name} spec changed: "${eSec[name]}" -> "${aSec[name]}"`
-          );
+          problems.push(`${rel} ${field}.${name} spec changed: "${eSec[name]}" -> "${aSec[name]}"`);
         }
       }
     }
@@ -108,7 +113,5 @@ if (import.meta.url === new URL(process.argv[1], 'file:').href) {
     console.error('Update tools/test/runtime-deps-lock.json in the same PR when deliberate.');
     process.exit(1);
   }
-  console.log(
-    `OK: runtime dependency lock matches ${runtimeManifestPaths().length} manifest(s).`
-  );
+  console.log(`OK: runtime dependency lock matches ${runtimeManifestPaths().length} manifest(s).`);
 }

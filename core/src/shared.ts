@@ -13,9 +13,29 @@ export function hasOwnProperty(object: unknown, property: string): boolean {
   return !!object && Object.hasOwnProperty.call(object, property);
 }
 
-/** True for keys whose assignment changes [[Prototype]] or writes through it. */
+/**
+ * True for every name that lives on `Object.prototype` or `Function.prototype`.
+ *
+ * Use it where a walker reads `target[key]` and then recurses or assigns into the result
+ * (`deepExtend`), or stores a key in a lookup table that is also read with `in` (unit names): for
+ * these keys the read returns a shared builtin (`Object`, `Function.prototype.call`, ...), so a
+ * write would reach every object in the realm. It also matches ordinary data keys such as `name`,
+ * `length` and `constructor`, so a shallow copy must use {@link isPrototypeKey} instead.
+ */
 export function isPollutingKey(prop: string): boolean {
   return prop in Object.prototype || prop in Function.prototype;
+}
+
+/**
+ * True for the one key that a plain `target[key] = value` cannot store as data: `__proto__` runs
+ * the `Object.prototype` setter and replaces the target's `[[Prototype]]`.
+ *
+ * The shallow copiers (`clone`, `mapObject`, `extend`, `deepFlatten`) write into an object they
+ * own and never read through the key, so this is the only key they must skip; `name`, `length`,
+ * `constructor` and the other names {@link isPollutingKey} also matches are copied as data.
+ */
+export function isPrototypeKey(prop: string): boolean {
+  return prop === '__proto__';
 }
 
 /**

@@ -2703,7 +2703,11 @@
       "expression/src/node/utils/assign.ts",
       "expression/src/parse.ts"
     ],
-    "expression/src/limits.ts": ["expression/src/compiler/compile.ts", "expression/src/parse.ts"],
+    "expression/src/limits.ts": [
+      "expression/src/compiler/compile.ts",
+      "expression/src/evaluator/evaluate.ts",
+      "expression/src/parse.ts"
+    ],
     "expression/src/compiler/compile.ts": [
       "expression/src/compiler/index.ts",
       "expression/src/evaluator/evaluate.ts"
