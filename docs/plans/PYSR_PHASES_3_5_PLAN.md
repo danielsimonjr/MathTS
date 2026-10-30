@@ -115,7 +115,7 @@ Every PR:
 - Changeset (`.changeset/*.md`) for every touched published package, `minor` for a new export, `patch` for a behavior fix. No version bump in `package.json`. Docs-only PRs have no changeset.
 - No tag, release, or publish. PR #398 stays untouched.
 
-Package tests go through turbo so `dist/` is fresh: `bunx turbo test --filter=@danielsimonjr/mathts-functions` (and the same for `expression` and `parallel`). One file from the repo root: `bunx vitest run <path>`.
+Package tests go through turbo so `dist/` is fresh: `bunx turbo test --filter=@danielsimonjr/mathts-functions` (and the same for `expression` and `parallel`). One file: run vitest from the package that owns it (`cd functions && bunx vitest run tests/<file>`; the same for `expression`, `parallel`). The repo-root `vitest.config.ts` includes only `tests/integration/**` and `tests/wasm/**`, so `bunx vitest run functions/tests/<file>` from the repo root exits 1 with "No test files found". Files under the root `tests/integration/` run from the repo root.
 
 ## PR 1 — Record the review of M1, M3, and M4
 
@@ -129,13 +129,13 @@ M2, M5, M6, M7, and M8 keep their B9 boxes open. This PR does not review them.
 
 ### Work
 
-The reviewer re-runs, from the repo root:
+The reviewer re-runs these four commands. Three of the four files belong to a package, so each runs under that package's vitest config; only the integration file runs from the repo root (the root config includes only `tests/integration/**` and `tests/wasm/**`, and the plain `bunx vitest run expression/tests/…` form exits 1 with "No test files found"):
 
 ```bash
-bunx vitest run expression/tests/scalar-structure.test.ts
+(cd expression && bunx vitest run tests/scalar-structure.test.ts)
 bunx vitest run tests/integration/scalar-canonical-parity.test.ts
-bunx vitest run functions/tests/scalar-compile.test.ts
-bunx vitest run functions/tests/pareto-front.test.ts
+(cd functions && bunx vitest run tests/scalar-compile.test.ts)
+(cd functions && bunx vitest run tests/pareto-front.test.ts)
 ```
 
 The reviewer greps `expression/src/scalar-structure.ts` for `hasOwnProperty` (the own-key helper at line 208) and confirms there is one walker. The reviewer confirms `paretoDist` is not called from `functions/src/pareto-front.ts`.
@@ -334,7 +334,7 @@ Same as PR 2.
 ### Work
 
 1. In `docs/integration/upt.md`, under the Scalar ExprNode section, add that `inferScalarDimension` and `solveParameterDimensions` are MathTS exports and that their exponents are `Fraction`s on `SiDimensionVector` (`#414`). State that Q2 is unchanged: dimensional analysis of `Tensor` stays in UPT.
-2. Run `bunx vitest run functions/tests/simplify-exact-fractions.test.ts`. Do not edit `simplifyConstant.ts`.
+2. Run `(cd functions && bunx vitest run tests/simplify-exact-fractions.test.ts)`. Do not edit `simplifyConstant.ts`.
 3. Leave §10 question 4 unanswered. Do not edit `physicalConstants.ts`.
 
 ### Files
@@ -489,6 +489,8 @@ Sum of the table is `8.512392`. The picker draws `next()`, multiplies by that su
 
 `crossoverSubtrees` is not in the default weights. It is a separate export.
 
+The `identity` operator is exported as `identityMutation`: `functions/src/index.ts` re-exports `./factories/index.js` with `export *`, and an explicit `identity` export would replace the package's matrix `identity` for every consumer. The weight key stays `identity`.
+
 ### Tests
 
 `functions/tests/scalar-mutate.test.ts`.
@@ -565,6 +567,8 @@ Same as PR 2. No wall-clock assertion. No worker.
 
 A two-island run with a fixed seed is byte-identical across two runs.
 
+**Decided.** A single population draws from the `'population'` fork and islands from `island:${index}`, so `populations: 1` stays the PR 7 stream. Annealing (`temperature` starts at `initialTemperature`, 3.17, times 0.995 per generation) and adaptive parsimony default to on only when `populations > 1`; with one population they default to off, which is what keeps PR 7's recorded front valid. Migration runs after every generation that leaves budget: each island's expected replacement count is `fractionReplaced * populationSize`, rounded at random, the worst trees go, and the donors are the best 12 of the other islands, all read before any island changes. A tree the island already holds is not migrated in. Adaptive parsimony ranks contestants by `log(loss) + scaling * share`, the logarithm of PySR's `loss * exp(scaling * share)`: at scaling 1040 the product overflows once `share` passes 0.68, and a zero loss would become `NaN`. `scoreFront` stays the only score formula.
+
 ### Files
 
 | Path                                      | Action                                                                                                      |
@@ -595,13 +599,15 @@ The worker file is `functions/src/scalar-batch.worker.ts`. It is a second tsdown
 
 Resolve the script with `new URL('./scalar-batch.worker.js', import.meta.url)` from the built module. No `node:fs`, no `node:url`, no `require`. The parallel-equals-serial test imports `@danielsimonjr/mathts-functions` (the built `dist`) so that URL is the sibling of `dist/index.js`.
 
-Dispatch constant `SCALAR_PARALLEL_MIN_ROWS = 100` in `functions/src/scalar-batch-parallel.ts`, with a comment that cites the M3 section of `docs/BENCHMARK_RESULTS.md`. The comparison is in the function that chooses the path, not only in the comment. Below 100 rows, `compileScalar` on the caller thread and the pool is not called. At 100 or more, `pool.execute(payload, transferables, timeoutMs)`.
+Dispatch constant `SCALAR_PARALLEL_MIN_ROWS = 100` in `functions/src/scalar-batch-parallel.ts`, with a comment that cites the M3 section of `docs/BENCHMARK_RESULTS.md`. That section compares `compileScalar` with per-row `evaluateScalar` on one thread; it did not time a worker round trip. The comment says so: 100 rows is the smallest size at which the compiled batch beats per-row evaluation, used here as a floor for the opt-in worker path, not a measured worker crossover. The comment carries no speedup number. The comparison is in the function that chooses the path, not only in the comment. Below 100 rows, `compileScalar` on the caller thread and the pool is not called. At 100 or more, `pool.execute(payload, transferables, timeoutMs)`.
 
 `timeoutMs` is required on the options object the search passes. Default `30_000`. The third argument of `execute` is that number. Omitting it is a bug (the security invariant is the timeout path).
 
 Merge worker results by candidate index on the caller. A parallel front equals the serial front for the same seed. Do not add a speedup number. Do not add a benchmark file in this PR.
 
 `evaluateScalarPopulation` accepts `pool?: Pick<WorkerPool, 'execute'>` so a test can pass a fake. The default constructs `new WorkerPool(scriptUrl)`. The fake records `timeoutMs` and returns the serial `compileScalar` values. The public `searchScalars` options gain `parallel?: { timeoutMs?: number; pool?: ... }`. When `parallel` is omitted, evaluation stays on the caller thread (PR 7 and PR 8 tests stay serial).
+
+**Decided.** The search sends only the first scoring of each generation to the workers (trees with the parameters they inherited). The refit of a tree's parameters and every random draw stay on the caller thread, in input order, which is what makes a parallel run equal the serial run. `timeoutMs` must be positive: `WorkerPool.execute` treats `0` as "no timeout", and the plan makes the timeout path the security invariant, so `0` is a `RangeError`. A pool the search starts is terminated when the generator ends or is closed; a pool the caller passes is the caller's. The 100-row threshold is the M3 table's `n` where the tape beats the interpreter on the caller thread; that table did not time a worker round trip, so the comment says so and no speed-up is claimed. `WorkerPool` also gets two fixes the plan relies on: a task that waits in the queue times out, and `terminate()` stops a worker that was still starting.
 
 ### Tests
 
@@ -618,6 +624,7 @@ Merge worker results by candidate index on the caller. A parallel front equals t
 | `functions/src/scalar-compile.ts`                   | **Change.** Lift `evaluateScalarTape`. Do not export it from the package barrel (the worker imports the file).                  |
 | `functions/src/scalar-batch.worker.ts`              | **Add.** Message loop. Calls `evaluateScalarTape`.                                                                              |
 | `functions/src/scalar-batch-parallel.ts`            | **Add.** Threshold, resolver, `evaluateScalarPopulation`.                                                                       |
+| `functions/src/scalar-batch-task.ts`                | **Add.** The worker message types and `runScalarBatchTask`, which the worker entry, the dispatcher and the tests share.         |
 | `functions/src/scalar-search.ts`                    | **Change.** Optional `parallel` option.                                                                                         |
 | `functions/package.json`                            | **Change.** The three tsdown scripts, as above. No `"version"` edit.                                                            |
 | `functions/tests/scalar-batch-parallel.test.ts`     | **Add.**                                                                                                                        |
@@ -668,31 +675,35 @@ Docs-only bar, unless a grep failed and a header comment changed. No changeset f
 
 ### LaTeX
 
-One `tabular` with columns complexity, loss, score, equation, in that order, plus a header row. Loss and score use `toPrecision` when `options.precision` is set; the default precision is 6. A `null` score is an empty cell. `Infinity` is `\infty`.
+One `tabular` with columns complexity, loss, score, equation, in that order, plus a header row. Loss and score use `toPrecision(precision)`; the default precision is 6, and `precision` must be an integer from 1 to 100 (`RangeError` otherwise). A `null` score is an empty cell. `Infinity` is `$\infty$` and `-Infinity` is `$-\infty$`. A row whose complexity is not finite throws `RangeError`.
 
-The test's expected document is one string literal. Formula cells inside it are the strings already pinned in `functions/tests/scalar-node-bridge.test.ts`:
+**Decided (review):** every equation cell is `$` + `scalarToTex` + `$`. A `tabular` cell is text mode, and `\cdot`, `\frac`, `\sin` and `\infty` are math-only, so the bare cells that an earlier draft pinned stop `pdflatex` with `! Missing $ inserted.` for any formula that has a `*`, a `/`, a call or `^`, and for any infinite score. Checked with `pdflatex` (texlive-latex-base): the bare table fails, and the wrapped table, with `\sin`, `\frac`, `x_1`, `${ x}^{2}$`, `3.00000e-16` and `$\infty$`, compiles. `frontToLatexTable` takes only `precision`: the sketch's `variables` option had no effect, because `Node.toTex` reads no such key, so it is gone.
 
-| Tree       | `scalarToTex` |
-| ---------- | ------------- |
-| symbol `x` | ` x`          |
-| `a + b`    | ` a+ b`       |
-| `a * b`    | ` a\cdot b`   |
+The test's expected document is one string literal (`String.raw`). Formula cells inside it are the strings already pinned in `functions/tests/scalar-node-bridge.test.ts`, each in math mode:
+
+| Tree       | `scalarToTex` | cell          |
+| ---------- | ------------- | ------------- |
+| symbol `x` | ` x`          | `$ x$`        |
+| `a + b`    | ` a+ b`       | `$ a+ b$`     |
+| `a * b`    | ` a\cdot b`   | `$ a\cdot b$` |
 
 Three rows, complexities 1, 3, and 3, losses `0.5`, `0.25`, and `0.125`, scores `0`, a finite score, and `null` (build the `null` with `scoreFront(..., { lossScale: 'linear' })` on a one-row front, or pass a `ScoredCandidate` whose `score` is `null`). The literal includes those tex strings. The test does not call `frontToLatexTable` to build the expected value.
 
 ### JSON
 
-`frontToJson` returns `{ schemaVersion: 1, rows: [{ complexity, loss, score, key, tex }] }`. `key` equals `scalarCanonicalKey(item)`. For symbol `x` the key is `{"k":"s","v":"x"}` (`expression/src/scalar-structure.ts` encodes a symbol as `{ k: 's', v: name }`). The test pins that string. `JSON.parse` of the serialized value restores the same keys. `tex` equals `scalarToTex(item)`.
+`frontToJson(scored)` returns `{ schemaVersion: 1, rows: [{ complexity, loss, score, key, tex }] }`. `key` equals `scalarCanonicalKey(item)`. For symbol `x` the key is `{"k":"s","v":"x"}` (`expression/src/scalar-structure.ts` encodes a symbol as `{ k: 's', v: name }`). The test pins that string. `JSON.parse` of the serialized value restores the same keys. `tex` equals `scalarToTex(item)`, without the table's `$`.
+
+**Decided (review):** the report equals `JSON.parse(JSON.stringify(report))`. `JSON.stringify` writes `Infinity` and `NaN` as `null`, and an exact fit (loss 0) has score `Infinity` (`scoreFront`), which would then read as the linear scale's `null`. A non-finite `loss` or `score` is therefore the string `'Infinity'`, `'-Infinity'` or `'NaN'` (type `FrontJsonNumber`); a finite value stays a number, and `null` stays the linear-scale score. A row whose complexity is not finite throws `RangeError`.
 
 ### Files
 
-| Path                                   | Action                                                                  |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| `functions/src/front-export.ts`        | **Add.**                                                                |
-| `functions/src/index.ts`               | **Change.** Export `frontToLatexTable`, `frontToJson`, and `FrontJson`. |
-| `functions/tests/front-export.test.ts` | **Add.**                                                                |
-| README, reference, `DOMAIN_SUPPLEMENT` | **Change.**                                                             |
-| `.changeset/front-export-m15.md`       | **Add.** `minor` on `@danielsimonjr/mathts-functions`.                  |
+| Path                                   | Action                                                                                                                                         |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `functions/src/front-export.ts`        | **Add.**                                                                                                                                       |
+| `functions/src/index.ts`               | **Change.** Export `frontToLatexTable`, `frontToJson`, and the types `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`. |
+| `functions/tests/front-export.test.ts` | **Add.**                                                                                                                                       |
+| README, reference, `DOMAIN_SUPPLEMENT` | **Change.**                                                                                                                                    |
+| `.changeset/front-export-m15.md`       | **Add.** `minor` on `@danielsimonjr/mathts-functions`.                                                                                         |
 
 ### CI
 
