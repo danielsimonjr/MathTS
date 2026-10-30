@@ -940,7 +940,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 151
     },
     {
       "file": "core/tests/config.test.ts",
@@ -1024,7 +1024,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 98
+      "loc": 150
     },
     {
       "file": "core/tests/public-api-smoke.test.ts",
@@ -5077,7 +5077,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 132
+      "loc": 153
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",
