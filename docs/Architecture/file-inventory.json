@@ -11307,7 +11307,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 136
+      "loc": 139
     },
     {
       "file": "functions/vitest.config.ts",
