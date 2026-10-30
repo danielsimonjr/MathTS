@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2015
+**Total files**: 2019
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1196 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      731 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      735 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2015** |                                                                                                                |
+| **Total**     | **2019** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1222 |
-| `tests`    |   731 |
+| `tests`    |   735 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -45,10 +45,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    24 |
 | `@danielsimonjr/mathts-compat`         |    16 |
-| `@danielsimonjr/mathts-core`           |   100 |
+| `@danielsimonjr/mathts-core`           |   102 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   559 |
-| `@danielsimonjr/mathts-functions`      |   849 |
+| `@danielsimonjr/mathts-functions`      |   851 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   112 |
@@ -223,9 +223,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types-interfaces.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/bignumber-coverage.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/bignumber-math.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/bignumber-oracle.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/bignumber-radix.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/bignumber.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex-coverage.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/complex-oracle.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/complex.test.ts`                                                | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/core-exact-clones-oracle.test.ts`                               | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/exact-scale-registry-parse.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
@@ -1591,8 +1593,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/sort-as-wasm.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-bridge.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special-accuracy.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/special-as-oracle.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special-as-wasm.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special-extended.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/special-oracle-inventory.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special-scalars-airy-oracle.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/spectral-peaks.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
