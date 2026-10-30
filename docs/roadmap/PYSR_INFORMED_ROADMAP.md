@@ -9,7 +9,7 @@ no new package for this roadmap (§10).
 **Author:** MathTS maintenance
 **Date:** 2026-10-22 (refreshed 2026-10-23 against the
 [2026-10-22 codebase audit](../audit/2026-10-22-codebase-audit.md))
-**Status:** Active. Phase 1: M1 ([#396](https://github.com/danielsimonjr/MathTS/pull/396)),
+**Status:** Phases 1–5 are complete; release waits on Phase 6 and up. Phase 1: M1 ([#396](https://github.com/danielsimonjr/MathTS/pull/396)),
 M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 ([#395](https://github.com/danielsimonjr/MathTS/pull/395)) are merged; M1's weight lookup was
 fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). Sprint 1R items 1–7 are
@@ -22,7 +22,7 @@ criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af
 or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and claude-sonnet-5-5 recorded it on
 [#519](https://github.com/danielsimonjr/MathTS/pull/519). M2 is merged
 ([#440](https://github.com/danielsimonjr/MathTS/pull/440), `71f8c3ce`). M5 (`createSeededRng`/`fork`) is implemented in `core`.
-Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented; sprints 2R–5R remain open. B9 for M5, M6, M7 and M8 stays open until a review is recorded.
+Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. B9 for M2 and M5–M8 stays open until a review is recorded. Phases 3–5 are built in the stack of PRs [#519](https://github.com/danielsimonjr/MathTS/pull/519)–[#528](https://github.com/danielsimonjr/MathTS/pull/528) (M9, M10, Sprint 3R, M11, M12, M13, M14, Sprint 4R, M15, and this Sprint 5R close-out); every DoD box those PRs own is ticked, and the status above holds once that stack is on `main`. The release in §7 has not run, and Phase 6 (§8) has not started.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
@@ -449,6 +449,10 @@ Greps and reads on the same head:
 - `paretoDist` is not called from `functions/src/pareto-front.ts` (grep: no match). It is the
   unrelated Pareto distribution object in `functions/src/typed/dist-objects.ts`.
 - `functions/src/scalar-compile.ts` imports `NUMERIC_LITERAL` from `scalar-eval.ts`.
+
+Re-run at the head of the Sprint 5R close-out PR ([#528](https://github.com/danielsimonjr/MathTS/pull/528)),
+which holds the whole Phases 3–5 stack: the same four commands pass again with the same
+counts (15, 11, 22 and 17 tests), so the B9 cells above stand.
 
 ---
 
@@ -973,16 +977,23 @@ are done (#423). Nelder–Mead merge (item 7) is done.
     changed expectation. Iteration counts and intermediate iterates are not
     expectations and may change.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracles: `lgamma` and `erfc` against published reference values (for example
+  - [x] Oracles: `lgamma` and `erfc` against published reference values (for example
         DLMF or SciPy at fixed arguments); `ols` coefficients and LM solutions checked
         against the oracle values of their existing fixtures, under the
         test-expectation rule. For LM, the fixture is a planted-parameter recovery test
         (`functions/tests/gap-optimization-clustering.test.ts:32-41`: noise-free data
         from `y = 2.5·exp(0.5·t)`, expecting `(2.5, 0.5)` to 6 digits). `curvefit`,
         `solveBVP`, `solveODE` and `solveDAE` keep their existing fixtures under the same
-        rule.
-  - [ ] B3: `matMul` added to the `matrix` barrel and `docs/api/matrix.md`; no other
-        public export changes.
+        rule. Evidence at the Sprint 5R head: `functions/tests/special.test.ts:37-38` (`erfc(1)`
+        to 0.15729920705) and `:307-310` (`lgamma(-0.5)` = 1.2655121234846454 = ln(2√π)),
+        `functions/tests/lgamma-contracts.test.ts:7-10` (the closed form on `_lgamma` and
+        `lgamma`), `functions/tests/cov-special.test.ts` (DLMF values), and the LM planted-parameter
+        fixture `functions/tests/gap-optimization-clustering.test.ts:32-41`, whose last change is a
+        formatting commit (`8c143e7f`).
+  - [x] B3: `matMul` added to the `matrix` barrel and `docs/api/matrix.md`; no other
+        public export changes. Evidence: `matrix/src/operations/index.ts:66` re-exports it,
+        `typeof matMul` is `'function'` from the built `@danielsimonjr/mathts-matrix`, and
+        `docs/api/matrix.md:260` documents it.
 
 ### Phase 3 — Dimension-aware primitives
 
@@ -1038,12 +1049,18 @@ export function inferScalarDimension(
   physics closed forms instead.
 - **DoD:** base checklist + the following specifics:
   - [x] PR-SIDIM merged (Sprint 1R item 7, #414); D-2 recorded in §10.
-  - [ ] B1: vectors come from `toSiDimensionVector` with `Fraction` exponents; no new
-        dimension-order constant.
-  - [ ] Oracles: physics closed forms (gravitation, kinetic energy, a pendulum period
-        with `x^0.5`) and the four violations.
-  - [ ] Exports on the `functions` barrel: `inferScalarDimension`, types
+  - [x] B1: vectors come from `toSiDimensionVector` with `Fraction` exponents; no new
+        dimension-order constant. `functions/src/scalar-dimension.ts:12` imports `Fraction`,
+        `SI_DIMENSION_LENGTH` and `SiDimensionVector` from `core` and defines no order of its
+        own; `functions/tests/scalar-dimension.test.ts:41,46` build the gravitation inputs with
+        `toSiDimensionVector(gravitationConstant.dimensions)`.
+  - [x] Oracles: physics closed forms (gravitation, kinetic energy, a pendulum period
+        with `x^0.5`) and the four violations. `scalar-dimension.test.ts:45` (Newton),
+        `:64` (kinetic energy), `:81` (pendulum), `:101`-`:137` (add-mismatch, transcendental,
+        non-literal exponent, unknown symbol).
+  - [x] Exports on the `functions` barrel: `inferScalarDimension`, types
         `RationalDimension` (`SiDimensionVector`), `DimensionInference`.
+        `functions/src/index.ts:102-106`.
 
 #### M10 — Constant-unit solving (PySR's `[⋅]`)
 
@@ -1064,10 +1081,14 @@ export function inferScalarDimension(
   - With `{ dimensionlessOnly: true }`, the same case is `inconsistent`, mirroring
     `dimensionless_constants_only`.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: the system is solved by `rationalNullspace`.
-  - [ ] Oracles: PySR's physics example; an underdetermined and an inconsistent case
-        worked by hand.
-  - [ ] Exports on the `functions` barrel: `solveParameterDimensions`.
+  - [x] B1: the system is solved by `rationalNullspace`.
+        `functions/src/scalar-dimension.ts:14,426,456`; no other solver in the file.
+  - [x] Oracles: PySR's physics example; an underdetermined and an inconsistent case
+        worked by hand. `scalar-dimension.test.ts:258` (`M * c` gives `c = m s^-2`),
+        `:268` (`dimensionlessOnly` is inconsistent), `:277` and `:284` (underdetermined),
+        `:291` and `:345` (inconsistent).
+  - [x] Exports on the `functions` barrel: `solveParameterDimensions`.
+        `functions/src/index.ts:102`.
 
 #### Sprint 3R — Phase 3 integration
 
@@ -1156,11 +1177,15 @@ export function enumerateScalars(
   - Pruning by `admit` happens before children are expanded, when the predicate is
     monotone. The predicate declares whether it is monotone.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Placement (`functions` or `expression`) recorded; the cycle probe is in the PR.
-  - [ ] B1: dedup is `scalarCanonicalKey`; budgets are `scalarSize` / `scalarDepth`.
-  - [ ] Oracle: hand-counted enumeration for the tiny grammar.
-  - [ ] Exports on the chosen barrel: `enumerateScalars`, types `ScalarGrammar`,
-        `EnumerationBudget`, `EnumerationStop`.
+  - [x] Placement (`functions` or `expression`) recorded; the cycle probe is in the PR.
+        The `expression/src/scalar-enumerate.ts` header records the placement; `bun run
+docs:graph -- cycles` reports `none (0 circular dependencies)` at the Sprint 5R head.
+  - [x] B1: dedup is `scalarCanonicalKey`; budgets are `scalarSize` / `scalarDepth`.
+        `expression/src/scalar-enumerate.ts:19` imports exactly those, plus `forEachScalar`.
+  - [x] Oracle: hand-counted enumeration for the tiny grammar.
+        `expression/tests/scalar-enumerate.test.ts:57`.
+  - [x] Exports on the chosen barrel: `enumerateScalars`, types `ScalarGrammar`,
+        `EnumerationBudget`, `EnumerationStop`. `expression/src/index.ts:75-76`.
 
 #### M12 — Mutation and crossover operators
 
@@ -1183,10 +1208,15 @@ export function enumerateScalars(
   - The empirical mutation frequencies match the weights (χ² test, seeded).
   - The same seed gives the same output sequence.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: no simplifier or constraint checker of its own.
-  - [ ] Oracles: PySR's default weights (§2.2) for the χ² test; hand-built before/after
-        trees for each operator.
-  - [ ] Exports on the chosen barrel: the operators and `weightedMutation`.
+  - [x] B1: no simplifier or constraint checker of its own. The constraint check is
+        `scalarGrammarAccepts` from `expression` (`functions/src/scalar-mutate.ts:10,153`);
+        `simplifyConstants` folds numeric-only subtrees through `evaluateScalar`, as plan PR 6
+        defines it.
+  - [x] Oracles: PySR's default weights (§2.2) for the χ² test; hand-built before/after
+        trees for each operator. `functions/tests/scalar-mutate.test.ts:163` (the weights) and
+        `:212` (χ², df = 10, alpha = 0.001); every operator has its own tests.
+  - [x] Exports on the chosen barrel: the operators and `weightedMutation`. All 13 names
+        are in `functions/src/index.ts`.
 
 #### M13 — Regularized-evolution loop
 
@@ -1211,9 +1241,14 @@ export function enumerateScalars(
   - A front is always returned, including on budget exhaustion.
   - The report never labels a candidate beyond "fitted".
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: the front is the M4 trio; no second Pareto or ranking helper.
-  - [ ] Oracles: the planted laws; byte-identical serial runs.
-  - [ ] Exports on the chosen barrel: `searchScalars` and its option and progress types.
+  - [x] B1: the front is the M4 trio; no second Pareto or ranking helper.
+        `functions/src/scalar-search.ts:27,594,611` call `paretoFront`, `scoreFront` and
+        `selectFrontModel`.
+  - [x] Oracles: the planted laws; byte-identical serial runs.
+        `functions/tests/scalar-search.test.ts:129` (planted laws), `:303` and `:571` (a fixed
+        seed gives the same events and the same result, and `options.rng` is not advanced).
+  - [x] Exports on the chosen barrel: `searchScalars` and its option and progress types.
+        `functions/src/index.ts:80-87`.
 
 #### M14 — Parallel population evaluation
 
@@ -1238,9 +1273,16 @@ export function enumerateScalars(
   speedup claim goes into a committed benchmark that follows `AGENTS.md`, and the
   per-op threshold reaches the dispatch code (benchmark rule 9).
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: `WorkerPool.execute` with `timeoutMs`; no second copy of the M3 tape.
-  - [ ] Oracle: parallel front equals serial front for fixed seeds.
-  - [ ] A measured `ScalarNode` batch threshold, from two Node runs, cited in the code.
+  - [x] B1: `WorkerPool.execute` with `timeoutMs`; no second copy of the M3 tape.
+        `functions/src/scalar-batch-parallel.ts:162` calls `pool.execute(task, undefined,
+timeoutMs)`; the worker runs `evaluateScalarTape` (`scalar-batch-task.ts:9`).
+  - [x] Oracle: parallel front equals serial front for fixed seeds.
+        `functions/tests/scalar-search-parallel.test.ts:133`.
+  - [x] A measured `ScalarNode` batch threshold, from two Node runs, cited in the code.
+        `SCALAR_PARALLEL_MIN_ROWS = 100` cites the two runs of the `scalar` benchmark in
+        `docs/BENCHMARK_RESULTS.md` (`scalar-batch-parallel.ts:29-37`). They compare the tape
+        with the interpreter on the caller thread; no worker round trip was timed, so the pool
+        is opt-in and carries no speed-up claim.
 
 #### Sprint 4R — Phase 4 integration
 
@@ -1308,9 +1350,14 @@ re-decide it here if PR-POLY has already merged.
 - **Acceptance:** the LaTeX output is pinned as strings, and the JSON round trip
   restores identical keys.
 - **DoD:** base checklist + the following specifics:
-  - [ ] B1: formulas through `scalarToTex`; no second LaTeX printer.
-  - [ ] Oracles: hand-written LaTeX table for a three-row front; JSON schema fixture.
-  - [ ] Exports on the `functions` barrel: `frontToLatexTable`, `frontToJson`.
+  - [x] B1: formulas through `scalarToTex`; no second LaTeX printer.
+        `functions/src/front-export.ts` calls `scalarToTex` for every equation cell and the JSON
+        `tex`, and `scalarCanonicalKey` for `key`.
+  - [x] Oracles: hand-written LaTeX table for a three-row front; JSON schema fixture.
+        `functions/tests/front-export.test.ts` (`EXPECTED_LATEX` is one `String.raw` literal;
+        `EXPECTED_JSON`). The table was also compiled with `pdflatex`.
+  - [x] Exports on the `functions` barrel: `frontToLatexTable`, `frontToJson`.
+        `functions/src/index.ts`, and the export lock.
 
 #### Sprint 5R — Phase 5 integration and release readiness
 
@@ -1327,9 +1374,9 @@ re-decide it here if PR-POLY has already merged.
   4. **Configuration and dependency hygiene.** **Done (I-9 / #425):** `create(all, config)`
      uses per-instance `runWithConfig` overlays instead of mutating process-wide
      `DEFAULT_CONFIG`; the nine unused `typed-function ^4.0.0` pins are gone (#413) and
-     `packages/typed-function` still has no workspace dependents (I-10);
-     the `mad` / `parallelStatMAD` naming (I-16). **Done (mad clause):** `parallelStatMeanAD`
-     alias, docs, and median-vs-mean oracle test; I-10 in this item remains open.
+     `packages/typed-function` still has no workspace dependents (I-10, recorded in §10
+     item 8); the `mad` / `parallelStatMAD` naming (I-16). **Done (mad clause):**
+     `parallelStatMeanAD` alias, docs, and median-vs-mean oracle test.
   5. **Dead artefacts** (D-3, I-6, I-18). **Done (#413).** Deleted
      `write_factories_index.py`, the matrix JS FFT bridge, and the `MathTSWasm` bindings
      (`assembly/src/bindings/wasm-loader.ts`, `assembly/src/bindings/index.ts`).
@@ -1344,11 +1391,73 @@ re-decide it here if PR-POLY has already merged.
 - **Exit criteria:** items 1–6 merged or recorded as owner decisions in §10; every DoD box
   for M1–M15 and Sprints 1R–5R ticked. §7's release still waits on the Phase 6 loop.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracle: the `capabilities --json` output parsed and `schemaVersion` compared to
-        `SCHEMA_VERSION`.
+  - [x] Oracle: the `capabilities --json` output parsed and `schemaVersion` compared to
+        `SCHEMA_VERSION`. `workbook/tests/cli.test.ts:167-174` parses the envelope and pins both
+        `schemaVersion` and `data.schemaVersion` to `{ major: 1, minor: 0 }`, the value of
+        `SCHEMA_VERSION` (`workbook/src/contract.ts:9`), and rejects `'[Circular]'`.
   - [x] Oracle: `compat/tests/instance-config-isolation.test.ts` — `create(all, config)`
         leaves barrel `evaluate` on `number` and instances do not cross-contaminate.
-  - [ ] `node tools/test/consumer-typecheck.mjs` passes on the full set of packages.
+  - [x] `node tools/test/consumer-typecheck.mjs` passes on the full set of packages.
+        At the Sprint 5R head (`--skip-build`, after `bun run build`): 24 packages, 27 entry
+        points, 2,439 runtime-function exports callable, shipped wasm valid; `PASS (0 unexpected
+errors)` under `moduleResolution` Bundler and under `--module-resolution=NodeNext`.
+
+### Phase 6 and up: clone-reduction loop
+
+This phase is not a PySR milestone. It starts after Phase 5's close-out
+([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 12). It repeats until
+the clone report is clean. There is no grok planner on this loop.
+
+Each phase N (6, 7, …) is four steps, in order:
+
+1. **Measure.** composer-2.5 runs `repo-tools clones` and writes
+   [`docs/roadmap/CLONES_REMAINING.md`](./CLONES_REMAINING.md) from that run (counts,
+   exact groups, near pairs, the commit SHA). The ledger names the tool version. It
+   does not mark pairs MERGE or KEEP. Do not commit `inventory.jsonl` or `clones.json`.
+2. **Plan.** claude-opus-5-5 (effort xhigh) reviews that ledger and writes
+   `docs/plans/CLONES_PHASE_<N>_PLAN.md`. The plan marks each pair MERGE or KEEP, with
+   a reason a later reader can check. Opus does not implement the merges.
+3. **Build.** composer-2.5 implements that plan, one small PR at a time, and stops.
+4. **Review.** claude-sonnet-5-5 (effort xhigh) re-runs the tests, greps for a second
+   copy of any algorithm the PR claims to share, and fixes what it finds.
+
+Then phase N+1 starts at step 1 on the merge commit. A phase that merged code is not
+the last phase.
+
+**Clean** means the opus plan for that phase lists no MERGE pair. Every remaining pair
+is KEEP, or the tool reported no pairs. The ledger for that clean phase was measured
+after the previous phase's merges were on `main`. A KEEP that the dependency graph
+forces stays KEEP: the worker-bundle copies of `mulberry32` and `rowMajorStrides` in
+`packages/workerpool/src/worker-numerics.ts` are the standing example (`workerpool`
+cannot import `core`).
+
+**Tool.** `@danielsimonjr/repo-tools` **2.3.0**, the version recorded in
+[`docs/plans/CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md). The CI pin
+`REPO_TOOLS_VERSION: 2.2.4` in `.github/workflows/ci.yml` is for `repo-tools check`.
+Do not change it in a clone phase.
+
+From the repo root, with the tool installed outside the repo:
+
+```bash
+repo-tools clones . --src \
+  packages/typed-function/src packages/workerpool/src \
+  core/src matrix/src tensor/src autograd/src functions/src expression/src \
+  parser/src units/src numbers/src ast/src evaluator/src linalg/src \
+  arithmetic/src trigonometry/src statistics/src signal/src \
+  parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
+  --out=../tmp/clones-phase-N
+```
+
+`--src` is one flag. It takes every following argument until the next flag. `--out`
+is relative to the repo root and its parent must be writable. An absolute path is
+rejected.
+
+[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md) is the historical plan
+for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
+`CLONES_REMAINING.md` with the new measurement and adds its own plan file.
+
+**Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
+merge PR #398. The loop is part of the release gate.
 
 ### Phase 6 and up: clone-reduction loop
 
@@ -1449,6 +1558,12 @@ merge PR #398. The loop is part of the release gate.
    ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 9): import
    `evaluateScalarTape` from `functions`. Do not copy the tape into `workerpool`, and do
    not serialize it through `kernelSource`.
+8. **I-10, `packages/typed-function`.** **Decided: no code change.**
+   `@danielsimonjr/mathts-typed-function` stays without workspace dependents (no
+   `package.json` in the repo lists it). `core` and `functions` depend on the npm package
+   `typed-function` (`npm:@danielsimonjr/typed-function@5.0.0-alpha.4`,
+   `core/package.json:38`, `functions/package.json:61`). The nine unused `^4.0.0` pins are
+   gone (#413).
 
 ## 11. Sources read
 
