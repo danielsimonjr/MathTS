@@ -86,13 +86,59 @@ describe('collection properties (fast-check)', () => {
     fc.assert(
       fc.property(fc.array(fc.double({ noNaN: false }), { maxLength: 8 }), (vec) => {
         const result = reduce(vec, 0, (acc, val) => Number(acc) + Number(val));
-        let sum = 0;
-        for (let i = 0; i < vec.length; i++) sum += vec[i];
         if (vec.length === 0) {
           expect(result).toBeUndefined();
-        } else {
-          expect(result).toBe(sum);
+          return;
         }
+        // Start from the first element, as the fold does: `0 + -0` would be `0`.
+        let sum = vec[0];
+        for (let i = 1; i < vec.length; i++) sum += vec[i];
+        expect(Object.is(result, sum)).toBe(true);
+      }),
+      FC
+    );
+  });
+
+  it('reduce of a rectangular matrix matches row and column loops', () => {
+    const matrix = fc
+      .tuple(fc.integer({ min: 1, max: 5 }), fc.integer({ min: 1, max: 5 }))
+      .chain(([rows, cols]) =>
+        fc.array(
+          fc.array(fc.integer({ min: -1000, max: 1000 }), { minLength: cols, maxLength: cols }),
+          {
+            minLength: rows,
+            maxLength: rows,
+          }
+        )
+      );
+    fc.assert(
+      fc.property(matrix, (m) => {
+        const add = (acc: number, val: number) => acc + val;
+        const columnSums: number[] = [];
+        for (let c = 0; c < m[0].length; c++) {
+          let total = 0;
+          for (let r = 0; r < m.length; r++) total += m[r][c];
+          columnSums.push(total);
+        }
+        const rowSums = m.map((row) => {
+          let total = 0;
+          for (const v of row) total += v;
+          return total;
+        });
+        expect(reduce(m, 0, add)).toEqual(columnSums);
+        expect(reduce(m, 1, add)).toEqual(rowSums);
+      }),
+      FC
+    );
+  });
+
+  it('deepMap with skipZeros keeps every zero leaf and maps the others', () => {
+    fc.assert(
+      fc.property(nestedNumsArb(3), (input) => {
+        const f = (x: number) => x + 1;
+        const oracle = (v: unknown): unknown =>
+          typeof v === 'number' ? (v === 0 ? v : f(v)) : Array.isArray(v) ? v.map(oracle) : v;
+        expect(structuralEqual(deepMap(input, f, true), oracle(input))).toBe(true);
       }),
       FC
     );

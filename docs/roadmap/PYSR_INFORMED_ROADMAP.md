@@ -28,7 +28,7 @@ D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implem
 `@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
 `matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 lives in `functions`, and M11 may sit in `expression` next to `scalar-structure.ts` only if it imports `expression` and `core` alone. A package is not an option in this roadmap (§8, Phase 4; §10).
 
-> Core sprint (speed, stability, security of `core` and the expression parser) is planned in `docs/plans/CORE_SPRINT_PLAN.md` and gated by PRs 1–10 of that plan. The next PySR milestone starts after PR 10 merges. Releases stay off (§7, PR #398 unmerged).
+> Core sprint (speed, stability, security of `core` and the expression parser) is planned in [`docs/plans/CORE_SPRINT_PLAN.md`](../plans/CORE_SPRINT_PLAN.md) and gated by PRs 1–10 of that plan. The next PySR milestone starts after PR 10 merges. Releases stay off (§7, PR #398 unmerged).
 
 **Related external projects:** [PySR](https://github.com/danielsimonjr/pysr) (fork of MilesCranmer/PySR, studied read-only at commit `72a9ab9`, backend pin `SymbolicRegression ~2.7.2` in `pysr/juliapkg.json`); [Universal Physics Tensor (UPT)](https://github.com/danielsimonjr/universal-physics-tensor) (studied read-only at its default-branch HEAD).
 **Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md).

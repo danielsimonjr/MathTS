@@ -3,49 +3,49 @@
     "id": "array_abs_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_log10_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_sin_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "array_sin_ptr"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_log1p_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "log1p"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_cos_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_atanh_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_log_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "array_sec_ptr",
     "tier": "wasm",
     "test": "functions/tests/typed-elementwise-as-wasm.test.ts",
-    "symbol": "elementwiseUnaryDispatch"
+    "symbol": "WASM_ELEMENTWISE_OPS"
   },
   {
     "id": "fused_chain",
@@ -93,91 +93,91 @@
     "id": "abs",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "abs"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "sin",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "sin"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "cos",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "cos"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "tan",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "tan"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "exp",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "exp"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "atan",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "atan"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "sinh",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "sinh"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "tanh",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "tanh"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "log",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "log"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "log2",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "log2"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "log10",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "log10"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "atanh",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "atanh"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "sec",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "sec"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "csc",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "csc"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "cot",
     "tier": "gpu",
     "test": "functions/tests/gpu-elementwise.browser.test.ts",
-    "symbol": "cot"
+    "symbol": "GPU_ELEMENTWISE_OPS"
   },
   {
     "id": "exec",

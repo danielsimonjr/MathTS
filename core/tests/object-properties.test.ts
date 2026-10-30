@@ -1,95 +1,147 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { clone, extend, mapObject } from '@danielsimonjr/mathts-core/internal';
-import { isPollutingKey } from '../src/shared.js';
+import { clone, deepExtend, extend, mapObject } from '../src/object.js';
 
 const FC = { seed: 0x5eed, numRuns: 100 } as const;
 
-const pollutingKey = fc.constantFrom('__proto__', 'constructor', 'toString');
+/** Keys that are attack vectors, or names that sit on `Object.prototype` / `Function.prototype`. */
+const specialKey = fc.constantFrom(
+  '__proto__',
+  'constructor',
+  'toString',
+  'name',
+  'length',
+  'polluted'
+);
+const anyKey = fc.oneof(specialKey, fc.string({ minLength: 1, maxLength: 6 }));
 
-function protoSnapshot(): string {
-  return JSON.stringify(Object.prototype);
-}
-
-function ownPolluted(obj: Record<string, unknown>): unknown {
-  return Object.getOwnPropertyDescriptor(obj, 'polluted')?.value;
-}
-
-/** Plain object copier oracle (skips polluting keys like clone). */
-function manualClone(value: unknown): unknown {
-  if (value === null || typeof value !== 'object') return value;
-  if (Array.isArray(value)) return value.map((v) => manualClone(v));
-  const out: Record<string, unknown> = {};
-  for (const key of Object.keys(value as Record<string, unknown>)) {
-    if (isPollutingKey(key)) continue;
-    out[key] = manualClone((value as Record<string, unknown>)[key]);
-  }
-  return out;
-}
-
-const objectKey = fc.oneof(
-  pollutingKey,
-  fc.string({ minLength: 1, maxLength: 6 }).filter((s) => s !== '__proto__' && s !== 'constructor')
+const leafValue = fc.oneof(
+  fc.double({ noNaN: false }),
+  fc.boolean(),
+  fc.constant({ polluted: true })
 );
 
-const plainObject = fc
-  .dictionary(objectKey, fc.oneof(fc.double({ noNaN: false }), fc.boolean()), {
-    maxKeys: 6,
-  })
-  .filter((o) => {
-    if (Object.getPrototypeOf(o) !== Object.prototype) return false;
-    // Own `constructor` / `__proto__` shadow builtins and break `isObject` / `clone`.
-    if (Object.prototype.hasOwnProperty.call(o, 'constructor')) return false;
-    if (Object.prototype.hasOwnProperty.call(o, '__proto__')) return false;
-    return true;
-  });
+type Entries = [string, unknown][];
+
+/**
+ * Build the object with `Object.fromEntries`, which defines `__proto__` as an own data property
+ * (as `JSON.parse` does), unlike the assignment `obj['__proto__'] = v`.
+ */
+function build(entries: Entries): Record<string, unknown> {
+  return Object.fromEntries(entries);
+}
+
+const entriesArb = (keys: fc.Arbitrary<string>): fc.Arbitrary<Entries> =>
+  fc.array(fc.tuple(keys, leafValue), { maxLength: 6 });
+
+/** `clone` recognises a plain object by `constructor === Object`, so it cannot take that data key. */
+const cloneKey = anyKey.filter((k) => k !== 'constructor');
+const noProtoKey = anyKey.filter((k) => k !== '__proto__');
+
+function assertGlobalPrototypeIntact(before: string[]): void {
+  expect(Object.getOwnPropertyNames(Object.prototype)).toEqual(before);
+  expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
+}
+
+function assertCleanResult(result: Record<string, unknown>): void {
+  expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
+  expect(Object.getOwnPropertyDescriptor(result, '__proto__')).toBeUndefined();
+}
 
 describe('object pollution properties (fast-check)', () => {
-  it('clone leaves Object.prototype and result prototype untouched', () => {
+  it('clone copies every key but __proto__ and leaves the prototype alone', () => {
     fc.assert(
-      fc.property(plainObject, (src) => {
-        const before = protoSnapshot();
-        const result = clone(src) as Record<string, unknown>;
-        expect(protoSnapshot()).toBe(before);
-        expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
-        expect(ownPolluted(Object.prototype as Record<string, unknown>)).toBeUndefined();
-        expect(ownPolluted(result)).toBeUndefined();
+      fc.property(entriesArb(cloneKey), (entries) => {
+        const before = Object.getOwnPropertyNames(Object.prototype);
+        const src = build(entries);
+        const result = clone(src);
+        assertGlobalPrototypeIntact(before);
+        assertCleanResult(result);
+
+        // Oracle: a test-local recursive loop, not the production key predicates.
+        const copy = (value: unknown): unknown => {
+          if (typeof value !== 'object' || value === null) return value;
+          const out: Record<string, unknown> = {};
+          for (const [key, v] of Object.entries(value)) if (key !== '__proto__') out[key] = copy(v);
+          return out;
+        };
+        expect(result).toEqual(copy(src));
       }),
       FC
     );
   });
 
-  it('mapObject leaves Object.prototype and result prototype untouched', () => {
+  it('mapObject keeps every key but __proto__ and leaves the prototype alone', () => {
     fc.assert(
-      fc.property(plainObject, (src) => {
-        const before = protoSnapshot();
-        const result = mapObject(src, (v) => v) as Record<string, unknown>;
-        expect(protoSnapshot()).toBe(before);
-        expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
-        expect(ownPolluted(Object.prototype as Record<string, unknown>)).toBeUndefined();
+      fc.property(entriesArb(anyKey), (entries) => {
+        const before = Object.getOwnPropertyNames(Object.prototype);
+        const src = build(entries);
+        const result = mapObject(src, (v) => v);
+        assertGlobalPrototypeIntact(before);
+        assertCleanResult(result);
+
+        const expectedKeys: string[] = [];
+        for (const key of Object.keys(src)) if (key !== '__proto__') expectedKeys.push(key);
+        expect(Object.keys(result).sort()).toEqual(expectedKeys.sort());
+        for (const key of expectedKeys) expect(result[key]).toBe(src[key]);
       }),
       FC
     );
   });
 
-  it('extend leaves Object.prototype and result prototype untouched', () => {
+  it('extend copies every key of b but __proto__ and leaves the prototype alone', () => {
     fc.assert(
-      fc.property(plainObject, plainObject, (target, extra) => {
-        const before = protoSnapshot();
-        const base = { ...target };
-        const result = extend(base, extra) as Record<string, unknown>;
-        expect(protoSnapshot()).toBe(before);
-        expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
-        expect(ownPolluted(Object.prototype as Record<string, unknown>)).toBeUndefined();
+      fc.property(entriesArb(noProtoKey), entriesArb(anyKey), (targetEntries, extraEntries) => {
+        const before = Object.getOwnPropertyNames(Object.prototype);
+        const target = build(targetEntries);
+        const extra = build(extraEntries);
+
+        // Oracle: start from target's keys, then overlay b's keys in order.
+        const expected = new Map<string, unknown>(Object.entries(target));
+        for (const [key, value] of Object.entries(extra)) {
+          if (key !== '__proto__') expected.set(key, value);
+        }
+
+        const result = extend(target, extra);
+        assertGlobalPrototypeIntact(before);
+        assertCleanResult(result);
+        expect(Object.keys(result).sort()).toEqual([...expected.keys()].sort());
+        for (const [key, value] of expected) expect(result[key]).toBe(value);
       }),
       FC
     );
   });
 
-  it('clone matches a test-local copier on plain objects', () => {
+  it('deepExtend never writes through __proto__, constructor or prototype', () => {
+    const vectorKey = fc.constantFrom('__proto__', 'constructor', 'prototype');
     fc.assert(
-      fc.property(plainObject, (src) => {
-        expect(clone(src)).toEqual(manualClone(src));
+      fc.property(
+        fc.array(vectorKey, { minLength: 1, maxLength: 3 }),
+        fc.string({ minLength: 1, maxLength: 5 }),
+        (path, leaf) => {
+          const before = Object.getOwnPropertyNames(Object.prototype);
+          // {"__proto__": {"constructor": {"prototype": {"<leaf>": true}}}} and permutations.
+          let payload = JSON.stringify({ [leaf]: true });
+          for (const key of [...path].reverse()) payload = `{"${key}":${payload}}`;
+          const target: Record<string, unknown> = {};
+          deepExtend(target, JSON.parse(payload));
+          assertGlobalPrototypeIntact(before);
+          expect(({} as Record<string, unknown>)[leaf]).toBeUndefined();
+          expect((Object.prototype as unknown as Record<string, unknown>)[leaf]).toBeUndefined();
+          expect(Object.getPrototypeOf(target)).toBe(Object.prototype);
+        }
+      ),
+      FC
+    );
+  });
+
+  it('a shared nested payload is not aliased into the clone', () => {
+    fc.assert(
+      fc.property(fc.double({ noNaN: true }), (n) => {
+        const inner = { n };
+        const result = clone({ a: inner, b: inner });
+        expect(result.a).toEqual(inner);
+        expect(result.a).not.toBe(inner);
       }),
       FC
     );

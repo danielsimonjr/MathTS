@@ -350,7 +350,7 @@ fromSiDimensionVector(nums); // length-10 Unit exponent vector
 
 Not on the public `.` entry (the generated index below is the `.` barrel only). WASM helpers on `/internal`: `sha384OfBuffer`, `verifyWasmIntegrity`, `loadWasmManifest`, `resolvePackagedWasm`, `defaultWasmLocation`, and abstract class `WasmModuleLoader` (shared `load` / cached `loadModule` / `getImports` for the package-local `functions` and `matrix` loaders). SHA-384 verification stays in each subclass's Node/browser load path.
 
-Tree helpers (`clone`, `extend`, `mapObject`, `deepExtend`, `deepFlatten`, `deepMap`, `deepForEach`, `reduce`) skip own keys whose names sit on `Object.prototype` so copies cannot retarget the result prototype (see `docs/core/configuration.md`). Nested arrays and matrices share typed overloads on `deepMap` / `reduce` (`NestedArray<T>` from `/internal`).
+Tree helpers: `clone`, `extend`, `mapObject` and `deepFlatten` skip an own `__proto__` key and copy every other key (including `name`, `length` and `constructor`), so a copy cannot retarget the result prototype; `deepExtend` also skips every name on `Object.prototype` or `Function.prototype` (see `docs/core/configuration.md`). `deepMap`, `deepForEach` and `reduce` take nested arrays or matrices through typed overloads (`NestedArray<T>` from `/internal`).
 
 ## Complete export index
 

@@ -84,10 +84,30 @@ describe('Complex branch-cut / domain edges (current implementation)', () => {
     expect(s.im).toBe(2);
   });
 
-  it('tan with huge |Im| underflows the real cosine → NaN imaginary part', () => {
-    // cos(π)+cosh(700) overflows; denominator is non-finite → 0/Inf style NaN.
-    const t = new Complex(Math.PI / 2, 700).tan();
-    expect(t.re).toBe(0);
-    expect(Number.isNaN(t.im)).toBe(true);
+  // cmath.tan(complex(pi/2, 700)) == 1j, cmath.tanh(complex(500, 0.3)) == (1+0j): the closed form
+  // (sin 2x + i sinh 2y) / (cos 2x + cosh 2y) overflowed to Infinity / Infinity = NaN here.
+  it('tan, cot, tanh, coth keep their limits where sinh/cosh overflow', () => {
+    const tan = new Complex(Math.PI / 2, 700).tan();
+    expect(Math.abs(tan.re)).toBeLessThan(1e-300);
+    expect(tan.im).toBe(1);
+    expect(new Complex(0.3, -400).tan().im).toBe(-1);
+    expect(new Complex(0.3, 400).cot().im).toBe(-1);
+    expect(new Complex(0.3, -400).cot().im).toBe(1);
+    const tanhPos = new Complex(500, 0.3).tanh();
+    expect(tanhPos.re).toBe(1);
+    expect(Math.abs(tanhPos.im)).toBeLessThan(1e-300);
+    expect(new Complex(-500, 0.3).tanh().re).toBe(-1);
+    expect(new Complex(500, 0.3).coth().re).toBe(1);
+    expect(new Complex(-500, 0.3).coth().re).toBe(-1);
+  });
+
+  it('the overflow limit joins the closed form without a jump', () => {
+    // 2*349.9 = 699.8 uses the closed form, 2*350.1 = 700.2 uses the limit; the true value moves
+    // by about e^-699, far below double precision, so both sides are +1i to the last digit.
+    const below = new Complex(0.3, 349.9).tan();
+    const above = new Complex(0.3, 350.1).tan();
+    expect(below.im).toBe(1);
+    expect(above.im).toBe(1);
+    expect(Math.abs(below.re - above.re)).toBeLessThan(1e-300);
   });
 });

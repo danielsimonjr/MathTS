@@ -6,6 +6,20 @@
  *
  * ellipticK / ellipticE: TSDoc in `functions/src/typed/special.ts` uses parameter
  * `m` (not modulus k). DLMF §19.6 reference values below use that same `m`.
+ *
+ * Regenerate the literals on a machine with mpmath installed (`pip install mpmath`):
+ *
+ *   from mpmath import (mp, mpf, loggamma, besselj, bessely, besseli, airyai, airybi, ellipk,
+ *       ellipe, erfi, beta, digamma, lambertw, ci, si, li, ei, fresnelc, fresnels)
+ *   mp.dps = 25
+ *   loggamma(mpf('2.5'));  besselj(0, mpf('2.5'));  besselj(1, mpf('2.5'))
+ *   bessely(0, mpf('2.5')); bessely(1, mpf('2.5'));  airyai(mpf('1.2')); airybi(mpf('1.2'))
+ *   ellipk(mpf('0.5'));    ellipe(mpf('0.5'));      erfi(mpf('0.7'))   # ellipk/ellipe take m
+ *   beta(2, 3); digamma(mpf('3.5')); besselj(2, 1); bessely(2, 1); besseli(0, 1)
+ *   lambertw(1); ci(1); si(1); li(2); ei(1); fresnelc(1); fresnels(1)
+ *
+ * The polynomial rows (chebyshevT, hermiteH, laguerreL, legendreP) are exact small integers or
+ * dyadic rationals; every other literal is the dps=25 value rounded to a double.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {

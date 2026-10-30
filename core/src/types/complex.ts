@@ -5,6 +5,9 @@
 
 import type { Scalar, IComplex } from './interfaces.js';
 
+/** Beyond this, `cosh`/`sinh` of the argument is within a factor e^-700 of overflowing to Infinity. */
+const HYPERBOLIC_OVERFLOW_ARG = 700;
+
 /**
  * Check if a value is a Complex number
  */
@@ -480,6 +483,11 @@ export class Complex implements IComplex {
   tan(): Complex {
     const x2 = this.re * 2;
     const y2 = this.im * 2;
+    if (Math.abs(y2) > HYPERBOLIC_OVERFLOW_ARG) {
+      // cosh/sinh(2y) overflow to ±Infinity and the quotient becomes NaN. Past this point
+      // 1/cosh(2y) = 2e^-|2y| and tanh(2y) = ±1 to double precision, so use those limits.
+      return new Complex(2 * Math.sin(x2) * Math.exp(-Math.abs(y2)), Math.sign(y2));
+    }
     const d = Math.cos(x2) + Math.cosh(y2);
     return new Complex(Math.sin(x2) / d, Math.sinh(y2) / d);
   }
@@ -490,6 +498,9 @@ export class Complex implements IComplex {
   cot(): Complex {
     const x2 = this.re * 2;
     const y2 = this.im * 2;
+    if (Math.abs(y2) > HYPERBOLIC_OVERFLOW_ARG) {
+      return new Complex(2 * Math.sin(x2) * Math.exp(-Math.abs(y2)), -Math.sign(y2));
+    }
     const d = Math.cosh(y2) - Math.cos(x2);
     return new Complex(Math.sin(x2) / d, -Math.sinh(y2) / d);
   }
@@ -538,6 +549,9 @@ export class Complex implements IComplex {
   tanh(): Complex {
     const x2 = this.re * 2;
     const y2 = this.im * 2;
+    if (Math.abs(x2) > HYPERBOLIC_OVERFLOW_ARG) {
+      return new Complex(Math.sign(x2), 2 * Math.sin(y2) * Math.exp(-Math.abs(x2)));
+    }
     const d = Math.cosh(x2) + Math.cos(y2);
     return new Complex(Math.sinh(x2) / d, Math.sin(y2) / d);
   }
@@ -548,6 +562,9 @@ export class Complex implements IComplex {
   coth(): Complex {
     const x2 = this.re * 2;
     const y2 = this.im * 2;
+    if (Math.abs(x2) > HYPERBOLIC_OVERFLOW_ARG) {
+      return new Complex(Math.sign(x2), -2 * Math.sin(y2) * Math.exp(-Math.abs(x2)));
+    }
     const d = Math.cosh(x2) - Math.cos(y2);
     return new Complex(Math.sinh(x2) / d, -Math.sin(y2) / d);
   }
