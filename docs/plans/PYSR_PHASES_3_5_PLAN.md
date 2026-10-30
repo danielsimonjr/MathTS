@@ -489,6 +489,8 @@ Sum of the table is `8.512392`. The picker draws `next()`, multiplies by that su
 
 `crossoverSubtrees` is not in the default weights. It is a separate export.
 
+The `identity` operator is exported as `identityMutation`: `functions/src/index.ts` re-exports `./factories/index.js` with `export *`, and an explicit `identity` export would replace the package's matrix `identity` for every consumer. The weight key stays `identity`.
+
 ### Tests
 
 `functions/tests/scalar-mutate.test.ts`.

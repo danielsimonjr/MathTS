@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2023,
+  "totalFiles": 2025,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1198,
+    "build-entry": 1199,
     "test-only": 0,
     "orphan": 0,
-    "test": 737,
+    "test": 738,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1224,
-    "tests": 737,
+    "src": 1225,
+    "tests": 738,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 853,
+    "@danielsimonjr/mathts-functions": 855,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -6281,7 +6281,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 671
+      "loc": 693
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7234,6 +7234,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 185
+    },
+    {
+      "file": "functions/src/scalar-mutate.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 606
     },
     {
       "file": "functions/src/scalar-node-bridge.ts",
@@ -10615,6 +10622,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 131
+    },
+    {
+      "file": "functions/tests/scalar-mutate.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 473
     },
     {
       "file": "functions/tests/scalar-node-bridge.test.ts",

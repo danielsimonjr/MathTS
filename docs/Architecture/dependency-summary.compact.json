@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1226, "e": 6344, "re": 2690 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1227, "e": 6378, "re": 2708 },
   "s": {
-    "loc": 201901,
+    "loc": 202529,
     "cls": 59,
-    "int": 550,
-    "fn": 2043,
+    "int": 551,
+    "fn": 2057,
     "tg": 161,
     "en": 0,
-    "co": 1628,
-    "toi": 616
+    "co": 1630,
+    "toi": 617
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -530,7 +530,7 @@
       ]
     },
     "functions": {
-      "f": 26,
+      "f": 27,
       "exp": [
         "gradient",
         "hessian",
@@ -1868,7 +1868,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 11 },
     { "p": "function/typed.ts", "i": 3, "o": 203 },
-    { "p": "src/index.ts", "i": 145, "o": 0 },
+    { "p": "src/index.ts", "i": 147, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 55 },

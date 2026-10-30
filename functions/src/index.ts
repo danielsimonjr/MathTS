@@ -55,6 +55,28 @@ export type {
   CompiledScalar,
   CompiledScalarGradient,
 } from './scalar-compile.js';
+export {
+  addNode,
+  crossoverSubtrees,
+  DEFAULT_MUTATION_WEIGHTS,
+  deleteNode,
+  identityMutation,
+  insertNode,
+  mutateConstant,
+  mutateFeature,
+  mutateOperator,
+  MUTATE_CONSTANT_NEGATE_PROBABILITY,
+  randomizeTree,
+  rotateTree,
+  simplifyConstants,
+  swapOperands,
+  weightedMutation,
+} from './scalar-mutate.js';
+export type {
+  MutationWeightKey,
+  ScalarMutationContext,
+  ScalarMutationOperator,
+} from './scalar-mutate.js';
 // scalarToNode, nodeToScalar, simplifyScalar, scalarToTex are exported via export * from './factories/index.js'.
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';

@@ -2284,6 +2284,9 @@
       "DDESolution": {
         "kind": "type"
       },
+      "DEFAULT_MUTATION_WEIGHTS": {
+        "kind": "object"
+      },
       "DIST_WORKER_THRESHOLD": {
         "kind": "number"
       },
@@ -2536,6 +2539,9 @@
       "MASS_PROPERTY_SHAPES": {
         "kind": "object"
       },
+      "MUTATE_CONSTANT_NEGATE_PROBABILITY": {
+        "kind": "number"
+      },
       "MWBootstrapResult": {
         "kind": "type"
       },
@@ -2588,6 +2594,9 @@
         "kind": "type"
       },
       "MultivariateDistribution": {
+        "kind": "type"
+      },
+      "MutationWeightKey": {
         "kind": "type"
       },
       "MvnCov": {
@@ -2749,6 +2758,12 @@
       "ScalarEvalError": {
         "kind": "function"
       },
+      "ScalarMutationContext": {
+        "kind": "type"
+      },
+      "ScalarMutationOperator": {
+        "kind": "type"
+      },
       "ScalarScope": {
         "kind": "type"
       },
@@ -2864,6 +2879,9 @@
         "kind": "function"
       },
       "add": {
+        "kind": "function"
+      },
+      "addNode": {
         "kind": "function"
       },
       "addScalar": {
@@ -3394,6 +3412,9 @@
       "crossCorrelation": {
         "kind": "function"
       },
+      "crossoverSubtrees": {
+        "kind": "function"
+      },
       "csAmd": {
         "kind": "function"
       },
@@ -3488,6 +3509,9 @@
         "kind": "function"
       },
       "delaunayTriangulation": {
+        "kind": "function"
+      },
+      "deleteNode": {
         "kind": "function"
       },
       "derivative": {
@@ -4279,6 +4303,9 @@
       "identity": {
         "kind": "function"
       },
+      "identityMutation": {
+        "kind": "function"
+      },
       "idst": {
         "kind": "function"
       },
@@ -4319,6 +4346,9 @@
         "kind": "function"
       },
       "initializeStatistics": {
+        "kind": "function"
+      },
+      "insertNode": {
         "kind": "function"
       },
       "integerDigits": {
@@ -4879,6 +4909,15 @@
       "multivariateTaylor": {
         "kind": "function"
       },
+      "mutateConstant": {
+        "kind": "function"
+      },
+      "mutateFeature": {
+        "kind": "function"
+      },
+      "mutateOperator": {
+        "kind": "function"
+      },
       "mvnPdf": {
         "kind": "function"
       },
@@ -5347,6 +5386,9 @@
       "randomInt": {
         "kind": "function"
       },
+      "randomizeTree": {
+        "kind": "function"
+      },
       "range": {
         "kind": "function"
       },
@@ -5450,6 +5492,9 @@
         "kind": "function"
       },
       "rotate": {
+        "kind": "function"
+      },
+      "rotateTree": {
         "kind": "function"
       },
       "rotateVector2D": {
@@ -5588,6 +5633,9 @@
         "kind": "function"
       },
       "simplifyConstant": {
+        "kind": "function"
+      },
+      "simplifyConstants": {
         "kind": "function"
       },
       "simplifyCore": {
@@ -5807,6 +5855,9 @@
         "kind": "function"
       },
       "svds": {
+        "kind": "function"
+      },
+      "swapOperands": {
         "kind": "function"
       },
       "sylvester": {
@@ -6041,6 +6092,9 @@
         "kind": "number"
       },
       "weibullDist": {
+        "kind": "function"
+      },
+      "weightedMutation": {
         "kind": "function"
       },
       "welchPSD": {
