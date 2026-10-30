@@ -78,6 +78,12 @@ interface SolveContext {
   readonly dims: Readonly<Record<string, RationalDimension>>;
   readonly parameters: readonly string[];
   readonly paramIndex: ReadonlyMap<string, number>;
+  /**
+   * `constraints[k]` lists forms of SI component `k` that must be zero. A `+`
+   * mismatch, a transcendental argument and a non-literal exponent each add
+   * one per component whose form depends on a parameter.
+   */
+  readonly constraints: ComponentForm[][];
 }
 
 type WalkContext = InferContext | SolveContext;
@@ -125,21 +131,6 @@ function zeroForms(nParams: number): LinearDimension {
   }));
 }
 
-function formEquals(a: ComponentForm, b: ComponentForm): boolean {
-  if (!a.known.equals(b.known)) return false;
-  for (let i = 0; i < a.coeffs.length; i++) {
-    if (!a.coeffs[i].equals(b.coeffs[i])) return false;
-  }
-  return true;
-}
-
-function formsEqual(a: LinearDimension, b: LinearDimension): boolean {
-  for (let i = 0; i < SI_DIMENSION_LENGTH; i++) {
-    if (!formEquals(a[i], b[i])) return false;
-  }
-  return true;
-}
-
 function formIsZero(form: ComponentForm): boolean {
   if (!form.known.equals(ZERO)) return false;
   return form.coeffs.every((coeff) => coeff.equals(ZERO));
@@ -147,6 +138,29 @@ function formIsZero(form: ComponentForm): boolean {
 
 function formsAreDimensionless(forms: LinearDimension): boolean {
   return forms.every(formIsZero);
+}
+
+function formHasParameter(form: ComponentForm): boolean {
+  return form.coeffs.some((coeff) => !coeff.equals(ZERO));
+}
+
+/**
+ * Require every component of `forms` to be zero. A component with no parameter
+ * term is decided here: a non-zero constant cannot be repaired by any
+ * parameter value, so it returns `false`. A component that depends on a
+ * parameter becomes an equation for the solver; infer mode has no parameters,
+ * so it never reaches that branch.
+ */
+function requireZero(forms: LinearDimension, ctx: WalkContext): boolean {
+  for (let k = 0; k < SI_DIMENSION_LENGTH; k++) {
+    const form = forms[k];
+    if (formHasParameter(form)) {
+      if (ctx.mode === 'solve') ctx.constraints[k].push(form);
+    } else if (!form.known.equals(ZERO)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function formAdd(a: ComponentForm, b: ComponentForm): ComponentForm {
@@ -225,6 +239,16 @@ function orderedUnderdeterminedParameters(
   return parameters.filter((name) => involved.has(name));
 }
 
+/**
+ * Exact exponent of a literal `^`. A non-finite literal (`NaN`, `±Infinity`)
+ * has no rational value, so it returns `null` and the caller reports a violation
+ * instead of letting {@link Fraction.fromNumber} throw.
+ */
+function literalExponent(value: number): Fraction | null {
+  if (!Number.isFinite(value)) return null;
+  return Number.isInteger(value) ? new Fraction(BigInt(value), 1n) : Fraction.fromNumber(value);
+}
+
 function violationResult(violation: DimensionViolation, path: readonly number[]): WalkFailure {
   return { ok: false, violation, path };
 }
@@ -269,7 +293,7 @@ function walkScalar(
         return { ok: true, forms: arg.forms };
       }
       if (TRANSCENDENTAL_CALLS.has(node.fn)) {
-        if (!formsAreDimensionless(arg.forms)) {
+        if (!requireZero(arg.forms, ctx)) {
           return violationResult('transcendental-arg-not-dimensionless', path);
         }
         return { ok: true, forms: zeroForms(nParams) };
@@ -296,15 +320,24 @@ function walkScalar(
         if (!base.ok) return base;
         const exponentNode = node.args[1];
         if (exponentNode.kind === 'number') {
-          const exponent = Number.isInteger(exponentNode.value)
-            ? new Fraction(BigInt(exponentNode.value), 1n)
-            : Fraction.fromNumber(exponentNode.value);
+          if (formsAreDimensionless(base.forms)) {
+            return { ok: true, forms: zeroForms(nParams) };
+          }
+          const exponent = literalExponent(exponentNode.value);
+          if (exponent === null) {
+            return violationResult('non-literal-exponent-on-dimensional-base', path);
+          }
           return { ok: true, forms: scaleForms(base.forms, exponent) };
         }
-        if (formsAreDimensionless(base.forms)) {
-          return { ok: true, forms: zeroForms(nParams) };
+        const exponentWalk = walkScalar(exponentNode, [...path, 1], ctx);
+        if (!exponentWalk.ok) return exponentWalk;
+        if (!requireZero(exponentWalk.forms, ctx)) {
+          return violationResult('transcendental-arg-not-dimensionless', path);
         }
-        return violationResult('non-literal-exponent-on-dimensional-base', path);
+        if (!requireZero(base.forms, ctx)) {
+          return violationResult('non-literal-exponent-on-dimensional-base', path);
+        }
+        return { ok: true, forms: zeroForms(nParams) };
       }
 
       const args = node.args;
@@ -316,16 +349,16 @@ function walkScalar(
       }
 
       if (node.op === '+' || node.op === '-') {
-        let acc = walkScalar(args[0], [...path, 0], ctx);
-        if (!acc.ok) return acc;
+        const first = walkScalar(args[0], [...path, 0], ctx);
+        if (!first.ok) return first;
         for (let i = 1; i < args.length; i++) {
           const next = walkScalar(args[i], [...path, i], ctx);
           if (!next.ok) return next;
-          if (!formsEqual(acc.forms, next.forms)) {
+          if (!requireZero(subForms(first.forms, next.forms), ctx)) {
             return violationResult(ADD_MISMATCH, path);
           }
         }
-        return { ok: true, forms: acc.forms };
+        return { ok: true, forms: first.forms };
       }
 
       let acc = walkScalar(args[0], [...path, 0], ctx);
@@ -361,17 +394,17 @@ export function inferScalarDimension(
   return { ok: true, dimension: formsToDimension(result.forms) };
 }
 
+/** `A x = b` for one SI component, from its constraints (`form = 0`). */
 function buildComponentSystem(
-  form: ComponentForm,
-  target: Fraction,
+  constraints: readonly ComponentForm[],
   n: number,
   dimensionlessOnly: boolean
 ): { readonly rows: Fraction[][]; readonly rhs: Fraction[] } {
   const rows: Fraction[][] = [];
   const rhs: Fraction[] = [];
-  if (form.coeffs.some((coeff) => !coeff.equals(ZERO))) {
+  for (const form of constraints) {
     rows.push(form.coeffs.slice());
-    rhs.push(target.sub(form.known));
+    rhs.push(form.known.mul(NEG_ONE));
   }
   if (dimensionlessOnly) {
     for (let j = 0; j < n; j++) {
@@ -401,43 +434,54 @@ function homogeneousParameterNames(
   return parameters.filter((name) => names.has(name));
 }
 
+/**
+ * Solve one component. Consistency is decided before uniqueness: a system with
+ * no solution is `inconsistent` even when it is also rank-deficient, because no
+ * choice of the free parameters can repair it.
+ */
 function solveComponent(
-  form: ComponentForm,
-  target: Fraction,
-  parameters: readonly string[],
-  dimensionlessOnly: boolean
+  rows: Fraction[][],
+  rhs: readonly Fraction[],
+  parameters: readonly string[]
 ):
   | { readonly values: Fraction[] }
   | { readonly inconsistent: true }
-  | { readonly underdetermined: true } {
+  | { readonly underdetermined: readonly string[] } {
   const n = parameters.length;
-  const { rows, rhs } = buildComponentSystem(form, target, n, dimensionlessOnly);
-
   if (rows.length === 0) {
-    return { underdetermined: true };
-  }
-
-  if (homogeneousParameterNames(rows, parameters).length > 0) {
-    return { underdetermined: true };
+    return { underdetermined: parameters };
   }
 
   const augmented = rows.map((row, rowIndex) => [...row, rhs[rowIndex].mul(NEG_ONE)]);
   const { basis } = rationalNullspace(augmented);
-  for (const vector of basis) {
-    const scale = vector[n];
-    if (!scale.equals(ZERO)) {
-      return { values: vector.slice(0, n).map((entry) => entry.div(scale)) };
-    }
+  const particular = basis.find((vector) => !vector[n].equals(ZERO));
+  if (particular === undefined) {
+    return { inconsistent: true };
   }
 
-  const b = target.sub(form.known);
-  return b.equals(ZERO)
-    ? { values: Array.from({ length: n }, () => ZERO) }
-    : { inconsistent: true };
+  const free = homogeneousParameterNames(rows, parameters);
+  if (free.length > 0) {
+    return { underdetermined: free };
+  }
+  const scale = particular[n];
+  return { values: particular.slice(0, n).map((entry) => entry.div(scale)) };
 }
 
 /**
  * Solve unknown parameter dimensions so the tree matches a target dimension.
+ *
+ * One walk of the tree collects, for each SI component, the equations that the
+ * parameters must satisfy: both sides of a `+` or `-` agree, the argument of a
+ * transcendental call and a non-literal exponent are dimensionless, and the root
+ * equals `target`. `x + c` with a length `x` therefore solves `c` as a length,
+ * and `sin(c * t)` solves `c` as one over `t`. The seven component systems are
+ * solved exactly with {@link rationalNullspace}.
+ *
+ * The result is `solved` (every parameter has one value), `underdetermined` (the
+ * named parameters are not fixed by the equations, or one sits in an exponent,
+ * which this solver does not treat as linear), or `inconsistent` (no values can
+ * satisfy the tree, including a symbol that is neither in `dims` nor in
+ * `parameters`).
  */
 export function solveParameterDimensions(
   node: ScalarNode,
@@ -448,17 +492,20 @@ export function solveParameterDimensions(
 ): ParameterDimensionResult {
   validateDimensionVector(target, 'target');
   const dimensionlessOnly = options?.dimensionlessOnly ?? false;
+  const n = parameters.length;
   const paramIndex = new Map<string, number>();
-  for (let i = 0; i < parameters.length; i++) {
+  for (let i = 0; i < n; i++) {
     paramIndex.set(parameters[i], i);
   }
-
-  const walked = walkScalar(node, [], {
+  const ctx: SolveContext = {
     mode: 'solve',
     dims,
     parameters,
     paramIndex,
-  });
+    constraints: Array.from({ length: SI_DIMENSION_LENGTH }, () => []),
+  };
+
+  const walked = walkScalar(node, [], ctx);
   if (!walked.ok) {
     if ('underdetermined' in walked) {
       return { underdetermined: walked.underdetermined };
@@ -466,35 +513,24 @@ export function solveParameterDimensions(
     return { inconsistent: true };
   }
 
-  if (parameters.length === 0) {
-    for (let k = 0; k < SI_DIMENSION_LENGTH; k++) {
-      if (!walked.forms[k].known.equals(target[k])) {
-        return { inconsistent: true };
-      }
-    }
+  const rootGap = subForms(walked.forms, formsFromDimension(target, n));
+  if (!requireZero(rootGap, ctx)) {
+    return { inconsistent: true };
+  }
+  if (n === 0) {
     return { solved: {} };
   }
 
   const underdetermined = new Set<string>();
   const valuesByComponent: Fraction[][] = Array.from({ length: SI_DIMENSION_LENGTH }, () => []);
-
   for (let k = 0; k < SI_DIMENSION_LENGTH; k++) {
-    const form = walked.forms[k];
-    const names = homogeneousParameterNames(
-      buildComponentSystem(form, target[k], parameters.length, dimensionlessOnly).rows,
-      parameters
-    );
-    if (names.length > 0) {
-      for (const name of names) underdetermined.add(name);
-      continue;
-    }
-
-    const solved = solveComponent(form, target[k], parameters, dimensionlessOnly);
+    const { rows, rhs } = buildComponentSystem(ctx.constraints[k], n, dimensionlessOnly);
+    const solved = solveComponent(rows, rhs, parameters);
     if ('inconsistent' in solved) {
       return { inconsistent: true };
     }
     if ('underdetermined' in solved) {
-      for (const name of parameters) underdetermined.add(name);
+      for (const name of solved.underdetermined) underdetermined.add(name);
       continue;
     }
     valuesByComponent[k] = solved.values;
@@ -505,16 +541,15 @@ export function solveParameterDimensions(
   }
 
   const solved: Record<string, RationalDimension> = {};
-  for (let j = 0; j < parameters.length; j++) {
-    solved[parameters[j]] = [
-      valuesByComponent[0][j],
-      valuesByComponent[1][j],
-      valuesByComponent[2][j],
-      valuesByComponent[3][j],
-      valuesByComponent[4][j],
-      valuesByComponent[5][j],
-      valuesByComponent[6][j],
-    ];
+  for (let j = 0; j < n; j++) {
+    // defineProperty, not assignment: a parameter named `__proto__` must become
+    // an own key rather than replace the prototype of the result.
+    Object.defineProperty(solved, parameters[j], {
+      value: valuesByComponent.map((values) => values[j]) as unknown as RationalDimension,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
   }
   return { solved };
 }

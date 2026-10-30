@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-30'
-  totalFiles: 1231
+  totalFiles: 1228
   totalModules: 82
-  totalExports: 6363
+  totalExports: 6388
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8995,38 +8995,6 @@ modules:
         - FitScalarResult
       functions:
         - fitScalarParameters
-    functions/src/front-export.ts:
-      description: LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./factories/index.js
-          imports:
-            - scalarToTex
-        - file: ./pareto-front.js
-          imports:
-            - ScoredCandidate
-          typeOnly: true
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - ScalarNode
-            - StringOptions
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - scalarCanonicalKey
-      exports:
-        - frontToLatexTable
-        - frontToJson
-      interfaces:
-        - FrontJsonRow
-        - FrontJson
-        - FrontLatexTableOptions
-      functions:
-        - frontToLatexTable
-        - frontToJson
     functions/src/geometry-extra.ts:
       description: Geodesy / spherical-geometry connectors (Wave C / bridge C7).
       externalDependencies: []
@@ -9197,6 +9165,28 @@ modules:
             - compileScalar
             - compileScalarGradient
           reExport: true
+        - file: ./scalar-mutate.js
+          imports:
+            - addNode
+            - crossoverSubtrees
+            - DEFAULT_MUTATION_WEIGHTS
+            - deleteNode
+            - identityMutation
+            - insertNode
+            - mutateConstant
+            - mutateFeature
+            - mutateOperator
+            - MUTATE_CONSTANT_NEGATE_PROBABILITY
+            - randomizeTree
+            - rotateTree
+            - simplifyConstants
+            - swapOperands
+            - weightedMutation
+          reExport: true
+        - file: ./scalar-search.js
+          imports:
+            - searchScalars
+          reExport: true
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -9208,6 +9198,11 @@ modules:
           imports:
             - numericallyEquivalent
             - NumericEquivalenceError
+          reExport: true
+        - file: ./scalar-dimension.js
+          imports:
+            - inferScalarDimension
+            - solveParameterDimensions
           reExport: true
         - file: ./numeric/propagate-uncertainty.js
           imports:
@@ -9742,6 +9737,22 @@ modules:
             - CompiledScalarGradient
           reExport: true
           typeOnly: true
+        - file: ./scalar-mutate.js
+          imports:
+            - MutationWeightKey
+            - ScalarMutationContext
+            - ScalarMutationOperator
+          reExport: true
+          typeOnly: true
+        - file: ./scalar-search.js
+          imports:
+            - ScalarSearchOptions
+            - ScalarSearchProblem
+            - ScalarSearchResult
+            - ScalarSearchStopReason
+            - SearchProgress
+          reExport: true
+          typeOnly: true
         - file: ./pareto-front.js
           imports:
             - FrontCandidate
@@ -9752,6 +9763,13 @@ modules:
           imports:
             - NumericEquivalenceOptions
             - NumericEquivalence
+          reExport: true
+          typeOnly: true
+        - file: ./scalar-dimension.js
+          imports:
+            - DimensionInference
+            - ParameterDimensionResult
+            - RationalDimension
           reExport: true
           typeOnly: true
         - file: ./grad-forward.js
@@ -10108,12 +10126,30 @@ modules:
         - ScalarEvalError
         - compileScalar
         - compileScalarGradient
+        - addNode
+        - crossoverSubtrees
+        - DEFAULT_MUTATION_WEIGHTS
+        - deleteNode
+        - identityMutation
+        - insertNode
+        - mutateConstant
+        - mutateFeature
+        - mutateOperator
+        - MUTATE_CONSTANT_NEGATE_PROBABILITY
+        - randomizeTree
+        - rotateTree
+        - simplifyConstants
+        - swapOperands
+        - weightedMutation
+        - searchScalars
         - paretoFront
         - scoreFront
         - selectFrontModel
         - ParetoFrontError
         - numericallyEquivalent
         - NumericEquivalenceError
+        - inferScalarDimension
+        - solveParameterDimensions
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -10411,10 +10447,21 @@ modules:
         - ScalarBatchResult
         - CompiledScalar
         - CompiledScalarGradient
+        - MutationWeightKey
+        - ScalarMutationContext
+        - ScalarMutationOperator
+        - ScalarSearchOptions
+        - ScalarSearchProblem
+        - ScalarSearchResult
+        - ScalarSearchStopReason
+        - SearchProgress
         - FrontCandidate
         - ScoredCandidate
         - NumericEquivalenceOptions
         - NumericEquivalence
+        - DimensionInference
+        - ParameterDimensionResult
+        - RationalDimension
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -10556,12 +10603,30 @@ modules:
         - ScalarEvalError
         - compileScalar
         - compileScalarGradient
+        - addNode
+        - crossoverSubtrees
+        - DEFAULT_MUTATION_WEIGHTS
+        - deleteNode
+        - identityMutation
+        - insertNode
+        - mutateConstant
+        - mutateFeature
+        - mutateOperator
+        - MUTATE_CONSTANT_NEGATE_PROBABILITY
+        - randomizeTree
+        - rotateTree
+        - simplifyConstants
+        - swapOperands
+        - weightedMutation
+        - searchScalars
         - paretoFront
         - scoreFront
         - selectFrontModel
         - ParetoFrontError
         - numericallyEquivalent
         - NumericEquivalenceError
+        - inferScalarDimension
+        - solveParameterDimensions
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -10859,10 +10924,21 @@ modules:
         - ScalarBatchResult
         - CompiledScalar
         - CompiledScalarGradient
+        - MutationWeightKey
+        - ScalarMutationContext
+        - ScalarMutationOperator
+        - ScalarSearchOptions
+        - ScalarSearchProblem
+        - ScalarSearchResult
+        - ScalarSearchStopReason
+        - SearchProgress
         - FrontCandidate
         - ScoredCandidate
         - NumericEquivalenceOptions
         - NumericEquivalence
+        - DimensionInference
+        - ParameterDimensionResult
+        - RationalDimension
         - DualFn
         - LinRegressResult
         - CorrelationTestResult
@@ -11183,50 +11259,6 @@ modules:
       functions:
         - fitLine
         - linearRegression
-    functions/src/scalar-batch-parallel.ts:
-      description: Parallel batch evaluation of scalar populations over shared columns (M14).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./scalar-compile.js
-          imports:
-            - buildTape
-            - compileScalar
-            - CompileScalarOptions
-            - ScalarBatchResult
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - ScalarNode
-        - package: '@danielsimonjr/mathts-parallel'
-          directory: parallel
-          imports:
-            - WorkerPool
-      exports:
-        - SCALAR_PARALLEL_MIN_ROWS
-        - resolveScalarBatchWorkerScript
-        - evaluateScalarPopulation
-      interfaces:
-        - ScalarPopulationEvalItem
-        - ScalarPopulationParallelOptions
-        - EvaluateScalarPopulationOptions
-        - ScalarPopulationEvalResult
-      functions:
-        - resolveScalarBatchWorkerScript
-        - evaluateScalarPopulation
-      constants:
-        - SCALAR_PARALLEL_MIN_ROWS
-    functions/src/scalar-batch.worker.ts:
-      description: Web worker entry for parallel {@link evaluateScalarPopulation} (M14).
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./scalar-compile.js
-          imports:
-            - evaluateScalarTape
-      workspaceDependencies: []
-      exports: []
     functions/src/scalar-compile.ts:
       description: Batch evaluation of {@link ScalarNode} trees over `Float64Array` columns.
       externalDependencies: []
@@ -11249,8 +11281,6 @@ modules:
             - ScalarNode
             - ScalarOperator
       exports:
-        - evaluateScalarTape
-        - buildTape
         - compileScalar
         - compileScalarGradient
       interfaces:
@@ -11259,8 +11289,6 @@ modules:
         - CompiledScalar
         - CompiledScalarGradient
       functions:
-        - evaluateScalarTape
-        - buildTape
         - compileScalar
         - compileScalarGradient
     functions/src/scalar-dimension.ts:
@@ -11352,6 +11380,7 @@ modules:
             - createScalarBuilder
             - mapScalar
             - scalarGrammarAccepts
+            - LoweredScalarFn
             - ScalarGrammar
             - ScalarNode
         - package: '@danielsimonjr/mathts-core'
@@ -11361,7 +11390,7 @@ modules:
       exports:
         - MUTATE_CONSTANT_NEGATE_PROBABILITY
         - DEFAULT_MUTATION_WEIGHTS
-        - identity
+        - identityMutation
         - mutateConstant
         - mutateOperator
         - mutateFeature
@@ -11378,7 +11407,7 @@ modules:
       interfaces:
         - ScalarMutationContext
       functions:
-        - identity
+        - identityMutation
         - mutateConstant
         - mutateOperator
         - mutateFeature
@@ -11430,17 +11459,13 @@ modules:
       functions:
         - createScalarNodeBridge
     functions/src/scalar-search.ts:
-      description: PySR-style regularized evolution over {@link ScalarNode} trees (M13).
+      description: PySR-style evolutionary search over {@link ScalarNode} trees (M13).
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
         - file: ./fit-scalar.js
           imports:
             - fitScalarParameters
-        - file: ./scalar-batch-parallel.js
-          imports:
-            - evaluateScalarPopulation
-            - ScalarPopulationParallelOptions
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -11464,21 +11489,29 @@ modules:
           directory: expression
           imports:
             - enumerateScalars
+            - scalarCanonicalKey
             - scalarComplexity
             - scalarGrammarAccepts
             - ScalarGrammar
             - ScalarNode
-        - package: '@danielsimonjr/mathts-parallel'
-          directory: parallel
-          imports:
-            - WorkerPool
-      exports: []
+      exports:
+        - parsimonyKey
+        - tournamentSelect
+        - migrateIslands
+        - ComplexityFrequency
+      classes:
+        - ComplexityFrequency
       interfaces:
         - ScalarSearchProblem
-        - ScalarSearchParallelOptions
         - ScalarSearchOptions
         - SearchProgress
         - ScalarSearchResult
+        - EvaluatedIndividual
+        - Island
+      functions:
+        - parsimonyKey
+        - tournamentSelect
+        - migrateIslands
     functions/src/signal-filter-extra.ts:
       description: Digital filter design + application (Wave D / remaining). FIR window design
       externalDependencies: []
@@ -34460,10 +34493,6 @@ modules:
             - DEFAULT_THRESHOLD_BY_OP
             - resolveOpThreshold
           reExport: true
-        - file: ./WorkerPool.js
-          imports:
-            - WorkerPool
-          reExport: true
         - file: ./operations/index.js
           imports:
             - parallelMatmul
@@ -34580,7 +34609,6 @@ modules:
         - DEFAULT_POOL_CONFIG
         - DEFAULT_THRESHOLD_BY_OP
         - resolveOpThreshold
-        - WorkerPool
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -34668,7 +34696,6 @@ modules:
         - DEFAULT_POOL_CONFIG
         - DEFAULT_THRESHOLD_BY_OP
         - resolveOpThreshold
-        - WorkerPool
         - parallelMatmul
         - parallelMatvec
         - parallelTranspose
@@ -39531,7 +39558,6 @@ dependencyGraph:
         - functions/src/descriptive-stats.ts
         - functions/src/distribution-functions.ts
         - functions/src/fit-scalar.ts
-        - functions/src/front-export.ts
         - functions/src/geometry-extra.ts
         - functions/src/grad-forward.ts
         - functions/src/help.ts
@@ -39544,8 +39570,6 @@ dependencyGraph:
         - functions/src/optimization-extra.ts
         - functions/src/pareto-front.ts
         - functions/src/regression-extra.ts
-        - functions/src/scalar-batch-parallel.ts
-        - functions/src/scalar-batch.worker.ts
         - functions/src/scalar-compile.ts
         - functions/src/scalar-dimension.ts
         - functions/src/scalar-eval.ts
@@ -40653,18 +40677,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1231
+  totalTypeScriptFiles: 1228
   totalModules: 82
-  totalLinesOfCode: 203364
-  totalExports: 6363
-  totalClasses: 59
-  totalInterfaces: 563
-  totalFunctions: 2063
+  totalLinesOfCode: 203240
+  totalExports: 6388
+  totalClasses: 60
+  totalInterfaces: 557
+  totalFunctions: 2060
   totalTypeGuards: 161
   totalEnums: 0
-  totalConstants: 1631
-  totalReExports: 2686
-  totalTypeOnlyImports: 616
+  totalConstants: 1630
+  totalReExports: 2714
+  totalTypeOnlyImports: 618
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

@@ -7,13 +7,14 @@ import {
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
 import { createSeededRng, type SeededRng } from '@danielsimonjr/mathts-core';
+import { identity as matrixIdentity } from '../src/index.js';
 import {
   addNode,
   crossoverSubtrees,
   DEFAULT_MUTATION_WEIGHTS,
   deleteNode,
   drawMutationOperator,
-  identity,
+  identityMutation,
   insertNode,
   mutateConstant,
   mutateFeature,
@@ -65,9 +66,9 @@ function key(node: ScalarNode | null): string {
 }
 
 describe('scalar-mutate operators', () => {
-  it('identity returns the same tree without using rng', () => {
+  it('identityMutation returns the same tree without using rng', () => {
     const tree = b.op('+', [b.symbol('x'), b.number(1)]);
-    expect(key(identity(tree, stubRng({}), ctx))).toBe(key(tree));
+    expect(identityMutation(tree, stubRng({}), ctx)).toBe(tree);
   });
 
   it('mutateConstant perturbs one number leaf', () => {
@@ -194,17 +195,18 @@ describe('weightedMutation', () => {
   });
 
   it('repeats canonical keys for the same seed', () => {
-    const keysA: string[] = [];
-    const keysB: string[] = [];
-    for (let i = 0; i < 20; i++) {
-      const outA = mutate(tree, createSeededRng(1), ctx);
-      keysA.push(outA === null ? 'null' : scalarCanonicalKey(outA));
-    }
-    for (let i = 0; i < 20; i++) {
-      const outB = mutate(tree, createSeededRng(1), ctx);
-      keysB.push(outB === null ? 'null' : scalarCanonicalKey(outB));
-    }
-    expect(keysA).toEqual(keysB);
+    const run = (): string[] => {
+      const rng = createSeededRng(1);
+      const keys: string[] = [];
+      for (let i = 0; i < 20; i++) {
+        keys.push(key(mutate(tree, rng, ctx)));
+      }
+      return keys;
+    };
+    const first = run();
+    expect(run()).toEqual(first);
+    // A single repeated draw would also "repeat"; the stream must actually vary.
+    expect(new Set(first).size).toBeGreaterThan(2);
   });
 
   it('matches default weights under chi-square (df=10, alpha=0.001)', () => {
@@ -227,5 +229,244 @@ describe('weightedMutation', () => {
       chi2 += (diff * diff) / exp;
     }
     expect(chi2).toBeLessThanOrEqual(29.588);
+  });
+});
+
+describe('operators reach nodes under a call', () => {
+  const sinSum = b.call('sin', b.op('+', [b.symbol('x'), b.number(2)]));
+
+  it('mutateConstant perturbs a number inside sin(...)', () => {
+    const out = mutateConstant(sinSum, stubRng({ nextInt: [0], next: [0.75, 1] }), ctx);
+    expect(key(out)).toBe(key(b.call('sin', b.op('+', [b.symbol('x'), b.number(2.25)]))));
+  });
+
+  it('mutateFeature renames a symbol inside sin(...)', () => {
+    const out = mutateFeature(sinSum, stubRng({ nextInt: [0, 0] }), ctx);
+    expect(key(out)).toBe(key(b.call('sin', b.op('+', [b.symbol('y'), b.number(2)]))));
+  });
+
+  it('swapOperands swaps the sum under sin(...)', () => {
+    const out = swapOperands(sinSum, stubRng({ nextInt: [0] }), ctx);
+    expect(key(out)).toBe(key(b.call('sin', b.op('+', [b.number(2), b.symbol('x')]))));
+  });
+
+  it('mutateOperator renames the call and the operator under it', () => {
+    // choices in pre-order: ops first, then calls
+    const op = mutateOperator(sinSum, stubRng({ nextInt: [0, 0] }), ctx);
+    expect(key(op)).toBe(key(b.call('sin', b.op('*', [b.symbol('x'), b.number(2)]))));
+    const fn = mutateOperator(sinSum, stubRng({ nextInt: [1, 0] }), ctx);
+    expect(key(fn)).toBe(key(b.call('cos', b.op('+', [b.symbol('x'), b.number(2)]))));
+  });
+
+  it('addNode wraps the argument of sin(...)', () => {
+    // path [0] is the sum: nextInt picks it, then the leaf draws 'x'
+    const out = addNode(sinSum, stubRng({ nextInt: [1, 0, 0], next: [1, 0] }), ctx);
+    expect(key(out)).toBe(
+      key(b.call('sin', b.op('+', [b.op('+', [b.symbol('x'), b.number(2)]), b.symbol('x')])))
+    );
+  });
+
+  it('insertNode puts an operator between sin and its argument', () => {
+    const tree = b.call('sin', b.symbol('x'));
+    // one edge (sin -> x); op index 1 is '*'; leaf 'y'; next < 0.5 keeps the child first
+    const out = insertNode(tree, stubRng({ nextInt: [0, 1, 1], next: [0] }), ctx);
+    expect(key(out)).toBe(key(b.call('sin', b.op('*', [b.symbol('x'), b.symbol('y')]))));
+  });
+
+  it('deleteNode removes the operator under sin(...)', () => {
+    const out = deleteNode(sinSum, stubRng({ nextInt: [0, 1] }), ctx);
+    expect(key(out)).toBe(key(b.call('sin', b.number(2))));
+  });
+
+  it('rotateTree rotates a binary node under sin(...)', () => {
+    const tree = b.call(
+      'sin',
+      b.op('+', [b.op('*', [b.symbol('x'), b.symbol('y')]), b.symbol('c')])
+    );
+    const out = rotateTree(tree, stubRng({ nextInt: [0], next: [0.25] }), ctx);
+    expect(key(out)).toBe(
+      key(b.call('sin', b.op('*', [b.symbol('x'), b.op('+', [b.symbol('y'), b.symbol('c')])])))
+    );
+  });
+
+  it('crossoverSubtrees replaces and donates nodes below a call', () => {
+    // left paths: [], [0], [0,0], [0,1]; right paths: [], [0]
+    const out = crossoverSubtrees(
+      sinSum,
+      b.call('cos', b.symbol('y')),
+      stubRng({ nextInt: [3, 1] }),
+      ctx
+    );
+    expect(key(out)).toBe(key(b.call('sin', b.op('+', [b.symbol('x'), b.symbol('y')]))));
+  });
+
+  it('never throws and always passes the grammar over a tree full of calls', () => {
+    const rng = createSeededRng(7);
+    const mutate = weightedMutation();
+    let tree: ScalarNode = sinSum;
+    for (let i = 0; i < 2000; i++) {
+      const out = mutate(tree, rng, ctx);
+      if (out !== null) {
+        expect(scalarGrammarAccepts(testGrammar, out)).toBe(true);
+        tree = out;
+      }
+    }
+  });
+});
+
+describe('grammar and call-name fidelity', () => {
+  it('swapOperands returns null when the swapped tree breaks the grammar', () => {
+    // the exponent may only be a leaf, so (x + y) ^ 2 is legal and 2 ^ (x + y) is not
+    const grammar: ScalarGrammar = {
+      ...testGrammar,
+      binary: ['^', '+'],
+      argumentLimits: { '^': [3, 1] },
+    };
+    const tree = b.op('^', [b.op('+', [b.symbol('x'), b.symbol('y')]), b.number(2)]);
+    expect(scalarGrammarAccepts(grammar, tree)).toBe(true);
+    const swapped = b.op('^', [b.number(2), b.op('+', [b.symbol('x'), b.symbol('y')])]);
+    expect(scalarGrammarAccepts(grammar, swapped)).toBe(false);
+    expect(swapOperands(tree, stubRng({ nextInt: [0] }), { ...ctx, grammar })).toBeNull();
+  });
+
+  it('addNode keeps the lowered name: natural log stays log, not log10', () => {
+    const grammar: ScalarGrammar = { ...testGrammar, unary: ['log'] };
+    // next 0 < 0.5 selects the call arm
+    const out = addNode(b.symbol('x'), stubRng({ nextInt: [0, 0], next: [0] }), {
+      ...ctx,
+      grammar,
+    });
+    expect(out).toEqual({ kind: 'call', fn: 'log', arg: { kind: 'symbol', name: 'x' } });
+  });
+
+  it('randomizeTree only ever emits names the grammar lists, natural log included', () => {
+    const grammar: ScalarGrammar = { ...testGrammar, unary: ['log'], binary: ['+'] };
+    let sawLog = false;
+    for (let seed = 1; seed <= 200; seed++) {
+      const out = randomizeTree(b.symbol('x'), createSeededRng(seed), { ...ctx, grammar });
+      if (out === null) continue;
+      expect(scalarGrammarAccepts(grammar, out)).toBe(true);
+      sawLog ||= JSON.stringify(out).includes('"fn":"log"');
+    }
+    expect(sawLog).toBe(true);
+  });
+
+  it('randomizeTree returns null for a grammar that allows no node', () => {
+    const grammar: ScalarGrammar = { ...testGrammar, maxSize: 0 };
+    expect(randomizeTree(b.symbol('x'), createSeededRng(1), { ...ctx, grammar })).toBeNull();
+  });
+
+  it('mutateOperator skips nodes that have no alternative', () => {
+    const grammar: ScalarGrammar = { ...testGrammar, binary: ['+'], unary: ['sin', 'cos'] };
+    const tree = b.call('sin', b.op('+', [b.symbol('x'), b.symbol('y')]));
+    const out = mutateOperator(tree, stubRng({ nextInt: [0, 0] }), { ...ctx, grammar });
+    // the only node with an alternative is the call
+    expect(key(out)).toBe(key(b.call('cos', b.op('+', [b.symbol('x'), b.symbol('y')]))));
+    const single: ScalarGrammar = { ...testGrammar, binary: ['+'], unary: ['sin'] };
+    expect(mutateOperator(tree, stubRng({}), { ...ctx, grammar: single })).toBeNull();
+  });
+
+  it('rotateTree uses the direction that exists instead of failing', () => {
+    // only the right child is binary, so the left rotation is impossible
+    const tree = b.op('+', [b.symbol('c'), b.op('*', [b.symbol('x'), b.symbol('y')])]);
+    const expected = b.op('*', [b.op('+', [b.symbol('c'), b.symbol('x')]), b.symbol('y')]);
+    for (const u of [0.25, 0.75]) {
+      expect(key(rotateTree(tree, stubRng({ nextInt: [0], next: [u] }), ctx))).toBe(key(expected));
+    }
+  });
+
+  it('mutations do not modify their input', () => {
+    const tree = b.call('sin', b.op('+', [b.symbol('x'), b.number(2)]));
+    const frozen = JSON.stringify(tree);
+    const mutate = weightedMutation();
+    const rng = createSeededRng(3);
+    for (let i = 0; i < 300; i++) {
+      mutate(tree, rng, ctx);
+    }
+    expect(JSON.stringify(tree)).toBe(frozen);
+  });
+});
+
+describe('mutation picker', () => {
+  const order = [
+    'rotateTree',
+    'addNode',
+    'deleteNode',
+    'mutateOperator',
+    'identity',
+    'swapOperands',
+    'mutateFeature',
+    'mutateConstant',
+    'insertNode',
+    'simplifyConstants',
+    'randomizeTree',
+  ] as const;
+
+  function rngOf(u: number): SeededRng {
+    return stubRng({ next: [u] });
+  }
+
+  it('walks the table in draw order with half-open intervals', () => {
+    const sum = Object.values(DEFAULT_MUTATION_WEIGHTS).reduce((a, w) => a + w, 0);
+    expect(sum).toBeCloseTo(8.512392, 12);
+    expect(drawMutationOperator(rngOf(0))).toBe('rotateTree');
+    expect(drawMutationOperator(rngOf(4.25 / sum))).toBe('rotateTree');
+    expect(drawMutationOperator(rngOf(4.27 / sum))).toBe('addNode');
+    expect(drawMutationOperator(rngOf(6.72 / sum))).toBe('addNode');
+    expect(drawMutationOperator(rngOf(6.74 / sum))).toBe('deleteNode');
+    expect(drawMutationOperator(rngOf(1 - 1e-12))).toBe('randomizeTree');
+  });
+
+  it('never returns a key whose weight is zero', () => {
+    const weights = Object.fromEntries(order.map((k) => [k, 0])) as Record<
+      (typeof order)[number],
+      number
+    >;
+    weights.mutateConstant = 1;
+    expect(drawMutationOperator(rngOf(0), weights)).toBe('mutateConstant');
+    expect(drawMutationOperator(rngOf(1 - 1e-16), weights)).toBe('mutateConstant');
+  });
+
+  it('rejects weights that cannot form a distribution', () => {
+    const bad = (patch: Partial<Record<(typeof order)[number], number>>) =>
+      weightedMutation({ ...DEFAULT_MUTATION_WEIGHTS, ...patch });
+    expect(() => bad({ addNode: -1 })).toThrow(RangeError);
+    expect(() => bad({ addNode: Number.NaN })).toThrow(RangeError);
+    expect(() => bad({ addNode: Number.POSITIVE_INFINITY })).toThrow(RangeError);
+    const zeros = Object.fromEntries(order.map((k) => [k, 0])) as Record<
+      (typeof order)[number],
+      number
+    >;
+    expect(() => weightedMutation(zeros)).toThrow(RangeError);
+    const missing = { ...DEFAULT_MUTATION_WEIGHTS } as Partial<
+      Record<(typeof order)[number], number>
+    >;
+    delete missing.addNode;
+    expect(() => weightedMutation(missing as Record<(typeof order)[number], number>)).toThrow(
+      RangeError
+    );
+  });
+
+  it('a weighted override selects only the weighted operator', () => {
+    const weights = Object.fromEntries(order.map((k) => [k, 0])) as Record<
+      (typeof order)[number],
+      number
+    >;
+    weights.swapOperands = 1;
+    const mutate = weightedMutation(weights);
+    const tree = b.op('*', [b.symbol('x'), b.symbol('y')]);
+    expect(key(mutate(tree, createSeededRng(5), ctx))).toBe(
+      key(b.op('*', [b.symbol('y'), b.symbol('x')]))
+    );
+  });
+});
+
+describe('public name of the identity mutation', () => {
+  it('does not shadow the matrix identity export of the package', () => {
+    const eye = matrixIdentity(2) as unknown as { toArray(): number[][] };
+    expect(eye.toArray()).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
   });
 });
