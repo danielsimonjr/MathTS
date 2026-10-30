@@ -45,6 +45,7 @@
     "test:wasm:integration": "vitest run tests/wasm/",
     "test:coverage": "turbo run test:coverage",
     "bench:core": "node tools/benchmarks/core-hot-paths.mjs",
+    "bench:sprint": "node tools/benchmarks/sprint-baseline.mjs",
     "bench:parallel": "bun tools/benchmark/parallel/run.ts",
     "bench:tensor": "bun tools/benchmark/tensor/contract.bench.ts && bun tools/benchmark/tensor/contract-network.bench.ts && bun tools/benchmark/tensor/tensordot.bench.ts && bun tools/benchmark/tensor/decompositions.bench.ts",
     "bench:wasm": "bun tools/benchmark/wasm/run.ts",
