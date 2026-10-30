@@ -15,9 +15,10 @@ export function hasOwnProperty(object: unknown, property: string): boolean {
 
 /**
  * True for keys whose assignment changes [[Prototype]] or writes through it.
+ * Function.prototype names such as `name` are safe as own data keys on plain objects.
  */
 export function isPollutingKey(prop: string): boolean {
-  return prop in Object.prototype || prop in Function.prototype;
+  return prop in Object.prototype;
 }
 
 /**

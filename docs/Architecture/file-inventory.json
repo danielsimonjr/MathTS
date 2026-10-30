@@ -716,14 +716,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 490
+      "loc": 489
     },
     {
       "file": "core/src/shared.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 95
+      "loc": 96
     },
     {
       "file": "core/src/string.ts",
