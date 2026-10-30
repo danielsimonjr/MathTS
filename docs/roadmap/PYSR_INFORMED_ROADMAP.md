@@ -9,7 +9,9 @@ no new package for this roadmap (§10).
 **Author:** MathTS maintenance
 **Date:** 2026-10-22 (refreshed 2026-10-23 against the
 [2026-10-22 codebase audit](../audit/2026-10-22-codebase-audit.md))
-**Status:** Active. Phase 1: M1 ([#396](https://github.com/danielsimonjr/MathTS/pull/396)),
+**Status:** Active. Phases 1–5 implementation is complete on the Phases 3–5 stack
+([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)); release waits on Phase 6 and up
+(§7, §8). Phase 1: M1 ([#396](https://github.com/danielsimonjr/MathTS/pull/396)),
 M3 ([#397](https://github.com/danielsimonjr/MathTS/pull/397)) and M4
 ([#395](https://github.com/danielsimonjr/MathTS/pull/395)) are merged; M1's weight lookup was
 fixed in [#407](https://github.com/danielsimonjr/MathTS/pull/407). Sprint 1R items 1–7 are
@@ -406,7 +408,23 @@ of the base checklist and every specific box is ticked in its pull request, with
 
 M1, M3 and M4 merged before this checklist existed. The 2026-10-22 audit checked them
 against it. B1–B8 are Yes. B9 stays Partly: no review was recorded on #396, #397, or #395, and the
-later audit was after merge. Do not tick B9.
+later audit was after merge. Do not tick B9 until claude-sonnet-5-5 records it on the
+implementation PR (see **Recorded review protocol** below).
+
+### Recorded review protocol (Phases 3–5 PR 1)
+
+[`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 1 assigns **claude-sonnet-5-5** to re-run, from the repo root:
+
+```bash
+bunx vitest run expression/tests/scalar-structure.test.ts
+bunx vitest run tests/integration/scalar-canonical-parity.test.ts
+bunx vitest run functions/tests/scalar-compile.test.ts
+bunx vitest run functions/tests/pareto-front.test.ts
+```
+
+The reviewer greps `expression/src/scalar-structure.ts` for `hasOwnProperty` (own-key helper) and
+confirms `paretoDist` is not called from `functions/src/pareto-front.ts`. **B9** cells for M1, M3,
+and M4 stay **Partly** until the reviewer ticks them; the builder does not tick B9.
 
 | Box | M1 (#396, #407)                                                                                                                       | M3 (#397)                                                                                     | M4 (#395)                                                              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -1054,6 +1072,9 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
 - **DoD:** base checklist + the following specifics:
   - [x] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
+  - [x] Exit: `docs/integration/upt.md` documents `inferScalarDimension` and
+        `solveParameterDimensions` with `Fraction` exponents on `SiDimensionVector`
+        (PYSR Phases 3–5 PR 4); Q2 (tensor dimensional analysis) unchanged.
 
 ### Phase 4 — Search kit (no new package)
 
@@ -1231,8 +1252,12 @@ re-decide it here if PR-POLY has already merged.
   `workerpool` layering copy; one dense JS polynomial convolution; one matrix threshold
   table that the code reads; no threshold in a comment that `policy.ts` contradicts.
 - **DoD:** base checklist + the following specifics:
-  - [ ] Oracles: existing FFT and `polymul` fixtures pass under Sprint 2R's
+  - [x] Oracles: existing FFT and `polymul` fixtures pass under Sprint 2R's
         test-expectation rule; any new threshold backed by two committed Node runs.
+  - [x] Exit (grep evidence, PYSR PR 10): `packages/workerpool/src/fft-core.ts` header
+        names `functions/src/signal/fft-core-f64.ts`; `polymul` calls `polyMulJS`;
+        one `DEFAULT_CONFIG` in `matrix/src/config.ts`; M11 module at
+        `expression/src/scalar-enumerate.ts`; M14 `SCALAR_PARALLEL_MIN_ROWS` is 100.
 
 ### Phase 5 — Reporting
 
@@ -1291,6 +1316,10 @@ re-decide it here if PR-POLY has already merged.
   - [x] Oracle: `compat/tests/instance-config-isolation.test.ts` — `create(all, config)`
         leaves barrel `evaluate` on `number` and instances do not cross-contaminate.
   - [ ] `node tools/test/consumer-typecheck.mjs` passes on the full set of packages.
+  - [x] I-10: `@danielsimonjr/mathts-typed-function` has no workspace dependents; `core`
+        depends on npm `typed-function` (no code change in PR 12).
+  - [x] Roadmap close-out (PYSR PR 12): Phases 1–5 recorded complete; §7 still forbids tag,
+        release, and publish until Phase 6 is clean.
 
 ### Phase 6 and up: clone-reduction loop
 
