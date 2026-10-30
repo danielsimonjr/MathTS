@@ -92,7 +92,9 @@ async function sample(op, pool) {
   for (let i = 0; i < op.reps; i++) last = await op.run(pool);
   const ms = performance.now() - t0;
   if (last === undefined || last === null || last.parallelized !== false) {
-    throw new Error(`${op.name}: expected a sequential result envelope, got ${JSON.stringify(last)}`);
+    throw new Error(
+      `${op.name}: expected a sequential result envelope, got ${JSON.stringify(last)}`
+    );
   }
   return ms / op.reps;
 }
