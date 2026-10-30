@@ -2893,6 +2893,8 @@ format(1 / 3, { precision: 4 }); // '0.3333'
 | `ParetoFrontError`                                                 | Thrown by `scoreFront` / `selectFrontModel` for invalid selection input                                                       |
 | `numericallyEquivalent(a, b, options)`                             | Sample two scalar trees; compare with `nearlyEqual` (evidence, not proof)                                                     |
 | `NumericEquivalenceError`                                          | Thrown for invalid `numericallyEquivalent` options or domain                                                                  |
+| `inferScalarDimension(node, dims)`                                 | SI dimension of a scalar tree with `Fraction` exponents, or a named violation and its path                                    |
+| `solveParameterDimensions(node, dims, target, parameters[, opts])` | Solve unknown parameter dimensions exactly (`solved` / `underdetermined` / `inconsistent`)                                    |
 | `scalar`                                                           | Scalar-node builder (`number`, `symbol`, `op`, `call`, `from`)                                                                |
 | `ScalarEvalError`                                                  | Thrown when a scalar node cannot be evaluated                                                                                 |
 | `compileExpr(expr)`                                                | Compile once, evaluate many                                                                                                   |
@@ -2989,7 +2991,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1100 exports).
+> `@danielsimonjr/mathts-functions` (1118 exports).
 
 ### Functions by category
 
@@ -3043,15 +3045,15 @@ await terminatePool();
 
 **Type Checking & Utilities** (22): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `typeOf`, `validateClosureSource`
 
-**Expression Evaluation** (21): `compileExpr`, `compileScalar`, `compileScalarGradient`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `replacer`, `reviver`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `selectFrontModel`, `simplifyScalar`
+**Expression Evaluation** (37): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
 **Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `runWithConfig`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
 
-### Constants & values (70)
+### Constants & values (72)
 
-`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+`ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `DEFAULT_MUTATION_WEIGHTS`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
 ### Classes & types (2)
 

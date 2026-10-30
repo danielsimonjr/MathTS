@@ -4353,29 +4353,6 @@ graph LR
 
 ---
 
-### `functions/src/front-export.ts` - LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).
-
-**Workspace Dependencies:**
-
-| Package                            | Import                      |
-| ---------------------------------- | --------------------------- |
-| `@danielsimonjr/mathts-expression` | `ScalarNode, StringOptions` |
-| `@danielsimonjr/mathts-expression` | `scalarCanonicalKey`        |
-
-**Internal Dependencies:**
-
-| File                   | Imports           | Type               |
-| ---------------------- | ----------------- | ------------------ |
-| `./factories/index.js` | `scalarToTex`     | Import             |
-| `./pareto-front.js`    | `ScoredCandidate` | Import (type-only) |
-
-**Exports:**
-
-- Interfaces: `FrontJsonRow`, `FrontJson`, `FrontLatexTableOptions`
-- Functions: `frontToLatexTable`, `frontToJson`
-
----
-
 ### `functions/src/geometry-extra.ts` - Geodesy / spherical-geometry connectors (Wave C / bridge C7).
 
 **Internal Dependencies:**
@@ -4467,8 +4444,11 @@ graph LR
 | `./factories/evaluate.js`              | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer`                                                                                                                                                                                                        | Re-export             |
 | `./scalar-eval.js`                     | `evaluateScalar, scalar, ScalarEvalError`                                                                                                                                                                                                                                      | Re-export             |
 | `./scalar-compile.js`                  | `compileScalar, compileScalarGradient`                                                                                                                                                                                                                                         | Re-export             |
+| `./scalar-mutate.js`                   | `addNode, crossoverSubtrees, DEFAULT_MUTATION_WEIGHTS, deleteNode, identityMutation, insertNode, mutateConstant, mutateFeature, mutateOperator, MUTATE_CONSTANT_NEGATE_PROBABILITY, randomizeTree, rotateTree, simplifyConstants, swapOperands, weightedMutation`              | Re-export             |
+| `./scalar-search.js`                   | `searchScalars`                                                                                                                                                                                                                                                                | Re-export             |
 | `./pareto-front.js`                    | `paretoFront, scoreFront, selectFrontModel, ParetoFrontError`                                                                                                                                                                                                                  | Re-export             |
 | `./numeric-equivalence.js`             | `numericallyEquivalent, NumericEquivalenceError`                                                                                                                                                                                                                               | Re-export             |
+| `./scalar-dimension.js`                | `inferScalarDimension, solveParameterDimensions`                                                                                                                                                                                                                               | Re-export             |
 | `./numeric/propagate-uncertainty.js`   | `propagateUncertainty, UncertaintyExpression, UncertaintyPropagationOptions, UncertaintyPropagationResult`                                                                                                                                                                     | Re-export             |
 | `./help.js`                            | `help`                                                                                                                                                                                                                                                                         | Re-export             |
 | `./numbertheory/extra.js`              | `continuedFraction, eulerNumbers, stirlingS1, discreteLog, primitiveRoot, multiplicativeOrder, kroneckerSymbol, permutationsGen, combinationsGen`                                                                                                                              | Re-export             |
@@ -4547,8 +4527,12 @@ graph LR
 | `./factories/evaluate.js`              | `PhysicsEvaluateOptions`                                                                                                                                                                                                                                                       | Re-export (type-only) |
 | `./scalar-eval.js`                     | `ScalarScope`                                                                                                                                                                                                                                                                  | Re-export (type-only) |
 | `./scalar-compile.js`                  | `CompileScalarOptions, ScalarBatchResult, CompiledScalar, CompiledScalarGradient`                                                                                                                                                                                              | Re-export (type-only) |
+| `./scalar-mutate.js`                   | `MutationWeightKey, ScalarMutationContext, ScalarMutationOperator`                                                                                                                                                                                                             | Re-export (type-only) |
+| `./scalar-search.js`                   | `ScalarSearchOptions, ScalarSearchProblem, ScalarSearchResult, ScalarSearchStopReason, SearchProgress`                                                                                                                                                                         | Re-export (type-only) |
+| `./scalar-batch-parallel.js`           | `ScalarPopulationParallelOptions`                                                                                                                                                                                                                                              | Re-export (type-only) |
 | `./pareto-front.js`                    | `FrontCandidate, ScoredCandidate`                                                                                                                                                                                                                                              | Re-export (type-only) |
 | `./numeric-equivalence.js`             | `NumericEquivalenceOptions, NumericEquivalence`                                                                                                                                                                                                                                | Re-export (type-only) |
+| `./scalar-dimension.js`                | `DimensionInference, ParameterDimensionResult, RationalDimension`                                                                                                                                                                                                              | Re-export (type-only) |
 | `./grad-forward.js`                    | `DualFn`                                                                                                                                                                                                                                                                       | Re-export (type-only) |
 | `./descriptive-stats.js`               | `LinRegressResult, CorrelationTestResult, KendallTauTestResult, DescribeResult, HistogramResult`                                                                                                                                                                               | Re-export (type-only) |
 | `./hypothesis-extra.js`                | `FTestResult, JarqueBeraResult, KruskalResult, WilcoxonResult, FisherExactResult, TukeyComparison`                                                                                                                                                                             | Re-export (type-only) |
@@ -4604,7 +4588,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `runWithConfig`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `numericallyEquivalent`, `NumericEquivalenceError`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionInverse`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `PhysicsEvaluateOptions`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `FrontCandidate`, `ScoredCandidate`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `runWithConfig`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionInverse`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `PhysicsEvaluateOptions`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`
 
 ---
 
@@ -4738,7 +4722,7 @@ graph LR
 
 ---
 
-### `functions/src/scalar-batch-parallel.ts` - Parallel batch evaluation of scalar populations over shared columns (M14).
+### `functions/src/scalar-batch-parallel.ts` - Evaluates many scalar trees over shared columns, on worker threads when asked to (M14).
 
 **Workspace Dependencies:**
 
@@ -4749,25 +4733,42 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                                                             | Type   |
-| --------------------- | ------------------------------------------------------------------- | ------ |
-| `./scalar-compile.js` | `buildTape, compileScalar, CompileScalarOptions, ScalarBatchResult` | Import |
+| File                     | Imports                                                                                    | Type   |
+| ------------------------ | ------------------------------------------------------------------------------------------ | ------ |
+| `./scalar-compile.js`    | `buildTape, compileScalar, CompileScalarOptions, ScalarBatchResult`                        | Import |
+| `./scalar-batch-task.js` | `SCALAR_BATCH_MESSAGE_PREFIX, ScalarBatchTask, ScalarBatchTaskItem, ScalarBatchTaskResult` | Import |
 
 **Exports:**
 
-- Interfaces: `ScalarPopulationEvalItem`, `ScalarPopulationParallelOptions`, `EvaluateScalarPopulationOptions`, `ScalarPopulationEvalResult`
-- Functions: `resolveScalarBatchWorkerScript`, `evaluateScalarPopulation`
-- Constants: `SCALAR_PARALLEL_MIN_ROWS`
+- Interfaces: `ScalarPopulationParallelOptions`, `ScalarPopulationEvalItem`, `EvaluateScalarPopulationOptions`, `ScalarPopulationEvalResult`
+- Functions: `resolveScalarBatchWorkerScript`, `createScalarBatchPool`, `resolveParallelTimeout`, `evaluateScalarPopulation`
+- Constants: `SCALAR_PARALLEL_MIN_ROWS`, `DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS`
 
 ---
 
-### `functions/src/scalar-batch.worker.ts` - Web worker entry for parallel {@link evaluateScalarPopulation} (M14).
+### `functions/src/scalar-batch-task.ts` - The unit of work that crosses to a scalar batch worker (M14), and the function that
 
 **Internal Dependencies:**
 
-| File                  | Imports              | Type   |
-| --------------------- | -------------------- | ------ |
-| `./scalar-compile.js` | `evaluateScalarTape` | Import |
+| File                  | Imports                         | Type   |
+| --------------------- | ------------------------------- | ------ |
+| `./scalar-compile.js` | `evaluateScalarTape, buildTape` | Import |
+
+**Exports:**
+
+- Interfaces: `ScalarBatchTaskItem`, `ScalarBatchTask`, `ScalarBatchTaskRow`, `ScalarBatchTaskResult`
+- Functions: `runScalarBatchTask`
+- Constants: `SCALAR_BATCH_MESSAGE_PREFIX`
+
+---
+
+### `functions/src/scalar-batch.worker.ts` - Worker entry for parallel {@link evaluateScalarPopulation} (M14). Built as its own
+
+**Internal Dependencies:**
+
+| File                     | Imports                               | Type   |
+| ------------------------ | ------------------------------------- | ------ |
+| `./scalar-batch-task.js` | `runScalarBatchTask, ScalarBatchTask` | Import |
 
 ---
 
@@ -4844,10 +4845,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                            |
-| ---------------------------------- | --------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `createScalarBuilder, mapScalar, scalarGrammarAccepts, ScalarGrammar, ScalarNode` |
-| `@danielsimonjr/mathts-core`       | `SeededRng`                                                                       |
+| Package                            | Import                                                                                             |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `createScalarBuilder, mapScalar, scalarGrammarAccepts, LoweredScalarFn, ScalarGrammar, ScalarNode` |
+| `@danielsimonjr/mathts-core`       | `SeededRng`                                                                                        |
 
 **Internal Dependencies:**
 
@@ -4859,7 +4860,7 @@ graph LR
 
 - Interfaces: `ScalarMutationContext`
 - Types: `MutationWeightKey`, `ScalarMutationOperator`
-- Functions: `identity`, `mutateConstant`, `mutateOperator`, `mutateFeature`, `swapOperands`, `addNode`, `insertNode`, `deleteNode`, `rotateTree`, `randomizeTree`, `simplifyConstants`, `crossoverSubtrees`, `drawMutationOperator`, `weightedMutation`
+- Functions: `identityMutation`, `mutateConstant`, `mutateOperator`, `mutateFeature`, `swapOperands`, `addNode`, `insertNode`, `deleteNode`, `rotateTree`, `randomizeTree`, `simplifyConstants`, `crossoverSubtrees`, `drawMutationOperator`, `weightedMutation`
 - Constants: `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `DEFAULT_MUTATION_WEIGHTS`
 
 ---
@@ -4887,30 +4888,32 @@ graph LR
 
 ---
 
-### `functions/src/scalar-search.ts` - PySR-style regularized evolution over {@link ScalarNode} trees (M13).
+### `functions/src/scalar-search.ts` - PySR-style evolutionary search over {@link ScalarNode} trees (M13).
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                              |
-| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarComplexity, scalarGrammarAccepts, ScalarGrammar, ScalarNode` |
-| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                          |
+| Package                            | Import                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                  |
+| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                              |
+| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarGrammar, ScalarNode` |
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                      | Type   |
-| ---------------------------- | ------------------------------------------------------------ | ------ |
-| `./fit-scalar.js`            | `fitScalarParameters`                                        | Import |
-| `./scalar-batch-parallel.js` | `evaluateScalarPopulation, ScalarPopulationParallelOptions`  | Import |
-| `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate` | Import |
-| `./scalar-compile.js`        | `compileScalar`                                              | Import |
-| `./scalar-mutate.js`         | `weightedMutation, ScalarMutationContext`                    | Import |
+| File                         | Imports                                                                                                    | Type   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
+| `./fit-scalar.js`            | `fitScalarParameters`                                                                                      | Import |
+| `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
+| `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
+| `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
+| `./scalar-mutate.js`         | `weightedMutation, ScalarMutationContext`                                                                  | Import |
 
 **Exports:**
 
-- Interfaces: `ScalarSearchProblem`, `ScalarSearchParallelOptions`, `ScalarSearchOptions`, `SearchProgress`, `ScalarSearchResult`
-- Types: `ScalarSearchStopReason`, `SearchScalarsResult`, `SearchScalarsOptions`
+- Classes: `ComplexityFrequency`
+- Interfaces: `ScalarSearchProblem`, `ScalarSearchOptions`, `SearchProgress`, `ScalarSearchResult`, `EvaluatedIndividual`, `Island`
+- Types: `ScalarSearchStopReason`
+- Functions: `parsimonyKey`, `tournamentSelect`, `migrateIslands`
 
 ---
 
@@ -18498,9 +18501,9 @@ graph LR
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
-| `functions/src/factories/index`                        | 244 files    | 12 files   |
+| `functions/src/factories/index`                        | 244 files    | 11 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 203 files  |
-| `functions/src/index`                                  | 87 files     | 0 files    |
+| `functions/src/index`                                  | 91 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/is`                               | 0 files      | 55 files   |
@@ -18744,9 +18747,9 @@ graph TD
         N131[descriptive-stats]
         N132[distribution-functions]
         N133[fit-scalar]
-        N134[front-export]
-        N135[geometry-extra]
-        N136[grad-forward]
+        N134[geometry-extra]
+        N135[grad-forward]
+        N136[help]
         N137[...21 more]
     end
 
@@ -19388,15 +19391,15 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1231   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203364 |
-| Total Exports           | 6363   |
-| Total Re-exports        | 2686   |
-| Total Classes           | 59     |
-| Total Interfaces        | 563    |
-| Total Functions         | 2063   |
+| Total Lines of Code     | 203742 |
+| Total Exports           | 6400   |
+| Total Re-exports        | 2716   |
+| Total Classes           | 60     |
+| Total Interfaces        | 565    |
+| Total Functions         | 2067   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
-| Type-only Imports       | 616    |
+| Type-only Imports       | 619    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

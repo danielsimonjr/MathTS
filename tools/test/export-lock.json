@@ -2284,6 +2284,9 @@
       "DDESolution": {
         "kind": "type"
       },
+      "DEFAULT_MUTATION_WEIGHTS": {
+        "kind": "object"
+      },
       "DIST_WORKER_THRESHOLD": {
         "kind": "number"
       },
@@ -2294,6 +2297,9 @@
         "kind": "type"
       },
       "DescribeResult": {
+        "kind": "type"
+      },
+      "DimensionInference": {
         "kind": "type"
       },
       "Distribution": {
@@ -2533,6 +2539,9 @@
       "MASS_PROPERTY_SHAPES": {
         "kind": "object"
       },
+      "MUTATE_CONSTANT_NEGATE_PROBABILITY": {
+        "kind": "number"
+      },
       "MWBootstrapResult": {
         "kind": "type"
       },
@@ -2585,6 +2594,9 @@
         "kind": "type"
       },
       "MultivariateDistribution": {
+        "kind": "type"
+      },
+      "MutationWeightKey": {
         "kind": "type"
       },
       "MvnCov": {
@@ -2665,6 +2677,9 @@
       "ParabolicSource": {
         "kind": "type"
       },
+      "ParameterDimensionResult": {
+        "kind": "type"
+      },
       "ParetoFrontError": {
         "kind": "function"
       },
@@ -2690,6 +2705,9 @@
         "kind": "type"
       },
       "QuadResult": {
+        "kind": "type"
+      },
+      "RationalDimension": {
         "kind": "type"
       },
       "RationalNullspaceOptions": {
@@ -2740,10 +2758,34 @@
       "ScalarEvalError": {
         "kind": "function"
       },
+      "ScalarMutationContext": {
+        "kind": "type"
+      },
+      "ScalarMutationOperator": {
+        "kind": "type"
+      },
+      "ScalarPopulationParallelOptions": {
+        "kind": "type"
+      },
       "ScalarScope": {
         "kind": "type"
       },
+      "ScalarSearchOptions": {
+        "kind": "type"
+      },
+      "ScalarSearchProblem": {
+        "kind": "type"
+      },
+      "ScalarSearchResult": {
+        "kind": "type"
+      },
+      "ScalarSearchStopReason": {
+        "kind": "type"
+      },
       "ScoredCandidate": {
+        "kind": "type"
+      },
+      "SearchProgress": {
         "kind": "type"
       },
       "SecantOptions": {
@@ -2855,6 +2897,9 @@
         "kind": "function"
       },
       "add": {
+        "kind": "function"
+      },
+      "addNode": {
         "kind": "function"
       },
       "addScalar": {
@@ -3385,6 +3430,9 @@
       "crossCorrelation": {
         "kind": "function"
       },
+      "crossoverSubtrees": {
+        "kind": "function"
+      },
       "csAmd": {
         "kind": "function"
       },
@@ -3479,6 +3527,9 @@
         "kind": "function"
       },
       "delaunayTriangulation": {
+        "kind": "function"
+      },
+      "deleteNode": {
         "kind": "function"
       },
       "derivative": {
@@ -4270,6 +4321,9 @@
       "identity": {
         "kind": "function"
       },
+      "identityMutation": {
+        "kind": "function"
+      },
       "idst": {
         "kind": "function"
       },
@@ -4300,6 +4354,9 @@
       "indexFn": {
         "kind": "function"
       },
+      "inferScalarDimension": {
+        "kind": "function"
+      },
       "initializePool": {
         "kind": "function"
       },
@@ -4307,6 +4364,9 @@
         "kind": "function"
       },
       "initializeStatistics": {
+        "kind": "function"
+      },
+      "insertNode": {
         "kind": "function"
       },
       "integerDigits": {
@@ -4867,6 +4927,15 @@
       "multivariateTaylor": {
         "kind": "function"
       },
+      "mutateConstant": {
+        "kind": "function"
+      },
+      "mutateFeature": {
+        "kind": "function"
+      },
+      "mutateOperator": {
+        "kind": "function"
+      },
       "mvnPdf": {
         "kind": "function"
       },
@@ -5335,6 +5404,9 @@
       "randomInt": {
         "kind": "function"
       },
+      "randomizeTree": {
+        "kind": "function"
+      },
       "range": {
         "kind": "function"
       },
@@ -5440,6 +5512,9 @@
       "rotate": {
         "kind": "function"
       },
+      "rotateTree": {
+        "kind": "function"
+      },
       "rotateVector2D": {
         "kind": "function"
       },
@@ -5483,6 +5558,9 @@
         "kind": "function"
       },
       "scoreFront": {
+        "kind": "function"
+      },
+      "searchScalars": {
         "kind": "function"
       },
       "sec": {
@@ -5578,6 +5656,9 @@
       "simplifyConstant": {
         "kind": "function"
       },
+      "simplifyConstants": {
+        "kind": "function"
+      },
       "simplifyCore": {
         "kind": "function"
       },
@@ -5657,6 +5738,9 @@
         "kind": "function"
       },
       "solveParabolicPDE": {
+        "kind": "function"
+      },
+      "solveParameterDimensions": {
         "kind": "function"
       },
       "sort": {
@@ -5792,6 +5876,9 @@
         "kind": "function"
       },
       "svds": {
+        "kind": "function"
+      },
+      "swapOperands": {
         "kind": "function"
       },
       "sylvester": {
@@ -6028,6 +6115,9 @@
       "weibullDist": {
         "kind": "function"
       },
+      "weightedMutation": {
+        "kind": "function"
+      },
       "welchPSD": {
         "kind": "function"
       },
@@ -6077,6 +6167,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6108,6 +6204,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -6278,6 +6377,9 @@
       "embeddedDocs": {
         "kind": "object"
       },
+      "enumerateScalars": {
+        "kind": "function"
+      },
       "escapeMathML": {
         "kind": "function"
       },
@@ -6327,6 +6429,9 @@
         "kind": "function"
       },
       "scalarEquals": {
+        "kind": "function"
+      },
+      "scalarGrammarAccepts": {
         "kind": "function"
       },
       "scalarSize": {
@@ -6348,6 +6453,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6379,6 +6490,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -6549,6 +6663,9 @@
       "embeddedDocs": {
         "kind": "type"
       },
+      "enumerateScalars": {
+        "kind": "type"
+      },
       "escapeMathML": {
         "kind": "type"
       },
@@ -6598,6 +6715,9 @@
         "kind": "type"
       },
       "scalarEquals": {
+        "kind": "type"
+      },
+      "scalarGrammarAccepts": {
         "kind": "type"
       },
       "scalarSize": {
@@ -6912,6 +7032,12 @@
       "CompiledExpression": {
         "kind": "type"
       },
+      "EnumerationBudget": {
+        "kind": "type"
+      },
+      "EnumerationStop": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -6943,6 +7069,9 @@
         "kind": "type"
       },
       "ScalarFunctionName": {
+        "kind": "type"
+      },
+      "ScalarGrammar": {
         "kind": "type"
       },
       "ScalarNode": {
@@ -7113,6 +7242,9 @@
       "embeddedDocs": {
         "kind": "type"
       },
+      "enumerateScalars": {
+        "kind": "type"
+      },
       "escapeMathML": {
         "kind": "type"
       },
@@ -7162,6 +7294,9 @@
         "kind": "type"
       },
       "scalarEquals": {
+        "kind": "type"
+      },
+      "scalarGrammarAccepts": {
         "kind": "type"
       },
       "scalarSize": {
@@ -8291,6 +8426,9 @@
         "kind": "function"
       },
       "Transfer": {
+        "kind": "function"
+      },
+      "WorkerPool": {
         "kind": "function"
       },
       "bitAnd": {

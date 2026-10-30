@@ -60,7 +60,7 @@ export {
   crossoverSubtrees,
   DEFAULT_MUTATION_WEIGHTS,
   deleteNode,
-  identity,
+  identityMutation,
   insertNode,
   mutateConstant,
   mutateFeature,
@@ -80,31 +80,16 @@ export type {
 export { searchScalars } from './scalar-search.js';
 export type {
   ScalarSearchOptions,
-  ScalarSearchParallelOptions,
   ScalarSearchProblem,
   ScalarSearchResult,
   ScalarSearchStopReason,
   SearchProgress,
-  SearchScalarsOptions,
-  SearchScalarsResult,
 } from './scalar-search.js';
-export {
-  evaluateScalarPopulation,
-  resolveScalarBatchWorkerScript,
-  SCALAR_PARALLEL_MIN_ROWS,
-} from './scalar-batch-parallel.js';
-export type {
-  EvaluateScalarPopulationOptions,
-  ScalarPopulationEvalItem,
-  ScalarPopulationEvalResult,
-  ScalarPopulationParallelOptions,
-} from './scalar-batch-parallel.js';
+export type { ScalarPopulationParallelOptions } from './scalar-batch-parallel.js';
 // scalarToNode, nodeToScalar, simplifyScalar, scalarToTex are exported via export * from './factories/index.js'.
 
 export { paretoFront, scoreFront, selectFrontModel, ParetoFrontError } from './pareto-front.js';
 export type { FrontCandidate, ScoredCandidate } from './pareto-front.js';
-export { frontToJson, frontToLatexTable } from './front-export.js';
-export type { FrontJson, FrontJsonRow, FrontLatexTableOptions } from './front-export.js';
 export { numericallyEquivalent, NumericEquivalenceError } from './numeric-equivalence.js';
 export type { NumericEquivalenceOptions, NumericEquivalence } from './numeric-equivalence.js';
 export { inferScalarDimension, solveParameterDimensions } from './scalar-dimension.js';

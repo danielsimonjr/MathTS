@@ -1639,7 +1639,6 @@
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/evaluate.ts",
       "functions/src/fit-scalar.ts",
-      "functions/src/front-export.ts",
       "functions/src/index.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
@@ -1720,12 +1719,7 @@
       "functions/src/index.ts",
       "functions/src/numeric-equivalence.ts",
       "functions/src/scalar-batch-parallel.ts",
-      "functions/src/scalar-batch.worker.ts",
-      "functions/src/scalar-search.ts"
-    ],
-    "functions/src/pareto-front.ts": [
-      "functions/src/front-export.ts",
-      "functions/src/index.ts",
+      "functions/src/scalar-batch-task.ts",
       "functions/src/scalar-search.ts"
     ],
     "functions/src/typed/trigonometry.ts": [
@@ -1767,7 +1761,11 @@
       "functions/src/scalar-compile.ts",
       "functions/src/scalar-mutate.ts"
     ],
+    "functions/src/scalar-mutate.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
+    "functions/src/scalar-search.ts": ["functions/src/index.ts"],
+    "functions/src/pareto-front.ts": ["functions/src/index.ts", "functions/src/scalar-search.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
@@ -1886,16 +1884,22 @@
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-batch-parallel.ts": [
+      "functions/src/index.ts",
+      "functions/src/scalar-search.ts"
+    ],
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/scalar-batch-task.ts": [
+      "functions/src/scalar-batch-parallel.ts",
+      "functions/src/scalar-batch.worker.ts"
     ],
     "functions/src/numeric/rational-nullspace.ts": [
       "functions/src/scalar-dimension.ts",
       "functions/src/typed/numeric.ts"
     ],
-    "functions/src/scalar-batch-parallel.ts": ["functions/src/scalar-search.ts"],
-    "functions/src/scalar-mutate.ts": ["functions/src/scalar-search.ts"],
     "functions/src/type/local/Decimal.ts": ["functions/src/types.ts"],
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/typed/factorization/integer-poly.ts": [

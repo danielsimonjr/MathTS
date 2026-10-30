@@ -16,7 +16,11 @@ npm install @danielsimonjr/mathts-parallel
   threshold is met — most element-wise defaults are `'never'` / sequential).
 - `DEFAULT_THRESHOLD_BY_OP`, `resolveOpThreshold`, standalone `parallel*` helpers, and
   bitwise ops.
-- Opt-in per-task timeouts with hung-worker replacement.
+- `WorkerPool`, the low-level pool that `execute(data, transferables?, timeoutMs?)` runs on:
+  opt-in per-task timeouts with hung-worker replacement. A call that waits in the queue is
+  covered by its timeout too, and `terminate()` cancels the timers and stops a worker that
+  was still starting. `@danielsimonjr/mathts-functions` uses it for `searchScalars`
+  (`parallel` option).
 
 ## License
 
