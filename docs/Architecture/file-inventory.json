@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2014,
+  "totalFiles": 2015,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1196,
     "test-only": 0,
     "orphan": 0,
-    "test": 730,
+    "test": 731,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1222,
-    "tests": 730,
+    "tests": 731,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
     "@danielsimonjr/mathts-expression": 559,
-    "@danielsimonjr/mathts-functions": 848,
+    "@danielsimonjr/mathts-functions": 849,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 112,
@@ -10804,6 +10804,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 32
+    },
+    {
+      "file": "functions/tests/tier-parity-registry.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 216
     },
     {
       "file": "functions/tests/timeseries.test.ts",
