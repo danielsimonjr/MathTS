@@ -947,7 +947,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 81
+      "loc": 174
     },
     {
       "file": "core/tests/config.test.ts",
