@@ -26,12 +26,12 @@ D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implem
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
 `@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
-`matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 lives in `functions`, and M11 may sit in `expression` next to `scalar-structure.ts` only if it imports `expression` and `core` alone. A package is not an option in this roadmap (§8, Phase 4; §10).
+`matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 stays in the existing packages. M11 lives in `expression` (`expression/src/scalar-enumerate.ts` in the phases 3–5 plan) because it imports only `expression`. A package is not an option (§8, Phase 4; §10).
 
-> Core sprint (speed, stability, security of `core` and the expression parser) is planned in [`docs/plans/CORE_SPRINT_PLAN.md`](../plans/CORE_SPRINT_PLAN.md) and gated by PRs 1–10 of that plan. The next PySR milestone starts after PR 10 merges. Releases stay off (§7, PR #398 unmerged).
+> Core sprint (speed, stability, security of `core` and the expression parser) is **done**. [`docs/plans/CORE_SPRINT_PLAN.md`](../plans/CORE_SPRINT_PLAN.md) PRs 1–10 are on `main`: [#510](https://github.com/danielsimonjr/MathTS/pull/510), [#509](https://github.com/danielsimonjr/MathTS/pull/509), [#508](https://github.com/danielsimonjr/MathTS/pull/508), [#511](https://github.com/danielsimonjr/MathTS/pull/511), [#513](https://github.com/danielsimonjr/MathTS/pull/513), [#514](https://github.com/danielsimonjr/MathTS/pull/514), [#512](https://github.com/danielsimonjr/MathTS/pull/512), [#516](https://github.com/danielsimonjr/MathTS/pull/516), [#517](https://github.com/danielsimonjr/MathTS/pull/517), [#515](https://github.com/danielsimonjr/MathTS/pull/515). Next is Phases 3–5 in [`docs/plans/PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) (M9–M15, Sprints 3R–5R, and the recorded B9 review of M1, M3, and M4). Those phases are built in MathTS now; they do not wait on a UPT delegation issue. After Phase 5, Phase 6 and up is the clone-reduction loop (§8). Releases stay off (§7, PR #398 unmerged).
 
 **Related external projects:** [PySR](https://github.com/danielsimonjr/pysr) (fork of MilesCranmer/PySR, studied read-only at commit `72a9ab9`, backend pin `SymbolicRegression ~2.7.2` in `pysr/juliapkg.json`); [Universal Physics Tensor (UPT)](https://github.com/danielsimonjr/universal-physics-tensor) (studied read-only at its default-branch HEAD).
-**Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md).
+**Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md), and the build plan [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md).
 
 ---
 
@@ -65,35 +65,40 @@ around each missing primitive by hand. Three of them now exist in MathTS:
 | `src/atlas/witness-symbolic.ts` reseeds the **global** `seedProbabilityRng(spec.id)` before sampling.                                                  | Instance-scoped, splittable seeded RNG      | `createSeededRng` / `fork` (M5, in `core`).                                                                     |
 | No loss-vs-complexity front utility exists in either repo.                                                                                             | Pareto front + PySR-style score / selection | `paretoFront`, `scoreFront`, `selectFrontModel` (M4, merged).                                                   |
 
-There are five phases and fifteen milestones (§8). Each milestone is scoped to one
-focused PR. Each phase ends with an **integration sprint** (Sprint 1R to Sprint 5R) that
-removes the duplicates and documentation gaps the audit found in the code that phase
-touches. Every milestone and every sprint has a Definition of Done (§6).
+There are five feature phases and fifteen milestones (§8). Each milestone is scoped to one
+focused PR. Each feature phase ends with an **integration sprint** (Sprint 1R to Sprint 5R)
+that removes the duplicates and documentation gaps the audit found in the code that phase
+touches. Every milestone and every sprint has a Definition of Done (§6). Phase 6 and later
+is a clone-reduction loop, not a milestone.
 
 **Next, in order:**
 
 1. **Phase 1 (M2 and M5) is complete.** M2 is on `main` as
    [#440](https://github.com/danielsimonjr/MathTS/pull/440) (`71f8c3ce`). M5 is
    `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`), **M7**
-   (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented; next
-   is Sprint 2R. Leave §6 B9 for M5, M6, M7 and M8 unchecked until a review is recorded.
+   (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. Leave §6 B9
+   for M5, M6, M7 and M8 unchecked until a review is recorded.
 2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
-   ticked below). Do not tick §6 B9 for M1, M3 or M4.
-3. **Phase 2 (M6–M8) is complete.** Next is Sprint 2R (ODE/BVP/DAE Jacobians, Nelder–Mead merge;
-   `linearRegression`/`linregress` and `numericRealRoots` consolidation done in #423; LM/`svds`/`matMul`
-   already moved into Sprint 1R).
+   ticked below). §6 B9 for M1, M3 and M4 stays Partly until PR 1 of
+   [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) records the review.
+3. **Phase 2 (M6–M8) is complete.** Sprint 2R's code items are done (ODE/BVP/DAE Jacobians,
+   Nelder–Mead merge, `linearRegression`/`linregress` and `numericRealRoots` in #423; LM/`svds`/`matMul`
+   moved into Sprint 1R). Its two unchecked DoD boxes stay as they are.
+4. **The core sprint is done** (PRs 1–10; see the status block). **Next implementation** is
+   Phases 3–5, in MathTS, in the order in [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md).
+5. **Then Phase 6 and up:** the clone-reduction loop (§8). No release before that loop is clean.
 
 ---
 
 ## 1. Framing and division of labour
 
-| Concern                                                                                          | Owner                                                                                                                                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Search policy, epistemic status, adjudication, falsifiers, holdouts, multiple-hypothesis control | **UPT** (`src/composition/probe/*`, Scientific-Bridge-Discovery-v1 §1.3–1.5, §13, §15)                                                                                                                                                                  |
-| UPT's physics AST (`ExprNode`), its dimensional validator, `normalForm`, `CanonicalEquation`     | **UPT** (`src/dimensional/ast-types.ts`, `src/dimensional/validator.ts`, `src/canonical/normal-form.ts`)                                                                                                                                                |
-| Scalar IR that UPT lowers into (`ScalarNode`), its evaluation, simplification, LaTeX             | **MathTS** (`expression/src/scalar-builder.ts`, `expression/src/scalar-structure.ts`, `functions/src/scalar-eval.ts`, `functions/src/scalar-compile.ts`; UPT lowers into it in `src/composition/expr-eval.ts`)                                          |
-| Numerics: optimizers, statistics, seeded RNG, units/dimension vectors, constants                 | **MathTS** (`functions/src/numeric/bfgs.ts`, `functions/src/optimization-extra.ts`, `functions/src/numeric/numeric-jacobian.ts`, `core/src/numeric/stable.ts`, `core/src/types/si-dimension-vector.ts`, `functions/src/type/unit/physicalConstants.ts`) |
-| Generic search kit (mutations, enumerator, evolution loop)                                       | **MathTS, Phase 4, optional.** UPT may wrap it as a `CandidateGenerator` (UPT §7.1) or keep its own enumerator. Home: `functions` by default; M11 may sit in `expression` if the placement probe allows. D-1 is decided: no new package (§10).          |
+| Concern                                                                                          | Owner                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Search policy, epistemic status, adjudication, falsifiers, holdouts, multiple-hypothesis control | **UPT** (`src/composition/probe/*`, Scientific-Bridge-Discovery-v1 §1.3–1.5, §13, §15)                                                                                                                                                                             |
+| UPT's physics AST (`ExprNode`), its dimensional validator, `normalForm`, `CanonicalEquation`     | **UPT** (`src/dimensional/ast-types.ts`, `src/dimensional/validator.ts`, `src/canonical/normal-form.ts`)                                                                                                                                                           |
+| Scalar IR that UPT lowers into (`ScalarNode`), its evaluation, simplification, LaTeX             | **MathTS** (`expression/src/scalar-builder.ts`, `expression/src/scalar-structure.ts`, `functions/src/scalar-eval.ts`, `functions/src/scalar-compile.ts`; UPT lowers into it in `src/composition/expr-eval.ts`)                                                     |
+| Numerics: optimizers, statistics, seeded RNG, units/dimension vectors, constants                 | **MathTS** (`functions/src/numeric/bfgs.ts`, `functions/src/optimization-extra.ts`, `functions/src/numeric/numeric-jacobian.ts`, `core/src/numeric/stable.ts`, `core/src/types/si-dimension-vector.ts`, `functions/src/type/unit/physicalConstants.ts`)            |
+| Generic search kit (mutations, enumerator, evolution loop)                                       | **MathTS, Phase 4, built now.** UPT may wrap it as a `CandidateGenerator` (UPT §7.1) or keep its own enumerator. M12–M14 live in `functions`. M11 lives in `expression/src/scalar-enumerate.ts` (imports only `expression`). D-1 is decided: no new package (§10). |
 
 The roadmap is built around one design decision: **`ScalarNode` is the interchange
 IR.** It is already public, it is already what UPT lowers into (`docs/integration/upt.md`
@@ -248,22 +253,22 @@ A constant whose units are left free is printed `[⋅]`.
 
 ### 2.9 Transfer matrix: which PySR methods carry over to UPT-style search
 
-| PySR method                                                    | Carries over?                                                                                                           | MathTS's role                                                                          |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Expression trees + operator sets by arity                      | **Yes.** `ScalarNode` already exists, with `+ - * / ^` and 11 lowered unary functions (12 input names).                 | M1 (structure, merged), M11 (operator-set and grammar descriptor)                      |
-| Complexity (weighted node count)                               | **Yes.** UPT §8 budgets already count `maxAstDepth` and `maxOperators`.                                                 | M1 `scalarComplexity` with PySR-style weights (merged)                                 |
-| Pareto front per complexity + score + `best` selection         | **Yes**, as a reporting and ranking device. It is never a status decision (UPT §1.4).                                   | M4 (merged): `paretoFront`, `scoreFront`, `selectFrontModel`                           |
-| Constant fitting (BFGS / Nelder–Mead, restarts)                | **Yes.** It generalizes UPT's single-prefactor `ols` fit to several constants.                                          | M6 exact gradients, M7 `fitScalarParameters`                                           |
-| Simplification during and after search                         | **Yes, and more strongly.** UPT needs canonical equivalence, not only shorter output.                                   | M1 canonical key (merged), M2 Node bridge (reuses `simplify`), M8 numeric equivalence  |
-| Dimensional constraints                                        | **Yes, but as generation-time typing** (UPT §7), not an additive penalty.                                               | M9 dimension inference, M10 constant-unit solving (built only if UPT asks to delegate) |
-| Structural constraints (`maxsize`, nesting, argument size)     | **Yes.** They map onto UPT `SearchBudget` and grammar rules.                                                            | M11 grammar descriptor, M12 constraint-checked mutations                               |
-| Mutation + crossover operators                                 | **Partly.** They are useful for an optional stochastic backend (UPT §8.1 step 6), not for the deterministic enumerator. | M12                                                                                    |
-| Islands, migration, annealing, adaptive parsimony              | **Optional.** This is the step-6 "stochastic generator", and it is declared `seeded`.                                   | M13                                                                                    |
-| Batching rows                                                  | **Yes**, for large observation sets. UPT keeps holdouts separate (`fit.ts`: "Generation never sees holdout rows").      | M3 (merged) accepts any columns; the caller picks the row subset                       |
-| `guesses` / warm start                                         | **Yes.** Known equations are natural seeds for bridge search.                                                           | M13 `seeds` option, plus JSON round-trip of `ScalarNode` (it is already plain data)    |
-| `TemplateExpressionSpec` (fixed skeleton + free sub-trees)     | **Interesting later.** It fits "a known law × an unknown correction".                                                   | Out of scope until M13 exists (§9)                                                     |
-| SymPy / LaTeX export                                           | **Yes**, through the existing expression `Node.toTex`.                                                                  | M2, M15                                                                                |
-| JAX / PyTorch export, `TypeSpec`, `denoise`, feature selection | **No**, for now. The author does not use `denoise` or `select_k_features` either (`docs/src/tuning.md:40`).             | None                                                                                   |
+| PySR method                                                    | Carries over?                                                                                                           | MathTS's role                                                                                    |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Expression trees + operator sets by arity                      | **Yes.** `ScalarNode` already exists, with `+ - * / ^` and 11 lowered unary functions (12 input names).                 | M1 (structure, merged), M11 (operator-set and grammar descriptor)                                |
+| Complexity (weighted node count)                               | **Yes.** UPT §8 budgets already count `maxAstDepth` and `maxOperators`.                                                 | M1 `scalarComplexity` with PySR-style weights (merged)                                           |
+| Pareto front per complexity + score + `best` selection         | **Yes**, as a reporting and ranking device. It is never a status decision (UPT §1.4).                                   | M4 (merged): `paretoFront`, `scoreFront`, `selectFrontModel`                                     |
+| Constant fitting (BFGS / Nelder–Mead, restarts)                | **Yes.** It generalizes UPT's single-prefactor `ols` fit to several constants.                                          | M6 exact gradients, M7 `fitScalarParameters`                                                     |
+| Simplification during and after search                         | **Yes, and more strongly.** UPT needs canonical equivalence, not only shorter output.                                   | M1 canonical key (merged), M2 Node bridge (reuses `simplify`), M8 numeric equivalence            |
+| Dimensional constraints                                        | **Yes, but as generation-time typing** (UPT §7), not an additive penalty.                                               | M9 dimension inference, M10 constant-unit solving (built in MathTS now; see the phases 3–5 plan) |
+| Structural constraints (`maxsize`, nesting, argument size)     | **Yes.** They map onto UPT `SearchBudget` and grammar rules.                                                            | M11 grammar descriptor, M12 constraint-checked mutations                                         |
+| Mutation + crossover operators                                 | **Partly.** They are useful for an optional stochastic backend (UPT §8.1 step 6), not for the deterministic enumerator. | M12                                                                                              |
+| Islands, migration, annealing, adaptive parsimony              | **Optional.** This is the step-6 "stochastic generator", and it is declared `seeded`.                                   | M13                                                                                              |
+| Batching rows                                                  | **Yes**, for large observation sets. UPT keeps holdouts separate (`fit.ts`: "Generation never sees holdout rows").      | M3 (merged) accepts any columns; the caller picks the row subset                                 |
+| `guesses` / warm start                                         | **Yes.** Known equations are natural seeds for bridge search.                                                           | M13 `seeds` option, plus JSON round-trip of `ScalarNode` (it is already plain data)              |
+| `TemplateExpressionSpec` (fixed skeleton + free sub-trees)     | **Interesting later.** It fits "a known law × an unknown correction".                                                   | Out of scope until M13 exists (§9)                                                               |
+| SymPy / LaTeX export                                           | **Yes**, through the existing expression `Node.toTex`.                                                                  | M2, M15                                                                                          |
+| JAX / PyTorch export, `TypeSpec`, `denoise`, feature selection | **No**, for now. The author does not use `denoise` or `select_k_features` either (`docs/src/tuning.md:40`).             | None                                                                                             |
 
 ---
 
@@ -301,20 +306,20 @@ against #412–#418. Line numbers drift; the symbol names are the stable referen
 
 ## 4. Gap analysis
 
-| #   | Gap                                                                                                                                               | Evidence                                                                                                                        | Milestone | Status                                                                                                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| G1  | No traversal, size/depth, weighted complexity or symbol collection for `ScalarNode`                                                               | `expression/src/scalar-builder.ts` exported only build and normalize functions                                                  | M1        | **Closed** by #396 (`expression/src/scalar-structure.ts`)                                                         |
-| G2  | No canonical structural key for `ScalarNode` (commutative flattening, `a/(b/c)` ≡ `a·c/b`, `a·a` ≡ `a^2`)                                         | UPT `src/composition/algebraic-equivalence.ts` header                                                                           | M1        | **Closed** by #396 (`scalarCanonicalKey`)                                                                         |
-| G3  | No direct `ScalarNode` ↔ `Node` conversion, so `simplify` / `toTex` / `derivative` need a string round trip                                       | UPT `algebraic-equivalence.ts` (`renderGensym`, then `parse`, then `simplify`)                                                  | M2        | **Closed** (`functions/src/scalar-node-bridge.ts`; no `parse(` in module)                                         |
-| G4  | No columnar batch evaluator. Per-row interpretation goes through typed dispatch, with a throw on failure                                          | `functions/src/scalar-eval.ts`; UPT `probe/fit.ts` `predictions()`                                                              | M3        | **Closed** by #397 (`compileScalar`)                                                                              |
-| G5  | No Pareto front, front score or model-selection utility                                                                                           | §3, Pareto row                                                                                                                  | M4        | **Closed** by #395 (`paretoFront`, `scoreFront`, `selectFrontModel`)                                              |
-| G6  | No instance-scoped, splittable seeded RNG (`createSeededRng` / `fork`). The Mulberry32 _body_ is in `core` (#415); one worker-bundle copy remains | §3 RNG row; UPT `witness-symbolic.ts` reseeds the global stream                                                                 | M5        | **Closed** (API in `core`; worker mulberry32 copy unchanged; `seedProbabilityRng` / `createRng` not migrated, §9) |
-| G7  | `levenbergMarquardt` has no analytic-Jacobian hook (exact `ScalarNode` parameter gradients: **closed** via `compileScalarGradient`, M6)           | `compileScalarGradient` (`functions/src/scalar-compile.ts`); `levenbergMarquardt` `LMOptions.jacobian`, `optimization-extra.ts` | M6, M7    | **Closed** (M6 gradients; M7 optional `jacobian` on LM)                                                           |
-| G8  | No multi-constant fit of an expression to data (PySR §2.5)                                                                                        | UPT `probe/fit.ts` fits one prefactor with `ols`                                                                                | M7        | **Closed** (`fitScalarParameters`, `functions/src/fit-scalar.ts`)                                                 |
-| G9  | No guarded numerical-equivalence check (UPT §9 level 5)                                                                                           | `symbolicEqual` is symbolic and one-sided                                                                                       | M8        | **Closed** (`functions/src/numeric-equivalence.ts`; `numericallyEquivalent`)                                      |
-| G10 | No dimension inference over `ScalarNode` with rational exponents, and no constant-unit solving (PySR's `[⋅]`)                                     | UPT owns `ExprNode` validation; `ScalarNode` has none                                                                           | M9, M10   | Open (conditional on UPT delegation)                                                                              |
-| G11 | No grammar / operator-set descriptor, no enumerator, no mutation / crossover operators, no evolution loop                                         | Greenfield                                                                                                                      | M11–M13   | Open (optional)                                                                                                   |
-| G12 | No front export (LaTeX table / JSON report) comparable to `sympy2latextable`                                                                      | `pysr/export_latex.py:62`                                                                                                       | M15       | Open                                                                                                              |
+| #   | Gap                                                                                                                                               | Evidence                                                                                                                        | Milestone | Status                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| G1  | No traversal, size/depth, weighted complexity or symbol collection for `ScalarNode`                                                               | `expression/src/scalar-builder.ts` exported only build and normalize functions                                                  | M1        | **Closed** by #396 (`expression/src/scalar-structure.ts`)                                                                    |
+| G2  | No canonical structural key for `ScalarNode` (commutative flattening, `a/(b/c)` ≡ `a·c/b`, `a·a` ≡ `a^2`)                                         | UPT `src/composition/algebraic-equivalence.ts` header                                                                           | M1        | **Closed** by #396 (`scalarCanonicalKey`)                                                                                    |
+| G3  | No direct `ScalarNode` ↔ `Node` conversion, so `simplify` / `toTex` / `derivative` need a string round trip                                       | UPT `algebraic-equivalence.ts` (`renderGensym`, then `parse`, then `simplify`)                                                  | M2        | **Closed** (`functions/src/scalar-node-bridge.ts`; no `parse(` in module)                                                    |
+| G4  | No columnar batch evaluator. Per-row interpretation goes through typed dispatch, with a throw on failure                                          | `functions/src/scalar-eval.ts`; UPT `probe/fit.ts` `predictions()`                                                              | M3        | **Closed** by #397 (`compileScalar`)                                                                                         |
+| G5  | No Pareto front, front score or model-selection utility                                                                                           | §3, Pareto row                                                                                                                  | M4        | **Closed** by #395 (`paretoFront`, `scoreFront`, `selectFrontModel`)                                                         |
+| G6  | No instance-scoped, splittable seeded RNG (`createSeededRng` / `fork`). The Mulberry32 _body_ is in `core` (#415); one worker-bundle copy remains | §3 RNG row; UPT `witness-symbolic.ts` reseeds the global stream                                                                 | M5        | **Closed** (API in `core`; worker mulberry32 copy unchanged; `seedProbabilityRng` / `createRng` not migrated, §9)            |
+| G7  | `levenbergMarquardt` has no analytic-Jacobian hook (exact `ScalarNode` parameter gradients: **closed** via `compileScalarGradient`, M6)           | `compileScalarGradient` (`functions/src/scalar-compile.ts`); `levenbergMarquardt` `LMOptions.jacobian`, `optimization-extra.ts` | M6, M7    | **Closed** (M6 gradients; M7 optional `jacobian` on LM)                                                                      |
+| G8  | No multi-constant fit of an expression to data (PySR §2.5)                                                                                        | UPT `probe/fit.ts` fits one prefactor with `ols`                                                                                | M7        | **Closed** (`fitScalarParameters`, `functions/src/fit-scalar.ts`)                                                            |
+| G9  | No guarded numerical-equivalence check (UPT §9 level 5)                                                                                           | `symbolicEqual` is symbolic and one-sided                                                                                       | M8        | **Closed** (`functions/src/numeric-equivalence.ts`; `numericallyEquivalent`)                                                 |
+| G10 | No dimension inference over `ScalarNode` with rational exponents, and no constant-unit solving (PySR's `[⋅]`)                                     | UPT owns `ExprNode` validation; `ScalarNode` has none                                                                           | M9, M10   | Open. Built in MathTS now ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)); not waiting on a UPT issue        |
+| G11 | No grammar / operator-set descriptor, no enumerator, no mutation / crossover operators, no evolution loop                                         | Greenfield                                                                                                                      | M11–M13   | Open. Built in MathTS now ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)); not waiting on a consumer request |
+| G12 | No front export (LaTeX table / JSON report) comparable to `sympy2latextable`                                                                      | `pysr/export_latex.py:62`                                                                                                       | M15       | Open. Scheduled as PR 11 of [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)                                    |
 
 ---
 
@@ -419,10 +424,11 @@ later audit was after merge. Do not tick B9.
 
 ## 7. Release policy
 
-A release happens **only when every roadmap item is done**: M1–M15 and Sprint 1R–5R, each
-with every DoD box ticked. A milestone that the owner decides not to build (Phase 3 if UPT
-does not delegate, Phase 4 if no consumer asks) counts as done once it is moved to §9 with
-its rationale.
+A release happens **only when every roadmap item is done**: M1–M15, Sprint 1R–5R, and the
+Phase 6 clone-reduction loop (§8) is clean, each with every DoD box ticked. Phases 3 and 4
+are built in MathTS ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)); they are
+not moved to §9 for lack of a UPT issue. A milestone the owner later decides not to build
+counts as done once it is moved to §9 with its rationale.
 
 - **Nothing is released per milestone or per sprint.** No version PR merge, no tag, no
   GitHub Release, no npm publish.
@@ -942,14 +948,14 @@ are done (#423). Nelder–Mead merge (item 7) is done.
   - [ ] B3: `matMul` added to the `matrix` barrel and `docs/api/matrix.md`; no other
         public export changes.
 
-### Phase 3 — Dimension-aware primitives (conditional on UPT delegation)
+### Phase 3 — Dimension-aware primitives
 
 UPT owns `ExprNode` dimensional validation. `docs/integration/upt.md` Q2 keeps
 dimensional analysis on `Tensor` UPT-only. These milestones cover a different object,
-dimension inference over **`ScalarNode`**, and are built **only if UPT files an issue
-asking to delegate**, as it did for units in #347. D-2 is decided (§10) and is
-implemented by Sprint 1R item 7 (**PR-SIDIM**, #414). **PR-SIDIM has merged, so M9
-may start** (it still waits on a UPT delegation issue).
+dimension inference over **`ScalarNode`**. They are built in MathTS now
+([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PRs 2–4). They do not
+wait on a UPT delegation issue. D-2 is decided (§10) and is implemented by Sprint 1R
+item 7 (**PR-SIDIM**, #414). **PR-SIDIM has merged, so M9 may start.**
 
 #### M9 — `inferScalarDimension`
 
@@ -1049,17 +1055,20 @@ This sprint runs even if M9 and M10 stay candidates; item 2 does not depend on t
   - [x] Oracle: hand-written exact fractions for `simplify`; CODATA 2022 published
         uncertainties if item 3 is done.
 
-### Phase 4 — Search kit (optional; no new package)
+### Phase 4 — Search kit (no new package)
 
-Phase 4 only proceeds if UPT, or another consumer, wants a generic in-process
-stochastic generator (UPT §8.1 step 6).
+Phase 4 is built in MathTS now ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)
+PRs 5–10). It does not wait on a UPT or other consumer request. The kit is the optional
+stochastic generator UPT §8.1 step 6 describes; MathTS ships the primitives either way.
 
 **Home: D-1 decided — no new package.** All Phase 4 work stays in `core`, `functions`,
-and `expression`. There is no `@danielsimonjr/mathts-symbolic-search`. The default home
-is a module family in `functions` (M11 may sit in `expression` next to `scalar-structure.ts`
-if the placement probe shows it imports only `expression` and `core`). Before M11 merges,
-run `bun run docs:graph -- cycles` as a placement check **between `functions` and
-`expression`**: a cycle means move the module, not create a package.
+and `expression`. There is no `@danielsimonjr/mathts-symbolic-search`. M12, M13, and M14
+live in `functions`. M11 lives in `expression/src/scalar-enumerate.ts` because it imports
+only `expression` (`createScalarBuilder`, `scalarSize`, `scalarDepth`, `scalarCanonicalKey`;
+`admit` is a callback, so `inferScalarDimension` is not imported). Before M11 merges, run
+`bun run docs:deps` and then `bun run docs:graph -- cycles` and paste the summary in the
+PR. A cycle is an import bug: fix the import list. Do not create a package, and do not
+move the file to `functions` to hide a cycle.
 
 #### M11 — Grammar descriptor + deterministic bounded enumerator
 
@@ -1178,10 +1187,12 @@ export function enumerateScalars(
 - **Design:** post `ScalarNode` JSON and column buffers to the workers, and evaluate
   inside the worker. Results are merged deterministically by candidate index, so a
   parallel run equals a serial run for the same seed.
-- **Open question:** how the worker obtains the evaluator. `workerpool` cannot import
-  `functions`, and copying the M3 tape into `packages/workerpool/src/worker.ts` would be a
-  duplicate. Serializing it through `kernelSource` is the candidate; settle this at the
-  Definition of Ready.
+- **Decided** ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 9): the
+  worker imports `evaluateScalarTape` from `functions/src/scalar-compile.ts`.
+  `packages/workerpool` does not depend on `functions`. Do not copy the tape into
+  `packages/workerpool` or `parallel/src/matrix.worker.ts`. Do not ship the tape through
+  `kernelSource`. `WorkerPool` is exported from `parallel/src/index.ts`. The batch worker
+  is a second tsdown entry of `functions`. The threshold stays 100 rows.
 - **Acceptance:** parallel and serial fronts are identical for the same seed. Any
   speedup claim goes into a committed benchmark that follows `AGENTS.md`, and the
   per-op threshold reaches the dispatch code (benchmark rule 9).
@@ -1267,18 +1278,76 @@ re-decide it here if PR-POLY has already merged.
   6. **CI audit step** (I-1). **Done (#421).** Retry `bun audit` on a registry outage via
      `tools/test/bun-audit-retry.mjs`, keep `--audit-level=high`, fail on a real advisory.
   7. **Roadmap close-out.** Every milestone and sprint box in this file ticked or the
-     item moved to §9; `CHANGELOG.md` entries; this file's status line set to "complete,
-     ready to release".
+     item moved to §9. The status line records Phases 1–5 complete. It does not say
+     "ready to release": Phase 6 and up is still a release gate (§7, §8). No
+     `CHANGELOG.md` entry until the release itself.
 - **Reuse:** the existing CLI envelope, `examples/`, the release scripts and workflows
   as they are.
 - **Exit criteria:** items 1–6 merged or recorded as owner decisions in §10; every DoD box
-  in this roadmap ticked. Only then does §7's release happen.
+  for M1–M15 and Sprints 1R–5R ticked. §7's release still waits on the Phase 6 loop.
 - **DoD:** base checklist + the following specifics:
   - [ ] Oracle: the `capabilities --json` output parsed and `schemaVersion` compared to
         `SCHEMA_VERSION`.
   - [x] Oracle: `compat/tests/instance-config-isolation.test.ts` — `create(all, config)`
         leaves barrel `evaluate` on `number` and instances do not cross-contaminate.
   - [ ] `node tools/test/consumer-typecheck.mjs` passes on the full set of packages.
+
+### Phase 6 and up: clone-reduction loop
+
+This phase is not a PySR milestone. It starts after Phase 5's close-out
+([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 12). It repeats until
+the clone report is clean. There is no grok planner on this loop.
+
+Each phase N (6, 7, …) is four steps, in order:
+
+1. **Measure.** composer-2.5 runs `repo-tools clones` and writes
+   [`docs/roadmap/CLONES_REMAINING.md`](./CLONES_REMAINING.md) from that run (counts,
+   exact groups, near pairs, the commit SHA). The ledger names the tool version. It
+   does not mark pairs MERGE or KEEP. Do not commit `inventory.jsonl` or `clones.json`.
+2. **Plan.** claude-opus-5-5 (effort xhigh) reviews that ledger and writes
+   `docs/plans/CLONES_PHASE_<N>_PLAN.md`. The plan marks each pair MERGE or KEEP, with
+   a reason a later reader can check. Opus does not implement the merges.
+3. **Build.** composer-2.5 implements that plan, one small PR at a time, and stops.
+4. **Review.** claude-sonnet-5-5 (effort xhigh) re-runs the tests, greps for a second
+   copy of any algorithm the PR claims to share, and fixes what it finds.
+
+Then phase N+1 starts at step 1 on the merge commit. A phase that merged code is not
+the last phase.
+
+**Clean** means the opus plan for that phase lists no MERGE pair. Every remaining pair
+is KEEP, or the tool reported no pairs. The ledger for that clean phase was measured
+after the previous phase's merges were on `main`. A KEEP that the dependency graph
+forces stays KEEP: the worker-bundle copies of `mulberry32` and `rowMajorStrides` in
+`packages/workerpool/src/worker-numerics.ts` are the standing example (`workerpool`
+cannot import `core`).
+
+**Tool.** `@danielsimonjr/repo-tools` **2.3.0**, the version recorded in
+[`docs/plans/CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md). The CI pin
+`REPO_TOOLS_VERSION: 2.2.4` in `.github/workflows/ci.yml` is for `repo-tools check`.
+Do not change it in a clone phase.
+
+From the repo root, with the tool installed outside the repo:
+
+```bash
+repo-tools clones . --src \
+  packages/typed-function/src packages/workerpool/src \
+  core/src matrix/src tensor/src autograd/src functions/src expression/src \
+  parser/src units/src numbers/src ast/src evaluator/src linalg/src \
+  arithmetic/src trigonometry/src statistics/src signal/src \
+  parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
+  --out=../tmp/clones-phase-N
+```
+
+`--src` is one flag. It takes every following argument until the next flag. `--out`
+is relative to the repo root and its parent must be writable. An absolute path is
+rejected.
+
+[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md) is the historical plan
+for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
+`CLONES_REMAINING.md` with the new measurement and adds its own plan file.
+
+**Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
+merge PR #398. The loop is part of the release gate.
 
 ---
 
@@ -1302,11 +1371,12 @@ re-decide it here if PR-POLY has already merged.
 
 ## 10. Open questions and decisions for the owner
 
-1. **Phase 3 delegation.** Does UPT want MathTS to own `ScalarNode` dimension inference
-   (M9/M10), or should UPT keep its validator as the sole authority? The default is
-   that UPT keeps it.
-2. **D-1, Phase 4 home.** **Decided:** no 25th package. Phase 4 lives in `functions`;
-   M11 may sit in `expression` if the placement probe allows. A package is not an option.
+1. **Phase 3 delegation.** **Decided:** MathTS implements M9 and M10 in-tree
+   ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md)). UPT keeps `ExprNode`
+   validation and Tensor dimensional analysis (Q2). A UPT issue is not a gate.
+2. **D-1, Phase 4 home.** **Decided:** no 25th package. Phase 4 is built now. M11 lives
+   in `expression` when it imports only `expression` (the phases 3–5 plan). A package
+   is not an option. The cycle probe still runs in the M11 PR.
 3. **D-2, dimension exponents.** **Decided and implemented (#414):** `SiDimensionVector`
    exponents are `core` `Fraction`s. `Unit.dimensions` stays `number[]`.
 4. **Constant uncertainty.** If constants are "data", should
@@ -1317,8 +1387,10 @@ re-decide it here if PR-POLY has already merged.
 6. **D-3, dead artefacts.** **Decided: delete** (not a banner). **Done (#413):**
    `write_factories_index.py`, `matrix/src/backends/wasm/fft-wasm.ts`, and the
    `MathTSWasm` bindings under `assembly/src/bindings/` are gone.
-7. **M14 worker evaluator.** Serialize the M3 tape through `kernelSource`, or another
-   route that adds no copy (M14 open question).
+7. **M14 worker evaluator.** **Decided**
+   ([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 9): import
+   `evaluateScalarTape` from `functions`. Do not copy the tape into `workerpool`, and do
+   not serialize it through `kernelSource`.
 
 ## 11. Sources read
 
