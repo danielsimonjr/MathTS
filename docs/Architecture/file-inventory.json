@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2054,
+  "totalFiles": 2056,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 760,
+    "test": 762,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1232,
-    "tests": 760,
+    "tests": 762,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 872,
+    "@danielsimonjr/mathts-functions": 873,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 112,
+    "@danielsimonjr/mathts-matrix": 113,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 22,
@@ -912,7 +912,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 31
+      "loc": 139
     },
     {
       "file": "core/tests/arithmetic/scalar.test.ts",
@@ -11317,6 +11317,13 @@
       "loc": 67
     },
     {
+      "file": "functions/tests/wasm-as-alloc-order-pin.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
+    },
+    {
       "file": "functions/tests/wasm-bridge-clones-pin.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11629,7 +11636,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 51
+      "loc": 53
     },
     {
       "file": "matrix/src/backends/wasm/detect.ts",
@@ -11868,6 +11875,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 923
+    },
+    {
+      "file": "matrix/tests/backends/as-alloc-typed-view-pin.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 80
     },
     {
       "file": "matrix/tests/backends/as-typed-array-header.test.ts",

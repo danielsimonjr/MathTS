@@ -7,17 +7,19 @@
  * exported from the package barrel.
  */
 
-import { allocAsHeader, type AsHeaderRuntime } from '@danielsimonjr/mathts-core/internal';
+import { allocAsHeader } from '@danielsimonjr/mathts-core/internal';
 
 /** Minimal AS runtime surface needed to allocate managed typed arrays. */
-export interface AsRuntime extends AsHeaderRuntime {}
+export interface AsRuntime {
+  __new: (size: number, id: number) => number;
+  __pin: (ptr: number) => number;
+  memory: WebAssembly.Memory;
+}
 
 /** AssemblyScript runtime type ids (see `assembly/build/mathts.js`). */
 export const AS_ID_ARRAY_BUFFER = 1;
 export const AS_ID_FLOAT64_ARRAY = 5;
 export const AS_ID_INT32_ARRAY = 6;
-/** AS typed-array header is { buffer, dataStart, byteLength } = 3 × u32. */
-export const AS_HEADER_BYTES = 12;
 export const AS_F64_ALIGN_SHIFT = 3;
 export const AS_I32_ALIGN_SHIFT = 2;
 
