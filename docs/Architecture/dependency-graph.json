@@ -602,7 +602,7 @@
           },
           {
             "file": "./array.js",
-            "imports": ["arraySize", "deepMap", "deepForEach"]
+            "imports": ["NestedArray", "arraySize", "deepMap", "deepForEach"]
           },
           {
             "file": "./switch.js",
@@ -611,7 +611,20 @@
         ],
         "workspaceDependencies": [],
         "exports": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"],
-        "functions": ["containsCollections", "deepForEach", "deepMap", "reduce", "scatter"]
+        "functions": [
+          "containsCollections",
+          "deepForEach",
+          "deepForEach",
+          "deepMap",
+          "deepMap",
+          "deepMap",
+          "deepMap",
+          "deepMap",
+          "reduce",
+          "reduce",
+          "reduce",
+          "scatter"
+        ]
       },
       "core/src/config.ts": {
         "description": "Configuration interface for math.js",
@@ -42711,11 +42724,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1224,
     "totalModules": 82,
-    "totalLinesOfCode": 200856,
+    "totalLinesOfCode": 200900,
     "totalExports": 6329,
     "totalClasses": 59,
     "totalInterfaces": 548,
-    "totalFunctions": 2033,
+    "totalFunctions": 2040,
     "totalTypeGuards": 160,
     "totalEnums": 0,
     "totalConstants": 1627,

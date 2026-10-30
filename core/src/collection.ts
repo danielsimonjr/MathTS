@@ -13,12 +13,17 @@
  * scoped to this file (see its header); `expression`/`functions`'s own
  * `utils/switch.ts` remain untouched, a future dedup slice.
  */
-import { isCollection, isMatrix } from './is.js';
+import { isCollection, isMatrix as isMatrixInstance } from './is.js';
 import { DimensionError } from './error/DimensionError.js';
-import { arraySize, deepMap as arrayDeepMap, deepForEach as arrayDeepForEach } from './array.js';
+import {
+  type NestedArray,
+  arraySize,
+  deepMap as arrayDeepMap,
+  deepForEach as arrayDeepForEach,
+} from './array.js';
 import { _switch } from './switch.js';
 
-// Type definitions for Matrix interface
+// Type definitions for Matrix interface (local duck-type; distinct from `./is.js` `Matrix`)
 interface Matrix<T = unknown> {
   forEach(callback: (value: T) => void, skipZeros: boolean, recurse: boolean): void;
   map<U>(callback: (value: T) => U, skipZeros: boolean, recurse: boolean): Matrix<U>;
@@ -50,78 +55,124 @@ export function containsCollections(array: unknown[]): boolean {
 }
 
 /**
- * Recursively loop over all elements in a given multi dimensional array
- * and invoke the callback on each of the elements.
- * @param array - Array or Matrix to iterate over
- * @param callback - The callback method is invoked with one parameter: the current element in the array
+ * Recursively loop over all elements in a given multi-dimensional array or matrix
+ * and invoke the callback on each scalar leaf.
+ *
+ * Nested arrays are first-class inputs: `deepForEach([[1, 2], 3], fn)` visits `1`, `2`, then `3`.
+ * For a matrix argument, recursion follows `forEach` with `recurse: true`.
+ *
+ * @param array - Nested array or matrix to iterate over
+ * @param callback - Invoked once per scalar element
  */
-export function deepForEach<T>(array: T[] | Matrix<T>, callback: (value: T) => void): void {
-  if (isMatrix(array)) {
-    (array as Matrix<T>).forEach((x) => callback(x), false, true);
+export function deepForEach<T>(
+  array: NestedArray<T> | Matrix<T>,
+  callback: (value: T) => void
+): void;
+export function deepForEach<T>(
+  array: NestedArray<T> | Matrix<T>,
+  callback: (value: T) => void
+): void {
+  if (isMatrixInstance(array)) {
+    (array as unknown as Matrix<T>).forEach((x) => callback(x), false, true);
   } else {
-    arrayDeepForEach(array as T[], callback, true);
+    arrayDeepForEach(array as NestedArray<T>, callback, true);
   }
 }
 
 /**
- * Execute the callback function element wise for each element in array and any
- * nested array
- * Returns an array with the results
- * @param array - Array or Matrix to map over
- * @param callback - The callback is called with two parameters:
- *                   value1 and value2, which contain the current
- *                   element of both arrays.
- * @param skipZeros - Invoke callback function for non-zero values only.
+ * Map a callback over every scalar in a nested array or matrix, preserving structure.
  *
- * @return Mapped result
+ * When `skipZeros` is `true`, numeric zero leaves are kept as the original value (`T`);
+ * other leaves become `callback(value)` (`U`), so the result type is `NestedArray<T | U>`
+ * or `Matrix<T | U>`. When `skipZeros` is omitted or `false`, every leaf is mapped to `U`.
+ *
+ * @param array - Nested array or matrix to map over
+ * @param callback - Applied to each scalar element
+ * @param skipZeros - When true, skip the callback for zero values (zeros stay as `T`)
+ * @returns A nested array or matrix with the same shape as the input
  */
 export function deepMap<T, U>(
-  array: T[] | Matrix<T>,
+  array: Matrix<T>,
+  callback: (value: T) => U,
+  skipZeros: true
+): Matrix<T | U>;
+export function deepMap<T, U>(
+  array: NestedArray<T>,
+  callback: (value: T) => U,
+  skipZeros: true
+): NestedArray<T | U>;
+export function deepMap<T, U>(
+  array: Matrix<T>,
+  callback: (value: T) => U,
+  skipZeros?: false
+): Matrix<U>;
+export function deepMap<T, U>(
+  array: NestedArray<T>,
+  callback: (value: T) => U,
+  skipZeros?: false
+): NestedArray<U>;
+export function deepMap<T, U>(
+  array: NestedArray<T> | Matrix<T>,
   callback: (value: T) => U,
   skipZeros?: boolean
-): U[] | Matrix<U> {
+): NestedArray<U> | Matrix<U> | NestedArray<T | U> | Matrix<T | U> {
   if (!skipZeros) {
-    if (isMatrix(array)) {
-      return (array as Matrix<T>).map((x) => callback(x), false, true);
+    if (isMatrixInstance(array)) {
+      return (array as unknown as Matrix<T>).map((x) => callback(x), false, true);
     } else {
-      return arrayDeepMap(array as T[], callback, true) as U[];
+      return arrayDeepMap(array as NestedArray<T>, callback, true);
     }
   }
   const skipZerosCallback = (x: T): T | U => (x === 0 ? x : callback(x));
-  if (isMatrix(array)) {
-    return (array as Matrix<T>).map((x) => skipZerosCallback(x), false, true) as Matrix<U>;
+  if (isMatrixInstance(array)) {
+    return (array as unknown as Matrix<T>).map((x) => skipZerosCallback(x), false, true) as Matrix<
+      T | U
+    >;
   } else {
-    return arrayDeepMap(array as T[], skipZerosCallback, true) as U[];
+    return arrayDeepMap(array as NestedArray<T>, skipZerosCallback, true);
   }
 }
 
 /**
- * Reduce a given matrix or array to a new matrix or
- * array with one less dimension, applying the given
- * callback in the selected dimension.
- * @param mat - Array or Matrix to reduce
- * @param dim - Dimension to reduce
- * @param callback - Callback function
- * @return Reduced result
+ * Reduce a nested array or matrix along one dimension.
+ *
+ * For a one-dimensional nested array and `dim === 0`, the result is a **scalar** (`U`), not a
+ * one-element array — e.g. `reduce([1, 2, 3], 0, add)` is `6`. Higher-rank inputs return a
+ * nested array with one fewer effective dimension; matrices return a new matrix.
+ *
+ * @param mat - Nested array or matrix to reduce
+ * @param dim - Zero-based dimension index (must be in range for `arraySize(mat)`)
+ * @param callback - Fold function `(accumulator, value) => newAccumulator`
+ * @returns Scalar, nested array, or matrix depending on rank and `dim`
  */
 export function reduce<T, U>(
-  mat: T[] | Matrix<T>,
+  mat: Matrix<T>,
   dim: number,
   callback: (acc: U | T, val: T) => U
-): U[] | Matrix<U> {
-  const size = Array.isArray(mat) ? arraySize(mat) : (mat as Matrix<T>).size();
+): Matrix<U>;
+export function reduce<T, U>(
+  mat: NestedArray<T>,
+  dim: number,
+  callback: (acc: U | T, val: T) => U
+): U | NestedArray<U>;
+export function reduce<T, U>(
+  mat: NestedArray<T> | Matrix<T>,
+  dim: number,
+  callback: (acc: U | T, val: T) => U
+): U | NestedArray<U> | Matrix<U> {
+  const size = Array.isArray(mat) ? arraySize(mat) : (mat as unknown as Matrix<T>).size();
   if (dim < 0 || dim >= size.length) {
     throw new DimensionError(dim, size.length, '<');
   }
 
-  if (isMatrix(mat)) {
-    const reduced = _reduce((mat as Matrix<T>).valueOf(), dim, callback);
-    return (mat as Matrix<T>).create(
+  if (isMatrixInstance(mat)) {
+    const reduced = _reduce((mat as unknown as Matrix<T>).valueOf() as T[], dim, callback);
+    return (mat as unknown as Matrix<T>).create(
       reduced as unknown as T[],
-      (mat as Matrix<T>).datatype()
+      (mat as unknown as Matrix<T>).datatype()
     ) as unknown as Matrix<U>;
   } else {
-    return _reduce(mat as T[], dim, callback) as U[];
+    return _reduce(mat as T[], dim, callback) as U | NestedArray<U>;
   }
 }
 

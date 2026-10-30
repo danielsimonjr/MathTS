@@ -87,7 +87,7 @@ export const createProd = /* #__PURE__ */ factory(
     function _prod(array: unknown[] | MatrixType): unknown {
       let prod: unknown;
 
-      deepForEach(array as Parameters<typeof deepForEach>[0], function (value: unknown) {
+      deepForEach(array, function (value: unknown) {
         try {
           // Pre-convert string inputs BEFORE multiplication
           const converted = typeof value === 'string' ? parseNumberWithConfig(value) : value;
@@ -118,7 +118,7 @@ export const createProd = /* #__PURE__ */ factory(
     ): unknown {
       try {
         const dimValue = typeof dim === 'number' ? dim : dim.valueOf();
-        const prod = reduce(array as Parameters<typeof reduce>[0], dimValue, multiplyScalar);
+        const prod = reduce(array, dimValue, multiplyScalar);
         return prod;
       } catch (err) {
         throw improveErrorMessage(err, 'prod', undefined);

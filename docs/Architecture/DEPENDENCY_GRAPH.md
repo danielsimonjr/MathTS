@@ -483,16 +483,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                           | Type   |
-| --------------------------- | --------------------------------- | ------ |
-| `./is.js`                   | `isCollection, isMatrix`          | Import |
-| `./error/DimensionError.js` | `DimensionError`                  | Import |
-| `./array.js`                | `arraySize, deepMap, deepForEach` | Import |
-| `./switch.js`               | `_switch`                         | Import |
+| File                        | Imports                                        | Type   |
+| --------------------------- | ---------------------------------------------- | ------ |
+| `./is.js`                   | `isCollection, isMatrix`                       | Import |
+| `./error/DimensionError.js` | `DimensionError`                               | Import |
+| `./array.js`                | `NestedArray, arraySize, deepMap, deepForEach` | Import |
+| `./switch.js`               | `_switch`                                      | Import |
 
 **Exports:**
 
-- Functions: `containsCollections`, `deepForEach`, `deepMap`, `reduce`, `scatter`
+- Functions: `containsCollections`, `deepForEach`, `deepForEach`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `deepMap`, `reduce`, `reduce`, `reduce`, `scatter`
 
 ---
 
@@ -19235,12 +19235,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1224   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 200856 |
+| Total Lines of Code     | 200900 |
 | Total Exports           | 6329   |
 | Total Re-exports        | 2680   |
 | Total Classes           | 59     |
 | Total Interfaces        | 548    |
-| Total Functions         | 2033   |
+| Total Functions         | 2040   |
 | Total Type Guards       | 160    |
 | Total Enums             | 0      |
 | Type-only Imports       | 614    |
