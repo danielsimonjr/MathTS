@@ -38,6 +38,7 @@
     "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4"
   },
   "devDependencies": {
+    "fast-check": "^4.9.0",
     "@types/node": "^26.4.0",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",

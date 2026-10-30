@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-30",
-  "totalFiles": 2010,
+  "totalFiles": 2014,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1196,
     "test-only": 0,
     "orphan": 0,
-    "test": 726,
+    "test": 730,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1222,
-    "tests": 726,
+    "tests": 730,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,10 +24,10 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 98,
+    "@danielsimonjr/mathts-core": 100,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 51,
-    "@danielsimonjr/mathts-expression": 557,
+    "@danielsimonjr/mathts-expression": 559,
     "@danielsimonjr/mathts-functions": 848,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
@@ -936,6 +936,13 @@
       "loc": 43
     },
     {
+      "file": "core/tests/collection-properties.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 105
+    },
+    {
       "file": "core/tests/config.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1011,6 +1018,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 91
+    },
+    {
+      "file": "core/tests/object-properties.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 98
     },
     {
       "file": "core/tests/public-api-smoke.test.ts",
@@ -4828,6 +4842,13 @@
       "loc": 159
     },
     {
+      "file": "expression/tests/helpers/wired-parse.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 133
+    },
+    {
       "file": "expression/tests/IndexError.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -4965,7 +4986,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 939
+      "loc": 792
     },
     {
       "file": "expression/tests/Parser-extra.test.ts",
@@ -5050,6 +5071,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 67
+    },
+    {
+      "file": "expression/tests/security/parse-fuzz.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 132
     },
     {
       "file": "expression/tests/security/sandbox.test.ts",

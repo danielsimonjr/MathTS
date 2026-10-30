@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2010
+**Total files**: 2014
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1196 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      726 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      730 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2010** |                                                                                                                |
+| **Total**     | **2014** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1222 |
-| `tests`    |   726 |
+| `tests`    |   730 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -45,9 +45,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    24 |
 | `@danielsimonjr/mathts-compat`         |    16 |
-| `@danielsimonjr/mathts-core`           |    98 |
+| `@danielsimonjr/mathts-core`           |   100 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   557 |
+| `@danielsimonjr/mathts-expression`     |   559 |
 | `@danielsimonjr/mathts-functions`      |   848 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
@@ -197,6 +197,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/BigNumber-formatter-api.test.ts`                                      | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/bignumber-formatter.test.ts`                                          | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/collection-nested.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/collection-properties.test.ts`                                        | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/config.test.ts`                                                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/constants.test.ts`                                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/dist-public-api.test.ts`                                              | @danielsimonjr/mathts-core           | tests    | test        |
@@ -208,6 +209,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/map.test.ts`                                                          | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/numeric/rng.test.ts`                                                  | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/object-pollution.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/object-properties.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/public-api-smoke.test.ts`                                             | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/range-integration.test.ts`                                            | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/shared.test.ts`                                                       | @danielsimonjr/mathts-core           | tests    | test        |
@@ -753,6 +755,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/Help-config.test.ts`                                            | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/Help.test.ts`                                                   | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/helpers/bootstrap.ts`                                           | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/helpers/wired-parse.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/IndexError.test.ts`                                             | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/IndexNode.test.ts`                                              | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/is-guards-local.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -785,6 +788,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/scalar-builder.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-structure.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/limits.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/security/parse-fuzz.test.ts`                                    | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/sandbox.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/stringSubset-clone.test.ts`                                     | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/stringSubset-set-clone.test.ts`                                 | @danielsimonjr/mathts-expression     | tests    | test        |
