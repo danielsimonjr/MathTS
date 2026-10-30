@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2021
+**Total files**: 2023
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1197 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1198 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      736 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      737 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2021** |                                                                                                                |
+| **Total**     | **2023** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1223 |
-| `tests`    |   736 |
+| `src`      |  1224 |
+| `tests`    |   737 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -47,7 +47,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |   102 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
-| `@danielsimonjr/mathts-expression`     |   559 |
+| `@danielsimonjr/mathts-expression`     |   561 |
 | `@danielsimonjr/mathts-functions`      |   853 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
@@ -686,6 +686,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/src/parse.ts`                                                         | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/Parser.ts`                                                        | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/scalar-builder.ts`                                                | @danielsimonjr/mathts-expression     | src      | build-entry |
+| `expression/src/scalar-enumerate.ts`                                              | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/scalar-structure.ts`                                              | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/and.transform.ts`                                       | @danielsimonjr/mathts-expression     | src      | build-entry |
 | `expression/src/transform/bitAnd.transform.ts`                                    | @danielsimonjr/mathts-expression     | src      | build-entry |
@@ -788,6 +789,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/s2r-clones-short-circuit-oracle.test.ts`                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/s2r-clones-transform-args-oracle.test.ts`                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-builder.test.ts`                                         | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/scalar-enumerate.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/scalar-structure.test.ts`                                       | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/limits.test.ts`                                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/security/parse-fuzz.test.ts`                                    | @danielsimonjr/mathts-expression     | tests    | test        |

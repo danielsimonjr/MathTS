@@ -2537,6 +2537,7 @@
       "expression/src/node/ObjectNode.ts",
       "expression/src/operators.ts",
       "expression/src/parse.ts",
+      "expression/src/scalar-enumerate.ts",
       "expression/src/scalar-structure.ts",
       "expression/src/utils/customs.ts",
       "expression/src/utils/factory.ts",
@@ -2689,9 +2690,14 @@
     ],
     "expression/src/scalar-builder.ts": [
       "expression/src/index.ts",
+      "expression/src/scalar-enumerate.ts",
       "expression/src/scalar-structure.ts"
     ],
-    "expression/src/scalar-structure.ts": ["expression/src/index.ts"],
+    "expression/src/scalar-structure.ts": [
+      "expression/src/index.ts",
+      "expression/src/scalar-enumerate.ts"
+    ],
+    "expression/src/scalar-enumerate.ts": ["expression/src/index.ts"],
     "expression/src/utils/collection.ts": ["expression/src/parse.ts"],
     "expression/src/utils/number.ts": ["expression/src/parse.ts"],
     "expression/src/utils/customs.ts": [
