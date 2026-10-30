@@ -26,6 +26,7 @@ import {
   swapOperands,
   weightedMutation,
   type ScalarMutationContext,
+  type ScalarMutationOperator,
 } from '../src/scalar-mutate.js';
 
 const b = createScalarBuilder();
@@ -430,6 +431,234 @@ describe('grammar and call-name fidelity', () => {
       mutate(tree, rng, ctx);
     }
     expect(JSON.stringify(tree)).toBe(frozen);
+  });
+});
+
+/**
+ * `scalarCanonicalKey` sorts the operands of `+` and `*`, so a key comparison cannot see a
+ * rotation or a swap that exchanged the operands of a commutative operator. These pins compare the
+ * raw tree with `JSON.stringify`, on the non-commutative `-` and `/`, and replay the pre-P6-1
+ * bodies of `swapOperands`, `deleteNode` and `rotateTree` as a reference over seeded trees.
+ */
+describe('structural pins: rotation side, swap and delete (P6-1)', () => {
+  const raw = (node: ScalarNode | null): string => JSON.stringify(node);
+  const ncGrammar: ScalarGrammar = {
+    variables: ['x', 'y', 'z'],
+    parameters: ['c'],
+    literals: [1, 2],
+    binary: ['+', '-', '*', '/'],
+    unary: ['sin'],
+    maxSize: 64,
+  };
+  const ncCtx: ScalarMutationContext = { ...ctx, grammar: ncGrammar };
+  const [x, y, c] = [b.symbol('x'), b.symbol('y'), b.symbol('c')];
+
+  it('rotateTree: only the left child is binary, both coin outcomes rotate left', () => {
+    // -( /(x,y), c )  ->  /( x, -(y,c) )
+    const tree = b.op('-', [b.op('/', [x, y]), c]);
+    const expected = b.op('/', [x, b.op('-', [y, c])]);
+    for (const u of [0.25, 0.75]) {
+      expect(raw(rotateTree(tree, stubRng({ nextInt: [0], next: [u] }), ncCtx))).toBe(
+        raw(expected)
+      );
+    }
+  });
+
+  it('rotateTree: only the right child is binary, both coin outcomes rotate right', () => {
+    // -( c, /(x,y) )  ->  /( -(c,x), y )
+    const tree = b.op('-', [c, b.op('/', [x, y])]);
+    const expected = b.op('/', [b.op('-', [c, x]), y]);
+    for (const u of [0.25, 0.75]) {
+      expect(raw(rotateTree(tree, stubRng({ nextInt: [0], next: [u] }), ncCtx))).toBe(
+        raw(expected)
+      );
+    }
+  });
+
+  it('rotateTree: both children are binary, the coin picks the side', () => {
+    // -( /(x,y), *(x,c) )
+    const tree = b.op('-', [b.op('/', [x, y]), b.op('*', [x, c])]);
+    const left = b.op('/', [x, b.op('-', [y, b.op('*', [x, c])])]);
+    const right = b.op('*', [b.op('-', [b.op('/', [x, y]), x]), c]);
+    expect(raw(rotateTree(tree, stubRng({ nextInt: [0], next: [0.25] }), ncCtx))).toBe(raw(left));
+    expect(raw(rotateTree(tree, stubRng({ nextInt: [0], next: [0.5] }), ncCtx))).toBe(raw(right));
+    expect(raw(rotateTree(tree, stubRng({ nextInt: [0], next: [0.75] }), ncCtx))).toBe(raw(right));
+  });
+
+  it('swapOperands exchanges the operands of - and / exactly, and nothing else', () => {
+    const tree = b.call('sin', b.op('-', [b.op('/', [x, y]), c]));
+    // paths with a binary op, in walk order: the `-` (index 0), then the `/` (index 1)
+    expect(raw(swapOperands(tree, stubRng({ nextInt: [0] }), ncCtx))).toBe(
+      raw(b.call('sin', b.op('-', [c, b.op('/', [x, y])])))
+    );
+    expect(raw(swapOperands(tree, stubRng({ nextInt: [1] }), ncCtx))).toBe(
+      raw(b.call('sin', b.op('-', [b.op('/', [y, x]), c])))
+    );
+  });
+
+  it('deleteNode draws the path first and the surviving child second', () => {
+    const tree = b.op('-', [b.op('/', [x, y]), c]);
+    const draws: number[] = [];
+    const rng = stubRng({ nextInt: [1, 1] });
+    const spy: SeededRng = {
+      ...rng,
+      nextInt: (max) => {
+        const v = rng.nextInt(max);
+        draws.push(max, v);
+        return v;
+      },
+    };
+    // two binary paths: the root `-` and the inner `/`; the first draw (1) picks the `/`
+    expect(raw(deleteNode(tree, spy, ncCtx))).toBe(raw(b.op('-', [y, c])));
+    expect(draws).toEqual([2, 1, 2, 1]);
+  });
+
+  function randomTree(rng: SeededRng, budget: number): ScalarNode {
+    if (budget <= 1 || rng.next() < 0.2) {
+      const pick = rng.nextInt(4);
+      return pick === 0 ? b.symbol('x') : pick === 1 ? b.symbol('y') : pick === 2 ? c : b.number(2);
+    }
+    if (rng.next() < 0.2) {
+      return b.call('sin', randomTree(rng, budget - 1));
+    }
+    const op = ncGrammar.binary[rng.nextInt(ncGrammar.binary.length)];
+    const half = Math.floor((budget - 1) / 2);
+    return b.op(op, [randomTree(rng, half), randomTree(rng, budget - 1 - half)]);
+  }
+
+  type Path = readonly number[];
+  const kids = (n: ScalarNode): readonly ScalarNode[] =>
+    n.kind === 'call' ? [n.arg] : n.kind === 'op' ? n.args : [];
+  function legacyPaths(node: ScalarNode, pred: (n: ScalarNode) => boolean): Path[] {
+    const out: Path[] = [];
+    const walk = (n: ScalarNode, path: Path): void => {
+      if (pred(n)) {
+        out.push(path);
+      }
+      kids(n).forEach((k, i) => walk(k, [...path, i]));
+    };
+    walk(node, []);
+    return out;
+  }
+  const legacyAt = (root: ScalarNode, path: Path): ScalarNode =>
+    path.reduce<ScalarNode>((cur, i) => kids(cur)[i], root);
+  function legacyReplace(root: ScalarNode, path: Path, repl: ScalarNode): ScalarNode {
+    if (path.length === 0) {
+      return repl;
+    }
+    const [head, ...rest] = path;
+    if (root.kind === 'call') {
+      return { kind: 'call', fn: root.fn, arg: legacyReplace(root.arg, rest, repl) };
+    }
+    if (root.kind !== 'op') {
+      return root;
+    }
+    return {
+      kind: 'op',
+      op: root.op,
+      args: root.args.map((k, i) => (i === head ? legacyReplace(k, rest, repl) : k)),
+    };
+  }
+  const isBin = (n: ScalarNode): boolean => n.kind === 'op' && n.args.length === 2;
+  const ok = (grammar: ScalarGrammar, n: ScalarNode): ScalarNode | null =>
+    scalarGrammarAccepts(grammar, n) ? n : null;
+
+  function legacySwap(node: ScalarNode, rng: SeededRng, g: ScalarGrammar): ScalarNode | null {
+    const paths = legacyPaths(node, isBin);
+    if (paths.length === 0) {
+      return null;
+    }
+    const path = paths[rng.nextInt(paths.length)];
+    const cur = legacyAt(node, path);
+    if (cur.kind !== 'op' || cur.args.length !== 2) {
+      return null;
+    }
+    return ok(
+      g,
+      legacyReplace(node, path, { kind: 'op', op: cur.op, args: [cur.args[1], cur.args[0]] })
+    );
+  }
+  function legacyDelete(node: ScalarNode, rng: SeededRng, g: ScalarGrammar): ScalarNode | null {
+    const paths = legacyPaths(node, isBin);
+    if (paths.length === 0) {
+      return null;
+    }
+    const path = paths[rng.nextInt(paths.length)];
+    const cur = legacyAt(node, path);
+    if (cur.kind !== 'op' || cur.args.length !== 2) {
+      return null;
+    }
+    return ok(g, legacyReplace(node, path, cur.args[rng.nextInt(2)]));
+  }
+  function legacyLeft(n: ScalarNode): ScalarNode | null {
+    if (n.kind !== 'op' || n.args.length !== 2) {
+      return null;
+    }
+    const [l, r] = n.args;
+    if (l.kind !== 'op' || l.args.length !== 2) {
+      return null;
+    }
+    return b.op(l.op, [l.args[0], b.op(n.op, [l.args[1], r])]);
+  }
+  function legacyRight(n: ScalarNode): ScalarNode | null {
+    if (n.kind !== 'op' || n.args.length !== 2) {
+      return null;
+    }
+    const [l, r] = n.args;
+    if (r.kind !== 'op' || r.args.length !== 2) {
+      return null;
+    }
+    return b.op(r.op, [b.op(n.op, [l, r.args[0]]), r.args[1]]);
+  }
+  function legacyRotate(node: ScalarNode, rng: SeededRng, g: ScalarGrammar): ScalarNode | null {
+    const paths = legacyPaths(
+      node,
+      (n) => n.kind === 'op' && n.args.length === 2 && (isBin(n.args[0]) || isBin(n.args[1]))
+    );
+    if (paths.length === 0) {
+      return null;
+    }
+    const path = paths[rng.nextInt(paths.length)];
+    const cur = legacyAt(node, path);
+    if (cur.kind !== 'op') {
+      return null;
+    }
+    const rotated =
+      rng.next() < 0.5
+        ? (legacyLeft(cur) ?? legacyRight(cur))
+        : (legacyRight(cur) ?? legacyLeft(cur));
+    return rotated === null ? null : ok(g, legacyReplace(node, path, rotated));
+  }
+
+  it('swapOperands, deleteNode and rotateTree match the pre-P6-1 bodies, tree and rng state', () => {
+    const cases: Array<
+      [
+        string,
+        ScalarMutationOperator,
+        (n: ScalarNode, r: SeededRng, g: ScalarGrammar) => ScalarNode | null,
+      ]
+    > = [
+      ['swapOperands', swapOperands, legacySwap],
+      ['deleteNode', deleteNode, legacyDelete],
+      ['rotateTree', rotateTree, legacyRotate],
+    ];
+    let produced = 0;
+    for (const [name, current, legacy] of cases) {
+      for (let seed = 1; seed <= 600; seed++) {
+        const tree = randomTree(createSeededRng(seed * 7919), 3 + (seed % 17));
+        const a = createSeededRng(seed);
+        const r = createSeededRng(seed);
+        const got = current(tree, a, ncCtx);
+        const want = legacy(tree, r, ncGrammar);
+        expect(raw(got), `${name} seed ${seed}`).toBe(raw(want));
+        // the same draws were consumed, so every later draw of a seeded search is unchanged
+        expect(a.next(), `${name} seed ${seed} rng`).toBe(r.next());
+        if (got !== null) {
+          produced++;
+        }
+      }
+    }
+    expect(produced).toBeGreaterThan(900);
   });
 });
 

@@ -626,7 +626,7 @@ graph LR
 | `./switch.js`                | `_switch`                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
 | `./map.js`                   | `ObjectWrappingMap, PartitionedMap, createEmptyMap, createMap, toObject, assign, isObjectWrappingMap`                                                                                                                                                                                                                                                                                                                       | Re-export             |
 | `./wasm-loader.js`           | `sha384OfBuffer, loadWasmManifest, verifyWasmIntegrity, resolvePackagedWasm, defaultWasmLocation, WasmModuleLoader`                                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./wasm-as-header.js`        | `allocAsHeader, AsHeaderRuntime`                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
+| `./wasm-as-header.js`        | `allocAsHeader`                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./shared.js`                | `MemoizedFunction`                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export (type-only) |
 | `./config.js`                | `ConfigOptions, MathJsConfig`                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 | `./types/unit/unit-types.js` | `ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
@@ -635,7 +635,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `AsHeaderRuntime`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`
 
 ---
 
@@ -1549,15 +1549,15 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                           |
-| ---------------------------- | -------------------------------- |
-| `@danielsimonjr/mathts-core` | `allocAsHeader, AsHeaderRuntime` |
+| Package                      | Import          |
+| ---------------------------- | --------------- |
+| `@danielsimonjr/mathts-core` | `allocAsHeader` |
 
 **Exports:**
 
 - Interfaces: `AsRuntime`
 - Functions: `allocAsTypedView`
-- Constants: `AS_ID_ARRAY_BUFFER`, `AS_ID_FLOAT64_ARRAY`, `AS_ID_INT32_ARRAY`, `AS_HEADER_BYTES`, `AS_F64_ALIGN_SHIFT`, `AS_I32_ALIGN_SHIFT`
+- Constants: `AS_ID_ARRAY_BUFFER`, `AS_ID_FLOAT64_ARRAY`, `AS_ID_INT32_ARRAY`, `AS_F64_ALIGN_SHIFT`, `AS_I32_ALIGN_SHIFT`
 
 ---
 
@@ -19454,9 +19454,9 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1234   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203573 |
-| Total Exports           | 6412   |
-| Total Re-exports        | 2725   |
+| Total Lines of Code     | 203555 |
+| Total Exports           | 6410   |
+| Total Re-exports        | 2724   |
 | Total Classes           | 60     |
 | Total Interfaces        | 569    |
 | Total Functions         | 2070   |

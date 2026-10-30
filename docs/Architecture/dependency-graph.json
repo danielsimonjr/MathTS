@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-30",
     "totalFiles": 1234,
     "totalModules": 82,
-    "totalExports": 6412
+    "totalExports": 6410
   },
   "entryPoints": [
     {
@@ -1568,7 +1568,7 @@
           },
           {
             "file": "./wasm-as-header.js",
-            "imports": ["allocAsHeader", "AsHeaderRuntime"],
+            "imports": ["allocAsHeader"],
             "reExport": true
           },
           {
@@ -1705,7 +1705,6 @@
           "defaultWasmLocation",
           "WasmModuleLoader",
           "allocAsHeader",
-          "AsHeaderRuntime",
           "format",
           "toEngineering",
           "toExponential",
@@ -1824,7 +1823,6 @@
           "defaultWasmLocation",
           "WasmModuleLoader",
           "allocAsHeader",
-          "AsHeaderRuntime",
           "MemoizedFunction",
           "ConfigOptions",
           "MathJsConfig",
@@ -4476,7 +4474,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["allocAsHeader", "AsHeaderRuntime"],
+            "imports": ["allocAsHeader"],
             "subpath": "internal"
           }
         ],
@@ -4484,7 +4482,6 @@
           "AS_ID_ARRAY_BUFFER",
           "AS_ID_FLOAT64_ARRAY",
           "AS_ID_INT32_ARRAY",
-          "AS_HEADER_BYTES",
           "AS_F64_ALIGN_SHIFT",
           "AS_I32_ALIGN_SHIFT",
           "allocAsTypedView"
@@ -4495,7 +4492,6 @@
           "AS_ID_ARRAY_BUFFER",
           "AS_ID_FLOAT64_ARRAY",
           "AS_ID_INT32_ARRAY",
-          "AS_HEADER_BYTES",
           "AS_F64_ALIGN_SHIFT",
           "AS_I32_ALIGN_SHIFT"
         ]
@@ -43275,15 +43271,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1234,
     "totalModules": 82,
-    "totalLinesOfCode": 203573,
-    "totalExports": 6412,
+    "totalLinesOfCode": 203555,
+    "totalExports": 6410,
     "totalClasses": 60,
     "totalInterfaces": 569,
     "totalFunctions": 2070,
     "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1633,
-    "totalReExports": 2725,
+    "totalConstants": 1632,
+    "totalReExports": 2724,
     "totalTypeOnlyImports": 620,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

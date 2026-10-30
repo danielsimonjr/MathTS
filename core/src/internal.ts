@@ -209,4 +209,4 @@ export {
   WasmModuleLoader,
 } from './wasm-loader.js';
 
-export { allocAsHeader, type AsHeaderRuntime } from './wasm-as-header.js';
+export { allocAsHeader } from './wasm-as-header.js';
