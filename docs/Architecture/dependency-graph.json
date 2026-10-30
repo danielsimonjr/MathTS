@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-10-30",
-    "totalFiles": 1226,
+    "totalFiles": 1227,
     "totalModules": 82,
-    "totalExports": 6344
+    "totalExports": 6378
   },
   "entryPoints": [
     {
@@ -9749,6 +9749,27 @@
             "reExport": true
           },
           {
+            "file": "./scalar-mutate.js",
+            "imports": [
+              "addNode",
+              "crossoverSubtrees",
+              "DEFAULT_MUTATION_WEIGHTS",
+              "deleteNode",
+              "identityMutation",
+              "insertNode",
+              "mutateConstant",
+              "mutateFeature",
+              "mutateOperator",
+              "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+              "randomizeTree",
+              "rotateTree",
+              "simplifyConstants",
+              "swapOperands",
+              "weightedMutation"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ParetoFrontError"],
             "reExport": true
@@ -10312,6 +10333,12 @@
             "typeOnly": true
           },
           {
+            "file": "./scalar-mutate.js",
+            "imports": ["MutationWeightKey", "ScalarMutationContext", "ScalarMutationOperator"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["FrontCandidate", "ScoredCandidate"],
             "reExport": true,
@@ -10697,6 +10724,21 @@
           "ScalarEvalError",
           "compileScalar",
           "compileScalarGradient",
+          "addNode",
+          "crossoverSubtrees",
+          "DEFAULT_MUTATION_WEIGHTS",
+          "deleteNode",
+          "identityMutation",
+          "insertNode",
+          "mutateConstant",
+          "mutateFeature",
+          "mutateOperator",
+          "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+          "randomizeTree",
+          "rotateTree",
+          "simplifyConstants",
+          "swapOperands",
+          "weightedMutation",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -11002,6 +11044,9 @@
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient",
+          "MutationWeightKey",
+          "ScalarMutationContext",
+          "ScalarMutationOperator",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -11151,6 +11196,21 @@
           "ScalarEvalError",
           "compileScalar",
           "compileScalarGradient",
+          "addNode",
+          "crossoverSubtrees",
+          "DEFAULT_MUTATION_WEIGHTS",
+          "deleteNode",
+          "identityMutation",
+          "insertNode",
+          "mutateConstant",
+          "mutateFeature",
+          "mutateOperator",
+          "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+          "randomizeTree",
+          "rotateTree",
+          "simplifyConstants",
+          "swapOperands",
+          "weightedMutation",
           "paretoFront",
           "scoreFront",
           "selectFrontModel",
@@ -11456,6 +11516,9 @@
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient",
+          "MutationWeightKey",
+          "ScalarMutationContext",
+          "ScalarMutationOperator",
           "FrontCandidate",
           "ScoredCandidate",
           "NumericEquivalenceOptions",
@@ -11886,6 +11949,72 @@
         "classes": ["ScalarEvalError"],
         "functions": ["evaluateScalar"],
         "constants": ["scalar", "NUMERIC_LITERAL"]
+      },
+      "functions/src/scalar-mutate.ts": {
+        "description": "PySR-style mutation and crossover operators over {@link ScalarNode} trees (M12).",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./scalar-eval.js",
+            "imports": ["evaluateScalar"]
+          }
+        ],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-expression",
+            "directory": "expression",
+            "imports": [
+              "createScalarBuilder",
+              "mapScalar",
+              "scalarGrammarAccepts",
+              "LoweredScalarFn",
+              "ScalarGrammar",
+              "ScalarNode"
+            ]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["SeededRng"]
+          }
+        ],
+        "exports": [
+          "MUTATE_CONSTANT_NEGATE_PROBABILITY",
+          "DEFAULT_MUTATION_WEIGHTS",
+          "identityMutation",
+          "mutateConstant",
+          "mutateOperator",
+          "mutateFeature",
+          "swapOperands",
+          "addNode",
+          "insertNode",
+          "deleteNode",
+          "rotateTree",
+          "randomizeTree",
+          "simplifyConstants",
+          "crossoverSubtrees",
+          "drawMutationOperator",
+          "weightedMutation"
+        ],
+        "interfaces": ["ScalarMutationContext"],
+        "functions": [
+          "identityMutation",
+          "mutateConstant",
+          "mutateOperator",
+          "mutateFeature",
+          "swapOperands",
+          "addNode",
+          "insertNode",
+          "deleteNode",
+          "rotateTree",
+          "randomizeTree",
+          "simplifyConstants",
+          "crossoverSubtrees",
+          "drawMutationOperator",
+          "weightedMutation"
+        ],
+        "constants": ["MUTATE_CONSTANT_NEGATE_PROBABILITY", "DEFAULT_MUTATION_WEIGHTS"]
       },
       "functions/src/scalar-node-bridge.ts": {
         "description": "Convert between {@link ScalarNode} trees and wired expression {@link MathNode}s.",
@@ -41599,6 +41728,7 @@
           "functions/src/scalar-compile.ts",
           "functions/src/scalar-dimension.ts",
           "functions/src/scalar-eval.ts",
+          "functions/src/scalar-mutate.ts",
           "functions/src/scalar-node-bridge.ts",
           "functions/src/signal-filter-extra.ts",
           "functions/src/timeseries-extra.ts",
@@ -42838,18 +42968,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1226,
+    "totalTypeScriptFiles": 1227,
     "totalModules": 82,
-    "totalLinesOfCode": 201901,
-    "totalExports": 6344,
+    "totalLinesOfCode": 202529,
+    "totalExports": 6378,
     "totalClasses": 59,
-    "totalInterfaces": 550,
-    "totalFunctions": 2043,
+    "totalInterfaces": 551,
+    "totalFunctions": 2057,
     "totalTypeGuards": 161,
     "totalEnums": 0,
-    "totalConstants": 1628,
-    "totalReExports": 2690,
-    "totalTypeOnlyImports": 616,
+    "totalConstants": 1630,
+    "totalReExports": 2708,
+    "totalTypeOnlyImports": 617,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

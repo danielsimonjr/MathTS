@@ -1755,8 +1755,10 @@
     "functions/src/scalar-eval.ts": [
       "functions/src/index.ts",
       "functions/src/numeric-equivalence.ts",
-      "functions/src/scalar-compile.ts"
+      "functions/src/scalar-compile.ts",
+      "functions/src/scalar-mutate.ts"
     ],
+    "functions/src/scalar-mutate.ts": ["functions/src/index.ts"],
     "functions/src/pareto-front.ts": ["functions/src/index.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
     "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
