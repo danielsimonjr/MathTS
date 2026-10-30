@@ -567,6 +567,8 @@ Same as PR 2. No wall-clock assertion. No worker.
 
 A two-island run with a fixed seed is byte-identical across two runs.
 
+**Decided.** A single population draws from the `'population'` fork and islands from `island:${index}`, so `populations: 1` stays the PR 7 stream. Annealing (`temperature` starts at `initialTemperature`, 3.17, times 0.995 per generation) and adaptive parsimony default to on only when `populations > 1`; with one population they default to off, which is what keeps PR 7's recorded front valid. Migration runs after every generation that leaves budget: each island's expected replacement count is `fractionReplaced * populationSize`, rounded at random, the worst trees go, and the donors are the best 12 of the other islands, all read before any island changes. A tree the island already holds is not migrated in. Adaptive parsimony ranks contestants by `log(loss) + scaling * share`, the logarithm of PySR's `loss * exp(scaling * share)`: at scaling 1040 the product overflows once `share` passes 0.68, and a zero loss would become `NaN`. `scoreFront` stays the only score formula.
+
 ### Files
 
 | Path                                      | Action                                                                                                      |

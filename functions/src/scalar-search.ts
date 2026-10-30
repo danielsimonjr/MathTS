@@ -1,12 +1,14 @@
 /**
  * PySR-style evolutionary search over {@link ScalarNode} trees (M13).
  *
- * One population evolves by tournament selection and {@link weightedMutation}.
- * Each generation breeds `populationSize` offspring from tournament winners,
- * evaluates them in one batch, and keeps the best `populationSize` distinct trees
- * of parents and offspring (elitist truncation, not PySR's age-based replacement).
- * A hall of fame keeps the best tree per complexity; its Pareto front is reported
- * through {@link paretoFront} and {@link scoreFront}.
+ * `populations` islands each evolve by tournament selection and
+ * {@link weightedMutation}. Each generation breeds `populationSize` offspring per
+ * island from tournament winners, evaluates them in one batch, and keeps the best
+ * `populationSize` distinct trees of parents and offspring (elitist truncation, not
+ * PySR's age-based replacement). After every generation the islands exchange their
+ * best trees (migration). A hall of fame shared by every island keeps the best tree
+ * per complexity; its Pareto front is reported through {@link paretoFront} and
+ * {@link scoreFront}.
  *
  * @packageDocumentation
  */
@@ -60,17 +62,33 @@ export interface ScalarSearchOptions {
   readonly perturbationFactor?: number;
   /** How `selected` is chosen from the front. Omitted: no selection. */
   readonly modelSelection?: 'accuracy' | 'score' | 'best';
-  /** Ignored until islands land (M13b). */
+  /**
+   * Independent islands, each with `populationSize` trees and its own random stream
+   * (`rng.fork('island:' + index)`). Default 1, which draws from `rng.fork('population')`.
+   * Evaluations are counted across all islands.
+   */
   readonly populations?: number;
-  /** Ignored until islands land (M13b). */
+  /**
+   * Expected share of each island replaced by another island's best trees after every
+   * generation, in [0, 1]. The count is the expectation rounded at random. Default 0.00036
+   * (PySR `fraction_replaced`).
+   */
   readonly fractionReplaced?: number;
-  /** Ignored until islands land (M13b). */
+  /**
+   * Shrink the constant perturbation scale over the run: the mutation temperature starts
+   * at `initialTemperature` and is multiplied by 0.995 after every generation. Default:
+   * on when `populations > 1`, so a single population stays the M13a search.
+   */
   readonly annealing?: boolean;
-  /** Ignored until islands land (M13b). */
+  /** Starting temperature when `annealing` is on. Default 3.17 (PySR `alpha`). */
   readonly initialTemperature?: number;
-  /** Ignored until islands land (M13b). */
+  /**
+   * Rank tournament contestants by `loss * exp(adaptiveParsimonyScaling * f)`, where `f`
+   * is the share of recent evaluations that had the contestant's complexity. Crowded
+   * sizes lose, so the population explores every size. Default: on when `populations > 1`.
+   */
   readonly adaptiveParsimony?: boolean;
-  /** Ignored until islands land (M13b). */
+  /** Strength of the adaptive-parsimony penalty. Default 1040 (PySR). */
   readonly adaptiveParsimonyScaling?: number;
 }
 
@@ -100,7 +118,8 @@ export interface ScalarSearchResult {
   readonly selected?: ScoredCandidate<ScalarNode>;
 }
 
-interface EvaluatedIndividual {
+/** @internal One evaluated tree; exported for the unit tests, not the package barrel. */
+export interface EvaluatedIndividual {
   readonly node: ScalarNode;
   readonly key: string;
   readonly loss: number;
@@ -113,9 +132,21 @@ const DEFAULT_TOURNAMENT_SIZE = 15;
 const DEFAULT_TOURNAMENT_P = 0.982;
 const DEFAULT_OPTIMIZE_PROBABILITY = 0.14;
 const DEFAULT_PERTURBATION_FACTOR = 0.25;
+const DEFAULT_FRACTION_REPLACED = 0.00036;
+const DEFAULT_INITIAL_TEMPERATURE = 3.17;
+const DEFAULT_PARSIMONY_SCALING = 1040;
 
 /** Tries a mutation this often before an offspring falls back to a copy of its parent. */
 const MUTATION_ATTEMPTS = 10;
+
+/** The mutation temperature is multiplied by this after every generation. */
+const TEMPERATURE_DECAY = 0.995;
+
+/** Migrants are drawn from the best this-many trees of the donor island (PySR `topn`). */
+const MIGRANT_POOL = 12;
+
+/** Evaluations that the complexity frequencies remember (PySR's running window). */
+const FREQUENCY_WINDOW = 100_000;
 
 function paramNames(problem: ScalarSearchProblem, grammar: ScalarGrammar): readonly string[] {
   return problem.parameters ?? grammar.parameters ?? [];
@@ -130,6 +161,12 @@ function positiveInteger(name: string, value: number): void {
 function probability(name: string, value: number): void {
   if (!(value >= 0 && value <= 1)) {
     throw new RangeError(`searchScalars: ${name} must be in [0, 1], got ${value}`);
+  }
+}
+
+function nonNegativeFinite(name: string, value: number): void {
+  if (!(Number.isFinite(value) && value >= 0)) {
+    throw new RangeError(`searchScalars: ${name} must be a finite number >= 0, got ${value}`);
   }
 }
 
@@ -168,6 +205,16 @@ function assertSearchInputs(
     throw new RangeError(`searchScalars: tournamentP must be in (0, 1], got ${tournamentP}`);
   }
   probability('optimizeProbability', optimizeProbability);
+  positiveInteger('populations', options.populations ?? 1);
+  probability('fractionReplaced', options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED);
+  nonNegativeFinite(
+    'initialTemperature',
+    options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE
+  );
+  nonNegativeFinite(
+    'adaptiveParsimonyScaling',
+    options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING
+  );
   if (Number.isNaN(options.maxEvaluations) || options.maxEvaluations < 0) {
     throw new RangeError(
       `searchScalars: maxEvaluations must be a number >= 0, got ${options.maxEvaluations}`
@@ -278,19 +325,71 @@ function evaluateNodes(
   return out;
 }
 
-function tournamentSelect(
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * How often each tree size occurred among the last {@link FREQUENCY_WINDOW}
+ * evaluations, shared by every island (PySR's `RunningSearchStatistics`).
+ */
+export class ComplexityFrequency {
+  private readonly counts = new Map<number, number>();
+  private readonly ring: number[] = [];
+  private next = 0;
+
+  record(complexity: number): void {
+    if (this.ring.length < FREQUENCY_WINDOW) {
+      this.ring.push(complexity);
+    } else {
+      const evicted = this.ring[this.next]!;
+      this.counts.set(evicted, this.counts.get(evicted)! - 1);
+      this.ring[this.next] = complexity;
+      this.next = (this.next + 1) % FREQUENCY_WINDOW;
+    }
+    this.counts.set(complexity, (this.counts.get(complexity) ?? 0) + 1);
+  }
+
+  /** Share of the window with this complexity, in [0, 1]; 0 before anything is recorded. */
+  share(complexity: number): number {
+    return this.ring.length === 0 ? 0 : (this.counts.get(complexity) ?? 0) / this.ring.length;
+  }
+}
+
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * Ordering key of a contestant under adaptive parsimony: `log(loss) + scaling * share`,
+ * the logarithm of PySR's `loss * exp(scaling * share)`. Working in log space keeps the
+ * order while `exp(1040 * share)` would overflow to `Infinity` for a share above 0.68
+ * and turn a zero loss into `NaN`. A zero loss counts as the smallest positive double so
+ * that two perfect trees are still told apart by how crowded their size is.
+ */
+export function parsimonyKey(ind: EvaluatedIndividual, share: number, scaling: number): number {
+  return Math.log(Math.max(ind.loss, Number.MIN_VALUE)) + scaling * share;
+}
+
+export function tournamentSelect(
   population: readonly EvaluatedIndividual[],
   rng: SeededRng,
   tournamentSize: number,
-  tournamentP: number
+  tournamentP: number,
+  parsimony?: { readonly frequency: ComplexityFrequency; readonly scaling: number }
 ): EvaluatedIndividual {
   const n = population.length;
   const k = Math.min(tournamentSize, n);
-  const contestants: EvaluatedIndividual[] = [];
+  const drawn: EvaluatedIndividual[] = [];
   for (let i = 0; i < k; i += 1) {
-    contestants.push(population[rng.nextInt(n)]!);
+    drawn.push(population[rng.nextInt(n)]!);
   }
-  contestants.sort((a, b) => compareLoss(a.loss, b.loss));
+  const contestants =
+    parsimony === undefined
+      ? drawn.sort((a, b) => compareLoss(a.loss, b.loss))
+      : drawn
+          .map((ind) => ({
+            ind,
+            key: parsimonyKey(ind, parsimony.frequency.share(ind.complexity), parsimony.scaling),
+          }))
+          .sort((a, b) => compareLoss(a.key, b.key))
+          .map((entry) => entry.ind);
   let u = rng.next();
   for (let rank = 0; rank < k; rank += 1) {
     const prob = tournamentP * (1 - tournamentP) ** rank;
@@ -300,6 +399,68 @@ function tournamentSelect(
     u -= prob;
   }
   return contestants[k - 1]!;
+}
+
+/** The best `size` distinct trees (by structure) of `merged`, best first. */
+function truncateDistinct(merged: EvaluatedIndividual[], size: number): EvaluatedIndividual[] {
+  merged.sort((a, b) => compareLoss(a.loss, b.loss) || a.complexity - b.complexity);
+  const seen = new Set<string>();
+  const out: EvaluatedIndividual[] = [];
+  for (const ind of merged) {
+    if (out.length >= size) {
+      break;
+    }
+    if (!seen.has(ind.key)) {
+      seen.add(ind.key);
+      out.push(ind);
+    }
+  }
+  return out;
+}
+
+/** @internal One island's random stream and population. */
+export interface Island {
+  readonly rng: SeededRng;
+  /** Best first after the first generation; the initial deal is in enumeration order. */
+  population: EvaluatedIndividual[];
+}
+
+/**
+ * @internal Exported for the unit tests, not the package barrel.
+ *
+ * Replaces the worst trees of every island with copies of the best trees of other
+ * islands. All donors are read before any island changes, so the order of the islands
+ * does not favour one. A tree an island already holds is not migrated into it.
+ */
+export function migrateIslands(islands: Island[], fractionReplaced: number, rng: SeededRng): void {
+  if (islands.length < 2 || fractionReplaced <= 0) {
+    return;
+  }
+  const donors = islands.map((island) => island.population.slice(0, MIGRANT_POOL));
+  for (let i = 0; i < islands.length; i += 1) {
+    const island = islands[i]!;
+    const expected = fractionReplaced * island.population.length;
+    let count = Math.floor(expected);
+    if (rng.next() < expected - count) {
+      count += 1;
+    }
+    count = Math.min(count, island.population.length);
+    const held = new Set(island.population.map((ind) => ind.key));
+    const incoming: EvaluatedIndividual[] = [];
+    for (let m = 0; m < count; m += 1) {
+      const pick = rng.nextInt(islands.length - 1);
+      const pool = donors[pick >= i ? pick + 1 : pick]!;
+      const migrant = pool[rng.nextInt(pool.length)]!;
+      if (!held.has(migrant.key)) {
+        held.add(migrant.key);
+        incoming.push({ ...migrant, parameters: new Float64Array(migrant.parameters) });
+      }
+    }
+    if (incoming.length > 0) {
+      const survivors = island.population.slice(0, island.population.length - incoming.length);
+      island.population = truncateDistinct([...survivors, ...incoming], island.population.length);
+    }
+  }
 }
 
 /** Seeds that the grammar accepts, then enumerated trees, up to `limit` distinct trees. */
@@ -406,31 +567,57 @@ export async function* searchScalars(
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
   const mutate = weightedMutation();
-  const rng = options.rng.fork('population');
-  const mutationCtx: ScalarMutationContext = {
-    grammar: options.grammar,
-    perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
-    temperature: 1,
-  };
+  const populations = options.populations ?? 1;
+  const multiIsland = populations > 1;
+  const annealing = options.annealing ?? multiIsland;
+  const parsimony =
+    (options.adaptiveParsimony ?? multiIsland)
+      ? {
+          frequency: new ComplexityFrequency(),
+          scaling: options.adaptiveParsimonyScaling ?? DEFAULT_PARSIMONY_SCALING,
+        }
+      : undefined;
+  const fractionReplaced = options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED;
+  const migrationRng = options.rng.fork('migration');
+  let temperature = annealing ? (options.initialTemperature ?? DEFAULT_INITIAL_TEMPERATURE) : 1;
 
   let evaluations = 0;
   const hallOfFame = new HallOfFame();
 
-  const trees = initialTrees(options.grammar, options.seeds, Math.min(populationSize, budget));
+  const trees = initialTrees(
+    options.grammar,
+    options.seeds,
+    Math.min(populationSize * populations, budget)
+  );
   if (trees.length === 0 && budget >= 1) {
     throw new RangeError('searchScalars: the grammar admits no tree');
   }
-  let population = evaluateNodes(
-    trees,
-    trees.map(() => defaultParameters(names.length)),
-    problem,
-    names,
-    optimizeProbability,
-    rng
-  );
-  evaluations += population.length;
-  for (const ind of population) {
-    hallOfFame.add(ind);
+
+  // The initial trees are dealt round-robin, so every island gets a share of the small
+  // ones. An island that would get none (fewer trees than islands) is dropped.
+  const islands: Island[] = [];
+  for (let index = 0; index < populations; index += 1) {
+    const mine = trees.filter((_, t) => t % populations === index);
+    if (mine.length === 0) {
+      continue;
+    }
+    // One island draws from the 'population' stream, which is what makes
+    // `populations: 1` the same search as M13a.
+    const rng = options.rng.fork(multiIsland ? `island:${index}` : 'population');
+    const population = evaluateNodes(
+      mine,
+      mine.map(() => defaultParameters(names.length)),
+      problem,
+      names,
+      optimizeProbability,
+      rng
+    );
+    evaluations += population.length;
+    for (const ind of population) {
+      hallOfFame.add(ind);
+      parsimony?.frequency.record(ind.complexity);
+    }
+    islands.push({ rng, population });
   }
 
   const report = (): SearchProgress => {
@@ -448,35 +635,54 @@ export async function* searchScalars(
   yield report();
 
   while (evaluations < budget) {
-    const offspringCount = Math.min(populationSize, budget - evaluations);
-    const nodes: ScalarNode[] = [];
-    const inherited: Float64Array[] = [];
-    for (let i = 0; i < offspringCount; i += 1) {
-      const parent = tournamentSelect(population, rng, tournamentSize, tournamentP);
-      let child: ScalarNode | null = null;
-      for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
-        child = mutate(parent.node, rng, mutationCtx);
-      }
-      nodes.push(child ?? parent.node);
-      inherited.push(new Float64Array(parent.parameters));
-    }
-    const offspring = evaluateNodes(nodes, inherited, problem, names, optimizeProbability, rng);
-    evaluations += offspring.length;
-    for (const ind of offspring) {
-      hallOfFame.add(ind);
-    }
-    const merged = [...population, ...offspring];
-    merged.sort((a, b) => compareLoss(a.loss, b.loss) || a.complexity - b.complexity);
-    const seen = new Set<string>();
-    population = [];
-    for (const ind of merged) {
-      if (population.length >= populationSize) {
+    const mutationCtx: ScalarMutationContext = {
+      grammar: options.grammar,
+      perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
+      temperature,
+    };
+    for (const island of islands) {
+      const offspringCount = Math.min(populationSize, budget - evaluations);
+      if (offspringCount <= 0) {
         break;
       }
-      if (!seen.has(ind.key)) {
-        seen.add(ind.key);
-        population.push(ind);
+      const nodes: ScalarNode[] = [];
+      const inherited: Float64Array[] = [];
+      for (let i = 0; i < offspringCount; i += 1) {
+        const parent = tournamentSelect(
+          island.population,
+          island.rng,
+          tournamentSize,
+          tournamentP,
+          parsimony
+        );
+        let child: ScalarNode | null = null;
+        for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
+          child = mutate(parent.node, island.rng, mutationCtx);
+        }
+        nodes.push(child ?? parent.node);
+        inherited.push(new Float64Array(parent.parameters));
       }
+      const offspring = evaluateNodes(
+        nodes,
+        inherited,
+        problem,
+        names,
+        optimizeProbability,
+        island.rng
+      );
+      evaluations += offspring.length;
+      for (const ind of offspring) {
+        hallOfFame.add(ind);
+        parsimony?.frequency.record(ind.complexity);
+      }
+      island.population = truncateDistinct([...island.population, ...offspring], populationSize);
+    }
+    // After the last evaluation nothing breeds again, so migrating would change nothing.
+    if (evaluations < budget) {
+      migrateIslands(islands, fractionReplaced, migrationRng);
+    }
+    if (annealing) {
+      temperature *= TEMPERATURE_DECAY;
     }
 
     yield report();

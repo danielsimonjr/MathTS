@@ -4857,8 +4857,10 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `ScalarSearchProblem`, `ScalarSearchOptions`, `SearchProgress`, `ScalarSearchResult`
+- Classes: `ComplexityFrequency`
+- Interfaces: `ScalarSearchProblem`, `ScalarSearchOptions`, `SearchProgress`, `ScalarSearchResult`, `EvaluatedIndividual`, `Island`
 - Types: `ScalarSearchStopReason`
+- Functions: `parsimonyKey`, `tournamentSelect`, `migrateIslands`
 
 ---
 
@@ -19335,12 +19337,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1228   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203034 |
-| Total Exports           | 6384   |
+| Total Lines of Code     | 203240 |
+| Total Exports           | 6388   |
 | Total Re-exports        | 2714   |
-| Total Classes           | 59     |
-| Total Interfaces        | 555    |
-| Total Functions         | 2057   |
+| Total Classes           | 60     |
+| Total Interfaces        | 557    |
+| Total Functions         | 2060   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 618    |

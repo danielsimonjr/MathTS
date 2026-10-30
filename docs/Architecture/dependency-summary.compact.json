@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1228, "e": 6384, "re": 2714 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-30", "f": 1228, "e": 6388, "re": 2714 },
   "s": {
-    "loc": 203034,
-    "cls": 59,
-    "int": 555,
-    "fn": 2057,
+    "loc": 203240,
+    "cls": 60,
+    "int": 557,
+    "fn": 2060,
     "tg": 161,
     "en": 0,
     "co": 1630,
@@ -553,7 +553,12 @@
         "corrcoef",
         "kendallTau"
       ],
-      "cls": ["NumericEquivalenceError", "ParetoFrontError", "ScalarEvalError"],
+      "cls": [
+        "NumericEquivalenceError",
+        "ParetoFrontError",
+        "ScalarEvalError",
+        "ComplexityFrequency"
+      ],
       "int": [
         "KMeansResult",
         "LinRegressResult",
