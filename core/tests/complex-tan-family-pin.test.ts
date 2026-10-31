@@ -170,4 +170,22 @@ describe('Complex tan family against the pre-P6-5 bodies', () => {
     close(z.coth().re, 1.3025933473515863);
     close(z.coth().im, -1.467710695249466);
   });
+
+  it('installs the four methods on the prototype with the attributes of a class method', () => {
+    const sin = Object.getOwnPropertyDescriptor(Complex.prototype, 'sin')!;
+    for (const m of METHODS) {
+      const d = Object.getOwnPropertyDescriptor(Complex.prototype, m)!;
+      expect(typeof d.value).toBe('function');
+      expect(d.writable).toBe(sin.writable);
+      expect(d.enumerable).toBe(sin.enumerable);
+      expect(d.configurable).toBe(sin.configurable);
+      expect(d.value.name).toBe(m);
+      expect(d.value.length).toBe(0);
+    }
+    const z = new Complex(1, 2);
+    expect(Object.keys(z)).toEqual(Object.keys(new Complex(3, 4)));
+    const seen: string[] = [];
+    for (const key in z) seen.push(key);
+    expect(seen).toEqual(Object.keys(z));
+  });
 });

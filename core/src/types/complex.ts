@@ -12,16 +12,20 @@ const HYPERBOLIC_OVERFLOW_ARG = 700;
  * The one closed form behind `tan`, `cot`, `tanh` and `coth`.
  *
  * `sign` (+1 tangent, -1 cotangent) and `hyperbolic` are bound once, when the method is created in
- * `Complex`'s static block, so the function that runs has no boolean parameter and `z.tan()` is a
- * direct method call. The earlier shared helper took both flags on every call; V8 inlined it and
- * folded the literals, but JavaScriptCore did not, and `tan`/`cot`/`tanh` ran 5% to 11% slower there.
- * Four pasted bodies were the other fix, and they put the formula in four places.
+ * `Complex`'s static block, so `z.tan()` is a direct method call and the body takes no flag per call.
+ * A helper that takes both flags on every call is not inlined by JavaScriptCore (`tan`, `cot` and
+ * `tanh` ran 5% to 11% slower on Bun, V8 was unaffected), and four pasted bodies would repeat the
+ * formula four times.
  *
  * Bit-identical to the four bodies it replaced: `cosh h + sign * cos t` is `cos t + cosh h` for the
  * tangents and `cosh h - cos t` for the cotangents, and `x * sign` is `x` or `-x`.
  */
-function createTanFamilyMethod(sign: 1 | -1, hyperbolic: boolean): (this: Complex) => Complex {
-  return function (this: Complex): Complex {
+function createTanFamilyMethod(
+  name: string,
+  sign: 1 | -1,
+  hyperbolic: boolean
+): (this: Complex) => Complex {
+  const method = function (this: Complex): Complex {
     const t = (hyperbolic ? this.im : this.re) * 2;
     const h = (hyperbolic ? this.re : this.im) * 2;
     let s: number;
@@ -36,6 +40,7 @@ function createTanFamilyMethod(sign: 1 | -1, hyperbolic: boolean): (this: Comple
     }
     return hyperbolic ? new Complex(q, s * sign) : new Complex(s, q * sign);
   };
+  return Object.defineProperty(method, 'name', { value: name });
 }
 
 /**
@@ -93,7 +98,7 @@ export class Complex implements IComplex {
     ] as const;
     for (const [name, sign, hyperbolic] of tanFamily) {
       Object.defineProperty(Complex.prototype, name, {
-        value: createTanFamilyMethod(sign, hyperbolic),
+        value: createTanFamilyMethod(name, sign, hyperbolic),
         writable: true,
         configurable: true,
         enumerable: false,
