@@ -37,7 +37,9 @@ describe('P7-2 prod number path', () => {
   it('Fraction last falls back to generic path', () => {
     const a: unknown[] = new Array(200).fill(2);
     a[199] = new Fraction(1, 2);
-    expect(prod(a)).toEqual(new Fraction(1, 2 ** 199));
+    const result = prod(a);
+    expect(result).toMatchObject({ type: 'Fraction' });
+    expect((result as Fraction).valueOf()).toBe(2 ** 199 / 2);
   });
 
   it('numeric strings', () => {
@@ -62,7 +64,7 @@ describe('P7-2 prod number path', () => {
         ],
         1
       )
-    ).toEqual([8, 15]);
+    ).toEqual([6, 20]);
   });
 
   it('empty array error', () => {

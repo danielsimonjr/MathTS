@@ -35,6 +35,32 @@ export const createProd = /* #__PURE__ */ factory(
     numeric: _numeric,
     parseNumberWithConfig,
   }: ProdDependencies) => {
+    type NumberMul = (a: number, b: number) => number;
+    let cachedProdMul: NumberMul | null | undefined;
+
+    function getProdMul(): NumberMul | null {
+      if (cachedProdMul === undefined) {
+        cachedProdMul =
+          (typed.find(multiplyScalar, ['number', 'number']) as NumberMul | null) ?? null;
+      }
+      return cachedProdMul;
+    }
+
+    function arrayAllNumbers(array: unknown[]): boolean {
+      for (let i = 0; i < array.length; i++) {
+        if (typeof array[i] !== 'number') return false;
+      }
+      return true;
+    }
+
+    function _prodNumber(array: number[], mul: NumberMul): number {
+      let p = array[0];
+      for (let i = 1; i < array.length; i++) {
+        p = mul(p, array[i]);
+      }
+      return p;
+    }
+
     /**
      * Compute the product of a matrix or a list with values.
      * In case of a multidimensional array or matrix, the sum of all
@@ -85,6 +111,18 @@ export const createProd = /* #__PURE__ */ factory(
      * @private
      */
     function _prod(array: unknown[] | MatrixType): unknown {
+      if (
+        Array.isArray(array) &&
+        array.constructor === Array &&
+        array.length > 0 &&
+        arrayAllNumbers(array)
+      ) {
+        const mul = getProdMul();
+        if (mul) {
+          return _prodNumber(array as number[], mul);
+        }
+      }
+
       let prod: unknown;
 
       deepForEach(array, function (value: unknown) {
