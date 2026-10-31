@@ -5,11 +5,16 @@ export const entry = '@danielsimonjr/mathts-autograd';
 
 function randTensor(shape, seed) {
   const r = mulberry32(seed);
-  let n = 1;
-  for (const d of shape) n *= d;
-  const data = new Float64Array(n);
-  for (let i = 0; i < n; i++) data[i] = r() * 2 - 1;
-  return Tensor.fromNested(data, shape);
+  /** @param {number[]} dims */
+  function build(dims) {
+    if (dims.length === 1) {
+      const row = new Array(dims[0]);
+      for (let i = 0; i < dims[0]; i++) row[i] = r() * 2 - 1;
+      return row;
+    }
+    return Array.from({ length: dims[0] }, () => build(dims.slice(1)));
+  }
+  return Tensor.fromNested(build(shape), shape);
 }
 
 export const cases = [
