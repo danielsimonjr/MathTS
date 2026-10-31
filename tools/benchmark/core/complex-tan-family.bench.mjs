@@ -14,10 +14,13 @@
  * past the |2 Im| (or |2 Re|) > 700 overflow branch. Exit code 1 when any method is slower than
  * the noise band (default 5%).
  *
- * Harness floor on JavaScriptCore: this two-way harness has no control row. On Bun, a `new` that is
- * the legacy body behind the same arrow wrapper (an A/A run, 2026-10-31) reads 1.01 to 1.05 against
- * `old` (Bun 1.4.2 and 1.4.4) and 1.00 on Node. Read a Bun result against that floor, and repeat a
- * run that exceeds the band before acting on it.
+ * Both sides are called through one arrow wrapper. The first version timed the legacy body as a bare
+ * function and the shipped method behind an arrow, so on JavaScriptCore every `new` carried an extra
+ * call the legacy side did not: a `new` that was the legacy body behind that wrapper (an A/A run,
+ * 2026-10-31) read 1.01 to 1.05 against `old`. With the wrapper on both sides the A/A run reads 0.98
+ * to 1.02 on Bun 1.4.2 and 1.00 on Node. The gate still has teeth: against `main`'s boolean-parameter
+ * `tanFamily` it reads `cot` 1.07 on Bun in every run. A single reading near the band can still be
+ * noise, so repeat a run that exceeds it before acting on it.
  */
 import { Complex } from '../../../core/dist/index.js';
 
@@ -55,7 +58,7 @@ for (let i = 0; i < N; i++) {
   zs[i] = new Complex(re, im);
 }
 
-const legacy = {
+const legacyBodies = {
   tan(z) {
     const x2 = z.re * 2;
     const y2 = z.im * 2;
@@ -92,6 +95,13 @@ const legacy = {
     const d = Math.cosh(x2) - Math.cos(y2);
     return new Complex(Math.sinh(x2) / d, -Math.sin(y2) / d);
   },
+};
+
+const legacy = {
+  tan: (z) => legacyBodies.tan(z),
+  cot: (z) => legacyBodies.cot(z),
+  tanh: (z) => legacyBodies.tanh(z),
+  coth: (z) => legacyBodies.coth(z),
 };
 
 const shipped = {
