@@ -43,7 +43,13 @@ if (!existsSync(join(perfBaseDir(repoRoot), 'REF'))) {
 /** @type {{ entry: string, cases: { name: string, kind: string }[] }[]} */
 const specs = [];
 for (const cf of caseFiles) {
-  const spec = await import(pathToFileURL(cf).href);
+  let spec;
+  try {
+    spec = await import(pathToFileURL(cf).href);
+  } catch (e) {
+    console.error(`Failed to load case file ${cf}: ${e}`);
+    process.exit(1);
+  }
   specs.push({ file: cf, ...spec });
   if (!control) {
     const err = preflightEntryPackage(spec.entry);
