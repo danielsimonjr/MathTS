@@ -4,7 +4,10 @@ on:
   push:
     branches: [main, master]
   pull_request:
-    branches: [main, master]
+    # `cursor/p7-*` is the Phase 7 stack: every PR above P7-0 bases on its parent branch, and a
+    # base filter of main alone leaves each of them without a CI run. Drop the pattern when the
+    # stack has merged.
+    branches: [main, master, 'cursor/p7-*']
   # A branch pushed by a bot with GITHUB_TOKEN does not fire `push` or
   # `pull_request` -- GitHub's recursion guard suppresses it. That is how the
   # Changesets release PR (`changeset-release/main`) reached BLOCKED with zero
@@ -135,6 +138,9 @@ jobs:
 
       - name: Bun audit retry tests
         run: node --test tools/test/bun-audit-retry.test.mjs
+
+      - name: A/B harness tests
+        run: node --test tools/test/ab-harness.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
