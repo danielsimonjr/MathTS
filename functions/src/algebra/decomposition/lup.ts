@@ -138,6 +138,108 @@ export const createLup = /* #__PURE__ */ factory(
     SparseMatrix,
     Spa,
   }: Dependencies) => {
+    type NumberBin = (a: number, b: number) => number;
+    type NumberUnary = (a: number) => number;
+    type NumberLarger = (a: number, b: number) => boolean;
+    type NumberEqual = (a: number, b: number) => boolean;
+    type LupNumberOps = {
+      add: NumberBin;
+      mul: NumberBin;
+      sub: NumberBin;
+      div: NumberBin;
+      abs: NumberUnary;
+      larger: NumberLarger;
+      equalScalar: NumberEqual;
+    };
+
+    let cachedLupOps: LupNumberOps | null | undefined;
+
+    function getLupNumberOps(): LupNumberOps | null {
+      if (cachedLupOps === undefined) {
+        const add = typed.find(addScalar, ['number', 'number']) as NumberBin | null;
+        const mul = typed.find(multiplyScalar, ['number', 'number']) as NumberBin | null;
+        const sub = typed.find(subtractScalar, ['number', 'number']) as NumberBin | null;
+        const div = typed.find(divideScalar, ['number', 'number']) as NumberBin | null;
+        const absNum = typed.find(abs, ['number']) as NumberUnary | null;
+        const largerNum = typed.find(larger, ['number', 'number']) as NumberLarger | null;
+        const equalNum = typed.find(equalScalar, ['number', 'number']) as NumberEqual | null;
+        cachedLupOps =
+          add && mul && sub && div && absNum && largerNum && equalNum
+            ? {
+                add,
+                mul,
+                sub,
+                div,
+                abs: absNum,
+                larger: largerNum,
+                equalScalar: equalNum,
+              }
+            : null;
+      }
+      return cachedLupOps;
+    }
+
+    function matrixAllNumbers(data: unknown[][]): boolean {
+      for (let r = 0; r < data.length; r++) {
+        const row = data[r];
+        for (let c = 0; c < row.length; c++) {
+          if (typeof row[c] !== 'number') return false;
+        }
+      }
+      return true;
+    }
+
+    function _denseLUPNumberFactor(
+      data: number[][],
+      rows: number,
+      columns: number,
+      p: number[],
+      ops: LupNumberOps
+    ): void {
+      let i: number;
+      let j: number;
+      let k: number;
+
+      for (j = 0; j < columns; j++) {
+        if (j > 0) {
+          for (i = 0; i < rows; i++) {
+            const min = Math.min(i, j);
+            let s = 0;
+            for (k = 0; k < min; k++) {
+              s = ops.add(s, ops.mul(data[i][k], data[k][j]));
+            }
+            data[i][j] = ops.sub(data[i][j], s);
+          }
+        }
+        let pi = j;
+        let pabsv = 0;
+        let vjj = 0;
+        for (i = j; i < rows; i++) {
+          const v = data[i][j];
+          const absv = ops.abs(v);
+          if (ops.larger(absv, pabsv)) {
+            pi = i;
+            pabsv = absv;
+            vjj = v;
+          }
+        }
+        if (j !== pi) {
+          const tmp = p[j];
+          p[j] = p[pi];
+          p[pi] = tmp;
+          DenseMatrix._swapRows(j, pi, data);
+        }
+        if (j < rows) {
+          for (i = j + 1; i < rows; i++) {
+            const vij = data[i][j];
+            if (!ops.equalScalar(vij, 0)) {
+              data[i][j] = ops.div(data[i][j], vjj);
+            }
+          }
+        }
+      }
+    }
+
     /**
      * Calculate the Matrix LU decomposition with partial pivoting. Matrix `A` is decomposed in two matrices (`L`, `U`) and a
      * row permutation vector `p` where `A[p,:] = L * U`
@@ -209,60 +311,66 @@ export const createLup = /* #__PURE__ */ factory(
       for (i = 0; i < rows; i++) {
         p[i] = i;
       }
-      // loop columns
-      for (j = 0; j < columns; j++) {
-        // skip first column in upper triangular matrix
-        if (j > 0) {
-          // loop rows
-          for (i = 0; i < rows; i++) {
-            // min i,j
-            const min = Math.min(i, j);
-            // v[i, j]
-            let s: unknown = 0;
-            // loop up to min
-            for (k = 0; k < min; k++) {
-              // s = l[i, k] - data[k, j]
-              s = addScalar(s, multiplyScalar(data[i][k], data[k][j]));
+
+      const lupNumberOps = getLupNumberOps();
+      if (lupNumberOps && matrixAllNumbers(data)) {
+        _denseLUPNumberFactor(data as number[][], rows, columns, p, lupNumberOps);
+      } else {
+        // loop columns
+        for (j = 0; j < columns; j++) {
+          // skip first column in upper triangular matrix
+          if (j > 0) {
+            // loop rows
+            for (i = 0; i < rows; i++) {
+              // min i,j
+              const min = Math.min(i, j);
+              // v[i, j]
+              let s: unknown = 0;
+              // loop up to min
+              for (k = 0; k < min; k++) {
+                // s = l[i, k] - data[k, j]
+                s = addScalar(s, multiplyScalar(data[i][k], data[k][j]));
+              }
+              data[i][j] = subtractScalar(data[i][j], s);
             }
-            data[i][j] = subtractScalar(data[i][j], s);
           }
-        }
-        // row with larger value in cvector, row >= j
-        let pi = j;
-        let pabsv: unknown = 0;
-        let vjj: unknown = 0;
-        // loop rows
-        for (i = j; i < rows; i++) {
-          // data @ i, j
-          const v = data[i][j];
-          // absolute value
-          const absv = abs(v);
-          // value is greater than pivote value
-          if (larger(absv, pabsv)) {
-            // store row
-            pi = i;
-            // update max value
-            pabsv = absv;
-            // value @ [j, j]
-            vjj = v;
+          // row with larger value in cvector, row >= j
+          let pi = j;
+          let pabsv: unknown = 0;
+          let vjj: unknown = 0;
+          // loop rows
+          for (i = j; i < rows; i++) {
+            // data @ i, j
+            const v = data[i][j];
+            // absolute value
+            const absv = abs(v);
+            // value is greater than pivote value
+            if (larger(absv, pabsv)) {
+              // store row
+              pi = i;
+              // update max value
+              pabsv = absv;
+              // value @ [j, j]
+              vjj = v;
+            }
           }
-        }
-        // swap rows (j <-> pi)
-        if (j !== pi) {
-          // swap values j <-> pi in p
-          p[j] = [p[pi], (p[pi] = p[j])][0];
-          // swap j <-> pi in data
-          DenseMatrix._swapRows(j, pi, data);
-        }
-        // check column is in lower triangular matrix
-        if (j < rows) {
-          // loop rows (lower triangular matrix)
-          for (i = j + 1; i < rows; i++) {
-            // value @ i, j
-            const vij = data[i][j];
-            if (!equalScalar(vij, 0)) {
-              // update data
-              data[i][j] = divideScalar(data[i][j], vjj);
+          // swap rows (j <-> pi)
+          if (j !== pi) {
+            // swap values j <-> pi in p
+            p[j] = [p[pi], (p[pi] = p[j])][0];
+            // swap j <-> pi in data
+            DenseMatrix._swapRows(j, pi, data);
+          }
+          // check column is in lower triangular matrix
+          if (j < rows) {
+            // loop rows (lower triangular matrix)
+            for (i = j + 1; i < rows; i++) {
+              // value @ i, j
+              const vij = data[i][j];
+              if (!equalScalar(vij, 0)) {
+                // update data
+                data[i][j] = divideScalar(data[i][j], vjj);
+              }
             }
           }
         }

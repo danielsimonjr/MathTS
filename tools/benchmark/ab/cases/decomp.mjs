@@ -63,4 +63,18 @@ export const cases = [
     kind: 'neutral',
     make: (F) => () => F.det(randomMatrix(128, 128, 0x99128)),
   },
+  { name: 'lup 2×2', kind: 'gain', make: (F) => () => F.lup(randomMatrix(2, 2, 0x72002)) },
+  { name: 'lup 8×8', kind: 'gain', make: (F) => () => F.lup(randomMatrix(8, 8, 0x72008)) },
+  { name: 'lup 32×32', kind: 'gain', make: (F) => () => F.lup(randomMatrix(32, 32, 0x72032)) },
+  { name: 'lup 128×128', kind: 'gain', make: (F) => () => F.lup(randomMatrix(128, 128, 0x72128)) },
+  { name: 'lusolve 8×8', kind: 'gain', make: (F) => () => F.lusolve(randomMatrix(8, 8, 0x72008), randomMatrix(8, 1, 0x72081)[0]) },
+  {
+    name: 'lusolve 128×128',
+    kind: 'gain',
+    make: (F) => () => {
+      const A = randomMatrix(128, 128, 0x72128);
+      const b = randomMatrix(128, 1, 0x721281)[0];
+      return F.lusolve(A, b);
+    },
+  },
 ];
