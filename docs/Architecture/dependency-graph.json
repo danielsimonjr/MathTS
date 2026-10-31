@@ -6602,7 +6602,7 @@
         "constants": ["createLup"]
       },
       "functions/src/algebra/decomposition/qr.ts": {
-        "description": "Calculate the Matrix QR decomposition. Matrix `A` is decomposed in",
+        "description": "Householder step loop for plain number storage. Scalar work per step uses the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -43271,7 +43271,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1234,
     "totalModules": 82,
-    "totalLinesOfCode": 203553,
+    "totalLinesOfCode": 203690,
     "totalExports": 6410,
     "totalClasses": 60,
     "totalInterfaces": 569,

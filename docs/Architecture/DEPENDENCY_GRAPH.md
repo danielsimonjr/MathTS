@@ -2673,7 +2673,7 @@ graph LR
 
 ---
 
-### `functions/src/algebra/decomposition/qr.ts` - Calculate the Matrix QR decomposition. Matrix `A` is decomposed in
+### `functions/src/algebra/decomposition/qr.ts` - Householder step loop for plain number storage. Scalar work per step uses the
 
 **Internal Dependencies:**
 
@@ -19454,7 +19454,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1234   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203553 |
+| Total Lines of Code     | 203690 |
 | Total Exports           | 6410   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
