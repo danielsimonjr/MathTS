@@ -1,5 +1,6 @@
 import { factory } from '../../utils/factory.js';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { isFraction } from '../../utils/is.js';
 
 // Type definitions
 interface MatrixConstructor {
@@ -182,6 +183,19 @@ export const createQr = /* #__PURE__ */ factory(
 
     return qrTyped;
 
+    function assertNoFractionEntries(data: unknown[][]): void {
+      for (let r = 0; r < data.length; r++) {
+        const row = data[r];
+        for (let c = 0; c < row.length; c++) {
+          if (isFraction(row[c])) {
+            throw new TypeError(
+              'Matrix QR decomposition does not support Fraction entries (use number or Complex)'
+            );
+          }
+        }
+      }
+    }
+
     function _denseQRimpl(m: DenseMatrix): QRResult {
       // rows & columns (m x n)
       const rows = m._size[0]; // m
@@ -192,6 +206,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       const R = m.clone();
       const Rdata = R._data as unknown[][];
+      assertNoFractionEntries(Rdata);
 
       // vars
       let i: number, j: number, k: number;
