@@ -4,6 +4,8 @@
 import { describe, it, expect } from 'vitest';
 import { Fraction } from '@danielsimonjr/mathts-core';
 import { bignumber, matrix, prod } from '../src/factories/index.js';
+import { factoryScope } from '../src/factories/scope.js';
+import { createProd } from '../src/statistics/prod.js';
 
 describe('P7-2 prod number path', () => {
   it('seeded n = 10_000 (bit-exact golden)', () => {
@@ -137,5 +139,19 @@ describe('P7-2 prod number path', () => {
       for (let i = 1; i < values.length; i++) expected *= values[i];
       expect(Object.is(prod(a), expected)).toBe(true);
     }
+  });
+
+  it('a plain-function multiplyScalar (no typed.find) keeps prod working on the generic path', () => {
+    const realMul = factoryScope.multiplyScalar as (a: unknown, b: unknown) => unknown;
+    const scope = new Proxy(factoryScope, {
+      get: (target, key) =>
+        key === 'multiplyScalar'
+          ? (a: unknown, b: unknown) => realMul(a, b)
+          : target[key as string],
+      has: (target, key) => key in target,
+    });
+    const run = createProd(scope) as (a: unknown) => unknown;
+    expect(run([2, 3, 4])).toBe(24);
+    expect(Object.is(run([1.5, -0, 2]), -0)).toBe(true);
   });
 });

@@ -176,6 +176,32 @@ describe('P7-1 qr number path — resume at the first unfinished step', () => {
   });
 });
 
+describe('P7-1 qr number path — replaced dependencies', () => {
+  /**
+   * `typed.find` throws for a dependency that is not a typed function, and a factory dependency
+   * can be replaced by one. The number path must then be skipped (the ops cache holds `null`)
+   * and `qr` must keep working through per-call dispatch, as before.
+   */
+  it('plain-function addScalar and conj keep qr working on the generic path', () => {
+    const g = byName.get('8x8');
+    expect(g).toBeDefined();
+    const realAdd = factoryScope.addScalar as (a: unknown, b: unknown) => unknown;
+    const realConj = factoryScope.conj as (a: unknown) => unknown;
+    const scope = new Proxy(factoryScope, {
+      get: (target, key) => {
+        if (key === 'addScalar') return (a: unknown, b: unknown) => realAdd(a, b);
+        if (key === 'conj') return (a: unknown) => realConj(a);
+        return target[key as string];
+      },
+      has: (target, key) => key in target,
+    });
+    const run = createQr(scope) as (a: unknown) => { Q: unknown[][]; R: unknown[][] };
+    const { Q, R } = run(g!.A);
+    expectMatrixBitExact(Q, g!.Q);
+    expectMatrixBitExact(R, g!.R);
+  });
+});
+
 describe('P7-1 qr number path — regressions', () => {
   it('Fraction matrix keeps the pre-change throw', () => {
     expect(() =>

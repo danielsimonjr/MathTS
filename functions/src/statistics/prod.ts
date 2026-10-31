@@ -1,5 +1,6 @@
 import { deepForEach, reduce } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -40,8 +41,10 @@ export const createProd = /* #__PURE__ */ factory(
 
     function getProdMul(): NumberMul | null {
       if (cachedProdMul === undefined) {
-        cachedProdMul =
-          (typed.find(multiplyScalar, ['number', 'number']) as NumberMul | null) ?? null;
+        cachedProdMul = findTypedImpl<[number, number], number>(typed, multiplyScalar, [
+          'number',
+          'number',
+        ]);
       }
       return cachedProdMul;
     }

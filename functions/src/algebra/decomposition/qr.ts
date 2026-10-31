@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -127,11 +128,12 @@ export const createQr = /* #__PURE__ */ factory(
 
     function getQrNumberOps(): QRNumberOps | null {
       if (cachedQrNumberOps === undefined) {
-        const add = typed.find(addScalar, ['number', 'number']) as QRNumberOp | null;
-        const mul = typed.find(multiplyScalar, ['number', 'number']) as QRNumberOp | null;
-        const sub = typed.find(subtractScalar, ['number', 'number']) as QRNumberOp | null;
-        const div = typed.find(divideScalar, ['number', 'number']) as QRNumberOp | null;
-        const conjNum = typed.find(conj, ['number']) as QRNumberConj | null;
+        const nn = ['number', 'number'];
+        const add = findTypedImpl<[number, number], number>(typed, addScalar, nn);
+        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
+        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
+        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
+        const conjNum = findTypedImpl<[number], number>(typed, conj, ['number']);
         cachedQrNumberOps =
           add && mul && sub && div && conjNum ? { add, mul, sub, div, conj: conjNum } : null;
       }

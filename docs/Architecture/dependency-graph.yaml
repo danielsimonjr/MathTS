@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-10-31'
-  totalFiles: 1234
+  totalFiles: 1235
   totalModules: 82
-  totalExports: 6411
+  totalExports: 6412
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -6396,6 +6396,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -18559,6 +18562,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ./utils/improveErrorMessage.js
           imports:
             - improveErrorMessage
@@ -24436,6 +24442,20 @@ modules:
         - createTypeOf
       constants:
         - createTypeOf
+    functions/src/utils/typed-impl.ts:
+      description: The implementation `typed` dispatches to for `signature`, resolved once so that a hot loop can
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../core/function/typed.js
+          imports:
+            - TypedFunction
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - findTypedImpl
+      functions:
+        - findTypedImpl
   functions/wasm:
     functions/src/wasm/WasmLoader.ts:
       description: WASM Loader - Loads and manages WebAssembly modules
@@ -40215,6 +40235,7 @@ dependencyGraph:
         - functions/src/utils/string.ts
         - functions/src/utils/switch.ts
         - functions/src/utils/typeOf.ts
+        - functions/src/utils/typed-impl.ts
     - name: Functions/wasm
       files:
         - functions/src/wasm/WasmLoader.ts
@@ -40887,18 +40908,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1234
+  totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 203831
-  totalExports: 6411
+  totalLinesOfCode: 203858
+  totalExports: 6412
   totalClasses: 60
   totalInterfaces: 570
-  totalFunctions: 2071
+  totalFunctions: 2072
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1632
   totalReExports: 2724
-  totalTypeOnlyImports: 620
+  totalTypeOnlyImports: 621
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
