@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-31",
     "totalFiles": 1235,
     "totalModules": 82,
-    "totalExports": 6412
+    "totalExports": 6411
   },
   "entryPoints": [
     {
@@ -19493,7 +19493,7 @@
         "constants": ["createCumSum"]
       },
       "functions/src/statistics/extreme.ts": {
-        "description": "extreme module",
+        "description": "Recursively reduce an array or matrix to a single extreme value.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -19521,8 +19521,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["_reduceExtremeNumber", "reduceExtreme"],
-        "functions": ["_reduceExtremeNumber", "reduceExtreme"]
+        "exports": ["reduceExtreme"],
+        "functions": ["reduceExtreme"]
       },
       "functions/src/statistics/mad.ts": {
         "description": "Compute the median absolute deviation of a matrix or a list with values.",
@@ -19567,6 +19567,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19665,6 +19669,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -43296,11 +43304,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 203858,
-    "totalExports": 6412,
+    "totalLinesOfCode": 203856,
+    "totalExports": 6411,
     "totalClasses": 60,
     "totalInterfaces": 570,
-    "totalFunctions": 2072,
+    "totalFunctions": 2071,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1632,

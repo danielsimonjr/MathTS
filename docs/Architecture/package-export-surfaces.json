@@ -1530,7 +1530,6 @@
     "functions": [
       "_factorSolver",
       "_lgamma",
-      "_reduceExtremeNumber",
       "_switch",
       "abs",
       "absNumber",

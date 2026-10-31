@@ -8687,7 +8687,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/extreme.ts` - extreme module
+### `functions/src/statistics/extreme.ts` - Recursively reduce an array or matrix to a single extreme value.
 
 **Internal Dependencies:**
 
@@ -8701,7 +8701,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_reduceExtremeNumber`, `reduceExtreme`
+- Functions: `reduceExtreme`
 
 ---
 
@@ -8731,6 +8731,7 @@ graph LR
 | `../utils/collection.js`         | `reduce, containsCollections` | Import             |
 | `./extreme.js`                   | `reduceExtreme`               | Import             |
 | `../utils/factory.js`            | `factory`                     | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`               | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
 | `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
@@ -8786,6 +8787,7 @@ graph LR
 | `../utils/collection.js`         | `containsCollections, reduce` | Import             |
 | `./extreme.js`                   | `reduceExtreme`               | Import             |
 | `../utils/factory.js`            | `factory`                     | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`               | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
 | `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
@@ -19471,12 +19473,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203858 |
-| Total Exports           | 6412   |
+| Total Lines of Code     | 203856 |
+| Total Exports           | 6411   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
 | Total Interfaces        | 570    |
-| Total Functions         | 2072   |
+| Total Functions         | 2071   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 621    |
