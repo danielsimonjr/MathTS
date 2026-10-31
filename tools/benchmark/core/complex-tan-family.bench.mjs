@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * P6-5 speed gate: `Complex.tan/cot/tanh/coth` (shared `tanFamily`) against the pre-P6-5 bodies.
+ * P6-5 speed gate: `Complex.tan/cot/tanh/coth` (one closed form, `createTanFamilyMethod`) against the
+ * pre-P6-5 bodies.
  *
  *   bunx turbo build --filter=@danielsimonjr/mathts-core   # the bench imports core's dist
  *   node tools/benchmark/core/complex-tan-family.bench.mjs
@@ -12,6 +13,11 @@
  * path fails the run instead of timing as fast. 10^6 random arguments, of which about 12% lie
  * past the |2 Im| (or |2 Re|) > 700 overflow branch. Exit code 1 when any method is slower than
  * the noise band (default 5%).
+ *
+ * Harness floor on JavaScriptCore: this two-way harness has no control row. On Bun, a `new` that is
+ * the legacy body behind the same arrow wrapper (an A/A run, 2026-10-31) reads 1.01 to 1.05 against
+ * `old` (Bun 1.4.2 and 1.4.4) and 1.00 on Node. Read a Bun result against that floor, and repeat a
+ * run that exceeds the band before acting on it.
  */
 import { Complex } from '../../../core/dist/index.js';
 

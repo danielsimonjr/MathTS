@@ -1,5 +1,5 @@
 /**
- * P6-5 pins for `Complex.tan` / `cot` / `tanh` / `coth` (the shared `tanFamily`).
+ * P6-5 pins for `Complex.tan` / `cot` / `tanh` / `coth` (one closed form, `createTanFamilyMethod`).
  *
  * The four pre-P6-5 bodies are repeated below and every grid point is compared with `Object.is`,
  * so a changed sign of zero, a swapped part, a flipped overflow branch, or a last-bit difference

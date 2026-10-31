@@ -9,6 +9,36 @@ import type { Scalar, IComplex } from './interfaces.js';
 const HYPERBOLIC_OVERFLOW_ARG = 700;
 
 /**
+ * The one closed form behind `tan`, `cot`, `tanh` and `coth`.
+ *
+ * `sign` (+1 tangent, -1 cotangent) and `hyperbolic` are bound once, when the method is created in
+ * `Complex`'s static block, so the function that runs has no boolean parameter and `z.tan()` is a
+ * direct method call. The earlier shared helper took both flags on every call; V8 inlined it and
+ * folded the literals, but JavaScriptCore did not, and `tan`/`cot`/`tanh` ran 5% to 11% slower there.
+ * Four pasted bodies were the other fix, and they put the formula in four places.
+ *
+ * Bit-identical to the four bodies it replaced: `cosh h + sign * cos t` is `cos t + cosh h` for the
+ * tangents and `cosh h - cos t` for the cotangents, and `x * sign` is `x` or `-x`.
+ */
+function createTanFamilyMethod(sign: 1 | -1, hyperbolic: boolean): (this: Complex) => Complex {
+  return function (this: Complex): Complex {
+    const t = (hyperbolic ? this.im : this.re) * 2;
+    const h = (hyperbolic ? this.re : this.im) * 2;
+    let s: number;
+    let q: number;
+    if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
+      s = 2 * Math.sin(t) * Math.exp(-Math.abs(h));
+      q = Math.sign(h);
+    } else {
+      const d = Math.cosh(h) + sign * Math.cos(t);
+      s = Math.sin(t) / d;
+      q = Math.sinh(h) / d;
+    }
+    return hyperbolic ? new Complex(q, s * sign) : new Complex(s, q * sign);
+  };
+}
+
+/**
  * Check if a value is a Complex number
  */
 export function isComplex(value: unknown): value is Complex {
@@ -41,6 +71,7 @@ function hypotFast(re: number, im: number): number {
  * Complex number class with full arithmetic support
  * Implements the IComplex interface for type-safe complex number operations.
  */
+// eslint-disable-next-line typescript/no-unsafe-declaration-merging -- tan/cot/tanh/coth are declared by the `Complex` interface below the class and installed by the static block
 export class Complex implements IComplex {
   readonly type = 'Complex';
   readonly re: number;
@@ -49,6 +80,25 @@ export class Complex implements IComplex {
   constructor(re: number, im: number = 0) {
     this.re = re;
     this.im = im;
+  }
+
+  // `tan`, `cot`, `tanh` and `coth` are created from `createTanFamilyMethod`, with the same property
+  // attributes a class method has. Their signatures and docs sit on the `Complex` interface below.
+  static {
+    const tanFamily = [
+      ['tan', 1, false],
+      ['cot', -1, false],
+      ['tanh', 1, true],
+      ['coth', -1, true],
+    ] as const;
+    for (const [name, sign, hyperbolic] of tanFamily) {
+      Object.defineProperty(Complex.prototype, name, {
+        value: createTanFamilyMethod(sign, hyperbolic),
+        writable: true,
+        configurable: true,
+        enumerable: false,
+      });
+    }
   }
 
   // ============================================================
@@ -476,34 +526,6 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Tangent: tan(x+iy) = (sin 2x + i sinh 2y) / (cos 2x + cosh 2y)
-   *
-   * Closed form — no intermediate `sin`/`cos` Complex allocations.
-   */
-  tan(): Complex {
-    const t = this.re * 2;
-    const h = this.im * 2;
-    if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(2 * Math.sin(t) * Math.exp(-Math.abs(h)), Math.sign(h));
-    }
-    const d = Math.cos(t) + Math.cosh(h);
-    return new Complex(Math.sin(t) / d, Math.sinh(h) / d);
-  }
-
-  /**
-   * Cotangent: cot(x+iy) = (sin 2x − i sinh 2y) / (cosh 2y − cos 2x)
-   */
-  cot(): Complex {
-    const t = this.re * 2;
-    const h = this.im * 2;
-    if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(2 * Math.sin(t) * Math.exp(-Math.abs(h)), -Math.sign(h));
-    }
-    const d = Math.cosh(h) - Math.cos(t);
-    return new Complex(Math.sin(t) / d, -Math.sinh(h) / d);
-  }
-
-  /**
    * Secant: sec(z) = 1 / cos(z)
    */
   sec(): Complex {
@@ -539,32 +561,6 @@ export class Complex implements IComplex {
       Math.cosh(this.re) * Math.cos(this.im),
       Math.sinh(this.re) * Math.sin(this.im)
     );
-  }
-
-  /**
-   * Hyperbolic tangent: tanh(x+iy) = (sinh 2x + i sin 2y) / (cosh 2x + cos 2y)
-   */
-  tanh(): Complex {
-    const t = this.im * 2;
-    const h = this.re * 2;
-    if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(Math.sign(h), 2 * Math.sin(t) * Math.exp(-Math.abs(h)));
-    }
-    const d = Math.cosh(h) + Math.cos(t);
-    return new Complex(Math.sinh(h) / d, Math.sin(t) / d);
-  }
-
-  /**
-   * Hyperbolic cotangent: coth(x+iy) = (sinh 2x − i sin 2y) / (cosh 2x − cos 2y)
-   */
-  coth(): Complex {
-    const t = this.im * 2;
-    const h = this.re * 2;
-    if (Math.abs(h) > HYPERBOLIC_OVERFLOW_ARG) {
-      return new Complex(Math.sign(h), -2 * Math.sin(t) * Math.exp(-Math.abs(h)));
-    }
-    const d = Math.cosh(h) - Math.cos(t);
-    return new Complex(Math.sinh(h) / d, -Math.sin(t) / d);
   }
 
   /**
@@ -736,6 +732,33 @@ export class Complex implements IComplex {
     if (r === 0) return new Complex(0, 0);
     return new Complex(this.re / r, this.im / r);
   }
+}
+
+// Merged with the class so the four tangent methods keep their method signatures in the emitted
+// `.d.ts` (a `declare tan: () => Complex` field would publish them as properties). Their bodies are
+// installed by the class's static block, and `complex-tan-family-pin.test.ts` calls each one.
+export interface Complex {
+  /**
+   * Tangent: tan(x+iy) = (sin 2x + i sinh 2y) / (cos 2x + cosh 2y)
+   *
+   * Closed form — no intermediate `sin`/`cos` Complex allocations.
+   */
+  tan(): Complex;
+
+  /**
+   * Cotangent: cot(x+iy) = (sin 2x − i sinh 2y) / (cosh 2y − cos 2x)
+   */
+  cot(): Complex;
+
+  /**
+   * Hyperbolic tangent: tanh(x+iy) = (sinh 2x + i sin 2y) / (cosh 2x + cos 2y)
+   */
+  tanh(): Complex;
+
+  /**
+   * Hyperbolic cotangent: coth(x+iy) = (sinh 2x − i sin 2y) / (cosh 2x − cos 2y)
+   */
+  coth(): Complex;
 }
 
 /**

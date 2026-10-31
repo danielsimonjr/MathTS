@@ -2566,6 +2566,8 @@ modules:
         - Complex
       classes:
         - Complex
+      interfaces:
+        - Complex
       functions:
         - isComplex
       constants:
@@ -40885,10 +40887,10 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1234
   totalModules: 82
-  totalLinesOfCode: 203554
+  totalLinesOfCode: 203577
   totalExports: 6410
   totalClasses: 60
-  totalInterfaces: 569
+  totalInterfaces: 570
   totalFunctions: 2070
   totalTypeGuards: 161
   totalEnums: 0
