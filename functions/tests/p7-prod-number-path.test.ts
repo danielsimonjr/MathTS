@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { Fraction } from '@danielsimonjr/mathts-core';
-import { prod } from '../src/factories/index.js';
+import { bignumber, matrix, prod } from '../src/factories/index.js';
 
 describe('P7-2 prod number path', () => {
   it('seeded n = 10_000 (bit-exact golden)', () => {
@@ -44,6 +44,29 @@ describe('P7-2 prod number path', () => {
 
   it('numeric strings', () => {
     expect(prod(['2', '3'])).toBe(6);
+  });
+
+  it('a numeric string after numbers is converted by the generic path', () => {
+    expect(prod([2, 3, '4'])).toBe(24);
+  });
+
+  it('BigNumber array falls back to the generic path', () => {
+    const result = prod([bignumber('2'), bignumber('3'), bignumber('7')]);
+    expect(String(result)).toBe('42');
+  });
+
+  it('Array subclass stays on the generic path', () => {
+    class Tagged extends Array<number> {}
+    const t = Tagged.from([2, 3, 4]);
+    expect(prod(t)).toBe(24);
+  });
+
+  it('DenseMatrix input', () => {
+    expect(prod(matrix([2, 3, 4]))).toBe(24);
+  });
+
+  it('variadic call', () => {
+    expect(prod(2, 3, 4)).toBe(24);
   });
 
   it('2-D array', () => {

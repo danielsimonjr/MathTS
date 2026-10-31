@@ -10474,7 +10474,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 74
+      "loc": 97
     },
     {
       "file": "functions/tests/p7-qr-number-path.test.ts",
