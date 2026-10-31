@@ -1,13 +1,13 @@
-# Clone ledger — Phase 6 measurement
+# Clone ledger — Phase 7 measurement
 
-Measured on `main` at `40466a97` (`docs(roadmap): Sprint 5R close-out (PySR PR 12) (#528)`), with
+Measured on `main` at `9dc97c56` (`refactor(functions): P6-11 GPU chain lifecycle consolidation (#542)`), with
 `@danielsimonjr/repo-tools` **2.3.0** (`repo-tools clones`) and the tool defaults. This file is a
-measurement only. It does not mark any pair MERGE or KEEP; the Phase 6 verdicts are in
-[`docs/plans/CLONES_PHASE_6_PLAN.md`](../plans/CLONES_PHASE_6_PLAN.md). The procedure is the
+measurement only, and it classifies no pair. Phase 7 is a runtime-speed phase
+([`docs/plans/PHASE_7_PERFORMANCE_PLAN.md`](../plans/PHASE_7_PERFORMANCE_PLAN.md)); a clone pair is worked
+there only when merging it makes code faster. The measurement procedure is the
 "Phase 6 and up: clone-reduction loop" section of
-[`PYSR_INFORMED_ROADMAP.md`](./PYSR_INFORMED_ROADMAP.md). The previous ledger and its verdicts are in
-git history at `bf90a00e` and in the historical
-[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md).
+[`PYSR_INFORMED_ROADMAP.md`](./PYSR_INFORMED_ROADMAP.md). The Phase 6 ledger (`40466a97`, 553 pairs) and its
+verdicts are in git history at `d68f3a78` and in [`CLONES_PHASE_6_PLAN.md`](../plans/CLONES_PHASE_6_PLAN.md).
 
 **Tool version.** `repo-tools` 2.2.4, the `REPO_TOOLS_VERSION` pin in `.github/workflows/ci.yml`, has no
 `clones` subcommand (`repo-tools: unknown subcommand or option 'clones'`); its subcommands are `map`,
@@ -15,6 +15,9 @@ git history at `bf90a00e` and in the historical
 `repo-tools check . --docs=docs/Architecture` and is unchanged. No `package.json` script or CI job runs
 `clones`; the roadmap command below is the canonical invocation. Two runs on the same tree wrote
 byte-identical `inventory.jsonl` and `clones.json`. Neither report is committed.
+
+**Discovery.** The tool reads git-tracked files only (`git ls-files --cached`), so a new file is invisible
+to it until it is staged. Stage new files before you measure a branch.
 
 ## Command
 
@@ -28,17 +31,17 @@ repo-tools clones . --src \
   parser/src units/src numbers/src ast/src evaluator/src linalg/src \
   arithmetic/src trigonometry/src statistics/src signal/src \
   parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
-  --out=../tmp/clones-phase-6
+  --out=../tmp/clones-phase-7
 ```
 
 Output:
 
 ```
-files=1230 parseErrors=0 units(minNodes=50)=2653
-nodes p50=109 p90=327 p99=827 max=3705
-exact groups=10 (units in them=39) text-identical groups=4
-near pairs=553 by jStruct: 0.9 or more: 109, 0.8 to 0.9: 159, 0.7 to 0.8: 90, 0.6 to 0.7: 171, below 0.6 (containment): 24
-units by folder: assembly/src=150 autograd/src=51 compat/src=9 core/src=227 expression/src=157 functions/src=1564 gpu/src=14 matrix/src=190 packages/typed-function=2 packages/workerpool=62 parallel/src=51 plot/src=36 tensor/src=58 workbook/src=82
+files=1232 parseErrors=0 units(minNodes=50)=2644
+nodes p50=109 p90=327 p99=826 max=3602
+exact groups=9 (units in them=37) text-identical groups=4
+near pairs=533 by jStruct: 0.9 or more: 105, 0.8 to 0.9: 155, 0.7 to 0.8: 87, 0.6 to 0.7: 162, below 0.6 (containment): 24
+units by folder: assembly/src=150 autograd/src=51 compat/src=9 core/src=228 expression/src=157 functions/src=1559 gpu/src=14 matrix/src=186 packages/typed-function=2 packages/workerpool=62 parallel/src=50 plot/src=36 tensor/src=58 workbook/src=82
 ```
 
 | Flag                | Value |
@@ -51,33 +54,34 @@ units by folder: assembly/src=150 autograd/src=51 compat/src=9 core/src=227 expr
 | `--rare`            | 60    |
 | `--min-shared`      | 3     |
 
-`109 + 159 + 90 + 171 + 24 = 553`.
+`105 + 155 + 87 + 162 + 24 = 533`.
 
 ## Counts
 
 Every column is the same command with the same flags, run on a `git archive` export of that commit.
 
-| Measure                                                 | `156e4ea8` | `bf90a00e` | `655ffb3a` | `40466a97` |
-| ------------------------------------------------------- | ---------: | ---------: | ---------: | ---------: |
-| Files scanned                                           |       1219 |       1221 |       1222 |       1230 |
-| Parse errors                                            |          5 |          0 |          0 |          0 |
-| Units (at least 50 nodes)                               |       2604 |       2594 |       2594 |       2653 |
-| Exact groups                                            |         12 |         11 |          9 |         10 |
-| Units inside exact groups                               |         43 |         41 |         37 |         39 |
-| Text-identical groups                                   |          4 |          4 |          4 |          4 |
-| Near pairs                                              |        573 |        549 |        551 |        553 |
-| Near pairs, jStruct 0.9 or more                         |        112 |        110 |        108 |        109 |
-| Near pairs, jStruct 0.8 to 0.9                          |        164 |        158 |        159 |        159 |
-| Near pairs, jStruct 0.7 to 0.8                          |         91 |         89 |         90 |         90 |
-| Near pairs, jStruct 0.6 to 0.7                          |        181 |        168 |        170 |        171 |
-| Near pairs, jStruct below 0.6 (reported by containment) |         25 |         24 |         24 |         24 |
+| Measure                                                 | `156e4ea8` | `bf90a00e` | `655ffb3a` | `40466a97` | `9dc97c56` |
+| ------------------------------------------------------- | ---------: | ---------: | ---------: | ---------: | ---------: |
+| Files scanned                                           |       1219 |       1221 |       1222 |       1230 |       1232 |
+| Parse errors                                            |          5 |          0 |          0 |          0 |          0 |
+| Units (at least 50 nodes)                               |       2604 |       2594 |       2594 |       2653 |       2644 |
+| Exact groups                                            |         12 |         11 |          9 |         10 |          9 |
+| Units inside exact groups                               |         43 |         41 |         37 |         39 |         37 |
+| Text-identical groups                                   |          4 |          4 |          4 |          4 |          4 |
+| Near pairs                                              |        573 |        549 |        551 |        553 |        533 |
+| Near pairs, jStruct 0.9 or more                         |        112 |        110 |        108 |        109 |        105 |
+| Near pairs, jStruct 0.8 to 0.9                          |        164 |        158 |        159 |        159 |        155 |
+| Near pairs, jStruct 0.7 to 0.8                          |         91 |         89 |         90 |         90 |         87 |
+| Near pairs, jStruct 0.6 to 0.7                          |        181 |        168 |        170 |        171 |        162 |
+| Near pairs, jStruct below 0.6 (reported by containment) |         25 |         24 |         24 |         24 |         24 |
 
 - `156e4ea8`: Tree reviewed by `CLONES_REFACTOR_PLAN.md`.
 - `bf90a00e`: After clone PRs A–I (#497–#505) and #496.
 - `655ffb3a`: After the core sprint (#507–#517).
-- `40466a97`: This ledger: after PySR PRs 1–12 (#519–#530).
+- `40466a97`: Tree reviewed by `CLONES_PHASE_6_PLAN.md`, after PySR PRs 1–12 (#519–#530).
+- `9dc97c56`: This ledger: after the Phase 6 build PRs P6-1 to P6-11 (#532–#542).
 
-## Exact groups (10)
+## Exact groups (9)
 
 Same normalized structure (`exactHash`). Each group is also reported as near pairs at `jStruct` 1.
 A member marked "text-identical" shares its `textHash` with another member of the group.
@@ -128,9 +132,6 @@ A member marked "text-identical" shares its `textHash` with another member of th
 9. 2 units, 77 nodes each:
    - `expression/src/utils/is.ts:291 isBigNumber` (text-identical)
    - `functions/src/utils/is.ts:226 isBigNumber` (text-identical)
-10. 2 units, 93 nodes each:
-    - `functions/src/scalar-mutate.ts:366 rotateLeft`
-    - `functions/src/scalar-mutate.ts:381 rotateRight`
 
 ## Text-identical groups (4)
 
@@ -139,77 +140,58 @@ A member marked "text-identical" shares its `textHash` with another member of th
 - `expression/src/utils/factory.ts:94 factory` = `functions/src/utils/factory.ts:104 factory`
 - `expression/src/utils/is.ts:291 isBigNumber` = `functions/src/utils/is.ts:226 isBigNumber`
 
-## Changes since `156e4ea8`
+## Changes since `40466a97`
 
-`156e4ea8` is the tree whose pairs `CLONES_REFACTOR_PLAN.md` marked. Units are matched by file, container,
+`40466a97` is the tree whose pairs `CLONES_PHASE_6_PLAN.md` marked. Units are matched by file, container,
 name, kind, and ordinal, so a moved line number is not a change.
 
-- Near pairs: 573 then, 553 now. 25 left the report, 5 appeared,
-  and 548 are carried. 5 carried pairs have a unit whose text changed.
-- Exact groups: 12 then, 10 now. 3 left, 1 appeared.
+- Near pairs: 553 then, 533 now. 20 left the report, 0 appeared,
+  and 533 are carried. No carried pairs have a unit whose text changed.
+- Exact groups: 10 then, 9 now. 1 left, none appeared.
 
 Exact groups that left:
 
-- `core/src/types/complex.ts` `cot`, `core/src/types/complex.ts` `coth`
-- `core/src/types/complex.ts` `tan`, `core/src/types/complex.ts` `tanh`
-- `functions/src/set/setSymDifference.ts` `Array | Matrix, Array | Matrix`, `functions/src/set/setUnion.ts` `Array | Matrix, Array | Matrix`
+- `functions/src/scalar-mutate.ts` `rotateLeft`, `functions/src/scalar-mutate.ts` `rotateRight`
 
-Exact groups that appeared:
+### Near pairs that left the report (20)
 
-- `functions/src/scalar-mutate.ts:366 rotateLeft`, `functions/src/scalar-mutate.ts:381 rotateRight`
+Line numbers are from `40466a97`. Each pair is a Phase 6 MERGE pair, and each left in its own PR.
 
-### Near pairs that left the report (25)
+- `functions/src/scalar-mutate.ts:366 rotateLeft` ↔ `functions/src/scalar-mutate.ts:381 rotateRight` (j 1.000) — first unit removed, second unit removed
+- `packages/workerpool/src/worker.ts:770 tensordotChunk` ↔ `parallel/src/ComputePool.ts:413 tensordotChunkKernel` (j 0.971) — first unit removed, second unit removed
+- `functions/src/wasm/WasmLoader.ts:368 loadNodeWasm` ↔ `matrix/src/backends/WasmLoader.ts:658 loadNodeWasm` (j 0.952) — first unit removed, second unit removed
+- `functions/src/wasm/WasmLoader.ts:400 loadBrowserWasm` ↔ `matrix/src/backends/WasmLoader.ts:691 loadBrowserWasm` (j 0.919) — first unit removed, second unit removed
+- `functions/src/gpu/elementwise-gpu.ts:307 chainGpuDispatchImpl` ↔ `functions/src/gpu/elementwise-gpu.ts:499 chainReduceGpuDispatchImpl` (j 0.888) — first unit removed, second unit removed
+- `functions/src/wasm/WasmLoader.ts:306 precompile` ↔ `matrix/src/backends/WasmLoader.ts:592 precompile` (j 0.877) — first unit removed, second unit removed
+- `functions/src/arithmetic/xgcd.ts:99 _xgcdBigNumber` ↔ `functions/src/arithmetic/xgcd.ts:153 _xgcdFraction` (j 0.846) — first unit removed
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:549 tanh` (j 0.803) — first unit removed, second unit removed
+- `functions/src/fit-scalar.ts:550 gradL1` ↔ `functions/src/fit-scalar.ts:570 gradHuber` (j 0.770) — first unit removed, second unit removed
+- `functions/src/wasm/bridges/common.ts:180 asAllocHeader` ↔ `matrix/src/backends/wasm/as-typed-array.ts:35 allocAsTypedView` (j 0.727) — first unit removed, second unit removed
+- `core/src/types/complex.ts:498 cot` ↔ `core/src/types/complex.ts:562 coth` (j 0.706) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:712 exec` ↔ `packages/workerpool/src/index.ts:740 execFunction` (j 0.684) — first unit removed, second unit removed
+- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:498 cot` (j 0.683) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:2263 runChunks` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.680) — first unit removed
+- `functions/src/numeric/solveODE.ts:465 rosenbrockSolve` ↔ `functions/src/numeric/solveODE.ts:613 rodasSolve` (j 0.678)
+- `packages/workerpool/src/index.ts:765 reduceScalar` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.664) — second unit removed
+- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.662)
+- `functions/src/scalar-mutate.ts:261 swapOperands` ↔ `functions/src/scalar-mutate.ts:348 deleteNode` (j 0.649) — first unit removed, second unit removed
+- `core/src/types/complex.ts:549 tanh` ↔ `core/src/types/complex.ts:562 coth` (j 0.636) — first unit removed, second unit removed
+- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.616) — second unit removed
 
-Line numbers are from `156e4ea8`.
+### Near pairs that appeared (0)
 
-- `functions/src/set/setSymDifference.ts:48 Array | Matrix, Array | Matrix` ↔ `functions/src/set/setUnion.ts:65 Array | Matrix, Array | Matrix` (j 1.000) — first unit removed, second unit removed
-- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.915) — second unit removed
-- `expression/src/node/AssignmentNode.ts:302 _toString` ↔ `expression/src/node/AssignmentNode.ts:349 _toHTML` (j 0.869) — first unit removed, second unit removed
-- `assembly/src/special.ts:396 _airyAiSeries` ↔ `assembly/src/special.ts:423 _airyBiSeries` (j 0.863) — first unit removed, second unit removed
-- `functions/src/typed/graph.ts:831 betweennessCentrality` ↔ `functions/src/typed/graph.ts:1011 eigenvectorCentrality` (j 0.818) — first unit removed, second unit removed
-- `functions/src/algebra/simplify/util.ts:201 unflattenr` ↔ `functions/src/algebra/simplify/util.ts:225 unflattenl` (j 0.802) — first unit removed, second unit removed
-- `functions/src/typed/graph.ts:632 pageRank` ↔ `functions/src/typed/graph.ts:831 betweennessCentrality` (j 0.754) — second unit removed
-- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.726)
-- `matrix/src/operations/qr-family.ts:53 flipRows` ↔ `matrix/src/operations/qr-family.ts:67 flipCols` (j 0.716) — first unit removed, second unit removed
-- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:1148 bitwiseNot` (j 0.692)
-- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1148 bitwiseNot` (j 0.692)
-- `expression/src/node/AssignmentNode.ts:302 _toString` ↔ `expression/src/node/AssignmentNode.ts:383 _toTex` (j 0.687) — first unit removed, second unit removed
-- `functions/src/typed/factorization/index.ts:45 cleanUnivariatePoly` ↔ `functions/src/typed/factorization/index.ts:89 renderIntPoly` (j 0.662)
-- `packages/workerpool/src/index.ts:844 dot` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.661)
-- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:960 scale` (j 0.655)
-- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:960 scale` (j 0.655)
-- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:844 dot` (j 0.642)
-- `core/src/types/fraction.ts:573 floor` ↔ `core/src/types/fraction.ts:587 ceil` (j 0.630) — first unit removed, second unit removed
-- `packages/workerpool/src/index.ts:768 sum` ↔ `packages/workerpool/src/index.ts:1659 applyKernel` (j 0.627)
-- `packages/workerpool/src/index.ts:806 prod` ↔ `packages/workerpool/src/index.ts:1659 applyKernel` (j 0.627)
-- `expression/src/node/AssignmentNode.ts:349 _toHTML` ↔ `expression/src/node/AssignmentNode.ts:383 _toTex` (j 0.620) — first unit removed, second unit removed
-- `packages/workerpool/src/index.ts:1148 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1495 norm` (j 0.619)
-- `packages/workerpool/src/index.ts:1495 norm` ↔ `packages/workerpool/src/index.ts:1533 distance` (j 0.618)
-- `expression/src/node/ObjectNode.ts:162 _toString` ↔ `expression/src/node/ObjectNode.ts:198 _toHTML` (j 0.606) — first unit removed, second unit removed
-- `matrix/src/operations/qr-family.ts:67 flipCols` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.515) — first unit removed
+None.
 
-### Near pairs that appeared (5)
+### Carried pairs whose text changed (0)
 
-- `functions/src/scalar-mutate.ts:366 rotateLeft` ↔ `functions/src/scalar-mutate.ts:381 rotateRight` (j 1.000) — first unit new, second unit new
-- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:498 cot` (j 0.683)
-- `packages/workerpool/src/index.ts:765 reduceScalar` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.664) — first unit new
-- `functions/src/scalar-mutate.ts:261 swapOperands` ↔ `functions/src/scalar-mutate.ts:348 deleteNode` (j 0.649) — first unit new, second unit new
-- `core/src/types/complex.ts:549 tanh` ↔ `core/src/types/complex.ts:562 coth` (j 0.636)
+None. Every carried pair has the same two bodies as at `40466a97`; only line numbers moved.
 
-### Carried pairs whose text changed (5)
-
-- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:549 tanh` (j 1.000 → 0.803); changed: `tan`, `tanh`
-- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:822 prod` (j 0.846 → 0.710); changed: `sum`, `prod`
-- `core/src/types/complex.ts:498 cot` ↔ `core/src/types/complex.ts:562 coth` (j 1.000 → 0.706); changed: `cot`, `coth`
-- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:1490 norm` (j 0.813 → 0.610); changed: `sum`, `norm`
-- `expression/src/compiler/compile.ts:307 compileFunctionNode` ↔ `expression/src/compiler/compile.ts:456 compileArrayNode` (j 0.103 → 0.105); changed: `compileFunctionNode`, `compileArrayNode`
-
-## Near pairs (553)
+## Near pairs (533)
 
 Every pair the run reported, in bands by `jStruct`, highest first. `contain` is the containment score and
-`names` is `jNames`. Line numbers are the function start lines at `40466a97`.
+`names` is `jNames`. Line numbers are the function start lines at `9dc97c56`.
 
-### jStruct 0.9 or more (109)
+### jStruct 0.9 or more (105)
 
 - `assembly/src/special.ts:617 _carlsonRC` ↔ `functions/src/wasm/special/wasm-bridge.ts:278 _carlsonRC` (j 1.000, contain 1.000, names 1.000)
 - `autograd/src/tape.ts:2302 _batchedMatmul` ↔ `autograd/src/tape.ts:2345 _batchedMatmulGradA` (j 1.000, contain 1.000, names 0.630)
@@ -223,7 +205,6 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `expression/src/utils/customs.ts:104 isSafeMethod` ↔ `functions/src/utils/customs.ts:102 isSafeMethod` (j 1.000, contain 1.000, names 1.000)
 - `expression/src/utils/factory.ts:94 factory` ↔ `functions/src/utils/factory.ts:104 factory` (j 1.000, contain 1.000, names 1.000)
 - `expression/src/utils/is.ts:291 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 1.000, contain 1.000, names 1.000)
-- `functions/src/scalar-mutate.ts:366 rotateLeft` ↔ `functions/src/scalar-mutate.ts:381 rotateRight` (j 1.000, contain 1.000, names 0.692)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 1.000, contain 1.000, names 0.846)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 1.000, contain 1.000, names 0.846)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:891 Float64Array` (j 1.000, contain 1.000, names 0.846)
@@ -311,9 +292,6 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/typed/trigonometry.ts:215 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 1.000, contain 1.000, names 0.867)
 - `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 1.000, contain 1.000, names 0.846)
 - `matrix/src/backends/wasm/detect.ts:60 detectSIMD` ↔ `matrix/src/backends/wasm/detect.ts:115 detectBulkMemory` (j 1.000, contain 1.000, names 0.500)
-- `packages/workerpool/src/worker.ts:770 tensordotChunk` ↔ `parallel/src/ComputePool.ts:413 tensordotChunkKernel` (j 0.971, contain 0.990, names 0.828)
-- `functions/src/wasm/WasmLoader.ts:368 loadNodeWasm` ↔ `matrix/src/backends/WasmLoader.ts:658 loadNodeWasm` (j 0.952, contain 0.990, names 1.000)
-- `functions/src/wasm/WasmLoader.ts:400 loadBrowserWasm` ↔ `matrix/src/backends/WasmLoader.ts:691 loadBrowserWasm` (j 0.919, contain 0.993, names 1.000)
 - `matrix/src/backends/JSBackend.ts:123 abs` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.917, contain 1.000, names 0.818)
 - `assembly/src/special.ts:709 _carlsonRJ` ↔ `functions/src/wasm/special/wasm-bridge.ts:379 _carlsonRJ` (j 0.915, contain 0.959, names 0.971)
 - `assembly/src/special.ts:783 _ellipticPiIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:459 _ellipticPiIncomplete` (j 0.909, contain 0.952, names 1.000)
@@ -321,16 +299,14 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:858 cos` (j 0.900, contain 0.952, names 0.889)
 - `matrix/src/backends/GPUMatrixBackend.ts:183 addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:282 multiplyAsync` (j 0.900, contain 0.953, names 0.875)
 
-### jStruct 0.8 to 0.9 (159)
+### jStruct 0.8 to 0.9 (155)
 
 - `assembly/src/special.ts:772 _ellipticEIncomplete` ↔ `functions/src/wasm/special/wasm-bridge.ts:448 _ellipticEIncomplete` (j 0.898, contain 0.946, names 1.000)
-- `functions/src/probability/util/gammaSample.ts:24 gammaSampleRng` ↔ `packages/workerpool/src/worker.ts:850 _workerGammaRandom` (j 0.891, contain 0.946, names 0.733)
+- `functions/src/probability/util/gammaSample.ts:24 gammaSampleRng` ↔ `packages/workerpool/src/worker.ts:798 _workerGammaRandom` (j 0.891, contain 0.946, names 0.733)
 - `packages/workerpool/src/worker.ts:250 applyKernelChunk` ↔ `packages/workerpool/src/worker.ts:271 applyKernel2Chunk` (j 0.889, contain 1.000, names 0.643)
-- `functions/src/gpu/elementwise-gpu.ts:307 chainGpuDispatchImpl` ↔ `functions/src/gpu/elementwise-gpu.ts:499 chainReduceGpuDispatchImpl` (j 0.888, contain 0.972, names 0.860)
 - `functions/src/numeric/krylov.ts:223 makeILU0` ↔ `functions/src/numeric/krylov.ts:244 makeIC0` (j 0.887, contain 0.949, names 0.800)
 - `core/src/numeric/stable.ts:132 norm2` ↔ `core/src/numeric/stable.ts:222 scaledDistance` (j 0.881, contain 0.957, names 0.611)
 - `assembly/src/special.ts:667 _carlsonRD` ↔ `functions/src/wasm/special/wasm-bridge.ts:329 _carlsonRD` (j 0.877, contain 0.934, names 1.000)
-- `functions/src/wasm/WasmLoader.ts:306 precompile` ↔ `matrix/src/backends/WasmLoader.ts:592 precompile` (j 0.877, contain 0.965, names 1.000)
 - `matrix/src/backends/GPUMatrixBackend.ts:183 addAsync` ↔ `matrix/src/backends/GPUMatrixBackend.ts:242 scaleAsync` (j 0.875, contain 0.963, names 0.792)
 - `autograd/src/tape.ts:475 sum` ↔ `autograd/src/tape.ts:500 mean` (j 0.874, contain 1.000, names 0.818)
 - `matrix/src/backends/WASMBackend.ts:779 inverse` ↔ `matrix/src/backends/WASMBackend.ts:894 choleskyDecomposition` (j 0.873, contain 0.976, names 0.667)
@@ -338,13 +314,12 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` (j 0.872, contain 0.983, names 0.857)
 - `functions/src/algebra/solver/lsolveAll.ts:149 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:149 _denseBackwardSubstitution` (j 0.869, contain 0.942, names 1.000)
 - `functions/src/algebra/solver/lsolveAll.ts:218 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolveAll.ts:218 _sparseBackwardSubstitution` (j 0.867, contain 0.958, names 1.000)
-- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1143 bitwiseNot` (j 0.862, contain 0.932, names 0.735)
+- `packages/workerpool/src/index.ts:927 scale` ↔ `packages/workerpool/src/index.ts:1115 bitwiseNot` (j 0.862, contain 0.932, names 0.735)
 - `core/src/is.ts:155 isBigNumber` ↔ `expression/src/utils/is.ts:291 isBigNumber` (j 0.861, contain 0.939, names 1.000)
 - `core/src/is.ts:155 isBigNumber` ↔ `functions/src/utils/is.ts:226 isBigNumber` (j 0.861, contain 0.939, names 1.000)
 - `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:165 complex_array_scale_complex` (j 0.855, contain 0.973, names 0.667)
 - `assembly/src/sort.ts:98 _siftDown` ↔ `assembly/src/sort.ts:200 _siftDownIdx` (j 0.852, contain 0.920, names 0.545)
 - `assembly/src/special.ts:544 _ellipticK` ↔ `functions/src/wasm/special/scalars.ts:333 ellipticKScalar` (j 0.849, contain 0.918, names 1.000)
-- `functions/src/arithmetic/xgcd.ts:99 _xgcdBigNumber` ↔ `functions/src/arithmetic/xgcd.ts:153 _xgcdFraction` (j 0.846, contain 0.917, names 0.529)
 - `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.842, contain 0.928, names 0.867)
 - `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.842, contain 0.928, names 0.867)
 - `functions/src/typed/arithmetic.ts:774 Float64Array` ↔ `functions/src/typed/trigonometry.ts:138 Float64Array` (j 0.842, contain 0.928, names 0.867)
@@ -377,7 +352,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:92 divideElementwise` (j 0.840, contain 0.913, names 1.000)
 - `assembly/src/special.ts:640 _carlsonRF` ↔ `functions/src/wasm/special/wasm-bridge.ts:301 _carlsonRF` (j 0.839, contain 0.916, names 1.000)
 - `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:836 sin` (j 0.832, contain 0.913, names 0.737)
-- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.832, contain 0.933, names 0.879)
+- `packages/workerpool/src/index.ts:927 scale` ↔ `packages/workerpool/src/index.ts:1605 applyKernel` (j 0.832, contain 0.933, names 0.879)
 - `assembly/src/ops/special.ts:79 erfi` ↔ `functions/src/typed/special.ts:111 erfiScalar` (j 0.829, contain 0.932, names 0.900)
 - `assembly/src/special.ts:101 _besselHankel` ↔ `functions/src/wasm/special/scalars.ts:132 besselHankel` (j 0.829, contain 0.906, names 1.000)
 - `core/src/numeric/stable.ts:103 neumaierSum` ↔ `core/src/numeric/stable.ts:373 neumaierCumsum` (j 0.829, contain 0.935, names 0.900)
@@ -391,8 +366,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `assembly/src/ops/polynomial.ts:87 determinant` ↔ `assembly/src/poly.ts:60 detSquare` (j 0.818, contain 0.992, names 0.706)
 - `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:614 matrix_gemv` (j 0.814, contain 0.980, names 0.375)
 - `packages/workerpool/src/worker.ts:311 bitwiseChunk` ↔ `packages/workerpool/src/worker.ts:353 bitwiseScalarChunk` (j 0.812, contain 0.920, names 0.538)
-- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.810, contain 0.925, names 0.694)
-- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:549 tanh` (j 0.803, contain 0.924, names 1.000)
+- `packages/workerpool/src/index.ts:1115 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1605 applyKernel` (j 0.810, contain 0.925, names 0.694)
 - `assembly/src/ops/array.ts:89 array_argmin` ↔ `assembly/src/ops/array.ts:109 array_argmax` (j 0.800, contain 0.889, names 0.600)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:774 Float64Array` (j 0.800, contain 0.982, names 0.733)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:796 Float64Array` (j 0.800, contain 0.982, names 0.733)
@@ -483,7 +457,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/typed/trigonometry.ts:279 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
 - `functions/src/typed/trigonometry.ts:299 Float64Array` ↔ `functions/src/typed/trigonometry.ts:319 Float64Array` (j 0.800, contain 0.982, names 0.733)
 
-### jStruct 0.7 to 0.8 (90)
+### jStruct 0.7 to 0.8 (87)
 
 - `assembly/src/ops/special.ts:117 sinIntegral` ↔ `functions/src/typed/special.ts:437 sinIntegralScalar` (j 0.798, contain 0.908, names 0.889)
 - `assembly/src/special.ts:143 _besselJ1Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.797, contain 0.917, names 0.875)
@@ -493,10 +467,9 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:235 complex_array_abs_squared` (j 0.780, contain 0.902, names 0.889)
 - `assembly/src/special.ts:129 _besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:164 besselJ0Series` (j 0.778, contain 0.907, names 0.875)
 - `functions/src/algebra/solver/lsolve.ts:134 _denseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:134 _denseBackwardSubstitution` (j 0.774, contain 0.882, names 1.000)
-- `functions/src/fit-scalar.ts:550 gradL1` ↔ `functions/src/fit-scalar.ts:570 gradHuber` (j 0.770, contain 0.884, names 0.781)
 - `assembly/src/ops/f64-buffer.ts:7 f64Min` ↔ `assembly/src/ops/f64-buffer.ts:21 f64Max` (j 0.769, contain 0.870, names 0.800)
-- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:1985 matvec` (j 0.766, contain 0.895, names 0.755)
-- `packages/workerpool/src/index.ts:839 dot` ↔ `packages/workerpool/src/index.ts:1507 distance` (j 0.764, contain 0.887, names 0.865)
+- `packages/workerpool/src/index.ts:1165 matmul` ↔ `packages/workerpool/src/index.ts:1957 matvec` (j 0.766, contain 0.895, names 0.755)
+- `packages/workerpool/src/index.ts:811 dot` ↔ `packages/workerpool/src/index.ts:1479 distance` (j 0.764, contain 0.887, names 0.865)
 - `assembly/src/ops/curvefit.ts:31 logfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.762, contain 0.869, names 0.800)
 - `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.760, contain 0.864, names 1.000)
 - `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` ↔ `assembly/src/ops/bitwise.ts:43 bitXor_i32_array` (j 0.760, contain 0.864, names 1.000)
@@ -540,7 +513,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `autograd/src/tape.ts:2049 _eigGeneralBackward` (j 0.757, contain 0.927, names 0.571)
 - `assembly/src/sort.ts:130 _introsort` ↔ `assembly/src/sort.ts:235 _introsortIdx` (j 0.756, contain 0.861, names 0.393)
 - `tensor/src/Tensor.ts:161 add` ↔ `tensor/src/Tensor.ts:172 sub` (j 0.755, contain 0.860, names 1.000)
-- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:1847 distanceMatrix` (j 0.754, contain 0.880, names 0.760)
+- `packages/workerpool/src/index.ts:1165 matmul` ↔ `packages/workerpool/src/index.ts:1819 distanceMatrix` (j 0.754, contain 0.880, names 0.760)
 - `assembly/src/ops/curvefit.ts:6 expfit` ↔ `assembly/src/ops/curvefit.ts:55 powerfit` (j 0.752, contain 0.926, names 0.857)
 - `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:836 sin` (j 0.752, contain 0.871, names 0.737)
 - `assembly/src/ops/complex-array.ts:211 complex_array_abs` ↔ `assembly/src/ops/complex-array.ts:223 complex_array_arg` (j 0.750, contain 0.882, names 0.727)
@@ -551,13 +524,12 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `parallel/src/ParallelMatrix.ts:388 dotProduct` ↔ `parallel/src/ParallelMatrix.ts:421 sum` (j 0.744, contain 0.918, names 0.875)
 - `functions/src/algebra/solver/lsolve.ts:184 _sparseForwardSubstitution` ↔ `functions/src/algebra/solver/usolve.ts:188 _sparseBackwardSubstitution` (j 0.742, contain 0.872, names 0.973)
 - `matrix/src/backends/gpu/run-shader.ts:32 planRunShaderFromAdd` ↔ `matrix/src/backends/gpu/run-shader.ts:82 planRunShaderFromTranspose` (j 0.742, contain 0.868, names 0.938)
-- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.738, contain 0.926, names 0.763)
-- `packages/workerpool/src/index.ts:1633 applyKernel` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.732, contain 0.924, names 0.744)
+- `packages/workerpool/src/index.ts:927 scale` ↔ `packages/workerpool/src/index.ts:1528 unary` (j 0.738, contain 0.926, names 0.763)
+- `packages/workerpool/src/index.ts:1605 applyKernel` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.732, contain 0.924, names 0.744)
 - `expression/src/parse.ts:1031 parseShift` ↔ `expression/src/parse.ts:1441 parseLeftHandOperators` (j 0.731, contain 0.851, names 0.643)
 - `functions/src/numeric/solveDAE.ts:184 _denseSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728, contain 0.886, names 0.483)
 - `functions/src/numeric/solveODE.ts:137 _inlineLuSolve` ↔ `functions/src/signal/fir-smoothing.ts:26 solveLinearSystem` (j 0.728, contain 0.937, names 0.429)
 - `assembly/src/signal.ts:236 goertzel_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:93 goertzelJS` (j 0.727, contain 0.860, names 0.833)
-- `functions/src/wasm/bridges/common.ts:180 asAllocHeader` ↔ `matrix/src/backends/wasm/as-typed-array.ts:35 allocAsTypedView` (j 0.727, contain 0.923, names 0.722)
 - `functions/src/numeric/control-equations.ts:79 transpose` ↔ `functions/src/numeric/control-equations.ts:87 matadd` (j 0.724, contain 0.913, names 0.636)
 - `matrix/src/backends/JSBackend.ts:108 scale` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.723, contain 0.855, names 0.900)
 - `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:880 tan` (j 0.720, contain 0.865, names 0.842)
@@ -565,8 +537,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `assembly/src/ops/matrix.ts:204 matrix_multiply` ↔ `assembly/src/ops/matrix.ts:583 matrix_gemm` (j 0.714, contain 0.833, names 0.300)
 - `autograd/src/tape.ts:858 cos` ↔ `autograd/src/tape.ts:880 tan` (j 0.714, contain 0.857, names 0.750)
 - `functions/src/wasm/interpolation/wasm-bridge.ts:117 tridiagSolveDispatch` ↔ `functions/src/wasm/interpolation/wasm-bridge.ts:206 dividedDifferenceDispatch` (j 0.714, contain 0.878, names 0.385)
-- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:822 prod` (j 0.710, contain 0.831, names 1.000)
-- `core/src/types/complex.ts:498 cot` ↔ `core/src/types/complex.ts:562 coth` (j 0.706, contain 0.833, names 1.000)
+- `packages/workerpool/src/index.ts:777 sum` ↔ `packages/workerpool/src/index.ts:794 prod` (j 0.710, contain 0.831, names 1.000)
 - `matrix/src/backends/ParallelBackend.ts:180 transpose` ↔ `matrix/src/backends/ParallelBackend.ts:201 sum` (j 0.705, contain 0.915, names 0.750)
 - `assembly/src/ops/complex-array.ts:267 complex_array_exp` ↔ `assembly/src/ops/complex-array.ts:298 complex_array_sqrt` (j 0.703, contain 0.959, names 0.650)
 - `assembly/src/poly.ts:331 cheb_fit_f64` ↔ `assembly/src/poly.ts:373 legendre_fit_f64` (j 0.703, contain 0.895, names 0.696)
@@ -576,7 +547,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/wasm/special/scalars.ts:164 besselJ0Series` ↔ `functions/src/wasm/special/scalars.ts:181 besselJ1Series` (j 0.701, contain 0.870, names 1.000)
 - `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:203 gradient` (j 0.700, contain 0.949, names 0.800)
 
-### jStruct 0.6 to 0.7 (171)
+### jStruct 0.6 to 0.7 (162)
 
 - `matrix/src/backends/JSBackend.ts:44 add` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
 - `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:177 transpose` (j 0.699, contain 0.927, names 0.818)
@@ -588,9 +559,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `core/src/numeric/stable.ts:46 pairwiseSum` ↔ `core/src/numeric/stable.ts:167 pairwiseDot` (j 0.686, contain 0.850, names 0.762)
 - `matrix/src/operations/sqrtm.ts:91 sqrtmSymmetric` ↔ `matrix/src/operations/sqrtm.ts:185 sqrtmGeneral` (j 0.686, contain 0.923, names 0.700)
 - `autograd/src/tape.ts:836 sin` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.685, contain 0.817, names 0.737)
-- `packages/workerpool/src/index.ts:712 exec` ↔ `packages/workerpool/src/index.ts:740 execFunction` (j 0.684, contain 0.893, names 0.650)
-- `core/src/types/complex.ts:483 tan` ↔ `core/src/types/complex.ts:498 cot` (j 0.683, contain 0.848, names 1.000)
-- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.682, contain 0.855, names 0.892)
+- `packages/workerpool/src/index.ts:859 elementwise` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.682, contain 0.855, names 0.892)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/arithmetic.ts:660 Float64Array` (j 0.681, contain 0.825, names 0.833)
 - `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:704 Float64Array` (j 0.681, contain 0.825, names 0.833)
 - `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/arithmetic.ts:870 Float64Array` (j 0.681, contain 0.825, names 0.833)
@@ -604,11 +573,9 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/typed/arithmetic.ts:660 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.681, contain 0.825, names 0.833)
 - `autograd/src/tape.ts:858 cos` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.680, contain 0.810, names 0.737)
 - `functions/src/typed/special.ts:487 fresnelCScalar` ↔ `functions/src/typed/special.ts:509 fresnelSScalar` (j 0.680, contain 0.837, names 1.000)
-- `packages/workerpool/src/index.ts:2263 runChunks` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.680, contain 0.870, names 0.649)
-- `functions/src/numeric/solveODE.ts:465 rosenbrockSolve` ↔ `functions/src/numeric/solveODE.ts:613 rodasSolve` (j 0.678, contain 0.814, names 0.513)
 - `functions/src/matrix/subset.ts:240 _getObjectProperty` ↔ `functions/src/matrix/subset.ts:265 _setObjectProperty` (j 0.677, contain 0.875, names 0.600)
 - `functions/src/signal/fft-core-f64.ts:43 fftCoreFloat64` ↔ `packages/workerpool/src/fft-core.ts:35 fftFrameInPlace` (j 0.677, contain 0.828, names 0.763)
-- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.674, contain 0.884, names 0.610)
+- `packages/workerpool/src/index.ts:1115 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1528 unary` (j 0.674, contain 0.884, names 0.610)
 - `assembly/src/special.ts:158 _besselY0Series` ↔ `functions/src/wasm/special/scalars.ts:195 besselY0Series` (j 0.672, contain 0.821, names 0.688)
 - `functions/src/numeric/control-equations.ts:113 norm1` ↔ `matrix/src/operations/common.ts:255 norm1` (j 0.672, contain 0.811, names 0.615)
 - `matrix/src/backends/JSBackend.ts:108 scale` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.671, contain 0.825, names 0.750)
@@ -619,8 +586,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:922 square` (j 0.667, contain 0.812, names 0.875)
 - `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:1051 _unaryElementwise` (j 0.667, contain 0.804, names 0.650)
 - `matrix/src/parallel-matrix.ts:415 DenseMatrix, DenseMatrix` ↔ `matrix/src/parallel-matrix.ts:937 DenseMatrix, DenseMatrix` (j 0.667, contain 0.868, names 0.375)
-- `packages/workerpool/src/index.ts:1556 unary` ↔ `packages/workerpool/src/index.ts:1633 applyKernel` (j 0.665, contain 0.847, names 0.769)
-- `packages/workerpool/src/index.ts:765 reduceScalar` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.664, contain 0.805, names 0.735)
+- `packages/workerpool/src/index.ts:1528 unary` ↔ `packages/workerpool/src/index.ts:1605 applyKernel` (j 0.665, contain 0.847, names 0.769)
 - `assembly/src/signal.ts:274 chirp_z_transform_f64` ↔ `functions/src/wasm/signal/wasm-bridge.ts:223 chirpZTransformJS` (j 0.663, contain 0.810, names 0.800)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:94 Float64Array` (j 0.662, contain 0.895, names 0.733)
 - `functions/src/typed/arithmetic.ts:536 Float64Array` ↔ `functions/src/typed/trigonometry.ts:116 Float64Array` (j 0.662, contain 0.895, names 0.733)
@@ -657,7 +623,6 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/typed/trigonometry.ts:138 Float64Array` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.662, contain 0.895, names 0.733)
 - `functions/src/utils/bignumber/bitwise.ts:434 rightArithShiftBigNumber` ↔ `functions/src/utils/bignumber/bitwise.ts:484 rightLogShiftBigNumber` (j 0.662, contain 0.864, names 0.810)
 - `matrix/src/backends/ParallelBackend.ts:158 multiply` ↔ `matrix/src/backends/ParallelBackend.ts:180 transpose` (j 0.662, contain 0.895, names 0.529)
-- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2319 reduce` (j 0.662, contain 0.806, names 0.714)
 - `functions/src/typed/normal-equations-solve.ts:8 solveAugmentedNormalEquations` ↔ `functions/src/typed/numeric.ts:196 linsolve` (j 0.661, contain 0.897, names 0.524)
 - `functions/src/ml/ols.ts:73 invertUnscaled` ↔ `functions/src/typed/matrix-ops.ts:490 matrixInverse` (j 0.658, contain 0.798, names 0.667)
 - `core/src/types/bignumber.ts:1432 _alternatingEvenTaylor` ↔ `core/src/types/bignumber.ts:1471 _atanTaylor` (j 0.657, contain 0.807, names 0.762)
@@ -669,29 +634,27 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `matrix/src/backends/JSBackend.ts:60 subtract` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
 - `matrix/src/backends/JSBackend.ts:76 multiplyElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
 - `matrix/src/backends/JSBackend.ts:92 divideElementwise` ↔ `matrix/src/backends/JSBackend.ts:123 abs` (j 0.654, contain 0.850, names 0.692)
-- `packages/workerpool/src/index.ts:839 dot` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.654, contain 0.833, names 0.725)
-- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1556 unary` (j 0.654, contain 0.858, names 0.578)
-- `packages/workerpool/src/index.ts:1012 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1081 bitwiseScalar` (j 0.654, contain 0.847, names 0.757)
+- `packages/workerpool/src/index.ts:811 dot` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.654, contain 0.833, names 0.725)
+- `packages/workerpool/src/index.ts:859 elementwise` ↔ `packages/workerpool/src/index.ts:1528 unary` (j 0.654, contain 0.858, names 0.578)
+- `packages/workerpool/src/index.ts:984 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1053 bitwiseScalar` (j 0.654, contain 0.847, names 0.757)
 - `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:817 exp` (j 0.653, contain 0.837, names 0.765)
 - `functions/src/typed/signal.ts:578 dct` ↔ `functions/src/typed/signal.ts:622 dst` (j 0.652, contain 0.829, names 0.833)
 - `functions/src/special/spheroidal.ts:159 spheroidalAngular` ↔ `functions/src/special/spheroidal.ts:234 spheroidalAngularContinued` (j 0.651, contain 0.944, names 0.667)
 - `autograd/src/tape.ts:880 tan` ↔ `autograd/src/tape.ts:903 sqrt` (j 0.649, contain 0.810, names 0.700)
 - `autograd/src/tape.ts:880 tan` ↔ `autograd/src/tape.ts:1001 reciprocal` (j 0.649, contain 0.810, names 0.650)
-- `functions/src/scalar-mutate.ts:261 swapOperands` ↔ `functions/src/scalar-mutate.ts:348 deleteNode` (j 0.649, contain 0.847, names 0.842)
 - `functions/src/stats/gaussian-process.ts:101 forwardSolve` ↔ `functions/src/stats/gaussian-process.ts:113 backSolveTranspose` (j 0.649, contain 0.857, names 1.000)
 - `assembly/src/ops/complex-array.ts:120 complex_array_mul` ↔ `assembly/src/ops/complex-array.ts:137 complex_array_div` (j 0.647, contain 0.815, names 0.929)
 - `matrix/src/types/SparseMatrix.ts:576 multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:878 mapNonZeros` (j 0.645, contain 0.831, names 0.727)
 - `core/src/types/bignumber.ts:1100 sinh` ↔ `core/src/types/bignumber.ts:1126 tanh` (j 0.642, contain 0.843, names 0.917)
 - `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:1022 abs` (j 0.640, contain 0.845, names 0.700)
-- `functions/src/numeric/solveODE.ts:1613 _rk23` ↔ `functions/src/numeric/solveODE.ts:1634 _rk45` (j 0.639, contain 0.885, names 1.000)
+- `functions/src/numeric/solveODE.ts:1594 _rk23` ↔ `functions/src/numeric/solveODE.ts:1615 _rk45` (j 0.639, contain 0.885, names 1.000)
 - `assembly/src/signal.ts:50 _fftInterleaved` ↔ `functions/src/wasm/signal/wasm-bridge.ts:110 _fftInterleavedJS` (j 0.638, contain 0.787, names 0.882)
 - `autograd/src/tape.ts:798 log` ↔ `autograd/src/tape.ts:1022 abs` (j 0.637, contain 0.851, names 0.789)
 - `matrix/src/backends/WASMBackend.ts:574 luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:779 inverse` (j 0.637, contain 0.921, names 0.500)
 - `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/f64-buffer.ts:35 f64Add` (j 0.636, contain 0.795, names 0.800)
-- `core/src/types/complex.ts:549 tanh` ↔ `core/src/types/complex.ts:562 coth` (j 0.636, contain 0.789, names 1.000)
 - `matrix/src/types/SparseMatrix.ts:576 multiplyElementwise` ↔ `matrix/src/types/SparseMatrix.ts:601 multiply` (j 0.636, contain 0.882, names 0.615)
 - `assembly/src/ops/matrix.ts:297 vector_matrix_multiply` ↔ `assembly/src/ops/matrix.ts:441 matrix_sum_cols` (j 0.633, contain 0.864, names 0.636)
-- `functions/src/typed/integration.ts:389 gaussQuadSerial` ↔ `packages/workerpool/src/worker.ts:966 integrateChunk` (j 0.632, contain 0.782, names 0.412)
+- `functions/src/typed/integration.ts:389 gaussQuadSerial` ↔ `packages/workerpool/src/worker.ts:914 integrateChunk` (j 0.632, contain 0.782, names 0.412)
 - `functions/src/special/spheroidal.ts:35 ferrersP` ↔ `functions/src/special/spheroidal.ts:212 ferrersPContinued` (j 0.631, contain 0.795, names 0.857)
 - `autograd/src/tape.ts:817 exp` ↔ `autograd/src/tape.ts:922 square` (j 0.630, contain 0.777, names 0.765)
 - `functions/src/typed/arithmetic.ts:1013 number, number` ↔ `functions/src/typed/arithmetic.ts:1028 bigint, bigint` (j 0.630, contain 0.895, names 0.778)
@@ -708,10 +671,10 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:279 Float64Array` (j 0.629, contain 0.772, names 0.600)
 - `functions/src/typed/parallel-map.ts:38 mapArray` ↔ `functions/src/typed/trigonometry.ts:299 Float64Array` (j 0.629, contain 0.772, names 0.600)
 - `functions/src/numeric/krylov.ts:197 incompleteCholesky` ↔ `functions/src/typed/dist-objects.ts:1281 _cholesky` (j 0.628, contain 0.860, names 0.632)
-- `packages/workerpool/src/index.ts:887 elementwise` ↔ `packages/workerpool/src/index.ts:1012 bitwiseBinary` (j 0.627, contain 0.791, names 0.838)
-- `packages/workerpool/src/index.ts:955 scale` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.626, contain 0.866, names 0.650)
+- `packages/workerpool/src/index.ts:859 elementwise` ↔ `packages/workerpool/src/index.ts:984 bitwiseBinary` (j 0.627, contain 0.791, names 0.838)
+- `packages/workerpool/src/index.ts:927 scale` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.626, contain 0.866, names 0.650)
 - `assembly/src/ops/matrix.ts:276 matrix_vector_multiply` ↔ `assembly/src/ops/matrix.ts:422 matrix_sum_rows` (j 0.625, contain 0.833, names 0.727)
-- `packages/workerpool/src/index.ts:1193 matmul` ↔ `packages/workerpool/src/index.ts:2059 outer` (j 0.625, contain 0.780, names 0.886)
+- `packages/workerpool/src/index.ts:1165 matmul` ↔ `packages/workerpool/src/index.ts:2031 outer` (j 0.625, contain 0.780, names 0.886)
 - `autograd/src/tape.ts:133 add` ↔ `autograd/src/tape.ts:202 mul` (j 0.624, contain 0.888, names 0.842)
 - `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:66 subtractScalar` (j 0.623, contain 0.768, names 0.818)
 - `core/src/arithmetic/scalar.ts:56 addScalar` ↔ `core/src/arithmetic/scalar.ts:77 multiplyScalar` (j 0.623, contain 0.768, names 0.818)
@@ -724,16 +687,15 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `autograd/src/tape.ts:903 sqrt` ↔ `autograd/src/tape.ts:922 square` (j 0.620, contain 0.769, names 0.765)
 - `functions/src/type/matrix/utils/matAlgo13xDD.ts:120 _iterate` ↔ `functions/src/type/matrix/utils/matAlgo14xDs.ts:101 _iterate` (j 0.618, contain 0.825, names 0.917)
 - `autograd/src/tape.ts:1428 svd` ↔ `autograd/src/tape.ts:1583 _eigSymmetric` (j 0.617, contain 0.852, names 0.400)
-- `packages/workerpool/src/index.ts:1143 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.617, contain 0.864, names 0.625)
-- `packages/workerpool/src/index.ts:2184 sort` ↔ `packages/workerpool/src/index.ts:2263 runChunks` (j 0.616, contain 0.809, names 0.686)
+- `packages/workerpool/src/index.ts:1115 bitwiseNot` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.617, contain 0.864, names 0.625)
 - `functions/src/signal/wavelets.ts:86 rickerWavelet` ↔ `functions/src/signal/wavelets.ts:99 morletWavelet` (j 0.615, contain 0.766, names 0.750)
 - `parallel/src/ParallelMatrix.ts:288 elementwise` ↔ `parallel/src/ParallelMatrix.ts:356 scale` (j 0.615, contain 0.798, names 0.789)
 - `core/src/array.ts:985 recursiveMapWithIndex` ↔ `core/src/array.ts:1003 recursiveMap` (j 0.614, contain 0.896, names 0.615)
-- `packages/workerpool/src/index.ts:1012 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1683 applyKernel2` (j 0.612, contain 0.823, names 0.750)
+- `packages/workerpool/src/index.ts:984 bitwiseBinary` ↔ `packages/workerpool/src/index.ts:1655 applyKernel2` (j 0.612, contain 0.823, names 0.750)
 - `functions/src/typed/arithmetic.ts:1343 Float64Array` ↔ `functions/src/typed/arithmetic.ts:1366 Float64Array` (j 0.610, contain 0.766, names 0.800)
-- `packages/workerpool/src/index.ts:805 sum` ↔ `packages/workerpool/src/index.ts:1490 norm` (j 0.610, contain 0.847, names 0.750)
+- `packages/workerpool/src/index.ts:777 sum` ↔ `packages/workerpool/src/index.ts:1462 norm` (j 0.610, contain 0.847, names 0.750)
 - `matrix/src/backends/WASMBackend.ts:574 luDecomposition` ↔ `matrix/src/backends/WASMBackend.ts:894 choleskyDecomposition` (j 0.609, contain 0.945, names 0.512)
-- `packages/workerpool/src/index.ts:1847 distanceMatrix` ↔ `packages/workerpool/src/index.ts:1985 matvec` (j 0.609, contain 0.763, names 0.755)
+- `packages/workerpool/src/index.ts:1819 distanceMatrix` ↔ `packages/workerpool/src/index.ts:1957 matvec` (j 0.609, contain 0.763, names 0.755)
 - `autograd/src/tape.ts:230 scale` ↔ `autograd/src/tape.ts:798 log` (j 0.608, contain 0.793, names 0.765)
 - `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:23 bitAnd_i32_array` (j 0.607, contain 0.773, names 0.800)
 - `assembly/src/ops/array.ts:316 array_axpby` ↔ `assembly/src/ops/bitwise.ts:33 bitOr_i32_array` (j 0.607, contain 0.773, names 0.800)
@@ -764,7 +726,7 @@ Every pair the run reported, in bands by `jStruct`, highest first. `contain` is 
 - `matrix/src/operations/logm.ts:234 validateEigenvalues` ↔ `matrix/src/operations/logm.ts:264 logmEig` (j 0.350, contain 0.913, names 0.455)
 - `assembly/src/elementwise.ts:34 _erfSeries` ↔ `functions/src/wasm/special/scalars.ts:69 erfcSelfContained` (j 0.335, contain 0.957, names 0.450)
 - `functions/src/numeric/control-equations.ts:172 vecRowMajor` ↔ `matrix/src/operations/expm.ts:139 matrixExpm` (j 0.247, contain 0.902, names 0.097)
-- `core/src/wasm-loader.ts:302 getImports` ↔ `matrix/src/backends/WASMBackend.ts:404 loadAsModule` (j 0.232, contain 0.956, names 0.324)
+- `core/src/wasm-loader.ts:425 getImports` ↔ `matrix/src/backends/WASMBackend.ts:404 loadAsModule` (j 0.232, contain 0.956, names 0.324)
 - `autograd/src/tape.ts:1970 _eigSymBackward` ↔ `tensor/src/operations/cholesky.ts:45 transposeSquare` (j 0.221, contain 0.919, names 0.174)
 - `functions/src/numeric/nnls.ts:94 gradient` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.220, contain 0.949, names 0.300)
 - `functions/src/numeric/bfgs.ts:92 matVec` ↔ `functions/src/numeric/nnls.ts:189 lsqBounded` (j 0.194, contain 1.000, names 0.143)
