@@ -46,4 +46,10 @@ describe('evaluate unit symbols', () => {
   it('keeps min as the function, not the minute unit', () => {
     expect(typeof evaluate('min')).toBe('function');
   });
+
+  it('converts with the to operator (5 km to m)', () => {
+    const got = evaluate('5 km to m') as UnitValue;
+    expect(got.toNumber('m')).toBe(5000);
+    expect(got.toString()).toMatch(/5000\s*m/);
+  });
 });
