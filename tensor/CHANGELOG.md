@@ -1,5 +1,37 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.2.26
+
+### Patch Changes
+
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- 3345ca5: Consolidate tensor max/min, axis label lookup, and shared eig/SVD row-axis reshape prep (clone batch G).
+- Updated dependencies [45d691e]
+- Updated dependencies [cbabf22]
+- Updated dependencies [c7ef24d]
+- Updated dependencies [8ed70e9]
+- Updated dependencies [156e4ea]
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [0400aa1]
+- Updated dependencies [f5ffe00]
+- Updated dependencies [bc74de0]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [67406a8]
+- Updated dependencies [974167d]
+- Updated dependencies [fc6c32b]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-matrix@0.8.0
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.2.25
 
 ### Patch Changes

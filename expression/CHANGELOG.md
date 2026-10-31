@@ -1,5 +1,38 @@
 # @danielsimonjr/mathts-expression
 
+## 0.11.0
+
+### Minor Changes
+
+- 4594b6c: Add a ScalarNode structural toolkit: traversal, size, depth, weighted complexity, symbol collection, and a canonical structural key.
+- 540691c: Add `enumerateScalars`, `scalarGrammarAccepts`, and grammar/budget types for deterministic bounded scalar expression enumeration (M11).
+
+### Patch Changes
+
+- 5ec27a9: Sprint 2R clone reduction: `setStringSubset` is the single string-assignment body; functions `_setSubstring` delegates to it (mirrors `getStringSubset` / `_getSubstring`).
+- 71f8c3c: Add scalarToNode, nodeToScalar, simplifyScalar, and scalarToTex. Expression re-exports the MathNode and StringOptions types those signatures use.
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- dc47a4b: Sprint 2R near-clone reduction: shared `renderRelational` for RelationalNode string/TeX output, `prepareTransformArrayAndCallback` for filter/forEach transform arg compilation, and `scatterArgExtrema` for TapedTensor max/min adjoints. Public APIs unchanged.
+- af7733a: Document the ScalarNode toolkit, compileScalar, and the Pareto front with runnable TSDoc examples.
+- 49a347a: Fix `scalarComplexity` reading inherited keys of the weight records: a symbol named `constructor` or `toString` returned a function weight and the sum became `NaN`. Weights are now read with the existing own-property helper, so an absent name weighs 1.
+- 48becfb: Consolidate shared child-array loop for AST node `map` methods (IndexNode, OperatorNode, FunctionNode, ArrayNode) per Sprint 2R clone batch 3 G4; public API and map behavior unchanged.
+- cdec291: Consolidate duplicate expression transform helpers (filter/forEach, cumsum/mapSlices dim shift, and/or/bitwise short-circuit) per Sprint 2R clone batch 1. The shared dim shift also fixes `cumsum`/`mapSlices` with a BigNumber `dim`, which used to throw `dim.minus is not a function`.
+- 6e7532e: Sprint 2R clone reduction: shared `assertSameShape` for DualTensor/TapedTensor; unified ConditionalNode/RangeNode render helpers; `getStringSubset` barrel export with shared string subset body for functions `subset`.
+- da5e661: Share assignment/object relational node render helpers (clones plan PR-A).
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.10.3
 
 ### Patch Changes

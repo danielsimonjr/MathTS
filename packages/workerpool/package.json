@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-workerpool",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Worker pool management for MathTS parallel computations",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
@@ -49,7 +49,7 @@
     "workerpool": "npm:@danielsimonjr/workerpool@10.2.2"
   },
   "devDependencies": {
-    "@danielsimonjr/mathts-core": "^0.19.0",
+    "@danielsimonjr/mathts-core": "^0.20.0",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"

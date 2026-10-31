@@ -1,5 +1,29 @@
 # @danielsimonjr/mathts-units
 
+## 0.6.0
+
+### Minor Changes
+
+- a6cf17a: BREAKING: `SiDimensionVector` is now a readonly 7-tuple of `Fraction` exponents; use `vec.map((f) => f.toNumber())` instead of comparing tuple elements with `===` on numbers. `fromSiDimensionVector` accepts `SiDimensionExponent` (`number | Fraction`) and still returns the length-10 `number[]` for `Unit`. There is no `toSiDimensionNumbers` helper.
+
+### Patch Changes
+
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- cbc9119: Add UPT residual unit aliases `d` → day and `Angstrom` → angstrom. A vendored UPT `units.json` symbol-walk test builds `new Unit(1, symbol)` for all 104 symbols and pins each scale and SI dimension (storage `bit` keeps its own scale; angle, solid-angle and bit exponents are an explicit allow-list).
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.5.0
 
 ### Minor Changes

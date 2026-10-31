@@ -1,5 +1,28 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.3.20
+
+### Patch Changes
+
+- dc47a4b: Sprint 2R near-clone reduction: shared `renderRelational` for RelationalNode string/TeX output, `prepareTransformArrayAndCallback` for filter/forEach transform arg compilation, and `scatterArgExtrema` for TapedTensor max/min adjoints. Public APIs unchanged.
+- 0589dca: Share the taped sum/mean reduced-axis backward scatter via `addReducedBroadcast` (mean keeps `/ N` rounding).
+- 6e7532e: Sprint 2R clone reduction: shared `assertSameShape` for DualTensor/TapedTensor; unified ConditionalNode/RangeNode render helpers; `getStringSubset` barrel export with shared string subset body for functions `subset`.
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [3345ca5]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-core@0.20.0
+  - @danielsimonjr/mathts-tensor@0.2.26
+
 ## 0.3.19
 
 ### Patch Changes
