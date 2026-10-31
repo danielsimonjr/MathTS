@@ -81,6 +81,108 @@ function elementwise(op: ScalarOp, a: unknown, b: unknown): unknown {
   return op(a, b);
 }
 
+type NumberBin = (a: number, b: number) => number;
+const numberBinCache = new WeakMap<object, NumberBin>();
+
+function getNumberBin(tf: object, fallback: ScalarOp): NumberBin {
+  let f = numberBinCache.get(tf);
+  if (!f) {
+    const found = mathTyped.find(tf as Parameters<typeof mathTyped.find>[0], [
+      'number',
+      'number',
+    ]) as NumberBin | null;
+    f = found ?? ((a, b) => fallback(a, b) as number);
+    numberBinCache.set(tf, f);
+  }
+  return f;
+}
+
+function arrayAllNumbersFlat(a: unknown[]): boolean {
+  for (let i = 0; i < a.length; i++) {
+    if (typeof a[i] !== 'number') return false;
+  }
+  return true;
+}
+
+function arrayAllNumbersPair(a: unknown[], b: unknown[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (typeof a[i] !== 'number' || typeof b[i] !== 'number') return false;
+  }
+  return true;
+}
+
+function elementwiseNumber(tf: object, fallback: ScalarOp, a: unknown, b: unknown): unknown {
+  const f = getNumberBin(tf, fallback);
+  const aArr = Array.isArray(a);
+  const bArr = Array.isArray(b);
+  if (aArr && bArr) {
+    if (a.length !== b.length) {
+      throw new RangeError(
+        `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
+      );
+    }
+    if (a.constructor !== Array || b.constructor !== Array) {
+      return elementwise(fallback, a, b);
+    }
+    if (a.length > 0 && (Array.isArray(a[0]) || Array.isArray(b[0]))) {
+      const out = new Array(a.length);
+      for (let i = 0; i < a.length; i++) {
+        out[i] = elementwiseNumber(tf, fallback, a[i], b[i]);
+      }
+      return out;
+    }
+    if (arrayAllNumbersPair(a, b)) {
+      const n = a.length;
+      const out = new Array(n);
+      for (let i = 0; i < n; i++) out[i] = f(a[i] as number, b[i] as number);
+      return out;
+    }
+    return elementwise(fallback, a, b);
+  }
+  if (aArr) {
+    if (a.constructor !== Array || typeof b !== 'number') {
+      return elementwise(fallback, a, b);
+    }
+    if (a.length > 0 && Array.isArray(a[0])) {
+      return a.map((x) => elementwiseNumber(tf, fallback, x, b));
+    }
+    if (arrayAllNumbersFlat(a)) {
+      const out = new Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = f(a[i] as number, b as number);
+      return out;
+    }
+    return elementwise(fallback, a, b);
+  }
+  if (bArr) {
+    if (b.constructor !== Array || typeof a !== 'number') {
+      return elementwise(fallback, a, b);
+    }
+    if (b.length > 0 && Array.isArray(b[0])) {
+      return b.map((y) => elementwiseNumber(tf, fallback, a, y));
+    }
+    if (arrayAllNumbersFlat(b)) {
+      const out = new Array(b.length);
+      for (let i = 0; i < b.length; i++) out[i] = f(a as number, b[i] as number);
+      return out;
+    }
+    return elementwise(fallback, a, b);
+  }
+  return fallback(a, b);
+}
+
+function elementwiseMatrixNumber(
+  tf: object,
+  fallback: ScalarOp,
+  a: unknown,
+  b: unknown
+): MathJSDenseMatrix | MathJSSparseMatrix {
+  const data = elementwiseNumber(tf, fallback, toNested(a), toNested(b)) as unknown[][];
+  return isSparseStorage(a) || isSparseStorage(b)
+    ? new MathJSSparseMatrix(data)
+    : new MathJSDenseMatrix(data as number[][]);
+}
+
 /** True if `m` is a matrix in sparse storage. */
 function isSparseStorage(m: unknown): boolean {
   const s = (m as { storage?: () => string }).storage;
@@ -93,27 +195,15 @@ function toNested(m: unknown): unknown {
   return typeof t === 'function' ? t.call(m) : m;
 }
 
-/**
- * Element-wise `op` over Matrix (and Matrix⊕scalar) operands, returning a bridge
- * matrix that preserves storage: sparse if either operand is sparse (CSC fields
- * intact, which the CSparse algebra factories rely on), otherwise dense.
- */
-function elementwiseMatrix(
-  op: ScalarOp,
-  a: unknown,
-  b: unknown
-): MathJSDenseMatrix | MathJSSparseMatrix {
-  const data = elementwise(op, toNested(a), toNested(b)) as unknown[][];
-  return isSparseStorage(a) || isSparseStorage(b)
-    ? new MathJSSparseMatrix(data)
-    : new MathJSDenseMatrix(data as number[][]);
-}
-
 // Leaf operations for the element-wise walks above — deferred closures so they
 // resolve the binary `add` / `subtract` / `multiply` at call time (after all are defined).
 const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
 const subOp: ScalarOp = (x, y) => (subtract as unknown as ScalarOp)(x, y);
 const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
+
+const addForNumberPath: { fn?: object } = {};
+const subtractForNumberPath: { fn?: object } = {};
+const multiplyForNumberPath: { fn?: object } = {};
 
 // =============================================================================
 // Unit operator helpers
@@ -231,18 +321,27 @@ export const add = mathTyped('add', {
   // Element-wise addition over plain (possibly nested / N-D) arrays, with scalar
   // broadcast. Leaves fold through the binary `add`, so number / Complex /
   // Fraction / BigNumber elements all work.
-  'Array, Array': (a: unknown[], b: unknown[]): unknown => elementwise(addOp, a, b),
-  'Array, number': (a: unknown[], b: f64): unknown => elementwise(addOp, a, b),
-  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(addOp, a, b),
+  'Array, Array': (a: unknown[], b: unknown[]): unknown =>
+    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+  'Array, number': (a: unknown[], b: f64): unknown =>
+    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown =>
+    elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
 
   // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
   // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
-  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
-  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
-  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(addOp, a, b),
-  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
-  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(addOp, a, b),
-  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(addOp, a, b),
+  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
 
   // Variadic addition over ANY types (mathjs parity). Folds pairwise through the
   // binary `add`, so Complex / Fraction / BigNumber / mixed arguments work — not
@@ -258,6 +357,7 @@ export const add = mathTyped('add', {
     return result;
   },
 });
+addForNumberPath.fn = add;
 
 // =============================================================================
 // Subtraction (Parallel-First)
@@ -304,19 +404,29 @@ export const subtract = mathTyped('subtract', {
   // broadcast. Leaves fold through the binary `subtract`, so number / Complex /
   // Fraction / BigNumber elements all work. Unlike `add`, there is no variadic form:
   // subtraction is binary (mathjs parity).
-  'Array, Array': (a: unknown[], b: unknown[]): unknown => elementwise(subOp, a, b),
-  'Array, number': (a: unknown[], b: f64): unknown => elementwise(subOp, a, b),
-  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(subOp, a, b),
+  'Array, Array': (a: unknown[], b: unknown[]): unknown =>
+    elementwiseNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'Array, number': (a: unknown[], b: f64): unknown =>
+    elementwiseNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown =>
+    elementwiseNumber(subtractForNumberPath.fn!, subOp, a, b),
 
   // Element-wise matrix subtraction (mathjs parity). Sparse⊖sparse stays sparse so
   // the CSparse algebra factories get CSC output, as they do for `add`.
-  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
-  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
-  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(subOp, a, b),
-  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
-  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(subOp, a, b),
-  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(subOp, a, b),
+  'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
 });
+subtractForNumberPath.fn = subtract;
 
 // =============================================================================
 // Multiplication (Parallel-First)
@@ -401,12 +511,18 @@ export const multiply = mathTyped('multiply', {
   // stays matrix multiplication — the `Array, Array` matmul above (reached for
   // Matrix operands via the Matrix~>Array conversion); element-wise product of
   // two collections is `dotMultiply`.
-  'Array, number': (a: unknown[], b: f64): unknown => elementwise(mulOp, a, b),
-  'number, Array': (a: f64, b: unknown[]): unknown => elementwise(mulOp, a, b),
-  'DenseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(mulOp, a, b),
-  'number, DenseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(mulOp, a, b),
-  'SparseMatrix, number': (a: unknown, b: f64): unknown => elementwiseMatrix(mulOp, a, b),
-  'number, SparseMatrix': (a: f64, b: unknown): unknown => elementwiseMatrix(mulOp, a, b),
+  'Array, number': (a: unknown[], b: f64): unknown =>
+    elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+  'number, Array': (a: f64, b: unknown[]): unknown =>
+    elementwiseNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+  'DenseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+  'number, DenseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+  'SparseMatrix, number': (a: unknown, b: f64): unknown =>
+    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
+  'number, SparseMatrix': (a: f64, b: unknown): unknown =>
+    elementwiseMatrixNumber(multiplyForNumberPath.fn!, mulOp, a, b),
 
   // Variadic multiplication over ANY types (mathjs parity); folds pairwise
   // through the binary `multiply`. See the variadic-add note above re: types and
@@ -420,6 +536,7 @@ export const multiply = mathTyped('multiply', {
     return result;
   },
 });
+multiplyForNumberPath.fn = multiply;
 
 // =============================================================================
 // Division (Parallel-First)
