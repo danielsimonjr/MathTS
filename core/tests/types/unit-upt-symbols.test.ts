@@ -12,6 +12,7 @@ import {
   LN2_EXACT_SCALE,
   readScaleExpression,
   namedExactScale,
+  toSiDimensionVector,
 } from '../../src/index';
 import uptFixture from '../fixtures/upt-units-symbols.json';
 
@@ -22,18 +23,32 @@ const { blob, symbols } = uptFixture as unknown as {
   symbols: readonly UptSymbolRow[];
 };
 
-/** Same normalizations as `Unit.ts` before parsing (UPT fixture uses a few unicode spellings). */
-function normalizeUnitSpellings(s: string): string {
-  return s
-    .replace(/℃/g, 'degC')
-    .replace(/°C/g, 'degC')
-    .replace(/°F/g, 'degF')
-    .replace(/°R/g, 'degR')
-    .replace(/°/g, 'deg')
-    .replace(/[µμ]/g, 'u')
-    .replace(/[ΩΩ]/g, 'ohm')
-    .replace(/Å/g, 'angstrom');
-}
+/** UPT dimension keys in the `[L, M, T, I, Θ, N, J]` order of `toSiDimensionVector`. */
+const UPT_DIMENSION_ORDER = ['L', 'M', 'T', 'I', 'Theta', 'N', 'J'] as const;
+
+/**
+ * UPT treats angle, solid angle and information as dimensionless; MathTS tracks them as extra
+ * exponents (`Unit.dimensions` indexes 7 ANGLE, 8 BIT, 9 SOLID_ANGLE). A symbol is listed here
+ * only when it is expected to carry one, so any other symbol with a stray extra exponent fails.
+ */
+const MATHTS_EXTRA_DIMENSIONS: Readonly<Record<string, readonly [number, number, number]>> = {
+  rad: [1, 0, 0],
+  deg: [1, 0, 0],
+  arcsec: [1, 0, 0],
+  arcmin: [1, 0, 0],
+  mas: [1, 0, 0],
+  uas: [1, 0, 0],
+  bit: [0, 1, 0],
+  sr: [0, 0, 1],
+  lm: [0, 0, 1],
+  lx: [0, 0, 1],
+};
+
+/**
+ * Symbols whose scale differs on purpose. UPT `bit` is the information bit (ln 2 nat); MathTS
+ * `bit` is the storage bit and stays separate (`1 byte = 8 bit`).
+ */
+const SCALE_EXCEPTIONS: ReadonlySet<string> = new Set(['bit']);
 
 /** UPT `constant-rows.ts` spellings referenced in the vendored scale expressions. */
 const UPT_REGISTRY_SCALES: Readonly<Record<string, string>> = Object.freeze({
@@ -71,14 +86,32 @@ describe('UPT units.json symbol walk', () => {
     expect(uptScaleNumber('ln2')).toBe(exactScaleToNumber(LN2_EXACT_SCALE));
   });
 
-  it('matches UPT scales for every symbol except storage bit', () => {
-    for (const { symbol, scale } of symbols) {
-      if (symbol === 'bit') continue;
-      const normalized = normalizeUnitSpellings(symbol);
-      expect(getUnitRow(normalized), symbol).toBeDefined();
-      const mathts = unitRowValue(normalized);
-      const upt = uptScaleNumber(scale);
-      expect(mathts, `${symbol} scale`).toBe(upt);
+  it('parses every UPT symbol with Unit and matches its scale and SI dimension', () => {
+    for (const { symbol, scale, dimension } of symbols) {
+      const unit = new Unit(1, symbol);
+
+      if (!SCALE_EXCEPTIONS.has(symbol)) {
+        expect(unit.value, `${symbol} scale`).toBe(uptScaleNumber(scale));
+      }
+
+      const extra = MATHTS_EXTRA_DIMENSIONS[symbol] ?? [0, 0, 0];
+      expect(
+        [unit.dimensions[7], unit.dimensions[8], unit.dimensions[9]],
+        `${symbol} angle, bit, solid-angle exponents`
+      ).toEqual([...extra]);
+
+      const exponents = toSiDimensionVector(unit.dimensions, { ignoreExtra: true }).map((f) =>
+        f.toNumber()
+      );
+      const expected = UPT_DIMENSION_ORDER.map((key) => dimension[key] ?? 0);
+      expect(exponents, `${symbol} dimension`).toEqual(expected);
+    }
+  });
+
+  it('only allow-lists symbols that UPT lists', () => {
+    const listed = new Set(symbols.map((row) => row.symbol));
+    for (const symbol of [...Object.keys(MATHTS_EXTRA_DIMENSIONS), ...SCALE_EXCEPTIONS]) {
+      expect(listed.has(symbol), symbol).toBe(true);
     }
   });
 });

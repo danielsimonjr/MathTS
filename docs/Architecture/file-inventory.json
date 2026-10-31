@@ -1262,7 +1262,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 92
+      "loc": 125
     },
     {
       "file": "core/tests/types/unit.test.ts",

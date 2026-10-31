@@ -512,7 +512,6 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   chains: 'chain',
   angstroms: 'angstrom',
   Angstrom: 'angstrom',
-  d: 'day',
 
   lt: 'l',
   litres: 'litre',
@@ -614,9 +613,10 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   byte: 'bytes',
   calories: 'calorie',
 
-  // Issue #347 spellings. A symbol that is also a prefix (`G`, `P`, `M`, `u`, `%`)
+  // Issue #347 spellings. A symbol that is also a prefix (`G`, `P`, `M`, `u`, `d`, `%`)
   // is an exact name, so the bare symbol is the unit and the prefixed form
-  // (`GPa`, `Pm`, `MPa`, `um`) still parses as prefix + unit.
+  // (`GPa`, `Pm`, `MPa`, `um`, `dm`) still parses as prefix + unit.
+  d: 'day',
   G: 'gauss',
   Gauss: 'gauss',
   poise: 'P',
