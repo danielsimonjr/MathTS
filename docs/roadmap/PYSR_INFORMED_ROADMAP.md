@@ -22,14 +22,14 @@ criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af
 or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and claude-sonnet-5-5 recorded it on
 [#519](https://github.com/danielsimonjr/MathTS/pull/519). M2 is merged
 ([#440](https://github.com/danielsimonjr/MathTS/pull/440), `71f8c3ce`). M5 (`createSeededRng`/`fork`) is implemented in `core`.
-Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. B9 for M2 and M5–M8 stays open until a review is recorded. Phases 3–5 are built in the stack of PRs [#519](https://github.com/danielsimonjr/MathTS/pull/519)–[#528](https://github.com/danielsimonjr/MathTS/pull/528) (M9, M10, Sprint 3R, M11, M12, M13, M14, Sprint 4R, M15, and this Sprint 5R close-out); every DoD box those PRs own is ticked, and the status above holds once that stack is on `main`. The release in §7 has not run, and Phase 6 (§8) has not started.
+Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. §6 B9 for M2 and M5–M8 is **Yes** (recorded in the completion sign-off PR; see §6 **Recorded review (M2 and M5–M8)**). Phases 3–5 are on `main` ([#519](https://github.com/danielsimonjr/MathTS/pull/519)–[#528](https://github.com/danielsimonjr/MathTS/pull/528)); every DoD box those PRs own is ticked. Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are merged; the clone-reduction loop is **not** clean, so the release in §7 has not run. The next clone measurement and [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md) belong to the Phase 7 planner.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
 `@danielsimonjr/mathts-core` for the milestones; the integration sprints also touch
 `matrix`, `parallel`, `tensor`, `workerpool`, `workbook` and `plot`. **D-1 is decided:** there is no 25th package. Phase 4 stays in the existing packages. M11 lives in `expression` (`expression/src/scalar-enumerate.ts` in the phases 3–5 plan) because it imports only `expression`. A package is not an option (§8, Phase 4; §10).
 
-> Core sprint (speed, stability, security of `core` and the expression parser) is **done**. [`docs/plans/CORE_SPRINT_PLAN.md`](../plans/CORE_SPRINT_PLAN.md) PRs 1–10 are on `main`: [#510](https://github.com/danielsimonjr/MathTS/pull/510), [#509](https://github.com/danielsimonjr/MathTS/pull/509), [#508](https://github.com/danielsimonjr/MathTS/pull/508), [#511](https://github.com/danielsimonjr/MathTS/pull/511), [#513](https://github.com/danielsimonjr/MathTS/pull/513), [#514](https://github.com/danielsimonjr/MathTS/pull/514), [#512](https://github.com/danielsimonjr/MathTS/pull/512), [#516](https://github.com/danielsimonjr/MathTS/pull/516), [#517](https://github.com/danielsimonjr/MathTS/pull/517), [#515](https://github.com/danielsimonjr/MathTS/pull/515). Next is Phases 3–5 in [`docs/plans/PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) (M9–M15, Sprints 3R–5R, and the recorded B9 review of M1, M3, and M4). Those phases are built in MathTS now; they do not wait on a UPT delegation issue. After Phase 5, Phase 6 and up is the clone-reduction loop (§8). Releases stay off (§7, PR #398 unmerged).
+> Core sprint (speed, stability, security of `core` and the expression parser) is **done**. [`docs/plans/CORE_SPRINT_PLAN.md`](../plans/CORE_SPRINT_PLAN.md) PRs 1–10 are on `main`. Phases 1–5 and Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are on `main`. Remaining completion work is [`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md) (B9 for M2 and M5–M8, residual UPT unit spellings, P6-5 JavaScriptCore regression). The clean clone loop and [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md) belong to the Phase 7 planner (§8). Releases stay off (§7, PR #398 unmerged).
 
 **Related external projects:** [PySR](https://github.com/danielsimonjr/pysr) (fork of MilesCranmer/PySR, studied read-only at commit `72a9ab9`, backend pin `SymbolicRegression ~2.7.2` in `pysr/juliapkg.json`); [Universal Physics Tensor (UPT)](https://github.com/danielsimonjr/universal-physics-tensor) (studied read-only at its default-branch HEAD).
 **Related MathTS docs:** [`docs/integration/upt.md`](../integration/upt.md), [`docs/FEATURE_WORKFLOW.md`](../FEATURE_WORKFLOW.md), [`ITENSOR_PARITY.md`](ITENSOR_PARITY.md) (same proposal format), the merged plans [`PYSR_M1_PLAN.md`](../plans/PYSR_M1_PLAN.md), [`PYSR_M3_PLAN.md`](../plans/PYSR_M3_PLAN.md) and [`PYSR_M4_PLAN.md`](../plans/PYSR_M4_PLAN.md), and the build plan [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md).
@@ -74,20 +74,10 @@ is a clone-reduction loop, not a milestone.
 
 **Next, in order:**
 
-1. **Phase 1 (M2 and M5) is complete.** M2 is on `main` as
-   [#440](https://github.com/danielsimonjr/MathTS/pull/440) (`71f8c3ce`). M5 is
-   `createSeededRng` / `fork` in `core`. **M6** (`compileScalarGradient`), **M7**
-   (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. Leave §6 B9
-   for M5, M6, M7 and M8 unchecked until a review is recorded.
-2. **Sprint 1R** is closed at the sprint level (items 1–7 merged; exit criteria met; DoD boxes
-   ticked below). §6 B9 for M1, M3 and M4 is Yes: PR 1 of
-   [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) ([#519](https://github.com/danielsimonjr/MathTS/pull/519)) records the review.
-3. **Phase 2 (M6–M8) is complete.** Sprint 2R's code items are done (ODE/BVP/DAE Jacobians,
-   Nelder–Mead merge, `linearRegression`/`linregress` and `numericRealRoots` in #423; LM/`svds`/`matMul`
-   moved into Sprint 1R). Its two unchecked DoD boxes stay as they are.
-4. **The core sprint is done** (PRs 1–10; see the status block). **Next implementation** is
-   Phases 3–5, in MathTS, in the order in [`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md).
-5. **Then Phase 6 and up:** the clone-reduction loop (§8). No release before that loop is clean.
+1. **Phases 1–5 are on `main`.** §6 B9 for M1, M3 and M4 is Yes ([#519](https://github.com/danielsimonjr/MathTS/pull/519)). §6 B9 for M2 and M5–M8 is recorded in the completion sign-off PR from [`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md).
+2. **Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are merged.** The clone-reduction loop is not clean; §7 stays shut.
+3. **Finish [`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md):** residual UPT unit spellings (`d`, `Angstrom`) and the P6-5 JavaScriptCore regression (after the B9 sign-off PR lands).
+4. **Phase 7 planner:** measure clones, write [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md), and run the §8 loop until clean. No release before that loop is clean.
 
 ---
 
@@ -409,7 +399,8 @@ M1, M3 and M4 merged before this checklist existed. The 2026-10-22 audit checked
 against it. B1–B8 are Yes. B9 was Partly: no review was recorded on #396, #397, or #395, and the
 later audit was after merge. claude-sonnet-5-5 recorded the review on
 [#519](https://github.com/danielsimonjr/MathTS/pull/519) (see **Recorded review** below), so B9
-is Yes for M1, M3 and M4. B9 for M2 and M5–M8 stays open: that review did not cover them.
+is Yes for M1, M3 and M4. §6 B9 for M2 and M5–M8 is Yes after the completion sign-off PR
+(see **Recorded review (M2 and M5–M8)** below).
 
 | Box | M1 (#396, #407)                                                                                                                       | M3 (#397)                                                                                     | M4 (#395)                                                              |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -422,6 +413,18 @@ is Yes for M1, M3 and M4. B9 for M2 and M5–M8 stays open: that review did not 
 | B7  | Yes. `.changeset/scalar-structure-m1.md`, `.changeset/scalar-complexity-own-weights.md`.                                              | Yes. `.changeset/scalar-compile-m3.md`.                                                       | Yes. `.changeset/pareto-front-m4.md`.                                  |
 | B8  | Yes. PR checks green.                                                                                                                 | Yes.                                                                                          | Yes.                                                                   |
 | B9  | Yes. claude-sonnet-5-5 re-ran the four commands above on #519. GitHub recorded no review on #396; #407 fixed the gap the audit found. | Yes. Same re-run on #519; scalar-compile (22 tests) and the parity test pass.                 | Yes. Same re-run on #519; pareto-front (17 tests) pass.                |
+
+| Box | M2 ([#440](https://github.com/danielsimonjr/MathTS/pull/440))                                                                                                     | M5                                                                                       | M6                                                                                      | M7                                                                                       | M8                                                                             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| B1  | Yes. Reuses node classes, `simplify`, and `Node.toTex` from `functions/src/factories/index.ts`; no `parse`, `eval`, or `new Function` in `scalar-node-bridge.ts`. | Yes. `createSeededRng` calls `mulberry32`; string seeds use FNV-1a; no second generator. | Yes. Unary derivatives from `DUAL_UNARY_RULES`; only extra calculus is the `^` partial. | Yes. Calls `levenbergMarquardt`, `bfgs`, `nelderMead`, `pairwiseSum`, and `pairwiseDot`. | Yes. Imports `nearlyEqual` from core internal; evaluates with `compileScalar`. |
+| B2  | Yes. `functions/tests/scalar-node-bridge.test.ts`.                                                                                                                | Yes. `core/tests/numeric/rng.test.ts`.                                                   | Yes. `functions/tests/scalar-compile-gradient.test.ts`.                                 | Yes. `functions/tests/fit-scalar-parameters.test.ts`.                                    | Yes. `functions/tests/numeric-equivalence.test.ts`.                            |
+| B3  | Yes. Barrel via `export * from './factories/index.js'` (`functions/src/index.ts:21`, comment at line 89).                                                         | Yes. `core/src/index.ts:262`.                                                            | Yes. `functions/src/index.ts:51`.                                                       | Yes. `functions/src/index.ts:402`.                                                       | Yes. `functions/src/index.ts:100`.                                             |
+| B4  | Yes. Usage in `docs/api/functions.md`.                                                                                                                            | Yes. Usage in `docs/api/core.md`.                                                        | Yes. Usage in `docs/api/functions.md`.                                                  | Yes. Usage in `docs/api/functions.md`.                                                   | Yes. Usage in `docs/api/functions.md`; TSDoc states evidence, not proof.       |
+| B5  | Yes. Architecture prose + export index.                                                                                                                           | Yes. Architecture prose.                                                                 | Yes. Architecture prose.                                                                | Yes. Architecture prose.                                                                 | Yes. Architecture prose.                                                       |
+| B6  | Yes on `origin/main`.                                                                                                                                             | Yes.                                                                                     | Yes.                                                                                    | Yes.                                                                                     | Yes.                                                                           |
+| B7  | Yes. `.changeset/scalar-node-bridge-m2.md`.                                                                                                                       | Yes. `.changeset/seeded-rng-m5.md`.                                                      | Yes. `.changeset/scalar-compile-gradient-m6.md`.                                        | Yes. `.changeset/fit-scalar-parameters-m7.md`.                                           | Yes. `.changeset/numeric-equivalence-m8.md`.                                   |
+| B8  | Yes. PR checks green.                                                                                                                                             | Yes.                                                                                     | Yes.                                                                                    | Yes.                                                                                     | Yes.                                                                           |
+| B9  | Yes. claude-sonnet-5-5, completion sign-off PR; `scalar-node-bridge.test.ts` (397 passed).                                                                        | Yes. Same reviewer and PR; `rng.test.ts` (18 passed).                                    | Yes. Same reviewer and PR; `scalar-compile-gradient.test.ts` (62 passed).               | Yes. Same reviewer and PR; `fit-scalar-parameters.test.ts` (13 passed).                  | Yes. Same reviewer and PR; `numeric-equivalence.test.ts` (23 passed).          |
 
 ### Recorded review (Phases 3–5 PR 1, [#519](https://github.com/danielsimonjr/MathTS/pull/519))
 
@@ -453,6 +456,36 @@ Greps and reads on the same head:
 Re-run at the head of the Sprint 5R close-out PR ([#528](https://github.com/danielsimonjr/MathTS/pull/528)),
 which holds the whole Phases 3–5 stack: the same four commands pass again with the same
 counts (15, 11, 22 and 17 tests), so the B9 cells above stand.
+
+### Recorded review (M2 and M5–M8, completion sign-off PR)
+
+Reviewer: **claude-sonnet-5-5**, 2026-10-31, on the head of the completion sign-off PR from
+[`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md). Each file runs under its own
+package's test runner:
+
+```bash
+(cd functions && bunx vitest run tests/scalar-node-bridge.test.ts)      # 397 passed
+(cd core && bun test --isolate --timeout 30000 tests/numeric/rng.test.ts) # 18 passed
+(cd functions && bunx vitest run tests/scalar-compile-gradient.test.ts) # 62 passed
+(cd functions && bunx vitest run tests/fit-scalar-parameters.test.ts)   # 13 passed
+(cd functions && bunx vitest run tests/numeric-equivalence.test.ts)     # 23 passed
+```
+
+Greps and reads on the same head:
+
+- **M2:** `functions/src/scalar-node-bridge.ts` contains no `parse(`, `eval(`, or `new Function`.
+  `nodeToScalarImpl` unwraps `ParenthesisNode` at lines 163–166. A node type outside the scalar
+  subset throws `ScalarBuildError` at line 272 (`ConditionalNode` is rejected there).
+- **M5:** `createSeededRng` calls `mulberry32`. String seeds use FNV-1a (`FNV_OFFSET = 0x811c9dc5`
+  in `core/src/numeric/rng.ts`). `seedProbabilityRng` and `createRng` are unchanged.
+  `createSeededRng(42)` matches `MULBERRY32_42_FIRST_8`.
+- **M6:** Unary derivatives in `functions/src/scalar-compile.ts` come from `DUAL_UNARY_RULES`; the
+  only extra calculus is the `^` partial (`Math.log` at line 271).
+- **M7:** `fit-scalar.ts` calls `levenbergMarquardt`, `bfgs`, `nelderMead`, `pairwiseSum`, and
+  `pairwiseDot`; it does not define another optimizer.
+- **M8:** `numeric-equivalence.ts` imports `nearlyEqual` from `@danielsimonjr/mathts-core/internal`
+  and calls `compileScalar`. The TSDoc says the `consistent` verdict is evidence, not proof.
+  `paretoDist` is unrelated and stays out of this review (already recorded for M4).
 
 ---
 
@@ -558,7 +591,8 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   - [x] Exports on the `functions` barrel: `scalarToNode`, `nodeToScalar`,
         `simplifyScalar`, `scalarToTex`; a usage section in `docs/api/functions.md`.
   - [x] Tests: `functions/tests/scalar-node-bridge.test.ts`.
-  - [ ] B9 reviewer sign-off (not recorded here).
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+        (`scalar-node-bridge.test.ts` 397 passed).
 
 #### M3 — Batch compiled `ScalarNode` evaluator ✅ merged (#397)
 
@@ -642,6 +676,8 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
         after (`core/tests/numeric/rng.test.ts`; fixture tests unchanged).
   - [x] Exports on the `core` barrel: `createSeededRng`, type `SeededRng`;
         `docs/api/core.md` usage section.
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+        (`rng.test.ts` 18 passed).
 
 #### Sprint 1R — Phase 1 integration
 
@@ -794,6 +830,8 @@ export function compileScalarGradient(
         `log(0)`.
   - [x] Exports on the `functions` barrel: `compileScalarGradient`, type
         `CompiledScalarGradient`.
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+        (`scalar-compile-gradient.test.ts` 62 passed).
 
 #### M7 — `fitScalarParameters` (PySR-style constant optimization) ✅ implemented
 
@@ -861,6 +899,8 @@ export function fitScalarParameters(
   - [x] Exports on the `functions` barrel: `fitScalarParameters`, types
         `FitScalarOptions`, `FitScalarResult`; `levenbergMarquardt`'s new `jacobian`
         option documented in `docs/reference/functions.md`.
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+        (`fit-scalar-parameters.test.ts` 13 passed).
 
 #### M8 — Guarded numerical equivalence ✅ implemented
 
@@ -914,6 +954,8 @@ export function numericallyEquivalent(
   - [x] Exports on the `functions` barrel: `numericallyEquivalent`, types
         `NumericEquivalenceOptions`, `NumericEquivalence`; the "evidence, not proof"
         wording in TSDoc and `docs/api/functions.md`.
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+        (`numeric-equivalence.test.ts` 23 passed).
 
 #### Sprint 2R — Phase 2 integration
 
@@ -1459,63 +1501,6 @@ for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
 **Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
 merge PR #398. The loop is part of the release gate.
 
-### Phase 6 and up: clone-reduction loop
-
-This phase is not a PySR milestone. It starts after Phase 5's close-out
-([`PYSR_PHASES_3_5_PLAN.md`](../plans/PYSR_PHASES_3_5_PLAN.md) PR 12). It repeats until
-the clone report is clean. There is no grok planner on this loop.
-
-Each phase N (6, 7, …) is four steps, in order:
-
-1. **Measure.** composer-2.5 runs `repo-tools clones` and writes
-   [`docs/roadmap/CLONES_REMAINING.md`](./CLONES_REMAINING.md) from that run (counts,
-   exact groups, near pairs, the commit SHA). The ledger names the tool version. It
-   does not mark pairs MERGE or KEEP. Do not commit `inventory.jsonl` or `clones.json`.
-2. **Plan.** claude-opus-5-5 (effort xhigh) reviews that ledger and writes
-   `docs/plans/CLONES_PHASE_<N>_PLAN.md`. The plan marks each pair MERGE or KEEP, with
-   a reason a later reader can check. Opus does not implement the merges.
-3. **Build.** composer-2.5 implements that plan, one small PR at a time, and stops.
-4. **Review.** claude-sonnet-5-5 (effort xhigh) re-runs the tests, greps for a second
-   copy of any algorithm the PR claims to share, and fixes what it finds.
-
-Then phase N+1 starts at step 1 on the merge commit. A phase that merged code is not
-the last phase.
-
-**Clean** means the opus plan for that phase lists no MERGE pair. Every remaining pair
-is KEEP, or the tool reported no pairs. The ledger for that clean phase was measured
-after the previous phase's merges were on `main`. A KEEP that the dependency graph
-forces stays KEEP: the worker-bundle copies of `mulberry32` and `rowMajorStrides` in
-`packages/workerpool/src/worker-numerics.ts` are the standing example (`workerpool`
-cannot import `core`).
-
-**Tool.** `@danielsimonjr/repo-tools` **2.3.0**, the version recorded in
-[`docs/plans/CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md). The CI pin
-`REPO_TOOLS_VERSION: 2.2.4` in `.github/workflows/ci.yml` is for `repo-tools check`.
-Do not change it in a clone phase.
-
-From the repo root, with the tool installed outside the repo:
-
-```bash
-repo-tools clones . --src \
-  packages/typed-function/src packages/workerpool/src \
-  core/src matrix/src tensor/src autograd/src functions/src expression/src \
-  parser/src units/src numbers/src ast/src evaluator/src linalg/src \
-  arithmetic/src trigonometry/src statistics/src signal/src \
-  parallel/src workbook/src assembly/src compat/src gpu/src plot/src \
-  --out=../tmp/clones-phase-N
-```
-
-`--src` is one flag. It takes every following argument until the next flag. `--out`
-is relative to the repo root and its parent must be writable. An absolute path is
-rejected.
-
-[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md) is the historical plan
-for the #473 follow-up. Later phases do not rewrite it. Each phase replaces
-`CLONES_REMAINING.md` with the new measurement and adds its own plan file.
-
-**Release.** §7 stays shut. Do not set `RELEASES_ENABLED`. Do not tag, publish, or
-merge PR #398. The loop is part of the release gate.
-
 ---
 
 ## 9. Explicitly out of scope (non-decisions)
@@ -1530,7 +1515,10 @@ merge PR #398. The loop is part of the release gate.
   conditionals, tensors). `^` already covers powers. Revisit only with a consumer
   request, because UPT's lowering depends on the current arms.
 - **`TemplateExpressionSpec`-style skeletons, differential operators `D(f)`,
-  `TypeSpec`, `denoise`, feature selection.** Revisit after M13.
+  `TypeSpec`, `denoise`, feature selection.** M13 is on `main`
+  ([#526](https://github.com/danielsimonjr/MathTS/pull/526),
+  [#530](https://github.com/danielsimonjr/MathTS/pull/530)). No consumer request was found;
+  these features stay in §9 and do not block §7.
 - **Dimensional analysis on `Tensor`.** It remains UPT-only (`docs/integration/upt.md`
   Q2).
 - **Migrating `seedProbabilityRng` / `createRng` onto M5.** It would change published
