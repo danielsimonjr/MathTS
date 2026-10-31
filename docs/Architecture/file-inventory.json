@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-30",
+  "generated": "2026-10-31",
   "totalFiles": 2059,
   "byDisposition": {
     "reachable": 26,
@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 749
+      "loc": 752
     },
     {
       "file": "core/src/types/dual-rules.ts",
