@@ -8685,7 +8685,7 @@ graph LR
 
 ---
 
-### `functions/src/statistics/extreme.ts` - Recursively reduce an array or matrix to a single extreme value.
+### `functions/src/statistics/extreme.ts` - extreme module
 
 **Internal Dependencies:**
 
@@ -8699,7 +8699,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `reduceExtreme`
+- Functions: `_reduceExtremeNumber`, `reduceExtreme`
 
 ---
 
@@ -19454,12 +19454,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1234   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203725 |
-| Total Exports           | 6410   |
+| Total Lines of Code     | 203812 |
+| Total Exports           | 6411   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
 | Total Interfaces        | 569    |
-| Total Functions         | 2070   |
+| Total Functions         | 2071   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 620    |

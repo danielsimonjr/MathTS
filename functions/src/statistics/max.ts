@@ -30,6 +30,20 @@ export const createMax = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, larger, isNaN: mathIsNaN }: MaxDependencies) => {
+    type NumberCmp = (a: unknown, b: unknown) => unknown;
+    type NumberNan = (value: unknown) => unknown;
+    let cachedNan: NumberNan | null | undefined;
+    let cachedCmp: NumberCmp | null | undefined;
+
+    function getMaxNumberOps(): { nan: NumberNan; cmp: NumberCmp } | null {
+      if (cachedNan === undefined) {
+        cachedNan = (typed.find(mathIsNaN, ['number']) as NumberNan | null) ?? null;
+        cachedCmp = (typed.find(larger, ['number', 'number']) as NumberCmp | null) ?? null;
+      }
+      if (cachedNan && cachedCmp) return { nan: cachedNan, cmp: cachedCmp };
+      return null;
+    }
+
     /**
      * Compute the maximum value of a matrix or a  list with values.
      * In case of a multidimensional array, the maximum of the flattened array
@@ -106,10 +120,13 @@ export const createMax = /* #__PURE__ */ factory(
      * @private
      */
     function _max(array: unknown[] | MatrixType): unknown {
+      const ops = getMaxNumberOps();
       return reduceExtreme(array, larger as (value: unknown, best: unknown) => unknown, 'max', {
         isNaN: mathIsNaN,
         numeric,
         config,
+        nan: ops?.nan,
+        cmp: ops?.cmp,
       });
     }
   }

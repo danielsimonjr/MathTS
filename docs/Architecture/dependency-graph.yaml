@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-31'
   totalFiles: 1234
   totalModules: 82
-  totalExports: 6410
+  totalExports: 6411
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18358,7 +18358,7 @@ modules:
       constants:
         - createCumSum
     functions/src/statistics/extreme.ts:
-      description: Recursively reduce an array or matrix to a single extreme value.
+      description: extreme module
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -18381,8 +18381,10 @@ modules:
           typeOnly: true
       workspaceDependencies: []
       exports:
+        - _reduceExtremeNumber
         - reduceExtreme
       functions:
+        - _reduceExtremeNumber
         - reduceExtreme
     functions/src/statistics/mad.ts:
       description: Compute the median absolute deviation of a matrix or a list with values.
@@ -40885,11 +40887,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1234
   totalModules: 82
-  totalLinesOfCode: 203725
-  totalExports: 6410
+  totalLinesOfCode: 203812
+  totalExports: 6411
   totalClasses: 60
   totalInterfaces: 569
-  totalFunctions: 2070
+  totalFunctions: 2071
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1632

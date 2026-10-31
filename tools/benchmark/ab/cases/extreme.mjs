@@ -17,7 +17,7 @@ export const cases = [
     name: 'prod n = 10',
     kind: 'gain',
     make: (F) => {
-      const r = mulberry32(0xpr0d010);
+      const r = mulberry32(0x7002010);
       const a = new Array(10);
       for (let i = 0; i < a.length; i++) a[i] = 0.5 + r() * 0.5;
       return () => F.prod(a);

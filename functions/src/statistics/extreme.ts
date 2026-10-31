@@ -8,6 +8,46 @@ interface MatrixType {
   forEach(callback: (value: unknown) => void, skipZeros: boolean, recurse: boolean): void;
 }
 
+interface ReduceExtremeDeps {
+  isNaN: TypedFunction;
+  numeric: TypedFunction;
+  config: ConfigOptions;
+  nan?: (value: unknown) => unknown;
+  cmp?: (value: unknown, best: unknown) => unknown;
+}
+
+/**
+ * @private
+ */
+export function _reduceExtremeNumber(
+  array: number[],
+  nan: (value: unknown) => unknown,
+  cmp: (value: unknown, best: unknown) => unknown,
+  fnName: 'max' | 'min'
+): unknown {
+  let res: unknown;
+  for (let i = 0; i < array.length; i++) {
+    const value = array[i];
+    if (nan(value)) {
+      res = value;
+    } else if (res === undefined || cmp(value, res)) {
+      res = value;
+    }
+  }
+  if (res === undefined) {
+    throw new Error(`Cannot calculate ${fnName} of an empty array`);
+  }
+  return res;
+}
+
+function plainArrayAllNumbers(array: unknown[]): boolean {
+  if (array.constructor !== Array) return false;
+  for (let i = 0; i < array.length; i++) {
+    if (typeof array[i] !== 'number') return false;
+  }
+  return true;
+}
+
 /**
  * Recursively reduce an array or matrix to a single extreme value.
  * `compare` is the typed `larger` (max) or `smaller` (min) the factories close over —
@@ -18,13 +58,21 @@ export function reduceExtreme(
   array: unknown[] | MatrixType,
   compare: (value: unknown, best: unknown) => unknown,
   fnName: 'max' | 'min',
-  deps: {
-    isNaN: TypedFunction;
-    numeric: TypedFunction;
-    config: ConfigOptions;
-  }
+  deps: ReduceExtremeDeps
 ): unknown {
-  const { isNaN: mathIsNaN, numeric, config } = deps;
+  const { isNaN: mathIsNaN, numeric, config, nan, cmp } = deps;
+  if (nan && cmp && Array.isArray(array) && plainArrayAllNumbers(array as unknown[])) {
+    try {
+      const res = _reduceExtremeNumber(array as number[], nan, cmp, fnName);
+      if (typeof res === 'string') {
+        return numeric(res, safeNumberType(res, config));
+      }
+      return res;
+    } catch (err) {
+      throw improveErrorMessage(err, fnName, undefined);
+    }
+  }
+
   let res: unknown;
 
   deepForEach(array, function (value: unknown) {

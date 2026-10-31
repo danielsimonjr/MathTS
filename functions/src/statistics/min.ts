@@ -30,6 +30,20 @@ export const createMin = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, smaller, isNaN: mathIsNaN }: MinDependencies) => {
+    type NumberCmp = (a: unknown, b: unknown) => unknown;
+    type NumberNan = (value: unknown) => unknown;
+    let cachedNan: NumberNan | null | undefined;
+    let cachedCmp: NumberCmp | null | undefined;
+
+    function getMinNumberOps(): { nan: NumberNan; cmp: NumberCmp } | null {
+      if (cachedNan === undefined) {
+        cachedNan = (typed.find(mathIsNaN, ['number']) as NumberNan | null) ?? null;
+        cachedCmp = (typed.find(smaller, ['number', 'number']) as NumberCmp | null) ?? null;
+      }
+      if (cachedNan && cachedCmp) return { nan: cachedNan, cmp: cachedCmp };
+      return null;
+    }
+
     /**
      * Compute the minimum value of a matrix or a  list of values.
      * In case of a multidimensional array, the minimum of the flattened array
@@ -106,10 +120,13 @@ export const createMin = /* #__PURE__ */ factory(
      * @private
      */
     function _min(array: unknown[] | MatrixType): unknown {
+      const ops = getMinNumberOps();
       return reduceExtreme(array, smaller as (value: unknown, best: unknown) => unknown, 'min', {
         isNaN: mathIsNaN,
         numeric,
         config,
+        nan: ops?.nan,
+        cmp: ops?.cmp,
       });
     }
   }
