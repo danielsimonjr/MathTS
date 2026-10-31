@@ -17,6 +17,7 @@ interface TypedFunction<T = unknown> {
     ...moreSignatures: Record<string, (...args: never[]) => unknown>[]
   ): (...args: unknown[]) => T;
   (...args: unknown[]): T;
+  find(fn: unknown, types: string[]): ((...args: never[]) => unknown) | null;
 }
 
 type CompareFunction = (a: unknown, b: unknown) => number;
@@ -31,12 +32,72 @@ interface Dependencies {
 const name = 'partitionSelect';
 const dependencies = ['typed', 'isNumeric', 'isNaN', 'compare'];
 
+type NumberCompare = (a: number, b: number) => number;
+
 export const createPartitionSelect = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, isNumeric, isNaN: mathIsNaN, compare }: Dependencies) => {
     const asc = compare;
     const desc = (a: unknown, b: unknown): number => -compare(a, b);
+
+    let cachedNumberCompare: NumberCompare | null | undefined;
+
+    function getNumberCompare(): NumberCompare | null {
+      if (cachedNumberCompare === undefined) {
+        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+      }
+      return cachedNumberCompare;
+    }
+
+    function scanPlainNumbers(
+      arr: unknown[]
+    ): { allNumbers: true; nan?: number } | { allNumbers: false } {
+      for (let i = 0; i < arr.length; i++) {
+        const v = arr[i];
+        if (typeof v !== 'number') {
+          return { allNumbers: false };
+        }
+        if (v !== v) {
+          return { allNumbers: true, nan: v };
+        }
+      }
+      return { allNumbers: true };
+    }
+
+    function quickSelectNumber(arr: unknown[], k: number, cmp: NumberCompare): unknown {
+      let from = 0;
+      let to = arr.length - 1;
+
+      while (from < to) {
+        let r = from;
+        let w = to;
+        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from];
+
+        while (r < w) {
+          if (cmp(arr[r] as number, pivot as number) >= 0) {
+            const tmp = arr[w];
+            arr[w] = arr[r];
+            arr[r] = tmp;
+            --w;
+          } else {
+            ++r;
+          }
+        }
+
+        if (cmp(arr[r] as number, pivot as number) > 0) {
+          --r;
+        }
+
+        if (k <= r) {
+          to = r;
+        } else {
+          from = r + 1;
+        }
+      }
+
+      return arr[k];
+    }
 
     /**
      * Partition-based selection of an array or 1D matrix.
@@ -126,6 +187,18 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
     function quickSelect(arr: unknown[], k: number, compare: CompareFunction): unknown {
       if (k >= arr.length) {
         throw new Error('k out of bounds');
+      }
+
+      const scan = scanPlainNumbers(arr);
+      if (scan.allNumbers) {
+        if ('nan' in scan && scan.nan !== undefined) {
+          return scan.nan;
+        }
+        const cmpNum = getNumberCompare();
+        if (cmpNum && (compare === asc || compare === desc)) {
+          const cmp = compare === desc ? (a: number, b: number) => -cmpNum(a, b) : cmpNum;
+          return quickSelectNumber(arr, k, cmp);
+        }
       }
 
       // check for NaN values since these can cause an infinite while loop

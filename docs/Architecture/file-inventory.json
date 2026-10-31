@@ -6582,7 +6582,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 179
+      "loc": 252
     },
     {
       "file": "functions/src/matrix/pinv.ts",
@@ -7590,7 +7590,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 138
+      "loc": 160
     },
     {
       "file": "functions/src/statistics/min.ts",
