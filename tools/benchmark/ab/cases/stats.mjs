@@ -17,7 +17,7 @@ export const cases = [
     name: 'mode n = 10,000 (control)',
     kind: 'neutral',
     make: (F) => {
-      const r = mulberry32(0xmode01);
+      const r = mulberry32(0x0de001);
       const a = new Array(10_000);
       for (let i = 0; i < a.length; i++) a[i] = Math.floor(r() * 100);
       return () => F.mode(a);
