@@ -1450,7 +1450,11 @@ export const min = mathTyped('min', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a < b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) < 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) < 0 ? a : b),
-  Array: (arr: f64[]): f64 => Math.min(...arr),
+  Array: (arr: f64[]): f64 => {
+    let m = Infinity;
+    for (let i = 0; i < arr.length; i++) m = Math.min(m, arr[i]);
+    return m;
+  },
   number: (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.min(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.min(a, b, ...rest),
@@ -1474,7 +1478,11 @@ export const max = mathTyped('max', {
   'bigint, bigint': (a: i64, b: i64): i64 => (a > b ? a : b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (a.compare(b) > 0 ? a : b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (a.compare(b) > 0 ? a : b),
-  Array: (arr: f64[]): f64 => Math.max(...arr),
+  Array: (arr: f64[]): f64 => {
+    let m = -Infinity;
+    for (let i = 0; i < arr.length; i++) m = Math.max(m, arr[i]);
+    return m;
+  },
   number: (a: f64): f64 => a,
   'number, number': (a: f64, b: f64): f64 => Math.max(a, b),
   'number, number, ...number': (a: f64, b: f64, rest: f64[]): f64 => Math.max(a, b, ...rest),
