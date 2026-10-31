@@ -2539,6 +2539,7 @@
       "findPeaks",
       "FindPeaksOptions",
       "findRoot",
+      "findTypedImpl",
       "fineStructure",
       "firls",
       "firstRadiation",

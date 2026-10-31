@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-31", "f": 1234, "e": 6410, "re": 2724 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-31", "f": 1235, "e": 6411, "re": 2724 },
   "s": {
-    "loc": 203749,
+    "loc": 203773,
     "cls": 60,
     "int": 570,
-    "fn": 2070,
+    "fn": 2071,
     "tg": 161,
     "en": 0,
     "co": 1632,
-    "toi": 620
+    "toi": 621
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -1160,7 +1160,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 34,
+      "f": 35,
       "exp": [
         "arraySize",
         "validate",
@@ -1871,7 +1871,7 @@
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 12 },
-    { "p": "function/typed.ts", "i": 3, "o": 203 },
+    { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "src/index.ts", "i": 152, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
