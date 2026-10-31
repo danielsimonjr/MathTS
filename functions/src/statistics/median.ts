@@ -13,7 +13,7 @@ interface MedianDependencies {
   typed: TypedFunction;
   add: TypedFunction;
   divide: TypedFunction;
-  compare: (a: unknown, b: unknown) => number;
+  compare: TypedFunction;
   partitionSelect: TypedFunction;
   mapSlices: TypedFunction;
 }
@@ -21,10 +21,27 @@ interface MedianDependencies {
 const name = 'median';
 const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect', 'mapSlices'];
 
+type NumberCompare = (a: number, b: number) => number;
+
 export const createMedian = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, add, divide, compare, partitionSelect, mapSlices }: MedianDependencies) => {
+    let cachedNumberCompare: NumberCompare | null | undefined;
+
+    function getNumberCompare(): NumberCompare | null {
+      if (cachedNumberCompare === undefined) {
+        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+      }
+      return cachedNumberCompare;
+    }
+
+    function flatAllNumbers(flat: unknown[]): boolean {
+      for (let i = 0; i < flat.length; i++) {
+        if (typeof flat[i] !== 'number') return false;
+      }
+      return true;
+    }
     /**
      * Recursively calculate the median of an n-dimensional array
      * @param {Array | Matrix} array - Input array or matrix
@@ -47,8 +64,13 @@ export const createMedian = /* #__PURE__ */ factory(
 
           // array now partitioned at mid + 1, take max of left part
           let left = flat[mid];
+          const cmpNum = flatAllNumbers(flat) ? getNumberCompare() : null;
           for (let i = 0; i < mid; ++i) {
-            if (compare(flat[i], left) > 0) {
+            if (cmpNum) {
+              if (cmpNum(flat[i] as number, left as number) > 0) {
+                left = flat[i];
+              }
+            } else if ((compare as (a: unknown, b: unknown) => number)(flat[i], left) > 0) {
               left = flat[i];
             }
           }
