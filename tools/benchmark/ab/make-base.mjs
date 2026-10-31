@@ -5,10 +5,9 @@
  *   node tools/benchmark/ab/make-base.mjs [--ref <git-ref>] [--control]
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { repoRoot, workspaceDirs } from '../../test/workspaces.mjs';
 import { perfBaseDir, perfControlDir } from './util.mjs';
 
