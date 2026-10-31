@@ -20,11 +20,34 @@ export const createSort = /* #__PURE__ */ factory(
   }: {
     typed: TypedFunction;
     matrix: (data: unknown, storage?: string) => Matrix;
-    compare: CompareFn;
+    compare: TypedFunction;
     compareNatural: CompareFn;
   }): TypedFunction => {
-    const compareAsc = compare;
-    const compareDesc = (a: unknown, b: unknown): number => -compare(a, b);
+    const compareAsc = compare as CompareFn;
+    const compareDesc = (a: unknown, b: unknown): number => -compareAsc(a, b);
+
+    type NumberCompare = (a: number, b: number) => number;
+    let cachedNumberCompare: NumberCompare | null | undefined;
+
+    function getNumberCompare(): NumberCompare | null {
+      if (cachedNumberCompare === undefined) {
+        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+      }
+      return cachedNumberCompare;
+    }
+
+    function arrayAllNumbers(arr: unknown[]): boolean {
+      for (let i = 0; i < arr.length; i++) {
+        if (typeof arr[i] !== 'number') return false;
+      }
+      return true;
+    }
+
+    function sortNumberArray(arr: unknown[], cmp: NumberCompare, descending: boolean): unknown[] {
+      const c = descending ? (a: number, b: number) => -cmp(a, b) : cmp;
+      arr.sort(c as (a: unknown, b: unknown) => number);
+      return arr;
+    }
 
     /**
      * Sort the items in a matrix.
@@ -60,6 +83,8 @@ export const createSort = /* #__PURE__ */ factory(
     return typed(name, {
       Array: function (x: unknown[]) {
         _arrayIsVector(x);
+        const cmp = arrayAllNumbers(x) ? getNumberCompare() : null;
+        if (cmp) return sortNumberArray(x, cmp, false);
         return x.sort(compareAsc);
       },
 
@@ -80,6 +105,10 @@ export const createSort = /* #__PURE__ */ factory(
 
       'Array, string': function (x: unknown[], order: string): unknown[] {
         _arrayIsVector(x);
+        if (order === 'asc' || order === 'desc') {
+          const cmp = arrayAllNumbers(x) ? getNumberCompare() : null;
+          if (cmp) return sortNumberArray(x, cmp, order === 'desc');
+        }
         return x.sort(_comparator(order));
       },
 
