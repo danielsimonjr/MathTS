@@ -1,0 +1,800 @@
+{
+  "blob": "6acf72b69f29e28534fa03dd76b6e41e17a6808b",
+  "source": "universal-physics-tensor/data/units.json",
+  "symbols": [
+    {
+      "symbol": "m",
+      "scale": "1",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "g",
+      "scale": "1e-3",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "s",
+      "scale": "1",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "K",
+      "scale": "1",
+      "dimension": {
+        "Theta": 1
+      }
+    },
+    {
+      "symbol": "A",
+      "scale": "1",
+      "dimension": {
+        "I": 1
+      }
+    },
+    {
+      "symbol": "mol",
+      "scale": "1",
+      "dimension": {
+        "N": 1
+      }
+    },
+    {
+      "symbol": "Hz",
+      "scale": "1",
+      "dimension": {
+        "T": -1
+      }
+    },
+    {
+      "symbol": "N",
+      "scale": "1",
+      "dimension": {
+        "L": 1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "Pa",
+      "scale": "1",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "J",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "W",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3
+      }
+    },
+    {
+      "symbol": "C",
+      "scale": "1",
+      "dimension": {
+        "T": 1,
+        "I": 1
+      }
+    },
+    {
+      "symbol": "V",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "ohm",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3,
+        "I": -2
+      }
+    },
+    {
+      "symbol": "Ω",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3,
+        "I": -2
+      }
+    },
+    {
+      "symbol": "Ohm",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3,
+        "I": -2
+      }
+    },
+    {
+      "symbol": "S",
+      "scale": "1",
+      "dimension": {
+        "L": -2,
+        "M": -1,
+        "T": 3,
+        "I": 2
+      }
+    },
+    {
+      "symbol": "F",
+      "scale": "1",
+      "dimension": {
+        "L": -2,
+        "M": -1,
+        "T": 4,
+        "I": 2
+      }
+    },
+    {
+      "symbol": "eV",
+      "scale": "e",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "nat",
+      "scale": "1",
+      "dimension": {}
+    },
+    {
+      "symbol": "bit",
+      "scale": "ln2",
+      "dimension": {}
+    },
+    {
+      "symbol": "rad",
+      "scale": "1",
+      "dimension": {}
+    },
+    {
+      "symbol": "deg",
+      "scale": "pi/180",
+      "dimension": {}
+    },
+    {
+      "symbol": "min",
+      "scale": "60",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "h",
+      "scale": "3600",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "d",
+      "scale": "86400",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "yr",
+      "scale": "julian_year",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "au",
+      "scale": "149597870700",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "AU",
+      "scale": "149597870700",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Msun",
+      "scale": "M_sun",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "Msun_iau",
+      "scale": "Msun_iau",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "T",
+      "scale": "1",
+      "dimension": {
+        "M": 1,
+        "T": -2,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "G",
+      "scale": "1e-4",
+      "dimension": {
+        "M": 1,
+        "T": -2,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "gauss",
+      "scale": "1e-4",
+      "dimension": {
+        "M": 1,
+        "T": -2,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "Gauss",
+      "scale": "1e-4",
+      "dimension": {
+        "M": 1,
+        "T": -2,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "bar",
+      "scale": "1e5",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "atm",
+      "scale": "101325",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "angstrom",
+      "scale": "1e-10",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Angstrom",
+      "scale": "1e-10",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Å",
+      "scale": "1e-10",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "pc",
+      "scale": "3.085677581491367e16",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "ly",
+      "scale": "c*julian_year",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "L",
+      "scale": "1e-3",
+      "dimension": {
+        "L": 3
+      }
+    },
+    {
+      "symbol": "l",
+      "scale": "1e-3",
+      "dimension": {
+        "L": 3
+      }
+    },
+    {
+      "symbol": "cal",
+      "scale": "4.184",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "BTU",
+      "scale": "4.1868*453.59237/1.8",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "psi",
+      "scale": "psi",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "torr",
+      "scale": "101325/760",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "mmHg",
+      "scale": "mmHg",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "P",
+      "scale": "0.1",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "degR",
+      "scale": "5/9",
+      "dimension": {
+        "Theta": 1
+      }
+    },
+    {
+      "symbol": "°R",
+      "scale": "5/9",
+      "dimension": {
+        "Theta": 1
+      }
+    },
+    {
+      "symbol": "rpm",
+      "scale": "1/60",
+      "dimension": {
+        "T": -1
+      }
+    },
+    {
+      "symbol": "hp",
+      "scale": "550*foot*lbf",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3
+      }
+    },
+    {
+      "symbol": "H",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2,
+        "I": -2
+      }
+    },
+    {
+      "symbol": "Wb",
+      "scale": "1",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2,
+        "I": -1
+      }
+    },
+    {
+      "symbol": "sr",
+      "scale": "1",
+      "dimension": {}
+    },
+    {
+      "symbol": "cd",
+      "scale": "1",
+      "dimension": {
+        "J": 1
+      }
+    },
+    {
+      "symbol": "lm",
+      "scale": "1",
+      "dimension": {
+        "J": 1
+      }
+    },
+    {
+      "symbol": "lx",
+      "scale": "1",
+      "dimension": {
+        "J": 1,
+        "L": -2
+      }
+    },
+    {
+      "symbol": "arcsec",
+      "scale": "pi/648000",
+      "dimension": {}
+    },
+    {
+      "symbol": "arcmin",
+      "scale": "pi/10800",
+      "dimension": {}
+    },
+    {
+      "symbol": "mas",
+      "scale": "pi/648000000",
+      "dimension": {}
+    },
+    {
+      "symbol": "uas",
+      "scale": "pi/648000000000",
+      "dimension": {}
+    },
+    {
+      "symbol": "%",
+      "scale": "1e-2",
+      "dimension": {}
+    },
+    {
+      "symbol": "percent",
+      "scale": "1e-2",
+      "dimension": {}
+    },
+    {
+      "symbol": "ppm",
+      "scale": "1e-6",
+      "dimension": {}
+    },
+    {
+      "symbol": "ppb",
+      "scale": "1e-9",
+      "dimension": {}
+    },
+    {
+      "symbol": "M",
+      "scale": "1000",
+      "dimension": {
+        "N": 1,
+        "L": -3
+      }
+    },
+    {
+      "symbol": "u",
+      "scale": "m_u",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "amu",
+      "scale": "m_u",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "Da",
+      "scale": "m_u",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "erg",
+      "scale": "1e-7",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "cc",
+      "scale": "1e-6",
+      "dimension": {
+        "L": 3
+      }
+    },
+    {
+      "symbol": "dyn",
+      "scale": "1e-5",
+      "dimension": {
+        "L": 1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "Jy",
+      "scale": "1e-26",
+      "dimension": {
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "Lsun",
+      "scale": "3.828e26",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -3
+      }
+    },
+    {
+      "symbol": "Rsun",
+      "scale": "6.957e8",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Rearth",
+      "scale": "6.3781e6",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Rjup",
+      "scale": "7.1492e7",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "Mearth",
+      "scale": "5.9722e24",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "Mjup",
+      "scale": "1.89813e27",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "day",
+      "scale": "86400",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "hr",
+      "scale": "3600",
+      "dimension": {
+        "T": 1
+      }
+    },
+    {
+      "symbol": "poise",
+      "scale": "0.1",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "St",
+      "scale": "1e-4",
+      "dimension": {
+        "L": 2,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "rayl",
+      "scale": "1",
+      "dimension": {
+        "L": -2,
+        "M": 1,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "in",
+      "scale": "inch",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "inch",
+      "scale": "inch",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "ft",
+      "scale": "foot",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "mil",
+      "scale": "2.54e-5",
+      "dimension": {
+        "L": 1
+      }
+    },
+    {
+      "symbol": "lb",
+      "scale": "pound",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "lbm",
+      "scale": "pound",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "lbf",
+      "scale": "lbf",
+      "dimension": {
+        "L": 1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "kgf",
+      "scale": "standard_gravity",
+      "dimension": {
+        "L": 1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "mph",
+      "scale": "0.44704",
+      "dimension": {
+        "L": 1,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "knot",
+      "scale": "1852/3600",
+      "dimension": {
+        "L": 1,
+        "T": -1
+      }
+    },
+    {
+      "symbol": "psia",
+      "scale": "psi",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "ksi",
+      "scale": "1000*psi",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "mmH2O",
+      "scale": "standard_gravity",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "inHg",
+      "scale": "mmHg*25.4",
+      "dimension": {
+        "L": -1,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "tonne",
+      "scale": "1000",
+      "dimension": {
+        "M": 1
+      }
+    },
+    {
+      "symbol": "therm",
+      "scale": "105480400",
+      "dimension": {
+        "L": 2,
+        "M": 1,
+        "T": -2
+      }
+    },
+    {
+      "symbol": "c",
+      "scale": "c",
+      "dimension": {
+        "L": 1,
+        "T": -1
+      }
+    }
+  ]
+}

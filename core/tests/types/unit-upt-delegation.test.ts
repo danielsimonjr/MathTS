@@ -42,6 +42,13 @@ describe('unicode unit spellings', () => {
     expect(new Unit(1, 'Å').toNumeric('m')).toBe(1e-10);
     expect(new Unit(1, '%').toNumeric('ppm')).toBe(10000);
   });
+
+  it('accepts UPT day spelling d without breaking decimetre dm', () => {
+    expect(new Unit(1, 'd').toNumeric('s')).toBe(86400);
+    expect(new Unit(1, 'dm').toNumeric('m')).toBe(0.1);
+    expect(new Unit(1, 'day').toNumeric('s')).toBe(86400);
+    expect(new Unit(1, 'Angstrom').toNumeric('m')).toBe(1e-10);
+  });
 });
 
 describe('cycles and radians', () => {

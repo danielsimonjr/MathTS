@@ -1,19 +1,19 @@
 {
-  "generated": "2026-10-30",
-  "totalFiles": 2059,
+  "generated": "2026-10-31",
+  "totalFiles": 2060,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 765,
+    "test": 766,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1232,
-    "tests": 765,
+    "tests": 766,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 3,
     "@danielsimonjr/mathts-autograd": 24,
     "@danielsimonjr/mathts-compat": 16,
-    "@danielsimonjr/mathts-core": 105,
+    "@danielsimonjr/mathts-core": 106,
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
@@ -870,7 +870,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 680
+      "loc": 682
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
@@ -1255,7 +1255,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 105
+      "loc": 112
+    },
+    {
+      "file": "core/tests/types/unit-upt-symbols.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 125
     },
     {
       "file": "core/tests/types/unit.test.ts",
