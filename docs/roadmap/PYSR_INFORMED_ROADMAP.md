@@ -475,8 +475,9 @@ Greps and reads on the same head:
 
 - **M2:** `functions/src/scalar-node-bridge.ts` contains no `parse(`, `eval(`, or `new Function`.
   `nodeToScalarImpl` unwraps `ParenthesisNode` at lines 163–166. A node type outside the scalar
-  subset throws `ScalarBuildError` at line 272. `ConditionalNode` is that case: the reviewer
-  parsed `x > 0 ? x : -x` and `nodeToScalar` threw `ScalarBuildError`.
+  subset throws `ScalarBuildError` at line 272. `ConditionalNode` is that case:
+  `functions/tests/scalar-node-bridge.test.ts` lists `x ? 1 : 2` among the rejected inputs, and
+  the reviewer also parsed `x > 0 ? x : -x` and saw `nodeToScalar` throw `ScalarBuildError`.
 - **M5:** `createSeededRng` calls `mulberry32`. String seeds use FNV-1a (`FNV_OFFSET = 0x811c9dc5`
   in `core/src/numeric/rng.ts`). `seedProbabilityRng` and `createRng` are unchanged.
   `createSeededRng(42)` matches `MULBERRY32_42_FIRST_8`.
