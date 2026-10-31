@@ -15,20 +15,27 @@ export const cases = [
   {
     name: 'lup 128×128',
     kind: 'neutral',
-    make: (F) => () => F.lup(randomMatrix(128, 128, 0x42128)),
+    make: (F) => {
+      const A = randomMatrix(128, 128, 0x42128);
+      return () => F.lup(A);
+    },
   },
   {
     name: 'lusolve 128×128',
     kind: 'neutral',
-    make: (F) => () => {
+    make: (F) => {
       const A = randomMatrix(128, 128, 0x53128);
       const b = randomMatrix(128, 1, 0x53129).map((r) => r[0]);
-      return F.lusolve(A, b);
+      return () => F.lusolve(A, b);
     },
   },
   {
     name: 'det 128×128 (control)',
     kind: 'neutral',
-    make: (F) => () => F.det(randomMatrix(128, 128, 0x99128)),
+    control: true,
+    make: (F) => {
+      const A = randomMatrix(128, 128, 0x99128);
+      return () => F.det(A);
+    },
   },
 ];

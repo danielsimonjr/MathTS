@@ -22,6 +22,7 @@ export const cases = [
   {
     name: 'dotMultiply n = 1,000 (control)',
     kind: 'neutral',
+    control: true,
     make: (F) => {
       const a = numArr(1000, 0xd001);
       const b = numArr(1000, 0xd002);
