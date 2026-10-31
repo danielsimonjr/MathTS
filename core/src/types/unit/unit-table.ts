@@ -511,6 +511,8 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   rods: 'rod',
   chains: 'chain',
   angstroms: 'angstrom',
+  Angstrom: 'angstrom',
+  d: 'day',
 
   lt: 'l',
   litres: 'litre',

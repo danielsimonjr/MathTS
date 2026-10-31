@@ -4,13 +4,13 @@
 
 # Complete File Inventory
 
-**Generated**: 2026-10-30 (by tools/create-dependency-graph)
+**Generated**: 2026-10-31 (by tools/create-dependency-graph)
 
 Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-root cross-package `tests/`, `tools/`, build/test `*.config.ts`, `examples/`, and `docs/` reference sources — tagged with a disposition. A completeness census: no `.ts` may be silently missing. The self-check gate (`verifyFileCensus`) does a MAXIMAL, location-agnostic repo walk (broader than this census’s enumerated discovery) and HARD-FAILS `npm run docs:deps` if any `.ts` on disk is unaccounted, or if any `orphan` exists.
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2059
+**Total files**: 2060
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1206 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      765 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      766 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2059** |                                                                                                                |
+| **Total**     | **2060** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    29 |
 | `examples` |     5 |
 | `src`      |  1232 |
-| `tests`    |   765 |
+| `tests`    |   766 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -45,7 +45,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-ast`            |     3 |
 | `@danielsimonjr/mathts-autograd`       |    24 |
 | `@danielsimonjr/mathts-compat`         |    16 |
-| `@danielsimonjr/mathts-core`           |   105 |
+| `@danielsimonjr/mathts-core`           |   106 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   561 |
 | `@danielsimonjr/mathts-functions`      |   875 |
@@ -243,6 +243,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/unit-exact-definitions.test.ts`                                 | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit-external-reference.test.ts`                                | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit-upt-delegation.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/unit-upt-symbols.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit.test.ts`                                                   | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/core-unit.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/create-unit-pollution.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
