@@ -8820,6 +8820,7 @@ graph LR
 | -------------------------------- | --------------------- | ------------------ |
 | `../utils/collection.js`         | `deepForEach, reduce` | Import             |
 | `../utils/factory.js`            | `factory`             | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`       | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`       | Import (type-only) |
@@ -19470,7 +19471,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203773 |
+| Total Lines of Code     | 203776 |
 | Total Exports           | 6411   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

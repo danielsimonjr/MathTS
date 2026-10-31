@@ -881,7 +881,10 @@
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
     ],
-    "functions/src/utils/typed-impl.ts": ["functions/src/algebra/decomposition/qr.ts"],
+    "functions/src/utils/typed-impl.ts": [
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/statistics/prod.ts"
+    ],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
       "functions/src/algebra/derivative.ts",
