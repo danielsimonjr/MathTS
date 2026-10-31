@@ -40,6 +40,16 @@ export const cases = [
     },
   },
   {
+    name: 'sort n = 100,000',
+    kind: 'gain',
+    make: (F) => {
+      const r = mulberry32(0x50b001);
+      const a = new Array(100_000);
+      for (let i = 0; i < a.length; i++) a[i] = r() * 1e6;
+      return () => F.sort(a.slice());
+    },
+  },
+  {
     name: 'mode n = 10,000 (control)',
     kind: 'neutral',
     make: (F) => {
