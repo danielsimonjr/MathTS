@@ -18,7 +18,7 @@ export const cases = [
     kind: 'gain',
     pr: 'P7-2',
     make: (F) => {
-      const r = mulberry32(0x700d010);
+      const r = mulberry32(0x7002010);
       const a = new Array(10);
       for (let i = 0; i < a.length; i++) a[i] = 0.5 + r() * 0.5;
       return () => F.prod(a);
@@ -42,6 +42,16 @@ export const cases = [
     make: (F) => {
       const a = new Array(200);
       for (let i = 0; i < a.length; i++) a[i] = F.bignumber('1.001');
+      return () => F.prod(a);
+    },
+  },
+  {
+    name: 'prod Fraction at 1 (fallback)',
+    kind: 'neutral',
+    pr: 'P7-2',
+    make: (F) => {
+      const a = new Array(200).fill(1);
+      a[1] = F.fraction(1, 2);
       return () => F.prod(a);
     },
   },

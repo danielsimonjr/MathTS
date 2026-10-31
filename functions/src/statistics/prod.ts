@@ -46,21 +46,6 @@ export const createProd = /* #__PURE__ */ factory(
       return cachedProdMul;
     }
 
-    function arrayAllNumbers(array: unknown[]): boolean {
-      for (let i = 0; i < array.length; i++) {
-        if (typeof array[i] !== 'number') return false;
-      }
-      return true;
-    }
-
-    function _prodNumber(array: number[], mul: NumberMul): number {
-      let p = array[0];
-      for (let i = 1; i < array.length; i++) {
-        p = mul(p, array[i]);
-      }
-      return p;
-    }
-
     /**
      * Compute the product of a matrix or a list with values.
      * In case of a multidimensional array or matrix, the sum of all
@@ -111,19 +96,27 @@ export const createProd = /* #__PURE__ */ factory(
      * @private
      */
     function _prod(array: unknown[] | MatrixType): unknown {
-      if (
-        Array.isArray(array) &&
-        array.constructor === Array &&
-        array.length > 0 &&
-        arrayAllNumbers(array)
-      ) {
+      if (Array.isArray(array) && array.constructor === Array && array.length > 0) {
         const mul = getProdMul();
-        if (mul) {
-          return _prodNumber(array as number[], mul);
+        if (mul !== null && typeof array[0] === 'number') {
+          // Fold plain numbers with the cached implementation. The first other element hands
+          // the partial product to the generic fold, so no multiplication is done twice.
+          let p = array[0] as number;
+          let i = 1;
+          for (; i < array.length; i++) {
+            const value = array[i];
+            if (typeof value !== 'number') break;
+            p = mul(p, value);
+          }
+          return i === array.length ? p : _prodGeneric(array.slice(i), p);
         }
       }
 
-      let prod: unknown;
+      return _prodGeneric(array, undefined);
+    }
+
+    function _prodGeneric(array: unknown[] | MatrixType, start: unknown): unknown {
+      let prod: unknown = start;
 
       deepForEach(array, function (value: unknown) {
         try {
