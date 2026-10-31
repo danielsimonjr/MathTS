@@ -1,11 +1,20 @@
 #!/usr/bin/env node
 /**
  * One fresh-process A/B timing child. Invoked by run.mjs; prints one JSON line to stdout.
+ *
+ * Modes (`PERF_MODE`):
+ *   dual         both trees in this process, imported in `PERF_ORDER` (base-first | head-first)
+ *   single-base  the base tree alone     } the two single-tree estimates; run.mjs alternates
+ *   single-head  the head tree alone     } processes of the two
+ *
+ * Each slot (base, head, and the A/A twin) gets its own copy of the timing code and of the case
+ * module (`?slot=` imports), so no call site, and no type feedback behind it, is shared between
+ * the two sides that are being compared. See `slot.mjs`.
  */
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { packageDotEntry } from '../../package-dot-entry.mjs';
-import { same } from './same.mjs';
+import { checkResults } from './same.mjs';
 import { treeModuleRoot } from './util.mjs';
 import { repoRoot as defaultRepoRoot } from '../../test/workspaces.mjs';
 
@@ -32,54 +41,121 @@ async function loadNs(entry, which) {
 }
 
 /**
- * @param {() => unknown} fn
- * @param {number} reps
+ * Everything one side needs: its own timing functions and its own instance of the case module.
+ * @param {string} slot
+ * @param {string} caseFile
+ * @param {string} caseName
+ * @param {unknown} ns the imported package namespace the case is built from
  */
-function timeBatch(fn, reps) {
-  const t0 = performance.now();
-  let last;
-  for (let i = 0; i < reps; i++) last = fn();
-  const ms = performance.now() - t0;
-  return { perCallUs: (ms * 1000) / reps, last };
+async function loadSlot(slot, caseFile, caseName, ns) {
+  const timer = await import(new URL(`./slot.mjs?slot=${slot}`, import.meta.url).href);
+  const spec = await import(`${pathToFileURL(resolve(caseFile)).href}?slot=${slot}`);
+  const caseDef = spec.cases.find((c) => c.name === caseName);
+  if (!caseDef) throw new Error(`case ${caseName} not found`);
+  const thunk = caseDef.make(ns);
+  return { timer, caseDef, thunk };
 }
 
-/** @param {() => unknown} fn */
-function calibrateReps(fn) {
-  let reps = 1;
-  for (let i = 0; i < 12; i++) {
-    const t0 = performance.now();
-    for (let j = 0; j < reps; j++) fn();
-    const ms = performance.now() - t0;
-    if (ms >= 20 && ms <= 40) return reps;
-    if (ms < 1) reps *= 4;
-    else reps = Math.max(1, Math.round((reps * 25) / Math.max(ms, 0.01)));
-  }
-  return Math.max(1, reps);
+/** Time budget for the timed part of one process, in milliseconds. */
+const BUDGET_MS = 2500;
+
+/**
+ * Warm-up floor and cap, in milliseconds. JavaScriptCore tiers a hot loop up in steps over
+ * about two seconds (a `prod` of 10,000 numbers reads 200 µs, then 120, then 89), and a process
+ * that is timed in the middle of a step reads 110-260 µs for the same code (sd 26% between
+ * processes; 3% once warm). V8 settles within a few hundred milliseconds.
+ */
+const WARM_MIN_MS = process.versions.bun ? 2000 : 400;
+const WARM_MAX_MS = process.versions.bun ? 6000 : 2000;
+
+/** @param {number[]} xs */
+function medianOf(xs) {
+  const s = [...xs].sort((x, y) => x - y);
+  return s[Math.floor(s.length / 2)];
+}
+
+/** The last ten batches read the same, within 2%, as the ten before them. */
+function settled(times) {
+  if (times.length < 20) return false;
+  const last = medianOf(times.slice(-10));
+  const before = medianOf(times.slice(-20, -10));
+  return Math.abs(last / before - 1) < 0.02;
 }
 
 /**
- * @param {() => unknown} baseFn
- * @param {() => unknown} headFn
+ * Run every slot until it has been warm for `WARM_MIN_MS` and its batch time has settled, or
+ * for `WARM_MAX_MS`. A call that takes more than 100 ms is a few batches, not a few seconds.
+ * @param {{ timer: { timeBatch: Function }, thunk: () => unknown }[]} slots
  * @param {number} reps
+ * @param {number} batchMs
  */
-function timeAbba(baseFn, headFn, reps) {
-  for (let i = 0; i < 5; i++) {
-    timeBatch(baseFn, reps);
-    timeBatch(headFn, reps);
+function warmUp(slots, reps, batchMs) {
+  if (batchMs > 100) {
+    for (const slot of slots) slot.timer.timeBatch(slot.thunk, reps);
+    return;
   }
-  const baseSamples = [];
-  const headSamples = [];
-  for (let r = 0; r < 8; r++) {
-    baseSamples.push(timeBatch(baseFn, reps).perCallUs);
-    headSamples.push(timeBatch(headFn, reps).perCallUs);
-    headSamples.push(timeBatch(headFn, reps).perCallUs);
-    baseSamples.push(timeBatch(baseFn, reps).perCallUs);
+  const history = slots.map(() => []);
+  const t0 = performance.now();
+  for (;;) {
+    slots.forEach((slot, i) => history[i].push(slot.timer.timeBatch(slot.thunk, reps)));
+    const elapsed = performance.now() - t0;
+    if (elapsed >= WARM_MAX_MS) return;
+    if (elapsed >= WARM_MIN_MS && history.every(settled)) return;
   }
-  baseSamples.sort((x, y) => x - y);
-  headSamples.sort((x, y) => x - y);
-  const medBase = baseSamples[Math.floor(baseSamples.length / 2)];
-  const medHead = headSamples[Math.floor(headSamples.length / 2)];
-  return { medBaseUs: medBase, medHeadUs: medHead, ratio: medHead / medBase };
+}
+
+/**
+ * Batches per side. A batch of one or two calls takes about 25 ms or more, so it carries the
+ * noise of a single call (collections, scheduling), and eight rounds leave the median of 16
+ * samples ±5% for a 26 ms `median` of 100,000 numbers; those cases get more rounds. A call
+ * that takes hundreds of milliseconds (the generic `qr` at 128×128) is steady, and the budget
+ * caps its rounds.
+ * @param {number} reps
+ * @param {number} batchMs
+ */
+function roundsFor(reps, batchMs) {
+  const wanted = reps <= 2 ? 16 : 8;
+  return Math.max(2, Math.min(wanted, Math.floor(BUDGET_MS / (4 * batchMs))));
+}
+
+/**
+ * One tree alone: median per-call time over a number of batches after warm-up. A process sits
+ * ±3-5% from the next on the same code, so the gate takes its precision from the number of
+ * processes, and each one only needs a steady median of its own.
+ * @param {{ timer: { timeBatch: Function }, thunk: () => unknown }} only
+ * @param {number} reps
+ * @param {number} batchMs
+ */
+function timeSingle(only, reps, batchMs) {
+  const samples = Math.max(5, Math.min(24, Math.floor(BUDGET_MS / batchMs)));
+  warmUp([only], reps, batchMs);
+  const times = [];
+  for (let i = 0; i < samples; i++) times.push(only.timer.timeBatch(only.thunk, reps));
+  times.sort((x, y) => x - y);
+  return times[Math.floor(times.length / 2)];
+}
+
+/**
+ * A B B A rounds after warm-up batches. Medians per call, in microseconds.
+ * @param {{ timer: { timeBatch: Function }, thunk: () => unknown }} a
+ * @param {{ timer: { timeBatch: Function }, thunk: () => unknown }} b
+ * @param {number} reps
+ * @param {number} rounds
+ */
+function timeAbba(a, b, reps, rounds) {
+  const aSamples = [];
+  const bSamples = [];
+  for (let r = 0; r < rounds; r++) {
+    aSamples.push(a.timer.timeBatch(a.thunk, reps));
+    bSamples.push(b.timer.timeBatch(b.thunk, reps));
+    bSamples.push(b.timer.timeBatch(b.thunk, reps));
+    aSamples.push(a.timer.timeBatch(a.thunk, reps));
+  }
+  aSamples.sort((x, y) => x - y);
+  bSamples.sort((x, y) => x - y);
+  const medA = aSamples[Math.floor(aSamples.length / 2)];
+  const medB = bSamples[Math.floor(bSamples.length / 2)];
+  return { medAUs: medA, medBUs: medB, ratio: medB / medA };
 }
 
 async function main() {
@@ -94,18 +170,13 @@ async function main() {
     process.exit(2);
   }
 
-  const spec = await import(pathToFileURL(resolve(caseFile)).href);
-  const entry = spec.entry;
-  const caseDef = spec.cases.find((c) => c.name === caseName);
-  if (!caseDef) throw new Error(`case ${caseName} not found`);
+  const entry = (await import(pathToFileURL(resolve(caseFile)).href)).entry;
 
   if (mode === 'single-base' || mode === 'single-head') {
-    const which = mode === 'single-base' ? 'base' : 'head';
-    const ns = await loadNs(entry, which);
-    const thunk = caseDef.make(ns);
-    const reps = calibrateReps(thunk);
-    const { medBaseUs } = timeAbba(thunk, thunk, reps);
-    console.log(JSON.stringify({ ok: true, medUs: medBaseUs, mode }));
+    const ns = await loadNs(entry, mode === 'single-base' ? 'base' : control ? 'control' : 'head');
+    const only = await loadSlot('only', caseFile, caseName, ns);
+    const { reps, batchMs } = only.timer.calibrateReps(only.thunk);
+    console.log(JSON.stringify({ ok: true, medUs: timeSingle(only, reps, batchMs), mode }));
     return;
   }
 
@@ -119,46 +190,53 @@ async function main() {
     baseNs = await loadNs(entry, 'base');
   }
 
-  const baseThunk = caseDef.make(baseNs);
-  const headThunk = caseDef.make(headNs);
+  const base = await loadSlot('base', caseFile, caseName, baseNs);
+  const head = await loadSlot('head', caseFile, caseName, headNs);
 
-  let baseResult;
-  let headResult;
+  // The tree that executes first in a process runs in a slower state on Bun (JavaScriptCore): two
+  // identical trees read 0.66 for `prod` when the base always ran first. So the call order
+  // follows `order` like the import order does, and run.mjs takes the geometric mean of both.
+  const [first, second] = order === 'base-first' ? [base, head] : [head, base];
+
+  let firstResult;
+  let secondResult;
   try {
-    baseResult = baseThunk();
-    headResult = headThunk();
+    firstResult = first.thunk();
+    secondResult = second.thunk();
   } catch (e) {
     console.log(JSON.stringify({ ok: false, error: String(e) }));
     return;
   }
+  const [baseResult, headResult] =
+    order === 'base-first' ? [firstResult, secondResult] : [secondResult, firstResult];
 
-  const equal = caseDef.compare
-    ? caseDef.compare(baseResult, headResult)
-    : same(baseResult, headResult);
-  if (!equal) {
-    console.log(JSON.stringify({ ok: false, error: 'results differ', equal: false }));
+  const checked = checkResults(baseResult, headResult, base.caseDef.compare);
+  if (!checked.ok) {
+    console.log(JSON.stringify({ ok: false, error: checked.reason, equal: false }));
     return;
   }
 
-  const reps = calibrateReps(baseThunk);
-  const { medBaseUs, medHeadUs, ratio } = timeAbba(baseThunk, headThunk, reps);
+  const { reps, batchMs } = first.timer.calibrateReps(first.thunk);
+  const secondCal = second.timer.calibrateReps(second.thunk);
+  const slowMs = Math.max(batchMs, secondCal.batchMs);
+  warmUp([first, second], reps, slowMs);
+  const timed = timeAbba(first, second, reps, roundsFor(reps, slowMs));
+  const medBaseUs = order === 'base-first' ? timed.medAUs : timed.medBUs;
+  const medHeadUs = order === 'base-first' ? timed.medBUs : timed.medAUs;
+  const ratio = medHeadUs / medBaseUs;
 
+  // In-process A/A: the base tree against a twin of itself, each with its own slot. It measures
+  // what this process and this case cannot tell apart, whatever the head does.
   let aaRatio = null;
-  if (control) {
-    const head2 = caseDef.make(headNs);
-    aaRatio = timeAbba(baseThunk, head2, reps).ratio;
+  if (slowMs <= 200) {
+    const twin = await loadSlot('twin', caseFile, caseName, baseNs);
+    twin.timer.calibrateReps(twin.thunk);
+    warmUp([twin], reps, slowMs);
+    aaRatio = timeAbba(twin, base, reps, Math.max(2, roundsFor(reps, slowMs) / 2)).ratio;
   }
 
   console.log(
-    JSON.stringify({
-      ok: true,
-      equal: true,
-      medBaseUs,
-      medHeadUs,
-      ratio,
-      aaRatio,
-      order,
-    })
+    JSON.stringify({ ok: true, equal: true, medBaseUs, medHeadUs, ratio, aaRatio, order })
   );
 }
 

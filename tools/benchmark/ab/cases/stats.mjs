@@ -16,6 +16,7 @@ export const cases = [
   {
     name: 'mode n = 10,000 (control)',
     kind: 'neutral',
+    control: true,
     make: (F) => {
       const r = mulberry32(0x0de001);
       const a = new Array(10_000);
