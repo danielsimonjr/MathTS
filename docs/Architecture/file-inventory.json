@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-31",
-  "totalFiles": 2064,
+  "totalFiles": 2065,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1206,
     "test-only": 0,
     "orphan": 0,
-    "test": 770,
+    "test": 771,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1232,
-    "tests": 770,
+    "tests": 771,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 879,
+    "@danielsimonjr/mathts-functions": 880,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 114,
@@ -5294,7 +5294,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 503
+      "loc": 611
     },
     {
       "file": "functions/src/algebra/decomposition/qr.ts",
@@ -8171,7 +8171,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1705
+      "loc": 1822
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10468,6 +10468,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/p7-elementwise-number-path.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 38
     },
     {
       "file": "functions/tests/p7-factory-extreme-number-path.test.ts",
