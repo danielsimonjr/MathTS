@@ -1,5 +1,42 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.7.0
+
+### Minor Changes
+
+- 55f6b3a: Export `WorkerPool` from the package barrel. Fix its timeout and shutdown edges: a task that waits in the queue now times out and leaves the queue (it used to be skipped silently and could hang), `terminate()` cancels the timers of the tasks it rejects and stops a worker that was still starting, and `execute()` after `terminate()` rejects.
+
+### Patch Changes
+
+- 156e4ea: Share one implementation where two functions already ran the same algorithm: Gauss–Jordan solve (`matInv` and the matrix square-root column solver), scalar central differences (`bfgs` and `gradientDescent`), matrix rank, combination-index generation, cumulative max/min, the upper-gamma continued fraction, and chunk assembly.
+  
+  New public exports: `gaussJordanSolve` (matrix), `centralDifferenceGradient` and `upperGammaQ` (functions). `gaussJordanSolve` reads a missing right-hand-side entry as 0, where the old square-root column solver produced NaN. Other public names and their numeric results stay the same.
+- 7e71f31: Phase 6 P6-8: shared `tensordotRange` kernel in workerpool (clone reduction).
+- e591145: Sprint 2R batch 5: `ComputePool` imports workerpool `forEachMultiIndex` (G64); `dot`/`distance` share `gatedBinary`; bitwise AND/OR/XOR share `bitwiseBinary`; shifts share `bitwiseShift`. Per-op thresholds and public API unchanged.
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- 58a5ec7: Consolidate chunk planning, ParallelMatrix block dispatch, and row-block gemm helpers per clone sprint batch E.
+- Updated dependencies [ce66065]
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [7e71f31]
+- Updated dependencies [e59fe83]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [0573f58]
+- Updated dependencies [2761c87]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [c33fca2]
+- Updated dependencies [747c740]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-workerpool@0.2.7
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.6.11
 
 ### Patch Changes

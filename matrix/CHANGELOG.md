@@ -1,5 +1,57 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.8.0
+
+### Minor Changes
+
+- 156e4ea: Share one implementation where two functions already ran the same algorithm: Gauss–Jordan solve (`matInv` and the matrix square-root column solver), scalar central differences (`bfgs` and `gradientDescent`), matrix rank, combination-index generation, cumulative max/min, the upper-gamma continued fraction, and chunk assembly.
+  
+  New public exports: `gaussJordanSolve` (matrix), `centralDifferenceGradient` and `upperGammaQ` (functions). `gaussJordanSolve` reads a missing right-hand-side entry as 0, where the old square-root column solver produced NaN. Other public names and their numeric results stay the same.
+- fc6c32b: Export `matMul` for dense `number[][]` matrix products and route internal `functions` call sites through it instead of local copies.
+
+### Patch Changes
+
+- 45d691e: Remove the unreachable matrix WASM FFT JS bridge (`fft-wasm.ts`); public FFT remains in `@danielsimonjr/mathts-functions`.
+- cbabf22: Consolidate ParallelBackend sequential fallbacks (divide via parallelBinary, dot via jsBackend, whenParallel for scale/multiply/transpose/sum). Sparse Hadamard stays an inlined CSR walk (mapNonZeros was >10% slower at 2000×2000 nnz≈40k).
+- c7ef24d: Consolidate duplicate AssemblyScript typed-array header allocation (`allocHeader` / `makeAs`) into `wasm/as-typed-array.ts` per clone sprint batch D (M7).
+- 8ed70e9: Sprint 2R: deduplicate matrix backend helpers and shared decomposition utilities (transpose re-export, `matInv`, `ParallelBackend` element-wise/sumAxis delegation, `JSBackend.norm` → reduction).
+- 83d8074: Extract shared `WasmModuleLoader` base (`load` / cached `loadModule` / `getImports`) from the byte-identical copies in `functions` and `matrix` into `core/src/wasm-loader.ts` (`/internal` only). SHA-384 verification stays in each package's Node/browser load paths.
+- 2fd47ee: Phase 6 P6-9: shared `allocAsHeader` on core `/internal` (clone reduction).
+- 0400aa1: Sprint 2R: deduplicate matrix WASM allocation helpers (`allocHeader`, `allocateAs`/`makeAs`) and parallel dense-matrix pair dispatch (`densePair` for add/subtract/hadamard/divide). Public behavior unchanged; AS Int32 type id 4 vs 6 stays file-local.
+- f5ffe00: Consolidate duplicate matrix operation helpers (Givens rotation, Schur QR chase, Gauss–Jordan continue-on-tiny-pivot, Newton sqrt update) per clone batch A.
+- bc74de0: Unify matrix backend thresholds in `DEFAULT_CONFIG` (`multiply` WASM 256, `gpu.enabled` false) and derive `DEFAULT_EXTENDED_HINTS` from that table so `setConfig` cannot restore stale multiply threshold 500. Public `DenseMatrix.multiply` and `lu`/`qr`/`cholesky` remain JavaScript; WASM GEMM stays on `backendManager` / `Tensor.matMul`.
+  
+  **Tests:** `matrix/tests/config.test.ts` — `getRecommendedBackend(200000)` now `'wasm'` (oracle: `gpu.enabled` false and no GPU backend registered); GPU element threshold expects `DEFAULT_BACKEND_HINTS.gpuThreshold` instead of 100000; added `getRecommendedBackend(300, 'multiply') === 'wasm'` so 500 cannot creep back.
+  
+  **Expectation changes (independent oracle cited in test):**
+  
+  - `config.test.ts` GPU threshold: `DEFAULT_BACKEND_HINTS.gpuThreshold` (65536), not legacy 100000.
+  - `config.test.ts` large-data recommendation: `'wasm'`, not `'gpu'` — registry has no GPU backend.
+  
+  Fixes #424.
+- 2fd47ee: Phase 6 P6-10: consolidate WASM load paths on `WasmModuleLoader` (clone reduction).
+- 67406a8: Sprint 2R near-clone batch 3: `runShader` for GPUBackend add/matmul/transpose, `gpuOrJs` for GPUMatrixBackend async ops, shared `applyGivensCols` for Schur/SVD.
+- 974167d: Share dense matrix flip axis helper (clones plan PR-G).
+- Updated dependencies [156e4ea]
+- Updated dependencies [9f5a065]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [7e71f31]
+- Updated dependencies [e591145]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [55f6b3a]
+- Updated dependencies [58a5ec7]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-parallel@0.7.0
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.7.9
 
 ### Patch Changes

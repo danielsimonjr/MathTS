@@ -1,5 +1,121 @@
 # @danielsimonjr/mathts-functions
 
+## 0.70.0
+
+### Minor Changes
+
+- b1da434: Add compileScalar, a batch ScalarNode evaluator with per-row validity that matches evaluateScalar.
+- fa4e463: Add `inferScalarDimension` and dimension inference types for scalar SI analysis.
+- 71f8c3c: Add scalarToNode, nodeToScalar, simplifyScalar, and scalarToTex. Expression re-exports the MathNode and StringOptions types those signatures use.
+- 1203b0f: Add `compileScalarGradient` and `CompiledScalarGradient`: batch exact parameter gradients over the M3 scalar register tape (forward lanes per parameter, `DUAL_UNARY_RULES` for unaries).
+- e2be2c7: Add guarded `numericallyEquivalent` for scalar trees (`consistent` / `counterexample` / `inconclusive`). Numerical agreement is evidence, not proof of symbolic equivalence.
+- 156e4ea: Share one implementation where two functions already ran the same algorithm: Gauss–Jordan solve (`matInv` and the matrix square-root column solver), scalar central differences (`bfgs` and `gradientDescent`), matrix rank, combination-index generation, cumulative max/min, the upper-gamma continued fraction, and chunk assembly.
+  
+  New public exports: `gaussJordanSolve` (matrix), `centralDifferenceGradient` and `upperGammaQ` (functions). `gaussJordanSolve` reads a missing right-hand-side entry as 0, where the old square-root column solver produced NaN. Other public names and their numeric results stay the same.
+- c4f28d5: Add `searchScalars` and related types for PySR-style single-population scalar symbolic regression (M13a): tournament selection, constant fitting via `fitScalarParameters` at `optimizeProbability`, and Pareto hall-of-fame reporting via `paretoFront` / `scoreFront`. A tree that is invalid on any row has infinite loss, so it never reaches the front. Each front row comes with the parameter values behind its loss (`fittedParameters`).
+- a01adf3: Add a Pareto hall of fame with PySR log-loss scores and accuracy, score, and best model selection.
+- 55f6b3a: Add the `parallel` option to `searchScalars` (M14): `parallel: { timeoutMs?, pool? }` scores each generation's trees on worker threads (`scalar-batch.worker.js`, a second build entry) once `observed` has 100 or more rows. Parameter refits and every random draw stay on the caller thread, so a parallel run equals the serial run for the same seed, bit for bit. `timeoutMs` defaults to 30000 and must be positive; a pool the search starts itself is terminated when the generator ends or is closed. New type export: `ScalarPopulationParallelOptions`. `compileScalar` now evaluates through one shared `evaluateScalarTape` (internal).
+- b802c14: Add M12 scalar mutation and crossover operators (`weightedMutation`, PySR default weights, and grammar-checked tree variation). Every operator reaches nodes below a unary call, keeps natural `log` as `log`, and returns `null` instead of a tree that the grammar rejects. The do-nothing operator is exported as `identityMutation`, so the package's matrix `identity` export is unchanged.
+- 01e3d57: Fix `simplify` `exactFractions` to read core `Fraction` `numerator`/`denominator` (fixes `0.4 * x` → 2/5). Document `fractionsLimit` default as `Infinity`.
+  
+  Add `parallelStatMeanAD` as an alias of `parallelStatMAD` and clarify TSDoc: factory `mad` is median absolute deviation; parallel stats are mean absolute deviation.
+- b24e3ec: Add `fitScalarParameters` for PySR-style multi-constant fitting of `ScalarNode` trees to columnar data, and an optional analytic `jacobian` on `levenbergMarquardt` (`LMOptions`).
+- b540dfd: Add `frontToLatexTable` and `frontToJson` for scored Pareto-front export (PySR M15). The table is one `tabular` (complexity, loss, score, equation) whose equation cells are `scalarToTex` in math mode (a bare `\cdot` does not compile in a `tabular` cell) and whose loss and score use `toPrecision(precision)`, default 6. The JSON report is `{ schemaVersion: 1, rows: [{ complexity, loss, score, key, tex }] }`; a non-finite `loss` or `score` is written as `'Infinity'`, `'-Infinity'` or `'NaN'` so it survives `JSON.stringify` (an exact fit scores `Infinity`, which JSON would turn into `null`, the linear-scale value). Also exports the types `FrontJson`, `FrontJsonNumber`, `FrontJsonRow` and `FrontLatexTableOptions`.
+- 760114e: Add `solveParameterDimensions`: solve the SI dimension of each unknown parameter of a scalar tree. The tree implies one linear equation set per SI component (`+` operands agree, transcendental arguments and non-literal exponents are dimensionless, the root equals `target`); the sets are solved exactly with `rationalNullspace` and the result is `solved`, `underdetermined`, or `inconsistent`. The implementation lives in `scalar-dimension.ts` with `inferScalarDimension` (see the M9 changeset).
+
+### Patch Changes
+
+- c5e752a: Consolidate CAS string helpers (integer-range fold, additive-term derivative, Laplace table walk) per clone batch PR 5.
+- 5ec27a9: Sprint 2R clone reduction: `setStringSubset` is the single string-assignment body; functions `_setSubstring` delegates to it (mirrors `getStringSubset` / `_getSubstring`).
+- 8ed70e9: Sprint 2R: deduplicate matrix backend helpers and shared decomposition utilities (transpose re-export, `matInv`, `ParallelBackend` element-wise/sumAxis delegation, `JSBackend.norm` → reduction).
+- c467f72: Consolidate shape-walk duplicates (sparse matrix from vectors, Index dimension map, numeric-square predicates) per clone sprint PR 3.
+- 2761c87: Sprint 2R (#423): `linregress` delegates slope inference to `linearRegression` (`studentTTwoSidedP`); far-tail p-values are tiny positives instead of flushed 0. Changed expectation: `upt-review-2-2026-10-15.test.ts` now asserts `linregress` on the steep near-exact line in (0, 1e-20), matching `I_{ν/(ν+t²)}(ν/2, 1/2)` (scipy.special.betainc / 2·t.sf / mpmath = 1.30816251668737e-32). `numericRealRoots` refines brackets with `findRoot` (Brent, tol 1e-14).
+- 0b085aa: Consolidate duplicate single-variable polynomial dense-coefficient fill into `polyToDenseCoefficients` (trimming unchanged per caller).
+- ab33deb: Extend `searchScalars` with multi-island evolution (M13b): `populations` independent islands (`rng.fork('island:' + index)`), migration of other islands' best trees into the worst places of each island (`fractionReplaced`), annealing of the constant-perturbation temperature (`initialTemperature`, times 0.995 per generation), and adaptive parsimony in tournament selection (`adaptiveParsimonyScaling`, compared in log space so a large share cannot overflow). Annealing and adaptive parsimony default to on only when `populations > 1`; `populations: 1` is byte-identical to the single-population search. Invalid `populations`, `fractionReplaced`, `initialTemperature` and `adaptiveParsimonyScaling` now throw a `RangeError`.
+- 4f8bceb: `polymul`'s below-threshold path delegates to the shared `polyMulJS` convolution kernel (same arithmetic, same `trimPoly`).
+- a24444b: Consolidate BigNumber binomial product loops, schoolbook integer polynomial multiply, and binomialExact onto chooseScalar (clone batch PR 2).
+- 83d8074: Extract shared `WasmModuleLoader` base (`load` / cached `loadModule` / `getImports`) from the byte-identical copies in `functions` and `matrix` into `core/src/wasm-loader.ts` (`/internal` only). SHA-384 verification stays in each package's Node/browser load paths.
+- ec7dcdb: Phase 6 P6-4: consolidate L1/Huber fit gradients via `gradRobust` (clone reduction).
+- e59fe83: Consolidate log-gamma and accurate erfc/normal-CDF scalars for hypothesis, distributions, and worker kernels; remove duplicate worker log-gamma.
+- 3f2d4e5: Consolidate lasso/elastic-net fit shell, noncentral chi-square/F Poisson mixture, and reuse `normalSampleRng` in distribution `sampleN` fallbacks (PR6 numerics batch).
+- af7733a: Document the ScalarNode toolkit, compileScalar, and the Pareto front with runnable TSDoc examples.
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- bcfcff4: Consolidate Airy Ai/Bi scalar bodies and incomplete-beta continued fraction for worker-safe serialization.
+- 3b240fb: Consolidate duplicate scalar helpers (Euclid GCD snap, gammainc/betainc closed domain, binomial coefficient, graph restart aggregation, trial isPrime) per Sprint 2R clone batch 6.
+- 58fdd7a: Share set union and symmetric-difference flatten preamble (clones plan PR-B).
+- 8e16768: Refresh WASM dispatch comments in typed sources and bridges to cite `wasmPolicyAllows` / `functions/src/wasm/policy.ts` (comments only; no threshold or dispatch behavior changes).
+- 61d46ad: Share one NUMERIC_LITERAL regex between evaluateScalar and compileScalar.
+- 9dc97c5: Phase 6 P6-11: shared `runChainLifecycle` for GPU elementwise chain dispatch (clone reduction).
+- 1806a0a: Sprint 2R clone-merge: shared internal `fitOrthogonalSeries` for `chebyshevFit` and `legendreFit` (length check, WASM-threshold dispatch, normal-equation JS path). Public names and behavior unchanged.
+- 37c0fd4: Delegate `runUnaryPtr` to `runChainPtr` for the pointer-ABI elementwise path (clone batch M11).
+- 6e7532e: Sprint 2R clone reduction: shared `assertSameShape` for DualTensor/TapedTensor; unified ConditionalNode/RangeNode render helpers; `getStringSubset` barrel export with shared string subset body for functions `subset`.
+- 2fd47ee: Phase 6 P6-9: shared `allocAsHeader` on core `/internal` (clone reduction).
+- 81b76ea: `curvefit` now calls `levenbergMarquardt` and still returns `number[]` (same signature; it does not throw on the previous fixtures). Its λ schedule, Jacobian step (`1e-8` → `1e-7`), solver (`linsolve` → `inv`), and singular-only catch follow LM. Noise-free linear/exponential fixtures still recover the planted parameters; on a linear `y=2x+1` fit the new path is exact where the old path had a 1-ulp error. `levenbergMarquardt` itself keeps the same iterates (forward Jacobian `h=1e-7`, `pairwiseDot` cost). `svds` uses core `norm2` for overflow-safe normalization. No existing test expectation changed.
+- 3400f59: Share `mapBinaryF64` for FFT magnitude/power. Unary `Float64Array` overloads stay as inlined `Math.*` loops: a shared callback was measured megamorphic and slower on the sequential n<50k path.
+- bf374b0: Route `solveBVP`, stiff `solveODE`, and `solveDAE` finite-difference Jacobians through `numericJacobian` (`step` / `f0` options); use core `norm2` in `eigsh`, `fsolve`, and Krylov; use `pairwiseDot` (RSS) and `sumSquaredDeviations` (TSS: pairwise mean plus the `(Σd)²/n` correction) in `ols`. No changed test expectations on existing fixtures (new parity and oracle tests only). Refs #422.
+- 18f655b: Isolate compat `create(all, config)` from the process-wide functions config via a synchronous `runWithConfig` overlay and a config proxy on the activated factory graph. Fixes audit I-9 (#425).
+- ef55d67: Share graph centrality restart dispatch (clones plan PR-E).
+- 5b9bf24: Share univariate polynomial string renderer (clones plan PR-D).
+- d305864: Share simplify unflatten left/right walk (clones plan PR-C).
+- fbd543e: Phase 6 P6-2: consolidate the factory `xgcd` BigNumber and Fraction paths into one `_xgcdRing` loop over a small adapter (clone reduction).
+  
+  This is not a pure refactor for BigNumber. The old `_xgcdBigNumber` called decimal.js method names (`isInt`, `lt`, `neg`, `minus`) that `@danielsimonjr/mathts-core`'s `BigNumber` does not define, so `factory_xgcd` on two core BigNumbers threw `a.isInt is not a function`. The adapter uses core's names (`isInteger`, `lessThan`, `negate`, `subtract`), so that path now returns `[gcd, x, y]`. The Fraction path and the number path return what they returned before.
+- 5dfc421: Sprint 2R: consolidate Nelder–Mead — `minimize` calls `nelderMead` with `stepRule` / `tolRule` `'absolute'`; `nelderMead` adds `NelderMeadOptions` (defaults unchanged, relative step/tolerance). No changed test expectations.
+- 936f37e: Sprint 2R clone-merge (G40–G41, G48–G50): share Chebyshev/Legendre basis rows between the poly WASM bridge and `chebyshevFit`/`legendreFit`; unify `asReadReturned`/`withAsTyped` in the WASM bridge helpers; dedupe sort `argsort`/`rank` dispatch. Public API unchanged.
+- 9ee55f8: Sprint 2R near-clone batch 6: shared `linearFit` (exp/log/power fits), `solveAugmentedNormalEquations` (chebyshev/legendre JS paths and poly WASM fallback), Struve/Kelvin series helpers, `zipIntPoly`, set `selectById`, and `fibPair`. Public names and behavior unchanged.
+- d18eed3: Consolidate Welch/Bartlett PSD result packing, Newton/Halley iteration loop, and bandpass/bandstop quadratic root map per clone sprint PR 7.
+- adfa43f: Consolidate Sprint 2R exact clone helpers in arithmetic (ceil/floor snap, matrix 1/∞ norms), flatten, GPU/CPU reductions, and cubic Hermite for ODE/DDE solvers.
+- 2fd47ee: Phase 6 P6-10: consolidate WASM load paths on `WasmModuleLoader` (clone reduction).
+- 35ef447: Sprint 2R clone-merge batch 4 (G12, G24–G25, G28–G32): deduplicate mapSlices transpose, matrix-from-vector helpers, min/max reducers, print template interpolation, Decimal and matrix Index extremes. Public API unchanged.
+- 5179cec: Consolidate Dijkstra scan, 2-D angle helper, and circumcircle computation (shortest path, angle, circumcircle clone batch).
+- fc6c32b: Export `matMul` for dense `number[][]` matrix products and route internal `functions` call sites through it instead of local copies.
+- 2b8c5b9: Phase 6 P6-3: shared linearly-implicit stiff driver for Rosenbrock and RODAS (clone reduction).
+- 654984e: Phase 6 P6-1: consolidate scalar-mutate pick-and-replace and rotation helpers (clone reduction).
+- f915105: Consolidate Sprint 2R near-clone helpers for centrality restart fan-out, matrix row/column slice, sparse CSC tail, factory FFT interleaved conversion, CAS `renderCoeffTimes`, and `rankNearest` k-NN ranking.
+- Updated dependencies [45d691e]
+- Updated dependencies [cbabf22]
+- Updated dependencies [c7ef24d]
+- Updated dependencies [5ec27a9]
+- Updated dependencies [8ed70e9]
+- Updated dependencies [71f8c3c]
+- Updated dependencies [156e4ea]
+- Updated dependencies [9f5a065]
+- Updated dependencies [45d691e]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [7e71f31]
+- Updated dependencies [4594b6c]
+- Updated dependencies [e591145]
+- Updated dependencies [540691c]
+- Updated dependencies [dc47a4b]
+- Updated dependencies [af7733a]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [49a347a]
+- Updated dependencies [48becfb]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [cdec291]
+- Updated dependencies [6e7532e]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [0400aa1]
+- Updated dependencies [f5ffe00]
+- Updated dependencies [bc74de0]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [da5e661]
+- Updated dependencies [55f6b3a]
+- Updated dependencies [67406a8]
+- Updated dependencies [974167d]
+- Updated dependencies [fc6c32b]
+- Updated dependencies [58a5ec7]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-matrix@0.8.0
+  - @danielsimonjr/mathts-expression@0.11.0
+  - @danielsimonjr/mathts-parallel@0.7.0
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## Unreleased
 
 ### Patch Changes

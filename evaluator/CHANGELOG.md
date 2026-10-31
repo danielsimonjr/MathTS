@@ -1,5 +1,37 @@
 # @danielsimonjr/mathts-evaluator
 
+## 0.1.26
+
+### Patch Changes
+
+- 45d691e: Drop the unused `typed-function` dependency (upstream 4.x was never imported by these re-export packages).
+- Updated dependencies [5ec27a9]
+- Updated dependencies [71f8c3c]
+- Updated dependencies [9f5a065]
+- Updated dependencies [45d691e]
+- Updated dependencies [83d8074]
+- Updated dependencies [d7daec0]
+- Updated dependencies [4594b6c]
+- Updated dependencies [540691c]
+- Updated dependencies [dc47a4b]
+- Updated dependencies [af7733a]
+- Updated dependencies [19c4ba7]
+- Updated dependencies [11c4559]
+- Updated dependencies [49a347a]
+- Updated dependencies [48becfb]
+- Updated dependencies [a6cf17a]
+- Updated dependencies [cdec291]
+- Updated dependencies [6e7532e]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [b1bdef8]
+- Updated dependencies [b2a24a0]
+- Updated dependencies [1f52df2]
+- Updated dependencies [2fd47ee]
+- Updated dependencies [da5e661]
+- Updated dependencies [cbc9119]
+  - @danielsimonjr/mathts-expression@0.11.0
+  - @danielsimonjr/mathts-core@0.20.0
+
 ## 0.1.25
 
 ### Patch Changes

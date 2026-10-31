@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-core
 
+## 0.20.0
+
+### Minor Changes
+
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- 11c4559: Add createSeededRng, a forkable Mulberry32 stream with string seeds.
+- a6cf17a: BREAKING: `SiDimensionVector` is now a readonly 7-tuple of `Fraction` exponents; use `vec.map((f) => f.toNumber())` instead of comparing tuple elements with `===` on numbers. `fromSiDimensionVector` accepts `SiDimensionExponent` (`number | Fraction`) and still returns the length-10 `number[]` for `Unit`. There is no `toSiDimensionNumbers` helper.
+
+### Patch Changes
+
+- 9f5a065: Phase 6 P6-5: consolidate Complex tan/cot/tanh/coth via `tanFamily` (clone reduction).
+- 83d8074: Extract shared `WasmModuleLoader` base (`load` / cached `loadModule` / `getImports`) from the byte-identical copies in `functions` and `matrix` into `core/src/wasm-loader.ts` (`/internal` only). SHA-384 verification stays in each package's Node/browser load paths.
+- d7daec0: Consolidate Fraction add/subtract and BigNumber sin/cos Taylor series loops (clone batch H, M11–M12).
+- 2fd47ee: Phase 6 P6-9: shared `allocAsHeader` on core `/internal` (clone reduction).
+- b1bdef8: Replace `export type *` barrels with named type re-exports (tree-sitter-typescript 0.23.2) and drop `@inline` on private AssemblyScript sort helpers so `repo-tools clones` reports `parseErrors=0`.
+- b2a24a0: Fix the JavaScriptCore (Bun) slowdown of `Complex.tan/cot/tanh/coth` from P6-5. The four methods keep one closed form, but it is now bound once per method, when `Complex` is defined, instead of taking two boolean flags on every call through a shared helper. Results are bit-identical to the P6-5 pin.
+- 1f52df2: Share Fraction floor/ceil trunc bound (clones plan PR-F).
+- 2fd47ee: Phase 6 P6-10: consolidate WASM load paths on `WasmModuleLoader` (clone reduction).
+- cbc9119: Add UPT residual unit aliases `d` → day and `Angstrom` → angstrom. A vendored UPT `units.json` symbol-walk test builds `new Unit(1, symbol)` for all 104 symbols and pins each scale and SI dimension (storage `bit` keeps its own scale; angle, solid-angle and bit exponents are an explicit allow-list).
+
 ## 0.19.0
 
 ### Minor Changes
