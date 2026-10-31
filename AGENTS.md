@@ -200,6 +200,13 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
     dispatch decisions from `node tools/benchmark/wasm/run-node.mjs`, which bundles each area with
     esbuild and runs it as its own Node process, and run it twice: a row that flips between runs is
     noise, not a threshold.
+11. **Phase 7 speed claims use the A/B harness.** `bun run bench:ab:base` builds an isolated base
+    tree under `node_modules/.perf-base`; `bun run bench:ab` compares it to the current `dist/` on
+    the public symbol. Each case runs in a fresh process on Node and Bun (`--tsconfig-override` on
+    Bun). Co-loading both trees in one process skews ratios by import order (sometimes 2×); the
+    runner takes the geometric mean of base-first and head-first, and switches to single-tree mode
+    when the two orders disagree by more than ~20%. Gate on the median of at least five runs: gain
+    cases ≤ 0.95 on both engines, every case ≤ 1.02, bit-identical results (`tools/benchmark/ab/same.mjs`).
 
 ---
 
