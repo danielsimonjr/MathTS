@@ -1,6 +1,7 @@
 import { reduce, containsCollections } from '../utils/collection.js';
 import { reduceExtreme } from './extreme.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -30,6 +31,22 @@ export const createMax = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, larger, isNaN: mathIsNaN }: MaxDependencies) => {
+    type NumberCmp = (a: number, b: number) => boolean;
+    type NumberNan = (value: number) => boolean;
+    type NumberOps = { nan: NumberNan; cmp: NumberCmp };
+
+    /** Cached once per factory; `undefined` is unresolved, `null` means no number implementation. */
+    let cachedNumberOps: NumberOps | null | undefined;
+
+    function getMaxNumberOps(): NumberOps | null {
+      if (cachedNumberOps === undefined) {
+        const nan = findTypedImpl<[number], boolean>(typed, mathIsNaN, ['number']);
+        const cmp = findTypedImpl<[number, number], boolean>(typed, larger, ['number', 'number']);
+        cachedNumberOps = nan && cmp ? { nan, cmp } : null;
+      }
+      return cachedNumberOps;
+    }
+
     /**
      * Compute the maximum value of a matrix or a  list with values.
      * In case of a multidimensional array, the maximum of the flattened array
@@ -106,10 +123,13 @@ export const createMax = /* #__PURE__ */ factory(
      * @private
      */
     function _max(array: unknown[] | MatrixType): unknown {
+      const ops = getMaxNumberOps();
       return reduceExtreme(array, larger as (value: unknown, best: unknown) => unknown, 'max', {
         isNaN: mathIsNaN,
         numeric,
         config,
+        nan: ops?.nan,
+        cmp: ops?.cmp,
       });
     }
   }
