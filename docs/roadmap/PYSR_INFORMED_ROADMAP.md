@@ -22,7 +22,7 @@ criteria are met** (consumer seeded-output fixtures recorded at commit `a6cf17af
 or [#395](https://github.com/danielsimonjr/MathTS/pull/395), and claude-sonnet-5-5 recorded it on
 [#519](https://github.com/danielsimonjr/MathTS/pull/519). M2 is merged
 ([#440](https://github.com/danielsimonjr/MathTS/pull/440), `71f8c3ce`). M5 (`createSeededRng`/`fork`) is implemented in `core`.
-Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. §6 B9 for M2 and M5–M8 is **Yes** (recorded in the completion sign-off PR; see §6 **Recorded review (M2 and M5–M8)**). Phases 3–5 are on `main` ([#519](https://github.com/danielsimonjr/MathTS/pull/519)–[#528](https://github.com/danielsimonjr/MathTS/pull/528)); every DoD box those PRs own is ticked. Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are merged; the clone-reduction loop is **not** clean, so the release in §7 has not run. The next clone measurement and [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md) belong to the Phase 7 planner.
+Phase 1 (M2 and M5) is complete. **M6** (`compileScalarGradient`), **M7** (`fitScalarParameters`) and **M8** (`numericallyEquivalent`) are implemented. §6 B9 for M2 and M5–M8 is **Yes** (recorded in [#544](https://github.com/danielsimonjr/MathTS/pull/544); see §6 **Recorded review (M2 and M5–M8)**). Phases 3–5 are on `main` ([#519](https://github.com/danielsimonjr/MathTS/pull/519)–[#528](https://github.com/danielsimonjr/MathTS/pull/528)); every DoD box those PRs own is ticked. Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are merged; the clone-reduction loop is **not** clean, so the release in §7 has not run. The next clone measurement and [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md) belong to the Phase 7 planner.
 D-1, D-2 and D-3 are decided (§10); D-2 is implemented (#414) and D-3 is implemented
 (#413). Tags, GitHub Releases and publish stay off until `RELEASES_ENABLED=true` (§7, #411).
 **Target packages:** `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-functions`,
@@ -74,7 +74,7 @@ is a clone-reduction loop, not a milestone.
 
 **Next, in order:**
 
-1. **Phases 1–5 are on `main`.** §6 B9 for M1, M3 and M4 is Yes ([#519](https://github.com/danielsimonjr/MathTS/pull/519)). §6 B9 for M2 and M5–M8 is recorded in the completion sign-off PR from [`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md).
+1. **Phases 1–5 are on `main`.** §6 B9 for M1, M3 and M4 is Yes ([#519](https://github.com/danielsimonjr/MathTS/pull/519)). §6 B9 for M2 and M5–M8 is recorded in [#544](https://github.com/danielsimonjr/MathTS/pull/544) ([`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md)).
 2. **Phase 6 build PRs [#532](https://github.com/danielsimonjr/MathTS/pull/532)–[#542](https://github.com/danielsimonjr/MathTS/pull/542) are merged.** The clone-reduction loop is not clean; §7 stays shut.
 3. **Finish [`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md):** residual UPT unit spellings (`d`, `Angstrom`) and the P6-5 JavaScriptCore regression (after the B9 sign-off PR lands).
 4. **Phase 7 planner:** measure clones, write [`docs/plans/CLONES_PHASE_7_PLAN.md`](../plans/CLONES_PHASE_7_PLAN.md), and run the §8 loop until clean. No release before that loop is clean.
@@ -399,7 +399,7 @@ M1, M3 and M4 merged before this checklist existed. The 2026-10-22 audit checked
 against it. B1–B8 are Yes. B9 was Partly: no review was recorded on #396, #397, or #395, and the
 later audit was after merge. claude-sonnet-5-5 recorded the review on
 [#519](https://github.com/danielsimonjr/MathTS/pull/519) (see **Recorded review** below), so B9
-is Yes for M1, M3 and M4. §6 B9 for M2 and M5–M8 is Yes after the completion sign-off PR
+is Yes for M1, M3 and M4. §6 B9 for M2 and M5–M8 is Yes after [#544](https://github.com/danielsimonjr/MathTS/pull/544)
 (see **Recorded review (M2 and M5–M8)** below).
 
 | Box | M1 (#396, #407)                                                                                                                       | M3 (#397)                                                                                     | M4 (#395)                                                              |
@@ -424,7 +424,7 @@ is Yes for M1, M3 and M4. §6 B9 for M2 and M5–M8 is Yes after the completion 
 | B6  | Yes on `origin/main`.                                                                                                                                             | Yes.                                                                                     | Yes.                                                                                    | Yes.                                                                                     | Yes.                                                                           |
 | B7  | Yes. `.changeset/scalar-node-bridge-m2.md`.                                                                                                                       | Yes. `.changeset/seeded-rng-m5.md`.                                                      | Yes. `.changeset/scalar-compile-gradient-m6.md`.                                        | Yes. `.changeset/fit-scalar-parameters-m7.md`.                                           | Yes. `.changeset/numeric-equivalence-m8.md`.                                   |
 | B8  | Yes. PR checks green.                                                                                                                                             | Yes.                                                                                     | Yes.                                                                                    | Yes.                                                                                     | Yes.                                                                           |
-| B9  | Yes. claude-sonnet-5-5, completion sign-off PR; `scalar-node-bridge.test.ts` (397 passed).                                                                        | Yes. Same reviewer and PR; `rng.test.ts` (18 passed).                                    | Yes. Same reviewer and PR; `scalar-compile-gradient.test.ts` (62 passed).               | Yes. Same reviewer and PR; `fit-scalar-parameters.test.ts` (13 passed).                  | Yes. Same reviewer and PR; `numeric-equivalence.test.ts` (23 passed).          |
+| B9  | Yes. claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544); `scalar-node-bridge.test.ts` (397 passed).                                      | Yes. Same reviewer and PR; `rng.test.ts` (18 passed).                                    | Yes. Same reviewer and PR; `scalar-compile-gradient.test.ts` (62 passed).               | Yes. Same reviewer and PR; `fit-scalar-parameters.test.ts` (13 passed).                  | Yes. Same reviewer and PR; `numeric-equivalence.test.ts` (23 passed).          |
 
 ### Recorded review (Phases 3–5 PR 1, [#519](https://github.com/danielsimonjr/MathTS/pull/519))
 
@@ -457,10 +457,10 @@ Re-run at the head of the Sprint 5R close-out PR ([#528](https://github.com/dani
 which holds the whole Phases 3–5 stack: the same four commands pass again with the same
 counts (15, 11, 22 and 17 tests), so the B9 cells above stand.
 
-### Recorded review (M2 and M5–M8, completion sign-off PR)
+### Recorded review (M2 and M5–M8, [#544](https://github.com/danielsimonjr/MathTS/pull/544))
 
-Reviewer: **claude-sonnet-5-5**, 2026-10-31, on the head of the completion sign-off PR from
-[`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md). Each file runs under its own
+Reviewer: **claude-sonnet-5-5**, 2026-10-31, on the head of [#544](https://github.com/danielsimonjr/MathTS/pull/544)
+([`docs/plans/COMPLETION_PLAN.md`](../plans/COMPLETION_PLAN.md)). Each file runs under its own
 package's test runner:
 
 ```bash
@@ -591,7 +591,7 @@ export function scalarToTex(node: ScalarNode, options?: StringOptions): string; 
   - [x] Exports on the `functions` barrel: `scalarToNode`, `nodeToScalar`,
         `simplifyScalar`, `scalarToTex`; a usage section in `docs/api/functions.md`.
   - [x] Tests: `functions/tests/scalar-node-bridge.test.ts`.
-  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544)
         (`scalar-node-bridge.test.ts` 397 passed).
 
 #### M3 — Batch compiled `ScalarNode` evaluator ✅ merged (#397)
@@ -676,7 +676,7 @@ export function createSeededRng(seed: number | string): SeededRng; // Mulberry32
         after (`core/tests/numeric/rng.test.ts`; fixture tests unchanged).
   - [x] Exports on the `core` barrel: `createSeededRng`, type `SeededRng`;
         `docs/api/core.md` usage section.
-  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544)
         (`rng.test.ts` 18 passed).
 
 #### Sprint 1R — Phase 1 integration
@@ -830,7 +830,7 @@ export function compileScalarGradient(
         `log(0)`.
   - [x] Exports on the `functions` barrel: `compileScalarGradient`, type
         `CompiledScalarGradient`.
-  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544)
         (`scalar-compile-gradient.test.ts` 62 passed).
 
 #### M7 — `fitScalarParameters` (PySR-style constant optimization) ✅ implemented
@@ -899,7 +899,7 @@ export function fitScalarParameters(
   - [x] Exports on the `functions` barrel: `fitScalarParameters`, types
         `FitScalarOptions`, `FitScalarResult`; `levenbergMarquardt`'s new `jacobian`
         option documented in `docs/reference/functions.md`.
-  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544)
         (`fit-scalar-parameters.test.ts` 13 passed).
 
 #### M8 — Guarded numerical equivalence ✅ implemented
@@ -954,7 +954,7 @@ export function numericallyEquivalent(
   - [x] Exports on the `functions` barrel: `numericallyEquivalent`, types
         `NumericEquivalenceOptions`, `NumericEquivalence`; the "evidence, not proof"
         wording in TSDoc and `docs/api/functions.md`.
-  - [x] B9 reviewer sign-off: claude-sonnet-5-5, completion sign-off PR
+  - [x] B9 reviewer sign-off: claude-sonnet-5-5, [#544](https://github.com/danielsimonjr/MathTS/pull/544)
         (`numeric-equivalence.test.ts` 23 passed).
 
 #### Sprint 2R — Phase 2 integration
