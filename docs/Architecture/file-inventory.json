@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 749
+      "loc": 780
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 174
+      "loc": 192
     },
     {
       "file": "core/tests/config.test.ts",
@@ -7562,7 +7562,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 105
+      "loc": 100
     },
     {
       "file": "functions/src/statistics/mad.ts",
@@ -7611,7 +7611,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 167
+      "loc": 160
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
@@ -10481,14 +10481,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 74
+      "loc": 142
     },
     {
       "file": "functions/tests/p7-qr-number-path.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 189
     },
     {
       "file": "functions/tests/parabolic-pde.test.ts",

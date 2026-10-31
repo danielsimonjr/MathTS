@@ -8,8 +8,8 @@ export const cases = [
     kind: 'neutral',
     make: (M) => {
       const { DenseMatrix } = M;
-      const A = new DenseMatrix(randomMatrix(128, 128, 0xa12800));
-      const B = new DenseMatrix(randomMatrix(128, 128, 0xb12800));
+      const A = DenseMatrix.fromArray(randomMatrix(128, 128, 0xa12800));
+      const B = DenseMatrix.fromArray(randomMatrix(128, 128, 0xb12800));
       return () => A.multiply(B);
     },
   },

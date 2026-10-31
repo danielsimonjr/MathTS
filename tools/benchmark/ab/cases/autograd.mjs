@@ -28,7 +28,7 @@ export const cases = [
       const tape = new Tape();
       const A = TapedTensor.fromTensorAsInput(a, tape);
       const B = TapedTensor.fromTensorAsInput(b, tape);
-      return () => A.matmul(B).toTensor();
+      return () => A.matmul(B).toPrimalTensor();
     },
   },
 ];

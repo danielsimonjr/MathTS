@@ -200,13 +200,26 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
     dispatch decisions from `node tools/benchmark/wasm/run-node.mjs`, which bundles each area with
     esbuild and runs it as its own Node process, and run it twice: a row that flips between runs is
     noise, not a threshold.
-11. **Phase 7 speed claims use the A/B harness.** `bun run bench:ab:base` builds an isolated base
-    tree under `node_modules/.perf-base`; `bun run bench:ab` compares it to the current `dist/` on
-    the public symbol. Each case runs in a fresh process on Node and Bun (`--tsconfig-override` on
-    Bun). Co-loading both trees in one process skews ratios by import order (sometimes 2×); the
-    runner takes the geometric mean of base-first and head-first, and switches to single-tree mode
-    when the two orders disagree by more than ~20%. Gate on the median of at least five runs: gain
-    cases ≤ 0.95 on both engines, every case ≤ 1.02, bit-identical results (`tools/benchmark/ab/same.mjs`).
+11. **Phase 7 speed claims use the A/B harness** (`tools/benchmark/ab/`, scripts `bench:ab:base`
+    and `bench:ab`; running `node tools/benchmark/ab/run.mjs` directly is the same). `make-base.mjs`
+    builds an isolated base tree under `node_modules/.perf-base` (the default ref is the merge base
+    with `origin/main`; a pull request stacked on another branch passes `--ref origin/<base-branch>`),
+    and `run.mjs` times it against the current `dist/` on the public symbol, on Node and on Bun
+    (`--tsconfig-override=tsconfig.base.json` on Bun), each case in fresh processes. **Never time
+    two trees in one process and call the result the gate.** Whichever tree runs second on Node, or
+    first on Bun, runs in a different engine state: two identical trees read 0.66 for `prod` on Bun
+    and 1.2 for `median` of 100,000 on Node, and the size of that effect changes from process to
+    process. The gate therefore uses the single-tree estimate: `R` runs of two processes per side,
+    each process timing one tree alone, alternating base, head, head, base; the ratio is the median
+    head time over the median base time. Two-tree processes (one per import order, with the call
+    order following the import order) still run, for the bit-identical check (`same.mjs` tells `-0`,
+    `0` and `NaN` apart and fails a `null` result), the A/A twin, and a "Two-tree" cross-check
+    column. Gate on at least five runs: a `gain` case at 0.95 or lower on both engines, every case
+    at 1.02 or lower (a case above that is rerun with nine runs), and in a `--control` session every
+    A/A' ratio inside ±2%. A process sits ±3-5% from the next on the same code, so one run has a
+    noise floor of about ±5%: never read a single-run 1.03 on code the change does not touch. Time
+    the engines with a real Node: under `bun run`, the bunfig makes `node` Bun, and the runner looks
+    for another `node` on PATH (`PERF_NODE` overrides it).
 
 ---
 
