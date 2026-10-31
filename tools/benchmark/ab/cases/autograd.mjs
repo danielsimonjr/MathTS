@@ -20,7 +20,7 @@ function randTensor(shape, seed) {
 export const cases = [
   {
     name: 'batched matmul 1×128×96×112',
-    kind: 'neutral',
+    kind: 'gain',
     make: (Ns) => {
       const { Tape, TapedTensor } = Ns;
       const a = randTensor([1, 128, 96], 0xad0001);

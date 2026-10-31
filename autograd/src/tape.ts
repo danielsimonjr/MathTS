@@ -2294,6 +2294,46 @@ function _scatterToOriginalAxes(tensor: Tensor, targetLabels: ReadonlyArray<Inde
 }
 
 /**
+ * Batched strided contraction shared by forward matmul and its gradients.
+ * out[b,r,c] = Σ_t x[b,r,t] · y[b,c,t] with caller-provided strides per operand.
+ */
+function contractBatchedMatmul(
+  xData: Float64Array,
+  yData: Float64Array,
+  outData: Float64Array,
+  batchSize: number,
+  rows: number,
+  cols: number,
+  inner: number,
+  xBatchStride: number,
+  xRowStride: number,
+  xInnerStride: number,
+  yBatchStride: number,
+  yColStride: number,
+  yInnerStride: number,
+  outBatchStride: number,
+  outRowStride: number,
+  outColStride: number
+): void {
+  for (let batch = 0; batch < batchSize; batch++) {
+    const xOff = batch * xBatchStride;
+    const yOff = batch * yBatchStride;
+    const oOff = batch * outBatchStride;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        let sum = 0;
+        for (let t = 0; t < inner; t++) {
+          sum +=
+            xData[xOff + r * xRowStride + t * xInnerStride] *
+            yData[yOff + c * yColStride + t * yInnerStride];
+        }
+        outData[oOff + r * outRowStride + c * outColStride] = sum;
+      }
+    }
+  }
+}
+
+/**
  * Batched matrix multiply: Y[...ij] = Σ_k A[...ik] * B[...kj].
  *
  * `aShape` is [...batch, m, k], `bShape` is [...batch, k, n].
@@ -2311,26 +2351,28 @@ function _batchedMatmul(
   const k = aShape[rank - 1];
   const n = bShape[rank - 1];
 
-  // Total number of batch elements.
   let batchSize = 1;
   for (let b = 0; b < batchRank; b++) batchSize *= aShape[b];
 
   const yData = new Float64Array(batchSize * m * n);
-
-  for (let batch = 0; batch < batchSize; batch++) {
-    const aOff = batch * m * k;
-    const bOff = batch * k * n;
-    const yOff = batch * m * n;
-    for (let i = 0; i < m; i++) {
-      for (let j = 0; j < n; j++) {
-        let sum = 0;
-        for (let q = 0; q < k; q++) {
-          sum += aData[aOff + i * k + q] * bData[bOff + q * n + j];
-        }
-        yData[yOff + i * n + j] = sum;
-      }
-    }
-  }
+  contractBatchedMatmul(
+    aData,
+    bData,
+    yData,
+    batchSize,
+    m,
+    n,
+    k,
+    m * k,
+    k,
+    1,
+    k * n,
+    1,
+    n,
+    m * n,
+    n,
+    1
+  );
 
   return yData;
 }
@@ -2358,22 +2400,24 @@ function _batchedMatmulGradA(
   for (let b = 0; b < batchRank; b++) batchSize *= yShape[b];
 
   const dAData = new Float64Array(batchSize * m * k);
-
-  for (let batch = 0; batch < batchSize; batch++) {
-    const dYOff = batch * m * n;
-    const bOff = batch * k * n;
-    const dAOff = batch * m * k;
-    for (let i = 0; i < m; i++) {
-      for (let q = 0; q < k; q++) {
-        let sum = 0;
-        for (let j = 0; j < n; j++) {
-          // dY[i,j] * B[q,j]  (B transposed: B^T[j,q] = B[q,j])
-          sum += dYData[dYOff + i * n + j] * bData[bOff + q * n + j];
-        }
-        dAData[dAOff + i * k + q] = sum;
-      }
-    }
-  }
+  contractBatchedMatmul(
+    dYData,
+    bData,
+    dAData,
+    batchSize,
+    m,
+    k,
+    n,
+    m * n,
+    n,
+    1,
+    k * n,
+    n,
+    1,
+    m * k,
+    k,
+    1
+  );
 
   return dAData;
 }
@@ -2401,22 +2445,24 @@ function _batchedMatmulGradB(
   for (let b = 0; b < batchRank; b++) batchSize *= aShape[b];
 
   const dBData = new Float64Array(batchSize * k * n);
-
-  for (let batch = 0; batch < batchSize; batch++) {
-    const aOff = batch * m * k;
-    const dYOff = batch * m * n;
-    const dBOff = batch * k * n;
-    for (let q = 0; q < k; q++) {
-      for (let j = 0; j < n; j++) {
-        let sum = 0;
-        for (let i = 0; i < m; i++) {
-          // A[i,q] * dY[i,j]  (A transposed: A^T[q,i] = A[i,q])
-          sum += aData[aOff + i * k + q] * dYData[dYOff + i * n + j];
-        }
-        dBData[dBOff + q * n + j] = sum;
-      }
-    }
-  }
+  contractBatchedMatmul(
+    aData,
+    dYData,
+    dBData,
+    batchSize,
+    k,
+    n,
+    m,
+    m * k,
+    1,
+    k,
+    m * n,
+    1,
+    n,
+    k * n,
+    n,
+    1
+  );
 
   return dBData;
 }
