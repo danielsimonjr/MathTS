@@ -12,40 +12,10 @@ interface ReduceExtremeDeps {
   isNaN: TypedFunction;
   numeric: TypedFunction;
   config: ConfigOptions;
-  nan?: (value: unknown) => unknown;
-  cmp?: (value: unknown, best: unknown) => unknown;
-}
-
-/**
- * @private
- */
-export function _reduceExtremeNumber(
-  array: number[],
-  nan: (value: unknown) => unknown,
-  cmp: (value: unknown, best: unknown) => unknown,
-  fnName: 'max' | 'min'
-): unknown {
-  let res: unknown;
-  for (let i = 0; i < array.length; i++) {
-    const value = array[i];
-    if (nan(value)) {
-      res = value;
-    } else if (res === undefined || cmp(value, res)) {
-      res = value;
-    }
-  }
-  if (res === undefined) {
-    throw new Error(`Cannot calculate ${fnName} of an empty array`);
-  }
-  return res;
-}
-
-function plainArrayAllNumbers(array: unknown[]): boolean {
-  if (array.constructor !== Array) return false;
-  for (let i = 0; i < array.length; i++) {
-    if (typeof array[i] !== 'number') return false;
-  }
-  return true;
+  /** The `number` implementation of `isNaN`, resolved once by the calling factory. */
+  nan?: (value: number) => boolean;
+  /** The `number, number` implementation of `larger` (max) or `smaller` (min). */
+  cmp?: (value: number, best: number) => boolean;
 }
 
 /**
@@ -61,21 +31,43 @@ export function reduceExtreme(
   deps: ReduceExtremeDeps
 ): unknown {
   const { isNaN: mathIsNaN, numeric, config, nan, cmp } = deps;
-  if (nan && cmp && Array.isArray(array) && plainArrayAllNumbers(array as unknown[])) {
+  let res: unknown;
+  let rest: unknown[] | MatrixType = array;
+
+  if (
+    nan !== undefined &&
+    cmp !== undefined &&
+    Array.isArray(array) &&
+    array.constructor === Array
+  ) {
+    // Walk the leading numbers with the cached number implementations. The first other element
+    // hands the running result to the generic walk below, so no comparison is done twice.
+    let best: number | undefined;
+    let i = 0;
     try {
-      const res = _reduceExtremeNumber(array as number[], nan, cmp, fnName);
-      if (typeof res === 'string') {
-        return numeric(res, safeNumberType(res, config));
+      for (; i < array.length; i++) {
+        const value = array[i];
+        if (typeof value !== 'number') break;
+        if (nan(value)) {
+          best = value;
+        } else if (best === undefined || cmp(value, best)) {
+          best = value;
+        }
       }
-      return res;
     } catch (err) {
-      throw improveErrorMessage(err, fnName, undefined);
+      throw improveErrorMessage(err, fnName, array[i]);
     }
+    if (i === array.length) {
+      if (best === undefined) {
+        throw new Error(`Cannot calculate ${fnName} of an empty array`);
+      }
+      return best;
+    }
+    res = best;
+    rest = array.slice(i);
   }
 
-  let res: unknown;
-
-  deepForEach(array, function (value: unknown) {
+  deepForEach(rest, function (value: unknown) {
     try {
       if (mathIsNaN(value)) {
         res = value;
