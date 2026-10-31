@@ -947,6 +947,7 @@ graph LR
 **Exports:**
 
 - Classes: `Complex`
+- Interfaces: `Complex`
 - Functions: `isComplex`
 - Constants: `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`
 
@@ -19454,11 +19455,11 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1234   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203553 |
+| Total Lines of Code     | 203584 |
 | Total Exports           | 6410   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
-| Total Interfaces        | 569    |
+| Total Interfaces        | 570    |
 | Total Functions         | 2070   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
