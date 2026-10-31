@@ -1,9 +1,9 @@
 {
   "m": { "n": "mathts", "v": "0.1.0", "d": "2026-10-31", "f": 1234, "e": 6410, "re": 2724 },
   "s": {
-    "loc": 203690,
+    "loc": 203718,
     "cls": 60,
-    "int": 569,
+    "int": 570,
     "fn": 2070,
     "tg": 161,
     "en": 0,
@@ -229,6 +229,7 @@
       ],
       "int": [
         "BigNumberConfig",
+        "Complex",
         "DualUnaryRule",
         "MathTSValue",
         "Scalar",
@@ -236,8 +237,7 @@
         "IMatrix",
         "IComplex",
         "IFraction",
-        "IBigNumber",
-        "MatrixDimensions"
+        "IBigNumber"
       ]
     },
     "matrix/backends": {

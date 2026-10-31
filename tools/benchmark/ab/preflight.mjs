@@ -1,7 +1,7 @@
 /**
  * Refuse to benchmark when head `src/` is newer than its built dist entry.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { packageDotEntry } from '../../package-dot-entry.mjs';
 import { repoRoot as defaultRepoRoot, workspaceDirs } from '../../test/workspaces.mjs';
@@ -41,17 +41,15 @@ export function distFreshnessError(pkgDir) {
 }
 
 /**
- * @param {string} entryPackage npm name such as @danielsimonjr/mathts-functions
+ * Check every workspace package, not only the case file's entry package: the head tree is the
+ * workspace, and a stale `dist` of any package under the entry (core, matrix, ...) times old code.
  * @param {string} [repoRoot]
- * @returns {string | null}
+ * @returns {string | null} the first error, or null when every dist is fresh
  */
-export function preflightEntryPackage(entryPackage, repoRoot = defaultRepoRoot) {
+export function preflightWorkspace(repoRoot = defaultRepoRoot) {
   for (const rel of workspaceDirs(repoRoot)) {
-    const pkgDir = resolve(repoRoot, rel);
-    const pkg = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'));
-    if (pkg.name === entryPackage) {
-      return distFreshnessError(pkgDir);
-    }
+    const err = distFreshnessError(resolve(repoRoot, rel));
+    if (err) return err;
   }
-  return `unknown entry package ${entryPackage}`;
+  return null;
 }
