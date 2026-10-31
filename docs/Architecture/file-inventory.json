@@ -1,19 +1,19 @@
 {
   "generated": "2026-10-31",
-  "totalFiles": 2062,
+  "totalFiles": 2063,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 767,
+    "test": 768,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 767,
+    "tests": 768,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 877,
+    "@danielsimonjr/mathts-functions": 878,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 114,
@@ -7611,7 +7611,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 129
+      "loc": 163
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
@@ -10475,6 +10475,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 26
+    },
+    {
+      "file": "functions/tests/p7-prod-number-path.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 158
     },
     {
       "file": "functions/tests/p7-qr-number-path.test.ts",
