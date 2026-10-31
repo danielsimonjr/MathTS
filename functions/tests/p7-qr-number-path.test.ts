@@ -7,7 +7,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { Complex, Fraction } from '@danielsimonjr/mathts-core';
-import { qr } from '../src/factories/index.js';
+import { matrix, qr } from '../src/factories/index.js';
+import { factoryScope } from '../src/factories/scope.js';
+import { createQr } from '../src/algebra/decomposition/qr.js';
 
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/p7-qr-golden.jsonl');
 
@@ -28,6 +30,10 @@ function jsonReviver(_key: string, value: unknown): unknown {
     if (o.__complex === true) return { re: o.re as number, im: o.im as number };
   }
   return value;
+}
+
+function toTestCell(cell: unknown): unknown {
+  return isComplexLike(cell) ? new Complex(cell.re, cell.im) : cell;
 }
 
 function loadGoldens(): GoldenCase[] {
@@ -55,11 +61,11 @@ function expectMatrixBitExact(actual: unknown[][], expected: unknown[][]): void 
     for (let j = 0; j < actual[i]!.length; j++) {
       const a = actual[i]![j];
       const e = expected[i]![j];
-      if (isComplexLike(a) || isComplexLike(e)) {
-        expect(isComplexLike(a)).toBe(true);
-        expect(isComplexLike(e)).toBe(true);
+      if (isComplexLike(a) && isComplexLike(e)) {
         expect(Object.is(a.re, e.re)).toBe(true);
         expect(Object.is(a.im, e.im)).toBe(true);
+      } else if (isComplexLike(a) || isComplexLike(e)) {
+        expect.unreachable('one side is a Complex cell and the other is not');
       } else {
         expect(Object.is(a, e)).toBe(true);
       }
@@ -101,6 +107,72 @@ describe('P7-1 qr number path — golden Q/R', () => {
     const { Q, R } = qr(A) as { Q: unknown[][]; R: unknown[][] };
     expectMatrixBitExact(Q, g!.Q);
     expectMatrixBitExact(R, g!.R);
+  });
+
+  it('mixed8: one Complex entry among numbers keeps the whole matrix on the generic path', () => {
+    const g = byName.get('mixed8');
+    expect(g).toBeDefined();
+    const A = g!.A.map((row) =>
+      row.map((cell) => {
+        if (isComplexLike(cell)) return new Complex(cell.re, cell.im);
+        return cell;
+      })
+    );
+    const { Q, R } = qr(A) as { Q: unknown[][]; R: unknown[][] };
+    expectMatrixBitExact(Q, g!.Q);
+    expectMatrixBitExact(R, g!.R);
+  });
+
+  it('DenseMatrix input gives the golden Q and R of the Array input', () => {
+    const g = byName.get('8x8');
+    expect(g).toBeDefined();
+    const { Q, R } = qr(matrix(g!.A)) as {
+      Q: { toArray(): unknown[][] };
+      R: { toArray(): unknown[][] };
+    };
+    expectMatrixBitExact(Q.toArray(), g!.Q);
+    expectMatrixBitExact(R.toArray(), g!.R);
+  });
+});
+
+describe('P7-1 qr number path — resume at the first unfinished step', () => {
+  /**
+   * With the stock `sqrt`, a number matrix never leaves the number domain: `sqrt(NaN)` is `NaN`.
+   * A `sqrt` override that returns a Complex for `NaN` (the dependency is user-replaceable, and
+   * the number path must honour that) moves `u1`/`tau` off `number` at step 3 of the 12×12 pin,
+   * where column 3 of R holds NaN. The step loop must hand step 3 to the generic loop, which
+   * recomputes it from its start.
+   */
+  function qrWithComplexNaNSqrt() {
+    const realSqrt = factoryScope.sqrt as (x: unknown) => unknown;
+    const calls: unknown[] = [];
+    const sqrt = (x: unknown) => {
+      calls.push(x);
+      return typeof x === 'number' && Number.isNaN(x) ? new Complex(NaN, 0) : realSqrt(x);
+    };
+    const scope = new Proxy(factoryScope, {
+      get: (target, key) => (key === 'sqrt' ? sqrt : target[key as string]),
+      has: (target, key) => key in target,
+    });
+    return { run: createQr(scope) as (a: unknown) => { Q: unknown[][]; R: unknown[][] }, calls };
+  }
+
+  it('resumeSqrtComplex: bit-exact Q and R when the scalar work leaves the number domain', () => {
+    const g = byName.get('resumeSqrtComplex');
+    expect(g).toBeDefined();
+    const { run } = qrWithComplexNaNSqrt();
+    const { Q, R } = run(g!.A.map((row) => row.map(toTestCell)));
+    expectMatrixBitExact(Q, g!.Q);
+    expectMatrixBitExact(R, g!.R);
+  });
+
+  it('coverage guard (new code only): step 3 is computed twice, so the resume branch ran', () => {
+    const g = byName.get('resumeSqrtComplex');
+    const { run, calls } = qrWithComplexNaNSqrt();
+    run(g!.A.map((row) => row.map(toTestCell)));
+    const steps = g!.A.length;
+    expect(calls.length).toBe(steps + 1);
+    expect(calls.filter((x) => typeof x === 'number' && Number.isNaN(x)).length).toBeGreaterThan(1);
   });
 });
 

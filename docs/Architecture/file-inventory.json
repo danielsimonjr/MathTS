@@ -10474,7 +10474,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 189
     },
     {
       "file": "functions/tests/parabolic-pde.test.ts",
