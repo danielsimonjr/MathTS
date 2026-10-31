@@ -95,8 +95,17 @@ export function multiply(a: Matrix<number>, b: Matrix<number>): Float64Array {
     const ri = i * m;
     for (let k = 0; k < p; k++) {
       const aik = ad[ai + k];
-      if (aik === 0) continue;
       const bk = k * m;
+      if (aik === 0) {
+        // Match JSBackend: 0×∞ and 0×NaN must yield NaN, not skip silently.
+        for (let j = 0; j < m; j++) {
+          const bij = bd[bk + j];
+          if (bij !== 0 && !Number.isFinite(bij)) {
+            result[ri + j] += aik * bij;
+          }
+        }
+        continue;
+      }
       for (let j = 0; j < m; j++) result[ri + j] += aik * bd[bk + j];
     }
   }
