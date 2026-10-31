@@ -4,6 +4,15 @@ export const entry = '@danielsimonjr/mathts-functions';
 
 export const cases = [
   {
+    name: 'max kernel n = 1,000',
+    kind: 'gain',
+    make: (F) => {
+      const a = new Array(1000);
+      for (let i = 0; i < a.length; i++) a[i] = i * 0.001;
+      return () => F.max(a);
+    },
+  },
+  {
     name: 'factory_max n = 10,000',
     kind: 'neutral',
     make: (F) => {
