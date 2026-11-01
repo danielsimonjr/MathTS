@@ -3,6 +3,54 @@ import { mulberry32 } from '../util.mjs';
 export const entry = '@danielsimonjr/mathts-functions';
 
 export const cases = [
+  {
+    name: 'max kernel n = 10',
+    kind: 'gain',
+    pr: 'P7-6',
+    make: (F) => {
+      const a = new Array(10);
+      for (let i = 0; i < a.length; i++) a[i] = i * 0.1;
+      return () => F.max(a);
+    },
+  },
+  {
+    name: 'max kernel n = 1,000',
+    kind: 'gain',
+    pr: 'P7-6',
+    make: (F) => {
+      const a = new Array(1000);
+      for (let i = 0; i < a.length; i++) a[i] = i * 0.001;
+      return () => F.max(a);
+    },
+  },
+  {
+    name: 'min kernel n = 1,000',
+    kind: 'gain',
+    pr: 'P7-6',
+    make: (F) => {
+      const a = new Array(1000);
+      for (let i = 0; i < a.length; i++) a[i] = i * 0.001;
+      return () => F.min(a);
+    },
+  },
+  {
+    name: 'max kernel n = 10,000',
+    kind: 'gain',
+    pr: 'P7-6',
+    make: (F) => {
+      const r = mulberry32(0x76000a);
+      const a = new Array(10_000);
+      for (let i = 0; i < a.length; i++) a[i] = r() * 1000;
+      return () => F.max(a);
+    },
+  },
+  {
+    name: 'max(1, 2, 3) variadic (control)',
+    kind: 'neutral',
+    pr: 'P7-6',
+    control: true,
+    make: (F) => () => F.max(1, 2, 3),
+  },
   ...[10, 1_000, 10_000].flatMap((n) => [
     {
       name: `factory_max n = ${n.toLocaleString('en-US')}`,
