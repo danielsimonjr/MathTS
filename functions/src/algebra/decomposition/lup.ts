@@ -1,5 +1,6 @@
 import { clone } from '../../utils/object.js';
 import { factory } from '../../utils/factory.js';
+import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -156,13 +157,14 @@ export const createLup = /* #__PURE__ */ factory(
 
     function getLupNumberOps(): LupNumberOps | null {
       if (cachedLupOps === undefined) {
-        const add = typed.find(addScalar, ['number', 'number']) as NumberBin | null;
-        const mul = typed.find(multiplyScalar, ['number', 'number']) as NumberBin | null;
-        const sub = typed.find(subtractScalar, ['number', 'number']) as NumberBin | null;
-        const div = typed.find(divideScalar, ['number', 'number']) as NumberBin | null;
-        const absNum = typed.find(abs, ['number']) as NumberUnary | null;
-        const largerNum = typed.find(larger, ['number', 'number']) as NumberLarger | null;
-        const equalNum = typed.find(equalScalar, ['number', 'number']) as NumberEqual | null;
+        const nn = ['number', 'number'];
+        const add = findTypedImpl<[number, number], number>(typed, addScalar, nn);
+        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
+        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
+        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
+        const absNum = findTypedImpl<[number], number>(typed, abs, ['number']);
+        const largerNum = findTypedImpl<[number, number], boolean>(typed, larger, nn);
+        const equalNum = findTypedImpl<[number, number], boolean>(typed, equalScalar, nn);
         cachedLupOps =
           add && mul && sub && div && absNum && largerNum && equalNum
             ? {
