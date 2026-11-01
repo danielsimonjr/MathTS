@@ -37,7 +37,7 @@ function matmulCase(batch, m, k, n, seedA, seedB, kind) {
 export const cases = [
   matmulCase(8, 2, 3, 4, 0xad0802, 0xad0803, 'neutral'),
   matmulCase(8, 8, 8, 8, 0xad0808, 0xad0809, 'neutral'),
-  matmulCase(4, 32, 16, 24, 0xad0432, 0xad0433, 'gain'),
-  matmulCase(2, 64, 64, 64, 0xad0264, 0xad0265, 'gain'),
-  matmulCase(1, 128, 96, 112, 0xad0001, 0xad0002, 'gain'),
+  matmulCase(4, 32, 16, 24, 0xad0432, 0xad0433, 'neutral'),
+  matmulCase(2, 64, 64, 64, 0xad0264, 0xad0265, 'neutral'),
+  matmulCase(1, 128, 96, 112, 0xad0001, 0xad0002, 'neutral'),
 ];

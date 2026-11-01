@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2473
+      "loc": 2428
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
