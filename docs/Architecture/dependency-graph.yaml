@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-01'
   totalFiles: 1235
   totalModules: 82
-  totalExports: 6411
+  totalExports: 6412
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -3707,6 +3707,7 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+            - denseContiguousData
         - file: ../types/dense/reduction.js
           imports:
             - '* as reduction'
@@ -5326,11 +5327,13 @@ modules:
       workspaceDependencies: []
       exports:
         - isDenseMatrix
+        - denseContiguousData
         - DenseMatrix
       classes:
         - DenseMatrix
       functions:
         - isDenseMatrix
+        - denseContiguousData
     matrix/src/types/Matrix.ts:
       description: Matrix Base Class
       externalDependencies: []
@@ -40923,11 +40926,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 204200
-  totalExports: 6411
+  totalLinesOfCode: 204227
+  totalExports: 6412
   totalClasses: 60
   totalInterfaces: 570
-  totalFunctions: 2071
+  totalFunctions: 2072
   totalTypeGuards: 161
   totalEnums: 0
   totalConstants: 1632

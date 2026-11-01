@@ -1326,11 +1326,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                      | Type               |
-| ----------------------------- | ---------------------------- | ------------------ |
-| `../types/DenseMatrix.js`     | `DenseMatrix`                | Import             |
-| `../types/dense/reduction.js` | `* as reduction`             | Import             |
-| `./Backend.js`                | `MatrixBackend, BackendType` | Import (type-only) |
+| File                          | Imports                            | Type               |
+| ----------------------------- | ---------------------------------- | ------------------ |
+| `../types/DenseMatrix.js`     | `DenseMatrix, denseContiguousData` | Import             |
+| `../types/dense/reduction.js` | `* as reduction`                   | Import             |
+| `./Backend.js`                | `MatrixBackend, BackendType`       | Import (type-only) |
 
 **Exports:**
 
@@ -2002,7 +2002,7 @@ graph LR
 **Exports:**
 
 - Classes: `DenseMatrix`
-- Functions: `isDenseMatrix`
+- Functions: `isDenseMatrix`, `denseContiguousData`
 
 ---
 
@@ -19476,12 +19476,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204200 |
-| Total Exports           | 6411   |
+| Total Lines of Code     | 204227 |
+| Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
 | Total Interfaces        | 570    |
-| Total Functions         | 2071   |
+| Total Functions         | 2072   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
 | Type-only Imports       | 621    |
