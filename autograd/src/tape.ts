@@ -2320,14 +2320,18 @@ function contractBatchedMatmul(
     const yOff = batch * yBatchStride;
     const oOff = batch * outBatchStride;
     for (let r = 0; r < rows; r++) {
+      const xRow = xOff + r * xRowStride;
+      const oRow = oOff + r * outRowStride;
       for (let c = 0; c < cols; c++) {
+        let xPtr = xRow;
+        let yPtr = yOff + c * yColStride;
         let sum = 0;
         for (let t = 0; t < inner; t++) {
-          sum +=
-            xData[xOff + r * xRowStride + t * xInnerStride] *
-            yData[yOff + c * yColStride + t * yInnerStride];
+          sum += xData[xPtr] * yData[yPtr];
+          xPtr += xInnerStride;
+          yPtr += yInnerStride;
         }
-        outData[oOff + r * outRowStride + c * outColStride] = sum;
+        outData[oRow + c * outColStride] = sum;
       }
     }
   }
