@@ -3904,6 +3904,7 @@
       "DEFAULT_CONFIG",
       "DEFAULT_EXTENDED_HINTS",
       "defaultWasmLocation",
+      "denseContiguousData",
       "DenseMatrix",
       "destroyGlobalGPU",
       "destroyGlobalGPUBackend",

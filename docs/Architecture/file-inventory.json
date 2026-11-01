@@ -11930,7 +11930,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 578
+      "loc": 601
     },
     {
       "file": "matrix/src/types/index.ts",
@@ -12259,7 +12259,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 40
+      "loc": 58
     },
     {
       "file": "matrix/tests/parallel-matrix.test.ts",

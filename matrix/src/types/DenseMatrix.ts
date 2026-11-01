@@ -575,3 +575,26 @@ export class DenseMatrix extends Matrix<number> {
 export function isDenseMatrix(value: unknown): value is DenseMatrix {
   return value instanceof DenseMatrix;
 }
+
+type DenseStorage = {
+  isView: boolean;
+  offset: number;
+  rowStride: number;
+  cols: number;
+  data: Float64Array;
+  toFlatFloat64Array(): Float64Array;
+};
+
+/**
+ * Row-major Float64 storage for in-package kernels.
+ * Returns the backing array when the matrix is contiguous (no view, offset 0,
+ * row stride equal to the column count) and a copy otherwise.
+ * Not re-exported from `matrix/src/index.ts`.
+ */
+export function denseContiguousData(matrix: DenseMatrix): Float64Array {
+  const m = matrix as unknown as DenseStorage;
+  if (!m.isView && m.offset === 0 && m.rowStride === m.cols) {
+    return m.data;
+  }
+  return m.toFlatFloat64Array();
+}
