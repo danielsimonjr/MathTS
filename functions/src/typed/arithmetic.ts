@@ -87,10 +87,15 @@ const numberBinCache = new WeakMap<object, NumberBin>();
 function getNumberBin(tf: object, fallback: ScalarOp): NumberBin {
   let f = numberBinCache.get(tf);
   if (!f) {
-    const found = mathTyped.find(tf as Parameters<typeof mathTyped.find>[0], [
-      'number',
-      'number',
-    ]) as NumberBin | null;
+    let found: NumberBin | null = null;
+    try {
+      found = mathTyped.find(tf as Parameters<typeof mathTyped.find>[0], [
+        'number',
+        'number',
+      ]) as NumberBin;
+    } catch {
+      found = null;
+    }
     f = found ?? ((a, b) => fallback(a, b) as number);
     numberBinCache.set(tf, f);
   }
