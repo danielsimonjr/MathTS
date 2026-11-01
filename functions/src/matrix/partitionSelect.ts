@@ -1,6 +1,7 @@
 import { isMatrix } from '../utils/is.js';
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 
 // Type definitions
 interface Matrix {
@@ -45,7 +46,11 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
 
     function getNumberCompare(): NumberCompare | null {
       if (cachedNumberCompare === undefined) {
-        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+        cachedNumberCompare = findTypedImpl<[number, number], number>(
+          typed as unknown as Parameters<typeof findTypedImpl>[0],
+          compare,
+          ['number', 'number']
+        );
       }
       return cachedNumberCompare;
     }

@@ -1,6 +1,7 @@
 import { reduce, containsCollections } from '../utils/collection.js';
 import { reduceExtreme } from './extreme.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -30,18 +31,20 @@ export const createMax = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, numeric, larger, isNaN: mathIsNaN }: MaxDependencies) => {
-    type NumberCmp = (a: unknown, b: unknown) => unknown;
-    type NumberNan = (value: unknown) => unknown;
-    let cachedNan: NumberNan | null | undefined;
-    let cachedCmp: NumberCmp | null | undefined;
+    type NumberCmp = (a: number, b: number) => boolean;
+    type NumberNan = (value: number) => boolean;
+    type NumberOps = { nan: NumberNan; cmp: NumberCmp };
 
-    function getMaxNumberOps(): { nan: NumberNan; cmp: NumberCmp } | null {
-      if (cachedNan === undefined) {
-        cachedNan = (typed.find(mathIsNaN, ['number']) as NumberNan | null) ?? null;
-        cachedCmp = (typed.find(larger, ['number', 'number']) as NumberCmp | null) ?? null;
+    /** Cached once per factory; `undefined` is unresolved, `null` means no number implementation. */
+    let cachedNumberOps: NumberOps | null | undefined;
+
+    function getMaxNumberOps(): NumberOps | null {
+      if (cachedNumberOps === undefined) {
+        const nan = findTypedImpl<[number], boolean>(typed, mathIsNaN, ['number']);
+        const cmp = findTypedImpl<[number, number], boolean>(typed, larger, ['number', 'number']);
+        cachedNumberOps = nan && cmp ? { nan, cmp } : null;
       }
-      if (cachedNan && cachedCmp) return { nan: cachedNan, cmp: cachedCmp };
-      return null;
+      return cachedNumberOps;
     }
 
     /**
