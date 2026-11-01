@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2469
+      "loc": 2428
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -8122,7 +8122,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 280
+      "loc": 290
     },
     {
       "file": "functions/src/type/resultset/ResultSet.ts",
@@ -10488,7 +10488,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 85
+      "loc": 91
     },
     {
       "file": "functions/tests/p7-elementwise-number-path.test.ts",
