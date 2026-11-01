@@ -3,6 +3,7 @@ import { flatten } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 
 // Type definitions for median
 interface MatrixType {
@@ -31,7 +32,10 @@ export const createMedian = /* #__PURE__ */ factory(
 
     function getNumberCompare(): NumberCompare | null {
       if (cachedNumberCompare === undefined) {
-        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+        cachedNumberCompare = findTypedImpl<[number, number], number>(typed, compare, [
+          'number',
+          'number',
+        ]);
       }
       return cachedNumberCompare;
     }
