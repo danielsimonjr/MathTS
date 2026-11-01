@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-31'
+  lastUpdated: '2026-11-01'
   totalFiles: 1234
   totalModules: 82
   totalExports: 6410
@@ -6400,6 +6400,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../../utils/is.js
+          imports:
+            - isFraction
       workspaceDependencies: []
       exports:
         - createQr
@@ -40887,7 +40890,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1234
   totalModules: 82
-  totalLinesOfCode: 203584
+  totalLinesOfCode: 203602
   totalExports: 6410
   totalClasses: 60
   totalInterfaces: 570

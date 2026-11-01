@@ -183,14 +183,17 @@ export const createQr = /* #__PURE__ */ factory(
 
     return qrTyped;
 
-    function assertNoFractionEntries(data: unknown[][]): void {
+    /**
+     * Householder needs square roots, so Fraction cells cannot stay in ℚ.
+     * Promote them to IEEE numbers (valueOf) and keep the existing number path.
+     */
+    function promoteFractionEntries(data: unknown[][]): void {
       for (let r = 0; r < data.length; r++) {
         const row = data[r];
         for (let c = 0; c < row.length; c++) {
-          if (isFraction(row[c])) {
-            throw new TypeError(
-              'Matrix QR decomposition does not support Fraction entries (use number or Complex)'
-            );
+          const v = row[c];
+          if (isFraction(v)) {
+            row[c] = Number((v as { valueOf(): unknown }).valueOf());
           }
         }
       }
@@ -206,7 +209,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       const R = m.clone();
       const Rdata = R._data as unknown[][];
-      assertNoFractionEntries(Rdata);
+      promoteFractionEntries(Rdata);
 
       // vars
       let i: number, j: number, k: number;
