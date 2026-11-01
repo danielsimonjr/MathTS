@@ -95,6 +95,60 @@ export const cases = [
     },
   },
   {
+    name: 'sort n = 100',
+    kind: 'gain',
+    pr: 'P7-9',
+    make: (F) => {
+      const a = numArr(100, 0x590064);
+      return () => F.sort(a.slice());
+    },
+  },
+  {
+    name: 'sort n = 100,000',
+    kind: 'gain',
+    pr: 'P7-9',
+    make: (F) => {
+      const a = numArr(100_000, 0x50b001);
+      return () => F.sort(a.slice());
+    },
+  },
+  {
+    name: 'sort Matrix n = 1,000',
+    kind: 'gain',
+    pr: 'P7-9',
+    make: (F) => {
+      const m = F.matrix(numArr(1000, 0x5903e8));
+      return () => F.sort(m);
+    },
+  },
+  {
+    name: 'sort desc n = 100',
+    kind: 'neutral',
+    pr: 'P7-9',
+    make: (F) => {
+      const a = numArr(100, 0x59d064);
+      return () => F.sort(a.slice(), 'desc');
+    },
+  },
+  {
+    name: 'sort desc n = 100,000',
+    kind: 'neutral',
+    pr: 'P7-9',
+    make: (F) => {
+      const a = numArr(100_000, 0x59d001);
+      return () => F.sort(a.slice(), 'desc');
+    },
+  },
+  {
+    name: 'sort BigNumber n = 200 (fallback)',
+    kind: 'neutral',
+    pr: 'P7-9',
+    make: (F) => {
+      const a = numArr(200, 0x59b200).map((x) => F.bignumber(x));
+      return () => F.sort(a.slice());
+    },
+  },
+  {
     name: 'mode n = 10,000 (control)',
     kind: 'neutral',
     control: true,
