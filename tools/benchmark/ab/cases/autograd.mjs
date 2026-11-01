@@ -17,18 +17,27 @@ function randTensor(shape, seed) {
   return Tensor.fromNested(build(shape), shape);
 }
 
-export const cases = [
-  {
-    name: 'batched matmul 1×128×96×112',
-    kind: 'gain',
+function matmulCase(batch, m, k, n, seedA, seedB, kind) {
+  return {
+    name: `batched matmul ${batch}×${m}×${k}×${n}`,
+    kind,
+    pr: 'P7-10',
     make: (Ns) => {
       const { Tape, TapedTensor } = Ns;
-      const a = randTensor([1, 128, 96], 0xad0001);
-      const b = randTensor([1, 96, 112], 0xad0002);
+      const a = randTensor([batch, m, k], seedA);
+      const b = randTensor([batch, k, n], seedB);
       const tape = new Tape();
       const A = TapedTensor.fromTensorAsInput(a, tape);
       const B = TapedTensor.fromTensorAsInput(b, tape);
       return () => A.matmul(B).toPrimalTensor();
     },
-  },
+  };
+}
+
+export const cases = [
+  matmulCase(8, 2, 3, 4, 0xad0802, 0xad0803, 'neutral'),
+  matmulCase(8, 8, 8, 8, 0xad0808, 0xad0809, 'neutral'),
+  matmulCase(4, 32, 16, 24, 0xad0432, 0xad0433, 'gain'),
+  matmulCase(2, 64, 64, 64, 0xad0264, 0xad0265, 'gain'),
+  matmulCase(1, 128, 96, 112, 0xad0001, 0xad0002, 'gain'),
 ];
