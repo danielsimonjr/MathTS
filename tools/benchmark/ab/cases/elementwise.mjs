@@ -11,12 +11,52 @@ function numArr(n, seed) {
 
 export const cases = [
   {
+    name: 'add number[] n = 1',
+    kind: 'gain',
+    pr: 'P7-5',
+    make: (F) => {
+      const a = numArr(1, 0xa001);
+      const b = numArr(1, 0xa002);
+      return () => F.add(a, b);
+    },
+  },
+  {
+    name: 'add number[] n = 10',
+    kind: 'gain',
+    pr: 'P7-5',
+    make: (F) => {
+      const a = numArr(10, 0xa010);
+      const b = numArr(10, 0xa011);
+      return () => F.add(a, b);
+    },
+  },
+  {
     name: 'add number[] n = 1,000',
-    kind: 'neutral',
+    kind: 'gain',
+    pr: 'P7-5',
     make: (F) => {
       const a = numArr(1000, 0xa001);
       const b = numArr(1000, 0xa002);
       return () => F.add(a, b);
+    },
+  },
+  {
+    name: 'subtract number[] n = 1,000',
+    kind: 'gain',
+    pr: 'P7-5',
+    make: (F) => {
+      const a = numArr(1000, 0xb001);
+      const b = numArr(1000, 0xb002);
+      return () => F.subtract(a, b);
+    },
+  },
+  {
+    name: 'multiply(number[], number) n = 1,000',
+    kind: 'gain',
+    pr: 'P7-5',
+    make: (F) => {
+      const a = numArr(1000, 0xc001);
+      return () => F.multiply(a, 1.5);
     },
   },
   {
@@ -27,6 +67,22 @@ export const cases = [
       const a = numArr(1000, 0xd001);
       const b = numArr(1000, 0xd002);
       return () => F.dotMultiply(a, b);
+    },
+  },
+  {
+    name: 'add(number, number) (control)',
+    kind: 'neutral',
+    control: true,
+    make: (F) => () => F.add(1.5, 2.5),
+  },
+  {
+    name: 'add BigNumber n = 100 (fallback)',
+    kind: 'neutral',
+    pr: 'P7-5',
+    make: (F) => {
+      const a = numArr(100, 0xa0b1).map((x) => F.bignumber(x));
+      const b = numArr(100, 0xa0b2).map((x) => F.bignumber(x));
+      return () => F.add(a, b);
     },
   },
 ];
