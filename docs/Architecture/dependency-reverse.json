@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-31",
+  "generated": "2026-11-01",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -878,8 +878,10 @@
       "functions/src/utils/isPositive.ts",
       "functions/src/utils/isPrime.ts",
       "functions/src/utils/isZero.ts",
-      "functions/src/utils/typeOf.ts"
+      "functions/src/utils/typeOf.ts",
+      "functions/src/utils/typed-impl.ts"
     ],
+    "functions/src/utils/typed-impl.ts": ["functions/src/algebra/decomposition/qr.ts"],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
       "functions/src/algebra/derivative.ts",

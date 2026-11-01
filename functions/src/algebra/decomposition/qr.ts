@@ -1,4 +1,5 @@
 import { factory } from '../../utils/factory.js';
+import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -112,6 +113,127 @@ export const createQr = /* #__PURE__ */ factory(
     subtractScalar,
     complex,
   }: Dependencies) => {
+    type QRNumberOp = (a: number, b: number) => number;
+    type QRNumberConj = (a: number) => number;
+    type QRNumberOps = {
+      add: QRNumberOp;
+      mul: QRNumberOp;
+      sub: QRNumberOp;
+      div: QRNumberOp;
+      conj: QRNumberConj;
+    };
+
+    /** Cached once per factory; `undefined` = uninitialized, `null` = find failed. */
+    let cachedQrNumberOps: QRNumberOps | null | undefined;
+
+    function getQrNumberOps(): QRNumberOps | null {
+      if (cachedQrNumberOps === undefined) {
+        const nn = ['number', 'number'];
+        const add = findTypedImpl<[number, number], number>(typed, addScalar, nn);
+        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
+        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
+        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
+        const conjNum = findTypedImpl<[number], number>(typed, conj, ['number']);
+        cachedQrNumberOps =
+          add && mul && sub && div && conjNum ? { add, mul, sub, div, conj: conjNum } : null;
+      }
+      return cachedQrNumberOps;
+    }
+
+    function matrixAllNumbers(data: unknown[][]): boolean {
+      for (let r = 0; r < data.length; r++) {
+        const row = data[r];
+        for (let c = 0; c < row.length; c++) {
+          if (typeof row[c] !== 'number') return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * Householder step loop for plain number storage. Scalar work per step uses the
+     * same typed calls as `_denseQRimpl`; inner R/Q updates use cached number ops.
+     * Returns the first step index to finish on the generic path (may be `limit`).
+     */
+    function _denseQRNumber(
+      Rdata: number[][],
+      Qdata: number[][],
+      w: unknown[],
+      rows: number,
+      cols: number,
+      kStart: number,
+      ops: QRNumberOps
+    ): number {
+      const limit = Math.min(cols, rows);
+      let i: number;
+      let j: number;
+
+      for (let k = kStart; k < limit; ++k) {
+        const pivot = Rdata[k][k];
+        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
+        const conjSgn = conj(sgn);
+
+        let alphaSquared: unknown = 0;
+
+        for (i = k; i < rows; i++) {
+          alphaSquared = addScalar(alphaSquared, multiplyScalar(Rdata[i][k], conj(Rdata[i][k])));
+        }
+
+        const alpha = multiplyScalar(sgn, sqrt(alphaSquared));
+
+        if (!isZero(alpha)) {
+          const u1 = subtractScalar(pivot, alpha);
+
+          w[k] = 1;
+
+          for (i = k + 1; i < rows; i++) {
+            w[i] = divideScalar(Rdata[i][k], u1);
+          }
+
+          const tau = unaryMinus(conj(divideScalar(u1, alpha)));
+
+          if (typeof tau !== 'number' || typeof conjSgn !== 'number' || typeof u1 !== 'number') {
+            return k;
+          }
+
+          let s: number;
+
+          for (j = k; j < cols; j++) {
+            s = 0.0;
+
+            for (i = k; i < rows; i++) {
+              s = ops.add(s, ops.mul(ops.conj(w[i] as number), Rdata[i][j]));
+            }
+
+            s = ops.mul(s, tau);
+
+            for (i = k; i < rows; i++) {
+              Rdata[i][j] = ops.mul(ops.sub(Rdata[i][j], ops.mul(w[i] as number, s)), conjSgn);
+            }
+          }
+
+          for (i = 0; i < rows; i++) {
+            s = 0.0;
+
+            for (j = k; j < rows; j++) {
+              s = ops.add(s, ops.mul(Qdata[i][j], w[j] as number));
+            }
+
+            s = ops.mul(s, tau);
+
+            for (j = k; j < rows; ++j) {
+              Qdata[i][j] = ops.div(
+                ops.sub(Qdata[i][j], ops.mul(s, ops.conj(w[j] as number))),
+                conjSgn
+              );
+            }
+          }
+        }
+      }
+
+      return limit;
+    }
+
     /**
      * Calculate the Matrix QR decomposition. Matrix `A` is decomposed in
      * two matrices (`Q`, `R`) where `Q` is an
@@ -198,7 +320,21 @@ export const createQr = /* #__PURE__ */ factory(
 
       const w = zeros([rows], '') as unknown as unknown[];
 
-      for (k = 0; k < Math.min(cols, rows); ++k) {
+      let kStart = 0;
+      const numberOps = getQrNumberOps();
+      if (numberOps && matrixAllNumbers(Rdata) && matrixAllNumbers(Qdata)) {
+        kStart = _denseQRNumber(
+          Rdata as number[][],
+          Qdata as number[][],
+          w,
+          rows,
+          cols,
+          0,
+          numberOps
+        );
+      }
+
+      for (k = kStart; k < Math.min(cols, rows); ++k) {
         /*
          * **k-th Household matrix**
          *
