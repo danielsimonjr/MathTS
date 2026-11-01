@@ -117,17 +117,19 @@ export const createSort = /* #__PURE__ */ factory(
 
       'Array, string': function (x: unknown[], order: string): unknown[] {
         _arrayIsVector(x);
-        if (order === 'asc' || order === 'desc') {
+        // Descending missed the P7-0 gain bar on Bun at n = 100 (0.960 after R=9),
+        // so only ascending uses the number comparator.
+        if (order === 'asc') {
           const cmp = arrayAllNumbers(x) ? getNumberCompare() : null;
-          if (cmp) return sortNumberArray(x, cmp, order === 'desc');
+          if (cmp) return sortNumberArray(x, cmp, false);
         }
         return x.sort(_comparator(order));
       },
 
       'Matrix, string': function (x: Matrix, order: string): Matrix {
         _matrixIsVector(x);
-        if (order === 'asc' || order === 'desc') {
-          const fast = sortMatrixNumber(x, order === 'desc');
+        if (order === 'asc') {
+          const fast = sortMatrixNumber(x, false);
           if (fast) return fast;
         }
         return matrix(x.toArray().sort(_comparator(order)), x.storage());

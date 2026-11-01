@@ -6652,7 +6652,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 179
+      "loc": 181
     },
     {
       "file": "functions/src/matrix/sparse-csc-tail.ts",
@@ -10530,7 +10530,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 63
+      "loc": 60
     },
     {
       "file": "functions/tests/parabolic-pde.test.ts",
