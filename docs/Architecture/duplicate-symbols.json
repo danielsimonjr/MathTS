@@ -6215,6 +6215,12 @@
           "reason": "rides with keep-local hot-path is* guard types (project-all-libraries-build-on-core); byte-identical duck-typing interfaces paired 1:1 with the already-allowlisted is* functions in the same 3 files. 2026-07 type-dedup pass."
         },
         {
+          "file": "core/src/types/complex.ts",
+          "package": "@danielsimonjr/mathts-core",
+          "public": true,
+          "tag": "PLAIN"
+        },
+        {
           "file": "expression/src/utils/is.ts",
           "package": "@danielsimonjr/mathts-expression",
           "public": true,

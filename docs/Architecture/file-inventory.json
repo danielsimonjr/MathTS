@@ -3,17 +3,17 @@
   "totalFiles": 2064,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1206,
+    "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 770,
+    "test": 769,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
-    "src": 1232,
-    "tests": 770,
+    "src": 1233,
+    "tests": 769,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -772,7 +772,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 749
+      "loc": 780
     },
     {
       "file": "core/src/types/dual-rules.ts",
@@ -961,7 +961,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 174
+      "loc": 192
     },
     {
       "file": "core/tests/config.test.ts",
@@ -5301,7 +5301,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 477
+      "loc": 479
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -7562,7 +7562,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 100
+      "loc": 92
     },
     {
       "file": "functions/src/statistics/mad.ts",
@@ -7576,7 +7576,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 134
+      "loc": 137
     },
     {
       "file": "functions/src/statistics/mean.ts",
@@ -7597,7 +7597,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 134
+      "loc": 137
     },
     {
       "file": "functions/src/statistics/mode.ts",
@@ -7611,7 +7611,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 167
+      "loc": 163
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
@@ -8725,6 +8725,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 10
+    },
+    {
+      "file": "functions/src/utils/typed-impl.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 22
     },
     {
       "file": "functions/src/utils/typeOf.ts",
@@ -10474,28 +10481,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 37
-    },
-    {
-      "file": "functions/tests/p7-lup-number-path.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 78
+      "loc": 321
     },
     {
       "file": "functions/tests/p7-prod-number-path.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 74
+      "loc": 158
     },
     {
       "file": "functions/tests/p7-qr-number-path.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 117
+      "loc": 215
     },
     {
       "file": "functions/tests/parabolic-pde.test.ts",

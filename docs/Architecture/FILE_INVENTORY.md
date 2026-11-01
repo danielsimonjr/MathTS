@@ -17,10 +17,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1206 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1207 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      770 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      769 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1232 |
-| `tests`    |   770 |
+| `src`      |  1233 |
+| `tests`    |   769 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -1310,6 +1310,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/utils/product.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/string.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/switch.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/utils/typed-impl.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/typeOf.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/bitwise/wasm-bridge.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/bridges/common.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1560,7 +1561,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/ols.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/open-root-finders.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/p7-factory-extreme-number-path.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/p7-lup-number-path.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/p7-prod-number-path.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/p7-qr-number-path.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/parabolic-pde.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
