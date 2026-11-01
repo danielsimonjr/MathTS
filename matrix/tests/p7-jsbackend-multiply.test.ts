@@ -36,4 +36,22 @@ describe('P7-8 JSBackend.multiply flat reads', () => {
     const B = DenseMatrix.fromArray([[3], [4], [5]]);
     expect(() => jsBackend.multiply(A, B)).toThrow();
   });
+
+  it('view operand matches the contiguous product', () => {
+    const full = DenseMatrix.fromArray([
+      [9, 9, 9],
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ]);
+    const A = full.slice({ rowStart: 1, rowEnd: 3, colStart: 0, colEnd: 3 });
+    const B = DenseMatrix.fromArray([
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ]);
+    const viaView = jsBackend.multiply(A, B);
+    const viaCopy = jsBackend.multiply(DenseMatrix.fromArray(A.toArray()), B);
+    expect(viaView.toArray()).toEqual(viaCopy.toArray());
+  });
 });
