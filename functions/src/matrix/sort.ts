@@ -1,5 +1,6 @@
 import { arraySize as size } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 
 import { TypedFunction, Matrix } from '../types.js';
 
@@ -31,9 +32,20 @@ export const createSort = /* #__PURE__ */ factory(
 
     function getNumberCompare(): NumberCompare | null {
       if (cachedNumberCompare === undefined) {
-        cachedNumberCompare = typed.find(compare, ['number', 'number']) as NumberCompare | null;
+        cachedNumberCompare = findTypedImpl<[number, number], number>(typed, compare, [
+          'number',
+          'number',
+        ]);
       }
       return cachedNumberCompare;
+    }
+
+    function sortMatrixNumber(x: Matrix, descending: boolean): Matrix | null {
+      const arr = x.toArray() as unknown[];
+      if (!Array.isArray(arr) || !arrayAllNumbers(arr)) return null;
+      const cmp = getNumberCompare();
+      if (!cmp) return null;
+      return matrix(sortNumberArray(arr, cmp, descending), x.storage());
     }
 
     function arrayAllNumbers(arr: unknown[]): boolean {
@@ -90,7 +102,7 @@ export const createSort = /* #__PURE__ */ factory(
 
       Matrix: function (x: Matrix) {
         _matrixIsVector(x);
-        return matrix(x.toArray().sort(compareAsc), x.storage());
+        return sortMatrixNumber(x, false) ?? matrix(x.toArray().sort(compareAsc), x.storage());
       },
 
       'Array, function': function (x: unknown[], _comparator: CompareFn): unknown[] {
@@ -114,6 +126,10 @@ export const createSort = /* #__PURE__ */ factory(
 
       'Matrix, string': function (x: Matrix, order: string): Matrix {
         _matrixIsVector(x);
+        if (order === 'asc' || order === 'desc') {
+          const fast = sortMatrixNumber(x, order === 'desc');
+          if (fast) return fast;
+        }
         return matrix(x.toArray().sort(_comparator(order)), x.storage());
       },
     }) as unknown as TypedFunction;

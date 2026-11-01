@@ -6845,11 +6845,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                 | Type   |
-| --------------------- | ----------------------- | ------ |
-| `../utils/array.js`   | `arraySize`             | Import |
-| `../utils/factory.js` | `factory`               | Import |
-| `../types.js`         | `TypedFunction, Matrix` | Import |
+| File                     | Imports                 | Type   |
+| ------------------------ | ----------------------- | ------ |
+| `../utils/array.js`      | `arraySize`             | Import |
+| `../utils/factory.js`    | `factory`               | Import |
+| `../utils/typed-impl.js` | `findTypedImpl`         | Import |
+| `../types.js`            | `TypedFunction, Matrix` | Import |
 
 **Exports:**
 
@@ -19476,7 +19477,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204227 |
+| Total Lines of Code     | 204272 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

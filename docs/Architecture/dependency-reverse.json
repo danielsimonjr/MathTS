@@ -679,6 +679,7 @@
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/matrix/partitionSelect.ts",
+      "functions/src/matrix/sort.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/median.ts",
       "functions/src/statistics/min.ts",

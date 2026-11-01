@@ -16608,6 +16608,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../types.js",
             "imports": ["TypedFunction", "Matrix"]
           }
@@ -43316,7 +43320,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 204227,
+    "totalLinesOfCode": 204272,
     "totalExports": 6412,
     "totalClasses": 60,
     "totalInterfaces": 570,
