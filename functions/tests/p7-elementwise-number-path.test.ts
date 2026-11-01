@@ -34,4 +34,18 @@ describe('P7-5 elementwiseNumber', () => {
     const b = [2, new Complex(0, 1)];
     expect(() => add(a, b)).not.toThrow();
   });
+
+  it('NaN, -0 and Infinity stay IEEE', () => {
+    const out = add([NaN, -0, Infinity], [0, 0, 1]) as number[];
+    expect(Number.isNaN(out[0])).toBe(true);
+    expect(Object.is(out[1], -0) || Object.is(out[1], 0)).toBe(true);
+    expect(out[2]).toBe(Infinity);
+  });
+
+  it('a hole falls back to the generic walker', () => {
+    const a = [1, 2, 3];
+    delete (a as { 1?: number })[1];
+    const b = [4, 5, 6];
+    expect(() => add(a, b)).not.toThrow();
+  });
 });

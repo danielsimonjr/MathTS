@@ -2,8 +2,8 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-31",
-    "totalFiles": 1234,
+    "lastUpdated": "2026-11-01",
+    "totalFiles": 1235,
     "totalModules": 82,
     "totalExports": 6411
   },
@@ -2653,6 +2653,7 @@
         "workspaceDependencies": [],
         "exports": ["I", "COMPLEX_ZERO", "COMPLEX_ONE", "COMPLEX_NEG_ONE", "isComplex", "Complex"],
         "classes": ["Complex"],
+        "interfaces": ["Complex"],
         "functions": ["isComplex"],
         "constants": ["I", "COMPLEX_ZERO", "COMPLEX_ONE", "COMPLEX_NEG_ONE"]
       },
@@ -6592,6 +6593,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -6609,6 +6614,10 @@
           {
             "file": "../../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "../../core/function/typed.js",
@@ -19488,7 +19497,7 @@
         "constants": ["createCumSum"]
       },
       "functions/src/statistics/extreme.ts": {
-        "description": "extreme module",
+        "description": "Recursively reduce an array or matrix to a single extreme value.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -19516,8 +19525,8 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["_reduceExtremeNumber", "reduceExtreme"],
-        "functions": ["_reduceExtremeNumber", "reduceExtreme"]
+        "exports": ["reduceExtreme"],
+        "functions": ["reduceExtreme"]
       },
       "functions/src/statistics/mad.ts": {
         "description": "Compute the median absolute deviation of a matrix or a list with values.",
@@ -19562,6 +19571,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19662,6 +19675,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
           },
@@ -19715,6 +19732,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -26122,6 +26143,21 @@
         "workspaceDependencies": [],
         "exports": ["createTypeOf"],
         "constants": ["createTypeOf"]
+      },
+      "functions/src/utils/typed-impl.ts": {
+        "description": "The implementation `typed` dispatches to for `signature`, resolved once so that a hot loop can",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["findTypedImpl"],
+        "functions": ["findTypedImpl"]
       }
     },
     "functions/wasm": {
@@ -42536,7 +42572,8 @@
           "functions/src/utils/product.ts",
           "functions/src/utils/string.ts",
           "functions/src/utils/switch.ts",
-          "functions/src/utils/typeOf.ts"
+          "functions/src/utils/typeOf.ts",
+          "functions/src/utils/typed-impl.ts"
         ]
       },
       {
@@ -43269,18 +43306,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1234,
+    "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 204032,
+    "totalLinesOfCode": 204096,
     "totalExports": 6411,
     "totalClasses": 60,
-    "totalInterfaces": 569,
+    "totalInterfaces": 570,
     "totalFunctions": 2071,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1632,
     "totalReExports": 2724,
-    "totalTypeOnlyImports": 620,
+    "totalTypeOnlyImports": 621,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
