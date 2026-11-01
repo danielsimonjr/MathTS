@@ -1,7 +1,7 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-10-31'
+  lastUpdated: '2026-11-01'
   totalFiles: 1235
   totalModules: 82
   totalExports: 6411
@@ -6379,6 +6379,9 @@ modules:
         - file: ../../utils/factory.js
           imports:
             - factory
+        - file: ../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -40914,7 +40917,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 203856
+  totalLinesOfCode: 203966
   totalExports: 6411
   totalClasses: 60
   totalInterfaces: 570
