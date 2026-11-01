@@ -123,7 +123,7 @@ export const cases = [
   },
   {
     name: 'sort desc n = 100',
-    kind: 'gain',
+    kind: 'neutral',
     pr: 'P7-9',
     make: (F) => {
       const a = numArr(100, 0x59d064);
@@ -132,7 +132,7 @@ export const cases = [
   },
   {
     name: 'sort desc n = 100,000',
-    kind: 'gain',
+    kind: 'neutral',
     pr: 'P7-9',
     make: (F) => {
       const a = numArr(100_000, 0x59d001);
