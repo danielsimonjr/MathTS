@@ -6668,11 +6668,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports     | Type   |
-| --------------------- | ----------- | ------ |
-| `../utils/is.js`      | `isMatrix`  | Import |
-| `../utils/number.js`  | `isInteger` | Import |
-| `../utils/factory.js` | `factory`   | Import |
+| File                     | Imports         | Type   |
+| ------------------------ | --------------- | ------ |
+| `../utils/is.js`         | `isMatrix`      | Import |
+| `../utils/number.js`     | `isInteger`     | Import |
+| `../utils/factory.js`    | `factory`       | Import |
+| `../utils/typed-impl.js` | `findTypedImpl` | Import |
 
 **Exports:**
 
@@ -8772,6 +8773,7 @@ graph LR
 | `../utils/factory.js`            | `factory`             | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
+| `../utils/typed-impl.js`         | `findTypedImpl`       | Import             |
 
 **Exports:**
 
@@ -19474,7 +19476,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204096 |
+| Total Lines of Code     | 204200 |
 | Total Exports           | 6411   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

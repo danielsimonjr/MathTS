@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-01",
-  "totalFiles": 2067,
+  "totalFiles": 2068,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 772,
+    "test": 773,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 772,
+    "tests": 773,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 882,
+    "@danielsimonjr/mathts-functions": 883,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 114,
@@ -6582,7 +6582,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 179
+      "loc": 257
     },
     {
       "file": "functions/src/matrix/pinv.ts",
@@ -7590,7 +7590,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 138
+      "loc": 164
     },
     {
       "file": "functions/src/statistics/min.ts",
@@ -10503,6 +10503,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "functions/tests/p7-median-number-path.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 29
     },
     {
       "file": "functions/tests/p7-prod-number-path.test.ts",

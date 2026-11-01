@@ -16333,6 +16333,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           }
         ],
         "workspaceDependencies": [],
@@ -19651,6 +19655,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           }
         ],
         "workspaceDependencies": [],
@@ -43308,7 +43316,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 204096,
+    "totalLinesOfCode": 204200,
     "totalExports": 6411,
     "totalClasses": 60,
     "totalInterfaces": 570,
