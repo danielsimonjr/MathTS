@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2469
+      "loc": 2428
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -5406,7 +5406,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 337
+      "loc": 338
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 342
+      "loc": 343
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
