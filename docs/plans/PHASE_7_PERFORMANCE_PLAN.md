@@ -210,7 +210,9 @@ Every build PR (P7-1 to P7-12) follows these rules.
 2. builds the inputs, runs each thunk once, and compares the results with a deep `Object.is` walk over arrays, typed arrays, `valueOf()`, and own non-function properties. A difference, a `null` or `undefined` result, or a throw fails the case;
 3. calibrates a batch to about 25 ms, warms 5 batches of each side, times 8 A B B A rounds, and reports the median per-call time of each side and an in-process A/A (base against a second base thunk).
 
-**Single-tree mode.** When a case's two import orders differ by more than 20% (|ln(base-first / head-first)| > 0.18), co-loading biases it. The runner then also times the case with each tree alone in its own process, alternating base and head processes over at least 10 processes per side, and the gate takes the higher of the two estimates.
+**Single-tree mode (landed).** Two trees in one process do not measure the trees: identical copies read 0.66 for `prod` n = 10,000 on Bun and 1.2 for `median` n = 100,000 on Node. The landed P7-0 harness therefore gates on **single-tree processes**: R runs of two processes per side, each timing one tree alone, alternating base, head, head, base. The ratio is the median head time over the median base time after a warm-up that waits for the batch time to settle. Two-tree processes still run for the bit-identical check and the A/A / two-tree columns. `--workspace` snapshots the current built workspace as the base (the way to gate a stacked PR). `--pr P7-n` keeps that PR's cases plus the controls.
+
+The original plan's "only when import orders differ by more than 20%" trigger is not enough: the bias is always there. Do not gate on the two-tree column.
 
 **Report and gate.** Per case and engine: the median over runs of the per-run geometric mean, the min–max, the A/A, and the equality result, as a markdown table for the PR description (`--json` writes raw results). Exit code 1 when:
 
@@ -275,9 +277,9 @@ cd functions && bunx vitest run tests/gap-qr-parity.test.ts tests/gap-factory-de
 
 **Package:** `functions`. **File:** `functions/src/statistics/prod.ts`. **Public calls that get faster:** `prod(number[])`.
 
-`_prod` folds with `deepForEach` and calls `multiplyScalar` per element, after a string check per element. A new `_prodNumber(array, mul)` runs when the input is a plain `Array` (`constructor === Array`, which keeps subclasses and array-likes on the generic path), it is not empty, and a `typeof` scan finds only numbers. It starts from `array[0]` (base takes the first value as it is, without a multiplication) and folds `mul(p, array[i])` from index 1. `mul` is `typed.find(multiplyScalar, ['number', 'number'])`, cached as in P7-1. Nested arrays, strings, an empty array (base throws `Cannot calculate prod of an empty array`), and `prod(array, dim)` stay on their current paths.
+`_prod` folds with `deepForEach` and calls `multiplyScalar` per element, after a string check per element. For a plain `Array` (`constructor === Array`, which keeps subclasses and array-likes on the generic path) whose first element is a number, the implementation folds with `mul` while checking `typeof`. `mul` is resolved once through `findTypedImpl` (`functions/src/utils/typed-impl.ts`; `typed.find` throws, it does not return `null`) as `['number', 'number']` and cached per factory. At the first non-number, the partial product is handed to the generic `deepForEach` fold, which continues where base would be. Nested arrays, strings, an empty array (base throws `Cannot calculate prod of an empty array`), and `prod(array, dim)` stay on their current paths.
 
-The scan runs before any multiplication, so an array with a non-number late in it costs only the scan before the generic fold. The prototype folded and checked in one loop and still measured neutral on that case; scanning first keeps it so.
+A whole-array `typeof` scan before any multiplication failed the P7-0 gate: scanning 200 boxed elements costs about 3.5% of the generic fold (`prod Fraction last` read 1.041 on Node). Fold-and-resume repeats no work. A handover at index 1 measures 0.997 on Node and 0.998 on Bun. A Fraction at the end is then a gain (the leading numbers use the number path) and stays tagged `neutral` in the case file.
 
 **Public API and export lock:** unchanged.
 
@@ -290,7 +292,8 @@ The scan runs before any multiplication, so an array with a non-number late in i
 | `prod` n = 10                       | gain    | 0.111 | 0.114 |
 | `prod` n = 10,000                   | gain    | 0.044 | 0.078 |
 | `prod` BigNumber n = 200 (fallback) | neutral | 1.000 | 0.989 |
-| `prod` Fraction last (fallback)     | neutral | 0.997 | 1.015 |
+| `prod` Fraction at 1 (fallback)     | neutral | 0.997 | 0.998 |
+| `prod` Fraction last (fallback)     | neutral | 0.148 | 0.185 |
 
 **Tests that stay green:**
 
@@ -304,9 +307,9 @@ cd functions && bunx vitest run tests/statistics/prod-dim.test.ts tests/cov-stat
 
 **Package:** `functions`. **Files:** `functions/src/statistics/extreme.ts`, `max.ts`, `min.ts`. **Public calls that get faster:** `factory_max(number[])` and `factory_min(number[])` (the factory exports; the typed `max`/`min` are P7-6).
 
-`reduceExtreme` walks with `deepForEach` and calls the typed `isNaN` and the typed `larger` (or `smaller`) per element. `max.ts` and `min.ts` each resolve `{ nan, cmp }` once, with `typed.find(isNaN, ['number'])` and `typed.find(larger, ['number', 'number'])` (`smaller` for `min`), cache them per factory instance, and pass them to `reduceExtreme` in `deps`. For a plain `Array` whose `typeof` scan finds only numbers, a new `_reduceExtremeNumber(array, nan, cmp)` runs the base rule unchanged: a NaN replaces the result; otherwise the first value, or any value for which `cmp(value, result)` is true, replaces it. An empty array keeps the base error message.
+`reduceExtreme` walks with `deepForEach` and calls the typed `isNaN` and the typed `larger` (or `smaller`) per element. `max.ts` and `min.ts` each resolve `{ nan, cmp }` once through `findTypedImpl` (`isNaN` for `['number']`, `larger`/`smaller` for `['number', 'number']`) and cache the pair per factory. For a plain `Array`, the number walk uses the base rule unchanged: a NaN replaces the result; otherwise the first value, or any value for which `cmp(value, result)` is true, replaces it. At the first non-number it hands the running result to the generic `deepForEach` walk over `array.slice(i)`. An empty array keeps the base error message.
 
-The prototype folded and type-checked in one loop and threw its partial work away at the first non-number. That cost 5.3% (Node) and 6.0% (Bun) on an array with a Fraction at index 150 of 200. Scanning first reduces that case to a `typeof` walk.
+The plan's scan-first design failed the same way as P7-2: a `typeof` scan of 200 boxed elements is about 3.5% of the generic walk, so `factory_max Fraction at 150` could not stay at or below 1.02. Fold-and-resume is the fix. That Fraction row is now a gain (0.344 / 0.321) because the 150 numbers before it use the number path; it stays tagged `neutral` in the case file.
 
 **Public API and export lock:** unchanged.
 
@@ -327,10 +330,10 @@ The prototype folded and type-checked in one loop and threw its partial work awa
 | `factory_max` 2-D 100×100 (generic)        | neutral | 1.015 | 0.743 |
 | `factory_max` DenseMatrix 10,000 (generic) | neutral | 0.992 | 1.027 |
 | `factory_max` BigNumber n = 200 (fallback) | neutral | 0.971 | 1.033 |
-| `factory_max` Fraction at 150 (fallback)   | neutral | 1.053 | 1.060 |
+| `factory_max` Fraction at 150 (fallback)   | neutral | 0.344 | 0.321 |
 | `mode` n = 10,000 (control)                | neutral | 0.995 | 0.953 |
 
-The two fallback rows are the in-loop prototype and must reach 1.02 with the scan-first design. The Bun 2-D row is an import-order artifact (0.545 base-first, 1.012 head-first) and is a single-tree-mode case.
+The Fraction-at-150 row is a gain under fold-and-resume and must stay at or below 1.02 as a `neutral` tag. The Bun 2-D row is an import-order artifact (0.545 base-first, 1.012 head-first) and is a single-tree-mode case.
 
 **Tests that stay green:**
 
@@ -344,7 +347,7 @@ cd functions && bunx vitest run tests/factories-tier4.test.ts tests/s2r-clones-b
 
 **Package:** `functions`. **File:** `functions/src/algebra/decomposition/lup.ts`. **Public calls that get faster:** `lup` and `lusolve` on number `number[][]` and `DenseMatrix`.
 
-`_denseLUP`'s column loop calls `addScalar`, `multiplyScalar`, `subtractScalar`, `abs`, `larger`, `equalScalar` and `divideScalar` per element. A new `_denseLUPNumber(data, rows, columns, p, ops)` holds the same loop with the implementations found once (cached as in P7-1). `_denseLUP` calls it when a `typeof` scan of the cloned data finds only numbers; otherwise the existing loop runs unchanged. The L/U split after the loop is shared. In the number loop, the row swap of `p` uses a temporary, not the base's `p[j] = [p[pi], (p[pi] = p[j])][0]`, which allocates an array per swap and is slow on JavaScriptCore; both leave the same `p`. The pivot test keeps the typed `larger` (tolerance included), and the zero test keeps `equalScalar`, through their found number implementations. `SparseMatrix` input keeps its own algorithm.
+`_denseLUP`'s column loop calls `addScalar`, `multiplyScalar`, `subtractScalar`, `abs`, `larger`, `equalScalar` and `divideScalar` per element. A new `_denseLUPNumber(data, rows, columns, p, ops)` holds the same loop with the implementations found once through `findTypedImpl` (cached as in P7-1; a failed find keeps the generic path). `_denseLUP` calls it when a `typeof` scan of the cloned data finds only numbers; otherwise the existing loop runs unchanged. The L/U split after the loop is shared. In the number loop, the row swap of `p` uses a temporary, not the base's `p[j] = [p[pi], (p[pi] = p[j])][0]`, which allocates an array per swap and is slow on JavaScriptCore; both leave the same `p`. The pivot test keeps the typed `larger` (tolerance included), and the zero test keeps `equalScalar`, through their found number implementations. `SparseMatrix` input keeps its own algorithm.
 
 **Public API and export lock:** unchanged.
 
