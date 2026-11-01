@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-01",
-  "totalFiles": 2070,
+  "totalFiles": 2071,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 775,
+    "test": 776,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 775,
+    "tests": 776,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -22,7 +22,7 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 3,
-    "@danielsimonjr/mathts-autograd": 24,
+    "@danielsimonjr/mathts-autograd": 25,
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 106,
     "@danielsimonjr/mathts-evaluator": 3,
@@ -331,7 +331,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2423
+      "loc": 2428
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -367,6 +367,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
+    },
+    {
+      "file": "autograd/tests/p7-batched-matmul-contract.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 120
     },
     {
       "file": "autograd/tests/public-api-smoke.test.ts",
