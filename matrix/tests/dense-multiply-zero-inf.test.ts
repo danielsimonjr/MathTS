@@ -9,4 +9,11 @@ describe('DenseMatrix.multiply zero×non-finite', () => {
     expect(a.multiply(b).get(0, 0)).toBeNaN();
     expect(jsBackend.multiply(a, b).get(0, 0)).toBeNaN();
   });
+
+  it('propagates 0×NaN as NaN like JSBackend', () => {
+    const a = DenseMatrix.fromArray([[0]]);
+    const b = DenseMatrix.fromArray([[NaN]]);
+    expect(a.multiply(b).get(0, 0)).toBeNaN();
+    expect(jsBackend.multiply(a, b).get(0, 0)).toBeNaN();
+  });
 });
