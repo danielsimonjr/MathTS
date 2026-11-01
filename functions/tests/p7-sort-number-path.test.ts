@@ -35,7 +35,7 @@ describe('P7-9 sort number path', () => {
   });
 
   it('keeps Matrix storage and sorts the 1-d vector', () => {
-    const m = matrix([5, 1, 4]);
+    const m = matrix([5, 1, 4]) as { storage(): string; toArray(): number[] };
     const out = sort(m) as { storage(): string; toArray(): number[] };
     expect(out.storage()).toBe(m.storage());
     expect(out.toArray()).toEqual([1, 4, 5]);
