@@ -1,5 +1,6 @@
 import { factory } from '../../utils/factory.js';
 import { createSolveValidation } from './utils/solveValidation.js';
+import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 
 // Type definitions
@@ -82,6 +83,48 @@ export const createUsolve = /* #__PURE__ */ factory(
       typeof createSolveValidation
     >[0]) as unknown as SolveValidationFunction;
 
+    type NumberBin = (a: number, b: number) => number;
+    type NumberEqual = (a: number, b: number) => boolean;
+    type SolveNumberOps = {
+      div: NumberBin;
+      mul: NumberBin;
+      sub: NumberBin;
+      equalScalar: NumberEqual;
+    };
+
+    let cachedSolveOps: SolveNumberOps | null | undefined;
+
+    function getSolveNumberOps(): SolveNumberOps | null {
+      if (cachedSolveOps === undefined) {
+        const nn = ['number', 'number'];
+        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
+        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
+        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
+        const equalNum = findTypedImpl<[number, number], boolean>(typed, equalScalar, nn);
+        cachedSolveOps =
+          div && mul && sub && equalNum ? { div, mul, sub, equalScalar: equalNum } : null;
+      }
+      return cachedSolveOps;
+    }
+
+    function matrixAllNumbers(data: unknown[][]): boolean {
+      for (let r = 0; r < data.length; r++) {
+        const row = data[r];
+        for (let c = 0; c < row.length; c++) {
+          if (typeof row[c] !== 'number') return false;
+        }
+      }
+      return true;
+    }
+
+    function columnAllNumbers(data: unknown[][]): boolean {
+      for (let i = 0; i < data.length; i++) {
+        const v = data[i][0];
+        if (v != null && typeof v !== 'number') return false;
+      }
+      return true;
+    }
+
     /**
      * Finds one solution of a linear equation system by backward substitution. Matrix must be an upper triangular matrix. Throws an error if there's no solution.
      *
@@ -131,6 +174,34 @@ export const createUsolve = /* #__PURE__ */ factory(
       },
     });
 
+    function _denseBackwardSubstitutionNumber(
+      mdata: number[][],
+      bdata: unknown[][],
+      _rows: number,
+      columns: number,
+      ops: SolveNumberOps
+    ): unknown[][] {
+      const x: unknown[][] = [];
+      for (let j = columns - 1; j >= 0; j--) {
+        const bj = (bdata[j][0] as number) || 0;
+        let xj: number;
+        if (!ops.equalScalar(bj, 0)) {
+          const vjj = mdata[j][j];
+          if (ops.equalScalar(vjj, 0)) {
+            throw new Error('Linear system cannot be solved since matrix is singular');
+          }
+          xj = ops.div(bj, vjj);
+          for (let i = j - 1; i >= 0; i--) {
+            bdata[i] = [ops.sub((bdata[i][0] as number) || 0, ops.mul(xj, mdata[i][j]))];
+          }
+        } else {
+          xj = 0;
+        }
+        x[j] = [xj];
+      }
+      return x;
+    }
+
     function _denseBackwardSubstitution(
       m: DenseMatrix,
       b: unknown[][] | DenseMatrix | SparseMatrix
@@ -144,6 +215,14 @@ export const createUsolve = /* #__PURE__ */ factory(
       const columns = m._size[1];
 
       const mdata = m._data;
+
+      const ops = getSolveNumberOps();
+      if (ops && matrixAllNumbers(mdata) && columnAllNumbers(bdata)) {
+        return new DenseMatrix({
+          data: _denseBackwardSubstitutionNumber(mdata as number[][], bdata, rows, columns, ops),
+          size: [rows, 1],
+        });
+      }
 
       // result
       const x: unknown[][] = [];

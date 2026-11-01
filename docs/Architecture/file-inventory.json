@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-01",
-  "totalFiles": 2071,
+  "totalFiles": 2072,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 776,
+    "test": 777,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 776,
+    "tests": 777,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 884,
+    "@danielsimonjr/mathts-functions": 885,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 115,
@@ -373,7 +373,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 99
+      "loc": 120
     },
     {
       "file": "autograd/tests/public-api-smoke.test.ts",
@@ -5406,7 +5406,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 259
+      "loc": 337
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 264
+      "loc": 342
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -10496,6 +10496,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 321
+    },
+    {
+      "file": "functions/tests/p7-lsolve-usolve-number-path.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 172
     },
     {
       "file": "functions/tests/p7-lup-number-path.test.ts",

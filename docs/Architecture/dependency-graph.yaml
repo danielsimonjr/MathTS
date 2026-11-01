@@ -6826,6 +6826,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -6895,6 +6898,9 @@ modules:
         - file: ./utils/solveValidation.js
           imports:
             - createSolveValidation
+        - file: ../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../../core/function/typed.js
           imports:
             - TypedFunction
@@ -40929,7 +40935,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 204320
+  totalLinesOfCode: 204476
   totalExports: 6412
   totalClasses: 60
   totalInterfaces: 570
