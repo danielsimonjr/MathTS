@@ -6593,6 +6593,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -43304,7 +43308,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 203856,
+    "totalLinesOfCode": 203966,
     "totalExports": 6411,
     "totalClasses": 60,
     "totalInterfaces": 570,

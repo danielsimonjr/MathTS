@@ -675,6 +675,13 @@
       "functions/src/utils/parseNumber.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/typed-impl.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/statistics/max.ts",
+      "functions/src/statistics/min.ts",
+      "functions/src/statistics/prod.ts"
+    ],
     "functions/src/core/function/typed.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
@@ -880,12 +887,6 @@
       "functions/src/utils/isZero.ts",
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
-    ],
-    "functions/src/utils/typed-impl.ts": [
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/statistics/max.ts",
-      "functions/src/statistics/min.ts",
-      "functions/src/statistics/prod.ts"
     ],
     "functions/src/utils/number.ts": [
       "functions/src/algebra/decomposition/slu.ts",
