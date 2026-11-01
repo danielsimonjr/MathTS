@@ -44,6 +44,8 @@
     "test:wasm": "bun run --filter @danielsimonjr/mathts-wasm test",
     "test:wasm:integration": "vitest run tests/wasm/",
     "test:coverage": "turbo run test:coverage",
+    "bench:ab:base": "node tools/benchmark/ab/make-base.mjs",
+    "bench:ab": "node tools/benchmark/ab/run.mjs",
     "bench:core": "node tools/benchmarks/core-hot-paths.mjs",
     "bench:sprint": "node tools/benchmarks/sprint-baseline.mjs",
     "bench:parallel": "bun tools/benchmark/parallel/run.ts",

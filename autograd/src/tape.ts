@@ -2298,6 +2298,11 @@ function _scatterToOriginalAxes(tensor: Tensor, targetLabels: ReadonlyArray<Inde
  *
  * `aShape` is [...batch, m, k], `bShape` is [...batch, k, n].
  * Returns Y with shape [...batch, m, n].
+ *
+ * P7-10 tried a shared strided `contractBatchedMatmul` here. The public
+ * `TapedTensor.matmul` gate missed ≤0.95 on both engines (Node 2×64×64×64
+ * 1.089 / 1×128×96×112 1.111; Bun 4×32×16×24 1.016), so the helper was
+ * reverted. These specialized loops stay.
  */
 function _batchedMatmul(
   aData: Float64Array,

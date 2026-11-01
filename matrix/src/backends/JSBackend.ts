@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { DenseMatrix } from '../types/DenseMatrix.js';
+import { DenseMatrix, denseContiguousData } from '../types/DenseMatrix.js';
 import * as reduction from '../types/dense/reduction.js';
 import type { MatrixBackend, BackendType } from './Backend.js';
 
@@ -155,15 +155,19 @@ export class JSBackend implements MatrixBackend {
     const m = a.rows;
     const n = b.cols;
     const k = a.cols;
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
     const result = new Float64Array(m * n);
 
-    // Standard O(mn*k) multiplication with inner product form
-    // Optimized for row-major access pattern
+    // i-k-j loop: row-major flat reads (matches dense/arithmetic.ts)
     for (let i = 0; i < m; i++) {
+      const ai = i * k;
+      const ri = i * n;
       for (let p = 0; p < k; p++) {
-        const aip = a.get(i, p);
+        const aip = ad[ai + p];
+        const bp = p * n;
         for (let j = 0; j < n; j++) {
-          result[i * n + j] += aip * b.get(p, j);
+          result[ri + j] += aip * bd[bp + j];
         }
       }
     }

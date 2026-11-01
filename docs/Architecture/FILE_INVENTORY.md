@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2061
+**Total files**: 2072
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1206 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1207 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      767 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      777 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2061** |                                                                                                                |
+| **Total**     | **2072** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1232 |
-| `tests`    |   767 |
+| `src`      |  1233 |
+| `tests`    |   777 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -43,15 +43,15 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `(root)`                               |    52 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     3 |
-| `@danielsimonjr/mathts-autograd`       |    24 |
+| `@danielsimonjr/mathts-autograd`       |    25 |
 | `@danielsimonjr/mathts-compat`         |    16 |
 | `@danielsimonjr/mathts-core`           |   106 |
 | `@danielsimonjr/mathts-evaluator`      |     3 |
 | `@danielsimonjr/mathts-expression`     |   561 |
-| `@danielsimonjr/mathts-functions`      |   876 |
+| `@danielsimonjr/mathts-functions`      |   885 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
-| `@danielsimonjr/mathts-matrix`         |   114 |
+| `@danielsimonjr/mathts-matrix`         |   115 |
 | `@danielsimonjr/mathts-numbers`        |     3 |
 | `@danielsimonjr/mathts-parallel`       |    45 |
 | `@danielsimonjr/mathts-parser`         |     3 |
@@ -116,6 +116,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/tests/dual-elementwise-ad.test.ts`                                      | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/forward-grad.test.ts`                                             | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/grad-bridge-ad.test.ts`                                           | @danielsimonjr/mathts-autograd       | tests    | test        |
+| `autograd/tests/p7-batched-matmul-contract.test.ts`                               | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/public-api-smoke.test.ts`                                         | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/reverse-grad.test.ts`                                             | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/s2r-clones-extrema-oracle.test.ts`                                | @danielsimonjr/mathts-autograd       | tests    | test        |
@@ -1310,6 +1311,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/utils/product.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/string.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/switch.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/utils/typed-impl.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/typeOf.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/bitwise/wasm-bridge.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/wasm/bridges/common.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1559,6 +1561,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/numeric.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/ols.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/open-root-finders.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-elementwise-number-path.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-factory-extreme-number-path.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-lup-number-path.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-max-min-loop.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-median-number-path.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-prod-number-path.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-qr-number-path.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/p7-sort-number-path.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/parabolic-pde.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/parallel-arithmetic-unary.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/parallel-arithmetic.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1807,6 +1817,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `matrix/tests/operations/schur-eigenvalue-oracle.test.ts`                         | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/schur.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/operations/sqrtm.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
+| `matrix/tests/p7-jsbackend-multiply.test.ts`                                      | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/parallel-matrix.test.ts`                                            | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/public-api-smoke.test.ts`                                           | @danielsimonjr/mathts-matrix         | tests    | test        |
 | `matrix/tests/s2r-clones-batch3-oracle.test.ts`                                   | @danielsimonjr/mathts-matrix         | tests    | test        |
