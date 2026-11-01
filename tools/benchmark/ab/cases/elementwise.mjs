@@ -85,4 +85,53 @@ export const cases = [
       return () => F.add(a, b);
     },
   },
+  {
+    name: 'dotMultiply n = 1,000',
+    kind: 'gain',
+    pr: 'P7-12',
+    make: (F) => {
+      const a = numArr(1000, 0xc1201);
+      const b = numArr(1000, 0xc1202);
+      return () => F.dotMultiply(a, b);
+    },
+  },
+  {
+    name: 'dotDivide n = 1,000',
+    kind: 'gain',
+    pr: 'P7-12',
+    make: (F) => {
+      const a = numArr(1000, 0xc1211);
+      const b = numArr(1000, 0xc1212);
+      return () => F.dotDivide(a, b);
+    },
+  },
+  {
+    name: 'dotMultiply Array,scalar n = 1,000',
+    kind: 'gain',
+    pr: 'P7-12',
+    make: (F) => {
+      const a = numArr(1000, 0xc1221);
+      return () => F.dotMultiply(a, 1.5);
+    },
+  },
+  {
+    name: 'dotMultiply DenseMatrix n = 1,000 (identity)',
+    kind: 'neutral',
+    pr: 'P7-12',
+    make: (F) => {
+      const a = F.matrix(numArr(1000, 0xc1231));
+      const b = F.matrix(numArr(1000, 0xc1232));
+      return () => F.dotMultiply(a, b);
+    },
+  },
+  {
+    name: 'dotMultiply BigNumber n = 100 (fallback)',
+    kind: 'neutral',
+    pr: 'P7-12',
+    make: (F) => {
+      const a = numArr(100, 0xc12b1).map((x) => F.bignumber(x));
+      const b = numArr(100, 0xc12b2).map((x) => F.bignumber(x));
+      return () => F.dotMultiply(a, b);
+    },
+  },
 ];

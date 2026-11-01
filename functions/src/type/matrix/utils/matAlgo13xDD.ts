@@ -1,5 +1,6 @@
 import { factory } from '../../../utils/factory.js';
 import { DimensionError } from '../../../error/DimensionError.js';
+import { findTypedImpl } from '../../../utils/typed-impl.js';
 import type {
   DataType,
   DenseMatrixData,
@@ -90,8 +91,11 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
       if (typeof adt === 'string' && adt === bdt) {
         // datatype
         dt = adt;
-        // callback - typed.find returns the specialized function for the given types
-        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback;
+        cf =
+          findTypedImpl(typed as unknown as Parameters<typeof findTypedImpl>[0], callback, [
+            dt,
+            dt,
+          ]) ?? callback;
       }
 
       // populate cdata, iterate through dimensions

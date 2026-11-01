@@ -10050,6 +10050,7 @@ graph LR
 | ---------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------ |
 | `../../../utils/factory.js`        | `factory`                                                                                           | Import             |
 | `../../../error/DimensionError.js` | `DimensionError`                                                                                    | Import             |
+| `../../../utils/typed-impl.js`     | `findTypedImpl`                                                                                     | Import             |
 | `../types.js`                      | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
@@ -10062,11 +10063,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports                                                                                             | Type               |
-| --------------------------- | --------------------------------------------------------------------------------------------------- | ------------------ |
-| `../../../utils/factory.js` | `factory`                                                                                           | Import             |
-| `../../../utils/object.js`  | `clone`                                                                                             | Import             |
-| `../types.js`               | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
+| File                           | Imports                                                                                             | Type               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ------------------ |
+| `../../../utils/factory.js`    | `factory`                                                                                           | Import             |
+| `../../../utils/object.js`     | `clone`                                                                                             | Import             |
+| `../../../utils/typed-impl.js` | `findTypedImpl`                                                                                     | Import             |
+| `../types.js`                  | `DataType, DenseMatrixData, MatrixCallback, TypedFunction, DenseMatrixConstructorData, MatrixValue` | Import (type-only) |
 
 **Exports:**
 
@@ -19479,7 +19481,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204476 |
+| Total Lines of Code     | 204499 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

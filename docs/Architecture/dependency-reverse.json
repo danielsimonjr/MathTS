@@ -685,7 +685,9 @@
       "functions/src/statistics/max.ts",
       "functions/src/statistics/median.ts",
       "functions/src/statistics/min.ts",
-      "functions/src/statistics/prod.ts"
+      "functions/src/statistics/prod.ts",
+      "functions/src/type/matrix/utils/matAlgo13xDD.ts",
+      "functions/src/type/matrix/utils/matAlgo14xDs.ts"
     ],
     "functions/src/core/function/typed.ts": [
       "functions/src/algebra/decomposition/lup.ts",
