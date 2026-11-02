@@ -1,8 +1,7 @@
 /**
  * Symplectic Gauss–Legendre 4th-order ODE integrator.
  *
- * The Butcher tableau is pinned to the same constants UPT uses
- * (Hairer/Lubich/Wanner §II.1; Sanz-Serna 1988).
+ * The Butcher tableau is pinned to Hairer/Lubich/Wanner §II.1 and Sanz-Serna (1988).
  */
 
 import { describe, it, expect } from 'vitest';

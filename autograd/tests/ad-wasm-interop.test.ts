@@ -1,18 +1,13 @@
 /**
- * AD over WASM-routed primitives (UPT v0.7 §10.2 Q3).
+ * AD over WASM-routed ComputePool forward ops.
  *
- * The UPT v0.70 proposal asks: "How does mathts-autograd interact
- * with WASM-accelerated kernels? Do those operations have AD rules?"
- *
- * Answer (demonstrated here): the autograd `Tape` does not care
- * about the FORWARD-PASS strategy. It only requires (1) the primal
- * outputs produced by the forward op and (2) a backward closure that
- * implements the adjoint for that op. A forward op can therefore
- * execute through `computePool.<op>` — which routes to either the
- * in-process JS kernel, the worker pool, or the WASM tier per the
- * `thresholdByOp` map in `parallel/src/ComputePool.ts` — and the
- * autograd backward pass remains correct so long as the user
- * supplies the correct adjoint closure.
+ * The autograd `Tape` does not care about the FORWARD-PASS strategy. It only
+ * requires (1) the primal outputs produced by the forward op and (2) a backward
+ * closure that implements the adjoint for that op. A forward op can therefore
+ * execute through `computePool.<op>` — which routes to either the in-process JS
+ * kernel, the worker pool, or the WASM tier per the `thresholdByOp` map in
+ * `parallel/src/ComputePool.ts` — and the autograd backward pass remains correct
+ * so long as the user supplies the correct adjoint closure.
  *
  * This test pins that integration: it does the FORWARD pass via
  * `ComputePool.add` (a WASM-aware primitive), records the op on a
@@ -26,7 +21,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { Tape } from '../src/tape.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 
-describe('AD over WASM-routed primitives (UPT v0.7 §10.2 Q3)', () => {
+describe('AD over a forward op that did not run on the tape', () => {
   beforeAll(async () => {
     // Ensure the pool is ready. Even when the bench-derived
     // thresholdByOp keeps `add` sequential, the dispatch path is
