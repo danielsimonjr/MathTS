@@ -23,8 +23,8 @@ interface ComplexFactory {
 }
 
 interface FractionType {
-  n: bigint;
-  s: number;
+  numerator: bigint;
+  sign(): number;
 }
 
 interface FractionConstructor {
@@ -98,7 +98,7 @@ export const createSign = /* #__PURE__ */ factory(
       },
 
       Fraction: function (x: FractionType): FractionType {
-        return x.n === 0n ? new Fraction(0) : new Fraction(x.s);
+        return x.numerator === 0n ? new Fraction(0) : new Fraction(x.sign());
       },
 
       // deep map collection, skip zeros since sign(0) = 0

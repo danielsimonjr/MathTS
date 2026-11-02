@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-10-31",
-    "totalFiles": 1234,
+    "lastUpdated": "2026-11-02",
+    "totalFiles": 1235,
     "totalModules": 82,
-    "totalExports": 6410
+    "totalExports": 6412
   },
   "entryPoints": [
     {
@@ -3840,7 +3840,7 @@
         "internalDependencies": [
           {
             "file": "../types/DenseMatrix.js",
-            "imports": ["DenseMatrix"]
+            "imports": ["DenseMatrix", "denseContiguousData"]
           },
           {
             "file": "../types/dense/reduction.js",
@@ -5492,9 +5492,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["isDenseMatrix", "DenseMatrix"],
+        "exports": ["isDenseMatrix", "denseContiguousData", "DenseMatrix"],
         "classes": ["DenseMatrix"],
-        "functions": ["isDenseMatrix"]
+        "functions": ["isDenseMatrix", "denseContiguousData"]
       },
       "matrix/src/types/Matrix.ts": {
         "description": "Matrix Base Class",
@@ -6593,6 +6593,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
@@ -6603,7 +6607,7 @@
         "constants": ["createLup"]
       },
       "functions/src/algebra/decomposition/qr.ts": {
-        "description": "Calculate the Matrix QR decomposition. Matrix `A` is decomposed in",
+        "description": "Householder step loop for plain number storage. Scalar work per step uses the",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -6612,9 +6616,17 @@
             "imports": ["factory"]
           },
           {
+            "file": "../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../../utils/is.js",
+            "imports": ["isFraction"]
           }
         ],
         "workspaceDependencies": [],
@@ -16325,6 +16337,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           }
         ],
         "workspaceDependencies": [],
@@ -16594,6 +16610,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "../types.js",
@@ -19565,6 +19585,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "./utils/improveErrorMessage.js",
             "imports": ["improveErrorMessage"]
           },
@@ -19639,6 +19663,10 @@
             "file": "../core/function/typed.js",
             "imports": ["TypedFunction"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           }
         ],
         "workspaceDependencies": [],
@@ -19661,6 +19689,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -19716,6 +19748,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "./utils/improveErrorMessage.js",
@@ -26123,6 +26159,21 @@
         "workspaceDependencies": [],
         "exports": ["createTypeOf"],
         "constants": ["createTypeOf"]
+      },
+      "functions/src/utils/typed-impl.ts": {
+        "description": "The implementation `typed` dispatches to for `signature`, resolved once so that a hot loop can",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../core/function/typed.js",
+            "imports": ["TypedFunction"],
+            "typeOnly": true
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["findTypedImpl"],
+        "functions": ["findTypedImpl"]
       }
     },
     "functions/wasm": {
@@ -42537,7 +42588,8 @@
           "functions/src/utils/product.ts",
           "functions/src/utils/string.ts",
           "functions/src/utils/switch.ts",
-          "functions/src/utils/typeOf.ts"
+          "functions/src/utils/typeOf.ts",
+          "functions/src/utils/typed-impl.ts"
         ]
       },
       {
@@ -43270,18 +43322,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1234,
+    "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 203584,
-    "totalExports": 6410,
+    "totalLinesOfCode": 204308,
+    "totalExports": 6412,
     "totalClasses": 60,
     "totalInterfaces": 570,
-    "totalFunctions": 2070,
+    "totalFunctions": 2072,
     "totalTypeGuards": 161,
     "totalEnums": 0,
     "totalConstants": 1632,
     "totalReExports": 2724,
-    "totalTypeOnlyImports": 620,
+    "totalTypeOnlyImports": 621,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,

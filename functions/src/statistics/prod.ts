@@ -1,5 +1,6 @@
 import { deepForEach, reduce } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -35,6 +36,19 @@ export const createProd = /* #__PURE__ */ factory(
     numeric: _numeric,
     parseNumberWithConfig,
   }: ProdDependencies) => {
+    type NumberMul = (a: number, b: number) => number;
+    let cachedProdMul: NumberMul | null | undefined;
+
+    function getProdMul(): NumberMul | null {
+      if (cachedProdMul === undefined) {
+        cachedProdMul = findTypedImpl<[number, number], number>(typed, multiplyScalar, [
+          'number',
+          'number',
+        ]);
+      }
+      return cachedProdMul;
+    }
+
     /**
      * Compute the product of a matrix or a list with values.
      * In case of a multidimensional array or matrix, the sum of all
@@ -85,7 +99,27 @@ export const createProd = /* #__PURE__ */ factory(
      * @private
      */
     function _prod(array: unknown[] | MatrixType): unknown {
-      let prod: unknown;
+      if (Array.isArray(array) && array.constructor === Array && array.length > 0) {
+        const mul = getProdMul();
+        if (mul !== null && typeof array[0] === 'number') {
+          // Fold plain numbers with the cached implementation. The first other element hands
+          // the partial product to the generic fold, so no multiplication is done twice.
+          let p = array[0] as number;
+          let i = 1;
+          for (; i < array.length; i++) {
+            const value = array[i];
+            if (typeof value !== 'number') break;
+            p = mul(p, value);
+          }
+          return i === array.length ? p : _prodGeneric(array.slice(i), p);
+        }
+      }
+
+      return _prodGeneric(array, undefined);
+    }
+
+    function _prodGeneric(array: unknown[] | MatrixType, start: unknown): unknown {
+      let prod: unknown = start;
 
       deepForEach(array, function (value: unknown) {
         try {

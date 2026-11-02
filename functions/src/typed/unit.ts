@@ -47,6 +47,8 @@ import { Unit, type UnitInstance } from '@danielsimonjr/mathts-core';
  */
 export const to = mathTyped('to', {
   'Unit, string': (value: UnitInstance, target: string): UnitInstance => value.to(target),
+  // Expression `5 km to m` evaluates the target as a valueless Unit symbol, not a string.
+  'Unit, Unit': (value: UnitInstance, target: UnitInstance): UnitInstance => value.to(target),
   'number, string': (value: number, target: string): UnitInstance => new Unit(value, target),
 });
 

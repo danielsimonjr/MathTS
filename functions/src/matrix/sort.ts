@@ -1,5 +1,6 @@
 import { arraySize as size } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { findTypedImpl } from '../utils/typed-impl.js';
 
 import { TypedFunction, Matrix } from '../types.js';
 
@@ -20,11 +21,45 @@ export const createSort = /* #__PURE__ */ factory(
   }: {
     typed: TypedFunction;
     matrix: (data: unknown, storage?: string) => Matrix;
-    compare: CompareFn;
+    compare: TypedFunction;
     compareNatural: CompareFn;
   }): TypedFunction => {
-    const compareAsc = compare;
-    const compareDesc = (a: unknown, b: unknown): number => -compare(a, b);
+    const compareAsc = compare as CompareFn;
+    const compareDesc = (a: unknown, b: unknown): number => -compareAsc(a, b);
+
+    type NumberCompare = (a: number, b: number) => number;
+    let cachedNumberCompare: NumberCompare | null | undefined;
+
+    function getNumberCompare(): NumberCompare | null {
+      if (cachedNumberCompare === undefined) {
+        cachedNumberCompare = findTypedImpl<[number, number], number>(typed, compare, [
+          'number',
+          'number',
+        ]);
+      }
+      return cachedNumberCompare;
+    }
+
+    function sortMatrixNumber(x: Matrix, descending: boolean): Matrix | null {
+      const arr = x.toArray() as unknown[];
+      if (!Array.isArray(arr) || !arrayAllNumbers(arr)) return null;
+      const cmp = getNumberCompare();
+      if (!cmp) return null;
+      return matrix(sortNumberArray(arr, cmp, descending), x.storage());
+    }
+
+    function arrayAllNumbers(arr: unknown[]): boolean {
+      for (let i = 0; i < arr.length; i++) {
+        if (typeof arr[i] !== 'number') return false;
+      }
+      return true;
+    }
+
+    function sortNumberArray(arr: unknown[], cmp: NumberCompare, descending: boolean): unknown[] {
+      const c = descending ? (a: number, b: number) => -cmp(a, b) : cmp;
+      arr.sort(c as (a: unknown, b: unknown) => number);
+      return arr;
+    }
 
     /**
      * Sort the items in a matrix.
@@ -60,12 +95,14 @@ export const createSort = /* #__PURE__ */ factory(
     return typed(name, {
       Array: function (x: unknown[]) {
         _arrayIsVector(x);
+        const cmp = arrayAllNumbers(x) ? getNumberCompare() : null;
+        if (cmp) return sortNumberArray(x, cmp, false);
         return x.sort(compareAsc);
       },
 
       Matrix: function (x: Matrix) {
         _matrixIsVector(x);
-        return matrix(x.toArray().sort(compareAsc), x.storage());
+        return sortMatrixNumber(x, false) ?? matrix(x.toArray().sort(compareAsc), x.storage());
       },
 
       'Array, function': function (x: unknown[], _comparator: CompareFn): unknown[] {
@@ -80,11 +117,21 @@ export const createSort = /* #__PURE__ */ factory(
 
       'Array, string': function (x: unknown[], order: string): unknown[] {
         _arrayIsVector(x);
+        // Descending missed the P7-0 gain bar on Bun at n = 100 (0.960 after R=9),
+        // so only ascending uses the number comparator.
+        if (order === 'asc') {
+          const cmp = arrayAllNumbers(x) ? getNumberCompare() : null;
+          if (cmp) return sortNumberArray(x, cmp, false);
+        }
         return x.sort(_comparator(order));
       },
 
       'Matrix, string': function (x: Matrix, order: string): Matrix {
         _matrixIsVector(x);
+        if (order === 'asc') {
+          const fast = sortMatrixNumber(x, false);
+          if (fast) return fast;
+        }
         return matrix(x.toArray().sort(_comparator(order)), x.storage());
       },
     }) as unknown as TypedFunction;
