@@ -2,13 +2,18 @@
  * P7-12 pins: infer number datatype for Array,Array / Array,scalar only.
  */
 import { describe, it, expect } from 'vitest';
+import { Complex, Fraction } from '@danielsimonjr/mathts-core';
 import {
   bignumber,
+  complex,
   dotDivide,
   dotMultiply,
   getMatrixDataType,
   matrix,
 } from '../src/factories/index.js';
+import { factoryScope } from '../src/factories/scope.js';
+import { createMatAlgo13xDD } from '../src/type/matrix/utils/matAlgo13xDD.js';
+import type { TypedFunction } from '../src/core/function/typed.js';
 
 function attachedDatatype(x: unknown): string | undefined {
   if (x && typeof x === 'object' && '_datatype' in x) {
@@ -40,6 +45,42 @@ describe('P7-12 Array,Array number inference', () => {
     const out = dotMultiply(a, b) as unknown[];
     expect(out[0]).toBe(8);
     expect(String(out[1])).toBe('15');
+  });
+
+  it('a Fraction entry stays on the generic path', () => {
+    const a = [new Fraction(2, 1), new Fraction(3, 1)];
+    const b = [new Fraction(4, 1), new Fraction(5, 1)];
+    const out = dotMultiply(a, b) as { toNumber(): number }[];
+    expect(out[0]!.toNumber()).toBe(8);
+    expect(out[1]!.toNumber()).toBe(15);
+    expect(out[0]).toBeInstanceOf(Fraction);
+  });
+
+  it('a Complex entry stays on the generic path', () => {
+    const a = [complex(2, 0), new Complex(3, 1)];
+    const b = [complex(4, 0), new Complex(5, 0)];
+    const out = dotMultiply(a, b) as { re: number; im: number }[];
+    expect(out[0]!.re).toBe(8);
+    expect(out[1]!.re).toBe(15);
+    expect(out[1]!.im).toBe(5);
+  });
+
+  it('2-D number arrays stay bit-exact and datatype-free', () => {
+    const a = [
+      [1, 2],
+      [3, 4],
+    ];
+    const b = [
+      [5, 6],
+      [7, 8],
+    ];
+    const out = dotMultiply(a, b) as number[][];
+    expect(out).toEqual([
+      [5, 12],
+      [21, 32],
+    ]);
+    expect(Array.isArray(out)).toBe(true);
+    expect(attachedDatatype(out)).toBeUndefined();
   });
 });
 
@@ -86,5 +127,48 @@ describe('P7-12 DenseMatrix datatype is unchanged', () => {
     const out = dotMultiply([1, 2, 3], dense);
     expect(attachedDatatype(out)).toBeUndefined();
     expect((out as { toArray(): number[] }).toArray()).toEqual([4, 10, 18]);
+  });
+});
+
+describe('P7-12 malformed shapes stay on the generic path', () => {
+  it('a ragged array does not produce NaN from a raw number impl', () => {
+    let threw = false;
+    let out: unknown;
+    try {
+      out = dotMultiply([[1, 2], [3]], 4);
+    } catch {
+      threw = true;
+    }
+    if (!threw) {
+      const rows = out as unknown[][];
+      expect(rows).toEqual([[4, 8], [12]]);
+      expect(rows[1]).toHaveLength(1);
+      expect(rows.flat().some((v) => typeof v === 'number' && Number.isNaN(v))).toBe(false);
+    }
+  });
+});
+
+describe('P7-12 matAlgo13xDD does not tag when find fails', () => {
+  it('a plain-function callback returning BigNumbers leaves the result untagged', () => {
+    const algo = createMatAlgo13xDD({
+      typed: factoryScope.typed as TypedFunction,
+    }) as (
+      a: unknown,
+      b: unknown,
+      cb: (x: unknown, y: unknown) => unknown
+    ) => { _datatype?: string; toArray(): unknown[][] };
+    const a = matrix([
+      [1, 2],
+      [3, 4],
+    ]) as { _datatype?: string };
+    const b = matrix([
+      [5, 6],
+      [7, 8],
+    ]) as { _datatype?: string };
+    a._datatype = 'number';
+    b._datatype = 'number';
+    const out = algo(a, b, (x, y) => bignumber(x as number).mul(y as number));
+    expect(attachedDatatype(out)).toBeUndefined();
+    expect(String(out.toArray()[0]![0])).toBe('5');
   });
 });

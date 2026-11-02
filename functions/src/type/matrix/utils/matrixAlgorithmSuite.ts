@@ -51,21 +51,32 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
     type DenseScalarArg = Parameters<typeof matAlgo14xDs>[0];
     const bcast = broadcast as unknown as (a: unknown, b: unknown) => [unknown, unknown];
 
-    function nestedAllNumbers(value: unknown): boolean {
-      if (typeof value === 'number') return true;
-      if (!Array.isArray(value)) return false;
-      for (let i = 0; i < value.length; i++) {
-        if (!nestedAllNumbers(value[i])) return false;
-      }
-      return true;
+    /**
+     * Infer `number` only when the wrapped matrix's data matches `_size` and every
+     * cell at that size is a number. Ragged or mixed-depth arrays stay on generic
+     * dispatch (the iterator would otherwise hand `undefined` to a raw number impl).
+     */
+    function dataMatchesSizeAsNumbers(data: unknown, size: number[] | undefined): boolean {
+      if (!size) return false;
+      const walk = (value: unknown, dim: number): boolean => {
+        if (dim === size.length) return typeof value === 'number';
+        if (!Array.isArray(value) || value.length !== size[dim]) return false;
+        for (let i = 0; i < size[dim]; i++) {
+          if (!walk(value[i], dim + 1)) return false;
+        }
+        return true;
+      };
+      return walk(data, 0);
     }
 
     /** Infer `number` only for plain-array operands so `.valueOf()` results stay datatype-free. */
     function wrapArrayPair(x: unknown[], y: unknown[]): [Matrix, Matrix] {
-      const infer = nestedAllNumbers(x) && nestedAllNumbers(y);
       const xm = matrix(x as DenseMatrixData);
       const ym = matrix(y as DenseMatrixData);
-      if (infer) {
+      if (
+        dataMatchesSizeAsNumbers(xm._data, xm._size) &&
+        dataMatchesSizeAsNumbers(ym._data, ym._size)
+      ) {
         xm._datatype = 'number';
         ym._datatype = 'number';
       }
@@ -74,7 +85,9 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
 
     function wrapArrayScalar(x: unknown[], scalar: unknown): Matrix {
       const m = matrix(x as DenseMatrixData);
-      if (typeof scalar === 'number' && nestedAllNumbers(x)) m._datatype = 'number';
+      if (typeof scalar === 'number' && dataMatchesSizeAsNumbers(m._data, m._size)) {
+        m._datatype = 'number';
+      }
       return m;
     }
 

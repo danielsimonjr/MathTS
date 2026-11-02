@@ -87,15 +87,19 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
       // callback signature to use
       let cf: MatrixCallback = callback;
 
-      // process data types
+      // process data types — only tag the result when a specialized impl is found,
+      // matching matAlgo14xDs. A plain-function callback that returns BigNumbers
+      // from number-tagged matrices must not leave the result tagged `number`.
       if (typeof adt === 'string' && adt === bdt) {
-        // datatype
-        dt = adt;
-        cf =
-          findTypedImpl(typed as unknown as Parameters<typeof findTypedImpl>[0], callback, [
-            dt,
-            dt,
-          ]) ?? callback;
+        const impl = findTypedImpl(
+          typed as unknown as Parameters<typeof findTypedImpl>[0],
+          callback,
+          [adt, adt]
+        );
+        if (impl) {
+          dt = adt;
+          cf = impl;
+        }
       }
 
       // populate cdata, iterate through dimensions
