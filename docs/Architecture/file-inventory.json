@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-01",
-  "totalFiles": 2071,
+  "totalFiles": 2072,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 776,
+    "test": 777,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 776,
+    "tests": 777,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 884,
+    "@danielsimonjr/mathts-functions": 885,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 115,
@@ -5308,7 +5308,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 479
+      "loc": 497
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -10530,7 +10530,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 215
+      "loc": 226
     },
     {
       "file": "functions/tests/p7-sort-number-path.test.ts",
@@ -10664,6 +10664,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 920
+    },
+    {
+      "file": "functions/tests/qr-fraction-error.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 84
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",

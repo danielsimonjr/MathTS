@@ -6409,6 +6409,9 @@ modules:
           imports:
             - TypedFunction
           typeOnly: true
+        - file: ../../utils/is.js
+          imports:
+            - isFraction
       workspaceDependencies: []
       exports:
         - createQr
@@ -40929,7 +40932,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 204279
+  totalLinesOfCode: 204297
   totalExports: 6412
   totalClasses: 60
   totalInterfaces: 570

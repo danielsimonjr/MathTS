@@ -2684,6 +2684,7 @@ graph LR
 | `../../utils/factory.js`       | `factory`       | Import             |
 | `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js`            | `isFraction`    | Import             |
 
 **Exports:**
 
@@ -18591,7 +18592,7 @@ graph LR
 | `functions/src/index`                                  | 92 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
-| `functions/src/utils/is`                               | 0 files      | 55 files   |
+| `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -19477,7 +19478,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204279 |
+| Total Lines of Code     | 204297 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

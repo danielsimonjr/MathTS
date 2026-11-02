@@ -203,12 +203,29 @@ describe('P7-1 qr number path — replaced dependencies', () => {
 });
 
 describe('P7-1 qr number path — regressions', () => {
-  it('Fraction matrix keeps the pre-change throw', () => {
-    expect(() =>
-      qr([
-        [new Fraction(1, 2), 1],
-        [2, 3],
-      ])
-    ).toThrow();
+  it('Fraction matrix factorizes (Q*R reconstructs A)', () => {
+    const A = [
+      [new Fraction(1, 2), 1],
+      [2, 3],
+    ];
+    const { Q, R } = qr(A) as { Q: unknown[][]; R: unknown[][] };
+    const toNum = (v: unknown): number =>
+      typeof v === 'number' ? v : Number((v as { valueOf(): unknown }).valueOf());
+    const q = Q.map((row) => row.map(toNum));
+    const r = R.map((row) => row.map(toNum));
+    const prod = [
+      [
+        q[0]![0]! * r[0]![0]! + q[0]![1]! * r[1]![0]!,
+        q[0]![0]! * r[0]![1]! + q[0]![1]! * r[1]![1]!,
+      ],
+      [
+        q[1]![0]! * r[0]![0]! + q[1]![1]! * r[1]![0]!,
+        q[1]![0]! * r[0]![1]! + q[1]![1]! * r[1]![1]!,
+      ],
+    ];
+    expect(prod[0]![0]).toBeCloseTo(0.5, 12);
+    expect(prod[0]![1]).toBeCloseTo(1, 12);
+    expect(prod[1]![0]).toBeCloseTo(2, 12);
+    expect(prod[1]![1]).toBeCloseTo(3, 12);
   });
 });
