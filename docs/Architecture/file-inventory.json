@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 140
+      "loc": 135
     },
     {
       "file": "autograd/tests/assert-same-shape.test.ts",
@@ -4944,7 +4944,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 195
+      "loc": 171
     },
     {
       "file": "expression/tests/node-group-render.test.ts",
@@ -9984,7 +9984,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 139
+      "loc": 138
     },
     {
       "file": "functions/tests/geometry-consumers-oracle.test.ts",
@@ -10327,7 +10327,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 107
+      "loc": 106
     },
     {
       "file": "functions/tests/linprog-feasible.test.ts",
@@ -10461,6 +10461,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 74
+    },
+    {
+      "file": "functions/tests/numeric-tail-review-2026-10-15.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 77
     },
     {
       "file": "functions/tests/numeric.test.ts",
@@ -10957,7 +10964,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 42
     },
     {
       "file": "functions/tests/sort-as-wasm.test.ts",
@@ -11098,6 +11105,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 122
+    },
+    {
+      "file": "functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 104
     },
     {
       "file": "functions/tests/taylor-exact.test.ts",
@@ -11385,20 +11399,6 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
-    },
-    {
-      "file": "functions/tests/upt-review-2-2026-10-15.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 104
-    },
-    {
-      "file": "functions/tests/upt-review-2026-10-15.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 77
     },
     {
       "file": "functions/tests/utils-factory.test.ts",

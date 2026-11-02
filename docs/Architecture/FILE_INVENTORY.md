@@ -1558,6 +1558,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/numeric-equivalence.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric-jacobian.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric-literal.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/numeric-tail-review-2026-10-15.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/ols.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/open-root-finders.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1649,6 +1650,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/summation-symbolic-bound.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/svd-orth.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/svds.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts`                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/taylor-exact.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/tier-parity-registry.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/timeseries.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1690,8 +1692,6 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/unary-f64-merge.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-characterization.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-operators.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/upt-review-2-2026-10-15.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
-| `functions/tests/upt-review-2026-10-15.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/utils-factory.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/variance-normalization-consistency.test.ts`                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wasm-as-alloc-order-pin.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |

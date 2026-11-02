@@ -1,35 +1,13 @@
 /**
- * Node-extension demonstration test (UPT integration scenario, Q1 of
- * the UPT v0.7 proposal §10.2 "open questions").
- *
- * UPT (universal-physics-tensor) wants to extend the mathts AST with
- * physics-specific node types such as `BridgeEquationNode` so that the
- * existing parser, evaluator, and tree-walking helpers can transparently
- * handle UPT's domain nodes alongside the built-in 16.
- *
- * The mathts `Node` class is parameterised by a `mathWithTransform`
- * scope (the factory pattern at `expression/src/node/Node.ts`). To
- * extend it, downstream packages call `createNode({mathWithTransform})`
- * to obtain the concrete class, then subclass that class.
- *
- * This test pins the pattern: it builds a tiny `BridgeEquationNode`
- * stand-in that wraps a child expression node plus a physics tag,
- * implements every required virtual method (`_compile`, `forEach`,
- * `map`, `_toString`, `toJSON`), verifies that the standard
- * tree-walking helpers (`traverse`, `clone`, `equals`) all work, and
- * verifies that the resulting instance still passes the duck-typed
- * `isNode` guard.
- *
- * If this test ever breaks, downstream extension of mathts Nodes
- * needs a closer review — adjust this file before changing the
- * Node base class's extension surface.
+ * Subclassing via `createNode({ mathWithTransform })`: a minimal child-plus-tag node
+ * exercises `isNode`, `forEach`, `map`, `traverse`, `clone`, `toJSON`, and `_toString`.
  */
 import { describe, it, expect } from 'vitest';
 import { createNode } from '../src/node/Node.js';
 import { createConstantNode } from '../src/node/ConstantNode.js';
 import { isNode } from '../src/utils/is.js';
 
-describe('Node base class extensibility (UPT v0.7 §10.2 Q1)', () => {
+describe('Node base class extensibility (subclass via createNode)', () => {
   // Minimal `mathWithTransform` scope, enough to satisfy the factory
   // dependencies. Real downstream consumers would pass a fully-wired
   // mathjs-compat instance.
@@ -48,9 +26,8 @@ describe('Node base class extensibility (UPT v0.7 §10.2 Q1)', () => {
   });
 
   /**
-   * Physics-specific AST node (UPT-shaped fake).
-   * Wraps a single child expression node and tags it with a physics
-   * domain string. Implements every virtual the Node base requires.
+   * Generic AST node: one child expression plus a string tag.
+   * Implements every virtual the Node base requires.
    */
   class BridgeEquationNode extends Node {
     static name = 'BridgeEquationNode';
@@ -70,8 +47,7 @@ describe('Node base class extensibility (UPT v0.7 §10.2 Q1)', () => {
       return true;
     }
 
-    // _compile delegates to the child; in real UPT, this would emit
-    // bridge-specific dispatch code.
+    // _compile delegates to the child.
     _compile(
       math: Record<string, unknown>,
       argNames: Record<string, boolean>

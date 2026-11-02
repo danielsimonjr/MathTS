@@ -1,6 +1,6 @@
 /**
- * The second set of defects found by the Universal-Physics-Tensor deep dive of
- * 2026-10-15, each proved red before its fix.
+ * Regression pins for `symbolicEqual`, Student-t far-tail p-values, `ols` equilibration,
+ * and `Fraction.fromNumber` — each proved red before its fix.
  */
 import { describe, expect, it } from 'vitest';
 import { linearRegression, linregress, ols, symbolicEqual } from '../src/index.js';
