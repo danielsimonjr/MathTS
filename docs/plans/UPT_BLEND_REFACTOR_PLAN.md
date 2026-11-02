@@ -24,16 +24,16 @@ Public names that already fit MathTS stay. That includes `upToConstant` (a scale
 
 The scalar toolkit is a MathTS API. Callers build a `ScalarNode` (`number`, `symbol`, `op`, `call`) with `createScalarBuilder`. `ln` lowers to natural `log` and `log` lowers to `log10`. A formula string is rejected. The shipped surface, all of which stays:
 
-| Area | Home | Exports that stay |
-| --- | --- | --- |
-| Structure | `expression/src/scalar-structure.ts` | `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights` |
-| Batch and fit | `functions/src/scalar-compile.ts`, `functions/src/fit-scalar.ts` | `compileScalar`, `compileScalarGradient`, `fitScalarParameters` |
-| Bridge | `functions/src/scalar-node-bridge.ts` | `scalarToNode`, `nodeToScalar`, `simplifyScalar`, `scalarToTex` |
-| Front | `functions/src/pareto-front.ts`, `functions/src/front-export.ts` | `paretoFront`, `scoreFront`, `selectFrontModel`, `frontToLatexTable`, `frontToJson` |
-| Compare | `functions/src/numeric-equivalence.ts` | `numericallyEquivalent` (`consistent` is evidence, not proof) |
-| Dimension | `functions` scalar-dimension modules, `core/src/types/si-dimension-vector.ts` | `inferScalarDimension`, `solveParameterDimensions`, `SiDimensionVector` of seven `Fraction`s in BIPM order `[L, M, T, I, Θ, N, J]` |
-| Search | `expression/src/scalar-enumerate.ts`, `functions/src/scalar-mutate.ts`, `functions/src/scalar-search.ts` | `enumerateScalars`, the mutation operators, `searchScalars` |
-| Units | `core/src/types/unit/unit-table.ts`, `Unit.ts` | The supplementary units and spellings already in the table (`nat`, `percent`, `ppm`, `ppb`, `d` as day, `Angstrom`, cycle rates, exact scales, the ISO 80000 solidus). Storage `bit` stays 8 per byte, not an information bit of `ln2` nat |
+| Area          | Home                                                                                                     | Exports that stay                                                                                                                                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Structure     | `expression/src/scalar-structure.ts`                                                                     | `forEachScalar`, `mapScalar`, `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols`, `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`, `ScalarComplexityWeights`                                                         |
+| Batch and fit | `functions/src/scalar-compile.ts`, `functions/src/fit-scalar.ts`                                         | `compileScalar`, `compileScalarGradient`, `fitScalarParameters`                                                                                                                                                                            |
+| Bridge        | `functions/src/scalar-node-bridge.ts`                                                                    | `scalarToNode`, `nodeToScalar`, `simplifyScalar`, `scalarToTex`                                                                                                                                                                            |
+| Front         | `functions/src/pareto-front.ts`, `functions/src/front-export.ts`                                         | `paretoFront`, `scoreFront`, `selectFrontModel`, `frontToLatexTable`, `frontToJson`                                                                                                                                                        |
+| Compare       | `functions/src/numeric-equivalence.ts`                                                                   | `numericallyEquivalent` (`consistent` is evidence, not proof)                                                                                                                                                                              |
+| Dimension     | `functions` scalar-dimension modules, `core/src/types/si-dimension-vector.ts`                            | `inferScalarDimension`, `solveParameterDimensions`, `SiDimensionVector` of seven `Fraction`s in BIPM order `[L, M, T, I, Θ, N, J]`                                                                                                         |
+| Search        | `expression/src/scalar-enumerate.ts`, `functions/src/scalar-mutate.ts`, `functions/src/scalar-search.ts` | `enumerateScalars`, the mutation operators, `searchScalars`                                                                                                                                                                                |
+| Units         | `core/src/types/unit/unit-table.ts`, `Unit.ts`                                                           | The supplementary units and spellings already in the table (`nat`, `percent`, `ppm`, `ppb`, `d` as day, `Angstrom`, cycle rates, exact scales, the ISO 80000 solidus). Storage `bit` stays 8 per byte, not an information bit of `ln2` nat |
 
 `searchScalars` is the one shipped feature that is a search driver rather than a numeric primitive. It stays. This program does not extend it.
 
@@ -103,13 +103,13 @@ Benchmarks: `tools/benchmark/` and `tests/benchmark/` have no matches of either 
 
 These are hits of the inventory regex only. Leave the identifiers alone.
 
-| Class | Why it matched | Examples to leave |
-| --- | --- | --- |
-| `upTo…` | `upt` is the start of `upTo` | `upToConstant` on `numericallyEquivalent`; `upToYotta` in `unit-table.ts` and `unit-exact-definitions.test.ts`; `roundUpToPowerOf2` in `gpu/src/BufferPool.ts`; `expectCloseUpToPermutation` in `tensor/tests/contraction-sequence.test.ts` |
-| Sparse LU | `uptr` / `uPtr` / `luPtr` | `functions/src/algebra/decomposition/lup.ts`, `functions/src/algebra/sparse/csLu.ts`, `matrix/src/backends/WasmLoader.ts`, the signature in `docs/Planning/MATHTS_BUILDING_PLAN.md` |
-| `interrupt` | the word ends in those three letters | `INTERRUPT_CHECK_INTERVAL` in `expression/src/scalar-enumerate.ts`; `interruptExecution` / `interruptCell` / `interruptAll` in `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` (the tag on line 137 is a real hit and is [PR 7](#pr-7--workbook-branding-and-planning-misfits)); `workbook/src/timeout-runner.ts`; `matrix/tests/config.test.ts` |
-| `corrupt` | `corrupt` contains those three letters | FFT, SVD, poly, autograd, workerpool, GPU tests, changelog sentences about corrupted state. The real changelog lines are listed separately and are not these sentences |
-| `upto` | one comment | `expression/src/parse.ts` ("View upto `length` characters") |
+| Class       | Why it matched                         | Examples to leave                                                                                                                                                                                                                                                                                                                                               |
+| ----------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `upTo…`     | `upt` is the start of `upTo`           | `upToConstant` on `numericallyEquivalent`; `upToYotta` in `unit-table.ts` and `unit-exact-definitions.test.ts`; `roundUpToPowerOf2` in `gpu/src/BufferPool.ts`; `expectCloseUpToPermutation` in `tensor/tests/contraction-sequence.test.ts`                                                                                                                     |
+| Sparse LU   | `uptr` / `uPtr` / `luPtr`              | `functions/src/algebra/decomposition/lup.ts`, `functions/src/algebra/sparse/csLu.ts`, `matrix/src/backends/WasmLoader.ts`, the signature in `docs/Planning/MATHTS_BUILDING_PLAN.md`                                                                                                                                                                             |
+| `interrupt` | the word ends in those three letters   | `INTERRUPT_CHECK_INTERVAL` in `expression/src/scalar-enumerate.ts`; `interruptExecution` / `interruptCell` / `interruptAll` in `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` (the tag on line 137 is a real hit and is [PR 7](#pr-7--workbook-branding-and-planning-misfits)); `workbook/src/timeout-runner.ts`; `matrix/tests/config.test.ts` |
+| `corrupt`   | `corrupt` contains those three letters | FFT, SVD, poly, autograd, workerpool, GPU tests, changelog sentences about corrupted state. The real changelog lines are listed separately and are not these sentences                                                                                                                                                                                          |
+| `upto`      | one comment                            | `expression/src/parse.ts` ("View upto `length` characters")                                                                                                                                                                                                                                                                                                     |
 
 `expression/src/scalar-enumerate.ts` is only the interrupt false positive. Do not rename that constant.
 
@@ -117,15 +117,15 @@ These are hits of the inventory regex only. Leave the identifiers alone.
 
 Leave these lines. They are versioned notes for commits that already shipped (`61426de`, `4e4acae`, `0d7853a`, and the 2026-05 autograd and tensor release headings). Rewriting them rewrites the published record. They are the only matches allowed after PR 9.
 
-| File | Line on `8b0192cb` | Heading | Recommendation |
-| --- | --- | --- | --- |
-| `CHANGELOG.md` | 4194 | `## [autograd 0.1.0] - 2026-05-15` | Leave. The package is MathTS autodiff; the note names why 0.1.0 was cut. |
-| `CHANGELOG.md` | 4208 | `## [tensor 0.1.0] - 2026-05-14` | Leave. Same for the tensor package. |
-| `core/CHANGELOG.md` | 7 | `## 0.19.0` | Leave. The units, the solidus, and `createUnit`'s exact scale are the change. |
-| `core/CHANGELOG.md` | 13 | `## 0.18.1` | Leave. The numeric fixes are the change; the last sentence names the review that found them. |
-| `units/CHANGELOG.md` | 7 | `## 0.5.0` | Leave. Same sentence as core 0.19.0, because the units package re-exports that release. |
-| `functions/CHANGELOG.md` | 45 | `## 0.68.4` | Leave. Same review sentence as core 0.18.1. |
-| `functions/CHANGELOG.md` | 53 | `## 0.68.3` | Leave. `gammaincp`, `findRoot`, and `quad` are the change. |
+| File                     | Line on `8b0192cb` | Heading                            | Recommendation                                                                               |
+| ------------------------ | ------------------ | ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| `CHANGELOG.md`           | 4194               | `## [autograd 0.1.0] - 2026-05-15` | Leave. The package is MathTS autodiff; the note names why 0.1.0 was cut.                     |
+| `CHANGELOG.md`           | 4208               | `## [tensor 0.1.0] - 2026-05-14`   | Leave. Same for the tensor package.                                                          |
+| `core/CHANGELOG.md`      | 7                  | `## 0.19.0`                        | Leave. The units, the solidus, and `createUnit`'s exact scale are the change.                |
+| `core/CHANGELOG.md`      | 13                 | `## 0.18.1`                        | Leave. The numeric fixes are the change; the last sentence names the review that found them. |
+| `units/CHANGELOG.md`     | 7                  | `## 0.5.0`                         | Leave. Same sentence as core 0.19.0, because the units package re-exports that release.      |
+| `functions/CHANGELOG.md` | 45                 | `## 0.68.4`                        | Leave. Same review sentence as core 0.18.1.                                                  |
+| `functions/CHANGELOG.md` | 53                 | `## 0.68.3`                        | Leave. `gammaincp`, `findRoot`, and `quad` are the change.                                   |
 
 Do not add a committed allowlist file that repeats these sentences. That file would itself match the search. The reviewer of PR 9 diffs the command's output against this table. Line numbers will drift if `[Unreleased]` grows; match on the heading and the commit hash, not only the line number.
 
@@ -137,15 +137,15 @@ Do not add a committed allowlist file that repeats these sentences. That file wo
 
 These do not belong in MathTS as product surface. The numeric primitives underneath them stay.
 
-| Misfit | Where it shows up | What to do |
-| --- | --- | --- |
+| Misfit                                                                                                                                                | Where it shows up                                                                                                                                                                                                                                                                                                                                             | What to do                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A physics framework on top of tensors: `MetricTensor`, Christoffel symbols, Riemann / Ricci / Einstein tensors, geodesic integrators as a library API | `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md` "Phase 2: UPTF Core"; `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE_PART2.md` (no forbidden token; the whole file is that sketch); `docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md` tiers marked critical for that framework; `autograd/src/forward-grad.ts` citing metric call-sites | Do not add those types. PR 7 strips the framework name and marks the sketches out of scope. PR 4 drops the call-site sentence. PART2 has nothing for the search to find; do not edit it and do not build it. `@danielsimonjr/mathts-tensor` as it exists (rank-N `Float64Array`, einsum, contraction) stays. |
-| Many-body and quantum-number tensor storage: MPS/MPO, DMRG/TEBD/TDVP, fermionic anticommutation, quantum-number block-sparse storage | `docs/roadmap/ITENSOR_PARITY.md`, `docs/roadmap/FUNCTION_GAPS_AUDIT.md`, `TODO.md` around line 2433 | Already decided out of scope. PR 8 says that in MathTS words and deletes the downstream-project name. Do not add the features. |
-| Dimensional analysis on `Tensor` | `docs/integration/upt.md` Q2, repeated in the roadmap | `Tensor` stays unit-free. Scalar SI dimensions stay. PR 6 writes the non-goal into the scalar-search reference and deletes the integration note. Do not add `UnitTensor`. |
-| Adjudication of bridge equations, epistemic status, falsifiers, holdout policy | The deleted roadmap's division of labour | Not a MathTS module. The scalar evaluator does not grow a status verdict. |
-| A foreign symbolic-regression runtime (Python, Julia, a vendored copy of another search package) | The deleted roadmap's non-goals | Still a non-goal. `searchScalars` is the in-tree driver. |
-| Release gating tied to that roadmap | `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `MEMORY.md`, `.github/workflows/release.yml`, `.github/workflows/publish.yml` | The switch is the repository variable `RELEASES_ENABLED`, exactly `true`, otherwise off. PR 5 says that and stops naming the roadmap. This program does not set the variable, does not merge the version PR, and does not delete the workflows. |
-| Schwarzschild workbooks as a framework demo | `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw`, `schwarzschild_example.mtsw` | The geodesic example can stay as a workbook sample. PR 7 removes the framework name from titles and tags. Do not grow a general-relativity package from it. |
+| Many-body and quantum-number tensor storage: MPS/MPO, DMRG/TEBD/TDVP, fermionic anticommutation, quantum-number block-sparse storage                  | `docs/roadmap/ITENSOR_PARITY.md`, `docs/roadmap/FUNCTION_GAPS_AUDIT.md`, `TODO.md` around line 2433                                                                                                                                                                                                                                                           | Already decided out of scope. PR 8 says that in MathTS words and deletes the downstream-project name. Do not add the features.                                                                                                                                                                               |
+| Dimensional analysis on `Tensor`                                                                                                                      | `docs/integration/upt.md` Q2, repeated in the roadmap                                                                                                                                                                                                                                                                                                         | `Tensor` stays unit-free. Scalar SI dimensions stay. PR 6 writes the non-goal into the scalar-search reference and deletes the integration note. Do not add `UnitTensor`.                                                                                                                                    |
+| Adjudication of bridge equations, epistemic status, falsifiers, holdout policy                                                                        | The deleted roadmap's division of labour                                                                                                                                                                                                                                                                                                                      | Not a MathTS module. The scalar evaluator does not grow a status verdict.                                                                                                                                                                                                                                    |
+| A foreign symbolic-regression runtime (Python, Julia, a vendored copy of another search package)                                                      | The deleted roadmap's non-goals                                                                                                                                                                                                                                                                                                                               | Still a non-goal. `searchScalars` is the in-tree driver.                                                                                                                                                                                                                                                     |
+| Release gating tied to that roadmap                                                                                                                   | `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `MEMORY.md`, `.github/workflows/release.yml`, `.github/workflows/publish.yml`                                                                                                                                                                                                                                    | The switch is the repository variable `RELEASES_ENABLED`, exactly `true`, otherwise off. PR 5 says that and stops naming the roadmap. This program does not set the variable, does not merge the version PR, and does not delete the workflows.                                                              |
+| Schwarzschild workbooks as a framework demo                                                                                                           | `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw`, `schwarzschild_example.mtsw`                                                                                                                                                                                                                                                                       | The geodesic example can stay as a workbook sample. PR 7 removes the framework name from titles and tags. Do not grow a general-relativity package from it.                                                                                                                                                  |
 
 ## Rules for every implementation PR
 
@@ -166,16 +166,16 @@ These do not belong in MathTS as product surface. The numeric primitives underne
 
 The units and the `d` / `Angstrom` aliases are already on `main` (core 0.19.0 and the residual-spelling tests). Do not add them again. Do not change storage `bit`.
 
-| File | Action |
-| --- | --- |
-| `core/src/types/unit/unit-table.ts` | The comment "Units UPT delegates (issue #347)" becomes a MathTS comment: supplementary units and astronomical spellings, scales as written in this table. Leave `upToYotta`. |
-| `core/src/types/unit/Unit.ts` | "Dimension vectors of the units added for UPT" becomes "derived dimension vectors; each is a product of the ten base dimensions above". |
-| `core/src/types/si-dimension-vector.ts` | The 7-vector is BIPM order. Delete the Buckingham-routine clause. |
-| `core/tests/types/si-dimension-vector.test.ts` | Header cites BIPM order only. |
-| `core/tests/types/unit-upt-delegation.test.ts` | Rename to `core/tests/types/unit-supplementary.test.ts`. Describe titles say what they assert (`d` is the day, `dm` stays a decimetre, `Angstrom` is `1e-10` m). |
-| `core/tests/types/unit-upt-symbols.test.ts` | Rename to `core/tests/types/unit-symbol-oracle.test.ts`. Rename `UptSymbolRow`, `uptFixture`, `UPT_DIMENSION_ORDER`, `UPT_REGISTRY_SCALES`, `uptScaleResolver`, `uptScaleNumber` to neutral names. The walk, the `bit` exception, and the angle / solid-angle / information allow-list stay. |
-| `core/tests/fixtures/upt-units-symbols.json` | Rename to `core/tests/fixtures/unit-symbol-oracle.json`. Remove the `source` string that names the other repository. Keep `blob` as an opaque oracle id and keep every symbol row. The test still does not fetch. |
-| `.changeset/upt-residual-unit-spellings.md` | Rename to `.changeset/supplementary-unit-spellings.md`. Rewrite the summary without the old name. Keep the frontmatter (`core` and `units`, both patch). |
+| File                                           | Action                                                                                                                                                                                                                                                                                       |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/src/types/unit/unit-table.ts`            | The comment "Units UPT delegates (issue #347)" becomes a MathTS comment: supplementary units and astronomical spellings, scales as written in this table. Leave `upToYotta`.                                                                                                                 |
+| `core/src/types/unit/Unit.ts`                  | "Dimension vectors of the units added for UPT" becomes "derived dimension vectors; each is a product of the ten base dimensions above".                                                                                                                                                      |
+| `core/src/types/si-dimension-vector.ts`        | The 7-vector is BIPM order. Delete the Buckingham-routine clause.                                                                                                                                                                                                                            |
+| `core/tests/types/si-dimension-vector.test.ts` | Header cites BIPM order only.                                                                                                                                                                                                                                                                |
+| `core/tests/types/unit-upt-delegation.test.ts` | Rename to `core/tests/types/unit-supplementary.test.ts`. Describe titles say what they assert (`d` is the day, `dm` stays a decimetre, `Angstrom` is `1e-10` m).                                                                                                                             |
+| `core/tests/types/unit-upt-symbols.test.ts`    | Rename to `core/tests/types/unit-symbol-oracle.test.ts`. Rename `UptSymbolRow`, `uptFixture`, `UPT_DIMENSION_ORDER`, `UPT_REGISTRY_SCALES`, `uptScaleResolver`, `uptScaleNumber` to neutral names. The walk, the `bit` exception, and the angle / solid-angle / information allow-list stay. |
+| `core/tests/fixtures/upt-units-symbols.json`   | Rename to `core/tests/fixtures/unit-symbol-oracle.json`. Remove the `source` string that names the other repository. Keep `blob` as an opaque oracle id and keep every symbol row. The test still does not fetch.                                                                            |
+| `.changeset/upt-residual-unit-spellings.md`    | Rename to `.changeset/supplementary-unit-spellings.md`. Rewrite the summary without the old name. Keep the frontmatter (`core` and `units`, both patch).                                                                                                                                     |
 
 `bun run docs:deps` refreshes `FILE_INVENTORY.md` and `file-inventory.json` for the renamed tests. Do not hand-edit those.
 
@@ -191,13 +191,13 @@ repo-tools check . --docs=docs/Architecture
 
 **Package:** `expression`. **Verdict:** generalize.
 
-| File | Action |
-| --- | --- |
-| `expression/src/scalar-builder.ts` | The header describes the builder and the `ln` / `log` lowering. It does not say another project lowers an `ExprNode` onto it. |
-| `expression/src/index.ts` | The barrel comment says scalar trees, no formula string. |
+| File                                 | Action                                                                                                                                                         |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expression/src/scalar-builder.ts`   | The header describes the builder and the `ln` / `log` lowering. It does not say another project lowers an `ExprNode` onto it.                                  |
+| `expression/src/index.ts`            | The barrel comment says scalar trees, no formula string.                                                                                                       |
 | `expression/src/scalar-structure.ts` | Weights default to 1. The total is rounded with `Math.round`. `scalarComplexity`'s number-node field is "weight of one number node". No external project name. |
-| `docs/api/expression.md` | The `scalarCanonical` row says "canonical form and stable dedup key". That row sits above the generated-index marker. |
-| `docs/Architecture/OVERVIEW.md` | The scalar-structure bullet describes flattening and the rewrite rules. Drop the "PySR-style" adjective. |
+| `docs/api/expression.md`             | The `scalarCanonical` row says "canonical form and stable dedup key". That row sits above the generated-index marker.                                          |
+| `docs/Architecture/OVERVIEW.md`      | The scalar-structure bullet describes flattening and the rewrite rules. Drop the "PySR-style" adjective.                                                       |
 
 Do not edit `expression/src/scalar-enumerate.ts`.
 
@@ -212,22 +212,22 @@ repo-tools check . --docs=docs/Architecture
 
 **Package:** `functions`. **Verdict:** generalize. **Changesets:** rename nothing; rewrite the summary sentence. Same bumps.
 
-| File | Action |
-| --- | --- |
-| `functions/src/index.ts` | Barrel comment: scalar trees. `ln` lowers to natural `log`, `log` to `log10`. A formula string is rejected. |
-| `functions/src/pareto-front.ts` | Header and TSDoc state the score and selection rules from [What the code already is](#what-the-code-already-is). Delete the link to `pysr/sr.py` and the commit pin. |
-| `functions/src/scalar-mutate.ts` | "Default mutation weights" and the negation-probability comment. No roadmap section number. |
-| `functions/src/scalar-search.ts` | The generator's options (`seeds`, `fractionReplaced`, `initialTemperature` 3.17, adaptive-parsimony scaling 1040, migrant cap, frequency window) are documented as this function's defaults. |
-| `functions/src/scalar-compile.ts` | The constants comment says fitted constants are still `symbol` nodes, passed through to each `evaluate`. |
-| `functions/src/numeric-equivalence.ts` | Header: sampling comparison; agreement is evidence, not proof. Do not rename `upToConstant`. |
-| `functions/src/front-export.ts` | Header: LaTeX tabular and JSON for a scored front. |
-| `functions/README.md` | The five bullets that name the external project describe the same exports without that name. |
-| `functions/tests/pareto-front.test.ts` | Header: scores were computed from the formula in the module comment and checked with `Object.is`. |
-| `functions/tests/scalar-dimension.test.ts` | The two titles become the concrete system: `M * c`, `M` in kilograms, target `m s^-2 kg`, solved `c` is `m s^-2`; `dimensionlessOnly` makes that system inconsistent. |
-| `docs/api/functions.md` | Section "Scalar evaluation & Pareto selection", above the generated index. "PySR-oriented helpers", "PySR log-loss scores", and "Row plus PySR score" become MathTS descriptions. Leave the `upToConstant?` row; that cell is the false-positive class. |
-| `docs/reference/functions.md` | The `scoreFront` description above the generated index. Then `bun run docs:functions` so `docs/reference/functions.html` matches. |
-| `docs/Architecture/DATAFLOW.md` | Section title "1b. ScalarNode compile and Pareto selection". Drop the parenthetical. |
-| `.changeset/pareto-front-m4.md`, `scalar-mutate-m12.md`, `scalar-search-m13.md`, `fit-scalar-parameters-m7.md`, `front-export-m15.md` | One summary sentence each, same behavior, no external name. Frontmatter unchanged. |
+| File                                                                                                                                  | Action                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `functions/src/index.ts`                                                                                                              | Barrel comment: scalar trees. `ln` lowers to natural `log`, `log` to `log10`. A formula string is rejected.                                                                                                                                             |
+| `functions/src/pareto-front.ts`                                                                                                       | Header and TSDoc state the score and selection rules from [What the code already is](#what-the-code-already-is). Delete the link to `pysr/sr.py` and the commit pin.                                                                                    |
+| `functions/src/scalar-mutate.ts`                                                                                                      | "Default mutation weights" and the negation-probability comment. No roadmap section number.                                                                                                                                                             |
+| `functions/src/scalar-search.ts`                                                                                                      | The generator's options (`seeds`, `fractionReplaced`, `initialTemperature` 3.17, adaptive-parsimony scaling 1040, migrant cap, frequency window) are documented as this function's defaults.                                                            |
+| `functions/src/scalar-compile.ts`                                                                                                     | The constants comment says fitted constants are still `symbol` nodes, passed through to each `evaluate`.                                                                                                                                                |
+| `functions/src/numeric-equivalence.ts`                                                                                                | Header: sampling comparison; agreement is evidence, not proof. Do not rename `upToConstant`.                                                                                                                                                            |
+| `functions/src/front-export.ts`                                                                                                       | Header: LaTeX tabular and JSON for a scored front.                                                                                                                                                                                                      |
+| `functions/README.md`                                                                                                                 | The five bullets that name the external project describe the same exports without that name.                                                                                                                                                            |
+| `functions/tests/pareto-front.test.ts`                                                                                                | Header: scores were computed from the formula in the module comment and checked with `Object.is`.                                                                                                                                                       |
+| `functions/tests/scalar-dimension.test.ts`                                                                                            | The two titles become the concrete system: `M * c`, `M` in kilograms, target `m s^-2 kg`, solved `c` is `m s^-2`; `dimensionlessOnly` makes that system inconsistent.                                                                                   |
+| `docs/api/functions.md`                                                                                                               | Section "Scalar evaluation & Pareto selection", above the generated index. "PySR-oriented helpers", "PySR log-loss scores", and "Row plus PySR score" become MathTS descriptions. Leave the `upToConstant?` row; that cell is the false-positive class. |
+| `docs/reference/functions.md`                                                                                                         | The `scoreFront` description above the generated index. Then `bun run docs:functions` so `docs/reference/functions.html` matches.                                                                                                                       |
+| `docs/Architecture/DATAFLOW.md`                                                                                                       | Section title "1b. ScalarNode compile and Pareto selection". Drop the parenthetical.                                                                                                                                                                    |
+| `.changeset/pareto-front-m4.md`, `scalar-mutate-m12.md`, `scalar-search-m13.md`, `fit-scalar-parameters-m7.md`, `front-export-m15.md` | One summary sentence each, same behavior, no external name. Frontmatter unchanged.                                                                                                                                                                      |
 
 `s2r-regression-roots-functions.md` names a test file that PR 4 renames. Leave it for PR 4.
 
@@ -252,15 +252,15 @@ If a listed test path does not exist under that exact name, run the file that al
 
 **Verdict:** generalize. The tests pin real defects and a real extension point. The stories around them go.
 
-| File | Action |
-| --- | --- |
-| `functions/tests/upt-review-2026-10-15.test.ts` | Rename to `functions/tests/numeric-tail-review-2026-10-15.test.ts`. Header states the bugs (`gammaincp` far tail, `findRoot` `NaN` endpoint, `quad` `atol`) without a review attribution. |
-| `functions/tests/upt-review-2-2026-10-15.test.ts` | Rename to `functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts`. Header states `symbolicEqual`, the Student-t tail, `ols` equilibration, and `Fraction.fromNumber`. |
-| `functions/tests/linear-regression-stderr.test.ts`, `solveodesystem-fixed-step-count.test.ts`, `gauss-legendre4.test.ts`, `propagate-uncertainty.test.ts` | Keep the numeric claim. Delete the sentence that names the other project. Gauss–Legendre stays cited as Hairer/Lubich/Wanner and Sanz-Serna. The uncertainty example stays `x*y` at `(2, 3)` with those sigmas. |
-| `expression/tests/node-extension.test.ts` | The test still subclasses `createNode` and checks `isNode`, `forEach`, `map`, `traverse`, `clone`, `toJSON`, `_toString`. The stand-in class is a generic child-plus-tag node, not a bridge-equation type. The header describes that, and nothing else. |
-| `autograd/tests/ad-wasm-interop.test.ts` | Describe title: AD over a forward op that did not run on the tape. Drop the proposal section number. |
-| `autograd/src/forward-grad.ts` | Delete the sentence about metric call-sites. Keep the statement that a function of `add` / `sub` / `mul` / `scale` stays on the traced path. Match the old line count. |
-| `.changeset/s2r-regression-roots-functions.md` | The summary names the new test filename. No other edit. |
+| File                                                                                                                                                      | Action                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `functions/tests/upt-review-2026-10-15.test.ts`                                                                                                           | Rename to `functions/tests/numeric-tail-review-2026-10-15.test.ts`. Header states the bugs (`gammaincp` far tail, `findRoot` `NaN` endpoint, `quad` `atol`) without a review attribution.                                                               |
+| `functions/tests/upt-review-2-2026-10-15.test.ts`                                                                                                         | Rename to `functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts`. Header states `symbolicEqual`, the Student-t tail, `ols` equilibration, and `Fraction.fromNumber`.                                                                           |
+| `functions/tests/linear-regression-stderr.test.ts`, `solveodesystem-fixed-step-count.test.ts`, `gauss-legendre4.test.ts`, `propagate-uncertainty.test.ts` | Keep the numeric claim. Delete the sentence that names the other project. Gauss–Legendre stays cited as Hairer/Lubich/Wanner and Sanz-Serna. The uncertainty example stays `x*y` at `(2, 3)` with those sigmas.                                         |
+| `expression/tests/node-extension.test.ts`                                                                                                                 | The test still subclasses `createNode` and checks `isNode`, `forEach`, `map`, `traverse`, `clone`, `toJSON`, `_toString`. The stand-in class is a generic child-plus-tag node, not a bridge-equation type. The header describes that, and nothing else. |
+| `autograd/tests/ad-wasm-interop.test.ts`                                                                                                                  | Describe title: AD over a forward op that did not run on the tape. Drop the proposal section number.                                                                                                                                                    |
+| `autograd/src/forward-grad.ts`                                                                                                                            | Delete the sentence about metric call-sites. Keep the statement that a function of `add` / `sub` / `mul` / `scale` stays on the traced path. Match the old line count.                                                                                  |
+| `.changeset/s2r-regression-roots-functions.md`                                                                                                            | The summary names the new test filename. No other edit.                                                                                                                                                                                                 |
 
 `docs:deps` updates the file census for the two renames.
 
@@ -281,12 +281,12 @@ repo-tools check . --docs=docs/Architecture
 
 **Verdict:** generalize the gate, drop the roadmap as its reason. **No workflow behavior change.** `RELEASES_ENABLED` stays the only switch. The version-PR step still runs. Tagging, GitHub Releases, and publish stay off while the variable is unset.
 
-| File | Action |
-| --- | --- |
-| `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md` | Replace "until the PySR roadmap is done" with: leave the version PR unmerged; do not set `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. Keep the rest of the release paragraph (secret name `NPM`, `NODE_AUTH_TOKEN`, no provenance). |
-| `MEMORY.md` | Same sentence in "Release discipline". The "Where to look" bullet points at `expression/src/scalar-structure.ts`, `functions/src/scalar-compile.ts`, and `functions/src/pareto-front.ts`. It does not point at a roadmap file. |
-| `.github/workflows/release.yml`, `.github/workflows/publish.yml` | The header comments say the same thing. Do not change job logic, `if:` conditions, or secrets. |
-| `CHANGELOG.md` line 97 | Under `[Unreleased]`. "three earlier merges left the counts of six documents stale". Do not touch lines 4194 and 4208. |
+| File                                                             | Action                                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`                      | Replace "until the PySR roadmap is done" with: leave the version PR unmerged; do not set `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. Keep the rest of the release paragraph (secret name `NPM`, `NODE_AUTH_TOKEN`, no provenance). |
+| `MEMORY.md`                                                      | Same sentence in "Release discipline". The "Where to look" bullet points at `expression/src/scalar-structure.ts`, `functions/src/scalar-compile.ts`, and `functions/src/pareto-front.ts`. It does not point at a roadmap file.                                 |
+| `.github/workflows/release.yml`, `.github/workflows/publish.yml` | The header comments say the same thing. Do not change job logic, `if:` conditions, or secrets.                                                                                                                                                                 |
+| `CHANGELOG.md` line 97                                           | Under `[Unreleased]`. "three earlier merges left the counts of six documents stale". Do not touch lines 4194 and 4208.                                                                                                                                         |
 
 This PR does not add `docs/reference/scalar-search.md`. That file arrives in PR 6. Pointing MEMORY at source files keeps PR 5 from depending on it.
 
@@ -315,17 +315,17 @@ Then delete:
 
 Retarget every remaining link to those paths. The sentence that remains does not use a forbidden token and does not claim the deleted file still exists.
 
-| File | Action |
-| --- | --- |
-| `README.md` | Remove the integration-notes row. |
-| `docs/README.md` | Remove the integration row and the five roadmap/plan rows. Add one row for `docs/reference/scalar-search.md`. |
-| `ROADMAP.md` | Delete the icebox bullet. The work is shipped; an icebox entry is the wrong list. Do not add a new roadmap. |
-| `docs/plans/COMPLETION_PLAN.md` | This plan's unit work and its review sign-off are already on `main`. Replace source-of-truth links with "scalar-search reference and the unit table". Leave the historical sentence that names a line in a deleted plan only if it can be rewritten without the token; otherwise delete that sentence. Do not open a new implementation PR from it. |
-| `docs/plans/CORE_SPRINT_PLAN.md` | The sprint is done. "Returns to" and the status-paragraph instruction no longer name a roadmap. Do not edit milestone checkboxes that are not in this file. |
-| `docs/plans/CLONES_PHASE_6_PLAN.md`, `docs/roadmap/CLONES_REMAINING.md` | The clone procedure is the text already in those files plus `CLONES_REFACTOR_PLAN.md`. Delete the pointer at the removed roadmap, including the note about a duplicated section inside it. |
-| `docs/audit/2026-10-22-codebase-audit.md` | Keep the findings (five Mulberry32 copies, the reuse map, the open decisions that were later implemented). Section 7's title and the sentences that name the external projects become "scalar-search milestones M1, M3, M4, as of this audit". Do not restatus the audit; it is a 2026-10-22 snapshot. |
-| `docs/api/expression.md` | Add the node-extension paragraph if PR 2 did not already leave the table accurate. One section, no token. |
-| `docs/Architecture/DATAFLOW.md` | One sentence under section 1b: the tape does not inspect the forward implementation. Only if PR 3's heading edit has landed; otherwise include the heading edit here. |
+| File                                                                    | Action                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                                                             | Remove the integration-notes row.                                                                                                                                                                                                                                                                                                                   |
+| `docs/README.md`                                                        | Remove the integration row and the five roadmap/plan rows. Add one row for `docs/reference/scalar-search.md`.                                                                                                                                                                                                                                       |
+| `ROADMAP.md`                                                            | Delete the icebox bullet. The work is shipped; an icebox entry is the wrong list. Do not add a new roadmap.                                                                                                                                                                                                                                         |
+| `docs/plans/COMPLETION_PLAN.md`                                         | This plan's unit work and its review sign-off are already on `main`. Replace source-of-truth links with "scalar-search reference and the unit table". Leave the historical sentence that names a line in a deleted plan only if it can be rewritten without the token; otherwise delete that sentence. Do not open a new implementation PR from it. |
+| `docs/plans/CORE_SPRINT_PLAN.md`                                        | The sprint is done. "Returns to" and the status-paragraph instruction no longer name a roadmap. Do not edit milestone checkboxes that are not in this file.                                                                                                                                                                                         |
+| `docs/plans/CLONES_PHASE_6_PLAN.md`, `docs/roadmap/CLONES_REMAINING.md` | The clone procedure is the text already in those files plus `CLONES_REFACTOR_PLAN.md`. Delete the pointer at the removed roadmap, including the note about a duplicated section inside it.                                                                                                                                                          |
+| `docs/audit/2026-10-22-codebase-audit.md`                               | Keep the findings (five Mulberry32 copies, the reuse map, the open decisions that were later implemented). Section 7's title and the sentences that name the external projects become "scalar-search milestones M1, M3, M4, as of this audit". Do not restatus the audit; it is a 2026-10-22 snapshot.                                              |
+| `docs/api/expression.md`                                                | Add the node-extension paragraph if PR 2 did not already leave the table accurate. One section, no token.                                                                                                                                                                                                                                           |
+| `docs/Architecture/DATAFLOW.md`                                         | One sentence under section 1b: the tape does not inspect the forward implementation. Only if PR 3's heading edit has landed; otherwise include the heading edit here.                                                                                                                                                                               |
 
 `bun run docs:roadmap-check` after the `ROADMAP.md` edit. `repo-tools check` after any edit under `docs/Architecture`. No vitest unless a code fence in the new reference is wrong; the reference has no executable fence that imports a deleted module.
 
@@ -333,14 +333,14 @@ Retarget every remaining link to those paths. The sentence that remains does not
 
 **Verdict:** drop the framework name. Generalize the workbook format. Flag the geometry sketches as misfits and do not build them.
 
-| File | Action |
-| --- | --- |
-| `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw` | Title and tags describe Schwarzschild geodesics. Remove the framework name and the `UPTF` tag. Keep the cells. |
-| `docs/Architecture/Workbook/schwarzschild_example.mtsw` | Institution and tags drop the framework name. |
-| `docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md` | The format sentence names theoretical physics research and tensor mathematics. It does not name a framework. |
-| `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` | The tags on the sample metadata drop `UPTF`. Do not edit `interruptExecution`, `interruptCell`, or `interruptAll`. |
-| `docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md` | Tensor work that matches the shipped `tensor` package stays described as MathTS. Rows whose priority was the framework (differential geometry, curvature, "UPTF critical", the closing sentence about powering that framework) are marked out of scope. Do not add those modules. |
-| `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md` | "Phase 2: UPTF Core" is retitled and closed: `MetricTensor`, Christoffel, and curvature sketches are not a MathTS API and are not scheduled. The expression-tree phase is untouched. |
+| File                                                           | Action                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw`      | Title and tags describe Schwarzschild geodesics. Remove the framework name and the `UPTF` tag. Keep the cells.                                                                                                                                                                    |
+| `docs/Architecture/Workbook/schwarzschild_example.mtsw`        | Institution and tags drop the framework name.                                                                                                                                                                                                                                     |
+| `docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md`  | The format sentence names theoretical physics research and tensor mathematics. It does not name a framework.                                                                                                                                                                      |
+| `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` | The tags on the sample metadata drop `UPTF`. Do not edit `interruptExecution`, `interruptCell`, or `interruptAll`.                                                                                                                                                                |
+| `docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md`     | Tensor work that matches the shipped `tensor` package stays described as MathTS. Rows whose priority was the framework (differential geometry, curvature, "UPTF critical", the closing sentence about powering that framework) are marked out of scope. Do not add those modules. |
+| `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md`        | "Phase 2: UPTF Core" is retitled and closed: `MetricTensor`, Christoffel, and curvature sketches are not a MathTS API and are not scheduled. The expression-tree phase is untouched.                                                                                              |
 
 `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE_PART2.md` has no forbidden token. Leave the file. Do not implement it.
 
@@ -350,12 +350,12 @@ Retarget every remaining link to those paths. The sentence that remains does not
 
 **Verdict:** generalize the non-goal. Do not add the physics features.
 
-| File | Action |
-| --- | --- |
-| `docs/roadmap/ITENSOR_PARITY.md` | MPS/MPO, DMRG/TEBD/TDVP, fermionic anticommutation, and quantum-number block-sparse storage stay out of `mathts-tensor`. Say that. Delete the downstream-project name (five matches). |
-| `docs/roadmap/FUNCTION_GAPS_AUDIT.md` | The same non-goals, plus the "interface declarations consumed downstream" sentence, which becomes "public type exports used outside this repository". |
-| `docs/roadmap/FUNCTION_GAPS.md` | The landed AD and decomposition work is described as MathTS work. "Direct unblock for UPT Proposal 8" becomes "closes reductions and elementwise AD for a loss". "not blockers for UPT" becomes "not blockers for the landed slices". |
-| `TODO.md` | The out-of-scope sentence near the ITensor proposal (MPS/MPO and quantum-number storage) matches PR 8's wording in `ITENSOR_PARITY.md`. The other `TODO.md` hits of the naive regex are `corrupt` and stay. |
+| File                                  | Action                                                                                                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/roadmap/ITENSOR_PARITY.md`      | MPS/MPO, DMRG/TEBD/TDVP, fermionic anticommutation, and quantum-number block-sparse storage stay out of `mathts-tensor`. Say that. Delete the downstream-project name (five matches).                                                 |
+| `docs/roadmap/FUNCTION_GAPS_AUDIT.md` | The same non-goals, plus the "interface declarations consumed downstream" sentence, which becomes "public type exports used outside this repository".                                                                                 |
+| `docs/roadmap/FUNCTION_GAPS.md`       | The landed AD and decomposition work is described as MathTS work. "Direct unblock for UPT Proposal 8" becomes "closes reductions and elementwise AD for a loss". "not blockers for UPT" becomes "not blockers for the landed slices". |
+| `TODO.md`                             | The out-of-scope sentence near the ITensor proposal (MPS/MPO and quantum-number storage) matches PR 8's wording in `ITENSOR_PARITY.md`. The other `TODO.md` hits of the naive regex are `corrupt` and stay.                           |
 
 `bun run docs:roadmap-check`. No vitest.
 
@@ -376,89 +376,89 @@ bun run docs:roadmap-check
 
 Every file the acceptance search hits on `8b0192cb`, with its match count. "Both" means the naive regex also hits a false-positive class in the same file; only the real tokens are in scope.
 
-| File | Matches | Verdict | PR |
-| --- | ---: | --- | --- |
-| `docs/roadmap/PYSR_INFORMED_ROADMAP.md` | 145 | drop | 6 |
-| `docs/integration/upt.md` | 29 | drop, after the three facts move | 6 |
-| `core/tests/types/unit-upt-symbols.test.ts` | 25 | rename; both (`upTo` is not in this count) | 1 |
-| `docs/plans/COMPLETION_PLAN.md` | 23 | rename the pointers; the unit work is done | 6 |
-| `docs/plans/PYSR_PHASES_3_5_PLAN.md` | 16 | drop | 6 |
-| `docs/plans/PYSR_M4_PLAN.md` | 14 | drop | 6 |
-| `functions/src/scalar-search.ts` | 10 | generalize | 3 |
-| `functions/src/pareto-front.ts` | 9 | generalize | 3 |
-| `docs/plans/CORE_SPRINT_PLAN.md` | 8 | rename the pointers | 6 |
-| `docs/audit/2026-10-22-codebase-audit.md` | 8 | generalize the findings, rename the section | 6 |
-| `docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md` | 8 | drop the framework priority; misfit for geometry | 7 |
-| `expression/tests/node-extension.test.ts` | 7 | generalize | 4 |
-| `docs/README.md` | 6 | drop the rows, add the scalar-search row | 6 |
-| `ROADMAP.md` | 5 | drop the icebox bullet | 6 |
-| `functions/README.md` | 5 | generalize | 3 |
-| `docs/roadmap/ITENSOR_PARITY.md` | 5 | generalize the non-goal; misfit | 8 |
-| `docs/plans/PYSR_M1_PLAN.md` | 5 | drop | 6 |
-| `docs/Architecture/dependency-graph.yaml` | 5 | regenerate, do not hand-edit | 3 |
-| `docs/Architecture/DEPENDENCY_GRAPH.md` | 5 | regenerate, do not hand-edit | 3 |
-| `docs/Architecture/dependency-graph.json` | 5 | regenerate, do not hand-edit | 3 |
-| `functions/src/scalar-mutate.ts` | 4 | generalize | 3 |
-| `expression/src/scalar-structure.ts` | 4 | generalize | 2 |
-| `docs/roadmap/FUNCTION_GAPS.md` | 4 | generalize | 8 |
-| `docs/Architecture/FILE_INVENTORY.md` | 4 | regenerate on test renames | 1, 4 |
-| `docs/Architecture/file-inventory.json` | 4 | regenerate on test renames | 1, 4 |
-| `docs/roadmap/FUNCTION_GAPS_AUDIT.md` | 3 | generalize the non-goal; misfit | 8 |
-| `docs/plans/CLONES_PHASE_6_PLAN.md` | 3 | rename the pointer | 6 |
-| `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw` | 3 | rename titles and tags | 7 |
-| `docs/api/functions.md` | 3 | generalize the hand section; both for `upToConstant` | 3 |
-| `core/tests/types/unit-upt-delegation.test.ts` | 3 | rename | 1 |
-| `CHANGELOG.md` | 3 | rewrite the Unreleased bullet; leave 4194 and 4208 | 5, and never for the two release lines |
-| `autograd/tests/ad-wasm-interop.test.ts` | 3 | generalize | 4 |
-| `MEMORY.md` | 2 | generalize the gate | 5 |
-| `functions/tests/scalar-dimension.test.ts` | 2 | generalize titles | 3 |
-| `functions/CHANGELOG.md` | 2 | leave; historical | — |
-| `docs/roadmap/CLONES_REMAINING.md` | 2 | rename the pointer | 6 |
-| `docs/plans/PYSR_M3_PLAN.md` | 2 | drop | 6 |
-| `docs/Architecture/Workbook/schwarzschild_example.mtsw` | 2 | rename tags | 7 |
-| `core/CHANGELOG.md` | 2 | leave; historical | — |
-| `AGENTS.md` | 2 | generalize the gate | 5 |
-| `units/CHANGELOG.md` | 1 | leave; historical | — |
-| `TODO.md` | 1 | generalize; both for `corrupt` | 8 |
-| `README.md` | 1 | drop the row | 6 |
-| `.github/workflows/release.yml` | 1 | generalize the comment | 5 |
-| `.github/workflows/publish.yml` | 1 | generalize the comment | 5 |
-| `functions/tests/upt-review-2-2026-10-15.test.ts` | 1 | rename | 4 |
-| `functions/tests/upt-review-2026-10-15.test.ts` | 1 | rename | 4 |
-| `functions/tests/solveodesystem-fixed-step-count.test.ts` | 1 | generalize the header | 4 |
-| `functions/tests/propagate-uncertainty.test.ts` | 1 | generalize the header | 4 |
-| `functions/tests/pareto-front.test.ts` | 1 | generalize the header | 3 |
-| `functions/tests/linear-regression-stderr.test.ts` | 1 | generalize the header | 4 |
-| `functions/tests/gauss-legendre4.test.ts` | 1 | generalize the header | 4 |
-| `functions/src/scalar-compile.ts` | 1 | generalize | 3 |
-| `functions/src/numeric-equivalence.ts` | 1 | generalize; both for `upToConstant` | 3 |
-| `functions/src/index.ts` | 1 | generalize | 3 |
-| `functions/src/front-export.ts` | 1 | generalize | 3 |
-| `expression/src/scalar-builder.ts` | 1 | generalize | 2 |
-| `expression/src/index.ts` | 1 | generalize | 2 |
-| `docs/reference/functions.md` | 1 | generalize, then regenerate the html | 3 |
-| `docs/reference/functions.html` | 1 | regenerate from the markdown | 3 |
-| `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md` | 1 | misfit; close the phase | 7 |
-| `docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md` | 1 | generalize the format sentence | 7 |
-| `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` | 1 | drop the tag; both for `interrupt*` | 7 |
-| `docs/Architecture/OVERVIEW.md` | 1 | generalize | 2 |
-| `docs/Architecture/DATAFLOW.md` | 1 | generalize | 3 |
-| `docs/api/expression.md` | 1 | generalize | 2 |
-| `core/tests/types/si-dimension-vector.test.ts` | 1 | generalize | 1 |
-| `core/tests/fixtures/upt-units-symbols.json` | 1 | rename; drop the `source` string | 1 |
-| `core/src/types/unit/Unit.ts` | 1 | generalize | 1 |
-| `core/src/types/unit/unit-table.ts` | 1 | generalize; both for `upToYotta` | 1 |
-| `core/src/types/si-dimension-vector.ts` | 1 | generalize | 1 |
-| `CONTRIBUTING.md` | 1 | generalize the gate | 5 |
-| `CLAUDE.md` | 1 | generalize the gate | 5 |
-| `.changeset/upt-residual-unit-spellings.md` | 1 | rename | 1 |
-| `.changeset/scalar-search-m13.md` | 1 | rename the summary | 3 |
-| `.changeset/scalar-mutate-m12.md` | 1 | rename the summary | 3 |
-| `.changeset/s2r-regression-roots-functions.md` | 1 | rename the test path in the summary | 4 |
-| `.changeset/pareto-front-m4.md` | 1 | rename the summary | 3 |
-| `.changeset/front-export-m15.md` | 1 | rename the summary | 3 |
-| `.changeset/fit-scalar-parameters-m7.md` | 1 | rename the summary | 3 |
-| `autograd/src/forward-grad.ts` | 1 | generalize; both for `corrupt` on another line | 4 |
+| File                                                           | Matches | Verdict                                              | PR                                     |
+| -------------------------------------------------------------- | ------: | ---------------------------------------------------- | -------------------------------------- |
+| `docs/roadmap/PYSR_INFORMED_ROADMAP.md`                        |     145 | drop                                                 | 6                                      |
+| `docs/integration/upt.md`                                      |      29 | drop, after the three facts move                     | 6                                      |
+| `core/tests/types/unit-upt-symbols.test.ts`                    |      25 | rename; both (`upTo` is not in this count)           | 1                                      |
+| `docs/plans/COMPLETION_PLAN.md`                                |      23 | rename the pointers; the unit work is done           | 6                                      |
+| `docs/plans/PYSR_PHASES_3_5_PLAN.md`                           |      16 | drop                                                 | 6                                      |
+| `docs/plans/PYSR_M4_PLAN.md`                                   |      14 | drop                                                 | 6                                      |
+| `functions/src/scalar-search.ts`                               |      10 | generalize                                           | 3                                      |
+| `functions/src/pareto-front.ts`                                |       9 | generalize                                           | 3                                      |
+| `docs/plans/CORE_SPRINT_PLAN.md`                               |       8 | rename the pointers                                  | 6                                      |
+| `docs/audit/2026-10-22-codebase-audit.md`                      |       8 | generalize the findings, rename the section          | 6                                      |
+| `docs/Architecture/Workbook/MATHTS_ENHANCEMENT_ROADMAP.md`     |       8 | drop the framework priority; misfit for geometry     | 7                                      |
+| `expression/tests/node-extension.test.ts`                      |       7 | generalize                                           | 4                                      |
+| `docs/README.md`                                               |       6 | drop the rows, add the scalar-search row             | 6                                      |
+| `ROADMAP.md`                                                   |       5 | drop the icebox bullet                               | 6                                      |
+| `functions/README.md`                                          |       5 | generalize                                           | 3                                      |
+| `docs/roadmap/ITENSOR_PARITY.md`                               |       5 | generalize the non-goal; misfit                      | 8                                      |
+| `docs/plans/PYSR_M1_PLAN.md`                                   |       5 | drop                                                 | 6                                      |
+| `docs/Architecture/dependency-graph.yaml`                      |       5 | regenerate, do not hand-edit                         | 3                                      |
+| `docs/Architecture/DEPENDENCY_GRAPH.md`                        |       5 | regenerate, do not hand-edit                         | 3                                      |
+| `docs/Architecture/dependency-graph.json`                      |       5 | regenerate, do not hand-edit                         | 3                                      |
+| `functions/src/scalar-mutate.ts`                               |       4 | generalize                                           | 3                                      |
+| `expression/src/scalar-structure.ts`                           |       4 | generalize                                           | 2                                      |
+| `docs/roadmap/FUNCTION_GAPS.md`                                |       4 | generalize                                           | 8                                      |
+| `docs/Architecture/FILE_INVENTORY.md`                          |       4 | regenerate on test renames                           | 1, 4                                   |
+| `docs/Architecture/file-inventory.json`                        |       4 | regenerate on test renames                           | 1, 4                                   |
+| `docs/roadmap/FUNCTION_GAPS_AUDIT.md`                          |       3 | generalize the non-goal; misfit                      | 8                                      |
+| `docs/plans/CLONES_PHASE_6_PLAN.md`                            |       3 | rename the pointer                                   | 6                                      |
+| `docs/Architecture/Workbook/schwarzschild-geodesics.mtsw`      |       3 | rename titles and tags                               | 7                                      |
+| `docs/api/functions.md`                                        |       3 | generalize the hand section; both for `upToConstant` | 3                                      |
+| `core/tests/types/unit-upt-delegation.test.ts`                 |       3 | rename                                               | 1                                      |
+| `CHANGELOG.md`                                                 |       3 | rewrite the Unreleased bullet; leave 4194 and 4208   | 5, and never for the two release lines |
+| `autograd/tests/ad-wasm-interop.test.ts`                       |       3 | generalize                                           | 4                                      |
+| `MEMORY.md`                                                    |       2 | generalize the gate                                  | 5                                      |
+| `functions/tests/scalar-dimension.test.ts`                     |       2 | generalize titles                                    | 3                                      |
+| `functions/CHANGELOG.md`                                       |       2 | leave; historical                                    | —                                      |
+| `docs/roadmap/CLONES_REMAINING.md`                             |       2 | rename the pointer                                   | 6                                      |
+| `docs/plans/PYSR_M3_PLAN.md`                                   |       2 | drop                                                 | 6                                      |
+| `docs/Architecture/Workbook/schwarzschild_example.mtsw`        |       2 | rename tags                                          | 7                                      |
+| `core/CHANGELOG.md`                                            |       2 | leave; historical                                    | —                                      |
+| `AGENTS.md`                                                    |       2 | generalize the gate                                  | 5                                      |
+| `units/CHANGELOG.md`                                           |       1 | leave; historical                                    | —                                      |
+| `TODO.md`                                                      |       1 | generalize; both for `corrupt`                       | 8                                      |
+| `README.md`                                                    |       1 | drop the row                                         | 6                                      |
+| `.github/workflows/release.yml`                                |       1 | generalize the comment                               | 5                                      |
+| `.github/workflows/publish.yml`                                |       1 | generalize the comment                               | 5                                      |
+| `functions/tests/upt-review-2-2026-10-15.test.ts`              |       1 | rename                                               | 4                                      |
+| `functions/tests/upt-review-2026-10-15.test.ts`                |       1 | rename                                               | 4                                      |
+| `functions/tests/solveodesystem-fixed-step-count.test.ts`      |       1 | generalize the header                                | 4                                      |
+| `functions/tests/propagate-uncertainty.test.ts`                |       1 | generalize the header                                | 4                                      |
+| `functions/tests/pareto-front.test.ts`                         |       1 | generalize the header                                | 3                                      |
+| `functions/tests/linear-regression-stderr.test.ts`             |       1 | generalize the header                                | 4                                      |
+| `functions/tests/gauss-legendre4.test.ts`                      |       1 | generalize the header                                | 4                                      |
+| `functions/src/scalar-compile.ts`                              |       1 | generalize                                           | 3                                      |
+| `functions/src/numeric-equivalence.ts`                         |       1 | generalize; both for `upToConstant`                  | 3                                      |
+| `functions/src/index.ts`                                       |       1 | generalize                                           | 3                                      |
+| `functions/src/front-export.ts`                                |       1 | generalize                                           | 3                                      |
+| `expression/src/scalar-builder.ts`                             |       1 | generalize                                           | 2                                      |
+| `expression/src/index.ts`                                      |       1 | generalize                                           | 2                                      |
+| `docs/reference/functions.md`                                  |       1 | generalize, then regenerate the html                 | 3                                      |
+| `docs/reference/functions.html`                                |       1 | regenerate from the markdown                         | 3                                      |
+| `docs/Planning/MATHTS_PRIORITY_IMPLEMENTATION_GUIDE.md`        |       1 | misfit; close the phase                              | 7                                      |
+| `docs/Architecture/Workbook/MATHTS_WORKBOOK_SPECIFICATION.md`  |       1 | generalize the format sentence                       | 7                                      |
+| `docs/Architecture/Workbook/MATHTS_WORKBENCH_SPECIFICATION.md` |       1 | drop the tag; both for `interrupt*`                  | 7                                      |
+| `docs/Architecture/OVERVIEW.md`                                |       1 | generalize                                           | 2                                      |
+| `docs/Architecture/DATAFLOW.md`                                |       1 | generalize                                           | 3                                      |
+| `docs/api/expression.md`                                       |       1 | generalize                                           | 2                                      |
+| `core/tests/types/si-dimension-vector.test.ts`                 |       1 | generalize                                           | 1                                      |
+| `core/tests/fixtures/upt-units-symbols.json`                   |       1 | rename; drop the `source` string                     | 1                                      |
+| `core/src/types/unit/Unit.ts`                                  |       1 | generalize                                           | 1                                      |
+| `core/src/types/unit/unit-table.ts`                            |       1 | generalize; both for `upToYotta`                     | 1                                      |
+| `core/src/types/si-dimension-vector.ts`                        |       1 | generalize                                           | 1                                      |
+| `CONTRIBUTING.md`                                              |       1 | generalize the gate                                  | 5                                      |
+| `CLAUDE.md`                                                    |       1 | generalize the gate                                  | 5                                      |
+| `.changeset/upt-residual-unit-spellings.md`                    |       1 | rename                                               | 1                                      |
+| `.changeset/scalar-search-m13.md`                              |       1 | rename the summary                                   | 3                                      |
+| `.changeset/scalar-mutate-m12.md`                              |       1 | rename the summary                                   | 3                                      |
+| `.changeset/s2r-regression-roots-functions.md`                 |       1 | rename the test path in the summary                  | 4                                      |
+| `.changeset/pareto-front-m4.md`                                |       1 | rename the summary                                   | 3                                      |
+| `.changeset/front-export-m15.md`                               |       1 | rename the summary                                   | 3                                      |
+| `.changeset/fit-scalar-parameters-m7.md`                       |       1 | rename the summary                                   | 3                                      |
+| `autograd/src/forward-grad.ts`                                 |       1 | generalize; both for `corrupt` on another line       | 4                                      |
 
 81 files. Counts are `rg -c` matches, so one line with two tokens counts twice (`AGENTS.md` is the roadmap name and the filename on the next line).
 
