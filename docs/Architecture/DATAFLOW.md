@@ -33,7 +33,7 @@ which uses 40+ duck-typed type checks.
 
 ---
 
-## 1b. ScalarNode compile and Pareto selection (PySR)
+## 1b. ScalarNode compile and Pareto selection
 
 ```text
 ScalarNode tree (expression scalar-structure toolkit)

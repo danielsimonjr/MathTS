@@ -1,5 +1,5 @@
 /**
- * Guarded numerical equivalence for scalar trees (UPT §9 level 5).
+ * Sampling comparison of two scalar trees.
  *
  * Samples random points in a caller-supplied domain, evaluates both trees with
  * {@link compileScalar}, and compares with {@link nearlyEqual} from core.

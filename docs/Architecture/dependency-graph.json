@@ -9620,7 +9620,7 @@
         "functions": ["fitScalarParameters"]
       },
       "functions/src/front-export.ts": {
-        "description": "LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).",
+        "description": "LaTeX tabular and JSON export for a scored Pareto front.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -11855,7 +11855,7 @@
         "functions": ["orth"]
       },
       "functions/src/numeric-equivalence.ts": {
-        "description": "Guarded numerical equivalence for scalar trees (UPT §9 level 5).",
+        "description": "Sampling comparison of two scalar trees.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -11958,7 +11958,7 @@
         "functions": ["nelderMead", "gradientDescent", "levenbergMarquardt"]
       },
       "functions/src/pareto-front.ts": {
-        "description": "Pareto hall of fame, PySR log-loss scores, and model selection.",
+        "description": "Pareto hall of fame, log-loss scores, and model selection.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
@@ -12183,7 +12183,7 @@
         "constants": ["scalar", "NUMERIC_LITERAL"]
       },
       "functions/src/scalar-mutate.ts": {
-        "description": "PySR-style mutation and crossover operators over {@link ScalarNode} trees (M12).",
+        "description": "Mutation and crossover operators over {@link ScalarNode} trees.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -12286,7 +12286,7 @@
         "functions": ["createScalarNodeBridge"]
       },
       "functions/src/scalar-search.ts": {
-        "description": "PySR-style evolutionary search over {@link ScalarNode} trees (M13).",
+        "description": "Evolutionary search over {@link ScalarNode} trees.",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -43324,7 +43324,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 204304,
+    "totalLinesOfCode": 204314,
     "totalExports": 6412,
     "totalClasses": 60,
     "totalInterfaces": 570,
