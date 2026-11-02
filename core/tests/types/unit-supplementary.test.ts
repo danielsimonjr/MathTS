@@ -1,7 +1,7 @@
 /**
- * Issue #347: the units, the parsing and the cycle conversion UPT needs in
- * order to delegate to MathTS. Storage `bit` stays a BIT (1 byte = 8 bit);
- * an information bit is `ln2` nat, registered with `createUnit`'s exact scale.
+ * Supplementary units, ISO 80000 solidus parsing, unicode spellings, and cycle
+ * conversion. Storage `bit` stays a BIT (1 byte = 8 bit); an information bit is
+ * `ln2` nat, registered with `createUnit`'s exact scale.
  */
 import { describe, it, expect } from 'vitest';
 import { Unit } from '../../src/types/unit';
@@ -43,7 +43,7 @@ describe('unicode unit spellings', () => {
     expect(new Unit(1, '%').toNumeric('ppm')).toBe(10000);
   });
 
-  it('accepts UPT day spelling d without breaking decimetre dm', () => {
+  it('treats d as the day without breaking decimetre dm', () => {
     expect(new Unit(1, 'd').toNumeric('s')).toBe(86400);
     expect(new Unit(1, 'dm').toNumeric('m')).toBe(0.1);
     expect(new Unit(1, 'day').toNumeric('s')).toBe(86400);
@@ -64,7 +64,7 @@ describe('cycles and radians', () => {
   });
 });
 
-describe('units UPT was keeping locally', () => {
+describe('supplementary built-in units', () => {
   it('parses the prefixed spellings that share a letter with a new unit', () => {
     expect(new Unit(1, 'GPa').toNumeric('Pa')).toBe(1e9);
     expect(new Unit(1, 'Pm').toNumeric('m')).toBe(1e15);

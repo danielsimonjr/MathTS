@@ -2221,8 +2221,8 @@ export const createUnitClass = /* #__PURE__ */ factory(
       SOLID_ANGLE: {
         dimensions: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       },
-      // Dimension vectors of the units added for UPT. Each is a product of the
-      // ten base dimensions above, not a new fundamental dimension.
+      // Derived dimension vectors; each is a product of the ten base dimensions above,
+      // not a new fundamental dimension.
       VELOCITY: {
         dimensions: [0, 1, -1, 0, 0, 0, 0, 0, 0, 0],
       },

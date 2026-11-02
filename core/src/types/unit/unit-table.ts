@@ -433,7 +433,7 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   B: { base: 'BIT', prefixes: 'BINARY_SHORT', scale: '8' }, // byte, 8 bits
   bytes: { base: 'BIT', prefixes: 'BINARY_LONG', scale: '8' },
 
-  // --- Units UPT delegates (issue #347). Scales match data/units.json there. ---
+  // --- Supplementary units and astronomical spellings; scales as written in this table. ---
   // `bit` stays the storage unit (1 byte = 8 bit). A nat is the coherent
   // dimensionless unit of information; an information bit is `ln2` nat, registered
   // with createUnit's `exact` rather than by redefining storage `bit`.

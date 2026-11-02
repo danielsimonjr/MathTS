@@ -243,8 +243,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `core/tests/types/si-dimension-vector.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit-exact-definitions.test.ts`                                 | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit-external-reference.test.ts`                                | @danielsimonjr/mathts-core           | tests    | test        |
-| `core/tests/types/unit-upt-delegation.test.ts`                                    | @danielsimonjr/mathts-core           | tests    | test        |
-| `core/tests/types/unit-upt-symbols.test.ts`                                       | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/unit-supplementary.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
+| `core/tests/types/unit-symbol-oracle.test.ts`                                     | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit.test.ts`                                                   | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/core-unit.test.ts`                                         | @danielsimonjr/mathts-core           | tests    | test        |
 | `core/tests/types/unit/create-unit-pollution.test.ts`                             | @danielsimonjr/mathts-core           | tests    | test        |
