@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.2.7
+
+### Patch Changes
+
+- ce66065: Phase 6 P6-6: consolidate worker pool `exec` / `execFunction` via `_timedExec` (clone reduction).
+- 7e71f31: Phase 6 P6-8: shared `tensordotRange` kernel in workerpool (clone reduction).
+- e59fe83: Consolidate log-gamma and accurate erfc/normal-CDF scalars for hypothesis, distributions, and worker kernels; remove duplicate worker log-gamma.
+- 19c4ba7: Export `mulberry32`, `boxMuller`, and `rowMajorStrides` from core; deduplicate tensor, functions, parallel, and worker copies.
+- 0573f58: Share worker scalar sum/prod/norm shell (clones plan PR-H).
+- 2761c87: Comment-only: FFT header in `fft-core.ts` now references `functions/src/signal/fft-core-f64.ts` (no runtime change).
+- c33fca2: Phase 6 P6-7: consolidate map/filter/sort/reduce parallel envelope via `runParallel` (clone reduction).
+- 747c740: Sprint 2R batch 2: dedupe workerpool `map`/`filter` dispatch (`runChunks`), Float64/Int32 chunk helpers (`chunkTyped`, `chunkPairTyped`), and multi-index iteration (`forEachMultiIndex` for the worker bundle and `@internal` export).
+
 ## 0.2.6
 
 ### Patch Changes
