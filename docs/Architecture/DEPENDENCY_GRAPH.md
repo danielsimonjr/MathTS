@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 46 files
 - **functions/unit**: 2 files
-- **functions/utils**: 34 files
+- **functions/utils**: 35 files
 - **functions/wasm**: 13 files
 - **expression**: 11 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 49             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 505            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 506            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 481            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -1326,11 +1326,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                      | Type               |
-| ----------------------------- | ---------------------------- | ------------------ |
-| `../types/DenseMatrix.js`     | `DenseMatrix`                | Import             |
-| `../types/dense/reduction.js` | `* as reduction`             | Import             |
-| `./Backend.js`                | `MatrixBackend, BackendType` | Import (type-only) |
+| File                          | Imports                            | Type               |
+| ----------------------------- | ---------------------------------- | ------------------ |
+| `../types/DenseMatrix.js`     | `DenseMatrix, denseContiguousData` | Import             |
+| `../types/dense/reduction.js` | `* as reduction`                   | Import             |
+| `./Backend.js`                | `MatrixBackend, BackendType`       | Import (type-only) |
 
 **Exports:**
 
@@ -2002,7 +2002,7 @@ graph LR
 **Exports:**
 
 - Classes: `DenseMatrix`
-- Functions: `isDenseMatrix`
+- Functions: `isDenseMatrix`, `denseContiguousData`
 
 ---
 
@@ -2666,6 +2666,7 @@ graph LR
 | ------------------------------ | --------------- | ------------------ |
 | `../../utils/object.js`        | `clone`         | Import             |
 | `../../utils/factory.js`       | `factory`       | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 
 **Exports:**
@@ -2674,14 +2675,16 @@ graph LR
 
 ---
 
-### `functions/src/algebra/decomposition/qr.ts` - Calculate the Matrix QR decomposition. Matrix `A` is decomposed in
+### `functions/src/algebra/decomposition/qr.ts` - Householder step loop for plain number storage. Scalar work per step uses the
 
 **Internal Dependencies:**
 
 | File                           | Imports         | Type               |
 | ------------------------------ | --------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`       | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js`            | `isFraction`    | Import             |
 
 **Exports:**
 
@@ -6666,11 +6669,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports     | Type   |
-| --------------------- | ----------- | ------ |
-| `../utils/is.js`      | `isMatrix`  | Import |
-| `../utils/number.js`  | `isInteger` | Import |
-| `../utils/factory.js` | `factory`   | Import |
+| File                     | Imports         | Type   |
+| ------------------------ | --------------- | ------ |
+| `../utils/is.js`         | `isMatrix`      | Import |
+| `../utils/number.js`     | `isInteger`     | Import |
+| `../utils/factory.js`    | `factory`       | Import |
+| `../utils/typed-impl.js` | `findTypedImpl` | Import |
 
 **Exports:**
 
@@ -6842,11 +6846,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                  | Imports                 | Type   |
-| --------------------- | ----------------------- | ------ |
-| `../utils/array.js`   | `arraySize`             | Import |
-| `../utils/factory.js` | `factory`               | Import |
-| `../types.js`         | `TypedFunction, Matrix` | Import |
+| File                     | Imports                 | Type   |
+| ------------------------ | ----------------------- | ------ |
+| `../utils/array.js`      | `arraySize`             | Import |
+| `../utils/factory.js`    | `factory`               | Import |
+| `../utils/typed-impl.js` | `findTypedImpl`         | Import |
+| `../types.js`            | `TypedFunction, Matrix` | Import |
 
 **Exports:**
 
@@ -8730,6 +8735,7 @@ graph LR
 | `../utils/collection.js`         | `reduce, containsCollections` | Import             |
 | `./extreme.js`                   | `reduceExtreme`               | Import             |
 | `../utils/factory.js`            | `factory`                     | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`               | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
 | `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
@@ -8769,6 +8775,7 @@ graph LR
 | `../utils/factory.js`            | `factory`             | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
+| `../utils/typed-impl.js`         | `findTypedImpl`       | Import             |
 
 **Exports:**
 
@@ -8785,6 +8792,7 @@ graph LR
 | `../utils/collection.js`         | `containsCollections, reduce` | Import             |
 | `./extreme.js`                   | `reduceExtreme`               | Import             |
 | `../utils/factory.js`            | `factory`                     | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`               | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage`         | Import             |
 | `../core/function/typed.js`      | `TypedFunction`               | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`               | Import (type-only) |
@@ -8819,6 +8827,7 @@ graph LR
 | -------------------------------- | --------------------- | ------------------ |
 | `../utils/collection.js`         | `deepForEach, reduce` | Import             |
 | `../utils/factory.js`            | `factory`             | Import             |
+| `../utils/typed-impl.js`         | `findTypedImpl`       | Import             |
 | `./utils/improveErrorMessage.js` | `improveErrorMessage` | Import             |
 | `../core/function/typed.js`      | `TypedFunction`       | Import (type-only) |
 | `../core/config.js`              | `ConfigOptions`       | Import (type-only) |
@@ -11580,6 +11589,20 @@ graph LR
 **Exports:**
 
 - Constants: `createTypeOf`
+
+---
+
+### `functions/src/utils/typed-impl.ts` - The implementation `typed` dispatches to for `signature`, resolved once so that a hot loop can
+
+**Internal Dependencies:**
+
+| File                        | Imports         | Type               |
+| --------------------------- | --------------- | ------------------ |
+| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+
+**Exports:**
+
+- Functions: `findTypedImpl`
 
 ---
 
@@ -18565,11 +18588,11 @@ graph LR
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 244 files    | 12 files   |
-| `functions/src/core/function/typed`                    | 3 files      | 203 files  |
+| `functions/src/core/function/typed`                    | 3 files      | 204 files  |
 | `functions/src/index`                                  | 92 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
-| `functions/src/utils/is`                               | 0 files      | 55 files   |
+| `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -19109,7 +19132,7 @@ graph TD
         N343[customs]
         N344[emitter]
         N345[factory]
-        N346[...24 more]
+        N346[...25 more]
     end
 
     subgraph Functions/wasm
@@ -19453,17 +19476,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1234   |
+| Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 203584 |
-| Total Exports           | 6410   |
+| Total Lines of Code     | 204299 |
+| Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |
 | Total Interfaces        | 570    |
-| Total Functions         | 2070   |
+| Total Functions         | 2072   |
 | Total Type Guards       | 161    |
 | Total Enums             | 0      |
-| Type-only Imports       | 620    |
+| Type-only Imports       | 621    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

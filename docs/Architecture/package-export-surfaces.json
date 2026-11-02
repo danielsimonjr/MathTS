@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-31",
+  "generated": "2026-11-02",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2539,6 +2539,7 @@
       "findPeaks",
       "FindPeaksOptions",
       "findRoot",
+      "findTypedImpl",
       "fineStructure",
       "firls",
       "firstRadiation",
@@ -3903,6 +3904,7 @@
       "DEFAULT_CONFIG",
       "DEFAULT_EXTENDED_HINTS",
       "defaultWasmLocation",
+      "denseContiguousData",
       "DenseMatrix",
       "destroyGlobalGPU",
       "destroyGlobalGPUBackend",
