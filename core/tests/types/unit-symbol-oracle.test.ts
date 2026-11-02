@@ -1,6 +1,6 @@
 /**
- * Vendored UPT unit symbols (blob 6acf72b69f29e28534fa03dd76b6e41e17a6808b,
- * universal-physics-tensor/data/units.json). Walks every symbol without fetching at runtime.
+ * Unit symbol oracle (blob 6acf72b69f29e28534fa03dd76b6e41e17a6808b). Walks every
+ * symbol without fetching at runtime.
  */
 import { describe, it, expect } from 'vitest';
 import { Unit } from '../../src/types/unit';
@@ -14,20 +14,19 @@ import {
   namedExactScale,
   toSiDimensionVector,
 } from '../../src/index';
-import uptFixture from '../fixtures/upt-units-symbols.json';
+import symbolOracleFixture from '../fixtures/unit-symbol-oracle.json';
 
-type UptSymbolRow = { symbol: string; scale: string; dimension: Record<string, number> };
-const { blob, symbols } = uptFixture as unknown as {
+type SymbolOracleRow = { symbol: string; scale: string; dimension: Record<string, number> };
+const { blob, symbols } = symbolOracleFixture as unknown as {
   blob: string;
-  source: string;
-  symbols: readonly UptSymbolRow[];
+  symbols: readonly SymbolOracleRow[];
 };
 
-/** UPT dimension keys in the `[L, M, T, I, Θ, N, J]` order of `toSiDimensionVector`. */
-const UPT_DIMENSION_ORDER = ['L', 'M', 'T', 'I', 'Theta', 'N', 'J'] as const;
+/** Oracle dimension keys in the `[L, M, T, I, Θ, N, J]` order of `toSiDimensionVector`. */
+const ORACLE_SI_DIMENSION_ORDER = ['L', 'M', 'T', 'I', 'Theta', 'N', 'J'] as const;
 
 /**
- * UPT treats angle, solid angle and information as dimensionless; MathTS tracks them as extra
+ * The oracle treats angle, solid angle and information as dimensionless; MathTS tracks them as extra
  * exponents (`Unit.dimensions` indexes 7 ANGLE, 8 BIT, 9 SOLID_ANGLE). A symbol is listed here
  * only when it is expected to carry one, so any other symbol with a stray extra exponent fails.
  */
@@ -45,22 +44,22 @@ const MATHTS_EXTRA_DIMENSIONS: Readonly<Record<string, readonly [number, number,
 };
 
 /**
- * Symbols whose scale differs on purpose. UPT `bit` is the information bit (ln 2 nat); MathTS
+ * Symbols whose scale differs on purpose. The oracle information `bit` is ln 2 nat; MathTS
  * `bit` is the storage bit and stays separate (`1 byte = 8 bit`).
  */
 const SCALE_EXCEPTIONS: ReadonlySet<string> = new Set(['bit']);
 
-/** UPT `constant-rows.ts` spellings referenced in the vendored scale expressions. */
-const UPT_REGISTRY_SCALES: Readonly<Record<string, string>> = Object.freeze({
+/** Named constants referenced in the oracle scale expressions. */
+const ORACLE_REGISTRY_SCALES: Readonly<Record<string, string>> = Object.freeze({
   e: '1.602176634e-19',
   m_u: '1.66053906892e-27',
   M_sun: '1.989e30',
   Msun_iau: '1.988409870698051e30',
 });
 
-function uptScaleResolver(name: string) {
-  if (Object.prototype.hasOwnProperty.call(UPT_REGISTRY_SCALES, name)) {
-    return readUnitScale(UPT_REGISTRY_SCALES[name]!);
+function oracleScaleResolver(name: string) {
+  if (Object.prototype.hasOwnProperty.call(ORACLE_REGISTRY_SCALES, name)) {
+    return readUnitScale(ORACLE_REGISTRY_SCALES[name]!);
   }
   const fromNamed = namedExactScale(name);
   if (fromNamed !== undefined) return fromNamed;
@@ -69,29 +68,29 @@ function uptScaleResolver(name: string) {
   return undefined;
 }
 
-function uptScaleNumber(scale: string): number {
-  return exactScaleToNumber(readScaleExpression(scale, uptScaleResolver));
+function oracleScaleNumber(scale: string): number {
+  return exactScaleToNumber(readScaleExpression(scale, oracleScaleResolver));
 }
 
-describe('UPT units.json symbol walk', () => {
+describe('unit symbol oracle walk', () => {
   it('pins the vendored blob SHA', () => {
     expect(blob).toBe('6acf72b69f29e28534fa03dd76b6e41e17a6808b');
     expect(symbols.length).toBe(104);
   });
 
-  it('keeps storage bit separate from UPT information bit (ln2 nat)', () => {
+  it('keeps storage bit separate from the information bit (ln2 nat)', () => {
     expect(new Unit(1, 'byte').to('bit').toString()).toBe('8 bit');
     expect(getUnitRow('bit')!.base).toBe('BIT');
     expect(unitRowValue('bit')).toBe(1);
-    expect(uptScaleNumber('ln2')).toBe(exactScaleToNumber(LN2_EXACT_SCALE));
+    expect(oracleScaleNumber('ln2')).toBe(exactScaleToNumber(LN2_EXACT_SCALE));
   });
 
-  it('parses every UPT symbol with Unit and matches its scale and SI dimension', () => {
+  it('parses every oracle symbol with Unit and matches its scale and SI dimension', () => {
     for (const { symbol, scale, dimension } of symbols) {
       const unit = new Unit(1, symbol);
 
       if (!SCALE_EXCEPTIONS.has(symbol)) {
-        expect(unit.value, `${symbol} scale`).toBe(uptScaleNumber(scale));
+        expect(unit.value, `${symbol} scale`).toBe(oracleScaleNumber(scale));
       }
 
       const extra = MATHTS_EXTRA_DIMENSIONS[symbol] ?? [0, 0, 0];
@@ -103,12 +102,12 @@ describe('UPT units.json symbol walk', () => {
       const exponents = toSiDimensionVector(unit.dimensions, { ignoreExtra: true }).map((f) =>
         f.toNumber()
       );
-      const expected = UPT_DIMENSION_ORDER.map((key) => dimension[key] ?? 0);
+      const expected = ORACLE_SI_DIMENSION_ORDER.map((key) => dimension[key] ?? 0);
       expect(exponents, `${symbol} dimension`).toEqual(expected);
     }
   });
 
-  it('only allow-lists symbols that UPT lists', () => {
+  it('only allow-lists symbols that the oracle lists', () => {
     const listed = new Set(symbols.map((row) => row.symbol));
     for (const symbol of [...Object.keys(MATHTS_EXTRA_DIMENSIONS), ...SCALE_EXCEPTIONS]) {
       expect(listed.has(symbol), symbol).toBe(true);
@@ -116,7 +115,7 @@ describe('UPT units.json symbol walk', () => {
   });
 });
 
-describe('UPT ln2 exact scale pin', () => {
+describe('ln2 exact scale pin', () => {
   it('readScaleExpression(ln2) equals LN2_EXACT_SCALE', () => {
     expect(readScaleExpression('ln2')).toEqual(LN2_EXACT_SCALE);
     expect(exactScaleToNumber(LN2_EXACT_SCALE)).toBe(Math.LN2);

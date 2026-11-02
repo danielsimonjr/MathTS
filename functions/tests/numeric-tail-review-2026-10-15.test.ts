@@ -1,6 +1,6 @@
 /**
- * Defects found by the Universal-Physics-Tensor MathTS-usage review of
- * 2026-10-15, each proved red before its fix.
+ * Regression pins for `gammaincp` far upper tail, `findRoot` with a NaN endpoint,
+ * and `quad` absolute tolerance — each proved red before its fix.
  */
 import { describe, expect, it } from 'vitest';
 import { findRoot, gammaincp, quad } from '../src/index.js';

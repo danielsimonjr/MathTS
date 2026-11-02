@@ -1,10 +1,10 @@
 /**
- * PySR commit `72a9ab9`: `calculate_scores` and `idx_model_selection`.
+ * Scores and selection match the formulas documented on `pareto-front.ts`.
  *
  * Formula: score_i = -ln(loss_i / loss_{i-1}) / (c_i - c_{i-1}); first row 0;
  * loss_i <= 0 → +Infinity. Modes: accuracy, score, best (factor 1.5).
- * Every expected score was computed by hand from the formula, then checked with
- * `Object.is` against the literals below.
+ * Every expected score was computed from the formula in the module comment and
+ * checked with `Object.is` against the literals below.
  */
 import { describe, expect, it } from 'vitest';
 import {

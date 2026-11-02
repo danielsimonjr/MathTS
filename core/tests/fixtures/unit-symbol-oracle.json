@@ -1,6 +1,5 @@
 {
   "blob": "6acf72b69f29e28534fa03dd76b6e41e17a6808b",
-  "source": "universal-physics-tensor/data/units.json",
   "symbols": [
     {
       "symbol": "m",
@@ -116,7 +115,7 @@
       }
     },
     {
-      "symbol": "Ω",
+      "symbol": "\u03a9",
       "scale": "1",
       "dimension": {
         "L": 2,
@@ -309,7 +308,7 @@
       }
     },
     {
-      "symbol": "Å",
+      "symbol": "\u00c5",
       "scale": "1e-10",
       "dimension": {
         "L": 1
@@ -405,7 +404,7 @@
       }
     },
     {
-      "symbol": "°R",
+      "symbol": "\u00b0R",
       "scale": "5/9",
       "dimension": {
         "Theta": 1

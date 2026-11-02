@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-01",
-  "totalFiles": 2073,
+  "generated": "2026-11-02",
+  "totalFiles": 2075,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 778,
+    "test": 780,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 778,
+    "tests": 780,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 886,
+    "@danielsimonjr/mathts-functions": 887,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 115,
+    "@danielsimonjr/mathts-matrix": 116,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 22,
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "tests",
       "disposition": "test",
-      "loc": 140
+      "loc": 135
     },
     {
       "file": "autograd/tests/assert-same-shape.test.ts",
@@ -821,7 +821,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 252
+      "loc": 251
     },
     {
       "file": "core/src/types/unit-definitions.ts",
@@ -1258,18 +1258,18 @@
       "loc": 86
     },
     {
-      "file": "core/tests/types/unit-upt-delegation.test.ts",
+      "file": "core/tests/types/unit-supplementary.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
       "loc": 112
     },
     {
-      "file": "core/tests/types/unit-upt-symbols.test.ts",
+      "file": "core/tests/types/unit-symbol-oracle.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 124
     },
     {
       "file": "core/tests/types/unit.test.ts",
@@ -4405,7 +4405,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 600
+      "loc": 597
     },
     {
       "file": "expression/src/transform/and.transform.ts",
@@ -4944,7 +4944,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 195
+      "loc": 171
     },
     {
       "file": "expression/tests/node-group-render.test.ts",
@@ -5308,7 +5308,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 479
+      "loc": 497
     },
     {
       "file": "functions/src/algebra/decomposition/schur.ts",
@@ -5406,7 +5406,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 338
+      "loc": 361
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 343
+      "loc": 365
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -6974,7 +6974,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 354
+      "loc": 364
     },
     {
       "file": "functions/src/plain/number/arithmetic.ts",
@@ -8479,7 +8479,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 87
     },
     {
       "file": "functions/src/types.ts",
@@ -9256,7 +9256,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 56
     },
     {
       "file": "functions/tests/evaluate.test.ts",
@@ -9984,7 +9984,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 139
+      "loc": 138
     },
     {
       "file": "functions/tests/geometry-consumers-oracle.test.ts",
@@ -10327,7 +10327,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 107
+      "loc": 106
     },
     {
       "file": "functions/tests/linprog-feasible.test.ts",
@@ -10463,6 +10463,13 @@
       "loc": 74
     },
     {
+      "file": "functions/tests/numeric-tail-review-2026-10-15.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 77
+    },
+    {
       "file": "functions/tests/numeric.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -10509,7 +10516,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 172
+      "loc": 326
     },
     {
       "file": "functions/tests/p7-lup-number-path.test.ts",
@@ -10544,7 +10551,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 215
+      "loc": 232
     },
     {
       "file": "functions/tests/p7-sort-number-path.test.ts",
@@ -10678,6 +10685,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 920
+    },
+    {
+      "file": "functions/tests/qr-fraction-error.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 84
     },
     {
       "file": "functions/tests/qz-hardening.test.ts",
@@ -10964,7 +10978,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 43
+      "loc": 42
     },
     {
       "file": "functions/tests/sort-as-wasm.test.ts",
@@ -11105,6 +11119,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 122
+    },
+    {
+      "file": "functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 104
     },
     {
       "file": "functions/tests/taylor-exact.test.ts",
@@ -11392,20 +11413,6 @@
       "area": "tests",
       "disposition": "test",
       "loc": 62
-    },
-    {
-      "file": "functions/tests/upt-review-2-2026-10-15.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 104
-    },
-    {
-      "file": "functions/tests/upt-review-2026-10-15.test.ts",
-      "package": "@danielsimonjr/mathts-functions",
-      "area": "tests",
-      "disposition": "test",
-      "loc": 77
     },
     {
       "file": "functions/tests/utils-factory.test.ts",
@@ -11944,7 +11951,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 137
+      "loc": 146
     },
     {
       "file": "matrix/src/types/dense/reduction.ts",
@@ -12120,6 +12127,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 224
+    },
+    {
+      "file": "matrix/tests/dense-multiply-zero-inf.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 20
     },
     {
       "file": "matrix/tests/DenseMatrix.test.ts",

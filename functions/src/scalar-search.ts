@@ -1,11 +1,11 @@
 /**
- * PySR-style evolutionary search over {@link ScalarNode} trees (M13).
+ * Evolutionary search over {@link ScalarNode} trees.
  *
  * `populations` islands each evolve by tournament selection and
  * {@link weightedMutation}. Each generation breeds `populationSize` offspring per
  * island from tournament winners, evaluates them in one batch, and keeps the best
  * `populationSize` distinct trees of parents and offspring (elitist truncation, not
- * PySR's age-based replacement). After every generation the islands exchange their
+ * age-based replacement). After every generation the islands exchange their
  * best trees (migration). A hall of fame shared by every island keeps the best tree
  * per complexity; its Pareto front is reported through {@link paretoFront} and
  * {@link scoreFront}.
@@ -63,7 +63,7 @@ export interface ScalarSearchOptions {
   readonly maxEvaluations: number;
   /** Second cap on tree evaluations, reported as `'max-candidates'`. */
   readonly maxCandidates?: number;
-  /** Trees injected into the initial population (PySR `guesses`); the grammar filters them. */
+  /** Trees injected into the initial population (`seeds`); the grammar filters them. */
   readonly seeds?: readonly ScalarNode[];
   /** Constant-perturbation scale handed to the mutations. Default 0.25. */
   readonly perturbationFactor?: number;
@@ -78,7 +78,7 @@ export interface ScalarSearchOptions {
   /**
    * Expected share of each island replaced by another island's best trees after every
    * generation, in [0, 1]. The count is the expectation rounded at random. Default 0.00036
-   * (PySR `fraction_replaced`).
+   * (`fractionReplaced`).
    */
   readonly fractionReplaced?: number;
   /**
@@ -87,7 +87,7 @@ export interface ScalarSearchOptions {
    * on when `populations > 1`, so a single population stays the M13a search.
    */
   readonly annealing?: boolean;
-  /** Starting temperature when `annealing` is on. Default 3.17 (PySR `alpha`). */
+  /** Starting temperature when `annealing` is on. Default 3.17. */
   readonly initialTemperature?: number;
   /**
    * Rank tournament contestants by `loss * exp(adaptiveParsimonyScaling * f)`, where `f`
@@ -95,7 +95,7 @@ export interface ScalarSearchOptions {
    * sizes lose, so the population explores every size. Default: on when `populations > 1`.
    */
   readonly adaptiveParsimony?: boolean;
-  /** Strength of the adaptive-parsimony penalty. Default 1040 (PySR). */
+  /** Strength of the adaptive-parsimony penalty. Default 1040. */
   readonly adaptiveParsimonyScaling?: number;
   /**
    * Evaluate every generation's trees on worker threads (M14) once `observed` has at least
@@ -159,10 +159,10 @@ const MUTATION_ATTEMPTS = 10;
 /** The mutation temperature is multiplied by this after every generation. */
 const TEMPERATURE_DECAY = 0.995;
 
-/** Migrants are drawn from the best this-many trees of the donor island (PySR `topn`). */
+/** Migrants are drawn from the best this-many trees of the donor island. */
 const MIGRANT_POOL = 12;
 
-/** Evaluations that the complexity frequencies remember (PySR's running window). */
+/** Evaluations that the complexity frequencies remember (running window). */
 const FREQUENCY_WINDOW = 100_000;
 
 function paramNames(problem: ScalarSearchProblem, grammar: ScalarGrammar): readonly string[] {
@@ -404,7 +404,7 @@ async function evaluateNodes(
  * @internal Exported for the unit tests, not the package barrel.
  *
  * How often each tree size occurred among the last {@link FREQUENCY_WINDOW}
- * evaluations, shared by every island (PySR's `RunningSearchStatistics`).
+ * evaluations, shared by every island.
  */
 export class ComplexityFrequency {
   private readonly counts = new Map<number, number>();
@@ -433,7 +433,7 @@ export class ComplexityFrequency {
  * @internal Exported for the unit tests, not the package barrel.
  *
  * Ordering key of a contestant under adaptive parsimony: `log(loss) + scaling * share`,
- * the logarithm of PySR's `loss * exp(scaling * share)`. Working in log space keeps the
+ * the logarithm of `loss * exp(scaling * share)`. Working in log space keeps the
  * order while `exp(1040 * share)` would overflow to `Infinity` for a share above 0.68
  * and turn a zero loss into `NaN`. A zero loss counts as the smallest positive double so
  * that two perfect trees are still told apart by how crowded their size is.

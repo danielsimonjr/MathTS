@@ -9,8 +9,7 @@
  *   5 LUMINOUS_INTENSITY, 6 AMOUNT_OF_SUBSTANCE,
  *   7 ANGLE, 8 BIT, 9 SOLID_ANGLE
  *
- * The 7-vector used by dimensional analysis (BIPM base quantities, and the
- * order UPT's Buckingham routine uses) is
+ * The 7-vector used by dimensional analysis (BIPM base quantities) is
  *
  *   [L, M, T, I, Θ, N, J]
  *

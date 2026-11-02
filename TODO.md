@@ -2430,10 +2430,10 @@ Detail — Open Actions items 1–8:
                             `axisLabels.length` vs `shape.length`; fixed by skipping
                             label propagation when `keepDims=true`.
 
-                          Out of scope per the proposal §8: MPS/MPO/DMRG/TEBD/TDVP
-                          (live in UPT or a sibling), quantum-number block-sparse storage,
-                          fermionic anticommutation, HDF5 I/O, dtypes beyond Float64,
-                          compile-time shape inference in the TS type system.
+                          Out of scope per the proposal §8: MPS/MPO, DMRG/TEBD/TDVP,
+                          fermionic anticommutation, and quantum-number block-sparse storage
+                          stay out of `@danielsimonjr/mathts-tensor`; also HDF5 I/O, dtypes
+                          beyond Float64, compile-time shape inference in the TS type system.
 
 ## 📓 Scientific Workbook (`.mtsw`)
 

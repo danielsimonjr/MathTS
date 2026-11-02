@@ -1,11 +1,11 @@
 # MathTS Scientific Workbook
-# Universal Physics Tensor Framework - Schwarzschild Geodesics
+# Schwarzschild geodesics (sample workbook)
 # https://github.com/danielsimonjr/mathts
 
 version: "1.0"
 
 metadata:
-  title: "UPTF: Schwarzschild Geodesics"
+  title: "Schwarzschild Geodesics"
   author: "Daniel Simon Jr."
   created: 2025-12-05T20:00:00Z
   description: |
@@ -16,7 +16,7 @@ metadata:
     - Symbolic computation of Christoffel symbols
     - 3D visualization of geodesics using Three.js
     - Test cells for verification
-  tags: [UPTF, general-relativity, geodesics, schwarzschild, tensor-physics]
+  tags: [general-relativity, geodesics, schwarzschild, tensor-physics]
   license: MIT
 
 runtime:

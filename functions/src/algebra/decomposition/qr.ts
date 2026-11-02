@@ -1,6 +1,7 @@
 import { factory } from '../../utils/factory.js';
 import { findTypedImpl } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { isFraction } from '../../utils/is.js';
 
 // Type definitions
 interface MatrixConstructor {
@@ -304,6 +305,22 @@ export const createQr = /* #__PURE__ */ factory(
 
     return qrTyped;
 
+    /**
+     * Householder needs square roots, so Fraction cells cannot stay in ℚ.
+     * Promote them to IEEE numbers (valueOf) and keep the existing number path.
+     */
+    function promoteFractionEntries(data: unknown[][]): void {
+      for (let r = 0; r < data.length; r++) {
+        const row = data[r];
+        for (let c = 0; c < row.length; c++) {
+          const v = row[c];
+          if (isFraction(v)) {
+            row[c] = Number((v as { valueOf(): unknown }).valueOf());
+          }
+        }
+      }
+    }
+
     function _denseQRimpl(m: DenseMatrix): QRResult {
       // rows & columns (m x n)
       const rows = m._size[0]; // m
@@ -314,6 +331,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       const R = m.clone();
       const Rdata = R._data as unknown[][];
+      promoteFractionEntries(Rdata);
 
       // vars
       let i: number, j: number, k: number;

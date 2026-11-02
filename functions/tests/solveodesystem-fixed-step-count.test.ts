@@ -1,7 +1,6 @@
 /**
  * `solveODESystem` with a fixed `dt` takes `span/dt` steps when that quotient is an integer up
- * to rounding, and `ceil(span/dt)` otherwise. Found by the Universal-Physics-Tensor deep dive of
- * 2026-10-15: `dt = 1e-3/1000` over `[0, 1e-3]` gave `span/dt = 1000.0000000000001`, so `ceil`
+ * to rounding, and `ceil(span/dt)` otherwise. With `dt = 1e-3/1000` over `[0, 1e-3]`, `span/dt = 1000.0000000000001`, so `ceil`
  * took 1001 steps of `span/1001` and returned 1002 states.
  */
 import { describe, expect, it } from 'vitest';

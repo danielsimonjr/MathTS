@@ -1,5 +1,5 @@
 /**
- * PySR-style mutation and crossover operators over {@link ScalarNode} trees (M12).
+ * Mutation and crossover operators over {@link ScalarNode} trees.
  *
  * @packageDocumentation
  */
@@ -15,10 +15,10 @@ import {
 import type { SeededRng } from '@danielsimonjr/mathts-core';
 import { evaluateScalar } from './scalar-eval.js';
 
-/** Roadmap §2.5: probability of negating a perturbed constant. */
+/** Probability of negating a perturbed constant when mutating a numeric leaf. */
 export const MUTATE_CONSTANT_NEGATE_PROBABILITY = 0.00743;
 
-/** Default PySR mutation weights (roadmap §2.2, optimize/backsolve omitted). Draw order. */
+/** Default mutation weights (optimize/backsolve omitted). Draw order. */
 export const DEFAULT_MUTATION_WEIGHTS = {
   rotateTree: 4.26,
   addNode: 2.47,
@@ -154,8 +154,8 @@ function accepts(grammar: ScalarGrammar, node: ScalarNode): boolean {
 }
 
 /**
- * Returns the input unchanged. Does not consume `rng`. The weight key is `identity`
- * (PySR's `do_nothing`); the export carries a longer name because
+ * Returns the input unchanged. Does not consume `rng`. The weight key is `identity`;
+ * the export carries a longer name because
  * `@danielsimonjr/mathts-functions` already exports the matrix `identity`.
  */
 export function identityMutation(
@@ -579,7 +579,7 @@ const OPERATOR_BY_KEY: Record<MutationWeightKey, ScalarMutationOperator> = {
   randomizeTree,
 };
 
-/** Combine mutation operators with PySR default weights. */
+/** Combine mutation operators with {@link DEFAULT_MUTATION_WEIGHTS}. */
 export function weightedMutation(
   weights: Readonly<Record<MutationWeightKey, number>> = DEFAULT_MUTATION_WEIGHTS
 ): ScalarMutationOperator {

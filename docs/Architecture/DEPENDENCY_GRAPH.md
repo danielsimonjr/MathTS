@@ -2684,6 +2684,7 @@ graph LR
 | `../../utils/factory.js`       | `factory`       | Import             |
 | `../../utils/typed-impl.js`    | `findTypedImpl` | Import             |
 | `../../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| `../../utils/is.js`            | `isFraction`    | Import             |
 
 **Exports:**
 
@@ -4389,7 +4390,7 @@ graph LR
 
 ---
 
-### `functions/src/front-export.ts` - LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).
+### `functions/src/front-export.ts` - LaTeX tabular and JSON export for a scored Pareto front.
 
 **Workspace Dependencies:**
 
@@ -4690,7 +4691,7 @@ graph LR
 
 ---
 
-### `functions/src/numeric-equivalence.ts` - Guarded numerical equivalence for scalar trees (UPT §9 level 5).
+### `functions/src/numeric-equivalence.ts` - Sampling comparison of two scalar trees.
 
 **Workspace Dependencies:**
 
@@ -4753,7 +4754,7 @@ graph LR
 
 ---
 
-### `functions/src/pareto-front.ts` - Pareto hall of fame, PySR log-loss scores, and model selection.
+### `functions/src/pareto-front.ts` - Pareto hall of fame, log-loss scores, and model selection.
 
 **Exports:**
 
@@ -4903,7 +4904,7 @@ graph LR
 
 ---
 
-### `functions/src/scalar-mutate.ts` - PySR-style mutation and crossover operators over {@link ScalarNode} trees (M12).
+### `functions/src/scalar-mutate.ts` - Mutation and crossover operators over {@link ScalarNode} trees.
 
 **Workspace Dependencies:**
 
@@ -4950,7 +4951,7 @@ graph LR
 
 ---
 
-### `functions/src/scalar-search.ts` - PySR-style evolutionary search over {@link ScalarNode} trees (M13).
+### `functions/src/scalar-search.ts` - Evolutionary search over {@link ScalarNode} trees.
 
 **Workspace Dependencies:**
 
@@ -18595,7 +18596,7 @@ graph LR
 | `functions/src/index`                                  | 92 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
-| `functions/src/utils/is`                               | 0 files      | 55 files   |
+| `functions/src/utils/is`                               | 0 files      | 56 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `functions/src/utils/array`                            | 0 files      | 49 files   |
@@ -19481,7 +19482,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204468 |
+| Total Lines of Code     | 204548 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

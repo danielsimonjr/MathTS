@@ -69,7 +69,7 @@ Per-phase implementation plans: `docs/superpowers/plans/2026-07-1{5,6}-phase*.md
 Per-phase (or per coherent change): changeset (`functions` minor for additive, patch for fixes) →
 commit + push → the Release workflow opens the version PR → merge it. Tagging, GitHub Releases, and
 npm publish run only when `RELEASES_ENABLED` is exactly `true` (unset is off); leave the version PR
-unmerged until the PySR roadmap is done. When releases are on, that merge tags the bumped
+unmerged; do not set `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. When releases are on, that merge tags the bumped
 packages, opens GitHub Releases, and calls the Publish workflow (`bun run build` then
 `changeset publish`) in the same run. Auth is the repository secret `NPM`, passed as `NODE_AUTH_TOKEN` (not a secret named
 `NPM_TOKEN`). Do not `npm publish` from a workstation. Versions already on `main` are published
@@ -91,8 +91,8 @@ workspace via `npm:@danielsimonjr/typed-function@5.0.0-alpha.4` (root and `core/
 - **Live tasks + pending work:** `TODO.md`. **Change history:** `CHANGELOG.md` (running `[Unreleased]`).
 - **Public API:** `docs/reference/functions.md` (1,090 exports at the last run; the generated export
   index is the source of truth, `bun run docs:functions`).
-- **PySR / scalar structure (landed):** `docs/roadmap/PYSR_INFORMED_ROADMAP.md`,
-  `expression/src/scalar-structure.ts`, `functions/src/scalar-compile.ts`, `functions/src/pareto-front.ts`.
+- **Scalar structure (landed):** `expression/src/scalar-structure.ts`,
+  `functions/src/scalar-compile.ts`, `functions/src/pareto-front.ts`.
 - **Dependency graph:** `npm run docs:graph -- <query>` (QDG) over `docs/Architecture/dependency-graph.json`.
 - **Security invariants (do not regress):** WASM SHA-384 manifest verification; expression sandbox
   helpers (`getSafeProperty`/`setSafeProperty`/`getSafeMethod`); WorkerPool timeout plumbing. See

@@ -2,8 +2,9 @@ name: Release
 
 # Tagging, GitHub Releases, and the in-workflow Publish call are OFF unless the
 # repository variable RELEASES_ENABLED is exactly the string `true` (unset is off).
-# Releases stay disabled while the PySR roadmap is incomplete; re-enable by setting
-# RELEASES_ENABLED=true in Actions → Variables. The version PR step still runs.
+# Leave the version PR unmerged; do not set RELEASES_ENABLED as part of this work;
+# do not tag or publish by hand. Re-enable by setting RELEASES_ENABLED=true in
+# Actions → Variables. The version PR step still runs.
 #
 # Versions packages, tags them, and opens GitHub Releases when enabled. npm publish is the
 # Publish workflow (.github/workflows/publish.yml), called from this run when
