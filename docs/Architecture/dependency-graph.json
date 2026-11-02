@@ -21769,6 +21769,10 @@
             "imports": ["DimensionError"]
           },
           {
+            "file": "../../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
+          },
+          {
             "file": "../types.js",
             "imports": [
               "DataType",
@@ -21797,6 +21801,10 @@
           {
             "file": "../../../utils/object.js",
             "imports": ["clone"]
+          },
+          {
+            "file": "../../../utils/typed-impl.js",
+            "imports": ["findTypedImpl"]
           },
           {
             "file": "../types.js",
@@ -43332,7 +43340,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1235,
     "totalModules": 82,
-    "totalLinesOfCode": 204517,
+    "totalLinesOfCode": 204574,
     "totalExports": 6412,
     "totalClasses": 60,
     "totalInterfaces": 570,

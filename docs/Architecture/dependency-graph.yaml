@@ -20352,6 +20352,9 @@ modules:
         - file: ../../../error/DimensionError.js
           imports:
             - DimensionError
+        - file: ../../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../types.js
           imports:
             - DataType
@@ -20377,6 +20380,9 @@ modules:
         - file: ../../../utils/object.js
           imports:
             - clone
+        - file: ../../../utils/typed-impl.js
+          imports:
+            - findTypedImpl
         - file: ../types.js
           imports:
             - DataType
@@ -40938,7 +40944,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1235
   totalModules: 82
-  totalLinesOfCode: 204517
+  totalLinesOfCode: 204574
   totalExports: 6412
   totalClasses: 60
   totalInterfaces: 570

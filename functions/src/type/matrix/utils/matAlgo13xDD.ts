@@ -1,5 +1,6 @@
 import { factory } from '../../../utils/factory.js';
 import { DimensionError } from '../../../error/DimensionError.js';
+import { findTypedImpl } from '../../../utils/typed-impl.js';
 import type {
   DataType,
   DenseMatrixData,
@@ -86,12 +87,19 @@ export const createMatAlgo13xDD = /* #__PURE__ */ factory(
       // callback signature to use
       let cf: MatrixCallback = callback;
 
-      // process data types
+      // process data types — only tag the result when a specialized impl is found,
+      // matching matAlgo14xDs. A plain-function callback that returns BigNumbers
+      // from number-tagged matrices must not leave the result tagged `number`.
       if (typeof adt === 'string' && adt === bdt) {
-        // datatype
-        dt = adt;
-        // callback - typed.find returns the specialized function for the given types
-        cf = (typed.find(callback, [dt, dt]) as MatrixCallback) || callback;
+        const impl = findTypedImpl(
+          typed as unknown as Parameters<typeof findTypedImpl>[0],
+          callback,
+          [adt, adt]
+        );
+        if (impl) {
+          dt = adt;
+          cf = impl;
+        }
       }
 
       // populate cdata, iterate through dimensions

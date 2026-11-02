@@ -6,6 +6,8 @@
 
 - Dense `lsolve` / `usolve` take a number path (P7-11) when the triangle and RHS column are numbers. Results stay bit-identical to the generic loop, including singular and near-singular systems. BigNumber, Fraction, Complex, and mixed-type inputs stay on the generic path.
 
+- Element-wise factories infer a `number` datatype for rectangular plain-array operands (P7-12) so `matAlgo13xDD` / `matAlgo14xDs` resolve the callback once. Mixed, BigNumber, Fraction, Complex, and ragged arrays stay on the generic path. DenseMatrix result datatypes are unchanged.
+
 - Sprint 2R clone-merge: internal `fitOrthogonalSeries` for `chebyshevFit` and `legendreFit` (length check, WASM-threshold dispatch, normal-equation JS path). Public names and behavior unchanged.
 
 - Near-clone numeric batch 6 (Sprint 2R): internal `linearFit`, `solveAugmentedNormalEquations`, Struve/Kelvin series helpers, `zipIntPoly`, set `selectById`, and `fibPair`. Public exports and behavior unchanged.

@@ -52,6 +52,55 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
     const bcast = broadcast as unknown as (a: unknown, b: unknown) => [unknown, unknown];
 
     /**
+     * Infer `number` from the raw array, not the wrapped `_data`/`_size`.
+     * `matrix()` may store a 1-D vector as a flat `_data` with a 2-D `_size`
+     * (or the reverse); walking the wrapper then skips the found-callback path
+     * and the P7-12 A/B cases stay on generic dispatch.
+     *
+     * Ragged or mixed-depth arrays stay generic: a raw number impl would see
+     * `undefined` for a missing cell (`dotMultiply([[1, 2], [3]], 4)`).
+     */
+    function rectangularAllNumbers(value: unknown): boolean {
+      if (!Array.isArray(value)) return typeof value === 'number';
+      if (value.length === 0) return true;
+      const first = value[0];
+      if (typeof first === 'number') {
+        for (let i = 0; i < value.length; i++) {
+          if (typeof value[i] !== 'number') return false;
+        }
+        return true;
+      }
+      if (!Array.isArray(first)) return false;
+      const width = first.length;
+      for (let i = 0; i < value.length; i++) {
+        const row = value[i];
+        if (!Array.isArray(row) || row.length !== width) return false;
+        if (!rectangularAllNumbers(row)) return false;
+      }
+      return true;
+    }
+
+    /** Infer `number` only for plain-array operands so `.valueOf()` results stay datatype-free. */
+    function wrapArrayPair(x: unknown[], y: unknown[]): [Matrix, Matrix] {
+      const infer = rectangularAllNumbers(x) && rectangularAllNumbers(y);
+      const xm = matrix(x as DenseMatrixData);
+      const ym = matrix(y as DenseMatrixData);
+      if (infer) {
+        xm._datatype = 'number';
+        ym._datatype = 'number';
+      }
+      return [xm, ym];
+    }
+
+    function wrapArrayScalar(x: unknown[], scalar: unknown): Matrix {
+      const m = matrix(x as DenseMatrixData);
+      if (typeof scalar === 'number' && rectangularAllNumbers(x)) {
+        m._datatype = 'number';
+      }
+      return m;
+    }
+
+    /**
      * Return a signatures object with the usual boilerplate of
      * matrix algorithms, based on a plain options object with the
      * following properties:
@@ -79,13 +128,7 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           'DenseMatrix, DenseMatrix': (x: unknown, y: unknown) =>
             matAlgo13xDD(...(bcast(x, y) as DenseDenseArgs), elop),
           'Array, Array': (x: unknown[], y: unknown[]) =>
-            matAlgo13xDD(
-              ...(bcast(
-                matrix(x as DenseMatrixData),
-                matrix(y as DenseMatrixData)
-              ) as DenseDenseArgs),
-              elop
-            ).valueOf(),
+            matAlgo13xDD(...(bcast(...wrapArrayPair(x, y)) as DenseDenseArgs), elop).valueOf(),
           'Array, DenseMatrix': (x: unknown[], y: unknown) =>
             matAlgo13xDD(...(bcast(matrix(x as DenseMatrixData), y) as DenseDenseArgs), elop),
           'DenseMatrix, Array': (x: unknown, y: unknown[]) =>
@@ -120,10 +163,7 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           'Array, Array': typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown[], y: unknown[]) => {
               return matAlgo13xDD(
-                ...(bcast(
-                  matrix(x as DenseMatrixData),
-                  matrix(y as DenseMatrixData)
-                ) as DenseDenseArgs),
+                ...(bcast(...wrapArrayPair(x, y)) as DenseDenseArgs),
                 self
               ).valueOf();
             }
@@ -190,14 +230,14 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
             matAlgo14xDs(y as DenseScalarArg, x, elop, true);
           matrixSignatures['Array,' + scalar] = (x: unknown[], y: unknown) =>
             matAlgo14xDs(
-              matrix(x as DenseMatrixData) as unknown as DenseScalarArg,
+              wrapArrayScalar(x, y) as unknown as DenseScalarArg,
               y,
               elop,
               false
             ).valueOf();
           matrixSignatures[scalar + ', Array'] = (x: unknown, y: unknown[]) =>
             matAlgo14xDs(
-              matrix(y as DenseMatrixData) as unknown as DenseScalarArg,
+              wrapArrayScalar(y, x) as unknown as DenseScalarArg,
               x,
               elop,
               true
@@ -216,7 +256,7 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           matrixSignatures['Array,' + scalar] = typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown[], y: unknown) => {
               return matAlgo14xDs(
-                matrix(x as DenseMatrixData) as unknown as DenseScalarArg,
+                wrapArrayScalar(x, y) as unknown as DenseScalarArg,
                 y,
                 self,
                 false
@@ -226,7 +266,7 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
           matrixSignatures[scalar + ', Array'] = typed.referToSelf(
             (self: (...args: unknown[]) => unknown) => (x: unknown, y: unknown[]) => {
               return matAlgo14xDs(
-                matrix(y as DenseMatrixData) as unknown as DenseScalarArg,
+                wrapArrayScalar(y, x) as unknown as DenseScalarArg,
                 x,
                 self,
                 true
