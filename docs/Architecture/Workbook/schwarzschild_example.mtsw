@@ -15,7 +15,7 @@ metadata:
   modified: "2025-12-06T14:30:00Z"
   author: "Daniel Simon Jr."
   email: "daniel@example.com"
-  institution: "UPTF Research"
+  institution: "MathTS Samples"
   description: |
     A comprehensive analysis of the Schwarzschild metric, including:
     - Christoffel symbols computation
@@ -26,7 +26,7 @@ metadata:
     This notebook demonstrates the MathTS tensor algebra system
     for general relativity calculations.
     
-  tags: [general-relativity, schwarzschild, geodesics, tensor-algebra, UPTF]
+  tags: [general-relativity, schwarzschild, geodesics, tensor-algebra]
   license: "MIT"
   
   bibliography:
