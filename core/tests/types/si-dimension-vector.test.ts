@@ -1,7 +1,7 @@
 /**
  * Length-10 Unit exponents ↔ the 7 SI base dimensions.
  *
- * Tuple order is the BIPM / UPT order [L, M, T, I, Θ, N, J].
+ * Tuple order is BIPM [L, M, T, I, Θ, N, J].
  */
 
 import { describe, it, expect } from 'vitest';

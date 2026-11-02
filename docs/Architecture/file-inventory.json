@@ -821,7 +821,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 252
+      "loc": 251
     },
     {
       "file": "core/src/types/unit-definitions.ts",
@@ -1258,18 +1258,18 @@
       "loc": 86
     },
     {
-      "file": "core/tests/types/unit-upt-delegation.test.ts",
+      "file": "core/tests/types/unit-supplementary.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
       "loc": 112
     },
     {
-      "file": "core/tests/types/unit-upt-symbols.test.ts",
+      "file": "core/tests/types/unit-symbol-oracle.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 124
     },
     {
       "file": "core/tests/types/unit.test.ts",
