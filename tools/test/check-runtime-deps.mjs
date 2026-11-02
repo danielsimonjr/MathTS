@@ -11,6 +11,7 @@
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
 const LOCK_PATH = join(repoRoot, 'tools/test/runtime-deps-lock.json');
@@ -58,11 +59,29 @@ export function collectRuntimeDepsLock(root = repoRoot) {
 }
 
 /**
+ * @param {string} [root] repository root
+ * @returns {Record<string, string>} each workspace package name mapped to its version.
+ */
+export function workspaceVersions(root = repoRoot) {
+  /** @type {Record<string, string>} */
+  const out = {};
+  for (const dir of workspaceDirs(root)) {
+    const pkg = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8'));
+    if (pkg.name && pkg.version) out[pkg.name] = pkg.version;
+  }
+  return out;
+}
+
+/**
+ * A spec change is drift, except a release bump: a dependency on a workspace package
+ * whose new spec is exactly `^<that package's current version>`, which is what
+ * `changeset version` writes. Additions, removals and every other retarget stay drift.
  * @param {Record<string, Record<string, Record<string, string>>>} actual
  * @param {Record<string, Record<string, Record<string, string>>>} expected
+ * @param {Record<string, string>} [versions] workspace package name -> current version
  * @returns {string[]}
  */
-export function diffRuntimeDeps(actual, expected) {
+export function diffRuntimeDeps(actual, expected, versions = {}) {
   const problems = [];
   const paths = new Set([...Object.keys(actual), ...Object.keys(expected)]);
   for (const rel of [...paths].sort()) {
@@ -85,7 +104,10 @@ export function diffRuntimeDeps(actual, expected) {
           problems.push(`${rel} ${field}.${name} added (spec "${aSec[name]}")`);
         } else if (!(name in aSec)) {
           problems.push(`${rel} ${field}.${name} removed (was "${eSec[name]}")`);
-        } else if (aSec[name] !== eSec[name]) {
+        } else if (
+          aSec[name] !== eSec[name] &&
+          !(name in versions && aSec[name] === `^${versions[name]}`)
+        ) {
           problems.push(`${rel} ${field}.${name} spec changed: "${eSec[name]}" -> "${aSec[name]}"`);
         }
       }
@@ -94,7 +116,8 @@ export function diffRuntimeDeps(actual, expected) {
   return problems;
 }
 
-if (import.meta.url === new URL(process.argv[1], 'file:').href) {
+// pathToFileURL, not new URL(argv[1], 'file:'): a Windows path such as C:\... is not a URL path.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const actual = collectRuntimeDepsLock();
   if (writeMode) {
     writeFileSync(LOCK_PATH, `${JSON.stringify(actual, null, 2)}\n`);
@@ -106,7 +129,7 @@ if (import.meta.url === new URL(process.argv[1], 'file:').href) {
     process.exit(1);
   }
   const expected = JSON.parse(readFileSync(LOCK_PATH, 'utf8'));
-  const problems = diffRuntimeDeps(actual, expected);
+  const problems = diffRuntimeDeps(actual, expected, workspaceVersions());
   if (problems.length > 0) {
     console.error(`FAIL: ${problems.length} runtime dependency drift(s):`);
     for (const p of problems) console.error(`  ${p}`);
