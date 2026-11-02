@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-01",
+  "generated": "2026-11-02",
   "totalFiles": 2072,
   "byDisposition": {
     "reachable": 26,
@@ -8479,7 +8479,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 85
+      "loc": 87
     },
     {
       "file": "functions/src/types.ts",
@@ -9256,7 +9256,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 50
+      "loc": 56
     },
     {
       "file": "functions/tests/evaluate.test.ts",
@@ -10530,7 +10530,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 226
+      "loc": 232
     },
     {
       "file": "functions/tests/p7-sort-number-path.test.ts",
