@@ -1215,7 +1215,7 @@ interface SurfaceOptions {
 **Sprint 13-14: Tensor core (aligned with shipped `@danielsimonjr/mathts-tensor`)**
 
 - Tensor class with index structure
-- Einstein notation parser (workbook / expression integration as needed)
+- `Tensor.einsum` via structured `EinsumSpec` (shipped; no notation-string parser)
 - Index contraction
 - Tensor products
 

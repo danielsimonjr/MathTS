@@ -135,7 +135,7 @@ Expression (interface)
 - [x] Tensor class with index structure (shipped)
 - [x] Index contraction (shipped)
 - [x] Tensor products (shipped)
-- [x] Symmetrization/antisymmetrization (as applicable to shipped API)
+- [ ] Symmetrization/antisymmetrization — unshipped (not on the public `@danielsimonjr/mathts-tensor` API)
 - [ ] ~~MetricTensor class~~ — out of scope
 - [ ] ~~Christoffel symbols (first and second kind)~~ — out of scope
 - [ ] ~~Covariant derivative~~ — out of scope
