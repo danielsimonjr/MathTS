@@ -1,5 +1,5 @@
 /**
- * LaTeX tabular and JSON export for scored Pareto fronts (PySR M15).
+ * LaTeX tabular and JSON export for a scored Pareto front.
  *
  * Formula cells use {@link scalarToTex}; canonical keys use {@link scalarCanonicalKey}.
  *

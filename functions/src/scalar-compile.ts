@@ -48,7 +48,7 @@ type TapeInstr =
  * Bindings for {@link compileScalar}.
  *
  * `variables` is the column order. `parameters` are free constants supplied
- * to each `evaluate` call (PySR's fitted constants; still `symbol` nodes).
+ * to each `evaluate` call (still `symbol` nodes in the tree).
  * `constants` are fixed numbers, for example `{ pi: Math.PI }`.
  *
  * A name may occur in only one of those three. Symbol lookup then follows

@@ -1,7 +1,6 @@
 /**
  * The slope standard error of `linearRegression` and `linregress` is the residual form
- * √(Σ(y − ŷ)² / ((n − 2)·Σ(x − x̄)²)). Found by the Universal-Physics-Tensor deep dive of
- * 2026-10-15: the old `syy − slope·sxy` (that is, `syy·(1 − r²)`) cancels on a near-exact fit,
+ * √(Σ(y − ŷ)² / ((n − 2)·Σ(x − x̄)²)). The old `syy − slope·sxy` (that is, `syy·(1 − r²)`) cancels on a near-exact fit,
  * and goes negative when r rounds above 1, so `stdErr` was NaN (`null` once serialised).
  */
 import { describe, expect, it } from 'vitest';

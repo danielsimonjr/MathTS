@@ -3,8 +3,8 @@
 **Status:** planning only. This file is the contract for the implementation PRs below. It does not change runtime source.
 **Tree reviewed:** `bf90a00eca7ae5c3adf1bd93f2f42798056da4db` (`main` at the time of this plan). Re-read a cited file if `main` has moved; the paths below were checked on that commit.
 **Follows:** the #473 clone sprint and its ledger [`docs/roadmap/CLONES_REMAINING.md`](../roadmap/CLONES_REMAINING.md). That ledger's open typing note is PR 5 of this plan. The clone-merge work in [`CLONES_REFACTOR_PLAN.md`](./CLONES_REFACTOR_PLAN.md) is a different queue. Do not land its PR-A–PR-I here.
-**Returns to:** [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md) only after PR 10. Do not implement a PySR milestone in this sprint.
-**Source of truth for "done":** §6 of that roadmap, applied as [Definition of Done](#definition-of-done) below. Where this plan and a roadmap sketch differ, this plan wins.
+**After PR 10:** further symbolic-search milestones are out of scope until the core sprint completes. Do not implement a scalar-search milestone in this sprint.
+**Source of truth for "done":** [`docs/reference/scalar-search.md`](../reference/scalar-search.md) and the Definition of Done below. Where this plan and an older sketch differ, this plan wins.
 
 ## Goal
 
@@ -40,15 +40,15 @@ Copy this list into every implementation PR body. Tick a box only with a command
 - [ ] **B2 Oracle tests.** Tests pin to an independent oracle (a committed baseline, a published constant, libm, or a loop written in the test). They do not pin a function to a second call of itself. Edge rows: empty input, non-finite values, domain errors. Test files import `describe`, `it`, and `expect` from `vitest`, except the `node:test` files under `tools/test/`, which follow `tools/test/check-skip-budget.test.mjs`.
 - [ ] **B3 Surface.** No new public export unless this plan names it. Internal helpers stay off `src/index.ts`. `node tools/test/consumer-typecheck.mjs --skip-build` still passes on Node 22 after the package build. PR 2's name lock stays green, or the PR updates `tools/test/export-lock.json` and says why in the PR body.
 - [ ] **B4 Docs a caller can run.** A behavior a caller can hit (parse limits, `clone` skipping a polluting key) gets TSDoc on the touched function, one README bullet, and a short addition to `docs/api/core.md` or `docs/api/expression.md`. A CI gate that is not a library function does not need TSDoc. Do not add a symbol to `tools/generate-functions-reference.mjs` `DOMAIN_SUPPLEMENT`.
-- [ ] **B5 Generated docs and architecture counts.** A new `.ts` file makes the pre-commit hook run `bun run docs:deps`. Commit the generated `docs/Architecture/*` diff. Do not hand-edit `FILE_INVENTORY.md` or `dependency-graph.json`. Adding a `.ts` file changes the counts in the Verification tables. Run `repo-tools check . --docs=docs/Architecture` with `@danielsimonjr/repo-tools` **2.2.4** (the pin in `.github/workflows/ci.yml`, job `architecture-docs`). Set each failing cell to the number the checker prints. Do not edit PySR milestone checkboxes. PR 10 adds the only roadmap pointer.
+- [ ] **B5 Generated docs and architecture counts.** A new `.ts` file makes the pre-commit hook run `bun run docs:deps`. Commit the generated `docs/Architecture/*` diff. Do not hand-edit `FILE_INVENTORY.md` or `dependency-graph.json`. Adding a `.ts` file changes the counts in the Verification tables. Run `repo-tools check . --docs=docs/Architecture` with `@danielsimonjr/repo-tools` **2.2.4** (the pin in `.github/workflows/ci.yml`, job `architecture-docs`). Set each failing cell to the number the checker prints. PR 10 adds the only pointer back to this plan in [`docs/reference/scalar-search.md`](../reference/scalar-search.md).
 - [ ] **B6 Doc gates that this diff can affect.** `bun run format:check`. If `src/` or `tools/` changed: `bun run check:duplicates:fast`, `bun run check:file-census`, `bun run check:browser-safety`. If a published barrel changed: `bun run docs:functions:check`. `bun run docs:roadmap-check` when a roadmap markdown file changed.
-- [ ] **B7 Releases.** Waived for this sprint by the sprint contract: no `.changeset/*.md`, no version bump, no tag, no publish. [#398](https://github.com/danielsimonjr/MathTS/pull/398) stays untouched. The "no version bump, tag, or publish" half of roadmap §7 still applies.
+- [ ] **B7 Releases.** Waived for this sprint by the sprint contract: no `.changeset/*.md`, no version bump, no tag, no publish. [#398](https://github.com/danielsimonjr/MathTS/pull/398) stays untouched. The "no version bump, tag, or publish" rule still applies (`RELEASES_ENABLED` unset).
 - [ ] **B8 Code gates.** `bun run typecheck` is 0 errors. `bun run lint` is 0 warnings. The tests named in the PR pass. Linux CI is green on the PR head. A new `node:` import fails `check:browser-safety`; do not add one in library source. `tools/test/*.mjs` may import `node:` the way `tools/test/check-published-deps.mjs` already does.
 - [ ] **B9 Review.** claude-sonnet-5-5 re-ran the commands, checked B1 against the diff, and approved. The builder does not tick this box.
 
 ## Order
 
-PR 1 is first because later speed claims need its fingerprints. PR 2 and PR 3 land before behavior edits so an export or a bundle delta is a deliberate lock update. PR 4 closes the holes the property tests then lock. PR 5 changes types only, with runtime results unchanged, so PR 1's fingerprints still match. PR 6 through PR 8 add tests. PR 9 sets coverage floors after those tests exist. PR 10 deletes duplication the earlier PRs left behind and points back at the PySR roadmap.
+PR 1 is first because later speed claims need its fingerprints. PR 2 and PR 3 land before behavior edits so an export or a bundle delta is a deliberate lock update. PR 4 closes the holes the property tests then lock. PR 5 changes types only, with runtime results unchanged, so PR 1's fingerprints still match. PR 6 through PR 8 add tests. PR 9 sets coverage floors after those tests exist. PR 10 deletes duplication the earlier PRs left behind and links [`docs/reference/scalar-search.md`](../reference/scalar-search.md) back to this plan.
 
 | PR  | Title                                             | Depends on             |
 | --- | ------------------------------------------------- | ---------------------- |
@@ -743,7 +743,7 @@ Fill every workspace directory that has a `test:coverage` script, including the 
 
 ### Outcome
 
-One implementation of each helper this sprint added, docs that match the code, coverage floors ratcheted to the new measurements, and a pointer from the PySR roadmap back to this plan. PR 1 fingerprints still match.
+One implementation of each helper this sprint added, docs that match the code, coverage floors ratcheted to the new measurements, and a pointer from [`docs/reference/scalar-search.md`](../reference/scalar-search.md) back to this plan. PR 1 fingerprints still match.
 
 ### Work
 
@@ -754,9 +754,7 @@ One implementation of each helper this sprint added, docs that match the code, c
 5. Re-run `node tools/benchmarks/sprint-baseline.mjs --check`. It must pass. If a fingerprint drifted, that is a bug in an earlier PR; fix the bug, do not refresh the fingerprint to hide it.
 6. Re-run coverage. If a package's measured percent is more than 2 points above its floor, raise the floor to `floor(measured) - 1` in `coverage-floors.json`.
 7. `bun run check:duplicates:fast` reports no new `TRUE_DUPLICATE`. `isPollutingKey` must not show up as one.
-8. Add this paragraph under the status block at the top of `docs/roadmap/PYSR_INFORMED_ROADMAP.md` (do not edit milestone checkboxes, §6's audit table, or §7):
-
-   > Core sprint (speed, stability, security of `core` and the expression parser) is planned in `docs/plans/CORE_SPRINT_PLAN.md` and gated by PRs 1–10 of that plan. The next PySR milestone starts after PR 10 merges. Releases stay off (§7, PR #398 unmerged).
+8. Add a short note to [`docs/reference/scalar-search.md`](../reference/scalar-search.md) (or the core sprint section of `docs/README.md` if that is where the pointer lives) that the core sprint is planned in this file and gated by PRs 1–10. Releases stay off (PR #398 unmerged).
 
 9. `docs/api/core.md` and `docs/api/expression.md` match PRs 4 and 5. `expression/README.md` mentions the caps. No changelog edit (there is no changeset).
 
@@ -764,16 +762,15 @@ One implementation of each helper this sprint added, docs that match the code, c
 
 - [ ] `--check` on the sprint baseline exits 0.
 - [ ] `check:duplicates:fast` and `check:file-census` and `check:browser-safety` pass.
-- [ ] `docs:roadmap-check` passes with the new status paragraph (it must not look like a `pkg@version` "Recently shipped" line).
-- [ ] The PySR milestone boxes are unchanged.
+- [ ] `docs:roadmap-check` passes with the new status note (it must not look like a `pkg@version` "Recently shipped" line).
 - [ ] [#398](https://github.com/danielsimonjr/MathTS/pull/398) was not pushed to.
 - [ ] DoD base checklist, including B9 from claude-sonnet-5-5. B7 waived.
 
 ### DoD specifics
 
 - [ ] No production behavior change except a pollution or limit hole the grep in step 1 finds. A find is fixed with a regression test, not a new feature.
-- [ ] The roadmap paragraph links this file and does not mark a milestone done.
+- [ ] The scalar-search reference links this file and does not mark a milestone done.
 
 ## Out of scope reminder
 
-Clone merges (plan `CLONES_REFACTOR_PLAN.md`), GPU `serializeGpu` on `matrix` `GPUBackend` (the other #473 follow-up), PySR milestones, and any release of the changesets already on `main`. Those changesets stay accumulated. PR #398 stays open and unmerged.
+Clone merges (plan `CLONES_REFACTOR_PLAN.md`), GPU `serializeGpu` on `matrix` `GPUBackend` (the other #473 follow-up), scalar-search milestones beyond what is already on `main`, and any release of the changesets already on `main`. Those changesets stay accumulated. PR #398 stays open and unmerged.

@@ -1,10 +1,10 @@
 /**
  * Public scalar-expression builder.
  *
- * UPT lowers an `ExprNode` numeric tree onto this API instead of printing a
- * formula and parsing it. `call('ln', x)` and a `transcendental` node whose
- * `fn` is `ln` store MathTS natural `log`. `call('log', x)` and `fn: 'log'`
- * store `log10`. `log10` and `log2` stay themselves.
+ * Builds {@link ScalarNode} trees for numeric evaluation without parsing a
+ * formula string. `call('ln', x)` and a `transcendental` node whose `fn` is
+ * `ln` store MathTS natural `log`. `call('log', x)` and `fn: 'log'` store
+ * `log10`. `log10` and `log2` stay themselves.
  *
  * The node returned by {@link ScalarBuilder.call} and {@link ScalarBuilder.from}
  * already carries the lowered MathTS name on `fn`. Passing that node through

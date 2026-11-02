@@ -220,10 +220,10 @@ What's left and ranked by leverage:
 
 These were considered and consciously not pursued (see [`docs/roadmap/ITENSOR_PARITY.md`](./ITENSOR_PARITY.md) §8 for the longer rationales):
 
-- **MPS/MPO state representations** — physics-specific; belong in UPT or a sibling.
-- **DMRG / TEBD / TDVP variational algorithms** — physics-specific.
-- **Quantum-number block-sparse tensor storage** — UPT proposal §1.3 explicitly disclaims wanting this in MathTS.
-- **Fermionic anticommutation / particle-conservation arithmetic** — physics-specific.
+- **MPS/MPO state representations** — physics-specific many-body tensor-network features; stay out of `@danielsimonjr/mathts-tensor`.
+- **DMRG / TEBD / TDVP variational algorithms** — physics-specific; stay out of `@danielsimonjr/mathts-tensor`.
+- **Quantum-number block-sparse tensor storage** — stay out of `@danielsimonjr/mathts-tensor`.
+- **Fermionic anticommutation / particle-conservation arithmetic** — physics-specific; stay out of `@danielsimonjr/mathts-tensor`.
 - **HDF5 I/O for tensors** — adds a runtime dependency for marginal browser-audience value.
 - **Sparse-tensor decompositions** (COO / CSR-N etc.) — limited value for browser-first workloads; the matrix sparse path already covers most use cases.
 - **Compile-time shape inference at the TS type level** — tried in `@tensorflow/tfjs` and abandoned; TypeScript's type system isn't expressive enough to be ergonomic.
@@ -269,7 +269,7 @@ Two genuinely-unconsumed test-escape-hatch exports were also flagged and resolve
 
 Inspection of the post-fix `unused-analysis.md` confirms the remainder breaks down as:
 
-- **201 interface / type declarations (65%)** — public-API type exports consumed by downstream packages (UPT, external apps) and consumer code outside the monorepo. CDG can't see those consumers, so the flag is unavoidable without a deeper public-API manifest.
+- **201 interface / type declarations (65%)** — public type exports used outside this repository and consumer code outside the monorepo. CDG can't see those consumers, so the flag is unavoidable without a deeper public-API manifest.
 - **64 functions (21%)** — public-API helpers + benchmark-only entry points (at the time of this audit, `tools/benchmark/wasm/*.bench.ts` consumed `tridiagSolveJS`, `besselJ0JS`, etc.; CDG's reachability scope doesn't include `tools/`). _Note: that WASM benchmark suite was since removed in the Rust scrub._
 - **42 constants (14%)** — config defaults, threshold constants exported for consumer tuning.
 - **3 classes (1%)** — public-API class exports.

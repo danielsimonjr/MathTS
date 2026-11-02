@@ -22,19 +22,19 @@ The dep-graph audit found three classes of gap (full categorisation in the audit
 | B. Acceleration gaps            | typed/ files running pure-JS that could route through ComputePool or WASM | `algebra`, `integration`, `hypothesis`                |
 | C. Cross-cutting infrastructure | Decompositions / AD coverage / slicing primitives missing                 | `TapedTensor` reductions, `Tensor.qr/lu/cholesky/eig` |
 
-This proposal scopes **three** concrete landings — one from each class — that maximise downstream value (especially for UPT v0.7's `differentiableEvaluator`) and stay clean against the existing architecture. The four landings, in priority order:
+This proposal scopes **three** concrete landings — one from each class — that maximise downstream value for MathTS autograd and tensor consumers and stay clean against the existing architecture. The four landings, in priority order:
 
-| Slice | Surface                                                                                  |           Effort | Value                                                                                               |
-| ----- | ---------------------------------------------------------------------------------------- | ---------------: | --------------------------------------------------------------------------------------------------- |
-| 1     | `TapedTensor` reductions + elementwise math AD                                           | ~250 LOC + tests | **Highest leverage** — closes the AD loop for any loss function. Direct unblock for UPT Proposal 8. |
-| 2     | `typed/complex.ts` + `typed/set.ts` promotion                                            | ~100 LOC + tests | 14 leaf functions users will hit immediately (`arg`, `conj`, `im`, `re`, set ops).                  |
-| 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`) | ~300 LOC + tests | Rounds out the ITensor-parity decomposition story; uses the same pattern as `tensorSvd`.            |
+| Slice | Surface                                                                                  |           Effort | Value                                                                                                             |
+| ----- | ---------------------------------------------------------------------------------------- | ---------------: | ----------------------------------------------------------------------------------------------------------------- |
+| 1     | `TapedTensor` reductions + elementwise math AD                                           | ~250 LOC + tests | **Highest leverage** — closes the AD loop for any loss function. Closes reductions and elementwise AD for a loss. |
+| 2     | `typed/complex.ts` + `typed/set.ts` promotion                                            | ~100 LOC + tests | 14 leaf functions users will hit immediately (`arg`, `conj`, `im`, `re`, set ops).                                |
+| 3     | Tensor decomposition wrappers (`tensorQr` / `tensorLU` / `tensorCholesky` / `tensorEig`) | ~300 LOC + tests | Rounds out the ITensor-parity decomposition story; uses the same pattern as `tensorSvd`.                          |
 
 ---
 
 ## 1. Slice 1 — `TapedTensor` reductions + elementwise math
 
-UPT Proposal 8 needs AD over arbitrary bridge equations. `TapedTensor` today exposes `add / sub / mul / scale / contract / matmul` — fine for linear combinations but missing reductions (which any loss function needs: `sum`, `mean`, `norm`) and elementwise transcendentals (which any nonlinear bridge needs: `log`, `exp`, `sin`, `cos`).
+Differentiable losses over tensor expressions need AD over reductions and elementwise transcendentals. `TapedTensor` today exposes `add / sub / mul / scale / contract / matmul` — fine for linear combinations but, at the time of this proposal, missing reductions (which any loss function needs: `sum`, `mean`, `norm`) and elementwise transcendentals (which any nonlinear term needs: `log`, `exp`, `sin`, `cos`).
 
 ### 1.1 New methods on `autograd/src/tape.ts`
 
@@ -260,7 +260,7 @@ Routing:
 
 - **TapedTensor.divide / sub** — easy follow-up after Slice 1 lands. Not in this proposal.
 - **TapedTensor.tensordot / svd / eig** — adjoint complexity merits a dedicated slice.
-- **`typed/probability.ts` / `typed/relational.ts` / `typed/unit.ts` / `typed/string.ts`** — promotion gap items (per the audit), held for a follow-up after the higher-leverage Slice 1+2 ship. These are mostly leaf functions and not blockers for UPT.
+- **`typed/probability.ts` / `typed/relational.ts` / `typed/unit.ts` / `typed/string.ts`** — promotion gap items (per the audit), held for a follow-up after the higher-leverage Slice 1+2 ship. These are mostly leaf functions and not blockers for the landed slices.
 - **Acceleration of `algebra` / `integration` / `hypothesis`** (Slice B from the audit) — held for a separate slice; needs benchmark data to justify each routing decision.
 - **Sparse-tensor decompositions** — out of scope; sparse-tensor is itself out of scope per the ITensor-parity proposal §8.
 

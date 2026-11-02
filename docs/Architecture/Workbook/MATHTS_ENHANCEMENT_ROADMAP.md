@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive roadmap to enhance MathTS from its current mathjs foundation to a powerful scientific computing platform comparable to Mathematica and Maple. The enhancements are organized into tiers based on implementation complexity and UPTF research priorities.
+This document outlines a comprehensive roadmap to enhance MathTS from its current mathjs foundation to a powerful scientific computing platform comparable to Mathematica and Maple. The enhancements are organized into tiers based on implementation complexity and MathTS workbook priorities.
 
 The goal is to power the **MathTS Scientific Workbook (.mtsw)** format—a YAML-based, reactive, Three.js-visualized scientific computing environment for theoretical physics research.
 
@@ -31,17 +31,17 @@ The goal is to power the **MathTS Scientific Workbook (.mtsw)** format—a YAML-
 
 ### Critical Gaps for Maple/Mathematica Parity
 
-| Category                   | Gap                                                                   | Priority           |
-| -------------------------- | --------------------------------------------------------------------- | ------------------ |
-| **Symbolic Engine**        | Pattern matching, simplification rules, CAS                           | 🔴 Critical        |
-| **Tensor Algebra**         | Einstein notation, index contraction, covariant derivatives           | 🔴 Critical        |
-| **Calculus**               | Symbolic integration, series expansion, limits, multivariate calculus | 🔴 Critical        |
-| **Differential Equations** | ODE/PDE solvers (symbolic + numeric), DAE support                     | 🔴 Critical        |
-| **Special Functions**      | Bessel, elliptic, hypergeometric, orthogonal polynomials              | 🟡 High            |
-| **Optimization**           | Constrained/unconstrained, global optimization, LP/QP                 | 🟡 High            |
-| **Number Theory**          | Primes, factorization, modular arithmetic, Diophantine                | 🟢 Medium          |
-| **Graph Theory**           | Graphs, networks, algorithms                                          | 🟢 Medium          |
-| **Differential Geometry**  | Manifolds, curvature, geodesics                                       | 🔴 Critical (UPTF) |
+| Category                   | Gap                                                                   | Priority                           |
+| -------------------------- | --------------------------------------------------------------------- | ---------------------------------- |
+| **Symbolic Engine**        | Pattern matching, simplification rules, CAS                           | 🔴 Critical                        |
+| **Tensor Algebra**         | Einstein notation, index contraction, covariant derivatives           | 🔴 Critical                        |
+| **Calculus**               | Symbolic integration, series expansion, limits, multivariate calculus | 🔴 Critical                        |
+| **Differential Equations** | ODE/PDE solvers (symbolic + numeric), DAE support                     | 🔴 Critical                        |
+| **Special Functions**      | Bessel, elliptic, hypergeometric, orthogonal polynomials              | 🟡 High                            |
+| **Optimization**           | Constrained/unconstrained, global optimization, LP/QP                 | 🟡 High                            |
+| **Number Theory**          | Primes, factorization, modular arithmetic, Diophantine                | 🟢 Medium                          |
+| **Graph Theory**           | Graphs, networks, algorithms                                          | 🟢 Medium                          |
+| **Differential Geometry**  | Manifolds, curvature, geodesics                                       | ⚪ Out of scope (not a MathTS API) |
 
 ---
 
@@ -480,9 +480,9 @@ enum CoordinateSystem {
 
 ---
 
-### Tier 3: Tensor Algebra (@mathts/tensor) — UPTF Critical
+### Tier 3: Tensor algebra (`@danielsimonjr/mathts-tensor`)
 
-This is the heart of the UPTF project.
+The shipped MathTS tensor package provides rank-N dense tensors, contraction, and related numerics. Einstein-notation parsing and index raising/lowering against a metric belong to the **out-of-scope** differential-geometry sketches in §3.3–3.4, not to the current public API.
 
 #### 3.1 Tensor Core
 
@@ -574,10 +574,12 @@ class EinsteinParser {
 // "∂_μ g_{αβ}" → partial derivative of metric
 ```
 
-#### 3.3 Metric Tensors and Christoffel Symbols
+#### 3.3 Metric tensors and Christoffel symbols (out of scope)
+
+> **Not scheduled.** `MetricTensor`, automatic Christoffel computation, and geodesic integrators as a library API are physics-framework sketches, not part of MathTS. Workbook samples may discuss Schwarzschild metrics in prose or expression cells only.
 
 ```typescript
-// @mathts/tensor/metric.ts
+// @mathts/tensor/metric.ts — illustrative sketch only; not shipped
 
 /**
  * Metric tensor with automatic Christoffel computation
@@ -653,10 +655,12 @@ function SchwarzschildMetric(M: Expression): MetricTensor {
 }
 ```
 
-#### 3.4 Curvature Tensors
+#### 3.4 Curvature tensors (out of scope)
+
+> **Not scheduled.** Riemann / Ricci / Einstein tensor types as first-class library APIs are out of scope for MathTS.
 
 ```typescript
-// @mathts/tensor/curvature.ts
+// @mathts/tensor/curvature.ts — illustrative sketch only; not shipped
 
 /**
  * Riemann curvature tensor and derived quantities
@@ -1206,28 +1210,18 @@ interface SurfaceOptions {
 - Limit computation
 - Asymptotic analysis
 
-### Phase 3: Tensor Engine (Months 7-9) — UPTF Priority
+### Phase 3: Tensor engine (Months 7-9) — MathTS priority
 
-**Sprint 13-14: Tensor Core**
+**Sprint 13-14: Tensor core (aligned with shipped `@danielsimonjr/mathts-tensor`)**
 
 - Tensor class with index structure
-- Einstein notation parser
+- `Tensor.einsum` via structured `EinsumSpec` (shipped; no notation-string parser)
 - Index contraction
 - Tensor products
 
-**Sprint 15-16: Metric & Connection**
+**Sprint 15-18: Metric, connection, curvature — out of scope**
 
-- Metric tensor implementation
-- Christoffel symbol computation
-- Index raising/lowering
-- Covariant derivative
-
-**Sprint 17-18: Curvature**
-
-- Riemann tensor
-- Ricci tensor and scalar
-- Einstein tensor
-- Weyl tensor
+- Not scheduled: metric tensor library type, Christoffel symbol computation as API, covariant derivative, Riemann / Ricci / Einstein / Weyl tensor modules
 
 ### Phase 4: Differential Equations (Months 10-11)
 
@@ -1558,13 +1552,13 @@ Extend the backend stack by adding WebGPU compute shaders for very large matrice
 
 ### Functional Parity Metrics
 
-| Metric               | Target | Measurement                                    |
-| -------------------- | ------ | ---------------------------------------------- |
-| Core Functions       | 200+   | Count of implemented functions                 |
-| Symbolic Integration | 80%    | Success rate on standard integral tables       |
-| ODE Solving          | 90%    | Success rate on ODE classification tests       |
-| Special Functions    | 50+    | Functions with full numeric + symbolic support |
-| Tensor Operations    | 100%   | UPTF requirement coverage                      |
+| Metric               | Target | Measurement                                            |
+| -------------------- | ------ | ------------------------------------------------------ |
+| Core Functions       | 200+   | Count of implemented functions                         |
+| Symbolic Integration | 80%    | Success rate on standard integral tables               |
+| ODE Solving          | 90%    | Success rate on ODE classification tests               |
+| Special Functions    | 50+    | Functions with full numeric + symbolic support         |
+| Tensor Operations    | 100%   | Coverage of shipped `@danielsimonjr/mathts-tensor` API |
 
 ### Performance Metrics
 
@@ -1591,11 +1585,11 @@ Extend the backend stack by adding WebGPU compute shaders for very large matrice
 This roadmap transforms MathTS from a mathjs port into a legitimate scientific computing platform capable of supporting serious theoretical physics research. The phased approach prioritizes:
 
 1. **Foundation first** — Symbolic engine enables everything else
-2. **UPTF alignment** — Tensor algebra is a priority, not an afterthought
+2. **Tensor numerics** — `@danielsimonjr/mathts-tensor` supports workbook and expression workflows; differential geometry as a framework is out of scope
 3. **Incremental value** — Each phase delivers usable functionality
 4. **Performance aware** — WASM/WebGPU from the start, not bolted on
 
-The end goal: a TypeScript-native, web-first alternative to Mathematica/Maple that powers beautiful, reactive scientific workbooks for the UPTF and beyond.
+The end goal: a TypeScript-native, web-first alternative to Mathematica/Maple that powers beautiful, reactive scientific workbooks built on MathTS.
 
 ---
 

@@ -17,8 +17,8 @@
  * makes this work for the implemented ops). v0.2.0 may broaden via decorator
  * instrumentation.
  *
- * For UPT v0.4.0's call-sites (metric functions in christoffel lowering),
- * fn uses only add/sub/mul/scale → safe.
+ * When fn uses only add/sub/mul/scale it stays on the traced path.
+ *
  *
  * @packageDocumentation
  */

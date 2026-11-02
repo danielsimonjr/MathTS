@@ -13,8 +13,9 @@ name: Publish
 # requests `id-token: write`.
 #
 # All three triggers no-op unless the repository variable RELEASES_ENABLED is
-# exactly the string `true` (unset is off). Re-enable releases when the PySR
-# roadmap is complete by setting RELEASES_ENABLED=true in Actions → Variables.
+# exactly the string `true` (unset is off). Leave the version PR unmerged; do not
+# set RELEASES_ENABLED as part of this work; do not tag or publish by hand.
+# Re-enable by setting RELEASES_ENABLED=true in Actions → Variables.
 #
 # Triggers (each gated by RELEASES_ENABLED):
 # - workflow_call — the Release workflow calls this in the same run after a

@@ -98,7 +98,11 @@ is the `MathNode` type alias.
 
 ### Node (base)
 
-`createNode` (dep: `mathWithTransform`). Instance methods:
+`createNode` (dep: `mathWithTransform`) returns a base class meant to be subclassed for custom AST
+nodes. A minimal child-plus-tag subclass exercises `isNode`, `forEach`, `map`, `traverse`, `clone`,
+`toJSON`, and `_toString`; the pin is `expression/tests/node-extension.test.ts`.
+
+Instance methods:
 
 | Method                         | Signature                         | Description                                    |
 | ------------------------------ | --------------------------------- | ---------------------------------------------- |
@@ -195,7 +199,7 @@ Input names `ln` / `log` lower to natural `log` / `log10` per
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `forEachScalar`                                                  | Preorder walk over `ScalarNode`                                                                                     |
 | `mapScalar`                                                      | Post-order immutable map (children first; replacement is not re-walked)                                             |
-| `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | PySR-style canonical form and stable dedup key                                                                      |
+| `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | Canonical form and stable dedup key                                                                                 |
 | `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols` | Metrics (`scalarComplexity` accepts `ScalarComplexityWeights`)                                                      |
 | `ScalarBuildError`                                               | Invalid builder input                                                                                               |
 | Types                                                            | `ScalarNode`, `ScalarOperator`, `ScalarFunctionName`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarComplexityWeights` |

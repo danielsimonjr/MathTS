@@ -33,7 +33,7 @@ which uses 40+ duck-typed type checks.
 
 ---
 
-## 1b. ScalarNode compile and Pareto selection (PySR)
+## 1b. ScalarNode compile and Pareto selection
 
 ```text
 ScalarNode tree (expression scalar-structure toolkit)
@@ -46,6 +46,8 @@ ScalarNode tree (expression scalar-structure toolkit)
   → optional paretoFront / scoreFront / selectFrontModel on { loss, complexity, item } rows
   → numericallyEquivalent (functions/numeric-equivalence.ts): SeededRng.next samples → compileScalar on both trees → nearlyEqual per valid row (consistent is evidence, not proof)
 ```
+
+The autodiff tape records input ids, output size, and a backward closure; it does not inspect whether the forward op ran in JS, on a worker, or in WASM (see `docs/reference/scalar-search.md`).
 
 `compileScalar` does not use `eval` / `new Function` and does not load WASM.
 
@@ -427,5 +429,5 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 
 | Claim                | Value | Source                                                                                                       |
 | -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2177  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalTypeScriptFiles | 2178  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

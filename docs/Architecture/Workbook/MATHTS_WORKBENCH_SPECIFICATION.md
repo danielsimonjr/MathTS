@@ -134,7 +134,7 @@ metadata:
     Multi-line description of the document.
     Supports markdown formatting.
 
-  tags: [physics, tensor, general-relativity, UPTF]
+  tags: [physics, tensor, general-relativity]
   license: 'MIT'
 
   # Bibliography (optional)

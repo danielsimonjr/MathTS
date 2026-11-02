@@ -255,7 +255,7 @@ describe('solveParameterDimensions', () => {
   const force = si(1, 1, -2, 0, 0, 0, 0);
   const kilogram = si(0, 1, 0, 0, 0, 0, 0);
 
-  it('solves PySR physics example M * c for c = m s^-2', () => {
+  it('solves M * c with M in kilograms and target m s^-2 kg for c = m s^-2', () => {
     const tree = scalar.op('*', [scalar.symbol('M'), scalar.symbol('c')]);
     const result = solveParameterDimensions(tree, { M: kilogram }, force, ['c']);
     expect(result).toEqual({
@@ -265,7 +265,7 @@ describe('solveParameterDimensions', () => {
     });
   });
 
-  it('is inconsistent with dimensionlessOnly on the PySR example', () => {
+  it('is inconsistent with dimensionlessOnly on that M * c system', () => {
     const tree = scalar.op('*', [scalar.symbol('M'), scalar.symbol('c')]);
     expect(
       solveParameterDimensions(tree, { M: kilogram }, force, ['c'], {

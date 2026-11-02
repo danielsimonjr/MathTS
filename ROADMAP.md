@@ -83,14 +83,6 @@ These are **not** backlog; each has a written rationale and was deliberately not
 Raw ideas not yet promoted to Near-term — one line each, no spec until they pass
 the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
-- **PySR-informed symbolic-search primitives (for UPT)**: M1 (`expression/src/scalar-structure.ts`),
-  M3 (`functions/src/scalar-compile.ts` / `compileScalar`), and M4 (`functions/src/pareto-front.ts`)
-  are in tree; later milestones and the optional search kit remain in
-  [`docs/roadmap/PYSR_INFORMED_ROADMAP.md`](docs/roadmap/PYSR_INFORMED_ROADMAP.md) with plans under
-  [`docs/plans/PYSR_M1_PLAN.md`](docs/plans/PYSR_M1_PLAN.md),
-  [`docs/plans/PYSR_M3_PLAN.md`](docs/plans/PYSR_M3_PLAN.md), and
-  [`docs/plans/PYSR_M4_PLAN.md`](docs/plans/PYSR_M4_PLAN.md).
-
 - **WebGPU acceleration tier (browser flag-gated)** — add WebGPU as a THIRD acceleration
   backend behind the existing WASM/parallel dispatch, selected by size **and** an in-browser
   WebGPU-enabled flag (mirroring how the WASM/parallel tiers are chosen today). `matrix`'s

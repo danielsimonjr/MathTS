@@ -24,7 +24,7 @@ The MathTS Scientific Workbook (`.mtsw`) is a YAML-based, human-readable, Git-fr
 - **Publication-ready output** (LaTeX, PDF, HTML)
 - **TypeScript-native** runtime (no Python dependency)
 
-The format is designed specifically for theoretical physics research, tensor mathematics, and the **Universal Physics Tensor Framework (UPTF)**.
+The format is designed for theoretical physics research, tensor mathematics, and other scientific computing workflows that benefit from reactive YAML notebooks.
 
 ---
 

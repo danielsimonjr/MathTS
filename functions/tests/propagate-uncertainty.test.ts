@@ -1,8 +1,8 @@
 /**
  * First-order uncertainty propagation.
  *
- * The independent-input numbers match the delta-method example used by UPT:
- * f = x*y at (2, 3) with σx = 0.1, σy = 0.2 → value 6, partials {x: 3, y: 2}, σ = 0.5.
+ * Independent-input delta-method example: f = x*y at (2, 3) with σx = 0.1, σy = 0.2 →
+ * value 6, partials {x: 3, y: 2}, σ = 0.5.
  */
 
 import { describe, it, expect } from 'vitest';

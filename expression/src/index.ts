@@ -46,7 +46,7 @@ export { createSymbolNode } from './node/SymbolNode.js';
 export { getStringSubset, setStringSubset } from './node/utils/stringSubset.js';
 export type { IndexLike } from './node/utils/stringSubset.js';
 
-// Scalar trees for numeric ExprNode lowering (UPT). No formula string is parsed.
+// Scalar expression trees; callers build nodes directly (no formula string).
 export {
   createScalarBuilder,
   SCALAR_FUNCTIONS,
