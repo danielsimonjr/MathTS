@@ -150,9 +150,10 @@ describe('P7-12 malformed shapes stay on the generic path', () => {
 
 describe('P7-12 matAlgo13xDD does not tag when find fails', () => {
   it('a plain-function callback returning BigNumbers leaves the result untagged', () => {
+    // createMatAlgo13xDD's local DenseMatrix has no toArray; factory matrices do.
     const algo = createMatAlgo13xDD({
       typed: factoryScope.typed as TypedFunction,
-    }) as (
+    }) as unknown as (
       a: unknown,
       b: unknown,
       cb: (x: unknown, y: unknown) => unknown
@@ -167,7 +168,7 @@ describe('P7-12 matAlgo13xDD does not tag when find fails', () => {
     ]) as { _datatype?: string };
     a._datatype = 'number';
     b._datatype = 'number';
-    const out = algo(a, b, (x, y) => bignumber(x as number).mul(y as number));
+    const out = algo(a, b, (x, y) => bignumber((x as number) * (y as number)));
     expect(attachedDatatype(out)).toBeUndefined();
     expect(String(out.toArray()[0]![0])).toBe('5');
   });
