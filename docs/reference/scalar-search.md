@@ -1,6 +1,6 @@
 # Scalar search reference
 
-MathTS ships a **ScalarNode** toolkit: build trees with `createScalarBuilder` (`number`, `symbol`, `op`, `call`). `ln` lowers to natural `log`; `log` lowers to `log10`. A formula string is rejected at the builder. This page records the public surface, Pareto scoring and selection, mutation weights, non-goals, and two extension pins (expression nodes and autodiff).
+MathTS ships a **ScalarNode** toolkit: build trees with `createScalarBuilder` (`number`, `symbol`, `op`, `call`). `ln` lowers to natural `log`; `log` lowers to `log10`. A formula string is rejected at the builder. This page records the public surface, Pareto scoring and selection, mutation weights, the ScalarNode bridge conventions, non-goals, and two extension pins (expression nodes and autodiff).
 
 ## Export surface
 
@@ -27,9 +27,29 @@ Definitions match `functions/src/pareto-front.ts`.
 
 ## Mutation weights
 
-Default mutation weights and draw order live in `functions/src/scalar-mutate.ts` as `DEFAULT_MUTATION_WEIGHTS`. The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBABILITY` (`0.00743`). See that module for the numeric table and operator order.
+`DEFAULT_MUTATION_WEIGHTS` in `functions/src/scalar-mutate.ts` keeps these numbers. Draw order is `MUTATION_DRAW_ORDER`, the same as the object key order. Optimize and backsolve are omitted (weight 0).
 
-`searchScalars` documents its own defaults in `functions/src/scalar-search.ts` (population size, tournament parameters, `fractionReplaced`, annealing with `initialTemperature` 3.17, adaptive-parsimony scaling 1040, migrant cap, frequency window, and related options).
+| Operator            | Weight     |
+| ------------------- | ---------- |
+| `rotateTree`        | `4.26`     |
+| `addNode`           | `2.47`     |
+| `deleteNode`        | `0.87`     |
+| `mutateOperator`    | `0.293`    |
+| `identity`          | `0.273`    |
+| `swapOperands`      | `0.198`    |
+| `mutateFeature`     | `0.1`      |
+| `mutateConstant`    | `0.0346`   |
+| `insertNode`        | `0.0112`   |
+| `simplifyConstants` | `0.00209`  |
+| `randomizeTree`     | `0.000502` |
+
+The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBABILITY` (`0.00743`).
+
+`searchScalars` defaults in `functions/src/scalar-search.ts`: `populationSize` 27, `tournamentSize` 15, `tournamentP` 0.982, `fractionReplaced` 0.00036, annealing `initialTemperature` 3.17 decaying by 0.995 each generation, `adaptiveParsimonyScaling` 1040, migrant pool 12, frequency window 100000.
+
+## ScalarNode ↔ expression Node
+
+`scalarToNode` / `nodeToScalar` live in `functions/src/scalar-node-bridge.ts`. A round trip keeps `scalarCanonicalKey`. Natural `log` becomes expression `log(x)`; `log10` stays `log10(x)`. Unary minus is `(-1)*x`. `ParenthesisNode` unwraps; any other node type, including `ConditionalNode`, throws `ScalarBuildError`. `simplifyScalar` does not round-trip through a formula string; `a/(b/c)` and `a·c/b`, and `a·a` and `a²`, share keys after simplify. The pin is `functions/tests/scalar-node-bridge.test.ts`.
 
 ## Non-goals
 
