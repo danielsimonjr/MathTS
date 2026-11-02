@@ -72,10 +72,32 @@ export function workspaceVersions(root = repoRoot) {
   return out;
 }
 
+const PLAIN_VERSION = /^(\d+)\.(\d+)\.(\d+)$/;
+
+/**
+ * Whether `version` satisfies the plain caret range `spec` (`^X.Y.Z`, no prerelease).
+ * Any other spec form returns false.
+ * @param {string} spec
+ * @param {string} version
+ */
+export function caretSatisfies(spec, version) {
+  const r = spec.startsWith('^') ? PLAIN_VERSION.exec(spec.slice(1)) : null;
+  const v = PLAIN_VERSION.exec(version);
+  if (!r || !v) return false;
+  const [rMaj, rMin, rPat] = r.slice(1).map(Number);
+  const [vMaj, vMin, vPat] = v.slice(1).map(Number);
+  // The caret keeps the left-most non-zero part fixed.
+  if (rMaj > 0) return vMaj === rMaj && (vMin > rMin || (vMin === rMin && vPat >= rPat));
+  if (rMin > 0) return vMaj === 0 && vMin === rMin && vPat >= rPat;
+  return vMaj === 0 && vMin === 0 && vPat === rPat;
+}
+
 /**
  * A spec change is drift, except a release bump: a dependency on a workspace package
- * whose new spec is exactly `^<that package's current version>`, which is what
- * `changeset version` writes. Additions, removals and every other retarget stay drift.
+ * whose new spec is a plain caret range that the package's current version satisfies.
+ * `changeset version` writes such a spec, and keeps the spec while the dependency stays
+ * in range. A lock entry written before the bump never fails a later release.
+ * Additions, removals and every other retarget stay drift.
  * @param {Record<string, Record<string, Record<string, string>>>} actual
  * @param {Record<string, Record<string, Record<string, string>>>} expected
  * @param {Record<string, string>} [versions] workspace package name -> current version
@@ -106,7 +128,7 @@ export function diffRuntimeDeps(actual, expected, versions = {}) {
           problems.push(`${rel} ${field}.${name} removed (was "${eSec[name]}")`);
         } else if (
           aSec[name] !== eSec[name] &&
-          !(name in versions && aSec[name] === `^${versions[name]}`)
+          !(Object.hasOwn(versions, name) && caretSatisfies(aSec[name], versions[name]))
         ) {
           problems.push(`${rel} ${field}.${name} spec changed: "${eSec[name]}" -> "${aSec[name]}"`);
         }
