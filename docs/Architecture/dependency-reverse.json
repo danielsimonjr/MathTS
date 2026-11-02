@@ -678,6 +678,8 @@
     "functions/src/utils/typed-impl.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/usolve.ts",
       "functions/src/matrix/partitionSelect.ts",
       "functions/src/matrix/sort.ts",
       "functions/src/statistics/max.ts",

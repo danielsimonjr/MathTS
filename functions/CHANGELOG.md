@@ -4,6 +4,8 @@
 
 ### Patch Changes
 
+- Dense `lsolve` / `usolve` take a number path (P7-11) when the triangle and RHS column are numbers. Results stay bit-identical to the generic loop, including singular and near-singular systems. BigNumber, Fraction, Complex, and mixed-type inputs stay on the generic path.
+
 - Sprint 2R clone-merge: internal `fitOrthogonalSeries` for `chebyshevFit` and `legendreFit` (length check, WASM-threshold dispatch, normal-equation JS path). Public names and behavior unchanged.
 
 - Near-clone numeric batch 6 (Sprint 2R): internal `linearFit`, `solveAugmentedNormalEquations`, Struve/Kelvin series helpers, `zipIntPoly`, set `selectById`, and `fibPair`. Public exports and behavior unchanged.

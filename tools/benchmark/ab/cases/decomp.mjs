@@ -154,4 +154,72 @@ export const cases = [
       return () => F.lup(A);
     },
   },
+  ...lsolveCases(),
+  ...usolveCases(),
+  {
+    name: 'lusolve 128×128 after lup',
+    kind: 'gain',
+    pr: 'P7-11',
+    make: (F) => {
+      const A = randomMatrix(128, 128, 0x7b128);
+      const b = randomMatrix(128, 1, 0x7b1281).map((row) => row[0]);
+      return () => F.lusolve(A, b);
+    },
+  },
+  {
+    name: 'lsolve BigNumber 8×8 (fallback)',
+    kind: 'neutral',
+    pr: 'P7-11',
+    make: (F) => {
+      const L = lowerTriangular(8, 0x7bb808).map((row) => row.map((x) => F.bignumber(x)));
+      const b = randomMatrix(8, 1, 0x7bb809).map((row) => F.bignumber(row[0]));
+      return () => F.lsolve(L, b);
+    },
+  },
 ];
+
+/** @param {number} n @param {number} seed */
+function lowerTriangular(n, seed) {
+  const A = randomMatrix(n, n, seed);
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) A[i][j] = 0;
+    if (A[i][i] === 0) A[i][i] = 1;
+  }
+  return A;
+}
+
+/** @param {number} n @param {number} seed */
+function upperTriangular(n, seed) {
+  const A = randomMatrix(n, n, seed);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < i; j++) A[i][j] = 0;
+    if (A[i][i] === 0) A[i][i] = 1;
+  }
+  return A;
+}
+
+function lsolveCases() {
+  return [8, 32, 128].map((n) => ({
+    name: `lsolve ${n}×${n}`,
+    kind: 'gain',
+    pr: 'P7-11',
+    make: (F) => {
+      const L = lowerTriangular(n, 0x7b0000 + n);
+      const b = randomMatrix(n, 1, 0x7b1000 + n).map((row) => row[0]);
+      return () => F.lsolve(L, b);
+    },
+  }));
+}
+
+function usolveCases() {
+  return [8, 32, 128].map((n) => ({
+    name: `usolve ${n}×${n}`,
+    kind: 'gain',
+    pr: 'P7-11',
+    make: (F) => {
+      const U = upperTriangular(n, 0x7b2000 + n);
+      const b = randomMatrix(n, 1, 0x7b3000 + n).map((row) => row[0]);
+      return () => F.usolve(U, b);
+    },
+  }));
+}

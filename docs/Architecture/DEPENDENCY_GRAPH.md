@@ -2935,6 +2935,7 @@ graph LR
 | ------------------------------ | ----------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`               | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
 | `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 
 **Exports:**
@@ -2985,6 +2986,7 @@ graph LR
 | ------------------------------ | ----------------------- | ------------------ |
 | `../../utils/factory.js`       | `factory`               | Import             |
 | `./utils/solveValidation.js`   | `createSolveValidation` | Import             |
+| `../../utils/typed-impl.js`    | `findTypedImpl`         | Import             |
 | `../../core/function/typed.js` | `TypedFunction`         | Import (type-only) |
 
 **Exports:**
@@ -19478,7 +19480,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1235   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204314 |
+| Total Lines of Code     | 204517 |
 | Total Exports           | 6412   |
 | Total Re-exports        | 2724   |
 | Total Classes           | 60     |

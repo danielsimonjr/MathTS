@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-02",
-  "totalFiles": 2073,
+  "totalFiles": 2074,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1207,
     "test-only": 0,
     "orphan": 0,
-    "test": 778,
+    "test": 779,
     "tool": 28,
     "config": 29,
     "example": 5
   },
   "byArea": {
     "src": 1233,
-    "tests": 778,
+    "tests": 779,
     "config": 29,
     "examples": 5,
     "tools": 28
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 3,
     "(root)": 52,
     "@danielsimonjr/mathts-expression": 561,
-    "@danielsimonjr/mathts-functions": 885,
+    "@danielsimonjr/mathts-functions": 886,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
     "@danielsimonjr/mathts-matrix": 116,
@@ -5406,7 +5406,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 259
+      "loc": 361
     },
     {
       "file": "functions/src/algebra/solver/lsolveAll.ts",
@@ -5427,7 +5427,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 264
+      "loc": 365
     },
     {
       "file": "functions/src/algebra/solver/usolveAll.ts",
@@ -10503,6 +10503,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 321
+    },
+    {
+      "file": "functions/tests/p7-lsolve-usolve-number-path.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 326
     },
     {
       "file": "functions/tests/p7-lup-number-path.test.ts",
