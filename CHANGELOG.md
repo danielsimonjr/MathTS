@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compares with core BigNumber `equals` as well as decimal.js `eq`.
 
 ### Fixed
+- **The ast and parser builds run on Windows.** Their build scripts appended the type re-export with `printf ... >> dist/index.d.ts`. The Bun shell has no `printf` on native Windows (`command not found: printf`), and the Git Bash `printf` fails with `Bad file descriptor` under Bun, so `bun run build` failed on Windows. `tools/append-re-export-types.mjs` now copies `src/re-export-types.d.ts` and appends the line, once per file, so dev watch reruns add nothing. Tests: `node --test tools/test/append-re-export-types.test.mjs` (3), also a CI step.
 - **Vitest 5.0.5 stops the temp folder leak and clears three moderate advisories.** The root `package.json` moves
   `vitest`, `@vitest/browser`, `@vitest/browser-playwright` and `@vitest/coverage-v8` from `^5.0.0` to `^5.0.5`, and
   `bun.lock` resolves every workspace to 5.0.5. Vitest 5.0.0, 5.0.1 and 5.0.2 never remove the root temp folder of a

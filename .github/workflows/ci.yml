@@ -112,6 +112,9 @@ jobs:
         # (`tools/test/bun-audit-retry.mjs`); a real high+ advisory still fails on first try.
         run: node tools/test/bun-audit-retry.mjs
 
+      - name: Re-export types append tool
+        run: node --test tools/test/append-re-export-types.test.mjs
+
       - name: Runtime dependency lock
         run: |
           node --test tools/test/check-runtime-deps.test.mjs
