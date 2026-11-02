@@ -3,7 +3,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { collectRuntimeDepsLock, diffRuntimeDeps } from './check-runtime-deps.mjs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import {
+  collectRuntimeDepsLock,
+  diffRuntimeDeps,
+  workspaceVersions,
+} from './check-runtime-deps.mjs';
 
 function fixtureWorkspace(manifests) {
   const root = mkdtempSync(join(tmpdir(), 'runtime-deps-'));
@@ -88,4 +94,66 @@ test('a dependency added to a manifest after the lock was written is reported', 
     rmSync(root, { recursive: true, force: true });
     rmSync(lockedRoot, { recursive: true, force: true });
   }
+});
+
+test('an internal dependency moved to ^<its current workspace version> is a release bump, not drift', () => {
+  const sec = (deps) => ({ dependencies: deps, peerDependencies: {}, optionalDependencies: {} });
+  const expected = { 'a/package.json': sec({ '@scope/core': '^0.19.0', left: '1.0.0' }) };
+  const versions = { '@scope/core': '0.20.0' };
+  assert.deepEqual(
+    diffRuntimeDeps(
+      { 'a/package.json': sec({ '@scope/core': '^0.20.0', left: '1.0.0' }) },
+      expected,
+      versions
+    ),
+    []
+  );
+  // a spec that is not ^<current version> is still drift
+  assert.match(
+    diffRuntimeDeps(
+      { 'a/package.json': sec({ '@scope/core': '^0.21.0', left: '1.0.0' }) },
+      expected,
+      versions
+    ).join('\n'),
+    /@scope\/core spec changed/
+  );
+  assert.match(
+    diffRuntimeDeps(
+      { 'a/package.json': sec({ '@scope/core': 'github:x/y', left: '1.0.0' }) },
+      expected,
+      versions
+    ).join('\n'),
+    /spec changed/
+  );
+  // an external dependency gets no exemption
+  assert.match(
+    diffRuntimeDeps(
+      { 'a/package.json': sec({ '@scope/core': '^0.19.0', left: '2.0.0' }) },
+      expected,
+      versions
+    ).join('\n'),
+    /left spec changed/
+  );
+});
+
+test('workspaceVersions maps each workspace package name to its version', () => {
+  const root = fixtureWorkspace({
+    'package.json': { name: 'root', private: true, workspaces: ['core', 'packages/*'] },
+    'core/package.json': { name: '@scope/core', version: '0.20.0' },
+    'packages/pool/package.json': { name: '@scope/pool', version: '0.2.7' },
+  });
+  try {
+    assert.deepEqual(workspaceVersions(root), { '@scope/core': '0.20.0', '@scope/pool': '0.2.7' });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the CLI prints a verdict on every platform (the main-module guard matches)', () => {
+  const r = spawnSync(
+    process.execPath,
+    [fileURLToPath(new URL('./check-runtime-deps.mjs', import.meta.url))],
+    { encoding: 'utf8' }
+  );
+  assert.match(`${r.stdout}${r.stderr}`, /^(OK|FAIL): /m);
 });
