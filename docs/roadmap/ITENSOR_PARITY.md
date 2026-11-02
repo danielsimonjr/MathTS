@@ -14,7 +14,7 @@ This file is kept as the design record.
 
 ITensor has been the standard for tensor-network programming in Julia for almost a decade. Its core insight — that indices should be **first-class objects with identity**, so contractions can be expressed by name instead of by axis position — generalises well beyond physics. MathTS's `Tensor` is currently positional-only (axes addressed by integer index, contractions specified via `einsum("ij,jk->ik", a, b)` spec strings). This proposal adds an **opt-in named-index layer** plus two small primitives (truncated SVD on Tensor, random-tensor constructors) that round out parity with the general-purpose pieces of ITensor.
 
-What we are **not** adding: MPS/MPO, DMRG/TEBD/TDVP, fermion anticommutation, quantum-number block-sparse storage. Those are physics-specific and belong in the UPT layer or a sibling package, not in `mathts-tensor`. The UPT v0.70 proposal §1.3 explicitly disclaims wanting them upstream.
+What we are **not** adding: MPS/MPO, DMRG/TEBD/TDVP, fermion anticommutation, quantum-number block-sparse storage. Those are physics-specific many-body tensor-network features and stay out of `@danielsimonjr/mathts-tensor`; a separate domain package could consume the primitives below if needed.
 
 The six landings in this proposal, in priority order:
 
@@ -79,7 +79,7 @@ This is what we want.
 
 ### 1.3 Where ITensor goes that MathTS deliberately does not
 
-ITensor's flagship features beyond named indices — MPS/MPO state representations, DMRG/TEBD/TDVP variational algorithms, fermionic anticommutation, quantum-number block-sparse storage — are physics-specific. They belong downstream of `mathts-tensor` (in UPT or a sibling) consuming the primitives this proposal adds, not in the core.
+ITensor's flagship features beyond named indices — MPS/MPO state representations, DMRG/TEBD/TDVP variational algorithms, fermionic anticommutation, quantum-number block-sparse storage — are physics-specific. They stay out of `@danielsimonjr/mathts-tensor`; a separate domain package could build on the primitives this proposal adds.
 
 ---
 
@@ -315,7 +315,7 @@ export function contractNetwork(
 
 ## 6. Phase 5 — Autograd over named-index contractions
 
-UPT v0.7 Proposal 8 (`differentiableEvaluator`) needs reverse-mode AD to traverse bridge equations whose primitive ops include `contract` and `matmul`. `TapedTensor` today exposes `add / sub / mul / scale` but neither. This phase closes the loop.
+Reverse-mode AD over named-index contractions needs to traverse expressions whose primitive ops include `contract` and `matmul`. `TapedTensor` today exposes `add / sub / mul / scale` but neither. This phase closes the loop.
 
 ### 6.1 Modifications to `autograd/src/tape.ts`
 
@@ -431,9 +431,9 @@ Implementation delegates to `einsum` under the hood (build the spec string from 
 
 ## 8. Non-goals (explicit)
 
-- **MPS / MPO** state representations → live in UPT or a sibling package; consume the primitives from this proposal.
-- **DMRG / TEBD / TDVP** variational algorithms → physics-specific.
-- **Quantum-number block-sparse storage** → UPT proposal §1.3 explicitly disclaims wanting this in MathTS.
+- **MPS / MPO** state representations → stay out of `@danielsimonjr/mathts-tensor`; a separate domain package could consume the primitives from this proposal.
+- **DMRG / TEBD / TDVP** variational algorithms → physics-specific; not in `@danielsimonjr/mathts-tensor`.
+- **Quantum-number block-sparse storage** → stay out of `@danielsimonjr/mathts-tensor`.
 - **Fermionic anticommutation / particle-conservation arithmetic** → physics.
 - **HDF5 I/O** → JSON suffices for browser; HDF5 is interop with Python/Julia. Tracked as a long-term open item, not in scope here.
 - **Non-abelian symmetry sector contraction** → still in dev in ITensor itself; far out of scope.
