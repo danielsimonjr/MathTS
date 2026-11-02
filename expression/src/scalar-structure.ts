@@ -1,6 +1,6 @@
 /**
  * Structural utilities over {@link ScalarNode}: traversal, metrics, and
- * PySR-style canonical form with a stable structural key.
+ * canonical form with a stable structural key.
  *
  * @packageDocumentation
  */
@@ -23,12 +23,9 @@ function isLoweredScalarFn(fn: string): fn is LoweredScalarFn {
 /**
  * Per-node weights for {@link scalarComplexity}.
  *
- * Omitted fields default to 1, which is PySR's `complexity_of_operators`,
- * `complexity_of_constants`, and `complexity_of_variables` default.
- * A `symbol` record supplies per-name weights; a name that is absent from
- * the record still weighs 1. Weights are summed across the stored tree and
- * then rounded with `Math.round` (PySR rounds to the nearest integer after
- * the sum; the half-tie rule here is JavaScript's, not Julia's half-to-even).
+ * Omitted fields default to 1. A `symbol` record supplies per-name weights; a
+ * name that is absent from the record still weighs 1. Weights are summed
+ * across the stored tree and then rounded with `Math.round`.
  *
  * @example
  * ```ts
@@ -44,7 +41,7 @@ export interface ScalarComplexityWeights {
   readonly op?: Partial<Record<ScalarOperator, number>>;
   /** Weight of one call node, keyed by the lowered name (`ln` is `log`). Default 1. */
   readonly call?: Partial<Record<LoweredScalarFn, number>>;
-  /** Weight of one number node. Default 1. PySR `complexity_of_constants`. */
+  /** Weight of one number node. Default 1. */
   readonly number?: number;
   /** Weight of one symbol node: one number for every name, or a per-name record. Default 1. */
   readonly symbol?: number | Readonly<Record<string, number>>;

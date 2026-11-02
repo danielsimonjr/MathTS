@@ -195,7 +195,7 @@ Input names `ln` / `log` lower to natural `log` / `log10` per
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `forEachScalar`                                                  | Preorder walk over `ScalarNode`                                                                                     |
 | `mapScalar`                                                      | Post-order immutable map (children first; replacement is not re-walked)                                             |
-| `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | PySR-style canonical form and stable dedup key                                                                      |
+| `scalarCanonical`, `scalarCanonicalKey`, `scalarEquals`          | Canonical form and stable dedup key                                                                                 |
 | `scalarSize`, `scalarDepth`, `scalarComplexity`, `scalarSymbols` | Metrics (`scalarComplexity` accepts `ScalarComplexityWeights`)                                                      |
 | `ScalarBuildError`                                               | Invalid builder input                                                                                               |
 | Types                                                            | `ScalarNode`, `ScalarOperator`, `ScalarFunctionName`, `LoweredScalarFn`, `ScalarBuilder`, `ScalarComplexityWeights` |
