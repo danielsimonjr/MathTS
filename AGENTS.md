@@ -268,8 +268,9 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
   **no implementation** — edit the source package they re-export, not these.
 - **Carry work to RELEASED.** Versioning is via Changesets. Tagging, GitHub Releases, and npm
   publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is
-  off). The version PR still opens on each push; leave it unmerged until the PySR roadmap is
-  done (`docs/roadmap/PYSR_INFORMED_ROADMAP.md` §7). Set `RELEASES_ENABLED=true` to re-enable;
+  off). The version PR still opens on each push; leave it unmerged; do not set
+  `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. Set
+  `RELEASES_ENABLED=true` to re-enable;
   do not delete the workflows. `publish.yml` gates the same variable on all three triggers.
   The flow when releases are on: changeset → commit → push → the Release workflow opens a
   "chore: release packages" PR → merge it. That merge bumps versions. The same workflow then
