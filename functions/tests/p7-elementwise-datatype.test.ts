@@ -23,6 +23,22 @@ function attachedDatatype(x: unknown): string | undefined {
 }
 
 describe('P7-12 Array,Array number inference', () => {
+  it('1-D number arrays take the same path as a number-tagged DenseMatrix', () => {
+    const a = [2, -0, 3, NaN];
+    const b = [4, 0, 5, 1];
+    const am = matrix(a) as { _datatype?: string };
+    const bm = matrix(b) as { _datatype?: string };
+    am._datatype = 'number';
+    bm._datatype = 'number';
+    const fromArrays = dotMultiply(a, b) as number[];
+    const fromTagged = (dotMultiply(am, bm) as { toArray(): number[] }).toArray();
+    expect(fromArrays.length).toBe(fromTagged.length);
+    for (let i = 0; i < fromArrays.length; i++) {
+      expect(Object.is(fromArrays[i], fromTagged[i])).toBe(true);
+    }
+    expect(attachedDatatype(fromArrays)).toBeUndefined();
+  });
+
   it('dotMultiply is bit-exact on number arrays', () => {
     const a = [2, -0, 3, NaN];
     const b = [4, 0, 5, 1];
@@ -131,6 +147,20 @@ describe('P7-12 DenseMatrix datatype is unchanged', () => {
 });
 
 describe('P7-12 malformed shapes stay on the generic path', () => {
+  it('a mixed-depth 1-D array stays on the generic path', () => {
+    let threw = false;
+    let out: unknown;
+    try {
+      out = dotMultiply([1, 2] as unknown as number[], [3, [4]] as unknown as number[]);
+    } catch {
+      threw = true;
+    }
+    if (!threw) {
+      const flat = (out as unknown[]).flat(2);
+      expect(flat.some((v) => typeof v === 'number' && Number.isNaN(v))).toBe(false);
+    }
+  });
+
   it('a ragged array does not produce NaN from a raw number impl', () => {
     let threw = false;
     let out: unknown;

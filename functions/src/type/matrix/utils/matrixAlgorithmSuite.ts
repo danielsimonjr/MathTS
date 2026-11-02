@@ -52,31 +52,40 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
     const bcast = broadcast as unknown as (a: unknown, b: unknown) => [unknown, unknown];
 
     /**
-     * Infer `number` only when the wrapped matrix's data matches `_size` and every
-     * cell at that size is a number. Ragged or mixed-depth arrays stay on generic
-     * dispatch (the iterator would otherwise hand `undefined` to a raw number impl).
+     * Infer `number` from the raw array, not the wrapped `_data`/`_size`.
+     * `matrix()` may store a 1-D vector as a flat `_data` with a 2-D `_size`
+     * (or the reverse); walking the wrapper then skips the found-callback path
+     * and the P7-12 A/B cases stay on generic dispatch.
+     *
+     * Ragged or mixed-depth arrays stay generic: a raw number impl would see
+     * `undefined` for a missing cell (`dotMultiply([[1, 2], [3]], 4)`).
      */
-    function dataMatchesSizeAsNumbers(data: unknown, size: number[] | undefined): boolean {
-      if (!size) return false;
-      const walk = (value: unknown, dim: number): boolean => {
-        if (dim === size.length) return typeof value === 'number';
-        if (!Array.isArray(value) || value.length !== size[dim]) return false;
-        for (let i = 0; i < size[dim]; i++) {
-          if (!walk(value[i], dim + 1)) return false;
+    function rectangularAllNumbers(value: unknown): boolean {
+      if (!Array.isArray(value)) return typeof value === 'number';
+      if (value.length === 0) return true;
+      const first = value[0];
+      if (typeof first === 'number') {
+        for (let i = 0; i < value.length; i++) {
+          if (typeof value[i] !== 'number') return false;
         }
         return true;
-      };
-      return walk(data, 0);
+      }
+      if (!Array.isArray(first)) return false;
+      const width = first.length;
+      for (let i = 0; i < value.length; i++) {
+        const row = value[i];
+        if (!Array.isArray(row) || row.length !== width) return false;
+        if (!rectangularAllNumbers(row)) return false;
+      }
+      return true;
     }
 
     /** Infer `number` only for plain-array operands so `.valueOf()` results stay datatype-free. */
     function wrapArrayPair(x: unknown[], y: unknown[]): [Matrix, Matrix] {
+      const infer = rectangularAllNumbers(x) && rectangularAllNumbers(y);
       const xm = matrix(x as DenseMatrixData);
       const ym = matrix(y as DenseMatrixData);
-      if (
-        dataMatchesSizeAsNumbers(xm._data, xm._size) &&
-        dataMatchesSizeAsNumbers(ym._data, ym._size)
-      ) {
+      if (infer) {
         xm._datatype = 'number';
         ym._datatype = 'number';
       }
@@ -85,7 +94,7 @@ export const createMatrixAlgorithmSuite = /* #__PURE__ */ factory(
 
     function wrapArrayScalar(x: unknown[], scalar: unknown): Matrix {
       const m = matrix(x as DenseMatrixData);
-      if (typeof scalar === 'number' && dataMatchesSizeAsNumbers(m._data, m._size)) {
+      if (typeof scalar === 'number' && rectangularAllNumbers(x)) {
         m._datatype = 'number';
       }
       return m;
