@@ -406,10 +406,10 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   VAR: { base: 'POWER', prefixes: 'SHORT', scale: '1', imaginary: true }, // reactive power: the value is the imaginary unit times this scale
   VA: { base: 'POWER', prefixes: 'SHORT', scale: '1' },
   Pa: { base: 'PRESSURE', prefixes: 'SHORT', scale: '1' },
-  psi: { base: 'PRESSURE', prefixes: 'NONE', scale: 'lbf/inch^2' }, // lbf/in^2
+  psi: { base: 'PRESSURE', prefixes: 'SHORT', scale: 'lbf/inch^2' }, // lbf/in^2
   atm: { base: 'PRESSURE', prefixes: 'NONE', scale: 'standard_atmosphere' }, // standard atmosphere
   bar: { base: 'PRESSURE', prefixes: 'SHORTLONG', scale: '1e5' },
-  torr: { base: 'PRESSURE', prefixes: 'NONE', scale: 'standard_atmosphere/760' }, // 1/760 atm (exact)
+  torr: { base: 'PRESSURE', prefixes: 'SHORT', scale: 'standard_atmosphere/760' }, // 1/760 atm (exact)
   mmHg: { base: 'PRESSURE', prefixes: 'NONE', scale: '13.5951*standard_gravity' }, // conventional mmHg: 13.5951 g/cm^3 × g_n × 1 mm = 133.322387415 Pa (NIST SP 811). Not the torr
   mmH2O: { base: 'PRESSURE', prefixes: 'NONE', scale: 'standard_gravity' }, // conventional: 1000 kg/m^3 × g_n × 1 mm
   cmH2O: { base: 'PRESSURE', prefixes: 'NONE', scale: '10*standard_gravity' }, // conventional: 1000 kg/m^3 × g_n × 1 cm
@@ -630,6 +630,26 @@ export const UNIT_ROW_ALIASES: Readonly<Record<string, string>> = Object.freeze(
   Ω: 'ohm',
   Ohm: 'ohm',
   Å: 'angstrom',
+});
+
+/**
+ * Unit spellings the parser refuses. Each maps a spelling to the reason it is
+ * not a unit of fixed scale: the logarithmic units (dB, dBm, dBW, Np) convert
+ * no multiplicative scale, and Mach is a ratio to the local speed of sound.
+ * Where the parser would report a unit as not found, a spelling here gets a
+ * `UnitParseError` with this reason instead.
+ *
+ * A lookup MUST use `Object.hasOwn` or a null-prototype object, so a spelling
+ * like `__proto__` or `toString` never reads off `Object.prototype` as a
+ * refused reason.
+ */
+export const REFUSED_UNIT_SPELLINGS: Readonly<Record<string, string>> = Object.freeze({
+  dB: 'dB is a logarithmic unit; give the quantity in its linear unit, or a reference level',
+  dBm: 'dBm is a logarithmic unit (decibels over 1 mW); give watts',
+  dBW: 'dBW is a logarithmic unit (decibels over 1 W); give watts',
+  Np: 'Np is a logarithmic unit (the neper); give the quantity in its linear unit, or a reference level',
+  Mach: 'Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
+  mach: 'mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
 });
 
 const namedCache = new Map<string, ExactScale>();

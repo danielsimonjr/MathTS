@@ -12,7 +12,8 @@ import {
   multiplyExactScales,
   ratioExactScale,
 } from '../../src/index';
-import { DimensionMismatchError } from '../../src/types/unit/errors';
+import { DimensionMismatchError, UnitParseError } from '../../src/types/unit/errors';
+import { REFUSED_UNIT_SPELLINGS } from '../../src/types/unit/unit-table';
 
 const twoPi = exactScaleToNumber(multiplyExactScales(ratioExactScale(2), PI_EXACT_SCALE));
 
@@ -88,6 +89,81 @@ describe('supplementary built-in units', () => {
     expect(new Unit(1, 'Jy').toNumeric('W/m^2/Hz')).toBe(1e-26);
     expect(new Unit(1, 'c').toNumeric('m/s')).toBe(299792458);
     expect(new Unit(1, 'nat').toNumeric()).toBe(1);
+  });
+
+  it('parses SI-prefixed spellings of psi and torr', () => {
+    expect(new Unit(1, 'kpsi').toNumeric('psi')).toBe(1000);
+    expect(new Unit(1, 'Mpsi').toNumeric('psi')).toBe(1e6);
+    expect(new Unit(1, 'mtorr').toNumeric('torr')).toBe(1e-3);
+    expect(new Unit(1, 'utorr').toNumeric('torr')).toBe(1e-6);
+    expect(new Unit(1, 'kpsi').toNumeric('Pa')).toBeCloseTo(1000 * 6894.757293168362, 6);
+    expect(new Unit(1, 'Mpsi').toNumeric('Pa')).toBeCloseTo(1e6 * 6894.757293168362, 3);
+    expect(new Unit(1, 'mtorr').toNumeric('Pa')).toBeCloseTo(133.32236842105263 / 1000, 9);
+    expect(new Unit(1, 'utorr').toNumeric('Pa')).toBeCloseTo(133.32236842105263 / 1e6, 12);
+  });
+
+  it('still refuses a downward prefix on pc', () => {
+    expect(new Unit(1, 'Mpc').toNumeric('pc')).toBe(1e6);
+    expect(() => new Unit(1, 'mpc')).toThrow();
+  });
+});
+
+describe('refused unit spellings', () => {
+  const REFUSE_REASONS: readonly [string, string][] = [
+    ['dB', 'dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'],
+    ['dBm', 'dBm is a logarithmic unit (decibels over 1 mW); give watts'],
+    ['dBW', 'dBW is a logarithmic unit (decibels over 1 W); give watts'],
+    [
+      'Np',
+      'Np is a logarithmic unit (the neper); give the quantity in its linear unit, or a reference level',
+    ],
+    [
+      'Mach',
+      'Mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
+    ],
+    [
+      'mach',
+      'mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number',
+    ],
+  ];
+
+  it('refuses each spelling with its reason, in the UnitParseError the parser throws', () => {
+    for (const [spelling, reason] of REFUSE_REASONS) {
+      expect(() => new Unit(1, spelling)).toThrow(UnitParseError);
+      expect(() => new Unit(1, spelling)).toThrow(`Unit "${spelling}" is refused: ${reason}`);
+    }
+  });
+
+  it('refuses a spelling inside a compound unit', () => {
+    expect(() => new Unit(1, 'dB/m')).toThrow(
+      'Unit "dB" is refused: dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'
+    );
+    expect(() => new Unit(1, 'mach/s')).toThrow(
+      'Unit "mach" is refused: mach is a ratio to the local speed of sound; give m/s, or the ratio as a bare number'
+    );
+    expect(() => new Unit(1, 's/dB')).toThrow(
+      'Unit "dB" is refused: dB is a logarithmic unit; give the quantity in its linear unit, or a reference level'
+    );
+  });
+
+  it('keeps the not-found report for a spelling that is not refused', () => {
+    expect(() => new Unit(1, 'nonesuch')).toThrow('Unit "nonesuch" not found.');
+    // A name on Object.prototype is not a refused reason.
+    expect(() => new Unit(1, 'toString')).toThrow('Unit "toString" not found.');
+    // `__proto__` is not even a unit token, and never a refused reason.
+    expect(() => new Unit(1, '__proto__')).toThrow(UnitParseError);
+    expect(() => new Unit(1, '__proto__')).toThrow(/Unexpected "_"/);
+  });
+
+  it('matches the spellings exactly, never with a prefix or another case', () => {
+    for (const spelling of Object.keys(REFUSED_UNIT_SPELLINGS)) {
+      const msg = `Unit "${spelling}" is refused:`;
+      expect(() => new Unit(1, spelling)).toThrow(msg);
+    }
+    // Same case, prefix-attached forms stay "not found" (or prefix + a refused
+    // bare spelling never forms one name).
+    expect(() => new Unit(1, 'kMach')).toThrow(/not found/);
+    expect(() => new Unit(1, 'dBs')).toThrow(/not found/);
   });
 });
 

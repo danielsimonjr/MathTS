@@ -19,6 +19,7 @@ import {
   ALL_UNITS,
   UNIT_ROWS,
   UNIT_ROW_ALIASES,
+  REFUSED_UNIT_SPELLINGS,
   binaryExactScale,
   decimalExactScale,
   exactScaleOf,
@@ -306,6 +307,15 @@ describe('every built-in unit equals its exact definition, rounded once', () => 
     expect(missing).toEqual([]);
     const extra = Object.keys(DEFINITIONS).filter((n) => !Object.hasOwn(UNIT_ROWS, n));
     expect(extra).toEqual([]);
+  });
+
+  it('the parser refuses a spelling the tables could not also define as a built-in', () => {
+    expect(Object.keys(REFUSED_UNIT_SPELLINGS).length).toBeGreaterThan(0);
+    for (const spelling of Object.keys(REFUSED_UNIT_SPELLINGS)) {
+      expect(Object.hasOwn(UNIT_ROWS, spelling), spelling).toBe(false);
+      expect(Object.hasOwn(UNIT_ROW_ALIASES, spelling), spelling).toBe(false);
+      expect(Object.hasOwn(ALL_UNITS, spelling), spelling).toBe(false);
+    }
   });
 
   it.each(builtIn.filter((n) => !IMAGINARY.has(canonical(n))))('%s', (name) => {
