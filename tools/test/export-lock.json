@@ -194,9 +194,6 @@
       "forEachMultiIndex": {
         "kind": "function"
       },
-      "tensordotRange": {
-        "kind": "function"
-      },
       "getCapabilities": {
         "kind": "function"
       },
@@ -220,6 +217,9 @@
       },
       "mathWorkerPool": {
         "kind": "object"
+      },
+      "tensordotRange": {
+        "kind": "function"
       },
       "terminatePool": {
         "kind": "function"
@@ -434,6 +434,9 @@
         "kind": "number"
       },
       "PI_EXACT_SCALE": {
+        "kind": "object"
+      },
+      "REFUSED_UNIT_SPELLINGS": {
         "kind": "object"
       },
       "Range": {
@@ -990,9 +993,6 @@
       "WasmManifest": {
         "kind": "type"
       },
-      "allocAsHeader": {
-        "kind": "function"
-      },
       "WasmModuleLoader": {
         "kind": "function"
       },
@@ -1000,6 +1000,9 @@
         "kind": "function"
       },
       "acosh": {
+        "kind": "function"
+      },
+      "allocAsHeader": {
         "kind": "function"
       },
       "arraySize": {
