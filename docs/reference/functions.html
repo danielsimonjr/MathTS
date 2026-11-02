@@ -3413,7 +3413,7 @@
       | `compileScalarGradient(node, options)`                             | Same tape as `compileScalar` plus exact ∂f/∂parameter per row (`grad` layout)                                                 |
       | `fitScalarParameters(node, columns, observed, variables, options)` | Fit `ScalarNode` parameters to columnar data (`FitScalarOptions` / `FitScalarResult`); default `l2` uses `levenbergMarquardt` |
       | `paretoFront(candidates)`                                          | Pareto hall of fame (one survivor per complexity, ascending complexity)                                                       |
-      | `scoreFront(front[, { lossScale }])`                               | PySR log-loss scores (`'log'` default) for a front                                                                            |
+      | `scoreFront(front[, { lossScale }])`                               | Log-loss scores (`'log'` default) for a front                                                                                 |
       | `selectFrontModel(scored[, mode[, opts]])`                         | Pick `accuracy` / `score` / `best` champion (`ParetoFrontError` on bad input)                                                 |
       | `ParetoFrontError`                                                 | Thrown by `scoreFront` / `selectFrontModel` for invalid selection input                                                       |
       | `numericallyEquivalent(a, b, options)`                             | Sample two scalar trees; compare with `nearlyEqual` (evidence, not proof)                                                     |

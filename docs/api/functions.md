@@ -530,7 +530,7 @@ subfactorial(4); // 9 (derangements of 4 items)
 
 ## Scalar evaluation & Pareto selection
 
-PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expression`.
+Helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expression`.
 
 | Function / type             | Signature / role                                                             | Description                                       |
 | --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -543,14 +543,14 @@ PySR-oriented helpers over `ScalarNode` trees from `@danielsimonjr/mathts-expres
 | `compileScalarGradient`     | `(node, options) => CompiledScalarGradient`                                  | Same tape plus exact parameter gradients per row  |
 | `CompiledScalarGradient`    | `.evaluate(columns, params, out?)` → values, valid, `grad`                   | `grad[r*nParams+p]` is ∂f/∂param_p at row r       |
 | `paretoFront`               | `(candidates: FrontCandidate[]) => FrontCandidate[]`                         | Hall of fame (one row per complexity)             |
-| `scoreFront`                | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | PySR log-loss scores                              |
+| `scoreFront`                | `(front, options?: { lossScale?: 'log' \| 'linear' }) => ScoredCandidate[]`  | Log-loss scores on the log scale                  |
 | `selectFrontModel`          | `(scored, mode?: 'accuracy' \| 'score' \| 'best', opts?) => ScoredCandidate` | Pick a champion row                               |
 | `ParetoFrontError`          | `class`                                                                      | Bad mode / empty front / mixed scores             |
 | `CompileScalarOptions`      | `{ variables, parameters?, constants? }`                                     | Column order and bindings                         |
 | `CompiledScalar`            | `.evaluate(columns, params?, out?) => ScalarBatchResult`                     | Per-row validity mask                             |
 | `ScalarBatchResult`         | `{ values, valid, allValid }`                                                | Batch output                                      |
 | `FrontCandidate`            | `{ loss, complexity, item }`                                                 | One Pareto row                                    |
-| `ScoredCandidate`           | `FrontCandidate & { score: number \| null }`                                 | Row plus PySR score                               |
+| `ScoredCandidate`           | `FrontCandidate & { score: number \| null }`                                 | Row plus log-scale score                          |
 | `numericallyEquivalent`     | `(a, b, options) => NumericEquivalence`                                      | Random-sample compare (evidence, not proof)       |
 | `NumericEquivalenceError`   | `class`                                                                      | Invalid options / domain                          |
 | `NumericEquivalenceOptions` | `{ domain, rng, samples?, relTol?, absTol?, upToConstant?, logUniform? }`    | Sampling boxes and tolerances                     |

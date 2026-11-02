@@ -6974,7 +6974,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 354
+      "loc": 364
     },
     {
       "file": "functions/src/plain/number/arithmetic.ts",

@@ -1,9 +1,19 @@
 /**
- * Pareto hall of fame, PySR log-loss scores, and model selection.
+ * Pareto hall of fame, log-loss scores, and model selection.
  *
- * Mirrors PySR {@link https://github.com/MilesCranmer/PySR | PySR}
- * `calculate_scores` and `idx_model_selection` at commit `72a9ab9`
- * (`pysr/sr.py`).
+ * `scoreFront` on the log scale walks the array in the order given. It does not sort
+ * and it does not drop rows. The first row scores `0`. Each later row with `loss > 0`
+ * scores `-Math.log(loss / previousLoss) / (complexity - previousComplexity)`.
+ * `loss <= 0` scores `+Infinity`. A zero complexity gap is IEEE division (`NaN` or an
+ * infinity); there is no special case. On the linear scale every score is `null`, and a
+ * zero loss does not become `+Infinity`. Any other `lossScale` throws `ParetoFrontError`.
+ *
+ * `selectFrontModel` defaults to `best` with factor `1.5`. `accuracy` is the minimum
+ * loss. `score` is the maximum score. `best` keeps rows with `loss <= 1.5 * min(loss)`
+ * and then takes the maximum score. If every score is `null`, `score` and `best` both
+ * fall back to `accuracy`. A mix of `null` and numeric scores throws. Ties: lower
+ * complexity, then the earlier input index. `NaN` is worse than every other score,
+ * including `-Infinity`. The return value is the same object as the chosen row.
  *
  * @packageDocumentation
  */
@@ -28,8 +38,8 @@ export interface FrontCandidate<T = unknown> {
 }
 
 /**
- * A {@link FrontCandidate} plus a PySR score.
- * `null` means the linear loss scale, where PySR stores no score column.
+ * A {@link FrontCandidate} plus a log-scale score.
+ * `null` means the linear loss scale, where no score column is stored.
  * A numeric score may be `+Infinity`, `-Infinity`, or `NaN` (a zero complexity gap).
  *
  * @example
@@ -74,8 +84,8 @@ function isFiniteLossAndComplexity(c: FrontCandidate<unknown>): boolean {
  * Hall of fame: one survivor per complexity, sorted by complexity ascending.
  *
  * A candidate whose `loss` or `complexity` is not finite (`NaN`, `+Infinity`,
- * `-Infinity`) is dropped. That is a documented choice; PySR's frame is assumed
- * to contain finite losses before scoring.
+ * `-Infinity`) is dropped. That is a documented choice; callers are assumed
+ * to supply finite losses before scoring.
  *
  * Among finite candidates with `===` complexity (`-0` and `0` are the same),
  * keep the strictly smallest loss. If two losses are equal, keep the earlier
@@ -141,7 +151,7 @@ export function paretoFront<T>(candidates: readonly FrontCandidate<T>[]): FrontC
 }
 
 /**
- * PySR `calculate_scores`, in array order. Does not sort and does not drop rows.
+ * Log-loss scores, in array order. Does not sort and does not drop rows.
  *
  * `lossScale` defaults to `'log'`. On `'log'`, the first row scores `0`.
  * Each later row scores `-Math.log(loss / previousLoss) / (complexity - previousComplexity)`
@@ -270,13 +280,13 @@ function hasMixedScores<T>(rows: readonly ScoredCandidate<T>[]): boolean {
 }
 
 /**
- * PySR `idx_model_selection`. `mode` defaults to `'best'`.
+ * Pick a champion row from a scored front. `mode` defaults to `'best'`.
  *
  * `'accuracy'` is the minimum loss. `'score'` is the maximum score.
  * `'best'` keeps rows with `loss <= bestLossFactor * min(loss)` (`bestLossFactor`
  * defaults to `1.5`) and then takes the maximum score among them.
  * If every `score` is `null`, `'score'` and `'best'` both fall back to `'accuracy'`
- * (PySR does this when the score column is absent).
+ * (as when the score column is absent on the linear scale).
  *
  * Ties on the chosen metric: lower complexity wins, then the earlier input index.
  * Score order treats `NaN` as worse than every other score, including `-Infinity`.

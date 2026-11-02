@@ -44,8 +44,8 @@ export {
 } from './factories/evaluate.js';
 export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 
-// Scalar trees (UPT ExprNode numeric path). `ln` lowers to natural `log`,
-// `log` lowers to `log10`. A formula string is rejected.
+// Scalar trees. `ln` lowers to natural `log`, `log` lowers to `log10`.
+// A formula string is rejected.
 export { evaluateScalar, scalar, ScalarEvalError } from './scalar-eval.js';
 export type { ScalarScope } from './scalar-eval.js';
 export { compileScalar, compileScalarGradient } from './scalar-compile.js';
