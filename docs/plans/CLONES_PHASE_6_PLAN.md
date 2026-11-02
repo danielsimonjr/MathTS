@@ -2,9 +2,9 @@
 
 **Status:** planning only. This file is the contract for the Phase 6 build PRs. It changes no runtime source.
 **Ledger:** [`docs/roadmap/CLONES_REMAINING.md`](../roadmap/CLONES_REMAINING.md), the Phase 6 measurement, committed with this plan.
-**Tree reviewed:** `40466a97` (`docs(roadmap): Sprint 5R close-out (PySR PR 12) (#528)`), which is `main` at the time of this plan.
+**Tree reviewed:** `40466a97` (`docs(roadmap): Sprint 5R close-out (#528)`), which is `main` at the time of this plan.
 **Tool:** `@danielsimonjr/repo-tools` 2.3.0, command `repo-tools clones`. The CI pin `REPO_TOOLS_VERSION: 2.2.4` has no `clones` subcommand (`repo-tools: unknown subcommand or option 'clones'`). That pin is for `repo-tools check` and stays as it is.
-**Procedure:** the "Phase 6 and up: clone-reduction loop" section of [`PYSR_INFORMED_ROADMAP.md`](../roadmap/PYSR_INFORMED_ROADMAP.md). [`CLONES_REFACTOR_PLAN.md`](./CLONES_REFACTOR_PLAN.md) is the historical plan for `156e4ea8` and is not rewritten.
+**Procedure:** the clone-reduction loop in this file and [`CLONES_REFACTOR_PLAN.md`](./CLONES_REFACTOR_PLAN.md) (historical plan for `156e4ea8`, not rewritten).
 
 ## Judgment
 
@@ -725,7 +725,7 @@ Rejected as shared utilities, because each would hide a real difference or cost 
 
 ## Observations that are not clone PRs
 
-- The "Phase 6 and up: clone-reduction loop" section appears twice in `PYSR_INFORMED_ROADMAP.md` (from line 1405 and again from line 1462, verbatim). A docs-only change should delete the second copy.
+- The former roadmap duplicated its "Phase 6 and up" section; that duplicate was removed when the roadmap doc was deleted. This plan is the live procedure.
 - `AccessorNode._toTex` (`expression/src/node/AccessorNode.ts` 250) still assigns the literal `"\\left(' + object + '\\right)"`, so a parenthesized object renders that text instead of TeX. The previous plan recorded it; it is under the 50-node cutoff and still open.
 - `GPUBackend.add` / `matmul` / `transpose` (`matrix/src/backends/GPUBackend.ts` 212, 222, 235) still skip `serializeGpu`, so a WebGPU validation error can read back zeros.
 - `ParallelMatrix.elementwise` (`parallel/src/ParallelMatrix.ts` 288) calls a per-element `op` callback on its sequential path (`add`, `subtract`, `elementMultiply`). That is the #454 shape on a hot path. It is not a clone pair, and it needs a measurement before any change.

@@ -371,6 +371,6 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 | [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Generated dependency graph                             |
 | [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)       | Per-file coverage report                               |
 | [`docs/migration-guide.md`](./docs/migration-guide.md)                             | Migrating from mathjs v15                              |
-| [`docs/integration/upt.md`](./docs/integration/upt.md)                             | Notes for UPT (Universal Physics Tensor) consumers     |
+| [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)             | ScalarNode toolkit, Pareto selection, and search       |
 | [`TODO.md`](./TODO.md)                                                             | Open items and deferred decisions                      |
 | [`docs/reference/functions.md`](./docs/reference/functions.md)                     | Full typed-function export reference with Accel column |

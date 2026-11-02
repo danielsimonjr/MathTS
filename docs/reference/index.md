@@ -4,3 +4,4 @@
 - [Constants](constants.md) — pi, e, i, phi, tau, and more
 - [Functions](functions.md) — Arithmetic, trigonometry, statistics, signal processing
 - [Functions (HTML guide)](functions.html) — browsable reference with search, for scientists and engineers
+- [Scalar search](scalar-search.md) — ScalarNode toolkit, Pareto scoring, mutation weights, and non-goals

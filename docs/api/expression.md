@@ -98,7 +98,11 @@ is the `MathNode` type alias.
 
 ### Node (base)
 
-`createNode` (dep: `mathWithTransform`). Instance methods:
+`createNode` (dep: `mathWithTransform`) returns a base class meant to be subclassed for custom AST
+nodes. A minimal child-plus-tag subclass exercises `isNode`, `forEach`, `map`, `traverse`, `clone`,
+`toJSON`, and `_toString`; the pin is `expression/tests/node-extension.test.ts`.
+
+Instance methods:
 
 | Method                         | Signature                         | Description                                    |
 | ------------------------------ | --------------------------------- | ---------------------------------------------- |
