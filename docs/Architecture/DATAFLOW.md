@@ -47,6 +47,8 @@ ScalarNode tree (expression scalar-structure toolkit)
   → numericallyEquivalent (functions/numeric-equivalence.ts): SeededRng.next samples → compileScalar on both trees → nearlyEqual per valid row (consistent is evidence, not proof)
 ```
 
+The autodiff tape records input ids, output size, and a backward closure; it does not inspect whether the forward op ran in JS, on a worker, or in WASM (see `docs/reference/scalar-search.md`).
+
 `compileScalar` does not use `eval` / `new Function` and does not load WASM.
 
 ---

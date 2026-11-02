@@ -86,8 +86,7 @@ registry outage without hiding a real advisory.
 - **Broken or wrong references.** `SUPPORT.md` workbook-spec link, `npm run cdg`, `npx tsx` and
   `npx ts-node` commands, `compile:ts`, bench script names that do not exist.
 
-Intentionally untouched: `docs/roadmap/PYSR_INFORMED_ROADMAP.md` (its status line and inventory are
-stale, see section 7; it is rewritten in the roadmap step), the `## Verification` tables of
+Intentionally untouched: the `## Verification` tables of
 `docs/Architecture/*.md` (machine-checked; only the OVERVIEW lines-of-code cell moved, where
 `repo-tools check` demanded it), and historical files under `docs/archive/`.
 
@@ -97,19 +96,19 @@ The duplicate gate groups own-defined exports by **name** and reports `TRUE_DUPL
 algorithms still exist under different names. A package may only consolidate into a package it
 already depends on; `workerpool` depends on neither `core` nor `functions`.
 
-| Cluster                           | Where                                                                                                                                                                                     | Verdict                                                                         | Consolidation target                                                  |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Mulberry32, five identical copies | `tensor/src/operations/random.ts` (`makeMulberry32`), `functions/src/typed/{hypothesis,dist-objects,graph}.ts`, `packages/workerpool/src/worker.ts`                                       | true duplicate (the roadmap counts four)                                        | `core` (PySR M5); `workerpool` may take a `core` dependency, no cycle |
-| Lanczos log-gamma                 | canonical `functions/src/wasm/special/scalars.ts` `_lgamma` (uses `abs(sin)`); bare-`sin` copies in `typed/hypothesis.ts`, `typed/dist-objects.ts`, `packages/workerpool/src/worker.ts`   | true duplicate with **numeric drift** (negative non-integers)                   | `functions` canonical; update the worker copy in place                |
-| log-gamma, second algorithm       | `functions/src/plain/number/probability.ts` `lgammaNumber` (g=5, NaN for negatives) behind the factory `lgamma` and Dirichlet sampling                                                    | two live algorithms                                                             | decide the negative-domain contract, then delegate                    |
-| erf                               | `typed/hypothesis.ts` `_erf` (Abramowitz, about 7 digits) and its KS kernel string vs `typed/special.ts` `erfcScalar` / `distributions.ts` `_erfc`                                        | retired approximation still in use                                              | `functions` accurate scalar                                           |
-| Radix-2 FFT                       | `functions/src/signal/fft-core-f64.ts` (canonical), `packages/workerpool/src/fft-core.ts`, `matrix/src/backends/wasm/fft-wasm.ts` `fftJS`                                                 | workerpool copy is layering; `fftJS` is a publicly unreachable duplicate        | keep the first; retire `fftJS`                                        |
-| Matrix product                    | `matrix/src/operations/common.ts` `matMul` vs `functions/src/ml/ols.ts` `matmul`                                                                                                          | true duplicate                                                                  | export `matMul` from matrix, call it from `ols`                       |
-| Polynomial product                | `functions/src/typed/algebra.ts` `polymul` small path vs `functions/src/wasm/poly/wasm-bridge.ts` `polyMulJS`                                                                             | true duplicate                                                                  | one JS convolution                                                    |
-| Row-major strides                 | `Tensor.rowMajorStrides`, `parallel/src/ComputePool.ts` `_rowMajorStrides`, `packages/workerpool/src/worker.ts`                                                                           | true duplicate; the comment saying `parallel` has no `core` dependency is wrong | free function in `core`                                               |
-| Linear regression wrappers        | `descriptive-stats.ts` `linregress` vs `regression-extra.ts` `linearRegression` (both over `fitLine`)                                                                                     | near-duplicate public API                                                       | wrap one in the other after a parity pin                              |
-| Numeric Jacobian and norms        | `levenbergMarquardt` private forward-difference Jacobian (`h = 1e-7`) and sum-of-squares `norm2`, `svds` `norm2`, BFGS/Newton central differences vs `numericJacobian` and `core` `norm2` | LM and `svds` bypass the shared primitives                                      | `numericJacobian`; `core` `norm2`                                     |
-| Root finding                      | `typed/cas.ts` `numericRealRoots` own bisection vs `findRoot`                                                                                                                             | bypass                                                                          | `findRoot`                                                            |
+| Cluster                           | Where                                                                                                                                                                                     | Verdict                                                                         | Consolidation target                                             |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Mulberry32, five identical copies | `tensor/src/operations/random.ts` (`makeMulberry32`), `functions/src/typed/{hypothesis,dist-objects,graph}.ts`, `packages/workerpool/src/worker.ts`                                       | true duplicate (the old roadmap counted four)                                   | `core` (M5); `workerpool` may take a `core` dependency, no cycle |
+| Lanczos log-gamma                 | canonical `functions/src/wasm/special/scalars.ts` `_lgamma` (uses `abs(sin)`); bare-`sin` copies in `typed/hypothesis.ts`, `typed/dist-objects.ts`, `packages/workerpool/src/worker.ts`   | true duplicate with **numeric drift** (negative non-integers)                   | `functions` canonical; update the worker copy in place           |
+| log-gamma, second algorithm       | `functions/src/plain/number/probability.ts` `lgammaNumber` (g=5, NaN for negatives) behind the factory `lgamma` and Dirichlet sampling                                                    | two live algorithms                                                             | decide the negative-domain contract, then delegate               |
+| erf                               | `typed/hypothesis.ts` `_erf` (Abramowitz, about 7 digits) and its KS kernel string vs `typed/special.ts` `erfcScalar` / `distributions.ts` `_erfc`                                        | retired approximation still in use                                              | `functions` accurate scalar                                      |
+| Radix-2 FFT                       | `functions/src/signal/fft-core-f64.ts` (canonical), `packages/workerpool/src/fft-core.ts`, `matrix/src/backends/wasm/fft-wasm.ts` `fftJS`                                                 | workerpool copy is layering; `fftJS` is a publicly unreachable duplicate        | keep the first; retire `fftJS`                                   |
+| Matrix product                    | `matrix/src/operations/common.ts` `matMul` vs `functions/src/ml/ols.ts` `matmul`                                                                                                          | true duplicate                                                                  | export `matMul` from matrix, call it from `ols`                  |
+| Polynomial product                | `functions/src/typed/algebra.ts` `polymul` small path vs `functions/src/wasm/poly/wasm-bridge.ts` `polyMulJS`                                                                             | true duplicate                                                                  | one JS convolution                                               |
+| Row-major strides                 | `Tensor.rowMajorStrides`, `parallel/src/ComputePool.ts` `_rowMajorStrides`, `packages/workerpool/src/worker.ts`                                                                           | true duplicate; the comment saying `parallel` has no `core` dependency is wrong | free function in `core`                                          |
+| Linear regression wrappers        | `descriptive-stats.ts` `linregress` vs `regression-extra.ts` `linearRegression` (both over `fitLine`)                                                                                     | near-duplicate public API                                                       | wrap one in the other after a parity pin                         |
+| Numeric Jacobian and norms        | `levenbergMarquardt` private forward-difference Jacobian (`h = 1e-7`) and sum-of-squares `norm2`, `svds` `norm2`, BFGS/Newton central differences vs `numericJacobian` and `core` `norm2` | LM and `svds` bypass the shared primitives                                      | `numericJacobian`; `core` `norm2`                                |
+| Root finding                      | `typed/cas.ts` `numericRealRoots` own bisection vs `findRoot`                                                                                                                             | bypass                                                                          | `findRoot`                                                       |
 
 Reviewed and **not** duplicates: `paretoDist` vs `paretoFront`, `normalForm` vs `scalarCanonical`,
 `Node` traversal vs `ScalarNode` traversal (two IRs; M2 is the bridge), `rankdata` vs `rankF64JS` vs
@@ -141,7 +140,7 @@ items below are things the census cannot see.
 - Source comments that still state pre-policy WASM thresholds (`parallelStatMedian` "above 16 K",
   `welchPSD`, `goertzel`, `chirpZTransform`, hypothesis sorts, `lgamma`).
 
-## 7. PySR milestones M1, M3, M4 (merged) and the roadmap
+## 7. Scalar-search milestones M1, M3, M4 (as of this audit)
 
 M1 (`expression/src/scalar-structure.ts`), M3 (`functions/src/scalar-compile.ts`) and M4
 (`functions/src/pareto-front.ts`) are exported, tested and documented. None duplicates existing
@@ -154,8 +153,9 @@ code. Two findings:
   kernels as the typed `number` cases (an intentional specialisation: no typed dispatch per row).
   Exporting the regex once is a cleanup, not a new module.
 
-`docs/roadmap/PYSR_INFORMED_ROADMAP.md` still says "roadmap only; no feature code", that no
-traversal/hash/complexity helpers exist, and that no Pareto utility exists. Gaps G1, G2, G4 and G5
+At audit time the separate roadmap doc still said "roadmap only; no feature code", that no
+traversal/hash/complexity helpers exist, and that no Pareto utility exists. Those gaps are closed on
+`main` now; see [`docs/reference/scalar-search.md`](../reference/scalar-search.md). Gaps G1, G2, G4 and G5
 are closed; G6 undercounts the Mulberry32 copies.
 
 ### Reuse map, M1 to M15
@@ -186,10 +186,10 @@ the issues below are drafted here, each with enough detail to file as is.
   `lgammaNumber`.
 - **I-3. Hypothesis normal CDF uses the retired 7-digit erf** (`typed/hypothesis.ts`, including the
   KS kernel string). Reuse the accurate scalar body.
-- **I-4. Mulberry32 x5 -> one generator in `core`** (PySR M5, also the stale layering comment in
+- **I-4. Mulberry32 x5 -> one generator in `core`** (M5, also the stale layering comment in
   `ComputePool.ts` and the three strides copies).
 - **I-5. `levenbergMarquardt` bypasses `numericJacobian`; `svds` `norm2` overflows.** Add the
-  optional `jacobian` option (PySR M7) and use `core` `norm2`.
+  optional `jacobian` option (M7) and use `core` `norm2`.
 - **I-6. Remove `write_factories_index.py` and the unreachable matrix JS FFT** (`fftJS` and its
   `wasmFFT` family).
 - **I-7. Smaller duplicates:** `ols` `matmul` vs matrix `matMul`; `polymul` vs `polyMulJS`;
@@ -230,10 +230,10 @@ milestone, and no release, tag or publish, is part of this work.
 
 ## 10. Decisions for the owner
 
-- **D-1.** Phase 4 of the PySR roadmap asks for a 25th package. The audit finds every reuse point
+- **D-1.** An earlier roadmap phase asked for a 25th package. The audit finds every reuse point
   inside `core`, `functions` or `expression`; the guiding principle says no new package unless a
   dependency cycle forces it. Confirm.
-- **D-2.** `SiDimensionVector` exponents are `number`; PySR M9 sketches `Fraction`. Extend the type
+- **D-2.** `SiDimensionVector` exponents are `number`; M9 sketches `Fraction`. Extend the type
   or accept `number` with a tolerance.
 - **D-3.** Delete `write_factories_index.py`, the matrix JS FFT and the `MathTSWasm` bindings
   (I-6, I-18), or keep them with a banner.

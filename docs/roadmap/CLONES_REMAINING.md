@@ -4,9 +4,9 @@ Measured on `main` at `9dc97c56` (`refactor(functions): P6-11 GPU chain lifecycl
 `@danielsimonjr/repo-tools` **2.3.0** (`repo-tools clones`) and the tool defaults. This file is a
 measurement only, and it classifies no pair. Phase 7 is a runtime-speed phase
 ([`docs/plans/PHASE_7_PERFORMANCE_PLAN.md`](../plans/PHASE_7_PERFORMANCE_PLAN.md)); a clone pair is worked
-there only when merging it makes code faster. The measurement procedure is the
-"Phase 6 and up: clone-reduction loop" section of
-[`PYSR_INFORMED_ROADMAP.md`](./PYSR_INFORMED_ROADMAP.md). The Phase 6 ledger (`40466a97`, 553 pairs) and its
+there only when merging it makes code faster. The measurement procedure is documented in
+[`CLONES_PHASE_6_PLAN.md`](../plans/CLONES_PHASE_6_PLAN.md) and
+[`CLONES_REFACTOR_PLAN.md`](../plans/CLONES_REFACTOR_PLAN.md). The Phase 6 ledger (`40466a97`, 553 pairs) and its
 verdicts are in git history at `d68f3a78` and in [`CLONES_PHASE_6_PLAN.md`](../plans/CLONES_PHASE_6_PLAN.md).
 
 **Tool version.** `repo-tools` 2.2.4, the `REPO_TOOLS_VERSION` pin in `.github/workflows/ci.yml`, has no
@@ -78,7 +78,7 @@ Every column is the same command with the same flags, run on a `git archive` exp
 - `156e4ea8`: Tree reviewed by `CLONES_REFACTOR_PLAN.md`.
 - `bf90a00e`: After clone PRs A–I (#497–#505) and #496.
 - `655ffb3a`: After the core sprint (#507–#517).
-- `40466a97`: Tree reviewed by `CLONES_PHASE_6_PLAN.md`, after PySR PRs 1–12 (#519–#530).
+- `40466a97`: Tree reviewed by `CLONES_PHASE_6_PLAN.md`, after scalar-search integration PRs 1–12 (#519–#530).
 - `9dc97c56`: This ledger: after the Phase 6 build PRs P6-1 to P6-11 (#532–#542).
 
 ## Exact groups (9)

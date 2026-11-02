@@ -47,12 +47,13 @@ reference). Looking for something? Skim the group headers, then the table.
 
 ### Reference (API symbols)
 
-| Doc                                              | What it covers                                                |
-| ------------------------------------------------ | ------------------------------------------------------------- |
-| [reference/index.md](reference/index.md)         | Reference landing page.                                       |
-| [reference/functions.md](reference/functions.md) | Function reference (HTML mirror: `reference/functions.html`). |
-| [reference/classes.md](reference/classes.md)     | Class reference.                                              |
-| [reference/constants.md](reference/constants.md) | Constants reference.                                          |
+| Doc                                                      | What it covers                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------- |
+| [reference/index.md](reference/index.md)                 | Reference landing page.                                       |
+| [reference/functions.md](reference/functions.md)         | Function reference (HTML mirror: `reference/functions.html`). |
+| [reference/classes.md](reference/classes.md)             | Class reference.                                              |
+| [reference/constants.md](reference/constants.md)         | Constants reference.                                          |
+| [reference/scalar-search.md](reference/scalar-search.md) | ScalarNode toolkit, Pareto scoring, search, and non-goals.    |
 
 ## 3. API (per package) ✅
 
@@ -119,13 +120,7 @@ reference). Looking for something? Skim the group headers, then the table.
 | [migration/examples/complex.md](migration/examples/complex.md) | Example: complex.                                                                |
 | [migration/examples/matrix.md](migration/examples/matrix.md)   | Example: matrix.                                                                 |
 
-## 8. Integration ✅
-
-| Doc                                      | What it covers                              |
-| ---------------------------------------- | ------------------------------------------- |
-| [integration/upt.md](integration/upt.md) | Universal Physics Tensor (UPT) integration. |
-
-## 9. Workbook (.mtsw) ✅
+## 8. Workbook (.mtsw) ✅
 
 | Doc                                                                                                                        | What it covers                                                              |
 | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -137,7 +132,7 @@ reference). Looking for something? Skim the group headers, then the table.
 > The `Architecture/Workbook/` folder also holds reference source/example files
 > (`*.ts`, `*.mtsw`, `mathts-architecture.mermaid`).
 
-## 10. Inventory ⚠️
+## 9. Inventory ⚠️
 
 Snapshot of the codebase surface. See the staleness banner on the summary.
 
@@ -150,7 +145,7 @@ Snapshot of the codebase surface. See the staleness banner on the summary.
 | [inventory/04-expression-compat-workbook.md](inventory/04-expression-compat-workbook.md)         | Expression / compat / workbook.      |
 | [inventory/05-integration-gaps.md](inventory/05-integration-gaps.md)                             | Integration gaps.                    |
 
-## 11. Roadmaps & Gap Analyses ✅/🗄️
+## 10. Roadmaps & Gap Analyses ✅/🗄️
 
 `docs/roadmap/` is the live roadmap area. It is heavily cross-linked from
 `CHANGELOG.md` and the root `TODO.md`, so files stay here even after a wave
@@ -159,27 +154,23 @@ items they still track.
 
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                                                                                                                                |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                                                                                        |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                                                                                  |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                                                                                         |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                                                                               |
-| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                                                                               |
-| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                                                                                    |
-| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                                                                                        |
-| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                                                                                       |
-| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                                                                            |
-| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                                                                                      |
-| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                                                                            |
-| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                                                                              |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                                                                                           |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                                                                               |
-| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for the PySR roadmap, open issues.                                                                     |
-| [roadmap/PYSR_INFORMED_ROADMAP.md](roadmap/PYSR_INFORMED_ROADMAP.md)                                     | PySR-informed symbolic-search roadmap for UPT: M1/M3/M4 merged, integration sprints 1R–5R, Definition of Done per item; release only when every item is done. |
-| [plans/PYSR_M1_PLAN.md](plans/PYSR_M1_PLAN.md)                                                           | M1 implementation plan: ScalarNode structure and canonical key.                                                                                               |
-| [plans/PYSR_M3_PLAN.md](plans/PYSR_M3_PLAN.md)                                                           | M3 implementation plan: batch ScalarNode evaluator.                                                                                                           |
-| [plans/PYSR_M4_PLAN.md](plans/PYSR_M4_PLAN.md)                                                           | M4 implementation plan: Pareto front and PySR model selection.                                                                                                |
+| Doc                                                                                                      | What it covers                                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                            |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                      |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                             |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                   |
+| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                   |
+| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                        |
+| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                            |
+| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                           |
+| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                |
+| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                          |
+| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                |
+| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                  |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                               |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                   |
+| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues. |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
@@ -198,7 +189,7 @@ items they still track.
 | [roadmap/WASM_OPTIMIZATION_EVALUATION.md](roadmap/WASM_OPTIMIZATION_EVALUATION.md) | Implementation complete (2026-04-10).                          |
 | [roadmap/WASM_PAIRING_GAP_PLAN.md](roadmap/WASM_PAIRING_GAP_PLAN.md)               | Executed 2026-06-25.                                           |
 
-## 12. Planning ✅/🗄️
+## 11. Planning ✅/🗄️
 
 | Doc                                                                                                              | Status                                               |
 | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
@@ -211,7 +202,7 @@ items they still track.
 | [Planning/CORRECTIVE_ACTION_PLAN.md](Planning/CORRECTIVE_ACTION_PLAN.md)                                         | 🗄️ Superseded by the consolidated v2 above.          |
 | [Planning/MATHTS_BUILDING_PLAN.md](Planning/MATHTS_BUILDING_PLAN.md)                                             | 🗄️ Original Dec-2025 building plan (planning phase). |
 
-## 13. Refactoring (active) ✅
+## 12. Refactoring (active) ✅
 
 Completed refactoring reports were moved to [`archive/refactoring/`](archive/refactoring/).
 
@@ -225,7 +216,7 @@ Completed refactoring reports were moved to [`archive/refactoring/`](archive/ref
 > Candidate data files: `refactoring/ASSEMBLYSCRIPT_CANDIDATES.json`,
 > `refactoring/WASM_REFACTORING_CANDIDATES.json`.
 
-## 14. Repo-root operational docs
+## 13. Repo-root operational docs
 
 | Doc                                                                                | Status                                                                                   |
 | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -237,7 +228,7 @@ Completed refactoring reports were moved to [`archive/refactoring/`](archive/ref
 | [../MATH_CORRECTNESS_AUDIT_2026-06-29.md](../MATH_CORRECTNESS_AUDIT_2026-06-29.md) | ✅ Math correctness audit (2026-06-29); harness in `tools/math-correctness-audit/`.      |
 | [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)                                       | 🗄️ Predates the WASM backend — see [performance.md](performance.md) for current numbers. |
 
-## 15. Superpowers (historical design records) 🗄️
+## 14. Superpowers (historical design records) 🗄️
 
 Agent-authored execution plans and design specs (2026-06/07). Kept for traceability;
 most work is landed or superseded by `docs/roadmap/` and package changelogs.
@@ -285,7 +276,7 @@ most work is landed or superseded by `docs/roadmap/` and package changelogs.
 | [superpowers/specs/2026-07-20-risch-integration-design.md](superpowers/specs/2026-07-20-risch-integration-design.md)                     | Risch integration            |
 | [superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md](superpowers/specs/2026-07-21-risch-layer2-quadratic-surd-design.md) | Risch layer 2 quadratic surd |
 
-## 16. Archive (historical) 🗄️
+## 15. Archive (historical) 🗄️
 
 Completed/superseded work, moved out of the active tree. See
 [archive/README.md](archive/README.md).
