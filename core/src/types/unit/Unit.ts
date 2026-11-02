@@ -51,6 +51,7 @@ import {
   UNIT_PREFIX_SETS,
   UNIT_ROW_ALIASES,
   UNIT_ROWS,
+  REFUSED_UNIT_SPELLINGS,
   unitPrefixExactScale,
 } from './unit-table.js';
 
@@ -659,6 +660,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
         // Verify the unit exists and get the prefix (if any)
         const res = _findUnit(uStr) as { unit: UnitDef; prefix: PrefixDef } | null;
         if (res === null) {
+          // A refused spelling carries its own reason. `Object.hasOwn` keeps a
+          // spelling like `__proto__` or `toString` from reading
+          // `Object.prototype` as a refused reason.
+          const refused = Object.hasOwn(REFUSED_UNIT_SPELLINGS, uStr)
+            ? REFUSED_UNIT_SPELLINGS[uStr]
+            : undefined;
+          if (refused !== undefined) {
+            throw new UnitParseError('Unit "' + uStr + '" is refused: ' + refused);
+          }
           // Unit not found.
           throw new UnitParseError('Unit "' + uStr + '" not found.');
         }

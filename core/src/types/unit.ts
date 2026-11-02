@@ -52,6 +52,7 @@ export {
   NAMED_SCALES,
   UNIT_ROWS,
   UNIT_ROW_ALIASES,
+  REFUSED_UNIT_SPELLINGS,
   namedExactScale,
   readUnitScale,
   getUnitRow,

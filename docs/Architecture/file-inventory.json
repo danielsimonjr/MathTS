@@ -667,7 +667,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 264
+      "loc": 265
     },
     {
       "file": "core/src/internal.ts",
@@ -842,7 +842,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 99
+      "loc": 100
     },
     {
       "file": "core/src/types/unit/dependencies.ts",
@@ -870,14 +870,14 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 89
+      "loc": 90
     },
     {
       "file": "core/src/types/unit/unit-table.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 682
+      "loc": 702
     },
     {
       "file": "core/src/types/unit/unit-types.ts",
@@ -891,7 +891,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2873
+      "loc": 2883
     },
     {
       "file": "core/src/types/wasm-loader.ts",
@@ -1248,7 +1248,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 622
+      "loc": 632
     },
     {
       "file": "core/tests/types/unit-external-reference.test.ts",
@@ -1262,7 +1262,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
       "disposition": "test",
-      "loc": 112
+      "loc": 188
     },
     {
       "file": "core/tests/types/unit-symbol-oracle.test.ts",
