@@ -315,7 +315,7 @@ export function contractNetwork(
 
 ## 6. Phase 5 — Autograd over named-index contractions
 
-Reverse-mode AD over named-index contractions needs to traverse expressions whose primitive ops include `contract` and `matmul`. `TapedTensor` today exposes `add / sub / mul / scale` but neither. This phase closes the loop.
+Reverse-mode AD over named-index contractions needs to traverse expressions whose primitive ops include `contract` and `matmul`. At the time of this proposal, `TapedTensor` exposed `add / sub / mul / scale` but neither. This phase closes the loop.
 
 ### 6.1 Modifications to `autograd/src/tape.ts`
 
