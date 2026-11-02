@@ -166,10 +166,10 @@ The codebase is organized into the following modules:
 - **expression/node**: 19 files
 - **expression/transform**: 33 files
 - **expression/utils**: 13 files
-- **parser**: 2 files
+- **parser**: 1 file
 - **units**: 1 file
 - **numbers**: 1 file
-- **ast**: 2 files
+- **ast**: 1 file
 - **evaluator**: 1 file
 - **linalg**: 1 file
 - **arithmetic**: 1 file
@@ -206,10 +206,10 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 506            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 481            | 0               |
-| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
+| `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
 | `@danielsimonjr/mathts-numbers` (`numbers/`)                        | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
-| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 2              | 0               |
+| `@danielsimonjr/mathts-ast` (`ast/`)                                | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-evaluator` (`evaluator/`)                    | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 0               |
 | `@danielsimonjr/mathts-linalg` (`linalg/`)                          | `@danielsimonjr/mathts-matrix`                                                                                                                                  | 1              | 0               |
 | `@danielsimonjr/mathts-arithmetic` (`arithmetic/`)                  | `@danielsimonjr/mathts-functions`                                                                                                                               | 1              | 0               |
@@ -565,41 +565,41 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Type                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
-| `./types/complex.js`          | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
-| `./types/matrix/Range.js`     | `createRangeClass, Range`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
-| `./types/dual.js`             | `Dual, isDual`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Re-export             |
-| `./types/dual-rules.js`       | `DUAL_UNARY_RULES`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
-| `./constants.js`              | `PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export             |
-| `./types/fraction.js`         | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
-| `./types/bignumber.js`        | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10`                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
-| `./arithmetic/scalar.js`      | `addScalar, subtractScalar, multiplyScalar, divideScalar, pow, abs, fix, round, equal, isNumeric, number`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
-| `./types/unit.js`             | `Unit, isUnit, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./types/unit.js`             | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression, NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix` | Re-export             |
-| `./types/unit.js`             | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./types/unit-definitions.js` | `BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
-| `./types/unit-prefixes.js`    | `SI_PREFIXES, BEST_PREFIXES, getPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
-| `./typed/index.js`            | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes`                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./factory/index.js`          | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
-| `./numeric/stable.js`         | `pairwiseSum, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
-| `./numeric/rng.js`            | `mulberry32, boxMuller, createSeededRng, SeededRng`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
-| `./numeric/strides.js`        | `rowMajorStrides`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
-| `./types/interfaces.js`       | `MathTSValue, Scalar, BackendType, NumericType, MatrixBackend, IMatrix, IComplex, IFraction, IBigNumber, MatrixDimensions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export (type-only) |
-| `./types/matrix/Range.js`     | `RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./types/dual-rules.js`       | `DualUnaryRule, DualUnaryRuleName`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./types/bignumber.js`        | `BigNumberConfig, RoundingMode`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./arithmetic/scalar.js`      | `NumericScalar`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./types/unit.js`             | `Dimensions, UnitDef, UnitInstance`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export (type-only) |
-| `./types/unit.js`             | `ExactScale, IrrationalName, IrrationalPowers, UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./types/unit.js`             | `SiDimensionVector, SiDimensionOptions, SiDimensionExponent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export (type-only) |
-| `./typed/index.js`            | `TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./factory/index.js`          | `MathTSConfig, FactoryFunction, FactoryDependencies, FactoryImport`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export (type-only) |
+| File                          | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Type                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `./types/complex.js`          | `Complex, isComplex, I, COMPLEX_ZERO, COMPLEX_ONE, COMPLEX_NEG_ONE`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export             |
+| `./types/matrix/Range.js`     | `createRangeClass, Range`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
+| `./types/dual.js`             | `Dual, isDual`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
+| `./types/dual-rules.js`       | `DUAL_UNARY_RULES`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
+| `./constants.js`              | `PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Re-export             |
+| `./types/fraction.js`         | `Fraction, isFraction, FRACTION_ZERO, FRACTION_ONE, FRACTION_NEG_ONE, FRACTION_HALF, FRACTION_THIRD, FRACTION_QUARTER`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Re-export             |
+| `./types/bignumber.js`        | `BigNumber, isBigNumber, BIGNUMBER_ZERO, BIGNUMBER_ONE, BIGNUMBER_NEG_ONE, BIGNUMBER_TEN, BIGNUMBER_PI, BIGNUMBER_E, BIGNUMBER_LN2, BIGNUMBER_LN10`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export             |
+| `./arithmetic/scalar.js`      | `addScalar, subtractScalar, multiplyScalar, divideScalar, pow, abs, fix, round, equal, isNumeric, number`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
+| `./types/unit.js`             | `Unit, isUnit, DimensionMismatchError, UnitParseError, DIMENSIONLESS, dim`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./types/unit.js`             | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression, NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, REFUSED_UNIT_SPELLINGS, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix` | Re-export             |
+| `./types/unit.js`             | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./types/unit-definitions.js` | `BASE_UNITS, DERIVED_UNITS, ALL_UNITS, UNIT_ALIASES, getUnitDef`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Re-export             |
+| `./types/unit-prefixes.js`    | `SI_PREFIXES, BEST_PREFIXES, getPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export             |
+| `./typed/index.js`            | `mathTyped, createMathTSTyped, typed, create, createTypedFunction, TypeRegistry, MATHTS_TYPES, MATHTS_CONVERSIONS, isNumber, isBoolean, isString, isBigInt, isArray, isFunction, isObject, isNull, isUndefined, isMatrix, isDenseMatrix, isSparseMatrix, isUnit, initTypedWasm, isTypedWasmAvailable, registerNativeTypes`                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./factory/index.js`          | `FunctionRegistry, createFactory, registry, math, DEFAULT_CONFIG`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
+| `./numeric/stable.js`         | `pairwiseSum, neumaierSum, norm2, pairwiseDot, scaledDistance, neumaierCumsum, sumSquaredDeviations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
+| `./numeric/rng.js`            | `mulberry32, boxMuller, createSeededRng, SeededRng`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export             |
+| `./numeric/strides.js`        | `rowMajorStrides`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
+| `./types/interfaces.js`       | `MathTSValue, Scalar, BackendType, NumericType, MatrixBackend, IMatrix, IComplex, IFraction, IBigNumber, MatrixDimensions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export (type-only) |
+| `./types/matrix/Range.js`     | `RangeForEachCallback, RangeMapCallback, RangeFormatOptions, RangeJSON`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./types/dual-rules.js`       | `DualUnaryRule, DualUnaryRuleName`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export (type-only) |
+| `./types/bignumber.js`        | `BigNumberConfig, RoundingMode`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./arithmetic/scalar.js`      | `NumericScalar`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./types/unit.js`             | `Dimensions, UnitDef, UnitInstance`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./types/unit.js`             | `ExactScale, IrrationalName, IrrationalPowers, UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export (type-only) |
+| `./types/unit.js`             | `SiDimensionVector, SiDimensionOptions, SiDimensionExponent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
+| `./typed/index.js`            | `TypedFunction, TypedInstance, TypeDef, ConversionDef, SignatureFunction, ReferTo, ReferToSelf`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./factory/index.js`          | `MathTSConfig, FactoryFunction, FactoryDependencies, FactoryImport`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
 
 **Exports:**
 
 - Constants: `VERSION`
-- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
+- Re-exports: `Complex`, `isComplex`, `I`, `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`, `createRangeClass`, `Range`, `Dual`, `isDual`, `DUAL_UNARY_RULES`, `PI`, `E`, `TAU`, `PHI`, `SQRT2`, `SQRT1_2`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `Fraction`, `isFraction`, `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`, `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`, `BigNumber`, `isBigNumber`, `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN`, `BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, `BIGNUMBER_LN10`, `addScalar`, `subtractScalar`, `multiplyScalar`, `divideScalar`, `pow`, `abs`, `fix`, `round`, `equal`, `isNumeric`, `number`, `Unit`, `isUnit`, `DimensionMismatchError`, `UnitParseError`, `DIMENSIONLESS`, `dim`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `BASE_UNITS`, `DERIVED_UNITS`, `ALL_UNITS`, `UNIT_ALIASES`, `getUnitDef`, `SI_PREFIXES`, `BEST_PREFIXES`, `getPrefix`, `mathTyped`, `createMathTSTyped`, `typed`, `create`, `createTypedFunction`, `TypeRegistry`, `MATHTS_TYPES`, `MATHTS_CONVERSIONS`, `isNumber`, `isBoolean`, `isString`, `isBigInt`, `isArray`, `isFunction`, `isObject`, `isNull`, `isUndefined`, `isMatrix`, `isDenseMatrix`, `isSparseMatrix`, `initTypedWasm`, `isTypedWasmAvailable`, `registerNativeTypes`, `FunctionRegistry`, `createFactory`, `registry`, `math`, `DEFAULT_CONFIG`, `pairwiseSum`, `neumaierSum`, `norm2`, `pairwiseDot`, `scaledDistance`, `neumaierCumsum`, `sumSquaredDeviations`, `mulberry32`, `boxMuller`, `createSeededRng`, `SeededRng`, `rowMajorStrides`, `MathTSValue`, `Scalar`, `BackendType`, `NumericType`, `MatrixBackend`, `IMatrix`, `IComplex`, `IFraction`, `IBigNumber`, `MatrixDimensions`, `RangeForEachCallback`, `RangeMapCallback`, `RangeFormatOptions`, `RangeJSON`, `DualUnaryRule`, `DualUnaryRuleName`, `BigNumberConfig`, `RoundingMode`, `NumericScalar`, `Dimensions`, `UnitDef`, `UnitInstance`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`, `TypedFunction`, `TypedInstance`, `TypeDef`, `ConversionDef`, `SignatureFunction`, `ReferTo`, `ReferToSelf`, `MathTSConfig`, `FactoryFunction`, `FactoryDependencies`, `FactoryImport`
 
 ---
 
@@ -1053,7 +1053,7 @@ graph LR
 | `./unit-types.js`  | `BaseUnitDef, BigNumberValue, ConverterFn, CreateUnitDefObject, CreateUnitOptions, FractionValue, Numeric, ParseOptions, PrefixDef, PrefixTable, TypeConverters, UnitComponent, UnitConfig, UnitConstructor, UnitDef, UnitDependencies, UnitFormatOptions, UnitInstance, UnitJSON, UnitSystem, UnitSystemEntry` | Import (type-only) |
 | `./errors.js`      | `DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                        | Import             |
 | `./exact-scale.js` | `ExactScale, addExactScales, binaryExactScale, divideExactScales, exactScaleOf, irrationalPower, roundExactScale, isRationalScale, multiplyExactScales, powerExactScale, ratioExactScale, readScaleExpression, PI_EXACT_SCALE, UNIT_EXACT_SCALE`                                                                | Import             |
-| `./unit-table.js`  | `UnitPrefix, UnitPrefixSetKey, namedExactScale, readUnitScale, UNIT_PREFIX_SETS, UNIT_ROW_ALIASES, UNIT_ROWS, unitPrefixExactScale`                                                                                                                                                                             | Import             |
+| `./unit-table.js`  | `UnitPrefix, UnitPrefixSetKey, namedExactScale, readUnitScale, UNIT_PREFIX_SETS, UNIT_ROW_ALIASES, UNIT_ROWS, REFUSED_UNIT_SPELLINGS, unitPrefixExactScale`                                                                                                                                                     | Import             |
 
 **Exports:**
 
@@ -1113,7 +1113,7 @@ graph LR
 | `./Unit.js`         | `createUnitClass`                                                                                                                                                                                                                                                                                                                                                                                                                           | Re-export             |
 | `./dependencies.js` | `unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
 | `./exact-scale.js`  | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression`                             | Re-export             |
-| `./unit-table.js`   | `NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix`                                                                                                                                                                                                                                         | Re-export             |
+| `./unit-table.js`   | `NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, REFUSED_UNIT_SPELLINGS, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix`                                                                                                                                                                                                                 | Re-export             |
 | `./unit-types.js`   | `BigNumberValue, ComplexValue, ComplexConstructor, BigNumberConstructor, FractionConstructor, FractionValue, Numeric, PrefixDef, PrefixTable, BaseUnitDef, UnitDef, UnitComponent, UnitSystemEntry, UnitSystem, UnitJSON, ConverterFn, TypeConverters, ParseOptions, UnitFormatOptions, CreateUnitOptions, CreateUnitDefObject, UnitConfig, SubtractScalar, ScalarBinaryOp, ScalarUnaryOp, UnitDependencies, UnitInstance, UnitConstructor` | Re-export (type-only) |
 | `./exact-scale.js`  | `ExactScale, IrrationalName, IrrationalPowers`                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
 | `./unit-table.js`   | `UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                        | Re-export (type-only) |
@@ -1121,7 +1121,7 @@ graph LR
 **Exports:**
 
 - Constants: `Unit`
-- Re-exports: `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `BigNumberValue`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`
+- Re-exports: `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `BigNumberValue`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`
 
 ---
 
@@ -1138,7 +1138,7 @@ graph LR
 - Interfaces: `UnitRow`, `UnitPrefix`
 - Types: `UnitBaseKey`, `UnitPrefixSetKey`
 - Functions: `unitPrefixExactScale`, `getUnitPrefix`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`
-- Constants: `UNIT_PREFIX_SETS`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`
+- Constants: `UNIT_PREFIX_SETS`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`
 
 ---
 
@@ -1195,22 +1195,22 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                       | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Type                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
-| `./unit/index.js`          | `Unit, createUnitClass, unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Re-export             |
-| `./unit/index.js`          | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression, NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix` | Re-export             |
-| `./unit/errors.js`         | `DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Re-export             |
-| `../is.js`                 | `isUnit`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Re-export             |
-| `./unit-definitions.js`    | `DIMENSIONLESS, dim`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
-| `./si-dimension-vector.js` | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export             |
-| `./unit/index.js`          | `UnitInstance`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Re-export (type-only) |
-| `./unit/index.js`          | `ExactScale, IrrationalName, IrrationalPowers, UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./unit-definitions.js`    | `Dimensions, UnitDef`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export (type-only) |
-| `./si-dimension-vector.js` | `SiDimensionVector, SiDimensionOptions, SiDimensionExponent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export (type-only) |
+| File                       | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Type                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `./unit/index.js`          | `Unit, createUnitClass, unitDependencies`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Re-export             |
+| `./unit/index.js`          | `UNIT_EXACT_SCALE, PI_EXACT_SCALE, LN2_EXACT_SCALE, NAMED_IRRATIONALS, namedIrrationalScale, irrationalPower, isRationalScale, decimalExactScale, exactScaleOf, binaryExactScale, ratioExactScale, multiplyExactScales, divideExactScales, powerExactScale, addExactScales, exactScalesEqual, exactScaleToNumber, clearExactScaleNumberCache, exactScaleNumberCacheSize, formatExactScale, readScaleExpression, NAMED_SCALES, UNIT_ROWS, UNIT_ROW_ALIASES, REFUSED_UNIT_SPELLINGS, namedExactScale, readUnitScale, getUnitRow, unitRowExactScale, unitRowValue, unitRowExactOffset, UNIT_PREFIX_SETS, unitPrefixExactScale, getUnitPrefix` | Re-export             |
+| `./unit/errors.js`         | `DimensionMismatchError, UnitParseError`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
+| `../is.js`                 | `isUnit`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
+| `./unit-definitions.js`    | `DIMENSIONLESS, dim`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Re-export             |
+| `./si-dimension-vector.js` | `UNIT_DIMENSION_LENGTH, SI_DIMENSION_LENGTH, toSiDimensions, toSiDimensionVector, fromSiDimensions, fromSiDimensionVector`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
+| `./unit/index.js`          | `UnitInstance`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./unit/index.js`          | `ExactScale, IrrationalName, IrrationalPowers, UnitRow, UnitBaseKey, UnitPrefixSetKey, UnitPrefix`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Re-export (type-only) |
+| `./unit-definitions.js`    | `Dimensions, UnitDef`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Re-export (type-only) |
+| `./si-dimension-vector.js` | `SiDimensionVector, SiDimensionOptions, SiDimensionExponent`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `Unit`, `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `DimensionMismatchError`, `UnitParseError`, `isUnit`, `DIMENSIONLESS`, `dim`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `UnitInstance`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `Dimensions`, `UnitDef`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`
+- Re-exports: `Unit`, `createUnitClass`, `unitDependencies`, `UNIT_EXACT_SCALE`, `PI_EXACT_SCALE`, `LN2_EXACT_SCALE`, `NAMED_IRRATIONALS`, `namedIrrationalScale`, `irrationalPower`, `isRationalScale`, `decimalExactScale`, `exactScaleOf`, `binaryExactScale`, `ratioExactScale`, `multiplyExactScales`, `divideExactScales`, `powerExactScale`, `addExactScales`, `exactScalesEqual`, `exactScaleToNumber`, `clearExactScaleNumberCache`, `exactScaleNumberCacheSize`, `formatExactScale`, `readScaleExpression`, `NAMED_SCALES`, `UNIT_ROWS`, `UNIT_ROW_ALIASES`, `REFUSED_UNIT_SPELLINGS`, `namedExactScale`, `readUnitScale`, `getUnitRow`, `unitRowExactScale`, `unitRowValue`, `unitRowExactOffset`, `UNIT_PREFIX_SETS`, `unitPrefixExactScale`, `getUnitPrefix`, `DimensionMismatchError`, `UnitParseError`, `isUnit`, `DIMENSIONLESS`, `dim`, `UNIT_DIMENSION_LENGTH`, `SI_DIMENSION_LENGTH`, `toSiDimensions`, `toSiDimensionVector`, `fromSiDimensions`, `fromSiDimensionVector`, `UnitInstance`, `ExactScale`, `IrrationalName`, `IrrationalPowers`, `UnitRow`, `UnitBaseKey`, `UnitPrefixSetKey`, `UnitPrefix`, `Dimensions`, `UnitDef`, `SiDimensionVector`, `SiDimensionOptions`, `SiDimensionExponent`
 
 ---
 
@@ -16846,20 +16846,6 @@ graph LR
 
 ---
 
-### `parser/src/re-export-types.d.ts` - re-export-types.d module
-
-**Workspace Dependencies:**
-
-| Package                            | Import |
-| ---------------------------------- | ------ |
-| `@danielsimonjr/mathts-expression` | `*`    |
-
-**Exports:**
-
-- Re-exports: `type * from @danielsimonjr/mathts-expression`
-
----
-
 <a id="units-dependencies"></a>
 
 ## Units Dependencies
@@ -16913,20 +16899,6 @@ graph LR
 **Exports:**
 
 - Re-exports: `createNode`, `createAccessorNode`, `createArrayNode`, `createAssignmentNode`, `createBlockNode`, `createConditionalNode`, `createConstantNode`, `createFunctionAssignmentNode`, `createFunctionNode`, `createIndexNode`, `createObjectNode`, `createOperatorNode`, `createParenthesisNode`, `createRangeNode`, `createRelationalNode`, `createSymbolNode`
-
----
-
-### `ast/src/re-export-types.d.ts` - re-export-types.d module
-
-**Workspace Dependencies:**
-
-| Package                            | Import |
-| ---------------------------------- | ------ |
-| `@danielsimonjr/mathts-expression` | `*`    |
-
-**Exports:**
-
-- Re-exports: `type * from @danielsimonjr/mathts-expression`
 
 ---
 
@@ -19244,155 +19216,153 @@ graph TD
 
     subgraph Parser
         N420[index]
-        N421[re-export-types.d]
     end
 
     subgraph Units
-        N422[index]
+        N421[index]
     end
 
     subgraph Numbers
-        N423[index]
+        N422[index]
     end
 
     subgraph Ast
-        N424[index]
-        N425[re-export-types.d]
+        N423[index]
     end
 
     subgraph Evaluator
-        N426[index]
+        N424[index]
     end
 
     subgraph Linalg
-        N427[index]
+        N425[index]
     end
 
     subgraph Arithmetic
-        N428[index]
+        N426[index]
     end
 
     subgraph Trigonometry
-        N429[index]
+        N427[index]
     end
 
     subgraph Statistics
-        N430[index]
+        N428[index]
     end
 
     subgraph Signal
-        N431[index]
+        N429[index]
     end
 
     subgraph Parallel
-        N432[ComputePool]
-        N433[ParallelMatrix]
-        N434[WorkerPool]
-        N435[gemm-rows]
-        N436[index]
-        N437[matrix.worker]
+        N430[ComputePool]
+        N431[ParallelMatrix]
+        N432[WorkerPool]
+        N433[gemm-rows]
+        N434[index]
+        N435[matrix.worker]
     end
 
     subgraph Parallel/operations
-        N438[elementwise]
-        N439[index]
-        N440[map]
-        N441[matmul]
-        N442[reduce]
+        N436[elementwise]
+        N437[index]
+        N438[map]
+        N439[matmul]
+        N440[reduce]
     end
 
     subgraph Parallel/ops
-        N443[bitwise]
+        N441[bitwise]
     end
 
     subgraph Parallel/strategies
-        N444[chunk]
-        N445[index]
-        N446[threshold]
+        N442[chunk]
+        N443[index]
+        N444[threshold]
     end
 
     subgraph Workbook
-        N447[cli]
-        N448[contract]
-        N449[doc]
-        N450[edit]
-        N451[executor]
-        N452[formatter]
-        N453[fs-atomic]
-        N454[graph]
-        N455[html]
-        N456[index]
-        N457[...15 more]
+        N445[cli]
+        N446[contract]
+        N447[doc]
+        N448[edit]
+        N449[executor]
+        N450[formatter]
+        N451[fs-atomic]
+        N452[graph]
+        N453[html]
+        N454[index]
+        N455[...15 more]
     end
 
     subgraph Assembly/algebra
-        N458[decomposition]
+        N456[decomposition]
     end
 
     subgraph Assembly
-        N459[elementwise]
-        N460[heap]
-        N461[index]
-        N462[poly]
-        N463[signal]
-        N464[sort]
-        N465[special]
-        N466[tridiag]
+        N457[elementwise]
+        N458[heap]
+        N459[index]
+        N460[poly]
+        N461[signal]
+        N462[sort]
+        N463[special]
+        N464[tridiag]
     end
 
     subgraph Assembly/ops
-        N467[approx]
-        N468[array]
-        N469[bitwise]
-        N470[complex-array]
-        N471[complex-ops]
-        N472[curvefit]
-        N473[f64-buffer]
-        N474[fft]
-        N475[linalg]
-        N476[matrix]
-        N477[...7 more]
+        N465[approx]
+        N466[array]
+        N467[bitwise]
+        N468[complex-array]
+        N469[complex-ops]
+        N470[curvefit]
+        N471[f64-buffer]
+        N472[fft]
+        N473[linalg]
+        N474[matrix]
+        N475[...7 more]
     end
 
     subgraph Assembly/types
-        N478[complex]
+        N476[complex]
     end
 
     subgraph Compat
-        N479[chain]
-        N480[index]
-        N481[shims]
+        N477[chain]
+        N478[index]
+        N479[shims]
     end
 
     subgraph Gpu
-        N482[BufferPool]
-        N483[GPUContext]
-        N484[ShaderManager]
-        N485[detect]
-        N486[device]
-        N487[flag]
-        N488[index]
-        N489[serialize]
+        N480[BufferPool]
+        N481[GPUContext]
+        N482[ShaderManager]
+        N483[detect]
+        N484[device]
+        N485[flag]
+        N486[index]
+        N487[serialize]
     end
 
     subgraph Plot
-        N490[coerce]
-        N491[contour]
-        N492[emit]
-        N493[frame]
-        N494[heatmap]
-        N495[histogram]
-        N496[index]
-        N497[marks2d]
-        N498[overlay]
-        N499[palette]
-        N500[...8 more]
+        N488[coerce]
+        N489[contour]
+        N490[emit]
+        N491[frame]
+        N492[heatmap]
+        N493[histogram]
+        N494[index]
+        N495[marks2d]
+        N496[overlay]
+        N497[palette]
+        N498[...8 more]
     end
 
     subgraph Plot/three
-        N501[points3d]
-        N502[project]
-        N503[surface]
+        N499[points3d]
+        N500[project]
+        N501[surface]
     end
 
     N4 --> N2
@@ -19480,11 +19450,11 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1235   |
+| Total TypeScript Files  | 1233   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 204574 |
-| Total Exports           | 6412   |
-| Total Re-exports        | 2724   |
+| Total Lines of Code     | 204601 |
+| Total Exports           | 6416   |
+| Total Re-exports        | 2725   |
 | Total Classes           | 60     |
 | Total Interfaces        | 570    |
 | Total Functions         | 2072   |

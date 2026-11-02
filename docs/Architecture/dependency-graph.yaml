@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-02'
-  totalFiles: 1235
+  totalFiles: 1233
   totalModules: 82
-  totalExports: 6412
+  totalExports: 6416
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -810,6 +810,7 @@ modules:
             - NAMED_SCALES
             - UNIT_ROWS
             - UNIT_ROW_ALIASES
+            - REFUSED_UNIT_SPELLINGS
             - namedExactScale
             - readUnitScale
             - getUnitRow
@@ -1064,6 +1065,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -1253,6 +1255,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -2788,6 +2791,7 @@ modules:
             - UNIT_PREFIX_SETS
             - UNIT_ROW_ALIASES
             - UNIT_ROWS
+            - REFUSED_UNIT_SPELLINGS
             - unitPrefixExactScale
       workspaceDependencies: []
       exports:
@@ -2973,6 +2977,7 @@ modules:
             - NAMED_SCALES
             - UNIT_ROWS
             - UNIT_ROW_ALIASES
+            - REFUSED_UNIT_SPELLINGS
             - namedExactScale
             - readUnitScale
             - getUnitRow
@@ -3058,6 +3063,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -3130,6 +3136,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -3194,6 +3201,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - unitPrefixExactScale
         - getUnitPrefix
         - namedExactScale
@@ -3219,6 +3227,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
     core/src/types/unit/unit-types.ts:
       description: Shared TypeScript interfaces for the Unit factory (`Unit.ts`).
       externalDependencies: []
@@ -3349,6 +3358,7 @@ modules:
             - NAMED_SCALES
             - UNIT_ROWS
             - UNIT_ROW_ALIASES
+            - REFUSED_UNIT_SPELLINGS
             - namedExactScale
             - readUnitScale
             - getUnitRow
@@ -3440,6 +3450,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -3501,6 +3512,7 @@ modules:
         - NAMED_SCALES
         - UNIT_ROWS
         - UNIT_ROW_ALIASES
+        - REFUSED_UNIT_SPELLINGS
         - namedExactScale
         - readUnitScale
         - getUnitRow
@@ -33105,19 +33117,6 @@ modules:
         - getAssociativity
         - isAssociativeWith
         - getOperator
-    parser/src/re-export-types.d.ts:
-      description: re-export-types.d module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - '*'
-      exports: []
-      reExported:
-        - type * from @danielsimonjr/mathts-expression
   units:
     units/src/index.ts:
       description: Standalone units & dimensional analysis for MathTS. Re-exports the unit system
@@ -33493,19 +33492,6 @@ modules:
         - createRangeNode
         - createRelationalNode
         - createSymbolNode
-    ast/src/re-export-types.d.ts:
-      description: re-export-types.d module
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-expression'
-          directory: expression
-          imports:
-            - '*'
-      exports: []
-      reExported:
-        - type * from @danielsimonjr/mathts-expression
   evaluator:
     evaluator/src/index.ts:
       description: Standalone compiler + evaluator for MathTS expressions. Re-exports the
@@ -40787,7 +40773,6 @@ dependencyGraph:
     - name: Parser
       files:
         - parser/src/index.ts
-        - parser/src/re-export-types.d.ts
     - name: Units
       files:
         - units/src/index.ts
@@ -40797,7 +40782,6 @@ dependencyGraph:
     - name: Ast
       files:
         - ast/src/index.ts
-        - ast/src/re-export-types.d.ts
     - name: Evaluator
       files:
         - evaluator/src/index.ts
@@ -40942,17 +40926,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1235
+  totalTypeScriptFiles: 1233
   totalModules: 82
-  totalLinesOfCode: 204574
-  totalExports: 6412
+  totalLinesOfCode: 204601
+  totalExports: 6416
   totalClasses: 60
   totalInterfaces: 570
   totalFunctions: 2072
   totalTypeGuards: 161
   totalEnums: 0
-  totalConstants: 1632
-  totalReExports: 2724
+  totalConstants: 1633
+  totalReExports: 2725
   totalTypeOnlyImports: 621
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
