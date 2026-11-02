@@ -4405,7 +4405,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 600
+      "loc": 597
     },
     {
       "file": "expression/src/transform/and.transform.ts",
