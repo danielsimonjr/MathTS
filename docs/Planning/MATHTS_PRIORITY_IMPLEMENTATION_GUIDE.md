@@ -14,11 +14,13 @@ This guide provides detailed TypeScript implementation patterns for the highest-
 2. **Pattern Matching Engine** - Powers simplification, integration, solving
 3. **Simplification Rules** - Makes output usable
 
-### Phase 2: UPTF Core
+### Phase 2: Differential geometry sketches (closed — out of scope)
 
-4. **Tensor Class** - Einstein notation, contraction, products
-5. **Metric Tensor** - Christoffel computation
-6. **Curvature Tensors** - Riemann, Ricci, Einstein
+The following were design sketches only. They are **not** a MathTS API and are **not** scheduled: `MetricTensor`, Christoffel symbols, and curvature tensors (`Riemann`, `Ricci`, `Einstein`). The shipped `@danielsimonjr/mathts-tensor` package covers rank-N dense tensors and contraction; it does not expose this differential-geometry layer.
+
+4. ~~**Tensor Class**~~ — see `@danielsimonjr/mathts-tensor` (landed)
+5. ~~**Metric Tensor**~~ — out of scope
+6. ~~**Curvature Tensors**~~ — out of scope
 
 ### Phase 3: Analysis
 
@@ -52,13 +54,13 @@ Expressions are automatically normalized:
 
 ### 3. Lazy Evaluation
 
-Heavy computations (Christoffel symbols, matrix inverses) are cached:
+Heavy computations (matrix inverses, large contractions) are cached:
 
 ```typescript
-class MetricTensor {
-  private _inverse?: MetricTensor;
+class CachedInverse {
+  private _inverse?: SomeMatrixType;
 
-  inverse(): MetricTensor {
+  inverse(): SomeMatrixType {
     if (!this._inverse) {
       this._inverse = this.computeInverse();
     }
@@ -128,18 +130,18 @@ Expression (interface)
 - [ ] Logarithmic derivatives
 - [ ] Implicit differentiation
 
-### Week 9-12: Tensor Engine
+### Week 9-12: Tensor engine (MathTS `@danielsimonjr/mathts-tensor`)
 
-- [ ] Tensor class with index structure
-- [ ] Index contraction
-- [ ] Tensor products
-- [ ] Symmetrization/antisymmetrization
-- [ ] MetricTensor class
-- [ ] Christoffel symbols (first and second kind)
-- [ ] Covariant derivative
-- [ ] Riemann tensor
-- [ ] Ricci tensor and scalar
-- [ ] Einstein tensor
+- [x] Tensor class with index structure (shipped)
+- [x] Index contraction (shipped)
+- [x] Tensor products (shipped)
+- [ ] Symmetrization/antisymmetrization — unshipped (not on the public `@danielsimonjr/mathts-tensor` API)
+- [ ] ~~MetricTensor class~~ — out of scope
+- [ ] ~~Christoffel symbols (first and second kind)~~ — out of scope
+- [ ] ~~Covariant derivative~~ — out of scope
+- [ ] ~~Riemann tensor~~ — out of scope
+- [ ] ~~Ricci tensor and scalar~~ — out of scope
+- [ ] ~~Einstein tensor~~ — out of scope
 
 ---
 
@@ -299,10 +301,12 @@ packages/
 
 ---
 
-## Example: Complete Schwarzschild Derivation
+## Example: Schwarzschild workbook sample (not a shipped API)
+
+The workbook samples under `docs/Architecture/Workbook/` demonstrate `.mtsw` metadata and cells. They are **not** backed by a `MetricTensor` / `CurvatureTensors` API in MathTS today.
 
 ```typescript
-import { MetricTensor, CurvatureTensors } from '@mathts/tensor';
+// Illustrative sketch only — these imports are not part of the public MathTS API.
 import { symbol } from '@mathts/symbolic';
 
 // Define coordinates
@@ -316,31 +320,8 @@ const M = symbol('M'); // Mass
 const G = symbol('G'); // Gravitational constant
 const c = symbol('c'); // Speed of light
 
-// Create Schwarzschild metric
-const metric = MetricTensor.schwarzschild(M, G, c);
-
-// Compute curvature
-const curvature = new CurvatureTensors(metric);
-
-// Get Ricci scalar (should be 0 for vacuum solution)
-const R = curvature.ricciScalar();
-console.log('Ricci scalar:', R.toLatex()); // Should simplify to 0
-
-// Get Kretschmann scalar
-const K = curvature.kretschmann();
-console.log('Kretschmann:', K.toLatex());
-// Should give: 48G²M² / (c⁴r⁶)
-
-// Compute Einstein tensor (should be 0 for vacuum)
-const G_tensor = curvature.einstein();
-for (let μ = 0; μ < 4; μ++) {
-  for (let ν = 0; ν < 4; ν++) {
-    const component = G_tensor.at([μ, ν]);
-    if (!component.isZero()) {
-      console.log(`G_${μ}${ν} = ${component.toLatex()}`);
-    }
-  }
-}
+// Metric and curvature computation via a differential-geometry layer is out of scope
+// for MathTS; use workbook expression cells or external tools for GR sketches.
 ```
 
 ---
