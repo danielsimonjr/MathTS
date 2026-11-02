@@ -174,14 +174,21 @@ export const createLsolve = /* #__PURE__ */ factory(
       },
     });
 
+    /**
+     * Forward substitution for number storage. Returns the first column to finish
+     * on the generic path (`columns` when the number path completed). A found
+     * `number, number` signature does not guarantee a number result; if `div`
+     * leaves the number domain, resume generic dispatch from that column so
+     * already-updated RHS entries are kept and later columns still dispatch.
+     */
     function _denseForwardSubstitutionNumber(
       mdata: number[][],
       bdata: unknown[][],
+      x: unknown[][],
       rows: number,
       columns: number,
       ops: SolveNumberOps
-    ): unknown[][] {
-      const x: unknown[][] = [];
+    ): number {
       for (let j = 0; j < columns; j++) {
         const bj = (bdata[j][0] as number) || 0;
         let xj: number;
@@ -190,16 +197,28 @@ export const createLsolve = /* #__PURE__ */ factory(
           if (ops.equalScalar(vjj, 0)) {
             throw new Error('Linear system cannot be solved since matrix is singular');
           }
-          xj = ops.div(bj, vjj);
+          const quot = ops.div(bj, vjj);
+          if (typeof quot !== 'number') {
+            return j;
+          }
+          xj = quot;
+          const updates: number[] = [];
           for (let i = j + 1; i < rows; i++) {
-            bdata[i] = [ops.sub((bdata[i][0] as number) || 0, ops.mul(xj, mdata[i][j]))];
+            const next = ops.sub((bdata[i][0] as number) || 0, ops.mul(xj, mdata[i][j]));
+            if (typeof next !== 'number') {
+              return j;
+            }
+            updates.push(next);
+          }
+          for (let k = 0; k < updates.length; k++) {
+            bdata[j + 1 + k] = [updates[k]];
           }
         } else {
           xj = 0;
         }
         x[j] = [xj];
       }
-      return x;
+      return columns;
     }
 
     function _denseForwardSubstitution(
@@ -215,19 +234,23 @@ export const createLsolve = /* #__PURE__ */ factory(
 
       const mdata = m._data;
 
-      const ops = getSolveNumberOps();
-      if (ops && matrixAllNumbers(mdata) && columnAllNumbers(bdata)) {
-        return new DenseMatrix({
-          data: _denseForwardSubstitutionNumber(mdata as number[][], bdata, rows, columns, ops),
-          size: [rows, 1],
-        });
-      }
-
       // result
       const x: unknown[][] = [];
 
+      const ops = getSolveNumberOps();
+      let jStart = 0;
+      if (ops && matrixAllNumbers(mdata) && columnAllNumbers(bdata)) {
+        jStart = _denseForwardSubstitutionNumber(mdata as number[][], bdata, x, rows, columns, ops);
+        if (jStart === columns) {
+          return new DenseMatrix({
+            data: x,
+            size: [rows, 1],
+          });
+        }
+      }
+
       // loop columns
-      for (let j = 0; j < columns; j++) {
+      for (let j = jStart; j < columns; j++) {
         const bj = bdata[j][0] || 0;
         let xj: unknown;
 
