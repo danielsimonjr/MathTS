@@ -136,6 +136,32 @@ test('an internal dependency moved to ^<its current workspace version> is a rele
   );
 });
 
+test('an internal caret spec that its current workspace version satisfies is a release bump, even when the lock is stale', () => {
+  // changeset version keeps ^0.70.0 when the dependency moves to 0.70.1 (still in range),
+  // so a lock written before ^0.70.0 must not fail every later release.
+  const sec = (deps) => ({ dependencies: deps, peerDependencies: {}, optionalDependencies: {} });
+  const expected = { 'a/package.json': sec({ '@scope/fn': '^0.69.0', '@scope/one': '^1.0.0' }) };
+  const versions = { '@scope/fn': '0.70.1', '@scope/one': '1.5.3' };
+  const diff = (fn, one) =>
+    diffRuntimeDeps(
+      { 'a/package.json': sec({ '@scope/fn': fn, '@scope/one': one }) },
+      expected,
+      versions
+    ).join('\n');
+  assert.equal(diff('^0.70.0', '^1.2.0'), '');
+  assert.equal(diff('^0.70.1', '^1.5.3'), '');
+  // a range the current version does not satisfy stays drift
+  assert.match(diff('^0.71.0', '^1.0.0'), /@scope\/fn spec changed/); // above the current version
+  assert.match(diff('^0.69.5', '^1.0.0'), /@scope\/fn spec changed/); // 0.x caret pins the minor
+  assert.match(diff('^0.70.0', '^2.0.0'), /@scope\/one spec changed/); // another major
+  assert.match(diff('^0.70.0', '^1.6.0'), /@scope\/one spec changed/); // above the current version
+  // only a plain caret range gets the exemption
+  assert.match(diff('0.70.1', '^1.0.0'), /@scope\/fn spec changed/);
+  assert.match(diff('~0.70.0', '^1.0.0'), /@scope\/fn spec changed/);
+  assert.match(diff('^0.70.1-rc.1', '^1.0.0'), /@scope\/fn spec changed/);
+  assert.match(diff('>=0.70.0', '^1.0.0'), /@scope\/fn spec changed/);
+});
+
 test('workspaceVersions maps each workspace package name to its version', () => {
   const root = fixtureWorkspace({
     'package.json': { name: 'root', private: true, workspaces: ['core', 'packages/*'] },

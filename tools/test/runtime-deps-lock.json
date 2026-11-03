@@ -30,9 +30,9 @@
   },
   "matrix/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
+      "@danielsimonjr/mathts-core": "^0.20.0",
       "@danielsimonjr/mathts-gpu": "^0.2.1",
-      "@danielsimonjr/mathts-parallel": "^0.6.11"
+      "@danielsimonjr/mathts-parallel": "^0.7.0"
     },
     "peerDependencies": {
       "@webgpu/types": "^0.1.72"
@@ -41,27 +41,27 @@
   },
   "tensor/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-matrix": "^0.7.9"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-matrix": "^0.8.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "autograd/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-tensor": "^0.2.25"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-tensor": "^0.2.26"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "functions/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-expression": "^0.10.3",
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0",
       "@danielsimonjr/mathts-gpu": "^0.2.1",
-      "@danielsimonjr/mathts-matrix": "^0.7.9",
-      "@danielsimonjr/mathts-parallel": "^0.6.11",
+      "@danielsimonjr/mathts-matrix": "^0.8.0",
+      "@danielsimonjr/mathts-parallel": "^0.7.0",
       "bignumber.js": "^11.1.5",
       "complex.js": "^2.2.5",
       "decimal.js": "^10.4.3",
@@ -77,99 +77,99 @@
   },
   "expression/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0"
+      "@danielsimonjr/mathts-core": "^0.20.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "parser/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-expression": "^0.10.3"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "units/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0"
+      "@danielsimonjr/mathts-core": "^0.20.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "numbers/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0"
+      "@danielsimonjr/mathts-core": "^0.20.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "ast/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-expression": "^0.10.3"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "evaluator/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-expression": "^0.10.3"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "linalg/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-matrix": "^0.7.9"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-matrix": "^0.8.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "arithmetic/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-functions": "^0.69.0"
+      "@danielsimonjr/mathts-functions": "^0.70.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "trigonometry/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-functions": "^0.69.0"
+      "@danielsimonjr/mathts-functions": "^0.70.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "statistics/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-functions": "^0.69.0"
+      "@danielsimonjr/mathts-functions": "^0.70.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "signal/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-functions": "^0.69.0"
+      "@danielsimonjr/mathts-functions": "^0.70.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "parallel/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-workerpool": "^0.2.5",
-      "@danielsimonjr/mathts-core": "^0.19.0"
+      "@danielsimonjr/mathts-workerpool": "^0.2.7",
+      "@danielsimonjr/mathts-core": "^0.20.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
   },
   "workbook/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-expression": "^0.10.3",
-      "@danielsimonjr/mathts-functions": "^0.69.1",
-      "@danielsimonjr/mathts-plot": "^0.4.13",
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0",
+      "@danielsimonjr/mathts-functions": "^0.70.0",
+      "@danielsimonjr/mathts-plot": "^0.4.14",
       "yaml": "^2.3.0"
     },
     "peerDependencies": {},
@@ -182,10 +182,10 @@
   },
   "compat/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-functions": "^0.69.1",
-      "@danielsimonjr/mathts-matrix": "^0.7.9",
-      "@danielsimonjr/mathts-parallel": "^0.6.11"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-functions": "^0.70.0",
+      "@danielsimonjr/mathts-matrix": "^0.8.0",
+      "@danielsimonjr/mathts-parallel": "^0.7.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
@@ -199,9 +199,9 @@
   },
   "plot/package.json": {
     "dependencies": {
-      "@danielsimonjr/mathts-core": "^0.19.0",
-      "@danielsimonjr/mathts-functions": "^0.69.1",
-      "@danielsimonjr/mathts-expression": "^0.10.3"
+      "@danielsimonjr/mathts-core": "^0.20.0",
+      "@danielsimonjr/mathts-functions": "^0.70.0",
+      "@danielsimonjr/mathts-expression": "^0.11.0"
     },
     "peerDependencies": {},
     "optionalDependencies": {}
