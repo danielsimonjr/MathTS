@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-evaluator
 
+## 0.1.27
+
+### Patch Changes
+
+- Updated dependencies [3652c57]
+  - @danielsimonjr/mathts-core@0.21.0
+  - @danielsimonjr/mathts-expression@0.11.1
+
 ## 0.1.26
 
 ### Patch Changes
