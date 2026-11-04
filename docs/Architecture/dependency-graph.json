@@ -12458,6 +12458,10 @@
             ]
           },
           {
+            "file": "./factories/index.js",
+            "imports": ["simplifyScalar"]
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ScoredCandidate"]
           },
@@ -12476,7 +12480,12 @@
           },
           {
             "file": "./scalar-mutate.js",
-            "imports": ["crossoverSubtrees", "weightedMutation", "ScalarMutationContext"]
+            "imports": [
+              "crossoverSubtrees",
+              "simplifyConstants",
+              "weightedMutation",
+              "ScalarMutationContext"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -12498,6 +12507,7 @@
               "scalarCanonicalKey",
               "scalarComplexity",
               "scalarGrammarAccepts",
+              "ScalarBuildError",
               "ScalarComplexityWeights",
               "ScalarGrammar",
               "ScalarNode"
@@ -43584,7 +43594,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1237,
     "totalModules": 82,
-    "totalLinesOfCode": 206769,
+    "totalLinesOfCode": 206851,
     "totalExports": 6457,
     "totalClasses": 60,
     "totalInterfaces": 576,

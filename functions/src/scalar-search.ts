@@ -22,6 +22,7 @@ import {
   scalarCanonicalKey,
   scalarComplexity,
   scalarGrammarAccepts,
+  ScalarBuildError,
   type ScalarComplexityWeights,
   type ScalarGrammar,
   type ScalarNode,
@@ -33,6 +34,7 @@ import {
   INVALID_ROW_PENALTY,
   type NamedScalarLoss,
 } from './fit-scalar.js';
+import { simplifyScalar } from './factories/index.js';
 import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
 import {
   createScalarBatchPool,
@@ -43,6 +45,7 @@ import {
 import { compileScalar, type ScalarBatchResult } from './scalar-compile.js';
 import {
   crossoverSubtrees,
+  simplifyConstants,
   weightedMutation,
   type ScalarMutationContext,
 } from './scalar-mutate.js';
@@ -136,6 +139,19 @@ export interface ScalarSearchOptions {
    * is always the first parent's.
    */
   readonly crossoverProbability?: number;
+  /**
+   * Simplify each seed and each bred offspring once, before the grammar check and
+   * the score, so the scored tree is the tree whose parameters are fitted. Default
+   * `'off'`: neither simplifier runs and the seed-7 pin is unchanged. `'constants'`
+   * folds numeric-only subtrees ({@link simplifyConstants}). `'algebraic'` runs the
+   * expression simplifier ({@link simplifyScalar}); when it throws
+   * `ScalarBuildError`, or its result fails the grammar (including `admit`), the
+   * tree keeps its unsimplified shape. Trees that come out of `enumerateScalars`
+   * are not simplified. Simplification draws no random numbers, so the island
+   * streams are unchanged. Algebraic simplification costs milliseconds per tree;
+   * the option stays off by default and no speed claim is made here.
+   */
+  readonly simplify?: 'off' | 'constants' | 'algebraic';
   /** Cap on tree evaluations, the initial population included. */
   readonly maxEvaluations: number;
   /** Second cap on tree evaluations, reported as `'max-candidates'`. */
@@ -648,6 +664,16 @@ function assertSearchInputs(
       `searchScalars: invalidRows must be 'reject' or 'penalize', got ${String(options.invalidRows)}`
     );
   }
+  if (
+    options.simplify !== undefined &&
+    options.simplify !== 'off' &&
+    options.simplify !== 'constants' &&
+    options.simplify !== 'algebraic'
+  ) {
+    throw new RangeError(
+      `searchScalars: simplify must be 'off', 'constants', or 'algebraic', got ${String(options.simplify)}`
+    );
+  }
 }
 
 function defaultParameters(n: number): Float64Array {
@@ -1034,11 +1060,55 @@ function grammarAdmits(grammar: ScalarGrammar, node: ScalarNode): boolean {
   );
 }
 
+/**
+ * The `simplify` option applied to one candidate tree. `'off'` returns the tree
+ * unchanged. `'constants'` folds numeric-only subtrees; `'algebraic'` runs the
+ * expression simplifier. A `ScalarBuildError` from {@link simplifyScalar} keeps
+ * the unsimplified tree; anything else propagates. The grammar check (including
+ * `admit`) happens at the call site, on the returned tree, so a simplified result
+ * that the grammar rejects falls back to the unsimplified one there.
+ */
+function simplifyCandidate(node: ScalarNode, mode: ScalarSearchOptions['simplify']): ScalarNode {
+  if (mode === undefined || mode === 'off') {
+    return node;
+  }
+  if (mode === 'constants') {
+    return simplifyConstants(node);
+  }
+  try {
+    return simplifyScalar(node);
+  } catch (err) {
+    if (err instanceof ScalarBuildError) {
+      return node;
+    }
+    throw err;
+  }
+}
+
+/**
+ * One candidate through simplification and the grammar. `'off'` checks the
+ * candidate once, today's behavior. With a mode on, the simplified tree is
+ * checked first; when the grammar (including `admit`) rejects it, the
+ * unsimplified tree is checked and kept if it passes.
+ */
+function acceptCandidate(
+  candidate: ScalarNode,
+  mode: ScalarSearchOptions['simplify'],
+  grammar: ScalarGrammar
+): ScalarNode | null {
+  const simplified = simplifyCandidate(candidate, mode);
+  if (grammarAdmits(grammar, simplified)) {
+    return simplified;
+  }
+  return simplified !== candidate && grammarAdmits(grammar, candidate) ? candidate : null;
+}
+
 /** Seeds that the grammar (and `admit`, when set) accepts, then enumerated trees. */
 function initialTrees(
   grammar: ScalarGrammar,
   seeds: readonly ScalarNode[] | undefined,
-  limit: number
+  limit: number,
+  simplifyMode: ScalarSearchOptions['simplify']
 ): ScalarNode[] {
   const out: ScalarNode[] = [];
   const seen = new Set<string>();
@@ -1046,10 +1116,14 @@ function initialTrees(
     if (out.length >= limit) {
       break;
     }
-    const key = scalarCanonicalKey(seed);
-    if (!seen.has(key) && grammarAdmits(grammar, seed)) {
+    const tree = acceptCandidate(seed, simplifyMode, grammar);
+    if (tree === null) {
+      continue;
+    }
+    const key = scalarCanonicalKey(tree);
+    if (!seen.has(key)) {
       seen.add(key);
-      out.push(seed);
+      out.push(tree);
     }
   }
   if (out.length < limit) {
@@ -1136,6 +1210,12 @@ function pickSelected(
  * bound or length throws before the first yield. Omitted fields are today's call.
  * `crossoverProbability` defaults to 0 (no coin). A positive probability draws
  * the coin on the island stream and, on success, a second tournament parent.
+ * `simplify` defaults to `'off'` (no simplifier runs). `'constants'` folds
+ * numeric-only subtrees and `'algebraic'` runs the expression simplifier, once
+ * per seed and per bred offspring, before the grammar check and the score; a
+ * `ScalarBuildError` or a grammar-rejected (including `admit`) simplify result
+ * keeps the unsimplified tree. Enumerated trees are not simplified, and
+ * simplification draws no random numbers.
  *
  * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
@@ -1148,6 +1228,7 @@ export async function* searchScalars(
   const tournamentP = options.tournamentP ?? DEFAULT_TOURNAMENT_P;
   const optimizeProbability = options.optimizeProbability ?? DEFAULT_OPTIMIZE_PROBABILITY;
   const crossoverProbability = options.crossoverProbability ?? DEFAULT_CROSSOVER_PROBABILITY;
+  const simplifyMode = options.simplify ?? 'off';
   assertSearchInputs(
     problem,
     options,
@@ -1208,7 +1289,8 @@ export async function* searchScalars(
     const trees = initialTrees(
       options.grammar,
       options.seeds,
-      Math.min(populationSize * populations, budget)
+      Math.min(populationSize * populations, budget),
+      simplifyMode
     );
     if (trees.length === 0 && budget >= 1) {
       throw new RangeError('searchScalars: the grammar admits no tree');
@@ -1292,14 +1374,14 @@ export async function* searchScalars(
               parsimony
             );
             const crossed = crossoverSubtrees(parent.node, mate.node, island.rng, mutationCtx);
-            if (crossed !== null && grammarAdmits(options.grammar, crossed)) {
-              child = crossed;
+            if (crossed !== null) {
+              child = acceptCandidate(crossed, simplifyMode, options.grammar);
             }
           }
           for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
             const candidate = mutate(parent.node, island.rng, mutationCtx);
-            if (candidate !== null && grammarAdmits(options.grammar, candidate)) {
-              child = candidate;
+            if (candidate !== null) {
+              child = acceptCandidate(candidate, simplifyMode, options.grammar);
             }
           }
           nodes.push(child ?? parent.node);

@@ -4989,21 +4989,22 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                                                             |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                                           |
-| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                       |
-| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
+| Package                            | Import                                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                                                             |
+| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                                         |
+| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarBuildError, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
 
 **Internal Dependencies:**
 
 | File                         | Imports                                                                                                    | Type   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
 | `./fit-scalar.js`            | `fitScalarParameters, namedScalarLossTerm, rankScalarBatchLoss, INVALID_ROW_PENALTY, NamedScalarLoss`      | Import |
+| `./factories/index.js`       | `simplifyScalar`                                                                                           | Import |
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
 | `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
-| `./scalar-mutate.js`         | `crossoverSubtrees, weightedMutation, ScalarMutationContext`                                               | Import |
+| `./scalar-mutate.js`         | `crossoverSubtrees, simplifyConstants, weightedMutation, ScalarMutationContext`                            | Import |
 
 **Exports:**
 
@@ -18634,7 +18635,7 @@ graph LR
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
-| `functions/src/factories/index`                        | 244 files    | 12 files   |
+| `functions/src/factories/index`                        | 244 files    | 13 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 204 files  |
 | `functions/src/index`                                  | 95 files     | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
@@ -19525,7 +19526,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1237   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 206769 |
+| Total Lines of Code     | 206851 |
 | Total Exports           | 6457   |
 | Total Re-exports        | 2750   |
 | Total Classes           | 60     |

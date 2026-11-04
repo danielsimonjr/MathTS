@@ -11807,6 +11807,9 @@ modules:
             - rankScalarBatchLoss
             - INVALID_ROW_PENALTY
             - NamedScalarLoss
+        - file: ./factories/index.js
+          imports:
+            - simplifyScalar
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -11826,6 +11829,7 @@ modules:
         - file: ./scalar-mutate.js
           imports:
             - crossoverSubtrees
+            - simplifyConstants
             - weightedMutation
             - ScalarMutationContext
       workspaceDependencies:
@@ -11845,6 +11849,7 @@ modules:
             - scalarCanonicalKey
             - scalarComplexity
             - scalarGrammarAccepts
+            - ScalarBuildError
             - ScalarComplexityWeights
             - ScalarGrammar
             - ScalarNode
@@ -41167,7 +41172,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1237
   totalModules: 82
-  totalLinesOfCode: 206769
+  totalLinesOfCode: 206851
   totalExports: 6457
   totalClasses: 60
   totalInterfaces: 576

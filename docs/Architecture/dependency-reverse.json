@@ -1675,6 +1675,7 @@
       "functions/src/linalg-extra.ts",
       "functions/src/numeric/propagate-uncertainty.ts",
       "functions/src/optimization-extra.ts",
+      "functions/src/scalar-search.ts",
       "functions/src/signal-filter-extra.ts",
       "functions/src/signal/fft-helpers.ts",
       "functions/src/typed/cas.ts"
