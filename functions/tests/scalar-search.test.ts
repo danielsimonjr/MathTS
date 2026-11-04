@@ -29,18 +29,34 @@ import {
 
 // Records the temperature every mutation is given and otherwise passes through, so the
 // search runs exactly as shipped. `failMutations` is for the crossover wiring test:
-// only a successful crossover can introduce a new tree.
-const seenTemperatures = vi.hoisted(() => ({ values: [] as number[], failMutations: false }));
+// only a successful crossover can introduce a new tree. `forceCrossover` /
+// `replaceMutation` pin the fallthrough path: an admit-rejected or null
+// crossover must still reach mutation.
+const seenTemperatures = vi.hoisted(() => ({
+  values: [] as number[],
+  failMutations: false,
+  forceCrossover: undefined as unknown,
+  replaceMutation: undefined as unknown,
+}));
 vi.mock('../src/scalar-mutate.js', async (importOriginal) => {
   const original = await importOriginal<typeof import('../src/scalar-mutate.js')>();
   return {
     ...original,
+    crossoverSubtrees: (...args: Parameters<typeof original.crossoverSubtrees>) => {
+      if (seenTemperatures.forceCrossover !== undefined) {
+        return seenTemperatures.forceCrossover as ReturnType<typeof original.crossoverSubtrees>;
+      }
+      return original.crossoverSubtrees(...args);
+    },
     weightedMutation: (...args: Parameters<typeof original.weightedMutation>) => {
       const operator = original.weightedMutation(...args);
       return (...call: Parameters<typeof operator>) => {
         seenTemperatures.values.push(call[2].temperature);
         if (seenTemperatures.failMutations) {
           return null;
+        }
+        if (seenTemperatures.replaceMutation !== undefined) {
+          return seenTemperatures.replaceMutation as ReturnType<typeof operator>;
         }
         return operator(...call);
       };
@@ -796,6 +812,72 @@ describe('searchScalars: crossover', () => {
       );
     } finally {
       seenTemperatures.failMutations = false;
+    }
+  });
+
+  // Target is x so a size-1 mutation to x wins the hall. x+y and x+7 share
+  // complexity 3 and would not prove the mutation child was kept.
+  const fallthroughProblem: ScalarSearchProblem = {
+    variables: ['x', 'y'],
+    columns: [xs, xs],
+    observed: xs,
+  };
+  const fallthroughGrammar: ScalarGrammar = {
+    variables: ['x', 'y'],
+    binary: ['+'],
+    unary: [],
+    literals: [7],
+    maxSize: 3,
+  };
+
+  it('an admit-rejected crossover falls through to mutation', async () => {
+    const graftKey = scalarCanonicalKey(graft);
+    const mutatedKey = scalarCanonicalKey(X);
+    seenTemperatures.forceCrossover = graft;
+    seenTemperatures.replaceMutation = X;
+    try {
+      const { result } = await runSearch(fallthroughProblem, {
+        grammar: {
+          ...fallthroughGrammar,
+          admit: (node) => scalarCanonicalKey(node) !== graftKey,
+        },
+        rng: createSeededRng(7),
+        seeds: [left, right],
+        populationSize: 2,
+        tournamentSize: 1,
+        crossoverProbability: 1,
+        optimizeProbability: 0,
+        maxEvaluations: 8,
+      });
+      const keys = result.front.map((row) => scalarCanonicalKey(row.item));
+      expect(keys).not.toContain(graftKey);
+      expect(keys).toContain(mutatedKey);
+    } finally {
+      seenTemperatures.forceCrossover = undefined;
+      seenTemperatures.replaceMutation = undefined;
+    }
+  });
+
+  it('a null crossover falls through to mutation', async () => {
+    seenTemperatures.forceCrossover = null;
+    seenTemperatures.replaceMutation = X;
+    try {
+      const { result } = await runSearch(fallthroughProblem, {
+        grammar: fallthroughGrammar,
+        rng: createSeededRng(7),
+        seeds: [left, right],
+        populationSize: 2,
+        tournamentSize: 1,
+        crossoverProbability: 1,
+        optimizeProbability: 0,
+        maxEvaluations: 8,
+      });
+      expect(result.front.map((row) => scalarCanonicalKey(row.item))).toContain(
+        scalarCanonicalKey(X)
+      );
+    } finally {
+      seenTemperatures.forceCrossover = undefined;
+      seenTemperatures.replaceMutation = undefined;
     }
   });
 });
