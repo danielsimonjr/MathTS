@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2090
+**Total files**: 2156
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1211 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1243 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |      791 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |      825 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       28 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       29 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        5 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2090** |                                                                                                                |
+| **Total**     | **2156** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    29 |
 | `examples` |     5 |
-| `src`      |  1237 |
-| `tests`    |   791 |
+| `src`      |  1269 |
+| `tests`    |   825 |
 | `tools`    |    28 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   108 |
 | `@danielsimonjr/mathts-evaluator`      |     4 |
 | `@danielsimonjr/mathts-expression`     |   562 |
-| `@danielsimonjr/mathts-functions`      |   888 |
+| `@danielsimonjr/mathts-functions`      |   954 |
 | `@danielsimonjr/mathts-gpu`            |    17 |
 | `@danielsimonjr/mathts-linalg`         |     3 |
 | `@danielsimonjr/mathts-matrix`         |   118 |
@@ -923,6 +923,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/cas/layer3.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/rat.ts`                                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/rational-integrate.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/cas/real-roots.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/render-coeff-times.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/clustering-extra.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/combinatorics/bellNumbers.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -954,6 +955,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/geometry-extra.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/alpha-shape.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/circumcircle.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/geometry/curves.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/delaunay.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/distance.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/geometry-extra.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -962,6 +964,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/geometry/intersect.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/intersect3d.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/mass-properties.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/geometry/polygon-ops.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/geometry/predicates.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/spherical-voronoi.ts`                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/geometry/voronoi.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/gpu/elementwise-gpu.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -974,6 +978,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/hypothesis-extra.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/index.ts`                                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/linalg-extra.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/linalg-extra2.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/linalg-special-matrices.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/linalg-svd-extra.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/logical/and.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/logical/not.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1035,17 +1041,26 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/ml/logistic-regression.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/ml/ols.ts`                                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/ml/regularized-regression.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numbertheory/arithmetic-functions.ts`                              | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numbertheory/diophantine.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numbertheory/extra.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numbertheory/integer-matrices.ts`                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numbertheory/modular.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numbertheory/sequences.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric-equivalence.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric-extra.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/adaptive-quad.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/bfgs.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/bspline.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/constrained.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/control-equations.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/eigsh.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/finite-differences.ts`                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/fsolve.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/gauss-legendre4.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/gauss-nodes-extra.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/gauss-nodes.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/global-optimizers.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/hermite.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/interpn.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/interval.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1057,6 +1072,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/numeric/numeric-jacobian.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/open-root-finders.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/propagate-uncertainty.ts`                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/numeric/quadrature-extra.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/rational-nullspace.ts`                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/solveDAE.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/numeric/solveDDE.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1128,25 +1144,35 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/set/setUnion.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal-filter-extra.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/conv.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/signal/dtw.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/fft-core-f64.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/fft-helpers.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/fft.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/fir-smoothing.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/freqz.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/iir-design.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/signal/lomb-scargle.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/remez-exchange.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/spectral-peaks.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/signal/system-response.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/signal/waveforms.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/wavelet-filters.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/wavelets.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/signal/windows-extra.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/signal/zpk2tf.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/special/angular-momentum.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/special/erf-extra.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/erf.ts`                                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/special/exp-integrals.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/hypergeometric.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/jacobi-elliptic.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/mathieu.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/niche.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/polygamma-orthopoly.ts`                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/special/spherical-bessel.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/spheroidal.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/wave-functions.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/special/zeta-extra.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/special/zeta.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/corr.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/cumsum.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1163,14 +1189,20 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/statistics/sum.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/utils/improveErrorMessage.ts`                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/statistics/variance.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/distances.ts`                                                | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/distributions-extra.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/effect-sizes.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/fit-distribution.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/gaussian-process.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/inference-extra.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/inference-extra2.ts`                                         | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/multivariate-sampling.ts`                                    | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/mvn.ts`                                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/nonparametric-extra.ts`                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/power-analysis.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/robust-stats.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/stats/timeseries.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/stats/weighted-stats.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/string/bin.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/string/format.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/string/hex.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1335,9 +1367,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/acsc-asec-acot-bignumber.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/adaptive-quad.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/algebra.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/angular-momentum.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/arithmetic-extended.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/arithmetic-functions.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/audit-2026-11-functions.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/b2-bridge-regression.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/batch-e1-signal-reexports.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/betainc-order.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/bfgs.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/bignumber-operations.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1359,6 +1394,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/clones-shapes-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics-extended.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/combinatorics.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/constrained.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/control-equations.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/conversions-parser.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/core/function/import.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1375,6 +1411,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/cov-statistics.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-string.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/cov-trigonometry.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/curves.test.ts`                                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dae.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dbscan-knn.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dde.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1383,19 +1420,26 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dedup-bucketC-arithmetic-equivalence.test.ts`                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/derivative.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/det-native-accel.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/diophantine.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dist-objects-sampleN-oracle.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dist-objects.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/distances.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/distributions-extra.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/distributions.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/docs-reference-completeness.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/docs-sync.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dtw.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/effect-sizes.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/eigs-correctness.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/eigsh.test.ts`                                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/elementwise-wasm.browser.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/embedded-docs-completeness.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/erf-extra.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/evaluate-units.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/evaluate.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/exact-mw-ks.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/exact-pvalues.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/exp-integrals.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/expression-transforms.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factories-final.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factories-leaf.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1420,6 +1464,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/factory-scope.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fft-factory-correctness.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fft-helpers.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/finite-differences.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fir-smoothing.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fit-distribution.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fit-scalar-parameters.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1439,6 +1484,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/forward-mode-ad.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/front-export.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/fsolve.test.ts`                                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/gap-2026-11-matrix-reexports.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-algebra-cas-oracle.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-besselk-precision-oracle.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-cancel-symbolic-oracle.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1497,6 +1543,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/gap-wavelet-families-oracle.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gap-zeta-complex-oracle.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gauss-legendre4.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/gauss-nodes-extra.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-consumers-oracle.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-delaunay-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry-extended.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1506,6 +1553,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/geometry-sets.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/geometry/intersect.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/global-optimizers.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gp-regression-oracle.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gpu-chain-lifecycle-pin.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/gpu-dispatch-overhead.browser.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1527,6 +1575,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/iir-design.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/inference-extra.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/inference-extra2.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/integer-matrices.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/integration.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/interpn-bvp.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/interpolation-as-wasm.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1545,20 +1594,25 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/levenberg-marquardt.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/lgamma-complex.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/lgamma-contracts.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/linalg-extra2.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/linalg-special-matrices.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/linear-regression-stderr.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/linprog-feasible.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/linprog-full.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/load-wasm.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/logistic-regression.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/lomb-scargle.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/mad-median-vs-mean-ad.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-bridge-accel.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-functions.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-multiply-gc7.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/matrix-ops.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/minimize-scalar.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/modular.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/multivariate-sampling-oracle.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/nelder-mead-parity.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/nnls.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/nonparametric-extra.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/normal-cdf-accuracy.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numbertheory-extra.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/numeric-accuracy.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1593,11 +1647,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/poly-as-wasm.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/poly-to-dense-coefficients.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polygamma-orthopoly.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/polygon-ops.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polynomial-gcd-exact.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/predicates.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/propagate-uncertainty.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/property-invariants.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/public-api-smoke.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/qr-fraction-error.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/quadrature-extra.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/qz-hardening.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rat.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-integrate-apart.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1609,8 +1666,10 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/rational-integrate.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-nullspace.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-surd.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/real-roots.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/regularized-regression.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/remez-pm.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/robust-stats.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/run-with-config.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/s2r-clones-batch4-oracle.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/s2r-jacobian-norms-parity.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1626,6 +1685,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/security/wasm-integrity.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-loader-paths-pin.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/security/wasm-loader-pin.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/sequences.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/set-flatten-pair.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-as-wasm.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal-extended.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1649,6 +1709,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/special-scalars-airy-oracle.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/special.test.ts`                                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/spectral-peaks.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/spherical-bessel.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/spheroidal.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/statistics-extended.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/statistics-extended2.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1660,6 +1721,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/svd-orth.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/svds.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts`                   | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/system-response.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/taylor-exact.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/tier-parity-registry.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/timeseries.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1709,10 +1771,14 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/wasm-policy.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wasm-ptr-abi-clones-pin.test.ts`                                 | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wasm-resolve.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/waveforms.test.ts`                                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/wavelets.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/weighted-stats.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/windowfunction-unknown.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/windows-extra.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/workerpool-stress.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/xgcd-factory-ring.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/zeta-extra.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/vitest.config.ts`                                                      | @danielsimonjr/mathts-functions      | config   | config      |
 | `gpu/src/BufferPool.ts`                                                           | @danielsimonjr/mathts-gpu            | src      | build-entry |
 | `gpu/src/detect.ts`                                                               | @danielsimonjr/mathts-gpu            | src      | build-entry |

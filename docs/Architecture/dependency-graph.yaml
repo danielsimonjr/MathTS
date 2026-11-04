@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-04'
-  totalFiles: 1237
+  totalFiles: 1269
   totalModules: 82
-  totalExports: 6456
+  totalExports: 6871
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9897,6 +9897,298 @@ modules:
             - dirichletPdf
             - wishartSample
           reExport: true
+        - file: ./stats/weighted-stats.js
+          imports:
+            - weightedMean
+            - weightedVariance
+            - weightedMedian
+            - weightedQuantile
+          reExport: true
+        - file: ./stats/robust-stats.js
+          imports:
+            - pmean
+            - gstd
+            - gzscore
+            - theilSen
+            - siegelSlopes
+            - partialCorrelation
+          reExport: true
+        - file: ./stats/effect-sizes.js
+          imports:
+            - cohensD
+            - hedgesG
+            - glassDelta
+            - etaSquared
+            - rankBiserial
+          reExport: true
+        - file: ./stats/distributions-extra.js
+          imports:
+            - owensT
+            - skewNormalPDF
+            - skewNormalCDF
+            - truncatedNormalPDF
+            - truncatedNormalCDF
+            - truncatedNormalMean
+            - inverseGammaPDF
+            - inverseGammaCDF
+            - gevCDF
+            - gevPDF
+            - skellamPMF
+            - zipfPMF
+            - nakagamiPDF
+            - ricePDF
+          reExport: true
+        - file: ./stats/nonparametric-extra.js
+          imports:
+            - signTest
+            - runsTest
+            - moodMedianTest
+            - powerDivergence
+            - gTest
+            - jackknife
+          reExport: true
+        - file: ./stats/distances.js
+          imports:
+            - wassersteinDistance
+            - energyDistance
+            - mutualInformation
+            - ecdf
+          reExport: true
+        - file: ./special/erf-extra.js
+          imports:
+            - erfinv
+            - erfcinv
+            - erfcx
+            - dawson
+          reExport: true
+        - file: ./special/exp-integrals.js
+          imports:
+            - expIntegralE1
+            - expn
+            - sinhIntegral
+            - coshIntegral
+          reExport: true
+        - file: ./special/spherical-bessel.js
+          imports:
+            - sphericalBesselJ
+            - sphericalBesselY
+            - sphericalBesselI
+            - sphericalBesselK
+            - hankelH1
+            - hankelH2
+            - besselJZeros
+          reExport: true
+        - file: ./special/angular-momentum.js
+          imports:
+            - wigner3j
+            - clebschGordan
+            - wigner6j
+            - sphericalHarmonic
+          reExport: true
+        - file: ./special/zeta-extra.js
+          imports:
+            - hurwitzZeta
+            - dirichletEta
+            - bernoulliPolynomial
+            - eulerPolynomial
+          reExport: true
+        - file: ./numeric/global-optimizers.js
+          imports:
+            - differentialEvolution
+            - simulatedAnnealing
+          reExport: true
+        - file: ./numeric/constrained.js
+          imports:
+            - minimizeConstrained
+          reExport: true
+        - file: ./numeric/gauss-nodes-extra.js
+          imports:
+            - rootsHermite
+            - rootsLaguerre
+            - rootsChebyshevT
+            - rootsChebyshevU
+            - rootsJacobi
+            - gaussHermiteIntegrate
+            - gaussLaguerreIntegrate
+          reExport: true
+        - file: ./numeric/quadrature-extra.js
+          imports:
+            - tanhSinh
+            - clenshawCurtis
+            - dblquad
+            - tplquad
+          reExport: true
+        - file: ./numeric/finite-differences.js
+          imports:
+            - finiteDifferenceCoefficients
+            - ridders
+            - fixedPoint
+          reExport: true
+        - file: ./numbertheory/modular.js
+          imports:
+            - modPow
+            - prevPrime
+            - legendreSymbol
+            - sqrtMod
+            - isCarmichael
+          reExport: true
+        - file: ./numbertheory/arithmetic-functions.js
+          imports:
+            - isSquarefree
+            - radical
+            - bigOmega
+            - smallOmega
+            - liouvilleLambda
+            - vonMangoldt
+            - mertens
+            - isPerfect
+            - isPerfectPower
+            - isPrimePower
+            - integerSqrt
+            - integerNthRoot
+            - digitSum
+            - digitalRoot
+            - collatzSteps
+            - primorial
+          reExport: true
+        - file: ./numbertheory/sequences.js
+          imports:
+            - motzkin
+            - narayana
+            - schroder
+            - delannoy
+            - pell
+            - tribonacci
+            - eulerianNumber
+            - lahNumber
+            - integerPartitionsGen
+            - compositionsGen
+            - grayCode
+            - binomialMod
+          reExport: true
+        - file: ./numbertheory/diophantine.js
+          imports:
+            - linearDiophantine
+            - pellSolve
+            - frobeniusNumber
+            - zeckendorf
+            - sumOfTwoSquares
+            - egyptianFraction
+            - fareySequence
+          reExport: true
+        - file: ./numbertheory/integer-matrices.js
+          imports:
+            - hermiteNormalForm
+            - smithNormalForm
+            - lll
+          reExport: true
+        - file: ./cas/real-roots.js
+          imports:
+            - sturmSequence
+            - sturmRootCount
+            - descartesSignChanges
+            - isolateRealRoots
+            - realRoots
+          reExport: true
+        - file: ./signal/conv.js
+          imports:
+            - conv2
+          reExport: true
+        - file: ./signal-filter-extra.js
+          imports:
+            - sinc
+          reExport: true
+        - file: ./signal/windows-extra.js
+          imports:
+            - kaiserWindow
+            - gaussianWindow
+            - tukeyWindow
+            - blackmanHarrisWindow
+            - nuttallWindow
+            - flattopWindow
+            - bohmanWindow
+            - parzenWindow
+            - cosineWindow
+            - exponentialWindow
+            - getWindow
+          reExport: true
+        - file: ./signal/waveforms.js
+          imports:
+            - chirp
+            - squareWave
+            - sawtooth
+            - gaussPulse
+            - unitImpulse
+            - sweepPoly
+          reExport: true
+        - file: ./signal/lomb-scargle.js
+          imports:
+            - lombScargle
+          reExport: true
+        - file: ./signal/system-response.js
+          imports:
+            - impulseResponse
+            - stepResponse
+            - tf2ss
+            - ss2tf
+            - cont2discrete
+            - iirNotch
+            - iirPeak
+            - tf2zpk
+            - sos2tf
+          reExport: true
+        - file: ./signal/dtw.js
+          imports:
+            - dtw
+          reExport: true
+        - file: ./linalg-special-matrices.js
+          imports:
+            - hilbertMatrix
+            - invHilbertMatrix
+            - hadamardMatrix
+            - pascalMatrix
+            - dftMatrix
+            - hankelMatrix
+            - blockDiag
+            - khatriRao
+            - fiedlerMatrix
+            - leslieMatrix
+            - helmertMatrix
+          reExport: true
+        - file: ./linalg-extra2.js
+          imports:
+            - subspaceAngles
+            - signm
+            - fractionalMatrixPower
+            - choleskyUpdate
+            - choleskyDowndate
+          reExport: true
+        - file: ./geometry/predicates.js
+          imports:
+            - orient2D
+            - orient3D
+            - inCircle
+            - pointInTriangle
+            - barycentricCoordinates
+            - polygonIsConvex
+          reExport: true
+        - file: ./geometry/polygon-ops.js
+          imports:
+            - polygonClip
+            - minkowskiSum
+            - earClipping
+          reExport: true
+        - file: ./geometry/curves.js
+          imports:
+            - douglasPeucker
+            - hausdorffDistance
+            - frechetDistance
+            - closestPair
+            - minimumEnclosingCircle
+            - catmullRom
+            - arcLength
+            - curvature
+          reExport: true
         - file: ./factories/evaluate.js
           imports:
             - PhysicsEvaluateOptions
@@ -10311,6 +10603,72 @@ modules:
             - SampleSeedOptions
           reExport: true
           typeOnly: true
+        - file: ./numeric/global-optimizers.js
+          imports:
+            - GlobalOptimizeOptions
+            - GlobalOptimizeResult
+            - SimulatedAnnealingOptions
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/constrained.js
+          imports:
+            - ConstrainedOptions
+            - ConstrainedResult
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/gauss-nodes-extra.js
+          imports:
+            - GaussRule
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/quadrature-extra.js
+          imports:
+            - TanhSinhOptions
+            - Limit1
+            - Limit2
+          reExport: true
+          typeOnly: true
+        - file: ./numeric/finite-differences.js
+          imports:
+            - ScalarSolveOptions
+            - FixedPointOptions
+          reExport: true
+          typeOnly: true
+        - file: ./signal/conv.js
+          imports:
+            - ConvMode
+          reExport: true
+          typeOnly: true
+        - file: ./signal/windows-extra.js
+          imports:
+            - ExtraWindowName
+            - WindowOptions
+          reExport: true
+          typeOnly: true
+        - file: ./signal/waveforms.js
+          imports:
+            - ChirpMethod
+            - ChirpOptions
+          reExport: true
+          typeOnly: true
+        - file: ./signal/lomb-scargle.js
+          imports:
+            - LombScargleOptions
+          reExport: true
+          typeOnly: true
+        - file: ./signal/system-response.js
+          imports:
+            - StateSpace
+            - DiscretizeMethod
+            - BiquadCoefficients
+          reExport: true
+          typeOnly: true
+        - file: ./signal/dtw.js
+          imports:
+            - DtwOptions
+            - DtwResult
+          reExport: true
+          typeOnly: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -10319,8 +10677,29 @@ modules:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
           imports:
+            - qrPivoted
+            - lq
+            - rq
+            - ql
+            - condest
+            - eigvals
+            - powerIteration
+            - matrixPinv
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
             - SVDResult
             - SVDOptions
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - QRPivotedResult
+            - QRPivotedOptions
+            - LQResult
+            - RQResult
+            - QLResult
+            - PinvOptions
+            - EigOptions
       exports:
         - config
         - runWithConfig
@@ -10657,6 +11036,204 @@ modules:
         - dirichletSample
         - dirichletPdf
         - wishartSample
+        - qrPivoted
+        - lq
+        - rq
+        - ql
+        - condest
+        - eigvals
+        - powerIteration
+        - matrixPinv
+        - weightedMean
+        - weightedVariance
+        - weightedMedian
+        - weightedQuantile
+        - pmean
+        - gstd
+        - gzscore
+        - theilSen
+        - siegelSlopes
+        - partialCorrelation
+        - cohensD
+        - hedgesG
+        - glassDelta
+        - etaSquared
+        - rankBiserial
+        - owensT
+        - skewNormalPDF
+        - skewNormalCDF
+        - truncatedNormalPDF
+        - truncatedNormalCDF
+        - truncatedNormalMean
+        - inverseGammaPDF
+        - inverseGammaCDF
+        - gevCDF
+        - gevPDF
+        - skellamPMF
+        - zipfPMF
+        - nakagamiPDF
+        - ricePDF
+        - signTest
+        - runsTest
+        - moodMedianTest
+        - powerDivergence
+        - gTest
+        - jackknife
+        - wassersteinDistance
+        - energyDistance
+        - mutualInformation
+        - ecdf
+        - erfinv
+        - erfcinv
+        - erfcx
+        - dawson
+        - expIntegralE1
+        - expn
+        - sinhIntegral
+        - coshIntegral
+        - sphericalBesselJ
+        - sphericalBesselY
+        - sphericalBesselI
+        - sphericalBesselK
+        - hankelH1
+        - hankelH2
+        - besselJZeros
+        - wigner3j
+        - clebschGordan
+        - wigner6j
+        - sphericalHarmonic
+        - hurwitzZeta
+        - dirichletEta
+        - bernoulliPolynomial
+        - eulerPolynomial
+        - differentialEvolution
+        - simulatedAnnealing
+        - minimizeConstrained
+        - rootsHermite
+        - rootsLaguerre
+        - rootsChebyshevT
+        - rootsChebyshevU
+        - rootsJacobi
+        - gaussHermiteIntegrate
+        - gaussLaguerreIntegrate
+        - tanhSinh
+        - clenshawCurtis
+        - dblquad
+        - tplquad
+        - finiteDifferenceCoefficients
+        - ridders
+        - fixedPoint
+        - modPow
+        - prevPrime
+        - legendreSymbol
+        - sqrtMod
+        - isCarmichael
+        - isSquarefree
+        - radical
+        - bigOmega
+        - smallOmega
+        - liouvilleLambda
+        - vonMangoldt
+        - mertens
+        - isPerfect
+        - isPerfectPower
+        - isPrimePower
+        - integerSqrt
+        - integerNthRoot
+        - digitSum
+        - digitalRoot
+        - collatzSteps
+        - primorial
+        - motzkin
+        - narayana
+        - schroder
+        - delannoy
+        - pell
+        - tribonacci
+        - eulerianNumber
+        - lahNumber
+        - integerPartitionsGen
+        - compositionsGen
+        - grayCode
+        - binomialMod
+        - linearDiophantine
+        - pellSolve
+        - frobeniusNumber
+        - zeckendorf
+        - sumOfTwoSquares
+        - egyptianFraction
+        - fareySequence
+        - hermiteNormalForm
+        - smithNormalForm
+        - lll
+        - sturmSequence
+        - sturmRootCount
+        - descartesSignChanges
+        - isolateRealRoots
+        - realRoots
+        - conv2
+        - sinc
+        - kaiserWindow
+        - gaussianWindow
+        - tukeyWindow
+        - blackmanHarrisWindow
+        - nuttallWindow
+        - flattopWindow
+        - bohmanWindow
+        - parzenWindow
+        - cosineWindow
+        - exponentialWindow
+        - getWindow
+        - chirp
+        - squareWave
+        - sawtooth
+        - gaussPulse
+        - unitImpulse
+        - sweepPoly
+        - lombScargle
+        - impulseResponse
+        - stepResponse
+        - tf2ss
+        - ss2tf
+        - cont2discrete
+        - iirNotch
+        - iirPeak
+        - tf2zpk
+        - sos2tf
+        - dtw
+        - hilbertMatrix
+        - invHilbertMatrix
+        - hadamardMatrix
+        - pascalMatrix
+        - dftMatrix
+        - hankelMatrix
+        - blockDiag
+        - khatriRao
+        - fiedlerMatrix
+        - leslieMatrix
+        - helmertMatrix
+        - subspaceAngles
+        - signm
+        - fractionalMatrixPower
+        - choleskyUpdate
+        - choleskyDowndate
+        - orient2D
+        - orient3D
+        - inCircle
+        - pointInTriangle
+        - barycentricCoordinates
+        - polygonIsConvex
+        - polygonClip
+        - minkowskiSum
+        - earClipping
+        - douglasPeucker
+        - hausdorffDistance
+        - frechetDistance
+        - closestPair
+        - minimumEnclosingCircle
+        - catmullRom
+        - arcLength
+        - curvature
         - PhysicsEvaluateOptions
         - SolveODESolution
         - ODEMatrixSolution
@@ -10813,6 +11390,35 @@ modules:
         - GPPrediction
         - GPModel
         - SampleSeedOptions
+        - QRPivotedResult
+        - QRPivotedOptions
+        - LQResult
+        - RQResult
+        - QLResult
+        - PinvOptions
+        - EigOptions
+        - GlobalOptimizeOptions
+        - GlobalOptimizeResult
+        - SimulatedAnnealingOptions
+        - ConstrainedOptions
+        - ConstrainedResult
+        - GaussRule
+        - TanhSinhOptions
+        - Limit1
+        - Limit2
+        - ScalarSolveOptions
+        - FixedPointOptions
+        - ConvMode
+        - ExtraWindowName
+        - WindowOptions
+        - ChirpMethod
+        - ChirpOptions
+        - LombScargleOptions
+        - StateSpace
+        - DiscretizeMethod
+        - BiquadCoefficients
+        - DtwOptions
+        - DtwResult
       reExported:
         - '* from ./typed/index.js'
         - '* from ./typed/cas.js'
@@ -11152,6 +11758,204 @@ modules:
         - dirichletSample
         - dirichletPdf
         - wishartSample
+        - qrPivoted
+        - lq
+        - rq
+        - ql
+        - condest
+        - eigvals
+        - powerIteration
+        - matrixPinv
+        - weightedMean
+        - weightedVariance
+        - weightedMedian
+        - weightedQuantile
+        - pmean
+        - gstd
+        - gzscore
+        - theilSen
+        - siegelSlopes
+        - partialCorrelation
+        - cohensD
+        - hedgesG
+        - glassDelta
+        - etaSquared
+        - rankBiserial
+        - owensT
+        - skewNormalPDF
+        - skewNormalCDF
+        - truncatedNormalPDF
+        - truncatedNormalCDF
+        - truncatedNormalMean
+        - inverseGammaPDF
+        - inverseGammaCDF
+        - gevCDF
+        - gevPDF
+        - skellamPMF
+        - zipfPMF
+        - nakagamiPDF
+        - ricePDF
+        - signTest
+        - runsTest
+        - moodMedianTest
+        - powerDivergence
+        - gTest
+        - jackknife
+        - wassersteinDistance
+        - energyDistance
+        - mutualInformation
+        - ecdf
+        - erfinv
+        - erfcinv
+        - erfcx
+        - dawson
+        - expIntegralE1
+        - expn
+        - sinhIntegral
+        - coshIntegral
+        - sphericalBesselJ
+        - sphericalBesselY
+        - sphericalBesselI
+        - sphericalBesselK
+        - hankelH1
+        - hankelH2
+        - besselJZeros
+        - wigner3j
+        - clebschGordan
+        - wigner6j
+        - sphericalHarmonic
+        - hurwitzZeta
+        - dirichletEta
+        - bernoulliPolynomial
+        - eulerPolynomial
+        - differentialEvolution
+        - simulatedAnnealing
+        - minimizeConstrained
+        - rootsHermite
+        - rootsLaguerre
+        - rootsChebyshevT
+        - rootsChebyshevU
+        - rootsJacobi
+        - gaussHermiteIntegrate
+        - gaussLaguerreIntegrate
+        - tanhSinh
+        - clenshawCurtis
+        - dblquad
+        - tplquad
+        - finiteDifferenceCoefficients
+        - ridders
+        - fixedPoint
+        - modPow
+        - prevPrime
+        - legendreSymbol
+        - sqrtMod
+        - isCarmichael
+        - isSquarefree
+        - radical
+        - bigOmega
+        - smallOmega
+        - liouvilleLambda
+        - vonMangoldt
+        - mertens
+        - isPerfect
+        - isPerfectPower
+        - isPrimePower
+        - integerSqrt
+        - integerNthRoot
+        - digitSum
+        - digitalRoot
+        - collatzSteps
+        - primorial
+        - motzkin
+        - narayana
+        - schroder
+        - delannoy
+        - pell
+        - tribonacci
+        - eulerianNumber
+        - lahNumber
+        - integerPartitionsGen
+        - compositionsGen
+        - grayCode
+        - binomialMod
+        - linearDiophantine
+        - pellSolve
+        - frobeniusNumber
+        - zeckendorf
+        - sumOfTwoSquares
+        - egyptianFraction
+        - fareySequence
+        - hermiteNormalForm
+        - smithNormalForm
+        - lll
+        - sturmSequence
+        - sturmRootCount
+        - descartesSignChanges
+        - isolateRealRoots
+        - realRoots
+        - conv2
+        - sinc
+        - kaiserWindow
+        - gaussianWindow
+        - tukeyWindow
+        - blackmanHarrisWindow
+        - nuttallWindow
+        - flattopWindow
+        - bohmanWindow
+        - parzenWindow
+        - cosineWindow
+        - exponentialWindow
+        - getWindow
+        - chirp
+        - squareWave
+        - sawtooth
+        - gaussPulse
+        - unitImpulse
+        - sweepPoly
+        - lombScargle
+        - impulseResponse
+        - stepResponse
+        - tf2ss
+        - ss2tf
+        - cont2discrete
+        - iirNotch
+        - iirPeak
+        - tf2zpk
+        - sos2tf
+        - dtw
+        - hilbertMatrix
+        - invHilbertMatrix
+        - hadamardMatrix
+        - pascalMatrix
+        - dftMatrix
+        - hankelMatrix
+        - blockDiag
+        - khatriRao
+        - fiedlerMatrix
+        - leslieMatrix
+        - helmertMatrix
+        - subspaceAngles
+        - signm
+        - fractionalMatrixPower
+        - choleskyUpdate
+        - choleskyDowndate
+        - orient2D
+        - orient3D
+        - inCircle
+        - pointInTriangle
+        - barycentricCoordinates
+        - polygonIsConvex
+        - polygonClip
+        - minkowskiSum
+        - earClipping
+        - douglasPeucker
+        - hausdorffDistance
+        - frechetDistance
+        - closestPair
+        - minimumEnclosingCircle
+        - catmullRom
+        - arcLength
+        - curvature
         - PhysicsEvaluateOptions
         - SolveODESolution
         - ODEMatrixSolution
@@ -11308,6 +12112,35 @@ modules:
         - GPPrediction
         - GPModel
         - SampleSeedOptions
+        - QRPivotedResult
+        - QRPivotedOptions
+        - LQResult
+        - RQResult
+        - QLResult
+        - PinvOptions
+        - EigOptions
+        - GlobalOptimizeOptions
+        - GlobalOptimizeResult
+        - SimulatedAnnealingOptions
+        - ConstrainedOptions
+        - ConstrainedResult
+        - GaussRule
+        - TanhSinhOptions
+        - Limit1
+        - Limit2
+        - ScalarSolveOptions
+        - FixedPointOptions
+        - ConvMode
+        - ExtraWindowName
+        - WindowOptions
+        - ChirpMethod
+        - ChirpOptions
+        - LombScargleOptions
+        - StateSpace
+        - DiscretizeMethod
+        - BiquadCoefficients
+        - DtwOptions
+        - DtwResult
     functions/src/linalg-extra.ts:
       description: Structured-matrix constructors + log-determinant (Wave C / bridges C2, C5).
       externalDependencies: []
@@ -11350,6 +12183,63 @@ modules:
         - laplacianMatrix
         - logdet
         - qz
+    functions/src/linalg-extra2.ts:
+      description: Subspace angles, matrix sign, fractional matrix power and Cholesky rank-1
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./typed/matrix-ops.js
+          imports:
+            - matrixExpm
+            - matrixLogm
+            - singularValues
+      workspaceDependencies: []
+      exports:
+        - subspaceAngles
+        - signm
+        - fractionalMatrixPower
+        - choleskyUpdate
+        - choleskyDowndate
+      functions:
+        - subspaceAngles
+        - signm
+        - fractionalMatrixPower
+        - choleskyUpdate
+        - choleskyDowndate
+    functions/src/linalg-special-matrices.ts:
+      description: Special matrix constructors (Gap-analysis 2026-11-04 Batch E7).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - hilbertMatrix
+        - invHilbertMatrix
+        - hadamardMatrix
+        - pascalMatrix
+        - dftMatrix
+        - hankelMatrix
+        - blockDiag
+        - khatriRao
+        - fiedlerMatrix
+        - leslieMatrix
+        - helmertMatrix
+      functions:
+        - hilbertMatrix
+        - invHilbertMatrix
+        - hadamardMatrix
+        - pascalMatrix
+        - dftMatrix
+        - hankelMatrix
+        - blockDiag
+        - khatriRao
+        - fiedlerMatrix
+        - leslieMatrix
+        - helmertMatrix
     functions/src/linalg-svd-extra.ts:
       description: '`orth` — orthonormal basis for the column space of a matrix.'
       externalDependencies: []
@@ -12144,6 +13034,27 @@ modules:
         - partialFractions
         - integratePFTerm
         - integrateRationalFunction
+    functions/src/cas/real-roots.ts:
+      description: 'Real-root isolation and approximation for real polynomials: Sturm sequences,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/algebra.js
+          imports:
+            - polyval
+      workspaceDependencies: []
+      exports:
+        - sturmSequence
+        - sturmRootCount
+        - descartesSignChanges
+        - isolateRealRoots
+        - realRoots
+      functions:
+        - sturmSequence
+        - sturmRootCount
+        - descartesSignChanges
+        - isolateRealRoots
+        - realRoots
     functions/src/cas/render-coeff-times.ts:
       description: Renders `coeff * rest` for CAS string output (`1`, `-1`, or `n/d*rest`).
       externalDependencies: []
@@ -14191,6 +15102,41 @@ modules:
         - circumcircle
       functions:
         - circumcircle
+    functions/src/geometry/curves.ts:
+      description: Curves, point-set distances and enclosing shapes (Gap-analysis 2026-11-04 Batch E10).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/geometry.js
+          imports:
+            - distance2D
+            - distancePointToLine2D
+        - file: ../numeric/adaptive-quad.js
+          imports:
+            - quad
+        - file: ./predicates.js
+          imports:
+            - Pt
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - douglasPeucker
+        - hausdorffDistance
+        - frechetDistance
+        - closestPair
+        - minimumEnclosingCircle
+        - catmullRom
+        - arcLength
+        - curvature
+      functions:
+        - douglasPeucker
+        - hausdorffDistance
+        - frechetDistance
+        - closestPair
+        - minimumEnclosingCircle
+        - catmullRom
+        - arcLength
+        - curvature
     functions/src/geometry/delaunay.ts:
       description: Delaunay triangulation (2-D) — part of the computational-geometry engine.
       externalDependencies: []
@@ -14383,6 +15329,47 @@ modules:
         - massProperties
       constants:
         - MASS_PROPERTY_SHAPES
+    functions/src/geometry/polygon-ops.ts:
+      description: 'Polygon operations (Gap-analysis 2026-11-04 Batch E9): Sutherland-Hodgman'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/geometry.js
+          imports:
+            - convexHull2D
+        - file: ./predicates.js
+          imports:
+            - orient2D
+            - Pt
+      workspaceDependencies: []
+      exports:
+        - polygonClip
+        - minkowskiSum
+        - earClipping
+      functions:
+        - polygonClip
+        - minkowskiSum
+        - earClipping
+    functions/src/geometry/predicates.ts:
+      description: Geometric predicates (Gap-analysis 2026-11-04 Batch E9).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - orient2D
+        - orient3D
+        - inCircle
+        - barycentricCoordinates
+        - pointInTriangle
+        - polygonIsConvex
+      functions:
+        - orient2D
+        - orient3D
+        - inCircle
+        - barycentricCoordinates
+        - pointInTriangle
+        - polygonIsConvex
     functions/src/geometry/spherical-voronoi.ts:
       description: Spherical Voronoi diagram — a consumer of the 3-D convex hull.
       externalDependencies: []
@@ -15974,6 +16961,68 @@ modules:
         - lasso
         - elasticNet
   functions/numbertheory:
+    functions/src/numbertheory/arithmetic-functions.ts:
+      description: 'Arithmetic functions and integer power / root helpers: squarefree tests,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - isSquarefree
+        - radical
+        - bigOmega
+        - smallOmega
+        - liouvilleLambda
+        - vonMangoldt
+        - mertens
+        - isPerfect
+        - integerSqrt
+        - integerNthRoot
+        - isPerfectPower
+        - isPrimePower
+        - digitSum
+        - digitalRoot
+        - collatzSteps
+        - primorial
+      functions:
+        - isSquarefree
+        - radical
+        - bigOmega
+        - smallOmega
+        - liouvilleLambda
+        - vonMangoldt
+        - mertens
+        - isPerfect
+        - integerSqrt
+        - integerNthRoot
+        - isPerfectPower
+        - isPrimePower
+        - digitSum
+        - digitalRoot
+        - collatzSteps
+        - primorial
+    functions/src/numbertheory/diophantine.ts:
+      description: 'Diophantine and lattice-style integer problems: linear Diophantine equations,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - linearDiophantine
+        - pellSolve
+        - frobeniusNumber
+        - zeckendorf
+        - sumOfTwoSquares
+        - egyptianFraction
+        - fareySequence
+      functions:
+        - linearDiophantine
+        - pellSolve
+        - frobeniusNumber
+        - zeckendorf
+        - sumOfTwoSquares
+        - egyptianFraction
+        - fareySequence
     functions/src/numbertheory/extra.ts:
       description: Number-theory fills — closes gaps left by the existing combinatorics/number-theory
       externalDependencies: []
@@ -16003,6 +17052,70 @@ modules:
         - kroneckerSymbol
         - combinationsGen
         - permutationsGen
+    functions/src/numbertheory/integer-matrices.ts:
+      description: 'Integer normal forms: row-style Hermite normal form, Smith normal form (with'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - hermiteNormalForm
+        - smithNormalForm
+        - lll
+      functions:
+        - hermiteNormalForm
+        - smithNormalForm
+        - lll
+    functions/src/numbertheory/modular.ts:
+      description: 'Modular arithmetic: modular exponentiation, previous prime, Legendre symbol,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - modPow
+        - prevPrime
+        - legendreSymbol
+        - sqrtMod
+        - isCarmichael
+      functions:
+        - modPow
+        - prevPrime
+        - legendreSymbol
+        - sqrtMod
+        - isCarmichael
+    functions/src/numbertheory/sequences.ts:
+      description: 'Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - motzkin
+        - narayana
+        - schroder
+        - delannoy
+        - pell
+        - tribonacci
+        - eulerianNumber
+        - lahNumber
+        - integerPartitionsGen
+        - compositionsGen
+        - grayCode
+        - binomialMod
+      functions:
+        - motzkin
+        - narayana
+        - schroder
+        - delannoy
+        - pell
+        - tribonacci
+        - eulerianNumber
+        - lahNumber
+        - integerPartitionsGen
+        - compositionsGen
+        - grayCode
+        - binomialMod
   functions/numeric:
     functions/src/numeric/adaptive-quad.ts:
       description: Adaptive Gauss-Kronrod (G7-K15) quadrature.
@@ -16054,6 +17167,22 @@ modules:
         - bsplineEval
         - bsplineEval
         - bsplineEval
+    functions/src/numeric/constrained.ts:
+      description: Constrained minimization by the augmented Lagrangian method
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./bfgs.js
+          imports:
+            - bfgs
+      workspaceDependencies: []
+      exports:
+        - minimizeConstrained
+      interfaces:
+        - ConstrainedOptions
+        - ConstrainedResult
+      functions:
+        - minimizeConstrained
     functions/src/numeric/control-equations.ts:
       description: Control-theory matrix equations — `dlyap`/`care`/`dare`.
       externalDependencies: []
@@ -16092,6 +17221,23 @@ modules:
         - EigshResult
       functions:
         - eigsh
+    functions/src/numeric/finite-differences.ts:
+      description: Finite-difference weights and two scalar fixed-point / bracketing solvers.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - finiteDifferenceCoefficients
+        - ridders
+        - fixedPoint
+      interfaces:
+        - ScalarSolveOptions
+        - FixedPointOptions
+      functions:
+        - finiteDifferenceCoefficients
+        - ridders
+        - fixedPoint
     functions/src/numeric/fsolve.ts:
       description: 'Nonlinear system solver: `fsolve` (damped Newton with a backtracking line'
       externalDependencies: []
@@ -16141,6 +17287,30 @@ modules:
         - GL4_C
         - GL4_A
         - GL4_B
+    functions/src/numeric/gauss-nodes-extra.ts:
+      description: Gauss quadrature nodes and weights for classical weight functions.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - rootsHermite
+        - rootsLaguerre
+        - rootsChebyshevT
+        - rootsChebyshevU
+        - rootsJacobi
+        - gaussHermiteIntegrate
+        - gaussLaguerreIntegrate
+      interfaces:
+        - GaussRule
+      functions:
+        - rootsHermite
+        - rootsLaguerre
+        - rootsChebyshevT
+        - rootsChebyshevU
+        - rootsJacobi
+        - gaussHermiteIntegrate
+        - gaussLaguerreIntegrate
     functions/src/numeric/gauss-nodes.ts:
       description: Gauss-Legendre quadrature nodes and weights.
       externalDependencies: []
@@ -16153,6 +17323,25 @@ modules:
         - RootsLegendreResult
       functions:
         - rootsLegendre
+    functions/src/numeric/global-optimizers.ts:
+      description: Global, derivative-free optimizers.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../probability/util/seededRNG.js
+          imports:
+            - createRng
+      workspaceDependencies: []
+      exports:
+        - differentialEvolution
+        - simulatedAnnealing
+      interfaces:
+        - GlobalOptimizeOptions
+        - GlobalOptimizeResult
+        - SimulatedAnnealingOptions
+      functions:
+        - differentialEvolution
+        - simulatedAnnealing
     functions/src/numeric/hermite.ts:
       description: Cubic-Hermite dense interpolation of the state on an accepted step `[ta, tb]`,
       externalDependencies: []
@@ -16342,6 +17531,29 @@ modules:
         - UncertaintyPropagationOptions
       functions:
         - propagateUncertainty
+    functions/src/numeric/quadrature-extra.ts:
+      description: Additional quadrature rules and multiple integrals.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./adaptive-quad.js
+          imports:
+            - quad
+            - QuadOptions
+            - QuadResult
+      workspaceDependencies: []
+      exports:
+        - tanhSinh
+        - clenshawCurtis
+        - dblquad
+        - tplquad
+      interfaces:
+        - TanhSinhOptions
+      functions:
+        - tanhSinh
+        - clenshawCurtis
+        - dblquad
+        - tplquad
     functions/src/numeric/rational-nullspace.ts:
       description: Exact rational null space.
       externalDependencies: []
@@ -17970,6 +19182,19 @@ modules:
         - conv2Direct
         - conv2FFT
         - conv2
+    functions/src/signal/dtw.ts:
+      description: Dynamic time warping with an optional Sakoe-Chiba band.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - dtw
+      interfaces:
+        - DtwOptions
+        - DtwResult
+      functions:
+        - dtw
     functions/src/signal/fft-core-f64.ts:
       description: The ONE radix-2 Cooley-Tukey core for this package, on flat Float64Arrays.
       externalDependencies: []
@@ -18160,6 +19385,18 @@ modules:
         - buttord
         - zpk2sos
         - sosfilt
+    functions/src/signal/lomb-scargle.ts:
+      description: Lomb-Scargle periodogram for unevenly sampled data (classic Scargle form with
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - lombScargle
+      interfaces:
+        - LombScargleOptions
+      functions:
+        - lombScargle
     functions/src/signal/remez-exchange.ts:
       description: Exact Parks-McClellan (Remez exchange) optimal equiripple FIR design.
       externalDependencies: []
@@ -18209,6 +19446,64 @@ modules:
         - stft
         - istft
         - decimate
+    functions/src/signal/system-response.ts:
+      description: LTI system responses, transfer-function / state-space conversions, and
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../signal-filter-extra.js
+          imports:
+            - lfilter
+        - file: ./fft.js
+          imports:
+            - ComplexNumber
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - impulseResponse
+        - stepResponse
+        - tf2ss
+        - ss2tf
+        - cont2discrete
+        - iirNotch
+        - iirPeak
+        - tf2zpk
+        - sos2tf
+      interfaces:
+        - StateSpace
+        - BiquadCoefficients
+      functions:
+        - impulseResponse
+        - stepResponse
+        - tf2ss
+        - ss2tf
+        - cont2discrete
+        - iirNotch
+        - iirPeak
+        - tf2zpk
+        - sos2tf
+    functions/src/signal/waveforms.ts:
+      description: Test waveform generators (scipy.signal.waveforms parity).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - chirp
+        - squareWave
+        - sawtooth
+        - gaussPulse
+        - unitImpulse
+        - sweepPoly
+      interfaces:
+        - ChirpOptions
+      functions:
+        - chirp
+        - squareWave
+        - sawtooth
+        - gaussPulse
+        - unitImpulse
+        - sweepPoly
     functions/src/signal/wavelet-filters.ts:
       description: Orthogonal wavelet filter table + a general periodization-boundary filter
       externalDependencies: []
@@ -18253,6 +19548,44 @@ modules:
         - wavedec
         - waverec
         - cwt
+    functions/src/signal/windows-extra.ts:
+      description: Extra window functions (scipy.signal.windows parity).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/signal.js
+          imports:
+            - windowFunction
+        - file: ../wasm/special/scalars.js
+          imports:
+            - besselIScalar
+      workspaceDependencies: []
+      exports:
+        - kaiserWindow
+        - gaussianWindow
+        - tukeyWindow
+        - blackmanHarrisWindow
+        - nuttallWindow
+        - flattopWindow
+        - bohmanWindow
+        - parzenWindow
+        - cosineWindow
+        - exponentialWindow
+        - getWindow
+      interfaces:
+        - WindowOptions
+      functions:
+        - kaiserWindow
+        - gaussianWindow
+        - tukeyWindow
+        - blackmanHarrisWindow
+        - nuttallWindow
+        - flattopWindow
+        - bohmanWindow
+        - parzenWindow
+        - cosineWindow
+        - exponentialWindow
+        - getWindow
     functions/src/signal/zpk2tf.ts:
       description: Transfer function representation [numerator, denominator]
       externalDependencies: []
@@ -18273,6 +19606,51 @@ modules:
       constants:
         - createZpk2tf
   functions/special:
+    functions/src/special/angular-momentum.ts:
+      description: Angular-momentum coupling (Wigner 3j, Clebsch–Gordan, Wigner 6j) via the Racah
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./spheroidal.js
+          imports:
+            - ferrersP
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - wigner3j
+        - clebschGordan
+        - wigner6j
+        - sphericalHarmonic
+      functions:
+        - wigner3j
+        - clebschGordan
+        - wigner6j
+        - sphericalHarmonic
+    functions/src/special/erf-extra.ts:
+      description: Inverse and scaled error functions, and Dawson's integral.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - normalQuantile
+        - file: ../wasm/special/scalars.js
+          imports:
+            - erfcScalar
+      workspaceDependencies: []
+      exports:
+        - erfcx
+        - erfinv
+        - erfcinv
+        - dawson
+      functions:
+        - erfcx
+        - erfinv
+        - erfcinv
+        - dawson
     functions/src/special/erf.ts:
       description: Compute the erf function of a value using a rational Chebyshev
       externalDependencies: []
@@ -18296,6 +19674,22 @@ modules:
         - createErf
       constants:
         - createErf
+    functions/src/special/exp-integrals.ts:
+      description: 'Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - expn
+        - expIntegralE1
+        - sinhIntegral
+        - coshIntegral
+      functions:
+        - expn
+        - expIntegralE1
+        - sinhIntegral
+        - coshIntegral
     functions/src/special/hypergeometric.ts:
       description: Hypergeometric functions.
       externalDependencies: []
@@ -18388,6 +19782,36 @@ modules:
         - trigamma
         - jacobiP
         - gegenbauerC
+    functions/src/special/spherical-bessel.ts:
+      description: Spherical Bessel functions j_n, y_n, i_n, k_n, Hankel functions of real order,
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/special.js
+          imports:
+            - besselJ
+            - besselY
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Complex
+      exports:
+        - sphericalBesselJ
+        - sphericalBesselY
+        - sphericalBesselI
+        - sphericalBesselK
+        - hankelH1
+        - hankelH2
+        - besselJZeros
+      functions:
+        - sphericalBesselJ
+        - sphericalBesselY
+        - sphericalBesselI
+        - sphericalBesselK
+        - hankelH1
+        - hankelH2
+        - besselJZeros
     functions/src/special/spheroidal.ts:
       description: Prolate spheroidal wave functions — angular characteristic values
       externalDependencies: []
@@ -18441,6 +19865,26 @@ modules:
         - coulombF
         - coulombG
         - coulombFG
+    functions/src/special/zeta-extra.ts:
+      description: Hurwitz zeta, Dirichlet eta, and Bernoulli / Euler polynomials.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/probability.js
+          imports:
+            - bernoulli
+            - combinations
+      workspaceDependencies: []
+      exports:
+        - hurwitzZeta
+        - dirichletEta
+        - bernoulliPolynomial
+        - eulerPolynomial
+      functions:
+        - hurwitzZeta
+        - dirichletEta
+        - bernoulliPolynomial
+        - eulerPolynomial
     functions/src/special/zeta.ts:
       description: Compute the Riemann Zeta function of a value using an infinite series for
       externalDependencies: []
@@ -18872,6 +20316,90 @@ modules:
       constants:
         - createVariance
   functions/stats:
+    functions/src/stats/distances.ts:
+      description: Distances between samples and discrete information measures (gap-analysis
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - wassersteinDistance
+        - energyDistance
+        - mutualInformation
+        - ecdf
+      functions:
+        - wassersteinDistance
+        - energyDistance
+        - mutualInformation
+        - ecdf
+    functions/src/stats/distributions-extra.ts:
+      description: Closed-form and quadrature-backed distribution functions (gap-analysis
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/distributions.js
+          imports:
+            - normalPDF
+            - normalCDF
+        - file: ../typed/special.js
+          imports:
+            - gammainc
+            - lgamma
+        - file: ../numeric/adaptive-quad.js
+          imports:
+            - quad
+        - file: ../wasm/special/scalars.js
+          imports:
+            - besselIScalar
+      workspaceDependencies: []
+      exports:
+        - owensT
+        - skewNormalPDF
+        - skewNormalCDF
+        - truncatedNormalPDF
+        - truncatedNormalCDF
+        - truncatedNormalMean
+        - inverseGammaPDF
+        - inverseGammaCDF
+        - gevCDF
+        - gevPDF
+        - skellamPMF
+        - zipfPMF
+        - nakagamiPDF
+        - ricePDF
+      functions:
+        - owensT
+        - skewNormalPDF
+        - skewNormalCDF
+        - truncatedNormalPDF
+        - truncatedNormalCDF
+        - truncatedNormalMean
+        - inverseGammaPDF
+        - inverseGammaCDF
+        - gevCDF
+        - gevPDF
+        - skellamPMF
+        - zipfPMF
+        - nakagamiPDF
+        - ricePDF
+    functions/src/stats/effect-sizes.ts:
+      description: Standardized effect sizes (gap-analysis 2026-11-04, Batch A).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - cohensD
+        - hedgesG
+        - glassDelta
+        - etaSquared
+        - rankBiserial
+      functions:
+        - cohensD
+        - hedgesG
+        - glassDelta
+        - etaSquared
+        - rankBiserial
     functions/src/stats/fit-distribution.ts:
       description: Maximum-likelihood distribution fitting (Phase 4 Task 1).
       externalDependencies: []
@@ -19027,6 +20555,32 @@ modules:
       functions:
         - mvnPdf
         - mvnSample
+    functions/src/stats/nonparametric-extra.ts:
+      description: Nonparametric and categorical tests plus the jackknife (gap-analysis
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../distribution-functions.js
+          imports:
+            - chiSquaredCDF
+        - file: ../typed/distributions.js
+          imports:
+            - normalCDF
+      workspaceDependencies: []
+      exports:
+        - signTest
+        - runsTest
+        - moodMedianTest
+        - powerDivergence
+        - gTest
+        - jackknife
+      functions:
+        - signTest
+        - runsTest
+        - moodMedianTest
+        - powerDivergence
+        - gTest
+        - jackknife
     functions/src/stats/power-analysis.ts:
       description: Two-sample t-test power analysis (Stats-breadth chunk).
       externalDependencies: []
@@ -19045,6 +20599,26 @@ modules:
         - TTestPowerOptions
       functions:
         - tTestPower
+    functions/src/stats/robust-stats.ts:
+      description: Generalized means, geometric standard deviation, robust regression slopes
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - pmean
+        - gstd
+        - gzscore
+        - theilSen
+        - siegelSlopes
+        - partialCorrelation
+      functions:
+        - pmean
+        - gstd
+        - gzscore
+        - theilSen
+        - siegelSlopes
+        - partialCorrelation
     functions/src/stats/timeseries.ts:
       description: Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit
       externalDependencies: []
@@ -19073,6 +20647,22 @@ modules:
         - ljungBox
         - durbinWatson
         - adfuller
+    functions/src/stats/weighted-stats.ts:
+      description: Weighted descriptive statistics (gap-analysis 2026-11-04, Batch A).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - weightedMean
+        - weightedVariance
+        - weightedQuantile
+        - weightedMedian
+      functions:
+        - weightedMean
+        - weightedVariance
+        - weightedQuantile
+        - weightedMedian
   functions/string:
     functions/src/string/bin.ts:
       description: Format a number as binary.
@@ -40042,6 +41632,8 @@ dependencyGraph:
         - functions/src/hypothesis-extra.ts
         - functions/src/index.ts
         - functions/src/linalg-extra.ts
+        - functions/src/linalg-extra2.ts
+        - functions/src/linalg-special-matrices.ts
         - functions/src/linalg-svd-extra.ts
         - functions/src/numeric-equivalence.ts
         - functions/src/numeric-extra.ts
@@ -40065,6 +41657,7 @@ dependencyGraph:
         - functions/src/cas/layer3.ts
         - functions/src/cas/rat.ts
         - functions/src/cas/rational-integrate.ts
+        - functions/src/cas/real-roots.ts
         - functions/src/cas/render-coeff-times.ts
     - name: Functions/combinatorics
       files:
@@ -40103,6 +41696,7 @@ dependencyGraph:
       files:
         - functions/src/geometry/alpha-shape.ts
         - functions/src/geometry/circumcircle.ts
+        - functions/src/geometry/curves.ts
         - functions/src/geometry/delaunay.ts
         - functions/src/geometry/distance.ts
         - functions/src/geometry/geometry-extra.ts
@@ -40111,6 +41705,8 @@ dependencyGraph:
         - functions/src/geometry/intersect.ts
         - functions/src/geometry/intersect3d.ts
         - functions/src/geometry/mass-properties.ts
+        - functions/src/geometry/polygon-ops.ts
+        - functions/src/geometry/predicates.ts
         - functions/src/geometry/spherical-voronoi.ts
         - functions/src/geometry/voronoi.ts
     - name: Functions/gpu
@@ -40190,17 +41786,26 @@ dependencyGraph:
         - functions/src/ml/regularized-regression.ts
     - name: Functions/numbertheory
       files:
+        - functions/src/numbertheory/arithmetic-functions.ts
+        - functions/src/numbertheory/diophantine.ts
         - functions/src/numbertheory/extra.ts
+        - functions/src/numbertheory/integer-matrices.ts
+        - functions/src/numbertheory/modular.ts
+        - functions/src/numbertheory/sequences.ts
     - name: Functions/numeric
       files:
         - functions/src/numeric/adaptive-quad.ts
         - functions/src/numeric/bfgs.ts
         - functions/src/numeric/bspline.ts
+        - functions/src/numeric/constrained.ts
         - functions/src/numeric/control-equations.ts
         - functions/src/numeric/eigsh.ts
+        - functions/src/numeric/finite-differences.ts
         - functions/src/numeric/fsolve.ts
         - functions/src/numeric/gauss-legendre4.ts
+        - functions/src/numeric/gauss-nodes-extra.ts
         - functions/src/numeric/gauss-nodes.ts
+        - functions/src/numeric/global-optimizers.ts
         - functions/src/numeric/hermite.ts
         - functions/src/numeric/interpn.ts
         - functions/src/numeric/interval.ts
@@ -40212,6 +41817,7 @@ dependencyGraph:
         - functions/src/numeric/numeric-jacobian.ts
         - functions/src/numeric/open-root-finders.ts
         - functions/src/numeric/propagate-uncertainty.ts
+        - functions/src/numeric/quadrature-extra.ts
         - functions/src/numeric/rational-nullspace.ts
         - functions/src/numeric/solveDAE.ts
         - functions/src/numeric/solveDDE.ts
@@ -40280,27 +41886,37 @@ dependencyGraph:
     - name: Functions/signal
       files:
         - functions/src/signal/conv.ts
+        - functions/src/signal/dtw.ts
         - functions/src/signal/fft-core-f64.ts
         - functions/src/signal/fft-helpers.ts
         - functions/src/signal/fft.ts
         - functions/src/signal/fir-smoothing.ts
         - functions/src/signal/freqz.ts
         - functions/src/signal/iir-design.ts
+        - functions/src/signal/lomb-scargle.ts
         - functions/src/signal/remez-exchange.ts
         - functions/src/signal/spectral-peaks.ts
+        - functions/src/signal/system-response.ts
+        - functions/src/signal/waveforms.ts
         - functions/src/signal/wavelet-filters.ts
         - functions/src/signal/wavelets.ts
+        - functions/src/signal/windows-extra.ts
         - functions/src/signal/zpk2tf.ts
     - name: Functions/special
       files:
+        - functions/src/special/angular-momentum.ts
+        - functions/src/special/erf-extra.ts
         - functions/src/special/erf.ts
+        - functions/src/special/exp-integrals.ts
         - functions/src/special/hypergeometric.ts
         - functions/src/special/jacobi-elliptic.ts
         - functions/src/special/mathieu.ts
         - functions/src/special/niche.ts
         - functions/src/special/polygamma-orthopoly.ts
+        - functions/src/special/spherical-bessel.ts
         - functions/src/special/spheroidal.ts
         - functions/src/special/wave-functions.ts
+        - functions/src/special/zeta-extra.ts
         - functions/src/special/zeta.ts
     - name: Functions/statistics
       files:
@@ -40321,14 +41937,20 @@ dependencyGraph:
         - functions/src/statistics/variance.ts
     - name: Functions/stats
       files:
+        - functions/src/stats/distances.ts
+        - functions/src/stats/distributions-extra.ts
+        - functions/src/stats/effect-sizes.ts
         - functions/src/stats/fit-distribution.ts
         - functions/src/stats/gaussian-process.ts
         - functions/src/stats/inference-extra.ts
         - functions/src/stats/inference-extra2.ts
         - functions/src/stats/multivariate-sampling.ts
         - functions/src/stats/mvn.ts
+        - functions/src/stats/nonparametric-extra.ts
         - functions/src/stats/power-analysis.ts
+        - functions/src/stats/robust-stats.ts
         - functions/src/stats/timeseries.ts
+        - functions/src/stats/weighted-stats.ts
     - name: Functions/string
       files:
         - functions/src/string/bin.ts
@@ -41159,18 +42781,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1237
+  totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 206489
-  totalExports: 6456
+  totalLinesOfCode: 212128
+  totalExports: 6871
   totalClasses: 60
-  totalInterfaces: 576
-  totalFunctions: 2086
-  totalTypeGuards: 162
+  totalInterfaces: 592
+  totalFunctions: 2274
+  totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1634
-  totalReExports: 2750
-  totalTypeOnlyImports: 625
+  totalReExports: 2977
+  totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0

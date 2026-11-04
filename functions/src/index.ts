@@ -718,3 +718,263 @@ export type { GPKernel, GPOptions, GPPrediction, GPModel } from './stats/gaussia
 // beyond MVN (Gamma-normalization / Bartlett decomposition).
 export { dirichletSample, dirichletPdf, wishartSample } from './stats/multivariate-sampling.js';
 export type { SampleSeedOptions } from './stats/multivariate-sampling.js';
+
+// Gap-analysis 2026-11-04 (§5.1) — matrix-package decompositions that were
+// implemented in `@danielsimonjr/mathts-matrix` but never surfaced here:
+// rank-revealing `qrPivoted`, the `lq`/`rq`/`ql` QR family, `condest` (1-norm
+// condition estimate), `eigvals`/`powerIteration`, and `matrixPinv` (the
+// matrix package's pinv, kept under its non-colliding name because `pinv`
+// here is the typed dispatcher).
+export {
+  qrPivoted,
+  lq,
+  rq,
+  ql,
+  condest,
+  eigvals,
+  powerIteration,
+  matrixPinv,
+} from '@danielsimonjr/mathts-matrix';
+export type {
+  QRPivotedResult,
+  QRPivotedOptions,
+  LQResult,
+  RQResult,
+  QLResult,
+  PinvOptions,
+  EigOptions,
+} from '@danielsimonjr/mathts-matrix';
+
+// Gap-analysis 2026-11-04 Batch A — weighted, robust, effect-size, distribution, nonparametric and distance statistics.
+export {
+  weightedMean,
+  weightedVariance,
+  weightedMedian,
+  weightedQuantile,
+} from './stats/weighted-stats.js';
+export {
+  pmean,
+  gstd,
+  gzscore,
+  theilSen,
+  siegelSlopes,
+  partialCorrelation,
+} from './stats/robust-stats.js';
+export { cohensD, hedgesG, glassDelta, etaSquared, rankBiserial } from './stats/effect-sizes.js';
+export {
+  owensT,
+  skewNormalPDF,
+  skewNormalCDF,
+  truncatedNormalPDF,
+  truncatedNormalCDF,
+  truncatedNormalMean,
+  inverseGammaPDF,
+  inverseGammaCDF,
+  gevCDF,
+  gevPDF,
+  skellamPMF,
+  zipfPMF,
+  nakagamiPDF,
+  ricePDF,
+} from './stats/distributions-extra.js';
+export {
+  signTest,
+  runsTest,
+  moodMedianTest,
+  powerDivergence,
+  gTest,
+  jackknife,
+} from './stats/nonparametric-extra.js';
+export { wassersteinDistance, energyDistance, mutualInformation, ecdf } from './stats/distances.js';
+
+// Gap-analysis 2026-11-04 Batch B — special functions (erf/Dawson, exponential integrals, spherical Bessel, angular momentum, zeta family).
+export { erfinv, erfcinv, erfcx, dawson } from './special/erf-extra.js';
+export { expIntegralE1, expn, sinhIntegral, coshIntegral } from './special/exp-integrals.js';
+export {
+  sphericalBesselJ,
+  sphericalBesselY,
+  sphericalBesselI,
+  sphericalBesselK,
+  hankelH1,
+  hankelH2,
+  besselJZeros,
+} from './special/spherical-bessel.js';
+export {
+  wigner3j,
+  clebschGordan,
+  wigner6j,
+  sphericalHarmonic,
+} from './special/angular-momentum.js';
+export {
+  hurwitzZeta,
+  dirichletEta,
+  bernoulliPolynomial,
+  eulerPolynomial,
+} from './special/zeta-extra.js';
+
+// Gap-analysis 2026-11-04 Batch C — numerical methods (global optimizers, constrained, Gauss nodes, quadrature, finite differences).
+export { differentialEvolution, simulatedAnnealing } from './numeric/global-optimizers.js';
+export type {
+  GlobalOptimizeOptions,
+  GlobalOptimizeResult,
+  SimulatedAnnealingOptions,
+} from './numeric/global-optimizers.js';
+export { minimizeConstrained } from './numeric/constrained.js';
+export type { ConstrainedOptions, ConstrainedResult } from './numeric/constrained.js';
+export {
+  rootsHermite,
+  rootsLaguerre,
+  rootsChebyshevT,
+  rootsChebyshevU,
+  rootsJacobi,
+  gaussHermiteIntegrate,
+  gaussLaguerreIntegrate,
+} from './numeric/gauss-nodes-extra.js';
+export type { GaussRule } from './numeric/gauss-nodes-extra.js';
+export { tanhSinh, clenshawCurtis, dblquad, tplquad } from './numeric/quadrature-extra.js';
+export type { TanhSinhOptions, Limit1, Limit2 } from './numeric/quadrature-extra.js';
+export { finiteDifferenceCoefficients, ridders, fixedPoint } from './numeric/finite-differences.js';
+export type { ScalarSolveOptions, FixedPointOptions } from './numeric/finite-differences.js';
+
+// Gap-analysis 2026-11-04 Batch D — number theory, integer matrices, real roots.
+export {
+  modPow,
+  prevPrime,
+  legendreSymbol,
+  sqrtMod,
+  isCarmichael,
+} from './numbertheory/modular.js';
+export {
+  isSquarefree,
+  radical,
+  bigOmega,
+  smallOmega,
+  liouvilleLambda,
+  vonMangoldt,
+  mertens,
+  isPerfect,
+  isPerfectPower,
+  isPrimePower,
+  integerSqrt,
+  integerNthRoot,
+  digitSum,
+  digitalRoot,
+  collatzSteps,
+  primorial,
+} from './numbertheory/arithmetic-functions.js';
+export {
+  motzkin,
+  narayana,
+  schroder,
+  delannoy,
+  pell,
+  tribonacci,
+  eulerianNumber,
+  lahNumber,
+  integerPartitionsGen,
+  compositionsGen,
+  grayCode,
+  binomialMod,
+} from './numbertheory/sequences.js';
+export {
+  linearDiophantine,
+  pellSolve,
+  frobeniusNumber,
+  zeckendorf,
+  sumOfTwoSquares,
+  egyptianFraction,
+  fareySequence,
+} from './numbertheory/diophantine.js';
+export { hermiteNormalForm, smithNormalForm, lll } from './numbertheory/integer-matrices.js';
+export {
+  sturmSequence,
+  sturmRootCount,
+  descartesSignChanges,
+  isolateRealRoots,
+  realRoots,
+} from './cas/real-roots.js';
+
+// Gap-analysis 2026-11-04 Batch E1–E6 — signal processing (conv2/sinc re-exports, windows, waveforms, Lomb-Scargle, system response, DTW).
+export { conv2 } from './signal/conv.js';
+export type { ConvMode } from './signal/conv.js';
+export { sinc } from './signal-filter-extra.js';
+export {
+  kaiserWindow,
+  gaussianWindow,
+  tukeyWindow,
+  blackmanHarrisWindow,
+  nuttallWindow,
+  flattopWindow,
+  bohmanWindow,
+  parzenWindow,
+  cosineWindow,
+  exponentialWindow,
+  getWindow,
+} from './signal/windows-extra.js';
+export type { ExtraWindowName, WindowOptions } from './signal/windows-extra.js';
+export {
+  chirp,
+  squareWave,
+  sawtooth,
+  gaussPulse,
+  unitImpulse,
+  sweepPoly,
+} from './signal/waveforms.js';
+export type { ChirpMethod, ChirpOptions } from './signal/waveforms.js';
+export { lombScargle } from './signal/lomb-scargle.js';
+export type { LombScargleOptions } from './signal/lomb-scargle.js';
+export {
+  impulseResponse,
+  stepResponse,
+  tf2ss,
+  ss2tf,
+  cont2discrete,
+  iirNotch,
+  iirPeak,
+  tf2zpk,
+  sos2tf,
+} from './signal/system-response.js';
+export type { StateSpace, DiscretizeMethod, BiquadCoefficients } from './signal/system-response.js';
+export { dtw } from './signal/dtw.js';
+export type { DtwOptions, DtwResult } from './signal/dtw.js';
+
+// Gap-analysis 2026-11-04 Batch E2 — special matrices, linalg extras, geometry predicates/curves.
+export {
+  hilbertMatrix,
+  invHilbertMatrix,
+  hadamardMatrix,
+  pascalMatrix,
+  dftMatrix,
+  hankelMatrix,
+  blockDiag,
+  khatriRao,
+  fiedlerMatrix,
+  leslieMatrix,
+  helmertMatrix,
+} from './linalg-special-matrices.js';
+export {
+  subspaceAngles,
+  signm,
+  fractionalMatrixPower,
+  choleskyUpdate,
+  choleskyDowndate,
+} from './linalg-extra2.js';
+export {
+  orient2D,
+  orient3D,
+  inCircle,
+  pointInTriangle,
+  barycentricCoordinates,
+  polygonIsConvex,
+} from './geometry/predicates.js';
+export { polygonClip, minkowskiSum, earClipping } from './geometry/polygon-ops.js';
+export {
+  douglasPeucker,
+  hausdorffDistance,
+  frechetDistance,
+  closestPair,
+  minimumEnclosingCircle,
+  catmullRom,
+  arcLength,
+  curvature,
+} from './geometry/curves.js';
