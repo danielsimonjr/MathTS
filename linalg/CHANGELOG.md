@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.2.0
+
+### Minor Changes
+
+- 78f8a1c: Re-export `luSolve`, `qrPivoted`, `lq`, `rq`, `ql`, `condest` and `transposeNestedArray` from matrix, with the types `QRPivotedResult`, `LQResult`, `RQResult` and `QLResult`.
+
+### Patch Changes
+
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-matrix@0.9.0
+
 ## 0.1.28
 
 ### Patch Changes

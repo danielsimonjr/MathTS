@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.4.0
+
+### Minor Changes
+
+- 78f8a1c: Binary `TapedTensor` ops throw a clear error when their operands come from different `Tape`s. `Tape.backward` replays only the nodes up to the output op. Add `Tape.reset()` to clear recorded nodes, closures and gradient slots; a `TapedTensor` from before the reset throws when used afterwards (`TapedTensor.epoch`).
+
+### Patch Changes
+
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-tensor@0.3.0
+
 ## 0.3.21
 
 ### Patch Changes

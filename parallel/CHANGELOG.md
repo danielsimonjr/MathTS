@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.8.0
+
+### Minor Changes
+
+- 78f8a1c: `forceParallel` and `forceSequential` are honored. The standalone `parallel*` functions used to accept them and ignore them; every `ComputePool` operation now takes a trailing `DispatchOptions` (new exported type) and the functions forward their options. `forceSequential` wins when both are set, and `forceParallel` on a pool that was never initialized runs inline.
+  
+  `WorkerPool` isolates worker errors: only the tasks the crashed worker was running are rejected, the worker is terminated, evicted and replaced, and a healthy worker whose task is gone returns to the free list (it used to be stranded). Workers start concurrently, task ids are a counter, and `maxWorkers` must be a non-negative integer (`0` still means auto-detect; negatives and fractions now throw a `RangeError` instead of falling back to the default). A worker that crashes before it ever answers is respawned at most `WorkerPool.MAX_STARTUP_FAILURES` (3) times in a row; after that the queued tasks are rejected instead of the pool respawning forever.
+  
+  Shapes are validated at every size: `ParallelMatrix.multiply` and `ComputePool.matmul` check inner dimensions and buffer lengths, `transpose` and `matvec` check them before choosing a path. `histogram` requires a positive integer `bins`, skips NaN and infinite samples and puts a constant array in bin 0. `tensordot` reads `subarray` operands correctly. `ParallelMatrix` keeps an input that is already `SharedArrayBuffer`-backed instead of copying it.
+  
+  Length-mismatch errors share one shape, `<op>: lengths must match (<a> vs <b>)`; messages that tests or callers matched on (`Array lengths must match: ...`, `dot: vectors must have the same length`) changed.
+
+### Patch Changes
+
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-workerpool@0.3.0
+
 ## 0.7.1
 
 ### Patch Changes
