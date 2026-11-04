@@ -153,7 +153,99 @@ Filled in from the implementation workers' reports and the reviewer's pass. "Don
 tests and (where the public surface changed) a changeset landed in this change; "Deferred" lists
 the reason.
 
-IMPLEMENTATION_STATUS_PLACEHOLDER
+### core, parallel, workerpool, units, numbers
+
+| #    | Status   | Where / note                                                                                                                                                                         |
+| ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| C-1  | Done     | `DispatchOptions` on `ComputePool`; `shouldParallelize(n, op, force)`; the free functions forward their options. `forceSequential` wins when both are set. `parallel/tests/dispatch-options.test.ts`. |
+| C-2  | Done     | `evictAndReplace` in `WorkerPool`; only the crashed worker's tasks are rejected; late replies return pooled workers to the free list. `WorkerPool.crash.test.ts`.                       |
+| C-3  | Done     | `parallel/src/validate.ts` (`assertSameLength`, `assertMatmulShape`) used by `ParallelMatrix.multiply`, `ComputePool.matmul/transpose/matvec`, `MathWorkerPool.matmul`.               |
+| C-4  | Done     | Pairwise and scaled kernels copied into `worker-numerics.ts` (parity test pins bit equality with core); `norm`/`distance` partials are `[scale, ssq]`; 1e200-scaled parallel `norm` test. |
+| C-5  | Done     | Slice-owned chunks and fresh results are transferred (`transfer` option, `workerpool.Transfer`); shared operands are never transferred.                                               |
+| C-6  | Done     | `exactBuffer` normalizes views; `matmul`/`transpose`/`matvec`/`outer` send row blocks; subarray-with-byteOffset tests.                                                                  |
+| C-7  | Done     | `histogram` requires a positive integer `bins`, skips non-finite samples, handles `lo === hi` (ComputePool, MathWorkerPool, `histogramChunk`).                                          |
+| C-8  | Done     | `Fraction.fromReduced`, Knuth cross-GCD in `multiply`/`divide`, `pow` without the extra squaring and with a `TypeError` for non-integer exponents. `core/tests/types/fraction-oracle.test.ts`. |
+| C-9  | Partial  | `createUnit` resolves definitions in any key order; VA/VAR check is relative (`va-var.ts`); memo limit 1000; the collision TODO is reworded (a clash with a function name is not detectable there). The prefix-split fast path was not added: first-match ordering could not be proven preserved. |
+| C-10 | Done     | TODO removed.                                                                                                                                                                        |
+| C-11 | Done     | `Promise.all` startup, counter ids, `maxWorkers` validated (0 keeps meaning auto-detect, the `ParallelConfig` convention). `shift()` kept with a comment.                               |
+| C-12 | Done     | Already-shared input returned as is.                                                                                                                                                 |
+| C-13 | Done     | One wording: `<op>: lengths must match (a vs b)`; `Fraction` zero-division wordings unchanged (tests pin them).                                                                        |
+| C-14 | Done     | `units` re-exports `REFUSED_UNIT_SPELLINGS`, `UnitInstance`; export-name pins in `units/tests` and `numbers/tests`.                                                                     |
+| C-15 | Done     | `ComputePool.exec` tests; hand-written "Types" sections in `docs/api/core.md` and `docs/api/parallel.md` above the generated index.                                                     |
+
+### functions
+
+| #    | Status   | Where / note                                                                                                                                                                                           |
+| ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| F-1  | Done     | `compileAt` in `typed/cas.ts` (lazy compile keeps per-call syntax errors); used by `integrate`, `fourierSeries`, `numericRealRoots`, `foldIntegerRange`, `numericalDerivative`. Integrate result bit-identical to the `evaluate` oracle. |
+| F-2  | Done     | f sampled once per `fourierSeries` call.                                                                                                                                                               |
+| F-3  | Done     | Ranks shuffled with the same rng; plain loop. Old outputs pinned as gold values (`toEqual` on full results).                                                                                            |
+| F-4  | Done     | `_sortedResample` (counting pass) for KS and Shapiro–Wilk; rng stream identical.                                                                                                                        |
+| F-5  | Done     | `checkQuantile` / `sortedCopy` / `interpolateQuantile` shared; multi-q equals mapped scalar-q.                                                                                                          |
+| F-6  | Done     | φ(n) prime-stripping with BigInt `modPowBig`; tests against brute force for n < 60, `ord(2) mod 1e9+7 = 500000003`, minimality checks above 1e10.                                                      |
+| F-7  | Done     | `linregressFromFit` shared; outputs bit-identical.                                                                                                                                                      |
+| F-8  | Deferred | Karatsuba subtracts large intermediates and loses per-coefficient relative accuracy on badly scaled input; schoolbook is exact for integers, which the bigint GCD work relies on.                        |
+| F-9  | Partial  | `polymul` has one path through `polyMulDispatch` (which applies threshold and policy). `polyDivMod`, `discriminant`, `resultant` keep their gate: `typed-algebra-wasm.test.ts` asserts they reach the AS kernel under the policy override. |
+| F-10 | Partial  | Outputs preallocated; the two-real-frames-per-FFT packing was not done (numerics risk vs the FFT oracle suites).                                                                                        |
+| F-11 | Done     | `modeOf(ArrayLike<number>)`.                                                                                                                                                                           |
+| F-12 | Done     | `SolveODEFunction`, `FreqzFunction`, `Zpk2tfFunction` (TypedFunction ∩ precise overloads); `FrequencyResponse`, `TransferFunction`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `ZPKValue` exported; a cast-free type test. **Found while typing them: `freqz` and `zpk2tf` threw `Class constructor Complex cannot be invoked without 'new'` on every call** (no test had called them); fixed. |
+| F-13 | Done     | Sparse input densified; Q·R = A, R upper triangular, equality with the dense factorisation.                                                                                                             |
+| F-14 | Deferred | Analytic continuation of `polylog` / `lerchPhi` is M-L effort with oracle work; left as a documented limitation.                                                                                        |
+| F-15 | Done     | `combinations` maps over a collection of n or k (`deepMap`, as `permutations`).                                                                                                                         |
+| F-16 | Done     | Grid value carried forward; scan ranges documented.                                                                                                                                                      |
+| F-17 | Done     | Multiplications for k = 2, 3, 4 (Math.pow oracle to 12 digits).                                                                                                                                         |
+| F-18 | Done     | Already delegated to `numericJacobian` with the forward scheme on the baseline (the 2026-10-22 note was stale).                                                                                        |
+| F-19 | Done     | `rankF64Dispatch` and `rankF64JS` removed with their tests; the AS `rank_f64` export stays.                                                                                                             |
+| F-20 | Done     | Continued-fraction rational detection (q ≤ 1e6, rel. tol 1e-12), common denominator ≤ 1e6, exact integer path; float Euclid only for irrational input.                                                  |
+| F-21 | Done     | `@deprecated`.                                                                                                                                                                                         |
+
+### expression, workbook, plot, compat
+
+| #    | Status   | Where / note                                                                                                                                                                                     |
+| ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| E-1  | Done     | Ancestor-path replacer; diamond test; the true-cycle test still prints `[Circular]`.                                                                                                              |
+| E-2  | Done     | `isMissingMember` via `isSafeMethod` / `isSafeProperty` / `getSafeProperty`; `obj?.__proto__()` and `obj?.constructor()` throw "No access to method"; plain `obj?.method()` works.                 |
+| E-3  | Done     | `_toMathML` on all eight nodes (arrays as bracketed `mtable`, conditionals as a cases table, bracket accessors as `msub`); 9 tests.                                                               |
+| E-4  | Done     | Seven module-level frozen tables.                                                                                                                                                                 |
+| E-5  | Done     | 256-entry LRU per (namespace, parser), keyed by text, `unsafe` flag and a caller-supplied fingerprint. The `functions` barrel passes the live config (literal parsing depends on `number`/`precision`): the first version without it served a `number` parse under a `BigNumber` overlay (`run-with-config.test.ts`); regression test added. |
+| E-6  | Done     | `Map<string, Cell>`; graph reused by the executor and cached per workbook object in `session.ts`.                                                                                                |
+| E-7  | Done     | Batch runs pass a pending set; standalone `runCell` unchanged.                                                                                                                                    |
+| E-8  | Done     | Iterative `topologicalSort` / `getDependents` / `getAncestors` (same order); `getDependentsOfMany` for `commit`; 20,000-cell chain test. `detectCycles` stays recursive (not in scope).            |
+| E-9  | Done     | Lazy enumerable getters that replace themselves on first access; identity, spread and key order preserved (1,138 keys, same order as before).                                                     |
+| E-10 | Done     | Top-level BigNumber index values coerced; non-integer throws `RangeError`.                                                                                                                       |
+| E-11 | Done     | `describeType` helper; old prefixes kept.                                                                                                                                                         |
+| E-12 | Done     | `facade-sync.test.ts` in parser, ast, evaluator (exact export list, same objects).                                                                                                                 |
+| E-13 | Done     | Number fast path; regex only when a character needs escaping.                                                                                                                                     |
+| E-14 | Done     | Status lines updated with evidence; diamond follow-up noted under I-11.                                                                                                                           |
+| E-15 | Deferred | The placeholders match mathjs's golden LaTeX, which the compat and parity suites pin.                                                                                                              |
+
+### matrix, tensor, autograd, linalg
+
+| #    | Status   | Where / note                                                                                                                                                                                           |
+| ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M-1  | Done     | Formula fixed; 3×5 / 5×3 oracle and sparse parity tests.                                                                                                                                                |
+| M-2  | Done     | `flat()` returns the backing array for `DenseMatrix`; every op allocates its result; a test checks inputs are untouched.                                                                                |
+| M-3  | Done     | Flat loops in `JSBackend` and `dense/reduction.ts`; `dot` on flat data; strided views tested. Summation order unchanged.                                                                                |
+| M-4  | Done     | Flat buffer both ways.                                                                                                                                                                                 |
+| M-5  | Done     | 12 WASM sites use `new DenseMatrix(r, c, f64)`; the 4 GPU sites widen `Float32Array` with `new Float64Array(...)`; `lu` copies once.                                                                    |
+| M-6  | Done     | `TypeError` for non-integer/NaN dimensions and unknown data types (also `SparseMatrix` dimensions).                                                                                                     |
+| M-7  | Done     | `fromCOO` bounds-checks, sums duplicates, drops cancelled zeros; constructor checks row pointers and column ranges; `SparseMatrix.validate(m)` checks sorted unique columns; counting-sort transpose (30 random parity cases). **Found while testing: `DenseMatrix.toSparse` used `require()` in an ESM module and failed under vitest**; replaced by an internal registration at module load. |
+| M-8  | Done     | `assertSameTape` from `checkSameShape`, `contract`, `matmul`, `tensordot`.                                                                                                                              |
+| M-9  | Done     | `backward` replays from the output op; `Tape.reset()`; nodes recorded after the output op never contributed before either. Defensive primal copies kept (aliasing semantics not documented).           |
+| M-10 | Done     | Odometer over permuted strides; true-permutation check.                                                                                                                                                |
+| M-11 | Done     | Duplicate axes rejected; per-axis output-offset precomputed; `einsum` validates references.                                                                                                            |
+| M-12 | Done     | `div`, `neg`, `map(f(x, index))`, `clone`; labels kept by `scale` and same-shape ops; per-op monomorphic loops.                                                                                         |
+| M-13 | Done     | Per-operand stride contributions precomputed; product order unchanged.                                                                                                                                |
+| M-14 | Done     | Re-exports plus import tests.                                                                                                                                                                         |
+| M-15 | Done     | `toSparse` tests; typed `globalThis` narrowing.                                                                                                                                                       |
+
+### Tooling
+
+| Item                           | Status | Note                                                                                                                              |
+| ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| js-yaml 5 port + override      | Done   | Named `dump` import, `quotingType` → `quoteStyle`, `@types/js-yaml` dropped, override `^5.5.0`; generated YAML identical after prettier. |
+| `test-output.log` CI artifact  | Open   | Needs a SHA-pinned `actions/upload-artifact`; the maintainer picks the pin.                                                        |
+| Dependabot / `bun.lock` v2     | Open   | Human-blocked (upstream Dependabot).                                                                                               |
 
 ## 7. Gates run on the final tree
 
