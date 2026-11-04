@@ -26,7 +26,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
       condition. **Until Dependabot's bun reads lockfileVersion 2, a dependency bump here is a HUMAN action:**
       `bun outdated`, then `bun update <pkg>`, then commit the regenerated `bun.lock`. Security ALERTS still fire
       (dependency-graph based), so the repo still reports vulnerabilities - nothing proposes the fix.
-- [ ] **`js-yaml` is pinned to 4.x by the root `overrides` floor, and the Dependabot ignore that recorded this is
+- [x] **(Closed 2026-11-04: ported `tools/create-dependency-graph` to js-yaml 5 — named `dump` import, `quotingType` → `quoteStyle` — and raised the override to `^5.5.0` in the same commit; `@types/js-yaml` dropped because v5 ships its own declarations.) `js-yaml` is pinned to 4.x by the root `overrides` floor, and the Dependabot ignore that recorded this is
       gone with the npm entry - so the fact is recorded HERE instead.** `overrides.js-yaml: ^4.3.0` silently clamps
       any 5.x bump of the root devDependency back to 4.x, which is how #275 left the root manifest claiming ^5.4.1
       while 4.3.2 was installed. `tools/create-dependency-graph` (its only importer) and `@types/js-yaml@4` are both

@@ -36,7 +36,7 @@ import {
   writeFileSync,
   type Dirent,
 } from 'fs';
-import yaml from 'js-yaml';
+import { dump as yamlDump } from 'js-yaml';
 import { basename, dirname, join, relative } from 'path';
 
 /**
@@ -4876,12 +4876,12 @@ async function main(): Promise<void> {
   console.log('Written: docs/Architecture/dependency-graph.json');
 
   // Write YAML output (more compact, ~40% smaller than JSON)
-  const yamlOutput = yaml.dump(json, {
+  const yamlOutput = yamlDump(json, {
     indent: 2,
     lineWidth: 120,
     noRefs: true,
     sortKeys: false,
-    quotingType: '"',
+    quoteStyle: 'double',
     forceQuotes: false,
   });
   writeFileSync(join(OUTPUT_DIR, 'dependency-graph.yaml'), yamlOutput);
