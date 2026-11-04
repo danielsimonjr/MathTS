@@ -6204,7 +6204,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 829
+      "loc": 898
     },
     {
       "file": "functions/src/front-export.ts",
@@ -7359,7 +7359,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 851
+      "loc": 908
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -9515,7 +9515,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 431
+      "loc": 455
     },
     {
       "file": "functions/tests/fit-scalar-robust-loss-extended-pin.test.ts",
@@ -10915,7 +10915,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 1255
+      "loc": 1380
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

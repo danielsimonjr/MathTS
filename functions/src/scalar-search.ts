@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import { type SeededRng } from '@danielsimonjr/mathts-core';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
@@ -25,7 +25,7 @@ import {
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
-import { fitScalarParameters } from './fit-scalar.js';
+import { fitScalarParameters, rankScalarBatchLoss, type NamedScalarLoss } from './fit-scalar.js';
 import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
 import {
   createScalarBatchPool,
@@ -65,6 +65,19 @@ export interface ScalarSearchOptions {
   readonly tournamentP?: number;
   /** Chance that an evaluated tree has its parameters refitted. Default 0.14. */
   readonly optimizeProbability?: number;
+  /**
+   * Residual loss for ranking and for every refit. Default `'l2'`: today's sum of
+   * squares, including `+Infinity` when any row is invalid. `'l1'` and `'huber'`
+   * reuse {@link fitScalarParameters}'s named losses. Omitted is the default
+   * branch, so the seed-7 pin is unchanged.
+   */
+  readonly loss?: NamedScalarLoss;
+  /**
+   * Per-row weights for that loss. Length must equal `observed.length`; every
+   * weight is finite and `>= 0`. A zero weight drops that row. Omitted: every
+   * row weighs 1.
+   */
+  readonly rowWeights?: Float64Array;
   /**
    * Chance that an offspring is a subtree crossover of two tournament parents
    * instead of a mutation of the first. Default 0: the coin is not drawn, so the
@@ -268,6 +281,32 @@ function assertSearchInputs(
       `searchScalars: maxCandidates must be a number >= 0, got ${options.maxCandidates}`
     );
   }
+  if (
+    options.loss !== undefined &&
+    options.loss !== 'l2' &&
+    options.loss !== 'l1' &&
+    options.loss !== 'huber'
+  ) {
+    throw new RangeError(
+      `searchScalars: loss must be 'l2', 'l1', or 'huber', got ${String(options.loss)}`
+    );
+  }
+  if (options.rowWeights !== undefined) {
+    if (!(options.rowWeights instanceof Float64Array)) {
+      throw new RangeError('searchScalars: rowWeights must be a Float64Array');
+    }
+    if (options.rowWeights.length !== rows) {
+      throw new RangeError(
+        `searchScalars: rowWeights length must equal observed.length (${rows}), got ${options.rowWeights.length}`
+      );
+    }
+    for (let i = 0; i < rows; i += 1) {
+      const w = options.rowWeights[i]!;
+      if (!Number.isFinite(w) || w < 0) {
+        throw new RangeError(`searchScalars: rowWeights[${i}] must be finite and >= 0, got ${w}`);
+      }
+    }
+  }
 }
 
 function defaultParameters(n: number): Float64Array {
@@ -279,22 +318,9 @@ function compareLoss(a: number, b: number): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-/**
- * Sum of squared errors, or `Infinity` when any row is invalid or the sum is not
- * finite. A candidate that cannot be evaluated on the whole data set never ranks
- * above one that can, whatever the scale of `observed`.
- */
-function sumSquaredLoss(values: Float64Array, valid: Uint8Array, observed: Float64Array): number {
-  const terms = new Float64Array(observed.length);
-  for (let i = 0; i < observed.length; i += 1) {
-    if (valid[i] === 0) {
-      return Number.POSITIVE_INFINITY;
-    }
-    const d = values[i]! - observed[i]!;
-    terms[i] = d * d;
-  }
-  const loss = pairwiseSum(terms);
-  return Number.isFinite(loss) ? loss : Number.POSITIVE_INFINITY;
+interface RankLoss {
+  readonly name: NamedScalarLoss;
+  readonly weights: Float64Array | undefined;
 }
 
 interface Scored {
@@ -302,22 +328,26 @@ interface Scored {
   readonly validRows: number;
 }
 
-function scoreBatch(batch: ScalarBatchResult, observed: Float64Array): Scored {
+function scoreBatch(batch: ScalarBatchResult, observed: Float64Array, rank: RankLoss): Scored {
   let validRows = 0;
   for (let i = 0; i < batch.valid.length; i += 1) {
     validRows += batch.valid[i]!;
   }
-  return { loss: sumSquaredLoss(batch.values, batch.valid, observed), validRows };
+  return {
+    loss: rankScalarBatchLoss(rank.name, batch.values, batch.valid, observed, rank.weights),
+    validRows,
+  };
 }
 
 function scoreOnProblem(
   node: ScalarNode,
   problem: ScalarSearchProblem,
   names: readonly string[],
-  parameters: Float64Array
+  parameters: Float64Array,
+  rank: RankLoss
 ): Scored {
   const compiled = compileScalar(node, { variables: problem.variables, parameters: names });
-  return scoreBatch(compiled.evaluate(problem.columns, parameters), problem.observed);
+  return scoreBatch(compiled.evaluate(problem.columns, parameters), problem.observed, rank);
 }
 
 /** Scores trees, each with the parameters it inherited; the i-th result is for the i-th tree. */
@@ -326,15 +356,20 @@ type ScoreTrees = (
   inherited: readonly Float64Array[]
 ) => Promise<Scored[]>;
 
-function scoreOnCallerThread(problem: ScalarSearchProblem, names: readonly string[]): ScoreTrees {
+function scoreOnCallerThread(
+  problem: ScalarSearchProblem,
+  names: readonly string[],
+  rank: RankLoss
+): ScoreTrees {
   return async (nodes, inherited) =>
-    nodes.map((node, i) => scoreOnProblem(node, problem, names, inherited[i]!));
+    nodes.map((node, i) => scoreOnProblem(node, problem, names, inherited[i]!, rank));
 }
 
 function scoreOnWorkers(
   problem: ScalarSearchProblem,
   names: readonly string[],
-  parallel: ScalarPopulationParallelOptions
+  parallel: ScalarPopulationParallelOptions,
+  rank: RankLoss
 ): ScoreTrees {
   return async (nodes, inherited) => {
     const results = await evaluateScalarPopulation({
@@ -344,7 +379,7 @@ function scoreOnWorkers(
       items: nodes.map((node, index) => ({ index, node, params: inherited[index]! })),
       parallel,
     });
-    return results.map((result) => scoreBatch(result.batch, problem.observed));
+    return results.map((result) => scoreBatch(result.batch, problem.observed, rank));
   };
 }
 
@@ -367,18 +402,24 @@ function scoreTrees(
   problem: ScalarSearchProblem,
   names: readonly string[],
   parallel: ScalarPopulationParallelOptions | undefined,
-  startPool: () => WorkerPool
+  startPool: () => WorkerPool,
+  rank: RankLoss
 ): ScoreTrees {
   if (parallel === undefined) {
-    return scoreOnCallerThread(problem, names);
+    return scoreOnCallerThread(problem, names, rank);
   }
-  return scoreOnWorkers(problem, names, {
-    timeoutMs: resolveParallelTimeout(parallel.timeoutMs),
-    pool: parallel.pool ?? {
-      execute: <T, R>(data: T, transferables?: Transferable[], timeoutMs?: number) =>
-        startPool().execute<T, R>(data, transferables, timeoutMs),
+  return scoreOnWorkers(
+    problem,
+    names,
+    {
+      timeoutMs: resolveParallelTimeout(parallel.timeoutMs),
+      pool: parallel.pool ?? {
+        execute: <T, R>(data: T, transferables?: Transferable[], timeoutMs?: number) =>
+          startPool().execute<T, R>(data, transferables, timeoutMs),
+      },
     },
-  });
+    rank
+  );
 }
 
 /**
@@ -395,7 +436,8 @@ async function evaluateNodes(
   problem: ScalarSearchProblem,
   names: readonly string[],
   optimizeProbability: number,
-  rng: SeededRng
+  rng: SeededRng,
+  rank: RankLoss
 ): Promise<EvaluatedIndividual[]> {
   const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
@@ -411,8 +453,10 @@ async function evaluateNodes(
         restarts: 2,
         maxIterations: 8,
         rng: rng.fork('fit'),
+        loss: rank.name,
+        weights: rank.weights,
       });
-      const fitted = scoreOnProblem(node, problem, names, fit.parameters);
+      const fitted = scoreOnProblem(node, problem, names, fit.parameters, rank);
       if (fitted.loss < loss) {
         loss = fitted.loss;
         parameters = fit.parameters;
@@ -657,6 +701,7 @@ function pickSelected(
  * A rejected child is a failed attempt; a rejected seed is skipped. `admit` must
  * be a pure function of the node — a predicate that reads a clock or a random
  * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
+ * Ranking and refit share `loss` (`'l2'` by default) and optional `rowWeights`.
  * `crossoverProbability` defaults to 0 (no coin). A positive probability draws
  * the coin on the island stream and, on success, a second tournament parent.
  *
@@ -681,14 +726,24 @@ export async function* searchScalars(
     crossoverProbability
   );
   const names = paramNames(problem, options.grammar);
+  const rank: RankLoss = {
+    name: options.loss ?? 'l2',
+    weights: options.rowWeights,
+  };
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
   let ownedPool: WorkerPool | undefined;
-  const score = scoreTrees(problem, names, options.parallel, () => {
-    ownedPool ??= createScalarBatchPool();
-    return ownedPool;
-  });
+  const score = scoreTrees(
+    problem,
+    names,
+    options.parallel,
+    () => {
+      ownedPool ??= createScalarBatchPool();
+      return ownedPool;
+    },
+    rank
+  );
   try {
     const mutate = weightedMutation();
     const populations = options.populations ?? 1;
@@ -735,7 +790,8 @@ export async function* searchScalars(
         problem,
         names,
         optimizeProbability,
-        rng
+        rng,
+        rank
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -812,7 +868,8 @@ export async function* searchScalars(
           problem,
           names,
           optimizeProbability,
-          island.rng
+          island.rng,
+          rank
         );
         evaluations += offspring.length;
         for (const ind of offspring) {

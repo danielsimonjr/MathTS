@@ -17,7 +17,81 @@ import { inv as _invRaw } from './factories/index.js';
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
 const INVALID_ROW_PENALTY = 1e8;
-const HUBER_DELTA = 1;
+
+/** Named residual losses shared by {@link fitScalarParameters} and {@link searchScalars}. */
+export type NamedScalarLoss = 'l2' | 'l1' | 'huber';
+
+/** Huber threshold used by both the fitter and the search ranker. */
+export const HUBER_DELTA = 1;
+
+/**
+ * One row of a named residual loss. `l1` and `huber` live here so the search
+ * ranker and the fitter cannot drift apart. `l2` is `weight * residual²`.
+ *
+ * @internal Used by the search ranker; not the package barrel.
+ */
+export function namedScalarLossTerm(
+  loss: NamedScalarLoss,
+  pred: number,
+  obs: number,
+  weight: number
+): number {
+  const a = pred - obs;
+  if (loss === 'l2') {
+    return weight * a * a;
+  }
+  if (loss === 'l1') {
+    return weight * Math.abs(a);
+  }
+  const abs = Math.abs(a);
+  const rho = abs <= HUBER_DELTA ? a * a : 2 * abs - 1;
+  return weight * rho;
+}
+
+/**
+ * Hall / ranking loss for a compiled batch. `'l2'` with weights omitted is the
+ * search's sum of squares (`pairwiseSum` of `d²` over every row); any invalid
+ * row, or a non-finite sum, is `+Infinity`. A zero weight drops that row. Other
+ * named losses use {@link namedScalarLossTerm}.
+ *
+ * @internal Used by the search ranker; not the package barrel.
+ */
+export function rankScalarBatchLoss(
+  loss: NamedScalarLoss,
+  values: Float64Array,
+  valid: Uint8Array,
+  observed: Float64Array,
+  weights?: Float64Array
+): number {
+  if (loss === 'l2' && weights === undefined) {
+    const terms = new Float64Array(observed.length);
+    for (let i = 0; i < observed.length; i += 1) {
+      if (valid[i] === 0) {
+        return Number.POSITIVE_INFINITY;
+      }
+      const d = values[i]! - observed[i]!;
+      terms[i] = d * d;
+    }
+    const total = pairwiseSum(terms);
+    return Number.isFinite(total) ? total : Number.POSITIVE_INFINITY;
+  }
+  const terms: number[] = [];
+  for (let i = 0; i < observed.length; i += 1) {
+    const w = weights === undefined ? 1 : weights[i]!;
+    if (w === 0) {
+      continue;
+    }
+    if (valid[i] === 0) {
+      return Number.POSITIVE_INFINITY;
+    }
+    terms.push(namedScalarLossTerm(loss, values[i]!, observed[i]!, w));
+  }
+  if (terms.length === 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const total = pairwiseSum(terms);
+  return Number.isFinite(total) ? total : Number.POSITIVE_INFINITY;
+}
 
 function prefix(msg: string): string {
   return `fitScalarParameters: ${msg}`;
@@ -408,13 +482,8 @@ export function fitScalarParameters(
       const pred = batch.values[row];
       const obs = observed[row];
       const w = wts === undefined ? 1 : wts[row];
-      if (tag === 'l1') {
-        terms.push(w * Math.abs(pred - obs));
-      } else if (tag === 'huber') {
-        const a = pred - obs;
-        const abs = Math.abs(a);
-        const rho = abs <= HUBER_DELTA ? a * a : 2 * abs - 1;
-        terms.push(w * rho);
+      if (tag === 'l1' || tag === 'huber') {
+        terms.push(namedScalarLossTerm(tag, pred, obs, w));
       } else if (custom) {
         const t = custom(pred, obs, w);
         if (!Number.isFinite(t)) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createSeededRng } from '@danielsimonjr/mathts-core';
 import { fitScalarParameters, levenbergMarquardt, scalar, ScalarEvalError } from '../src/index.js';
+import { HUBER_DELTA, namedScalarLossTerm, rankScalarBatchLoss } from '../src/fit-scalar.js';
 
 function expModelNode() {
   const a = scalar.symbol('a');
@@ -426,5 +427,28 @@ describe('levenbergMarquardt jacobian option', () => {
         jacobian: () => t.map(() => [1]),
       })
     ).toThrow(TypeError);
+  });
+});
+
+describe('named residual losses (shared with search ranking)', () => {
+  it('l1 and huber terms are the fitter formulas, not a second copy', () => {
+    expect(namedScalarLossTerm('l1', 10, 3, 2)).toBe(14);
+    const small = 0.25;
+    expect(namedScalarLossTerm('huber', small, 0, 1)).toBe(small * small);
+    expect(namedScalarLossTerm('huber', 4, 0, 1)).toBe(2 * 4 - 1);
+    expect(HUBER_DELTA).toBe(1);
+  });
+
+  it('a no-parameter l1 fit reports the same number as the ranker', () => {
+    const node = scalar.number(0);
+    const x = new Float64Array([0, 1, 2, 3]);
+    const y = new Float64Array([0, 1, 2, 100]);
+    const fitted = fitScalarParameters(node, [x], y, ['x'], {
+      parameters: [],
+      loss: 'l1',
+      restarts: 0,
+    });
+    const ranked = rankScalarBatchLoss('l1', new Float64Array(4), new Uint8Array([1, 1, 1, 1]), y);
+    expect(Object.is(fitted.loss, ranked)).toBe(true);
   });
 });
