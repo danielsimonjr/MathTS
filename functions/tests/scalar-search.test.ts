@@ -333,6 +333,27 @@ describe('searchScalars: reproducibility', () => {
     expect(await fingerprint(7)).not.toBe(await fingerprint(8));
   });
 
+  it('an always-true admit leaves the recorded seed-7 front unchanged', async () => {
+    const { progress, result } = await runSearch(quadProblem, {
+      grammar: { ...quadGrammar, admit: () => true },
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      ...pinned,
+    });
+    expect(result.front.map((row) => row.complexity)).toEqual(PINNED_ROWS.map((r) => r.complexity));
+    expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+      PINNED_ROWS.map((r) => r.key)
+    );
+    result.front.forEach((row, i) => {
+      expect(Object.is(row.loss, PINNED_ROWS[i]!.loss)).toBe(true);
+    });
+    expect(progress.map((p) => p.evaluations)).toEqual(
+      Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+    );
+    expect(result.evaluations).toBe(120);
+    expect(result.seed).toBe(7);
+  });
+
   it('populations: 1 reproduces the recorded front whatever migration is asked for', async () => {
     const plain = await runSearch(quadProblem, {
       grammar: quadGrammar,
@@ -601,6 +622,22 @@ describe('searchScalars: admit', () => {
       ...shared,
       grammar: { ...sinGrammar, admit: noSin },
     });
+    for (const node of reportedNodes(closed.progress, closed.result)) {
+      expect(containsSin(node)).toBe(false);
+    }
+  });
+
+  it('never reports a sin node from a mutation wrap when admit rejects sin and no sin seed is given', async () => {
+    // No seed: enumeration already applies admit, so the initial population is
+    // only `x`. Any later `sin` would be an addNode / randomizeTree wrap.
+    const closed = await runSearch(sinProblem, {
+      grammar: { ...sinGrammar, admit: noSin },
+      rng: createSeededRng(7),
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 80,
+    });
+    expect(closed.result.front.length).toBeGreaterThan(0);
     for (const node of reportedNodes(closed.progress, closed.result)) {
       expect(containsSin(node)).toBe(false);
     }
