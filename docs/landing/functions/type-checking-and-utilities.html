@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type Checking &amp; Utilities — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Type Checking &amp; Utilities</div>
+  <h1><span>Type Checking &amp; Utilities</span> (23)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Type Checking &amp; Utilities..." oninput="filterFuncs()">
+<div class="func-card" id="bin" data-name="bin">
+  <div class="func-name">bin</div>
+  <div class="func-desc">Binary / hex / octal string</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bin(x)</div>
+  </div>
+</div>
+<div class="func-card" id="chain" data-name="chain">
+  <div class="func-name">chain</div>
+  <div class="func-desc">Start a chained-operation <code>Chain</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chain(value)</div>
+  </div>
+</div>
+<div class="func-card" id="clone" data-name="clone">
+  <div class="func-name">clone</div>
+  <div class="func-desc">Deep clone</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">clone(x)</div>
+  </div>
+</div>
+<div class="func-card" id="config" data-name="config">
+  <div class="func-name">config</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">config(…)</div>
+  </div>
+</div>
+<div class="func-card" id="format" data-name="format">
+  <div class="func-name">format</div>
+  <div class="func-desc">Format a value as a string</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">format(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="fuseUnaryChain" data-name="fuseunarychain">
+  <div class="func-name">fuseUnaryChain</div>
+  <div class="func-desc"><span class="prose"><strong><code>fuseUnaryChainAsync(ops, xs)</code></strong> — the fused element-wise chain. It tries <strong>GPU (f32, opt-in) → WASM (f64) → JS (f64)</strong> and always returns a <code>Float64Array</code>. Note the container is f64 even when the GPU ran: the <em>values</em> then carry f32 precision (~7 significant digits). It is a separate <code>async</code> function rather than…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fuseUnaryChain(…)</div>
+  </div>
+</div>
+<div class="func-card" id="hasNumericValue" data-name="hasnumericvalue">
+  <div class="func-name">hasNumericValue</div>
+  <div class="func-desc">Numeric tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hasNumericValue(x)</div>
+  </div>
+</div>
+<div class="func-card" id="help" data-name="help">
+  <div class="func-name">help</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">help(…)</div>
+  </div>
+</div>
+<div class="func-card" id="hex" data-name="hex">
+  <div class="func-name">hex</div>
+  <div class="func-desc">Binary / hex / octal string</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hex(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isBounded" data-name="isbounded">
+  <div class="func-name">isBounded</div>
+  <div class="func-desc">Value tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isBounded(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isFinite" data-name="isfinite">
+  <div class="func-name">isFinite</div>
+  <div class="func-desc">Value tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isFinite(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isInteger" data-name="isinteger">
+  <div class="func-name">isInteger</div>
+  <div class="func-desc">Integer test</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isInteger(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isNaN" data-name="isnan">
+  <div class="func-name">isNaN</div>
+  <div class="func-desc">Value tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isNaN(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isNegative" data-name="isnegative">
+  <div class="func-name">isNegative</div>
+  <div class="func-desc">Sign tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isNegative(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isNumeric" data-name="isnumeric">
+  <div class="func-name">isNumeric</div>
+  <div class="func-desc">Numeric tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isNumeric(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isPositive" data-name="ispositive">
+  <div class="func-name">isPositive</div>
+  <div class="func-desc">Sign tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isPositive(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isPrime" data-name="isprime">
+  <div class="func-name">isPrime</div>
+  <div class="func-desc">Primality test</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isPrime(x)</div>
+  </div>
+</div>
+<div class="func-card" id="isZero" data-name="iszero">
+  <div class="func-name">isZero</div>
+  <div class="func-desc">Sign tests</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isZero(x)</div>
+  </div>
+</div>
+<div class="func-card" id="oct" data-name="oct">
+  <div class="func-name">oct</div>
+  <div class="func-desc">Binary / hex / octal string</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">oct(x)</div>
+  </div>
+</div>
+<div class="func-card" id="print" data-name="print">
+  <div class="func-name">print</div>
+  <div class="func-desc">Interpolate values into a template</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">print(template, values)</div>
+  </div>
+</div>
+<div class="func-card" id="runWithConfig" data-name="runwithconfig">
+  <div class="func-name">runWithConfig</div>
+  <div class="func-desc">Run synchronous <code>fn</code> under a temporary config overlay (missing keys fall back to the defaults); restored in <code>finally</code>, even on throw; nested calls replace rather than merge; async continuations see the defaults; <code>config()</code> itself always reads the defaults, not the overlay</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">runWithConfig(overlay, fn)</div>
+  </div>
+</div>
+<div class="func-card" id="typeOf" data-name="typeof">
+  <div class="func-name">typeOf</div>
+  <div class="func-desc">Runtime type name</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">typeOf(x)</div>
+  </div>
+</div>
+<div class="func-card" id="validateClosureSource" data-name="validateclosuresource">
+  <div class="func-name">validateClosureSource</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">validateClosureSource(…)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Theory — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Graph Theory</div>
+  <h1><span>Graph Theory</span> (26)</h1>
+  <p class="cat-desc">Algorithms over adjacency-matrix representations.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Graph Theory..." oninput="filterFuncs()">
+<div class="func-card" id="adjacencyMatrix" data-name="adjacencymatrix">
+  <div class="func-name">adjacencyMatrix</div>
+  <div class="func-desc">Build adjacency matrix from an edge list (<code>directed=true</code> keeps <code>[u,v]</code> one-directional; default <code>false</code> symmetrizes)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">adjacencyMatrix(edges, n[, directed])</div>
+  </div>
+</div>
+<div class="func-card" id="astar" data-name="astar">
+  <div class="func-name">astar</div>
+  <div class="func-desc">A\* heuristic shortest path → <code>{ path, cost }</code> (reduces to Dijkstra at h=0)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">astar(adj, start, goal, heuristic)</div>
+  </div>
+</div>
+<div class="func-card" id="bellmanFord" data-name="bellmanford">
+  <div class="func-name">bellmanFord</div>
+  <div class="func-desc">Single-source shortest paths + negative-cycle detection</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bellmanFord(adj, source)</div>
+  </div>
+</div>
+<div class="func-card" id="betweennessCentrality" data-name="betweennesscentrality">
+  <div class="func-name">betweennessCentrality</div>
+  <div class="func-desc">Brandes betweenness centrality — <code>async</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">betweennessCentrality(adj[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="bfs" data-name="bfs">
+  <div class="func-name">bfs</div>
+  <div class="func-desc">Breadth-first traversal order (ascending-index neighbor visitation)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bfs(adj, start)</div>
+  </div>
+</div>
+<div class="func-card" id="closenessCentrality" data-name="closenesscentrality">
+  <div class="func-name">closenessCentrality</div>
+  <div class="func-desc">Distance-based closeness centrality (networkx convention)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">closenessCentrality(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="connectedComponents" data-name="connectedcomponents">
+  <div class="func-name">connectedComponents</div>
+  <div class="func-desc">Connected components</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">connectedComponents(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="dfs" data-name="dfs">
+  <div class="func-name">dfs</div>
+  <div class="func-desc">Depth-first traversal order (ascending-index neighbor visitation)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dfs(adj, start)</div>
+  </div>
+</div>
+<div class="func-card" id="eigenvectorCentrality" data-name="eigenvectorcentrality">
+  <div class="func-name">eigenvectorCentrality</div>
+  <div class="func-desc">Power-iteration eigenvector centrality — <code>async</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">eigenvectorCentrality(adj[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="floydWarshall" data-name="floydwarshall">
+  <div class="func-name">floydWarshall</div>
+  <div class="func-desc">All-pairs shortest-path distances (negative weights okay)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">floydWarshall(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="graphColoring" data-name="graphcoloring">
+  <div class="func-name">graphColoring</div>
+  <div class="func-desc">Greedy proper vertex coloring (Welsh-Powell heuristic) → color index per vertex</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">graphColoring(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="graphDistance" data-name="graphdistance">
+  <div class="func-name">graphDistance</div>
+  <div class="func-desc">Shortest-path length</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">graphDistance(adj, start, end)</div>
+  </div>
+</div>
+<div class="func-card" id="harmonicCentrality" data-name="harmoniccentrality">
+  <div class="func-name">harmonicCentrality</div>
+  <div class="func-desc">Distance-based harmonic centrality (networkx convention)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">harmonicCentrality(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="hungarian" data-name="hungarian">
+  <div class="func-name">hungarian</div>
+  <div class="func-desc">Kuhn-Munkres optimal assignment (minimize) → <code>{ assignment, cost }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hungarian(cost)</div>
+  </div>
+</div>
+<div class="func-card" id="isConnected" data-name="isconnected">
+  <div class="func-name">isConnected</div>
+  <div class="func-desc">Connectivity test</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isConnected(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="isIsomorphic" data-name="isisomorphic">
+  <div class="func-name">isIsomorphic</div>
+  <div class="func-desc">Graph isomorphism test (backtracking + degree-sequence pruning)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isIsomorphic(graphA, graphB)</div>
+  </div>
+</div>
+<div class="func-card" id="katzCentrality" data-name="katzcentrality">
+  <div class="func-name">katzCentrality</div>
+  <div class="func-desc">Katz centrality (L2-normalized) — <code>networkx.katz_centrality_numpy</code> convention</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">katzCentrality(adj, alpha[, beta])</div>
+  </div>
+</div>
+<div class="func-card" id="louvainCommunities" data-name="louvaincommunities">
+  <div class="func-name">louvainCommunities</div>
+  <div class="func-desc">Louvain modularity community detection → partition (array of vertex groups)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">louvainCommunities(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="maxClique" data-name="maxclique">
+  <div class="func-name">maxClique</div>
+  <div class="func-desc">Maximum clique via Bron-Kerbosch with pivoting → vertex set</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">maxClique(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="maxFlow" data-name="maxflow">
+  <div class="func-name">maxFlow</div>
+  <div class="func-desc">Maximum flow (Edmonds-Karp) → <code>{ maxFlow, flow }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">maxFlow(capacity, source, sink)</div>
+  </div>
+</div>
+<div class="func-card" id="minCut" data-name="mincut">
+  <div class="func-name">minCut</div>
+  <div class="func-desc">Minimum s-t cut via max-flow-min-cut → <code>{ value, partition: [S, T] }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minCut(capacity, source, sink)</div>
+  </div>
+</div>
+<div class="func-card" id="minimumSpanningTree" data-name="minimumspanningtree">
+  <div class="func-name">minimumSpanningTree</div>
+  <div class="func-desc">MST (Prim) → edge list</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minimumSpanningTree(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="pageRank" data-name="pagerank">
+  <div class="func-name">pageRank</div>
+  <div class="func-desc">PageRank centrality (power iteration; <code>dampingFactor</code> default 0.85) — <code>async</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pageRank(adj[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="shortestPath" data-name="shortestpath">
+  <div class="func-name">shortestPath</div>
+  <div class="func-desc">Dijkstra shortest path (node sequence)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">shortestPath(adj, start, end)</div>
+  </div>
+</div>
+<div class="func-card" id="stronglyConnectedComponents" data-name="stronglyconnectedcomponents">
+  <div class="func-name">stronglyConnectedComponents</div>
+  <div class="func-desc">SCCs (Kosaraju)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">stronglyConnectedComponents(adj)</div>
+  </div>
+</div>
+<div class="func-card" id="topologicalSort" data-name="topologicalsort">
+  <div class="func-name">topologicalSort</div>
+  <div class="func-desc">Topological order (DAGs)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">topologicalSort(adj)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
