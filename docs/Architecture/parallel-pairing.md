@@ -4,7 +4,7 @@
 
 # Parallel (Worker-Pool) ↔ Function Pairing
 
-**Generated**: 2026-11-02 (by tools/create-dependency-graph)
+**Generated**: 2026-11-04 (by tools/create-dependency-graph)
 
 Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routing: a **named op** (`computePool.<op>()`, which consults a tunable threshold) or a **generic kernel** path (`applyKernel`/`mapArray`/`shouldParallelize`/a bare `parallel*` helper — gated by the global `thresholdElements`). A function counts as **effective** when at least one of its ops has a threshold ≠ `'never'`, and **disabled** when every op it touches is `'never'` (wired to the pool but always runs inline JS — the parallel analog of a WASM js-fallback).
 
@@ -12,9 +12,9 @@ Per public `mathTyped` function in `functions/src/typed/`, its worker-pool routi
 
 | Routing                                    |   Count |
 | ------------------------------------------ | ------: |
-| Parallel — effective (op threshold active) |      82 |
+| Parallel — effective (op threshold active) |      81 |
 | Parallel — disabled (all ops `'never'`)    |      31 |
-| Non-parallel (no worker-pool path)         |     106 |
+| Non-parallel (no worker-pool path)         |     107 |
 | **Total**                                  | **219** |
 
 Global fallback threshold (`thresholdElements`, for ops absent from the per-op map): **50000** elements.
@@ -91,7 +91,6 @@ Global fallback threshold (`thresholdElements`, for ops absent from the per-op m
 | `parallelStatHistogram` | `applyKernel`, `histogram` | 50000 (global kernel), never          | statistics    |
 | `parallelStatMAD`       | `applyKernel`, `mean`      | 50000 (global kernel), never          | statistics    |
 | `parallelStatMedian`    | `applyKernel`              | 50000 (global kernel)                 | statistics    |
-| `parallelStatMode`      | `applyKernel`              | 50000 (global kernel)                 | statistics    |
 | `parallelStatNorm`      | `applyKernel`, `norm`      | 50000 (global kernel), never          | statistics    |
 | `parallelStatProd`      | `applyKernel`, `prod`      | 50000 (global kernel), never          | statistics    |
 | `parallelStatQuantile`  | `applyKernel`              | 50000 (global kernel)                 | statistics    |
@@ -160,7 +159,7 @@ These route to the worker pool but every op resolves to `'never'` — overhead d
 | set           |         0 |        0 |           10 |
 | signal        |         7 |        0 |            0 |
 | special       |        31 |        0 |            7 |
-| statistics    |        10 |        6 |            1 |
+| statistics    |         9 |        6 |            2 |
 | string        |         0 |        0 |            5 |
 | trigonometry  |         9 |        3 |            7 |
 | unit          |         0 |        0 |            2 |
@@ -173,7 +172,7 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 | -------------------------- | --------------------- | :-----: | ----------: |
 | `abs`                      | never                 |    —    |           1 |
 | `add`                      | never                 |    —    |           1 |
-| `applyKernel`              | 50000 (global kernel) |    ✓    |          82 |
+| `applyKernel`              | 50000 (global kernel) |    ✓    |          81 |
 | `besselJ`                  | 1000000               |    ✓    |           0 |
 | `bitAnd`                   | never                 |    —    |           1 |
 | `bitNot`                   | never                 |    —    |           1 |
@@ -235,6 +234,6 @@ Parsed from `parallel/src/ComputePool.ts` (`DEFAULT_THRESHOLD_BY_OP`). `# functi
 
 Pure-JS or WASM-only typed functions — see `wasm-pairing.md` for their WASM routing.
 
-`acot`, `acsc`, `and`, `arg`, `asec`, `atan2`, `bernoulli`, `betaPDF`, `bin`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `carmichaelLambda`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `compare`, `compareNatural`, `compareText`, `compareUnits`, `cond`, `conj`, `deepEqual`, `divisorSigma`, `divisors`, `doubleFactorial`, `ellipticEIncomplete`, `ellipticF`, `ellipticPi`, `entropy`, `equal`, `equalScalar`, `equalText`, `eulerPhi`, `fallingFactorial`, `fibonacci`, `format`, `fsum`, `gammaPDF`, `gcd`, `harmonicNumber`, `hex`, `hypot`, `im`, `integerDigits`, `jacobiSymbol`, `jsDivergence`, `larger`, `largerEq`, `lcm`, `lowRankApprox`, `lucas`, `lucasL`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `mod`, `moebiusMu`, `multinomial`, `nextPrime`, `noncentralChi2PDF`, `norm2`, `normFro`, `not`, `nthRoot`, `nullish`, `oct`, `or`, `parallelStatCumsum`, `partitions`, `permutations`, `pickRandom`, `pinv`, `pow`, `prime`, `primeFactors`, `primePi`, `print`, `random`, `randomInt`, `re`, `risingFactorial`, `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`, `singularValues`, `smaller`, `smallerEq`, `studentTPDF`, `subfactorial`, `to`, `toBest`, `toDegrees`, `toRadians`, `unaryPlus`, `unequal`, `xgcd`, `xor`
+`acot`, `acsc`, `and`, `arg`, `asec`, `atan2`, `bernoulli`, `betaPDF`, `bin`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `carmichaelLambda`, `chineseRemainder`, `combinations`, `combinationsWithRep`, `compare`, `compareNatural`, `compareText`, `compareUnits`, `cond`, `conj`, `deepEqual`, `divisorSigma`, `divisors`, `doubleFactorial`, `ellipticEIncomplete`, `ellipticF`, `ellipticPi`, `entropy`, `equal`, `equalScalar`, `equalText`, `eulerPhi`, `fallingFactorial`, `fibonacci`, `format`, `fsum`, `gammaPDF`, `gcd`, `harmonicNumber`, `hex`, `hypot`, `im`, `integerDigits`, `jacobiSymbol`, `jsDivergence`, `larger`, `largerEq`, `lcm`, `lowRankApprox`, `lucas`, `lucasL`, `matrixExpm`, `matrixLogm`, `matrixSqrtm`, `mod`, `moebiusMu`, `multinomial`, `nextPrime`, `noncentralChi2PDF`, `norm2`, `normFro`, `not`, `nthRoot`, `nullish`, `oct`, `or`, `parallelStatCumsum`, `parallelStatMode`, `partitions`, `permutations`, `pickRandom`, `pinv`, `pow`, `prime`, `primeFactors`, `primePi`, `print`, `random`, `randomInt`, `re`, `risingFactorial`, `setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`, `singularValues`, `smaller`, `smallerEq`, `studentTPDF`, `subfactorial`, `to`, `toBest`, `toDegrees`, `toRadians`, `unaryPlus`, `unequal`, `xgcd`, `xor`
 
 > Notes: element-wise arithmetic/transcendental ops (`add`/`sin`/`exp`/…) and the signal/reduction ops are `'never'` — the 2026-05 parallel benchmark found worker overhead dominates at every tested size for memory-bound element-wise work. The active set is the compute-bound ops (tensordot, matmul, matrixPower, characteristicPolynomial, the hypothesis tests, and the special functions erfc/besselJ/spectrogram/sampleChunk) plus any generic `applyKernel` path above the 50000-element global threshold. Re-tune via `tools/benchmark/parallel/run.ts`.

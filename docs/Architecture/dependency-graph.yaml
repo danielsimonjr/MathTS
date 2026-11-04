@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-02'
-  totalFiles: 1233
+  lastUpdated: '2026-11-04'
+  totalFiles: 1236
   totalModules: 82
-  totalExports: 6416
+  totalExports: 6451
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -236,6 +236,13 @@ modules:
         - file: ./fft-core.js
           imports:
             - fftFrameInPlace
+        - file: ./worker-numerics.js
+          imports:
+            - _workerPairwiseSum
+            - _workerPairwiseDot
+            - _workerScaledSsq
+            - _workerScaledSsqDiff
+            - _workerCombineScaledSsq
         - file: ./chunk-typed.js
           imports:
             - chunkTyped
@@ -343,15 +350,26 @@ modules:
       exports:
         - _tdRowMajorStrides
         - _workerMulberry32
+        - _workerPairwiseSum
+        - _workerPairwiseDot
+        - _workerScaledSsq
+        - _workerScaledSsqDiff
+        - _workerCombineScaledSsq
       functions:
         - _tdRowMajorStrides
         - _workerMulberry32
+        - _workerPairwiseSum
+        - _workerPairwiseDot
+        - _workerScaledSsq
+        - _workerScaledSsqDiff
+        - _workerCombineScaledSsq
     packages/workerpool/src/worker.ts:
       description: Worker functions for parallel MathTS computations.
       externalDependencies:
         - package: workerpool
           imports:
             - worker
+            - Transfer
       nodeDependencies: []
       internalDependencies:
         - file: ./compile-function-source.js
@@ -366,6 +384,10 @@ modules:
         - file: ./worker-numerics.js
           imports:
             - _workerMulberry32
+            - _workerPairwiseSum
+            - _workerPairwiseDot
+            - _workerScaledSsq
+            - _workerScaledSsqDiff
       workspaceDependencies: []
       exports: []
     packages/workerpool/src/workerpool-browser-shim.ts:
@@ -2766,6 +2788,9 @@ modules:
           imports:
             - DimensionMismatchError
             - UnitParseError
+        - file: ./va-var.js
+          imports:
+            - isEffectivelyImaginary
         - file: ./exact-scale.js
           imports:
             - ExactScale
@@ -3265,6 +3290,16 @@ modules:
         - UnitDependencies
         - UnitInstance
         - UnitConstructor
+    core/src/types/unit/va-var.ts:
+      description: VA / VAR classification for complex-valued units.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - isEffectivelyImaginary
+      functions:
+        - isEffectivelyImaginary
     core/src/types/unit-definitions.ts:
       description: Unit definitions for the Unit type.
       externalDependencies: []
@@ -5339,12 +5374,14 @@ modules:
       workspaceDependencies: []
       exports:
         - isDenseMatrix
+        - registerSparseMatrixFactory
         - denseContiguousData
         - DenseMatrix
       classes:
         - DenseMatrix
       functions:
         - isDenseMatrix
+        - registerSparseMatrixFactory
         - denseContiguousData
     matrix/src/types/Matrix.ts:
       description: Matrix Base Class
@@ -5377,6 +5414,7 @@ modules:
         - file: ./DenseMatrix.js
           imports:
             - DenseMatrix
+            - registerSparseMatrixFactory
       workspaceDependencies: []
       exports:
         - isSparseMatrix
@@ -5394,6 +5432,10 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+        - file: ../DenseMatrix.js
+          imports:
+            - DenseMatrix
+            - denseContiguousData
       workspaceDependencies: []
       exports:
         - add
@@ -5418,6 +5460,10 @@ modules:
           imports:
             - Matrix
           typeOnly: true
+        - file: ../DenseMatrix.js
+          imports:
+            - DenseMatrix
+            - denseContiguousData
       workspaceDependencies: []
       exports:
         - sum
@@ -6375,11 +6421,14 @@ modules:
             - tensorSvd
             - tensorEig
       exports:
+        - assertSameTape
         - Tape
         - TapedTensor
       classes:
         - Tape
         - TapedTensor
+      functions:
+        - assertSameTape
   functions/algebra:
     functions/src/algebra/decomposition/lup.ts:
       description: >-
@@ -8908,7 +8957,7 @@ modules:
         - file: ./regression-extra.js
           imports:
             - fitLine
-            - linearRegression
+            - linregressFromFit
         - file: ./typed/distributions.js
           imports:
             - normalCDF
@@ -9831,6 +9880,28 @@ modules:
             - PhysicsEvaluateOptions
           reExport: true
           typeOnly: true
+        - file: ./numeric/solveODE.js
+          imports:
+            - ODESolution
+            - ODEMatrixSolution
+            - ODEOptions
+            - ForcingFunction
+            - SolveODEFunction
+          reExport: true
+          typeOnly: true
+        - file: ./signal/freqz.js
+          imports:
+            - FrequencyResponse
+            - FreqzFunction
+          reExport: true
+          typeOnly: true
+        - file: ./signal/zpk2tf.js
+          imports:
+            - TransferFunction
+            - ZPKValue
+            - Zpk2tfFunction
+          reExport: true
+          typeOnly: true
         - file: ./scalar-eval.js
           imports:
             - ScalarScope
@@ -10564,6 +10635,16 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
+        - ODESolution
+        - ODEMatrixSolution
+        - ODEOptions
+        - ForcingFunction
+        - SolveODEFunction
+        - FrequencyResponse
+        - FreqzFunction
+        - TransferFunction
+        - ZPKValue
+        - Zpk2tfFunction
         - ScalarScope
         - CompileScalarOptions
         - ScalarBatchResult
@@ -11048,6 +11129,16 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
+        - ODESolution
+        - ODEMatrixSolution
+        - ODEOptions
+        - ForcingFunction
+        - SolveODEFunction
+        - FrequencyResponse
+        - FreqzFunction
+        - TransferFunction
+        - ZPKValue
+        - Zpk2tfFunction
         - ScalarScope
         - CompileScalarOptions
         - ScalarBatchResult
@@ -11387,12 +11478,14 @@ modules:
       exports:
         - fitLine
         - linearRegression
+        - linregressFromFit
       interfaces:
         - LineFit
         - LinregressResult
       functions:
         - fitLine
         - linearRegression
+        - linregressFromFit
     functions/src/scalar-batch-parallel.ts:
       description: Evaluates many scalar trees over shared columns, on worker threads when asked to (M14).
       externalDependencies: []
@@ -16318,6 +16411,10 @@ modules:
         - rodasSolve
         - bdfSolve
         - radauSolve
+      interfaces:
+        - ODEOptions
+        - ODESolution
+        - ODEMatrixSolution
       functions:
         - _factorSolver
         - rosenbrockSolve
@@ -16767,6 +16864,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/collection.js
+          imports:
+            - deepMap
         - file: ../plain/number/combinations.js
           imports:
             - combinationsNumber
@@ -17980,6 +18080,8 @@ modules:
       workspaceDependencies: []
       exports:
         - createFreqz
+      interfaces:
+        - FrequencyResponse
       constants:
         - createFreqz
     functions/src/signal/iir-design.ts:
@@ -20664,7 +20766,6 @@ modules:
         - file: ../wasm/poly/wasm-bridge.js
           imports:
             - polyMulDispatch
-            - polyMulJS
             - polyDivModDispatch
             - resultantDispatch
             - discriminantDispatch
@@ -20980,6 +21081,7 @@ modules:
           imports:
             - parse
             - evaluate
+            - compileExpr
         - file: ./euclid.js
           imports:
             - euclidSnap
@@ -22780,12 +22882,19 @@ modules:
           imports:
             - seedrandom
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/collection.js
+          imports:
+            - deepMap
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
             - mathTyped
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - IMatrix
       exports:
         - bernoulli
         - combinations
@@ -24848,17 +24957,13 @@ modules:
         - WASM_SORT_THRESHOLD
         - sortF64JS
         - argsortF64JS
-        - rankF64JS
         - sortF64Dispatch
         - argsortF64Dispatch
-        - rankF64Dispatch
       functions:
         - sortF64JS
         - argsortF64JS
-        - rankF64JS
         - sortF64Dispatch
         - argsortF64Dispatch
-        - rankF64Dispatch
       constants:
         - WASM_SORT_THRESHOLD
     functions/src/wasm/special/scalars.ts:
@@ -31288,6 +31393,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../utils/mathml.js
+          imports:
+            - toMathMLSymbol
         - file: ./Node.js
           imports:
             - MathNode
@@ -31299,7 +31407,7 @@ modules:
       constants:
         - createFunctionAssignmentNode
     expression/src/node/FunctionNode.ts:
-      description: invoke a list with arguments on a node
+      description: Sandbox-safe "is this member undefined?" test for `obj?.method()`. It never
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -31321,6 +31429,8 @@ modules:
           imports:
             - getSafeProperty
             - getSafeMethod
+            - isSafeProperty
+            - isSafeMethod
         - file: ../utils/scope.js
           imports:
             - createSubScope
@@ -31348,7 +31458,7 @@ modules:
       constants:
         - createFunctionNode
     expression/src/node/IndexNode.ts:
-      description: Describes a subset of a matrix or an object property.
+      description: Convert a BigNumber index value to a number. Index values must be integers;
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -31364,6 +31474,7 @@ modules:
         - file: ../utils/is.js
           imports:
             - isArray
+            - isBigNumber
             - isConstantNode
             - isMatrix
             - isNode
@@ -31373,6 +31484,9 @@ modules:
         - file: ../utils/string.js
           imports:
             - escape
+        - file: ../utils/mathml.js
+          imports:
+            - toMathMLSymbol
         - file: ./Node.js
           imports:
             - MathNode
@@ -31445,6 +31559,9 @@ modules:
           imports:
             - escape
             - stringify
+        - file: ../utils/mathml.js
+          imports:
+            - escapeMathML
         - file: ./Node.js
           imports:
             - MathNode
@@ -31624,6 +31741,9 @@ modules:
         - file: ../../utils/customs.js
           imports:
             - getSafeProperty
+        - file: ./describeType.js
+          imports:
+            - describeType
         - file: ./stringSubset.js
           imports:
             - getStringSubset
@@ -31643,6 +31763,9 @@ modules:
         - file: ../../utils/customs.js
           imports:
             - setSafeProperty
+        - file: ./describeType.js
+          imports:
+            - describeType
         - file: ./stringSubset.js
           imports:
             - setStringSubset
@@ -31655,6 +31778,16 @@ modules:
         - assignFactory
       functions:
         - assignFactory
+    expression/src/node/utils/describeType.ts:
+      description: describeType module
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - describeType
+      functions:
+        - describeType
     expression/src/node/utils/stringSubset.ts:
       description: Retrieve a subset of a string.
       externalDependencies: []
@@ -33181,11 +33314,13 @@ modules:
             - UNIT_PREFIX_SETS
             - unitPrefixExactScale
             - getUnitPrefix
+            - REFUSED_UNIT_SPELLINGS
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
             - Dimensions
             - UnitDef
+            - UnitInstance
             - SiDimensionVector
             - SiDimensionOptions
             - SiDimensionExponent
@@ -33251,8 +33386,10 @@ modules:
         - UNIT_PREFIX_SETS
         - unitPrefixExactScale
         - getUnitPrefix
+        - REFUSED_UNIT_SPELLINGS
         - Dimensions
         - UnitDef
+        - UnitInstance
         - SiDimensionVector
         - SiDimensionOptions
         - SiDimensionExponent
@@ -33318,8 +33455,10 @@ modules:
         - UNIT_PREFIX_SETS
         - unitPrefixExactScale
         - getUnitPrefix
+        - REFUSED_UNIT_SPELLINGS
         - Dimensions
         - UnitDef
+        - UnitInstance
         - SiDimensionVector
         - SiDimensionOptions
         - SiDimensionExponent
@@ -33549,7 +33688,14 @@ modules:
             - matrixPinv
             - qr
             - lu
+            - luSolve
             - cholesky
+            - qrPivoted
+            - lq
+            - rq
+            - ql
+            - condest
+            - transposeNestedArray
             - matrixExpm
             - matrixLogm
             - matrixSqrtm
@@ -33565,6 +33711,10 @@ modules:
             - QRResult
             - QROptions
             - LUResult
+            - QRPivotedResult
+            - LQResult
+            - RQResult
+            - QLResult
             - CholeskyResult
             - ExpmOptions
             - LogmOptions
@@ -33589,7 +33739,14 @@ modules:
         - matrixPinv
         - qr
         - lu
+        - luSolve
         - cholesky
+        - qrPivoted
+        - lq
+        - rq
+        - ql
+        - condest
+        - transposeNestedArray
         - matrixExpm
         - matrixLogm
         - matrixSqrtm
@@ -33602,6 +33759,10 @@ modules:
         - QRResult
         - QROptions
         - LUResult
+        - QRPivotedResult
+        - LQResult
+        - RQResult
+        - QLResult
         - CholeskyResult
         - ExpmOptions
         - LogmOptions
@@ -33626,7 +33787,14 @@ modules:
         - matrixPinv
         - qr
         - lu
+        - luSolve
         - cholesky
+        - qrPivoted
+        - lq
+        - rq
+        - ql
+        - condest
+        - transposeNestedArray
         - matrixExpm
         - matrixLogm
         - matrixSqrtm
@@ -33639,6 +33807,10 @@ modules:
         - QRResult
         - QROptions
         - LUResult
+        - QRPivotedResult
+        - LQResult
+        - RQResult
+        - QLResult
         - CholeskyResult
         - ExpmOptions
         - LogmOptions
@@ -34632,6 +34804,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./validate.js
+          imports:
+            - assertSameLength
+            - assertMatmulShape
         - file: ./ops/bitwise.js
           imports:
             - bitAnd
@@ -34671,6 +34847,7 @@ modules:
         - ComputePool
       interfaces:
         - ComputePoolConfig
+        - DispatchOptions
         - ParallelResult
       functions:
         - resolveOpThreshold
@@ -34689,6 +34866,9 @@ modules:
         - file: ./gemm-rows.js
           imports:
             - gemmRows
+        - file: ./validate.js
+          imports:
+            - assertMatmulShape
       workspaceDependencies: []
       exports:
         - ParallelMatrix
@@ -34811,6 +34991,7 @@ modules:
             - ParallelResult
             - OpName
             - OpThreshold
+            - DispatchOptions
           reExport: true
           typeOnly: true
         - file: ./operations/index.js
@@ -34917,6 +35098,7 @@ modules:
         - ParallelResult
         - OpName
         - OpThreshold
+        - DispatchOptions
         - MatmulOptions
         - ElementwiseOptions
         - ReduceOptions
@@ -35005,6 +35187,7 @@ modules:
         - ParallelResult
         - OpName
         - OpThreshold
+        - DispatchOptions
         - MatmulOptions
         - ElementwiseOptions
         - ReduceOptions
@@ -35030,6 +35213,18 @@ modules:
             - gemmRows
       workspaceDependencies: []
       exports: []
+    parallel/src/validate.ts:
+      description: Argument validation shared by the parallel operations.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - assertSameLength
+        - assertMatmulShape
+      functions:
+        - assertSameLength
+        - assertMatmulShape
   parallel/operations:
     parallel/src/operations/elementwise.ts:
       description: Parallel Element-wise Operations
@@ -35345,6 +35540,9 @@ modules:
           imports:
             - calculateOptimalChunks
             - ChunkOptions
+        - file: ../validate.js
+          imports:
+            - assertSameLength
       workspaceDependencies: []
       exports:
         - bitAnd
@@ -35795,6 +35993,7 @@ modules:
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - getDependentsOfMany
         - getAncestors
         - toMermaid
         - toDOT
@@ -35803,6 +36002,7 @@ modules:
         - buildDependencyGraph
         - topologicalSort
         - getDependents
+        - getDependentsOfMany
         - getAncestors
         - toMermaid
         - toDOT
@@ -36247,6 +36447,7 @@ modules:
           imports:
             - Workbook
             - Cell
+            - DependencyGraph
             - CellResult
             - RunResult
             - CellType
@@ -36262,7 +36463,7 @@ modules:
           imports:
             - buildDependencyGraph
             - getAncestors
-            - getDependents
+            - getDependentsOfMany
         - file: ./fs-atomic.js
           imports:
             - writeFileAtomic
@@ -39522,10 +39723,16 @@ modules:
         - DEPTH_EPS
 dependencyGraph:
   circularDependencies:
-    runtime: []
+    runtime:
+      - - matrix/src/types/DenseMatrix.ts
+        - matrix/src/types/dense/arithmetic.ts
+        - matrix/src/types/DenseMatrix.ts
+      - - matrix/src/types/DenseMatrix.ts
+        - matrix/src/types/dense/reduction.ts
+        - matrix/src/types/DenseMatrix.ts
     typeOnly: []
-    total: 0
-    runtimeCount: 0
+    total: 2
+    runtimeCount: 2
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -39601,6 +39808,7 @@ dependencyGraph:
         - core/src/types/unit/index.ts
         - core/src/types/unit/unit-table.ts
         - core/src/types/unit/unit-types.ts
+        - core/src/types/unit/va-var.ts
         - core/src/types/unit-definitions.ts
         - core/src/types/unit-prefixes.ts
         - core/src/types/unit.ts
@@ -40719,6 +40927,7 @@ dependencyGraph:
         - expression/src/node/SymbolNode.ts
         - expression/src/node/utils/access.ts
         - expression/src/node/utils/assign.ts
+        - expression/src/node/utils/describeType.ts
         - expression/src/node/utils/stringSubset.ts
     - name: Expression/transform
       files:
@@ -40808,6 +41017,7 @@ dependencyGraph:
         - parallel/src/gemm-rows.ts
         - parallel/src/index.ts
         - parallel/src/matrix.worker.ts
+        - parallel/src/validate.ts
     - name: Parallel/operations
       files:
         - parallel/src/operations/elementwise.ts
@@ -40926,19 +41136,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1233
+  totalTypeScriptFiles: 1236
   totalModules: 82
-  totalLinesOfCode: 204601
-  totalExports: 6416
+  totalLinesOfCode: 206082
+  totalExports: 6451
   totalClasses: 60
-  totalInterfaces: 570
-  totalFunctions: 2072
-  totalTypeGuards: 161
+  totalInterfaces: 575
+  totalFunctions: 2083
+  totalTypeGuards: 162
   totalEnums: 0
   totalConstants: 1633
-  totalReExports: 2725
-  totalTypeOnlyImports: 621
-  runtimeCircularDeps: 0
+  totalReExports: 2749
+  totalTypeOnlyImports: 624
+  runtimeCircularDeps: 2
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

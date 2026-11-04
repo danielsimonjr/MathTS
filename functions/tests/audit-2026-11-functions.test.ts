@@ -13,6 +13,7 @@ import {
   parallelStatMode,
   multiplicativeOrder,
   polynomialGCD,
+  combinations,
   polymul,
   qr,
   matrix,
@@ -223,6 +224,21 @@ describe('multiplicativeOrder beyond 2^53 products', () => {
 });
 
 // ---------------------------------------------------------------------------
+describe('review follow-ups', () => {
+  it('polynomialGCD does not snap a large non-integer coefficient to an integer', () => {
+    // 1e13 + 0.5 is exact in binary; the relative convergent test alone would call it an
+    // integer and round it away. Both inputs equal, so the GCD is the (monic) input itself.
+    const p = [1e13 + 0.5, 1];
+    const g = polynomialGCD(p, p);
+    expect(g[g.length - 1]).toBe(1);
+    expect(g[0]).toBe(1e13 + 0.5);
+  });
+  it('the public combinations maps over a collection of n or of k', () => {
+    expect(combinations([5, 6], 2)).toEqual([10, 15]);
+    expect(combinations(6, [1, 2, 3])).toEqual([6, 15, 20]);
+  });
+});
+
 // polynomialGCD on rational coefficients
 // ---------------------------------------------------------------------------
 

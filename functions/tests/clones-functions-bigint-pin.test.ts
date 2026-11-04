@@ -93,8 +93,17 @@ function stubTyped(
   };
 }
 
+// The collection signatures use `typed.referToSelf`; this pin only exercises the scalar
+// BigNumber signature, so the stub resolves `self` to a function that must not be called.
+const stubTypedWithSelf = Object.assign(stubTyped, {
+  referToSelf: (cb: (self: never) => unknown) =>
+    cb((() => {
+      throw new Error('collection signature not under test');
+    }) as never),
+});
+
 const combinationsBn = createCombinations({
-  typed: stubTyped as unknown as TypedFunction,
+  typed: stubTypedWithSelf as unknown as TypedFunction,
 }) as unknown as (n: BigNumberBinomialType, k: BigNumberBinomialType) => LegacyBn;
 
 const combinationsWithRepBn = createCombinationsWithRep({

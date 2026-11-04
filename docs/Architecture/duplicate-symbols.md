@@ -4,7 +4,7 @@
 
 # Duplicate Symbols
 
-**Generated**: 2026-11-02 (by tools/create-dependency-graph)
+**Generated**: 2026-11-04 (by tools/create-dependency-graph)
 
 Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files across the monorepo, then CLASSIFIED (see `DupEntryTag`) so the actionable subset is clear: `TRUE_DUPLICATE` (real merge targets) vs `DISPATCH_VARIANT` (>=2 `mathTyped(...)` registrations of the same public name — distinct dispatch surfaces, Bucket C delegation candidates, not copy-paste bodies), `ALIAS_DELEGATION` (a `const X = importedY` forward, excluded once <2 real bodies remain), and `ALLOWLISTED` (matches `duplicate-allowlist.json`: hot-path `is*` guards, AssemblyScript mirrors, per-package `VERSION` strings).
 
@@ -24,11 +24,11 @@ Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files acros
 
 | Category                        | Count |
 | ------------------------------- | ----: |
-| **TRUE_DUPLICATE** (actionable) |     0 |
+| **TRUE_DUPLICATE** (actionable) |     1 |
 | DISPATCH_VARIANT                |     0 |
 | ALIAS_DELEGATION                |     0 |
 | ALLOWLISTED                     |    53 |
-| _Total flagged names_           |    53 |
+| _Total flagged names_           |    54 |
 
 ## Runtime duplicates
 
@@ -306,7 +306,9 @@ _None._
 
 ### TRUE_DUPLICATE
 
-_None._
+| Name          | Category  | Defining files (package, public?, sub-tag)                                                                                                                                | Canonical hint |
+| ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `ODESolution` | interface | `functions/src/numeric/solveODE.ts` (@danielsimonjr/mathts-functions, public, PLAIN)<br>`functions/src/typed/numeric.ts` (@danielsimonjr/mathts-functions, public, PLAIN) | **AMBIGUOUS**  |
 
 ### DISPATCH_VARIANT
 

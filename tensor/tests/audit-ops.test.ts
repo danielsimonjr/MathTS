@@ -117,6 +117,26 @@ describe('Tensor reductions axis validation', () => {
 });
 
 describe('Tensor.einsum validation and correctness', () => {
+  it('rejects a spec that references one operand axis twice', () => {
+    const a = new Tensor([2, 2], Float64Array.of(1, 2, 3, 4));
+    expect(() =>
+      Tensor.einsum(
+        {
+          free: [],
+          contractions: [
+            {
+              pair: [
+                [0, 0],
+                [0, 0],
+              ],
+            },
+          ],
+        } as never,
+        a
+      )
+    ).toThrow(/a second time/);
+  });
+
   it('rejects out-of-range operand / axis references with clear messages', () => {
     const a = seq([2, 3]);
     expect(() => Tensor.einsum({ contractions: [], free: [{ operand: 1, axis: 0 }] }, a)).toThrow(

@@ -726,6 +726,7 @@ export class Tensor {
 
   static einsum(spec: EinsumSpec, ...operands: Tensor[]): Tensor {
     const nOps = operands.length;
+    const seenRefs = new Set<string>();
     const checkRef = (what: string, operand: number, axis: number): void => {
       if (!Number.isInteger(operand) || operand < 0 || operand >= nOps) {
         throw new Error(
@@ -738,6 +739,13 @@ export class Tensor {
           `Tensor.einsum: ${what} references axis ${axis} of operand ${operand}, which has rank ${rank}`
         );
       }
+      const ref = operand + ':' + axis;
+      if (seenRefs.has(ref)) {
+        throw new Error(
+          `Tensor.einsum: ${what} references axis ${axis} of operand ${operand} a second time; each operand axis may appear once`
+        );
+      }
+      seenRefs.add(ref);
     };
     spec.free.forEach((fa, v) => checkRef(`free[${v}]`, fa.operand, fa.axis));
     spec.contractions.forEach((c, v) => {

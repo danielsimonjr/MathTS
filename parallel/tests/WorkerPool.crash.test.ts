@@ -170,6 +170,51 @@ describe('WorkerPool: a worker error is isolated to its own task', () => {
   });
 });
 
+describe('WorkerPool: a worker that never becomes ready is not respawned forever', () => {
+  it('stops after MAX_STARTUP_FAILURES consecutive startup crashes and fails queued tasks', async () => {
+    const pool = await readyPool(1);
+    const [w0] = pool.created;
+    // Keep one task queued behind a busy worker so the cap has something to reject.
+    const p1 = pool.execute({ op: 'x' });
+    const p2 = pool.execute({ op: 'y' });
+    await tick();
+    expect(pool.internals.taskQueue.length).toBe(1);
+    const w0Reject = p1.catch((e: Error) => e.message);
+    pool.internals.handleWorkerError(w0, { message: 'load failed' });
+    await tick();
+    expect(await w0Reject).toMatch(/Worker error: load failed/);
+    // The replacement never answers and crashes too, repeatedly.
+    for (let i = 0; i < WorkerPool.MAX_STARTUP_FAILURES - 1; i++) {
+      const latest = pool.created[pool.created.length - 1];
+      pool.internals.handleWorkerError(latest, { message: 'load failed' });
+      await tick();
+    }
+    const spawnedAfterCap = pool.created.length;
+    // p2 was handed to a replacement that then crashed, so it fails through the task
+    // path; what matters is that nothing is left queued or respawning.
+    await expect(p2).rejects.toThrow();
+    await tick();
+    expect(pool.internals.taskQueue.length).toBe(0);
+    expect(pool.created.length).toBe(spawnedAfterCap);
+    expect(pool.internals.workers.length).toBe(0);
+    pool.terminate();
+  });
+
+  it('a late reply never frees a worker that is running another task', async () => {
+    const pool = await readyPool(1);
+    const [w0] = pool.created;
+    const p1 = pool.execute({ op: 'x' });
+    await tick();
+    expect(pool.internals.availableWorkers).not.toContain(w0);
+    pool.internals.handleWorkerMessage(w0, { id: 'stale-id', type: 'result' });
+    expect(pool.internals.availableWorkers).not.toContain(w0);
+    pool.internals.handleWorkerMessage(w0, { id: w0.posted[0].id, type: 'result', data: 1 });
+    expect(await p1).toBe(1);
+    expect(pool.internals.availableWorkers).toContain(w0);
+    pool.terminate();
+  });
+});
+
 describe('WorkerPool: construction and ids', () => {
   it.each([-1, 2.5, Number.NaN, Infinity])('rejects maxWorkers = %s', (bad) => {
     spawned = [];
@@ -181,8 +226,8 @@ describe('WorkerPool: construction and ids', () => {
   it('treats maxWorkers = 0 as auto-detect (the ParallelConfig convention)', async () => {
     spawned = [];
     const pool = new FakePool('/* fake */', 0);
-    await pool.initialize();
-    expect(spawned.length).toBeGreaterThan(0);
+    await tick();
+    expect(pool.workerCount).toBeGreaterThan(0);
     pool.terminate();
   });
 

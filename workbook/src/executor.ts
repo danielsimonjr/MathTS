@@ -62,9 +62,29 @@ export class WorkbookExecutor {
    */
   async runAll(): Promise<void> {
     const pending = new Set(this.graph.executionOrder);
+    const completed: string[] = [];
     for (const cellId of this.graph.executionOrder) {
       pending.delete(cellId);
-      await this.runCellScheduled(cellId, pending);
+      try {
+        await this.runCellScheduled(cellId, pending);
+      } catch (error) {
+        // The batch stops here. Dependents of the cells that did run were not
+        // marked stale (they were expected to run later in this batch); they
+        // will not, so emit the stale events now before rethrowing.
+        if (this.workbook.runtime.execution === 'reactive') {
+          const stale = new Set<string>();
+          for (const done of completed) {
+            for (const depId of getDependents(this.graph, done)) {
+              if (pending.has(depId)) stale.add(depId);
+            }
+          }
+          for (const depId of stale) {
+            this.emit({ type: 'cell:stale', cellId: depId, timestamp: Date.now() });
+          }
+        }
+        throw error;
+      }
+      completed.push(cellId);
     }
 
     this.emit({

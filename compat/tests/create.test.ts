@@ -51,6 +51,14 @@ describe('compat create(all)', () => {
 });
 
 describe('compat create(all) lazy wrapping', () => {
+  it('a frozen instance still calls its functions (wrapper served from the closure)', () => {
+    const math = Object.freeze(create(all)) as unknown as {
+      add: (a: number, b: number) => number;
+    };
+    expect(math.add(1, 2)).toBe(3);
+    expect(math.add).toBe(math.add);
+  });
+
   it('memoizes wrappers: math.add === math.add and stays stable across reads', () => {
     const math = create(all) as Record<string, unknown>;
     const first = math.add;

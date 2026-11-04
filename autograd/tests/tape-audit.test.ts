@@ -53,6 +53,14 @@ describe('Tape.backward range and reset', () => {
     tape.backward(z.id, Float64Array.of(1, 1));
     expect(Array.from(tape.getInputGrad(x.id)!)).toEqual([40, 60]);
   });
+  it('a TapedTensor from before reset() throws instead of corrupting new slots', () => {
+    const tape = new Tape();
+    const old = leaf(tape, [2, 3]);
+    tape.reset();
+    const fresh = leaf(tape, [1, 1]);
+    expect(() => fresh.mul(old)).toThrow(/before Tape.reset/);
+    expect(() => old.add(old)).toThrow(/before Tape.reset/);
+  });
   it('reset clears nodes, closures and slots, and the tape is reusable', () => {
     const tape = new Tape();
     const x = leaf(tape, [2, 3]);

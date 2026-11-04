@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-02",
-    "totalFiles": 1233,
+    "lastUpdated": "2026-11-04",
+    "totalFiles": 1236,
     "totalModules": 82,
-    "totalExports": 6416
+    "totalExports": 6451
   },
   "entryPoints": [
     {
@@ -279,6 +279,16 @@
             "imports": ["fftFrameInPlace"]
           },
           {
+            "file": "./worker-numerics.js",
+            "imports": [
+              "_workerPairwiseSum",
+              "_workerPairwiseDot",
+              "_workerScaledSsq",
+              "_workerScaledSsqDiff",
+              "_workerCombineScaledSsq"
+            ]
+          },
+          {
             "file": "./chunk-typed.js",
             "imports": ["chunkTyped", "chunkPairTyped"],
             "reExport": true
@@ -383,15 +393,31 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "workspaceDependencies": [],
-        "exports": ["_tdRowMajorStrides", "_workerMulberry32"],
-        "functions": ["_tdRowMajorStrides", "_workerMulberry32"]
+        "exports": [
+          "_tdRowMajorStrides",
+          "_workerMulberry32",
+          "_workerPairwiseSum",
+          "_workerPairwiseDot",
+          "_workerScaledSsq",
+          "_workerScaledSsqDiff",
+          "_workerCombineScaledSsq"
+        ],
+        "functions": [
+          "_tdRowMajorStrides",
+          "_workerMulberry32",
+          "_workerPairwiseSum",
+          "_workerPairwiseDot",
+          "_workerScaledSsq",
+          "_workerScaledSsqDiff",
+          "_workerCombineScaledSsq"
+        ]
       },
       "packages/workerpool/src/worker.ts": {
         "description": "Worker functions for parallel MathTS computations.",
         "externalDependencies": [
           {
             "package": "workerpool",
-            "imports": ["worker"]
+            "imports": ["worker", "Transfer"]
           }
         ],
         "nodeDependencies": [],
@@ -410,7 +436,13 @@
           },
           {
             "file": "./worker-numerics.js",
-            "imports": ["_workerMulberry32"]
+            "imports": [
+              "_workerMulberry32",
+              "_workerPairwiseSum",
+              "_workerPairwiseDot",
+              "_workerScaledSsq",
+              "_workerScaledSsqDiff"
+            ]
           }
         ],
         "workspaceDependencies": [],
@@ -2849,6 +2881,10 @@
             "imports": ["DimensionMismatchError", "UnitParseError"]
           },
           {
+            "file": "./va-var.js",
+            "imports": ["isEffectivelyImaginary"]
+          },
+          {
             "file": "./exact-scale.js",
             "imports": [
               "ExactScale",
@@ -3387,6 +3423,15 @@
           "UnitInstance",
           "UnitConstructor"
         ]
+      },
+      "core/src/types/unit/va-var.ts": {
+        "description": "VA / VAR classification for complex-valued units.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["isEffectivelyImaginary"],
+        "functions": ["isEffectivelyImaginary"]
       },
       "core/src/types/unit-definitions.ts": {
         "description": "Unit definitions for the Unit type.",
@@ -5509,9 +5554,14 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["isDenseMatrix", "denseContiguousData", "DenseMatrix"],
+        "exports": [
+          "isDenseMatrix",
+          "registerSparseMatrixFactory",
+          "denseContiguousData",
+          "DenseMatrix"
+        ],
         "classes": ["DenseMatrix"],
-        "functions": ["isDenseMatrix", "denseContiguousData"]
+        "functions": ["isDenseMatrix", "registerSparseMatrixFactory", "denseContiguousData"]
       },
       "matrix/src/types/Matrix.ts": {
         "description": "Matrix Base Class",
@@ -5540,7 +5590,7 @@
           },
           {
             "file": "./DenseMatrix.js",
-            "imports": ["DenseMatrix"]
+            "imports": ["DenseMatrix", "registerSparseMatrixFactory"]
           }
         ],
         "workspaceDependencies": [],
@@ -5557,6 +5607,10 @@
             "file": "../Matrix.js",
             "imports": ["Matrix"],
             "typeOnly": true
+          },
+          {
+            "file": "../DenseMatrix.js",
+            "imports": ["DenseMatrix", "denseContiguousData"]
           }
         ],
         "workspaceDependencies": [],
@@ -5572,6 +5626,10 @@
             "file": "../Matrix.js",
             "imports": ["Matrix"],
             "typeOnly": true
+          },
+          {
+            "file": "../DenseMatrix.js",
+            "imports": ["DenseMatrix", "denseContiguousData"]
           }
         ],
         "workspaceDependencies": [],
@@ -6591,8 +6649,9 @@
             "imports": ["Tensor", "Index", "tensorSvd", "tensorEig"]
           }
         ],
-        "exports": ["Tape", "TapedTensor"],
-        "classes": ["Tape", "TapedTensor"]
+        "exports": ["assertSameTape", "Tape", "TapedTensor"],
+        "classes": ["Tape", "TapedTensor"],
+        "functions": ["assertSameTape"]
       }
     },
     "functions/algebra": {
@@ -9478,7 +9537,7 @@
           },
           {
             "file": "./regression-extra.js",
-            "imports": ["fitLine", "linearRegression"]
+            "imports": ["fitLine", "linregressFromFit"]
           },
           {
             "file": "./typed/distributions.js",
@@ -10436,6 +10495,30 @@
             "typeOnly": true
           },
           {
+            "file": "./numeric/solveODE.js",
+            "imports": [
+              "ODESolution",
+              "ODEMatrixSolution",
+              "ODEOptions",
+              "ForcingFunction",
+              "SolveODEFunction"
+            ],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./signal/freqz.js",
+            "imports": ["FrequencyResponse", "FreqzFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
+            "file": "./signal/zpk2tf.js",
+            "imports": ["TransferFunction", "ZPKValue", "Zpk2tfFunction"],
+            "reExport": true,
+            "typeOnly": true
+          },
+          {
             "file": "./scalar-eval.js",
             "imports": ["ScalarScope"],
             "reExport": true,
@@ -11186,6 +11269,16 @@
           "dirichletPdf",
           "wishartSample",
           "PhysicsEvaluateOptions",
+          "ODESolution",
+          "ODEMatrixSolution",
+          "ODEOptions",
+          "ForcingFunction",
+          "SolveODEFunction",
+          "FrequencyResponse",
+          "FreqzFunction",
+          "TransferFunction",
+          "ZPKValue",
+          "Zpk2tfFunction",
           "ScalarScope",
           "CompileScalarOptions",
           "ScalarBatchResult",
@@ -11671,6 +11764,16 @@
           "dirichletPdf",
           "wishartSample",
           "PhysicsEvaluateOptions",
+          "ODESolution",
+          "ODEMatrixSolution",
+          "ODEOptions",
+          "ForcingFunction",
+          "SolveODEFunction",
+          "FrequencyResponse",
+          "FreqzFunction",
+          "TransferFunction",
+          "ZPKValue",
+          "Zpk2tfFunction",
           "ScalarScope",
           "CompileScalarOptions",
           "ScalarBatchResult",
@@ -12010,9 +12113,9 @@
             "imports": ["pairwiseDot", "pairwiseSum", "sumSquaredDeviations"]
           }
         ],
-        "exports": ["fitLine", "linearRegression"],
+        "exports": ["fitLine", "linearRegression", "linregressFromFit"],
         "interfaces": ["LineFit", "LinregressResult"],
-        "functions": ["fitLine", "linearRegression"]
+        "functions": ["fitLine", "linearRegression", "linregressFromFit"]
       },
       "functions/src/scalar-batch-parallel.ts": {
         "description": "Evaluates many scalar trees over shared columns, on worker threads when asked to (M14).",
@@ -17372,6 +17475,7 @@
           "bdfSolve",
           "radauSolve"
         ],
+        "interfaces": ["ODEOptions", "ODESolution", "ODEMatrixSolution"],
         "functions": ["_factorSolver", "rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
         "constants": ["createSolveODE"]
       },
@@ -17825,6 +17929,10 @@
           {
             "file": "../utils/factory.js",
             "imports": ["factory"]
+          },
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepMap"]
           },
           {
             "file": "../plain/number/combinations.js",
@@ -19144,6 +19252,7 @@
         ],
         "workspaceDependencies": [],
         "exports": ["createFreqz"],
+        "interfaces": ["FrequencyResponse"],
         "constants": ["createFreqz"]
       },
       "functions/src/signal/iir-design.ts": {
@@ -22120,7 +22229,6 @@
             "file": "../wasm/poly/wasm-bridge.js",
             "imports": [
               "polyMulDispatch",
-              "polyMulJS",
               "polyDivModDispatch",
               "resultantDispatch",
               "discriminantDispatch",
@@ -22458,7 +22566,7 @@
         "internalDependencies": [
           {
             "file": "../factories/evaluate.js",
-            "imports": ["parse", "evaluate"]
+            "imports": ["parse", "evaluate", "compileExpr"]
           },
           {
             "file": "./euclid.js",
@@ -24358,12 +24466,22 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/collection.js",
+            "imports": ["deepMap"]
+          }
+        ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["mathTyped"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["IMatrix"]
           }
         ],
         "exports": [
@@ -26544,19 +26662,10 @@
           "WASM_SORT_THRESHOLD",
           "sortF64JS",
           "argsortF64JS",
-          "rankF64JS",
           "sortF64Dispatch",
-          "argsortF64Dispatch",
-          "rankF64Dispatch"
+          "argsortF64Dispatch"
         ],
-        "functions": [
-          "sortF64JS",
-          "argsortF64JS",
-          "rankF64JS",
-          "sortF64Dispatch",
-          "argsortF64Dispatch",
-          "rankF64Dispatch"
-        ],
+        "functions": ["sortF64JS", "argsortF64JS", "sortF64Dispatch", "argsortF64Dispatch"],
         "constants": ["WASM_SORT_THRESHOLD"]
       },
       "functions/src/wasm/special/scalars.ts": {
@@ -33086,6 +33195,10 @@
             "imports": ["factory"]
           },
           {
+            "file": "../utils/mathml.js",
+            "imports": ["toMathMLSymbol"]
+          },
+          {
             "file": "./Node.js",
             "imports": ["MathNode", "StringOptions"],
             "typeOnly": true
@@ -33096,7 +33209,7 @@
         "constants": ["createFunctionAssignmentNode"]
       },
       "expression/src/node/FunctionNode.ts": {
-        "description": "invoke a list with arguments on a node",
+        "description": "Sandbox-safe \"is this member undefined?\" test for `obj?.method()`. It never",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -33120,7 +33233,7 @@
           },
           {
             "file": "../utils/customs.js",
-            "imports": ["getSafeProperty", "getSafeMethod"]
+            "imports": ["getSafeProperty", "getSafeMethod", "isSafeProperty", "isSafeMethod"]
           },
           {
             "file": "../utils/scope.js",
@@ -33153,7 +33266,7 @@
         "constants": ["createFunctionNode"]
       },
       "expression/src/node/IndexNode.ts": {
-        "description": "Describes a subset of a matrix or an object property.",
+        "description": "Convert a BigNumber index value to a number. Index values must be integers;",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -33173,6 +33286,7 @@
             "file": "../utils/is.js",
             "imports": [
               "isArray",
+              "isBigNumber",
               "isConstantNode",
               "isMatrix",
               "isNode",
@@ -33184,6 +33298,10 @@
           {
             "file": "../utils/string.js",
             "imports": ["escape"]
+          },
+          {
+            "file": "../utils/mathml.js",
+            "imports": ["toMathMLSymbol"]
           },
           {
             "file": "./Node.js",
@@ -33265,6 +33383,10 @@
           {
             "file": "../utils/string.js",
             "imports": ["escape", "stringify"]
+          },
+          {
+            "file": "../utils/mathml.js",
+            "imports": ["escapeMathML"]
           },
           {
             "file": "./Node.js",
@@ -33469,6 +33591,10 @@
             "imports": ["getSafeProperty"]
           },
           {
+            "file": "./describeType.js",
+            "imports": ["describeType"]
+          },
+          {
             "file": "./stringSubset.js",
             "imports": ["getStringSubset"]
           }
@@ -33491,6 +33617,10 @@
             "imports": ["setSafeProperty"]
           },
           {
+            "file": "./describeType.js",
+            "imports": ["describeType"]
+          },
+          {
             "file": "./stringSubset.js",
             "imports": ["setStringSubset"]
           },
@@ -33503,6 +33633,15 @@
         "workspaceDependencies": [],
         "exports": ["assignFactory"],
         "functions": ["assignFactory"]
+      },
+      "expression/src/node/utils/describeType.ts": {
+        "description": "describeType module",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["describeType"],
+        "functions": ["describeType"]
       },
       "expression/src/node/utils/stringSubset.ts": {
         "description": "Retrieve a subset of a string.",
@@ -35152,7 +35291,8 @@
               "unitRowExactOffset",
               "UNIT_PREFIX_SETS",
               "unitPrefixExactScale",
-              "getUnitPrefix"
+              "getUnitPrefix",
+              "REFUSED_UNIT_SPELLINGS"
             ]
           },
           {
@@ -35161,6 +35301,7 @@
             "imports": [
               "Dimensions",
               "UnitDef",
+              "UnitInstance",
               "SiDimensionVector",
               "SiDimensionOptions",
               "SiDimensionExponent",
@@ -35229,8 +35370,10 @@
           "UNIT_PREFIX_SETS",
           "unitPrefixExactScale",
           "getUnitPrefix",
+          "REFUSED_UNIT_SPELLINGS",
           "Dimensions",
           "UnitDef",
+          "UnitInstance",
           "SiDimensionVector",
           "SiDimensionOptions",
           "SiDimensionExponent",
@@ -35297,8 +35440,10 @@
           "UNIT_PREFIX_SETS",
           "unitPrefixExactScale",
           "getUnitPrefix",
+          "REFUSED_UNIT_SPELLINGS",
           "Dimensions",
           "UnitDef",
+          "UnitInstance",
           "SiDimensionVector",
           "SiDimensionOptions",
           "SiDimensionExponent",
@@ -35549,7 +35694,14 @@
               "matrixPinv",
               "qr",
               "lu",
+              "luSolve",
               "cholesky",
+              "qrPivoted",
+              "lq",
+              "rq",
+              "ql",
+              "condest",
+              "transposeNestedArray",
               "matrixExpm",
               "matrixLogm",
               "matrixSqrtm",
@@ -35568,6 +35720,10 @@
               "QRResult",
               "QROptions",
               "LUResult",
+              "QRPivotedResult",
+              "LQResult",
+              "RQResult",
+              "QLResult",
               "CholeskyResult",
               "ExpmOptions",
               "LogmOptions",
@@ -35595,7 +35751,14 @@
           "matrixPinv",
           "qr",
           "lu",
+          "luSolve",
           "cholesky",
+          "qrPivoted",
+          "lq",
+          "rq",
+          "ql",
+          "condest",
+          "transposeNestedArray",
           "matrixExpm",
           "matrixLogm",
           "matrixSqrtm",
@@ -35608,6 +35771,10 @@
           "QRResult",
           "QROptions",
           "LUResult",
+          "QRPivotedResult",
+          "LQResult",
+          "RQResult",
+          "QLResult",
           "CholeskyResult",
           "ExpmOptions",
           "LogmOptions",
@@ -35633,7 +35800,14 @@
           "matrixPinv",
           "qr",
           "lu",
+          "luSolve",
           "cholesky",
+          "qrPivoted",
+          "lq",
+          "rq",
+          "ql",
+          "condest",
+          "transposeNestedArray",
           "matrixExpm",
           "matrixLogm",
           "matrixSqrtm",
@@ -35646,6 +35820,10 @@
           "QRResult",
           "QROptions",
           "LUResult",
+          "QRPivotedResult",
+          "LQResult",
+          "RQResult",
+          "QLResult",
           "CholeskyResult",
           "ExpmOptions",
           "LogmOptions",
@@ -36708,6 +36886,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./validate.js",
+            "imports": ["assertSameLength", "assertMatmulShape"]
+          },
+          {
             "file": "./ops/bitwise.js",
             "imports": [
               "bitAnd",
@@ -36755,7 +36937,7 @@
           "ComputePool"
         ],
         "classes": ["ComputePool"],
-        "interfaces": ["ComputePoolConfig", "ParallelResult"],
+        "interfaces": ["ComputePoolConfig", "DispatchOptions", "ParallelResult"],
         "functions": ["resolveOpThreshold"],
         "constants": ["DEFAULT_THRESHOLD_BY_OP", "DEFAULT_POOL_CONFIG", "computePool"]
       },
@@ -36771,6 +36953,10 @@
           {
             "file": "./gemm-rows.js",
             "imports": ["gemmRows"]
+          },
+          {
+            "file": "./validate.js",
+            "imports": ["assertMatmulShape"]
           }
         ],
         "workspaceDependencies": [],
@@ -36899,7 +37085,13 @@
           },
           {
             "file": "./ComputePool.js",
-            "imports": ["ComputePoolConfig", "ParallelResult", "OpName", "OpThreshold"],
+            "imports": [
+              "ComputePoolConfig",
+              "ParallelResult",
+              "OpName",
+              "OpThreshold",
+              "DispatchOptions"
+            ],
             "reExport": true,
             "typeOnly": true
           },
@@ -37010,6 +37202,7 @@
           "ParallelResult",
           "OpName",
           "OpThreshold",
+          "DispatchOptions",
           "MatmulOptions",
           "ElementwiseOptions",
           "ReduceOptions",
@@ -37099,6 +37292,7 @@
           "ParallelResult",
           "OpName",
           "OpThreshold",
+          "DispatchOptions",
           "MatmulOptions",
           "ElementwiseOptions",
           "ReduceOptions",
@@ -37128,6 +37322,15 @@
         ],
         "workspaceDependencies": [],
         "exports": []
+      },
+      "parallel/src/validate.ts": {
+        "description": "Argument validation shared by the parallel operations.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["assertSameLength", "assertMatmulShape"],
+        "functions": ["assertSameLength", "assertMatmulShape"]
       }
     },
     "parallel/operations": {
@@ -37477,6 +37680,10 @@
           {
             "file": "../strategies/chunk.js",
             "imports": ["calculateOptimalChunks", "ChunkOptions"]
+          },
+          {
+            "file": "../validate.js",
+            "imports": ["assertSameLength"]
           }
         ],
         "workspaceDependencies": [],
@@ -37935,6 +38142,7 @@
           "buildDependencyGraph",
           "topologicalSort",
           "getDependents",
+          "getDependentsOfMany",
           "getAncestors",
           "toMermaid",
           "toDOT",
@@ -37944,6 +38152,7 @@
           "buildDependencyGraph",
           "topologicalSort",
           "getDependents",
+          "getDependentsOfMany",
           "getAncestors",
           "toMermaid",
           "toDOT",
@@ -38415,7 +38624,14 @@
         "internalDependencies": [
           {
             "file": "./types.js",
-            "imports": ["Workbook", "Cell", "CellResult", "RunResult", "CellType"],
+            "imports": [
+              "Workbook",
+              "Cell",
+              "DependencyGraph",
+              "CellResult",
+              "RunResult",
+              "CellType"
+            ],
             "typeOnly": true
           },
           {
@@ -38428,7 +38644,7 @@
           },
           {
             "file": "./graph.js",
-            "imports": ["buildDependencyGraph", "getAncestors", "getDependents"]
+            "imports": ["buildDependencyGraph", "getAncestors", "getDependentsOfMany"]
           },
           {
             "file": "./fs-atomic.js",
@@ -41730,10 +41946,21 @@
   },
   "dependencyGraph": {
     "circularDependencies": {
-      "runtime": [],
+      "runtime": [
+        [
+          "matrix/src/types/DenseMatrix.ts",
+          "matrix/src/types/dense/arithmetic.ts",
+          "matrix/src/types/DenseMatrix.ts"
+        ],
+        [
+          "matrix/src/types/DenseMatrix.ts",
+          "matrix/src/types/dense/reduction.ts",
+          "matrix/src/types/DenseMatrix.ts"
+        ]
+      ],
       "typeOnly": [],
-      "total": 0,
-      "runtimeCount": 0,
+      "total": 2,
+      "runtimeCount": 2,
       "typeOnlyCount": 0
     },
     "layers": [
@@ -41828,6 +42055,7 @@
           "core/src/types/unit/index.ts",
           "core/src/types/unit/unit-table.ts",
           "core/src/types/unit/unit-types.ts",
+          "core/src/types/unit/va-var.ts",
           "core/src/types/unit-definitions.ts",
           "core/src/types/unit-prefixes.ts",
           "core/src/types/unit.ts",
@@ -43069,6 +43297,7 @@
           "expression/src/node/SymbolNode.ts",
           "expression/src/node/utils/access.ts",
           "expression/src/node/utils/assign.ts",
+          "expression/src/node/utils/describeType.ts",
           "expression/src/node/utils/stringSubset.ts"
         ]
       },
@@ -43176,7 +43405,8 @@
           "parallel/src/WorkerPool.ts",
           "parallel/src/gemm-rows.ts",
           "parallel/src/index.ts",
-          "parallel/src/matrix.worker.ts"
+          "parallel/src/matrix.worker.ts",
+          "parallel/src/validate.ts"
         ]
       },
       {
@@ -43325,19 +43555,19 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1233,
+    "totalTypeScriptFiles": 1236,
     "totalModules": 82,
-    "totalLinesOfCode": 204601,
-    "totalExports": 6416,
+    "totalLinesOfCode": 206082,
+    "totalExports": 6451,
     "totalClasses": 60,
-    "totalInterfaces": 570,
-    "totalFunctions": 2072,
-    "totalTypeGuards": 161,
+    "totalInterfaces": 575,
+    "totalFunctions": 2083,
+    "totalTypeGuards": 162,
     "totalEnums": 0,
     "totalConstants": 1633,
-    "totalReExports": 2725,
-    "totalTypeOnlyImports": 621,
-    "runtimeCircularDeps": 0,
+    "totalReExports": 2749,
+    "totalTypeOnlyImports": 624,
+    "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 0,
     "unusedFilesCount": 0,
     "unusedExportsCount": 0

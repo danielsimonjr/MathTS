@@ -53,6 +53,10 @@ export class WorkerPool {
   private workerScript: string;
   private isNode: boolean;
   private terminated = false;
+  /** Workers that have delivered at least one message (so their script loads). */
+  private readyWorkers = new WeakSet<Worker>();
+  /** Consecutive crashes of workers that never became ready. */
+  private startupFailures = 0;
 
   constructor(workerScript: string, maxWorkers?: number) {
     // 0 (and undefined) mean auto-detect, the convention `ParallelConfig` documents.
@@ -139,11 +143,18 @@ export class WorkerPool {
   }
 
   private handleWorkerMessage(worker: Worker, message: WorkerMessage): void {
+    this.readyWorkers.add(worker);
+    this.startupFailures = 0;
     const task = this.activeTasks.get(message.id);
     if (!task) {
       // The task is gone (timed out or rejected) but the worker is still a member of the
-      // pool and now idle: give it back, unless it was evicted or is already free.
-      if (this.workers.includes(worker) && !this.availableWorkers.includes(worker)) {
+      // pool and now idle: give it back, unless it was evicted, is already free, or is
+      // still running another task (a script that posts twice for one id).
+      if (
+        this.workers.includes(worker) &&
+        !this.availableWorkers.includes(worker) &&
+        !this.isBusy(worker)
+      ) {
         this.availableWorkers.push(worker);
         this.processQueue();
       }
@@ -178,7 +189,40 @@ export class WorkerPool {
         task.reject(new Error(`Worker error: ${error.message}`));
       }
     }
+    if (!this.readyWorkers.has(worker)) {
+      // The worker died before ever answering: the script itself is likely broken
+      // (bad path, top-level throw). Cap the respawns so a deterministic failure
+      // does not loop forever, and fail the queued tasks instead of hanging them.
+      this.startupFailures++;
+      if (this.startupFailures >= WorkerPool.MAX_STARTUP_FAILURES) {
+        this.workers = this.workers.filter((w) => w !== worker);
+        this.availableWorkers = this.availableWorkers.filter((w) => w !== worker);
+        try {
+          worker.terminate();
+        } catch {
+          /* already dead */
+        }
+        const reason = new Error(
+          `WorkerPool: ${this.startupFailures} consecutive workers failed before becoming ready (${error.message}); not respawning`
+        );
+        for (const task of this.taskQueue.splice(0)) {
+          this.clearTaskTimer(task);
+          task.reject(reason);
+        }
+        return;
+      }
+    }
     void this.evictAndReplace(worker);
+  }
+
+  /** Consecutive never-ready worker crashes tolerated before the pool stops respawning. */
+  static readonly MAX_STARTUP_FAILURES = 3;
+
+  private isBusy(worker: Worker): boolean {
+    for (const task of this.activeTasks.values()) {
+      if (task.worker === worker) return true;
+    }
+    return false;
   }
 
   /** Terminate a crashed worker, drop it from the roster and spawn a replacement. */

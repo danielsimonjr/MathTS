@@ -389,8 +389,17 @@ function scaleToSafeIntegers(coeffs: number[]): number[] | null {
     L = (L / gcdSmall(L, q)) * q;
     if (L > MAX_RATIONAL_DENOMINATOR) return null;
   }
-  const out = coeffs.map((c) => Math.round(c * L));
-  return out.every(Number.isSafeInteger) ? out : null;
+  // The convergent test above is relative, so a large non-integer (|c| ≳ 1e12) can pass as
+  // "integer"; require the scaled values to sit on integers in absolute terms too, otherwise
+  // rounding would silently change a coefficient.
+  const out = new Array<number>(coeffs.length);
+  for (let i = 0; i < coeffs.length; i++) {
+    const scaled = coeffs[i] * L;
+    const r = Math.round(scaled);
+    if (Math.abs(scaled - r) > 1e-9 || !Number.isSafeInteger(r)) return null;
+    out[i] = r;
+  }
+  return out;
 }
 
 /** Exact monic GCD of two integer-coefficient polynomials. */

@@ -1,5 +1,5 @@
 ---
-'@danielsimonjr/mathts-workerpool': patch
+'@danielsimonjr/mathts-workerpool': minor
 ---
 
 The `sumChunk`, `dotChunk`, `normChunk` and `distanceChunk` kernels use the same stable accumulation as `ComputePool`'s sequential path: pairwise sum and dot, and BLAS-style scaled partials combined scale-aware for `norm` and `distance`. A parallel `norm` of a 1e200-scaled vector is now finite and matches the sequential result; sums and dots can differ in the last bits from before. `normChunk` and `distanceChunk` now return `[scale, ssq]` partials instead of a sum of squares. The copies live in `worker-numerics.ts` and are pinned bit-for-bit to core by a parity test.

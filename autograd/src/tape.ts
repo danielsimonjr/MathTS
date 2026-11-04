@@ -25,10 +25,15 @@ interface TapeNode {
  * Throw when two TapedTensors come from different Tapes: their ids index
  * different gradient-slot tables, so combining them would corrupt gradients.
  */
-export function assertSameTape(a: { readonly tape: Tape }, b: { readonly tape: Tape }): void {
+export function assertSameTape(
+  a: { readonly tape: Tape; readonly epoch?: number },
+  b: { readonly tape: Tape; readonly epoch?: number }
+): void {
   if (a.tape !== b.tape) {
     throw new Error('TapedTensor: operands belong to different Tapes');
   }
+  if (a.epoch !== undefined) a.tape.assertCurrentEpoch(a.epoch, 'TapedTensor');
+  if (b.epoch !== undefined) b.tape.assertCurrentEpoch(b.epoch, 'TapedTensor');
 }
 
 /**
@@ -95,6 +100,19 @@ export class Tape {
     this.inputGradSlots.clear();
     this.nextOpId = 0;
     this.nextInputId = -1;
+    this.epoch++;
+  }
+
+  /** Incremented by {@link reset}; a TapedTensor records the epoch it was created in. */
+  epoch = 0;
+
+  /** Throw when `tensorEpoch` predates the last {@link reset} (its id may now name another slot). */
+  assertCurrentEpoch(tensorEpoch: number, what: string): void {
+    if (tensorEpoch !== this.epoch) {
+      throw new Error(
+        `${what}: this TapedTensor was created before Tape.reset() and is no longer valid`
+      );
+    }
   }
 
   getInputGrad(id: number): Float64Array | undefined {
@@ -116,6 +134,9 @@ export class TapedTensor {
    */
   readonly axisLabels?: ReadonlyArray<Index>;
 
+  /** The tape epoch this tensor was recorded in; stale after {@link Tape.reset}. */
+  readonly epoch: number;
+
   constructor(
     readonly shape: ReadonlyArray<number>,
     readonly primal: Float64Array,
@@ -123,6 +144,7 @@ export class TapedTensor {
     readonly id: number,
     axisLabels?: ReadonlyArray<Index>
   ) {
+    this.epoch = tape.epoch;
     if (axisLabels !== undefined) {
       this.axisLabels = [...axisLabels];
     }

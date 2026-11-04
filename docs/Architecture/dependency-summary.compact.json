@@ -1,16 +1,20 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-02", "f": 1233, "e": 6416, "re": 2725 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1236, "e": 6451, "re": 2749 },
   "s": {
-    "loc": 204601,
+    "loc": 206082,
     "cls": 60,
-    "int": 570,
-    "fn": 2072,
-    "tg": 161,
+    "int": 575,
+    "fn": 2083,
+    "tg": 162,
     "en": 0,
     "co": 1633,
-    "toi": 621
+    "toi": 624
   },
-  "c": { "rt": 0, "to": 0, "rtp": [] },
+  "c": {
+    "rt": 2,
+    "to": 0,
+    "rtp": ["DenseMatrix→arithmetic→DenseMatrix", "DenseMatrix→reduction→DenseMatrix"]
+  },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -196,7 +200,7 @@
       "int": ["MathTSTyped", "TypeDef", "ConversionDef", "MathTSTypeDef"]
     },
     "core/types": {
-      "f": 19,
+      "f": 20,
       "exp": [
         "BIGNUMBER_ZERO",
         "BIGNUMBER_ONE",
@@ -356,6 +360,7 @@
       "f": 6,
       "exp": [
         "isDenseMatrix",
+        "registerSparseMatrixFactory",
         "denseContiguousData",
         "DenseMatrix",
         "isMatrix",
@@ -454,7 +459,8 @@
         "reverseGrad",
         "ScalarFn",
         "NumericInput",
-        "assertSameShape"
+        "assertSameShape",
+        "assertSameTape"
       ],
       "cls": ["DualTensor", "Tape", "TapedTensor"]
     },
@@ -964,6 +970,7 @@
         "ComplexNumber",
         "FFTResult",
         "DeconvolveResult",
+        "FrequencyResponse",
         "FindPeaksOptions",
         "CsdOptions",
         "StftOptions",
@@ -1295,7 +1302,7 @@
     },
     "expression/function": { "f": 1, "exp": ["createParser"] },
     "expression/node": {
-      "f": 19,
+      "f": 20,
       "exp": [
         "createAccessorNode",
         "createArrayNode",
@@ -1316,7 +1323,7 @@
         "createSymbolNode",
         "accessFactory",
         "assignFactory",
-        "getStringSubset"
+        "describeType"
       ],
       "int": ["CompiledExpression", "StringOptions", "IndexLike"]
     },
@@ -1493,9 +1500,9 @@
         "matrixPinv",
         "qr",
         "lu",
+        "luSolve",
         "cholesky",
-        "matrixExpm",
-        "matrixLogm"
+        "qrPivoted"
       ]
     },
     "arithmetic": {
@@ -1599,7 +1606,7 @@
       ]
     },
     "parallel": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "Transfer",
         "DEFAULT_THRESHOLD_BY_OP",
@@ -1616,7 +1623,13 @@
         "parallelOuter"
       ],
       "cls": ["ComputePool", "ParallelMatrix", "WorkerPool"],
-      "int": ["ComputePoolConfig", "ParallelResult", "MatrixData", "ParallelConfig"]
+      "int": [
+        "ComputePoolConfig",
+        "DispatchOptions",
+        "ParallelResult",
+        "MatrixData",
+        "ParallelConfig"
+      ]
     },
     "parallel/operations": {
       "f": 5,
@@ -1873,7 +1886,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 12 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
-    { "p": "src/index.ts", "i": 152, "o": 0 },
+    { "p": "src/index.ts", "i": 155, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
@@ -1883,6 +1896,6 @@
     { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 46 },
     { "p": "utils/number.ts", "i": 0, "o": 44 },
-    { "p": "utils/collection.ts", "i": 0, "o": 39 }
+    { "p": "utils/collection.ts", "i": 0, "o": 41 }
   ]
 }
