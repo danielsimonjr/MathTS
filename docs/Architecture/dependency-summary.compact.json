@@ -1,20 +1,16 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1236, "e": 6451, "re": 2749 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1237, "e": 6452, "re": 2749 },
   "s": {
-    "loc": 206082,
+    "loc": 206123,
     "cls": 60,
     "int": 575,
-    "fn": 2083,
+    "fn": 2084,
     "tg": 162,
     "en": 0,
     "co": 1633,
-    "toi": 624
+    "toi": 625
   },
-  "c": {
-    "rt": 2,
-    "to": 0,
-    "rtp": ["DenseMatrix→arithmetic→DenseMatrix", "DenseMatrix→reduction→DenseMatrix"]
-  },
+  "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
     "packages/typed-function": {
       "f": 1,
@@ -357,7 +353,7 @@
       ]
     },
     "matrix/types": {
-      "f": 6,
+      "f": 7,
       "exp": [
         "isDenseMatrix",
         "registerSparseMatrixFactory",
@@ -378,7 +374,7 @@
         "max",
         "norm",
         "trace",
-        "Matrix"
+        "contiguousDenseData"
       ],
       "cls": ["DenseMatrix", "SparseMatrix"],
       "int": ["MatrixIndex", "SliceSpec", "MatrixEntry"]

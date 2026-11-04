@@ -182,8 +182,6 @@
       "matrix/src/parallel-matrix.ts",
       "matrix/src/typed-operations.ts",
       "matrix/src/types/SparseMatrix.ts",
-      "matrix/src/types/dense/arithmetic.ts",
-      "matrix/src/types/dense/reduction.ts",
       "matrix/src/types/index.ts"
     ],
     "matrix/src/backends/Backend.ts": [
@@ -308,9 +306,15 @@
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/dense/arithmetic.ts",
       "matrix/src/types/dense/reduction.ts",
+      "matrix/src/types/dense/storage.ts",
       "matrix/src/types/index.ts"
     ],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
+    "matrix/src/types/dense/storage.ts": [
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/types/dense/arithmetic.ts",
+      "matrix/src/types/dense/reduction.ts"
+    ],
     "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",

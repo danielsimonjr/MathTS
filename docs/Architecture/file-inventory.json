@@ -1,9 +1,9 @@
 {
   "generated": "2026-11-04",
-  "totalFiles": 2089,
+  "totalFiles": 2090,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1210,
+    "build-entry": 1211,
     "test-only": 0,
     "orphan": 0,
     "test": 791,
@@ -12,7 +12,7 @@
     "example": 5
   },
   "byArea": {
-    "src": 1236,
+    "src": 1237,
     "tests": 791,
     "config": 29,
     "examples": 5,
@@ -31,7 +31,7 @@
     "@danielsimonjr/mathts-functions": 888,
     "@danielsimonjr/mathts-gpu": 17,
     "@danielsimonjr/mathts-linalg": 3,
-    "@danielsimonjr/mathts-matrix": 117,
+    "@danielsimonjr/mathts-matrix": 118,
     "@danielsimonjr/mathts-numbers": 3,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 22,
@@ -12000,7 +12000,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 150
+      "loc": 151
     },
     {
       "file": "matrix/src/types/dense/reduction.ts",
@@ -12010,11 +12010,18 @@
       "loc": 125
     },
     {
+      "file": "matrix/src/types/dense/storage.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 44
+    },
+    {
       "file": "matrix/src/types/DenseMatrix.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 630
+      "loc": 618
     },
     {
       "file": "matrix/src/types/index.ts",
@@ -12826,7 +12833,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 418
+      "loc": 426
     },
     {
       "file": "parallel/tests/benchmark.test.ts",

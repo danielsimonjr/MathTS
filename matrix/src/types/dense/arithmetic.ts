@@ -1,5 +1,5 @@
 import type { Matrix } from '../Matrix.js';
-import { DenseMatrix, denseContiguousData } from '../DenseMatrix.js';
+import { contiguousDenseData } from './storage.js';
 
 /**
  * Contiguous row-major view of a matrix's data. Using the flat Float64Array
@@ -10,7 +10,8 @@ import { DenseMatrix, denseContiguousData } from '../DenseMatrix.js';
 function flat(m: Matrix<number>): Float64Array {
   // Read-only: no op in this module mutates its input, so the backing store of a
   // contiguous DenseMatrix is used without a copy.
-  if (m instanceof DenseMatrix) return denseContiguousData(m);
+  const dense = contiguousDenseData(m);
+  if (dense !== null) return dense;
   const maybe = m as { toFloat64Array?: () => Float64Array };
   if (typeof maybe.toFloat64Array === 'function') return maybe.toFloat64Array();
   // Generic fallback for matrix types without a flat accessor (e.g. sparse).

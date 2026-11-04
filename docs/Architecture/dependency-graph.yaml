@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-04'
-  totalFiles: 1236
+  totalFiles: 1237
   totalModules: 82
-  totalExports: 6451
+  totalExports: 6452
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5371,6 +5371,9 @@ modules:
         - file: ./dense/reduction.js
           imports:
             - '* as reduction'
+        - file: ./dense/storage.js
+          imports:
+            - contiguousDenseData
       workspaceDependencies: []
       exports:
         - isDenseMatrix
@@ -5432,10 +5435,9 @@ modules:
           imports:
             - Matrix
           typeOnly: true
-        - file: ../DenseMatrix.js
+        - file: ./storage.js
           imports:
-            - DenseMatrix
-            - denseContiguousData
+            - contiguousDenseData
       workspaceDependencies: []
       exports:
         - add
@@ -5460,10 +5462,9 @@ modules:
           imports:
             - Matrix
           typeOnly: true
-        - file: ../DenseMatrix.js
+        - file: ./storage.js
           imports:
-            - DenseMatrix
-            - denseContiguousData
+            - contiguousDenseData
       workspaceDependencies: []
       exports:
         - sum
@@ -5479,6 +5480,20 @@ modules:
         - max
         - norm
         - trace
+    matrix/src/types/dense/storage.ts:
+      description: The private storage fields of `DenseMatrix` that the in-package kernels read.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../Matrix.js
+          imports:
+            - Matrix
+          typeOnly: true
+      workspaceDependencies: []
+      exports:
+        - contiguousDenseData
+      functions:
+        - contiguousDenseData
     matrix/src/types/index.ts:
       description: Matrix Type Exports
       externalDependencies: []
@@ -39723,16 +39738,10 @@ modules:
         - DEPTH_EPS
 dependencyGraph:
   circularDependencies:
-    runtime:
-      - - matrix/src/types/DenseMatrix.ts
-        - matrix/src/types/dense/arithmetic.ts
-        - matrix/src/types/DenseMatrix.ts
-      - - matrix/src/types/DenseMatrix.ts
-        - matrix/src/types/dense/reduction.ts
-        - matrix/src/types/DenseMatrix.ts
+    runtime: []
     typeOnly: []
-    total: 2
-    runtimeCount: 2
+    total: 0
+    runtimeCount: 0
     typeOnlyCount: 0
   layers:
     - name: Packages/typed-function
@@ -39869,6 +39878,7 @@ dependencyGraph:
         - matrix/src/types/SparseMatrix.ts
         - matrix/src/types/dense/arithmetic.ts
         - matrix/src/types/dense/reduction.ts
+        - matrix/src/types/dense/storage.ts
         - matrix/src/types/index.ts
     - name: Tensor
       files:
@@ -41136,19 +41146,19 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1236
+  totalTypeScriptFiles: 1237
   totalModules: 82
-  totalLinesOfCode: 206082
-  totalExports: 6451
+  totalLinesOfCode: 206123
+  totalExports: 6452
   totalClasses: 60
   totalInterfaces: 575
-  totalFunctions: 2083
+  totalFunctions: 2084
   totalTypeGuards: 162
   totalEnums: 0
   totalConstants: 1633
   totalReExports: 2749
-  totalTypeOnlyImports: 624
-  runtimeCircularDeps: 2
+  totalTypeOnlyImports: 625
+  runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
   unusedFilesCount: 0
   unusedExportsCount: 0

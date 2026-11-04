@@ -10,6 +10,7 @@
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import * as arithmetic from './dense/arithmetic.js';
 import * as reduction from './dense/reduction.js';
+import { contiguousDenseData } from './dense/storage.js';
 
 /**
  * Dense matrix implementation using Float64Array
@@ -605,25 +606,12 @@ export function registerSparseMatrixFactory(factory: SparseFactory): void {
   sparseMatrixFactory = factory;
 }
 
-type DenseStorage = {
-  isView: boolean;
-  offset: number;
-  rowStride: number;
-  cols: number;
-  data: Float64Array;
-  toFlatFloat64Array(): Float64Array;
-};
-
 /**
- * Row-major Float64 storage for in-package kernels.
- * Returns the backing array when the matrix is contiguous (no view, offset 0,
- * row stride equal to the column count) and a copy otherwise.
+ * Row-major Float64 storage for in-package kernels (see `dense/storage.ts`).
+ * Returns the backing array when the matrix is contiguous and a copy otherwise.
  * Not re-exported from `matrix/src/index.ts`.
  */
 export function denseContiguousData(matrix: DenseMatrix): Float64Array {
-  const m = matrix as unknown as DenseStorage;
-  if (!m.isView && m.offset === 0 && m.rowStride === m.cols) {
-    return m.data;
-  }
-  return m.toFlatFloat64Array();
+  // A DenseMatrix always matches the storage shape; the fallback is a copy.
+  return contiguousDenseData(matrix) ?? matrix.toFloat64Array();
 }

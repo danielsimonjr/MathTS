@@ -3919,6 +3919,7 @@
       "cond",
       "condest",
       "configureAdaptiveTuning",
+      "contiguousDenseData",
       "createBackendManager",
       "createGPUMatrixBackend",
       "createParallelBackend",
