@@ -593,36 +593,83 @@ describe('searchScalars: one front row per canonical key (SR-8)', () => {
     expect(scalarCanonicalKey(padded)).toBe(scalarCanonicalKey(square));
     const { front, fittedParameters } = hallFrontForTest([ind(square, 4, 3), ind(padded, 2, 5)]);
     expect(front).toHaveLength(1);
-    // The smaller stored complexity wins, and the survivor reports its own
-    // stored complexity, not the canonical shape's.
-    expect(front[0]!.complexity).toBe(3);
-    expect(front[0]!.item).toBe(square);
+    expect(front[0]!.loss).toBe(2);
+    expect(front[0]!.complexity).toBe(5);
+    expect(front[0]!.item).toBe(padded);
     expect([...fittedParameters[0]!]).toEqual([3]);
   });
 
-  it('a duplicate with a smaller loss but larger complexity does not replace the survivor', () => {
+  it('a duplicate with a smaller loss replaces the survivor even at larger complexity', () => {
     const { front } = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 5)]);
     expect(front).toHaveLength(1);
-    expect(front[0]!.complexity).toBe(3);
-    expect(front[0]!.item).toBe(square);
+    expect(front[0]!.loss).toBe(1);
+    expect(front[0]!.item).toBe(padded);
   });
 
   it('at equal complexity the smaller loss wins; a full tie keeps the first recorded', () => {
     const smaller = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 3)]);
     expect(smaller.front).toHaveLength(1);
     expect(smaller.front[0]!.item).toBe(padded);
-    // add() already keeps one tree per complexity, so a full tie means the
-    // second shape is never stored at all.
     const tied = hallFrontForTest([ind(square, 4, 3), ind(padded, 4, 3)]);
     expect(tied.front).toHaveLength(1);
     expect(tied.front[0]!.item).toBe(square);
   });
 
+  it('B1: the better-loss same-key tree is not dropped from the front by Pareto domination', () => {
+    const other = b.number(2);
+    const { front } = hallFrontForTest([
+      ind(other, 1, 1),
+      ind(square, 10, 3),
+      ind(padded, 0.01, 5),
+    ]);
+    const keys = front.map((row) => scalarCanonicalKey(row.item));
+    expect(keys).toContain(scalarCanonicalKey(square));
+    const squareRow = front.find(
+      (row) => scalarCanonicalKey(row.item) === scalarCanonicalKey(square)
+    );
+    expect(squareRow!.loss).toBe(0.01);
+    expect(front).toHaveLength(2);
+  });
+
+  it('B4: evicting a same-key duplicate does not remove a Pareto-optimal tree at that complexity', () => {
+    const other = b.op('+', [b.symbol('x'), b.symbol('x')]);
+    expect(scalarCanonicalKey(other)).not.toBe(scalarCanonicalKey(square));
+    const { front } = hallFrontForTest([
+      ind(other, 2, 3),
+      ind(square, 10, 3),
+      ind(padded, 0.01, 5),
+    ]);
+    expect(front).toHaveLength(2);
+    expect(new Set(front.map((row) => row.item))).toEqual(new Set([other, padded]));
+  });
+
+  it('B2: penalized x/x does not hide a loss-0 same-key offspring on the front', () => {
+    const div = b.op('/', [X, X]);
+    const one = b.op('*', [b.op('^', [X, b.number(0)]), b.number(1)]);
+    expect(scalarCanonicalKey(div)).toBe(scalarCanonicalKey(one));
+    const { front } = hallFrontForTest([ind(div, 1e8, 3), ind(one, 0, 5)]);
+    expect(front).toHaveLength(1);
+    expect(front[0]!.loss).toBe(0);
+    expect(front[0]!.item).toBe(one);
+  });
+
+  it('B3: complexityWeights do not change which same-key survivor the hall keeps', () => {
+    const div = b.op('/', [X, X]);
+    const one = b.op('*', [b.op('^', [X, b.number(0)]), b.number(1)]);
+    const weightsList = [{}, { op: { '/': 100 } }, { op: { '^': 100 } }] as const;
+    const losses = weightsList.map((weights) => {
+      const cDiv = scalarComplexity(div, weights);
+      const cOne = scalarComplexity(one, weights);
+      const { front } = hallFrontForTest([ind(div, 1e8, cDiv), ind(one, 0, cOne)]);
+      expect(front).toHaveLength(1);
+      return front[0]!.loss;
+    });
+    expect(losses).toEqual([0, 0, 0]);
+  });
+
   it('a unique-key row still ranks beside the survivor', () => {
     const other = b.op('+', [b.symbol('x'), b.symbol('x')]);
     expect(scalarCanonicalKey(other)).not.toBe(scalarCanonicalKey(square));
-    // The hall stores one tree per complexity, so the unique key sits at its
-    // own complexity; both rows are non-dominated and both survive.
     const { front } = hallFrontForTest([ind(square, 4, 3), ind(other, 2, 5)]);
     expect(front).toHaveLength(2);
     expect(new Set(front.map((row) => row.item))).toEqual(new Set([square, other]));
@@ -1274,7 +1321,7 @@ describe('searchScalars: complexityWeights', () => {
     expect(rng.next()).toBe(createSeededRng(7).next());
   });
 
-  it('zero and negative weights are accepted and the front stays ordered', async () => {
+  it('zero weights are accepted and the front stays ordered', async () => {
     const { result } = await runSearch(quadProblem, {
       grammar: quadGrammar,
       rng: createSeededRng(7),
@@ -1307,6 +1354,8 @@ describe('searchScalars: complexityWeights', () => {
     await bad({ op: { '+': 1 }, call: { sin: Number.NEGATIVE_INFINITY } });
     await bad({ symbol: Number.NaN });
     await bad({ symbol: { x: Number.POSITIVE_INFINITY, y: 1 } });
+    await bad({ op: { '*': -10 } });
+    await bad({ number: -1 });
     // Shape errors, for the same reason a bad `fit` is rejected up front.
     await bad(5);
     await bad(null);
@@ -2503,7 +2552,7 @@ describe('searchScalars: simplify', () => {
     expect(admitCalls).toBe(1);
   });
 
-  it("'algebraic' at seed 7 may drop the exact loss-0 x^2+x row; SR-8 dedups the hall by key", async () => {
+  it("'algebraic' at seed 7 can drop the exact loss-0 x^2+x row; SR-8 does not fix simplify:'algebraic'", async () => {
     const { result } = await runSearch(quadProblem, {
       grammar: quadGrammar,
       rng: createSeededRng(7),

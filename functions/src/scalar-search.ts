@@ -6,9 +6,11 @@
  * island from tournament winners, evaluates them in one batch, and keeps the best
  * `populationSize` distinct trees of parents and offspring (elitist truncation, not
  * age-based replacement). After every generation the islands exchange their
- * best trees (migration). A hall of fame shared by every island keeps the best tree
- * per complexity; its Pareto front is reported through {@link paretoFront} and
- * {@link scoreFront}. Subtree crossover ({@link crossoverSubtrees}) is opt-in:
+ * best trees (migration). A hall of fame shared by every island keeps the best loss
+ * per complexity among stored trees and one evaluated tree per {@link scalarCanonicalKey}
+ * (loss first, then complexity, then first recorded); its Pareto front is reported
+ * through {@link paretoFront} and {@link scoreFront}. Subtree crossover
+ * ({@link crossoverSubtrees}) is opt-in:
  * {@link ScalarSearchOptions.crossoverProbability} defaults to 0, so the
  * offspring loop stays mutation-only and the default random stream is unchanged.
  *
@@ -374,6 +376,9 @@ function readComplexityWeightValue(path: string, value: unknown): number {
   }
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     complexityWeightDescriptorError(path, `must be a finite number, got ${String(value)}`);
+  }
+  if (value < 0) {
+    complexityWeightDescriptorError(path, `must be >= 0, got ${value}`);
   }
   return value;
 }
@@ -1267,39 +1272,60 @@ function initialTrees(
   return out;
 }
 
-/** Best tree per complexity, then one per canonical key; the Pareto front is taken from these. */
+/**
+ * Best tree per complexity among stored individuals, with at most one stored tree
+ * per {@link scalarCanonicalKey}. Same-key dedup runs in {@link HallOfFame.add}:
+ * best loss, then smaller complexity, then the one recorded first; complexity
+ * weights affect reported complexity only, not which duplicate survives.
+ */
 class HallOfFame {
   private readonly byComplexity = new Map<number, EvaluatedIndividual>();
+  private readonly byKey = new Map<string, EvaluatedIndividual>();
+
+  /** Whether `candidate` should replace `prev` as the survivor for their shared key. */
+  private sameKeySurvivor(candidate: EvaluatedIndividual, prev: EvaluatedIndividual): boolean {
+    if (candidate.loss < prev.loss) {
+      return true;
+    }
+    if (candidate.loss > prev.loss) {
+      return false;
+    }
+    if (candidate.complexity < prev.complexity) {
+      return true;
+    }
+    if (candidate.complexity > prev.complexity) {
+      return false;
+    }
+    return false;
+  }
+
+  private evictFromComplexity(ind: EvaluatedIndividual): void {
+    const slot = this.byComplexity.get(ind.complexity);
+    if (slot === ind) {
+      this.byComplexity.delete(ind.complexity);
+    }
+  }
 
   add(ind: EvaluatedIndividual): void {
     if (!Number.isFinite(ind.loss)) {
       return;
     }
-    const prev = this.byComplexity.get(ind.complexity);
-    if (prev === undefined || ind.loss < prev.loss) {
+    const prevKey = this.byKey.get(ind.key);
+    if (prevKey !== undefined && !this.sameKeySurvivor(ind, prevKey)) {
+      return;
+    }
+    if (prevKey !== undefined) {
+      this.evictFromComplexity(prevKey);
+    }
+    this.byKey.set(ind.key, ind);
+    const prevComplexity = this.byComplexity.get(ind.complexity);
+    if (prevComplexity === undefined || ind.loss < prevComplexity.loss) {
       this.byComplexity.set(ind.complexity, ind);
     }
   }
 
   front(): { front: ScoredCandidate<ScalarNode>[]; fittedParameters: Float64Array[] } {
-    // One front row per canonical tree (SR-8): when two stored trees share a key,
-    // keep the smaller stored complexity, then the smaller loss, then the one
-    // recorded first (the byComplexity map preserves insertion order, so a full
-    // tie keeps the earlier individual). The survivor reports its own stored
-    // complexity — with SR-6 weights when they were given — never the canonical
-    // tree's.
-    const byKey = new Map<string, EvaluatedIndividual>();
-    for (const ind of this.byComplexity.values()) {
-      const prev = byKey.get(ind.key);
-      if (
-        prev === undefined ||
-        ind.complexity < prev.complexity ||
-        (ind.complexity === prev.complexity && ind.loss < prev.loss)
-      ) {
-        byKey.set(ind.key, ind);
-      }
-    }
-    const rows = [...byKey.values()].map((ind) => ({
+    const rows = [...this.byComplexity.values()].map((ind) => ({
       loss: ind.loss,
       complexity: ind.complexity,
       item: ind.node,
@@ -1346,7 +1372,10 @@ function pickSelected(
  * data objects only; non-enumerable keys and accessors are rejected). Record keys
  * use lowered call names (`ln` → `log`); unknown keys are ignored by
  * `scalarComplexity`. `grammar.maxSize` counts raw nodes, not weighted complexity;
- * `Math.round` on the sum can map distinct trees to one hall slot.
+ * `Math.round` on the sum can map distinct trees to one hall slot. The hall keeps one
+ * tree per canonical key at add time (best loss, then complexity, then first recorded);
+ * elitist truncation already keeps one tree per key in the population with the same
+ * loss-first order. Weights change reported complexity only, not which duplicate survives.
  * `fit`
  * forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
  * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
