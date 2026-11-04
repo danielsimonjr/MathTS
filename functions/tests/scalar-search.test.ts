@@ -846,6 +846,226 @@ describe('searchScalars: unusable candidates', () => {
   });
 });
 
+describe('searchScalars: invalidRows policy', () => {
+  // log(x) is invalid exactly on the negative rows: one invalid row in the first
+  // fixture, every row in the third.
+  const logGrammar: ScalarGrammar = {
+    variables: ['x'],
+    binary: [],
+    unary: ['log'],
+    literals: [],
+    maxSize: 2,
+  };
+  const mixedX = new Float64Array([1, -1, 2]);
+  const logTree = b.call('ln', X); // the builder lowers 'ln' to the natural-log node 'log'
+  const logPTimesX = b.call('ln', b.op('*', [b.symbol('p'), X]));
+
+  async function frontOf(
+    problem: ScalarSearchProblem,
+    extra: Partial<ScalarSearchOptions>
+  ): Promise<ScalarSearchResult> {
+    const { result } = await runSearch(problem, {
+      grammar: logGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 2,
+      optimizeProbability: 0,
+      ...extra,
+    });
+    return result;
+  }
+
+  it('reject is the default: an invalid-on-any-row tree is not scored', async () => {
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [mixedX],
+      observed: new Float64Array([0, 0, Math.log(2)]),
+    };
+    for (const invalidRows of [undefined, 'reject'] as const) {
+      const result = await frontOf(problem, {
+        seeds: [logTree],
+        maxEvaluations: 1,
+        invalidRows: invalidRows as ScalarSearchOptions['invalidRows'],
+      });
+      expect(result.front).toEqual([]);
+    }
+  });
+
+  it('penalize reports one invalid row as exactly one penalty when the rest are exact', async () => {
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [mixedX],
+      observed: new Float64Array([0, 0, Math.log(2)]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree],
+      maxEvaluations: 1,
+      invalidRows: 'penalize',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 1e8)).toBe(true);
+  });
+
+  it('penalize ranks an exact-but-for-one-row log tree ahead of a costlier valid tree', async () => {
+    // Any valid tree pays at least (1e5)² per row; the penalized log tree pays one
+    // penalty plus the squared error of its two exact rows.
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [mixedX],
+      observed: new Float64Array([1e5, 1e5, 1e5]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree, b.number(0)],
+      invalidRows: 'penalize',
+    });
+    expect(result.front.length).toBeGreaterThan(0);
+    for (const row of result.front) {
+      expect(Number.isFinite(row.loss)).toBe(true);
+    }
+    const logRow = result.front.find((row) => row.item === logTree);
+    const validRow = result.front.find((row) => row.item !== logTree);
+    expect(logRow).toBeDefined();
+    expect(validRow).toBeDefined();
+    expect(logRow!.loss).toBeLessThan(validRow!.loss);
+  });
+
+  it('penalize reports no valid row as the penalty times positively weighted rows', async () => {
+    const negative = new Float64Array([-1, -2, -3]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [negative],
+      observed: new Float64Array([0, 0, 0]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree],
+      maxEvaluations: 1,
+      invalidRows: 'penalize',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 3e8)).toBe(true);
+  });
+
+  it('penalize with rowWeights counts only positively weighted invalid rows when none are valid', async () => {
+    const negative = new Float64Array([-1, -2, -3]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [negative],
+      observed: new Float64Array([0, 0, 0]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree],
+      maxEvaluations: 1,
+      invalidRows: 'penalize',
+      rowWeights: new Float64Array([1, 0, 1]),
+    });
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 2e8)).toBe(true);
+  });
+
+  it('penalize refits when every weighted row is invalid and fit.initial yields a valid start', async () => {
+    const mulLogGrammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['*'],
+      unary: ['log'],
+      literals: [],
+      maxSize: 4,
+    };
+    const negX = new Float64Array([-2, -3]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [negX],
+      observed: new Float64Array([Math.log(2), Math.log(3)]),
+      parameters: ['p'],
+    };
+    const { result } = await runSearch(problem, {
+      grammar: mulLogGrammar,
+      seeds: [logPTimesX],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 1,
+      invalidRows: 'penalize',
+      fit: { initial: [-1] },
+    });
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 0)).toBe(true);
+    expect(Object.is(result.fittedParameters[0]![0]!, -1)).toBe(true);
+  });
+
+  it('reject still skips refit when no row is valid', async () => {
+    const mulLogGrammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['*'],
+      unary: ['log'],
+      literals: [],
+      maxSize: 4,
+    };
+    const negX = new Float64Array([-2, -3]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [negX],
+      observed: new Float64Array([Math.log(2), Math.log(3)]),
+      parameters: ['p'],
+    };
+    const { result } = await runSearch(problem, {
+      grammar: mulLogGrammar,
+      seeds: [logPTimesX],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 1,
+      invalidRows: 'reject',
+      fit: { initial: [-1] },
+    });
+    expect(result.front).toEqual([]);
+  });
+
+  it('a valid tree whose loss is below that product ranks ahead of the all-invalid tree', async () => {
+    const negative = new Float64Array([-1, -2, -3]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [negative],
+      observed: new Float64Array([0, 0, 0]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree, b.number(0)],
+      invalidRows: 'penalize',
+    });
+    // The valid tree is cheaper at a smaller complexity, so the front keeps only it.
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 0)).toBe(true);
+  });
+
+  it('a zero-weight invalid row is dropped on both sides of the penalize sum', async () => {
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [mixedX],
+      observed: new Float64Array([0, 0, Math.log(2)]),
+    };
+    const result = await frontOf(problem, {
+      seeds: [logTree],
+      maxEvaluations: 1,
+      invalidRows: 'penalize',
+      rowWeights: new Float64Array([1, 0, 1]),
+    });
+    expect(result.front).toHaveLength(1);
+    expect(Object.is(result.front[0]!.loss, 0)).toBe(true);
+  });
+
+  it('an unknown policy throws before the first yield', async () => {
+    await expect(
+      runSearch(
+        { variables: ['x'], columns: [mixedX], observed: new Float64Array(3) },
+        {
+          grammar: logGrammar,
+          rng: createSeededRng(7),
+          maxEvaluations: 2,
+          invalidRows: 'discard' as unknown as ScalarSearchOptions['invalidRows'],
+        }
+      )
+    ).rejects.toThrow(RangeError);
+  });
+});
+
 describe('searchScalars: arguments', () => {
   const base = { grammar: quadGrammar, rng: createSeededRng(7), maxEvaluations: 10 };
   const reject = async (problem: ScalarSearchProblem, options: ScalarSearchOptions) => {

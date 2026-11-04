@@ -2764,6 +2764,7 @@
       "Interval",
       "IntPoly",
       "inv",
+      "INVALID_ROW_PENALTY",
       "inverseConductanceQuantum",
       "inverseLaplace",
       "inverseLaplaceTransform",
