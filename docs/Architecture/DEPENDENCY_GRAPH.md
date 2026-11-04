@@ -5000,7 +5000,7 @@ graph LR
 | File                         | Imports                                                                                                    | Type   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
 | `./fit-scalar.js`            | `fitScalarParameters, namedScalarLossTerm, rankScalarBatchLoss, INVALID_ROW_PENALTY, NamedScalarLoss`      | Import |
-| `./factories/index.js`       | `simplifyScalar`                                                                                           | Import |
+| `./factories/index.js`       | `* as scalarFactories`                                                                                     | Import |
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
 | `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
@@ -5011,7 +5011,7 @@ graph LR
 - Classes: `ComplexityFrequency`
 - Interfaces: `ScalarSearchProblem`, `ScalarSearchOptions`, `ScalarFitOptions`, `SearchProgress`, `ScalarSearchResult`, `EvaluatedIndividual`, `Island`
 - Types: `ScalarSearchStopReason`
-- Functions: `parsimonyKey`, `tournamentSelect`, `migrateIslands`
+- Functions: `simplifyCandidateForTest`, `parsimonyKey`, `tournamentSelect`, `migrateIslands`
 
 ---
 
@@ -19526,12 +19526,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1237   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 206851 |
-| Total Exports           | 6457   |
+| Total Lines of Code     | 206991 |
+| Total Exports           | 6458   |
 | Total Re-exports        | 2750   |
 | Total Classes           | 60     |
 | Total Interfaces        | 576    |
-| Total Functions         | 2086   |
+| Total Functions         | 2087   |
 | Total Type Guards       | 162    |
 | Total Enums             | 0      |
 | Type-only Imports       | 625    |

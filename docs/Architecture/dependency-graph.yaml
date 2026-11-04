@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-04'
   totalFiles: 1237
   totalModules: 82
-  totalExports: 6457
+  totalExports: 6458
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -11809,7 +11809,7 @@ modules:
             - NamedScalarLoss
         - file: ./factories/index.js
           imports:
-            - simplifyScalar
+            - '* as scalarFactories'
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -11854,6 +11854,7 @@ modules:
             - ScalarGrammar
             - ScalarNode
       exports:
+        - simplifyCandidateForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -11869,6 +11870,7 @@ modules:
         - EvaluatedIndividual
         - Island
       functions:
+        - simplifyCandidateForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -41172,11 +41174,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1237
   totalModules: 82
-  totalLinesOfCode: 206851
-  totalExports: 6457
+  totalLinesOfCode: 206991
+  totalExports: 6458
   totalClasses: 60
   totalInterfaces: 576
-  totalFunctions: 2086
+  totalFunctions: 2087
   totalTypeGuards: 162
   totalEnums: 0
   totalConstants: 1635

@@ -25,6 +25,7 @@ import {
   migrateIslands,
   parsimonyKey,
   tournamentSelect,
+  simplifyCandidateForTest,
   type EvaluatedIndividual,
   type Island,
 } from '../src/scalar-search.js';
@@ -2101,6 +2102,7 @@ describe('searchScalars: simplify', () => {
         Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
       );
       expect(result.seed).toBe(7);
+      expect(result.simplifyFallbacks).toBe(0);
     });
   }
 
@@ -2115,7 +2117,8 @@ describe('searchScalars: simplify', () => {
     ).rejects.toThrow(RangeError);
   });
 
-  // (2*3)*x and the folded 6*x are both structure-legal: the grammar lists 2, 3, 6.
+  // (2*3)*x and the folded 6*x are both structure-legal: literals [2,3,6] is the pool
+  // `randomizeTree` samples from (with replacement), not a whitelist of allowed numbers.
   // One seed, one evaluation, no refit: the front row is exactly that tree.
   const constGrammar: ScalarGrammar = {
     variables: ['x'],
@@ -2377,7 +2380,96 @@ describe('searchScalars: simplify', () => {
     expect(Object.is(result.front[0]!.loss, 3e8)).toBe(true);
   });
 
-  it('two runs with the same seed match event by event and do not advance options.rng', async () => {
+  it("'algebraic' does not accept x/x as 1 when x=0 is invalid under invalidRows:'reject'", async () => {
+    const fiveX = new Float64Array([0, 1, 2, 3, 4]);
+    const divSeed = b.op('/', [X, X]);
+    const divGrammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['/'],
+      unary: [],
+      literals: [],
+      maxSize: 3,
+    };
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [fiveX],
+      observed: new Float64Array([1, 1, 1, 1, 1]),
+    };
+    expect(() => simplifyScalar(divSeed)).not.toThrow();
+    expect(scalarGrammarAccepts(divGrammar, simplifyScalar(divSeed))).toBe(true);
+    const { result } = await runSearch(problem, {
+      grammar: divGrammar,
+      seeds: [divSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      invalidRows: 'penalize',
+      simplify: 'algebraic',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(divSeed));
+    expect(result.front[0]!.loss).toBeGreaterThan(1e7);
+    expect(result.simplifyFallbacks).toBe(1);
+  });
+
+  it('RangeError from simplifyScalar keeps the original tree', async () => {
+    const factories = await import('../src/factories/index.js');
+    const spy = vi.spyOn(factories, 'simplifyScalar').mockImplementation(() => {
+      throw new RangeError('stack');
+    });
+    try {
+      expect(simplifyCandidateForTest(X, 'algebraic')).toEqual(X);
+      const { result } = await runSearch(constProblem, {
+        ...constSeed,
+        simplify: 'algebraic',
+      });
+      expect(result.front).toHaveLength(1);
+      expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(seed23x));
+      expect(result.simplifyFallbacks).toBe(1);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('calls admit once when constants simplify is a canonical no-op', async () => {
+    let admitCalls = 0;
+    const { result } = await runSearch(constProblem, {
+      ...constSeed,
+      seeds: [folded6x],
+      simplify: 'constants',
+      grammar: {
+        ...constGrammar,
+        admit: (node) => {
+          admitCalls += 1;
+          return scalarGrammarAccepts(constGrammar, node);
+        },
+      },
+    });
+    expect(result.front).toHaveLength(1);
+    expect(admitCalls).toBe(1);
+  });
+
+  it("'algebraic' at seed 7 may drop the exact loss-0 x^2+x row; SR-8 dedups the hall by key", async () => {
+    const { result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      simplify: 'algebraic',
+      ...pinned,
+    });
+    const lossZero = result.front.filter((row) => row.loss === 0);
+    expect(lossZero.some((row) => row.complexity === 7)).toBe(false);
+    expect(
+      result.front.some(
+        (row) =>
+          row.complexity === 5 &&
+          scalarCanonicalKey(row.item) ===
+            '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}'
+      )
+    ).toBe(true);
+  });
+
+  it('two runs with the same seed and simplify mode match event by event and do not advance options.rng', async () => {
     for (const simplify of ['constants', 'algebraic'] as const) {
       const rng = createSeededRng(7);
       const options = {
