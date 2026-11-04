@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-units
 
+## 0.7.0
+
+### Minor Changes
+
+- 78f8a1c: Re-exports `REFUSED_UNIT_SPELLINGS` and the `UnitInstance` type from core. A test pins the facade's runtime export names.
+
+### Patch Changes
+
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-core@0.21.1
+
 ## 0.6.1
 
 ### Patch Changes

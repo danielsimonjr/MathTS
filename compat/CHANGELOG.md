@@ -1,5 +1,19 @@
 # @danielsimonjr/mathts-compat
 
+## 0.4.35
+
+### Patch Changes
+
+- 78f8a1c: `create()` wraps each function with the instance config on first access instead of wrapping all of them up front. Wrappers are memoized (`math.add === math.add`), `Object.keys(math)` is unchanged, and a frozen instance keeps working (the wrapper is served from a closure when the property cannot be redefined).
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-functions@0.71.0
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-matrix@0.9.0
+  - @danielsimonjr/mathts-parallel@0.8.0
+
 ## 0.4.34
 
 ### Patch Changes

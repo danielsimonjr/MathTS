@@ -1,5 +1,22 @@
 # @danielsimonjr/mathts-functions
 
+## 0.71.0
+
+### Minor Changes
+
+- 78f8a1c: `solveODE`, `freqz` and `zpk2tf` now have precise call signatures and result types (`SolveODESolution`, `ODEMatrixSolution`, `FrequencyResponse`, `TransferFunction`, plus the option and function types) instead of a bare `TypedFunction`. `freqz` and `zpk2tf` threw "Class constructor Complex cannot be invoked without 'new'" on every call; they work now. `qr` accepts a `SparseMatrix` (dense Q and R). `combinations` maps over an `Array` or `Matrix` of `n` or `k`. `polynomialGCD` solves coefficients that are rationals with a common denominator up to 1e6 exactly (scaled to integers) instead of by floating-point Euclid. `multiplicativeOrder` no longer overflows for moduli above about 9.5e7 and runs in the order of phi(n) factoring time rather than O(order). The unused `rankF64Dispatch` and `rankF64JS` sort-bridge exports are removed. Faster: CAS numeric paths (`integrate`, `fourierSeries`, `summation`, `solve` fallback, derivatives) compile the expression once; the Mann-Whitney, Kolmogorov-Smirnov and Shapiro-Wilk bootstraps are O(n) per draw with unchanged seeded results; multi-quantile sorts once; `linregress` fits once; `polymul` has a single path; `spectrogram` and `periodogram` preallocate their outputs.
+
+### Patch Changes
+
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-expression@0.12.0
+  - @danielsimonjr/mathts-matrix@0.9.0
+  - @danielsimonjr/mathts-parallel@0.8.0
+
 ## 0.70.1
 
 ### Patch Changes

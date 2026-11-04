@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-plot
 
+## 0.4.16
+
+### Patch Changes
+
+- 78f8a1c: `escAttr` returns numbers and strings with no `& < > " '` without running the replace.
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+- Updated dependencies [78f8a1c]
+  - @danielsimonjr/mathts-functions@0.71.0
+  - @danielsimonjr/mathts-core@0.21.1
+  - @danielsimonjr/mathts-expression@0.12.0
+
 ## 0.4.15
 
 ### Patch Changes
