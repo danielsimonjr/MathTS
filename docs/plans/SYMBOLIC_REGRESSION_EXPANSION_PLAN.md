@@ -219,7 +219,7 @@ Algebraic simplification is expensive relative to a mutation. The Phase 7 survey
 
 ## SR-8 — One front row per canonical tree
 
-**Independent.** Touches the hall in `functions/src/scalar-search.ts` and the search test.
+**Status: implemented.** Independent. Touches the hall in `functions/src/scalar-search.ts` and the search test.
 
 When two evaluated trees share a `scalarCanonicalKey`, the hall keeps one: the smaller stored complexity, then the smaller loss, then the one recorded first. The population already keeps one key. This PR makes the front do the same. Complexity reported for the survivor stays the stored-tree complexity unless SR-6 weights apply. Do not switch the default complexity onto the canonical tree; that would change `PINNED_ROWS` even when keys are unique.
 

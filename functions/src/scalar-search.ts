@@ -277,6 +277,18 @@ export function simplifyCandidateForTest(
   return simplifyCandidate(node, mode, recordFallback);
 }
 
+/** @internal Exported for unit tests; not part of the package barrel. */
+export function hallFrontForTest(individuals: readonly EvaluatedIndividual[]): {
+  front: ScoredCandidate<ScalarNode>[];
+  fittedParameters: Float64Array[];
+} {
+  const hall = new HallOfFame();
+  for (const ind of individuals) {
+    hall.add(ind);
+  }
+  return hall.front();
+}
+
 /** @internal One evaluated tree; exported for the unit tests, not the package barrel. */
 export interface EvaluatedIndividual {
   readonly node: ScalarNode;
@@ -1255,7 +1267,7 @@ function initialTrees(
   return out;
 }
 
-/** Best tree per complexity; the Pareto front is taken from these. */
+/** Best tree per complexity, then one per canonical key; the Pareto front is taken from these. */
 class HallOfFame {
   private readonly byComplexity = new Map<number, EvaluatedIndividual>();
 
@@ -1270,7 +1282,24 @@ class HallOfFame {
   }
 
   front(): { front: ScoredCandidate<ScalarNode>[]; fittedParameters: Float64Array[] } {
-    const rows = [...this.byComplexity.values()].map((ind) => ({
+    // One front row per canonical tree (SR-8): when two stored trees share a key,
+    // keep the smaller stored complexity, then the smaller loss, then the one
+    // recorded first (the byComplexity map preserves insertion order, so a full
+    // tie keeps the earlier individual). The survivor reports its own stored
+    // complexity — with SR-6 weights when they were given — never the canonical
+    // tree's.
+    const byKey = new Map<string, EvaluatedIndividual>();
+    for (const ind of this.byComplexity.values()) {
+      const prev = byKey.get(ind.key);
+      if (
+        prev === undefined ||
+        ind.complexity < prev.complexity ||
+        (ind.complexity === prev.complexity && ind.loss < prev.loss)
+      ) {
+        byKey.set(ind.key, ind);
+      }
+    }
+    const rows = [...byKey.values()].map((ind) => ({
       loss: ind.loss,
       complexity: ind.complexity,
       item: ind.node,

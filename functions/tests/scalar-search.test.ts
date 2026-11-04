@@ -26,6 +26,7 @@ import {
   parsimonyKey,
   tournamentSelect,
   simplifyCandidateForTest,
+  hallFrontForTest,
   type EvaluatedIndividual,
   type Island,
 } from '../src/scalar-search.js';
@@ -572,6 +573,59 @@ describe('searchScalars: reproducibility', () => {
         expect(Object.is(row.loss, other.front[j]!.loss)).toBe(true);
       });
     });
+  });
+});
+
+describe('searchScalars: one front row per canonical key (SR-8)', () => {
+  // Two stored shapes of one canonical tree: `x*x` and `(x*x)*1` canonicalize to
+  // the same key (`x^2`) but are stored at complexities 3 and 5.
+  const square = b.op('*', [b.symbol('x'), b.symbol('x')]);
+  const padded = b.op('*', [b.op('*', [b.symbol('x'), b.symbol('x')]), b.number(1)]);
+  const ind = (node: ScalarNode, loss: number, complexity: number): EvaluatedIndividual => ({
+    node,
+    key: scalarCanonicalKey(node),
+    loss,
+    complexity,
+    parameters: new Float64Array([3]),
+  });
+
+  it('keeps one front row when two stored shapes share a canonical key', () => {
+    expect(scalarCanonicalKey(padded)).toBe(scalarCanonicalKey(square));
+    const { front, fittedParameters } = hallFrontForTest([ind(square, 4, 3), ind(padded, 2, 5)]);
+    expect(front).toHaveLength(1);
+    // The smaller stored complexity wins, and the survivor reports its own
+    // stored complexity, not the canonical shape's.
+    expect(front[0]!.complexity).toBe(3);
+    expect(front[0]!.item).toBe(square);
+    expect([...fittedParameters[0]!]).toEqual([3]);
+  });
+
+  it('a duplicate with a smaller loss but larger complexity does not replace the survivor', () => {
+    const { front } = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 5)]);
+    expect(front).toHaveLength(1);
+    expect(front[0]!.complexity).toBe(3);
+    expect(front[0]!.item).toBe(square);
+  });
+
+  it('at equal complexity the smaller loss wins; a full tie keeps the first recorded', () => {
+    const smaller = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 3)]);
+    expect(smaller.front).toHaveLength(1);
+    expect(smaller.front[0]!.item).toBe(padded);
+    // add() already keeps one tree per complexity, so a full tie means the
+    // second shape is never stored at all.
+    const tied = hallFrontForTest([ind(square, 4, 3), ind(padded, 4, 3)]);
+    expect(tied.front).toHaveLength(1);
+    expect(tied.front[0]!.item).toBe(square);
+  });
+
+  it('a unique-key row still ranks beside the survivor', () => {
+    const other = b.op('+', [b.symbol('x'), b.symbol('x')]);
+    expect(scalarCanonicalKey(other)).not.toBe(scalarCanonicalKey(square));
+    // The hall stores one tree per complexity, so the unique key sits at its
+    // own complexity; both rows are non-dominated and both survive.
+    const { front } = hallFrontForTest([ind(square, 4, 3), ind(other, 2, 5)]);
+    expect(front).toHaveLength(2);
+    expect(new Set(front.map((row) => row.item))).toEqual(new Set([square, other]));
   });
 });
 

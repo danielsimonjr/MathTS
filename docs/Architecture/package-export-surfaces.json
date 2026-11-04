@@ -2780,6 +2780,7 @@
       "HalfspaceIntersectionResult",
       "halley",
       "HalleyOptions",
+      "hallFrontForTest",
       "hankelH1",
       "hankelH2",
       "hankelMatrix",
