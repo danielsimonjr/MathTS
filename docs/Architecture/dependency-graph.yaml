@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-04'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6874
+  totalExports: 6875
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9124,6 +9124,7 @@ modules:
           imports:
             - ScalarNode
       exports:
+        - INVALID_ROW_PENALTY
         - HUBER_DELTA
         - namedScalarLossTerm
         - rankScalarBatchLoss
@@ -9136,6 +9137,7 @@ modules:
         - rankScalarBatchLoss
         - fitScalarParameters
       constants:
+        - INVALID_ROW_PENALTY
         - HUBER_DELTA
     functions/src/front-export.ts:
       description: LaTeX tabular and JSON export for a scored Pareto front.
@@ -12691,7 +12693,9 @@ modules:
         - file: ./fit-scalar.js
           imports:
             - fitScalarParameters
+            - namedScalarLossTerm
             - rankScalarBatchLoss
+            - INVALID_ROW_PENALTY
             - NamedScalarLoss
         - file: ./pareto-front.js
           imports:
@@ -12718,6 +12722,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - pairwiseSum
             - SeededRng
         - package: '@danielsimonjr/mathts-parallel'
           directory: parallel
@@ -42795,14 +42800,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 212464
-  totalExports: 6874
+  totalLinesOfCode: 212548
+  totalExports: 6875
   totalClasses: 60
   totalInterfaces: 592
   totalFunctions: 2277
   totalTypeGuards: 168
   totalEnums: 0
-  totalConstants: 1634
+  totalConstants: 1635
   totalReExports: 2977
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0

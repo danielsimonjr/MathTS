@@ -2868,6 +2868,7 @@
       "Interval",
       "IntPoly",
       "inv",
+      "INVALID_ROW_PENALTY",
       "inverseConductanceQuantum",
       "inverseGammaCDF",
       "inverseGammaPDF",

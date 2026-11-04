@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** SR-1, SR-2, SR-3, and SR-4 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
+**Status:** SR-1 through SR-5 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -118,7 +118,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 | 2    | Opt-in subtree crossover                | SR-2  | **Done.** `crossoverProbability` defaults to 0; the operator is unchanged.                        |
 | 3    | One loss for ranking and fitting        | SR-3  | **Done.** `l1`, `huber`, and row weights already exist on the fitter and now also rank the hall.  |
 | 4    | Fit budget, bounds, and a start vector  | SR-4  | **Done.** The constants `2` and `8` and the vector of ones are now `fit` options.                 |
-| 5    | Invalid-row policy                      | SR-5  | One non-positive row makes every `log` tree unscorable.                                           |
+| 5    | Invalid-row policy                      | SR-5  | **Done.** `invalidRows: 'penalize'` reuses the fitter's penalty in the ranker.                    |
 | 6    | Complexity weights on the hall          | SR-6  | The weight type exists. The front cannot see it.                                                  |
 | 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.      |
 | 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                  |
@@ -187,7 +187,7 @@ Add optional `fit?: { restarts?: number; maxIterations?: number; bounds?: readon
 
 ## SR-5 — Invalid-row policy
 
-**Independent.** Touches `functions/src/scalar-search.ts`, `functions/src/fit-scalar.ts` only to export the existing penalty constant if it is still private, and the search test.
+**Status: implemented.** Independent. Touches `functions/src/scalar-search.ts`, `functions/src/fit-scalar.ts` only to export the existing penalty constant if it is still private, and the search test.
 
 Add `invalidRows?: 'reject' | 'penalize'`, default `'reject'`. `'reject'` is today's `Infinity` when any row is invalid. `'penalize'` adds the fitter's existing invalid-row penalty times the number of invalid rows, plus the chosen loss on the valid rows, and it does that in the ranker. The refit already penalizes; the ranker must use the same number so a refit is comparable. Do not invent a second penalty.
 
@@ -386,7 +386,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                               |
 | 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.**     |
 | 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.** |
-| 5     | SR-5  | `invalidRows` defaults to `'reject'`.                                         |
+| 5     | SR-5  | `invalidRows` defaults to `'reject'`. **Done.**                               |
 | 6     | SR-6  | `complexityWeights` reach the hall.                                           |
 | 7     | SR-7  | `simplify` defaults to `'off'`.                                               |
 | 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |

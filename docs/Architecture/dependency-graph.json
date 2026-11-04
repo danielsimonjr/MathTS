@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6874
+    "totalExports": 6875
   },
   "entryPoints": [
     {
@@ -9719,6 +9719,7 @@
           }
         ],
         "exports": [
+          "INVALID_ROW_PENALTY",
           "HUBER_DELTA",
           "namedScalarLossTerm",
           "rankScalarBatchLoss",
@@ -9726,7 +9727,7 @@
         ],
         "interfaces": ["FitScalarOptions", "FitScalarResult"],
         "functions": ["namedScalarLossTerm", "rankScalarBatchLoss", "fitScalarParameters"],
-        "constants": ["HUBER_DELTA"]
+        "constants": ["INVALID_ROW_PENALTY", "HUBER_DELTA"]
       },
       "functions/src/front-export.ts": {
         "description": "LaTeX tabular and JSON export for a scored Pareto front.",
@@ -13386,7 +13387,13 @@
         "internalDependencies": [
           {
             "file": "./fit-scalar.js",
-            "imports": ["fitScalarParameters", "rankScalarBatchLoss", "NamedScalarLoss"]
+            "imports": [
+              "fitScalarParameters",
+              "namedScalarLossTerm",
+              "rankScalarBatchLoss",
+              "INVALID_ROW_PENALTY",
+              "NamedScalarLoss"
+            ]
           },
           {
             "file": "./pareto-front.js",
@@ -13414,7 +13421,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["SeededRng"]
+            "imports": ["pairwiseSum", "SeededRng"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -45209,14 +45216,14 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 212464,
-    "totalExports": 6874,
+    "totalLinesOfCode": 212548,
+    "totalExports": 6875,
     "totalClasses": 60,
     "totalInterfaces": 592,
     "totalFunctions": 2277,
     "totalTypeGuards": 168,
     "totalEnums": 0,
-    "totalConstants": 1634,
+    "totalConstants": 1635,
     "totalReExports": 2977,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
