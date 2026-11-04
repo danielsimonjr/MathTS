@@ -2,11 +2,10 @@
  * Tests for the WASM sort kernels and dispatch bridge — Slice 5.7a.
  *
  * Strategy:
- * - JS fallback correctness: sortF64JS / argsortF64JS / rankF64JS match
+ * - JS fallback correctness: sortF64JS / argsortF64JS match
  *   manual reference values for small arrays.
  * - NaN-last ordering: NaNs always sort after all finite values.
  * - argsort invariant: data[argsort[i]] is non-decreasing.
- * - rank ↔ argsort inverse permutation: rank[argsort[k]] == k.
  * - Large-array dispatch: arrays ≥ WASM_SORT_THRESHOLD follow the WASM path
  *   when the module is loaded; result must match JS reference.
  * - Threshold fallthrough: arrays below WASM_SORT_THRESHOLD always use JS.
@@ -18,10 +17,8 @@ import {
   WASM_SORT_THRESHOLD,
   sortF64Dispatch,
   argsortF64Dispatch,
-  rankF64Dispatch,
   sortF64JS,
   argsortF64JS,
-  rankF64JS,
 } from '../src/wasm/sort/wasm-bridge.js';
 
 // ---------------------------------------------------------------------------
@@ -121,44 +118,6 @@ describe('argsortF64JS (pure-JS fallback)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. rankF64JS — correctness and inverse-permutation property
-// ---------------------------------------------------------------------------
-
-describe('rankF64JS (pure-JS fallback)', () => {
-  it('rank[argsort[k]] == k for all k', () => {
-    const data = new Float64Array([2, 5, 1, 4, 3]);
-    const argsort = argsortF64JS(data);
-    const rank = rankF64JS(data);
-    for (let k = 0; k < data.length; k++) {
-      expect(rank[argsort[k]]).toBe(k);
-    }
-  });
-
-  it('rank values are in [0, n)', () => {
-    const data = new Float64Array([10, 30, 20, 40]);
-    const rank = rankF64JS(data);
-    const n = data.length;
-    for (let i = 0; i < n; i++) {
-      expect(rank[i]).toBeGreaterThanOrEqual(0);
-      expect(rank[i]).toBeLessThan(n);
-    }
-  });
-
-  it('reconstructed sorted order via rank matches sortF64JS', () => {
-    const data = new Float64Array([7, 2, 9, 1, 5]);
-    const rank = rankF64JS(data);
-    const sorted = new Float64Array(data.length);
-    for (let i = 0; i < data.length; i++) sorted[rank[i]] = data[i];
-    expect(isSortedNanLast(sorted)).toBe(true);
-  });
-
-  it('rank empty returns empty Int32Array', () => {
-    const rank = rankF64JS(new Float64Array(0));
-    expect(rank.length).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // 4. Dispatch — below threshold always uses JS path
 // ---------------------------------------------------------------------------
 
@@ -175,13 +134,6 @@ describe('dispatch below threshold', () => {
     const data = new Float64Array([5, 2, 8, 1]);
     const jsResult = argsortF64JS(data);
     const dispResult = argsortF64Dispatch(data);
-    expect(Array.from(dispResult)).toEqual(Array.from(jsResult));
-  });
-
-  it('rankF64Dispatch on small array matches JS result', () => {
-    const data = new Float64Array([5, 2, 8, 1]);
-    const jsResult = rankF64JS(data);
-    const dispResult = rankF64Dispatch(data);
     expect(Array.from(dispResult)).toEqual(Array.from(jsResult));
   });
 });
@@ -223,18 +175,6 @@ describe('dispatch above threshold', () => {
     // data[idx[i]] should be non-decreasing
     for (let i = 0; i < idx.length - 1; i++) {
       expect(data[idx[i]]).toBeLessThanOrEqual(data[idx[i + 1]]);
-    }
-  });
-
-  it('rankF64Dispatch inverse-permutation property holds on large array', () => {
-    const n = WASM_SORT_THRESHOLD + 128;
-    const data = makeRandomF64(n, 13);
-    const argsort = argsortF64Dispatch(data);
-    const rank = rankF64Dispatch(data);
-    // Spot-check 200 positions for performance.
-    const step = Math.floor(n / 200);
-    for (let k = 0; k < n; k += step) {
-      expect(rank[argsort[k]]).toBe(k);
     }
   });
 

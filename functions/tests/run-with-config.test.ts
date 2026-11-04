@@ -11,6 +11,17 @@ afterEach(() => {
 const factoryConfig = factoryScope.config as typeof DEFAULT_CONFIG;
 
 describe('runWithConfig', () => {
+  it('the compile cache never serves a parse made under another number config', () => {
+    // Same text evaluated three times across overlays: the cached compile from the
+    // first call must not leak its literal type into the second or third.
+    expect(typeof evaluate('1 + 1')).toBe('number');
+    const big = runWithConfig({ number: 'BigNumber' }, () => evaluate('1 + 1'));
+    expect(big).toBeInstanceOf(BigNumber);
+    expect(typeof evaluate('1 + 1')).toBe('number');
+    const frac = runWithConfig({ number: 'Fraction' }, () => evaluate('1 + 1'));
+    expect(frac).toBeInstanceOf(Fraction);
+  });
+
   it('restores the config stack after a throw', () => {
     expect(() => {
       runWithConfig({ number: 'Fraction' }, () => {

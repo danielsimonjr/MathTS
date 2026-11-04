@@ -305,14 +305,16 @@ describeIfAS('polynomial algebra — above-threshold AS WASM dispatch', () => {
     expect(Math.max(...rem.map(Math.abs))).toBeLessThan(1e-6);
   });
 
-  it('polynomialGCD of non-integer inputs runs float Euclid on poly_div_mod_f64', () => {
-    // Halving every coefficient is exact in binary and makes the inputs
-    // non-integer, so they take the floating-point path; the first Euclid step
-    // divides the above-threshold polynomial on the AS kernel.
+  it('polynomialGCD of inputs no integer scaling can represent runs float Euclid on poly_div_mod_f64', () => {
+    // Scaling every coefficient by 2^60 is exact in binary and puts them beyond
+    // 2^53 (not safe integers, and no small common denominator can fix that), so
+    // they take the floating-point path; the first Euclid step divides the
+    // above-threshold polynomial on the AS kernel. (Rational input such as
+    // halved coefficients is scaled to integers and solved exactly instead.)
     const xm1 = [-1, 1];
-    const bigPoly = polymul(polymul(xm1, [1, 1]), randPoly(N - 3)).map((c) => c / 2);
+    const bigPoly = polymul(polymul(xm1, [1, 1]), randPoly(N - 3)).map((c) => c * 2 ** 60);
     const { result: g, counts } = countExportCalls(['poly_div_mod_f64'], () =>
-      polynomialGCD(bigPoly, [-0.5, 0.5])
+      polynomialGCD(bigPoly, [-(2 ** 60), 2 ** 60])
     );
     expect(g).toEqual([-1, 1]);
     expect(counts.poly_div_mod_f64).toBeGreaterThan(0);

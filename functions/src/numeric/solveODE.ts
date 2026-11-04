@@ -79,7 +79,7 @@ interface NormalizedEvent {
 /**
  * Options for ODE solver
  */
-interface ODEOptions {
+export interface ODEOptions {
   method?: 'RK23' | 'RK45' | 'Rosenbrock' | 'RODAS' | 'BDF' | 'Radau';
   tol?: number;
   firstStep?: number | Unit;
@@ -106,7 +106,7 @@ interface ODEOptions {
 /**
  * Solution result from ODE solver
  */
-interface ODESolution<T = unknown> {
+export interface ODESolution<T = unknown> {
   t: T[];
   y: T[];
   /** Event crossing times, one array per event function (present only when `events` was given). */
@@ -118,7 +118,7 @@ interface ODESolution<T = unknown> {
 /**
  * Forcing function type for ODE
  */
-type ForcingFunction = (
+export type ForcingFunction = (
   t: MathNumericType,
   y: MathNumericType | MathArray
 ) => MathNumericType | MathArray;
@@ -1325,6 +1325,33 @@ export function radauSolve(
   return { t: tOut, y: yOut };
 }
 
+/** Solution when the time span and state are `Matrix` values: `t` and `y` come back as matrices. */
+export interface ODEMatrixSolution {
+  t: Matrix;
+  y: Matrix;
+  tEvents?: number[][];
+  yEvents?: unknown[][];
+}
+
+/** Call signatures of `solveODE`: array in, array solution; `Matrix` in, matrix solution. */
+interface SolveODEOverloads {
+  (
+    f: ForcingFunction,
+    tspan: unknown[],
+    y0: unknown[] | number | BigNumber | Unit,
+    options?: ODEOptions
+  ): ODESolution;
+  (
+    f: ForcingFunction,
+    tspan: Matrix,
+    y0: Matrix | number | BigNumber | Unit,
+    options?: ODEOptions
+  ): ODEMatrixSolution;
+}
+
+/** `solveODE` with its precise call signatures; still a `TypedFunction`. */
+export type SolveODEFunction = SolveODEOverloads & TypedFunction;
+
 export const createSolveODE = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
@@ -1346,7 +1373,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     matrix,
     bignumber,
     unaryMinus,
-  }): TypedFunction => {
+  }): SolveODEFunction => {
     /**
      * Numerical Integration of Ordinary Differential Equations
      *
@@ -1746,7 +1773,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
       return out;
     }
 
-    return typed('solveODE', {
+    const solveODE = typed('solveODE', {
       'function, Array, Array, Object': _solveODE,
       'function, Matrix, Matrix, Object': _matrixSolveODE,
       'function, Array, Array': (f: ForcingFunction, T: unknown[], y0: unknown[]) =>
@@ -1789,6 +1816,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
         }
         return out;
       },
-    });
+    }) as unknown as SolveODEFunction;
+    return solveODE;
   }
 );

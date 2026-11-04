@@ -187,7 +187,16 @@ function cacheFor(mathScope: object, parseFn: object): CompileCache {
  */
 export function createEvaluate(
   parseFn: (expr: string) => MathNode,
-  mathScope: Record<string, unknown>
+  mathScope: Record<string, unknown>,
+  /**
+   * Optional fingerprint of the state `parseFn` depends on besides the text
+   * (for example the live `number` / `precision` config, which decides the
+   * numeric type of literals at parse time). Called on every evaluate; its
+   * value becomes part of the cache key, so a parse made under one config is
+   * never reused under another. Omit when `parseFn` is a pure function of its
+   * input.
+   */
+  cacheKey?: () => string
 ) {
   /**
    * Evaluate a math expression string.
@@ -235,7 +244,7 @@ export function createEvaluate(
   ): unknown {
     const unsafe = options?.unsafe === true;
     // Safe and unsafe compiles of the same text are distinct entries.
-    const key = (unsafe ? 'u:' : 's:') + expr;
+    const key = (unsafe ? 'u:' : 's:') + (cacheKey ? cacheKey() + '\u0000' : '') + expr;
     let compiled = cache.get(key);
     if (compiled !== undefined) {
       // refresh recency (Map iterates in insertion order)

@@ -8,17 +8,26 @@ const dependencies = ['typed', 'add', 'multiply', 'Complex', 'divide', 'matrix']
 /**
  * Frequency response result
  */
-interface FrequencyResponse {
+export interface FrequencyResponse {
   h: Complex[] | Matrix;
   w: number[] | Matrix;
 }
+
+/** Call signatures of `freqz` (numerator `b`, denominator `a`, optional frequencies or point count `w`). */
+interface FreqzOverloads {
+  (b: number[], a: number[], w?: number[] | number): FrequencyResponse;
+  (b: Matrix, a: Matrix, w?: Matrix | number): FrequencyResponse;
+}
+
+/** `freqz` with its precise call signatures; still a `TypedFunction`. */
+export type FreqzFunction = FreqzOverloads & TypedFunction;
 
 export const createFreqz = /* #__PURE__ */ factory(
   name,
   dependencies,
   // The deps are untyped (`any`), so the result is declared: without it the export
   // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
-  ({ typed, add, multiply, Complex, divide, matrix }): TypedFunction => {
+  ({ typed, add, multiply, Complex, divide, matrix }): FreqzFunction => {
     /**
      * Calculates the frequency response of a filter given its numerator and denominator coefficients.
      *
@@ -40,7 +49,10 @@ export const createFreqz = /* #__PURE__ */ factory(
      *
      *
      */
-    return typed(name, {
+    // `Complex` is injected as the core class (not complex.js' callable factory), so it needs `new`.
+    const mkComplex = (re: number, im: number): Complex => new Complex(re, im) as Complex;
+
+    const freqz = typed(name, {
       'Array, Array': function (b: number[], a: number[]): FrequencyResponse {
         const w = createBins(512);
         return _freqz(b, a, w);
@@ -85,7 +97,8 @@ export const createFreqz = /* #__PURE__ */ factory(
           w: matrix(_w),
         };
       },
-    });
+    }) as unknown as FreqzFunction;
+    return freqz;
 
     /**
      * Internal frequency response calculation
@@ -100,14 +113,14 @@ export const createFreqz = /* #__PURE__ */ factory(
 
       // Compute numerator and denominator at each frequency
       for (let i = 0; i < w.length; i++) {
-        let sumNum: Complex = Complex(0, 0) as Complex;
-        let sumDen: Complex = Complex(0, 0) as Complex;
+        let sumNum: Complex = mkComplex(0, 0) as Complex;
+        let sumDen: Complex = mkComplex(0, 0) as Complex;
 
         // Sum b[j] * exp(-j*w[i]*1i) for numerator
         for (let j = 0; j < b.length; j++) {
           sumNum = add(
             sumNum,
-            multiply(b[j], Complex(Math.cos(-j * w[i]), Math.sin(-j * w[i])))
+            multiply(b[j], mkComplex(Math.cos(-j * w[i]), Math.sin(-j * w[i])))
           ) as Complex;
         }
 
@@ -115,7 +128,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         for (let j = 0; j < a.length; j++) {
           sumDen = add(
             sumDen,
-            multiply(a[j], Complex(Math.cos(-j * w[i]), Math.sin(-j * w[i])))
+            multiply(a[j], mkComplex(Math.cos(-j * w[i]), Math.sin(-j * w[i])))
           ) as Complex;
         }
 

@@ -12,7 +12,6 @@
 
 import {
   polyMulDispatch,
-  polyMulJS,
   polyDivModDispatch,
   resultantDispatch,
   discriminantDispatch,
@@ -238,9 +237,9 @@ export function polyadd(a: number[], b: number[]): number[] {
  * @param b - Second polynomial coefficients
  * @returns Product polynomial coefficients
  *
- * Below `WASM_POLY_THRESHOLD` coefficients, multiplies via the shared
- * `polyMulJS` kernel then strips high-end zeros with `trimPoly`. At or
- * above the threshold, uses `polyMulDispatch` (WASM when policy allows).
+ * Multiplies through `polyMulDispatch` (the shared `polyMulJS` kernel, or the
+ * WASM kernel at or above `WASM_POLY_THRESHOLD` coefficients when the policy
+ * allows), then strips high-end zeros with `trimPoly`.
  *
  * @example
  * ```typescript
@@ -249,14 +248,9 @@ export function polyadd(a: number[], b: number[]): number[] {
  */
 export function polymul(a: number[], b: number[]): number[] {
   if (a.length === 0 || b.length === 0) return [0];
-  // WASM fast path for large inputs.
-  if (a.length >= WASM_POLY_THRESHOLD || b.length >= WASM_POLY_THRESHOLD) {
-    const fa = new Float64Array(a);
-    const fb = new Float64Array(b);
-    const out = polyMulDispatch(fa, fb);
-    return trimPoly(Array.from(out));
-  }
-  return trimPoly(Array.from(polyMulJS(new Float64Array(a), new Float64Array(b))));
+  // One path: polyMulDispatch applies the size threshold and the WASM policy itself
+  // (JS `polyMulJS` below the threshold or when the policy has no band).
+  return trimPoly(Array.from(polyMulDispatch(new Float64Array(a), new Float64Array(b))));
 }
 
 /**
@@ -301,6 +295,10 @@ export function polyder(coeffs: number[], n: number = 1): number[] {
  * @param b - Second polynomial coefficients (index = power)
  * @returns GCD polynomial coefficients (monic); `[0]` when both inputs are zero
  *
+ * Integer coefficients, and rational coefficients whose common denominator is at most 1e6
+ * (checked to 1e-12 relative), are scaled to integers and solved exactly; other input
+ * uses floating-point Euclid.
+ *
  * @example
  * ```typescript
  * // GCD of x^2-1 and x-1 is x-1
@@ -310,6 +308,15 @@ export function polyder(coeffs: number[], n: number = 1): number[] {
 export function polynomialGCD(a: number[], b: number[]): number[] {
   if (a.every(Number.isSafeInteger) && b.every(Number.isSafeInteger)) {
     return integerPolynomialGCD(a, b);
+  }
+
+  // Rational coefficients with small denominators: scale each polynomial to
+  // integers (the monic GCD is invariant under scaling either input) and take
+  // the exact path. Only irrational / ill-conditioned input uses float Euclid.
+  const sa = scaleToSafeIntegers(a);
+  const sb = sa === null ? null : scaleToSafeIntegers(b);
+  if (sa !== null && sb !== null) {
+    return integerPolynomialGCD(sa, sb);
   }
 
   let r0 = trimPoly([...a]);
@@ -327,6 +334,63 @@ export function polynomialGCD(a: number[], b: number[]): number[] {
     return r0.map((c) => c / leading);
   }
   return r0;
+}
+
+/** Largest denominator accepted for a coefficient, and for the common denominator of a polynomial. */
+const MAX_RATIONAL_DENOMINATOR = 1_000_000;
+
+/**
+ * Denominator `q` (1 ≤ q ≤ {@link MAX_RATIONAL_DENOMINATOR}) of the first continued-fraction
+ * convergent `p/q` with `|x − p/q| ≤ 1e-12·|x|`, or `null` when none exists
+ * (irrational-looking or non-finite input).
+ */
+function rationalDenominator(x: number): number | null {
+  if (!Number.isFinite(x)) return null;
+  if (Number.isInteger(x)) return 1;
+  const tol = 1e-12 * Math.abs(x);
+  const ax = Math.abs(x);
+  let h0 = 1;
+  let k0 = 0;
+  let h1 = Math.floor(ax);
+  let k1 = 1;
+  let rem = ax - h1;
+  for (let it = 0; it < 40; it++) {
+    if (Math.abs(ax - h1 / k1) <= tol) return k1;
+    if (rem === 0) return null;
+    const inv = 1 / rem;
+    const t = Math.floor(inv);
+    rem = inv - t;
+    const h2 = t * h1 + h0;
+    const k2 = t * k1 + k0;
+    if (k2 > MAX_RATIONAL_DENOMINATOR) return null;
+    h0 = h1;
+    k0 = k1;
+    h1 = h2;
+    k1 = k2;
+  }
+  return null;
+}
+
+function gcdSmall(x: number, y: number): number {
+  while (y !== 0) [x, y] = [y, x % y];
+  return x;
+}
+
+/**
+ * Scale a coefficient array by the lcm of its coefficients' denominators so that every entry is a
+ * safe integer. Returns `null` unless every coefficient is a rational with a small denominator
+ * and the common denominator stays within {@link MAX_RATIONAL_DENOMINATOR}.
+ */
+function scaleToSafeIntegers(coeffs: number[]): number[] | null {
+  let L = 1;
+  for (const c of coeffs) {
+    const q = rationalDenominator(c);
+    if (q === null) return null;
+    L = (L / gcdSmall(L, q)) * q;
+    if (L > MAX_RATIONAL_DENOMINATOR) return null;
+  }
+  const out = coeffs.map((c) => Math.round(c * L));
+  return out.every(Number.isSafeInteger) ? out : null;
 }
 
 /** Exact monic GCD of two integer-coefficient polynomials. */

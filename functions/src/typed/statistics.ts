@@ -344,36 +344,39 @@ export const parallelStatMedian = mathTyped('parallelStatMedian', {
 // Parallel Mode Functions
 // =============================================================================
 
+/** Most frequent value(s) of a numeric sequence, ascending. Shared by the Array and Float64Array overloads. */
+function modeOf(arr: ArrayLike<number>): number[] {
+  if (arr.length === 0) return [];
+
+  const counts = new Map<number, i32>();
+  let maxCount: i32 = 0;
+
+  for (let i: i32 = 0; i < arr.length; i++) {
+    const val = arr[i];
+    const count = (counts.get(val) || 0) + 1;
+    counts.set(val, count);
+    if (count > maxCount) maxCount = count;
+  }
+
+  const modes: number[] = [];
+  counts.forEach((count, value) => {
+    if (count === maxCount) modes.push(value);
+  });
+
+  return modes.sort((a, b) => a - b);
+}
+
 /**
  * Parallel mode with typed-function dispatch
  * Returns the most frequently occurring value(s)
  */
 export const parallelStatMode = mathTyped('parallelStatMode', {
   // Number array
-  Array: (arr: number[]): number[] => {
-    if (arr.length === 0) return [];
-
-    const counts = new Map<number, i32>();
-    let maxCount: i32 = 0;
-
-    for (let i: i32 = 0; i < arr.length; i++) {
-      const val = arr[i];
-      const count = (counts.get(val) || 0) + 1;
-      counts.set(val, count);
-      if (count > maxCount) maxCount = count;
-    }
-
-    const modes: number[] = [];
-    counts.forEach((count, value) => {
-      if (count === maxCount) modes.push(value);
-    });
-
-    return modes.sort((a, b) => a - b);
-  },
+  Array: (arr: number[]): number[] => modeOf(arr),
 
   // Float64Array
   Float64Array: (data: Float64Array): number[] => {
-    return parallelStatMode(Array.from(data)) as number[];
+    return modeOf(data);
   },
 });
 
@@ -625,30 +628,39 @@ export const parallelStatCumsum = mathTyped('parallelStatCumsum', {
 // Parallel Quantile Functions
 // =============================================================================
 
+function checkQuantile(q: f64): void {
+  if (q < 0 || q > 1) {
+    throw new Error('Quantile must be between 0 and 1');
+  }
+}
+
+/** Sorted copy — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts). */
+function sortedCopy(data: Float64Array): Float64Array {
+  const sorted = new Float64Array(data);
+  sortF64Dispatch(sorted);
+  return sorted;
+}
+
+/** Linear-interpolated quantile of an already sorted, non-empty array. */
+function interpolateQuantile(sorted: Float64Array, q: f64): f64 {
+  const pos = (sorted.length - 1) * q;
+  const lower = Math.floor(pos);
+  const upper = Math.ceil(pos);
+  if (lower === upper) return sorted[lower];
+  const frac = pos - lower;
+  return sorted[lower] * (1 - frac) + sorted[upper] * frac;
+}
+
 /**
  * Parallel quantile computation
  */
 export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
   // Float64Array with quantile value
   'Float64Array, number': (data: Float64Array, q: f64): f64 => {
-    if (q < 0 || q > 1) {
-      throw new Error('Quantile must be between 0 and 1');
-    }
+    checkQuantile(q);
     if (data.length === 0) return NaN;
     if (data.length === 1) return data[0];
-
-    // Sort a copy — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
-    const sorted = new Float64Array(data);
-    sortF64Dispatch(sorted);
-
-    const pos = (sorted.length - 1) * q;
-    const lower = Math.floor(pos);
-    const upper = Math.ceil(pos);
-
-    if (lower === upper) return sorted[lower];
-
-    const frac = pos - lower;
-    return sorted[lower] * (1 - frac) + sorted[upper] * frac;
+    return interpolateQuantile(sortedCopy(data), q);
   },
 
   // Number array
@@ -658,7 +670,12 @@ export const parallelStatQuantile = mathTyped('parallelStatQuantile', {
 
   // Multiple quantiles
   'Float64Array, Array': (data: Float64Array, quantiles: number[]): number[] => {
-    return quantiles.map((q) => parallelStatQuantile(data, q) as number);
+    quantiles.forEach(checkQuantile);
+    if (data.length === 0) return quantiles.map(() => NaN);
+    if (data.length === 1) return quantiles.map(() => data[0]);
+    // Sort once, interpolate each q (same arithmetic as the scalar overload).
+    const sorted = sortedCopy(data);
+    return quantiles.map((q) => interpolateQuantile(sorted, q));
   },
 });
 

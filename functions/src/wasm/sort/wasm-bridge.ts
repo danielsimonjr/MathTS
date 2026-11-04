@@ -4,13 +4,14 @@
  * Kernels covered:
  *   - `sort_f64`    — in-place ascending sort (NaN-last, returns same array).
  *   - `argsort_f64` — return Int32Array of permutation indices (NaN-last).
- *   - `rank_f64`    — return Int32Array of ranks (0-indexed, NaN-last).
+ *
+ * (`rank_f64` still exists in the AS binary but has no JS bridge: nothing in `functions` used it.)
  *
  * Dispatch (for arrays ≥ WASM_SORT_THRESHOLD = 16 384 elements):
  *   - `sort_f64` uses the AS managed kernel — now an INTROSORT (3-way quicksort +
  *     median-of-3 + heapsort fallback), so duplicate-heavy input is O(n log n)
  *     (the old Lomuto quicksort degraded to O(n²)); value-sort stays bit-identical.
- *   - `argsort_f64` / `rank_f64` are repointed to AS (Phase 6): the AS
+ *   - `argsort_f64` is repointed to AS (Phase 6): the AS
  *     index sort now uses a STABLE total-order comparator (value, then original
  *     index), so for tied values it returns the same permutation as the JS stable
  *     reference (verified Phase 6 — exact match on tie-heavy + NaN input).
@@ -71,15 +72,6 @@ export function argsortF64JS(data: Float64Array): Int32Array {
   arr.sort((i, j) => cmpNanLast(data[i], data[j]));
   for (let k = 0; k < n; k++) indices[k] = arr[k];
   return indices;
-}
-
-/** JS fallback: return rank array (NaN-last). */
-export function rankF64JS(data: Float64Array): Int32Array {
-  const n = data.length;
-  const argsort = argsortF64JS(data);
-  const rank = new Int32Array(n);
-  for (let k = 0; k < n; k++) rank[argsort[k]] = k;
-  return rank;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,16 +140,4 @@ function indexDispatch(
 
 export function argsortF64Dispatch(data: Float64Array): Int32Array {
   return indexDispatch(data, { exportName: 'argsort_f64', js: argsortF64JS });
-}
-
-/**
- * Return the rank array for `data` (0-indexed, NaN-last) — STABLE.
- * `result[i]` = position of `data[i]` in the sorted array.
- *
- * Uses the AS managed kernel above {@link WASM_SORT_THRESHOLD} (derived from the
- * stable AS argsort, so it matches the JS stable reference on ties — verified
- * Phase 6). Falls back to JS when wasm is unavailable / on any error.
- */
-export function rankF64Dispatch(data: Float64Array): Int32Array {
-  return indexDispatch(data, { exportName: 'rank_f64', js: rankF64JS });
 }

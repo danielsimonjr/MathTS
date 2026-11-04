@@ -489,8 +489,10 @@ export const createQr = /* #__PURE__ */ factory(
       return ret;
     }
 
-    function _sparseQR(_m: SparseMatrix): QRResult {
-      throw new Error('qr not implemented for sparse matrices yet');
+    // QR of a sparse matrix: there is no sparse Householder kernel, so densify, factor, and return
+    // dense Q and R (both are generally dense even when the input is sparse).
+    function _sparseQR(m: SparseMatrix): QRResult {
+      return _denseQR(matrix(m.valueOf(), 'dense') as DenseMatrix);
     }
   }
 );

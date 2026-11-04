@@ -130,7 +130,19 @@ export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
 // Step 3: Create the evaluate function
 // ---------------------------------------------------------------------------
 
-const _evaluate = createEvaluate(parse, mathScope);
+/**
+ * Literal parsing reads the live config (`number`, `numberFallback`,
+ * `precision`, ...) through the overlay-aware view in `factoryScope.config`,
+ * so a compiled expression is only reusable under the same config values.
+ */
+const liveConfig = factoryScope.config as Record<string, unknown>;
+function configFingerprint(): string {
+  let key = '';
+  for (const k in liveConfig) key += k + '=' + String(liveConfig[k]) + ';';
+  return key;
+}
+
+const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 
 /**
  * Exact elementary charge (CODATA / 2019 SI), in coulombs.

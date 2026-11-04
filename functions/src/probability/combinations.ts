@@ -1,4 +1,5 @@
 import { factory } from '../utils/factory.js';
+import { deepMap } from '../utils/collection.js';
 import { combinationsNumber } from '../plain/number/combinations.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import {
@@ -6,6 +7,10 @@ import {
   isPositiveInteger,
   type BigNumberBinomialType,
 } from './bigint-binomial.js';
+
+interface Matrix {
+  valueOf(): unknown;
+}
 
 interface CombinationsDependencies {
   typed: TypedFunction;
@@ -54,7 +59,19 @@ export const createCombinations = /* #__PURE__ */ factory(
         return binomialProductBigNumber(n, k);
       },
 
-      // TODO: implement support for collection in combinations
+      // Collections map elementwise over whichever argument is the collection (as `permutations`
+      // does); two collections are not zipped.
+      'Array | Matrix, number | BigNumber': typed.referToSelf(
+        (self: TypedFunction) =>
+          (n: unknown[] | Matrix, k: number | BigNumberBinomialType): unknown[] | Matrix =>
+            deepMap(n as unknown[], (nVal) => self(nVal, k)) as unknown[] | Matrix
+      ),
+
+      'number | BigNumber, Array | Matrix': typed.referToSelf(
+        (self: TypedFunction) =>
+          (n: number | BigNumberBinomialType, k: unknown[] | Matrix): unknown[] | Matrix =>
+            deepMap(k as unknown[], (kVal) => self(n, kVal)) as unknown[] | Matrix
+      ),
     });
   }
 );
