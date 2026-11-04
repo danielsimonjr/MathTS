@@ -90,13 +90,14 @@ describe('WorkerPool.terminate()', () => {
       }
     }
     const pool = new GatedPool('/* fake */', 3);
-    expect(created).toHaveLength(1);
+    // Workers start concurrently, so all three are in flight before any is ready.
+    expect(created).toHaveLength(3);
     await pool.terminate();
-    gates[0]!();
+    for (const open of gates) open();
     await sleep(20);
-    expect(created[0]!.terminated).toBe(true);
-    // The loop stopped: no second and third worker were spawned after the terminate.
-    expect(created).toHaveLength(1);
+    // Each one that finished starting after the terminate is stopped and never joins the pool.
+    expect(created.every((w) => w.terminated)).toBe(true);
+    expect(created).toHaveLength(3);
     expect(pool.workerCount).toBe(0);
   });
 

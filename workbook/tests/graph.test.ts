@@ -3,6 +3,7 @@ import {
   buildDependencyGraph,
   topologicalSort,
   getDependents,
+  getAncestors,
   detectCycles,
 } from '../src/graph.js';
 import type { Cell, DependencyGraph, DependencyNode } from '../src/types.js';
@@ -148,5 +149,26 @@ describe('detectCycles', () => {
   it('should return empty for independent nodes', () => {
     const graph = buildDependencyGraph([cell('a'), cell('b'), cell('c')]);
     expect(detectCycles(graph)).toEqual([]);
+  });
+});
+
+describe('deep chains (iterative traversals)', () => {
+  it('handles a 20,000-cell chain without stack overflow', () => {
+    const n = 20000;
+    const cells: Cell[] = [];
+    for (let i = 0; i < n; i++) {
+      cells.push({
+        id: `c${i}`,
+        type: 'code',
+        content: '0',
+        ...(i > 0 ? { dependsOn: [`c${i - 1}`] } : {}),
+      });
+    }
+    const g = buildDependencyGraph(cells);
+    expect(g.executionOrder.length).toBe(n);
+    expect(g.executionOrder[0]).toBe('c0');
+    expect(g.executionOrder[n - 1]).toBe(`c${n - 1}`);
+    expect(getDependents(g, 'c0').length).toBe(n - 1);
+    expect(getAncestors(g, `c${n - 1}`).length).toBe(n);
   });
 });

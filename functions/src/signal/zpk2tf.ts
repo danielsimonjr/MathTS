@@ -8,19 +8,28 @@ const dependencies = ['typed', 'add', 'multiply', 'Complex', 'number'];
 /**
  * Transfer function representation [numerator, denominator]
  */
-type TransferFunction = [Complex[], Complex[]];
+export type TransferFunction = [Complex[], Complex[]];
 
 /**
  * Zero, pole, or gain value (can be number, Complex, or BigNumber)
  */
-type ZPKValue = number | Complex | { type: string; re?: number; im?: number };
+export type ZPKValue = number | Complex | { type: string; re?: number; im?: number };
+
+/** Call signatures of `zpk2tf` (zeros, poles, optional gain defaulting to 1). */
+interface Zpk2tfOverloads {
+  (z: ZPKValue[], p: ZPKValue[], k?: number): TransferFunction;
+  (z: Matrix, p: Matrix, k?: number): TransferFunction;
+}
+
+/** `zpk2tf` with its precise call signatures; still a `TypedFunction`. */
+export type Zpk2tfFunction = Zpk2tfOverloads & TypedFunction;
 
 export const createZpk2tf = /* #__PURE__ */ factory(
   name,
   dependencies,
   // The deps are untyped (`any`), so the result is declared: without it the export
   // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
-  ({ typed, add, multiply, Complex, number }): TypedFunction => {
+  ({ typed, add, multiply, Complex, number }): Zpk2tfFunction => {
     /**
      * Compute the transfer function of a zero-pole-gain model.
      *
@@ -39,7 +48,10 @@ export const createZpk2tf = /* #__PURE__ */ factory(
      * @return {Array} Two dimensional array containing the numerator (first row) and denominator (second row) polynomials
      *
      */
-    return typed(name, {
+    // `Complex` is injected as the core class (not complex.js' callable factory), so it needs `new`.
+    const mkComplex = (re: number, im: number): Complex => new Complex(re, im) as Complex;
+
+    const zpk2tf = typed(name, {
       'Array,Array,number': function (z: ZPKValue[], p: ZPKValue[], k: number): TransferFunction {
         return _zpk2tf(z, p, k);
       },
@@ -52,7 +64,8 @@ export const createZpk2tf = /* #__PURE__ */ factory(
       'Matrix,Matrix': function (z: Matrix, p: Matrix): TransferFunction {
         return _zpk2tf(z.valueOf() as ZPKValue[], p.valueOf() as ZPKValue[], 1);
       },
-    });
+    }) as unknown as Zpk2tfFunction;
+    return zpk2tf;
 
     /**
      * Internal implementation of zpk2tf conversion
@@ -70,23 +83,29 @@ export const createZpk2tf = /* #__PURE__ */ factory(
         p = p.map((el) => number(el));
       }
 
-      let num: Complex[] = [Complex(1, 0) as Complex];
-      let den: Complex[] = [Complex(1, 0) as Complex];
+      let num: Complex[] = [mkComplex(1, 0) as Complex];
+      let den: Complex[] = [mkComplex(1, 0) as Complex];
 
       // Build numerator polynomial from zeros
       // Each zero contributes a factor (s - zero) to the polynomial
       for (let i = 0; i < z.length; i++) {
         let zero: Complex = z[i] as Complex;
-        if (typeof zero === 'number') zero = Complex(zero, 0) as Complex;
-        num = _multiply(num, [Complex(1, 0) as Complex, Complex(-zero.re, -zero.im) as Complex]);
+        if (typeof zero === 'number') zero = mkComplex(zero, 0) as Complex;
+        num = _multiply(num, [
+          mkComplex(1, 0) as Complex,
+          mkComplex(-zero.re, -zero.im) as Complex,
+        ]);
       }
 
       // Build denominator polynomial from poles
       // Each pole contributes a factor (s - pole) to the polynomial
       for (let i = 0; i < p.length; i++) {
         let pole: Complex = p[i] as Complex;
-        if (typeof pole === 'number') pole = Complex(pole, 0) as Complex;
-        den = _multiply(den, [Complex(1, 0) as Complex, Complex(-pole.re, -pole.im) as Complex]);
+        if (typeof pole === 'number') pole = mkComplex(pole, 0) as Complex;
+        den = _multiply(den, [
+          mkComplex(1, 0) as Complex,
+          mkComplex(-pole.re, -pole.im) as Complex,
+        ]);
       }
 
       // Apply gain to numerator
@@ -108,7 +127,7 @@ export const createZpk2tf = /* #__PURE__ */ factory(
 
       // Polynomial multiplication using convolution
       for (let i = 0; i < a.length + b.length - 1; i++) {
-        c[i] = Complex(0, 0) as Complex;
+        c[i] = mkComplex(0, 0) as Complex;
         for (let j = 0; j < a.length; j++) {
           if (i - j >= 0 && i - j < b.length) {
             c[i] = add(c[i], multiply(a[j], b[i - j])) as Complex;

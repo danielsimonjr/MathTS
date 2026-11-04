@@ -250,26 +250,26 @@ describe('ComputePool — parallel paths and helpers', () => {
     // remaining binary ops' guard clauses here.
     it('bitOr throws on length mismatch', async () => {
       await expect(pool.bitOr(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))).rejects.toThrow(
-        /lengths must match/
+        'bitOr: lengths must match (3 vs 2)'
       );
     });
 
     it('bitXor throws on length mismatch', async () => {
       await expect(
         pool.bitXor(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-      ).rejects.toThrow(/lengths must match/);
+      ).rejects.toThrow('bitXor: lengths must match (3 vs 2)');
     });
 
     it('rightArithShift throws on Int32 length mismatch', async () => {
       await expect(
         pool.rightArithShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-      ).rejects.toThrow(/lengths must match/);
+      ).rejects.toThrow('rightArithShift: lengths must match (3 vs 2)');
     });
 
     it('rightLogShift throws on Int32 length mismatch', async () => {
       await expect(
         pool.rightLogShift(Int32Array.from([1, 2, 3]), Int32Array.from([1, 2]))
-      ).rejects.toThrow(/lengths must match/);
+      ).rejects.toThrow('rightLogShift: lengths must match (3 vs 2)');
     });
   });
 });

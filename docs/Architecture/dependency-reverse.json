@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-02",
+  "generated": "2026-11-04",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -10,16 +10,17 @@
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/worker.ts"
     ],
+    "packages/workerpool/src/worker-numerics.ts": [
+      "packages/workerpool/src/index.ts",
+      "packages/workerpool/src/tensordot-range.ts",
+      "packages/workerpool/src/worker.ts"
+    ],
     "packages/workerpool/src/multi-index.ts": [
       "packages/workerpool/src/index.ts",
       "packages/workerpool/src/tensordot-range.ts"
     ],
     "packages/workerpool/src/tensordot-range.ts": [
       "packages/workerpool/src/index.ts",
-      "packages/workerpool/src/worker.ts"
-    ],
-    "packages/workerpool/src/worker-numerics.ts": [
-      "packages/workerpool/src/tensordot-range.ts",
       "packages/workerpool/src/worker.ts"
     ],
     "core/src/config.ts": [
@@ -142,6 +143,7 @@
     "core/src/factory/factory.ts": ["core/src/factory/index.ts"],
     "core/src/typed/type-bridge.ts": ["core/src/typed/index.ts"],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
+    "core/src/types/unit/va-var.ts": ["core/src/types/unit/Unit.ts"],
     "core/src/types/unit/exact-scale.ts": [
       "core/src/types/unit-definitions.ts",
       "core/src/types/unit-prefixes.ts",
@@ -304,9 +306,15 @@
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/dense/arithmetic.ts",
       "matrix/src/types/dense/reduction.ts",
+      "matrix/src/types/dense/storage.ts",
       "matrix/src/types/index.ts"
     ],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
+    "matrix/src/types/dense/storage.ts": [
+      "matrix/src/types/DenseMatrix.ts",
+      "matrix/src/types/dense/arithmetic.ts",
+      "matrix/src/types/dense/reduction.ts"
+    ],
     "matrix/src/types/SparseMatrix.ts": ["matrix/src/types/index.ts"],
     "tensor/src/named-index.ts": [
       "tensor/src/Tensor.ts",
@@ -1233,6 +1241,7 @@
       "functions/src/complex/im.ts",
       "functions/src/complex/re.ts",
       "functions/src/logical/not.ts",
+      "functions/src/probability/combinations.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/multinomial.ts",
       "functions/src/probability/permutations.ts",
@@ -1248,6 +1257,7 @@
       "functions/src/statistics/variance.ts",
       "functions/src/type/matrix/utils/matAlgo06xS0S0.ts",
       "functions/src/type/unit/function/unit.ts",
+      "functions/src/typed/probability.ts",
       "functions/src/utils/isInteger.ts",
       "functions/src/utils/isNaN.ts",
       "functions/src/utils/isNegative.ts",
@@ -1911,6 +1921,18 @@
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/solveODE.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/index.ts",
+      "functions/src/numeric/solveDAE.ts",
+      "functions/src/numeric/solveParabolicPDE.ts",
+      "functions/src/typed/numeric.ts"
+    ],
+    "functions/src/signal/freqz.ts": ["functions/src/factories/index.ts", "functions/src/index.ts"],
+    "functions/src/signal/zpk2tf.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/index.ts"
+    ],
     "functions/src/scalar-batch-parallel.ts": [
       "functions/src/index.ts",
       "functions/src/scalar-search.ts"
@@ -2103,7 +2125,6 @@
     "functions/src/probability/bernoulli.ts": ["functions/src/factories/index.ts"],
     "functions/src/relational/equal.ts": ["functions/src/factories/index.ts"],
     "functions/src/utils/isInteger.ts": ["functions/src/factories/index.ts"],
-    "functions/src/signal/zpk2tf.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/cumsum.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/sum.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/dotDivide.ts": ["functions/src/factories/index.ts"],
@@ -2195,7 +2216,6 @@
     "functions/src/statistics/quantileSeq.ts": ["functions/src/factories/index.ts"],
     "functions/src/probability/kldivergence.ts": ["functions/src/factories/index.ts"],
     "functions/src/probability/multinomial.ts": ["functions/src/factories/index.ts"],
-    "functions/src/signal/freqz.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setCartesian.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setDifference.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setDistinct.ts": ["functions/src/factories/index.ts"],
@@ -2205,12 +2225,6 @@
     "functions/src/set/setPowerset.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/simplifyCore.ts": ["functions/src/factories/index.ts"],
     "functions/src/algebra/polynomialRoot.ts": ["functions/src/factories/index.ts"],
-    "functions/src/numeric/solveODE.ts": [
-      "functions/src/factories/index.ts",
-      "functions/src/numeric/solveDAE.ts",
-      "functions/src/numeric/solveParabolicPDE.ts",
-      "functions/src/typed/numeric.ts"
-    ],
     "functions/src/special/zeta.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/matrix/function/index.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/eigs.ts": ["functions/src/factories/index.ts"],
@@ -2679,8 +2693,11 @@
       "expression/src/index.ts",
       "expression/src/node/AssignmentNode.ts",
       "expression/src/node/ConstantNode.ts",
+      "expression/src/node/FunctionAssignmentNode.ts",
       "expression/src/node/FunctionNode.ts",
+      "expression/src/node/IndexNode.ts",
       "expression/src/node/Node.ts",
+      "expression/src/node/ObjectNode.ts",
       "expression/src/node/OperatorNode.ts",
       "expression/src/node/RelationalNode.ts",
       "expression/src/node/SymbolNode.ts"
@@ -3977,6 +3994,10 @@
       "expression/src/transform/sum.transform.ts",
       "expression/src/transform/variance.transform.ts"
     ],
+    "expression/src/node/utils/describeType.ts": [
+      "expression/src/node/utils/access.ts",
+      "expression/src/node/utils/assign.ts"
+    ],
     "expression/src/error/DimensionError.ts": ["expression/src/node/utils/stringSubset.ts"],
     "expression/src/transform/utils/shortCircuitBinary.ts": [
       "expression/src/transform/and.transform.ts",
@@ -4039,6 +4060,11 @@
     ],
     "expression/src/utils/print.ts": ["expression/src/transform/print.transform.ts"],
     "expression/src/error/IndexError.ts": ["expression/src/transform/utils/errorTransform.ts"],
+    "parallel/src/validate.ts": [
+      "parallel/src/ComputePool.ts",
+      "parallel/src/ParallelMatrix.ts",
+      "parallel/src/ops/bitwise.ts"
+    ],
     "parallel/src/ops/bitwise.ts": ["parallel/src/ComputePool.ts", "parallel/src/index.ts"],
     "parallel/src/WorkerPool.ts": ["parallel/src/ParallelMatrix.ts", "parallel/src/index.ts"],
     "parallel/src/gemm-rows.ts": [

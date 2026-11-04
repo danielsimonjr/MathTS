@@ -21,6 +21,7 @@
  */
 
 import { calculateOptimalChunks, type ChunkOptions } from '../strategies/chunk.js';
+import { assertSameLength } from '../validate.js';
 
 /**
  * The set of supported binary bitwise op codes.
@@ -86,9 +87,7 @@ function runBinary(
   op: BitwiseBinaryOp,
   options: ChunkOptions = {}
 ): Int32Array {
-  if (a.length !== b.length) {
-    throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-  }
+  assertSameLength(op, a.length, b.length);
   const out = new Int32Array(a.length);
   if (a.length === 0) return out;
 

@@ -159,3 +159,16 @@ describe('access - unsupported type throws', () => {
     );
   });
 });
+
+describe('access - error messages name the offending type', () => {
+  it('names number / boolean for unsupported types', () => {
+    expect(() => access(42 as never, makeSimpleNumericIndex(0) as never)).toThrow('got number');
+    expect(() => access(true as never, makeSimpleNumericIndex(0) as never)).toThrow('got boolean');
+  });
+
+  it('names null for a numeric index on null', () => {
+    expect(() => access(null as never, makeSimpleNumericIndex(0) as never)).toThrow(
+      'object is null'
+    );
+  });
+});

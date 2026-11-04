@@ -35,7 +35,18 @@ export {
   matrixPinv,
   qr,
   lu,
+  luSolve,
   cholesky,
+
+  // Rank-revealing / alternative QR-family factorizations
+  qrPivoted,
+  lq,
+  rq,
+  ql,
+
+  // Condition estimation and nested-array helper
+  condest,
+  transposeNestedArray,
 
   // Matrix functions
   matrixExpm,
@@ -53,6 +64,10 @@ export type {
   QRResult,
   QROptions,
   LUResult,
+  QRPivotedResult,
+  LQResult,
+  RQResult,
+  QLResult,
   CholeskyResult,
   ExpmOptions,
   LogmOptions,

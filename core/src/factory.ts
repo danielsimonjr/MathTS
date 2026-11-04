@@ -210,7 +210,6 @@ export function sortFactories(
   return sorted;
 }
 
-// TODO: comment or cleanup if unused in the end
 /**
  * Run the factory functions in dependency order on one scope object.
  *

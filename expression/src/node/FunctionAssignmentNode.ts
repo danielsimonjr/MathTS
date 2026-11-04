@@ -6,6 +6,7 @@ import { forEach, join } from '../utils/array.js';
 import { toSymbol } from '../utils/latex.js';
 import { getPrecedence } from '../operators.js';
 import { factory } from '../utils/factory.js';
+import { toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode, StringOptions } from './Node.js';
 
 const name = 'FunctionAssignmentNode';
@@ -278,6 +279,21 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
           '<span class="math-operator math-assignment-operator ' +
           'math-variable-assignment-operator math-binary-operator">=</span>' +
           expr
+        );
+      }
+
+      /**
+       * Get the MathML representation of this node (mirrors `_toTex`).
+       */
+      _toMathML(): string {
+        let expr = this.expr.toMathML();
+        if (needParenthesis(this, 'keep', undefined)) {
+          expr = `<mrow><mo>(</mo>${expr}<mo>)</mo></mrow>`;
+        }
+        const params = this.params.map((p) => toMathMLSymbol(p)).join('<mo>,</mo>');
+        return (
+          `<mrow>${toMathMLSymbol(this.name)}<mo>&#x2061;</mo>` +
+          `<mrow><mo>(</mo>${params}<mo>)</mo></mrow><mo>=</mo>${expr}</mrow>`
         );
       }
 

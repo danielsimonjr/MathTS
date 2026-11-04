@@ -20,6 +20,33 @@ import {
 import { compileFunctionSource } from './compile-function-source.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
+import {
+  _workerPairwiseSum,
+  _workerPairwiseDot,
+  _workerScaledSsq,
+  _workerScaledSsqDiff,
+  _workerCombineScaledSsq,
+} from './worker-numerics.js';
+
+/**
+ * Length-mismatch error shared by every binary operation:
+ * `<op>: lengths must match (<a> vs <b>)`.
+ */
+function lengthMismatch(op: string, a: number, b: number): Error {
+  return new Error(`${op}: lengths must match (${a} vs ${b})`);
+}
+
+/**
+ * The `ArrayBuffer` that holds exactly the elements of `x`, starting at byte 0.
+ *
+ * Worker kernels rebuild a typed array from the buffer alone (`new Float64Array(buffer)`), so a
+ * view with a non-zero `byteOffset` or a buffer longer than the view would be read from the wrong
+ * region. An exact view is passed through without a copy; anything else is copied once.
+ */
+function exactBuffer<T extends Float64Array | Int32Array>(x: T): ArrayBuffer {
+  const exact = x.byteOffset === 0 && x.buffer.byteLength === x.byteLength ? x : x.slice();
+  return exact.buffer as ArrayBuffer;
+}
 
 // Try to import WASM feature detection from workerpool/wasm subpath
 // These may not be available in all environments
@@ -754,19 +781,21 @@ export class MathWorkerPool {
   // Array Operations
   // =========================================================================
 
-  private reduceScalar(
+  private reduceScalar<P = number>(
     data: Float64Array,
     options: TaskOptions | undefined,
     spec: {
       sequential: () => number;
       task: 'sumChunk' | 'prodChunk' | 'normChunk';
-      reducePartials: (parts: number[]) => number;
+      reducePartials: (parts: P[]) => number;
     }
   ): Promise<ParallelResult<number>> {
     return this.runParallel(data.length, options, {
       sequential: spec.sequential,
       chunks: () => this.chunkFloat64Array(data, options?.chunkSize),
-      send: (chunk) => this.exec<number>(spec.task, [chunk.buffer, 0, chunk.length]),
+      // The chunk is a slice this method owns, so its buffer moves to the worker uncopied.
+      send: (chunk) =>
+        this.exec<P>(spec.task, [chunk.buffer, 0, chunk.length], { transfer: [chunk.buffer] }),
       combine: spec.reducePartials,
     });
   }
@@ -776,15 +805,11 @@ export class MathWorkerPool {
    */
   async sum(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
     return this.reduceScalar(data, options, {
-      sequential: () => {
-        let total = 0;
-        for (let i = 0; i < data.length; i++) {
-          total += data[i];
-        }
-        return total;
-      },
+      // Pairwise, as in the chunk kernel and in ComputePool's sequential path: the result
+      // must not depend on whether the call crossed the parallel threshold.
+      sequential: () => _workerPairwiseSum(data),
       task: 'sumChunk',
-      reducePartials: (parts) => parts.reduce((a, b) => a + b, 0),
+      reducePartials: (parts) => _workerPairwiseSum(parts),
     });
   }
 
@@ -813,17 +838,12 @@ export class MathWorkerPool {
     b: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<number>> {
-    if (a.length !== b.length) {
-      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (a.length !== b.length) throw lengthMismatch('dot', a.length, b.length);
 
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
-      let result = 0;
-      for (let i = 0; i < a.length; i++) {
-        result += a[i] * b[i];
-      }
+      const result = _workerPairwiseDot(a, b);
       return {
         result,
         duration: performance.now() - start,
@@ -838,11 +858,13 @@ export class MathWorkerPool {
 
     const partialDots = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<number>('dotChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length])
+        this.exec<number>('dotChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length], {
+          transfer: [chunkA.buffer, chunkB.buffer],
+        })
       )
     );
 
-    const result = partialDots.reduce((acc, val) => acc + val, 0);
+    const result = _workerPairwiseSum(partialDots);
 
     return {
       result,
@@ -862,9 +884,7 @@ export class MathWorkerPool {
     op: 'add' | 'subtract' | 'multiply' | 'divide',
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (a.length !== b.length) throw lengthMismatch(op, a.length, b.length);
 
     const start = performance.now();
 
@@ -900,13 +920,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<ArrayBuffer>('elementwiseChunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-          op,
-        ])
+        this.exec<ArrayBuffer>(
+          'elementwiseChunk',
+          [chunkA.buffer, chunkB.buffer, 0, chunkA.length, op],
+          { transfer: [chunkA.buffer, chunkB.buffer] }
+        )
       )
     );
 
@@ -950,7 +968,9 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('scaleChunk', [chunk.buffer, 0, chunk.length, scalar])
+        this.exec<ArrayBuffer>('scaleChunk', [chunk.buffer, 0, chunk.length, scalar], {
+          transfer: [chunk.buffer],
+        })
       )
     );
 
@@ -987,9 +1007,7 @@ export class MathWorkerPool {
     op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift',
     options?: TaskOptions
   ): Promise<ParallelResult<Int32Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (a.length !== b.length) throw lengthMismatch(op, a.length, b.length);
 
     const start = performance.now();
 
@@ -1029,7 +1047,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<ArrayBuffer>('bitwiseChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length, op])
+        this.exec<ArrayBuffer>(
+          'bitwiseChunk',
+          [chunkA.buffer, chunkB.buffer, 0, chunkA.length, op],
+          { transfer: [chunkA.buffer, chunkB.buffer] }
+        )
       )
     );
 
@@ -1094,7 +1116,9 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('bitwiseScalarChunk', [chunk.buffer, 0, chunk.length, scalar, op])
+        this.exec<ArrayBuffer>('bitwiseScalarChunk', [chunk.buffer, 0, chunk.length, scalar, op], {
+          transfer: [chunk.buffer],
+        })
       )
     );
 
@@ -1134,7 +1158,9 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('bitwiseNotChunk', [chunk.buffer, 0, chunk.length])
+        this.exec<ArrayBuffer>('bitwiseNotChunk', [chunk.buffer, 0, chunk.length], {
+          transfer: [chunk.buffer],
+        })
       )
     );
 
@@ -1170,6 +1196,14 @@ export class MathWorkerPool {
     bCols: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    if (a.length !== aRows * aCols) {
+      throw new Error(`matmul: a has ${a.length} elements, expected ${aRows}x${aCols}`);
+    }
+    if (b.length !== aCols * bCols) {
+      throw new Error(
+        `matmul: inner dimensions must match (b has ${b.length} elements, expected aCols*bCols = ${aCols}*${bCols})`
+      );
+    }
     const resultSize = aRows * bCols;
     const start = performance.now();
 
@@ -1193,11 +1227,13 @@ export class MathWorkerPool {
       };
     }
 
-    // Distribute rows across workers
+    // Distribute rows across workers. Each task gets only its own block of A's rows (a slice
+    // it owns, moved by transfer) and a copy of B, which every task needs.
     const stats = this.stats();
     const numWorkers = Math.max(1, stats.totalWorkers);
     const rowsPerWorker = Math.ceil(aRows / numWorkers);
     const tasks: Promise<ArrayBuffer>[] = [];
+    const bBuffer = exactBuffer(b);
 
     for (let w = 0; w < numWorkers; w++) {
       const rowStart = w * rowsPerWorker;
@@ -1205,16 +1241,13 @@ export class MathWorkerPool {
 
       if (rowStart >= aRows) break;
 
+      const aBlock = a.slice(rowStart * aCols, rowEnd * aCols);
       tasks.push(
-        this.exec<ArrayBuffer>('matmulRows', [
-          a.buffer,
-          b.buffer,
-          aRows,
-          aCols,
-          bCols,
-          rowStart,
-          rowEnd,
-        ])
+        this.exec<ArrayBuffer>(
+          'matmulRows',
+          [aBlock.buffer, bBuffer, rowEnd - rowStart, aCols, bCols, 0, rowEnd - rowStart],
+          { transfer: [aBlock.buffer] }
+        )
       );
     }
 
@@ -1247,6 +1280,9 @@ export class MathWorkerPool {
     cols: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    if (data.length !== rows * cols) {
+      throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
+    }
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1276,8 +1312,12 @@ export class MathWorkerPool {
 
       if (rowStart >= rows) break;
 
+      // Only this task's rows travel, as a slice it owns (moved, not cloned).
+      const block = data.slice(rowStart * cols, rowEnd * cols);
       tasks.push(
-        this.exec<ArrayBuffer>('transposeRows', [data.buffer, rows, cols, rowStart, rowEnd])
+        this.exec<ArrayBuffer>('transposeRows', [block.buffer, rows, cols, 0, rowEnd - rowStart], {
+          transfer: [block.buffer],
+        })
       );
     }
 
@@ -1354,11 +1394,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk, idx) =>
-        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>('minMaxChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-        ]).then((result) => ({
+        this.exec<{ min: number; max: number; minIdx: number; maxIdx: number }>(
+          'minMaxChunk',
+          [chunk.buffer, 0, chunk.length],
+          { transfer: [chunk.buffer] }
+        ).then((result) => ({
           ...result,
           minIdx: result.minIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
           maxIdx: result.maxIdx + idx * (options?.chunkSize ?? this.config.chunkSize),
@@ -1424,11 +1464,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<{ count: number; mean: number; m2: number }>('varianceChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-        ])
+        this.exec<{ count: number; mean: number; m2: number }>(
+          'varianceChunk',
+          [chunk.buffer, 0, chunk.length],
+          { transfer: [chunk.buffer] }
+        )
       )
     );
 
@@ -1460,16 +1500,12 @@ export class MathWorkerPool {
    * Compute norm (Euclidean length) in parallel
    */
   async norm(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
-    return this.reduceScalar(data, options, {
-      sequential: () => {
-        let sumSq = 0;
-        for (let i = 0; i < data.length; i++) {
-          sumSq += data[i] * data[i];
-        }
-        return Math.sqrt(sumSq);
-      },
+    // Chunks return scaled `[scale, ssq]` partials (BLAS dnrm2), combined scale-aware, so a
+    // vector of 1e200s gives a finite norm instead of Infinity.
+    return this.reduceScalar<[number, number]>(data, options, {
+      sequential: () => _workerCombineScaledSsq([_workerScaledSsq(data)]),
       task: 'normChunk',
-      reducePartials: (parts) => Math.sqrt(parts.reduce((a, b) => a + b, 0)),
+      reducePartials: _workerCombineScaledSsq,
     });
   }
 
@@ -1481,20 +1517,13 @@ export class MathWorkerPool {
     b: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<number>> {
-    if (a.length !== b.length) {
-      throw new Error(`Vector lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (a.length !== b.length) throw lengthMismatch('distance', a.length, b.length);
 
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
-      let sumSq = 0;
-      for (let i = 0; i < a.length; i++) {
-        const diff = a[i] - b[i];
-        sumSq += diff * diff;
-      }
       return {
-        result: Math.sqrt(sumSq),
+        result: _workerCombineScaledSsq([_workerScaledSsqDiff(a, b)]),
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -1507,14 +1536,16 @@ export class MathWorkerPool {
 
     const partialDistances = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<number>('distanceChunk', [chunkA.buffer, chunkB.buffer, 0, chunkA.length])
+        this.exec<[number, number]>(
+          'distanceChunk',
+          [chunkA.buffer, chunkB.buffer, 0, chunkA.length],
+          { transfer: [chunkA.buffer, chunkB.buffer] }
+        )
       )
     );
 
-    const sumSq = partialDistances.reduce((acc, val) => acc + val, 0);
-
     return {
-      result: Math.sqrt(sumSq),
+      result: _workerCombineScaledSsq(partialDistances),
       duration: performance.now() - start,
       chunks: chunkPairs.length,
       parallelized: true,
@@ -1579,7 +1610,9 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('unaryChunk', [chunk.buffer, 0, chunk.length, fn])
+        this.exec<ArrayBuffer>('unaryChunk', [chunk.buffer, 0, chunk.length, fn], {
+          transfer: [chunk.buffer],
+        })
       )
     );
 
@@ -1629,7 +1662,9 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<ArrayBuffer>('applyKernelChunk', [chunk.buffer, 0, chunk.length, fnSource])
+        this.exec<ArrayBuffer>('applyKernelChunk', [chunk.buffer, 0, chunk.length, fnSource], {
+          transfer: [chunk.buffer],
+        })
       )
     );
 
@@ -1658,9 +1693,7 @@ export class MathWorkerPool {
     fnSource: string,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (a.length !== b.length) throw lengthMismatch('applyKernel2', a.length, b.length);
 
     const start = performance.now();
 
@@ -1684,13 +1717,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunkPairs.map(([chunkA, chunkB]) =>
-        this.exec<ArrayBuffer>('applyKernel2Chunk', [
-          chunkA.buffer,
-          chunkB.buffer,
-          0,
-          chunkA.length,
-          fnSource,
-        ])
+        this.exec<ArrayBuffer>(
+          'applyKernel2Chunk',
+          [chunkA.buffer, chunkB.buffer, 0, chunkA.length, fnSource],
+          { transfer: [chunkA.buffer, chunkB.buffer] }
+        )
       )
     );
 
@@ -1775,13 +1806,11 @@ export class MathWorkerPool {
       const realChunk = real.slice(elemStart, elemStart + elemCount);
       const imagChunk = imag.slice(elemStart, elemStart + elemCount);
       tasks.push(
-        this.exec<ArrayBuffer>('fftBatchChunk', [
-          realChunk.buffer,
-          imagChunk.buffer,
-          groupFrames,
-          frameLength,
-          inverse,
-        ]).then((buffer) => ({ buffer, frameStart, groupFrames }))
+        this.exec<ArrayBuffer>(
+          'fftBatchChunk',
+          [realChunk.buffer, imagChunk.buffer, groupFrames, frameLength, inverse],
+          { transfer: [realChunk.buffer, imagChunk.buffer] }
+        ).then((buffer) => ({ buffer, frameStart, groupFrames }))
       );
     }
 
@@ -1850,13 +1879,15 @@ export class MathWorkerPool {
     const numWorkers = Math.max(1, stats.totalWorkers);
     const rowsPerWorker = Math.ceil(n / numWorkers);
     const tasks: Promise<ArrayBuffer>[] = [];
+    // Every task reads all points, so the buffer is cloned per task (not transferred).
+    const pointsBuffer = exactBuffer(points);
 
     for (let w = 0; w < numWorkers; w++) {
       const rowStart = w * rowsPerWorker;
       const rowEnd = Math.min(rowStart + rowsPerWorker, n);
       if (rowStart >= n) break;
       tasks.push(
-        this.exec<ArrayBuffer>('distanceMatrixRowsChunk', [points.buffer, n, dim, rowStart, rowEnd])
+        this.exec<ArrayBuffer>('distanceMatrixRowsChunk', [pointsBuffer, n, dim, rowStart, rowEnd])
       );
     }
 
@@ -1888,23 +1919,35 @@ export class MathWorkerPool {
     max?: number,
     options?: TaskOptions
   ): Promise<ParallelResult<number[]>> {
+    if (!Number.isInteger(bins) || bins <= 0) {
+      throw new RangeError(`histogram: bins must be a positive integer (got ${bins})`);
+    }
     const start = performance.now();
 
     // Find min/max if not provided
     let actualMin = min;
     let actualMax = max;
     if (actualMin === undefined || actualMax === undefined) {
-      const minMaxResult = await this.minMax(data, options);
-      actualMin = actualMin ?? minMaxResult.result.min;
-      actualMax = actualMax ?? minMaxResult.result.max;
+      let lo = Infinity;
+      let hi = -Infinity;
+      // Non-finite samples have no bin, so they must not set the range either.
+      for (let i = 0; i < data.length; i++) {
+        const v = data[i];
+        if (!Number.isFinite(v)) continue;
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+      actualMin = actualMin ?? lo;
+      actualMax = actualMax ?? hi;
     }
 
     if (!this.shouldParallelize(data.length, options)) {
       const histogram = new Array(bins).fill(0);
-      const binWidth = (actualMax - actualMin) / bins;
+      // Degenerate range (all samples equal): one unit-wide bin so they land in bin 0.
+      const binWidth = actualMax > actualMin ? (actualMax - actualMin) / bins : 1;
       for (let i = 0; i < data.length; i++) {
         const val = data[i];
-        if (val >= actualMin && val <= actualMax) {
+        if (Number.isFinite(val) && val >= actualMin && val <= actualMax) {
           const binIdx = Math.min(Math.floor((val - actualMin) / binWidth), bins - 1);
           histogram[binIdx]++;
         }
@@ -1923,14 +1966,11 @@ export class MathWorkerPool {
 
     const results = await Promise.all(
       chunks.map((chunk) =>
-        this.exec<number[]>('histogramChunk', [
-          chunk.buffer,
-          0,
-          chunk.length,
-          actualMin,
-          actualMax,
-          bins,
-        ])
+        this.exec<number[]>(
+          'histogramChunk',
+          [chunk.buffer, 0, chunk.length, actualMin, actualMax, bins],
+          { transfer: [chunk.buffer] }
+        )
       )
     );
 
@@ -1964,6 +2004,9 @@ export class MathWorkerPool {
     if (cols !== vector.length) {
       throw new Error(`Matrix columns (${cols}) must match vector length (${vector.length})`);
     }
+    if (matrix.length !== rows * cols) {
+      throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
+    }
 
     const start = performance.now();
 
@@ -1989,21 +2032,20 @@ export class MathWorkerPool {
     const numWorkers = Math.max(1, stats.totalWorkers);
     const rowsPerWorker = Math.ceil(rows / numWorkers);
     const tasks: Promise<ArrayBuffer>[] = [];
+    const vectorBuffer = exactBuffer(vector);
 
     for (let w = 0; w < numWorkers; w++) {
       const rowStart = w * rowsPerWorker;
       const rowEnd = Math.min(rowStart + rowsPerWorker, rows);
       if (rowStart >= rows) break;
 
+      const block = matrix.slice(rowStart * cols, rowEnd * cols);
       tasks.push(
-        this.exec<ArrayBuffer>('matvecRows', [
-          matrix.buffer,
-          vector.buffer,
-          rows,
-          cols,
-          rowStart,
-          rowEnd,
-        ])
+        this.exec<ArrayBuffer>(
+          'matvecRows',
+          [block.buffer, vectorBuffer, rowEnd - rowStart, cols, 0, rowEnd - rowStart],
+          { transfer: [block.buffer] }
+        )
       );
     }
 
@@ -2056,21 +2098,20 @@ export class MathWorkerPool {
     const numWorkers = Math.max(1, stats.totalWorkers);
     const rowsPerWorker = Math.ceil(a.length / numWorkers);
     const tasks: Promise<ArrayBuffer>[] = [];
+    const bBuffer = exactBuffer(b);
 
     for (let w = 0; w < numWorkers; w++) {
       const rowStart = w * rowsPerWorker;
       const rowEnd = Math.min(rowStart + rowsPerWorker, a.length);
       if (rowStart >= a.length) break;
 
+      const block = a.slice(rowStart, rowEnd);
       tasks.push(
-        this.exec<ArrayBuffer>('outerProductRows', [
-          a.buffer,
-          b.buffer,
-          a.length,
-          b.length,
-          rowStart,
-          rowEnd,
-        ])
+        this.exec<ArrayBuffer>(
+          'outerProductRows',
+          [block.buffer, bBuffer, rowEnd - rowStart, b.length, 0, rowEnd - rowStart],
+          { transfer: [block.buffer] }
+        )
       );
     }
 

@@ -72,7 +72,83 @@ describe('node.toMathML() (mirrors node.toTex())', () => {
   });
 
   it('degrades an unhandled node type to escaped <mtext> (never throws)', () => {
-    expect(mm('[1, 2, 3]')).toContain('<mtext>'); // ArrayNode -> base fallback
+    expect(mm('a[2] = 3')).toContain('<mtext>'); // indexed assignment -> text fallback
+  });
+});
+
+describe('node.toMathML() for structural nodes (parity with toTex)', () => {
+  it('ArrayNode: flat array is a bracketed column vector', () => {
+    const out = mm('[1, 2, 3]');
+    expect(out).not.toContain('<mtext>');
+    expect(out.startsWith('<mrow><mo>[</mo><mtable>')).toBe(true);
+    expect((out.match(/<mtr>/g) ?? []).length).toBe(3);
+    expect((out.match(/<mtd>/g) ?? []).length).toBe(3);
+  });
+
+  it('ArrayNode: nested array is a matrix (rows x columns)', () => {
+    const out = mm('[[1, 2], [3, 4]]');
+    expect((out.match(/<mtr>/g) ?? []).length).toBe(2);
+    expect((out.match(/<mtd>/g) ?? []).length).toBe(4);
+    expect(out).not.toContain('<mtext>');
+  });
+
+  it('AccessorNode: bracket index is a subscript, dot access is inline', () => {
+    const sub = mm('A[2]');
+    expect(sub).toContain('<msub>');
+    expect(sub).toContain('<mi>A</mi>');
+    expect(sub).toContain('<mn>2</mn>');
+    expect(sub).not.toContain('<mtext>');
+    const dot = mm('obj.prop');
+    expect(dot).toBe('<mrow><mi>obj</mi><mo>.</mo><mi>prop</mi></mrow>');
+  });
+
+  it('IndexNode: multi-dimensional index renders comma-separated dimensions', () => {
+    const out = mm('A[1, 2]');
+    expect(out).toContain('<mo>,</mo>');
+    expect(out).not.toContain('<mtext>');
+  });
+
+  it('BlockNode: statements are separated, hidden ones end in a semicolon', () => {
+    const out = mm('a = 1; b = 2');
+    expect(out).not.toContain('<mtext>');
+    expect(out).toContain('<mspace');
+    expect(out).toContain('<mo>;</mo>');
+    expect((out.match(/<mo>=<\/mo>/g) ?? []).length).toBe(2);
+  });
+
+  it('ConditionalNode: renders as a two-row cases table', () => {
+    const out = mm('a > 0 ? 1 : 2');
+    expect(out).not.toContain('merror');
+    expect(out).toContain('<mo>{</mo>');
+    expect((out.match(/<mtr>/g) ?? []).length).toBe(2);
+    expect(out).toContain('<mtext>if </mtext>');
+    expect(out).toContain('<mtext>otherwise</mtext>');
+    expect(out).toContain('<mo>&gt;</mo>');
+  });
+
+  it('FunctionAssignmentNode: name(params) = body', () => {
+    const out = mm('f(x, y) = x + y');
+    expect(out).not.toContain('<mtext>');
+    expect(out).toContain('<mi>f</mi><mo>&#x2061;</mo>');
+    expect(out).toContain('<mi>x</mi><mo>,</mo><mi>y</mi>');
+    expect(out).toContain('<mo>=</mo>');
+  });
+
+  it('ObjectNode: braced key/value table with escaped keys', () => {
+    const out = mm('{a: 1, b: 2}');
+    expect(out).not.toContain('<mtext>{');
+    expect(out).toContain('<mo>{</mo>');
+    expect(out).toContain('<mtext>a:</mtext>');
+    expect(out).toContain('<mtext>b:</mtext>');
+    expect((out.match(/<mtr>/g) ?? []).length).toBe(2);
+  });
+
+  it('RangeNode: start:end and start:step:end', () => {
+    const two = mm('1:5');
+    expect(two).toBe('<mrow><mn>1</mn><mo>:</mo><mn>5</mn></mrow>');
+    const three = mm('1:2:9');
+    expect((three.match(/<mo>:<\/mo>/g) ?? []).length).toBe(2);
+    expect(three).not.toContain('<mtext>');
   });
 });
 

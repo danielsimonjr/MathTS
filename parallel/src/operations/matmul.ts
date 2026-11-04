@@ -56,7 +56,7 @@ export async function parallelMatmul(
   options: MatmulOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.matmul(a, aRows, aCols, b, bCols);
+  return pool.matmul(a, aRows, aCols, b, bCols, options);
 }
 
 /**
@@ -79,7 +79,7 @@ export async function parallelMatvec(
   options: MatmulOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.matvec(matrix, rows, cols, vector);
+  return pool.matvec(matrix, rows, cols, vector, options);
 }
 
 /**
@@ -100,7 +100,7 @@ export async function parallelTranspose(
   options: MatmulOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.transpose(data, rows, cols);
+  return pool.transpose(data, rows, cols, options);
 }
 
 /**
@@ -119,7 +119,7 @@ export async function parallelOuter(
   options: MatmulOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.outer(a, b);
+  return pool.outer(a, b, options);
 }
 
 /**
@@ -138,5 +138,5 @@ export async function parallelDot(
   options: MatmulOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.dot(a, b);
+  return pool.dot(a, b, options);
 }

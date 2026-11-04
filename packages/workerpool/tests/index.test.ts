@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { pairwiseSum, norm2 } from '@danielsimonjr/mathts-core';
 import {
   MathWorkerPool,
   DEFAULT_WORKER_CONFIG,
@@ -148,9 +149,15 @@ describe('@danielsimonjr/mathts-workerpool', () => {
           prod *= v;
           sumSq += v * v;
         }
-        expect((await gatePool.sum(data)).result).toBe(sum);
+        // sum and norm use the stable kernels (pairwise / dnrm2 scaling), identical to core's;
+        // they agree with the naive loops to rounding. prod is still the plain loop.
+        expect((await gatePool.sum(data)).result).toBe(pairwiseSum(data));
+        expect(Math.abs((await gatePool.sum(data)).result - sum)).toBeLessThan(1e-9);
         expect((await gatePool.prod(data)).result).toBe(prod);
-        expect((await gatePool.norm(data)).result).toBe(Math.sqrt(sumSq));
+        expect((await gatePool.norm(data)).result).toBe(norm2(data));
+        expect(
+          Math.abs((await gatePool.norm(data)).result - Math.sqrt(sumSq)) / Math.sqrt(sumSq)
+        ).toBeLessThan(1e-14);
         expect((await gatePool.sum(data)).parallelized).toBe(false);
         expect((await gatePool.prod(data)).parallelized).toBe(false);
         expect((await gatePool.norm(data)).parallelized).toBe(false);

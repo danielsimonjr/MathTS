@@ -7,7 +7,7 @@ import {
 } from '../utils/is.js';
 import { escape, format } from '../utils/string.js';
 import { hasOwnProperty } from '../utils/object.js';
-import { getSafeProperty, getSafeMethod } from '../utils/customs.js';
+import { getSafeProperty, getSafeMethod, isSafeProperty, isSafeMethod } from '../utils/customs.js';
 import { createSubScope } from '../utils/scope.js';
 import { factory } from '../utils/factory.js';
 import { defaultTemplate, latexFunctions } from '../utils/latex.js';
@@ -17,6 +17,18 @@ import { mapChildArray } from './Node.js';
 
 const name = 'FunctionNode';
 const dependencies = ['math', 'Node', 'SymbolNode'];
+
+/**
+ * Sandbox-safe "is this member undefined?" test for `obj?.method()`. It never
+ * reads an unsafe member: an unsafe name (`__proto__`, `constructor`, ...) that
+ * exists is reported as present so the caller's getSafeMethod rejects it.
+ */
+function isMissingMember(object: unknown, prop: string): boolean {
+  if (!(prop in Object(object))) return true; // absent: `in` reads no value
+  if (isSafeMethod(object, prop)) return false;
+  if (isSafeProperty(object, prop)) return getSafeProperty(object, prop) === undefined;
+  return false;
+}
 
 export const createFunctionNode = /* #__PURE__ */ factory(
   name,
@@ -350,10 +362,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
             const object = evalObject(scope, args, context);
 
             // Optional chaining: if the base object is nullish, short-circuit to undefined
-            if (
-              fromOptionalChaining &&
-              (object == null || (object as Record<string, unknown>)[prop] === undefined)
-            ) {
+            if (fromOptionalChaining && (object == null || isMissingMember(object, prop))) {
               return undefined;
             }
 

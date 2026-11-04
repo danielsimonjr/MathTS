@@ -28,26 +28,43 @@ interface WorkerMessage<T = unknown> {
   error?: string;
 }
 
+/** Monotonic task id source, shared by all pools so ids are unique per process. */
+let taskCounter = 0;
+
 /**
  * Runs tasks on a set of workers and queues tasks when no worker is free.
  *
  * The pool uses `worker_threads` when `process.versions.node` is defined, and
  * module Web Workers otherwise. When the caller gives no worker count, the
  * count is `navigator.hardwareConcurrency - 1` (minimum 2), or 4 when that
- * value is not available. A worker error rejects all active tasks.
+ * value is not available. A worker error rejects only the tasks that worker was
+ * running; the crashed worker is terminated, evicted and replaced so the pool keeps
+ * its capacity, and the other workers are untouched.
  * `terminate` rejects all queued and active tasks and stops all workers.
  */
 export class WorkerPool {
   private workers: Worker[] = [];
   private availableWorkers: Worker[] = [];
+  // FIFO queue. `shift()` is O(n) but queues here hold a handful of chunk tasks (one
+  // per worker per operation), so an index-based ring buffer would not pay for itself.
   private taskQueue: WorkerTask[] = [];
   private activeTasks: Map<string, WorkerTask> = new Map();
   private maxWorkers: number;
   private workerScript: string;
   private isNode: boolean;
   private terminated = false;
+  /** Workers that have delivered at least one message (so their script loads). */
+  private readyWorkers = new WeakSet<Worker>();
+  /** Consecutive crashes of workers that never became ready. */
+  private startupFailures = 0;
 
   constructor(workerScript: string, maxWorkers?: number) {
+    // 0 (and undefined) mean auto-detect, the convention `ParallelConfig` documents.
+    if (maxWorkers !== undefined && (!Number.isInteger(maxWorkers) || maxWorkers < 0)) {
+      throw new RangeError(
+        `WorkerPool: maxWorkers must be a non-negative integer, 0 for auto (got ${maxWorkers})`
+      );
+    }
     this.workerScript = workerScript;
     this.maxWorkers = maxWorkers || this.getOptimalWorkerCount();
     this.isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
@@ -62,21 +79,32 @@ export class WorkerPool {
   }
 
   private async initialize(): Promise<void> {
-    for (let i = 0; i < this.maxWorkers; i++) {
-      const worker = await this.createWorker();
-      if (this.terminated) {
-        // terminate() ran while this worker was starting; it is not in `workers`, so
-        // nothing else would ever stop it.
-        worker.terminate();
-        return;
-      }
-      this.workers.push(worker);
-      this.availableWorkers.push(worker);
-      // A task may have been submitted (and queued) before this worker
-      // finished spawning — initialize() is fire-and-forget from the
-      // constructor. Drain the queue now that a worker is available.
-      this.processQueue();
-    }
+    // Spawn all workers concurrently; each one joins the pool as soon as it is ready.
+    await Promise.all(
+      Array.from({ length: this.maxWorkers }, async () => {
+        const worker = await this.createWorker();
+        if (this.terminated) {
+          // terminate() ran while this worker was starting; it is not in `workers`, so
+          // nothing else would ever stop it.
+          worker.terminate();
+          return;
+        }
+        this.workers.push(worker);
+        this.availableWorkers.push(worker);
+        // A task may have been submitted (and queued) before this worker
+        // finished spawning — initialize() is fire-and-forget from the
+        // constructor. Drain the queue now that a worker is available.
+        this.processQueue();
+      })
+    );
+  }
+
+  /** `worker_threads`, imported once per pool and shared by every concurrent spawn. */
+  private workerThreadsModule?: Promise<typeof import('worker_threads')>;
+
+  private nodeWorkerThreads(): Promise<typeof import('worker_threads')> {
+    this.workerThreadsModule ??= import('worker_threads');
+    return this.workerThreadsModule;
   }
 
   protected async createWorker(): Promise<Worker> {
@@ -84,7 +112,7 @@ export class WorkerPool {
 
     if (this.isNode) {
       // Node.js worker_threads
-      const { Worker: NodeWorker } = await import('worker_threads');
+      const { Worker: NodeWorker } = await this.nodeWorkerThreads();
       // Node's worker_threads Worker rejects raw file:// strings — it requires
       // either an absolute/relative path or a URL object. Wrap file:// URLs in
       // `new URL`; pass plain paths through unchanged.
@@ -123,8 +151,23 @@ export class WorkerPool {
   }
 
   private handleWorkerMessage(worker: Worker, message: WorkerMessage): void {
+    this.readyWorkers.add(worker);
+    this.startupFailures = 0;
     const task = this.activeTasks.get(message.id);
-    if (!task) return;
+    if (!task) {
+      // The task is gone (timed out or rejected) but the worker is still a member of the
+      // pool and now idle: give it back, unless it was evicted, is already free, or is
+      // still running another task (a script that posts twice for one id).
+      if (
+        this.workers.includes(worker) &&
+        !this.availableWorkers.includes(worker) &&
+        !this.isBusy(worker)
+      ) {
+        this.availableWorkers.push(worker);
+        this.processQueue();
+      }
+      return;
+    }
 
     this.activeTasks.delete(message.id);
     if (task.timeoutHandle) {
@@ -145,13 +188,72 @@ export class WorkerPool {
 
   private handleWorkerError(worker: Worker, error: ErrorEvent): void {
     console.error('Worker error:', error);
-    // Find and reject all tasks for this worker
+    if (!this.workers.includes(worker)) return; // already evicted (timeout/terminate)
+    // Reject only the tasks this worker was running.
     for (const [id, task] of this.activeTasks) {
-      if (this.workers.includes(worker)) {
+      if (task.worker === worker) {
         this.activeTasks.delete(id);
         this.clearTaskTimer(task);
         task.reject(new Error(`Worker error: ${error.message}`));
       }
+    }
+    if (!this.readyWorkers.has(worker)) {
+      // The worker died before ever answering: the script itself is likely broken
+      // (bad path, top-level throw). Cap the respawns so a deterministic failure
+      // does not loop forever, and fail the queued tasks instead of hanging them.
+      this.startupFailures++;
+      if (this.startupFailures >= WorkerPool.MAX_STARTUP_FAILURES) {
+        this.workers = this.workers.filter((w) => w !== worker);
+        this.availableWorkers = this.availableWorkers.filter((w) => w !== worker);
+        try {
+          worker.terminate();
+        } catch {
+          /* already dead */
+        }
+        const reason = new Error(
+          `WorkerPool: ${this.startupFailures} consecutive workers failed before becoming ready (${error.message}); not respawning`
+        );
+        for (const task of this.taskQueue.splice(0)) {
+          this.clearTaskTimer(task);
+          task.reject(reason);
+        }
+        return;
+      }
+    }
+    void this.evictAndReplace(worker);
+  }
+
+  /** Consecutive never-ready worker crashes tolerated before the pool stops respawning. */
+  static readonly MAX_STARTUP_FAILURES = 3;
+
+  private isBusy(worker: Worker): boolean {
+    for (const task of this.activeTasks.values()) {
+      if (task.worker === worker) return true;
+    }
+    return false;
+  }
+
+  /** Terminate a crashed worker, drop it from the roster and spawn a replacement. */
+  private async evictAndReplace(dead: Worker): Promise<void> {
+    try {
+      dead.terminate();
+    } catch {
+      /* swallow — replacement is what matters */
+    }
+    this.workers = this.workers.filter((w) => w !== dead);
+    this.availableWorkers = this.availableWorkers.filter((w) => w !== dead);
+    if (this.terminated) return;
+    try {
+      const replacement = await this.createWorker();
+      if (this.terminated) {
+        replacement.terminate();
+        return;
+      }
+      this.workers.push(replacement);
+      this.availableWorkers.push(replacement);
+      this.processQueue();
+    } catch (err) {
+      console.error('WorkerPool: failed to spawn replacement worker:', err);
     }
   }
 
@@ -275,7 +377,7 @@ export class WorkerPool {
   }
 
   private generateTaskId(): string {
-    return `task_${Date.now()}_${globalThis.crypto.randomUUID()}`;
+    return `task_${++taskCounter}`;
   }
 
   public async terminate(): Promise<void> {

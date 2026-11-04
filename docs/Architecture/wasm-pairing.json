@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-02",
+  "generated": "2026-11-04",
   "total": 219,
-  "acceleratedCount": 41,
+  "acceleratedCount": 40,
   "parallelOnlyCount": 48,
-  "jsOnlyCount": 130,
+  "jsOnlyCount": 131,
   "bundledBackend": "assemblyscript",
-  "wasmEffectiveCount": 39,
+  "wasmEffectiveCount": 38,
   "jsFallbackCount": 0,
   "accelerated": [
     {
@@ -248,13 +248,6 @@
     },
     {
       "name": "parallelStatMedian",
-      "file": "statistics.ts",
-      "routing": "wasm",
-      "dispatch": ["sortF64Dispatch"],
-      "effectiveBackend": "wasm"
-    },
-    {
-      "name": "parallelStatQuantile",
       "file": "statistics.ts",
       "routing": "wasm",
       "dispatch": ["sortF64Dispatch"],
@@ -726,6 +719,7 @@
     "parallelFFTPower",
     "parallelStatCumsum",
     "parallelStatMode",
+    "parallelStatQuantile",
     "parallelXCorr",
     "partitions",
     "permutations",
@@ -828,9 +822,9 @@
       "jsOnly": 19
     },
     "statistics.ts": {
-      "wasm": 2,
+      "wasm": 1,
       "parallel": 13,
-      "jsOnly": 2
+      "jsOnly": 3
     },
     "string.ts": {
       "wasm": 0,

@@ -18,7 +18,7 @@
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
 import { studentTCDF as _studentTCDF } from './distribution-functions.js';
-import { fitLine, linearRegression } from './regression-extra.js';
+import { fitLine, linregressFromFit } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 
 const _quantileSeq = _quantileSeqRaw as (data: readonly number[], p: number) => number;
@@ -36,7 +36,26 @@ function centralMoment(x: number[], k: number): number {
   if (x.length === 0) return NaN;
   const m = mean(x);
   let acc = 0;
-  for (let i = 0; i < x.length; i++) acc += Math.pow(x[i] - m, k);
+  // Plain multiplications for the common k = 2, 3, 4 (skewness/kurtosis/variance); Math.pow otherwise.
+  if (k === 2) {
+    for (let i = 0; i < x.length; i++) {
+      const d = x[i] - m;
+      acc += d * d;
+    }
+  } else if (k === 3) {
+    for (let i = 0; i < x.length; i++) {
+      const d = x[i] - m;
+      acc += d * d * d;
+    }
+  } else if (k === 4) {
+    for (let i = 0; i < x.length; i++) {
+      const d = x[i] - m;
+      const d2 = d * d;
+      acc += d2 * d2;
+    }
+  } else {
+    for (let i = 0; i < x.length; i++) acc += Math.pow(x[i] - m, k);
+  }
   return acc / x.length;
 }
 
@@ -298,7 +317,7 @@ export interface LinRegressResult {
  * the slope/intercept standard errors. Matches `scipy.stats.linregress`.
  *
  * Slope inference (p-value, slope standard error) is delegated to
- * {@link linearRegression} (`studentTTwoSidedP`, same incomplete-beta tail as SciPy
+ * {@link linregressFromFit} (`studentTTwoSidedP`, same incomplete-beta tail as SciPy
  * `t.sf`). Unlike `linearRegression`, a zero-variance predictor does not throw.
  */
 export function linregress(x: Vec, y: Vec): LinRegressResult {
@@ -317,7 +336,7 @@ export function linregress(x: Vec, y: Vec): LinRegressResult {
       interceptStdErr: nan,
     };
   }
-  const base = linearRegression(x, y);
+  const base = linregressFromFit(fit, n);
   const df = n - 2;
   const s2 = fit.rss / df;
   const interceptStdErr = Math.sqrt(s2 * (1 / n + (fit.mx * fit.mx) / fit.sxx));

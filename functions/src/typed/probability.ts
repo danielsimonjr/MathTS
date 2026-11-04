@@ -30,6 +30,8 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
+import { deepMap } from '../utils/collection.js';
 import seedrandom from 'seedrandom';
 
 // =============================================================================
@@ -187,6 +189,12 @@ export const bernoulli = mathTyped('bernoulli', {
  */
 export const combinations = mathTyped('combinations', {
   'number, number': (n: number, k: number): number => combinationsExact(n, k),
+  // Collections map elementwise over whichever argument is the collection
+  // (as `permutations` does); two collections are not zipped.
+  'Array | Matrix, number': (n: unknown[] | Matrix, k: number): unknown[] | Matrix =>
+    deepMap(n as unknown[], (nVal) => combinationsExact(nVal as number, k)) as unknown[] | Matrix,
+  'number, Array | Matrix': (n: number, k: unknown[] | Matrix): unknown[] | Matrix =>
+    deepMap(k as unknown[], (kVal) => combinationsExact(n, kVal as number)) as unknown[] | Matrix,
 });
 
 /**

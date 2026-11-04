@@ -43,13 +43,11 @@ export class JSBackend implements MatrixBackend {
    */
   add(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     this.checkDimensionsMatch(a, b);
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = a.get(i, j) + b.get(i, j);
-      }
-    }
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = ad[i] + bd[i];
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -59,13 +57,11 @@ export class JSBackend implements MatrixBackend {
    */
   subtract(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     this.checkDimensionsMatch(a, b);
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = a.get(i, j) - b.get(i, j);
-      }
-    }
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = ad[i] - bd[i];
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -75,13 +71,11 @@ export class JSBackend implements MatrixBackend {
    */
   multiplyElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     this.checkDimensionsMatch(a, b);
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = a.get(i, j) * b.get(i, j);
-      }
-    }
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = ad[i] * bd[i];
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -91,13 +85,11 @@ export class JSBackend implements MatrixBackend {
    */
   divideElementwise(a: DenseMatrix, b: DenseMatrix): DenseMatrix {
     this.checkDimensionsMatch(a, b);
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = a.get(i, j) / b.get(i, j);
-      }
-    }
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = ad[i] / bd[i];
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -106,13 +98,10 @@ export class JSBackend implements MatrixBackend {
    * Scalar multiplication
    */
   scale(a: DenseMatrix, scalar: number): DenseMatrix {
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = a.get(i, j) * scalar;
-      }
-    }
+    const ad = denseContiguousData(a);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = ad[i] * scalar;
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -121,13 +110,10 @@ export class JSBackend implements MatrixBackend {
    * Element-wise absolute value
    */
   abs(a: DenseMatrix): DenseMatrix {
-    const result = new Float64Array(a.rows * a.cols);
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[i * a.cols + j] = Math.abs(a.get(i, j));
-      }
-    }
+    const ad = denseContiguousData(a);
+    const n = ad.length;
+    const result = new Float64Array(n);
+    for (let i = 0; i < n; i++) result[i] = Math.abs(ad[i]);
 
     return new DenseMatrix(a.rows, a.cols, result);
   }
@@ -179,15 +165,19 @@ export class JSBackend implements MatrixBackend {
    * Matrix transpose
    */
   transpose(a: DenseMatrix): DenseMatrix {
-    const result = new Float64Array(a.cols * a.rows);
+    const rows = a.rows;
+    const cols = a.cols;
+    const ad = denseContiguousData(a);
+    const result = new Float64Array(cols * rows);
 
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        result[j * a.rows + i] = a.get(i, j);
+    for (let i = 0; i < rows; i++) {
+      const ai = i * cols;
+      for (let j = 0; j < cols; j++) {
+        result[j * rows + i] = ad[ai + j];
       }
     }
 
-    return new DenseMatrix(a.cols, a.rows, result);
+    return new DenseMatrix(cols, rows, result);
   }
 
   // =========================================================================
@@ -198,14 +188,9 @@ export class JSBackend implements MatrixBackend {
    * Sum of all elements
    */
   sum(a: DenseMatrix): number {
+    const ad = denseContiguousData(a);
     let total = 0;
-
-    for (let i = 0; i < a.rows; i++) {
-      for (let j = 0; j < a.cols; j++) {
-        total += a.get(i, j);
-      }
-    }
-
+    for (let i = 0; i < ad.length; i++) total += ad[i];
     return total;
   }
 
@@ -215,28 +200,27 @@ export class JSBackend implements MatrixBackend {
    * axis=1: sum rows (result is m×1 column vector)
    */
   sumAxis(a: DenseMatrix, axis: 0 | 1): DenseMatrix {
+    const rows = a.rows;
+    const cols = a.cols;
+    const ad = denseContiguousData(a);
     if (axis === 0) {
-      // Sum columns: result is 1×n
-      const result = new Float64Array(a.cols);
-
-      for (let j = 0; j < a.cols; j++) {
-        for (let i = 0; i < a.rows; i++) {
-          result[j] += a.get(i, j);
-        }
+      // Sum columns: result is 1×n (row-major walk, same per-column order)
+      const result = new Float64Array(cols);
+      for (let i = 0; i < rows; i++) {
+        const ai = i * cols;
+        for (let j = 0; j < cols; j++) result[j] += ad[ai + j];
       }
-
-      return new DenseMatrix(1, a.cols, result);
+      return new DenseMatrix(1, cols, result);
     } else {
       // Sum rows: result is m×1
-      const result = new Float64Array(a.rows);
-
-      for (let i = 0; i < a.rows; i++) {
-        for (let j = 0; j < a.cols; j++) {
-          result[i] += a.get(i, j);
-        }
+      const result = new Float64Array(rows);
+      for (let i = 0; i < rows; i++) {
+        const ai = i * cols;
+        let acc = 0;
+        for (let j = 0; j < cols; j++) acc += ad[ai + j];
+        result[i] = acc;
       }
-
-      return new DenseMatrix(a.rows, 1, result);
+      return new DenseMatrix(rows, 1, result);
     }
   }
 
@@ -264,11 +248,11 @@ export class JSBackend implements MatrixBackend {
     }
 
     let sum = 0;
-    const aValues = Array.from(a.values());
-    const bValues = Array.from(b.values());
+    const ad = denseContiguousData(a);
+    const bd = denseContiguousData(b);
 
-    for (let i = 0; i < aValues.length; i++) {
-      sum += aValues[i] * bValues[i];
+    for (let i = 0; i < ad.length; i++) {
+      sum += ad[i] * bd[i];
     }
 
     return sum;

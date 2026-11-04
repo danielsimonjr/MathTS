@@ -124,21 +124,21 @@ new Fraction(numerator: number | bigint, denominator: number | bigint)
 
 #### Instance Methods
 
-| Method      | Signature                       | Description                |
-| ----------- | ------------------------------- | -------------------------- |
-| `add`       | `(other: Fraction) => Fraction` | Addition                   |
-| `subtract`  | `(other: Fraction) => Fraction` | Subtraction                |
-| `multiply`  | `(other: Fraction) => Fraction` | Multiplication             |
-| `divide`    | `(other: Fraction) => Fraction` | Division                   |
-| `negate`    | `() => Fraction`                | Negation                   |
-| `inverse`   | `() => Fraction`                | Reciprocal                 |
-| `abs`       | `() => Fraction`                | Absolute value             |
-| `pow`       | `(n: number) => Fraction`       | Integer power              |
-| `valueOf`   | `() => number`                  | Convert to number          |
-| `equals`    | `(other: Fraction) => boolean`  | Equality check             |
-| `compareTo` | `(other: Fraction) => number`   | Comparison (-1, 0, 1)      |
-| `toString`  | `() => string`                  | String "n/d"               |
-| `toDecimal` | `(decimals?: number) => string` | Fixed-point decimal string |
+| Method      | Signature                       | Description                         |
+| ----------- | ------------------------------- | ----------------------------------- |
+| `add`       | `(other: Fraction) => Fraction` | Addition                            |
+| `subtract`  | `(other: Fraction) => Fraction` | Subtraction                         |
+| `multiply`  | `(other: Fraction) => Fraction` | Multiplication                      |
+| `divide`    | `(other: Fraction) => Fraction` | Division                            |
+| `negate`    | `() => Fraction`                | Negation                            |
+| `inverse`   | `() => Fraction`                | Reciprocal                          |
+| `abs`       | `() => Fraction`                | Absolute value                      |
+| `pow`       | `(n: number) => Fraction`       | Integer power (TypeError otherwise) |
+| `valueOf`   | `() => number`                  | Convert to number                   |
+| `equals`    | `(other: Fraction) => boolean`  | Equality check                      |
+| `compareTo` | `(other: Fraction) => number`   | Comparison (-1, 0, 1)               |
+| `toString`  | `() => string`                  | String "n/d"                        |
+| `toDecimal` | `(decimals?: number) => string` | Fixed-point decimal string          |
 
 #### Constants
 
@@ -351,6 +351,23 @@ fromSiDimensionVector(nums); // length-10 Unit exponent vector
 Not on the public `.` entry (the generated index below is the `.` barrel only). WASM helpers on `/internal`: `sha384OfBuffer`, `verifyWasmIntegrity`, `loadWasmManifest`, `resolvePackagedWasm`, `defaultWasmLocation`, and abstract class `WasmModuleLoader` (shared `load` / cached `loadModule` / `getImports` for the package-local `functions` and `matrix` loaders). SHA-384 verification stays in each subclass's Node/browser load path.
 
 Tree helpers: `clone`, `extend`, `mapObject` and `deepFlatten` skip an own `__proto__` key and copy every other key (including `name`, `length` and `constructor`), so a copy cannot retarget the result prototype; `deepExtend` also skips every name on `Object.prototype` or `Function.prototype` (see `docs/core/configuration.md`). `deepMap`, `deepForEach` and `reduce` take nested arrays or matrices through typed overloads (`NestedArray<T>` from `/internal`).
+
+## Types
+
+Type-only exports do not appear in the generated index below (it lists runtime values).
+The main ones:
+
+| Type              | Description                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `IComplex`        | Interface of `Complex`: `re`, `im`, plus `conjugate()`, `arg()`, `sqrt()`, `exp()`, `log()`.                                                                                   |
+| `IFraction`       | Interface of `Fraction`: bigint `numerator` / `denominator`, `simplify()`, `toNumber()`.                                                                                       |
+| `IBigNumber`      | Interface of `BigNumber`: arithmetic taking `IBigNumber \| number \| string`, `negate`, `abs`, `pow`, `sqrt`, `isNaN()` and other predicates.                                  |
+| `MatrixBackend`   | Contract of a matrix compute backend: `name`, `isAvailable`, `matmul` / `transpose` / `add` / `subtract` / `scale` on `Float64Array` buffers, and `lu` / `qr` / `svd` / `eig`. |
+| `NumericType`     | Element type of a typed buffer: `'float32' \| 'float64' \| 'int32' \| 'int64' \| 'complex64' \| 'complex128'`.                                                                 |
+| `RoundingMode`    | BigNumber rounding: `'up'`, `'down'`, `'ceil'`, `'floor'`, `'halfUp'` (default), `'halfDown'`, `'halfEven'`, `'halfCeil'`.                                                     |
+| `BigNumberConfig` | Global BigNumber settings: `precision` (default 64), `rounding`, `minExponent`, `maxExponent`; read and set with `BigNumber.config()`.                                         |
+
+---
 
 ## Complete export index
 

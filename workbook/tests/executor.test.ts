@@ -148,6 +148,58 @@ describe('WorkbookExecutor', () => {
     });
   });
 
+  describe('reactive stale events inside a batch', () => {
+    const cells: Workbook['cells'] = [
+      { id: 'a', type: 'code', content: '1' },
+      { id: 'b', type: 'code', content: 'a + 1', dependsOn: ['a'] },
+    ];
+
+    it('runAll does not emit cell:stale for dependents scheduled later', async () => {
+      const exec = new WorkbookExecutor(makeWorkbook(cells, 'reactive'));
+      const events: WorkbookEvent[] = [];
+      exec.on((e) => events.push(e));
+      await exec.runAll();
+      expect(events.some((e) => e.type === 'cell:stale')).toBe(false);
+    });
+
+    it('runAll that aborts emits cell:stale for dependents that will not run', async () => {
+      // a -> c, b unrelated and failing; order a, b, c. c was suppressed as "pending"
+      // while a ran, but the batch stops at b, so c must still be marked stale.
+      const exec = new WorkbookExecutor(
+        makeWorkbook(
+          [
+            { id: 'a', type: 'code', content: '1' },
+            { id: 'b', type: 'code', content: 'undefinedSymbolXYZ + 1' },
+            { id: 'c', type: 'code', content: 'a + 1', dependsOn: ['a'] },
+          ],
+          'reactive'
+        )
+      );
+      const events: WorkbookEvent[] = [];
+      exec.on((e) => events.push(e));
+      await expect(exec.runAll()).rejects.toThrow();
+      const stale = events.filter((e) => e.type === 'cell:stale').map((e) => e.cellId);
+      expect(stale).toEqual(['c']);
+    });
+
+    it('runReport does not emit cell:stale for later dependents', async () => {
+      const exec = new WorkbookExecutor(makeWorkbook(cells, 'reactive'));
+      const events: WorkbookEvent[] = [];
+      exec.on((e) => events.push(e));
+      const r = await exec.runReport();
+      expect(r.ok).toBe(true);
+      expect(events.some((e) => e.type === 'cell:stale')).toBe(false);
+    });
+
+    it('runReport still marks dependents that are NOT part of the batch as stale', async () => {
+      const exec = new WorkbookExecutor(makeWorkbook(cells, 'reactive'));
+      const events: WorkbookEvent[] = [];
+      exec.on((e) => events.push(e));
+      await exec.runReport({ runIds: new Set(['a']) });
+      expect(events.filter((e) => e.type === 'cell:stale').map((e) => e.cellId)).toEqual(['b']);
+    });
+  });
+
   describe('runAll()', () => {
     it('should run all cells and emit workbook:complete', async () => {
       const wb = makeWorkbook([

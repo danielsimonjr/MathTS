@@ -2362,6 +2362,15 @@
       "FitScalarResult": {
         "kind": "type"
       },
+      "ForcingFunction": {
+        "kind": "type"
+      },
+      "FrequencyResponse": {
+        "kind": "type"
+      },
+      "FreqzFunction": {
+        "kind": "type"
+      },
       "FrontCandidate": {
         "kind": "type"
       },
@@ -2662,6 +2671,12 @@
       "NumericJacobianOptions": {
         "kind": "type"
       },
+      "ODEMatrixSolution": {
+        "kind": "type"
+      },
+      "ODEOptions": {
+        "kind": "type"
+      },
       "ODESolution": {
         "kind": "type"
       },
@@ -2830,6 +2845,12 @@
       "SolveDDEOptions": {
         "kind": "type"
       },
+      "SolveODEFunction": {
+        "kind": "type"
+      },
+      "SolveODESolution": {
+        "kind": "type"
+      },
       "SolveParabolicPDEOptions": {
         "kind": "type"
       },
@@ -2863,6 +2884,9 @@
       "TTestResult": {
         "kind": "type"
       },
+      "TransferFunction": {
+        "kind": "type"
+      },
       "TukeyComparison": {
         "kind": "type"
       },
@@ -2891,6 +2915,12 @@
         "kind": "number"
       },
       "WilcoxonResult": {
+        "kind": "type"
+      },
+      "ZPKValue": {
+        "kind": "type"
+      },
+      "Zpk2tfFunction": {
         "kind": "type"
       },
       "abs": {
@@ -6805,6 +6835,9 @@
       "PI_EXACT_SCALE": {
         "kind": "object"
       },
+      "REFUSED_UNIT_SPELLINGS": {
+        "kind": "object"
+      },
       "SI_DIMENSION_LENGTH": {
         "kind": "number"
       },
@@ -6845,6 +6878,9 @@
         "kind": "type"
       },
       "UnitDef": {
+        "kind": "type"
+      },
+      "UnitInstance": {
         "kind": "type"
       },
       "UnitParseError": {
@@ -7373,6 +7409,9 @@
       "ExpmOptions": {
         "kind": "type"
       },
+      "LQResult": {
+        "kind": "type"
+      },
       "LUResult": {
         "kind": "type"
       },
@@ -7382,10 +7421,19 @@
       "PinvOptions": {
         "kind": "type"
       },
+      "QLResult": {
+        "kind": "type"
+      },
       "QROptions": {
         "kind": "type"
       },
+      "QRPivotedResult": {
+        "kind": "type"
+      },
       "QRResult": {
+        "kind": "type"
+      },
+      "RQResult": {
         "kind": "type"
       },
       "SVDOptions": {
@@ -7409,6 +7457,9 @@
       "cond": {
         "kind": "function"
       },
+      "condest": {
+        "kind": "function"
+      },
       "eig": {
         "kind": "function"
       },
@@ -7424,7 +7475,13 @@
       "lowRankApprox": {
         "kind": "function"
       },
+      "lq": {
+        "kind": "function"
+      },
       "lu": {
+        "kind": "function"
+      },
+      "luSolve": {
         "kind": "function"
       },
       "matrixExpm": {
@@ -7454,7 +7511,16 @@
       "powerIteration": {
         "kind": "function"
       },
+      "ql": {
+        "kind": "function"
+      },
       "qr": {
+        "kind": "function"
+      },
+      "qrPivoted": {
+        "kind": "function"
+      },
+      "rq": {
         "kind": "function"
       },
       "singularValues": {
@@ -7467,6 +7533,9 @@
         "kind": "function"
       },
       "svdWasm": {
+        "kind": "function"
+      },
+      "transposeNestedArray": {
         "kind": "function"
       }
     }
@@ -8406,6 +8475,9 @@
       },
       "DEFAULT_THRESHOLD_BY_OP": {
         "kind": "object"
+      },
+      "DispatchOptions": {
+        "kind": "type"
       },
       "DispatchResult": {
         "kind": "type"

@@ -69,8 +69,18 @@ export function linearRegression(x: Vec, y: Vec): LinregressResult {
   if (b.length !== n) throw new Error(`linearRegression: length mismatch ${n} vs ${b.length}`);
   if (n < 3)
     throw new Error('linearRegression: need at least 3 points for a slope significance test');
-  const { slope, intercept, rValue, sxx, rss } = fitLine(a, b);
-  if (sxx === 0) throw new Error('linearRegression: predictor x has zero variance');
+  const fit = fitLine(a, b);
+  if (fit.sxx === 0) throw new Error('linearRegression: predictor x has zero variance');
+  return linregressFromFit(fit, n);
+}
+
+/**
+ * Slope inference from an existing {@link LineFit} (`sxx > 0`, `n ≥ 3`): R², the slope standard
+ * error and the two-sided slope p-value. Lets `linregress` fit once and reuse the fit for the
+ * intercept standard error instead of fitting a second time through `linearRegression`.
+ */
+export function linregressFromFit(fit: LineFit, n: number): LinregressResult {
+  const { slope, intercept, rValue, sxx, rss } = fit;
   const df = n - 2;
   // Residual mean square → slope standard error; t-test for slope = 0.
   const stdErr = Math.sqrt(rss / df / sxx);

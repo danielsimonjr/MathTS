@@ -254,6 +254,21 @@ export const createAccessorNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Get the MathML representation of this node (mirrors `_toTex`).
+       */
+      _toMathML(): string {
+        let object = this.object.toMathML();
+        if (needParenthesis(this.object)) {
+          object = `<mrow><mo>(</mo>${object}<mo>)</mo></mrow>`;
+        }
+        if (this.index.dotNotation) {
+          return `<mrow>${object}${this.index.toMathML()}</mrow>`;
+        }
+        // bracket notation is typeset as a subscript, like toTex
+        return `<msub><mrow>${object}</mrow>${this.index.toMathML()}</msub>`;
+      }
+
+      /**
        * Get a JSON representation of the node
        */
       toJSON(): {

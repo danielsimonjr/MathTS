@@ -24,6 +24,7 @@ import {
   type PoolStats,
 } from '@danielsimonjr/mathts-workerpool';
 
+import { assertSameLength, assertMatmulShape } from './validate.js';
 import {
   bitAnd as bitAndOp,
   bitOr as bitOrOp,
@@ -226,11 +227,10 @@ export const DEFAULT_THRESHOLD_BY_OP: Partial<Record<OpName, OpThreshold>> = {
   // to the global threshold; benchmarked memory-bound (0.09–1.19×, occasional noise
   // spikes but no persistent win) → 'never'.
   norm: 'never',
-  // ACCURACY NOTE: `dot`/`distance` staying 'never' is also what keeps them stable. The
-  // sequential fallbacks use core's pairwiseDot / scaledDistance, but the worker kernels
-  // (dotChunk / distanceChunk in workerpool) still accumulate naively. Do NOT tune these off
-  // 'never' without giving those kernels the same pairwise/scaled accumulation first, or large
-  // inputs — the regime where O(n)·ε is worst — would silently revert to naive accuracy.
+  // Accuracy note: the worker kernels (sumChunk / dotChunk / normChunk / distanceChunk in
+  // workerpool) now use the same pairwise / scaled accumulation as core's pairwiseSum,
+  // pairwiseDot, norm2 and scaledDistance (byte-identical copies in worker-numerics.ts, pinned
+  // by a parity test), so the 'never' entries below are a speed choice, not an accuracy guard.
   dot: 'never',
   // Added 2026-07-02 (WS-2): `min`/`max` are now `OpName`s (added to the union) so
   // they're tunable. Same memory-bound reduction profile as sum/mean/norm above →
@@ -329,6 +329,22 @@ export const DEFAULT_POOL_CONFIG: ComputePoolConfig = {
 };
 
 /**
+ * Per-call dispatch override accepted by the `ComputePool` operations.
+ *
+ * - `forceSequential` computes inline whatever the size or threshold.
+ * - `forceParallel` skips the threshold checks and dispatches to the workers. It still needs
+ *   a ready pool: on a pool that was not initialized (or is disabled) the call runs inline.
+ *
+ * `forceSequential` wins when both are set.
+ */
+export interface DispatchOptions {
+  /** Force parallel execution regardless of threshold */
+  forceParallel?: boolean;
+  /** Force sequential execution regardless of threshold */
+  forceSequential?: boolean;
+}
+
+/**
  * Result of a parallel operation
  */
 export interface ParallelResult<T> {
@@ -355,6 +371,15 @@ function mergeThresholds(
   override: ComputePoolConfig['thresholdByOp']
 ): ComputePoolConfig['thresholdByOp'] {
   return override === undefined ? base : { ...base, ...override };
+}
+
+/**
+ * The `ArrayBuffer` that holds exactly the elements of `x` from byte 0 (copied once when `x`
+ * is a view with a non-zero `byteOffset` or over a longer buffer).
+ */
+function exactBuffer(x: Float64Array): ArrayBuffer {
+  const exact = x.byteOffset === 0 && x.buffer.byteLength === x.byteLength ? x : x.slice();
+  return exact.buffer as ArrayBuffer;
 }
 
 function toParallelResult<T>(result: WorkerParallelResult<T>): ParallelResult<T> {
@@ -439,7 +464,9 @@ export class ComputePool {
    * is used.  When `op` is omitted the global threshold is always used (for
    * backward-compatibility with existing callers that don't know the op name).
    */
-  shouldParallelize(elementCount: number, op?: OpName): boolean {
+  shouldParallelize(elementCount: number, op?: OpName, force?: DispatchOptions): boolean {
+    if (force?.forceSequential) return false;
+    if (force?.forceParallel) return this.config.enabled && this.workerPool.isReady();
     const byOp = this.config.thresholdByOp;
     if (op !== undefined && byOp !== undefined && op in byOp) {
       const raw = byOp[op];
@@ -474,12 +501,11 @@ export class ComputePool {
       op: 'dot' | 'distance';
       sequential: (x: Float64Array, y: Float64Array) => number;
       worker: (x: Float64Array, y: Float64Array) => Promise<WorkerParallelResult<number>>;
+      force?: DispatchOptions;
     }
   ): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(a.length, options.op)) {
-      if (a.length !== b.length) {
-        throw new Error(`${options.op}: vectors must have the same length`);
-      }
+    assertSameLength(options.op, a.length, b.length);
+    if (!this.shouldParallelize(a.length, options.op, options.force)) {
       return this.seqResult(options.sequential(a, b));
     }
     return toParallelResult(await options.worker(a, b));
@@ -497,9 +523,7 @@ export class ComputePool {
       fallback: (x: Int32Array, y: Int32Array) => Int32Array;
     }
   ): Promise<ParallelResult<Int32Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    assertSameLength(options.op, a.length, b.length);
     if (this.shouldParallelize(a.length, options.op)) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, options.op));
     }
@@ -525,9 +549,7 @@ export class ComputePool {
       fallback: (x: Int32Array, y: Int32Array | number) => Int32Array;
     }
   ): Promise<ParallelResult<Int32Array>> {
-    if (typeof b !== 'number' && a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    if (typeof b !== 'number') assertSameLength(options.op, a.length, b.length);
     if (this.shouldParallelize(a.length, options.op)) {
       const result =
         typeof b === 'number'
@@ -562,36 +584,41 @@ export class ComputePool {
   /**
    * Parallel sum of array elements
    */
-  async sum(data: Float64Array): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(data.length, 'sum')) {
+  async sum(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    if (!this.shouldParallelize(data.length, 'sum', force)) {
       // PAIRWISE, not `s += data[i]`. Naive accumulation grows error as O(n)*eps; pairwise as
       // O(log n)*eps. On 1e6 elements that is 1.3e-11 vs 2.9e-16 — we were ~46,000x less accurate
       // than NumPy's `np.sum`, and `mean`/`std`/`variance` all inherit it.
       return this.seqResult(pairwiseSum(data));
     }
-    return toParallelResult(await this.workerPool.sum(data));
+    return toParallelResult(await this.workerPool.sum(data, this.forceTask(force)));
   }
 
   /**
    * Parallel product of array elements
    */
-  async prod(data: Float64Array): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(data.length, 'prod')) {
+  async prod(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    if (!this.shouldParallelize(data.length, 'prod', force)) {
       let p = 1;
       for (let i = 0; i < data.length; i++) p *= data[i];
       return this.seqResult(p);
     }
-    return toParallelResult(await this.workerPool.prod(data));
+    return toParallelResult(await this.workerPool.prod(data, this.forceTask(force)));
   }
 
   /**
    * Parallel dot product
    */
-  async dot(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+  async dot(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<number>> {
     return this.gatedBinary(a, b, {
       op: 'dot',
+      force,
       sequential: pairwiseDot,
-      worker: (x, y) => this.workerPool.dot(x, y),
+      worker: (x, y) => this.workerPool.dot(x, y, this.forceTask(force)),
     });
   }
 
@@ -604,10 +631,27 @@ export class ComputePool {
    * parallelize below 50,000. The bitwise family had the same bug (WS-2 addendum).
    * `shouldParallelize` requires a ready pool, so `forceParallel` never reaches an idle one.
    */
-  private poolOptions(elementCount: number, op: OpName): TaskOptions {
-    return this.shouldParallelize(elementCount, op)
+  private poolOptions(elementCount: number, op: OpName, force?: DispatchOptions): TaskOptions {
+    return this.shouldParallelize(elementCount, op, force)
       ? { forceParallel: true }
       : { forceSequential: true };
+  }
+
+  /**
+   * Task options that carry only the caller's force flags, for methods that already gated
+   * in `ComputePool` (the pool then makes the same decision) or that have no per-op threshold.
+   */
+  private forceTask(force?: DispatchOptions): TaskOptions | undefined {
+    if (force === undefined) return undefined;
+    if (force.forceSequential) return { forceSequential: true };
+    if (force.forceParallel) {
+      // Only ask the workers when the pool can take it; otherwise the call would throw
+      // 'not initialized' instead of running inline.
+      return this.shouldParallelize(0, undefined, force)
+        ? { forceParallel: true }
+        : { forceSequential: true };
+    }
+    return undefined;
   }
 
   /**
@@ -616,20 +660,30 @@ export class ComputePool {
   async elementwise(
     a: Float64Array,
     b: Float64Array,
-    op: 'add' | 'subtract' | 'multiply' | 'divide'
+    op: 'add' | 'subtract' | 'multiply' | 'divide',
+    force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.elementwise(a, b, op, this.poolOptions(a.length, op));
+    const result = await this.workerPool.elementwise(
+      a,
+      b,
+      op,
+      this.poolOptions(a.length, op, force)
+    );
     return toParallelResult(result);
   }
 
   /**
    * Parallel scale operation
    */
-  async scale(data: Float64Array, scalar: number): Promise<ParallelResult<Float64Array>> {
+  async scale(
+    data: Float64Array,
+    scalar: number,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
     const result = await this.workerPool.scale(
       data,
       scalar,
-      this.poolOptions(data.length, 'scale')
+      this.poolOptions(data.length, 'scale', force)
     );
     return toParallelResult(result);
   }
@@ -648,15 +702,17 @@ export class ComputePool {
     aRows: number,
     aCols: number,
     b: Float64Array,
-    bCols: number
+    bCols: number,
+    force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
+    assertMatmulShape('matmul', a.length, aRows, aCols, b.length, aCols, bCols);
     const result = await this.workerPool.matmul(
       a,
       aRows,
       aCols,
       b,
       bCols,
-      this.poolOptions(aRows * bCols, 'matmul')
+      this.poolOptions(aRows * bCols, 'matmul', force)
     );
     return toParallelResult(result);
   }
@@ -667,27 +723,32 @@ export class ComputePool {
   async transpose(
     data: Float64Array,
     rows: number,
-    cols: number
+    cols: number,
+    force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
-    if (!this.shouldParallelize(data.length, 'transpose')) {
-      if (data.length !== rows * cols) {
-        throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
-      }
+    if (data.length !== rows * cols) {
+      throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
+    }
+    if (!this.shouldParallelize(data.length, 'transpose', force)) {
       const out = new Float64Array(rows * cols);
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) out[j * rows + i] = data[i * cols + j];
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.transpose(data, rows, cols);
+    const result = await this.workerPool.transpose(data, rows, cols, this.forceTask(force));
     return toParallelResult(result);
   }
 
   /**
    * Parallel map operation
    */
-  async map<T, R>(data: T[], fn: (item: T) => R): Promise<ParallelResult<R[]>> {
-    const result = await this.workerPool.map(data, fn);
+  async map<T, R>(
+    data: T[],
+    fn: (item: T) => R,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<R[]>> {
+    const result = await this.workerPool.map(data, fn, this.forceTask(force));
     return toParallelResult(result);
   }
 
@@ -697,17 +758,22 @@ export class ComputePool {
   async reduce<T, R>(
     data: T[],
     fn: (acc: R, item: T) => R,
-    initial: R
+    initial: R,
+    force?: DispatchOptions
   ): Promise<ParallelResult<R>> {
-    const result = await this.workerPool.reduce(data, fn, initial);
+    const result = await this.workerPool.reduce(data, fn, initial, this.forceTask(force));
     return toParallelResult(result);
   }
 
   /**
    * Parallel filter operation
    */
-  async filter<T>(data: T[], predicate: (item: T) => boolean): Promise<ParallelResult<T[]>> {
-    const result = await this.workerPool.filter(data, predicate);
+  async filter<T>(
+    data: T[],
+    predicate: (item: T) => boolean,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<T[]>> {
+    const result = await this.workerPool.filter(data, predicate, this.forceTask(force));
     return toParallelResult(result);
   }
 
@@ -719,13 +785,14 @@ export class ComputePool {
    * Find min and max values in parallel
    */
   async minMax(
-    data: Float64Array
+    data: Float64Array,
+    force?: DispatchOptions
   ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
     // 'minMax' backs both `min` and `max` (they slice this result); gate on the
     // stricter of the two so it honors either op's threshold.
     if (
-      !this.shouldParallelize(data.length, 'minMax') &&
-      !this.shouldParallelize(data.length, 'min')
+      !this.shouldParallelize(data.length, 'minMax', force) &&
+      !this.shouldParallelize(data.length, 'min', force)
     ) {
       let min = Infinity;
       let max = -Infinity;
@@ -743,16 +810,17 @@ export class ComputePool {
       }
       return this.seqResult({ min, max, minIdx, maxIdx });
     }
-    return toParallelResult(await this.workerPool.minMax(data));
+    return toParallelResult(await this.workerPool.minMax(data, this.forceTask(force)));
   }
 
   /**
    * Compute variance, mean, and standard deviation in parallel
    */
   async variance(
-    data: Float64Array
+    data: Float64Array,
+    force?: DispatchOptions
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
-    if (!this.shouldParallelize(data.length, 'variance')) {
+    if (!this.shouldParallelize(data.length, 'variance', force)) {
       const n = data.length;
       // Corrected two-pass (pairwise mean + (Σd)²/n correction). A naive mean and an uncorrected
       // Σ(x-mean)² lost ~7 digits on large-mean data — variance was ~1e-7 relErr vs NumPy's ~1e-13.
@@ -760,30 +828,35 @@ export class ComputePool {
       const variance = n > 0 ? sumSquaredDeviations(data) / n : 0; // population (matches the worker)
       return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
     }
-    return toParallelResult(await this.workerPool.variance(data));
+    return toParallelResult(await this.workerPool.variance(data, this.forceTask(force)));
   }
 
   /**
    * Compute norm (Euclidean length) in parallel
    */
-  async norm(data: Float64Array): Promise<ParallelResult<number>> {
-    if (!this.shouldParallelize(data.length, 'norm')) {
+  async norm(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    if (!this.shouldParallelize(data.length, 'norm', force)) {
       // LAPACK dnrm2 scaling, not `sqrt(sum(x*x))`: squaring before adding overflows to Infinity
       // around 1e200 and FLUSHES TO ZERO around 1e-200 (a silently wrong answer, worse than the
       // overflow). NumPy has this bug — `np.linalg.norm([1e200]*4)` is `inf`. We don't.
       return this.seqResult(norm2(data));
     }
-    return toParallelResult(await this.workerPool.norm(data));
+    return toParallelResult(await this.workerPool.norm(data, this.forceTask(force)));
   }
 
   /**
    * Compute Euclidean distance in parallel
    */
-  async distance(a: Float64Array, b: Float64Array): Promise<ParallelResult<number>> {
+  async distance(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<number>> {
     return this.gatedBinary(a, b, {
       op: 'distance',
+      force,
       sequential: scaledDistance,
-      worker: (x, y) => this.workerPool.distance(x, y),
+      worker: (x, y) => this.workerPool.distance(x, y, this.forceTask(force)),
     });
   }
 
@@ -794,30 +867,39 @@ export class ComputePool {
     data: Float64Array,
     bins: number,
     min?: number,
-    max?: number
+    max?: number,
+    force?: DispatchOptions
   ): Promise<ParallelResult<number[]>> {
-    if (!this.shouldParallelize(data.length, 'histogram')) {
+    if (!Number.isInteger(bins) || bins <= 0) {
+      throw new RangeError(`histogram: bins must be a positive integer (got ${bins})`);
+    }
+    if (!this.shouldParallelize(data.length, 'histogram', force)) {
       let lo = min;
       let hi = max;
       if (lo === undefined || hi === undefined) {
         lo = Infinity;
         hi = -Infinity;
         for (let i = 0; i < data.length; i++) {
-          if (data[i] < lo) lo = data[i];
-          if (data[i] > hi) hi = data[i];
+          const v = data[i];
+          if (!Number.isFinite(v)) continue; // NaN/Infinity have no bin
+          if (v < lo) lo = v;
+          if (v > hi) hi = v;
         }
       }
       const counts = new Array<number>(bins).fill(0);
-      const width = (hi - lo) / bins || 1;
+      // Degenerate range (all samples equal, or no finite sample): one unit-wide bin 0.
+      const width = hi > lo ? (hi - lo) / bins : 1;
       for (let i = 0; i < data.length; i++) {
-        let b = Math.floor((data[i] - lo) / width);
+        const v = data[i];
+        if (!Number.isFinite(v)) continue;
+        let b = Math.floor((v - lo) / width);
         if (b >= bins) b = bins - 1;
         if (b < 0) b = 0;
         counts[b]++;
       }
       return this.seqResult(counts);
     }
-    const result = await this.workerPool.histogram(data, bins, min, max);
+    const result = await this.workerPool.histogram(data, bins, min, max, this.forceTask(force));
     return toParallelResult(result);
   }
 
@@ -830,9 +912,10 @@ export class ComputePool {
    */
   async unary(
     data: Float64Array,
-    fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square'
+    fn: 'abs' | 'sqrt' | 'exp' | 'log' | 'sin' | 'cos' | 'tan' | 'negate' | 'square',
+    force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
-    const result = await this.workerPool.unary(data, fn, this.poolOptions(data.length, fn));
+    const result = await this.workerPool.unary(data, fn, this.poolOptions(data.length, fn, force));
     return toParallelResult(result);
   }
 
@@ -1016,64 +1099,64 @@ export class ComputePool {
   /**
    * Parallel absolute value
    */
-  async abs(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'abs');
+  async abs(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'abs', force);
   }
 
   /**
    * Parallel square root
    */
-  async sqrt(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'sqrt');
+  async sqrt(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'sqrt', force);
   }
 
   /**
    * Parallel exponential
    */
-  async exp(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'exp');
+  async exp(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'exp', force);
   }
 
   /**
    * Parallel natural log
    */
-  async log(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'log');
+  async log(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'log', force);
   }
 
   /**
    * Parallel sine
    */
-  async sin(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'sin');
+  async sin(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'sin', force);
   }
 
   /**
    * Parallel cosine
    */
-  async cos(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'cos');
+  async cos(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'cos', force);
   }
 
   /**
    * Parallel tangent
    */
-  async tan(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'tan');
+  async tan(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'tan', force);
   }
 
   /**
    * Parallel negation
    */
-  async negate(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'negate');
+  async negate(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'negate', force);
   }
 
   /**
    * Parallel square
    */
-  async square(data: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.unary(data, 'square');
+  async square(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<Float64Array>> {
+    return this.unary(data, 'square', force);
   }
 
   // =========================================================================
@@ -1087,15 +1170,16 @@ export class ComputePool {
     matrix: Float64Array,
     rows: number,
     cols: number,
-    vector: Float64Array
+    vector: Float64Array,
+    force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
-    if (!this.shouldParallelize(matrix.length, 'matvec')) {
-      if (matrix.length !== rows * cols) {
-        throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
-      }
-      if (vector.length !== cols) {
-        throw new Error(`matvec: vector length ${vector.length} !== cols (${cols})`);
-      }
+    if (matrix.length !== rows * cols) {
+      throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
+    }
+    if (vector.length !== cols) {
+      throw new Error(`matvec: vector length ${vector.length} !== cols (${cols})`);
+    }
+    if (!this.shouldParallelize(matrix.length, 'matvec', force)) {
       const out = new Float64Array(rows);
       for (let i = 0; i < rows; i++) {
         let s = 0;
@@ -1104,22 +1188,26 @@ export class ComputePool {
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.matvec(matrix, rows, cols, vector);
+    const result = await this.workerPool.matvec(matrix, rows, cols, vector, this.forceTask(force));
     return toParallelResult(result);
   }
 
   /**
    * Parallel outer product
    */
-  async outer(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    if (!this.shouldParallelize(a.length * b.length, 'outer')) {
+  async outer(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    if (!this.shouldParallelize(a.length * b.length, 'outer', force)) {
       const out = new Float64Array(a.length * b.length);
       for (let i = 0; i < a.length; i++) {
         for (let j = 0; j < b.length; j++) out[i * b.length + j] = a[i] * b[j];
       }
       return this.seqResult(out);
     }
-    const result = await this.workerPool.outer(a, b);
+    const result = await this.workerPool.outer(a, b, this.forceTask(force));
     return toParallelResult(result);
   }
 
@@ -1132,17 +1220,22 @@ export class ComputePool {
    */
   async find<T>(
     data: T[],
-    predicate: (item: T) => boolean
+    predicate: (item: T) => boolean,
+    force?: DispatchOptions
   ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
-    const result = await this.workerPool.find(data, predicate);
+    const result = await this.workerPool.find(data, predicate, this.forceTask(force));
     return toParallelResult(result);
   }
 
   /**
    * Parallel sort operation
    */
-  async sort<T>(data: T[], compare?: (a: T, b: T) => number): Promise<ParallelResult<T[]>> {
-    const result = await this.workerPool.sort(data, compare);
+  async sort<T>(
+    data: T[],
+    compare?: (a: T, b: T) => number,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<T[]>> {
+    const result = await this.workerPool.sort(data, compare, this.forceTask(force));
     return toParallelResult(result);
   }
 
@@ -1153,29 +1246,45 @@ export class ComputePool {
   /**
    * Parallel addition of two arrays
    */
-  async add(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.elementwise(a, b, 'add');
+  async add(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'add', force);
   }
 
   /**
    * Parallel subtraction of two arrays
    */
-  async subtract(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.elementwise(a, b, 'subtract');
+  async subtract(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'subtract', force);
   }
 
   /**
    * Parallel element-wise multiplication
    */
-  async multiply(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.elementwise(a, b, 'multiply');
+  async multiply(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'multiply', force);
   }
 
   /**
    * Parallel element-wise division
    */
-  async divide(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    return this.elementwise(a, b, 'divide');
+  async divide(
+    a: Float64Array,
+    b: Float64Array,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<Float64Array>> {
+    return this.elementwise(a, b, 'divide', force);
   }
 
   /**
@@ -1188,9 +1297,7 @@ export class ComputePool {
    * sequential path is taken unless the caller overrides `thresholdByOp.pow`.
    */
   async pow(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
-    if (a.length !== b.length) {
-      throw new Error(`Array lengths must match: ${a.length} vs ${b.length}`);
-    }
+    assertSameLength('pow', a.length, b.length);
     if (this.shouldParallelize(a.length, 'pow')) {
       return this.applyKernel2(a, b, '(a, b) => Math.pow(a, b)');
     }
@@ -1318,12 +1425,18 @@ export class ComputePool {
       const axesAArr = Array.from(axesA);
       const axesBArr = Array.from(axesB);
 
+      // Every task reads both operands whole, so each buffer is cloned per task (not moved), and
+      // it must hold exactly the operand: a view with a byteOffset would otherwise be read from
+      // the wrong region.
+      const aBuffer = exactBuffer(a);
+      const bBuffer = exactBuffer(b);
+
       const chunkResults = await Promise.all(
         chunks.map(([outStart, outEnd]) =>
           this.workerPool.exec<ArrayBuffer>('tensordotChunk', [
-            a.buffer,
+            aBuffer,
             aShapeArr,
-            b.buffer,
+            bBuffer,
             bShapeArr,
             axesAArr,
             axesBArr,
@@ -1367,8 +1480,8 @@ export class ComputePool {
   /**
    * Compute mean in parallel (uses variance internally)
    */
-  async mean(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.variance(data);
+  async mean(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    const result = await this.variance(data, force);
     return {
       ...result,
       result: result.result.mean,
@@ -1378,8 +1491,8 @@ export class ComputePool {
   /**
    * Compute standard deviation in parallel
    */
-  async std(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.variance(data);
+  async std(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    const result = await this.variance(data, force);
     return {
       ...result,
       result: result.result.std,
@@ -1389,8 +1502,8 @@ export class ComputePool {
   /**
    * Find minimum value in parallel
    */
-  async min(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.minMax(data);
+  async min(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    const result = await this.minMax(data, force);
     return {
       ...result,
       result: result.result.min,
@@ -1400,8 +1513,8 @@ export class ComputePool {
   /**
    * Find maximum value in parallel
    */
-  async max(data: Float64Array): Promise<ParallelResult<number>> {
-    const result = await this.minMax(data);
+  async max(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
+    const result = await this.minMax(data, force);
     return {
       ...result,
       result: result.result.max,

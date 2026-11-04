@@ -165,6 +165,40 @@ export const createArrayNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Get the MathML representation of this node (mirrors `_toTex`: a
+       * bracketed `mtable`, a flat array is a column vector).
+       */
+      _toMathML(): string {
+        interface Built {
+          wrapped: boolean;
+          rows: string[][];
+        }
+        const tableOf = (rows: string[][]): string =>
+          '<mrow><mo>[</mo><mtable>' +
+          rows
+            .map((row) => '<mtr>' + row.map((cell) => `<mtd>${cell}</mtd>`).join('') + '</mtr>')
+            .join('') +
+          '</mtable><mo>]</mo></mrow>';
+        const build = (items: MathNode[], nested: boolean): Built => {
+          const mixedItems = items.some(isArrayNode) && !items.every(isArrayNode);
+          const itemsFormRow = nested || mixedItems;
+          const pieces: string[][] = items.map((node: MathNode) => {
+            const arrayItems = (node as { items?: MathNode[] }).items;
+            if (arrayItems) {
+              const sub = build(arrayItems, !nested);
+              return sub.wrapped ? [tableOf(sub.rows)] : sub.rows[0];
+            }
+            return [node.toMathML()];
+          });
+          return {
+            wrapped: mixedItems || !itemsFormRow || (itemsFormRow && !nested),
+            rows: itemsFormRow ? [pieces.flat()] : pieces,
+          };
+        };
+        return tableOf(build(this.items, false).rows);
+      }
+
+      /**
        * Get LaTeX representation
        * @param options
        * @returns str

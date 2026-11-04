@@ -196,6 +196,16 @@ export const createBlockNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Get the MathML representation of this node (mirrors `_toTex`).
+       */
+      _toMathML(): string {
+        const parts = this.blocks.map(
+          (param) => param.node.toMathML() + (param.visible ? '' : '<mo>;</mo>')
+        );
+        return `<mrow>${parts.join('<mspace width="1em"/>')}</mrow>`;
+      }
+
+      /**
        * Get LaTeX representation
        * @param options
        * @returns str

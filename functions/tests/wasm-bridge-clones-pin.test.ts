@@ -20,11 +20,7 @@ import {
   withAsI32,
   type RawWasm,
 } from '../src/wasm/bridges/common.js';
-import {
-  argsortF64Dispatch,
-  rankF64Dispatch,
-  WASM_SORT_THRESHOLD,
-} from '../src/wasm/sort/wasm-bridge.js';
+import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../src/wasm/sort/wasm-bridge.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import { loadWasm } from '../src/index.js';
 import { overrideWasmPolicy, wasmPolicyAllows } from '../src/wasm/policy.js';
@@ -232,22 +228,14 @@ describe('G50 — argsort/rank stable ties and NaN-last (independent oracles)', 
     expect(Array.from(argsortF64Dispatch(data))).toEqual([1, 4, 3, 0, 2, 5]);
   });
 
-  it('rank is the inverse of a stable argsort for equal values', () => {
-    // argsort of [5,5,1,5,2] is [2, 4, 0, 1, 3] → rank [2, 3, 0, 4, 1]
-    const data = new Float64Array([5, 5, 1, 5, 2]);
-    expect(Array.from(rankF64Dispatch(data))).toEqual([2, 3, 0, 4, 1]);
-  });
-
   it('argsort puts NaN indices last, preserving NaN input order', () => {
     // 1 at 3, 2 at 1, NaNs at 0 then 2
     const data = new Float64Array([NaN, 2, NaN, 1]);
     expect(Array.from(argsortF64Dispatch(data))).toEqual([3, 1, 0, 2]);
   });
 
-  it('rank_f64 stays off the public WASM path (no policy band; n≤5000 is below 16384)', () => {
+  it('argsort_f64 stays off the public WASM path (no policy band)', () => {
     expect(WASM_SORT_THRESHOLD).toBe(16384);
-    expect(wasmPolicyAllows('rank_f64', 5000)).toBe(false);
-    expect(wasmPolicyAllows('rank_f64', 16384)).toBe(false);
     expect(wasmPolicyAllows('argsort_f64', 16384)).toBe(false);
   });
 });

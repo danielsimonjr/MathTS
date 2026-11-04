@@ -43,6 +43,17 @@ export {
   replacer,
 } from './factories/evaluate.js';
 export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
+// Result/option types of the factory-built solveODE / freqz / zpk2tf. `ODESolution` is already
+// taken by typed/numeric.ts (solveODESystem's result), so solveODE's generic one is `SolveODESolution`.
+export type {
+  SolveODESolution,
+  ODEMatrixSolution,
+  ODEOptions,
+  ForcingFunction,
+  SolveODEFunction,
+} from './numeric/solveODE.js';
+export type { FrequencyResponse, FreqzFunction } from './signal/freqz.js';
+export type { TransferFunction, ZPKValue, Zpk2tfFunction } from './signal/zpk2tf.js';
 
 // Scalar trees. `ln` lowers to natural `log`, `log` lowers to `log10`.
 // A formula string is rejected.

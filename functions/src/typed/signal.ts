@@ -917,8 +917,6 @@ export async function spectrogram(
 
   const win = windowFunction(windowSize, winType);
 
-  const magnitude: number[][] = [];
-  const times: number[] = [];
   const frequencies: number[] = Array.from({ length: nFreqs }, (_, i) => i / nfft);
 
   // Collect every frame start offset; each frame is an independent FFT.
@@ -927,12 +925,15 @@ export async function spectrogram(
     starts.push(start);
   }
   const frameCount: i32 = starts.length;
+  // Outputs are sized once from the frame count rather than grown with push.
+  const magnitude: number[][] = new Array<number[]>(frameCount);
+  const times: number[] = new Array<number>(frameCount);
   if (frameCount === 0) {
     return { magnitude, frequencies, times };
   }
 
   for (let f: i32 = 0; f < frameCount; f++) {
-    times.push(starts[f] + windowSize / 2);
+    times[f] = starts[f] + windowSize / 2;
   }
 
   // Parallel path: pack all windowed frames into one contiguous batch and
@@ -952,13 +953,13 @@ export async function spectrogram(
 
     for (let f: i32 = 0; f < frameCount; f++) {
       const base: i32 = f * nfft;
-      const mag: number[] = [];
+      const mag: number[] = new Array<number>(nFreqs);
       for (let i: i32 = 0; i < nFreqs; i++) {
         const re: f64 = batch.result.real[base + i];
         const im: f64 = batch.result.imag[base + i];
-        mag.push(Math.sqrt(re * re + im * im));
+        mag[i] = Math.sqrt(re * re + im * im);
       }
-      magnitude.push(mag);
+      magnitude[f] = mag;
     }
 
     return { magnitude, frequencies, times };
@@ -975,11 +976,11 @@ export async function spectrogram(
 
     const result = fftCoreFloat64(real, imag, false);
 
-    const mag: number[] = [];
+    const mag: number[] = new Array<number>(nFreqs);
     for (let i: i32 = 0; i < nFreqs; i++) {
-      mag.push(Math.sqrt(result.real[i] ** 2 + result.imag[i] ** 2));
+      mag[i] = Math.sqrt(result.real[i] ** 2 + result.imag[i] ** 2);
     }
-    magnitude.push(mag);
+    magnitude[f] = mag;
   }
 
   return { magnitude, frequencies, times };
@@ -1017,13 +1018,13 @@ export function periodogram(
   const result = fftCoreFloat64(real, imag, false);
 
   const nFreqs: i32 = nfft / 2 + 1;
-  const psd: number[] = [];
-  const frequencies: number[] = [];
+  const psd: number[] = new Array<number>(nFreqs);
+  const frequencies: number[] = new Array<number>(nFreqs);
 
   for (let i: i32 = 0; i < nFreqs; i++) {
     const power: f64 = (result.real[i] ** 2 + result.imag[i] ** 2) / (x.length * winPower);
-    psd.push(i > 0 && i < nfft / 2 ? 2 * power : power);
-    frequencies.push(i / nfft);
+    psd[i] = i > 0 && i < nfft / 2 ? 2 * power : power;
+    frequencies[i] = i / nfft;
   }
 
   return { psd, frequencies };

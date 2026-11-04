@@ -290,13 +290,21 @@ export function multiplicativeOrder(a: number, n: number): number {
   if (gcdInt(amod, n) !== 1) return -1;
   if (n === 1) return 1;
 
-  let cur = amod;
-  let k = 1;
-  while (cur !== 1) {
-    cur = (cur * amod) % n;
-    k++;
+  // ord divides phi(n): start from phi(n) and strip every prime q of phi(n)
+  // while a^(ord/q) is still 1. BigInt keeps the modular products exact for
+  // any safe-integer modulus (a plain `cur * amod` overflows 2^53 past n ~ 9.5e7).
+  let phi = n;
+  for (const p of distinctPrimeFactors(n)) phi = (phi / p) * (p - 1);
+
+  const nBig = BigInt(n);
+  const aBig = BigInt(amod);
+  let ord = phi;
+  for (const q of distinctPrimeFactors(phi)) {
+    while (ord % q === 0 && modPowBig(aBig, BigInt(ord / q), nBig) === 1n) {
+      ord /= q;
+    }
   }
-  return k;
+  return ord;
 }
 
 // =============================================================================

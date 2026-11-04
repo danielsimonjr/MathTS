@@ -288,6 +288,22 @@ export const createRangeNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Get the MathML representation of this node (mirrors `_toTex`).
+       */
+      _toMathML(): string {
+        const parens = calculateNecessaryParentheses(this, 'keep', 'hide');
+        const wrap = (s: string, need: boolean | undefined): string =>
+          need ? `<mrow><mo>(</mo>${s}<mo>)</mo></mrow>` : s;
+
+        let str = wrap(this.start.toMathML(), parens.start);
+        if (this.step) {
+          str += '<mo>:</mo>' + wrap(this.step.toMathML(), parens.step);
+        }
+        str += '<mo>:</mo>' + wrap(this.end.toMathML(), parens.end);
+        return `<mrow>${str}</mrow>`;
+      }
+
+      /**
        * Get LaTeX representation
        * @params {Object} options
        * @returns str

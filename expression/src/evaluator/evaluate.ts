@@ -141,6 +141,34 @@ function validateAst(node: unknown, depth = 0): void {
   }
 }
 
+/** Maximum compiled expressions kept per (namespace, parser) pair. */
+const COMPILE_CACHE_SIZE = 256;
+
+type CompileCache = Map<string, CompiledExpression>;
+
+/**
+ * Compiled-expression caches, keyed by namespace identity and then parser
+ * identity (so namespaces never share entries and are collectable). Entries are
+ * created only after `validateAst` and `compile` both succeeded. Assumption:
+ * a namespace is not mutated after expressions were compiled against it (the
+ * compiler binds operator functions at compile time).
+ */
+const compileCaches = new WeakMap<object, WeakMap<object, CompileCache>>();
+
+function cacheFor(mathScope: object, parseFn: object): CompileCache {
+  let byParser = compileCaches.get(mathScope);
+  if (!byParser) {
+    byParser = new WeakMap();
+    compileCaches.set(mathScope, byParser);
+  }
+  let cache = byParser.get(parseFn);
+  if (!cache) {
+    cache = new Map();
+    byParser.set(parseFn, cache);
+  }
+  return cache;
+}
+
 /**
  * Create an evaluate function bound to a math scope and parse function.
  *
@@ -159,7 +187,16 @@ function validateAst(node: unknown, depth = 0): void {
  */
 export function createEvaluate(
   parseFn: (expr: string) => MathNode,
-  mathScope: Record<string, unknown>
+  mathScope: Record<string, unknown>,
+  /**
+   * Optional fingerprint of the state `parseFn` depends on besides the text
+   * (for example the live `number` / `precision` config, which decides the
+   * numeric type of literals at parse time). Called on every evaluate; its
+   * value becomes part of the cache key, so a parse made under one config is
+   * never reused under another. Omit when `parseFn` is a pure function of its
+   * input.
+   */
+  cacheKey?: () => string
 ) {
   /**
    * Evaluate a math expression string.
@@ -198,16 +235,33 @@ export function createEvaluate(
     return evaluateOne(exprOrExprs, scope, options);
   }
 
+  const cache = cacheFor(mathScope, parseFn);
+
   function evaluateOne(
     expr: string,
     scope?: Record<string, unknown> | Scope,
     options?: EvaluateOptions
   ): unknown {
-    const node = parseFn(expr);
-    if (!options || options.unsafe !== true) {
-      validateAst(node);
+    const unsafe = options?.unsafe === true;
+    // Safe and unsafe compiles of the same text are distinct entries.
+    const key = (unsafe ? 'u:' : 's:') + (cacheKey ? cacheKey() + '\u0000' : '') + expr;
+    let compiled = cache.get(key);
+    if (compiled !== undefined) {
+      // refresh recency (Map iterates in insertion order)
+      cache.delete(key);
+      cache.set(key, compiled);
+    } else {
+      const node = parseFn(expr);
+      if (!unsafe) {
+        validateAst(node);
+      }
+      compiled = compile(node, mathScope);
+      cache.set(key, compiled);
+      if (cache.size > COMPILE_CACHE_SIZE) {
+        const oldest = cache.keys().next().value;
+        if (oldest !== undefined) cache.delete(oldest);
+      }
     }
-    const compiled = compile(node, mathScope);
     return compiled.evaluate(scope);
   }
 

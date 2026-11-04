@@ -10,24 +10,33 @@
 import { compileFunctionSource } from './compile-function-source.js';
 import { fftFrameInPlace } from './fft-core.js';
 import { tensordotRange } from './tensordot-range.js';
-import { _workerMulberry32 } from './worker-numerics.js';
-import { worker } from 'workerpool';
+import {
+  _workerMulberry32,
+  _workerPairwiseSum,
+  _workerPairwiseDot,
+  _workerScaledSsq,
+  _workerScaledSsqDiff,
+} from './worker-numerics.js';
+import { worker, Transfer } from 'workerpool';
+
+/**
+ * Hand a freshly allocated result buffer back to the caller by transfer (zero-copy) instead
+ * of structured clone. Only for buffers the kernel created itself: the transfer detaches them.
+ * The declared type stays `ArrayBuffer` because that is what the caller receives.
+ */
+function transferBuffer(buffer: ArrayBuffer): ArrayBuffer {
+  return new Transfer(buffer, [buffer]) as unknown as ArrayBuffer;
+}
 
 // =============================================================================
 // Array Reduction Operations
 // =============================================================================
 
 /**
- * Sum elements in a chunk of Float64Array
+ * Sum elements in a chunk of Float64Array (pairwise, as core's `pairwiseSum`)
  */
 function sumChunk(buffer: ArrayBuffer, start: number, length: number): number {
-  const data = new Float64Array(buffer);
-  let total = 0;
-  const end = start + length;
-  for (let i = start; i < end; i++) {
-    total += data[i];
-  }
-  return total;
+  return _workerPairwiseSum(new Float64Array(buffer), start, start + length);
 }
 
 /**
@@ -52,16 +61,12 @@ function dotChunk(
   start: number,
   length: number
 ): number {
-  const a = new Float64Array(aBuffer);
-  const b = new Float64Array(bBuffer);
-  let result = 0;
-  const end = start + length;
-
-  for (let i = start; i < end; i++) {
-    result += a[i] * b[i];
-  }
-
-  return result;
+  return _workerPairwiseDot(
+    new Float64Array(aBuffer),
+    new Float64Array(bBuffer),
+    start,
+    start + length
+  );
 }
 
 /**
@@ -118,18 +123,11 @@ function minMaxChunk(
 }
 
 /**
- * Compute norm (sum of squares) for a chunk
+ * Scaled sum of squares `[scale, ssq]` for a chunk (BLAS `dnrm2` partial). The caller combines
+ * the partials with `_workerCombineScaledSsq`, so squares never overflow or flush to zero.
  */
-function normChunk(buffer: ArrayBuffer, start: number, length: number): number {
-  const data = new Float64Array(buffer);
-  let sumSq = 0;
-  const end = start + length;
-
-  for (let i = start; i < end; i++) {
-    sumSq += data[i] * data[i];
-  }
-
-  return sumSq;
+function normChunk(buffer: ArrayBuffer, start: number, length: number): [number, number] {
+  return _workerScaledSsq(new Float64Array(buffer), start, start + length);
 }
 
 // =============================================================================
@@ -169,7 +167,7 @@ function elementwiseChunk(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -188,7 +186,7 @@ function scaleChunk(
     result[i] = data[start + i] * scalar;
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -236,7 +234,7 @@ function unaryChunk(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -259,7 +257,7 @@ function applyKernelChunk(
   for (let i = 0; i < length; i++) {
     result[i] = fn(data[start + i]);
   }
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -282,7 +280,7 @@ function applyKernel2Chunk(
   for (let i = 0; i < length; i++) {
     result[i] = fn(a[start + i], b[start + i]);
   }
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 // =============================================================================
@@ -342,7 +340,7 @@ function bitwiseChunk(
       break;
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -381,7 +379,7 @@ function bitwiseScalarChunk(
       break;
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -393,7 +391,7 @@ function bitwiseNotChunk(buffer: ArrayBuffer, start: number, length: number): Ar
   for (let i = 0; i < length; i++) {
     result[i] = ~data[start + i];
   }
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 // =============================================================================
@@ -430,7 +428,7 @@ function fftBatchChunk(
   const out = new Float64Array(total * 2);
   out.set(real.subarray(0, total), 0);
   out.set(imag.subarray(0, total), total);
-  return out.buffer;
+  return transferBuffer(out.buffer);
 }
 
 // =============================================================================
@@ -465,7 +463,7 @@ function matmulRows(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -489,7 +487,7 @@ function transposeRows(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -517,7 +515,7 @@ function matvecRows(
     result[i] = sum;
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 /**
@@ -543,7 +541,7 @@ function outerProductRows(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 // =============================================================================
@@ -613,25 +611,21 @@ function sortChunk<T>(chunk: T[], compareString?: string): T[] {
 // =============================================================================
 
 /**
- * Compute squared Euclidean distance for a chunk
+ * Scaled sum of squared differences `[scale, ssq]` for a chunk (partial behind
+ * core's `scaledDistance`); combined with `_workerCombineScaledSsq`.
  */
 function distanceChunk(
   aBuffer: ArrayBuffer,
   bBuffer: ArrayBuffer,
   start: number,
   length: number
-): number {
-  const a = new Float64Array(aBuffer);
-  const b = new Float64Array(bBuffer);
-  let sumSquared = 0;
-  const end = start + length;
-
-  for (let i = start; i < end; i++) {
-    const diff = a[i] - b[i];
-    sumSquared += diff * diff;
-  }
-
-  return sumSquared;
+): [number, number] {
+  return _workerScaledSsqDiff(
+    new Float64Array(aBuffer),
+    new Float64Array(bBuffer),
+    start,
+    start + length
+  );
 }
 
 /**
@@ -690,7 +684,7 @@ function distanceMatrixRowsChunk(
     }
   }
 
-  return result.buffer;
+  return transferBuffer(result.buffer);
 }
 
 // =============================================================================
@@ -708,14 +702,19 @@ function histogramChunk(
   max: number,
   bins: number
 ): number[] {
+  if (!Number.isInteger(bins) || bins <= 0) {
+    throw new RangeError(`histogramChunk: bins must be a positive integer (got ${bins})`);
+  }
   const data = new Float64Array(buffer);
   const histogram = new Array(bins).fill(0);
-  const binWidth = (max - min) / bins;
+  // lo === hi (all samples equal): one unit-wide bin so equal samples land in bin 0, not NaN.
+  const binWidth = max > min ? (max - min) / bins : 1;
   const end = start + length;
 
   for (let i = start; i < end; i++) {
     const val = data[i];
-    if (val >= min && val <= max) {
+    // The range test also drops NaN; Infinity is dropped explicitly (it has no bin).
+    if (Number.isFinite(val) && val >= min && val <= max) {
       const binIdx = Math.min(Math.floor((val - min) / binWidth), bins - 1);
       histogram[binIdx]++;
     }
@@ -766,7 +765,7 @@ function tensordotChunk(
   outStart: number,
   outEnd: number
 ): ArrayBuffer {
-  return tensordotRange(
+  const out = tensordotRange(
     new Float64Array(aBuffer),
     aShape,
     new Float64Array(bBuffer),
@@ -776,7 +775,8 @@ function tensordotChunk(
     resultShape,
     outStart,
     outEnd
-  ).buffer as ArrayBuffer;
+  );
+  return transferBuffer(out.buffer as ArrayBuffer);
 }
 
 // =============================================================================
@@ -889,7 +889,7 @@ function sampleChunk(distName: string, params: number[], seed: number, count: nu
       throw new Error(`sampleChunk: unknown distribution "${distName}"`);
   }
 
-  return out.buffer;
+  return transferBuffer(out.buffer);
 }
 
 // =============================================================================

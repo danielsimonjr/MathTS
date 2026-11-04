@@ -263,6 +263,21 @@ export const createConditionalNode = /* #__PURE__ */ factory(
       }
 
       /**
+       * Get the MathML representation of this node (mirrors `_toTex`: a
+       * two-row `cases` table).
+       */
+      _toMathML(): string {
+        return (
+          '<mrow><mo>{</mo><mtable columnalign="left left">' +
+          `<mtr><mtd>${this.trueExpr.toMathML()}</mtd>` +
+          `<mtd><mtext>if </mtext>${this.condition.toMathML()}</mtd></mtr>` +
+          `<mtr><mtd>${this.falseExpr.toMathML()}</mtd>` +
+          '<mtd><mtext>otherwise</mtext></mtd></mtr>' +
+          '</mtable></mrow>'
+        );
+      }
+
+      /**
        * Get LaTeX representation
        * @param options
        * @returns str

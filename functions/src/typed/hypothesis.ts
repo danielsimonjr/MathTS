@@ -211,6 +211,25 @@ export interface ChiSquareBootstrapResult {
 const HYPOTHESIS_THRESHOLD = 4096;
 
 /**
+ * Draw `n` indices with replacement from an ascending `sorted` array and return
+ * the resample in ascending order, without sorting: tally the draws in a counts
+ * array (the same rng stream as drawing values directly), then emit each value
+ * as many times as it was drawn. O(n) and identical to sort-after-draw.
+ */
+function _sortedResample(sorted: ArrayLike<number>, n: number, rng: () => number): Float64Array {
+  const counts = new Int32Array(n);
+  for (let i = 0; i < n; i++) counts[Math.floor(rng() * n)]++;
+  const out = new Float64Array(n);
+  let o = 0;
+  for (let i = 0; i < n; i++) {
+    const c = counts[i];
+    const v = sorted[i];
+    for (let k = 0; k < c; k++) out[o++] = v;
+  }
+  return out;
+}
+
+/**
  * Fisher-Yates in-place shuffle of a Float64Array using a provided PRNG.
  */
 function _shuffle(arr: Float64Array, rng: () => number): void {
@@ -736,11 +755,7 @@ export async function kolmogorovSmirnovTest(
    * One bootstrap iteration: resample with replacement, sort, compute D.
    */
   function _ksBootstrapOnce(): f64 {
-    const resample = new Float64Array(n);
-    for (let i = 0; i < n; i++) {
-      resample[i] = sorted[Math.floor(rng() * n)];
-    }
-    resample.sort();
+    const resample = _sortedResample(sorted, n, rng);
     let d = 0;
     for (let i = 0; i < n; i++) {
       const cv = cdf(resample[i]);
@@ -952,71 +967,29 @@ export async function mannWhitneyTest(
   const B = opts?.bootstrap ?? 0;
   if (B <= 0) return baseResult;
 
-  // Build combined pool as Float64Array for permutation bootstrap.
-  const combinedPool = new Float64Array(nTotal);
-  for (let k = 0; k < nTotal; k++) combinedPool[k] = combined[k].value;
-
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
 
   /**
-   * Compute Mann-Whitney U statistic for a given split of a pre-sorted
-   * combined array. The first `n1` elements are treated as group 1.
-   * (Pure sequential — fast enough per iteration.)
+   * Mann-Whitney U for one permutation. the pooled values are already sorted and
+   * `ranksArr` holds the tie-averaged rank of each pooled position, so shuffling
+   * a copy of the ranks (same rng draws as shuffling the values) and summing the
+   * first `n1` gives group 1's rank sum in O(n) with no re-sort.
    */
-  function _mwUFromPermutation(perm: Float64Array): f64 {
-    // Sort the permutation array
-    const tmp = perm.slice();
-    tmp.sort();
-
-    // Assign ranks with tie handling
-    const r = new Float64Array(nTotal);
-    let ii = 0;
-    while (ii < nTotal) {
-      let jj = ii;
-      while (jj < nTotal && tmp[jj] === tmp[ii]) jj++;
-      const avgR = (ii + 1 + jj) / 2;
-      for (let kk = ii; kk < jj; kk++) r[kk] = avgR;
-      ii = jj;
-    }
-
-    // rank-sum for group 1 (first n1 elements of perm, not tmp)
-    // We need to map perm values back to ranks.
-    // Build value→rank index from the sorted array.
-    // Since we use avg ranks, we can do a simpler approach:
-    // create sorted copy with original indices to map back.
-    const indexed = Array.from({ length: nTotal }, (_, k) => ({
-      val: perm[k],
-      origIdx: k,
-    })).sort((a, b) => a.val - b.val);
-
-    // Re-assign avg ranks by value
-    const rankByOrig = new Float64Array(nTotal);
-    let kk = 0;
-    while (kk < nTotal) {
-      let ll = kk;
-      while (ll < nTotal && indexed[ll].val === indexed[kk].val) ll++;
-      const avgR = (kk + 1 + ll) / 2;
-      for (let mm = kk; mm < ll; mm++) rankByOrig[indexed[mm].origIdx] = avgR;
-      kk = ll;
-    }
-
+  const rankPerm = new Float64Array(nTotal);
+  function _mwUFromPermutation(): f64 {
+    rankPerm.set(ranksArr);
+    _shuffle(rankPerm, rng);
     let r1 = 0;
-    for (let k = 0; k < n1; k++) r1 += rankByOrig[k];
+    for (let k = 0; k < n1; k++) r1 += rankPerm[k];
     const u1 = r1 - (n1 * (n1 + 1)) / 2;
     const u2 = n1 * n2 - u1;
     return Math.min(u1, u2);
   }
 
   const bootstrapStats = new Float64Array(B);
-  const tasks = Array.from({ length: B }, (_, idx) =>
-    Promise.resolve().then(() => {
-      // Permute combined pool and take first n1 as group 1.
-      const perm = combinedPool.slice();
-      _shuffle(perm, rng);
-      bootstrapStats[idx] = _mwUFromPermutation(perm);
-    })
-  );
-  await Promise.all(tasks);
+  for (let idx = 0; idx < B; idx++) {
+    bootstrapStats[idx] = _mwUFromPermutation();
+  }
 
   let countGe = 0;
   for (let i2 = 0; i2 < B; i2++) {
@@ -1195,11 +1168,7 @@ export async function shapiroWilkTest(
    * The resample is drawn with replacement from the original sorted data.
    */
   function _swBootstrapOnce(): f64 {
-    const resample = new Float64Array(n);
-    for (let i = 0; i < n; i++) {
-      resample[i] = sorted[Math.floor(rng() * n)];
-    }
-    resample.sort();
+    const resample = _sortedResample(sorted, n, rng);
 
     let mR = 0;
     for (let i = 0; i < n; i++) mR += resample[i];

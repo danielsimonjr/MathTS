@@ -45,7 +45,7 @@ export async function parallelMap<T, R>(
   options: MapOptions = {}
 ): Promise<ParallelResult<R[]>> {
   const pool = options.pool ?? computePool;
-  return pool.map(data, fn);
+  return pool.map(data, fn, options);
 }
 
 /**
@@ -71,7 +71,7 @@ export async function parallelFilter<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<T[]>> {
   const pool = options.pool ?? computePool;
-  return pool.filter(data, predicate);
+  return pool.filter(data, predicate, options);
 }
 
 /**
@@ -98,7 +98,7 @@ export async function parallelFind<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
   const pool = options.pool ?? computePool;
-  return pool.find(data, predicate);
+  return pool.find(data, predicate, options);
 }
 
 /**
@@ -125,7 +125,7 @@ export async function parallelSort<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<T[]>> {
   const pool = options.pool ?? computePool;
-  return pool.sort(data, compare);
+  return pool.sort(data, compare, options);
 }
 
 /**
@@ -145,10 +145,14 @@ export async function parallelForEach<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<void[]>> {
   const pool = options.pool ?? computePool;
-  const result = await pool.map(data, (item: T) => {
-    fn(item);
-    return undefined;
-  });
+  const result = await pool.map(
+    data,
+    (item: T) => {
+      fn(item);
+      return undefined;
+    },
+    options
+  );
   return {
     ...result,
     result: result.result as unknown as void[],
@@ -171,7 +175,7 @@ export async function parallelSome<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<boolean>> {
   const pool = options.pool ?? computePool;
-  const findResult = await pool.find(data, predicate);
+  const findResult = await pool.find(data, predicate, options);
   return {
     ...findResult,
     result: findResult.result.found,
@@ -195,7 +199,7 @@ export async function parallelEvery<T>(
 ): Promise<ParallelResult<boolean>> {
   const pool = options.pool ?? computePool;
   // Find an element that doesn't pass - if found, not all pass
-  const findResult = await pool.find(data, (item: T) => !predicate(item));
+  const findResult = await pool.find(data, (item: T) => !predicate(item), options);
   return {
     ...findResult,
     result: !findResult.result.found,
@@ -229,7 +233,7 @@ export async function parallelCount<T>(
     };
   }
 
-  const filterResult = await pool.filter(data, predicate);
+  const filterResult = await pool.filter(data, predicate, options);
   return {
     ...filterResult,
     result: filterResult.result.length,

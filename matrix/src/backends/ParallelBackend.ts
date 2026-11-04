@@ -58,8 +58,10 @@ export class ParallelBackend {
    */
   isAvailable(): boolean {
     // Parallel backend requires WebWorker support
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return typeof (globalThis as any).Worker !== 'undefined' || typeof process !== 'undefined';
+    return (
+      typeof (globalThis as { Worker?: unknown }).Worker !== 'undefined' ||
+      typeof process !== 'undefined'
+    );
   }
 
   /**

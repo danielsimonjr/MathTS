@@ -36,7 +36,7 @@ export async function parallelSum(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.sum(data);
+  return pool.sum(data, options);
 }
 
 /**
@@ -51,7 +51,7 @@ export async function parallelMean(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.mean(data);
+  return pool.mean(data, options);
 }
 
 /**
@@ -66,7 +66,7 @@ export async function parallelMin(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.min(data);
+  return pool.min(data, options);
 }
 
 /**
@@ -81,7 +81,7 @@ export async function parallelMax(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.max(data);
+  return pool.max(data, options);
 }
 
 /**
@@ -96,7 +96,7 @@ export async function parallelMinMax(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
   const pool = options.pool ?? computePool;
-  return pool.minMax(data);
+  return pool.minMax(data, options);
 }
 
 /**
@@ -113,7 +113,7 @@ export async function parallelVariance(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
   const pool = options.pool ?? computePool;
-  return pool.variance(data);
+  return pool.variance(data, options);
 }
 
 /**
@@ -128,7 +128,7 @@ export async function parallelStd(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.std(data);
+  return pool.std(data, options);
 }
 
 /**
@@ -145,7 +145,7 @@ export async function parallelNorm(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.norm(data);
+  return pool.norm(data, options);
 }
 
 /**
@@ -164,7 +164,7 @@ export async function parallelDistance(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
-  return pool.distance(a, b);
+  return pool.distance(a, b, options);
 }
 
 /**
@@ -187,7 +187,7 @@ export async function parallelHistogram(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<number[]>> {
   const pool = options.pool ?? computePool;
-  return pool.histogram(data, bins, min, max);
+  return pool.histogram(data, bins, min, max, options);
 }
 
 /**
@@ -210,5 +210,5 @@ export async function parallelReduce<T, R>(
   options: ReduceOptions = {}
 ): Promise<ParallelResult<R>> {
   const pool = options.pool ?? computePool;
-  return pool.reduce(data, fn, initial);
+  return pool.reduce(data, fn, initial, options);
 }

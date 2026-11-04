@@ -44,8 +44,8 @@ export function lu(A: DenseMatrix): LUResult {
 
   // Working copy in row-major order. We overwrite this in place with the
   // compact LU factorisation (L below diagonal, U on and above diagonal).
-  const flat = A.toFloat64Array();
-  const W = new Float64Array(flat);
+  // `toFloat64Array()` already returns a fresh copy, so no second copy is needed.
+  const W = A.toFloat64Array();
 
   const perm = new Array<number>(n);
   for (let i = 0; i < n; i++) perm[i] = i;

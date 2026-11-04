@@ -5,7 +5,7 @@
  *   - sort_f64 is now an INTROSORT (3-way quicksort + median-of-3 + heapsort
  *     fallback): duplicate-heavy input is O(n log n) (was O(n²)); value-sort
  *     stays bit-identical to JS.
- *   - argsort_f64 / rank_f64 are repointed to AS: the AS index sort uses a STABLE
+ *   - argsort_f64 is repointed to AS: the AS index sort uses a STABLE
  *     total-order comparator (value, then original index), so it returns exactly
  *     the JS stable permutation on tied values.
  *
@@ -18,10 +18,8 @@ import {
   WASM_SORT_THRESHOLD,
   sortF64Dispatch,
   argsortF64Dispatch,
-  rankF64Dispatch,
   sortF64JS,
   argsortF64JS,
-  rankF64JS,
 } from '../src/wasm/sort/wasm-bridge.js';
 import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
 import { overrideWasmPolicy } from '../src/wasm/policy.js';
@@ -105,10 +103,6 @@ describeIfAS('sort bridge — AssemblyScript managed dispatch (Phase 3b)', () =>
     const a = countExportCalls(['argsort_f64'], () => argsortF64Dispatch(Float64Array.from(dup)));
     expect(a.counts.argsort_f64).toBeGreaterThan(0); // proves AS path, not JS fallback
     expect(Array.from(a.result)).toEqual(Array.from(argsortF64JS(dup)));
-
-    const r = countExportCalls(['rank_f64'], () => rankF64Dispatch(Float64Array.from(dup)));
-    expect(r.counts.rank_f64).toBeGreaterThan(0);
-    expect(Array.from(r.result)).toEqual(Array.from(rankF64JS(dup)));
   });
 
   it('below threshold uses JS (no AS kernel call)', () => {

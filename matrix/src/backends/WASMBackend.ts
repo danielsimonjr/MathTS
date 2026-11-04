@@ -526,7 +526,7 @@ export class WASMBackend implements MatrixBackend {
         rAlloc.bufferPtr
       );
       const result = readAsFloat64Array(mod, rAlloc);
-      return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
+      return new DenseMatrix(a.rows, b.cols, result);
     } finally {
       this.allocCache.release(aAlloc);
       this.allocCache.release(bAlloc);
@@ -617,7 +617,7 @@ export class WASMBackend implements MatrixBackend {
         }
       }
       const perm = readAsInt32Array(mod, permAlloc);
-      return { lu: DenseMatrix.fromFlat(n, n, Array.from(combined)), perm, singular: false };
+      return { lu: new DenseMatrix(n, n, combined), perm, singular: false };
     } finally {
       this.allocCache.release(aAlloc);
       this.allocCache.release(lAlloc);
@@ -654,7 +654,7 @@ export class WASMBackend implements MatrixBackend {
       }
 
       if (maxVal < 1e-14) {
-        return { lu: DenseMatrix.fromFlat(n, n, Array.from(data)), perm, singular: true };
+        return { lu: new DenseMatrix(n, n, data), perm, singular: true };
       }
 
       if (pivotRow !== k) {
@@ -678,7 +678,7 @@ export class WASMBackend implements MatrixBackend {
       }
     }
 
-    return { lu: DenseMatrix.fromFlat(n, n, Array.from(data)), perm, singular: false };
+    return { lu: new DenseMatrix(n, n, data), perm, singular: false };
   }
 
   async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
@@ -709,8 +709,8 @@ export class WASMBackend implements MatrixBackend {
       const qFlat = readAsFloat64Array(mod, qAlloc);
       const rFlat = readAsFloat64Array(mod, rAlloc);
       return {
-        q: DenseMatrix.fromFlat(m, m, Array.from(qFlat)),
-        r: DenseMatrix.fromFlat(m, n, Array.from(rFlat)),
+        q: new DenseMatrix(m, m, qFlat),
+        r: new DenseMatrix(m, n, rFlat),
       };
     } finally {
       this.allocCache.release(aAlloc);
@@ -771,8 +771,8 @@ export class WASMBackend implements MatrixBackend {
     }
 
     return {
-      q: DenseMatrix.fromFlat(m, m, Array.from(q)),
-      r: DenseMatrix.fromFlat(m, n, Array.from(r)),
+      q: new DenseMatrix(m, m, q),
+      r: new DenseMatrix(m, n, r),
     };
   }
 
@@ -802,7 +802,7 @@ export class WASMBackend implements MatrixBackend {
         return { inverse: DenseMatrix.zeros(n, n), singular: true };
       }
       const result = readAsFloat64Array(mod, resultAlloc);
-      return { inverse: DenseMatrix.fromFlat(n, n, Array.from(result)), singular: false };
+      return { inverse: new DenseMatrix(n, n, result), singular: false };
     } finally {
       this.allocCache.release(aAlloc);
       this.allocCache.release(resultAlloc);
@@ -841,7 +841,7 @@ export class WASMBackend implements MatrixBackend {
       for (let i = 0; i < n; i++) result[i * n + col] = x[i];
     }
 
-    return { inverse: DenseMatrix.fromFlat(n, n, Array.from(result)), singular: false };
+    return { inverse: new DenseMatrix(n, n, result), singular: false };
   }
 
   async determinantWasm(a: DenseMatrix): Promise<number> {
@@ -912,7 +912,7 @@ export class WASMBackend implements MatrixBackend {
         return { l: DenseMatrix.zeros(n, n), positiveDefinite: false };
       }
       const result = readAsFloat64Array(mod, lAlloc);
-      return { l: DenseMatrix.fromFlat(n, n, Array.from(result)), positiveDefinite: true };
+      return { l: new DenseMatrix(n, n, result), positiveDefinite: true };
     } finally {
       this.allocCache.release(aAlloc);
       this.allocCache.release(lAlloc);
@@ -950,7 +950,7 @@ export class WASMBackend implements MatrixBackend {
       }
     }
 
-    return { l: DenseMatrix.fromFlat(n, n, Array.from(l)), positiveDefinite: true };
+    return { l: new DenseMatrix(n, n, l), positiveDefinite: true };
   }
 
   /**

@@ -22,6 +22,21 @@ interface TapeNode {
 }
 
 /**
+ * Throw when two TapedTensors come from different Tapes: their ids index
+ * different gradient-slot tables, so combining them would corrupt gradients.
+ */
+export function assertSameTape(
+  a: { readonly tape: Tape; readonly epoch?: number },
+  b: { readonly tape: Tape; readonly epoch?: number }
+): void {
+  if (a.tape !== b.tape) {
+    throw new Error('TapedTensor: operands belong to different Tapes');
+  }
+  if (a.epoch !== undefined) a.tape.assertCurrentEpoch(a.epoch, 'TapedTensor');
+  if (b.epoch !== undefined) b.tape.assertCurrentEpoch(b.epoch, 'TapedTensor');
+}
+
+/**
  * Records the operations of a forward pass so that `backward` can replay them in reverse.
  *
  * `allocate` gives inputs negative ids. `record` gives operations non-negative ids.
@@ -67,8 +82,36 @@ export class Tape {
     // E19 fix: overwrite the seed (slot starts at 0). The previous += was
     // wasteful and could double-count if backward() were re-invoked.
     slot.set(outputGrad);
-    for (let n = this.nodes.length - 1; n >= 0; n--) {
+    // Op ids are monotonic and equal the node index, and a node only reads
+    // slots of earlier ids, so nodes recorded after `outputId` cannot
+    // contribute: start the replay at the output op itself.
+    const start = outputId >= 0 ? outputId : this.nodes.length - 1;
+    for (let n = start; n >= 0; n--) {
       this.nodes[n].backward(this.nodes[n].outputGradSlot);
+    }
+  }
+
+  /**
+   * Drop every recorded node, closure and gradient slot and restart id allocation.
+   * TapedTensors created before the reset are invalid afterwards: do not use them.
+   */
+  reset(): void {
+    this.nodes = [];
+    this.inputGradSlots.clear();
+    this.nextOpId = 0;
+    this.nextInputId = -1;
+    this.epoch++;
+  }
+
+  /** Incremented by {@link reset}; a TapedTensor records the epoch it was created in. */
+  epoch = 0;
+
+  /** Throw when `tensorEpoch` predates the last {@link reset} (its id may now name another slot). */
+  assertCurrentEpoch(tensorEpoch: number, what: string): void {
+    if (tensorEpoch !== this.epoch) {
+      throw new Error(
+        `${what}: this TapedTensor was created before Tape.reset() and is no longer valid`
+      );
     }
   }
 
@@ -91,6 +134,9 @@ export class TapedTensor {
    */
   readonly axisLabels?: ReadonlyArray<Index>;
 
+  /** The tape epoch this tensor was recorded in; stale after {@link Tape.reset}. */
+  readonly epoch: number;
+
   constructor(
     readonly shape: ReadonlyArray<number>,
     readonly primal: Float64Array,
@@ -98,6 +144,7 @@ export class TapedTensor {
     readonly id: number,
     axisLabels?: ReadonlyArray<Index>
   ) {
+    this.epoch = tape.epoch;
     if (axisLabels !== undefined) {
       this.axisLabels = [...axisLabels];
     }
@@ -258,6 +305,7 @@ export class TapedTensor {
    * finds the right shared axes.
    */
   contract(other: TapedTensor): TapedTensor {
+    assertSameTape(this, other);
     // Both operands must carry axisLabels — delegate validation to Tensor.contract.
     const aPrimal = this.toPrimalTensorWith(this.axisLabels);
     const bPrimal = other.toPrimalTensorWith(other.axisLabels);
@@ -386,6 +434,7 @@ export class TapedTensor {
    *   dB:       '...ki,...kj->...ij'   (contract A on k with dY on k)
    */
   matmul(other: TapedTensor): TapedTensor {
+    assertSameTape(this, other);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
 
@@ -457,6 +506,7 @@ export class TapedTensor {
   }
 
   private checkSameShape(other: TapedTensor, op: string): void {
+    assertSameTape(this, other);
     assertSameShape(this.shape, other.shape, 'TapedTensor', op);
   }
 
@@ -1205,6 +1255,7 @@ export class TapedTensor {
    * adjoint as `TapedTensor.matmul`.
    */
   tensordot(other: TapedTensor, axes: ReadonlyArray<readonly [number, number]>): TapedTensor {
+    assertSameTape(this, other);
     const aShape = [...this.shape];
     const bShape = [...other.shape];
     const aRank = aShape.length;

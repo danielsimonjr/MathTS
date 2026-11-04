@@ -20,7 +20,7 @@
  * @packageDocumentation
  */
 
-import { parse, evaluate } from '../factories/evaluate.js';
+import { parse, evaluate, compileExpr } from '../factories/evaluate.js';
 import { euclidSnap } from './euclid.js';
 import {
   polyFromExpression,
@@ -131,6 +131,21 @@ function evalAt(expr: string, varName: string, value: f64): f64 {
 }
 
 /**
+ * Compile `expr` once and return a single-variable evaluator.
+ *
+ * Compilation is lazy (first call) so syntax errors surface at evaluation time,
+ * exactly as with {@link evalAt}; callers that wrap evaluation in try/catch keep
+ * their behaviour. Uses the same engine and scope as `evaluate`.
+ */
+function compileAt(expr: string, varName: string): (x: f64) => f64 {
+  let compiled: ReturnType<typeof compileExpr> | undefined;
+  return (x: f64): f64 => {
+    compiled ??= compileExpr(expr);
+    return compiled.evaluate({ [varName]: x }) as f64;
+  };
+}
+
+/**
  * Evaluate an expression with a scope of variable bindings.
  */
 function evalWith(expr: string, scope: Record<string, f64>): f64 {
@@ -156,8 +171,9 @@ function numericalDerivative(
 
   // Central difference for 1st derivative, then recurse
   const baseScope = scope ? { ...scope } : {};
+  const compiled = compileExpr(expr);
   const evalPoint = (x: f64): f64 => {
-    return evalWith(expr, { ...baseScope, [varName]: x });
+    return compiled.evaluate({ ...baseScope, [varName]: x }) as f64;
   };
 
   if (k === 1) {
@@ -292,10 +308,11 @@ export function integrate(expr: string, varName: string, a?: f64, b?: f64): stri
   if (a !== undefined && b !== undefined) {
     const n = 1000;
     const h = (b - a) / n;
-    let sum = evalAt(trimmed, varName, a) + evalAt(trimmed, varName, b);
+    const f = compileAt(trimmed, varName);
+    let sum = f(a) + f(b);
     for (let i = 1; i < n; i++) {
       const xi = a + i * h;
-      sum += (i % 2 === 0 ? 2 : 4) * evalAt(trimmed, varName, xi);
+      sum += (i % 2 === 0 ? 2 : 4) * f(xi);
     }
     return (sum * h) / 3;
   }
@@ -866,12 +883,18 @@ export function fourierSeries(
   const N = 1000; // integration points
   const dx = (2 * Math.PI) / N;
 
-  // Compute a0 = (1/pi) * integral from -pi to pi of f(x) dx
-  let a0Sum: f64 = 0;
+  // Sample f once; every harmonic reuses the same N values.
+  const f = compileAt(expr, varName);
+  const xs = new Float64Array(N);
+  const fs = new Float64Array(N);
   for (let i = 0; i < N; i++) {
-    const x = -Math.PI + i * dx;
-    a0Sum += evalAt(expr, varName, x);
+    xs[i] = -Math.PI + i * dx;
+    fs[i] = f(xs[i]);
   }
+
+  // a0 = (1/pi) * integral from -pi to pi of f(x) dx
+  let a0Sum: f64 = 0;
+  for (let i = 0; i < N; i++) a0Sum += fs[i];
   const a0 = (a0Sum * dx) / Math.PI;
 
   const an: f64[] = [];
@@ -881,10 +904,8 @@ export function fourierSeries(
     let akSum: f64 = 0;
     let bkSum: f64 = 0;
     for (let i = 0; i < N; i++) {
-      const x = -Math.PI + i * dx;
-      const fx = evalAt(expr, varName, x);
-      akSum += fx * Math.cos(k * x);
-      bkSum += fx * Math.sin(k * x);
+      akSum += fs[i] * Math.cos(k * xs[i]);
+      bkSum += fs[i] * Math.sin(k * xs[i]);
     }
     an.push((akSum * dx) / Math.PI);
     bn.push((bkSum * dx) / Math.PI);
@@ -1129,7 +1150,14 @@ function polyCoeffsDeg3(expr: string, varName: string): f64[] | null {
   }
 }
 
-/** Numeric real-root scan (sign change + Brent refinement) — fallback for degree ≥ 4 / transcendental. */
+/**
+ * Numeric real-root scan (sign change + Brent refinement) — fallback for degree ≥ 4 / transcendental.
+ *
+ * Scan ranges are fixed: first [-100, 100] in steps of 0.1; only if that finds
+ * no root, [-1000, 1000] in steps of 1. Roots outside +/-1000, pairs of roots
+ * closer than one step (no sign change), and even-multiplicity roots away from
+ * a grid point are not detected.
+ */
 function numericRealRoots(expr: string, varName: string): f64[] {
   const roots: f64[] = [];
   const seen = new Set<string>();
@@ -1146,30 +1174,37 @@ function numericRealRoots(expr: string, varName: string): f64[] {
     { lo: -100, hi: 100, step: 0.1 },
     { lo: -1000, hi: 1000, step: 1 },
   ];
+  const f = compileAt(expr, varName);
   for (const { lo, hi, step } of ranges) {
+    // fb of one interval is fa of the next: one evaluation per grid point.
+    let fa: f64 | undefined;
     for (let x = lo; x <= hi; x += step) {
-      let fa: f64;
-      try {
-        fa = evalAt(expr, varName, x);
-      } catch {
-        continue;
+      if (fa === undefined) {
+        try {
+          fa = f(x);
+        } catch {
+          continue;
+        }
       }
       if (Math.abs(fa) < 1e-10) {
         addRoot(x);
+        fa = undefined;
         continue;
       }
       let fb: f64;
       try {
-        fb = evalAt(expr, varName, x + step);
+        fb = f(x + step);
       } catch {
+        fa = undefined;
         continue;
       }
       if (fa * fb < 0 && Number.isFinite(fa) && Number.isFinite(fb)) {
         const a = x;
         const b = x + step;
-        const root = findRoot((t) => evalAt(expr, varName, t), a, b, { tol: 1e-14, xtol: 1e-14 });
+        const root = findRoot(f, a, b, { tol: 1e-14, xtol: 1e-14 });
         addRoot(root);
       }
+      fa = fb;
     }
     if (roots.length > 0) break;
   }
@@ -1332,9 +1367,10 @@ function foldIntegerRange(
   if (a > b) {
     return identity;
   }
+  const f = compileAt(expr, varName);
   let acc = identity;
   for (let k = a; k <= b; k++) {
-    acc = op(acc, evalAt(expr, varName, k));
+    acc = op(acc, f(k));
   }
   return acc;
 }
@@ -2472,6 +2508,8 @@ export function inverseLaplaceTransform(
 /**
  * CAS batch size threshold (deprecated).
  * Formerly used to trigger worker pool fan-out. Kept for API compatibility.
+ *
+ * @deprecated No longer read by any code path; scheduled for removal in the next major version.
  */
 export const CAS_BATCH_THRESHOLD = 16;
 

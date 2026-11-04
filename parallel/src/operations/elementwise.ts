@@ -31,7 +31,7 @@ export async function parallelAdd(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.add(a, b);
+  return pool.add(a, b, options);
 }
 
 /**
@@ -43,7 +43,7 @@ export async function parallelSubtract(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.subtract(a, b);
+  return pool.subtract(a, b, options);
 }
 
 /**
@@ -55,7 +55,7 @@ export async function parallelMultiply(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.multiply(a, b);
+  return pool.multiply(a, b, options);
 }
 
 /**
@@ -67,7 +67,7 @@ export async function parallelDivide(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.divide(a, b);
+  return pool.divide(a, b, options);
 }
 
 /**
@@ -79,7 +79,7 @@ export async function parallelScale(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.scale(data, scalar);
+  return pool.scale(data, scalar, options);
 }
 
 /**
@@ -90,7 +90,7 @@ export async function parallelAbs(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.abs(data);
+  return pool.abs(data, options);
 }
 
 /**
@@ -101,7 +101,7 @@ export async function parallelNegate(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.negate(data);
+  return pool.negate(data, options);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function parallelSquare(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.square(data);
+  return pool.square(data, options);
 }
 
 /**
@@ -123,7 +123,7 @@ export async function parallelSqrt(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.sqrt(data);
+  return pool.sqrt(data, options);
 }
 
 /**
@@ -134,7 +134,7 @@ export async function parallelExp(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.exp(data);
+  return pool.exp(data, options);
 }
 
 /**
@@ -145,7 +145,7 @@ export async function parallelLog(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.log(data);
+  return pool.log(data, options);
 }
 
 /**
@@ -156,7 +156,7 @@ export async function parallelSin(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.sin(data);
+  return pool.sin(data, options);
 }
 
 /**
@@ -167,7 +167,7 @@ export async function parallelCos(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.cos(data);
+  return pool.cos(data, options);
 }
 
 /**
@@ -178,7 +178,7 @@ export async function parallelTan(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.tan(data);
+  return pool.tan(data, options);
 }
 
 /**
@@ -191,7 +191,7 @@ export async function parallelElementwise(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.elementwise(a, b, op);
+  return pool.elementwise(a, b, op, options);
 }
 
 /**
@@ -203,5 +203,5 @@ export async function parallelUnary(
   options: ElementwiseOptions = {}
 ): Promise<ParallelResult<Float64Array>> {
   const pool = options.pool ?? computePool;
-  return pool.unary(data, fn);
+  return pool.unary(data, fn, options);
 }

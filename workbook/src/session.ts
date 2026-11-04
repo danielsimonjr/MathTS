@@ -8,10 +8,10 @@
  */
 
 import { readFileSync } from 'node:fs';
-import type { Workbook, Cell, CellResult, RunResult, CellType } from './types.js';
+import type { Workbook, Cell, DependencyGraph, CellResult, RunResult, CellType } from './types.js';
 import { parseWorkbook, serializeWorkbook } from './parser.js';
 import { WorkbookExecutor } from './executor.js';
-import { buildDependencyGraph, getAncestors, getDependents } from './graph.js';
+import { buildDependencyGraph, getAncestors, getDependentsOfMany } from './graph.js';
 import { writeFileAtomic } from './fs-atomic.js';
 import * as edit from './edit.js';
 
@@ -43,6 +43,14 @@ export class Session {
   private require(): Workbook {
     if (!this.workbook) throw new Error('No workbook open');
     return this.workbook;
+  }
+
+  /** Memoized dependency graph for the current workbook object (edits yield a new object). */
+  private graphCache: { wb: Workbook; graph: DependencyGraph } | undefined;
+
+  private graphFor(wb: Workbook): DependencyGraph {
+    if (this.graphCache?.wb !== wb) this.graphCache = { wb, graph: buildDependencyGraph(wb.cells) };
+    return this.graphCache.graph;
   }
 
   /** A cell has a usable, up-to-date result (the basis for "not stale"). */
@@ -81,11 +89,9 @@ export class Session {
     }
 
     // Affected = changed cells plus everything that transitively depends on them.
-    const graph = buildDependencyGraph(next.cells);
+    const graph = this.graphFor(next);
     const affected = new Set(changed);
-    for (const id of changed) {
-      for (const dep of getDependents(graph, id)) affected.add(dep);
-    }
+    for (const dep of getDependentsOfMany(graph, changed)) affected.add(dep);
 
     // Prune the cache to surviving ids, then drop the affected ones.
     const survivingIds = new Set(next.cells.map((c) => c.id));
@@ -137,7 +143,7 @@ export class Session {
    */
   async run(only?: string): Promise<{ result: RunResult; events: WorkbookEventLite[] }> {
     const wb = this.require();
-    const graph = buildDependencyGraph(wb.cells);
+    const graph = this.graphFor(wb);
     const target = only ? new Set(getAncestors(graph, only)) : new Set(wb.cells.map((c) => c.id));
     const toRun = new Set([...this.stale].filter((id) => target.has(id)));
 
