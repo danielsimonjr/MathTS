@@ -89,10 +89,14 @@ export interface ScalarSearchOptions {
    * today's `+Infinity` — such a tree never enters the hall. `'penalize'` scores
    * {@link INVALID_ROW_PENALTY} (the fitter's existing invalid-row penalty) times
    * the number of invalid rows a positive `rowWeights` entry covers, plus the
-   * chosen `loss` on the valid rows; a tree with no valid row reports the penalty
-   * times `observed.length`. The refit comparison scores both sides with the same
-   * number, so a refit stays comparable. Omitted is the default branch, so the
-   * seed-7 pin is unchanged.
+   * chosen `loss` on the valid rows; a zero-weight row is dropped on both sides.
+   * A tree with no valid row reports the penalty times the number of positively
+   * weighted rows (each invalid among them adds one penalty). The penalty is
+   * absolute, not scaled to the target magnitude. The ranker adds that sum on top
+   * of the valid-row loss; the fitter's reported loss counts only valid rows and
+   * freezes invalid rows with a squared penalty inside LM — different objectives.
+   * Refit acceptance compares both sides with {@link scoreOnProblem} / the ranker.
+   * Omitted is the default branch, so the seed-7 pin is unchanged.
    */
   readonly invalidRows?: 'reject' | 'penalize';
   /**
@@ -495,11 +499,10 @@ interface Scored {
 }
 
 /**
- * The `'penalize'` ranker: the fitter's existing invalid-row penalty
- * ({@link INVALID_ROW_PENALTY}) times the number of invalid rows a positive weight
- * covers, plus the chosen loss on the valid rows. A zero-weight row is dropped on
- * both sides, so it is neither penalized nor scored. The fitter pays this same
- * penalty per invalid row, so a refit stays comparable with the rank that kept it.
+ * The `'penalize'` ranker: {@link INVALID_ROW_PENALTY} times each invalid row with
+ * positive weight, plus the chosen loss on the valid rows. Zero-weight rows are
+ * omitted entirely. With no valid row the total is the penalty times that invalid
+ * count (not `observed.length` when some weights are zero). The penalty is absolute.
  * A non-finite total is `+Infinity`, like any other unusable rank.
  */
 function penalizedBatchLoss(
@@ -653,7 +656,11 @@ async function evaluateNodes(
     let parameters = inherited[i]!;
     const first = firsts[i]!;
     let loss = first.loss;
-    if (names.length > 0 && first.validRows > 0 && rng.next() < optimizeProbability) {
+    const tryRefit =
+      names.length > 0 &&
+      rng.next() < optimizeProbability &&
+      (first.validRows > 0 || rank.invalidRows === 'penalize');
+    if (tryRefit) {
       const rawStart =
         fit.initial !== undefined ? Float64Array.from(fit.initial) : new Float64Array(parameters);
       const fitStart =
@@ -935,7 +942,10 @@ function pickSelected(
  * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
  * Ranking and refit share `loss` (`'l2'` by default) and optional `rowWeights`.
  * `invalidRows` defaults to `'reject'` (`+Infinity` on any invalid row); `'penalize'`
- * adds the fitter's existing invalid-row penalty per invalid row instead. `fit`
+ * adds {@link INVALID_ROW_PENALTY} per positively weighted invalid row on top of the
+ * valid-row loss (absolute, not target-scaled). Under `'penalize'` the advisory refit
+ * still runs when every weighted row is invalid; refit acceptance uses the ranker on
+ * both sides. `fit`
  * forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
  * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
  * bound or length throws before the first yield. Omitted fields are today's call.
