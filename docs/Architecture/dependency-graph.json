@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6878
+    "totalExports": 6879
   },
   "entryPoints": [
     {
@@ -13454,6 +13454,7 @@
         ],
         "exports": [
           "simplifyCandidateForTest",
+          "hallFrontForTest",
           "parsimonyKey",
           "tournamentSelect",
           "migrateIslands",
@@ -13471,6 +13472,7 @@
         ],
         "functions": [
           "simplifyCandidateForTest",
+          "hallFrontForTest",
           "parsimonyKey",
           "tournamentSelect",
           "migrateIslands"
@@ -45244,11 +45246,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213150,
-    "totalExports": 6878,
+    "totalLinesOfCode": 213208,
+    "totalExports": 6879,
     "totalClasses": 60,
     "totalInterfaces": 592,
-    "totalFunctions": 2280,
+    "totalFunctions": 2281,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,
