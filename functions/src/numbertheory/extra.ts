@@ -208,7 +208,7 @@ export function discreteLog(g: number, h: number, p: number): number {
 }
 
 // =============================================================================
-// primitiveRoot — smallest primitive root modulo a prime
+// primitiveRoot — smallest primitive root modulo n (n = 2, 4, p^k, 2p^k)
 // =============================================================================
 
 /** Distinct prime factors of `n` via trial division. */
@@ -226,36 +226,51 @@ function distinctPrimeFactors(nIn: number): number[] {
 }
 
 /**
- * Smallest primitive root modulo a prime `p`.
+ * Smallest primitive root modulo `n`.
  *
- * For each candidate `g = 2, 3, ...`, `g` is a primitive root iff
- * `g^((p-1)/q) !== 1 (mod p)` for every prime factor `q` of `p - 1`.
+ * A primitive root exists only for `n` in {1, 2, 4, p^k, 2p^k} (p an odd
+ * prime); for any other `n` (8, 12, 15, ...) this throws, matching the
+ * file's contract of throwing `Error` on invalid input. For such `n`, `g` is a
+ * primitive root iff `gcd(g, n) = 1` and `g^(φ(n)/q) !== 1 (mod n)` for every
+ * prime factor `q` of `φ(n)`.
  *
- * @param p - An odd prime (p = 2 returns 1 trivially)
- * @returns The smallest primitive root modulo p
+ * @param n - An integer >= 2 with a primitive root (n = 2 returns 1)
+ * @returns The smallest primitive root modulo n
+ * @throws Error if n < 2, non-integer, or n has no primitive root
  *
  * @example
  * primitiveRoot(7) // => 3
+ * primitiveRoot(4) // => 3
+ * primitiveRoot(8) // throws (no primitive root)
  */
-export function primitiveRoot(p: number): number {
-  if (!Number.isInteger(p) || p < 2) {
+export function primitiveRoot(n: number): number {
+  if (!Number.isInteger(n) || n < 2) {
     throw new Error('primitiveRoot requires an integer p >= 2');
   }
-  if (p === 2) return 1;
-  const phi = p - 1;
+  if (n === 2) return 1;
+  if (n === 4) return 3;
+  // Existence: n = p^k or 2 p^k with p an odd prime.
+  const m = n % 2 === 0 ? n / 2 : n;
+  if (m % 2 === 0) throw new Error(`primitiveRoot: ${n} has no primitive root`);
+  const oddPrimes = distinctPrimeFactors(m);
+  if (oddPrimes.length !== 1) throw new Error(`primitiveRoot: ${n} has no primitive root`);
+  const q0 = oddPrimes[0];
+  // φ(n) = φ(m) = m / q0 · (q0 − 1)
+  const phi = (m / q0) * (q0 - 1);
   const phiFactors = distinctPrimeFactors(phi);
-  const P = BigInt(p);
-  for (let g = 2; g < p; g++) {
+  const N = BigInt(n);
+  for (let g = 2; g < n; g++) {
+    if (gcdInt(g, n) !== 1) continue;
     let isRoot = true;
     for (const q of phiFactors) {
-      if (modPowBig(BigInt(g), BigInt(phi / q), P) === 1n) {
+      if (modPowBig(BigInt(g), BigInt(phi / q), N) === 1n) {
         isRoot = false;
         break;
       }
     }
     if (isRoot) return g;
   }
-  throw new Error('primitiveRoot: no primitive root found (p may not be prime)');
+  throw new Error(`primitiveRoot: no primitive root found for ${n}`);
 }
 
 // =============================================================================

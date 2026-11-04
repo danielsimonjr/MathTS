@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': minor
+---
+
+Add number-theory, integer-matrix and real-root utilities: modular arithmetic (`modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`), arithmetic functions and exact integer roots (`isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`), integer sequences and enumerators (`motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`), Diophantine solvers (`linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`), integer normal forms (`hermiteNormalForm`, `smithNormalForm`, `lll`), and real-root isolation (`sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`).

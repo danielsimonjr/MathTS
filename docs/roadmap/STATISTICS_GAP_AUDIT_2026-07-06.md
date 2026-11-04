@@ -1,5 +1,11 @@
 # Statistics Library Gap Audit — vs NumPy/SciPy, MATLAB, Mathematica
 
+> **Update 2026-11-04:** the "P3 specialist" rows deferred below have largely shipped since
+> (circular and noncentral statistics, GLM, ridge/lasso, Dirichlet/Wishart), and the remaining
+> ones (weighted/robust statistics, effect sizes, extra distributions, sign/runs/Mood/G tests,
+> distribution distances) landed with `docs/roadmap/GAP_ANALYSIS_2026-11-04.md` Batch A. Treat
+> that file as the current statistics gap status; this one is historical.
+>
 > **STATUS 2026-07-06 — CLOSED (waves A–H).** The ranked P1/P2 plan below was
 > implemented and released (`functions@0.16.0`, `statistics@0.3.0`, 138 → 182
 > exports). Added, each scipy-pinned in `functions/tests/gap-stats-completeness.test.ts`:

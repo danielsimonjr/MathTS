@@ -126,30 +126,30 @@ The codebase is organized into the following modules:
 - **functions/algebra**: 45 files
 - **functions/arithmetic**: 39 files
 - **functions/bitwise**: 8 files
-- **functions**: 32 files
-- **functions/cas**: 4 files
+- **functions**: 34 files
+- **functions/cas**: 5 files
 - **functions/combinatorics**: 4 files
 - **functions/complex**: 4 files
 - **functions/core**: 5 files
 - **functions/error**: 3 files
 - **functions/expression**: 1 file
 - **functions/factories**: 4 files
-- **functions/geometry**: 12 files
+- **functions/geometry**: 15 files
 - **functions/gpu**: 2 files
 - **functions/graph**: 3 files
 - **functions/logical**: 5 files
 - **functions/matrix**: 49 files
 - **functions/ml**: 6 files
-- **functions/numbertheory**: 1 file
-- **functions/numeric**: 26 files
+- **functions/numbertheory**: 6 files
+- **functions/numeric**: 31 files
 - **functions/plain**: 10 files
 - **functions/probability**: 16 files
 - **functions/relational**: 13 files
 - **functions/set**: 11 files
-- **functions/signal**: 12 files
-- **functions/special**: 9 files
+- **functions/signal**: 17 files
+- **functions/special**: 14 files
 - **functions/statistics**: 15 files
-- **functions/stats**: 8 files
+- **functions/stats**: 14 files
 - **functions/string**: 5 files
 - **functions/trigonometry**: 26 files
 - **functions/type**: 32 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel`, `@danielsimonjr/mathts-core`                                                                     | 50             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 22             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 506            | 2               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 538            | 2               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 482            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4518,174 +4518,221 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                  |
-| ------------------------------ | ----------------------- |
-| `@danielsimonjr/mathts-matrix` | `svd`                   |
-| `@danielsimonjr/mathts-matrix` | `SVDResult, SVDOptions` |
+| Package                        | Import                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-matrix` | `svd`                                                                                      |
+| `@danielsimonjr/mathts-matrix` | `qrPivoted, lq, rq, ql, condest, eigvals, powerIteration, matrixPinv`                      |
+| `@danielsimonjr/mathts-matrix` | `SVDResult, SVDOptions`                                                                    |
+| `@danielsimonjr/mathts-matrix` | `QRPivotedResult, QRPivotedOptions, LQResult, RQResult, QLResult, PinvOptions, EigOptions` |
 
 **Internal Dependencies:**
 
-| File                                   | Imports                                                                                                                                                                                                                                                                        | Type                  |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
-| `./typed/index.js`                     | `*`                                                                                                                                                                                                                                                                            | Re-export             |
-| `./typed/cas.js`                       | `*`                                                                                                                                                                                                                                                                            | Re-export             |
-| `./factories/index.js`                 | `*`                                                                                                                                                                                                                                                                            | Re-export             |
-| `./config-api.js`                      | `config, runWithConfig`                                                                                                                                                                                                                                                        | Re-export             |
-| `./wasm/WasmLoader.js`                 | `loadWasm, isWasmLoaded`                                                                                                                                                                                                                                                       | Re-export             |
-| `./typed/unit.js`                      | `to, toBest`                                                                                                                                                                                                                                                                   | Re-export             |
-| `./factories/evaluate.js`              | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer`                                                                                                                                                                                                        | Re-export             |
-| `./scalar-eval.js`                     | `evaluateScalar, scalar, ScalarEvalError`                                                                                                                                                                                                                                      | Re-export             |
-| `./scalar-compile.js`                  | `compileScalar, compileScalarGradient`                                                                                                                                                                                                                                         | Re-export             |
-| `./scalar-mutate.js`                   | `addNode, crossoverSubtrees, DEFAULT_MUTATION_WEIGHTS, deleteNode, identityMutation, insertNode, mutateConstant, mutateFeature, mutateOperator, MUTATE_CONSTANT_NEGATE_PROBABILITY, randomizeTree, rotateTree, simplifyConstants, swapOperands, weightedMutation`              | Re-export             |
-| `./scalar-search.js`                   | `searchScalars`                                                                                                                                                                                                                                                                | Re-export             |
-| `./pareto-front.js`                    | `paretoFront, scoreFront, selectFrontModel, ParetoFrontError`                                                                                                                                                                                                                  | Re-export             |
-| `./front-export.js`                    | `frontToJson, frontToLatexTable`                                                                                                                                                                                                                                               | Re-export             |
-| `./numeric-equivalence.js`             | `numericallyEquivalent, NumericEquivalenceError`                                                                                                                                                                                                                               | Re-export             |
-| `./scalar-dimension.js`                | `inferScalarDimension, solveParameterDimensions`                                                                                                                                                                                                                               | Re-export             |
-| `./numeric/propagate-uncertainty.js`   | `propagateUncertainty, UncertaintyExpression, UncertaintyPropagationOptions, UncertaintyPropagationResult`                                                                                                                                                                     | Re-export             |
-| `./help.js`                            | `help`                                                                                                                                                                                                                                                                         | Re-export             |
-| `./numbertheory/extra.js`              | `continuedFraction, eulerNumbers, stirlingS1, discreteLog, primitiveRoot, multiplicativeOrder, kroneckerSymbol, permutationsGen, combinationsGen`                                                                                                                              | Re-export             |
-| `./grad-forward.js`                    | `derivativeAt, valueAndDerivativeAt, gradientAt`                                                                                                                                                                                                                               | Re-export             |
-| `./descriptive-stats.js`               | `gmean, hmean, moment, skewness, kurtosis, iqr, sem, zscore, cov, corrcoef, rankdata, spearman, kendallTau, linregress, pearsonr, spearmanr, kendalltau, kendallTauTest, ptp, variation, trimmedMean, describe, histogram`                                                     | Re-export             |
-| `./numeric-extra.js`                   | `clamp, sigmoid, logsumexp, softmax, cumprod, cummax, cummin, cumtrapz`                                                                                                                                                                                                        | Re-export             |
-| `./distribution-functions.js`          | `normalQuantile, studentTCDF, studentTQuantile, chiSquaredCDF, chiSquaredQuantile, fCDF, fQuantile, gammaCDF, gammaQuantile, betaCDF, betaQuantile, cauchyPDF, cauchyCDF, cauchyQuantile, laplacePDF, laplaceCDF, laplaceQuantile, logisticPDF, logisticCDF, logisticQuantile` | Re-export             |
-| `./hypothesis-extra.js`                | `fTest, jarqueBera, kruskalWallis, wilcoxon, fisherExact, studentizedRangeCDF, studentizedRangeQuantile, tukeyHSD`                                                                                                                                                             | Re-export             |
-| `./linalg-extra.js`                    | `tril, triu, vander, toeplitz, circulant, companion, logdet, laplacianMatrix, generalizedEig, qz`                                                                                                                                                                              | Re-export             |
-| `./calculus-extra.js`                  | `hessian, gradient`                                                                                                                                                                                                                                                            | Re-export             |
-| `./linalg-svd-extra.js`                | `orth`                                                                                                                                                                                                                                                                         | Re-export             |
-| `./numeric/numeric-jacobian.js`        | `numericJacobian`                                                                                                                                                                                                                                                              | Re-export             |
-| `./numeric/open-root-finders.js`       | `newton, secant, halley`                                                                                                                                                                                                                                                       | Re-export             |
-| `./numeric/fsolve.js`                  | `fsolve, root`                                                                                                                                                                                                                                                                 | Re-export             |
-| `./numeric/krylov.js`                  | `cg, minres, gmres, bicgstab, incompleteLU, incompleteCholesky`                                                                                                                                                                                                                | Re-export             |
-| `./numeric/eigsh.js`                   | `eigsh`                                                                                                                                                                                                                                                                        | Re-export             |
-| `./numeric/svds.js`                    | `svds`                                                                                                                                                                                                                                                                         | Re-export             |
-| `./numeric/structured-solvers.js`      | `thomasSolve, solveBanded, toeplitzSolve, ldl`                                                                                                                                                                                                                                 | Re-export             |
-| `./numeric/matrix-functions.js`        | `funm, cosm, sinm, complexCos, complexSin`                                                                                                                                                                                                                                     | Re-export             |
-| `./numeric/control-equations.js`       | `dlyap, care, dare`                                                                                                                                                                                                                                                            | Re-export             |
-| `./numeric/minimize-scalar.js`         | `minimizeScalar`                                                                                                                                                                                                                                                               | Re-export             |
-| `./numeric/adaptive-quad.js`           | `quad`                                                                                                                                                                                                                                                                         | Re-export             |
-| `./numeric/interpn.js`                 | `interpn`                                                                                                                                                                                                                                                                      | Re-export             |
-| `./numeric/bspline.js`                 | `bsplineFit, bsplineEval`                                                                                                                                                                                                                                                      | Re-export             |
-| `./numeric/monte-carlo.js`             | `monteCarloIntegrate`                                                                                                                                                                                                                                                          | Re-export             |
-| `./timeseries-extra.js`                | `movingAverage, ewma, detrend, acf`                                                                                                                                                                                                                                            | Re-export             |
-| `./stats/timeseries.js`                | `pacf, ljungBox, durbinWatson, adfuller`                                                                                                                                                                                                                                       | Re-export             |
-| `./regression-extra.js`                | `linearRegression`                                                                                                                                                                                                                                                             | Re-export             |
-| `./ml/ols.js`                          | `ols`                                                                                                                                                                                                                                                                          | Re-export             |
-| `./ml/regularized-regression.js`       | `ridge, lasso, elasticNet`                                                                                                                                                                                                                                                     | Re-export             |
-| `./ml/logistic-regression.js`          | `logisticRegression`                                                                                                                                                                                                                                                           | Re-export             |
-| `./optimization-extra.js`              | `nelderMead, gradientDescent, levenbergMarquardt`                                                                                                                                                                                                                              | Re-export             |
-| `./fit-scalar.js`                      | `fitScalarParameters`                                                                                                                                                                                                                                                          | Re-export             |
-| `./clustering-extra.js`                | `kmeans, spectralClustering`                                                                                                                                                                                                                                                   | Re-export             |
-| `./ml/dbscan-knn.js`                   | `dbscan, knnClassify, knnRegress`                                                                                                                                                                                                                                              | Re-export             |
-| `./ml/kde.js`                          | `gaussianKDE`                                                                                                                                                                                                                                                                  | Re-export             |
-| `./stats/inference-extra.js`           | `chi2Contingency, multipleTest`                                                                                                                                                                                                                                                | Re-export             |
-| `./stats/fit-distribution.js`          | `fitDistribution`                                                                                                                                                                                                                                                              | Re-export             |
-| `./numeric/bfgs.js`                    | `bfgs`                                                                                                                                                                                                                                                                         | Re-export             |
-| `./numeric/nnls.js`                    | `nnls, lsqBounded`                                                                                                                                                                                                                                                             | Re-export             |
-| `./cas-integration.js`                 | `symbolicIntegral`                                                                                                                                                                                                                                                             | Re-export             |
-| `./signal-filter-extra.js`             | `firwin, butter, lfilter, lfilterZi, filtfilt`                                                                                                                                                                                                                                 | Re-export             |
-| `./signal/fft-helpers.js`              | `rfft, irfft, fftshift, ifftshift, fftfreq, rfftfreq, fftn`                                                                                                                                                                                                                    | Re-export             |
-| `./signal/iir-design.js`               | `cheby1, cheby2, ellip, sosfilt, zpk2sos, bilinear, buttord`                                                                                                                                                                                                                   | Re-export             |
-| `./signal/fir-smoothing.js`            | `firwinBandpass, firls, remez, savgol, wiener, deconvolve`                                                                                                                                                                                                                     | Re-export             |
-| `./signal/wavelets.js`                 | `idwt, wavedec, waverec, cwt`                                                                                                                                                                                                                                                  | Re-export             |
-| `./signal/spectral-peaks.js`           | `findPeaks, peakWidths, csd, coherence, stft, istft, decimate`                                                                                                                                                                                                                 | Re-export             |
-| `./geometry-extra.js`                  | `haversine, EARTH_RADIUS_KM, slerp, quaternionMultiply, quaternionConjugate, quaternionNormalize, quaternionFromAxisAngle, quaternionRotate, quaternionToRotationMatrix`                                                                                                       | Re-export             |
-| `./geometry/geometry-extra.js`         | `quaternionInverse, quaternionSlerp, quaternionToEuler, quaternionLog, quaternionExp, quaternionPow, boundingBox, procrustes, kdTreeKNN, kdTreeRadius, setIsSuperset, setEqual, setDisjoint`                                                                                   | Re-export             |
-| `./geometry/intersect3d.js`            | `rayTriangleIntersect, rayPlaneIntersect, segmentSegmentClosest`                                                                                                                                                                                                               | Re-export             |
-| `./geometry/hull.js`                   | `convexHull`                                                                                                                                                                                                                                                                   | Re-export             |
-| `./geometry/delaunay.js`               | `delaunay`                                                                                                                                                                                                                                                                     | Re-export             |
-| `./geometry/voronoi.js`                | `voronoi`                                                                                                                                                                                                                                                                      | Re-export             |
-| `./geometry/alpha-shape.js`            | `alphaShape`                                                                                                                                                                                                                                                                   | Re-export             |
-| `./geometry/spherical-voronoi.js`      | `sphericalVoronoi`                                                                                                                                                                                                                                                             | Re-export             |
-| `./geometry/halfspace-intersection.js` | `halfspaceIntersection`                                                                                                                                                                                                                                                        | Re-export             |
-| `./geometry/mass-properties.js`        | `massProperties, MASS_PROPERTY_SHAPES`                                                                                                                                                                                                                                         | Re-export             |
-| `./stats/inference-extra2.js`          | `noncentralChi2CDF, noncentralFCDF, noncentralTCDF, circmean, circstd, circvar, vonMisesPDF, mcnemar, cochranQ`                                                                                                                                                                | Re-export             |
-| `./special/hypergeometric.js`          | `hyp0f1, hyp1f1, hyp2f1, pFq`                                                                                                                                                                                                                                                  | Re-export             |
-| `./special/polygamma-orthopoly.js`     | `polygamma, trigamma, jacobiP, gegenbauerC`                                                                                                                                                                                                                                    | Re-export             |
-| `./special/jacobi-elliptic.js`         | `jacobiSN, jacobiCN, jacobiDN`                                                                                                                                                                                                                                                 | Re-export             |
-| `./numeric/gauss-nodes.js`             | `rootsLegendre`                                                                                                                                                                                                                                                                | Re-export             |
-| `./special/niche.js`                   | `polylog, struveH, struveL, kelvinBer, kelvinBei, barnesG`                                                                                                                                                                                                                     | Re-export             |
-| `./special/wave-functions.js`          | `siegelZ, riemannSiegelZ, lerchPhi, parabolicCylinderD, coulombF, coulombG, coulombFG`                                                                                                                                                                                         | Re-export             |
-| `./special/mathieu.js`                 | `mathieuA, mathieuB, mathieuCe, mathieuSe`                                                                                                                                                                                                                                     | Re-export             |
-| `./special/spheroidal.js`              | `spheroidalLambda, spheroidalCharacteristic, spheroidalAngular, spheroidalRadial, ferrersP`                                                                                                                                                                                    | Re-export             |
-| `./graph/traversal-centrality.js`      | `bfs, dfs, floydWarshall, bellmanFord, closenessCentrality, harmonicCentrality`                                                                                                                                                                                                | Re-export             |
-| `./graph/optimization.js`              | `maxFlow, minCut, astar, hungarian`                                                                                                                                                                                                                                            | Re-export             |
-| `./numeric/interval.js`                | `interval, Interval`                                                                                                                                                                                                                                                           | Re-export             |
-| `./graph/community-coloring.js`        | `graphColoring, maxClique, louvainCommunities, katzCentrality, isIsomorphic`                                                                                                                                                                                                   | Re-export             |
-| `./ml/glm.js`                          | `glm`                                                                                                                                                                                                                                                                          | Re-export             |
-| `./stats/mvn.js`                       | `mvnPdf, mvnSample`                                                                                                                                                                                                                                                            | Re-export             |
-| `./stats/power-analysis.js`            | `tTestPower`                                                                                                                                                                                                                                                                   | Re-export             |
-| `./stats/gaussian-process.js`          | `gaussianProcessRegression, gpRegression`                                                                                                                                                                                                                                      | Re-export             |
-| `./stats/multivariate-sampling.js`     | `dirichletSample, dirichletPdf, wishartSample`                                                                                                                                                                                                                                 | Re-export             |
-| `./factories/evaluate.js`              | `PhysicsEvaluateOptions`                                                                                                                                                                                                                                                       | Re-export (type-only) |
-| `./numeric/solveODE.js`                | `SolveODESolution, ODEMatrixSolution, ODEOptions, ForcingFunction, SolveODEFunction`                                                                                                                                                                                           | Re-export (type-only) |
-| `./signal/freqz.js`                    | `FrequencyResponse, FreqzFunction`                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./signal/zpk2tf.js`                   | `TransferFunction, ZPKValue, Zpk2tfFunction`                                                                                                                                                                                                                                   | Re-export (type-only) |
-| `./scalar-eval.js`                     | `ScalarScope`                                                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./scalar-compile.js`                  | `CompileScalarOptions, ScalarBatchResult, CompiledScalar, CompiledScalarGradient`                                                                                                                                                                                              | Re-export (type-only) |
-| `./scalar-mutate.js`                   | `MutationWeightKey, ScalarMutationContext, ScalarMutationOperator`                                                                                                                                                                                                             | Re-export (type-only) |
-| `./scalar-search.js`                   | `ScalarFitOptions, ScalarSearchOptions, ScalarSearchProblem, ScalarSearchResult, ScalarSearchStopReason, SearchProgress`                                                                                                                                                       | Re-export (type-only) |
-| `./scalar-batch-parallel.js`           | `ScalarPopulationParallelOptions`                                                                                                                                                                                                                                              | Re-export (type-only) |
-| `./pareto-front.js`                    | `FrontCandidate, ScoredCandidate`                                                                                                                                                                                                                                              | Re-export (type-only) |
-| `./front-export.js`                    | `FrontJson, FrontJsonNumber, FrontJsonRow, FrontLatexTableOptions`                                                                                                                                                                                                             | Re-export (type-only) |
-| `./numeric-equivalence.js`             | `NumericEquivalenceOptions, NumericEquivalence`                                                                                                                                                                                                                                | Re-export (type-only) |
-| `./scalar-dimension.js`                | `DimensionInference, ParameterDimensionResult, RationalDimension`                                                                                                                                                                                                              | Re-export (type-only) |
-| `./grad-forward.js`                    | `DualFn`                                                                                                                                                                                                                                                                       | Re-export (type-only) |
-| `./descriptive-stats.js`               | `LinRegressResult, CorrelationTestResult, KendallTauTestResult, DescribeResult, HistogramResult`                                                                                                                                                                               | Re-export (type-only) |
-| `./hypothesis-extra.js`                | `FTestResult, JarqueBeraResult, KruskalResult, WilcoxonResult, FisherExactResult, TukeyComparison`                                                                                                                                                                             | Re-export (type-only) |
-| `./linalg-svd-extra.js`                | `OrthOptions`                                                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./numeric/numeric-jacobian.js`        | `VectorField, NumericJacobianOptions`                                                                                                                                                                                                                                          | Re-export (type-only) |
-| `./numeric/open-root-finders.js`       | `NewtonOptions, SecantOptions, HalleyOptions`                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./numeric/fsolve.js`                  | `FsolveOptions`                                                                                                                                                                                                                                                                | Re-export (type-only) |
-| `./numeric/krylov.js`                  | `LinearOperatorInput, Preconditioner, KrylovOptions, GmresOptions, KrylovResult`                                                                                                                                                                                               | Re-export (type-only) |
-| `./numeric/eigsh.js`                   | `EigshOperatorInput, EigshOptions, EigshResult`                                                                                                                                                                                                                                | Re-export (type-only) |
-| `./numeric/svds.js`                    | `SvdsOptions, SvdsResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
-| `./numeric/structured-solvers.js`      | `LDLResult`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./numeric/matrix-functions.js`        | `ComplexValue, ComplexMatrix, ScalarComplexFunction`                                                                                                                                                                                                                           | Re-export (type-only) |
-| `./numeric/minimize-scalar.js`         | `MinimizeScalarOptions, MinimizeScalarResult`                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./numeric/adaptive-quad.js`           | `QuadOptions, QuadResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
-| `./numeric/interpn.js`                 | `NDArrayInput`                                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./numeric/bspline.js`                 | `BSplineFitOptions, BSplineTuple`                                                                                                                                                                                                                                              | Re-export (type-only) |
-| `./numeric/monte-carlo.js`             | `Bound, MonteCarloOptions, MonteCarloResult`                                                                                                                                                                                                                                   | Re-export (type-only) |
-| `./stats/timeseries.js`                | `LjungBoxResult, AdfullerResult`                                                                                                                                                                                                                                               | Re-export (type-only) |
-| `./regression-extra.js`                | `LinregressResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./ml/ols.js`                          | `OlsOptions, OlsResult`                                                                                                                                                                                                                                                        | Re-export (type-only) |
-| `./ml/regularized-regression.js`       | `RidgeOptions, CoordinateDescentOptions, RegularizedRegressionResult`                                                                                                                                                                                                          | Re-export (type-only) |
-| `./ml/logistic-regression.js`          | `LogisticRegressionOptions, LogisticRegressionResult`                                                                                                                                                                                                                          | Re-export (type-only) |
-| `./optimization-extra.js`              | `OptimizeResult, LMResult, LMOptions, NelderMeadOptions`                                                                                                                                                                                                                       | Re-export (type-only) |
-| `./fit-scalar.js`                      | `FitScalarOptions, FitScalarResult`                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./ml/kde.js`                          | `GaussianKDEOptions, GaussianKDEResult`                                                                                                                                                                                                                                        | Re-export (type-only) |
-| `./stats/inference-extra.js`           | `Chi2ContingencyOptions, Chi2ContingencyResult, MultipleTestMethod`                                                                                                                                                                                                            | Re-export (type-only) |
-| `./stats/fit-distribution.js`          | `DistributionName, FitDistributionResult`                                                                                                                                                                                                                                      | Re-export (type-only) |
-| `./numeric/bfgs.js`                    | `BfgsOptions, BfgsResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
-| `./clustering-extra.js`                | `KMeansResult`                                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./numeric/nnls.js`                    | `NnlsOptions, NnlsResult, LsqBoundedOptions, LsqBoundedResult`                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./signal/fir-smoothing.js`            | `DeconvolveResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./signal/remez-exchange.js`           | `RemezType`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./signal/spectral-peaks.js`           | `FindPeaksOptions, CsdOptions, StftOptions, StftResult`                                                                                                                                                                                                                        | Re-export (type-only) |
-| `./geometry/geometry-extra.js`         | `ProcrustesResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./geometry/intersect3d.js`            | `RayHit, SegmentClosestResult`                                                                                                                                                                                                                                                 | Re-export (type-only) |
-| `./geometry/hull.js`                   | `ConvexHullResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./geometry/delaunay.js`               | `DelaunayResult`                                                                                                                                                                                                                                                               | Re-export (type-only) |
-| `./geometry/voronoi.js`                | `VoronoiResult`                                                                                                                                                                                                                                                                | Re-export (type-only) |
-| `./geometry/alpha-shape.js`            | `AlphaShapeResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
-| `./geometry/spherical-voronoi.js`      | `SphericalVoronoiResult`                                                                                                                                                                                                                                                       | Re-export (type-only) |
-| `./geometry/halfspace-intersection.js` | `HalfspaceIntersectionResult`                                                                                                                                                                                                                                                  | Re-export (type-only) |
-| `./geometry/mass-properties.js`        | `MassProperties2D, MassProperties3D, MassPropertyShape, MassPropertyShapeRecord`                                                                                                                                                                                               | Re-export (type-only) |
-| `./stats/inference-extra2.js`          | `CircularOptions, McNemarOptions, McNemarResult, CochranQResult`                                                                                                                                                                                                               | Re-export (type-only) |
-| `./numeric/gauss-nodes.js`             | `RootsLegendreResult`                                                                                                                                                                                                                                                          | Re-export (type-only) |
-| `./special/wave-functions.js`          | `CoulombFG`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./graph/traversal-centrality.js`      | `BellmanFordResult`                                                                                                                                                                                                                                                            | Re-export (type-only) |
-| `./graph/optimization.js`              | `MaxFlowResult, MinCutResult, AStarResult, HungarianResult`                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./ml/glm.js`                          | `GlmFamily, GlmLink, GlmOptions, GlmResult`                                                                                                                                                                                                                                    | Re-export (type-only) |
-| `./stats/mvn.js`                       | `MvnVector, MvnCov, MvnSampleOptions`                                                                                                                                                                                                                                          | Re-export (type-only) |
-| `./stats/power-analysis.js`            | `TTestPowerAlternative, TTestPowerOptions`                                                                                                                                                                                                                                     | Re-export (type-only) |
-| `./stats/gaussian-process.js`          | `GPKernel, GPOptions, GPPrediction, GPModel`                                                                                                                                                                                                                                   | Re-export (type-only) |
-| `./stats/multivariate-sampling.js`     | `SampleSeedOptions`                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| File                                     | Imports                                                                                                                                                                                                                                                                        | Type                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `./typed/index.js`                       | `*`                                                                                                                                                                                                                                                                            | Re-export             |
+| `./typed/cas.js`                         | `*`                                                                                                                                                                                                                                                                            | Re-export             |
+| `./factories/index.js`                   | `*`                                                                                                                                                                                                                                                                            | Re-export             |
+| `./config-api.js`                        | `config, runWithConfig`                                                                                                                                                                                                                                                        | Re-export             |
+| `./wasm/WasmLoader.js`                   | `loadWasm, isWasmLoaded`                                                                                                                                                                                                                                                       | Re-export             |
+| `./typed/unit.js`                        | `to, toBest`                                                                                                                                                                                                                                                                   | Re-export             |
+| `./factories/evaluate.js`                | `evaluate, compileExpr, parse, parser, physicsScope, reviver, replacer`                                                                                                                                                                                                        | Re-export             |
+| `./scalar-eval.js`                       | `evaluateScalar, scalar, ScalarEvalError`                                                                                                                                                                                                                                      | Re-export             |
+| `./scalar-compile.js`                    | `compileScalar, compileScalarGradient`                                                                                                                                                                                                                                         | Re-export             |
+| `./scalar-mutate.js`                     | `addNode, crossoverSubtrees, DEFAULT_MUTATION_WEIGHTS, deleteNode, identityMutation, insertNode, mutateConstant, mutateFeature, mutateOperator, MUTATE_CONSTANT_NEGATE_PROBABILITY, randomizeTree, rotateTree, simplifyConstants, swapOperands, weightedMutation`              | Re-export             |
+| `./scalar-search.js`                     | `searchScalars`                                                                                                                                                                                                                                                                | Re-export             |
+| `./pareto-front.js`                      | `paretoFront, scoreFront, selectFrontModel, ParetoFrontError`                                                                                                                                                                                                                  | Re-export             |
+| `./front-export.js`                      | `frontToJson, frontToLatexTable`                                                                                                                                                                                                                                               | Re-export             |
+| `./numeric-equivalence.js`               | `numericallyEquivalent, NumericEquivalenceError`                                                                                                                                                                                                                               | Re-export             |
+| `./scalar-dimension.js`                  | `inferScalarDimension, solveParameterDimensions`                                                                                                                                                                                                                               | Re-export             |
+| `./numeric/propagate-uncertainty.js`     | `propagateUncertainty, UncertaintyExpression, UncertaintyPropagationOptions, UncertaintyPropagationResult`                                                                                                                                                                     | Re-export             |
+| `./help.js`                              | `help`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./numbertheory/extra.js`                | `continuedFraction, eulerNumbers, stirlingS1, discreteLog, primitiveRoot, multiplicativeOrder, kroneckerSymbol, permutationsGen, combinationsGen`                                                                                                                              | Re-export             |
+| `./grad-forward.js`                      | `derivativeAt, valueAndDerivativeAt, gradientAt`                                                                                                                                                                                                                               | Re-export             |
+| `./descriptive-stats.js`                 | `gmean, hmean, moment, skewness, kurtosis, iqr, sem, zscore, cov, corrcoef, rankdata, spearman, kendallTau, linregress, pearsonr, spearmanr, kendalltau, kendallTauTest, ptp, variation, trimmedMean, describe, histogram`                                                     | Re-export             |
+| `./numeric-extra.js`                     | `clamp, sigmoid, logsumexp, softmax, cumprod, cummax, cummin, cumtrapz`                                                                                                                                                                                                        | Re-export             |
+| `./distribution-functions.js`            | `normalQuantile, studentTCDF, studentTQuantile, chiSquaredCDF, chiSquaredQuantile, fCDF, fQuantile, gammaCDF, gammaQuantile, betaCDF, betaQuantile, cauchyPDF, cauchyCDF, cauchyQuantile, laplacePDF, laplaceCDF, laplaceQuantile, logisticPDF, logisticCDF, logisticQuantile` | Re-export             |
+| `./hypothesis-extra.js`                  | `fTest, jarqueBera, kruskalWallis, wilcoxon, fisherExact, studentizedRangeCDF, studentizedRangeQuantile, tukeyHSD`                                                                                                                                                             | Re-export             |
+| `./linalg-extra.js`                      | `tril, triu, vander, toeplitz, circulant, companion, logdet, laplacianMatrix, generalizedEig, qz`                                                                                                                                                                              | Re-export             |
+| `./calculus-extra.js`                    | `hessian, gradient`                                                                                                                                                                                                                                                            | Re-export             |
+| `./linalg-svd-extra.js`                  | `orth`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./numeric/numeric-jacobian.js`          | `numericJacobian`                                                                                                                                                                                                                                                              | Re-export             |
+| `./numeric/open-root-finders.js`         | `newton, secant, halley`                                                                                                                                                                                                                                                       | Re-export             |
+| `./numeric/fsolve.js`                    | `fsolve, root`                                                                                                                                                                                                                                                                 | Re-export             |
+| `./numeric/krylov.js`                    | `cg, minres, gmres, bicgstab, incompleteLU, incompleteCholesky`                                                                                                                                                                                                                | Re-export             |
+| `./numeric/eigsh.js`                     | `eigsh`                                                                                                                                                                                                                                                                        | Re-export             |
+| `./numeric/svds.js`                      | `svds`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./numeric/structured-solvers.js`        | `thomasSolve, solveBanded, toeplitzSolve, ldl`                                                                                                                                                                                                                                 | Re-export             |
+| `./numeric/matrix-functions.js`          | `funm, cosm, sinm, complexCos, complexSin`                                                                                                                                                                                                                                     | Re-export             |
+| `./numeric/control-equations.js`         | `dlyap, care, dare`                                                                                                                                                                                                                                                            | Re-export             |
+| `./numeric/minimize-scalar.js`           | `minimizeScalar`                                                                                                                                                                                                                                                               | Re-export             |
+| `./numeric/adaptive-quad.js`             | `quad`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./numeric/interpn.js`                   | `interpn`                                                                                                                                                                                                                                                                      | Re-export             |
+| `./numeric/bspline.js`                   | `bsplineFit, bsplineEval`                                                                                                                                                                                                                                                      | Re-export             |
+| `./numeric/monte-carlo.js`               | `monteCarloIntegrate`                                                                                                                                                                                                                                                          | Re-export             |
+| `./timeseries-extra.js`                  | `movingAverage, ewma, detrend, acf`                                                                                                                                                                                                                                            | Re-export             |
+| `./stats/timeseries.js`                  | `pacf, ljungBox, durbinWatson, adfuller`                                                                                                                                                                                                                                       | Re-export             |
+| `./regression-extra.js`                  | `linearRegression`                                                                                                                                                                                                                                                             | Re-export             |
+| `./ml/ols.js`                            | `ols`                                                                                                                                                                                                                                                                          | Re-export             |
+| `./ml/regularized-regression.js`         | `ridge, lasso, elasticNet`                                                                                                                                                                                                                                                     | Re-export             |
+| `./ml/logistic-regression.js`            | `logisticRegression`                                                                                                                                                                                                                                                           | Re-export             |
+| `./optimization-extra.js`                | `nelderMead, gradientDescent, levenbergMarquardt`                                                                                                                                                                                                                              | Re-export             |
+| `./fit-scalar.js`                        | `fitScalarParameters`                                                                                                                                                                                                                                                          | Re-export             |
+| `./clustering-extra.js`                  | `kmeans, spectralClustering`                                                                                                                                                                                                                                                   | Re-export             |
+| `./ml/dbscan-knn.js`                     | `dbscan, knnClassify, knnRegress`                                                                                                                                                                                                                                              | Re-export             |
+| `./ml/kde.js`                            | `gaussianKDE`                                                                                                                                                                                                                                                                  | Re-export             |
+| `./stats/inference-extra.js`             | `chi2Contingency, multipleTest`                                                                                                                                                                                                                                                | Re-export             |
+| `./stats/fit-distribution.js`            | `fitDistribution`                                                                                                                                                                                                                                                              | Re-export             |
+| `./numeric/bfgs.js`                      | `bfgs`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./numeric/nnls.js`                      | `nnls, lsqBounded`                                                                                                                                                                                                                                                             | Re-export             |
+| `./cas-integration.js`                   | `symbolicIntegral`                                                                                                                                                                                                                                                             | Re-export             |
+| `./signal-filter-extra.js`               | `firwin, butter, lfilter, lfilterZi, filtfilt`                                                                                                                                                                                                                                 | Re-export             |
+| `./signal/fft-helpers.js`                | `rfft, irfft, fftshift, ifftshift, fftfreq, rfftfreq, fftn`                                                                                                                                                                                                                    | Re-export             |
+| `./signal/iir-design.js`                 | `cheby1, cheby2, ellip, sosfilt, zpk2sos, bilinear, buttord`                                                                                                                                                                                                                   | Re-export             |
+| `./signal/fir-smoothing.js`              | `firwinBandpass, firls, remez, savgol, wiener, deconvolve`                                                                                                                                                                                                                     | Re-export             |
+| `./signal/wavelets.js`                   | `idwt, wavedec, waverec, cwt`                                                                                                                                                                                                                                                  | Re-export             |
+| `./signal/spectral-peaks.js`             | `findPeaks, peakWidths, csd, coherence, stft, istft, decimate`                                                                                                                                                                                                                 | Re-export             |
+| `./geometry-extra.js`                    | `haversine, EARTH_RADIUS_KM, slerp, quaternionMultiply, quaternionConjugate, quaternionNormalize, quaternionFromAxisAngle, quaternionRotate, quaternionToRotationMatrix`                                                                                                       | Re-export             |
+| `./geometry/geometry-extra.js`           | `quaternionInverse, quaternionSlerp, quaternionToEuler, quaternionLog, quaternionExp, quaternionPow, boundingBox, procrustes, kdTreeKNN, kdTreeRadius, setIsSuperset, setEqual, setDisjoint`                                                                                   | Re-export             |
+| `./geometry/intersect3d.js`              | `rayTriangleIntersect, rayPlaneIntersect, segmentSegmentClosest`                                                                                                                                                                                                               | Re-export             |
+| `./geometry/hull.js`                     | `convexHull`                                                                                                                                                                                                                                                                   | Re-export             |
+| `./geometry/delaunay.js`                 | `delaunay`                                                                                                                                                                                                                                                                     | Re-export             |
+| `./geometry/voronoi.js`                  | `voronoi`                                                                                                                                                                                                                                                                      | Re-export             |
+| `./geometry/alpha-shape.js`              | `alphaShape`                                                                                                                                                                                                                                                                   | Re-export             |
+| `./geometry/spherical-voronoi.js`        | `sphericalVoronoi`                                                                                                                                                                                                                                                             | Re-export             |
+| `./geometry/halfspace-intersection.js`   | `halfspaceIntersection`                                                                                                                                                                                                                                                        | Re-export             |
+| `./geometry/mass-properties.js`          | `massProperties, MASS_PROPERTY_SHAPES`                                                                                                                                                                                                                                         | Re-export             |
+| `./stats/inference-extra2.js`            | `noncentralChi2CDF, noncentralFCDF, noncentralTCDF, circmean, circstd, circvar, vonMisesPDF, mcnemar, cochranQ`                                                                                                                                                                | Re-export             |
+| `./special/hypergeometric.js`            | `hyp0f1, hyp1f1, hyp2f1, pFq`                                                                                                                                                                                                                                                  | Re-export             |
+| `./special/polygamma-orthopoly.js`       | `polygamma, trigamma, jacobiP, gegenbauerC`                                                                                                                                                                                                                                    | Re-export             |
+| `./special/jacobi-elliptic.js`           | `jacobiSN, jacobiCN, jacobiDN`                                                                                                                                                                                                                                                 | Re-export             |
+| `./numeric/gauss-nodes.js`               | `rootsLegendre`                                                                                                                                                                                                                                                                | Re-export             |
+| `./special/niche.js`                     | `polylog, struveH, struveL, kelvinBer, kelvinBei, barnesG`                                                                                                                                                                                                                     | Re-export             |
+| `./special/wave-functions.js`            | `siegelZ, riemannSiegelZ, lerchPhi, parabolicCylinderD, coulombF, coulombG, coulombFG`                                                                                                                                                                                         | Re-export             |
+| `./special/mathieu.js`                   | `mathieuA, mathieuB, mathieuCe, mathieuSe`                                                                                                                                                                                                                                     | Re-export             |
+| `./special/spheroidal.js`                | `spheroidalLambda, spheroidalCharacteristic, spheroidalAngular, spheroidalRadial, ferrersP`                                                                                                                                                                                    | Re-export             |
+| `./graph/traversal-centrality.js`        | `bfs, dfs, floydWarshall, bellmanFord, closenessCentrality, harmonicCentrality`                                                                                                                                                                                                | Re-export             |
+| `./graph/optimization.js`                | `maxFlow, minCut, astar, hungarian`                                                                                                                                                                                                                                            | Re-export             |
+| `./numeric/interval.js`                  | `interval, Interval`                                                                                                                                                                                                                                                           | Re-export             |
+| `./graph/community-coloring.js`          | `graphColoring, maxClique, louvainCommunities, katzCentrality, isIsomorphic`                                                                                                                                                                                                   | Re-export             |
+| `./ml/glm.js`                            | `glm`                                                                                                                                                                                                                                                                          | Re-export             |
+| `./stats/mvn.js`                         | `mvnPdf, mvnSample`                                                                                                                                                                                                                                                            | Re-export             |
+| `./stats/power-analysis.js`              | `tTestPower`                                                                                                                                                                                                                                                                   | Re-export             |
+| `./stats/gaussian-process.js`            | `gaussianProcessRegression, gpRegression`                                                                                                                                                                                                                                      | Re-export             |
+| `./stats/multivariate-sampling.js`       | `dirichletSample, dirichletPdf, wishartSample`                                                                                                                                                                                                                                 | Re-export             |
+| `./stats/weighted-stats.js`              | `weightedMean, weightedVariance, weightedMedian, weightedQuantile`                                                                                                                                                                                                             | Re-export             |
+| `./stats/robust-stats.js`                | `pmean, gstd, gzscore, theilSen, siegelSlopes, partialCorrelation`                                                                                                                                                                                                             | Re-export             |
+| `./stats/effect-sizes.js`                | `cohensD, hedgesG, glassDelta, etaSquared, rankBiserial`                                                                                                                                                                                                                       | Re-export             |
+| `./stats/distributions-extra.js`         | `owensT, skewNormalPDF, skewNormalCDF, truncatedNormalPDF, truncatedNormalCDF, truncatedNormalMean, inverseGammaPDF, inverseGammaCDF, gevCDF, gevPDF, skellamPMF, zipfPMF, nakagamiPDF, ricePDF`                                                                               | Re-export             |
+| `./stats/nonparametric-extra.js`         | `signTest, runsTest, moodMedianTest, powerDivergence, gTest, jackknife`                                                                                                                                                                                                        | Re-export             |
+| `./stats/distances.js`                   | `wassersteinDistance, energyDistance, mutualInformation, ecdf`                                                                                                                                                                                                                 | Re-export             |
+| `./special/erf-extra.js`                 | `erfinv, erfcinv, erfcx, dawson`                                                                                                                                                                                                                                               | Re-export             |
+| `./special/exp-integrals.js`             | `expIntegralE1, expn, sinhIntegral, coshIntegral`                                                                                                                                                                                                                              | Re-export             |
+| `./special/spherical-bessel.js`          | `sphericalBesselJ, sphericalBesselY, sphericalBesselI, sphericalBesselK, hankelH1, hankelH2, besselJZeros`                                                                                                                                                                     | Re-export             |
+| `./special/angular-momentum.js`          | `wigner3j, clebschGordan, wigner6j, sphericalHarmonic`                                                                                                                                                                                                                         | Re-export             |
+| `./special/zeta-extra.js`                | `hurwitzZeta, dirichletEta, bernoulliPolynomial, eulerPolynomial`                                                                                                                                                                                                              | Re-export             |
+| `./numeric/global-optimizers.js`         | `differentialEvolution, simulatedAnnealing`                                                                                                                                                                                                                                    | Re-export             |
+| `./numeric/constrained.js`               | `minimizeConstrained`                                                                                                                                                                                                                                                          | Re-export             |
+| `./numeric/gauss-nodes-extra.js`         | `rootsHermite, rootsLaguerre, rootsChebyshevT, rootsChebyshevU, rootsJacobi, gaussHermiteIntegrate, gaussLaguerreIntegrate`                                                                                                                                                    | Re-export             |
+| `./numeric/quadrature-extra.js`          | `tanhSinh, clenshawCurtis, dblquad, tplquad`                                                                                                                                                                                                                                   | Re-export             |
+| `./numeric/finite-differences.js`        | `finiteDifferenceCoefficients, ridders, fixedPoint`                                                                                                                                                                                                                            | Re-export             |
+| `./numbertheory/modular.js`              | `modPow, prevPrime, legendreSymbol, sqrtMod, isCarmichael`                                                                                                                                                                                                                     | Re-export             |
+| `./numbertheory/arithmetic-functions.js` | `isSquarefree, radical, bigOmega, smallOmega, liouvilleLambda, vonMangoldt, mertens, isPerfect, isPerfectPower, isPrimePower, integerSqrt, integerNthRoot, digitSum, digitalRoot, collatzSteps, primorial`                                                                     | Re-export             |
+| `./numbertheory/sequences.js`            | `motzkin, narayana, schroder, delannoy, pell, tribonacci, eulerianNumber, lahNumber, integerPartitionsGen, compositionsGen, grayCode, binomialMod`                                                                                                                             | Re-export             |
+| `./numbertheory/diophantine.js`          | `linearDiophantine, pellSolve, frobeniusNumber, zeckendorf, sumOfTwoSquares, egyptianFraction, fareySequence`                                                                                                                                                                  | Re-export             |
+| `./numbertheory/integer-matrices.js`     | `hermiteNormalForm, smithNormalForm, lll`                                                                                                                                                                                                                                      | Re-export             |
+| `./cas/real-roots.js`                    | `sturmSequence, sturmRootCount, descartesSignChanges, isolateRealRoots, realRoots`                                                                                                                                                                                             | Re-export             |
+| `./signal/conv.js`                       | `conv2`                                                                                                                                                                                                                                                                        | Re-export             |
+| `./signal-filter-extra.js`               | `sinc`                                                                                                                                                                                                                                                                         | Re-export             |
+| `./signal/windows-extra.js`              | `kaiserWindow, gaussianWindow, tukeyWindow, blackmanHarrisWindow, nuttallWindow, flattopWindow, bohmanWindow, parzenWindow, cosineWindow, exponentialWindow, getWindow`                                                                                                        | Re-export             |
+| `./signal/waveforms.js`                  | `chirp, squareWave, sawtooth, gaussPulse, unitImpulse, sweepPoly`                                                                                                                                                                                                              | Re-export             |
+| `./signal/lomb-scargle.js`               | `lombScargle`                                                                                                                                                                                                                                                                  | Re-export             |
+| `./signal/system-response.js`            | `impulseResponse, stepResponse, tf2ss, ss2tf, cont2discrete, iirNotch, iirPeak, tf2zpk, sos2tf`                                                                                                                                                                                | Re-export             |
+| `./signal/dtw.js`                        | `dtw`                                                                                                                                                                                                                                                                          | Re-export             |
+| `./linalg-special-matrices.js`           | `hilbertMatrix, invHilbertMatrix, hadamardMatrix, pascalMatrix, dftMatrix, hankelMatrix, blockDiag, khatriRao, fiedlerMatrix, leslieMatrix, helmertMatrix`                                                                                                                     | Re-export             |
+| `./linalg-extra2.js`                     | `subspaceAngles, signm, fractionalMatrixPower, choleskyUpdate, choleskyDowndate`                                                                                                                                                                                               | Re-export             |
+| `./geometry/predicates.js`               | `orient2D, orient3D, inCircle, pointInTriangle, barycentricCoordinates, polygonIsConvex`                                                                                                                                                                                       | Re-export             |
+| `./geometry/polygon-ops.js`              | `polygonClip, minkowskiSum, earClipping`                                                                                                                                                                                                                                       | Re-export             |
+| `./geometry/curves.js`                   | `douglasPeucker, hausdorffDistance, frechetDistance, closestPair, minimumEnclosingCircle, catmullRom, arcLength, curvature`                                                                                                                                                    | Re-export             |
+| `./factories/evaluate.js`                | `PhysicsEvaluateOptions`                                                                                                                                                                                                                                                       | Re-export (type-only) |
+| `./numeric/solveODE.js`                  | `SolveODESolution, ODEMatrixSolution, ODEOptions, ForcingFunction, SolveODEFunction`                                                                                                                                                                                           | Re-export (type-only) |
+| `./signal/freqz.js`                      | `FrequencyResponse, FreqzFunction`                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./signal/zpk2tf.js`                     | `TransferFunction, ZPKValue, Zpk2tfFunction`                                                                                                                                                                                                                                   | Re-export (type-only) |
+| `./scalar-eval.js`                       | `ScalarScope`                                                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./scalar-compile.js`                    | `CompileScalarOptions, ScalarBatchResult, CompiledScalar, CompiledScalarGradient`                                                                                                                                                                                              | Re-export (type-only) |
+| `./scalar-mutate.js`                     | `MutationWeightKey, ScalarMutationContext, ScalarMutationOperator`                                                                                                                                                                                                             | Re-export (type-only) |
+| `./scalar-search.js`                     | `ScalarFitOptions, ScalarSearchOptions, ScalarSearchProblem, ScalarSearchResult, ScalarSearchStopReason, SearchProgress`                                                                                                                                                       | Re-export (type-only) |
+| `./scalar-batch-parallel.js`             | `ScalarPopulationParallelOptions`                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./pareto-front.js`                      | `FrontCandidate, ScoredCandidate`                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./front-export.js`                      | `FrontJson, FrontJsonNumber, FrontJsonRow, FrontLatexTableOptions`                                                                                                                                                                                                             | Re-export (type-only) |
+| `./numeric-equivalence.js`               | `NumericEquivalenceOptions, NumericEquivalence`                                                                                                                                                                                                                                | Re-export (type-only) |
+| `./scalar-dimension.js`                  | `DimensionInference, ParameterDimensionResult, RationalDimension`                                                                                                                                                                                                              | Re-export (type-only) |
+| `./grad-forward.js`                      | `DualFn`                                                                                                                                                                                                                                                                       | Re-export (type-only) |
+| `./descriptive-stats.js`                 | `LinRegressResult, CorrelationTestResult, KendallTauTestResult, DescribeResult, HistogramResult`                                                                                                                                                                               | Re-export (type-only) |
+| `./hypothesis-extra.js`                  | `FTestResult, JarqueBeraResult, KruskalResult, WilcoxonResult, FisherExactResult, TukeyComparison`                                                                                                                                                                             | Re-export (type-only) |
+| `./linalg-svd-extra.js`                  | `OrthOptions`                                                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./numeric/numeric-jacobian.js`          | `VectorField, NumericJacobianOptions`                                                                                                                                                                                                                                          | Re-export (type-only) |
+| `./numeric/open-root-finders.js`         | `NewtonOptions, SecantOptions, HalleyOptions`                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./numeric/fsolve.js`                    | `FsolveOptions`                                                                                                                                                                                                                                                                | Re-export (type-only) |
+| `./numeric/krylov.js`                    | `LinearOperatorInput, Preconditioner, KrylovOptions, GmresOptions, KrylovResult`                                                                                                                                                                                               | Re-export (type-only) |
+| `./numeric/eigsh.js`                     | `EigshOperatorInput, EigshOptions, EigshResult`                                                                                                                                                                                                                                | Re-export (type-only) |
+| `./numeric/svds.js`                      | `SvdsOptions, SvdsResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
+| `./numeric/structured-solvers.js`        | `LDLResult`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./numeric/matrix-functions.js`          | `ComplexValue, ComplexMatrix, ScalarComplexFunction`                                                                                                                                                                                                                           | Re-export (type-only) |
+| `./numeric/minimize-scalar.js`           | `MinimizeScalarOptions, MinimizeScalarResult`                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./numeric/adaptive-quad.js`             | `QuadOptions, QuadResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
+| `./numeric/interpn.js`                   | `NDArrayInput`                                                                                                                                                                                                                                                                 | Re-export (type-only) |
+| `./numeric/bspline.js`                   | `BSplineFitOptions, BSplineTuple`                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./numeric/monte-carlo.js`               | `Bound, MonteCarloOptions, MonteCarloResult`                                                                                                                                                                                                                                   | Re-export (type-only) |
+| `./stats/timeseries.js`                  | `LjungBoxResult, AdfullerResult`                                                                                                                                                                                                                                               | Re-export (type-only) |
+| `./regression-extra.js`                  | `LinregressResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./ml/ols.js`                            | `OlsOptions, OlsResult`                                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./ml/regularized-regression.js`         | `RidgeOptions, CoordinateDescentOptions, RegularizedRegressionResult`                                                                                                                                                                                                          | Re-export (type-only) |
+| `./ml/logistic-regression.js`            | `LogisticRegressionOptions, LogisticRegressionResult`                                                                                                                                                                                                                          | Re-export (type-only) |
+| `./optimization-extra.js`                | `OptimizeResult, LMResult, LMOptions, NelderMeadOptions`                                                                                                                                                                                                                       | Re-export (type-only) |
+| `./fit-scalar.js`                        | `FitScalarOptions, FitScalarResult`                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./ml/kde.js`                            | `GaussianKDEOptions, GaussianKDEResult`                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./stats/inference-extra.js`             | `Chi2ContingencyOptions, Chi2ContingencyResult, MultipleTestMethod`                                                                                                                                                                                                            | Re-export (type-only) |
+| `./stats/fit-distribution.js`            | `DistributionName, FitDistributionResult`                                                                                                                                                                                                                                      | Re-export (type-only) |
+| `./numeric/bfgs.js`                      | `BfgsOptions, BfgsResult`                                                                                                                                                                                                                                                      | Re-export (type-only) |
+| `./clustering-extra.js`                  | `KMeansResult`                                                                                                                                                                                                                                                                 | Re-export (type-only) |
+| `./numeric/nnls.js`                      | `NnlsOptions, NnlsResult, LsqBoundedOptions, LsqBoundedResult`                                                                                                                                                                                                                 | Re-export (type-only) |
+| `./signal/fir-smoothing.js`              | `DeconvolveResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./signal/remez-exchange.js`             | `RemezType`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./signal/spectral-peaks.js`             | `FindPeaksOptions, CsdOptions, StftOptions, StftResult`                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./geometry/geometry-extra.js`           | `ProcrustesResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./geometry/intersect3d.js`              | `RayHit, SegmentClosestResult`                                                                                                                                                                                                                                                 | Re-export (type-only) |
+| `./geometry/hull.js`                     | `ConvexHullResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./geometry/delaunay.js`                 | `DelaunayResult`                                                                                                                                                                                                                                                               | Re-export (type-only) |
+| `./geometry/voronoi.js`                  | `VoronoiResult`                                                                                                                                                                                                                                                                | Re-export (type-only) |
+| `./geometry/alpha-shape.js`              | `AlphaShapeResult`                                                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./geometry/spherical-voronoi.js`        | `SphericalVoronoiResult`                                                                                                                                                                                                                                                       | Re-export (type-only) |
+| `./geometry/halfspace-intersection.js`   | `HalfspaceIntersectionResult`                                                                                                                                                                                                                                                  | Re-export (type-only) |
+| `./geometry/mass-properties.js`          | `MassProperties2D, MassProperties3D, MassPropertyShape, MassPropertyShapeRecord`                                                                                                                                                                                               | Re-export (type-only) |
+| `./stats/inference-extra2.js`            | `CircularOptions, McNemarOptions, McNemarResult, CochranQResult`                                                                                                                                                                                                               | Re-export (type-only) |
+| `./numeric/gauss-nodes.js`               | `RootsLegendreResult`                                                                                                                                                                                                                                                          | Re-export (type-only) |
+| `./special/wave-functions.js`            | `CoulombFG`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./graph/traversal-centrality.js`        | `BellmanFordResult`                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./graph/optimization.js`                | `MaxFlowResult, MinCutResult, AStarResult, HungarianResult`                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./ml/glm.js`                            | `GlmFamily, GlmLink, GlmOptions, GlmResult`                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./stats/mvn.js`                         | `MvnVector, MvnCov, MvnSampleOptions`                                                                                                                                                                                                                                          | Re-export (type-only) |
+| `./stats/power-analysis.js`              | `TTestPowerAlternative, TTestPowerOptions`                                                                                                                                                                                                                                     | Re-export (type-only) |
+| `./stats/gaussian-process.js`            | `GPKernel, GPOptions, GPPrediction, GPModel`                                                                                                                                                                                                                                   | Re-export (type-only) |
+| `./stats/multivariate-sampling.js`       | `SampleSeedOptions`                                                                                                                                                                                                                                                            | Re-export (type-only) |
+| `./numeric/global-optimizers.js`         | `GlobalOptimizeOptions, GlobalOptimizeResult, SimulatedAnnealingOptions`                                                                                                                                                                                                       | Re-export (type-only) |
+| `./numeric/constrained.js`               | `ConstrainedOptions, ConstrainedResult`                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./numeric/gauss-nodes-extra.js`         | `GaussRule`                                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./numeric/quadrature-extra.js`          | `TanhSinhOptions, Limit1, Limit2`                                                                                                                                                                                                                                              | Re-export (type-only) |
+| `./numeric/finite-differences.js`        | `ScalarSolveOptions, FixedPointOptions`                                                                                                                                                                                                                                        | Re-export (type-only) |
+| `./signal/conv.js`                       | `ConvMode`                                                                                                                                                                                                                                                                     | Re-export (type-only) |
+| `./signal/windows-extra.js`              | `ExtraWindowName, WindowOptions`                                                                                                                                                                                                                                               | Re-export (type-only) |
+| `./signal/waveforms.js`                  | `ChirpMethod, ChirpOptions`                                                                                                                                                                                                                                                    | Re-export (type-only) |
+| `./signal/lomb-scargle.js`               | `LombScargleOptions`                                                                                                                                                                                                                                                           | Re-export (type-only) |
+| `./signal/system-response.js`            | `StateSpace, DiscretizeMethod, BiquadCoefficients`                                                                                                                                                                                                                             | Re-export (type-only) |
+| `./signal/dtw.js`                        | `DtwOptions, DtwResult`                                                                                                                                                                                                                                                        | Re-export (type-only) |
 
 **Exports:**
 
-- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `runWithConfig`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionInverse`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`
+- Re-exports: `* from ./typed/index.js`, `* from ./typed/cas.js`, `* from ./factories/index.js`, `config`, `runWithConfig`, `loadWasm`, `isWasmLoaded`, `to`, `toBest`, `evaluate`, `compileExpr`, `parse`, `parser`, `physicsScope`, `reviver`, `replacer`, `evaluateScalar`, `scalar`, `ScalarEvalError`, `compileScalar`, `compileScalarGradient`, `addNode`, `crossoverSubtrees`, `DEFAULT_MUTATION_WEIGHTS`, `deleteNode`, `identityMutation`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `randomizeTree`, `rotateTree`, `simplifyConstants`, `swapOperands`, `weightedMutation`, `searchScalars`, `paretoFront`, `scoreFront`, `selectFrontModel`, `ParetoFrontError`, `frontToJson`, `frontToLatexTable`, `numericallyEquivalent`, `NumericEquivalenceError`, `inferScalarDimension`, `solveParameterDimensions`, `propagateUncertainty`, `UncertaintyExpression`, `UncertaintyPropagationOptions`, `UncertaintyPropagationResult`, `help`, `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `permutationsGen`, `combinationsGen`, `derivativeAt`, `valueAndDerivativeAt`, `gradientAt`, `gmean`, `hmean`, `moment`, `skewness`, `kurtosis`, `iqr`, `sem`, `zscore`, `cov`, `corrcoef`, `rankdata`, `spearman`, `kendallTau`, `linregress`, `pearsonr`, `spearmanr`, `kendalltau`, `kendallTauTest`, `ptp`, `variation`, `trimmedMean`, `describe`, `histogram`, `clamp`, `sigmoid`, `logsumexp`, `softmax`, `cumprod`, `cummax`, `cummin`, `cumtrapz`, `normalQuantile`, `studentTCDF`, `studentTQuantile`, `chiSquaredCDF`, `chiSquaredQuantile`, `fCDF`, `fQuantile`, `gammaCDF`, `gammaQuantile`, `betaCDF`, `betaQuantile`, `cauchyPDF`, `cauchyCDF`, `cauchyQuantile`, `laplacePDF`, `laplaceCDF`, `laplaceQuantile`, `logisticPDF`, `logisticCDF`, `logisticQuantile`, `fTest`, `jarqueBera`, `kruskalWallis`, `wilcoxon`, `fisherExact`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `tukeyHSD`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `logdet`, `laplacianMatrix`, `generalizedEig`, `qz`, `hessian`, `gradient`, `svd`, `orth`, `numericJacobian`, `newton`, `secant`, `halley`, `fsolve`, `root`, `cg`, `minres`, `gmres`, `bicgstab`, `incompleteLU`, `incompleteCholesky`, `eigsh`, `svds`, `thomasSolve`, `solveBanded`, `toeplitzSolve`, `ldl`, `funm`, `cosm`, `sinm`, `complexCos`, `complexSin`, `dlyap`, `care`, `dare`, `minimizeScalar`, `quad`, `interpn`, `bsplineFit`, `bsplineEval`, `monteCarloIntegrate`, `movingAverage`, `ewma`, `detrend`, `acf`, `pacf`, `ljungBox`, `durbinWatson`, `adfuller`, `linearRegression`, `ols`, `ridge`, `lasso`, `elasticNet`, `logisticRegression`, `nelderMead`, `gradientDescent`, `levenbergMarquardt`, `fitScalarParameters`, `kmeans`, `spectralClustering`, `dbscan`, `knnClassify`, `knnRegress`, `gaussianKDE`, `chi2Contingency`, `multipleTest`, `fitDistribution`, `bfgs`, `nnls`, `lsqBounded`, `symbolicIntegral`, `firwin`, `butter`, `lfilter`, `lfilterZi`, `filtfilt`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `cheby1`, `cheby2`, `ellip`, `sosfilt`, `zpk2sos`, `bilinear`, `buttord`, `firwinBandpass`, `firls`, `remez`, `savgol`, `wiener`, `deconvolve`, `idwt`, `wavedec`, `waverec`, `cwt`, `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`, `haversine`, `EARTH_RADIUS_KM`, `slerp`, `quaternionMultiply`, `quaternionConjugate`, `quaternionNormalize`, `quaternionFromAxisAngle`, `quaternionRotate`, `quaternionToRotationMatrix`, `quaternionInverse`, `quaternionSlerp`, `quaternionToEuler`, `quaternionLog`, `quaternionExp`, `quaternionPow`, `boundingBox`, `procrustes`, `kdTreeKNN`, `kdTreeRadius`, `setIsSuperset`, `setEqual`, `setDisjoint`, `rayTriangleIntersect`, `rayPlaneIntersect`, `segmentSegmentClosest`, `convexHull`, `delaunay`, `voronoi`, `alphaShape`, `sphericalVoronoi`, `halfspaceIntersection`, `massProperties`, `MASS_PROPERTY_SHAPES`, `noncentralChi2CDF`, `noncentralFCDF`, `noncentralTCDF`, `circmean`, `circstd`, `circvar`, `vonMisesPDF`, `mcnemar`, `cochranQ`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `pFq`, `polygamma`, `trigamma`, `jacobiP`, `gegenbauerC`, `jacobiSN`, `jacobiCN`, `jacobiDN`, `rootsLegendre`, `polylog`, `struveH`, `struveL`, `kelvinBer`, `kelvinBei`, `barnesG`, `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `spheroidalLambda`, `spheroidalCharacteristic`, `spheroidalAngular`, `spheroidalRadial`, `ferrersP`, `bfs`, `dfs`, `floydWarshall`, `bellmanFord`, `closenessCentrality`, `harmonicCentrality`, `maxFlow`, `minCut`, `astar`, `hungarian`, `interval`, `Interval`, `graphColoring`, `maxClique`, `louvainCommunities`, `katzCentrality`, `isIsomorphic`, `glm`, `mvnPdf`, `mvnSample`, `tTestPower`, `gaussianProcessRegression`, `gpRegression`, `dirichletSample`, `dirichletPdf`, `wishartSample`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `eigvals`, `powerIteration`, `matrixPinv`, `weightedMean`, `weightedVariance`, `weightedMedian`, `weightedQuantile`, `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`, `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`, `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`, `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`, `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`, `erfinv`, `erfcinv`, `erfcx`, `dawson`, `expIntegralE1`, `expn`, `sinhIntegral`, `coshIntegral`, `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`, `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`, `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`, `differentialEvolution`, `simulatedAnnealing`, `minimizeConstrained`, `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`, `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`, `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`, `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `integerSqrt`, `integerNthRoot`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`, `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`, `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`, `hermiteNormalForm`, `smithNormalForm`, `lll`, `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`, `conv2`, `sinc`, `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`, `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`, `lombScargle`, `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`, `dtw`, `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`, `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`, `orient2D`, `orient3D`, `inCircle`, `pointInTriangle`, `barycentricCoordinates`, `polygonIsConvex`, `polygonClip`, `minkowskiSum`, `earClipping`, `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`, `PhysicsEvaluateOptions`, `SolveODESolution`, `ODEMatrixSolution`, `ODEOptions`, `ForcingFunction`, `SolveODEFunction`, `FrequencyResponse`, `FreqzFunction`, `TransferFunction`, `ZPKValue`, `Zpk2tfFunction`, `ScalarScope`, `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`, `MutationWeightKey`, `ScalarMutationContext`, `ScalarMutationOperator`, `ScalarFitOptions`, `ScalarSearchOptions`, `ScalarSearchProblem`, `ScalarSearchResult`, `ScalarSearchStopReason`, `SearchProgress`, `ScalarPopulationParallelOptions`, `FrontCandidate`, `ScoredCandidate`, `FrontJson`, `FrontJsonNumber`, `FrontJsonRow`, `FrontLatexTableOptions`, `NumericEquivalenceOptions`, `NumericEquivalence`, `DimensionInference`, `ParameterDimensionResult`, `RationalDimension`, `DualFn`, `LinRegressResult`, `CorrelationTestResult`, `KendallTauTestResult`, `DescribeResult`, `HistogramResult`, `FTestResult`, `JarqueBeraResult`, `KruskalResult`, `WilcoxonResult`, `FisherExactResult`, `TukeyComparison`, `SVDResult`, `SVDOptions`, `OrthOptions`, `VectorField`, `NumericJacobianOptions`, `NewtonOptions`, `SecantOptions`, `HalleyOptions`, `FsolveOptions`, `LinearOperatorInput`, `Preconditioner`, `KrylovOptions`, `GmresOptions`, `KrylovResult`, `EigshOperatorInput`, `EigshOptions`, `EigshResult`, `SvdsOptions`, `SvdsResult`, `LDLResult`, `ComplexValue`, `ComplexMatrix`, `ScalarComplexFunction`, `MinimizeScalarOptions`, `MinimizeScalarResult`, `QuadOptions`, `QuadResult`, `NDArrayInput`, `BSplineFitOptions`, `BSplineTuple`, `Bound`, `MonteCarloOptions`, `MonteCarloResult`, `LjungBoxResult`, `AdfullerResult`, `LinregressResult`, `OlsOptions`, `OlsResult`, `RidgeOptions`, `CoordinateDescentOptions`, `RegularizedRegressionResult`, `LogisticRegressionOptions`, `LogisticRegressionResult`, `OptimizeResult`, `LMResult`, `LMOptions`, `NelderMeadOptions`, `FitScalarOptions`, `FitScalarResult`, `GaussianKDEOptions`, `GaussianKDEResult`, `Chi2ContingencyOptions`, `Chi2ContingencyResult`, `MultipleTestMethod`, `DistributionName`, `FitDistributionResult`, `BfgsOptions`, `BfgsResult`, `KMeansResult`, `NnlsOptions`, `NnlsResult`, `LsqBoundedOptions`, `LsqBoundedResult`, `DeconvolveResult`, `RemezType`, `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`, `ProcrustesResult`, `RayHit`, `SegmentClosestResult`, `ConvexHullResult`, `DelaunayResult`, `VoronoiResult`, `AlphaShapeResult`, `SphericalVoronoiResult`, `HalfspaceIntersectionResult`, `MassProperties2D`, `MassProperties3D`, `MassPropertyShape`, `MassPropertyShapeRecord`, `CircularOptions`, `McNemarOptions`, `McNemarResult`, `CochranQResult`, `RootsLegendreResult`, `CoulombFG`, `BellmanFordResult`, `MaxFlowResult`, `MinCutResult`, `AStarResult`, `HungarianResult`, `GlmFamily`, `GlmLink`, `GlmOptions`, `GlmResult`, `MvnVector`, `MvnCov`, `MvnSampleOptions`, `TTestPowerAlternative`, `TTestPowerOptions`, `GPKernel`, `GPOptions`, `GPPrediction`, `GPModel`, `SampleSeedOptions`, `QRPivotedResult`, `QRPivotedOptions`, `LQResult`, `RQResult`, `QLResult`, `PinvOptions`, `EigOptions`, `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`, `ConstrainedOptions`, `ConstrainedResult`, `GaussRule`, `TanhSinhOptions`, `Limit1`, `Limit2`, `ScalarSolveOptions`, `FixedPointOptions`, `ConvMode`, `ExtraWindowName`, `WindowOptions`, `ChirpMethod`, `ChirpOptions`, `LombScargleOptions`, `StateSpace`, `DiscretizeMethod`, `BiquadCoefficients`, `DtwOptions`, `DtwResult`
 
 ---
 
@@ -4707,6 +4754,34 @@ graph LR
 **Exports:**
 
 - Functions: `generalizedEig`, `tril`, `triu`, `vander`, `toeplitz`, `circulant`, `companion`, `laplacianMatrix`, `logdet`, `qz`
+
+---
+
+### `functions/src/linalg-extra2.ts` - Subspace angles, matrix sign, fractional matrix power and Cholesky rank-1
+
+**Internal Dependencies:**
+
+| File                    | Imports                                  | Type   |
+| ----------------------- | ---------------------------------------- | ------ |
+| `./typed/matrix-ops.js` | `matrixExpm, matrixLogm, singularValues` | Import |
+
+**Exports:**
+
+- Functions: `subspaceAngles`, `signm`, `fractionalMatrixPower`, `choleskyUpdate`, `choleskyDowndate`
+
+---
+
+### `functions/src/linalg-special-matrices.ts` - Special matrix constructors (Gap-analysis 2026-11-04 Batch E7).
+
+**Workspace Dependencies:**
+
+| Package                      | Import    |
+| ---------------------------- | --------- |
+| `@danielsimonjr/mathts-core` | `Complex` |
+
+**Exports:**
+
+- Functions: `hilbertMatrix`, `invHilbertMatrix`, `hadamardMatrix`, `pascalMatrix`, `dftMatrix`, `hankelMatrix`, `blockDiag`, `khatriRao`, `fiedlerMatrix`, `leslieMatrix`, `helmertMatrix`
 
 ---
 
@@ -5132,6 +5207,20 @@ graph LR
 
 - Interfaces: `RatFunc`, `Surd`, `DenFactor`, `PFTerm`
 - Functions: `surdFromRat`, `surdNeg`, `surdAdd`, `surdSub`, `surdMul`, `surdDiv`, `surdRender`, `parseRationalFunction`, `polynomialPart`, `integratePolynomial`, `factorDenominator`, `partialFractions`, `integratePFTerm`, `integrateRationalFunction`
+
+---
+
+### `functions/src/cas/real-roots.ts` - Real-root isolation and approximation for real polynomials: Sturm sequences,
+
+**Internal Dependencies:**
+
+| File                  | Imports   | Type   |
+| --------------------- | --------- | ------ |
+| `../typed/algebra.js` | `polyval` | Import |
+
+**Exports:**
+
+- Functions: `sturmSequence`, `sturmRootCount`, `descartesSignChanges`, `isolateRealRoots`, `realRoots`
 
 ---
 
@@ -5825,6 +5914,22 @@ graph LR
 
 ---
 
+### `functions/src/geometry/curves.ts` - Curves, point-set distances and enclosing shapes (Gap-analysis 2026-11-04 Batch E10).
+
+**Internal Dependencies:**
+
+| File                          | Imports                             | Type               |
+| ----------------------------- | ----------------------------------- | ------------------ |
+| `../typed/geometry.js`        | `distance2D, distancePointToLine2D` | Import             |
+| `../numeric/adaptive-quad.js` | `quad`                              | Import             |
+| `./predicates.js`             | `Pt`                                | Import (type-only) |
+
+**Exports:**
+
+- Functions: `douglasPeucker`, `hausdorffDistance`, `frechetDistance`, `closestPair`, `minimumEnclosingCircle`, `catmullRom`, `arcLength`, `curvature`
+
+---
+
 ### `functions/src/geometry/delaunay.ts` - Delaunay triangulation (2-D) — part of the computational-geometry engine.
 
 **Internal Dependencies:**
@@ -5957,6 +6062,30 @@ graph LR
 - Types: `MassPropertyShape`
 - Functions: `massProperties`, `massProperties`, `massProperties`, `massProperties`
 - Constants: `MASS_PROPERTY_SHAPES`
+
+---
+
+### `functions/src/geometry/polygon-ops.ts` - Polygon operations (Gap-analysis 2026-11-04 Batch E9): Sutherland-Hodgman
+
+**Internal Dependencies:**
+
+| File                   | Imports        | Type   |
+| ---------------------- | -------------- | ------ |
+| `../typed/geometry.js` | `convexHull2D` | Import |
+| `./predicates.js`      | `orient2D, Pt` | Import |
+
+**Exports:**
+
+- Functions: `polygonClip`, `minkowskiSum`, `earClipping`
+
+---
+
+### `functions/src/geometry/predicates.ts` - Geometric predicates (Gap-analysis 2026-11-04 Batch E9).
+
+**Exports:**
+
+- Types: `Pt`
+- Functions: `orient2D`, `orient3D`, `inCircle`, `barycentricCoordinates`, `pointInTriangle`, `polygonIsConvex`
 
 ---
 
@@ -7131,6 +7260,22 @@ graph LR
 
 ## Functions/numbertheory Dependencies
 
+### `functions/src/numbertheory/arithmetic-functions.ts` - Arithmetic functions and integer power / root helpers: squarefree tests,
+
+**Exports:**
+
+- Functions: `isSquarefree`, `radical`, `bigOmega`, `smallOmega`, `liouvilleLambda`, `vonMangoldt`, `mertens`, `isPerfect`, `integerSqrt`, `integerNthRoot`, `isPerfectPower`, `isPrimePower`, `digitSum`, `digitalRoot`, `collatzSteps`, `primorial`
+
+---
+
+### `functions/src/numbertheory/diophantine.ts` - Diophantine and lattice-style integer problems: linear Diophantine equations,
+
+**Exports:**
+
+- Functions: `linearDiophantine`, `pellSolve`, `frobeniusNumber`, `zeckendorf`, `sumOfTwoSquares`, `egyptianFraction`, `fareySequence`
+
+---
+
 ### `functions/src/numbertheory/extra.ts` - Number-theory fills — closes gaps left by the existing combinatorics/number-theory
 
 **Internal Dependencies:**
@@ -7142,6 +7287,30 @@ graph LR
 **Exports:**
 
 - Functions: `continuedFraction`, `eulerNumbers`, `stirlingS1`, `discreteLog`, `primitiveRoot`, `multiplicativeOrder`, `kroneckerSymbol`, `combinationsGen`, `permutationsGen`
+
+---
+
+### `functions/src/numbertheory/integer-matrices.ts` - Integer normal forms: row-style Hermite normal form, Smith normal form (with
+
+**Exports:**
+
+- Functions: `hermiteNormalForm`, `smithNormalForm`, `lll`
+
+---
+
+### `functions/src/numbertheory/modular.ts` - Modular arithmetic: modular exponentiation, previous prime, Legendre symbol,
+
+**Exports:**
+
+- Functions: `modPow`, `prevPrime`, `legendreSymbol`, `sqrtMod`, `isCarmichael`
+
+---
+
+### `functions/src/numbertheory/sequences.ts` - Integer sequences and enumerators: Motzkin, Narayana, Schroder, Delannoy,
+
+**Exports:**
+
+- Functions: `motzkin`, `narayana`, `schroder`, `delannoy`, `pell`, `tribonacci`, `eulerianNumber`, `lahNumber`, `integerPartitionsGen`, `compositionsGen`, `grayCode`, `binomialMod`
 
 ---
 
@@ -7188,6 +7357,21 @@ graph LR
 
 ---
 
+### `functions/src/numeric/constrained.ts` - Constrained minimization by the augmented Lagrangian method
+
+**Internal Dependencies:**
+
+| File        | Imports | Type   |
+| ----------- | ------- | ------ |
+| `./bfgs.js` | `bfgs`  | Import |
+
+**Exports:**
+
+- Interfaces: `ConstrainedOptions`, `ConstrainedResult`
+- Functions: `minimizeConstrained`
+
+---
+
 ### `functions/src/numeric/control-equations.ts` - Control-theory matrix equations — `dlyap`/`care`/`dare`.
 
 **Workspace Dependencies:**
@@ -7221,6 +7405,15 @@ graph LR
 - Interfaces: `EigshOptions`, `EigshResult`
 - Types: `EigshOperatorInput`
 - Functions: `eigsh`
+
+---
+
+### `functions/src/numeric/finite-differences.ts` - Finite-difference weights and two scalar fixed-point / bracketing solvers.
+
+**Exports:**
+
+- Interfaces: `ScalarSolveOptions`, `FixedPointOptions`
+- Functions: `finiteDifferenceCoefficients`, `ridders`, `fixedPoint`
 
 ---
 
@@ -7258,12 +7451,36 @@ graph LR
 
 ---
 
+### `functions/src/numeric/gauss-nodes-extra.ts` - Gauss quadrature nodes and weights for classical weight functions.
+
+**Exports:**
+
+- Interfaces: `GaussRule`
+- Functions: `rootsHermite`, `rootsLaguerre`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsJacobi`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`
+
+---
+
 ### `functions/src/numeric/gauss-nodes.ts` - Gauss-Legendre quadrature nodes and weights.
 
 **Exports:**
 
 - Interfaces: `RootsLegendreResult`
 - Functions: `rootsLegendre`
+
+---
+
+### `functions/src/numeric/global-optimizers.ts` - Global, derivative-free optimizers.
+
+**Internal Dependencies:**
+
+| File                               | Imports     | Type   |
+| ---------------------------------- | ----------- | ------ |
+| `../probability/util/seededRNG.js` | `createRng` | Import |
+
+**Exports:**
+
+- Interfaces: `GlobalOptimizeOptions`, `GlobalOptimizeResult`, `SimulatedAnnealingOptions`
+- Functions: `differentialEvolution`, `simulatedAnnealing`
 
 ---
 
@@ -7400,6 +7617,22 @@ graph LR
 - Interfaces: `UncertaintyPropagationResult`, `UncertaintyPropagationOptions`
 - Types: `UncertaintyExpression`
 - Functions: `propagateUncertainty`
+
+---
+
+### `functions/src/numeric/quadrature-extra.ts` - Additional quadrature rules and multiple integrals.
+
+**Internal Dependencies:**
+
+| File                 | Imports                         | Type   |
+| -------------------- | ------------------------------- | ------ |
+| `./adaptive-quad.js` | `quad, QuadOptions, QuadResult` | Import |
+
+**Exports:**
+
+- Interfaces: `TanhSinhOptions`
+- Types: `Limit1`, `Limit2`
+- Functions: `tanhSinh`, `clenshawCurtis`, `dblquad`, `tplquad`
 
 ---
 
@@ -8392,6 +8625,15 @@ graph LR
 
 ---
 
+### `functions/src/signal/dtw.ts` - Dynamic time warping with an optional Sakoe-Chiba band.
+
+**Exports:**
+
+- Interfaces: `DtwOptions`, `DtwResult`
+- Functions: `dtw`
+
+---
+
 ### `functions/src/signal/fft-core-f64.ts` - The ONE radix-2 Cooley-Tukey core for this package, on flat Float64Arrays.
 
 **Exports:**
@@ -8487,6 +8729,15 @@ graph LR
 
 ---
 
+### `functions/src/signal/lomb-scargle.ts` - Lomb-Scargle periodogram for unevenly sampled data (classic Scargle form with
+
+**Exports:**
+
+- Interfaces: `LombScargleOptions`
+- Functions: `lombScargle`
+
+---
+
 ### `functions/src/signal/remez-exchange.ts` - Exact Parks-McClellan (Remez exchange) optimal equiripple FIR design.
 
 **Exports:**
@@ -8510,6 +8761,33 @@ graph LR
 
 - Interfaces: `FindPeaksOptions`, `CsdOptions`, `StftOptions`, `StftResult`
 - Functions: `findPeaks`, `peakWidths`, `csd`, `coherence`, `stft`, `istft`, `decimate`
+
+---
+
+### `functions/src/signal/system-response.ts` - LTI system responses, transfer-function / state-space conversions, and
+
+**Internal Dependencies:**
+
+| File                        | Imports         | Type               |
+| --------------------------- | --------------- | ------------------ |
+| `../signal-filter-extra.js` | `lfilter`       | Import             |
+| `./fft.js`                  | `ComplexNumber` | Import (type-only) |
+
+**Exports:**
+
+- Interfaces: `StateSpace`, `BiquadCoefficients`
+- Types: `DiscretizeMethod`
+- Functions: `impulseResponse`, `stepResponse`, `tf2ss`, `ss2tf`, `cont2discrete`, `iirNotch`, `iirPeak`, `tf2zpk`, `sos2tf`
+
+---
+
+### `functions/src/signal/waveforms.ts` - Test waveform generators (scipy.signal.waveforms parity).
+
+**Exports:**
+
+- Interfaces: `ChirpOptions`
+- Types: `ChirpMethod`
+- Functions: `chirp`, `squareWave`, `sawtooth`, `gaussPulse`, `unitImpulse`, `sweepPoly`
 
 ---
 
@@ -8539,6 +8817,23 @@ graph LR
 
 ---
 
+### `functions/src/signal/windows-extra.ts` - Extra window functions (scipy.signal.windows parity).
+
+**Internal Dependencies:**
+
+| File                         | Imports          | Type   |
+| ---------------------------- | ---------------- | ------ |
+| `../typed/signal.js`         | `windowFunction` | Import |
+| `../wasm/special/scalars.js` | `besselIScalar`  | Import |
+
+**Exports:**
+
+- Interfaces: `WindowOptions`
+- Types: `ExtraWindowName`
+- Functions: `kaiserWindow`, `gaussianWindow`, `tukeyWindow`, `blackmanHarrisWindow`, `nuttallWindow`, `flattopWindow`, `bohmanWindow`, `parzenWindow`, `cosineWindow`, `exponentialWindow`, `getWindow`
+
+---
+
 ### `functions/src/signal/zpk2tf.ts` - Transfer function representation [numerator, denominator]
 
 **Internal Dependencies:**
@@ -8559,6 +8854,41 @@ graph LR
 
 ## Functions/special Dependencies
 
+### `functions/src/special/angular-momentum.ts` - Angular-momentum coupling (Wigner 3j, Clebsch–Gordan, Wigner 6j) via the Racah
+
+**Workspace Dependencies:**
+
+| Package                      | Import    |
+| ---------------------------- | --------- |
+| `@danielsimonjr/mathts-core` | `Complex` |
+
+**Internal Dependencies:**
+
+| File              | Imports    | Type   |
+| ----------------- | ---------- | ------ |
+| `./spheroidal.js` | `ferrersP` | Import |
+
+**Exports:**
+
+- Functions: `wigner3j`, `clebschGordan`, `wigner6j`, `sphericalHarmonic`
+
+---
+
+### `functions/src/special/erf-extra.ts` - Inverse and scaled error functions, and Dawson's integral.
+
+**Internal Dependencies:**
+
+| File                           | Imports          | Type   |
+| ------------------------------ | ---------------- | ------ |
+| `../distribution-functions.js` | `normalQuantile` | Import |
+| `../wasm/special/scalars.js`   | `erfcScalar`     | Import |
+
+**Exports:**
+
+- Functions: `erfcx`, `erfinv`, `erfcinv`, `dawson`
+
+---
+
 ### `functions/src/special/erf.ts` - Compute the erf function of a value using a rational Chebyshev
 
 **Internal Dependencies:**
@@ -8573,6 +8903,14 @@ graph LR
 **Exports:**
 
 - Constants: `createErf`
+
+---
+
+### `functions/src/special/exp-integrals.ts` - Exponential-type integrals: E1 / E_n, Shi (sinh integral) and Chi (cosh integral).
+
+**Exports:**
+
+- Functions: `expn`, `expIntegralE1`, `sinhIntegral`, `coshIntegral`
 
 ---
 
@@ -8634,6 +8972,26 @@ graph LR
 
 ---
 
+### `functions/src/special/spherical-bessel.ts` - Spherical Bessel functions j_n, y_n, i_n, k_n, Hankel functions of real order,
+
+**Workspace Dependencies:**
+
+| Package                      | Import    |
+| ---------------------------- | --------- |
+| `@danielsimonjr/mathts-core` | `Complex` |
+
+**Internal Dependencies:**
+
+| File                  | Imports            | Type   |
+| --------------------- | ------------------ | ------ |
+| `../typed/special.js` | `besselJ, besselY` | Import |
+
+**Exports:**
+
+- Functions: `sphericalBesselJ`, `sphericalBesselY`, `sphericalBesselI`, `sphericalBesselK`, `hankelH1`, `hankelH2`, `besselJZeros`
+
+---
+
 ### `functions/src/special/spheroidal.ts` - Prolate spheroidal wave functions — angular characteristic values
 
 **Workspace Dependencies:**
@@ -8662,6 +9020,20 @@ graph LR
 
 - Interfaces: `CoulombFG`
 - Functions: `siegelZ`, `riemannSiegelZ`, `lerchPhi`, `parabolicCylinderD`, `coulombF`, `coulombG`, `coulombFG`
+
+---
+
+### `functions/src/special/zeta-extra.ts` - Hurwitz zeta, Dirichlet eta, and Bernoulli / Euler polynomials.
+
+**Internal Dependencies:**
+
+| File                      | Imports                   | Type   |
+| ------------------------- | ------------------------- | ------ |
+| `../typed/probability.js` | `bernoulli, combinations` | Import |
+
+**Exports:**
+
+- Functions: `hurwitzZeta`, `dirichletEta`, `bernoulliPolynomial`, `eulerPolynomial`
 
 ---
 
@@ -8979,6 +9351,40 @@ graph LR
 
 ## Functions/stats Dependencies
 
+### `functions/src/stats/distances.ts` - Distances between samples and discrete information measures (gap-analysis
+
+**Exports:**
+
+- Functions: `wassersteinDistance`, `energyDistance`, `mutualInformation`, `ecdf`
+
+---
+
+### `functions/src/stats/distributions-extra.ts` - Closed-form and quadrature-backed distribution functions (gap-analysis
+
+**Internal Dependencies:**
+
+| File                          | Imports                | Type   |
+| ----------------------------- | ---------------------- | ------ |
+| `../typed/distributions.js`   | `normalPDF, normalCDF` | Import |
+| `../typed/special.js`         | `gammainc, lgamma`     | Import |
+| `../numeric/adaptive-quad.js` | `quad`                 | Import |
+| `../wasm/special/scalars.js`  | `besselIScalar`        | Import |
+| `../special/erf-extra.js`     | `erfcx`                | Import |
+
+**Exports:**
+
+- Functions: `owensT`, `skewNormalPDF`, `skewNormalCDF`, `truncatedNormalPDF`, `truncatedNormalCDF`, `truncatedNormalMean`, `inverseGammaPDF`, `inverseGammaCDF`, `gevCDF`, `gevPDF`, `skellamPMF`, `zipfPMF`, `nakagamiPDF`, `ricePDF`
+
+---
+
+### `functions/src/stats/effect-sizes.ts` - Standardized effect sizes (gap-analysis 2026-11-04, Batch A).
+
+**Exports:**
+
+- Functions: `cohensD`, `hedgesG`, `glassDelta`, `etaSquared`, `rankBiserial`
+
+---
+
 ### `functions/src/stats/fit-distribution.ts` - Maximum-likelihood distribution fitting (Phase 4 Task 1).
 
 **Internal Dependencies:**
@@ -9083,6 +9489,21 @@ graph LR
 
 ---
 
+### `functions/src/stats/nonparametric-extra.ts` - Nonparametric and categorical tests plus the jackknife (gap-analysis
+
+**Internal Dependencies:**
+
+| File                           | Imports         | Type   |
+| ------------------------------ | --------------- | ------ |
+| `../distribution-functions.js` | `chiSquaredCDF` | Import |
+| `../typed/distributions.js`    | `normalCDF`     | Import |
+
+**Exports:**
+
+- Functions: `signTest`, `runsTest`, `moodMedianTest`, `powerDivergence`, `gTest`, `jackknife`
+
+---
+
 ### `functions/src/stats/power-analysis.ts` - Two-sample t-test power analysis (Stats-breadth chunk).
 
 **Internal Dependencies:**
@@ -9100,6 +9521,14 @@ graph LR
 
 ---
 
+### `functions/src/stats/robust-stats.ts` - Generalized means, geometric standard deviation, robust regression slopes
+
+**Exports:**
+
+- Functions: `pmean`, `gstd`, `gzscore`, `theilSen`, `siegelSlopes`, `partialCorrelation`
+
+---
+
 ### `functions/src/stats/timeseries.ts` - Time-series inference (Phase 4 Task 3) — model-diagnostic statistics that sit
 
 **Internal Dependencies:**
@@ -9114,6 +9543,14 @@ graph LR
 
 - Interfaces: `LjungBoxResult`, `AdfullerResult`
 - Functions: `pacf`, `ljungBox`, `durbinWatson`, `adfuller`
+
+---
+
+### `functions/src/stats/weighted-stats.ts` - Weighted descriptive statistics (gap-analysis 2026-11-04, Batch A).
+
+**Exports:**
+
+- Functions: `weightedMean`, `weightedVariance`, `weightedQuantile`, `weightedMedian`
 
 ---
 
@@ -10994,7 +11431,7 @@ graph LR
 | `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
 | `./parallel-map.js`                  | `mapArray, kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                                                                                   | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                              | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
@@ -11850,7 +12287,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselGammaAux`, `besselJYTemme`, `besselHankelReal`, `besselJRealOrder`, `besselYRealOrder`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -18636,7 +19073,7 @@ graph LR
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
 | `functions/src/factories/index`                        | 244 files    | 12 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 204 files  |
-| `functions/src/index`                                  | 95 files     | 0 files    |
+| `functions/src/index`                                  | 128 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/is`                               | 0 files      | 56 files   |
@@ -18885,557 +19322,568 @@ graph TD
         N136[front-export]
         N137[geometry-extra]
         N138[grad-forward]
-        N139[...22 more]
+        N139[...24 more]
     end
 
     subgraph Functions/cas
         N140[layer3]
         N141[rat]
         N142[rational-integrate]
-        N143[render-coeff-times]
+        N143[real-roots]
+        N144[render-coeff-times]
     end
 
     subgraph Functions/combinatorics
-        N144[bellNumbers]
-        N145[catalan]
-        N146[composition]
-        N147[stirlingS2]
+        N145[bellNumbers]
+        N146[catalan]
+        N147[composition]
+        N148[stirlingS2]
     end
 
     subgraph Functions/complex
-        N148[arg]
-        N149[conj]
-        N150[im]
-        N151[re]
+        N149[arg]
+        N150[conj]
+        N151[im]
+        N152[re]
     end
 
     subgraph Functions/core
-        N152[config]
-        N153[create]
-        N154[config]
-        N155[import]
-        N156[typed]
+        N153[config]
+        N154[create]
+        N155[config]
+        N156[import]
+        N157[typed]
     end
 
     subgraph Functions/error
-        N157[ArgumentsError]
-        N158[DimensionError]
-        N159[IndexError]
+        N158[ArgumentsError]
+        N159[DimensionError]
+        N160[IndexError]
     end
 
     subgraph Functions/expression
-        N160[operators]
+        N161[operators]
     end
 
     subgraph Functions/factories
-        N161[evaluate]
-        N162[index]
-        N163[matrix-bridge]
-        N164[scope]
+        N162[evaluate]
+        N163[index]
+        N164[matrix-bridge]
+        N165[scope]
     end
 
     subgraph Functions/geometry
-        N165[alpha-shape]
-        N166[circumcircle]
-        N167[delaunay]
-        N168[distance]
-        N169[geometry-extra]
-        N170[halfspace-intersection]
-        N171[hull]
-        N172[intersect]
-        N173[intersect3d]
-        N174[mass-properties]
-        N175[...2 more]
+        N166[alpha-shape]
+        N167[circumcircle]
+        N168[curves]
+        N169[delaunay]
+        N170[distance]
+        N171[geometry-extra]
+        N172[halfspace-intersection]
+        N173[hull]
+        N174[intersect]
+        N175[intersect3d]
+        N176[...5 more]
     end
 
     subgraph Functions/gpu
-        N176[elementwise-gpu]
-        N177[fft-gpu]
+        N177[elementwise-gpu]
+        N178[fft-gpu]
     end
 
     subgraph Functions/graph
-        N178[community-coloring]
-        N179[optimization]
-        N180[traversal-centrality]
+        N179[community-coloring]
+        N180[optimization]
+        N181[traversal-centrality]
     end
 
     subgraph Functions/logical
-        N181[and]
-        N182[not]
-        N183[nullish]
-        N184[or]
-        N185[xor]
+        N182[and]
+        N183[not]
+        N184[nullish]
+        N185[or]
+        N186[xor]
     end
 
     subgraph Functions/matrix
-        N186[column]
-        N187[complex-to-interleaved]
-        N188[concat]
-        N189[count]
-        N190[cross]
-        N191[ctranspose]
-        N192[det]
-        N193[diag]
-        N194[diff]
-        N195[dot]
-        N196[...39 more]
+        N187[column]
+        N188[complex-to-interleaved]
+        N189[concat]
+        N190[count]
+        N191[cross]
+        N192[ctranspose]
+        N193[det]
+        N194[diag]
+        N195[diff]
+        N196[dot]
+        N197[...39 more]
     end
 
     subgraph Functions/ml
-        N197[dbscan-knn]
-        N198[glm]
-        N199[kde]
-        N200[logistic-regression]
-        N201[ols]
-        N202[regularized-regression]
+        N198[dbscan-knn]
+        N199[glm]
+        N200[kde]
+        N201[logistic-regression]
+        N202[ols]
+        N203[regularized-regression]
     end
 
     subgraph Functions/numbertheory
-        N203[extra]
+        N204[arithmetic-functions]
+        N205[diophantine]
+        N206[extra]
+        N207[integer-matrices]
+        N208[modular]
+        N209[sequences]
     end
 
     subgraph Functions/numeric
-        N204[adaptive-quad]
-        N205[bfgs]
-        N206[bspline]
-        N207[control-equations]
-        N208[eigsh]
-        N209[fsolve]
-        N210[gauss-legendre4]
-        N211[gauss-nodes]
-        N212[hermite]
-        N213[interpn]
-        N214[...16 more]
+        N210[adaptive-quad]
+        N211[bfgs]
+        N212[bspline]
+        N213[constrained]
+        N214[control-equations]
+        N215[eigsh]
+        N216[finite-differences]
+        N217[fsolve]
+        N218[gauss-legendre4]
+        N219[gauss-nodes-extra]
+        N220[...21 more]
     end
 
     subgraph Functions/plain
-        N215[arithmetic]
-        N216[bitwise]
-        N217[combinations]
-        N218[constants]
-        N219[index]
-        N220[logical]
-        N221[probability]
-        N222[relational]
-        N223[trigonometry]
-        N224[utils]
+        N221[arithmetic]
+        N222[bitwise]
+        N223[combinations]
+        N224[constants]
+        N225[index]
+        N226[logical]
+        N227[probability]
+        N228[relational]
+        N229[trigonometry]
+        N230[utils]
     end
 
     subgraph Functions/probability
-        N225[bernoulli]
-        N226[bigint-binomial]
-        N227[combinations]
-        N228[combinationsWithRep]
-        N229[factorial]
-        N230[gamma]
-        N231[kldivergence]
-        N232[lgamma]
-        N233[multinomial]
-        N234[permutations]
-        N235[...6 more]
+        N231[bernoulli]
+        N232[bigint-binomial]
+        N233[combinations]
+        N234[combinationsWithRep]
+        N235[factorial]
+        N236[gamma]
+        N237[kldivergence]
+        N238[lgamma]
+        N239[multinomial]
+        N240[permutations]
+        N241[...6 more]
     end
 
     subgraph Functions/relational
-        N236[compare]
-        N237[compareNatural]
-        N238[compareText]
-        N239[compareUnits]
-        N240[deepEqual]
-        N241[equal]
-        N242[equalScalar]
-        N243[equalText]
-        N244[larger]
-        N245[largerEq]
-        N246[...3 more]
+        N242[compare]
+        N243[compareNatural]
+        N244[compareText]
+        N245[compareUnits]
+        N246[deepEqual]
+        N247[equal]
+        N248[equalScalar]
+        N249[equalText]
+        N250[larger]
+        N251[largerEq]
+        N252[...3 more]
     end
 
     subgraph Functions/set
-        N247[flatten-pair]
-        N248[setCartesian]
-        N249[setDifference]
-        N250[setDistinct]
-        N251[setIntersect]
-        N252[setIsSubset]
-        N253[setMultiplicity]
-        N254[setPowerset]
-        N255[setSize]
-        N256[setSymDifference]
-        N257[...1 more]
+        N253[flatten-pair]
+        N254[setCartesian]
+        N255[setDifference]
+        N256[setDistinct]
+        N257[setIntersect]
+        N258[setIsSubset]
+        N259[setMultiplicity]
+        N260[setPowerset]
+        N261[setSize]
+        N262[setSymDifference]
+        N263[...1 more]
     end
 
     subgraph Functions/signal
-        N258[conv]
-        N259[fft-core-f64]
-        N260[fft-helpers]
-        N261[fft]
-        N262[fir-smoothing]
-        N263[freqz]
-        N264[iir-design]
-        N265[remez-exchange]
-        N266[spectral-peaks]
-        N267[wavelet-filters]
-        N268[...2 more]
+        N264[conv]
+        N265[dtw]
+        N266[fft-core-f64]
+        N267[fft-helpers]
+        N268[fft]
+        N269[fir-smoothing]
+        N270[freqz]
+        N271[iir-design]
+        N272[lomb-scargle]
+        N273[remez-exchange]
+        N274[...7 more]
     end
 
     subgraph Functions/special
-        N269[erf]
-        N270[hypergeometric]
-        N271[jacobi-elliptic]
-        N272[mathieu]
-        N273[niche]
-        N274[polygamma-orthopoly]
-        N275[spheroidal]
-        N276[wave-functions]
-        N277[zeta]
+        N275[angular-momentum]
+        N276[erf-extra]
+        N277[erf]
+        N278[exp-integrals]
+        N279[hypergeometric]
+        N280[jacobi-elliptic]
+        N281[mathieu]
+        N282[niche]
+        N283[polygamma-orthopoly]
+        N284[spherical-bessel]
+        N285[...4 more]
     end
 
     subgraph Functions/statistics
-        N278[corr]
-        N279[cumsum]
-        N280[extreme]
-        N281[mad]
-        N282[max]
-        N283[mean]
-        N284[median]
-        N285[min]
-        N286[mode]
-        N287[prod]
-        N288[...5 more]
+        N286[corr]
+        N287[cumsum]
+        N288[extreme]
+        N289[mad]
+        N290[max]
+        N291[mean]
+        N292[median]
+        N293[min]
+        N294[mode]
+        N295[prod]
+        N296[...5 more]
     end
 
     subgraph Functions/stats
-        N289[fit-distribution]
-        N290[gaussian-process]
-        N291[inference-extra]
-        N292[inference-extra2]
-        N293[multivariate-sampling]
-        N294[mvn]
-        N295[power-analysis]
-        N296[timeseries]
+        N297[distances]
+        N298[distributions-extra]
+        N299[effect-sizes]
+        N300[fit-distribution]
+        N301[gaussian-process]
+        N302[inference-extra]
+        N303[inference-extra2]
+        N304[multivariate-sampling]
+        N305[mvn]
+        N306[nonparametric-extra]
+        N307[...4 more]
     end
 
     subgraph Functions/string
-        N297[bin]
-        N298[format]
-        N299[hex]
-        N300[oct]
-        N301[print]
+        N308[bin]
+        N309[format]
+        N310[hex]
+        N311[oct]
+        N312[print]
     end
 
     subgraph Functions/trigonometry
-        N302[acos]
-        N303[acosh]
-        N304[acot]
-        N305[acoth]
-        N306[acsc]
-        N307[acsch]
-        N308[asec]
-        N309[asech]
-        N310[asin]
-        N311[asinh]
-        N312[...16 more]
+        N313[acos]
+        N314[acosh]
+        N315[acot]
+        N316[acoth]
+        N317[acsc]
+        N318[acsch]
+        N319[asec]
+        N320[asech]
+        N321[asin]
+        N322[asinh]
+        N323[...16 more]
     end
 
     subgraph Functions/type
-        N313[BigNumber]
-        N314[Chain]
-        N315[chain]
-        N316[Complex]
-        N317[Decimal]
-        N318[FibonacciHeap]
-        N319[ImmutableDenseMatrix]
-        N320[MatrixIndex]
-        N321[Spa]
-        N322[index]
-        N323[...22 more]
+        N324[BigNumber]
+        N325[Chain]
+        N326[chain]
+        N327[Complex]
+        N328[Decimal]
+        N329[FibonacciHeap]
+        N330[ImmutableDenseMatrix]
+        N331[MatrixIndex]
+        N332[Spa]
+        N333[index]
+        N334[...22 more]
     end
 
     subgraph Functions/typed
-        N324[aggregate-restart]
-        N325[algebra]
-        N326[arithmetic]
-        N327[bitwise]
-        N328[cas]
-        N329[centrality-restarts]
-        N330[combinatorics]
-        N331[complex]
-        N332[dist-objects]
-        N333[distributions]
-        N334[...36 more]
+        N335[aggregate-restart]
+        N336[algebra]
+        N337[arithmetic]
+        N338[bitwise]
+        N339[cas]
+        N340[centrality-restarts]
+        N341[combinatorics]
+        N342[complex]
+        N343[dist-objects]
+        N344[distributions]
+        N345[...36 more]
     end
 
     subgraph Functions/unit
-        N335[to]
-        N336[toBest]
+        N346[to]
+        N347[toBest]
     end
 
     subgraph Functions/utils
-        N337[array]
-        N338[bigint]
-        N339[bitwise]
-        N340[nearlyEqual]
-        N341[clone]
-        N342[collection]
-        N343[complex]
-        N344[customs]
-        N345[emitter]
-        N346[factory]
-        N347[...25 more]
+        N348[array]
+        N349[bigint]
+        N350[bitwise]
+        N351[nearlyEqual]
+        N352[clone]
+        N353[collection]
+        N354[complex]
+        N355[customs]
+        N356[emitter]
+        N357[factory]
+        N358[...25 more]
     end
 
     subgraph Functions/wasm
-        N348[WasmLoader]
-        N349[wasm-bridge]
-        N350[common]
-        N351[wasm-bridge]
-        N352[integrity]
-        N353[wasm-bridge]
-        N354[policy]
-        N355[wasm-bridge]
-        N356[resolve]
-        N357[wasm-bridge]
-        N358[...3 more]
+        N359[WasmLoader]
+        N360[wasm-bridge]
+        N361[common]
+        N362[wasm-bridge]
+        N363[integrity]
+        N364[wasm-bridge]
+        N365[policy]
+        N366[wasm-bridge]
+        N367[resolve]
+        N368[wasm-bridge]
+        N369[...3 more]
     end
 
     subgraph Expression
-        N359[Help]
-        N360[Parser]
-        N361[index]
-        N362[keywords]
-        N363[limits]
-        N364[operators]
-        N365[parse]
-        N366[scalar-builder]
-        N367[scalar-enumerate]
-        N368[scalar-structure]
-        N369[...1 more]
+        N370[Help]
+        N371[Parser]
+        N372[index]
+        N373[keywords]
+        N374[limits]
+        N375[operators]
+        N376[parse]
+        N377[scalar-builder]
+        N378[scalar-enumerate]
+        N379[scalar-structure]
+        N380[...1 more]
     end
 
     subgraph Expression/compiler
-        N370[compile]
-        N371[index]
+        N381[compile]
+        N382[index]
     end
 
     subgraph Expression/embeddedDocs
-        N372[Infinity]
-        N373[LN10]
-        N374[LN2]
-        N375[LOG10E]
-        N376[LOG2E]
-        N377[NaN]
-        N378[SQRT1_2]
-        N379[SQRT2]
-        N380[e]
-        N381[false]
-        N382[...388 more]
+        N383[Infinity]
+        N384[LN10]
+        N385[LN2]
+        N386[LOG10E]
+        N387[LOG2E]
+        N388[NaN]
+        N389[SQRT1_2]
+        N390[SQRT2]
+        N391[e]
+        N392[false]
+        N393[...388 more]
     end
 
     subgraph Expression/error
-        N383[DimensionError]
-        N384[IndexError]
+        N394[DimensionError]
+        N395[IndexError]
     end
 
     subgraph Expression/evaluator
-        N385[evaluate]
-        N386[index]
+        N396[evaluate]
+        N397[index]
     end
 
     subgraph Expression/function
-        N387[parser]
+        N398[parser]
     end
 
     subgraph Expression/node
-        N388[AccessorNode]
-        N389[ArrayNode]
-        N390[AssignmentNode]
-        N391[BlockNode]
-        N392[ConditionalNode]
-        N393[ConstantNode]
-        N394[FunctionAssignmentNode]
-        N395[FunctionNode]
-        N396[IndexNode]
-        N397[Node]
-        N398[...10 more]
+        N399[AccessorNode]
+        N400[ArrayNode]
+        N401[AssignmentNode]
+        N402[BlockNode]
+        N403[ConditionalNode]
+        N404[ConstantNode]
+        N405[FunctionAssignmentNode]
+        N406[FunctionNode]
+        N407[IndexNode]
+        N408[Node]
+        N409[...10 more]
     end
 
     subgraph Expression/transform
-        N399[and.transform]
-        N400[bitAnd.transform]
-        N401[bitOr.transform]
-        N402[column.transform]
-        N403[concat.transform]
-        N404[cumsum.transform]
-        N405[diff.transform]
-        N406[filter.transform]
-        N407[forEach.transform]
-        N408[index.transform]
-        N409[...23 more]
+        N410[and.transform]
+        N411[bitAnd.transform]
+        N412[bitOr.transform]
+        N413[column.transform]
+        N414[concat.transform]
+        N415[cumsum.transform]
+        N416[diff.transform]
+        N417[filter.transform]
+        N418[forEach.transform]
+        N419[index.transform]
+        N420[...23 more]
     end
 
     subgraph Expression/utils
-        N410[array]
-        N411[collection]
-        N412[customs]
-        N413[factory]
-        N414[is]
-        N415[latex]
-        N416[map]
-        N417[mathml]
-        N418[number]
-        N419[object]
-        N420[...3 more]
+        N421[array]
+        N422[collection]
+        N423[customs]
+        N424[factory]
+        N425[is]
+        N426[latex]
+        N427[map]
+        N428[mathml]
+        N429[number]
+        N430[object]
+        N431[...3 more]
     end
 
     subgraph Parser
-        N421[index]
+        N432[index]
     end
 
     subgraph Units
-        N422[index]
+        N433[index]
     end
 
     subgraph Numbers
-        N423[index]
+        N434[index]
     end
 
     subgraph Ast
-        N424[index]
+        N435[index]
     end
 
     subgraph Evaluator
-        N425[index]
+        N436[index]
     end
 
     subgraph Linalg
-        N426[index]
+        N437[index]
     end
 
     subgraph Arithmetic
-        N427[index]
+        N438[index]
     end
 
     subgraph Trigonometry
-        N428[index]
+        N439[index]
     end
 
     subgraph Statistics
-        N429[index]
+        N440[index]
     end
 
     subgraph Signal
-        N430[index]
+        N441[index]
     end
 
     subgraph Parallel
-        N431[ComputePool]
-        N432[ParallelMatrix]
-        N433[WorkerPool]
-        N434[gemm-rows]
-        N435[index]
-        N436[matrix.worker]
-        N437[validate]
+        N442[ComputePool]
+        N443[ParallelMatrix]
+        N444[WorkerPool]
+        N445[gemm-rows]
+        N446[index]
+        N447[matrix.worker]
+        N448[validate]
     end
 
     subgraph Parallel/operations
-        N438[elementwise]
-        N439[index]
-        N440[map]
-        N441[matmul]
-        N442[reduce]
+        N449[elementwise]
+        N450[index]
+        N451[map]
+        N452[matmul]
+        N453[reduce]
     end
 
     subgraph Parallel/ops
-        N443[bitwise]
+        N454[bitwise]
     end
 
     subgraph Parallel/strategies
-        N444[chunk]
-        N445[index]
-        N446[threshold]
+        N455[chunk]
+        N456[index]
+        N457[threshold]
     end
 
     subgraph Workbook
-        N447[cli]
-        N448[contract]
-        N449[doc]
-        N450[edit]
-        N451[executor]
-        N452[formatter]
-        N453[fs-atomic]
-        N454[graph]
-        N455[html]
-        N456[index]
-        N457[...15 more]
+        N458[cli]
+        N459[contract]
+        N460[doc]
+        N461[edit]
+        N462[executor]
+        N463[formatter]
+        N464[fs-atomic]
+        N465[graph]
+        N466[html]
+        N467[index]
+        N468[...15 more]
     end
 
     subgraph Assembly/algebra
-        N458[decomposition]
+        N469[decomposition]
     end
 
     subgraph Assembly
-        N459[elementwise]
-        N460[heap]
-        N461[index]
-        N462[poly]
-        N463[signal]
-        N464[sort]
-        N465[special]
-        N466[tridiag]
+        N470[elementwise]
+        N471[heap]
+        N472[index]
+        N473[poly]
+        N474[signal]
+        N475[sort]
+        N476[special]
+        N477[tridiag]
     end
 
     subgraph Assembly/ops
-        N467[approx]
-        N468[array]
-        N469[bitwise]
-        N470[complex-array]
-        N471[complex-ops]
-        N472[curvefit]
-        N473[f64-buffer]
-        N474[fft]
-        N475[linalg]
-        N476[matrix]
-        N477[...7 more]
+        N478[approx]
+        N479[array]
+        N480[bitwise]
+        N481[complex-array]
+        N482[complex-ops]
+        N483[curvefit]
+        N484[f64-buffer]
+        N485[fft]
+        N486[linalg]
+        N487[matrix]
+        N488[...7 more]
     end
 
     subgraph Assembly/types
-        N478[complex]
+        N489[complex]
     end
 
     subgraph Compat
-        N479[chain]
-        N480[index]
-        N481[shims]
+        N490[chain]
+        N491[index]
+        N492[shims]
     end
 
     subgraph Gpu
-        N482[BufferPool]
-        N483[GPUContext]
-        N484[ShaderManager]
-        N485[detect]
-        N486[device]
-        N487[flag]
-        N488[index]
-        N489[serialize]
+        N493[BufferPool]
+        N494[GPUContext]
+        N495[ShaderManager]
+        N496[detect]
+        N497[device]
+        N498[flag]
+        N499[index]
+        N500[serialize]
     end
 
     subgraph Plot
-        N490[coerce]
-        N491[contour]
-        N492[emit]
-        N493[frame]
-        N494[heatmap]
-        N495[histogram]
-        N496[index]
-        N497[marks2d]
-        N498[overlay]
-        N499[palette]
-        N500[...8 more]
+        N501[coerce]
+        N502[contour]
+        N503[emit]
+        N504[frame]
+        N505[heatmap]
+        N506[histogram]
+        N507[index]
+        N508[marks2d]
+        N509[overlay]
+        N510[palette]
+        N511[...8 more]
     end
 
     subgraph Plot/three
-        N501[points3d]
-        N502[project]
-        N503[surface]
+        N512[points3d]
+        N513[project]
+        N514[surface]
     end
 
     N4 --> N2
@@ -19523,17 +19971,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1237   |
+| Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 206769 |
-| Total Exports           | 6457   |
-| Total Re-exports        | 2750   |
+| Total Lines of Code     | 212928 |
+| Total Exports           | 6877   |
+| Total Re-exports        | 2977   |
 | Total Classes           | 60     |
-| Total Interfaces        | 576    |
-| Total Functions         | 2086   |
-| Total Type Guards       | 162    |
+| Total Interfaces        | 592    |
+| Total Functions         | 2279   |
+| Total Type Guards       | 168    |
 | Total Enums             | 0      |
-| Type-only Imports       | 625    |
+| Type-only Imports       | 638    |
 | Runtime Circular Deps   | 0      |
 | Type-only Circular Deps | 0      |
 

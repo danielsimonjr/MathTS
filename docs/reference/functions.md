@@ -22,7 +22,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1090** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1318** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -2991,7 +2991,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1120 exports).
+> `@danielsimonjr/mathts-functions` (1318 exports).
 
 ### Functions by category
 
@@ -3049,7 +3049,7 @@ await terminatePool();
 
 **Parallel Execution Model** (8): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
 
-**Other exports (uncategorized)** (18): `complexCos`, `complexSin`, `convexHull2D`, `dirichletPdf`, `dirichletSample`, `ferrersP`, `gaussianProcessRegression`, `gpRegression`, `halfspaceIntersection`, `isGpuChainSupported`, `isWasmLoaded`, `massProperties`, `runWithConfig`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `wishartSample`
+**Other exports (uncategorized)** (216): `arcLength`, `barycentricCoordinates`, `bernoulliPolynomial`, `besselJZeros`, `bigOmega`, `binomialMod`, `blackmanHarrisWindow`, `blockDiag`, `bohmanWindow`, `catmullRom`, `chirp`, `choleskyDowndate`, `choleskyUpdate`, `clebschGordan`, `clenshawCurtis`, `closestPair`, `cohensD`, `collatzSteps`, `complexCos`, `complexSin`, `compositionsGen`, `condest`, `cont2discrete`, `conv2`, `convexHull2D`, `coshIntegral`, `cosineWindow`, `curvature`, `dawson`, `dblquad`, `delannoy`, `descartesSignChanges`, `dftMatrix`, `differentialEvolution`, `digitalRoot`, `digitSum`, `dirichletEta`, `dirichletPdf`, `dirichletSample`, `douglasPeucker`, `dtw`, `earClipping`, `ecdf`, `egyptianFraction`, `eigvals`, `energyDistance`, `erfcinv`, `erfcx`, `erfinv`, `etaSquared`, `eulerianNumber`, `eulerPolynomial`, `expIntegralE1`, `expn`, `exponentialWindow`, `fareySequence`, `ferrersP`, `fiedlerMatrix`, `finiteDifferenceCoefficients`, `fixedPoint`, `flattopWindow`, `fractionalMatrixPower`, `frechetDistance`, `frobeniusNumber`, `gaussHermiteIntegrate`, `gaussianProcessRegression`, `gaussianWindow`, `gaussLaguerreIntegrate`, `gaussPulse`, `getWindow`, `gevCDF`, `gevPDF`, `glassDelta`, `gpRegression`, `grayCode`, `gstd`, `gTest`, `gzscore`, `hadamardMatrix`, `halfspaceIntersection`, `hankelH1`, `hankelH2`, `hankelMatrix`, `hausdorffDistance`, `hedgesG`, `helmertMatrix`, `hermiteNormalForm`, `hilbertMatrix`, `hurwitzZeta`, `iirNotch`, `iirPeak`, `impulseResponse`, `inCircle`, `integerNthRoot`, `integerPartitionsGen`, `integerSqrt`, `inverseGammaCDF`, `inverseGammaPDF`, `invHilbertMatrix`, `isCarmichael`, `isGpuChainSupported`, `isolateRealRoots`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `isSquarefree`, `isWasmLoaded`, `jackknife`, `kaiserWindow`, `khatriRao`, `lahNumber`, `legendreSymbol`, `leslieMatrix`, `linearDiophantine`, `liouvilleLambda`, `lll`, `lombScargle`, `lq`, `massProperties`, `matrixPinv`, `mertens`, `minimizeConstrained`, `minimumEnclosingCircle`, `minkowskiSum`, `modPow`, `moodMedianTest`, `motzkin`, `mutualInformation`, `nakagamiPDF`, `narayana`, `nuttallWindow`, `orient2D`, `orient3D`, `owensT`, `partialCorrelation`, `parzenWindow`, `pascalMatrix`, `pell`, `pellSolve`, `pmean`, `pointInTriangle`, `polygonClip`, `polygonIsConvex`, `powerDivergence`, `powerIteration`, `prevPrime`, `primorial`, `ql`, `qrPivoted`, `radical`, `rankBiserial`, `realRoots`, `ricePDF`, `ridders`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rq`, `runsTest`, `runWithConfig`, `sawtooth`, `schroder`, `siegelSlopes`, `signm`, `signTest`, `simulatedAnnealing`, `sinc`, `sinhIntegral`, `skellamPMF`, `skewNormalCDF`, `skewNormalPDF`, `smallOmega`, `smithNormalForm`, `sos2tf`, `sphericalBesselI`, `sphericalBesselJ`, `sphericalBesselK`, `sphericalBesselY`, `sphericalHarmonic`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `sqrtMod`, `squareWave`, `ss2tf`, `stepResponse`, `sturmRootCount`, `sturmSequence`, `subspaceAngles`, `sumOfTwoSquares`, `sweepPoly`, `tanhSinh`, `tf2ss`, `tf2zpk`, `theilSen`, `tplquad`, `tribonacci`, `truncatedNormalCDF`, `truncatedNormalMean`, `truncatedNormalPDF`, `tukeyWindow`, `unitImpulse`, `vonMangoldt`, `wassersteinDistance`, `weightedMean`, `weightedMedian`, `weightedQuantile`, `weightedVariance`, `wigner3j`, `wigner6j`, `wishartSample`, `zeckendorf`, `zipfPMF`
 
 ### Constants & values (72)
 

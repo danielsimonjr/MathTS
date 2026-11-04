@@ -1653,6 +1653,7 @@
     ],
     "functions/src/typed/algebra.ts": [
       "functions/src/cas-integration.ts",
+      "functions/src/cas/real-roots.ts",
       "functions/src/typed/cas.ts",
       "functions/src/typed/index.ts"
     ],
@@ -1706,8 +1707,10 @@
       "functions/src/index.ts",
       "functions/src/ml/ols.ts",
       "functions/src/regression-extra.ts",
+      "functions/src/special/erf-extra.ts",
       "functions/src/stats/inference-extra.ts",
       "functions/src/stats/inference-extra2.ts",
+      "functions/src/stats/nonparametric-extra.ts",
       "functions/src/stats/power-analysis.ts",
       "functions/src/stats/timeseries.ts",
       "functions/src/typed/hypothesis.ts"
@@ -1719,6 +1722,8 @@
     "functions/src/typed/distributions.ts": [
       "functions/src/descriptive-stats.ts",
       "functions/src/hypothesis-extra.ts",
+      "functions/src/stats/distributions-extra.ts",
+      "functions/src/stats/nonparametric-extra.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/dist-objects.ts": [
@@ -1731,8 +1736,11 @@
       "functions/src/distribution-functions.ts",
       "functions/src/numbertheory/extra.ts",
       "functions/src/signal/iir-design.ts",
+      "functions/src/signal/windows-extra.ts",
+      "functions/src/special/erf-extra.ts",
       "functions/src/special/niche.ts",
       "functions/src/special/wave-functions.ts",
+      "functions/src/stats/distributions-extra.ts",
       "functions/src/stats/inference-extra2.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/distributions.ts",
@@ -1740,7 +1748,11 @@
       "functions/src/typed/special.ts",
       "functions/src/wasm/special/wasm-bridge.ts"
     ],
-    "functions/src/numeric/bfgs.ts": ["functions/src/fit-scalar.ts", "functions/src/index.ts"],
+    "functions/src/numeric/bfgs.ts": [
+      "functions/src/fit-scalar.ts",
+      "functions/src/index.ts",
+      "functions/src/numeric/constrained.ts"
+    ],
     "functions/src/optimization-extra.ts": [
       "functions/src/fit-scalar.ts",
       "functions/src/index.ts",
@@ -1771,6 +1783,8 @@
     "functions/src/typed/special.ts": [
       "functions/src/hypothesis-extra.ts",
       "functions/src/special/polygamma-orthopoly.ts",
+      "functions/src/special/spherical-bessel.ts",
+      "functions/src/stats/distributions-extra.ts",
       "functions/src/stats/fit-distribution.ts",
       "functions/src/typed/dist-objects.ts",
       "functions/src/typed/fused.ts",
@@ -1834,7 +1848,10 @@
     "functions/src/numeric/control-equations.ts": ["functions/src/index.ts"],
     "functions/src/numeric/minimize-scalar.ts": ["functions/src/index.ts"],
     "functions/src/numeric/adaptive-quad.ts": [
+      "functions/src/geometry/curves.ts",
       "functions/src/index.ts",
+      "functions/src/numeric/quadrature-extra.ts",
+      "functions/src/stats/distributions-extra.ts",
       "functions/src/typed/numeric.ts"
     ],
     "functions/src/numeric/interpn.ts": ["functions/src/index.ts"],
@@ -1866,7 +1883,8 @@
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts",
       "functions/src/signal/iir-design.ts",
-      "functions/src/signal/spectral-peaks.ts"
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/signal/system-response.ts"
     ],
     "functions/src/signal/fft-helpers.ts": ["functions/src/index.ts"],
     "functions/src/signal/iir-design.ts": ["functions/src/index.ts"],
@@ -1911,7 +1929,10 @@
     "functions/src/special/niche.ts": ["functions/src/index.ts"],
     "functions/src/special/wave-functions.ts": ["functions/src/index.ts"],
     "functions/src/special/mathieu.ts": ["functions/src/index.ts"],
-    "functions/src/special/spheroidal.ts": ["functions/src/index.ts"],
+    "functions/src/special/spheroidal.ts": [
+      "functions/src/index.ts",
+      "functions/src/special/angular-momentum.ts"
+    ],
     "functions/src/graph/traversal-centrality.ts": ["functions/src/index.ts"],
     "functions/src/graph/optimization.ts": ["functions/src/index.ts"],
     "functions/src/numeric/interval.ts": ["functions/src/index.ts"],
@@ -1921,6 +1942,50 @@
     "functions/src/stats/power-analysis.ts": ["functions/src/index.ts"],
     "functions/src/stats/gaussian-process.ts": ["functions/src/index.ts"],
     "functions/src/stats/multivariate-sampling.ts": ["functions/src/index.ts"],
+    "functions/src/stats/weighted-stats.ts": ["functions/src/index.ts"],
+    "functions/src/stats/robust-stats.ts": ["functions/src/index.ts"],
+    "functions/src/stats/effect-sizes.ts": ["functions/src/index.ts"],
+    "functions/src/stats/distributions-extra.ts": ["functions/src/index.ts"],
+    "functions/src/stats/nonparametric-extra.ts": ["functions/src/index.ts"],
+    "functions/src/stats/distances.ts": ["functions/src/index.ts"],
+    "functions/src/special/erf-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/distributions-extra.ts"
+    ],
+    "functions/src/special/exp-integrals.ts": ["functions/src/index.ts"],
+    "functions/src/special/spherical-bessel.ts": ["functions/src/index.ts"],
+    "functions/src/special/angular-momentum.ts": ["functions/src/index.ts"],
+    "functions/src/special/zeta-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/global-optimizers.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/constrained.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/gauss-nodes-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/quadrature-extra.ts": ["functions/src/index.ts"],
+    "functions/src/numeric/finite-differences.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/modular.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/arithmetic-functions.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/sequences.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/diophantine.ts": ["functions/src/index.ts"],
+    "functions/src/numbertheory/integer-matrices.ts": ["functions/src/index.ts"],
+    "functions/src/cas/real-roots.ts": ["functions/src/index.ts"],
+    "functions/src/signal/conv.ts": [
+      "functions/src/index.ts",
+      "functions/src/signal/fir-smoothing.ts",
+      "functions/src/signal/wavelets.ts"
+    ],
+    "functions/src/signal/windows-extra.ts": ["functions/src/index.ts"],
+    "functions/src/signal/waveforms.ts": ["functions/src/index.ts"],
+    "functions/src/signal/lomb-scargle.ts": ["functions/src/index.ts"],
+    "functions/src/signal/system-response.ts": ["functions/src/index.ts"],
+    "functions/src/signal/dtw.ts": ["functions/src/index.ts"],
+    "functions/src/linalg-special-matrices.ts": ["functions/src/index.ts"],
+    "functions/src/linalg-extra2.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/predicates.ts": [
+      "functions/src/geometry/curves.ts",
+      "functions/src/geometry/polygon-ops.ts",
+      "functions/src/index.ts"
+    ],
+    "functions/src/geometry/polygon-ops.ts": ["functions/src/index.ts"],
+    "functions/src/geometry/curves.ts": ["functions/src/index.ts"],
     "functions/src/numeric/solveODE.ts": [
       "functions/src/factories/index.ts",
       "functions/src/index.ts",
@@ -1940,6 +2005,14 @@
     "functions/src/signal/remez-exchange.ts": [
       "functions/src/index.ts",
       "functions/src/signal/fir-smoothing.ts"
+    ],
+    "functions/src/typed/matrix-ops.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/linalg-extra2.ts",
+      "functions/src/stats/gaussian-process.ts",
+      "functions/src/stats/multivariate-sampling.ts",
+      "functions/src/stats/mvn.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/scalar-batch-task.ts": [
       "functions/src/scalar-batch-parallel.ts",
@@ -2143,13 +2216,6 @@
     "functions/src/bitwise/rightLogShift.ts": ["functions/src/factories/index.ts"],
     "functions/src/logical/or.ts": ["functions/src/factories/index.ts"],
     "functions/src/logical/xor.ts": ["functions/src/factories/index.ts"],
-    "functions/src/typed/matrix-ops.ts": [
-      "functions/src/factories/index.ts",
-      "functions/src/stats/gaussian-process.ts",
-      "functions/src/stats/multivariate-sampling.ts",
-      "functions/src/stats/mvn.ts",
-      "functions/src/typed/index.ts"
-    ],
     "functions/src/relational/compare.ts": ["functions/src/factories/index.ts"],
     "functions/src/relational/compareText.ts": ["functions/src/factories/index.ts"],
     "functions/src/relational/deepEqual.ts": ["functions/src/factories/index.ts"],
@@ -2256,8 +2322,10 @@
       "functions/src/geometry/voronoi.ts"
     ],
     "functions/src/typed/geometry.ts": [
+      "functions/src/geometry/curves.ts",
       "functions/src/geometry/delaunay.ts",
       "functions/src/geometry/hull.ts",
+      "functions/src/geometry/polygon-ops.ts",
       "functions/src/geometry/spherical-voronoi.ts",
       "functions/src/typed/index.ts"
     ],
@@ -2312,6 +2380,7 @@
       "functions/src/typed/index.ts"
     ],
     "functions/src/probability/util/seededRNG.ts": [
+      "functions/src/numeric/global-optimizers.ts",
       "functions/src/numeric/monte-carlo.ts",
       "functions/src/probability/pickRandom.ts",
       "functions/src/probability/random.ts",
@@ -2368,20 +2437,22 @@
     "functions/src/signal/fft.ts": [
       "functions/src/signal/conv.ts",
       "functions/src/signal/fft-helpers.ts",
-      "functions/src/signal/spectral-peaks.ts"
-    ],
-    "functions/src/signal/conv.ts": [
-      "functions/src/signal/fir-smoothing.ts",
-      "functions/src/signal/wavelets.ts"
+      "functions/src/signal/spectral-peaks.ts",
+      "functions/src/signal/system-response.ts"
     ],
     "functions/src/typed/signal.ts": [
       "functions/src/signal/spectral-peaks.ts",
       "functions/src/signal/wavelets.ts",
+      "functions/src/signal/windows-extra.ts",
       "functions/src/typed/index.ts"
     ],
     "functions/src/signal/wavelet-filters.ts": [
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/signal.ts"
+    ],
+    "functions/src/typed/probability.ts": [
+      "functions/src/special/zeta-extra.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
@@ -2517,7 +2588,6 @@
     "functions/src/typed/gpu.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/relational.ts": ["functions/src/typed/index.ts"],
     "functions/src/typed/string.ts": ["functions/src/typed/index.ts"],
-    "functions/src/typed/probability.ts": ["functions/src/typed/index.ts"],
     "functions/src/gpu/fft-gpu.ts": [
       "functions/src/typed/index.ts",
       "functions/src/typed/signal.ts"

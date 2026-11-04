@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1237, "e": 6457, "re": 2750 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1269, "e": 6877, "re": 2977 },
   "s": {
-    "loc": 206769,
+    "loc": 212928,
     "cls": 60,
-    "int": 576,
-    "fn": 2086,
-    "tg": 162,
+    "int": 592,
+    "fn": 2279,
+    "tg": 168,
     "en": 0,
     "co": 1635,
-    "toi": 625
+    "toi": 638
   },
   "c": { "rt": 0, "to": 0, "rtp": [] },
   "mod": {
@@ -533,7 +533,7 @@
       ]
     },
     "functions": {
-      "f": 32,
+      "f": 34,
       "exp": [
         "gradient",
         "hessian",
@@ -576,7 +576,7 @@
       ]
     },
     "functions/cas": {
-      "f": 4,
+      "f": 5,
       "exp": [
         "detZ",
         "resultantZ",
@@ -651,10 +651,18 @@
       "int": ["PhysicsEvaluateOptions", "PhysicsScopeOptions"]
     },
     "functions/geometry": {
-      "f": 12,
+      "f": 15,
       "exp": [
         "alphaShape",
         "circumcircle",
+        "douglasPeucker",
+        "hausdorffDistance",
+        "frechetDistance",
+        "closestPair",
+        "minimumEnclosingCircle",
+        "catmullRom",
+        "arcLength",
+        "curvature",
         "delaunay",
         "createDistance",
         "quaternionInverse",
@@ -664,15 +672,7 @@
         "quaternionExp",
         "quaternionPow",
         "boundingBox",
-        "procrustes",
-        "kdTreeKNN",
-        "kdTreeRadius",
-        "setIsSuperset",
-        "setEqual",
-        "setDisjoint",
-        "halfspaceIntersection",
-        "convexHull",
-        "createIntersect"
+        "procrustes"
       ],
       "int": [
         "AlphaShapeResult",
@@ -795,30 +795,45 @@
       ]
     },
     "functions/numbertheory": {
-      "f": 1,
+      "f": 6,
       "exp": [
-        "continuedFraction",
-        "eulerNumbers",
-        "stirlingS1",
-        "discreteLog",
-        "primitiveRoot",
-        "multiplicativeOrder",
-        "kroneckerSymbol",
-        "combinationsGen",
-        "permutationsGen"
+        "isSquarefree",
+        "radical",
+        "bigOmega",
+        "smallOmega",
+        "liouvilleLambda",
+        "vonMangoldt",
+        "mertens",
+        "isPerfect",
+        "integerSqrt",
+        "integerNthRoot",
+        "isPerfectPower",
+        "isPrimePower",
+        "digitSum",
+        "digitalRoot",
+        "collatzSteps",
+        "primorial",
+        "linearDiophantine",
+        "pellSolve",
+        "frobeniusNumber",
+        "zeckendorf"
       ]
     },
     "functions/numeric": {
-      "f": 26,
+      "f": 31,
       "exp": [
         "quad",
         "bfgs",
         "bsplineFit",
         "bsplineEval",
+        "minimizeConstrained",
         "dlyap",
         "care",
         "dare",
         "eigsh",
+        "finiteDifferenceCoefficients",
+        "ridders",
+        "fixedPoint",
         "root",
         "fsolve",
         "GL4_C",
@@ -826,11 +841,7 @@
         "GL4_B",
         "gaussLegendre4",
         "GL4ConvergenceError",
-        "rootsLegendre",
-        "hermiteCubic",
-        "interpn",
-        "interval",
-        "Interval"
+        "rootsHermite"
       ],
       "cls": ["GL4ConvergenceError", "Interval"],
       "int": [
@@ -840,10 +851,10 @@
         "BfgsResult",
         "BSplineFitOptions",
         "BSplineTuple",
+        "ConstrainedOptions",
+        "ConstrainedResult",
         "EigshOptions",
-        "EigshResult",
-        "FsolveOptions",
-        "GaussLegendre4Options"
+        "EigshResult"
       ]
     },
     "functions/plain": {
@@ -939,7 +950,7 @@
       "int": ["FlattenSetPairDeps"]
     },
     "functions/signal": {
-      "f": 12,
+      "f": 17,
       "exp": [
         "convDirect",
         "convFFT",
@@ -949,6 +960,7 @@
         "conv2Direct",
         "conv2FFT",
         "conv2",
+        "dtw",
         "bitReverse",
         "fftCoreFloat64",
         "rfft",
@@ -959,44 +971,44 @@
         "rfftfreq",
         "fftn",
         "complex",
-        "complexConj",
-        "complexAbs"
+        "complexConj"
       ],
       "int": [
+        "DtwOptions",
+        "DtwResult",
         "ComplexNumber",
         "FFTResult",
         "DeconvolveResult",
         "FrequencyResponse",
+        "LombScargleOptions",
         "FindPeaksOptions",
         "CsdOptions",
-        "StftOptions",
-        "StftResult",
-        "WaveletFilters"
+        "StftOptions"
       ]
     },
     "functions/special": {
-      "f": 9,
+      "f": 14,
       "exp": [
+        "wigner3j",
+        "clebschGordan",
+        "wigner6j",
+        "sphericalHarmonic",
+        "erfcx",
+        "erfinv",
+        "erfcinv",
+        "dawson",
         "createErf",
+        "expn",
+        "expIntegralE1",
+        "sinhIntegral",
+        "coshIntegral",
         "pFq",
         "hyp0f1",
         "hyp1f1",
         "hyp2f1",
         "jacobiSN",
         "jacobiCN",
-        "jacobiDN",
-        "mathieuA",
-        "mathieuB",
-        "mathieuCe",
-        "mathieuSe",
-        "polylog",
-        "struveH",
-        "struveL",
-        "kelvinBer",
-        "kelvinBei",
-        "barnesG",
-        "polygamma",
-        "trigamma"
+        "jacobiDN"
       ],
       "int": ["CoulombFG"]
     },
@@ -1021,28 +1033,28 @@
       ]
     },
     "functions/stats": {
-      "f": 8,
+      "f": 14,
       "exp": [
-        "fitDistribution",
-        "gpRegression",
-        "gaussianProcessRegression",
-        "chi2Contingency",
-        "multipleTest",
-        "noncentralChi2CDF",
-        "noncentralFCDF",
-        "noncentralTCDF",
-        "circmean",
-        "circvar",
-        "circstd",
-        "vonMisesPDF",
-        "mcnemar",
-        "cochranQ",
-        "dirichletSample",
-        "dirichletPdf",
-        "wishartSample",
-        "mvnPdf",
-        "mvnSample",
-        "tTestPower"
+        "wassersteinDistance",
+        "energyDistance",
+        "mutualInformation",
+        "ecdf",
+        "owensT",
+        "skewNormalPDF",
+        "skewNormalCDF",
+        "truncatedNormalPDF",
+        "truncatedNormalCDF",
+        "truncatedNormalMean",
+        "inverseGammaPDF",
+        "inverseGammaCDF",
+        "gevCDF",
+        "gevPDF",
+        "skellamPMF",
+        "zipfPMF",
+        "nakagamiPDF",
+        "ricePDF",
+        "cohensD",
+        "hedgesG"
       ],
       "int": [
         "FitDistributionResult",
@@ -1882,7 +1894,7 @@
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
     { "p": "factories/index.ts", "i": 246, "o": 12 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
-    { "p": "src/index.ts", "i": 155, "o": 0 },
+    { "p": "src/index.ts", "i": 200, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "utils/is.ts", "i": 0, "o": 56 },
