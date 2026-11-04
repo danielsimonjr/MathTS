@@ -5001,7 +5001,7 @@ graph LR
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
 | `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
-| `./scalar-mutate.js`         | `weightedMutation, ScalarMutationContext`                                                                  | Import |
+| `./scalar-mutate.js`         | `crossoverSubtrees, weightedMutation, ScalarMutationContext`                                               | Import |
 
 **Exports:**
 
@@ -19523,7 +19523,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1237   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 206145 |
+| Total Lines of Code     | 206184 |
 | Total Exports           | 6452   |
 | Total Re-exports        | 2749   |
 | Total Classes           | 60     |

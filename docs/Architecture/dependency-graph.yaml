@@ -11809,6 +11809,7 @@ modules:
             - ScalarBatchResult
         - file: ./scalar-mutate.js
           imports:
+            - crossoverSubtrees
             - weightedMutation
             - ScalarMutationContext
       workspaceDependencies:
@@ -41148,7 +41149,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1237
   totalModules: 82
-  totalLinesOfCode: 206145
+  totalLinesOfCode: 206184
   totalExports: 6452
   totalClasses: 60
   totalInterfaces: 575

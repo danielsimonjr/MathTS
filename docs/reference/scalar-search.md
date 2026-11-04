@@ -51,7 +51,11 @@ Definitions match `functions/src/pareto-front.ts`.
 
 The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBABILITY` (`0.00743`).
 
-`searchScalars` defaults in `functions/src/scalar-search.ts`: `populationSize` 27, `tournamentSize` 15, `tournamentP` 0.982, `fractionReplaced` 0.00036, annealing `initialTemperature` 3.17 decaying by 0.995 each generation, `adaptiveParsimonyScaling` 1040, migrant pool 12, frequency window 100000.
+`searchScalars` defaults in `functions/src/scalar-search.ts`: `populationSize` 27, `tournamentSize` 15, `tournamentP` 0.982, `crossoverProbability` 0, `fractionReplaced` 0.00036, annealing `initialTemperature` 3.17 decaying by 0.995 each generation, `adaptiveParsimonyScaling` 1040, migrant pool 12, frequency window 100000.
+
+## Opt-in crossover
+
+`crossoverProbability` is in `[0, 1]` and defaults to `0`. At `0` (or when omitted) the offspring loop does not draw a coin, so the island random stream matches a mutation-only search and the seed-7 pin is unchanged. Above `0`, each offspring draws a coin on that island's stream. On success the search draws a second parent with the same tournament, calls `crossoverSubtrees`, and keeps the child when it is non-null and the grammar (including `admit`) accepts it. On failure it falls through to the existing mutation attempts. The inherited parameter vector is the first parent's. `DEFAULT_MUTATION_WEIGHTS` and `crossoverSubtrees` are unchanged.
 
 ## ScalarNode ↔ expression Node
 
