@@ -9882,7 +9882,7 @@ modules:
           typeOnly: true
         - file: ./numeric/solveODE.js
           imports:
-            - ODESolution
+            - SolveODESolution
             - ODEMatrixSolution
             - ODEOptions
             - ForcingFunction
@@ -10635,7 +10635,7 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
-        - ODESolution
+        - SolveODESolution
         - ODEMatrixSolution
         - ODEOptions
         - ForcingFunction
@@ -11129,7 +11129,7 @@ modules:
         - dirichletPdf
         - wishartSample
         - PhysicsEvaluateOptions
-        - ODESolution
+        - SolveODESolution
         - ODEMatrixSolution
         - ODEOptions
         - ForcingFunction
@@ -16413,7 +16413,7 @@ modules:
         - radauSolve
       interfaces:
         - ODEOptions
-        - ODESolution
+        - SolveODESolution
         - ODEMatrixSolution
       functions:
         - _factorSolver

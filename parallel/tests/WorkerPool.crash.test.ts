@@ -177,6 +177,12 @@ describe('WorkerPool: a worker that never becomes ready is not respawned forever
     // Keep one task queued behind a busy worker so the cap has something to reject.
     const p1 = pool.execute({ op: 'x' });
     const p2 = pool.execute({ op: 'y' });
+    // Attach the handler now: under `bun test` a rejection that is not yet observed
+    // when it fires counts as an unhandled error between tests.
+    const p2Settled = p2.then(
+      () => 'resolved',
+      (e: Error) => e.message
+    );
     await tick();
     expect(pool.internals.taskQueue.length).toBe(1);
     const w0Reject = p1.catch((e: Error) => e.message);
@@ -192,7 +198,7 @@ describe('WorkerPool: a worker that never becomes ready is not respawned forever
     const spawnedAfterCap = pool.created.length;
     // p2 was handed to a replacement that then crashed, so it fails through the task
     // path; what matters is that nothing is left queued or respawning.
-    await expect(p2).rejects.toThrow();
+    expect(await p2Settled).toMatch(/load failed|consecutive workers failed/);
     await tick();
     expect(pool.internals.taskQueue.length).toBe(0);
     expect(pool.created.length).toBe(spawnedAfterCap);

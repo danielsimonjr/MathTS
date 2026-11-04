@@ -13022,7 +13022,7 @@
       "package": "@danielsimonjr/mathts-parallel",
       "area": "tests",
       "disposition": "test",
-      "loc": 246
+      "loc": 252
     },
     {
       "file": "parallel/tests/WorkerPool.lifecycle.test.ts",

@@ -46,7 +46,7 @@ export type { PhysicsEvaluateOptions } from './factories/evaluate.js';
 // Result/option types of the factory-built solveODE / freqz / zpk2tf. `ODESolution` is already
 // taken by typed/numeric.ts (solveODESystem's result), so solveODE's generic one is `SolveODESolution`.
 export type {
-  ODESolution as SolveODESolution,
+  SolveODESolution,
   ODEMatrixSolution,
   ODEOptions,
   ForcingFunction,

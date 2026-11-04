@@ -10497,7 +10497,7 @@
           {
             "file": "./numeric/solveODE.js",
             "imports": [
-              "ODESolution",
+              "SolveODESolution",
               "ODEMatrixSolution",
               "ODEOptions",
               "ForcingFunction",
@@ -11269,7 +11269,7 @@
           "dirichletPdf",
           "wishartSample",
           "PhysicsEvaluateOptions",
-          "ODESolution",
+          "SolveODESolution",
           "ODEMatrixSolution",
           "ODEOptions",
           "ForcingFunction",
@@ -11764,7 +11764,7 @@
           "dirichletPdf",
           "wishartSample",
           "PhysicsEvaluateOptions",
-          "ODESolution",
+          "SolveODESolution",
           "ODEMatrixSolution",
           "ODEOptions",
           "ForcingFunction",
@@ -17475,7 +17475,7 @@
           "bdfSolve",
           "radauSolve"
         ],
-        "interfaces": ["ODEOptions", "ODESolution", "ODEMatrixSolution"],
+        "interfaces": ["ODEOptions", "SolveODESolution", "ODEMatrixSolution"],
         "functions": ["_factorSolver", "rosenbrockSolve", "rodasSolve", "bdfSolve", "radauSolve"],
         "constants": ["createSolveODE"]
       },

@@ -24,11 +24,11 @@ Names that are OWN-DEFINED (not merely re-exported) by >= 2 distinct files acros
 
 | Category                        | Count |
 | ------------------------------- | ----: |
-| **TRUE_DUPLICATE** (actionable) |     1 |
+| **TRUE_DUPLICATE** (actionable) |     0 |
 | DISPATCH_VARIANT                |     0 |
 | ALIAS_DELEGATION                |     0 |
 | ALLOWLISTED                     |    53 |
-| _Total flagged names_           |    54 |
+| _Total flagged names_           |    53 |
 
 ## Runtime duplicates
 
@@ -306,9 +306,7 @@ _None._
 
 ### TRUE_DUPLICATE
 
-| Name          | Category  | Defining files (package, public?, sub-tag)                                                                                                                                | Canonical hint |
-| ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `ODESolution` | interface | `functions/src/numeric/solveODE.ts` (@danielsimonjr/mathts-functions, public, PLAIN)<br>`functions/src/typed/numeric.ts` (@danielsimonjr/mathts-functions, public, PLAIN) | **AMBIGUOUS**  |
+_None._
 
 ### DISPATCH_VARIANT
 
