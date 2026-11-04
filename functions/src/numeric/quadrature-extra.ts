@@ -52,6 +52,10 @@ export function tanhSinh(
   opts: TanhSinhOptions = {}
 ): QuadResult {
   checkFiniteLimits(a, b, 'tanhSinh');
+  if (a > b) {
+    const r = tanhSinh(f, b, a, opts);
+    return { ...r, value: -r.value };
+  }
   const tol = opts.tol ?? 1e-12;
   const maxLevel = opts.maxLevel ?? 10;
   const half = 0.5 * (b - a);

@@ -229,7 +229,10 @@ export function catmullRom(p0: Pt, p1: Pt, p2: Pt, p3: Pt, t: number, alpha = 0.
   return lerp(t1, t2, B1, B2, u);
 }
 
-/** Arc length of a parametric planar curve over [a, b], integrating |r'(t)| by adaptive quadrature. */
+/**
+ * Arc length of a parametric planar curve between a and b, integrating |r'(t)| by
+ * adaptive quadrature. Always non-negative: reversed bounds (a > b) are swapped.
+ */
 export function arcLength(curve: (t: number) => Pt, a: number, b: number): number {
   const h = 1e-6;
   const speed = (t: number): number => {
@@ -237,7 +240,9 @@ export function arcLength(curve: (t: number) => Pt, a: number, b: number): numbe
     const m = curve(t - h);
     return Math.hypot((p[0] - m[0]) / (2 * h), (p[1] - m[1]) / (2 * h));
   };
-  return quad(speed, a, b, { tol: 1e-12 }).value;
+  const lo = Math.min(a, b);
+  const hi = Math.max(a, b);
+  return quad(speed, lo, hi, { tol: 1e-12 }).value;
 }
 
 /**

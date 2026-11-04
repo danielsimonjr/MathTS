@@ -1,7 +1,8 @@
 /**
  * Real-root isolation and approximation for real polynomials: Sturm sequences,
  * Descartes' sign-change bound, Cauchy-bound bisection isolation and refinement.
- * Coefficients are ascending (`coeffs[i]` multiplies x^i), as in `polyval`.
+ * Coefficients are ascending (`coeffs[i]` multiplies x^i), as in `polyval`:
+ * `[1, 0, -4]` is `1 - 4x^2` (roots +-1/2); `[-4, 0, 1]` is `x^2 - 4` (roots +-2).
  */
 import { polyval } from '../typed/algebra.js';
 
@@ -109,7 +110,10 @@ export function isolateRealRoots(
   const out: Array<[number, number]> = [];
   const split = (a: number, b: number, n: number): void => {
     if (n === 0) return;
-    if (n === 1 || b - a <= minWidth) {
+    const m0 = (a + b) / 2;
+    // Stop when the interval cannot be bisected in floating point (m0 collides
+    // with an endpoint), which also bounds recursion for huge-magnitude roots.
+    if (n === 1 || b - a <= minWidth || m0 <= a || m0 >= b) {
       out.push([a, b]);
       return;
     }
@@ -136,8 +140,11 @@ export function realRoots(coeffs: readonly number[], tol = 1e-10): number[] {
   return isolateRealRoots(p).map(([a0, b0]) => {
     let lo = a0;
     let hi = b0;
-    while (hi - lo > tol) {
+    // Relative-or-absolute tolerance plus an iteration cap: at |x| ~ 1e6 the
+    // float spacing exceeds an absolute 1e-10, so `hi - lo > tol` never fails.
+    for (let it = 0; it < 2200 && hi - lo > tol * Math.max(1, Math.abs(lo), Math.abs(hi)); it++) {
       const m = (lo + hi) / 2;
+      if (m <= lo || m >= hi) break;
       if (count(lo, m) === 1) hi = m;
       else lo = m;
     }

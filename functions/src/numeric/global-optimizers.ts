@@ -53,6 +53,8 @@ export interface SimulatedAnnealingOptions extends GlobalOptimizeOptions {
   cooling?: number;
   /** Optional box `[lo, hi]` per coordinate; proposals are clipped into it. */
   bounds?: ReadonlyArray<readonly [number, number]>;
+  /** Finish with a Nelder-Mead local polish from the best point (default `true`). */
+  polish?: boolean;
 }
 
 type Bounds = ReadonlyArray<readonly [number, number]>;
@@ -160,7 +162,11 @@ export function differentialEvolution(
  * is `0.1 · (T / T0) · scale_i`, where `scale_i` is the bound width when
  * `bounds` is given and `max(1, |x_i|)` otherwise.
  *
- * Stops when `T < tol` (`converged: true`) or after `maxIter` iterations.
+ * Stops when `T < tol` or after `maxIter` iterations. Unless `polish: false`,
+ * the best point is then refined by a bounded Nelder-Mead local search (with
+ * restarts). `converged` is `true` only when the cooling schedule finished
+ * (`T < tol`) AND the polish stopped on its own tolerance rather than its
+ * evaluation cap.
  *
  * @example
  * simulatedAnnealing((x) => (x[0] - 3) ** 2, [0], { seed: 7 }).x // ~[3]
@@ -236,5 +242,110 @@ export function simulatedAnnealing(
     iterations++;
   }
 
-  return { x: best, fx: fBest, iterations, evaluations, converged };
+  let polishConverged = true;
+  if (opts.polish !== false) {
+    const r = nelderMeadPolish(evalAt, best, fBest, bounds);
+    best = r.x;
+    fBest = r.fx;
+    polishConverged = r.converged;
+  }
+
+  return { x: best, fx: fBest, iterations, evaluations, converged: converged && polishConverged };
+}
+
+/** Bounded Nelder-Mead with restarts; used as the final local polish of annealing. */
+function nelderMeadPolish(
+  evalAt: (x: number[]) => number,
+  x0: number[],
+  f0: number,
+  bounds: Bounds | undefined
+): { x: number[]; fx: number; converged: boolean } {
+  const n = x0.length;
+  const clip = (x: number[]): number[] =>
+    bounds ? x.map((v, i) => Math.min(bounds[i][1], Math.max(bounds[i][0], v))) : x;
+  let bestX = x0.slice();
+  let bestF = f0;
+  let converged = false;
+  let budget = 400 * n * n + 2000;
+  for (let restart = 0; restart < 8 && budget > 0; restart++) {
+    const simplex: number[][] = [bestX.slice()];
+    const fs: number[] = [bestF];
+    for (let i = 0; i < n; i++) {
+      const v = bestX.slice();
+      const h = bounds ? 0.05 * (bounds[i][1] - bounds[i][0]) : 0.1 * Math.max(1, Math.abs(v[i]));
+      v[i] += restart === 0 ? h : h / (restart + 1);
+      const c = clip(v);
+      simplex.push(c);
+      fs.push(evalAt(c));
+      budget--;
+    }
+    for (;;) {
+      const idx = fs.map((_, i) => i).sort((a, b) => fs[a] - fs[b]);
+      const sx = idx.map((i) => simplex[i]);
+      const sf = idx.map((i) => fs[i]);
+      for (let i = 0; i <= n; i++) {
+        simplex[i] = sx[i];
+        fs[i] = sf[i];
+      }
+      let size = 0;
+      for (let i = 1; i <= n; i++) {
+        for (let j = 0; j < n; j++) {
+          size = Math.max(
+            size,
+            Math.abs(simplex[i][j] - simplex[0][j]) / Math.max(1, Math.abs(simplex[0][j]))
+          );
+        }
+      }
+      if (size < 1e-12 || fs[n] - fs[0] === 0) {
+        converged = true;
+        break;
+      }
+      if (budget <= 0) {
+        converged = false;
+        break;
+      }
+      const cen = new Array<number>(n).fill(0);
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) cen[j] += simplex[i][j] / n;
+      const point = (t: number): number[] => clip(cen.map((c, j) => c + t * (simplex[n][j] - c)));
+      const xr = point(-1);
+      const fr = evalAt(xr);
+      budget--;
+      if (fr < fs[0]) {
+        const xe = point(-2);
+        const fe = evalAt(xe);
+        budget--;
+        if (fe < fr) {
+          simplex[n] = xe;
+          fs[n] = fe;
+        } else {
+          simplex[n] = xr;
+          fs[n] = fr;
+        }
+      } else if (fr < fs[n - 1]) {
+        simplex[n] = xr;
+        fs[n] = fr;
+      } else {
+        const xc = fr < fs[n] ? point(-0.5) : point(0.5);
+        const fc = evalAt(xc);
+        budget--;
+        if (fc < Math.min(fr, fs[n])) {
+          simplex[n] = xc;
+          fs[n] = fc;
+        } else {
+          for (let i = 1; i <= n; i++) {
+            simplex[i] = clip(simplex[i].map((v, j) => simplex[0][j] + 0.5 * (v - simplex[0][j])));
+            fs[i] = evalAt(simplex[i]);
+            budget--;
+          }
+        }
+      }
+    }
+    if (fs[0] < bestF) {
+      bestF = fs[0];
+      bestX = simplex[0].slice();
+    } else if (restart > 0) {
+      break;
+    }
+  }
+  return { x: bestX, fx: bestF, converged };
 }

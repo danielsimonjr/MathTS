@@ -81,3 +81,12 @@ describe('gauss-nodes-extra argument validation', () => {
     expect(() => rootsChebyshevT(1.5)).toThrow(RangeError);
   });
 });
+
+describe('rootsJacobi at alpha+beta = -1 (Chebyshev T)', () => {
+  it('weights are finite and equal pi/n', () => {
+    for (const n of [1, 2, 3, 5]) {
+      const { weights } = rootsJacobi(n, -0.5, -0.5);
+      for (const w of weights) expect(Math.abs(w - Math.PI / n)).toBeLessThan(1e-10);
+    }
+  });
+});

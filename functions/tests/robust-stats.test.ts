@@ -63,3 +63,12 @@ describe('partialCorrelation', () => {
     );
   });
 });
+
+describe('robust-stats small samples', () => {
+  it('gstd / gzscore throw RangeError when n <= ddof', async () => {
+    const m = await import('../src/stats/robust-stats.js');
+    expect(() => m.gstd([2])).toThrow(RangeError);
+    expect(() => m.gzscore([2])).toThrow(RangeError);
+    expect(m.gstd([2], { ddof: 0 })).toBeCloseTo(1, 12);
+  });
+});

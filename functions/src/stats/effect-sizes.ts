@@ -16,6 +16,7 @@ export function cohensD(a: Vec, b: Vec): number {
   const xb = arr(b);
   const n1 = xa.length;
   const n2 = xb.length;
+  if (n1 < 2 || n2 < 2) throw new RangeError('cohensD: each sample needs at least 2 values');
   const pooled = ((n1 - 1) * varOf(xa) + (n2 - 1) * varOf(xb)) / (n1 + n2 - 2);
   return (meanOf(xa) - meanOf(xb)) / Math.sqrt(pooled);
 }
@@ -29,6 +30,8 @@ export function hedgesG(a: Vec, b: Vec): number {
 /** Glass's Δ: (mean a − mean b) / sd(b). */
 export function glassDelta(a: Vec, b: Vec): number {
   const xb = arr(b);
+  if (arr(a).length < 1 || xb.length < 2)
+    throw new RangeError('glassDelta: needs a non-empty a and at least 2 values in b');
   return (meanOf(arr(a)) - meanOf(xb)) / Math.sqrt(varOf(xb));
 }
 

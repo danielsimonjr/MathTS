@@ -88,3 +88,23 @@ describe('simulatedAnnealing', () => {
     expect(() => simulatedAnnealing(sphere, [])).toThrow(RangeError);
   });
 });
+
+describe('simulatedAnnealing defaults', () => {
+  it('solves the sphere and Rosenbrock to tolerance with defaults', () => {
+    for (const seed of [1, 2, 3]) {
+      const s = simulatedAnnealing((x) => x[0] ** 2 + x[1] ** 2, [3, 3], { seed });
+      expect(s.fx).toBeLessThan(1e-6);
+      expect(s.converged).toBe(true);
+      const r = simulatedAnnealing(
+        (x) => 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2,
+        [-1.2, 1],
+        { seed }
+      );
+      expect(r.fx).toBeLessThan(1e-3);
+    }
+  });
+  it('does not claim convergence when the schedule was cut short', () => {
+    const r = simulatedAnnealing((x) => x[0] ** 2, [3], { seed: 1, maxIter: 5 });
+    expect(r.converged).toBe(false);
+  });
+});

@@ -103,3 +103,24 @@ describe('discrete and Bessel-based laws', () => {
     expect(ricePDF(1, 0, 1)).toBeCloseTo(0.6065306597126334, 12);
   });
 });
+
+describe('review fixes: tails and large-argument Rice', () => {
+  it('truncated normal tails are finite and accurate', async () => {
+    const m = await import('../src/stats/distributions-extra.js');
+    expect(m.truncatedNormalMean(10, Infinity)).toBeCloseTo(10.098, 3);
+    expect(m.truncatedNormalMean(-Infinity, -40)).toBeCloseTo(-40.0249, 3);
+    const m910 = m.truncatedNormalMean(9, 10);
+    expect(m910).toBeGreaterThan(9);
+    expect(m910).toBeLessThan(10);
+    const p = m.truncatedNormalPDF(41, 40, Infinity);
+    expect(p).toBeGreaterThan(0);
+    expect(Number.isFinite(p)).toBe(true);
+    expect(m.truncatedNormalCDF(40.5, 40, Infinity)).toBeCloseTo(1, 6);
+    expect(m.truncatedNormalCDF(-40.5, -Infinity, -40)).toBeCloseTo(0, 6);
+  });
+
+  it('ricePDF(50, 49, 1) is finite', async () => {
+    const m = await import('../src/stats/distributions-extra.js');
+    expect(m.ricePDF(50, 49, 1)).toBeCloseTo(0.24444, 4);
+  });
+});

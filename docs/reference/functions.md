@@ -22,7 +22,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1090** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1318** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)

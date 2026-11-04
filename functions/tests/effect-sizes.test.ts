@@ -32,3 +32,12 @@ describe('effect sizes', () => {
     expect(() => rankBiserial([], [1])).toThrow(RangeError);
   });
 });
+
+describe('effect-sizes small samples', () => {
+  it('throws RangeError for samples too small', async () => {
+    const m = await import('../src/stats/effect-sizes.js');
+    expect(() => m.cohensD([1], [2])).toThrow(RangeError);
+    expect(() => m.hedgesG([1], [2, 3])).toThrow(RangeError);
+    expect(() => m.glassDelta([1, 2], [3])).toThrow(RangeError);
+  });
+});

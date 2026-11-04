@@ -32,8 +32,8 @@ describe('weightedVariance', () => {
   it('gives the population weighted variance by default', () => {
     expect(weightedVariance([1, 2, 3, 4], [1, 1, 1, 5])).toBeCloseTo(1.1875, 12);
   });
-  it('ddof 1 divides by Σw − 1', () => {
-    expect(weightedVariance([1, 2, 3, 4], [1, 1, 1, 5], { ddof: 1 })).toBeCloseTo(9.5 / 7, 12);
+  it('ddof 1 uses the reliability-weights denominator Σw − Σw²/Σw', () => {
+    expect(weightedVariance([1, 2, 3, 4], [1, 1, 1, 5], { ddof: 1 })).toBeCloseTo(9.5 / 4.5, 12);
   });
 });
 
@@ -51,5 +51,12 @@ describe('weightedMedian and weightedQuantile', () => {
   });
   it('rejects p outside [0, 1]', () => {
     expect(() => weightedQuantile([1, 2], [1, 1], 1.5)).toThrow(RangeError);
+  });
+});
+
+describe('weightedVariance normalised weights', () => {
+  it('ddof 1 is finite for weights summing to 1 and equals n/(n-1) for equal weights', () => {
+    const v = weightedVariance([1, 2, 3, 4], [0.25, 0.25, 0.25, 0.25], { ddof: 1 });
+    expect(v).toBeCloseTo((1.25 * 4) / 3, 12);
   });
 });

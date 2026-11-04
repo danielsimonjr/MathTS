@@ -61,3 +61,10 @@ describe('dblquad / tplquad', () => {
     expect(tplquad((z, y, x) => x * y * z, 0, 1, 0, 1, 0, 1).value).toBeCloseTo(0.125, 9);
   });
 });
+
+describe('tanhSinh reversed limits', () => {
+  it('integrates x^2 from 1 to 0 as -1/3', async () => {
+    const { tanhSinh } = await import('../src/numeric/quadrature-extra.js');
+    expect(tanhSinh((x) => x * x, 1, 0).value).toBeCloseTo(-1 / 3, 10);
+  });
+});

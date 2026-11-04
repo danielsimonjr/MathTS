@@ -78,8 +78,10 @@ export function earClipping(poly: readonly Pt[]): Array<[number, number, number]
   const ccw = signedArea(poly) >= 0;
   const idx: number[] = Array.from({ length: n }, (_, i) => i);
   const tris: Array<[number, number, number]> = [];
+  // Orientation-normalised cross product: positive means a convex turn for the input's winding.
+  const orient = ccw ? 1 : -1;
   const cross = (o: Pt, a: Pt, b: Pt): number =>
-    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    orient * ((a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]));
   const coincides = (p: Pt, q: Pt): boolean => p[0] === q[0] && p[1] === q[1];
   // Closed-triangle test: a reflex vertex lying on a candidate diagonal blocks the ear.
   const pointIn = (p: Pt, a: Pt, b: Pt, c: Pt): boolean =>
@@ -109,7 +111,7 @@ export function earClipping(poly: readonly Pt[]): Array<[number, number, number]
         }
       }
       if (blocked) continue;
-      tris.push(ccw ? [pi, ci, ni] : [ni, ci, pi]);
+      tris.push([pi, ci, ni]);
       idx.splice(k, 1);
       clipped = true;
       break;
@@ -117,7 +119,7 @@ export function earClipping(poly: readonly Pt[]): Array<[number, number, number]
     if (!clipped) throw new Error('earClipping: no ear found; polygon may not be simple');
   }
   if (idx.length === 3 && cross(poly[idx[0]], poly[idx[1]], poly[idx[2]]) !== 0) {
-    tris.push(ccw ? [idx[0], idx[1], idx[2]] : [idx[2], idx[1], idx[0]]);
+    tris.push([idx[0], idx[1], idx[2]]);
   }
   return tris;
 }

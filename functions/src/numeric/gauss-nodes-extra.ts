@@ -229,14 +229,19 @@ export function rootsJacobi(n: number, alpha: number, beta: number): GaussRule {
   const nodes = scanRoots((x) => jacobiValues(n, alpha, beta, x)[n], -1, 1, n);
   const hk: number[] = [];
   for (let k = 0; k < n; k++) {
+    // k = 0: the generic factor 1/((2k+s)Γ(k+s)) with s = α+β+1 is 0·∞ at
+    // s = 0 (α+β = −1, e.g. Chebyshev T); its limit is 1/Γ(s+1), used for k = 0.
     const norm =
-      (Math.pow(2, alpha + beta + 1) / (2 * k + alpha + beta + 1)) *
-      Math.exp(
-        lgammaAt(k + alpha + 1) +
-          lgammaAt(k + beta + 1) -
-          lgammaAt(k + alpha + beta + 1) -
-          lgammaAt(k + 1)
-      );
+      k === 0
+        ? Math.pow(2, alpha + beta + 1) *
+          Math.exp(lgammaAt(alpha + 1) + lgammaAt(beta + 1) - lgammaAt(alpha + beta + 2))
+        : (Math.pow(2, alpha + beta + 1) / (2 * k + alpha + beta + 1)) *
+          Math.exp(
+            lgammaAt(k + alpha + 1) +
+              lgammaAt(k + beta + 1) -
+              lgammaAt(k + alpha + beta + 1) -
+              lgammaAt(k + 1)
+          );
     hk.push(norm);
   }
   const weights = nodes.map((x) => {

@@ -9369,6 +9369,7 @@ graph LR
 | `../typed/special.js`         | `gammainc, lgamma`     | Import |
 | `../numeric/adaptive-quad.js` | `quad`                 | Import |
 | `../wasm/special/scalars.js`  | `besselIScalar`        | Import |
+| `../special/erf-extra.js`     | `erfcx`                | Import |
 
 **Exports:**
 
@@ -11430,7 +11431,7 @@ graph LR
 | `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
 | `./parallel-map.js`                  | `mapArray, kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                                                                                   | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, besselJRealOrder, besselYRealOrder, besselHankelReal, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                             | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
@@ -12286,7 +12287,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJRealOrder`, `besselHankelReal`, `besselYRealOrder`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -19972,12 +19973,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 212128 |
-| Total Exports           | 6871   |
+| Total Lines of Code     | 212464 |
+| Total Exports           | 6874   |
 | Total Re-exports        | 2977   |
 | Total Classes           | 60     |
 | Total Interfaces        | 592    |
-| Total Functions         | 2274   |
+| Total Functions         | 2277   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

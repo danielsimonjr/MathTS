@@ -41,7 +41,8 @@ export function weightedMean(x: Vec, w: Vec): number {
 
 /**
  * Weighted variance. `ddof: 0` (default) gives Σw(x−m)²/Σw; `ddof: 1` divides
- * by (Σw − 1), the frequency-weight unbiased form.
+ * by (Σw − Σw²/Σw), the reliability-weights unbiased form (equal weights give
+ * n/(n−1) scaling, and it stays finite for normalised weights).
  */
 export function weightedVariance(x: Vec, w: Vec, opts?: { ddof?: 0 | 1 }): number {
   const xs = arr(x);
@@ -50,12 +51,14 @@ export function weightedVariance(x: Vec, w: Vec, opts?: { ddof?: 0 | 1 }): numbe
   const ddof = opts?.ddof ?? 0;
   const m = weightedMean(xs, ws);
   let sw = 0;
+  let sw2 = 0;
   let ss = 0;
   for (let i = 0; i < xs.length; i++) {
     sw += ws[i];
+    sw2 += ws[i] * ws[i];
     ss += ws[i] * (xs[i] - m) ** 2;
   }
-  const denom = ddof === 1 ? sw - 1 : sw;
+  const denom = ddof === 1 ? sw - sw2 / sw : sw;
   return denom <= 0 ? NaN : ss / denom;
 }
 

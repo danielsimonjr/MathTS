@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6871
+    "totalExports": 6874
   },
   "entryPoints": [
     {
@@ -21567,6 +21567,10 @@
           {
             "file": "../wasm/special/scalars.js",
             "imports": ["besselIScalar"]
+          },
+          {
+            "file": "../special/erf-extra.js",
+            "imports": ["erfcx"]
           }
         ],
         "workspaceDependencies": [],
@@ -26381,6 +26385,9 @@
               "besselY1Scalar",
               "besselJScalar",
               "besselYScalar",
+              "besselJRealOrder",
+              "besselYRealOrder",
+              "besselHankelReal",
               "airyUCoeffs",
               "airyAsymPQ",
               "airyScalar",
@@ -28303,6 +28310,9 @@
           "besselJ1Scalar",
           "besselY0Scalar",
           "besselY1Scalar",
+          "besselJRealOrder",
+          "besselHankelReal",
+          "besselYRealOrder",
           "besselJScalar",
           "besselYScalar",
           "ellipticKScalar",
@@ -28337,6 +28347,9 @@
           "besselJ1Scalar",
           "besselY0Scalar",
           "besselY1Scalar",
+          "besselJRealOrder",
+          "besselHankelReal",
+          "besselYRealOrder",
           "besselJScalar",
           "besselYScalar",
           "ellipticKScalar",
@@ -45196,11 +45209,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 212128,
-    "totalExports": 6871,
+    "totalLinesOfCode": 212464,
+    "totalExports": 6874,
     "totalClasses": 60,
     "totalInterfaces": 592,
-    "totalFunctions": 2274,
+    "totalFunctions": 2277,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1634,

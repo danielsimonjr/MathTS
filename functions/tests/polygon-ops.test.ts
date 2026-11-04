@@ -72,3 +72,25 @@ describe('polygon ops', () => {
     expect(triArea(Lshape, tris)).toBeCloseTo(polygonArea(Lshape), 12);
   });
 });
+
+describe('earClipping orientation', () => {
+  it('triangulates a clockwise square, preserving orientation', () => {
+    const sq: number[][] = [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+    ];
+    const tris = earClipping(sq);
+    expect(tris.length).toBe(2);
+    let area = 0;
+    for (const [i, j, k] of tris) {
+      const c =
+        (sq[j][0] - sq[i][0]) * (sq[k][1] - sq[i][1]) -
+        (sq[j][1] - sq[i][1]) * (sq[k][0] - sq[i][0]);
+      expect(c).toBeLessThan(0); // clockwise like the input
+      area += Math.abs(c) / 2;
+    }
+    expect(area).toBeCloseTo(1, 12);
+  });
+});

@@ -110,3 +110,34 @@ describe('linalg-extra2', () => {
     ).toThrow(RangeError);
   });
 });
+
+describe('linalg-extra2 review fixes', () => {
+  it('subspaceAngles keeps tiny angles and orders descending', () => {
+    const a = subspaceAngles([[1], [0]], [[1], [1e-9]]);
+    expect(a[0]).toBeCloseTo(1e-9, 15);
+    const A = [
+      [1, 0],
+      [0, 1],
+      [0, 0],
+    ];
+    const b = subspaceAngles(A, [
+      [1, 0],
+      [0, 0],
+      [0, 1],
+    ]);
+    expect(b[0]).toBeCloseTo(Math.PI / 2, 12);
+    expect(b[1]).toBeCloseTo(0, 12);
+  });
+
+  it('fractionalMatrixPower of a singular matrix to a negative integer throws', () => {
+    expect(() =>
+      fractionalMatrixPower(
+        [
+          [1, 2],
+          [2, 4],
+        ],
+        -1
+      )
+    ).toThrow(RangeError);
+  });
+});

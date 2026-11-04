@@ -43,6 +43,7 @@ export function pmean(x: Vec, p: number): number {
 export function gstd(x: Vec, opts?: { ddof?: number }): number {
   const a = arr(x);
   if (a.some((v) => v <= 0)) throw new RangeError('gstd: all entries must be > 0');
+  if (a.length <= (opts?.ddof ?? 1)) throw new RangeError('gstd: needs more values than ddof');
   return Math.exp(stdOf(a.map(Math.log), opts?.ddof ?? 1));
 }
 
@@ -50,6 +51,7 @@ export function gstd(x: Vec, opts?: { ddof?: number }): number {
 export function gzscore(x: Vec, opts?: { ddof?: number }): number[] {
   const a = arr(x);
   if (a.some((v) => v <= 0)) throw new RangeError('gzscore: all entries must be > 0');
+  if (a.length <= (opts?.ddof ?? 1)) throw new RangeError('gzscore: needs more values than ddof');
   const logs = a.map(Math.log);
   const m = meanOf(logs);
   const s = stdOf(logs, opts?.ddof ?? 1);

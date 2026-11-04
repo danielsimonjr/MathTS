@@ -117,6 +117,7 @@ function expm(M: number[][]): number[][] {
 
 /** Impulse response h[0..n-1] of the filter b / a. */
 export function impulseResponse(b: Vec, a: Vec, n: number): number[] {
+  if (!(a.length > 0 && a[0] !== 0)) throw new RangeError('impulseResponse: a[0] must be nonzero');
   const x = new Array<number>(n).fill(0);
   if (n > 0) x[0] = 1;
   return lfilter(b, a, x);
@@ -209,7 +210,8 @@ export function ss2tf(
  * Convert a continuous state-space system to discrete time with sample period dt.
  *
  * - `zoh`: exact zero-order hold, via the exponential of [[A, B], [0, 0]] dt
- * - `bilinear`: Tustin, Ad = (I - A dt/2)^-1 (I + A dt/2), Bd = (I - A dt/2)^-1 B dt
+ * - `bilinear`: Tustin (scipy, alpha = 1/2), with M = (I - A dt/2)^-1:
+ *   Ad = M (I + A dt/2), Bd = M B dt, Cd = C M, Dd = D + C Bd / 2
  * - `euler`: forward Euler, Ad = I + A dt, Bd = B dt
  */
 export function cont2discrete(
@@ -223,6 +225,8 @@ export function cont2discrete(
   const m = n > 0 ? B[0].length : 0;
   let Ad: number[][];
   let Bd: number[][];
+  let Cd: number[][] = C.map((row) => row.slice());
+  let Dd: number[][] = D.map((row) => row.slice());
   switch (method) {
     case 'zoh': {
       const big = zeros(n + m, n + m);
@@ -239,6 +243,8 @@ export function cont2discrete(
       const inv = inverse(add(identity(n), scale(A, -dt / 2)));
       Ad = matMul(inv, add(identity(n), scale(A, dt / 2)));
       Bd = scale(matMul(inv, B), dt);
+      Cd = matMul(C, inv);
+      Dd = add(D, scale(matMul(C, Bd), 0.5));
       break;
     }
     case 'euler':
@@ -251,8 +257,8 @@ export function cont2discrete(
   return {
     A: Ad,
     B: Bd,
-    C: C.map((row) => row.slice()),
-    D: D.map((row) => row.slice()),
+    C: Cd,
+    D: Dd,
   };
 }
 
@@ -265,35 +271,40 @@ function checkW0Q(w0: number, Q: number, name: string): void {
   if (!(Q > 0)) throw new RangeError(`${name}: Q must be > 0`);
 }
 
+/** scipy's band-edge parameter: bandwidth w0 pi / Q rad, edge gain 1/sqrt(2). */
+function notchPeakGain(w0: number, Q: number): number {
+  const bw = (w0 / Q) * Math.PI;
+  const gb = Math.SQRT1_2;
+  const beta = (Math.sqrt(1 - gb * gb) / gb) * Math.tan(bw / 2);
+  return 1 / (1 + beta);
+}
+
 /**
  * Second-order IIR notch at normalised frequency w0 (x pi rad/sample), quality
- * factor Q (RBJ cookbook form, alpha = sin(w0 pi) / (2 Q)). Zero at w0, unity at DC.
+ * factor Q = w0 / bandwidth (scipy.signal.iirnotch convention: -3 dB bandwidth
+ * w0 pi / Q). Zero at w0, unity gain at DC.
  */
 export function iirNotch(w0: number, Q: number): BiquadCoefficients {
   checkW0Q(w0, Q, 'iirNotch');
-  const wc = Math.PI * w0;
-  const alpha = Math.sin(wc) / (2 * Q);
-  const c = Math.cos(wc);
-  const a0 = 1 + alpha;
+  const c = Math.cos(Math.PI * w0);
+  const gain = notchPeakGain(w0, Q);
   return {
-    b: [1 / a0, (-2 * c) / a0, 1 / a0],
-    a: [1, (-2 * c) / a0, (1 - alpha) / a0],
+    b: [gain, -2 * gain * c, gain],
+    a: [1, -2 * gain * c, 2 * gain - 1],
   };
 }
 
 /**
  * Second-order IIR peak (band-pass) at w0 (x pi rad/sample), unity gain at w0 and
- * zero gain at DC and Nyquist (scipy.signal.iirpeak convention).
+ * zero gain at DC and Nyquist (scipy.signal.iirpeak convention, Q = w0 / bandwidth).
  */
 export function iirPeak(w0: number, Q: number): BiquadCoefficients {
   checkW0Q(w0, Q, 'iirPeak');
-  const wc = Math.PI * w0;
-  const alpha = Math.sin(wc) / (2 * Q);
-  const c = Math.cos(wc);
-  const a0 = 1 + alpha;
+  const c = Math.cos(Math.PI * w0);
+  const gain = notchPeakGain(w0, Q);
   return {
-    b: [alpha / a0, 0, -alpha / a0],
-    a: [1, (-2 * c) / a0, (1 - alpha) / a0],
+    b: [1 - gain, 0, -(1 - gain)],
+    a: [1, -2 * gain * c, 2 * gain - 1],
   };
 }
 

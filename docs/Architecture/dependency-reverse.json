@@ -1948,7 +1948,10 @@
     "functions/src/stats/distributions-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/nonparametric-extra.ts": ["functions/src/index.ts"],
     "functions/src/stats/distances.ts": ["functions/src/index.ts"],
-    "functions/src/special/erf-extra.ts": ["functions/src/index.ts"],
+    "functions/src/special/erf-extra.ts": [
+      "functions/src/index.ts",
+      "functions/src/stats/distributions-extra.ts"
+    ],
     "functions/src/special/exp-integrals.ts": ["functions/src/index.ts"],
     "functions/src/special/spherical-bessel.ts": ["functions/src/index.ts"],
     "functions/src/special/angular-momentum.ts": ["functions/src/index.ts"],

@@ -96,3 +96,28 @@ describe('notch, peak, zpk and sos', () => {
     expect(a).toEqual([1, 0, 0]);
   });
 });
+
+describe('review fixes', () => {
+  it('cont2discrete bilinear transforms C and D (scipy)', () => {
+    const d = cont2discrete({ A: [[-1]], B: [[1]], C: [[1]], D: [[0]] }, 0.5, 'bilinear');
+    expect(d.C[0][0]).toBeCloseTo(0.8, 12);
+    expect(d.D[0][0]).toBeCloseTo(0.2, 12);
+    expect(d.B[0][0]).toBeCloseTo(0.4, 12);
+  });
+
+  it('iirNotch / iirPeak use scipy coefficients', () => {
+    // scipy.signal.iirnotch(0.5, 5): beta = tan(pi/20), gain = 1/(1+beta), cos(pi/2)=0
+    const beta = Math.tan(Math.PI / 20);
+    const gain = 1 / (1 + beta);
+    const n = iirNotch(0.5, 5);
+    expect(n.b[0]).toBeCloseTo(gain, 12);
+    expect(n.a[2]).toBeCloseTo(2 * gain - 1, 12);
+    const p = iirPeak(0.5, 5);
+    expect(p.b[0]).toBeCloseTo(1 - gain, 12);
+    expect(p.b[2]).toBeCloseTo(gain - 1, 12);
+  });
+
+  it('impulseResponse throws when a[0] is zero', () => {
+    expect(() => impulseResponse([1], [0, 1], 4)).toThrow(RangeError);
+  });
+});

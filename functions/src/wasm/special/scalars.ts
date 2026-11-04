@@ -261,8 +261,67 @@ export function besselY1Scalar(x: f64): f64 {
   return x <= 13.0 ? besselY1Series(x) : besselHankel(1, x, true);
 }
 
+/**
+ * J_nu(x) for NON-integer real order nu and x > 0.
+ * Ascending series for x <= 14 (or when nu^2 > x, where the Hankel expansion is
+ * invalid); Hankel asymptotic expansion beyond. Accuracy ~1e-12 for moderate nu.
+ */
+export function besselJRealOrder(nu: f64, x: f64): f64 {
+  if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
+  if (x === 0) return nu > 0 ? 0 : NaN;
+  if (x > 14 && x > nu * nu) return besselHankelReal(nu, x, false);
+  const a = nu + 1;
+  const lg = _lgamma(a);
+  // sign of Gamma(a): negative only for a < 0 with odd floor(a)
+  const sg = a < 0 && Math.abs(Math.floor(a)) % 2 === 1 ? -1 : 1;
+  const q = (x * x) / 4;
+  let term = (sg * Math.exp(nu * Math.log(x / 2) - lg)) as f64;
+  let sum = term;
+  for (let k = 0; k < 500; k++) {
+    term *= -q / ((k + 1) * (k + 1 + nu));
+    sum += term;
+    if (Math.abs(term) < 1e-17 * Math.abs(sum) && k > q) break;
+  }
+  return sum;
+}
+
+/** Hankel asymptotic expansion for real order (x large). Y when `y` is true. */
+export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
+  const mu = 4 * nu * nu;
+  let P: f64 = 1;
+  let Q: f64 = 0;
+  let t: f64 = 1;
+  let prev = Infinity;
+  for (let k = 1; k < 60; k++) {
+    t *= (mu - (2 * k - 1) * (2 * k - 1)) / (k * 8 * x);
+    const at = Math.abs(t);
+    if (at > prev || at < 1e-17) break;
+    prev = at;
+    const m = Math.floor(k / 2);
+    const sgn = m % 2 === 0 ? 1 : -1;
+    if (k % 2 === 0) P += sgn * t;
+    else Q += sgn * t;
+  }
+  const chi = x - (nu / 2 + 0.25) * Math.PI;
+  const amp = Math.sqrt(2 / (Math.PI * x));
+  return y
+    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
+    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+}
+
+/** Y_nu(x) for non-integer real order nu and x > 0. */
+export function besselYRealOrder(nu: f64, x: f64): f64 {
+  if (isNaN(nu) || isNaN(x) || x <= 0) return NaN;
+  if (x > 14 && x > nu * nu) return besselHankelReal(nu, x, true);
+  return (
+    (besselJRealOrder(nu, x) * Math.cos(nu * Math.PI) - besselJRealOrder(-nu, x)) /
+    Math.sin(nu * Math.PI)
+  );
+}
+
 /** Bessel function of the first kind, general integer order n: J_n(x). */
 export function besselJScalar(n: f64, x: f64): f64 {
+  if (Number.isFinite(n) && n !== Math.round(n)) return besselJRealOrder(n, x);
   const ni = Math.round(n);
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselJScalar(-ni, x);
   if (ni === 0) return besselJ0Scalar(x);
@@ -310,6 +369,7 @@ export function besselJScalar(n: f64, x: f64): f64 {
  */
 export function besselYScalar(n: f64, x: f64): f64 {
   if (x <= 0) return NaN;
+  if (Number.isFinite(n) && n !== Math.round(n)) return besselYRealOrder(n, x);
   const ni = Math.round(n);
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselYScalar(-ni, x);
   if (ni === 0) return besselY0Scalar(x);

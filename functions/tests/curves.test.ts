@@ -136,3 +136,10 @@ describe('geometry curves', () => {
     expect(curvature((t) => [2 * Math.cos(t), 2 * Math.sin(t)], 1)).toBeCloseTo(0.5, 6);
   });
 });
+
+describe('arcLength reversed bounds', () => {
+  it('is non-negative for a > b', async () => {
+    const { arcLength } = await import('../src/geometry/curves.js');
+    expect(arcLength((t) => [t, 0], 1, 0)).toBeCloseTo(1, 8);
+  });
+});

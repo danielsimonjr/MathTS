@@ -43,3 +43,30 @@ describe('real roots', () => {
     expect(() => realRoots([0, 0])).toThrow(RangeError);
   });
 });
+
+describe('real roots: coefficient order and robustness', () => {
+  it('ascending convention: [-4,0,1] = x^2-4 and [-6,11,-6,1] has roots 1,2,3', () => {
+    const r = realRoots([-4, 0, 1]);
+    expect(r[0]).toBeCloseTo(-2, 8);
+    expect(r[1]).toBeCloseTo(2, 8);
+    const c = realRoots([-6, 11, -6, 1]);
+    expect(c.map((v) => Math.round(v * 1e6) / 1e6)).toEqual([1, 2, 3]);
+  });
+  it('[1,0,-4] is 1-4x^2 (roots +-1/2) and a constant has none', () => {
+    const r = realRoots([1, 0, -4]);
+    expect(r[0]).toBeCloseTo(-0.5, 8);
+    expect(r[1]).toBeCloseTo(0.5, 8);
+    expect(realRoots([1, 0, 0])).toEqual([]);
+  });
+  it('constant-term zero gives root 0', () => {
+    const r = realRoots([0, 1, -2]);
+    expect(r[0]).toBeCloseTo(0, 8);
+    expect(r[1]).toBeCloseTo(0.5, 8);
+  });
+  it('huge-magnitude roots terminate (1 - 1e-12 x^2)', () => {
+    const r = realRoots([1, 0, -1e-12]);
+    expect(r.length).toBe(2);
+    expect(Math.abs(r[1] - 1e6) / 1e6).toBeLessThan(1e-9);
+    expect(Math.abs(r[0] + 1e6) / 1e6).toBeLessThan(1e-9);
+  });
+});

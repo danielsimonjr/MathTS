@@ -44,8 +44,11 @@ function invDet(A: number[][]): { inv: number[][]; det: number } {
 
 /**
  * Principal angles between the column spaces of A and B, in radians, sorted in
- * descending order. Each space is orthonormalised by modified Gram-Schmidt and the
- * angles are arccos of the singular values of Qaᵀ Qb.
+ * descending order (largest angle first, as documented for scipy.linalg.subspace_angles).
+ * Each space is orthonormalised by modified Gram-Schmidt. As scipy does, angles whose
+ * sine squared is below 1/2 are taken from the singular values of the residual
+ * Qb - Qa Qaᵀ Qb (arcsin), the rest from those of Qaᵀ Qb (arccos), so small angles
+ * keep full relative accuracy.
  */
 export function subspaceAngles(A: number[][], B: number[][]): number[] {
   const orthonormal = (M: number[][]): number[][] => {
@@ -62,12 +65,23 @@ export function subspaceAngles(A: number[][], B: number[][]): number[] {
     }
     return transpose(basis);
   };
-  const Qa = orthonormal(A);
-  const Qb = orthonormal(B);
+  let Qa = orthonormal(A);
+  let Qb = orthonormal(B);
   if (Qa.length === 0 || Qb.length === 0) return [];
+  // Keep the smaller space second so the residual has min(rank) columns.
+  if ((Qa[0]?.length ?? 0) < (Qb[0]?.length ?? 0)) [Qa, Qb] = [Qb, Qa];
   const M = mul(transpose(Qa), Qb);
-  const s = _sv(M);
-  return s.map((x) => Math.acos(Math.min(1, Math.max(-1, x)))).sort((x, y) => y - x);
+  const cosines = _sv(M).sort((x, y) => y - x); // descending: angles ascending
+  const proj = mul(Qa, M);
+  const resid = Qb.map((row, i) => row.map((x, j) => x - proj[i][j]));
+  const sines = _sv(resid).sort((x, y) => x - y); // ascending: angles ascending
+  const k = Math.min(cosines.length, sines.length);
+  const angles: number[] = [];
+  for (let i = 0; i < k; i++) {
+    const sn = Math.min(1, sines[i]);
+    angles.push(sn * sn < 0.5 ? Math.asin(sn) : Math.acos(Math.min(1, Math.max(-1, cosines[i]))));
+  }
+  return angles.sort((x, y) => y - x);
 }
 
 /**
@@ -100,7 +114,12 @@ export function signm(A: number[][], opts: { tol?: number; maxIter?: number } = 
 /** Integer matrix power by repeated squaring (negative powers via the inverse). */
 function integerPower(A: number[][], t: number): number[][] {
   const n = A.length;
-  let base = t < 0 ? invDet(A).inv : A;
+  let base = A;
+  if (t < 0) {
+    const r = invDet(A);
+    if (r.det === 0) throw new RangeError('fractionalMatrixPower: matrix is singular');
+    base = r.inv;
+  }
   let e = Math.abs(t);
   let result: number[][] = Array.from({ length: n }, (_, i) =>
     Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))

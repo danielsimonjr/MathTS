@@ -5,7 +5,7 @@ WebWorker acceleration, plus a reactive YAML-based **Scientific Workbook** (`.mt
 system. This document is **forward-looking**: what's planned and why. Shipped history
 lives in per-package `CHANGELOG.md` files and in `TODO.md` (the working tracker).
 
-_Last updated: 2026-10-22._
+_Last updated: 2026-11-04._
 
 > **Process:** features follow the lifecycle in [`docs/FEATURE_WORKFLOW.md`](docs/FEATURE_WORKFLOW.md)
 > — idea → (lightweight brainstorm + CDG placement probe) → ROADMAP entry →
@@ -115,6 +115,23 @@ the Definition of Ready (see the process doc). Add here so ideas aren't lost.
 
 > Short rolling window (most recent first). Full history lives in per-package
 > `CHANGELOG.md`; prune this list periodically so ROADMAP stays forward-looking.
+
+- **2026-11-04 — Gap analysis closure (32 items, 5 batches).** A verified
+  SciPy/NumPy/SymPy/mathjs/MATLAB diff (`docs/roadmap/GAP_ANALYSIS_2026-11-04.md`,
+  579 candidate names grep-verified against every package's `src/`) and its full
+  work list, all pure-TS in `functions`: weighted/robust statistics, effect sizes,
+  nine extra distributions, sign/runs/Mood/G tests, Wasserstein/energy/MI distances;
+  `erfinv`/`erfcx`/`dawson`, E1/Eₙ/Shi/Chi, spherical Bessel + Hankel + zeros,
+  Wigner 3j/6j/Clebsch–Gordan/spherical harmonics, Hurwitz ζ/Dirichlet η; differential
+  evolution, simulated annealing, constrained minimization, Gauss–Hermite/Laguerre/
+  Jacobi/Chebyshev rules, tanh-sinh, Clenshaw–Curtis, `dblquad`/`tplquad`, Fornberg
+  coefficients; modular arithmetic, arithmetic functions, integer sequences,
+  Diophantine/Pell/Frobenius/Zeckendorf, HNF/SNF/LLL, Sturm real roots; ten windows,
+  waveforms, Lomb–Scargle, `tf2ss`/`ss2tf`/`cont2discrete`/`tf2zpk`, DTW, special
+  matrices, subspace angles/`signm`/`cholupdate`, geometry predicates, polygon ops,
+  curve utilities. Also surfaced `conv2`, `sinc`, `qrPivoted`, `lq`/`rq`/`ql`,
+  `condest`, `eigvals`, `powerIteration`, `matrixPinv` on the `functions` barrel.
+  Real-order `besselJ`/`besselY` (previously rounded ν to an integer) fixed at root.
 
 - **2026-07-10 — WebGPU foundation extraction (Spec 1a).** New leaf package
   `@danielsimonjr/mathts-gpu` (`GPUContext`, `BufferPool`, `detect`, generic
