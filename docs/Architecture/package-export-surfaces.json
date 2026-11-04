@@ -3466,6 +3466,7 @@
       "ScalarBatchResult",
       "ScalarComplexFunction",
       "ScalarEvalError",
+      "ScalarFitOptions",
       "scalarMul",
       "ScalarMutationContext",
       "ScalarMutationOperator",

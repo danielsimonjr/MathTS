@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1237,
     "totalModules": 82,
-    "totalExports": 6455
+    "totalExports": 6456
   },
   "entryPoints": [
     {
@@ -10569,6 +10569,7 @@
           {
             "file": "./scalar-search.js",
             "imports": [
+              "ScalarFitOptions",
               "ScalarSearchOptions",
               "ScalarSearchProblem",
               "ScalarSearchResult",
@@ -11312,6 +11313,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
           "ScalarSearchResult",
@@ -11807,6 +11809,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
           "ScalarSearchResult",
@@ -12498,6 +12501,7 @@
         "interfaces": [
           "ScalarSearchProblem",
           "ScalarSearchOptions",
+          "ScalarFitOptions",
           "SearchProgress",
           "ScalarSearchResult",
           "EvaluatedIndividual",
@@ -43572,15 +43576,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1237,
     "totalModules": 82,
-    "totalLinesOfCode": 206313,
-    "totalExports": 6455,
+    "totalLinesOfCode": 206489,
+    "totalExports": 6456,
     "totalClasses": 60,
-    "totalInterfaces": 575,
+    "totalInterfaces": 576,
     "totalFunctions": 2086,
     "totalTypeGuards": 162,
     "totalEnums": 0,
     "totalConstants": 1634,
-    "totalReExports": 2749,
+    "totalReExports": 2750,
     "totalTypeOnlyImports": 625,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,
