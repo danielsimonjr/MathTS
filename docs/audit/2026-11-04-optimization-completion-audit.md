@@ -249,4 +249,25 @@ the reason.
 
 ## 7. Gates run on the final tree
 
-GATES_PLACEHOLDER
+Run locally on the final tree with the same commands as `.github/workflows/ci.yml` (Compile & Lint,
+the Node 22 Test leg, and the standing gates). Every gate passed except the Bun pin check, which
+fails only because this container runs Bun 1.4.4 against the 1.4.2 `packageManager` pin (CI installs
+the pinned version).
+
+| Gate                                                                                                                                                                                                                                                                    | Result              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `bun install --frozen-lockfile`                                                                                                                                                                                                                                         | pass                |
+| `node tools/test/check-typecheck-graph.mjs`, `bun run build`, `bun run typecheck` (48/48), `bun run lint`, `bun run format:check`                                                                                                                                       | pass                |
+| `bun run docs:functions:check`, `docs:deps:test`, `check:browser-safety`, `docs:graph:test`, `docs:roadmap-check:test`                                                                                                                                                  | pass                |
+| `check-bundle-budget` (refreshed: core +3.3 KB, expression +5 KB, workerpool +4.7 KB, parallel +3.5 KB, tensor +2.8 KB, workbook +1.4 KB), `check-runtime-deps`, `check-published-deps`, `check-export-lock` (refreshed for the new linalg, units and parallel exports) | pass                |
+| `check:duplicates:fast` (0 TRUE_DUPLICATE), `check:file-census`, `sprint-baseline --check`                                                                                                                                                                              | pass                |
+| `TURBO_FORCE=true bun run test` (every package on its own runner plus the root aggregate) and `check-skip-budget`                                                                                                                                                       | pass (no new skips) |
+| `node tools/test/run-vitest-node.mjs` (every package under vitest on Node 22, root suites, assembly scripts)                                                                                                                                                            | pass (37/37 legs)   |
+| `node tools/test/smoke-dist-node.mjs`                                                                                                                                                                                                                                   | pass (47/47)        |
+| `node tools/test/consumer-typecheck.mjs --skip-build` (bundler and NodeNext)                                                                                                                                                                                            | pass                |
+
+Two failures surfaced only under this full run and were fixed before the final commit: `bun test`
+treats a promise rejection that is not yet observed as an unhandled error between tests (the new
+WorkerPool respawn-cap test now attaches its handler first), and two concurrent
+`import('worker_threads')` calls under vitest's module mock resolved inconsistently once workers
+spawned in parallel (the pool now imports the module once).

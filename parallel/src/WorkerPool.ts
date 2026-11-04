@@ -99,12 +99,20 @@ export class WorkerPool {
     );
   }
 
+  /** `worker_threads`, imported once per pool and shared by every concurrent spawn. */
+  private workerThreadsModule?: Promise<typeof import('worker_threads')>;
+
+  private nodeWorkerThreads(): Promise<typeof import('worker_threads')> {
+    this.workerThreadsModule ??= import('worker_threads');
+    return this.workerThreadsModule;
+  }
+
   protected async createWorker(): Promise<Worker> {
     let worker: Worker;
 
     if (this.isNode) {
       // Node.js worker_threads
-      const { Worker: NodeWorker } = await import('worker_threads');
+      const { Worker: NodeWorker } = await this.nodeWorkerThreads();
       // Node's worker_threads Worker rejects raw file:// strings — it requires
       // either an absolute/relative path or a URL object. Wrap file:// URLs in
       // `new URL`; pass plain paths through unchanged.
