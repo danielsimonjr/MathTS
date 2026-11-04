@@ -16,7 +16,14 @@ import { inv as _invRaw } from './factories/index.js';
 
 const _inv = _invRaw as unknown as (m: number[][]) => number[][];
 
-const INVALID_ROW_PENALTY = 1e8;
+/**
+ * Residual a frozen row pays inside the fitter when the tree is invalid or
+ * non-finite there. The search's `'penalize'` ranker reuses this exact number so
+ * a penalized rank is comparable with a refit loss.
+ *
+ * @internal Used by the search ranker; not the package barrel.
+ */
+export const INVALID_ROW_PENALTY = 1e8;
 
 /** Named residual losses shared by {@link fitScalarParameters} and {@link searchScalars}. */
 export type NamedScalarLoss = 'l2' | 'l1' | 'huber';

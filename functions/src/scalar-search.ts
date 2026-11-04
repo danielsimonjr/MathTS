@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { type SeededRng } from '@danielsimonjr/mathts-core';
+import { pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
@@ -25,7 +25,13 @@ import {
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
-import { fitScalarParameters, rankScalarBatchLoss, type NamedScalarLoss } from './fit-scalar.js';
+import {
+  fitScalarParameters,
+  namedScalarLossTerm,
+  rankScalarBatchLoss,
+  INVALID_ROW_PENALTY,
+  type NamedScalarLoss,
+} from './fit-scalar.js';
 import { paretoFront, scoreFront, selectFrontModel, type ScoredCandidate } from './pareto-front.js';
 import {
   createScalarBatchPool,
@@ -78,6 +84,17 @@ export interface ScalarSearchOptions {
    * row weighs 1.
    */
   readonly rowWeights?: Float64Array;
+  /**
+   * How a tree that is invalid on at least one row is ranked. Default `'reject'`:
+   * today's `+Infinity` — such a tree never enters the hall. `'penalize'` scores
+   * {@link INVALID_ROW_PENALTY} (the fitter's existing invalid-row penalty) times
+   * the number of invalid rows a positive `rowWeights` entry covers, plus the
+   * chosen `loss` on the valid rows; a tree with no valid row reports the penalty
+   * times `observed.length`. The refit comparison scores both sides with the same
+   * number, so a refit stays comparable. Omitted is the default branch, so the
+   * seed-7 pin is unchanged.
+   */
+  readonly invalidRows?: 'reject' | 'penalize';
   /**
    * Refit knobs forwarded to {@link fitScalarParameters}. An omitted field is
    * today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's
@@ -446,6 +463,15 @@ function assertSearchInputs(
       }
     }
   }
+  if (
+    options.invalidRows !== undefined &&
+    options.invalidRows !== 'reject' &&
+    options.invalidRows !== 'penalize'
+  ) {
+    throw new RangeError(
+      `searchScalars: invalidRows must be 'reject' or 'penalize', got ${String(options.invalidRows)}`
+    );
+  }
 }
 
 function defaultParameters(n: number): Float64Array {
@@ -460,11 +486,46 @@ function compareLoss(a: number, b: number): number {
 interface RankLoss {
   readonly name: NamedScalarLoss;
   readonly weights: Float64Array | undefined;
+  readonly invalidRows: 'reject' | 'penalize';
 }
 
 interface Scored {
   readonly loss: number;
   readonly validRows: number;
+}
+
+/**
+ * The `'penalize'` ranker: the fitter's existing invalid-row penalty
+ * ({@link INVALID_ROW_PENALTY}) times the number of invalid rows a positive weight
+ * covers, plus the chosen loss on the valid rows. A zero-weight row is dropped on
+ * both sides, so it is neither penalized nor scored. The fitter pays this same
+ * penalty per invalid row, so a refit stays comparable with the rank that kept it.
+ * A non-finite total is `+Infinity`, like any other unusable rank.
+ */
+function penalizedBatchLoss(
+  batch: ScalarBatchResult,
+  observed: Float64Array,
+  rank: RankLoss
+): number {
+  let invalid = 0;
+  const terms: number[] = [];
+  for (let i = 0; i < observed.length; i += 1) {
+    const w = rank.weights === undefined ? 1 : rank.weights[i]!;
+    if (w === 0) {
+      continue;
+    }
+    if (batch.valid[i] === 0) {
+      invalid += 1;
+      continue;
+    }
+    terms.push(namedScalarLossTerm(rank.name, batch.values[i]!, observed[i]!, w));
+  }
+  if (terms.length === 0 && invalid === 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const validLoss = terms.length === 0 ? 0 : pairwiseSum(terms);
+  const total = INVALID_ROW_PENALTY * invalid + validLoss;
+  return Number.isFinite(total) ? total : Number.POSITIVE_INFINITY;
 }
 
 function scoreBatch(batch: ScalarBatchResult, observed: Float64Array, rank: RankLoss): Scored {
@@ -476,7 +537,10 @@ function scoreBatch(batch: ScalarBatchResult, observed: Float64Array, rank: Rank
     }
   }
   return {
-    loss: rankScalarBatchLoss(rank.name, batch.values, batch.valid, observed, rank.weights),
+    loss:
+      rank.invalidRows === 'penalize'
+        ? penalizedBatchLoss(batch, observed, rank)
+        : rankScalarBatchLoss(rank.name, batch.values, batch.valid, observed, rank.weights),
     validRows,
   };
 }
@@ -870,7 +934,9 @@ function pickSelected(
  * be a pure function of the node — a predicate that reads a clock or a random
  * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
  * Ranking and refit share `loss` (`'l2'` by default) and optional `rowWeights`.
- * `fit` forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
+ * `invalidRows` defaults to `'reject'` (`+Infinity` on any invalid row); `'penalize'`
+ * adds the fitter's existing invalid-row penalty per invalid row instead. `fit`
+ * forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
  * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
  * bound or length throws before the first yield. Omitted fields are today's call.
  * `crossoverProbability` defaults to 0 (no coin). A positive probability draws
@@ -904,6 +970,7 @@ export async function* searchScalars(
   const rank: RankLoss = {
     name: options.loss ?? 'l2',
     weights: options.rowWeights,
+    invalidRows: options.invalidRows ?? 'reject',
   };
   assertFitOptions(fit, names.length, rank.name);
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
