@@ -23,12 +23,12 @@ There is one active code graph. Every file is reachable from a package `src/inde
 
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
-| TypeScript Files             | 1,190 (0 unused)                                             |
-| Lines of Code                | 198,637                                                      |
-| Total Exports                | 6,145 (2,592 re-exports)                                     |
+| TypeScript Files             | 1,269 (0 unused)                                             |
+| Lines of Code                | 213,347                                                      |
+| Total Exports                | 6,883 (2,979 re-exports)                                     |
 | Modules                      | 82                                                           |
 | Circular Dependencies        | 0 runtime (0 type-only)                                      |
-| Classes / Interfaces / Funcs | 58 / 530 / 1,954 (158 type guards, 1,617 constants, 0 enums) |
+| Classes / Interfaces / Funcs | 60 / 593 / 2,282 (168 type guards, 1,635 constants, 0 enums) |
 
 ## Packages
 
@@ -61,7 +61,7 @@ Versions are not listed here. Each package's `package.json` gives its version.
 ## Single Active Code Graph
 
 MathTS is **one active code graph**. Every file is reachable from a package
-`src/index.ts`. The `src/` tree of every workspace package has 1,190 files and
+`src/index.ts`. The `src/` tree of every workspace package has 1,269 files and
 0 unused files, per `dependency-graph.json` (regenerate with `npm run docs:deps:full`).
 The mathjs-derived factories are wired into the graph via
 `functions/src/factories/index.ts`. Highlights:
@@ -173,7 +173,7 @@ math.add(1, 2);
 
 The mathjs-derived factory layer is wired into the graph via
 `functions/src/factories/index.ts` (reachable from `functions/src/index.ts`). The
-codebase is one active graph of 1,190 files (0 unused).
+codebase is one active graph of 1,269 files (0 unused).
 
 ### Bridges in Place
 
@@ -200,8 +200,8 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
 | totalTypeScriptFiles | 2264   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 399416 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 8941   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 399879 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalExports         | 8946   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | typeOnlyCircularDeps | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

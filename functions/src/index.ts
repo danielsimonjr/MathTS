@@ -90,6 +90,7 @@ export type {
 } from './scalar-mutate.js';
 export { searchScalars } from './scalar-search.js';
 export type {
+  ScalarDimensionFilter,
   ScalarFitOptions,
   ScalarSearchOptions,
   ScalarSearchProblem,
@@ -111,7 +112,11 @@ export type {
 } from './front-export.js';
 export { numericallyEquivalent, NumericEquivalenceError } from './numeric-equivalence.js';
 export type { NumericEquivalenceOptions, NumericEquivalence } from './numeric-equivalence.js';
-export { inferScalarDimension, solveParameterDimensions } from './scalar-dimension.js';
+export {
+  inferScalarDimension,
+  solveParameterDimensions,
+  unitToRationalDimension,
+} from './scalar-dimension.js';
 export type {
   DimensionInference,
   ParameterDimensionResult,

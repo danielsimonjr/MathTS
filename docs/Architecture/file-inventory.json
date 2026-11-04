@@ -6393,7 +6393,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 981
+      "loc": 986
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7443,7 +7443,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 556
+      "loc": 587
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1634
+      "loc": 1737
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11300,7 +11300,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 399
+      "loc": 425
     },
     {
       "file": "functions/tests/scalar-eval.test.ts",
@@ -11335,7 +11335,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 2600
+      "loc": 2898
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

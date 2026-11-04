@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6879
+    "totalExports": 6883
   },
   "entryPoints": [
     {
@@ -9986,7 +9986,11 @@
           },
           {
             "file": "./scalar-dimension.js",
-            "imports": ["inferScalarDimension", "solveParameterDimensions"],
+            "imports": [
+              "inferScalarDimension",
+              "solveParameterDimensions",
+              "unitToRationalDimension"
+            ],
             "reExport": true
           },
           {
@@ -10892,6 +10896,7 @@
           {
             "file": "./scalar-search.js",
             "imports": [
+              "ScalarDimensionFilter",
               "ScalarFitOptions",
               "ScalarSearchOptions",
               "ScalarSearchProblem",
@@ -11423,6 +11428,7 @@
           "NumericEquivalenceError",
           "inferScalarDimension",
           "solveParameterDimensions",
+          "unitToRationalDimension",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -11931,6 +11937,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarDimensionFilter",
           "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
@@ -12146,6 +12153,7 @@
           "NumericEquivalenceError",
           "inferScalarDimension",
           "solveParameterDimensions",
+          "unitToRationalDimension",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -12654,6 +12662,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarDimensionFilter",
           "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
@@ -13225,11 +13234,22 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Fraction", "SI_DIMENSION_LENGTH", "SiDimensionVector"]
+            "imports": [
+              "Fraction",
+              "SI_DIMENSION_LENGTH",
+              "toSiDimensionVector",
+              "Unit",
+              "SiDimensionVector"
+            ]
           }
         ],
-        "exports": ["inferScalarDimension", "solveParameterDimensions"],
-        "functions": ["inferScalarDimension", "solveParameterDimensions"]
+        "exports": [
+          "validateDimensionVector",
+          "inferScalarDimension",
+          "solveParameterDimensions",
+          "unitToRationalDimension"
+        ],
+        "functions": ["inferScalarDimension", "solveParameterDimensions", "unitToRationalDimension"]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -13424,6 +13444,15 @@
               "weightedMutation",
               "ScalarMutationContext"
             ]
+          },
+          {
+            "file": "./scalar-dimension.js",
+            "imports": [
+              "inferScalarDimension",
+              "solveParameterDimensions",
+              "validateDimensionVector",
+              "RationalDimension"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -13463,6 +13492,7 @@
         "classes": ["ComplexityFrequency"],
         "interfaces": [
           "ScalarSearchProblem",
+          "ScalarDimensionFilter",
           "ScalarSearchOptions",
           "ScalarFitOptions",
           "SearchProgress",
@@ -45246,15 +45276,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213208,
-    "totalExports": 6879,
+    "totalLinesOfCode": 213347,
+    "totalExports": 6883,
     "totalClasses": 60,
-    "totalInterfaces": 592,
-    "totalFunctions": 2281,
+    "totalInterfaces": 593,
+    "totalFunctions": 2282,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,
-    "totalReExports": 2977,
+    "totalReExports": 2979,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

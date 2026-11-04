@@ -9,7 +9,13 @@
  */
 
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
-import { Fraction, SI_DIMENSION_LENGTH, type SiDimensionVector } from '@danielsimonjr/mathts-core';
+import {
+  Fraction,
+  SI_DIMENSION_LENGTH,
+  toSiDimensionVector,
+  Unit,
+  type SiDimensionVector,
+} from '@danielsimonjr/mathts-core';
 import { hasOwnProperty } from './utils/object.js';
 import { rationalNullspace } from './numeric/rational-nullspace.js';
 
@@ -103,6 +109,12 @@ function validateDimensionVector(vector: RationalDimension, label = 'dimension v
     throw new TypeError(`${label} must be a ${SI_DIMENSION_LENGTH}-tuple of Fractions`);
   }
 }
+
+/**
+ * @internal Exported for `scalar-search.ts`'s option validation, not the package
+ * barrel. The same length-and-`Fraction` check the inference entry points run.
+ */
+export { validateDimensionVector };
 
 function readDimension(
   dims: Readonly<Record<string, RationalDimension>>,
@@ -552,4 +564,23 @@ export function solveParameterDimensions(
     });
   }
   return { solved };
+}
+
+/**
+ * The SI dimension of a unit name as a {@link RationalDimension}.
+ *
+ * Builds `new Unit(1, unitName)` and maps its length-10 exponent vector through
+ * {@link toSiDimensionVector}. An unknown unit name throws the error `Unit`
+ * already throws (`UnitParseError`). No unit table is added here and no
+ * `UnitTensor` exists: this is the read side of the existing table only.
+ *
+ * @example
+ * ```ts
+ * import { unitToRationalDimension } from '@danielsimonjr/mathts-functions';
+ * unitToRationalDimension('m')[0].toString(); // '1'
+ * ```
+ */
+export function unitToRationalDimension(unitName: string): RationalDimension {
+  const unit = new Unit(1, unitName);
+  return toSiDimensionVector(unit.dimensions as number[]);
 }
