@@ -505,6 +505,144 @@ describe('searchScalars: budget and result shape', () => {
   });
 });
 
+describe('searchScalars: ranking loss', () => {
+  // A constant tree against y = x except one huge outlier. The three named losses
+  // then disagree on a finite number, and a zero weight on the outlier recovers SSE
+  // of the other rows.
+  const outlierX = new Float64Array([0, 1, 2, 3]);
+  const outlierY = new Float64Array([0, 1, 2, 100]);
+  const constantZero = b.number(0);
+  const outlierGrammar: ScalarGrammar = {
+    variables: ['x'],
+    binary: [],
+    unary: [],
+    literals: [0],
+    maxSize: 1,
+  };
+  const outlierProblem: ScalarSearchProblem = {
+    variables: ['x'],
+    columns: [outlierX],
+    observed: outlierY,
+  };
+
+  async function lossOf(extra: Partial<ScalarSearchOptions>): Promise<number> {
+    const { result } = await runSearch(outlierProblem, {
+      grammar: outlierGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      seeds: [constantZero],
+      ...extra,
+    });
+    expect(result.front).toHaveLength(1);
+    return result.front[0]!.loss;
+  }
+
+  it('ranks l1 and huber differently from l2 on a fixed outlier, stably', async () => {
+    const l2a = await lossOf({ loss: 'l2' });
+    const l2b = await lossOf({ loss: 'l2' });
+    const l1a = await lossOf({ loss: 'l1' });
+    const l1b = await lossOf({ loss: 'l1' });
+    const ha = await lossOf({ loss: 'huber' });
+    const hb = await lossOf({ loss: 'huber' });
+    expect(Number.isFinite(l2a)).toBe(true);
+    expect(Number.isFinite(l1a)).toBe(true);
+    expect(Number.isFinite(ha)).toBe(true);
+    expect(l1a).not.toBe(l2a);
+    expect(ha).not.toBe(l2a);
+    expect(ha).not.toBe(l1a);
+    expect(Object.is(l2a, l2b)).toBe(true);
+    expect(Object.is(l1a, l1b)).toBe(true);
+    expect(Object.is(ha, hb)).toBe(true);
+  });
+
+  it('a zero weight removes that row from an l2 loss', async () => {
+    const withoutOutlier = new Float64Array([0, 1, 2]);
+    const sseOthers = await runSearch(
+      {
+        variables: ['x'],
+        columns: [withoutOutlier],
+        observed: new Float64Array([0, 1, 2]),
+      },
+      {
+        grammar: outlierGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 1,
+        optimizeProbability: 0,
+        seeds: [constantZero],
+      }
+    );
+    const weighted = await lossOf({
+      loss: 'l2',
+      rowWeights: new Float64Array([1, 1, 1, 0]),
+    });
+    expect(Object.is(weighted, sseOthers.result.front[0]!.loss)).toBe(true);
+  });
+
+  it('optimizeProbability 0 still leaves parameters at ones under l1', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['*'],
+      unary: [],
+      literals: [],
+      maxSize: 3,
+    };
+    const planted = b.op('*', [b.symbol('p'), X]);
+    const x = linspace(8, 1, 4);
+    const { result } = await runSearch(
+      {
+        variables: ['x'],
+        columns: [x],
+        observed: observedOf(b.op('*', [b.number(2), X]), x),
+        parameters: ['p'],
+      },
+      {
+        grammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 20,
+        optimizeProbability: 0,
+        loss: 'l1',
+        seeds: [planted],
+      }
+    );
+    for (const params of result.fittedParameters) {
+      expect([...params]).toEqual([1]);
+    }
+  });
+
+  it('does not refit when every positive-weight row is invalid', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['+'],
+      unary: ['log'],
+      literals: [],
+      maxSize: 5,
+    };
+    const x = new Float64Array([1, -1]);
+    const tree = b.op('+', [b.symbol('p'), b.call('log', X)]);
+    const { result } = await runSearch(
+      {
+        variables: ['x'],
+        columns: [x],
+        observed: new Float64Array([0, 1]),
+        parameters: ['p'],
+      },
+      {
+        grammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 20,
+        optimizeProbability: 1,
+        rowWeights: new Float64Array([0, 1]),
+        seeds: [tree],
+      }
+    );
+    expect(result.evaluations).toBeGreaterThan(0);
+    expect(result.stopReason).toBe('max-evaluations');
+  });
+});
+
 describe('searchScalars: unusable candidates', () => {
   it('ranks a tree that is invalid on any row below every valid tree, whatever the scale', async () => {
     // y = 1e6 everywhere. Any valid tree has a huge residual; `log(x)` is invalid on the
@@ -580,6 +718,24 @@ describe('searchScalars: arguments', () => {
     await reject(quadProblem, { ...base, crossoverProbability: -0.1 });
     await reject(quadProblem, { ...base, crossoverProbability: 1.1 });
     await reject(quadProblem, { ...base, crossoverProbability: Number.NaN });
+    await reject(quadProblem, {
+      ...base,
+      loss: 'mae' as unknown as ScalarSearchOptions['loss'],
+    });
+    await reject(quadProblem, {
+      ...base,
+      rowWeights: new Float64Array(quadProblem.observed.length - 1),
+    });
+    await reject(quadProblem, {
+      ...base,
+      rowWeights: new Float64Array(quadProblem.observed.length).fill(-1),
+    });
+    await reject(quadProblem, {
+      ...base,
+      rowWeights: Float64Array.from({ length: quadProblem.observed.length }, (_, i) =>
+        i === 0 ? Number.NaN : 1
+      ),
+    });
     await reject(quadProblem, { ...base, maxEvaluations: Number.NaN });
     await reject(quadProblem, { ...base, maxEvaluations: -1 });
     await reject(quadProblem, { ...base, maxCandidates: Number.NaN });

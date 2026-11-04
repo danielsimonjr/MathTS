@@ -4415,7 +4415,9 @@ graph LR
 **Exports:**
 
 - Interfaces: `FitScalarOptions`, `FitScalarResult`
-- Functions: `fitScalarParameters`
+- Types: `NamedScalarLoss`
+- Functions: `namedScalarLossTerm`, `rankScalarBatchLoss`, `fitScalarParameters`
+- Constants: `HUBER_DELTA`
 
 ---
 
@@ -4989,7 +4991,7 @@ graph LR
 
 | Package                            | Import                                                                                                    |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                  |
+| `@danielsimonjr/mathts-core`       | `SeededRng`                                                                                               |
 | `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                              |
 | `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarGrammar, ScalarNode` |
 
@@ -4997,7 +4999,7 @@ graph LR
 
 | File                         | Imports                                                                                                    | Type   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
-| `./fit-scalar.js`            | `fitScalarParameters`                                                                                      | Import |
+| `./fit-scalar.js`            | `fitScalarParameters, rankScalarBatchLoss, NamedScalarLoss`                                                | Import |
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
 | `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
@@ -19523,12 +19525,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1237   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 206184 |
-| Total Exports           | 6452   |
+| Total Lines of Code     | 206313 |
+| Total Exports           | 6455   |
 | Total Re-exports        | 2749   |
 | Total Classes           | 60     |
 | Total Interfaces        | 575    |
-| Total Functions         | 2084   |
+| Total Functions         | 2086   |
 | Total Type Guards       | 162    |
 | Total Enums             | 0      |
 | Type-only Imports       | 625    |
