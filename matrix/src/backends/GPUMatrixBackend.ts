@@ -189,7 +189,7 @@ export class GPUMatrixBackend implements MatrixBackend {
         const aData = new Float32Array(a.toFloat64Array());
         const bData = new Float32Array(b.toFloat64Array());
         const result = await this.backend!.add(aData, bData, a.rows, a.cols);
-        return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
+        return new DenseMatrix(a.rows, a.cols, new Float64Array(result));
       },
       (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
@@ -247,7 +247,7 @@ export class GPUMatrixBackend implements MatrixBackend {
       async () => {
         const aData = new Float32Array(a.toFloat64Array());
         const result = await this.backend!.scale(aData, scalar);
-        return DenseMatrix.fromFlat(a.rows, a.cols, Array.from(result));
+        return new DenseMatrix(a.rows, a.cols, new Float64Array(result));
       },
       (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
@@ -288,7 +288,7 @@ export class GPUMatrixBackend implements MatrixBackend {
         const aData = new Float32Array(a.toFloat64Array());
         const bData = new Float32Array(b.toFloat64Array());
         const result = await this.backend!.matmul(aData, bData, a.rows, a.cols, b.cols);
-        return DenseMatrix.fromFlat(a.rows, b.cols, Array.from(result));
+        return new DenseMatrix(a.rows, b.cols, new Float64Array(result));
       },
       (gpuOp, fallback) => this.executeWithFallback(gpuOp, fallback)
     );
@@ -318,7 +318,7 @@ export class GPUMatrixBackend implements MatrixBackend {
       async () => {
         const aData = new Float32Array(a.toFloat64Array());
         const result = await this.backend!.transpose(aData, a.rows, a.cols);
-        return DenseMatrix.fromFlat(a.cols, a.rows, Array.from(result));
+        return new DenseMatrix(a.cols, a.rows, new Float64Array(result));
       },
       () => jsBackend.transpose(a)
     );

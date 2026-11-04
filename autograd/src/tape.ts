@@ -22,6 +22,16 @@ interface TapeNode {
 }
 
 /**
+ * Throw when two TapedTensors come from different Tapes: their ids index
+ * different gradient-slot tables, so combining them would corrupt gradients.
+ */
+export function assertSameTape(a: { readonly tape: Tape }, b: { readonly tape: Tape }): void {
+  if (a.tape !== b.tape) {
+    throw new Error('TapedTensor: operands belong to different Tapes');
+  }
+}
+
+/**
  * Records the operations of a forward pass so that `backward` can replay them in reverse.
  *
  * `allocate` gives inputs negative ids. `record` gives operations non-negative ids.
@@ -67,9 +77,24 @@ export class Tape {
     // E19 fix: overwrite the seed (slot starts at 0). The previous += was
     // wasteful and could double-count if backward() were re-invoked.
     slot.set(outputGrad);
-    for (let n = this.nodes.length - 1; n >= 0; n--) {
+    // Op ids are monotonic and equal the node index, and a node only reads
+    // slots of earlier ids, so nodes recorded after `outputId` cannot
+    // contribute: start the replay at the output op itself.
+    const start = outputId >= 0 ? outputId : this.nodes.length - 1;
+    for (let n = start; n >= 0; n--) {
       this.nodes[n].backward(this.nodes[n].outputGradSlot);
     }
+  }
+
+  /**
+   * Drop every recorded node, closure and gradient slot and restart id allocation.
+   * TapedTensors created before the reset are invalid afterwards: do not use them.
+   */
+  reset(): void {
+    this.nodes = [];
+    this.inputGradSlots.clear();
+    this.nextOpId = 0;
+    this.nextInputId = -1;
   }
 
   getInputGrad(id: number): Float64Array | undefined {
@@ -258,6 +283,7 @@ export class TapedTensor {
    * finds the right shared axes.
    */
   contract(other: TapedTensor): TapedTensor {
+    assertSameTape(this, other);
     // Both operands must carry axisLabels — delegate validation to Tensor.contract.
     const aPrimal = this.toPrimalTensorWith(this.axisLabels);
     const bPrimal = other.toPrimalTensorWith(other.axisLabels);
@@ -386,6 +412,7 @@ export class TapedTensor {
    *   dB:       '...ki,...kj->...ij'   (contract A on k with dY on k)
    */
   matmul(other: TapedTensor): TapedTensor {
+    assertSameTape(this, other);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
 
@@ -457,6 +484,7 @@ export class TapedTensor {
   }
 
   private checkSameShape(other: TapedTensor, op: string): void {
+    assertSameTape(this, other);
     assertSameShape(this.shape, other.shape, 'TapedTensor', op);
   }
 
@@ -1205,6 +1233,7 @@ export class TapedTensor {
    * adjoint as `TapedTensor.matmul`.
    */
   tensordot(other: TapedTensor, axes: ReadonlyArray<readonly [number, number]>): TapedTensor {
+    assertSameTape(this, other);
     const aShape = [...this.shape];
     const bShape = [...other.shape];
     const aRank = aShape.length;

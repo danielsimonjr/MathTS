@@ -13,7 +13,7 @@
  */
 
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
-import { DenseMatrix } from './DenseMatrix.js';
+import { DenseMatrix, registerSparseMatrixFactory } from './DenseMatrix.js';
 
 /**
  * Sparse matrix using Compressed Sparse Row (CSR) format
@@ -62,6 +62,11 @@ export class SparseMatrix extends Matrix<number> {
   ) {
     super();
 
+    if (!Number.isInteger(rows) || !Number.isInteger(cols)) {
+      throw new TypeError(
+        `Matrix dimensions must be integers, got ${String(rows)}×${String(cols)}`
+      );
+    }
     if (rows < 0 || cols < 0) {
       throw new Error('Matrix dimensions must be non-negative');
     }
@@ -82,6 +87,56 @@ export class SparseMatrix extends Matrix<number> {
     }
     if (this._rowPointers[rows] !== this._data.length) {
       throw new Error('rowPointers[rows] must equal number of non-zeros');
+    }
+
+    // Cheap O(rows + nnz) structural checks. The O(nnz) sortedness/uniqueness
+    // check lives in `SparseMatrix.validate` (not run on every construction).
+    const rp = this._rowPointers;
+    if (rp[0] !== 0) {
+      throw new Error('rowPointers[0] must be 0');
+    }
+    for (let i = 0; i < rows; i++) {
+      if (rp[i + 1] < rp[i]) {
+        throw new Error(`rowPointers must be non-decreasing (violated at row ${i})`);
+      }
+    }
+    const ci = this._colIndices;
+    for (let k = 0; k < ci.length; k++) {
+      const c = ci[k];
+      if (c < 0 || c >= cols) {
+        throw new RangeError(`Column index ${c} at position ${k} out of range for ${cols} columns`);
+      }
+    }
+  }
+
+  /**
+   * Full O(rows + nnz) structural validation of a CSR matrix: monotonic row
+   * pointers, column indices in range, and strictly increasing (sorted, unique)
+   * column indices within each row.
+   *
+   * @throws Error describing the first violation found.
+   */
+  static validate(m: SparseMatrix): void {
+    const rp = m._rowPointers;
+    const ci = m._colIndices;
+    if (rp.length !== m.rows + 1) throw new Error(`rowPointers length must be ${m.rows + 1}`);
+    if (rp[0] !== 0) throw new Error('rowPointers[0] must be 0');
+    if (rp[m.rows] !== m._data.length) {
+      throw new Error('rowPointers[rows] must equal number of non-zeros');
+    }
+    for (let i = 0; i < m.rows; i++) {
+      const start = rp[i];
+      const end = rp[i + 1];
+      if (end < start) throw new Error(`rowPointers must be non-decreasing (violated at row ${i})`);
+      for (let k = start; k < end; k++) {
+        const c = ci[k];
+        if (c < 0 || c >= m.cols) {
+          throw new RangeError(`Column index ${c} in row ${i} out of range for ${m.cols} columns`);
+        }
+        if (k > start && c <= ci[k - 1]) {
+          throw new Error(`Column indices in row ${i} must be strictly increasing`);
+        }
+      }
     }
   }
 
@@ -132,6 +187,18 @@ export class SparseMatrix extends Matrix<number> {
     cols: number,
     entries: Array<{ row: number; col: number; value: number }>
   ): SparseMatrix {
+    if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 0 || cols < 0) {
+      throw new Error(`Invalid matrix dimensions ${String(rows)}×${String(cols)}`);
+    }
+    for (const e of entries) {
+      if (!Number.isInteger(e.row) || e.row < 0 || e.row >= rows) {
+        throw new RangeError(`COO row index ${e.row} out of range for ${rows} rows`);
+      }
+      if (!Number.isInteger(e.col) || e.col < 0 || e.col >= cols) {
+        throw new RangeError(`COO column index ${e.col} out of range for ${cols} columns`);
+      }
+    }
+
     // Sort entries by row, then by column
     const sorted = [...entries].sort((a, b) => {
       if (a.row !== b.row) return a.row - b.row;
@@ -142,24 +209,26 @@ export class SparseMatrix extends Matrix<number> {
     const colIndices: number[] = [];
     const rowPointers: number[] = new Array(rows + 1).fill(0);
 
-    // Count entries per row
-    for (const entry of sorted) {
-      if (entry.value !== 0) {
-        rowPointers[entry.row + 1]++;
+    // Merge duplicate (row, col) entries by summation; drop resulting zeros
+    let idx = 0;
+    while (idx < sorted.length) {
+      const { row, col } = sorted[idx];
+      let value = sorted[idx].value;
+      idx++;
+      while (idx < sorted.length && sorted[idx].row === row && sorted[idx].col === col) {
+        value += sorted[idx].value;
+        idx++;
+      }
+      if (value !== 0) {
+        values.push(value);
+        colIndices.push(col);
+        rowPointers[row + 1]++;
       }
     }
 
     // Cumulative sum for row pointers
     for (let i = 1; i <= rows; i++) {
       rowPointers[i] += rowPointers[i - 1];
-    }
-
-    // Fill values and column indices
-    for (const entry of sorted) {
-      if (entry.value !== 0) {
-        values.push(entry.value);
-        colIndices.push(entry.col);
-      }
     }
 
     return new SparseMatrix(
@@ -688,23 +757,26 @@ export class SparseMatrix extends Matrix<number> {
    * Sparse matrix transpose
    */
   transpose(): SparseMatrix {
-    // CSR transpose = CSC of transposed = CSR of transposed
-    const entries: Array<{ row: number; col: number; value: number }> = [];
+    // Counting-sort CSR transpose: O(nnz + rows + cols), output columns come out
+    // sorted because source rows are visited in increasing order.
+    const nnz = this._data.length;
+    const outPtr = new Int32Array(this.cols + 1);
+    for (let k = 0; k < nnz; k++) outPtr[this._colIndices[k] + 1]++;
+    for (let c = 0; c < this.cols; c++) outPtr[c + 1] += outPtr[c];
 
+    const next = outPtr.slice(0, this.cols);
+    const outIdx = new Int32Array(nnz);
+    const outVal = new Float64Array(nnz);
     for (let i = 0; i < this.rows; i++) {
-      const start = this._rowPointers[i];
       const end = this._rowPointers[i + 1];
-
-      for (let j = start; j < end; j++) {
-        entries.push({
-          row: this._colIndices[j],
-          col: i,
-          value: this._data[j],
-        });
+      for (let k = this._rowPointers[i]; k < end; k++) {
+        const pos = next[this._colIndices[k]]++;
+        outIdx[pos] = i;
+        outVal[pos] = this._data[k];
       }
     }
 
-    return SparseMatrix.fromCOO(this.cols, this.rows, entries);
+    return new SparseMatrix(this.cols, this.rows, outVal, outIdx, outPtr);
   }
 
   /**
@@ -913,6 +985,11 @@ export class SparseMatrix extends Matrix<number> {
     return SparseMatrix.fromCOO(this.rows, this.cols, entries);
   }
 }
+
+registerSparseMatrixFactory(
+  (rows, cols, values, colIndices, rowPointers) =>
+    new SparseMatrix(rows, cols, values, colIndices, rowPointers)
+);
 
 /**
  * Type guard for SparseMatrix

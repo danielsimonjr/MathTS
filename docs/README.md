@@ -171,6 +171,7 @@ items they still track.
 | [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                               |
 | [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                   |
 | [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues. |
+| [audit/2026-11-04-optimization-completion-audit.md](audit/2026-11-04-optimization-completion-audit.md) | Optimization and completion audit of every package (2026-11-04), with the implemented fixes.      |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 

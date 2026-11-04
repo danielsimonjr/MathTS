@@ -125,10 +125,7 @@ export class Tensor {
    * matrix packages so matrix data can flow into rank-N / autodiff code.
    */
   static fromDenseMatrix(m: DenseMatrix): Tensor {
-    const nested = m.toArray() as number[][];
-    const rows = nested.length;
-    const cols = rows > 0 ? nested[0].length : 0;
-    return Tensor.fromNested(nested, [rows, cols]);
+    return new Tensor([m.rows, m.cols], m.toFloat64Array());
   }
 
   /**
@@ -140,7 +137,7 @@ export class Tensor {
         `Tensor.toDenseMatrix: expected a rank-2 tensor, got rank ${this.shape.length}`
       );
     }
-    return DenseMatrix.fromArray(this.toNested() as number[][]);
+    return new DenseMatrix(this.shape[0], this.shape[1], this.data.slice());
   }
 
   private sameShape(other: Tensor): boolean {
@@ -149,34 +146,33 @@ export class Tensor {
     );
   }
 
-  private elementwise(other: Tensor, op: string, f: (x: number, y: number) => number): Tensor {
-    if (!this.sameShape(other)) {
-      throw new Error(`Tensor.${op}: shape mismatch [${this.shape}] vs [${other.shape}]`);
-    }
-    const out = new Float64Array(this.data.length);
-    for (let i = 0; i < this.data.length; i++) out[i] = f(this.data[i], other.data[i]);
-    return new Tensor(this.shape, out);
-  }
-
   add(other: Tensor | number): Tensor {
+    const a = this.data;
     if (typeof other === 'number') {
-      const out = new Float64Array(this.data.length);
-      for (let i = 0; i < this.data.length; i++) out[i] = this.data[i] + other;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] + other;
       return new Tensor(this.shape, out, this.axisLabels);
     }
     if (this.sameShape(other)) {
-      return this.elementwise(other, 'add', (x, y) => x + y);
+      const b = other.data;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] + b[i];
+      return new Tensor(this.shape, out, this.axisLabels);
     }
     return Tensor.broadcastOp(this, other, 'add', (x, y) => x + y);
   }
   sub(other: Tensor | number): Tensor {
+    const a = this.data;
     if (typeof other === 'number') {
-      const out = new Float64Array(this.data.length);
-      for (let i = 0; i < this.data.length; i++) out[i] = this.data[i] - other;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] - other;
       return new Tensor(this.shape, out, this.axisLabels);
     }
     if (this.sameShape(other)) {
-      return this.elementwise(other, 'sub', (x, y) => x - y);
+      const b = other.data;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] - b[i];
+      return new Tensor(this.shape, out, this.axisLabels);
     }
     return Tensor.broadcastOp(this, other, 'sub', (x, y) => x - y);
   }
@@ -184,16 +180,58 @@ export class Tensor {
     if (typeof other === 'number') {
       return this.scale(other);
     }
+    const a = this.data;
     if (this.sameShape(other)) {
-      return this.elementwise(other, 'mul', (x, y) => x * y);
+      const b = other.data;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] * b[i];
+      return new Tensor(this.shape, out, this.axisLabels);
     }
     return Tensor.broadcastOp(this, other, 'mul', (x, y) => x * y);
   }
+  /** Element-wise division; broadcasts like `mul`. Division by zero follows IEEE-754. */
+  div(other: Tensor | number): Tensor {
+    const a = this.data;
+    if (typeof other === 'number') {
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] / other;
+      return new Tensor(this.shape, out, this.axisLabels);
+    }
+    if (this.sameShape(other)) {
+      const b = other.data;
+      const out = new Float64Array(a.length);
+      for (let i = 0; i < a.length; i++) out[i] = a[i] / b[i];
+      return new Tensor(this.shape, out, this.axisLabels);
+    }
+    return Tensor.broadcastOp(this, other, 'div', (x, y) => x / y);
+  }
+
+  /** Element-wise negation. */
+  neg(): Tensor {
+    const a = this.data;
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = -a[i];
+    return new Tensor(this.shape, out, this.axisLabels);
+  }
+
+  /** Apply `f` to every element, returning a new tensor of the same shape (labels preserved). */
+  map(f: (x: number, index: number) => number): Tensor {
+    const a = this.data;
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = f(a[i], i);
+    return new Tensor(this.shape, out, this.axisLabels);
+  }
+
+  /** Deep copy: independent data buffer; shape and axisLabels are carried over. */
+  clone(): Tensor {
+    return new Tensor([...this.shape], this.data.slice(), this.axisLabels);
+  }
 
   scale(k: number): Tensor {
-    const out = new Float64Array(this.data.length);
-    for (let i = 0; i < this.data.length; i++) out[i] = this.data[i] * k;
-    return new Tensor(this.shape, out);
+    const a = this.data;
+    const out = new Float64Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = a[i] * k;
+    return new Tensor(this.shape, out, this.axisLabels);
   }
 
   normInf(): number {
@@ -322,6 +360,9 @@ export class Tensor {
         throw new Error(`Tensor.reduce: axis ${ax} out of range for rank-${rank} tensor`);
       }
     }
+    if (axisSet.size !== axes.length) {
+      throw new Error(`Tensor.reduce: duplicate axes in [${axes}]`);
+    }
 
     // Build output shape
     const outShape: number[] = [];
@@ -341,29 +382,34 @@ export class Tensor {
     const out = new Float64Array(outSize).fill(init);
     const outStrides = Tensor.rowMajorStrides(outShape.length > 0 ? outShape : [1]);
 
-    // Iterate over all input elements
-    const inCoords = new Array<number>(rank).fill(0);
-    const inSize = this.data.length;
-    for (let n = 0; n < inSize; n++) {
-      // Compute the output flat index for this input coordinate
-      let outFlat = 0;
+    // Per-input-axis contribution to the output offset (0 for reduced axes),
+    // computed once; the odometer below then tracks outFlat incrementally.
+    const contrib = new Array<number>(rank).fill(0);
+    {
       let outDim = 0;
       for (let k = 0; k < rank; k++) {
         if (axisSet.has(k)) {
-          if (keepDims) {
-            // contributes 0 (coordinate is 0 in the kept dim-1 axis)
-            outDim++;
-          }
-          // else: skip
+          if (keepDims) outDim++;
         } else {
-          outFlat += inCoords[k] * outStrides[outDim];
+          contrib[k] = outStrides[outDim];
           outDim++;
         }
       }
-      out[outFlat] = combine(out[outFlat], this.data[n]);
-      // increment inCoords
+    }
+
+    // Iterate over all input elements (row-major odometer)
+    const inCoords = new Array<number>(rank).fill(0);
+    const inSize = this.data.length;
+    const data = this.data;
+    let outFlat = 0;
+    for (let n = 0; n < inSize; n++) {
+      out[outFlat] = combine(out[outFlat], data[n]);
       for (let k = rank - 1; k >= 0; k--) {
-        if (++inCoords[k] < this.shape[k]) break;
+        if (++inCoords[k] < this.shape[k]) {
+          outFlat += contrib[k];
+          break;
+        }
+        outFlat -= contrib[k] * (this.shape[k] - 1);
         inCoords[k] = 0;
       }
     }
@@ -613,28 +659,6 @@ export class Tensor {
     return [...axis];
   }
 
-  private static forEachIndex(shape: ReadonlyArray<number>, visit: (idx: number[]) => void): void {
-    if (shape.length === 0) {
-      visit([]);
-      return;
-    }
-    const idx = new Array<number>(shape.length).fill(0);
-    const total = Tensor.sizeOf(shape);
-    for (let n = 0; n < total; n++) {
-      visit(idx);
-      for (let k = shape.length - 1; k >= 0; k--) {
-        if (++idx[k] < shape[k]) break;
-        idx[k] = 0;
-      }
-    }
-  }
-
-  private static flatIndex(idx: ReadonlyArray<number>, strides: ReadonlyArray<number>): number {
-    let f = 0;
-    for (let k = 0; k < idx.length; k++) f += idx[k] * strides[k];
-    return f;
-  }
-
   reshape(shape: ReadonlyArray<number>): Tensor {
     if (Tensor.sizeOf(shape) !== this.data.length) {
       throw new Error(`Tensor.reshape: size mismatch [${this.shape}] -> [${shape}]`);
@@ -647,15 +671,38 @@ export class Tensor {
     const p = perm ?? Array.from({ length: rank }, (_, i) => rank - 1 - i);
     if (p.length !== rank)
       throw new Error(`Tensor.transpose: perm length ${p.length} != rank ${rank}`);
+    const seen = new Array<boolean>(rank).fill(false);
+    for (const axis of p) {
+      if (!Number.isInteger(axis) || axis < 0 || axis >= rank) {
+        throw new Error(`Tensor.transpose: perm axis ${axis} out of range for rank-${rank} tensor`);
+      }
+      if (seen[axis]) {
+        throw new Error(
+          `Tensor.transpose: perm [${p}] is not a permutation (repeated axis ${axis})`
+        );
+      }
+      seen[axis] = true;
+    }
     const outShape = p.map((axis) => this.shape[axis]);
     const inStrides = Tensor.rowMajorStrides(this.shape);
-    const outStrides = Tensor.rowMajorStrides(outShape);
-    const out = new Float64Array(this.data.length);
-    Tensor.forEachIndex(outShape, (outIdx) => {
-      const inIdx = new Array<number>(rank);
-      for (let k = 0; k < rank; k++) inIdx[p[k]] = outIdx[k];
-      out[Tensor.flatIndex(outIdx, outStrides)] = this.data[Tensor.flatIndex(inIdx, inStrides)];
-    });
+    // Input stride seen when stepping along each output axis.
+    const permStrides = p.map((axis) => inStrides[axis]);
+    const src = this.data;
+    const total = src.length;
+    const out = new Float64Array(total);
+    const coords = new Array<number>(rank).fill(0);
+    let inOff = 0;
+    for (let n = 0; n < total; n++) {
+      out[n] = src[inOff];
+      for (let k = rank - 1; k >= 0; k--) {
+        if (++coords[k] < outShape[k]) {
+          inOff += permStrides[k];
+          break;
+        }
+        inOff -= permStrides[k] * (outShape[k] - 1);
+        coords[k] = 0;
+      }
+    }
     return new Tensor(outShape, out);
   }
 
@@ -678,23 +725,42 @@ export class Tensor {
   }
 
   static einsum(spec: EinsumSpec, ...operands: Tensor[]): Tensor {
+    const nOps = operands.length;
+    const checkRef = (what: string, operand: number, axis: number): void => {
+      if (!Number.isInteger(operand) || operand < 0 || operand >= nOps) {
+        throw new Error(
+          `Tensor.einsum: ${what} references operand ${operand}, but only ${nOps} operand(s) were given`
+        );
+      }
+      const rank = operands[operand].shape.length;
+      if (!Number.isInteger(axis) || axis < 0 || axis >= rank) {
+        throw new Error(
+          `Tensor.einsum: ${what} references axis ${axis} of operand ${operand}, which has rank ${rank}`
+        );
+      }
+    };
+    spec.free.forEach((fa, v) => checkRef(`free[${v}]`, fa.operand, fa.axis));
+    spec.contractions.forEach((c, v) => {
+      checkRef(`contractions[${v}] (first)`, c.pair[0][0], c.pair[0][1]);
+      checkRef(`contractions[${v}] (second)`, c.pair[1][0], c.pair[1][1]);
+    });
+
     const inStrides = operands.map((o) => Tensor.rowMajorStrides(o.shape));
     const freeSizes = spec.free.map((fa) => operands[fa.operand].shape[fa.axis]);
     const contractSizes = spec.contractions.map((c) => {
       const [[oa, axa], [ob, axb]] = c.pair;
-      const sa = operands[oa]?.shape[axa];
-      const sb = operands[ob]?.shape[axb];
-      if (sa === undefined || sb === undefined || sa !== sb) {
+      const sa = operands[oa].shape[axa];
+      const sb = operands[ob].shape[axb];
+      if (sa !== sb) {
         throw new Error(`Tensor.einsum: contraction pair size mismatch`);
       }
       return sa;
     });
-    const outStrides = Tensor.rowMajorStrides(freeSizes);
     const out = new Float64Array(Tensor.sizeOf(freeSizes));
     // Guard (mirrors Float64ReferenceEngine): every rank-≥1 operand axis must
     // be referenced by the spec. Rank-0 operands are allowed and contribute a
     // scalar factor.
-    for (let o = 0; o < operands.length; o++) {
+    for (let o = 0; o < nOps; o++) {
       if (operands[o].shape.length === 0) continue;
       const covered = new Set<number>();
       spec.free.forEach((fa) => {
@@ -709,33 +775,57 @@ export class Tensor {
         throw new Error(`Tensor.einsum: operand ${o} has axes not referenced by the spec`);
       }
     }
-    const operandFlatIndex = (
-      opIndex: number,
-      freeVals: ReadonlyArray<number>,
-      contractVals: ReadonlyArray<number>
-    ): number => {
-      const idx = new Array<number>(operands[opIndex].shape.length).fill(0);
-      spec.free.forEach((fa, v) => {
-        if (fa.operand === opIndex) idx[fa.axis] = freeVals[v];
-      });
-      spec.contractions.forEach((c, v) => {
-        const [[oa, axa], [ob, axb]] = c.pair;
-        if (oa === opIndex) idx[axa] = contractVals[v];
-        if (ob === opIndex) idx[axb] = contractVals[v];
-      });
-      return Tensor.flatIndex(idx, inStrides[opIndex]);
-    };
-    Tensor.forEachIndex(freeSizes, (freeVals) => {
-      let acc = 0;
-      Tensor.forEachIndex(contractSizes, (contractVals) => {
-        let product = 1;
-        for (let o = 0; o < operands.length; o++) {
-          product *= operands[o].data[operandFlatIndex(o, freeVals, contractVals)];
-        }
-        acc += product;
-      });
-      out[Tensor.flatIndex(freeVals, outStrides)] = acc;
+
+    // Per-operand offset contribution of one step along each free / contracted
+    // variable, computed once so the loops below advance offsets incrementally.
+    const nFree = freeSizes.length;
+    const nCon = contractSizes.length;
+    const freeContrib: number[][] = operands.map(() => new Array<number>(nFree).fill(0));
+    const conContrib: number[][] = operands.map(() => new Array<number>(nCon).fill(0));
+    spec.free.forEach((fa, v) => {
+      freeContrib[fa.operand][v] += inStrides[fa.operand][fa.axis];
     });
+    spec.contractions.forEach((c, v) => {
+      const [[oa, axa], [ob, axb]] = c.pair;
+      conContrib[oa][v] += inStrides[oa][axa];
+      conContrib[ob][v] += inStrides[ob][axb];
+    });
+
+    const outSize = out.length;
+    const conSize = Tensor.sizeOf(contractSizes);
+    const datas = operands.map((o) => o.data);
+    const base = new Array<number>(nOps).fill(0);
+    const cur = new Array<number>(nOps).fill(0);
+    const freeCoords = new Array<number>(nFree).fill(0);
+    const conCoords = new Array<number>(nCon).fill(0);
+
+    for (let outN = 0; outN < outSize; outN++) {
+      for (let o = 0; o < nOps; o++) cur[o] = base[o];
+      conCoords.fill(0);
+      let acc = 0;
+      for (let cn = 0; cn < conSize; cn++) {
+        let product = 1;
+        for (let o = 0; o < nOps; o++) product *= datas[o][cur[o]];
+        acc += product;
+        for (let k = nCon - 1; k >= 0; k--) {
+          if (++conCoords[k] < contractSizes[k]) {
+            for (let o = 0; o < nOps; o++) cur[o] += conContrib[o][k];
+            break;
+          }
+          for (let o = 0; o < nOps; o++) cur[o] -= conContrib[o][k] * (contractSizes[k] - 1);
+          conCoords[k] = 0;
+        }
+      }
+      out[outN] = acc;
+      for (let k = nFree - 1; k >= 0; k--) {
+        if (++freeCoords[k] < freeSizes[k]) {
+          for (let o = 0; o < nOps; o++) base[o] += freeContrib[o][k];
+          break;
+        }
+        for (let o = 0; o < nOps; o++) base[o] -= freeContrib[o][k] * (freeSizes[k] - 1);
+        freeCoords[k] = 0;
+      }
+    }
     return new Tensor(freeSizes, out);
   }
 

@@ -1,4 +1,5 @@
 import type { Matrix } from '../Matrix.js';
+import { DenseMatrix, denseContiguousData } from '../DenseMatrix.js';
 
 /**
  * Add all elements of a matrix.
@@ -8,6 +9,11 @@ import type { Matrix } from '../Matrix.js';
  */
 export function sum(a: Matrix<number>): number {
   let total = 0;
+  if (a instanceof DenseMatrix) {
+    const d = denseContiguousData(a);
+    for (let i = 0; i < d.length; i++) total += d[i];
+    return total;
+  }
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       total += a.get(i, j);
@@ -34,6 +40,14 @@ export function mean(a: Matrix<number>): number {
  */
 export function min(a: Matrix<number>): number {
   let minVal = Infinity;
+  if (a instanceof DenseMatrix) {
+    const d = denseContiguousData(a);
+    for (let i = 0; i < d.length; i++) {
+      const val = d[i];
+      if (val < minVal) minVal = val;
+    }
+    return minVal;
+  }
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       const val = a.get(i, j);
@@ -51,6 +65,14 @@ export function min(a: Matrix<number>): number {
  */
 export function max(a: Matrix<number>): number {
   let maxVal = -Infinity;
+  if (a instanceof DenseMatrix) {
+    const d = denseContiguousData(a);
+    for (let i = 0; i < d.length; i++) {
+      const val = d[i];
+      if (val > maxVal) maxVal = val;
+    }
+    return maxVal;
+  }
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       const val = a.get(i, j);
@@ -69,6 +91,11 @@ export function max(a: Matrix<number>): number {
  */
 export function norm(a: Matrix<number>): number {
   let sumSquared = 0;
+  if (a instanceof DenseMatrix) {
+    const d = denseContiguousData(a);
+    for (let i = 0; i < d.length; i++) sumSquared += d[i] * d[i];
+    return Math.sqrt(sumSquared);
+  }
   for (let i = 0; i < a.rows; i++) {
     for (let j = 0; j < a.cols; j++) {
       const val = a.get(i, j);

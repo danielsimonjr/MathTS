@@ -57,6 +57,11 @@ export class DenseMatrix extends Matrix<number> {
   ) {
     super();
 
+    if (!Number.isInteger(rows) || !Number.isInteger(cols)) {
+      throw new TypeError(
+        `Matrix dimensions must be integers, got ${String(rows)}×${String(cols)}`
+      );
+    }
     if (rows < 0 || cols < 0) {
       throw new Error('Matrix dimensions must be non-negative');
     }
@@ -107,6 +112,10 @@ export class DenseMatrix extends Matrix<number> {
           }
           this.data = new Float64Array(flat);
         }
+      } else {
+        throw new TypeError(
+          `DenseMatrix data must be a Float64Array, number[] or number[][], got ${typeof data}`
+        );
       }
     }
   }
@@ -305,7 +314,7 @@ export class DenseMatrix extends Matrix<number> {
    * Get the diagonal elements
    */
   diagonal(k: number = 0): DenseMatrix {
-    const diagLength = Math.min(this.rows - Math.max(0, k), this.cols - Math.max(0, -k));
+    const diagLength = Math.min(this.rows - Math.max(0, -k), this.cols - Math.max(0, k));
 
     if (diagLength <= 0) {
       return new DenseMatrix(0, 1);
@@ -491,14 +500,15 @@ export class DenseMatrix extends Matrix<number> {
       rowPointers.push(values.length);
     }
 
-    // Synchronous lazy require to break the DenseMatrix ↔ SparseMatrix cycle
-    // — `toSparse()` is sync, so dynamic `import()` (which is async) can't be
-    // used here. The static `import type { SparseMatrix }` was already dropped
-    // per the cycle-elimination work in 2026-05-22; this require materialises
-    // the runtime value only when the method is actually called.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const SparseMatrixModule = require('./SparseMatrix.js');
-    return new SparseMatrixModule.SparseMatrix(
+    // SparseMatrix registers its constructor here when its module loads
+    // (see `registerSparseMatrixFactory`), which avoids a static
+    // DenseMatrix <-> SparseMatrix import cycle and works in pure ESM (no `require`).
+    if (sparseMatrixFactory === undefined) {
+      throw new Error(
+        'DenseMatrix.toSparse: SparseMatrix is not loaded; import it from @danielsimonjr/mathts-matrix'
+      );
+    }
+    return sparseMatrixFactory(
       this.rows,
       this.cols,
       new Float64Array(values),
@@ -574,6 +584,25 @@ export class DenseMatrix extends Matrix<number> {
  */
 export function isDenseMatrix(value: unknown): value is DenseMatrix {
   return value instanceof DenseMatrix;
+}
+
+type SparseFactory = (
+  rows: number,
+  cols: number,
+  values: Float64Array,
+  colIndices: Int32Array,
+  rowPointers: Int32Array
+) => Matrix;
+
+let sparseMatrixFactory: SparseFactory | undefined;
+
+/**
+ * Internal: called by SparseMatrix.ts at module load so `DenseMatrix.toSparse`
+ * can build a CSR matrix without importing it (no import cycle). Not re-exported
+ * from the package index.
+ */
+export function registerSparseMatrixFactory(factory: SparseFactory): void {
+  sparseMatrixFactory = factory;
 }
 
 type DenseStorage = {

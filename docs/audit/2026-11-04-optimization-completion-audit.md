@@ -1,0 +1,160 @@
+# MathTS optimization and completion audit (2026-11-04)
+
+**Status:** findings implemented in the same change set (see §5 for the per-item status).
+**Baseline:** `main` at `df6d330` (after PR #578). Every gate was green on the baseline:
+`bun run lint`, `bun run typecheck` (48/48 tasks), `bun run test` (all packages plus the root
+aggregate, 159 root tests).
+**Method:** one planner (this report's author) and a team of read-only explorers, one per package
+group, followed by one implementation worker per package group and an independent reviewer on the
+combined diff. Each explorer was told what `CLAUDE.md` already records as known or deliberate
+(the measured WASM dispatch policy, JS-only `eig`/`svd`, the unregistered GPU backend, the stub
+runtime heap rule) so that nothing deliberate is re-reported. Every finding below cites a file and
+line that the explorer read; line numbers are as of the baseline and drift after the fix.
+
+The previous whole-codebase audit (`2026-10-22-codebase-audit.md`, issues I-1 … I-18) was
+re-verified first. Most of its open items were already closed on `main` by later pull requests;
+§1 records the current state so nobody re-files a fixed issue.
+
+## 1. Status of the 2026-10-22 issues (re-verified on `df6d330`)
+
+| Issue | State on baseline                                                                                                                         | Action in this change                                                     |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| I-1   | Resolved: `ci.yml` runs `tools/test/bun-audit-retry.mjs`                                                                                  | Status line updated                                                       |
+| I-5   | Partial: LM, `svds`, `norm2` done; `solveODE` kept a private `_fdJacobian`                                                                | `_fdJacobian` routed through `numericJacobian` (§3, F-18)                 |
+| I-7   | Partial: `fft-core.ts` header fixed; `linregress` still fitted twice; `numericRealRoots` already delegates to `findRoot`                   | Double fit removed (§3, F-7)                                              |
+| I-8   | Partial: the two threshold tables now agree (`DEFAULT_EXTENDED_HINTS = extendedHintsFromConfig(DEFAULT_CONFIG)`); `DenseMatrix.multiply` still JS by design | No change (documented reality)                                 |
+| I-9   | Resolved: compat `create` keeps a per-instance config and uses `runWithConfig`                                                            | Status line updated                                                       |
+| I-10  | Partial: unused pins gone; `packages/typed-function` still has no dependents (release decision)                                            | No change                                                                 |
+| I-11  | Resolved for `schemaVersion`; the underlying replacer still turned shared non-circular references into `"[Circular]"`                     | Replacer fixed (§4, F-1)                                                  |
+| I-12  | Resolved: `_exactFraction` reads `numerator`/`denominator`                                                                                | Status line updated                                                       |
+| I-13  | Resolved: `TARGETS` lists expression, workbook, plot                                                                                       | Status line updated                                                       |
+| I-14  | Resolved: `lgamma` comment fixed; `tests/integration/examples-smoke.test.ts` runs the examples from the root `vitest run`                  | Status line updated                                                       |
+| I-15  | Resolved: `COVERAGE_AUDIT.md` regenerated 2026-10-27; June benchmark sections labelled historical                                          | Status line updated                                                       |
+| I-16  | Resolved: `parallelStatMeanAD` alias and `mad-median-vs-mean-ad.test.ts`                                                                  | Status line updated                                                       |
+| I-17  | Resolved: workbook barrel exports `toDOT`, `toTeX`, `DependencyGraph`, `DependencyNode`                                                   | Status line updated                                                       |
+
+`TODO.md` follow-ups re-verified: `js-yaml` 4.x override (closed here: ported to 5.5 with the
+override raised in the same commit), `rankF64Dispatch` dead (removed here), `polynomialGCD`
+inexact for rationals (rational scaling added here), `solveODE`/`freqz`/`zpk2tf` returning
+`unknown` (precise result types added here). Still human-blocked: Dependabot and `bun.lock` v2,
+and the `test-output.log` CI artifact (needs a SHA-pinned `upload-artifact`, the maintainer's
+pin).
+
+## 2. core, parallel, workerpool, typed-function, numbers, units
+
+| #    | Finding                                                                                                                                                                                                                                                                       | Kind         | Effort |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------ |
+| C-1  | `parallel/src/operations/{elementwise,map,matmul,reduce}.ts:20-22` declare `forceParallel`/`forceSequential` but only read `options.pool`; the flags are silently ignored by every free function on the barrel.                                                                 | completion   | M      |
+| C-2  | `parallel/src/WorkerPool.ts:146-155` `handleWorkerError` rejects the tasks of every worker (`this.workers.includes(worker)` does not depend on the task), never evicts or replaces the crashed worker, and healthy workers whose task was rejected never return to the free list (early return at :127 before the push at :138), so capacity shrinks permanently. | correctness  | M      |
+| C-3  | `ParallelMatrix.multiply` (:213-285), `ComputePool.matmul` (:643-662) and `MathWorkerPool.matmul` (:1165) check no dimensions; `transpose` (:674) and `matvec` (:1094) validate only in the sequential branch, so the same bad call throws below the threshold and returns garbage above it. | correctness  | S      |
+| C-4  | `packages/workerpool/src/worker.ts` `sumChunk` (:23), `dotChunk` (:49), `normChunk` (:123) use naive accumulation while `ComputePool`'s sequential path uses core's pairwise/scaled kernels; parallel `norm` of a 1e200-scaled vector overflows where sequential does not.         | correctness  | M      |
+| C-5  | Chunks are `slice()` copies that are then structured-cloned again because no dispatch site passes `transfer`, and the worker returns `result.buffer` without `workerpool.Transfer`. Roughly half the memcpy traffic is avoidable.                                                | optimization | M      |
+| C-6  | `index.ts:1209` (matmul), :1280, :2000, :2067 and `ComputePool.ts:1324` send the whole operand per task through `.buffer`, which ignores `byteOffset`: a `subarray` view above the threshold reads the wrong region.                                                           | correctness  | M      |
+| C-7  | `ComputePool.histogram` (:793-826): a NaN sample writes a `"NaN"` property on the counts array; `bins <= 0` or fractional throws a bare `RangeError`; `lo === hi` is hidden by `\|\| 1`.                                                                                      | correctness  | S      |
+| C-8  | `core/src/types/fraction.ts`: `negate`/`abs`/`inverse` re-run a bigint GCD on already-reduced pairs; `multiply`/`divide` GCD the full product instead of the Knuth cross-GCD; `pow` does one extra squaring and throws a bare `RangeError` for a non-integer exponent.            | optimization | S      |
+| C-9  | `core/src/types/unit/Unit.ts`: `_findUnit` memo capped at 100 entries (:986); `createUnit` cannot define a unit that references one defined later in the same object (:2604 TODO); `handleVAandVARUnits` uses an absolute `1e-14` test (:1933); name-collision TODO at :2657. | completion   | S-M    |
+| C-10 | `core/src/factory.ts:213` stale TODO (`create`/`sortFactories` are adopted by `expression/src/utils/factory.ts`).                                                                                                                                                              | completion   | S      |
+| C-11 | `WorkerPool.ts`: workers spawned serially with `await` in a loop (:64-77); `taskQueue.shift()` (:160); `Date.now()+randomUUID()` task ids (:277); `maxWorkers` accepts `NaN`/negative (:52).                                                                                  | optimization | S      |
+| C-12 | `ParallelMatrix.toSharedBuffer` (:133-142) copies even when the input is already `SharedArrayBuffer`-backed.                                                                                                                                                                  | optimization | S      |
+| C-13 | Three wordings for the same length mismatch (`ComputePool.ts:481,501,529,1192`, `index.ts:1485`) and three zero-division wordings in `Fraction`.                                                                                                                               | completion   | S      |
+| C-14 | `units/src/index.ts` omits `REFUSED_UNIT_SPELLINGS` and the `UnitInstance` type; the `units`/`numbers` facade tests do not pin the export set.                                                                                                                                 | completion   | S      |
+| C-15 | `ComputePool.exec` is the only public async method with no test; `docs/api/core.md` and `docs/api/parallel.md` list none of the option/result types (`OpName`, `ThresholdConfig`, `PoolOptions`, `IComplex`, `RoundingMode`, …).                                               | completion   | S      |
+
+Checked and clean: `core/src/numeric/stable.ts` and `strides.ts` (already unrolled, pairwise,
+allocation-free), `mathts-typed.ts`, the typed-function fork, `compileFunctionSource` (the
+per-chunk `(0, eval)` is the documented trust model).
+
+## 3. functions (and arithmetic, trigonometry, statistics, signal facades)
+
+| #    | Finding                                                                                                                                                                                                                                                                      | Kind         | Effort |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------ |
+| F-1  | `functions/src/typed/cas.ts` `evalAt`/`evalWith` (:129-138) call `evaluate(expr, scope)`, so every point of `integrate`'s Simpson loop (1,000 points), `fourierSeries`, `numericRealRoots` (about 2,200 scans) and `numericalDerivative` re-parses and re-compiles the string; `compileExpr` (`factories/evaluate.ts:313`) is never used. | optimization | S-M    |
+| F-2  | `fourierSeries` (:880-890) re-evaluates f(x) at all N points for every harmonic k although f does not depend on k.                                                                                                                                                           | optimization | S      |
+| F-3  | `hypothesis.ts` `_mwUFromPermutation` (:966-1008) sorts twice per permutation and discards one rank array; `combinedPool` is already sorted, so a shuffled copy of `ranksArr` summed over the first n1 entries is O(n) with the same rng stream. The `Promise.all` of `Promise.resolve().then` tasks (:1011-1018) is a sequential loop in disguise. | optimization | S      |
+| F-4  | KS (:738-748) and Shapiro–Wilk (:1197-1205) bootstraps `sort()` each resample drawn from an already-sorted array; a counting pass over the drawn indices is O(n) and yields the same sorted resample.                                                                         | optimization | S      |
+| F-5  | `typed/statistics.ts:660-662` multi-quantile `'Float64Array, Array'` copies and sorts once per requested quantile.                                                                                                                                                           | optimization | S      |
+| F-6  | `numbertheory/extra.ts:285-301` `multiplicativeOrder` is an O(ord) loop whose `cur*amod` exceeds 2^53 for n above about 9.5e7, returning wrong orders silently.                                                                                                             | correctness  | S      |
+| F-7  | `descriptive-stats.ts:304-336` `linregress` fits the line twice (`fitLine` at :313, then `linearRegression` at :320 fits again).                                                                                                                                             | optimization | S      |
+| F-8  | `polyMulJS` is O(n·m) at every size; a Karatsuba/FFT path above ~256 coefficients is the only sub-quadratic option since the WASM policy keeps `poly_mul_f64` on JS.                                                                                                          | optimization | M      |
+| F-9  | `typed/algebra.ts:252-259`, :114-118, :436: `>= WASM_*_THRESHOLD` branches make extra `Float64Array` copies and call a dispatch with no policy band, so both branches run the same JS.                                                                                        | optimization | S      |
+| F-10 | `typed/signal.ts:925-1000` `spectrogram`/`periodogram` run a full complex FFT per real frame and build `number[]` with `push`.                                                                                                                                                | optimization | M      |
+| F-11 | `parallelStatMode(Float64Array)` (:375-377) copies via `Array.from` to reach the `Array` overload, which only indexes.                                                                                                                                                       | optimization | S      |
+| F-12 | `solveODE`, `freqz`, `zpk2tf` are published as bare `TypedFunction` (`factories/index.ts:581,1276,1321`) although `ODESolution<T>`, `FrequencyResponse`, `TransferFunction` exist.                                                                                           | completion   | M      |
+| F-13 | `algebra/decomposition/qr.ts:492-494` `qr(SparseMatrix)` throws "not implemented" and is reachable through the `SparseMatrix` signature at :286.                                                                                                                              | completion   | S      |
+| F-14 | `special/niche.ts:54-56` `polylog` and `special/wave-functions.ts:241` `lerchPhi` throw for \|z\| ≥ 1 ("analytic continuation not implemented").                                                                                                                             | completion   | M-L    |
+| F-15 | `probability/combinations.ts:57` `// TODO: implement support for collection in combinations` is the one live reachable TODO stub.                                                                                                                                            | completion   | S      |
+| F-16 | `numericRealRoots` (:1148-1175) evaluates each grid point twice (`fa` and the previous `fb`), and the scan ranges are undocumented.                                                                                                                                           | optimization | S      |
+| F-17 | `descriptive-stats.ts:38-43` `centralMoment` uses `Math.pow(d, k)` per element for k = 2, 3, 4.                                                                                                                                                                              | optimization | S      |
+| F-18 | `numeric/solveODE.ts:211-214` keeps a private forward-difference `_fdJacobian` while `numericJacobian` has a `scheme: 'forward'` option (I-5 residue).                                                                                                                       | completion   | S      |
+| F-19 | `wasm/sort/wasm-bridge.ts:161` `rankF64Dispatch` has no importer in `functions/src` (TODO.md round-2 item).                                                                                                                                                                 | completion   | S      |
+| F-20 | `typed/algebra.ts:310-334` `polynomialGCD` routes only all-integer input to the exact bigint PRS; rational coefficients could be scaled to integers first (TODO.md round-2 item).                                                                                             | completion   | S-M    |
+| F-21 | `typed/cas.ts:2473-2476` `CAS_BATCH_THRESHOLD` is documented deprecated without a `@deprecated` tag.                                                                                                                                                                         | completion   | S      |
+
+Already resolved on the baseline and not re-reported: `simplifyConstant._exactFraction`, the
+`mad` / `parallelStatMAD` collision (aliased and tested), `numericRealRoots` vs `findRoot` (the
+former delegates to Brent), and the WASM-threshold comments in `typed/statistics.ts`,
+`typed/signal.ts`, `typed/geometry.ts` (they agree with `policy.ts`). Every explicit export of
+`functions/src/index.ts` except type names and `EARTH_RADIUS_KM` appears in at least one test.
+
+## 4. expression, workbook, plot, compat (and parser, ast, evaluator facades)
+
+| #    | Finding                                                                                                                                                                                                                                                                 | Kind         | Effort |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------ |
+| E-1  | `workbook/src/cli.ts:134-142` `jsonEnvelope`'s `WeakSet` replacer marks every visited object forever, so a shared non-circular reference (two cells aliasing one object) is emitted as `"[Circular]"` in the `--json` machine contract. `formatter.ts` handles this correctly. | correctness  | S      |
+| E-2  | `expression/src/node/FunctionNode.ts:355` reads `object[prop]` directly for the `?.` nullish check before `getSafeMethod`; a user-controlled name reaches a getter or Proxy without the sandbox helpers.                                                                | security     | S      |
+| E-3  | Eight of sixteen node classes (AccessorNode, ArrayNode, BlockNode, ConditionalNode, FunctionAssignmentNode, IndexNode, ObjectNode, RangeNode) have no `_toMathML` and fall back to `<mtext>` of `toString()` (`Node.ts:459-461`); every node has `_toTex` and `_toHTML`. | completion   | M      |
+| E-4  | `expression/src/parse.ts` (:998, 1039, 1070, 1169, 1203, 1374, 1449) rebuilds an operator lookup object on every call at that precedence level.                                                                                                                       | optimization | S      |
+| E-5  | `expression/src/evaluator/evaluate.ts:176-186` parses, validates and compiles on every `evaluate` of the same string; the compiled closures are scope-independent, so a bounded cache keyed on (namespace, string, unsafe) removes the repeated pipeline for reactive reruns. | optimization | S-M    |
+| E-6  | `workbook/src/executor.ts:66,236` does an O(n) `cells.find` per cell (O(n²) for `runAll`) and `runReport` rebuilds the graph the constructor already built; `session.ts` builds it again in `run` and `commit`.                                                        | optimization | S      |
+| E-7  | Reactive mode emits `cell:stale` for every dependent after each `runCell`, including cells about to run in the same `runAll` (:92-103).                                                                                                                               | optimization | S      |
+| E-8  | `workbook/src/graph.ts:44-56, 69-83, 94-105` traversals recurse per level (a deep chain overflows the stack); `Session.commit` calls `getDependents` once per changed cell.                                                                                            | correctness  | S-M    |
+| E-9  | `compat/src/index.ts:352-362` `create()` eagerly wraps every export through `copyFunctionSurface` (descriptor reflection per function) on every call.                                                                                                                | optimization | M      |
+| E-10 | `expression/src/node/IndexNode.ts:94-97` TODO: BigNumber range values silently truncated.                                                                                                                                                                             | completion   | S      |
+| E-11 | `node/utils/assign.ts:28,60` and `access.ts:44` throw bare `TypeError`s without the offending type name.                                                                                                                                                              | completion   | S      |
+| E-12 | `parser`, `ast`, `evaluator` facades have smoke tests only; nothing pins their export set against `expression`.                                                                                                                                                      | completion   | S      |
+| E-13 | `plot/src/svg.ts:67-82` `escAttr` runs a regex replace on every attribute value, including numbers.                                                                                                                                                                    | optimization | S      |
+| E-14 | `docs/audit/2026-10-22-issues-final.md` still says "open" for I-9, I-11, I-17 (and I-1, I-12, I-13, I-15, I-16).                                                                                                                                                      | completion   | S      |
+| E-15 | `expression/src/utils/latex.ts` placeholders at :69, :84, :87, :90, :91-92 ("TODO find ideal solution").                                                                                                                                                              | completion   | S      |
+
+Checked and clean: no `new Function` or per-call `new RegExp` in `expression/src`; the direct
+`math[name]` reads in `compile.ts` are guarded by `hasOwnProperty` on the trusted namespace; plot
+SVG building already uses `+=`/`join` with rounded numbers.
+
+## 5. matrix, gpu, tensor, autograd, assembly, linalg
+
+| #    | Finding                                                                                                                                                                                                                                                                                      | Kind         | Effort |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------ |
+| M-1  | **Bug.** `matrix/src/types/DenseMatrix.ts:308` `diagonal(k)` uses `min(rows - max(0,k), cols - max(0,-k))`; the correct form (as in `SparseMatrix.ts:479`) is `min(rows - max(0,-k), cols - max(0,k))`. On a 3×5 matrix `diagonal(-1)` throws `RangeError` and `diagonal(1)` returns 2 entries instead of 3. Verified against `matrix/dist`. Existing tests are square-only. | correctness  | S      |
+| M-2  | `types/dense/arithmetic.ts:9-18` `flat()` copies every operand through `toFloat64Array()` although `denseContiguousData` returns the backing array; `add`, `subtract`, `multiplyElementwise`, `scale`, `transpose`, `multiply` all pay it.                                                | optimization | S      |
+| M-3  | `backends/JSBackend.ts` (add :44 … `sumAxis` :217) and `types/dense/reduction.ts:154-242` use per-element `get()` with bounds checks; `JSBackend.dot` (:255) does `Array.from(a.values())` twice.                                                                                           | optimization | S-M    |
+| M-4  | `tensor/src/Tensor.ts:127-146` `fromDenseMatrix`/`toDenseMatrix` round-trip through nested arrays although a flat `Float64Array` path exists.                                                                                                                                              | optimization | S      |
+| M-5  | `operations/lu.ts:47-48` copies twice; `WASMBackend.ts` (:529 … :953) and `GPUMatrixBackend.ts` (:192 … :321) build results with `DenseMatrix.fromFlat(r, c, Array.from(f64))`, a Float64Array → number[] → Float64Array round trip on a fresh copy.                                      | optimization | S      |
+| M-6  | `DenseMatrix` constructor (:52-112) leaves `this.data` undefined for an unexpected data type and accepts non-integer/NaN dimensions.                                                                                                                                                         | completion   | S      |
+| M-7  | `SparseMatrix.fromCOO` (:130-160) does not bounds-check and does not merge duplicates (a duplicate produces a CSR where `get` returns only one of them); the constructor validates lengths only. `transpose` (:690) and other hot ops go through COO objects plus a re-sort (O(nnz log nnz) where a counting-sort CSR transpose is O(nnz + rows + cols)). | correctness  | M      |
+| M-8  | `autograd/src/tape.ts:133-146`: a binary op accepts an operand from a different `Tape`; ids overlap across tapes, so backward either throws or credits the wrong gradient slot.                                                                                                             | correctness  | S      |
+| M-9  | `Tape.backward` (:64-73) replays every node including ones recorded after `outputId` and unrelated branches; `inputIds` is stored but never read; there is no `reset`.                                                                                                                      | optimization | S-M    |
+| M-10 | `Tensor.transpose` (:645-660) allocates an index array per element and runs two `flatIndex` calls; `qr`, `reshape-axes`, `svd`, `eig`, `lu`, `cholesky`, `pinv` all call it. `perm` is validated by length only.                                                                             | optimization | S      |
+| M-11 | `Tensor.reduceAxes` (:303-372) recomputes `axisSet.has`/`outDim` per element; duplicate axes (`mean([0,0])`) are accepted and give a wrong mean; `einsum` (:680) does not validate operand/axis ranges.                                                                                     | correctness  | S-M    |
+| M-12 | `Tensor` lacks `div`, `neg`, `map`, `clone` (all on `DenseMatrix`; the `Tape` side has `divide`, `exp`, `log`, `pow`); `scale()` and the same-shape `elementwise()` path drop `axisLabels` while `add(number)` keeps them; add/sub/mul share one megamorphic `f(x, y)` closure.                | completion   | S-M    |
+| M-13 | `Tensor.einsum` (:712-736) allocates `new Array(rank)` and rescans the spec per (free × contraction × operand) iteration; `tensordot` and `contract` inherit it.                                                                                                                             | optimization | M      |
+| M-14 | `linalg/src/index.ts` omits `luSolve`, `qrPivoted`, `lq`, `rq`, `ql`, `condest`, `transposeNestedArray` and the `QRPivotedResult`/`LQResult`/`RQResult`/`QLResult` types that `matrix` exports.                                                                                              | completion   | S      |
+| M-15 | `DenseMatrix.toSparse` (:500) has no test; `ParallelBackend.ts:62` has one `(globalThis as any)`.                                                                                                                                                                                           | completion   | S      |
+
+Checked and clean: no reachable stub in `matrix`, `gpu`, `tensor`, `autograd` or `assembly/src`
+(`'unsupported'` in `GPUBackend.ts` is a status string); every barrel export of `matrix`,
+`tensor`, `autograd` is referenced by at least one test. I-8's threshold tables agree on the
+baseline; the residual is that three size measures gate the same WASM matmul (flops in
+`BackendManager.multiply`, element count in `WASMBackend.multiply`, and a retired `transpose`
+entry), which is cosmetic until a benchmark changes the dispatch.
+
+## 6. Implementation status
+
+Filled in from the implementation workers' reports and the reviewer's pass. "Done" means code,
+tests and (where the public surface changed) a changeset landed in this change; "Deferred" lists
+the reason.
+
+IMPLEMENTATION_STATUS_PLACEHOLDER
+
+## 7. Gates run on the final tree
+
+GATES_PLACEHOLDER
