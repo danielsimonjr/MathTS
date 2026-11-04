@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expression Evaluation — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Expression Evaluation</div>
+  <h1><span>Expression Evaluation</span> (39)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Expression Evaluation..." oninput="filterFuncs()">
+<div class="func-card" id="addNode" data-name="addnode">
+  <div class="func-name">addNode</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">addNode(…)</div>
+  </div>
+</div>
+<div class="func-card" id="compileExpr" data-name="compileexpr">
+  <div class="func-name">compileExpr</div>
+  <div class="func-desc">Compile once, evaluate many</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compileExpr(expr)</div>
+  </div>
+</div>
+<div class="func-card" id="compileScalar" data-name="compilescalar">
+  <div class="func-name">compileScalar</div>
+  <div class="func-desc">Batch-evaluate a scalar node over <code>Float64Array</code> columns with per-row validity</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compileScalar(node, options)</div>
+  </div>
+</div>
+<div class="func-card" id="compileScalarGradient" data-name="compilescalargradient">
+  <div class="func-name">compileScalarGradient</div>
+  <div class="func-desc">Same tape as <code>compileScalar</code> plus exact ∂f/∂parameter per row (<code>grad</code> layout)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compileScalarGradient(node, options)</div>
+  </div>
+</div>
+<div class="func-card" id="crossoverSubtrees" data-name="crossoversubtrees">
+  <div class="func-name">crossoverSubtrees</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">crossoverSubtrees(…)</div>
+  </div>
+</div>
+<div class="func-card" id="deleteNode" data-name="deletenode">
+  <div class="func-name">deleteNode</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">deleteNode(…)</div>
+  </div>
+</div>
+<div class="func-card" id="evaluate" data-name="evaluate">
+  <div class="func-name">evaluate</div>
+  <div class="func-desc">Evaluate an expression string</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">evaluate(expr[, scope])</div>
+  </div>
+</div>
+<div class="func-card" id="evaluateScalar" data-name="evaluatescalar">
+  <div class="func-name">evaluateScalar</div>
+  <div class="func-desc">Evaluate a scalar node from <code>scalar</code> (typed tree; a formula string is rejected)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">evaluateScalar(node[, scope])</div>
+  </div>
+</div>
+<div class="func-card" id="fitScalarParameters" data-name="fitscalarparameters">
+  <div class="func-name">fitScalarParameters</div>
+  <div class="func-desc">Fit <code>ScalarNode</code> parameters to columnar data (<code>FitScalarOptions</code> / <code>FitScalarResult</code>); default <code>l2</code> uses <code>levenbergMarquardt</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fitScalarParameters(node, columns, observed, variables, options)</div>
+  </div>
+</div>
+<div class="func-card" id="frontToJson" data-name="fronttojson">
+  <div class="func-name">frontToJson</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">frontToJson(…)</div>
+  </div>
+</div>
+<div class="func-card" id="frontToLatexTable" data-name="fronttolatextable">
+  <div class="func-name">frontToLatexTable</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">frontToLatexTable(…)</div>
+  </div>
+</div>
+<div class="func-card" id="identityMutation" data-name="identitymutation">
+  <div class="func-name">identityMutation</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">identityMutation(…)</div>
+  </div>
+</div>
+<div class="func-card" id="inferScalarDimension" data-name="inferscalardimension">
+  <div class="func-name">inferScalarDimension</div>
+  <div class="func-desc">SI dimension of a scalar tree with <code>Fraction</code> exponents, or a named violation and its path</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">inferScalarDimension(node, dims)</div>
+  </div>
+</div>
+<div class="func-card" id="insertNode" data-name="insertnode">
+  <div class="func-name">insertNode</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">insertNode(…)</div>
+  </div>
+</div>
+<div class="func-card" id="mutateConstant" data-name="mutateconstant">
+  <div class="func-name">mutateConstant</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mutateConstant(…)</div>
+  </div>
+</div>
+<div class="func-card" id="mutateFeature" data-name="mutatefeature">
+  <div class="func-name">mutateFeature</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mutateFeature(…)</div>
+  </div>
+</div>
+<div class="func-card" id="mutateOperator" data-name="mutateoperator">
+  <div class="func-name">mutateOperator</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mutateOperator(…)</div>
+  </div>
+</div>
+<div class="func-card" id="nodeToScalar" data-name="nodetoscalar">
+  <div class="func-name">nodeToScalar</div>
+  <div class="func-desc">Scalar subset of an expression node; throws <code>ScalarBuildError</code> when unsupported</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nodeToScalar(node)</div>
+  </div>
+</div>
+<div class="func-card" id="numericallyEquivalent" data-name="numericallyequivalent">
+  <div class="func-name">numericallyEquivalent</div>
+  <div class="func-desc">Sample two scalar trees; compare with <code>nearlyEqual</code> (evidence, not proof)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">numericallyEquivalent(a, b, options)</div>
+  </div>
+</div>
+<div class="func-card" id="NumericEquivalenceError" data-name="numericequivalenceerror">
+  <div class="func-name">NumericEquivalenceError</div>
+  <div class="func-desc">Thrown for invalid <code>numericallyEquivalent</code> options or domain</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">NumericEquivalenceError</div>
+  </div>
+</div>
+<div class="func-card" id="paretoFront" data-name="paretofront">
+  <div class="func-name">paretoFront</div>
+  <div class="func-desc">Pareto hall of fame (one survivor per complexity, ascending complexity)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">paretoFront(candidates)</div>
+  </div>
+</div>
+<div class="func-card" id="ParetoFrontError" data-name="paretofronterror">
+  <div class="func-name">ParetoFrontError</div>
+  <div class="func-desc">Thrown by <code>scoreFront</code> / <code>selectFrontModel</code> for invalid selection input</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ParetoFrontError</div>
+  </div>
+</div>
+<div class="func-card" id="parser" data-name="parser">
+  <div class="func-name">parser</div>
+  <div class="func-desc">Create a stateful parser with a scope retained across calls</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parser()</div>
+  </div>
+</div>
+<div class="func-card" id="physicsScope" data-name="physicsscope">
+  <div class="func-name">physicsScope</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">physicsScope(…)</div>
+  </div>
+</div>
+<div class="func-card" id="randomizeTree" data-name="randomizetree">
+  <div class="func-name">randomizeTree</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">randomizeTree(…)</div>
+  </div>
+</div>
+<div class="func-card" id="replacer" data-name="replacer">
+  <div class="func-name">replacer</div>
+  <div class="func-desc"><code>JSON.stringify</code> replacer — serialises <code>Complex</code>, <code>Fraction</code>, non-finite numbers</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">replacer(key, value)</div>
+  </div>
+</div>
+<div class="func-card" id="reviver" data-name="reviver">
+  <div class="func-name">reviver</div>
+  <div class="func-desc"><code>JSON.parse</code> reviver — restores <code>Complex</code>, <code>Fraction</code>, non-finite numbers</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">reviver(key, value)</div>
+  </div>
+</div>
+<div class="func-card" id="rotateTree" data-name="rotatetree">
+  <div class="func-name">rotateTree</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rotateTree(…)</div>
+  </div>
+</div>
+<div class="func-card" id="ScalarEvalError" data-name="scalarevalerror">
+  <div class="func-name">ScalarEvalError</div>
+  <div class="func-desc">Thrown when a scalar node cannot be evaluated</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ScalarEvalError</div>
+  </div>
+</div>
+<div class="func-card" id="scalarToNode" data-name="scalartonode">
+  <div class="func-name">scalarToNode</div>
+  <div class="func-desc">Build wired expression <code>Node</code> from a scalar tree (no string parse)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">scalarToNode(node)</div>
+  </div>
+</div>
+<div class="func-card" id="scalarToTex" data-name="scalartotex">
+  <div class="func-name">scalarToTex</div>
+  <div class="func-desc">LaTeX via <code>Node.toTex</code> on <code>scalarToNode(node)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">scalarToTex(node[, options])</div>
+  </div>
+</div>
+<div class="func-card" id="scoreFront" data-name="scorefront">
+  <div class="func-name">scoreFront</div>
+  <div class="func-desc">Log-loss scores (<code>'log'</code> default) for a front</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">scoreFront(front[, { lossScale }])</div>
+  </div>
+</div>
+<div class="func-card" id="searchScalars" data-name="searchscalars">
+  <div class="func-name">searchScalars</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">searchScalars(…)</div>
+  </div>
+</div>
+<div class="func-card" id="selectFrontModel" data-name="selectfrontmodel">
+  <div class="func-name">selectFrontModel</div>
+  <div class="func-desc">Pick <code>accuracy</code> / <code>score</code> / <code>best</code> champion (<code>ParetoFrontError</code> on bad input)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">selectFrontModel(scored[, mode[, opts]])</div>
+  </div>
+</div>
+<div class="func-card" id="simplifyConstants" data-name="simplifyconstants">
+  <div class="func-name">simplifyConstants</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">simplifyConstants(…)</div>
+  </div>
+</div>
+<div class="func-card" id="simplifyScalar" data-name="simplifyscalar">
+  <div class="func-name">simplifyScalar</div>
+  <div class="func-desc">Symbolic simplify via wired <code>simplify</code>, returning a scalar tree</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">simplifyScalar(node[, options])</div>
+  </div>
+</div>
+<div class="func-card" id="solveParameterDimensions" data-name="solveparameterdimensions">
+  <div class="func-name">solveParameterDimensions</div>
+  <div class="func-desc">Solve unknown parameter dimensions exactly (<code>solved</code> / <code>underdetermined</code> / <code>inconsistent</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveParameterDimensions(node, dims, target, parameters[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="swapOperands" data-name="swapoperands">
+  <div class="func-name">swapOperands</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">swapOperands(…)</div>
+  </div>
+</div>
+<div class="func-card" id="weightedMutation" data-name="weightedmutation">
+  <div class="func-name">weightedMutation</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weightedMutation(…)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type Conversion — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Type Conversion</div>
+  <h1><span>Type Conversion</span> (8)</h1>
+  <p class="cat-desc">Convert a value into a specific numeric or container type.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Type Conversion..." oninput="filterFuncs()">
+<div class="func-card" id="bignumber" data-name="bignumber">
+  <div class="func-name">bignumber</div>
+  <div class="func-desc">Convert to an arbitrary-precision <code>BigNumber</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bignumber(x)</div>
+  </div>
+</div>
+<div class="func-card" id="boolean" data-name="boolean">
+  <div class="func-name">boolean</div>
+  <div class="func-desc">Convert to a <code>boolean</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">boolean(x)</div>
+  </div>
+</div>
+<div class="func-card" id="complex" data-name="complex">
+  <div class="func-name">complex</div>
+  <div class="func-desc">Convert to / construct a <code>Complex</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">complex(re[, im])</div>
+  </div>
+</div>
+<div class="func-card" id="fraction" data-name="fraction">
+  <div class="func-name">fraction</div>
+  <div class="func-desc">Convert to an exact <code>Fraction</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fraction(x)</div>
+  </div>
+</div>
+<div class="func-card" id="matrix" data-name="matrix">
+  <div class="func-name">matrix</div>
+  <div class="func-desc">Convert to a dense <code>DenseMatrix</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrix(data)</div>
+  </div>
+</div>
+<div class="func-card" id="numeric" data-name="numeric">
+  <div class="func-name">numeric</div>
+  <div class="func-desc">Convert to a numeric type</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">numeric(x, type)</div>
+  </div>
+</div>
+<div class="func-card" id="parseNumberWithConfig" data-name="parsenumberwithconfig">
+  <div class="func-name">parseNumberWithConfig</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parseNumberWithConfig(…)</div>
+  </div>
+</div>
+<div class="func-card" id="sparse" data-name="sparse">
+  <div class="func-name">sparse</div>
+  <div class="func-desc">Convert to a <code>SparseMatrix</code> (CSC storage)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sparse(data)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

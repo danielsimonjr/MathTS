@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probability Distributions — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Probability Distributions</div>
+  <h1><span>Probability Distributions</span> (88)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Probability Distributions..." oninput="filterFuncs()">
+<div class="func-card" id="bernoulliPMF" data-name="bernoullipmf">
+  <div class="func-name">bernoulliPMF</div>
+  <div class="func-desc">Bernoulli PMF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bernoulliPMF(k, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="betaCDF" data-name="betacdf">
+  <div class="func-name">betaCDF</div>
+  <div class="func-desc">Beta CDF, shape parameters <code>a</code>, <code>b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">betaCDF(x, a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="betaDist" data-name="betadist">
+  <div class="func-name">betaDist</div>
+  <div class="func-desc">Beta distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">betaDist(alpha, beta)</div>
+  </div>
+</div>
+<div class="func-card" id="betaPDF" data-name="betapdf">
+  <div class="func-name">betaPDF</div>
+  <div class="func-desc">Beta PDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">betaPDF(x, alpha, beta_)</div>
+  </div>
+</div>
+<div class="func-card" id="betaQuantile" data-name="betaquantile">
+  <div class="func-name">betaQuantile</div>
+  <div class="func-desc">Beta quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">betaQuantile(p, a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="binomialDist" data-name="binomialdist">
+  <div class="func-name">binomialDist</div>
+  <div class="func-desc">Binomial distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">binomialDist(n, p)</div>
+  </div>
+</div>
+<div class="func-card" id="binomialPMF" data-name="binomialpmf">
+  <div class="func-name">binomialPMF</div>
+  <div class="func-desc">Binomial PMF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">binomialPMF(k, n, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="cauchyCDF" data-name="cauchycdf">
+  <div class="func-name">cauchyCDF</div>
+  <div class="func-desc">Cauchy CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cauchyCDF(x[, x0, gamma])</div>
+  </div>
+</div>
+<div class="func-card" id="cauchyPDF" data-name="cauchypdf">
+  <div class="func-name">cauchyPDF</div>
+  <div class="func-desc">Cauchy (Lorentz) PDF — location <code>x0</code>, scale <code>gamma</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cauchyPDF(x[, x0, gamma])</div>
+  </div>
+</div>
+<div class="func-card" id="cauchyQuantile" data-name="cauchyquantile">
+  <div class="func-name">cauchyQuantile</div>
+  <div class="func-desc">Cauchy quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cauchyQuantile(p[, x0, gamma])</div>
+  </div>
+</div>
+<div class="func-card" id="chiSquaredCDF" data-name="chisquaredcdf">
+  <div class="func-name">chiSquaredCDF</div>
+  <div class="func-desc">Chi-squared CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chiSquaredCDF(x, df)</div>
+  </div>
+</div>
+<div class="func-card" id="chiSquaredDist" data-name="chisquareddist">
+  <div class="func-name">chiSquaredDist</div>
+  <div class="func-desc">Chi-squared distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chiSquaredDist(k)</div>
+  </div>
+</div>
+<div class="func-card" id="chiSquaredQuantile" data-name="chisquaredquantile">
+  <div class="func-name">chiSquaredQuantile</div>
+  <div class="func-desc">Chi-squared quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chiSquaredQuantile(p, df)</div>
+  </div>
+</div>
+<div class="func-card" id="circmean" data-name="circmean">
+  <div class="func-name">circmean</div>
+  <div class="func-desc">Circular mean via <code>atan2(Σsinθ, Σcosθ)</code>; <code>opts.low</code>/<code>opts.high</code> set the angular range (default <code>[0, 2π)</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">circmean(angles[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="circstd" data-name="circstd">
+  <div class="func-name">circstd</div>
+  <div class="func-desc">Circular standard deviation, <code>sqrt(−2·ln R))</code>, <code>R</code> = mean resultant length</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">circstd(angles[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="circvar" data-name="circvar">
+  <div class="func-name">circvar</div>
+  <div class="func-desc">Circular variance, <code>1 − R</code>, <code>R ∈ [0, 1]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">circvar(angles[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="dirichletPdf" data-name="dirichletpdf">
+  <div class="func-name">dirichletPdf</div>
+  <div class="func-desc">Dirichlet density on the simplex</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dirichletPdf(x, alpha)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="dirichletSample" data-name="dirichletsample">
+  <div class="func-name">dirichletSample</div>
+  <div class="func-desc"><code>n</code> Dirichlet draws (default 1) as an <code>n × K</code> array, by gamma normalization; <code>seed</code> makes it reproducible</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dirichletSample(alpha[, n, { seed }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="discreteUniformDist" data-name="discreteuniformdist">
+  <div class="func-name">discreteUniformDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">discreteUniformDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="entropy" data-name="entropy">
+  <div class="func-name">entropy</div>
+  <div class="func-desc">Shannon entropy (bits)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">entropy(probs)</div>
+  </div>
+</div>
+<div class="func-card" id="exponentialCDF" data-name="exponentialcdf">
+  <div class="func-name">exponentialCDF</div>
+  <div class="func-desc">Exponential CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">exponentialCDF(x, lambda)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="exponentialDist" data-name="exponentialdist">
+  <div class="func-name">exponentialDist</div>
+  <div class="func-desc">Exponential distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">exponentialDist([lambda])</div>
+  </div>
+</div>
+<div class="func-card" id="exponentialPDF" data-name="exponentialpdf">
+  <div class="func-name">exponentialPDF</div>
+  <div class="func-desc">Exponential PDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">exponentialPDF(x, lambda)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="fCDF" data-name="fcdf">
+  <div class="func-name">fCDF</div>
+  <div class="func-desc">F-distribution CDF, <code>d1</code>/<code>d2</code> degrees of freedom</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fCDF(x, d1, d2)</div>
+  </div>
+</div>
+<div class="func-card" id="fDist" data-name="fdist">
+  <div class="func-name">fDist</div>
+  <div class="func-desc">F-distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fDist(d1, d2)</div>
+  </div>
+</div>
+<div class="func-card" id="fQuantile" data-name="fquantile">
+  <div class="func-name">fQuantile</div>
+  <div class="func-desc">F-distribution quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fQuantile(p, d1, d2)</div>
+  </div>
+</div>
+<div class="func-card" id="gammaCDF" data-name="gammacdf">
+  <div class="func-name">gammaCDF</div>
+  <div class="func-desc">Gamma CDF (shape <code>k</code>, <code>rate</code> defaults to 1)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gammaCDF(x, shape[, rate])</div>
+  </div>
+</div>
+<div class="func-card" id="gammaDist" data-name="gammadist">
+  <div class="func-name">gammaDist</div>
+  <div class="func-desc">Gamma distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gammaDist(shape[, rate])</div>
+  </div>
+</div>
+<div class="func-card" id="gammaPDF" data-name="gammapdf">
+  <div class="func-name">gammaPDF</div>
+  <div class="func-desc">Gamma PDF (shape <code>k</code>, scale <code>θ</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gammaPDF(x, shape, scale)</div>
+  </div>
+</div>
+<div class="func-card" id="gammaQuantile" data-name="gammaquantile">
+  <div class="func-name">gammaQuantile</div>
+  <div class="func-desc">Gamma quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gammaQuantile(p, shape[, rate])</div>
+  </div>
+</div>
+<div class="func-card" id="gaussianKDE" data-name="gaussiankde">
+  <div class="func-name">gaussianKDE</div>
+  <div class="func-desc">1-D Gaussian kernel density estimation; <code>opts.bandwidth</code> defaults to Silverman's rule of thumb; returns <code>{ evaluate, bandwidth }</code> — the library's first nonparametric density estimator</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gaussianKDE(samples[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="geometricPMF" data-name="geometricpmf">
+  <div class="func-name">geometricPMF</div>
+  <div class="func-desc">Geometric PMF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">geometricPMF(k, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="gevCDF" data-name="gevcdf">
+  <div class="func-name">gevCDF</div>
+  <div class="func-desc">Generalized extreme-value distribution; <code>ξ = 0</code> is the Gumbel limit; outside the support the CDF is 0 or 1 and the PDF is 0</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gevCDF(x, xi[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="gevPDF" data-name="gevpdf">
+  <div class="func-name">gevPDF</div>
+  <div class="func-desc">Generalized extreme-value distribution; <code>ξ = 0</code> is the Gumbel limit; outside the support the CDF is 0 or 1 and the PDF is 0</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gevPDF(x, xi[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="gumbelDist" data-name="gumbeldist">
+  <div class="func-name">gumbelDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gumbelDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="hypergeometricDist" data-name="hypergeometricdist">
+  <div class="func-name">hypergeometricDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hypergeometricDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="inverseGammaCDF" data-name="inversegammacdf">
+  <div class="func-name">inverseGammaCDF</div>
+  <div class="func-desc">Inverse-gamma with shape <code>α</code> and scale <code>β</code>; CDF is the regularized upper incomplete gamma <code>Q(α, β/x)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">inverseGammaCDF(x, alpha, beta)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="inverseGammaPDF" data-name="inversegammapdf">
+  <div class="func-name">inverseGammaPDF</div>
+  <div class="func-desc">Inverse-gamma with shape <code>α</code> and scale <code>β</code>; CDF is the regularized upper incomplete gamma <code>Q(α, β/x)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">inverseGammaPDF(x, alpha, beta)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="invGaussDist" data-name="invgaussdist">
+  <div class="func-name">invGaussDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">invGaussDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="jsDivergence" data-name="jsdivergence">
+  <div class="func-name">jsDivergence</div>
+  <div class="func-desc">Jensen–Shannon divergence</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">jsDivergence(p, q)</div>
+  </div>
+</div>
+<div class="func-card" id="kldivergence" data-name="kldivergence">
+  <div class="func-name">kldivergence</div>
+  <div class="func-desc">Kullback–Leibler divergence (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kldivergence(p, q)</div>
+  </div>
+</div>
+<div class="func-card" id="laplaceCDF" data-name="laplacecdf">
+  <div class="func-name">laplaceCDF</div>
+  <div class="func-desc">Laplace CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">laplaceCDF(x[, mu, b])</div>
+  </div>
+</div>
+<div class="func-card" id="laplacePDF" data-name="laplacepdf">
+  <div class="func-name">laplacePDF</div>
+  <div class="func-desc">Laplace (double-exponential) PDF — location <code>mu</code>, scale <code>b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">laplacePDF(x[, mu, b])</div>
+  </div>
+</div>
+<div class="func-card" id="laplaceQuantile" data-name="laplacequantile">
+  <div class="func-name">laplaceQuantile</div>
+  <div class="func-desc">Laplace quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">laplaceQuantile(p[, mu, b])</div>
+  </div>
+</div>
+<div class="func-card" id="logisticCDF" data-name="logisticcdf">
+  <div class="func-name">logisticCDF</div>
+  <div class="func-desc">Logistic CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logisticCDF(x[, mu, s])</div>
+  </div>
+</div>
+<div class="func-card" id="logisticPDF" data-name="logisticpdf">
+  <div class="func-name">logisticPDF</div>
+  <div class="func-desc">Logistic PDF — location <code>mu</code>, scale <code>s</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logisticPDF(x[, mu, s])</div>
+  </div>
+</div>
+<div class="func-card" id="logisticQuantile" data-name="logisticquantile">
+  <div class="func-name">logisticQuantile</div>
+  <div class="func-desc">Logistic quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logisticQuantile(p[, mu, s])</div>
+  </div>
+</div>
+<div class="func-card" id="logNormalDist" data-name="lognormaldist">
+  <div class="func-name">logNormalDist</div>
+  <div class="func-desc">Log-normal distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logNormalDist([mu, sigma])</div>
+  </div>
+</div>
+<div class="func-card" id="multivariateNormal" data-name="multivariatenormal">
+  <div class="func-name">multivariateNormal</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multivariateNormal(…)</div>
+  </div>
+</div>
+<div class="func-card" id="nakagamiPDF" data-name="nakagamipdf">
+  <div class="func-name">nakagamiPDF</div>
+  <div class="func-desc">Nakagami-<code>m</code> and Rice densities</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nakagamiPDF(x, m, omega)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="negativeBinomialDist" data-name="negativebinomialdist">
+  <div class="func-name">negativeBinomialDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">negativeBinomialDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="noncentralChi2CDF" data-name="noncentralchi2cdf">
+  <div class="func-name">noncentralChi2CDF</div>
+  <div class="func-desc">Noncentral chi-squared CDF (Poisson-mixture over <code>chiSquaredCDF</code>); matches <code>scipy.stats.ncx2.cdf</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">noncentralChi2CDF(x, df, nc)</div>
+  </div>
+</div>
+<div class="func-card" id="noncentralChi2PDF" data-name="noncentralchi2pdf">
+  <div class="func-name">noncentralChi2PDF</div>
+  <div class="func-desc">Noncentral chi-squared PDF (Poisson-mixture, <code>ncp = λ ≥ 0</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">noncentralChi2PDF(x, df, ncp)</div>
+  </div>
+</div>
+<div class="func-card" id="noncentralFCDF" data-name="noncentralfcdf">
+  <div class="func-name">noncentralFCDF</div>
+  <div class="func-desc">Noncentral F CDF (Poisson-mixture over <code>fCDF</code>); matches <code>scipy.stats.ncf.cdf</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">noncentralFCDF(x, dfn, dfd, nc)</div>
+  </div>
+</div>
+<div class="func-card" id="noncentralTCDF" data-name="noncentraltcdf">
+  <div class="func-name">noncentralTCDF</div>
+  <div class="func-desc">Noncentral Student-t CDF (Simpson quadrature of the <code>Φ(t·sqrt(V/ν) − δ)</code> mixture); matches <code>scipy.stats.nct.cdf</code> to ~3 digits</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">noncentralTCDF(t, df, nc)</div>
+  </div>
+</div>
+<div class="func-card" id="normalCDF" data-name="normalcdf">
+  <div class="func-name">normalCDF</div>
+  <div class="func-desc">Normal CDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">normalCDF(x[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="normalDist" data-name="normaldist">
+  <div class="func-name">normalDist</div>
+  <div class="func-desc">Normal distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">normalDist([mu, sigma])</div>
+  </div>
+</div>
+<div class="func-card" id="normalPDF" data-name="normalpdf">
+  <div class="func-name">normalPDF</div>
+  <div class="func-desc">Normal PDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">normalPDF(x[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="normalQuantile" data-name="normalquantile">
+  <div class="func-name">normalQuantile</div>
+  <div class="func-desc">Normal quantile (inverse CDF); defaults standard normal</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">normalQuantile(p[, mu, sigma])</div>
+  </div>
+</div>
+<div class="func-card" id="owensT" data-name="owenst">
+  <div class="func-name">owensT</div>
+  <div class="func-desc">Owen's T function <code>T(h, a) = (1/2π)∫₀ᵃ e^{−h²(1+x²)/2}/(1+x²) dx</code>; <code>T(0, 1) = 1/8</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">owensT(h, a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="paretoDist" data-name="paretodist">
+  <div class="func-name">paretoDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">paretoDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="pickRandom" data-name="pickrandom">
+  <div class="func-name">pickRandom</div>
+  <div class="func-desc">Random element(s) from an array</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pickRandom(array[, n])</div>
+  </div>
+</div>
+<div class="func-card" id="poissonDist" data-name="poissondist">
+  <div class="func-name">poissonDist</div>
+  <div class="func-desc">Poisson distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">poissonDist(lambda)</div>
+  </div>
+</div>
+<div class="func-card" id="poissonPMF" data-name="poissonpmf">
+  <div class="func-name">poissonPMF</div>
+  <div class="func-desc">Poisson PMF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">poissonPMF(k, lambda)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="random" data-name="random">
+  <div class="func-name">random</div>
+  <div class="func-desc">Uniform random number</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">random([min, max])</div>
+  </div>
+</div>
+<div class="func-card" id="randomInt" data-name="randomint">
+  <div class="func-name">randomInt</div>
+  <div class="func-desc">Uniform random integer</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">randomInt([min, max])</div>
+  </div>
+</div>
+<div class="func-card" id="rayleighDist" data-name="rayleighdist">
+  <div class="func-name">rayleighDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rayleighDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="ricePDF" data-name="ricepdf">
+  <div class="func-name">ricePDF</div>
+  <div class="func-desc">Nakagami-<code>m</code> and Rice densities</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ricePDF(x, nu, sigma)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="seedProbabilityRng" data-name="seedprobabilityrng">
+  <div class="func-name">seedProbabilityRng</div>
+  <div class="func-desc"><span class="prose"><code>seedProbabilityRng(seed)</code> resets the internal generator shared by <code>random</code>, <code>randomInt</code>, and <code>pickRandom</code> — pass a <code>string</code>/<code>number</code> for a reproducible sequence, or <code>null</code> to re-seed from the clock.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">seedProbabilityRng(…)</div>
+  </div>
+</div>
+<div class="func-card" id="skellamPMF" data-name="skellampmf">
+  <div class="func-name">skellamPMF</div>
+  <div class="func-desc">Skellam PMF (difference of two Poissons) <code>e^{−(μ₁+μ₂)}(μ₁/μ₂)^{k/2} I_{|k|}(2√(μ₁μ₂))</code>; negative <code>k</code> allowed</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">skellamPMF(k, mu1, mu2)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="skewNormalCDF" data-name="skewnormalcdf">
+  <div class="func-name">skewNormalCDF</div>
+  <div class="func-desc">Skew-normal density <code>2φ(z)Φ(αz)/scale</code> and CDF <code>Φ(z) − 2T(z, α)</code>, <code>z = (x−loc)/scale</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">skewNormalCDF(x, alpha[, loc, scale])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="skewNormalPDF" data-name="skewnormalpdf">
+  <div class="func-name">skewNormalPDF</div>
+  <div class="func-desc">Skew-normal density <code>2φ(z)Φ(αz)/scale</code> and CDF <code>Φ(z) − 2T(z, α)</code>, <code>z = (x−loc)/scale</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">skewNormalPDF(x, alpha[, loc, scale])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="string" data-name="string">
+  <div class="func-name">string</div>
+  <div class="func-desc">Convert to a <code>string</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">string(x)</div>
+  </div>
+</div>
+<div class="func-card" id="studentizedRangeCDF" data-name="studentizedrangecdf">
+  <div class="func-name">studentizedRangeCDF</div>
+  <div class="func-desc">CDF of the studentized range (<code>k</code> groups, <code>df</code> residual df); matches <code>scipy.stats.studentized_range.cdf</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentizedRangeCDF(q, k, df)</div>
+  </div>
+</div>
+<div class="func-card" id="studentizedRangeQuantile" data-name="studentizedrangequantile">
+  <div class="func-name">studentizedRangeQuantile</div>
+  <div class="func-desc">Quantile (inverse CDF) via bisection; supplies Tukey HSD critical values</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentizedRangeQuantile(p, k, df)</div>
+  </div>
+</div>
+<div class="func-card" id="studentTCDF" data-name="studenttcdf">
+  <div class="func-name">studentTCDF</div>
+  <div class="func-desc">Student-t CDF, <code>df</code> degrees of freedom</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTCDF(x, df)</div>
+  </div>
+</div>
+<div class="func-card" id="studentTPDF" data-name="studenttpdf">
+  <div class="func-name">studentTPDF</div>
+  <div class="func-desc">Student-t PDF</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTPDF(x, df)</div>
+  </div>
+</div>
+<div class="func-card" id="studentTQuantile" data-name="studenttquantile">
+  <div class="func-name">studentTQuantile</div>
+  <div class="func-desc">Student-t quantile</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTQuantile(p, df)</div>
+  </div>
+</div>
+<div class="func-card" id="tDist" data-name="tdist">
+  <div class="func-name">tDist</div>
+  <div class="func-desc">Student's t-distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tDist(nu)</div>
+  </div>
+</div>
+<div class="func-card" id="triangularDist" data-name="triangulardist">
+  <div class="func-name">triangularDist</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">triangularDist(…)</div>
+  </div>
+</div>
+<div class="func-card" id="truncatedNormalCDF" data-name="truncatednormalcdf">
+  <div class="func-name">truncatedNormalCDF</div>
+  <div class="func-desc">Normal truncated to <code>[a, b]</code> (<code>a ≥ b</code> throws <code>RangeError</code>); tail masses are evaluated through <code>erfcx</code>, so far-tail intervals stay accurate instead of cancelling</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">truncatedNormalCDF(x, a, b[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="truncatedNormalMean" data-name="truncatednormalmean">
+  <div class="func-name">truncatedNormalMean</div>
+  <div class="func-desc">Normal truncated to <code>[a, b]</code> (<code>a ≥ b</code> throws <code>RangeError</code>); tail masses are evaluated through <code>erfcx</code>, so far-tail intervals stay accurate instead of cancelling</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">truncatedNormalMean(a, b[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="truncatedNormalPDF" data-name="truncatednormalpdf">
+  <div class="func-name">truncatedNormalPDF</div>
+  <div class="func-desc">Normal truncated to <code>[a, b]</code> (<code>a ≥ b</code> throws <code>RangeError</code>); tail masses are evaluated through <code>erfcx</code>, so far-tail intervals stay accurate instead of cancelling</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">truncatedNormalPDF(x, a, b[, mu, sigma])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="uniformDist" data-name="uniformdist">
+  <div class="func-name">uniformDist</div>
+  <div class="func-desc">Uniform distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">uniformDist([a, b])</div>
+  </div>
+</div>
+<div class="func-card" id="vonMisesPDF" data-name="vonmisespdf">
+  <div class="func-name">vonMisesPDF</div>
+  <div class="func-desc">Von Mises (circular normal) PDF, <code>exp(κ·cos(θ−μ)) / (2π·I₀(κ))</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">vonMisesPDF(theta, mu, kappa)</div>
+  </div>
+</div>
+<div class="func-card" id="weibullDist" data-name="weibulldist">
+  <div class="func-name">weibullDist</div>
+  <div class="func-desc">Weibull distribution</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weibullDist(k[, lambda])</div>
+  </div>
+</div>
+<div class="func-card" id="wishartSample" data-name="wishartsample">
+  <div class="func-name">wishartSample</div>
+  <div class="func-desc"><code>n</code> Wishart draws (default 1) as <code>n</code> positive-definite matrices, by the Bartlett decomposition; <code>seed</code> makes it reproducible</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">wishartSample(df, scale[, n, { seed }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, number[][]</span></span></div>
+</div>
+<div class="func-card" id="zipfPMF" data-name="zipfpmf">
+  <div class="func-name">zipfPMF</div>
+  <div class="func-desc">Truncated Zipf PMF <code>k^{−s} / H_{n,s}</code> on <code>1..n</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">zipfPMF(k, s, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

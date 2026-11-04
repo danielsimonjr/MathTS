@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Algebra — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Linear Algebra</div>
+  <h1><span>Linear Algebra</span> (122)</h1>
+  <p class="cat-desc">Operates on <code>DenseMatrix</code> (and <code>SparseMatrix</code> where applicable). Heavy operations are eligible for WASM/GPU acceleration via the matrix package.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Linear Algebra..." oninput="filterFuncs()">
+<div class="func-card" id="bicgstab" data-name="bicgstab">
+  <div class="func-name">bicgstab</div>
+  <div class="func-desc">General nonsymmetric</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bicgstab(A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="blockDiag" data-name="blockdiag">
+  <div class="func-name">blockDiag</div>
+  <div class="func-desc">Block-diagonal matrix from possibly rectangular blocks</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">blockDiag(...blocks)</div>
+  </div>
+</div>
+<div class="func-card" id="care" data-name="care">
+  <div class="func-name">care</div>
+  <div class="func-desc">Continuous algebraic Riccati equation, for LQR design (see below)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">care(A, B, Q, R)</div>
+  </div>
+</div>
+<div class="func-card" id="cg" data-name="cg">
+  <div class="func-name">cg</div>
+  <div class="func-desc">Symmetric positive-definite</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cg(A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="characteristicPolynomial" data-name="characteristicpolynomial">
+  <div class="func-name">characteristicPolynomial</div>
+  <div class="func-desc">Characteristic polynomial</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">characteristicPolynomial(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="cholesky" data-name="cholesky">
+  <div class="func-name">cholesky</div>
+  <div class="func-desc">Cholesky decomposition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cholesky(A)</div>
+  </div>
+</div>
+<div class="func-card" id="choleskyDowndate" data-name="choleskydowndate">
+  <div class="func-name">choleskyDowndate</div>
+  <div class="func-desc">Rank-1 update / downdate of a lower Cholesky factor: factor of <code>L·Lᵀ + x·xᵀ</code> / <code>L·Lᵀ − x·xᵀ</code>; downdate throws <code>RangeError</code> if the result is not positive definite</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">choleskyDowndate(L, x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][], number[]</span></span></div>
+</div>
+<div class="func-card" id="choleskyUpdate" data-name="choleskyupdate">
+  <div class="func-name">choleskyUpdate</div>
+  <div class="func-desc">Rank-1 update / downdate of a lower Cholesky factor: factor of <code>L·Lᵀ + x·xᵀ</code> / <code>L·Lᵀ − x·xᵀ</code>; downdate throws <code>RangeError</code> if the result is not positive definite</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">choleskyUpdate(L, x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][], number[]</span></span></div>
+</div>
+<div class="func-card" id="circulant" data-name="circulant">
+  <div class="func-name">circulant</div>
+  <div class="func-desc">Circulant matrix; each row is the previous one rotated right by one (connects to the FFT)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">circulant(c)</div>
+  </div>
+</div>
+<div class="func-card" id="companion" data-name="companion">
+  <div class="func-name">companion</div>
+  <div class="func-desc">Companion matrix of the polynomial <code>[a₀, …, aₙ]</code> (highest degree first, numpy <code>np.companion</code> convention); its eigenvalues are the polynomial's roots</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">companion(coeffs)</div>
+  </div>
+</div>
+<div class="func-card" id="cond" data-name="cond">
+  <div class="func-name">cond</div>
+  <div class="func-desc">Condition number (SVD ratio, JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cond(A)</div>
+  </div>
+</div>
+<div class="func-card" id="condest" data-name="condest">
+  <div class="func-name">condest</div>
+  <div class="func-desc">Hager/Higham <strong>estimate</strong> of the 1-norm condition number <code>‖A‖₁·‖A⁻¹‖₁</code> without forming <code>A⁻¹</code> (a close lower bound; exact <code>cond</code> uses a full SVD); square input, only <code>p = 1</code> is implemented</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">condest(A[, p])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="cosm" data-name="cosm">
+  <div class="func-name">cosm</div>
+  <div class="func-desc">Matrix cosine <code>cos(A)</code> via <code>funm</code>, valid for any real spectrum (unlike <code>matrixSqrtm</code>/<code>matrixLogm</code>, which require positive/real spectra)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cosm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="cross" data-name="cross">
+  <div class="func-name">cross</div>
+  <div class="func-desc">Vector cross product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cross(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="csAmd" data-name="csamd">
+  <div class="func-name">csAmd</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csAmd(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csChol" data-name="cschol">
+  <div class="func-name">csChol</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csChol(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csCounts" data-name="cscounts">
+  <div class="func-name">csCounts</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csCounts(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csLu" data-name="cslu">
+  <div class="func-name">csLu</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csLu(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csSpsolve" data-name="csspsolve">
+  <div class="func-name">csSpsolve</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csSpsolve(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csSqr" data-name="cssqr">
+  <div class="func-name">csSqr</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csSqr(…)</div>
+  </div>
+</div>
+<div class="func-card" id="csSymperm" data-name="cssymperm">
+  <div class="func-name">csSymperm</div>
+  <div class="func-desc"><span class="prose"><code>csChol</code>, <code>csLu</code>, <code>csSpsolve</code>, <code>csSqr</code>, <code>csCounts</code>, <code>csSymperm</code>, <code>csAmd</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csSymperm(…)</div>
+  </div>
+</div>
+<div class="func-card" id="ctranspose" data-name="ctranspose">
+  <div class="func-name">ctranspose</div>
+  <div class="func-desc">Conjugate (Hermitian) transpose</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ctranspose(A)</div>
+  </div>
+</div>
+<div class="func-card" id="dare" data-name="dare">
+  <div class="func-name">dare</div>
+  <div class="func-desc">Discrete algebraic Riccati equation, for LQR design (see below)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dare(A, B, Q, R)</div>
+  </div>
+</div>
+<div class="func-card" id="det" data-name="det">
+  <div class="func-name">det</div>
+  <div class="func-desc">Determinant</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">det(A)</div>
+  </div>
+</div>
+<div class="func-card" id="dftMatrix" data-name="dftmatrix">
+  <div class="func-name">dftMatrix</div>
+  <div class="func-desc">DFT matrix <code>F_jk = exp(−2πi·jk/n)</code> as <code>Complex[][]</code>, <code>scale</code> <code>'none'</code> (default), <code>'sqrtn'</code> (unitary) or <code>'n'</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dftMatrix(n[, { scale }])</div>
+  </div>
+</div>
+<div class="func-card" id="diag" data-name="diag">
+  <div class="func-name">diag</div>
+  <div class="func-desc">Diagonal matrix or diagonal extraction</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">diag(v)</div>
+  </div>
+</div>
+<div class="func-card" id="disableGpu" data-name="disablegpu">
+  <div class="func-name">disableGpu</div>
+  <div class="func-desc"><span class="prose">Opting in is required because the GPU computes in <strong>32-bit float</strong> (WGSL has no f64); silently routing an f64 API onto the GPU would change precision without the caller asking. <code>enableGpu()</code> / <code>disableGpu()</code> / <code>isGpuEnabled()</code> control it.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">disableGpu(…)</div>
+  </div>
+</div>
+<div class="func-card" id="dlyap" data-name="dlyap">
+  <div class="func-name">dlyap</div>
+  <div class="func-desc">Discrete Lyapunov <code>A X Aᵀ − X + Q = 0</code> (see below)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dlyap(A, Q)</div>
+  </div>
+</div>
+<div class="func-card" id="eigs" data-name="eigs">
+  <div class="func-name">eigs</div>
+  <div class="func-desc">Eigenvalues and eigenvectors</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">eigs(A)</div>
+  </div>
+</div>
+<div class="func-card" id="eigsh" data-name="eigsh">
+  <div class="func-name">eigsh</div>
+  <div class="func-desc">Iterative Lanczos eigensolver — <code>k</code> largest/smallest eigenpairs of a symmetric <code>A</code> (see below)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">eigsh(A, k[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="eigvals" data-name="eigvals">
+  <div class="func-name">eigvals</div>
+  <div class="func-desc">Eigenvalues only, as <code>{ re, im }</code> pairs (skips the eigenvector computation)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">eigvals(A[, opts])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="elementwiseChainGpuDispatch" data-name="elementwisechaingpudispatch">
+  <div class="func-name">elementwiseChainGpuDispatch</div>
+  <div class="func-desc"><span class="prose">&gt; <strong>WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.</strong> The &gt; generated report <code>webgpu-pairing.md</code> lists <strong>9 standalone &gt; functions</strong> that route to the GPU (<code>fuseUnaryChainAsync</code>, <code>fuseUnaryChainReduceAsync</code>, &gt; <code>elementwiseChainGpuDispatch</code>,…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">elementwiseChainGpuDispatch(…)</div>
+  </div>
+</div>
+<div class="func-card" id="elementwiseChainReduceGpuDispatch" data-name="elementwisechainreducegpudispatch">
+  <div class="func-name">elementwiseChainReduceGpuDispatch</div>
+  <div class="func-desc"><span class="prose">&gt; <strong>WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.</strong> The &gt; generated report <code>webgpu-pairing.md</code> lists <strong>9 standalone &gt; functions</strong> that route to the GPU (<code>fuseUnaryChainAsync</code>, <code>fuseUnaryChainReduceAsync</code>, &gt; <code>elementwiseChainGpuDispatch</code>,…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">elementwiseChainReduceGpuDispatch(…)</div>
+  </div>
+</div>
+<div class="func-card" id="enableGpu" data-name="enablegpu">
+  <div class="func-name">enableGpu</div>
+  <div class="func-desc"><span class="prose"><strong><code>parallel</code></strong> — <code>ComputePool</code> may dispatch to worker threads when the typed path passes an <strong>op name</strong> and length meets that op's <code>DEFAULT_THRESHOLD_BY_OP</code> entry (for example <code>matmul</code> at 4,096 via <code>poolOptions(..., 'matmul')</code>). When the path calls <code>shouldParallelize(n)</code> <strong>without</strong> an op name, only the…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">enableGpu(…)</div>
+  </div>
+</div>
+<div class="func-card" id="expm" data-name="expm">
+  <div class="func-name">expm</div>
+  <div class="func-desc">Matrix exponential</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">expm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="fftGpuDispatch" data-name="fftgpudispatch">
+  <div class="func-name">fftGpuDispatch</div>
+  <div class="func-desc"><span class="prose"><strong><code>parallel</code></strong> — <code>ComputePool</code> may dispatch to worker threads when the typed path passes an <strong>op name</strong> and length meets that op's <code>DEFAULT_THRESHOLD_BY_OP</code> entry (for example <code>matmul</code> at 4,096 via <code>poolOptions(..., 'matmul')</code>). When the path calls <code>shouldParallelize(n)</code> <strong>without</strong> an op name, only the…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fftGpuDispatch(…)</div>
+  </div>
+</div>
+<div class="func-card" id="fiedlerMatrix" data-name="fiedlermatrix">
+  <div class="func-name">fiedlerMatrix</div>
+  <div class="func-desc">Fiedler matrix <code>F_ij = |a_i − a_j|</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fiedlerMatrix(a)</div>
+  </div>
+</div>
+<div class="func-card" id="fractionalMatrixPower" data-name="fractionalmatrixpower">
+  <div class="func-name">fractionalMatrixPower</div>
+  <div class="func-desc"><code>A^t = expm(t·logm(A))</code> for real <code>t</code> (principal logarithm required); integer <code>t</code> is exact repeated multiplication</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fractionalMatrixPower(A, t)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="funm" data-name="funm">
+  <div class="func-name">funm</div>
+  <div class="func-desc">General matrix function <code>f(A)</code> returning a complex-valued matrix <code>{ re, im }</code> — diagonal fast path, Lagrange-Sylvester interpolation for distinct eigenvalues, and confluent Hermite interpolation (Newton divided differences over repeated nodes) for defective/repeated-eigenvalue matrices. Defective matrices need derivatives of <code>f</code>: supply them analytically via optional <code>fDerivs</code> (<code>fDerivs[k] = f^(k+1)</code>, machine precision) or they are approximated numerically (~1e-6). Throws only when <code>f</code>/a derivative is singular at a repeated eigenvalue (e.g. <code>sqrt</code>/<code>log</code> at 0)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">funm(A, f, fDerivs?)</div>
+  </div>
+</div>
+<div class="func-card" id="fuseUnaryChainAsync" data-name="fuseunarychainasync">
+  <div class="func-name">fuseUnaryChainAsync</div>
+  <div class="func-desc"><span class="prose"><strong><code>parallel</code></strong> — <code>ComputePool</code> may dispatch to worker threads when the typed path passes an <strong>op name</strong> and length meets that op's <code>DEFAULT_THRESHOLD_BY_OP</code> entry (for example <code>matmul</code> at 4,096 via <code>poolOptions(..., 'matmul')</code>). When the path calls <code>shouldParallelize(n)</code> <strong>without</strong> an op name, only the…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fuseUnaryChainAsync(…)</div>
+  </div>
+</div>
+<div class="func-card" id="fuseUnaryChainReduceAsync" data-name="fuseunarychainreduceasync">
+  <div class="func-name">fuseUnaryChainReduceAsync</div>
+  <div class="func-desc"><span class="prose"><strong><code>parallel</code></strong> — <code>ComputePool</code> may dispatch to worker threads when the typed path passes an <strong>op name</strong> and length meets that op's <code>DEFAULT_THRESHOLD_BY_OP</code> entry (for example <code>matmul</code> at 4,096 via <code>poolOptions(..., 'matmul')</code>). When the path calls <code>shouldParallelize(n)</code> <strong>without</strong> an op name, only the…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fuseUnaryChainReduceAsync(…)</div>
+  </div>
+</div>
+<div class="func-card" id="generalizedEig" data-name="generalizedeig">
+  <div class="func-name">generalizedEig</div>
+  <div class="func-desc">Generalized eigenvalues of the pencil <code>A x = λ B x</code> (<code>B</code> nonsingular) via the eigendecomposition of <code>B⁻¹A</code>; eigenvalues match <code>scipy.linalg.eig(A, B)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">generalizedEig(A, B)</div>
+  </div>
+</div>
+<div class="func-card" id="gmres" data-name="gmres">
+  <div class="func-name">gmres</div>
+  <div class="func-desc">General nonsymmetric (restarted)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gmres(A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="gpuAdd" data-name="gpuadd">
+  <div class="func-name">gpuAdd</div>
+  <div class="func-desc">Matrix addition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gpuAdd(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WebGPU</span></span></div>
+</div>
+<div class="func-card" id="gpuMatmul" data-name="gpumatmul">
+  <div class="func-name">gpuMatmul</div>
+  <div class="func-desc">Matrix multiplication</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gpuMatmul(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WebGPU</span></span></div>
+</div>
+<div class="func-card" id="gpuScale" data-name="gpuscale">
+  <div class="func-name">gpuScale</div>
+  <div class="func-desc">Scalar multiplication</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gpuScale(a, s)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WebGPU</span></span></div>
+</div>
+<div class="func-card" id="gpuTranspose" data-name="gputranspose">
+  <div class="func-name">gpuTranspose</div>
+  <div class="func-desc">Matrix transpose</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gpuTranspose(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WebGPU</span></span></div>
+</div>
+<div class="func-card" id="hadamardMatrix" data-name="hadamardmatrix">
+  <div class="func-name">hadamardMatrix</div>
+  <div class="func-desc">Sylvester Hadamard matrix of ±1 entries; <code>n</code> must be a power of 2 (<code>H·Hᵀ = n·I</code>), else <code>RangeError</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hadamardMatrix(n)</div>
+  </div>
+</div>
+<div class="func-card" id="hankelMatrix" data-name="hankelmatrix">
+  <div class="func-name">hankelMatrix</div>
+  <div class="func-desc">Hankel matrix with first column <code>c</code> and optional last row <code>r</code> (<code>r[0]</code> ignored; default zeros)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hankelMatrix(c[, r])</div>
+  </div>
+</div>
+<div class="func-card" id="helmertMatrix" data-name="helmertmatrix">
+  <div class="func-name">helmertMatrix</div>
+  <div class="func-desc">Helmert matrix: the <code>(n−1) × n</code> orthonormal contrast rows, or the full <code>n × n</code> orthogonal matrix (first row <code>1/√n</code>) when <code>full</code> is true</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">helmertMatrix(n[, full])</div>
+  </div>
+</div>
+<div class="func-card" id="hessenbergForm" data-name="hessenbergform">
+  <div class="func-name">hessenbergForm</div>
+  <div class="func-desc">Hessenberg reduction</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hessenbergForm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="hilbertMatrix" data-name="hilbertmatrix">
+  <div class="func-name">hilbertMatrix</div>
+  <div class="func-desc">Hilbert matrix <code>1/(i+j+1)</code> and its inverse from the exact integer closed form</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hilbertMatrix(n)</div>
+  </div>
+</div>
+<div class="func-card" id="incompleteCholesky" data-name="incompletecholesky">
+  <div class="func-name">incompleteCholesky</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">incompleteCholesky(…)</div>
+  </div>
+</div>
+<div class="func-card" id="incompleteLU" data-name="incompletelu">
+  <div class="func-name">incompleteLU</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">incompleteLU(…)</div>
+  </div>
+</div>
+<div class="func-card" id="inv" data-name="inv">
+  <div class="func-name">inv</div>
+  <div class="func-desc">Matrix inverse</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">inv(A)</div>
+  </div>
+</div>
+<div class="func-card" id="invHilbertMatrix" data-name="invhilbertmatrix">
+  <div class="func-name">invHilbertMatrix</div>
+  <div class="func-desc">Hilbert matrix <code>1/(i+j+1)</code> and its inverse from the exact integer closed form</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">invHilbertMatrix(n)</div>
+  </div>
+</div>
+<div class="func-card" id="isGpuEnabled" data-name="isgpuenabled">
+  <div class="func-name">isGpuEnabled</div>
+  <div class="func-desc"><span class="prose">Opting in is required because the GPU computes in <strong>32-bit float</strong> (WGSL has no f64); silently routing an f64 API onto the GPU would change precision without the caller asking. <code>enableGpu()</code> / <code>disableGpu()</code> / <code>isGpuEnabled()</code> control it.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isGpuEnabled(…)</div>
+  </div>
+</div>
+<div class="func-card" id="jordanForm" data-name="jordanform">
+  <div class="func-name">jordanForm</div>
+  <div class="func-desc">Jordan normal form</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">jordanForm(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="khatriRao" data-name="khatrirao">
+  <div class="func-name">khatriRao</div>
+  <div class="func-desc">Column-wise Kronecker (Khatri–Rao) product; both inputs need the same column count</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">khatriRao(A, B)</div>
+  </div>
+</div>
+<div class="func-card" id="kron" data-name="kron">
+  <div class="func-name">kron</div>
+  <div class="func-desc">Kronecker product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kron(A, B)</div>
+  </div>
+</div>
+<div class="func-card" id="laplacianMatrix" data-name="laplacianmatrix">
+  <div class="func-name">laplacianMatrix</div>
+  <div class="func-desc">Graph Laplacian of an adjacency matrix; combinatorial <code>L = D − A</code> by default, or the symmetric normalized <code>L_sym = I − D^(−1/2) A D^(−1/2)</code> with <code>{ normalized: true }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">laplacianMatrix(adjacency[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="ldl" data-name="ldl">
+  <div class="func-name">ldl</div>
+  <div class="func-desc">Symmetric indefinite <code>A</code> — Bunch–Kaufman-pivoted <code>LDLᵀ</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ldl(A)</div>
+  </div>
+</div>
+<div class="func-card" id="leslieMatrix" data-name="lesliematrix">
+  <div class="func-name">leslieMatrix</div>
+  <div class="func-desc">Leslie population matrix: fecundities <code>f</code> in the first row, survival rates <code>s</code> on the subdiagonal (<code>s.length = f.length − 1</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">leslieMatrix(f, s)</div>
+  </div>
+</div>
+<div class="func-card" id="linsolve" data-name="linsolve">
+  <div class="func-name">linsolve</div>
+  <div class="func-desc">Solve a linear system <code>Ax = b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">linsolve(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="logdet" data-name="logdet">
+  <div class="func-name">logdet</div>
+  <div class="func-desc">Natural log of the absolute determinant via LU (the <code>logabsdet</code> part of numpy <code>slogdet</code>), stable where <code>log(det(A))</code> overflows; returns <code>{ sign, value }</code> with <code>det = sign · exp(value)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logdet(A)</div>
+  </div>
+</div>
+<div class="func-card" id="lowRankApprox" data-name="lowrankapprox">
+  <div class="func-name">lowRankApprox</div>
+  <div class="func-desc">Best rank-<code>k</code> approximation in the Frobenius-norm sense via truncated SVD: <code>A_k = U[:, :k] · diag(S[:k]) · V[:, :k]ᵀ</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lowRankApprox(A, k)</div>
+  </div>
+</div>
+<div class="func-card" id="lq" data-name="lq">
+  <div class="func-name">lq</div>
+  <div class="func-desc">QR-family variants built from reduced QR: <code>A = L·Q</code> (<code>L</code> lower, <code>Q</code> has orthonormal rows), <code>A = R·Q</code> (<code>R</code> upper, orthonormal rows), <code>A = Q·L</code> (orthonormal columns, <code>L</code> lower)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lq(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="lsolve" data-name="lsolve">
+  <div class="func-name">lsolve</div>
+  <div class="func-desc">Forward substitution (lower-triangular)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lsolve(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="lsolveAll" data-name="lsolveall">
+  <div class="func-name">lsolveAll</div>
+  <div class="func-desc">Forward substitution (lower-triangular)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lsolveAll(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="lup" data-name="lup">
+  <div class="func-name">lup</div>
+  <div class="func-desc">LU decomposition with partial pivoting</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lup(A)</div>
+  </div>
+</div>
+<div class="func-card" id="lusolve" data-name="lusolve">
+  <div class="func-name">lusolve</div>
+  <div class="func-desc">Solve <code>Ax = b</code> via LU</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lusolve(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="lyap" data-name="lyap">
+  <div class="func-name">lyap</div>
+  <div class="func-desc">Solve the Lyapunov equation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lyap(A, Q)</div>
+  </div>
+</div>
+<div class="func-card" id="matrixExpm" data-name="matrixexpm">
+  <div class="func-name">matrixExpm</div>
+  <div class="func-desc">Matrix exponential via Padé-13 scaling-and-squaring (Higham 2005)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixExpm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="matrixLog" data-name="matrixlog">
+  <div class="func-name">matrixLog</div>
+  <div class="func-desc">Matrix logarithm</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixLog(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="matrixLogm" data-name="matrixlogm">
+  <div class="func-name">matrixLogm</div>
+  <div class="func-desc">Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive/complex eigenvalues</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixLogm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="matrixPinv" data-name="matrixpinv">
+  <div class="func-name">matrixPinv</div>
+  <div class="func-desc">Moore–Penrose pseudoinverse via SVD with <code>rcond·max(S)</code> thresholding; the matrix package's routine under a non-colliding name (the typed pinv also accepts nested arrays)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixPinv(A[, { rcond }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="matrixRank" data-name="matrixrank">
+  <div class="func-name">matrixRank</div>
+  <div class="func-desc">Rank</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixRank(A)</div>
+  </div>
+</div>
+<div class="func-card" id="matrixSqrtm" data-name="matrixsqrtm">
+  <div class="func-name">matrixSqrtm</div>
+  <div class="func-desc">Principal matrix square root via Newton iteration (eigendecomposition fallback); throws for negative/complex eigenvalues</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixSqrtm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="minres" data-name="minres">
+  <div class="func-name">minres</div>
+  <div class="func-desc">Symmetric, possibly indefinite</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minres(A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="norm2" data-name="norm2">
+  <div class="func-name">norm2</div>
+  <div class="func-desc">Spectral norm (2-norm) of a matrix — the largest singular value</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">norm2(A)</div>
+  </div>
+</div>
+<div class="func-card" id="normFro" data-name="normfro">
+  <div class="func-name">normFro</div>
+  <div class="func-desc">Frobenius norm of a matrix — <code>sqrt(sum(A_ij²))</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">normFro(A)</div>
+  </div>
+</div>
+<div class="func-card" id="orth" data-name="orth">
+  <div class="func-name">orth</div>
+  <div class="func-desc">Orthonormal basis for the column space of <code>A</code> — the leading columns of <code>svd(A).U</code> above a rank tolerance (default <code>max(m, n) · S[0] · 2.22e-16</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">orth(A[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="parallelFFT" data-name="parallelfft">
+  <div class="func-name">parallelFFT</div>
+  <div class="func-desc">FFT → <code>{ real, imag, originalLength }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelFFT(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†, GPU‡</span></span></div>
+</div>
+<div class="func-card" id="parallelIFFT" data-name="parallelifft">
+  <div class="func-name">parallelIFFT</div>
+  <div class="func-desc">Inverse FFT → <code>{ real, imag }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelIFFT(X)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†, GPU‡</span></span></div>
+</div>
+<div class="func-card" id="pascalMatrix" data-name="pascalmatrix">
+  <div class="func-name">pascalMatrix</div>
+  <div class="func-desc">Pascal matrix, <code>kind</code> <code>'symmetric'</code> (default), <code>'lower'</code> or <code>'upper'</code>; determinant 1</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pascalMatrix(n[, kind])</div>
+  </div>
+</div>
+<div class="func-card" id="pinv" data-name="pinv">
+  <div class="func-name">pinv</div>
+  <div class="func-desc">Moore–Penrose pseudoinverse</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pinv(A)</div>
+  </div>
+</div>
+<div class="func-card" id="polarDecomposition" data-name="polardecomposition">
+  <div class="func-name">polarDecomposition</div>
+  <div class="func-desc">Polar decomposition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">polarDecomposition(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="powerIteration" data-name="poweriteration">
+  <div class="func-name">powerIteration</div>
+  <div class="func-desc">Dominant eigenpair <code>{ value, vector }</code> (defaults 1000 iterations, 1e-12)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">powerIteration(A[, { maxIterations, tolerance }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="ql" data-name="ql">
+  <div class="func-name">ql</div>
+  <div class="func-desc">QR-family variants built from reduced QR: <code>A = L·Q</code> (<code>L</code> lower, <code>Q</code> has orthonormal rows), <code>A = R·Q</code> (<code>R</code> upper, orthonormal rows), <code>A = Q·L</code> (orthonormal columns, <code>L</code> lower)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ql(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="qr" data-name="qr">
+  <div class="func-name">qr</div>
+  <div class="func-desc">QR decomposition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">qr(A)</div>
+  </div>
+</div>
+<div class="func-card" id="qrPivoted" data-name="qrpivoted">
+  <div class="func-name">qrPivoted</div>
+  <div class="func-desc">Column-pivoted rank-revealing QR: <code>{ Q, R, P, rank }</code> with <code>A[:, P] = Q·R</code>; <code>rank</code> counts <code>|R_ii| &gt; tolerance·|R_00|</code> (default 1e-10)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">qrPivoted(A[, { tolerance }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="qz" data-name="qz">
+  <div class="func-name">qz</div>
+  <div class="func-desc">Generalized (QZ) Schur decomposition of <code>(A, B)</code>; returns orthogonal <code>Q</code>, <code>Z</code> and upper-(quasi-)triangular <code>AA</code>, <code>BB</code> with <code>A = Q·AA·Zᵀ</code>, <code>B = Q·BB·Zᵀ</code> (matches <code>scipy.linalg.qz</code>; factors not unique)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">qz(A, B)</div>
+  </div>
+</div>
+<div class="func-card" id="rank" data-name="rank">
+  <div class="func-name">rank</div>
+  <div class="func-desc">Numerical rank (Gaussian elimination, JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rank(A)</div>
+  </div>
+</div>
+<div class="func-card" id="rationalNullspace" data-name="rationalnullspace">
+  <div class="func-name">rationalNullspace</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rationalNullspace(…)</div>
+  </div>
+</div>
+<div class="func-card" id="reduce" data-name="reduce">
+  <div class="func-name">reduce</div>
+  <div class="func-desc">Reduce an expression</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">reduce(expr)</div>
+  </div>
+</div>
+<div class="func-card" id="resetGpuElementwise" data-name="resetgpuelementwise">
+  <div class="func-name">resetGpuElementwise</div>
+  <div class="func-desc"><span class="prose"><strong>Per-call override.</strong> <code>enableGpu()</code> is process-global state — any dependency could flip it. Pass <code>{ gpu: true | false }</code> as the <strong>last</strong> argument — third for <code>fuseUnaryChainAsync</code> / <code>elementwiseChainGpuDispatch</code>, fourth for <code>fuseUnaryChainReduceAsync</code> / <code>elementwiseChainReduceGpuDispatch</code> (or to…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">resetGpuElementwise(…)</div>
+  </div>
+</div>
+<div class="func-card" id="resetGpuFft" data-name="resetgpufft">
+  <div class="func-name">resetGpuFft</div>
+  <div class="func-desc"><span class="prose">Also exported: <code>resetGpuFft()</code>, <code>GpuFftOptions</code>, <code>GpuFftResult</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">resetGpuFft(…)</div>
+  </div>
+</div>
+<div class="func-card" id="rotate" data-name="rotate">
+  <div class="func-name">rotate</div>
+  <div class="func-desc">Rotate a vector</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rotate(v, angle[, axis])</div>
+  </div>
+</div>
+<div class="func-card" id="rotationMatrix" data-name="rotationmatrix">
+  <div class="func-name">rotationMatrix</div>
+  <div class="func-desc">Rotation matrix</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rotationMatrix(angle[, axis])</div>
+  </div>
+</div>
+<div class="func-card" id="rowReduce" data-name="rowreduce">
+  <div class="func-name">rowReduce</div>
+  <div class="func-desc">Reduced row echelon form</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rowReduce(A)</div>
+  </div>
+</div>
+<div class="func-card" id="rq" data-name="rq">
+  <div class="func-name">rq</div>
+  <div class="func-desc">QR-family variants built from reduced QR: <code>A = L·Q</code> (<code>L</code> lower, <code>Q</code> has orthonormal rows), <code>A = R·Q</code> (<code>R</code> upper, orthonormal rows), <code>A = Q·L</code> (orthonormal columns, <code>L</code> lower)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rq(A)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">DenseMatrix</span></span></div>
+</div>
+<div class="func-card" id="schur" data-name="schur">
+  <div class="func-name">schur</div>
+  <div class="func-desc">Schur decomposition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">schur(A)</div>
+  </div>
+</div>
+<div class="func-card" id="signm" data-name="signm">
+  <div class="func-name">signm</div>
+  <div class="func-desc">Matrix sign function by determinant-scaled Newton iteration <code>X ← (μX + (μX)⁻¹)/2</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">signm(A[, { tol, maxIter }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="singularValues" data-name="singularvalues">
+  <div class="func-name">singularValues</div>
+  <div class="func-desc">Singular values in descending order (length <code>min(m, n)</code>, all non-negative)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">singularValues(A)</div>
+  </div>
+</div>
+<div class="func-card" id="sinm" data-name="sinm">
+  <div class="func-name">sinm</div>
+  <div class="func-desc">Matrix sine <code>sin(A)</code> via <code>funm</code>, valid for any real spectrum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sinm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="slu" data-name="slu">
+  <div class="func-name">slu</div>
+  <div class="func-desc">Sparse LU decomposition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">slu(A)</div>
+  </div>
+</div>
+<div class="func-card" id="solveBanded" data-name="solvebanded">
+  <div class="func-name">solveBanded</div>
+  <div class="func-desc">Banded <code>Ax = b</code> (<code>l</code> lower / <code>u</code> upper diagonals) — band-limited Gaussian elimination</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveBanded(l, u, A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="sqrtm" data-name="sqrtm">
+  <div class="func-name">sqrtm</div>
+  <div class="func-desc">Matrix square root</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sqrtm(A)</div>
+  </div>
+</div>
+<div class="func-card" id="subspaceAngles" data-name="subspaceangles">
+  <div class="func-name">subspaceAngles</div>
+  <div class="func-desc">Principal angles between the column spaces of <code>A</code> and <code>B</code> in radians, <strong>descending</strong> like <code>scipy.linalg.subspace_angles</code>; small angles keep full relative accuracy</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">subspaceAngles(A, B)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="svd" data-name="svd">
+  <div class="func-name">svd</div>
+  <div class="func-desc">Full singular value decomposition — <code>{ U, S, V, rank }</code>, <code>S</code> descending</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">svd(A)</div>
+  </div>
+</div>
+<div class="func-card" id="svds" data-name="svds">
+  <div class="func-name">svds</div>
+  <div class="func-desc"><span class="prose"><code>svds(A, k = 1, opts?)</code> — the <code>k</code> <strong>largest</strong> singular triplets of a dense <code>m × n</code> matrix <code>A</code>, for large/sparse problems where a full <code>svd</code> (which factors the whole matrix) is wasteful. It runs the Lanczos iteration on the smaller of the two normal operators (<code>AᵀA</code> when <code>m ≥ n</code>, else <code>A Aᵀ</code>) — never forming that…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">svds(…)</div>
+  </div>
+</div>
+<div class="func-card" id="sylvester" data-name="sylvester">
+  <div class="func-name">sylvester</div>
+  <div class="func-desc">Solve <code>AX + XB = C</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sylvester(A, B, C)</div>
+  </div>
+</div>
+<div class="func-card" id="thomasSolve" data-name="thomassolve">
+  <div class="func-name">thomasSolve</div>
+  <div class="func-desc">Tridiagonal <code>Ax = d</code> — the Thomas algorithm, O(n)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">thomasSolve(sub, diag, sup, d)</div>
+  </div>
+</div>
+<div class="func-card" id="toeplitz" data-name="toeplitz">
+  <div class="func-name">toeplitz</div>
+  <div class="func-desc">Toeplitz matrix with first column <code>c</code> and first row <code>r</code> (defaults to <code>c</code>); constant along each diagonal</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">toeplitz(c[, r])</div>
+  </div>
+</div>
+<div class="func-card" id="toeplitzSolve" data-name="toeplitzsolve">
+  <div class="func-name">toeplitzSolve</div>
+  <div class="func-desc">Toeplitz <code>Tx = b</code> (first column <code>c</code>, first row <code>r</code>) — Levinson–Durbin, O(n²)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">toeplitzSolve(c, r, b)</div>
+  </div>
+</div>
+<div class="func-card" id="trace" data-name="trace">
+  <div class="func-name">trace</div>
+  <div class="func-desc">Trace (sum of the diagonal)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">trace(A)</div>
+  </div>
+</div>
+<div class="func-card" id="transpose" data-name="transpose">
+  <div class="func-name">transpose</div>
+  <div class="func-desc">Transpose</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">transpose(A)</div>
+  </div>
+</div>
+<div class="func-card" id="tril" data-name="tril">
+  <div class="func-name">tril</div>
+  <div class="func-desc">Lower-triangular part of <code>A</code>, zeroing entries above the <code>k</code>-th diagonal (default <code>k = 0</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tril(A[, k])</div>
+  </div>
+</div>
+<div class="func-card" id="triu" data-name="triu">
+  <div class="func-name">triu</div>
+  <div class="func-desc">Upper-triangular part of <code>A</code>, zeroing entries below the <code>k</code>-th diagonal (default <code>k = 0</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">triu(A[, k])</div>
+  </div>
+</div>
+<div class="func-card" id="usolve" data-name="usolve">
+  <div class="func-name">usolve</div>
+  <div class="func-desc">Back substitution (upper-triangular)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">usolve(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="usolveAll" data-name="usolveall">
+  <div class="func-name">usolveAll</div>
+  <div class="func-desc">Back substitution (upper-triangular)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">usolveAll(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="vander" data-name="vander">
+  <div class="func-name">vander</div>
+  <div class="func-desc">Vandermonde matrix of <code>x</code>; column <code>j</code> is <code>xᵢ^(N-1-j)</code> (numpy <code>np.vander</code> convention, <code>N</code> defaults to <code>x.length</code>), or <code>xᵢ^j</code> when <code>increasing</code> is true</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">vander(x[, n][, increasing])</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

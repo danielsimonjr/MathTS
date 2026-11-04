@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Statistics</div>
+  <h1><span>Statistics</span> (110)</h1>
+  <p class="cat-desc">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Statistics..." oninput="filterFuncs()">
+<div class="func-card" id="acf" data-name="acf">
+  <div class="func-name">acf</div>
+  <div class="func-desc">Autocorrelation up to <code>nlags</code>, biased estimator (÷n, like statsmodels <code>acf</code>); <code>acf[0] = 1</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acf(x, nlags)</div>
+  </div>
+</div>
+<div class="func-card" id="adfuller" data-name="adfuller">
+  <div class="func-name">adfuller</div>
+  <div class="func-desc">Augmented Dickey-Fuller unit-root test (constant-only model): OLS of <code>Δxₜ</code> on <code>[1, xₜ₋₁, Δxₜ₋₁, …]</code>; <code>statistic</code> = t-stat on the lagged level; default <code>maxlag = floor(12(n/100)^0.25)</code>, auto-clamped if the design is ill-posed; <code>pValue</code> is an <strong>approximate</strong> MacKinnon (1994)-style interpolation over a small built-in critical-value table (not the exact response-surface p-value); returns <code>{ statistic, pValue, usedLag }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">adfuller(x[, maxlag])</div>
+  </div>
+</div>
+<div class="func-card" id="bootstrapCI" data-name="bootstrapci">
+  <div class="func-name">bootstrapCI</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bootstrapCI(…)</div>
+  </div>
+</div>
+<div class="func-card" id="cohensD" data-name="cohensd">
+  <div class="func-name">cohensD</div>
+  <div class="func-desc"><code>(mean a − mean b) / pooled sd</code> (ddof 1); negative when <code>a</code> is smaller</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cohensD(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="corr" data-name="corr">
+  <div class="func-name">corr</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">corr(…)</div>
+  </div>
+</div>
+<div class="func-card" id="corrcoef" data-name="corrcoef">
+  <div class="func-name">corrcoef</div>
+  <div class="func-desc">Pearson correlation-coefficient matrix (rows = observations, cols = variables); diagonal is 1</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">corrcoef(matrix)</div>
+  </div>
+</div>
+<div class="func-card" id="cov" data-name="cov">
+  <div class="func-name">cov</div>
+  <div class="func-desc">Sample covariance (scalar for two vectors) or covariance matrix (rows = observations, cols = variables); <code>ddof</code> defaults to 1</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cov(x, y[, ddof])
+cov(matrix[, , ddof])</div>
+  </div>
+</div>
+<div class="func-card" id="cummax" data-name="cummax">
+  <div class="func-name">cummax</div>
+  <div class="func-desc">Cumulative (running) maximum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cummax(x)</div>
+  </div>
+</div>
+<div class="func-card" id="cummin" data-name="cummin">
+  <div class="func-name">cummin</div>
+  <div class="func-desc">Cumulative (running) minimum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cummin(x)</div>
+  </div>
+</div>
+<div class="func-card" id="cumprod" data-name="cumprod">
+  <div class="func-name">cumprod</div>
+  <div class="func-desc">Cumulative product (running ∏); same length as input</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cumprod(x)</div>
+  </div>
+</div>
+<div class="func-card" id="cumsum" data-name="cumsum">
+  <div class="func-name">cumsum</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cumsum(…)</div>
+  </div>
+</div>
+<div class="func-card" id="cumtrapz" data-name="cumtrapz">
+  <div class="func-name">cumtrapz</div>
+  <div class="func-desc">Cumulative trapezoidal integral; <code>x</code> may be abscissae or scalar <code>dx</code> (default unit spacing), leading 0 (MATLAB convention)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cumtrapz(y[, x])</div>
+  </div>
+</div>
+<div class="func-card" id="dbscan" data-name="dbscan">
+  <div class="func-name">dbscan</div>
+  <div class="func-desc">Density-based clustering (DBSCAN); brute-force Euclidean ε-neighborhoods; 0-based cluster ids, noise labeled <code>-1</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dbscan(points, eps, minPts)</div>
+  </div>
+</div>
+<div class="func-card" id="describe" data-name="describe">
+  <div class="func-name">describe</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">describe(…)</div>
+  </div>
+</div>
+<div class="func-card" id="detrend" data-name="detrend">
+  <div class="func-name">detrend</div>
+  <div class="func-desc">Remove trend: <code>'linear'</code> (default, least-squares line) or <code>'constant'</code> (mean); matches <code>scipy.signal.detrend</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">detrend(x[, type])</div>
+  </div>
+</div>
+<div class="func-card" id="durbinWatson" data-name="durbinwatson">
+  <div class="func-name">durbinWatson</div>
+  <div class="func-desc">Durbin-Watson statistic <code>Σ(eₜ−eₜ₋₁)² / Σeₜ²</code>; ~2 = no autocorrelation, &lt;2 positive, &gt;2 negative; matches <code>statsmodels.stats.stattools.durbin_watson</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">durbinWatson(residuals)</div>
+  </div>
+</div>
+<div class="func-card" id="ecdf" data-name="ecdf">
+  <div class="func-name">ecdf</div>
+  <div class="func-desc">Empirical CDF: <code>{ x, y, evaluate(t) }</code> with the sorted unique values, cumulative proportions and a step-function evaluator</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ecdf(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="elasticNet" data-name="elasticnet">
+  <div class="func-name">elasticNet</div>
+  <div class="func-desc">Combined L1+L2 (elastic net) regression via coordinate descent; <code>l1Ratio</code> mixes the lasso (<code>1</code>) and ridge (<code>0</code>) penalties; returns <code>{ coefficients, intercept }</code> (<code>opts.maxIter</code>/<code>opts.tol</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">elasticNet(X, y, alpha, l1Ratio[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="energyDistance" data-name="energydistance">
+  <div class="func-name">energyDistance</div>
+  <div class="func-desc">1-D energy distance between two samples</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">energyDistance(u, v)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="etaSquared" data-name="etasquared">
+  <div class="func-name">etaSquared</div>
+  <div class="func-desc">One-way <code>η² = SS_between / SS_total</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">etaSquared(groups)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="ewma" data-name="ewma">
+  <div class="func-name">ewma</div>
+  <div class="func-desc">Exponentially-weighted moving average, <code>α ∈ (0,1]</code> (pandas <code>ewm(adjust=False)</code>); same length as input</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ewma(x, alpha)</div>
+  </div>
+</div>
+<div class="func-card" id="fitDistribution" data-name="fitdistribution">
+  <div class="func-name">fitDistribution</div>
+  <div class="func-desc">Maximum-likelihood fit of <code>'normal'</code> <code>| 'exponential'</code> <code>| 'lognormal'</code> <code>| 'poisson'</code> <code>| 'gamma'</code> to a sample; returns <code>{ params, logLikelihood }</code>. Normal/exponential/poisson are closed-form; lognormal fits a normal to <code>ln(data)</code> (requires all <code>&gt; 0</code>); gamma solves the digamma shape equation <code>ln(k) − ψ(k) = ln(x̄) − mean(ln x)</code> via the secant method (verified vs <code>scipy.stats.gamma.fit</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fitDistribution(name, data)</div>
+  </div>
+</div>
+<div class="func-card" id="gaussianProcessRegression" data-name="gaussianprocessregression">
+  <div class="func-name">gaussianProcessRegression</div>
+  <div class="func-desc">Gaussian-process regressor (alias pair). Options: <code>kernel</code> (<code>'rbf'</code> default, <code>'matern32'</code>, <code>'matern52'</code>), <code>lengthScale</code> (1), <code>signalVariance</code> (1), <code>noise</code> (1e-10). Returns <code>{ predict(Xstar) → { mean, variance, std }, logMarginalLikelihood, kernel }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gaussianProcessRegression(X, y[, options])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][], number[]</span></span></div>
+</div>
+<div class="func-card" id="glassDelta" data-name="glassdelta">
+  <div class="func-name">glassDelta</div>
+  <div class="func-desc"><code>(mean a − mean b) / sd(b)</code> — standardized by the second (control) group only</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">glassDelta(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="glm" data-name="glm">
+  <div class="func-name">glm</div>
+  <div class="func-desc">Generalized linear model via IRLS/Fisher scoring; <code>opts.family</code> <code>'poisson'</code> (log link) or <code>'gamma'</code> (log or inverse link), <code>opts.intercept</code> default true (matches <code>ols</code>); returns <code>{ coefficients, fittedValues, deviance, iterations, predict }</code>; matches <code>statsmodels.GLM.fit</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">glm(X, y, opts)</div>
+  </div>
+</div>
+<div class="func-card" id="gmean" data-name="gmean">
+  <div class="func-name">gmean</div>
+  <div class="func-desc">Geometric mean <code>exp(mean(ln x))</code>; all entries must be <code>&gt; 0</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gmean(x)</div>
+  </div>
+</div>
+<div class="func-card" id="gpRegression" data-name="gpregression">
+  <div class="func-name">gpRegression</div>
+  <div class="func-desc">Gaussian-process regressor (alias pair). Options: <code>kernel</code> (<code>'rbf'</code> default, <code>'matern32'</code>, <code>'matern52'</code>), <code>lengthScale</code> (1), <code>signalVariance</code> (1), <code>noise</code> (1e-10). Returns <code>{ predict(Xstar) → { mean, variance, std }, logMarginalLikelihood, kernel }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gpRegression(X, y[, options])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][], number[]</span></span></div>
+</div>
+<div class="func-card" id="gstd" data-name="gstd">
+  <div class="func-name">gstd</div>
+  <div class="func-desc">Geometric standard deviation <code>exp(std(ln x))</code>, <code>ddof</code> default 1 (scipy)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gstd(x[, { ddof }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="gzscore" data-name="gzscore">
+  <div class="func-name">gzscore</div>
+  <div class="func-desc">Geometric z-scores <code>(ln x − mean(ln x)) / std(ln x)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gzscore(x[, { ddof }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="hedgesG" data-name="hedgesg">
+  <div class="func-name">hedgesG</div>
+  <div class="func-desc"><code>cohensD</code> with the small-sample correction <code>1 − 3/(4(n₁+n₂) − 9)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hedgesG(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="histogram" data-name="histogram">
+  <div class="func-name">histogram</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">histogram(…)</div>
+  </div>
+</div>
+<div class="func-card" id="hmean" data-name="hmean">
+  <div class="func-name">hmean</div>
+  <div class="func-desc">Harmonic mean <code>n / Σ(1/xᵢ)</code>; all entries must be <code>&gt; 0</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hmean(x)</div>
+  </div>
+</div>
+<div class="func-card" id="iqr" data-name="iqr">
+  <div class="func-name">iqr</div>
+  <div class="func-desc">Interquartile range <code>Q3 − Q1</code> (via <code>quantileSeq</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">iqr(x)</div>
+  </div>
+</div>
+<div class="func-card" id="jackknife" data-name="jackknife">
+  <div class="func-name">jackknife</div>
+  <div class="func-desc">Leave-one-out jackknife of <code>stat</code>: <code>{ estimate, bias, se }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">jackknife(x, stat)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], function</span></span></div>
+</div>
+<div class="func-card" id="kendalltau" data-name="kendalltau">
+  <div class="func-name">kendalltau</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kendalltau(…)</div>
+  </div>
+</div>
+<div class="func-card" id="kendallTau" data-name="kendalltau">
+  <div class="func-name">kendallTau</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kendallTau(…)</div>
+  </div>
+</div>
+<div class="func-card" id="kmeans" data-name="kmeans">
+  <div class="func-name">kmeans</div>
+  <div class="func-desc">Lloyd's k-means on row-vectors, deterministic maximin seeding; returns <code>{ labels, centroids, inertia, iterations, converged }</code> (<code>opts.maxIter</code> default 100)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kmeans(data, k[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="knnClassify" data-name="knnclassify">
+  <div class="func-name">knnClassify</div>
+  <div class="func-desc">k-nearest-neighbour classifier; majority vote of the <code>k</code> closest training points (Euclidean), ties broken by the single nearest point's label</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">knnClassify(train, labels, query, k)</div>
+  </div>
+</div>
+<div class="func-card" id="knnRegress" data-name="knnregress">
+  <div class="func-name">knnRegress</div>
+  <div class="func-desc">k-nearest-neighbour regressor; mean of the <code>k</code> closest training targets (Euclidean)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">knnRegress(train, targets, query, k)</div>
+  </div>
+</div>
+<div class="func-card" id="kurtosis" data-name="kurtosis">
+  <div class="func-name">kurtosis</div>
+  <div class="func-desc">Excess kurtosis by default (SciPy <code>fisher=true</code>, subtracts 3). <code>{ fisher: false }</code> → Pearson's; <code>{ bias: false }</code> applies the sample correction</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kurtosis(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="lasso" data-name="lasso">
+  <div class="func-name">lasso</div>
+  <div class="func-desc">L1-penalized (lasso) regression via coordinate descent with soft-thresholding on standardized columns; drives coefficients to exactly 0 for large <code>alpha</code>; returns <code>{ coefficients, intercept }</code> (<code>opts.maxIter</code>/<code>opts.tol</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lasso(X, y, alpha[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="linearRegression" data-name="linearregression">
+  <div class="func-name">linearRegression</div>
+  <div class="func-desc">Simple OLS fit; returns <code>{ slope, intercept, rValue, rSquared, pValue, stdErr }</code> (mirrors <code>scipy.stats.linregress</code>; needs ≥ 3 points)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">linearRegression(x, y)</div>
+  </div>
+</div>
+<div class="func-card" id="linregress" data-name="linregress">
+  <div class="func-name">linregress</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">linregress(…)</div>
+  </div>
+</div>
+<div class="func-card" id="ljungBox" data-name="ljungbox">
+  <div class="func-name">ljungBox</div>
+  <div class="func-desc">Ljung-Box portmanteau test for residual autocorrelation up to <code>lags</code>: <code>Q = n(n+2)Σρ_k²/(n−k)</code>, <code>pValue = 1 − chiSquaredCDF(Q, lags)</code>; matches <code>statsmodels.stats.diagnostic.acorr_ljungbox</code>; returns <code>{ statistic, pValue }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ljungBox(x, lags)</div>
+  </div>
+</div>
+<div class="func-card" id="logisticRegression" data-name="logisticregression">
+  <div class="func-name">logisticRegression</div>
+  <div class="func-desc">Binary logistic regression (<code>y ∈ {0,1}</code>) fit by IRLS/Newton on the Bernoulli log-likelihood; <code>opts.intercept</code> default true; returns <code>{ coefficients, intercept, predict, predictProba }</code> — the library's first classifier/GLM</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logisticRegression(X, y[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="logsumexp" data-name="logsumexp">
+  <div class="func-name">logsumexp</div>
+  <div class="func-desc"><code>log(Σ exp(xᵢ))</code>, max-shifted for stability</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">logsumexp(x)</div>
+  </div>
+</div>
+<div class="func-card" id="mad" data-name="mad">
+  <div class="func-name">mad</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mad(…)</div>
+  </div>
+</div>
+<div class="func-card" id="mahalanobis" data-name="mahalanobis">
+  <div class="func-name">mahalanobis</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mahalanobis(…)</div>
+  </div>
+</div>
+<div class="func-card" id="max" data-name="max">
+  <div class="func-name">max</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">max(…)</div>
+  </div>
+</div>
+<div class="func-card" id="maxSelect" data-name="maxselect">
+  <div class="func-name">maxSelect</div>
+  <div class="func-desc"><code>k</code> largest elements</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">maxSelect(arr, k)</div>
+  </div>
+</div>
+<div class="func-card" id="meanCI" data-name="meanci">
+  <div class="func-name">meanCI</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">meanCI(…)</div>
+  </div>
+</div>
+<div class="func-card" id="median" data-name="median">
+  <div class="func-name">median</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">median(…)</div>
+  </div>
+</div>
+<div class="func-card" id="medianSelect" data-name="medianselect">
+  <div class="func-name">medianSelect</div>
+  <div class="func-desc">Exact median via quickselect</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">medianSelect(arr)</div>
+  </div>
+</div>
+<div class="func-card" id="min" data-name="min">
+  <div class="func-name">min</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">min(…)</div>
+  </div>
+</div>
+<div class="func-card" id="minSelect" data-name="minselect">
+  <div class="func-name">minSelect</div>
+  <div class="func-desc"><code>k</code> smallest elements</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minSelect(arr, k)</div>
+  </div>
+</div>
+<div class="func-card" id="mode" data-name="mode">
+  <div class="func-name">mode</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mode(…)</div>
+  </div>
+</div>
+<div class="func-card" id="moment" data-name="moment">
+  <div class="func-name">moment</div>
+  <div class="func-desc">k-th moment; <code>central</code> (default <code>true</code>) subtracts the mean first, else raw</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">moment(x, k[, central])</div>
+  </div>
+</div>
+<div class="func-card" id="movingAverage" data-name="movingaverage">
+  <div class="func-name">movingAverage</div>
+  <div class="func-desc">Simple moving average over trailing window <code>w</code>; returns length <code>n − w + 1</code> (&quot;valid&quot;)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">movingAverage(x, w)</div>
+  </div>
+</div>
+<div class="func-card" id="mutualInformation" data-name="mutualinformation">
+  <div class="func-name">mutualInformation</div>
+  <div class="func-desc">Mutual information in <strong>nats</strong> between two discrete label sequences</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mutualInformation(x, y)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="mvnPdf" data-name="mvnpdf">
+  <div class="func-name">mvnPdf</div>
+  <div class="func-desc">Multivariate-normal density; handles the 1-D scalar case and the general k×k covariance case (thin wrapper over <code>multivariateNormal</code>); matches <code>scipy.stats.multivariate_normal.pdf</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mvnPdf(x, mean, cov)</div>
+  </div>
+</div>
+<div class="func-card" id="mvnSample" data-name="mvnsample">
+  <div class="func-name">mvnSample</div>
+  <div class="func-desc">Draw <code>n</code> samples from a multivariate normal via Cholesky (<code>x = mean + L·z</code>); <code>opts.seed</code> for reproducible draws; returns an <code>n</code>-length array of length-k row vectors</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mvnSample(mean, cov, n[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="ols" data-name="ols">
+  <div class="func-name">ols</div>
+  <div class="func-desc">Multiple linear regression on a design matrix (<code>opts.intercept</code> default true, prepends a column of ones); returns <code>{ coefficients, stderr, tValues, pValues, r2, adjR2, fStat, residuals }</code> — the general case <code>linearRegression</code> doesn't cover</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ols(X, y[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="pacf" data-name="pacf">
+  <div class="func-name">pacf</div>
+  <div class="func-desc">Partial autocorrelation up to <code>nlags</code> via the Levinson-Durbin recursion on the biased <code>acf</code>; matches <code>statsmodels.tsa.stattools.pacf(..., method='ldb')</code>; <code>pacf[0] = 1</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pacf(x, nlags)</div>
+  </div>
+</div>
+<div class="func-card" id="parallelStatCorr" data-name="parallelstatcorr">
+  <div class="func-name">parallelStatCorr</div>
+  <div class="func-desc">Pearson correlation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatCorr(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatCumsum" data-name="parallelstatcumsum">
+  <div class="func-name">parallelStatCumsum</div>
+  <div class="func-desc">Cumulative sum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatCumsum(a)</div>
+  </div>
+</div>
+<div class="func-card" id="parallelStatDistance" data-name="parallelstatdistance">
+  <div class="func-name">parallelStatDistance</div>
+  <div class="func-desc">Euclidean distance</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatDistance(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatHistogram" data-name="parallelstathistogram">
+  <div class="func-name">parallelStatHistogram</div>
+  <div class="func-desc">Histogram bin counts</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatHistogram(a, bins)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMAD" data-name="parallelstatmad">
+  <div class="func-name">parallelStatMAD</div>
+  <div class="func-desc">Mean absolute deviation from the mean</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMAD(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMax" data-name="parallelstatmax">
+  <div class="func-name">parallelStatMax</div>
+  <div class="func-desc">Min / max</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMax(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMean" data-name="parallelstatmean">
+  <div class="func-name">parallelStatMean</div>
+  <div class="func-desc">Arithmetic mean</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMean(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMeanAD" data-name="parallelstatmeanad">
+  <div class="func-name">parallelStatMeanAD</div>
+  <div class="func-desc">Alias of <code>parallelStatMAD</code> (same mean AD, not factory <code>mad</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMeanAD(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMedian" data-name="parallelstatmedian">
+  <div class="func-name">parallelStatMedian</div>
+  <div class="func-desc">Median (<code>sort_f64</code> when n ≥ 1 048 576 after <code>loadWasm()</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMedian(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WASM (≥1 M)</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMin" data-name="parallelstatmin">
+  <div class="func-name">parallelStatMin</div>
+  <div class="func-desc">Min / max</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMin(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMinMax" data-name="parallelstatminmax">
+  <div class="func-name">parallelStatMinMax</div>
+  <div class="func-desc"><code>{ min, max }</code> in one pass</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMinMax(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatMode" data-name="parallelstatmode">
+  <div class="func-name">parallelStatMode</div>
+  <div class="func-desc">Mode</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatMode(a)</div>
+  </div>
+</div>
+<div class="func-card" id="parallelStatNorm" data-name="parallelstatnorm">
+  <div class="func-name">parallelStatNorm</div>
+  <div class="func-desc">p-norm</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatNorm(a[, p])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatPercentile" data-name="parallelstatpercentile">
+  <div class="func-name">parallelStatPercentile</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatPercentile(…)</div>
+  </div>
+</div>
+<div class="func-card" id="parallelStatProd" data-name="parallelstatprod">
+  <div class="func-name">parallelStatProd</div>
+  <div class="func-desc">Product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatProd(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatQuantile" data-name="parallelstatquantile">
+  <div class="func-name">parallelStatQuantile</div>
+  <div class="func-desc">q-th quantile (0–1); uses <code>sort_f64</code> like median</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatQuantile(a, q)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">WASM (≥1 M)</span></span></div>
+</div>
+<div class="func-card" id="parallelStatStd" data-name="parallelstatstd">
+  <div class="func-name">parallelStatStd</div>
+  <div class="func-desc">Standard deviation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatStd(a[, type])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatSum" data-name="parallelstatsum">
+  <div class="func-name">parallelStatSum</div>
+  <div class="func-desc">Sum of all elements</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatSum(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelStatVariance" data-name="parallelstatvariance">
+  <div class="func-name">parallelStatVariance</div>
+  <div class="func-desc">Variance (<code>unbiased</code>/<code>uncorrected</code>/<code>biased</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelStatVariance(a[, type])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="partialCorrelation" data-name="partialcorrelation">
+  <div class="func-name">partialCorrelation</div>
+  <div class="func-desc">Pearson correlation of <code>x</code> and <code>y</code> with <code>z</code> partialled out</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">partialCorrelation(x, y, z)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="pearsonr" data-name="pearsonr">
+  <div class="func-name">pearsonr</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pearsonr(…)</div>
+  </div>
+</div>
+<div class="func-card" id="pmean" data-name="pmean">
+  <div class="func-name">pmean</div>
+  <div class="func-desc">Power mean <code>(Σxᵖ/n)^(1/p)</code>; <code>p = 0</code> geometric, <code>1</code> arithmetic, <code>−1</code> harmonic; non-integer <code>p</code> needs <code>x &gt; 0</code>, an odd integer <code>p</code> keeps the sign of a negative mean</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pmean(x, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="prod" data-name="prod">
+  <div class="func-name">prod</div>
+  <div class="func-desc"><span class="prose">The typed arithmetic layer provides scalar/array aggregations: <code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>variance</code>, <code>std</code>. The factory layer adds <code>prod</code>, <code>median</code>, <code>mode</code>, <code>corr</code>, <code>mad</code>, <code>quantileSeq</code>, <code>cumsum</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">prod(…)</div>
+  </div>
+</div>
+<div class="func-card" id="proportionCI" data-name="proportionci">
+  <div class="func-name">proportionCI</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">proportionCI(…)</div>
+  </div>
+</div>
+<div class="func-card" id="ptp" data-name="ptp">
+  <div class="func-name">ptp</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ptp(…)</div>
+  </div>
+</div>
+<div class="func-card" id="quantileSeq" data-name="quantileseq">
+  <div class="func-name">quantileSeq</div>
+  <div class="func-desc">Quantile(s) of <code>x</code>; <code>prob</code> is a probability in <code>[0,1]</code>, an array of them, or an integer <code>N</code> for <code>N</code> evenly-spaced quantiles. Optional <code>mode</code> string selects the interpolation between order statistics (numpy <code>method=</code>): <code>'linear'</code> (default), <code>'lower'</code>, <code>'higher'</code>, <code>'nearest'</code> (ties round-half-to-even), <code>'midpoint'</code>. Pass <code>sorted=true</code> to skip the internal partition-select on pre-sorted data</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quantileSeq(x, prob[, sorted][, mode])</div>
+  </div>
+</div>
+<div class="func-card" id="quickSelect" data-name="quickselect">
+  <div class="func-name">quickSelect</div>
+  <div class="func-desc">kth smallest element (0-indexed)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quickSelect(arr, k)</div>
+  </div>
+</div>
+<div class="func-card" id="rankBiserial" data-name="rankbiserial">
+  <div class="func-name">rankBiserial</div>
+  <div class="func-desc">Rank-biserial correlation <code>2U_a/(n₁n₂) − 1</code> (ties count ½); positive when <code>a</code> tends to exceed <code>b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rankBiserial(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="rankdata" data-name="rankdata">
+  <div class="func-name">rankdata</div>
+  <div class="func-desc">1-based ranks with average tie handling (SciPy <code>rankdata</code> default <code>'average'</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rankdata(x)</div>
+  </div>
+</div>
+<div class="func-card" id="ridge" data-name="ridge">
+  <div class="func-name">ridge</div>
+  <div class="func-desc">L2-penalized (ridge) regression; closed form <code>β = (XᵀX + αI)⁻¹Xᵀy</code> on centered data; returns <code>{ coefficients, intercept }</code>; intercept never penalized</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ridge(X, y, alpha[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="sem" data-name="sem">
+  <div class="func-name">sem</div>
+  <div class="func-desc">Standard error of the mean <code>sampleStd / √n</code> (sample std, <code>ddof=1</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sem(x)</div>
+  </div>
+</div>
+<div class="func-card" id="siegelSlopes" data-name="siegelslopes">
+  <div class="func-name">siegelSlopes</div>
+  <div class="func-desc">Siegel repeated-medians line <code>{ slope, intercept }</code> (intercept <code>median(y − slope·x)</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">siegelSlopes(x, y)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="skewness" data-name="skewness">
+  <div class="func-name">skewness</div>
+  <div class="func-desc">Third standardized moment; population estimator by default (SciPy <code>bias=true</code>). <code>{ bias: false }</code> gives the sample-corrected G₁</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">skewness(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="softmax" data-name="softmax">
+  <div class="func-name">softmax</div>
+  <div class="func-desc"><code>exp(xᵢ − max) / Σ exp(x − max)</code>; returns a probability vector</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">softmax(x)</div>
+  </div>
+</div>
+<div class="func-card" id="spearman" data-name="spearman">
+  <div class="func-name">spearman</div>
+  <div class="func-desc">Spearman rank correlation ρ (Pearson of the ranks); captures any monotonic relationship — a monotonic non-linear pair gives ρ = 1</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">spearman(x, y)</div>
+  </div>
+</div>
+<div class="func-card" id="spearmanr" data-name="spearmanr">
+  <div class="func-name">spearmanr</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">spearmanr(…)</div>
+  </div>
+</div>
+<div class="func-card" id="spectralClustering" data-name="spectralclustering">
+  <div class="func-name">spectralClustering</div>
+  <div class="func-desc">Normalized-Laplacian spectral clustering of a weighted graph; returns a label per node</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">spectralClustering(adjacency, k[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="theilSen" data-name="theilsen">
+  <div class="func-name">theilSen</div>
+  <div class="func-desc">Theil–Sen line <code>{ slope, intercept }</code>: slope is the median of all pairwise slopes, intercept <code>median(y) − slope·median(x)</code> (scipy)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">theilSen(x, y)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="trimmedMean" data-name="trimmedmean">
+  <div class="func-name">trimmedMean</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">trimmedMean(…)</div>
+  </div>
+</div>
+<div class="func-card" id="tTestPower" data-name="ttestpower">
+  <div class="func-name">tTestPower</div>
+  <div class="func-desc">Power of a two-sample t-test (equal group sizes) via the noncentral-t CDF; <code>opts.solveFor: 'nobs'</code> solves for the per-group sample size needed to reach a target power instead; matches <code>statsmodels.stats.power.tt_ind_solve_power</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tTestPower(effectSize, nobs, alpha[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="variation" data-name="variation">
+  <div class="func-name">variation</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">variation(…)</div>
+  </div>
+</div>
+<div class="func-card" id="wassersteinDistance" data-name="wassersteindistance">
+  <div class="func-name">wassersteinDistance</div>
+  <div class="func-desc">1-D Wasserstein-1 (earth mover) distance between empirical distributions, optionally weighted</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">wassersteinDistance(u, v[, { uWeights, vWeights }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="weightedMean" data-name="weightedmean">
+  <div class="func-name">weightedMean</div>
+  <div class="func-desc">Weighted mean <code>Σwx / Σw</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weightedMean(x, w)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[]</span></span></div>
+</div>
+<div class="func-card" id="weightedMedian" data-name="weightedmedian">
+  <div class="func-name">weightedMedian</div>
+  <div class="func-desc">Lower weighted median (first sorted <code>x</code> whose cumulative weight reaches <code>Σw/2</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weightedMedian(x, w)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[]</span></span></div>
+</div>
+<div class="func-card" id="weightedQuantile" data-name="weightedquantile">
+  <div class="func-name">weightedQuantile</div>
+  <div class="func-desc">Lower weighted quantile, same rule at <code>p·Σw</code>; zero-weight points are never returned</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weightedQuantile(x, w, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[]</span></span></div>
+</div>
+<div class="func-card" id="weightedVariance" data-name="weightedvariance">
+  <div class="func-name">weightedVariance</div>
+  <div class="func-desc"><code>ddof: 0</code> (default) is <code>Σw(x−m)² / Σw</code>; <code>ddof: 1</code> divides by <code>Σw − Σw²/Σw</code> (reliability weights)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">weightedVariance(x, w[, { ddof }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[]</span></span></div>
+</div>
+<div class="func-card" id="zscore" data-name="zscore">
+  <div class="func-name">zscore</div>
+  <div class="func-desc">Per-element <code>(xᵢ − mean) / std</code> using population std (SciPy <code>zscore</code> default, <code>ddof=0</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">zscore(x)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

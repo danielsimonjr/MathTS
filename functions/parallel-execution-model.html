@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parallel Execution Model — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Parallel Execution Model</div>
+  <h1><span>Parallel Execution Model</span> (10)</h1>
+  <p class="cat-desc">Runtime probes for the optional acceleration tiers:</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Parallel Execution Model..." oninput="filterFuncs()">
+<div class="func-card" id="getComputePool" data-name="getcomputepool">
+  <div class="func-name">getComputePool</div>
+  <div class="func-desc"><span class="prose">Some <code>Float64Array</code> overloads return a <code>Promise</code>, but many op thresholds are <code>'never'</code>, so the synchronous JS path still runs. Await when the overload is async — <code>Promise&lt;Float64Array&gt;</code> for element-wise transforms, <code>Promise&lt;number&gt;</code> for reductions. The worker pool is created lazily on first use. <code>initializePool()</code>,…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">getComputePool(…)</div>
+  </div>
+</div>
+<div class="func-card" id="initializePool" data-name="initializepool">
+  <div class="func-name">initializePool</div>
+  <div class="func-desc"><span class="prose">Some <code>Float64Array</code> overloads return a <code>Promise</code>, but many op thresholds are <code>'never'</code>, so the synchronous JS path still runs. Await when the overload is async — <code>Promise&lt;Float64Array&gt;</code> for element-wise transforms, <code>Promise&lt;number&gt;</code> for reductions. The worker pool is created lazily on first use. <code>initializePool()</code>,…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">initializePool(…)</div>
+  </div>
+</div>
+<div class="func-card" id="initializeSignal" data-name="initializesignal">
+  <div class="func-name">initializeSignal</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">initializeSignal(…)</div>
+  </div>
+</div>
+<div class="func-card" id="initializeStatistics" data-name="initializestatistics">
+  <div class="func-name">initializeStatistics</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">initializeStatistics(…)</div>
+  </div>
+</div>
+<div class="func-card" id="isGpuChainSupported" data-name="isgpuchainsupported">
+  <div class="func-name">isGpuChainSupported</div>
+  <div class="func-desc">Type guard: true when every op name in a fused elementwise chain has a GPU kernel (the chain still needs <code>enableGpu()</code> and a large enough input to dispatch)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isGpuChainSupported(ops)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">string[]</span></span><span><span class="k">Accel</span><span class="accel">GPU</span></span></div>
+</div>
+<div class="func-card" id="isWasmLoaded" data-name="iswasmloaded">
+  <div class="func-name">isWasmLoaded</div>
+  <div class="func-desc">Whether <code>loadWasm()</code> has loaded the AssemblyScript module; until it has, every call stays on the JS path</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">isWasmLoaded()</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">none</span></span><span><span class="k">Accel</span><span class="accel">WASM</span></span></div>
+</div>
+<div class="func-card" id="shouldParallelize" data-name="shouldparallelize">
+  <div class="func-name">shouldParallelize</div>
+  <div class="func-desc"><span class="prose"><strong><code>parallel</code></strong> — <code>ComputePool</code> may dispatch to worker threads when the typed path passes an <strong>op name</strong> and length meets that op's <code>DEFAULT_THRESHOLD_BY_OP</code> entry (for example <code>matmul</code> at 4,096 via <code>poolOptions(..., 'matmul')</code>). When the path calls <code>shouldParallelize(n)</code> <strong>without</strong> an op name, only the…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">shouldParallelize(…)</div>
+  </div>
+</div>
+<div class="func-card" id="terminatePool" data-name="terminatepool">
+  <div class="func-name">terminatePool</div>
+  <div class="func-desc"><span class="prose">Some <code>Float64Array</code> overloads return a <code>Promise</code>, but many op thresholds are <code>'never'</code>, so the synchronous JS path still runs. Await when the overload is async — <code>Promise&lt;Float64Array&gt;</code> for element-wise transforms, <code>Promise&lt;number&gt;</code> for reductions. The worker pool is created lazily on first use. <code>initializePool()</code>,…</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">terminatePool(…)</div>
+  </div>
+</div>
+<div class="func-card" id="terminateSignal" data-name="terminatesignal">
+  <div class="func-name">terminateSignal</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">terminateSignal(…)</div>
+  </div>
+</div>
+<div class="func-card" id="terminateStatistics" data-name="terminatestatistics">
+  <div class="func-name">terminateStatistics</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">terminateStatistics(…)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-04 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
