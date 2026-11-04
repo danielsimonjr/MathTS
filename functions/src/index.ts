@@ -90,6 +90,7 @@ export type {
 } from './scalar-mutate.js';
 export { searchScalars } from './scalar-search.js';
 export type {
+  ScalarFitOptions,
   ScalarSearchOptions,
   ScalarSearchProblem,
   ScalarSearchResult,

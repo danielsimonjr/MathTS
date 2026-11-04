@@ -6365,7 +6365,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 720
+      "loc": 721
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7359,7 +7359,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 911
+      "loc": 1022
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -10915,7 +10915,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 1411
+      "loc": 1466
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

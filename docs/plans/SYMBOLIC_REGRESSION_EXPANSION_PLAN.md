@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** SR-1, SR-2, and SR-3 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
+**Status:** SR-1, SR-2, SR-3, and SR-4 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -117,7 +117,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 | 1    | Honor `admit` on seeds and offspring    | SR-1  | **Done.** A constraint the grammar already has; the search now applies it to seeds and offspring. |
 | 2    | Opt-in subtree crossover                | SR-2  | **Done.** `crossoverProbability` defaults to 0; the operator is unchanged.                        |
 | 3    | One loss for ranking and fitting        | SR-3  | **Done.** `l1`, `huber`, and row weights already exist on the fitter and now also rank the hall.  |
-| 4    | Fit budget, bounds, and a start vector  | SR-4  | The constants `2` and `8` and the vector of ones are private.                                     |
+| 4    | Fit budget, bounds, and a start vector  | SR-4  | **Done.** The constants `2` and `8` and the vector of ones are now `fit` options.                 |
 | 5    | Invalid-row policy                      | SR-5  | One non-positive row makes every `log` tree unscorable.                                           |
 | 6    | Complexity weights on the hall          | SR-6  | The weight type exists. The front cannot see it.                                                  |
 | 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.      |
@@ -177,7 +177,7 @@ Add `loss?: 'l2' | 'l1' | 'huber'`, default `'l2'`, and optional `rowWeights?: F
 
 ## SR-4 — Fit budget, bounds, and a start vector
 
-**Independent.** Touches `functions/src/scalar-search.ts` and its test.
+**Status: implemented.** Independent. Touches `functions/src/scalar-search.ts` and its test.
 
 Add optional `fit?: { restarts?: number; maxIterations?: number; bounds?: readonly (readonly [number, number])[]; algorithm?: 'lm' | 'bfgs' | 'nelder-mead'; initial?: ArrayLike<number> }`. Omitted fields are today's call: restarts 2, max iterations 8, no bounds, the fitter's default algorithm, initial ones (or the inherited vector when the tree already has one). The values are forwarded to `fitScalarParameters` and not reimplemented.
 
@@ -380,22 +380,22 @@ Also accept `columns` as a `Readonly<Record<string, Float64Array>>` on a small i
 
 Merge in this order. Each PR is reviewed and merged by itself. Skipping one leaves `main` consistent, because every new option defaults to today's behavior. SR-14's decision needs SR-11's harness on `main`. SR-17 is written against whatever subset has merged.
 
-| Order | PR    | One-line contract                                                         |
-| ----- | ----- | ------------------------------------------------------------------------- |
-| 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                              |
-| 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                           |
-| 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.** |
-| 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options.       |
-| 5     | SR-5  | `invalidRows` defaults to `'reject'`.                                     |
-| 6     | SR-6  | `complexityWeights` reach the hall.                                       |
-| 7     | SR-7  | `simplify` defaults to `'off'`.                                           |
-| 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                  |
-| 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                         |
-| 10    | SR-10 | Grammars may name `sqrt` and `atan`.                                      |
-| 11    | SR-11 | Node and Bun harness, no speed claim.                                     |
-| 12    | SR-12 | One compile per structure per generation, bit-identical.                  |
-| 13    | SR-13 | Islands overlap; merge in index order.                                    |
-| 14    | SR-14 | Worker threshold moves only when four runs agree.                         |
-| 15    | SR-15 | `AbortSignal` and opt-in `earlyStop`.                                     |
-| 16    | SR-16 | `runScalarSearch` and `bestLossFactor`.                                   |
-| 17    | SR-17 | Reference walkthrough and `examples/scalar-search.ts`.                    |
+| Order | PR    | One-line contract                                                             |
+| ----- | ----- | ----------------------------------------------------------------------------- |
+| 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                                  |
+| 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                               |
+| 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.**     |
+| 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.** |
+| 5     | SR-5  | `invalidRows` defaults to `'reject'`.                                         |
+| 6     | SR-6  | `complexityWeights` reach the hall.                                           |
+| 7     | SR-7  | `simplify` defaults to `'off'`.                                               |
+| 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |
+| 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                             |
+| 10    | SR-10 | Grammars may name `sqrt` and `atan`.                                          |
+| 11    | SR-11 | Node and Bun harness, no speed claim.                                         |
+| 12    | SR-12 | One compile per structure per generation, bit-identical.                      |
+| 13    | SR-13 | Islands overlap; merge in index order.                                        |
+| 14    | SR-14 | Worker threshold moves only when four runs agree.                             |
+| 15    | SR-15 | `AbortSignal` and opt-in `earlyStop`.                                         |
+| 16    | SR-16 | `runScalarSearch` and `bestLossFactor`.                                       |
+| 17    | SR-17 | Reference walkthrough and `examples/scalar-search.ts`.                        |

@@ -274,6 +274,61 @@ describe('searchScalars: planted laws', () => {
       }
       expect(bestRow(on.result.front).loss).toBeLessThan(1e-10);
     });
+
+    it('fit: { restarts: 0, maxIterations: 0 } does not move a parameter off its start', async () => {
+      const { result } = await runSearch(problem, {
+        ...base,
+        optimizeProbability: 1,
+        fit: { restarts: 0, maxIterations: 0 },
+      });
+      // The fitter returns the start vector when it may not iterate, so every
+      // refit is discarded and every tree keeps the ones it started with.
+      expect(bestRow(result.front).loss).toBeGreaterThan(1);
+      for (const params of result.fittedParameters) {
+        expect([...params]).toEqual([1]);
+      }
+    });
+
+    it('a fit bound that excludes the planted value keeps the reported p inside the bound', async () => {
+      const { result } = await runSearch(problem, {
+        ...base,
+        optimizeProbability: 1,
+        fit: { bounds: [[0, 1]] },
+      });
+      // p cannot reach the planted 2, so the bound costs accuracy, and every
+      // refit the search reports stays inside [0, 1].
+      expect(bestRow(result.front).loss).toBeGreaterThan(1e-6);
+      expect(result.fittedParameters.length).toBeGreaterThan(0);
+      for (const params of result.fittedParameters) {
+        expect(params[0]!).toBeGreaterThanOrEqual(0);
+        expect(params[0]!).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it('rejects bad fit options with RangeError before the first yield', async () => {
+      const expectReject = async (fit: ScalarSearchOptions['fit']) => {
+        await expect(runSearch(problem, { ...base, optimizeProbability: 1, fit })).rejects.toThrow(
+          RangeError
+        );
+      };
+      // lower > upper
+      await expectReject({ bounds: [[2, 1]] });
+      // a length other than the parameter count (1 here)
+      await expectReject({ bounds: [] });
+      await expectReject({
+        bounds: [
+          [0, 1],
+          [0, 1],
+        ],
+      });
+      await expectReject({ bounds: [[Number.NaN, 1]] });
+      await expectReject({ initial: [1, 2] });
+      await expectReject({ initial: [Number.NaN] });
+      await expectReject({ restarts: -1 });
+      await expectReject({ restarts: 1.5 });
+      await expectReject({ maxIterations: -2 });
+      await expectReject({ algorithm: 'gd' as 'lm' });
+    });
   });
 });
 

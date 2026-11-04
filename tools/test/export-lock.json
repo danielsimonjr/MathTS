@@ -2794,6 +2794,9 @@
       "ScalarEvalError": {
         "kind": "function"
       },
+      "ScalarFitOptions": {
+        "kind": "type"
+      },
       "ScalarMutationContext": {
         "kind": "type"
       },

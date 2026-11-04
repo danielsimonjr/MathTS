@@ -79,6 +79,14 @@ export interface ScalarSearchOptions {
    */
   readonly rowWeights?: Float64Array;
   /**
+   * Refit knobs forwarded to {@link fitScalarParameters}. An omitted field is
+   * today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's
+   * default algorithm, and `initial` set to the inherited vector (ones for the
+   * initial population). The values are forwarded, not reimplemented; a bad
+   * bound or length throws the fitter's `RangeError` before the first yield.
+   */
+  readonly fit?: ScalarFitOptions;
+  /**
    * Chance that an offspring is a subtree crossover of two tournament parents
    * instead of a mutation of the first. Default 0: the coin is not drawn, so the
    * random stream matches a search that never had this option. In (0, 1] the
@@ -140,6 +148,28 @@ export interface ScalarSearchOptions {
    * pool when it first needs it and terminates it when the generator finishes or is closed.
    */
   readonly parallel?: ScalarPopulationParallelOptions;
+}
+
+/** Budget, bounds, and start-vector knobs for the search's parameter refits. */
+export interface ScalarFitOptions {
+  /** Restarted fits per refit. Default 2. Must be an integer >= 0. */
+  readonly restarts?: number;
+  /** Optimizer iterations per fit. Default 8. Must be an integer >= 0. */
+  readonly maxIterations?: number;
+  /**
+   * One `[lo, hi]` pair per parameter. Endpoints are finite or `±Infinity`;
+   * `lo` must not exceed `hi`, and the length must equal the parameter count.
+   * Default: unbounded.
+   */
+  readonly bounds?: readonly (readonly [number, number])[];
+  /** Optimizer. Default: the fitter's choice (`'lm'` for `'l2'`, `'bfgs'` otherwise). */
+  readonly algorithm?: 'lm' | 'bfgs' | 'nelder-mead';
+  /**
+   * Start vector of every refit. Length must equal the parameter count and every
+   * value must be finite. Default: the tree's inherited vector (ones at the
+   * initial population).
+   */
+  readonly initial?: ArrayLike<number>;
 }
 
 /** One progress event; `status` is always `'fitted'`. */
@@ -218,6 +248,71 @@ function probability(name: string, value: number): void {
 function nonNegativeFinite(name: string, value: number): void {
   if (!(Number.isFinite(value) && value >= 0)) {
     throw new RangeError(`searchScalars: ${name} must be a finite number >= 0, got ${value}`);
+  }
+}
+
+/**
+ * The same checks {@link fitScalarParameters} runs on these fields, applied before
+ * the first yield so a bad `fit` fails every run of the options, not only the
+ * runs whose refit coin fires.
+ */
+function assertFitOptions(fit: ScalarFitOptions, parameterCount: number): void {
+  if (fit.restarts !== undefined && (!Number.isInteger(fit.restarts) || fit.restarts < 0)) {
+    throw new RangeError(
+      `searchScalars: fit.restarts must be an integer >= 0, got ${fit.restarts}`
+    );
+  }
+  if (
+    fit.maxIterations !== undefined &&
+    (!Number.isInteger(fit.maxIterations) || fit.maxIterations < 0)
+  ) {
+    throw new RangeError(
+      `searchScalars: fit.maxIterations must be an integer >= 0, got ${fit.maxIterations}`
+    );
+  }
+  if (
+    fit.algorithm !== undefined &&
+    fit.algorithm !== 'lm' &&
+    fit.algorithm !== 'bfgs' &&
+    fit.algorithm !== 'nelder-mead'
+  ) {
+    throw new RangeError(
+      `searchScalars: fit.algorithm must be 'lm', 'bfgs', or 'nelder-mead', got ${String(fit.algorithm)}`
+    );
+  }
+  if (fit.initial !== undefined) {
+    if (fit.initial.length !== parameterCount) {
+      throw new RangeError(
+        `searchScalars: fit.initial length must equal the parameter count (${parameterCount}), got ${fit.initial.length}`
+      );
+    }
+    for (let i = 0; i < parameterCount; i += 1) {
+      if (!Number.isFinite(Number(fit.initial[i]))) {
+        throw new RangeError(`searchScalars: fit.initial[${i}] must be finite`);
+      }
+    }
+  }
+  if (fit.bounds !== undefined) {
+    if (fit.bounds.length !== parameterCount) {
+      throw new RangeError(
+        `searchScalars: fit.bounds length must equal the parameter count (${parameterCount}), got ${fit.bounds.length}`
+      );
+    }
+    for (let i = 0; i < parameterCount; i += 1) {
+      const [lo, hi] = fit.bounds[i]!;
+      const loOk = Number.isFinite(lo) || lo === Number.NEGATIVE_INFINITY;
+      const hiOk = Number.isFinite(hi) || hi === Number.POSITIVE_INFINITY;
+      if (!loOk || !hiOk) {
+        throw new RangeError(
+          `searchScalars: fit.bounds[${i}] endpoints must be finite or ±Infinity`
+        );
+      }
+      if (lo > hi) {
+        throw new RangeError(
+          `searchScalars: fit.bounds[${i}] lower bound must not exceed the upper`
+        );
+      }
+    }
   }
 }
 
@@ -440,7 +535,8 @@ async function evaluateNodes(
   names: readonly string[],
   optimizeProbability: number,
   rng: SeededRng,
-  rank: RankLoss
+  rank: RankLoss,
+  fit: ScalarFitOptions
 ): Promise<EvaluatedIndividual[]> {
   const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
@@ -450,19 +546,27 @@ async function evaluateNodes(
     const first = firsts[i]!;
     let loss = first.loss;
     if (names.length > 0 && first.validRows > 0 && rng.next() < optimizeProbability) {
-      const fit = fitScalarParameters(node, problem.columns, problem.observed, problem.variables, {
-        parameters: names,
-        initial: parameters,
-        restarts: 2,
-        maxIterations: 8,
-        rng: rng.fork('fit'),
-        loss: rank.name,
-        weights: rank.weights,
-      });
-      const fitted = scoreOnProblem(node, problem, names, fit.parameters, rank);
+      const fitResult = fitScalarParameters(
+        node,
+        problem.columns,
+        problem.observed,
+        problem.variables,
+        {
+          parameters: names,
+          initial: fit.initial ?? parameters,
+          restarts: fit.restarts ?? 2,
+          maxIterations: fit.maxIterations ?? 8,
+          rng: rng.fork('fit'),
+          loss: rank.name,
+          weights: rank.weights,
+          bounds: fit.bounds,
+          algorithm: fit.algorithm,
+        }
+      );
+      const fitted = scoreOnProblem(node, problem, names, fitResult.parameters, rank);
       if (fitted.loss < loss) {
         loss = fitted.loss;
-        parameters = fit.parameters;
+        parameters = fitResult.parameters;
       }
     }
     out.push(individual(node, loss, parameters));
@@ -705,6 +809,9 @@ function pickSelected(
  * be a pure function of the node — a predicate that reads a clock or a random
  * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
  * Ranking and refit share `loss` (`'l2'` by default) and optional `rowWeights`.
+ * `fit` forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
+ * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
+ * bound or length throws before the first yield. Omitted fields are today's call.
  * `crossoverProbability` defaults to 0 (no coin). A positive probability draws
  * the coin on the island stream and, on success, a second tournament parent.
  *
@@ -729,6 +836,8 @@ export async function* searchScalars(
     crossoverProbability
   );
   const names = paramNames(problem, options.grammar);
+  const fit: ScalarFitOptions = options.fit ?? {};
+  assertFitOptions(fit, names.length);
   const rank: RankLoss = {
     name: options.loss ?? 'l2',
     weights: options.rowWeights,
@@ -794,7 +903,8 @@ export async function* searchScalars(
         names,
         optimizeProbability,
         rng,
-        rank
+        rank,
+        fit
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -872,7 +982,8 @@ export async function* searchScalars(
           names,
           optimizeProbability,
           island.rng,
-          rank
+          rank,
+          fit
         );
         evaluations += offspring.length;
         for (const ind of offspring) {
