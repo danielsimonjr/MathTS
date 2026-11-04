@@ -13436,6 +13436,7 @@
               "scalarCanonicalKey",
               "scalarComplexity",
               "scalarGrammarAccepts",
+              "ScalarComplexityWeights",
               "ScalarGrammar",
               "ScalarNode"
             ]
@@ -45222,7 +45223,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 212732,
+    "totalLinesOfCode": 212928,
     "totalExports": 6877,
     "totalClasses": 60,
     "totalInterfaces": 592,

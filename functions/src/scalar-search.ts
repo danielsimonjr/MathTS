@@ -22,6 +22,7 @@ import {
   scalarCanonicalKey,
   scalarComplexity,
   scalarGrammarAccepts,
+  type ScalarComplexityWeights,
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
@@ -99,6 +100,23 @@ export interface ScalarSearchOptions {
    * Omitted is the default branch, so the seed-7 pin is unchanged.
    */
   readonly invalidRows?: 'reject' | 'penalize';
+  /**
+   * Per-node weights for the complexity the hall, the truncation tie-break, and
+   * adaptive parsimony rank by. `ScalarComplexityWeights` from
+   * `@danielsimonjr/mathts-expression`; omitted fields weigh 1, so `{}` (and an
+   * omitted option) is today's node count. Weights are normalized once before the
+   * first yield into a frozen snapshot; only plain data objects are accepted at
+   * the top level and on `op`, `call`, and per-name `symbol` records (prototype
+   * `Object.prototype` or `null`). Own keys are read exactly once via
+   * `Reflect.ownKeys`; non-enumerable keys and accessor properties throw
+   * `RangeError`. Every weight must be a finite number; weights that would make
+   * `grammar.maxSize` nodes sum to a non-finite complexity also throw before the
+   * first yield. Zero and negative weights are accepted: they are summed and
+   * `Math.round`ed by `scalarComplexity` like any other weight. Nested record
+   * keys must use lowered call names (`ln` is stored as `log`); unknown keys are
+   * kept in the snapshot but ignored at scoring time.
+   */
+  readonly complexityWeights?: ScalarComplexityWeights;
   /**
    * Refit knobs forwarded to {@link fitScalarParameters}. An omitted field is
    * today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's
@@ -279,6 +297,160 @@ function nonNegativeFinite(name: string, value: number): void {
  */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Plain data object only — rejects `Map`, typed arrays, `Date`, and class instances. */
+function isDataPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function complexityWeightDescriptorError(path: string, reason: string): never {
+  throw new RangeError(`searchScalars: complexityWeights ${path} ${reason}`);
+}
+
+function readComplexityWeightValue(path: string, value: unknown): number {
+  if (value === undefined) {
+    complexityWeightDescriptorError(path, 'must not be undefined when read');
+  }
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    complexityWeightDescriptorError(path, `must be a finite number, got ${String(value)}`);
+  }
+  return value;
+}
+
+function readOwnComplexityWeightRecord(
+  path: string,
+  record: Record<string, unknown>
+): Record<string, number> {
+  if (!isDataPlainObject(record)) {
+    complexityWeightDescriptorError(path, `must be a plain object, got ${String(record)}`);
+  }
+  const out: Record<string, number> = {};
+  for (const key of Reflect.ownKeys(record)) {
+    if (typeof key !== 'string') {
+      complexityWeightDescriptorError(path, 'own keys must be strings');
+    }
+    const desc = Object.getOwnPropertyDescriptor(record, key);
+    if (desc === undefined) {
+      continue;
+    }
+    if (!desc.enumerable) {
+      complexityWeightDescriptorError(
+        `${path}.${key}`,
+        'must be an enumerable own property (non-enumerable keys are rejected)'
+      );
+    }
+    if (desc.get !== undefined || desc.set !== undefined) {
+      complexityWeightDescriptorError(`${path}.${key}`, 'must be a data property, not an accessor');
+    }
+    if (desc.value === undefined) {
+      continue;
+    }
+    out[key] = readComplexityWeightValue(`${path}.${key}`, desc.value);
+  }
+  return out;
+}
+
+function readOptionalTopComplexityField(
+  weights: Record<string, unknown>,
+  key: 'number' | 'op' | 'call' | 'symbol'
+): unknown {
+  if (!Object.prototype.hasOwnProperty.call(weights, key)) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(weights, key);
+  if (desc === undefined) {
+    return undefined;
+  }
+  if (!desc.enumerable) {
+    complexityWeightDescriptorError(
+      key,
+      'must be an enumerable own property (non-enumerable keys are rejected)'
+    );
+  }
+  if (desc.get !== undefined || desc.set !== undefined) {
+    complexityWeightDescriptorError(key, 'must be a data property, not an accessor');
+  }
+  return desc.value;
+}
+
+/**
+ * Validates `complexityWeights` once, copies every own enumerable data property into a
+ * fresh snapshot, and freezes it so later caller mutation or accessor tricks cannot
+ * change the run. Unknown keys on nested records are stored but ignored by
+ * {@link scalarComplexity}; keys must use lowered call names (`ln` is stored as `log`).
+ */
+function normalizeComplexityWeights(
+  weights: ScalarComplexityWeights,
+  maxSize: number
+): Readonly<ScalarComplexityWeights> {
+  if (!isDataPlainObject(weights)) {
+    throw new RangeError(
+      `searchScalars: complexityWeights must be a plain object, got ${String(weights)}`
+    );
+  }
+  const snapshot: {
+    number?: number;
+    op?: Record<string, number>;
+    call?: Record<string, number>;
+    symbol?: number | Record<string, number>;
+  } = {};
+  let maxNodeWeight = 1;
+  const noteWeight = (w: number): void => {
+    maxNodeWeight = Math.max(maxNodeWeight, Math.abs(w));
+  };
+
+  const numberVal = readOptionalTopComplexityField(weights, 'number');
+  if (numberVal !== undefined) {
+    snapshot.number = readComplexityWeightValue('number', numberVal);
+    noteWeight(snapshot.number);
+  }
+
+  const opVal = readOptionalTopComplexityField(weights, 'op');
+  if (opVal !== undefined) {
+    snapshot.op = readOwnComplexityWeightRecord('op', opVal as Record<string, unknown>);
+    for (const w of Object.values(snapshot.op)) {
+      noteWeight(w);
+    }
+  }
+
+  const callVal = readOptionalTopComplexityField(weights, 'call');
+  if (callVal !== undefined) {
+    snapshot.call = readOwnComplexityWeightRecord('call', callVal as Record<string, unknown>);
+    for (const w of Object.values(snapshot.call)) {
+      noteWeight(w);
+    }
+  }
+
+  const symbolVal = readOptionalTopComplexityField(weights, 'symbol');
+  if (symbolVal !== undefined) {
+    if (typeof symbolVal === 'number') {
+      snapshot.symbol = readComplexityWeightValue('symbol', symbolVal);
+      noteWeight(snapshot.symbol);
+    } else {
+      snapshot.symbol = readOwnComplexityWeightRecord(
+        'symbol',
+        symbolVal as Record<string, unknown>
+      );
+      for (const w of Object.values(snapshot.symbol)) {
+        noteWeight(w);
+      }
+    }
+  }
+
+  maxNodeWeight = Math.max(maxNodeWeight, 1);
+  const worstSum = maxSize * maxNodeWeight;
+  if (!Number.isFinite(worstSum)) {
+    throw new RangeError(
+      `searchScalars: complexityWeights would produce non-finite complexity at grammar.maxSize ${maxSize}`
+    );
+  }
+
+  return Object.freeze(snapshot) as Readonly<ScalarComplexityWeights>;
 }
 
 /** Keeps reported parameter vectors inside `fit.bounds` when bounds are set. */
@@ -592,12 +764,17 @@ function scoreOnWorkers(
   };
 }
 
-function individual(node: ScalarNode, loss: number, parameters: Float64Array): EvaluatedIndividual {
+function individual(
+  node: ScalarNode,
+  loss: number,
+  parameters: Float64Array,
+  weights: ScalarComplexityWeights
+): EvaluatedIndividual {
   return {
     node,
     key: scalarCanonicalKey(node),
     loss,
-    complexity: scalarComplexity(node),
+    complexity: scalarComplexity(node, weights),
     parameters,
   };
 }
@@ -647,7 +824,8 @@ async function evaluateNodes(
   optimizeProbability: number,
   rng: SeededRng,
   rank: RankLoss,
-  fit: ScalarFitOptions
+  fit: ScalarFitOptions,
+  weights: ScalarComplexityWeights
 ): Promise<EvaluatedIndividual[]> {
   const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
@@ -701,7 +879,7 @@ async function evaluateNodes(
       parameters = clampParametersToBounds(parameters, fit.bounds);
       loss = scoreOnProblem(node, problem, names, parameters, rank).loss;
     }
-    out.push(individual(node, loss, parameters));
+    out.push(individual(node, loss, parameters, weights));
   }
   return out;
 }
@@ -945,7 +1123,14 @@ function pickSelected(
  * adds {@link INVALID_ROW_PENALTY} per positively weighted invalid row on top of the
  * valid-row loss (absolute, not target-scaled). Under `'penalize'` the advisory refit
  * still runs when every weighted row is invalid; refit acceptance uses the ranker on
- * both sides. `fit`
+ * both sides. `complexityWeights` weighs the nodes of the complexity the hall, the
+ * truncation tie-break, and adaptive parsimony use; omitted, it is today's size.
+ * When set, weights are copied into a frozen snapshot before the first yield (plain
+ * data objects only; non-enumerable keys and accessors are rejected). Record keys
+ * use lowered call names (`ln` → `log`); unknown keys are ignored by
+ * `scalarComplexity`. `grammar.maxSize` counts raw nodes, not weighted complexity;
+ * `Math.round` on the sum can map distinct trees to one hall slot.
+ * `fit`
  * forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
  * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
  * bound or length throws before the first yield. Omitted fields are today's call.
@@ -977,6 +1162,10 @@ export async function* searchScalars(
     throw new RangeError(`searchScalars: fit must be a plain object, got ${String(options.fit)}`);
   }
   const fit: ScalarFitOptions = options.fit ?? {};
+  const complexityWeights: ScalarComplexityWeights =
+    options.complexityWeights === undefined
+      ? {}
+      : normalizeComplexityWeights(options.complexityWeights, options.grammar.maxSize);
   const rank: RankLoss = {
     name: options.loss ?? 'l2',
     weights: options.rowWeights,
@@ -1045,7 +1234,8 @@ export async function* searchScalars(
         optimizeProbability,
         rng,
         rank,
-        fit
+        fit,
+        complexityWeights
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -1124,7 +1314,8 @@ export async function* searchScalars(
           optimizeProbability,
           island.rng,
           rank,
-          fit
+          fit,
+          complexityWeights
         );
         evaluations += offspring.length;
         for (const ind of offspring) {

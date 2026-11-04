@@ -25,7 +25,12 @@ function isLoweredScalarFn(fn: string): fn is LoweredScalarFn {
  *
  * Omitted fields default to 1. A `symbol` record supplies per-name weights; a
  * name that is absent from the record still weighs 1. Weights are summed
- * across the stored tree and then rounded with `Math.round`.
+ * across the stored tree and then rounded with `Math.round`, so distinct trees
+ * can share one reported complexity after rounding. Keys on `call` must use the
+ * lowered stored name (`ln` in the builder is `log` here); unknown keys are
+ * ignored at walk time. `searchScalars` copies caller weights into a frozen
+ * snapshot before the first yield; until then only plain data objects are
+ * accepted.
  *
  * @example
  * ```ts

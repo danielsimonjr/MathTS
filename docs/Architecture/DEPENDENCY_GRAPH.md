@@ -5064,11 +5064,11 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                                    |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                  |
-| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                              |
-| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarGrammar, ScalarNode` |
+| Package                            | Import                                                                                                                             |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                                           |
+| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                       |
+| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
 
 **Internal Dependencies:**
 
@@ -19973,7 +19973,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 212732 |
+| Total Lines of Code     | 212928 |
 | Total Exports           | 6877   |
 | Total Re-exports        | 2977   |
 | Total Classes           | 60     |
