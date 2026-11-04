@@ -331,7 +331,10 @@ interface Scored {
 function scoreBatch(batch: ScalarBatchResult, observed: Float64Array, rank: RankLoss): Scored {
   let validRows = 0;
   for (let i = 0; i < batch.valid.length; i += 1) {
-    validRows += batch.valid[i]!;
+    const w = rank.weights === undefined ? 1 : rank.weights[i]!;
+    if (w > 0 && batch.valid[i] !== 0) {
+      validRows += 1;
+    }
   }
   return {
     loss: rankScalarBatchLoss(rank.name, batch.values, batch.valid, observed, rank.weights),

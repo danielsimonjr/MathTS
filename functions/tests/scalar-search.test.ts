@@ -610,6 +610,37 @@ describe('searchScalars: ranking loss', () => {
       expect([...params]).toEqual([1]);
     }
   });
+
+  it('does not refit when every positive-weight row is invalid', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['+'],
+      unary: ['log'],
+      literals: [],
+      maxSize: 5,
+    };
+    const x = new Float64Array([1, -1]);
+    const tree = b.op('+', [b.symbol('p'), b.call('log', X)]);
+    const { result } = await runSearch(
+      {
+        variables: ['x'],
+        columns: [x],
+        observed: new Float64Array([0, 1]),
+        parameters: ['p'],
+      },
+      {
+        grammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 20,
+        optimizeProbability: 1,
+        rowWeights: new Float64Array([0, 1]),
+        seeds: [tree],
+      }
+    );
+    expect(result.evaluations).toBeGreaterThan(0);
+    expect(result.stopReason).toBe('max-evaluations');
+  });
 });
 
 describe('searchScalars: unusable candidates', () => {
