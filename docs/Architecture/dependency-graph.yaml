@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-04'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6877
+  totalExports: 6878
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12697,6 +12697,9 @@ modules:
             - rankScalarBatchLoss
             - INVALID_ROW_PENALTY
             - NamedScalarLoss
+        - file: ./factories/index.js
+          imports:
+            - '* as scalarFactories'
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -12716,6 +12719,7 @@ modules:
         - file: ./scalar-mutate.js
           imports:
             - crossoverSubtrees
+            - simplifyConstants
             - weightedMutation
             - ScalarMutationContext
       workspaceDependencies:
@@ -12735,10 +12739,12 @@ modules:
             - scalarCanonicalKey
             - scalarComplexity
             - scalarGrammarAccepts
+            - ScalarBuildError
             - ScalarComplexityWeights
             - ScalarGrammar
             - ScalarNode
       exports:
+        - simplifyCandidateForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -12754,6 +12760,7 @@ modules:
         - EvaluatedIndividual
         - Island
       functions:
+        - simplifyCandidateForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -42807,11 +42814,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 212928
-  totalExports: 6877
+  totalLinesOfCode: 213150
+  totalExports: 6878
   totalClasses: 60
   totalInterfaces: 592
-  totalFunctions: 2279
+  totalFunctions: 2280
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635

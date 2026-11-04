@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-04",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6877
+    "totalExports": 6878
   },
   "entryPoints": [
     {
@@ -13396,6 +13396,10 @@
             ]
           },
           {
+            "file": "./factories/index.js",
+            "imports": ["* as scalarFactories"]
+          },
+          {
             "file": "./pareto-front.js",
             "imports": ["paretoFront", "scoreFront", "selectFrontModel", "ScoredCandidate"]
           },
@@ -13414,7 +13418,12 @@
           },
           {
             "file": "./scalar-mutate.js",
-            "imports": ["crossoverSubtrees", "weightedMutation", "ScalarMutationContext"]
+            "imports": [
+              "crossoverSubtrees",
+              "simplifyConstants",
+              "weightedMutation",
+              "ScalarMutationContext"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -13436,13 +13445,20 @@
               "scalarCanonicalKey",
               "scalarComplexity",
               "scalarGrammarAccepts",
+              "ScalarBuildError",
               "ScalarComplexityWeights",
               "ScalarGrammar",
               "ScalarNode"
             ]
           }
         ],
-        "exports": ["parsimonyKey", "tournamentSelect", "migrateIslands", "ComplexityFrequency"],
+        "exports": [
+          "simplifyCandidateForTest",
+          "parsimonyKey",
+          "tournamentSelect",
+          "migrateIslands",
+          "ComplexityFrequency"
+        ],
         "classes": ["ComplexityFrequency"],
         "interfaces": [
           "ScalarSearchProblem",
@@ -13453,7 +13469,12 @@
           "EvaluatedIndividual",
           "Island"
         ],
-        "functions": ["parsimonyKey", "tournamentSelect", "migrateIslands"]
+        "functions": [
+          "simplifyCandidateForTest",
+          "parsimonyKey",
+          "tournamentSelect",
+          "migrateIslands"
+        ]
       },
       "functions/src/signal-filter-extra.ts": {
         "description": "Digital filter design + application (Wave D / remaining). FIR window design",
@@ -45223,11 +45244,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 212928,
-    "totalExports": 6877,
+    "totalLinesOfCode": 213150,
+    "totalExports": 6878,
     "totalClasses": 60,
     "totalInterfaces": 592,
-    "totalFunctions": 2279,
+    "totalFunctions": 2280,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,

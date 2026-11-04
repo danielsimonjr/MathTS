@@ -5064,28 +5064,29 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                                                                             |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                                           |
-| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                       |
-| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
+| Package                            | Import                                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `pairwiseSum, SeededRng`                                                                                                                             |
+| `@danielsimonjr/mathts-parallel`   | `WorkerPool`                                                                                                                                         |
+| `@danielsimonjr/mathts-expression` | `enumerateScalars, scalarCanonicalKey, scalarComplexity, scalarGrammarAccepts, ScalarBuildError, ScalarComplexityWeights, ScalarGrammar, ScalarNode` |
 
 **Internal Dependencies:**
 
 | File                         | Imports                                                                                                    | Type   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
 | `./fit-scalar.js`            | `fitScalarParameters, namedScalarLossTerm, rankScalarBatchLoss, INVALID_ROW_PENALTY, NamedScalarLoss`      | Import |
+| `./factories/index.js`       | `* as scalarFactories`                                                                                     | Import |
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
 | `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
-| `./scalar-mutate.js`         | `crossoverSubtrees, weightedMutation, ScalarMutationContext`                                               | Import |
+| `./scalar-mutate.js`         | `crossoverSubtrees, simplifyConstants, weightedMutation, ScalarMutationContext`                            | Import |
 
 **Exports:**
 
 - Classes: `ComplexityFrequency`
 - Interfaces: `ScalarSearchProblem`, `ScalarSearchOptions`, `ScalarFitOptions`, `SearchProgress`, `ScalarSearchResult`, `EvaluatedIndividual`, `Island`
 - Types: `ScalarSearchStopReason`
-- Functions: `parsimonyKey`, `tournamentSelect`, `migrateIslands`
+- Functions: `simplifyCandidateForTest`, `parsimonyKey`, `tournamentSelect`, `migrateIslands`
 
 ---
 
@@ -19071,7 +19072,7 @@ graph LR
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
 | `functions/src/utils/factory`                          | 1 file       | 260 files  |
-| `functions/src/factories/index`                        | 244 files    | 12 files   |
+| `functions/src/factories/index`                        | 244 files    | 13 files   |
 | `functions/src/core/function/typed`                    | 3 files      | 204 files  |
 | `functions/src/index`                                  | 128 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 53 files   |
@@ -19973,12 +19974,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 212928 |
-| Total Exports           | 6877   |
+| Total Lines of Code     | 213150 |
+| Total Exports           | 6878   |
 | Total Re-exports        | 2977   |
 | Total Classes           | 60     |
 | Total Interfaces        | 592    |
-| Total Functions         | 2279   |
+| Total Functions         | 2280   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

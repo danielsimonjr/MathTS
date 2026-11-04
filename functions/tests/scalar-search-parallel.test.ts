@@ -190,6 +190,14 @@ describe('searchScalars with parallel evaluation', () => {
     expect(weightedRows.length).toBeGreaterThan(0);
   });
 
+  it('equals the serial run with simplify', async () => {
+    const problem = problemOf(120, planted);
+    const simplified = { ...base, rng: createSeededRng(7), simplify: 'algebraic' as const };
+    const serial = await drain(problem, simplified);
+    const parallel = await drain(problem, { ...simplified, parallel: {} });
+    expectSameRun(parallel.progress, serial.progress);
+  });
+
   it('starts no pool below 100 rows', async () => {
     const before = world.pools.length;
     const problem = problemOf(99, planted);
