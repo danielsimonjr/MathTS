@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** SR-1 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
+**Status:** SR-1 and SR-2 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -97,7 +97,7 @@ No benchmark times `searchScalars`, mutation, fitting inside the search, or the 
 These are facts about `5db1f780`, in the order of the PRs.
 
 1. **`admit` does not bind the search.** Closed by SR-1: `initialTrees` and the offspring loop call `scalarGrammarAccepts` and then `grammar.admit` when it is set. `enumerateScalars` already applied `admit`. `scalarGrammarAccepts` still does not call it.
-2. **Crossover is not in the loop.** `crossoverSubtrees` is exported and tested. `searchScalars` never calls it. Offspring are mutations, or a copy of the parent after 10 failed attempts. The copy is scored again, and the refit coin can run again, because the random stream must stay in order.
+2. **Crossover is not in the loop.** Closed by SR-2: `crossoverProbability` defaults to 0 (no coin). Above 0 the offspring loop may call `crossoverSubtrees` with a second tournament parent.
 3. **The ranker and the fitter do not share a loss.** The hall ranks by sum of squares. The fitter can do `l1`, `huber`, weights, and bounds, but the search never passes them. A tree that is invalid on one row is `Infinity` in the hall even when the fitter would have penalized that row and kept going.
 4. **The refit budget is a private constant.** `restarts: 2` and `maxIterations: 8` are not options. The start vector is ones. There is no bounds argument.
 5. **Complexity weights exist and the search ignores them.** `scalarComplexity(node, weights)` is real. The hall calls `scalarComplexity(node)`. An expensive `sin` costs the same as `+`.
@@ -115,7 +115,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 | Rank | Improvement                             | PR    | Why this rank                                                                                     |
 | ---- | --------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
 | 1    | Honor `admit` on seeds and offspring    | SR-1  | **Done.** A constraint the grammar already has; the search now applies it to seeds and offspring. |
-| 2    | Opt-in subtree crossover                | SR-2  | The operator is already tested. The loop never uses a second parent.                              |
+| 2    | Opt-in subtree crossover                | SR-2  | **Done.** `crossoverProbability` defaults to 0; the operator is unchanged.                        |
 | 3    | One loss for ranking and fitting        | SR-3  | `l1`, `huber`, and row weights already exist on the fitter and cannot affect which tree wins.     |
 | 4    | Fit budget, bounds, and a start vector  | SR-4  | The constants `2` and `8` and the vector of ones are private.                                     |
 | 5    | Invalid-row policy                      | SR-5  | One non-positive row makes every `log` tree unscorable.                                           |
@@ -157,7 +157,7 @@ Add an internal check used by `initialTrees` and by the offspring loop: `scalarG
 
 ## SR-2 — Opt-in subtree crossover
 
-**Independent.** Touches `functions/src/scalar-search.ts` and `functions/tests/scalar-search.test.ts`. Does not change `DEFAULT_MUTATION_WEIGHTS` or `crossoverSubtrees`.
+**Status: implemented.** Independent. Touches `functions/src/scalar-search.ts` and `functions/tests/scalar-search.test.ts`. Does not change `DEFAULT_MUTATION_WEIGHTS` or `crossoverSubtrees`.
 
 Add `crossoverProbability`, default `0`, range `[0, 1]`. At `0` the offspring loop is the current loop, so the random draws stay in today's order. Above `0`, each offspring draws a coin on that island's stream. On success it draws a second parent with the same tournament the first parent used, calls `crossoverSubtrees`, and accepts the child when it is non-null and passes the SR-1 check if SR-1 has merged, otherwise `scalarGrammarAccepts`. On failure it falls through to today's mutation attempts. The inherited parameter vector stays the first parent's vector.
 
@@ -383,7 +383,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | Order | PR    | One-line contract                                                   |
 | ----- | ----- | ------------------------------------------------------------------- |
 | 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                        |
-| 2     | SR-2  | `crossoverProbability` defaults to 0.                               |
+| 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                     |
 | 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`.     |
 | 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. |
 | 5     | SR-5  | `invalidRows` defaults to `'reject'`.                               |

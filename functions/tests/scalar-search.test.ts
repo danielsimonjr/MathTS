@@ -28,8 +28,9 @@ import {
 } from '../src/scalar-search.js';
 
 // Records the temperature every mutation is given and otherwise passes through, so the
-// search runs exactly as shipped.
-const seenTemperatures = vi.hoisted(() => ({ values: [] as number[] }));
+// search runs exactly as shipped. `failMutations` is for the crossover wiring test:
+// only a successful crossover can introduce a new tree.
+const seenTemperatures = vi.hoisted(() => ({ values: [] as number[], failMutations: false }));
 vi.mock('../src/scalar-mutate.js', async (importOriginal) => {
   const original = await importOriginal<typeof import('../src/scalar-mutate.js')>();
   return {
@@ -38,6 +39,9 @@ vi.mock('../src/scalar-mutate.js', async (importOriginal) => {
       const operator = original.weightedMutation(...args);
       return (...call: Parameters<typeof operator>) => {
         seenTemperatures.values.push(call[2].temperature);
+        if (seenTemperatures.failMutations) {
+          return null;
+        }
         return operator(...call);
       };
     },
@@ -301,6 +305,27 @@ describe('searchScalars: reproducibility', () => {
     expect(result.seed).toBe(7);
   });
 
+  it('crossoverProbability 0 reproduces the recorded front because the coin is not drawn', async () => {
+    const { progress, result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      crossoverProbability: 0,
+      ...pinned,
+    });
+    expect(result.front.map((row) => row.complexity)).toEqual(PINNED_ROWS.map((r) => r.complexity));
+    expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+      PINNED_ROWS.map((r) => r.key)
+    );
+    result.front.forEach((row, i) => {
+      expect(Object.is(row.loss, PINNED_ROWS[i]!.loss)).toBe(true);
+    });
+    expect(progress.map((p) => p.evaluations)).toEqual(
+      Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+    );
+    expect(result.seed).toBe(7);
+  });
+
   it('is identical across runs, event by event, and does not advance options.rng', async () => {
     const rng = createSeededRng(7);
     const options = { grammar: quadGrammar, rng, tournamentP: 0.982, ...pinned } as const;
@@ -536,6 +561,9 @@ describe('searchScalars: arguments', () => {
     await reject(quadProblem, { ...base, tournamentP: 1.5 });
     await reject(quadProblem, { ...base, optimizeProbability: -0.1 });
     await reject(quadProblem, { ...base, optimizeProbability: Number.NaN });
+    await reject(quadProblem, { ...base, crossoverProbability: -0.1 });
+    await reject(quadProblem, { ...base, crossoverProbability: 1.1 });
+    await reject(quadProblem, { ...base, crossoverProbability: Number.NaN });
     await reject(quadProblem, { ...base, maxEvaluations: Number.NaN });
     await reject(quadProblem, { ...base, maxEvaluations: -1 });
     await reject(quadProblem, { ...base, maxCandidates: Number.NaN });
@@ -690,6 +718,85 @@ describe('searchScalars: admit', () => {
     const grammar: ScalarGrammar = { ...sinGrammar, admit: () => false };
     expect(scalarGrammarAccepts(grammar, b.call('sin', X))).toBe(true);
     expect(scalarGrammarAccepts(grammar, X)).toBe(true);
+  });
+});
+
+describe('searchScalars: crossover', () => {
+  const Y = b.symbol('y');
+  const left = b.op('+', [X, Y]);
+  const right = b.number(7);
+  const graft = b.op('+', [X, right]);
+  const allowed = new Set([
+    scalarCanonicalKey(left),
+    scalarCanonicalKey(right),
+    scalarCanonicalKey(graft),
+  ]);
+  // The operator test already owns the graft shape (x+y with donor 7 at y).
+  // admit rejects the other structure-legal grafts (7+y, bare 7 as a replacement
+  // of the root is already a seed). Mutations are forced to fail, so the search
+  // can introduce x+7 only through crossoverSubtrees.
+  const graftGrammar: ScalarGrammar = {
+    variables: ['x', 'y'],
+    binary: ['+'],
+    unary: [],
+    literals: [7],
+    maxSize: 3,
+    admit: (node) => allowed.has(scalarCanonicalKey(node)),
+  };
+  const graftProblem: ScalarSearchProblem = {
+    variables: ['x', 'y'],
+    columns: [xs, xs],
+    // The hall keeps one tree per complexity. x+y and x+7 are both size 3, so
+    // the graft only appears on the front when its loss wins that slot.
+    observed: compileScalar(graft, { variables: ['x', 'y'] }).evaluate([xs, xs]).values,
+  };
+
+  it('probability 0.5 matches itself event by event and does not advance options.rng', async () => {
+    const rng = createSeededRng(7);
+    const options = {
+      grammar: quadGrammar,
+      rng,
+      tournamentP: 0.982,
+      crossoverProbability: 0.5,
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 120,
+    } as const;
+    const a = await runSearch(quadProblem, options);
+    const c = await runSearch(quadProblem, options);
+    expect(a.progress).toHaveLength(c.progress.length);
+    a.progress.forEach((event, i) => {
+      const other = c.progress[i]!;
+      expect(event.evaluations).toBe(other.evaluations);
+      expect(event.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        other.front.map((row) => scalarCanonicalKey(row.item))
+      );
+      event.front.forEach((row, j) => {
+        expect(Object.is(row.loss, other.front[j]!.loss)).toBe(true);
+      });
+    });
+    expect(rng.next()).toBe(createSeededRng(7).next());
+  });
+
+  it('probability 1 with two parents whose only legal crossover is one graft reports that graft', async () => {
+    seenTemperatures.failMutations = true;
+    try {
+      const { result } = await runSearch(graftProblem, {
+        grammar: graftGrammar,
+        rng: createSeededRng(7),
+        seeds: [left, right],
+        populationSize: 2,
+        tournamentSize: 1,
+        crossoverProbability: 1,
+        optimizeProbability: 0,
+        maxEvaluations: 80,
+      });
+      expect(result.front.map((row) => scalarCanonicalKey(row.item))).toContain(
+        scalarCanonicalKey(graft)
+      );
+    } finally {
+      seenTemperatures.failMutations = false;
+    }
   });
 });
 

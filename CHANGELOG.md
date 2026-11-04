@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`searchScalars` opt-in subtree crossover (SR-2).** `crossoverProbability` defaults to `0`: the coin is not drawn, so the island stream and the seed-7 pin stay byte-identical. In `(0, 1]` each offspring draws a coin, then a second tournament parent, and `crossoverSubtrees`; a null or grammar-rejected (`admit` included) child falls through to the existing mutation attempts. The inherited parameter vector is the first parent's. `DEFAULT_MUTATION_WEIGHTS` and `crossoverSubtrees` are unchanged. Tests: `functions/tests/scalar-search.test.ts`.
 - **`searchScalars` honors `grammar.admit` on seeds and mutation offspring (SR-1).** When `admit` is set, a seed that fails it is skipped and a mutation that fails it is a failed attempt (the existing 10-attempt budget). `scalarGrammarAccepts` still does not call `admit`. `admit` must be a pure function of the node. When `admit` is omitted the seed-7 pin is unchanged. An always-true `admit` also leaves the seed-7 pin unchanged. Tests: `functions/tests/scalar-search.test.ts`.
 
 ### Changed
+- **OVERVIEW.md `totalLinesOfCode` 388077 -> 388223.** SR-2's crossover option, tests, and docs added lines; `repo-tools check` failed on that one claim until the value moved.
 - **OVERVIEW.md `totalLinesOfCode` 387906 -> 388077.** SR-1's search-side `admit` check and its tests added lines; `repo-tools check` failed on that one claim until the value moved.
 - **Sprint 2R assembly clone-merge (G0–G5, `f64-buffer.ts`).** `array_min`/`matrix_min`, `array_max`/`matrix_max`, element-wise add/sub/mul/div exports for array, matrix, and interleaved complex buffers share `@inline` `f64Min`/`f64Max`/`f64Add`/`f64Sub`/`f64Mul`/`f64Div`. Wasm export names and semantics unchanged (empty min/max → NaN; complex add/sub remain componentwise f64 over the buffer). Oracle pins in `assembly/tests/f64-buffer-clone.test.mjs`.
 - **Remaining clone pairs after Sprint 2R.** `docs/roadmap/CLONES_REMAINING.md` records the 12 exact groups `repo-tools clones` still reports after `4f1d0fc6` (43 units), the 638 remaining near pairs (115 at jStruct ≥ 0.9, 165 at 0.8–0.9), skip reasons pinned to headers or tests, and the counts against the `b24e3ec2` baseline.

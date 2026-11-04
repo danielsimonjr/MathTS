@@ -8,7 +8,9 @@
  * age-based replacement). After every generation the islands exchange their
  * best trees (migration). A hall of fame shared by every island keeps the best tree
  * per complexity; its Pareto front is reported through {@link paretoFront} and
- * {@link scoreFront}.
+ * {@link scoreFront}. Subtree crossover ({@link crossoverSubtrees}) is opt-in:
+ * {@link ScalarSearchOptions.crossoverProbability} defaults to 0, so the
+ * offspring loop stays mutation-only and the default random stream is unchanged.
  *
  * @packageDocumentation
  */
@@ -32,7 +34,11 @@ import {
   type ScalarPopulationParallelOptions,
 } from './scalar-batch-parallel.js';
 import { compileScalar, type ScalarBatchResult } from './scalar-compile.js';
-import { weightedMutation, type ScalarMutationContext } from './scalar-mutate.js';
+import {
+  crossoverSubtrees,
+  weightedMutation,
+  type ScalarMutationContext,
+} from './scalar-mutate.js';
 
 /** Columnar regression target for {@link searchScalars}. */
 export interface ScalarSearchProblem {
@@ -59,6 +65,17 @@ export interface ScalarSearchOptions {
   readonly tournamentP?: number;
   /** Chance that an evaluated tree has its parameters refitted. Default 0.14. */
   readonly optimizeProbability?: number;
+  /**
+   * Chance that an offspring is a subtree crossover of two tournament parents
+   * instead of a mutation of the first. Default 0: the coin is not drawn, so the
+   * random stream matches a search that never had this option. In (0, 1] the
+   * island stream draws the coin; on success a second parent is drawn with the
+   * same tournament, {@link crossoverSubtrees} runs, and the child is kept when
+   * it is non-null and the grammar (including `admit`) accepts it. Otherwise the search falls
+   * through to the existing mutation attempts. The inherited parameter vector
+   * is always the first parent's.
+   */
+  readonly crossoverProbability?: number;
   /** Cap on tree evaluations, the initial population included. */
   readonly maxEvaluations: number;
   /** Second cap on tree evaluations, reported as `'max-candidates'`. */
@@ -151,6 +168,7 @@ const DEFAULT_POPULATION_SIZE = 27;
 const DEFAULT_TOURNAMENT_SIZE = 15;
 const DEFAULT_TOURNAMENT_P = 0.982;
 const DEFAULT_OPTIMIZE_PROBABILITY = 0.14;
+const DEFAULT_CROSSOVER_PROBABILITY = 0;
 const DEFAULT_PERTURBATION_FACTOR = 0.25;
 const DEFAULT_FRACTION_REPLACED = 0.00036;
 const DEFAULT_INITIAL_TEMPERATURE = 3.17;
@@ -196,7 +214,8 @@ function assertSearchInputs(
   populationSize: number,
   tournamentSize: number,
   tournamentP: number,
-  optimizeProbability: number
+  optimizeProbability: number,
+  crossoverProbability: number
 ): void {
   const rows = problem.observed.length;
   if (rows === 0) {
@@ -225,6 +244,7 @@ function assertSearchInputs(
     throw new RangeError(`searchScalars: tournamentP must be in (0, 1], got ${tournamentP}`);
   }
   probability('optimizeProbability', optimizeProbability);
+  probability('crossoverProbability', crossoverProbability);
   positiveInteger('populations', options.populations ?? 1);
   probability('fractionReplaced', options.fractionReplaced ?? DEFAULT_FRACTION_REPLACED);
   nonNegativeFinite(
@@ -637,6 +657,8 @@ function pickSelected(
  * A rejected child is a failed attempt; a rejected seed is skipped. `admit` must
  * be a pure function of the node — a predicate that reads a clock or a random
  * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
+ * `crossoverProbability` defaults to 0 (no coin). A positive probability draws
+ * the coin on the island stream and, on success, a second tournament parent.
  *
  * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
@@ -648,13 +670,15 @@ export async function* searchScalars(
   const tournamentSize = options.tournamentSize ?? DEFAULT_TOURNAMENT_SIZE;
   const tournamentP = options.tournamentP ?? DEFAULT_TOURNAMENT_P;
   const optimizeProbability = options.optimizeProbability ?? DEFAULT_OPTIMIZE_PROBABILITY;
+  const crossoverProbability = options.crossoverProbability ?? DEFAULT_CROSSOVER_PROBABILITY;
   assertSearchInputs(
     problem,
     options,
     populationSize,
     tournamentSize,
     tournamentP,
-    optimizeProbability
+    optimizeProbability,
+    crossoverProbability
   );
   const names = paramNames(problem, options.grammar);
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
@@ -757,6 +781,21 @@ export async function* searchScalars(
             parsimony
           );
           let child: ScalarNode | null = null;
+          // Probability 0 skips the coin so the island stream matches today's
+          // mutation-only order. A positive probability draws once per offspring.
+          if (crossoverProbability > 0 && island.rng.next() < crossoverProbability) {
+            const mate = tournamentSelect(
+              island.population,
+              island.rng,
+              tournamentSize,
+              tournamentP,
+              parsimony
+            );
+            const crossed = crossoverSubtrees(parent.node, mate.node, island.rng, mutationCtx);
+            if (crossed !== null && grammarAdmits(options.grammar, crossed)) {
+              child = crossed;
+            }
+          }
           for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
             const candidate = mutate(parent.node, island.rng, mutationCtx);
             if (candidate !== null && grammarAdmits(options.grammar, candidate)) {
