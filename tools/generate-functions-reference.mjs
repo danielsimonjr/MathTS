@@ -720,7 +720,12 @@ async function runMain() {
     for (const rel of docPaths) {
       const file = resolve(REPO, rel);
       const prev = readFileSync(file, 'utf8');
-      const next = spliceIndex(prev, block);
+      // The curated "Coverage" paragraph of the reference doc quotes the export
+      // count in prose; rewrite it from `total` so it cannot drift from the index.
+      const next = spliceIndex(prev, block).replace(
+        /(\[export index\]\(#complete-export-index\) below lists \*\*)\d+(\*\* exports)/,
+        `$1${total}$2`
+      );
       jobs.push({ file, prev, next, label: `${rel} export index (${total} exports)`, isMd: true });
       if (rel === t.refDoc) mdForHtml = next;
     }

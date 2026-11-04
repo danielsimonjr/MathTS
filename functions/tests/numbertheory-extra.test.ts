@@ -46,3 +46,16 @@ describe('number theory fills', () => {
     expect(permutationsGen([1, 2, 3], 2)).toHaveLength(6);
   });
 });
+
+describe('primitiveRoot on composites', () => {
+  it('handles 4, p^k and 2p^k', () => {
+    expect(primitiveRoot(4)).toBe(3);
+    expect(primitiveRoot(9)).toBe(2);
+    expect(primitiveRoot(10)).toBe(3);
+    expect(primitiveRoot(25)).toBe(2);
+    expect(primitiveRoot(2)).toBe(1);
+  });
+  it('throws when no primitive root exists', () => {
+    for (const n of [8, 12, 15, 16, 21]) expect(() => primitiveRoot(n)).toThrow();
+  });
+});

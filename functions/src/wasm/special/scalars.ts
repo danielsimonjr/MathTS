@@ -261,8 +261,231 @@ export function besselY1Scalar(x: f64): f64 {
   return x <= 13.0 ? besselY1Series(x) : besselHankel(1, x, true);
 }
 
+/**
+ * Reciprocal-gamma auxiliaries for Temme's method, |xmu| <= 1/2:
+ *   gampl = 1/Γ(1+μ), gammi = 1/Γ(1−μ),
+ *   gam1 = (gammi − gampl)/(2μ) (→ −γ as μ → 0), gam2 = (gammi + gampl)/2.
+ * Evaluated from the Taylor series of 1/Γ(1+z) (A&S 6.1.34), which has no
+ * cancellation at small μ because odd and even powers are summed separately.
+ * Self-contained (inlined coefficients) so kernelSource can serialize it.
+ */
+export function besselGammaAux(xmu: f64): [f64, f64, f64, f64] {
+  const a = [
+    1, 0.5772156649015329, -0.6558780715202538, -0.0420026350340952, 0.1665386113822915,
+    -0.0421977345555443, -0.009621971527877, 0.007218943246663, -0.0011651675918591,
+    -0.0002152416741149, 0.0001280502823882, -0.0000201348547807, -0.0000012504934821,
+    0.000001133027232, -0.0000002056338417, 0.000000006116095, 0.0000000050020075,
+    -0.0000000011812746, 0.0000000001043427, 0.0000000000077823, -0.0000000000036968,
+    0.00000000000051, -0.0000000000000206, -0.0000000000000054, 0.0000000000000014,
+    0.0000000000000001,
+  ];
+  let even: f64 = 0; // Σ a_{2k} μ^{2k}
+  let odd: f64 = 0; // Σ a_{2k+1} μ^{2k}
+  let pw: f64 = 1;
+  for (let k = 0; k < a.length; k += 2) {
+    even += a[k] * pw;
+    if (k + 1 < a.length) odd += a[k + 1] * pw;
+    pw *= xmu * xmu;
+  }
+  const gampl = even + xmu * odd;
+  const gammi = even - xmu * odd;
+  return [-odd, even, gampl, gammi];
+}
+
+/**
+ * J_ν(x) and Y_ν(x) for real order ν >= 0 and x > 0 (Temme 1976 / Steed, as in
+ * Numerical Recipes `bessjy`): CF1 (Lentz) for J'_ν/J_ν, then either Temme's
+ * series (x < 2) or Steed's CF2 (x >= 2) at the reduced order μ ∈ [−1/2, 1/2],
+ * and stable recurrences back to ν. Returns [J_ν, Y_ν]. Accurate to ~1e-15
+ * for all x > 0, with no loss near integer orders.
+ */
+export function besselJYTemme(xnu: f64, x: f64): [f64, f64] {
+  const EPS = 1e-16;
+  const FPMIN = 1e-300;
+  const MAXIT = 100000;
+  const XMIN = 2;
+  const nl = x < XMIN ? Math.floor(xnu + 0.5) : Math.max(0, Math.floor(xnu - x + 1.5));
+  const xmu = xnu - nl;
+  const xmu2 = xmu * xmu;
+  const xi = 1 / x;
+  const xi2 = 2 * xi;
+  const w = xi2 / Math.PI;
+  let isign = 1;
+  let h = xnu * xi;
+  if (h < FPMIN) h = FPMIN;
+  let b = xi2 * xnu;
+  let d: f64 = 0;
+  let c = h;
+  for (let i = 1; i <= MAXIT; i++) {
+    b += xi2;
+    d = b - d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b - 1 / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = c * d;
+    h = del * h;
+    if (d < 0) isign = -isign;
+    if (Math.abs(del - 1) < EPS) break;
+  }
+  let rjl = isign * FPMIN;
+  let rjpl = h * rjl;
+  const rjl1 = rjl;
+  const rjp1 = rjpl;
+  let fact = xnu * xi;
+  for (let l = nl; l >= 1; l--) {
+    const rjtemp = fact * rjl + rjpl;
+    fact -= xi;
+    rjpl = fact * rjtemp - rjl;
+    rjl = rjtemp;
+  }
+  if (rjl === 0) rjl = EPS;
+  const f = rjpl / rjl;
+  let rjmu: f64;
+  let rymu: f64;
+  let ry1: f64;
+  if (x < XMIN) {
+    const x2 = 0.5 * x;
+    const pimu = Math.PI * xmu;
+    const fact1 = Math.abs(pimu) < EPS ? 1 : pimu / Math.sin(pimu);
+    let dd = -Math.log(x2);
+    let e = xmu * dd;
+    const fact2 = Math.abs(e) < EPS ? 1 : Math.sinh(e) / e;
+    const g = besselGammaAux(xmu);
+    let ff = ((2 / Math.PI) * fact1 * (g[0] * Math.cosh(e) + g[1] * fact2 * dd)) as f64;
+    e = Math.exp(e);
+    let p = e / (g[2] * Math.PI);
+    let q = 1 / (e * Math.PI * g[3]);
+    const pimu2 = 0.5 * pimu;
+    const fact3 = Math.abs(pimu2) < EPS ? 1 : Math.sin(pimu2) / pimu2;
+    const r = Math.PI * pimu2 * fact3 * fact3;
+    let cc: f64 = 1;
+    dd = -x2 * x2;
+    let sum = ff + r * q;
+    let sum1 = p;
+    for (let i = 1; i <= MAXIT; i++) {
+      ff = (i * ff + p + q) / (i * i - xmu2);
+      cc *= dd / i;
+      p /= i - xmu;
+      q /= i + xmu;
+      const del = cc * (ff + r * q);
+      sum += del;
+      const del1 = cc * p - i * del;
+      sum1 += del1;
+      if (Math.abs(del) < (1 + Math.abs(sum)) * EPS) break;
+    }
+    rymu = -sum;
+    ry1 = -sum1 * xi2;
+    const rymup = xmu * xi * rymu - ry1;
+    rjmu = w / (rymup - f * rymu);
+  } else {
+    let a = 0.25 - xmu2;
+    let p = -0.5 * xi;
+    let q: f64 = 1;
+    const br = 2 * x;
+    let bi: f64 = 2;
+    let fct = (a * xi) / (p * p + q * q);
+    let cr = br + q * fct;
+    let ci = bi + p * fct;
+    let den = br * br + bi * bi;
+    let dr = br / den;
+    let di = -bi / den;
+    let dlr = cr * dr - ci * di;
+    let dli = cr * di + ci * dr;
+    let temp = p * dlr - q * dli;
+    q = p * dli + q * dlr;
+    p = temp;
+    for (let i = 2; i <= MAXIT; i++) {
+      a += 2 * (i - 1);
+      bi += 2;
+      dr = a * dr + br;
+      di = a * di + bi;
+      if (Math.abs(dr) + Math.abs(di) < FPMIN) dr = FPMIN;
+      fct = a / (cr * cr + ci * ci);
+      cr = br + cr * fct;
+      ci = bi - ci * fct;
+      if (Math.abs(cr) + Math.abs(ci) < FPMIN) cr = FPMIN;
+      den = dr * dr + di * di;
+      dr /= den;
+      di /= -den;
+      dlr = cr * dr - ci * di;
+      dli = cr * di + ci * dr;
+      temp = p * dlr - q * dli;
+      q = p * dli + q * dlr;
+      p = temp;
+      if (Math.abs(dlr - 1) + Math.abs(dli) < EPS) break;
+    }
+    const gam = (p - f) / q;
+    rjmu = Math.sqrt(w / ((p - f) * gam + q));
+    if (rjl < 0) rjmu = -rjmu;
+    rymu = rjmu * gam;
+    const rymup = rymu * (p + q / gam);
+    ry1 = xmu * xi * rymu - rymup;
+  }
+  const scale = rjmu / rjl;
+  const rj = rjl1 * scale;
+  void rjp1;
+  for (let i = 1; i <= nl; i++) {
+    const rytemp = (xmu + i) * xi2 * ry1 - rymu;
+    rymu = ry1;
+    ry1 = rytemp;
+  }
+  return [rj, rymu];
+}
+
+/** Hankel asymptotic expansion for real order (x very large). Y when `y` is true. */
+export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
+  const mu = 4 * nu * nu;
+  let P: f64 = 1;
+  let Q: f64 = 0;
+  let t: f64 = 1;
+  let prev = Infinity;
+  for (let k = 1; k < 60; k++) {
+    t *= (mu - (2 * k - 1) * (2 * k - 1)) / (k * 8 * x);
+    const at = Math.abs(t);
+    if (at > prev || at < 1e-17) break;
+    prev = at;
+    const m = Math.floor(k / 2);
+    const sgn = m % 2 === 0 ? 1 : -1;
+    if (k % 2 === 0) P += sgn * t;
+    else Q += sgn * t;
+  }
+  const chi = x - (nu / 2 + 0.25) * Math.PI;
+  const amp = Math.sqrt(2 / (Math.PI * x));
+  return y
+    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
+    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+}
+
+/**
+ * J_ν(x) for NON-integer real order ν. Temme/Steed for x > 0 (negative orders
+ * through J_{−ν} = cos(νπ)J_ν − sin(νπ)Y_ν); the Hankel expansion only when x
+ * is so large that the continued fractions would need O(x) steps.
+ */
+export function besselJRealOrder(nu: f64, x: f64): f64 {
+  if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
+  if (x === 0) return nu > 0 ? 0 : nu < 0 ? Infinity : 1;
+  const an = Math.abs(nu);
+  if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
+  const jy = besselJYTemme(an, x);
+  if (nu >= 0) return jy[0];
+  return Math.cos(an * Math.PI) * jy[0] - Math.sin(an * Math.PI) * jy[1];
+}
+
+/** Y_ν(x) for non-integer real order ν and x > 0 (see besselJRealOrder). */
+export function besselYRealOrder(nu: f64, x: f64): f64 {
+  if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
+  if (x === 0) return -Infinity;
+  const an = Math.abs(nu);
+  if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
+  const jy = besselJYTemme(an, x);
+  if (nu >= 0) return jy[1];
+  return Math.sin(an * Math.PI) * jy[0] + Math.cos(an * Math.PI) * jy[1];
+}
+
 /** Bessel function of the first kind, general integer order n: J_n(x). */
 export function besselJScalar(n: f64, x: f64): f64 {
+  if (Number.isFinite(n) && n !== Math.round(n)) return besselJRealOrder(n, x);
   const ni = Math.round(n);
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselJScalar(-ni, x);
   if (ni === 0) return besselJ0Scalar(x);
@@ -310,6 +533,7 @@ export function besselJScalar(n: f64, x: f64): f64 {
  */
 export function besselYScalar(n: f64, x: f64): f64 {
   if (x <= 0) return NaN;
+  if (Number.isFinite(n) && n !== Math.round(n)) return besselYRealOrder(n, x);
   const ni = Math.round(n);
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselYScalar(-ni, x);
   if (ni === 0) return besselY0Scalar(x);

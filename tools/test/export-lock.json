@@ -2194,6 +2194,9 @@
       "BfgsResult": {
         "kind": "type"
       },
+      "BiquadCoefficients": {
+        "kind": "type"
+      },
       "BootstrapCIOptions": {
         "kind": "type"
       },
@@ -2230,6 +2233,12 @@
       "ChiSquareResult": {
         "kind": "type"
       },
+      "ChirpMethod": {
+        "kind": "type"
+      },
+      "ChirpOptions": {
+        "kind": "type"
+      },
       "CholeskyResult": {
         "kind": "type"
       },
@@ -2255,6 +2264,15 @@
         "kind": "type"
       },
       "ConfidenceInterval": {
+        "kind": "type"
+      },
+      "ConstrainedOptions": {
+        "kind": "type"
+      },
+      "ConstrainedResult": {
+        "kind": "type"
+      },
+      "ConvMode": {
         "kind": "type"
       },
       "ConvexHullResult": {
@@ -2311,10 +2329,19 @@
       "DimensionInference": {
         "kind": "type"
       },
+      "DiscretizeMethod": {
+        "kind": "type"
+      },
       "Distribution": {
         "kind": "type"
       },
       "DistributionName": {
+        "kind": "type"
+      },
+      "DtwOptions": {
+        "kind": "type"
+      },
+      "DtwResult": {
         "kind": "type"
       },
       "DualFn": {
@@ -2322,6 +2349,9 @@
       },
       "EARTH_RADIUS_KM": {
         "kind": "number"
+      },
+      "EigOptions": {
+        "kind": "type"
       },
       "EigenvectorOptions": {
         "kind": "type"
@@ -2339,6 +2369,9 @@
         "kind": "type"
       },
       "EigshResult": {
+        "kind": "type"
+      },
+      "ExtraWindowName": {
         "kind": "type"
       },
       "FTestResult": {
@@ -2360,6 +2393,9 @@
         "kind": "type"
       },
       "FitScalarResult": {
+        "kind": "type"
+      },
+      "FixedPointOptions": {
         "kind": "type"
       },
       "ForcingFunction": {
@@ -2434,6 +2470,9 @@
       "GaussQuadOptions": {
         "kind": "type"
       },
+      "GaussRule": {
+        "kind": "type"
+      },
       "GaussianKDEOptions": {
         "kind": "type"
       },
@@ -2450,6 +2489,12 @@
         "kind": "type"
       },
       "GlmResult": {
+        "kind": "type"
+      },
+      "GlobalOptimizeOptions": {
+        "kind": "type"
+      },
+      "GlobalOptimizeResult": {
         "kind": "type"
       },
       "GmresOptions": {
@@ -2536,6 +2581,15 @@
       "LMResult": {
         "kind": "type"
       },
+      "LQResult": {
+        "kind": "type"
+      },
+      "Limit1": {
+        "kind": "type"
+      },
+      "Limit2": {
+        "kind": "type"
+      },
       "LinRegressResult": {
         "kind": "type"
       },
@@ -2558,6 +2612,9 @@
         "kind": "type"
       },
       "LogisticRegressionResult": {
+        "kind": "type"
+      },
+      "LombScargleOptions": {
         "kind": "type"
       },
       "LsqBoundedOptions": {
@@ -2725,6 +2782,9 @@
       "PhysicsEvaluateOptions": {
         "kind": "type"
       },
+      "PinvOptions": {
+        "kind": "type"
+      },
       "PolarResult": {
         "kind": "type"
       },
@@ -2737,10 +2797,22 @@
       "ProportionZResult": {
         "kind": "type"
       },
+      "QLResult": {
+        "kind": "type"
+      },
+      "QRPivotedOptions": {
+        "kind": "type"
+      },
+      "QRPivotedResult": {
+        "kind": "type"
+      },
       "QuadOptions": {
         "kind": "type"
       },
       "QuadResult": {
+        "kind": "type"
+      },
+      "RQResult": {
         "kind": "type"
       },
       "RationalDimension": {
@@ -2821,6 +2893,9 @@
       "ScalarSearchStopReason": {
         "kind": "type"
       },
+      "ScalarSolveOptions": {
+        "kind": "type"
+      },
       "ScoredCandidate": {
         "kind": "type"
       },
@@ -2842,6 +2917,9 @@
       "SimplifyOptions": {
         "kind": "type"
       },
+      "SimulatedAnnealingOptions": {
+        "kind": "type"
+      },
       "SolveDAEOptions": {
         "kind": "type"
       },
@@ -2861,6 +2939,9 @@
         "kind": "type"
       },
       "SphericalVoronoiResult": {
+        "kind": "type"
+      },
+      "StateSpace": {
         "kind": "type"
       },
       "StftOptions": {
@@ -2885,6 +2966,9 @@
         "kind": "type"
       },
       "TTestResult": {
+        "kind": "type"
+      },
+      "TanhSinhOptions": {
         "kind": "type"
       },
       "TransferFunction": {
@@ -2918,6 +3002,9 @@
         "kind": "number"
       },
       "WilcoxonResult": {
+        "kind": "type"
+      },
+      "WindowOptions": {
         "kind": "type"
       },
       "ZPKValue": {
@@ -2998,6 +3085,9 @@
       "apply": {
         "kind": "function"
       },
+      "arcLength": {
+        "kind": "function"
+      },
       "area": {
         "kind": "function"
       },
@@ -3055,6 +3145,9 @@
       "bartlettTest": {
         "kind": "function"
       },
+      "barycentricCoordinates": {
+        "kind": "function"
+      },
       "bellNumbers": {
         "kind": "function"
       },
@@ -3067,6 +3160,9 @@
       "bernoulliPMF": {
         "kind": "function"
       },
+      "bernoulliPolynomial": {
+        "kind": "function"
+      },
       "besselI": {
         "kind": "function"
       },
@@ -3077,6 +3173,9 @@
         "kind": "function"
       },
       "besselJ1": {
+        "kind": "function"
+      },
+      "besselJZeros": {
         "kind": "function"
       },
       "besselK": {
@@ -3124,6 +3223,9 @@
       "bicgstab": {
         "kind": "function"
       },
+      "bigOmega": {
+        "kind": "function"
+      },
       "bigint": {
         "kind": "function"
       },
@@ -3137,6 +3239,9 @@
         "kind": "function"
       },
       "binomialDist": {
+        "kind": "function"
+      },
+      "binomialMod": {
         "kind": "function"
       },
       "binomialPMF": {
@@ -3155,6 +3260,15 @@
         "kind": "function"
       },
       "bitXor": {
+        "kind": "function"
+      },
+      "blackmanHarrisWindow": {
+        "kind": "function"
+      },
+      "blockDiag": {
+        "kind": "function"
+      },
+      "bohmanWindow": {
         "kind": "function"
       },
       "bohrMagneton": {
@@ -3226,6 +3340,9 @@
       "catalan": {
         "kind": "function"
       },
+      "catmullRom": {
+        "kind": "function"
+      },
       "cauchyCDF": {
         "kind": "function"
       },
@@ -3289,10 +3406,19 @@
       "chineseRemainder": {
         "kind": "function"
       },
+      "chirp": {
+        "kind": "function"
+      },
       "chirpZTransform": {
         "kind": "function"
       },
       "cholesky": {
+        "kind": "function"
+      },
+      "choleskyDowndate": {
+        "kind": "function"
+      },
+      "choleskyUpdate": {
         "kind": "function"
       },
       "circmean": {
@@ -3316,10 +3442,19 @@
       "clearAssumptions": {
         "kind": "function"
       },
+      "clebschGordan": {
+        "kind": "function"
+      },
+      "clenshawCurtis": {
+        "kind": "function"
+      },
       "clone": {
         "kind": "function"
       },
       "closenessCentrality": {
+        "kind": "function"
+      },
+      "closestPair": {
         "kind": "function"
       },
       "cochranQ": {
@@ -3328,7 +3463,13 @@
       "coefficientList": {
         "kind": "function"
       },
+      "cohensD": {
+        "kind": "function"
+      },
       "coherence": {
+        "kind": "function"
+      },
+      "collatzSteps": {
         "kind": "function"
       },
       "collect": {
@@ -3388,10 +3529,16 @@
       "composition": {
         "kind": "function"
       },
+      "compositionsGen": {
+        "kind": "function"
+      },
       "concat": {
         "kind": "function"
       },
       "cond": {
+        "kind": "function"
+      },
+      "condest": {
         "kind": "function"
       },
       "conductanceQuantum": {
@@ -3406,7 +3553,13 @@
       "connectedComponents": {
         "kind": "function"
       },
+      "cont2discrete": {
+        "kind": "function"
+      },
       "continuedFraction": {
+        "kind": "function"
+      },
+      "conv2": {
         "kind": "function"
       },
       "convexHull": {
@@ -3440,6 +3593,12 @@
         "kind": "function"
       },
       "cosh": {
+        "kind": "function"
+      },
+      "coshIntegral": {
+        "kind": "function"
+      },
+      "cosineWindow": {
         "kind": "function"
       },
       "cosm": {
@@ -3547,6 +3706,9 @@
       "curl": {
         "kind": "function"
       },
+      "curvature": {
+        "kind": "function"
+      },
       "curvefit": {
         "kind": "function"
       },
@@ -3557,6 +3719,12 @@
         "kind": "function"
       },
       "dare": {
+        "kind": "function"
+      },
+      "dawson": {
+        "kind": "function"
+      },
+      "dblquad": {
         "kind": "function"
       },
       "dbscan": {
@@ -3577,6 +3745,9 @@
       "degree": {
         "kind": "function"
       },
+      "delannoy": {
+        "kind": "function"
+      },
       "delaunay": {
         "kind": "function"
       },
@@ -3590,6 +3761,9 @@
         "kind": "function"
       },
       "derivativeAt": {
+        "kind": "function"
+      },
+      "descartesSignChanges": {
         "kind": "function"
       },
       "describe": {
@@ -3607,6 +3781,9 @@
       "dfs": {
         "kind": "function"
       },
+      "dftMatrix": {
+        "kind": "function"
+      },
       "diag": {
         "kind": "function"
       },
@@ -3616,10 +3793,22 @@
       "differences": {
         "kind": "function"
       },
+      "differentialEvolution": {
+        "kind": "function"
+      },
       "digamma": {
         "kind": "function"
       },
+      "digitSum": {
+        "kind": "function"
+      },
+      "digitalRoot": {
+        "kind": "function"
+      },
       "directionalDerivative": {
+        "kind": "function"
+      },
+      "dirichletEta": {
         "kind": "function"
       },
       "dirichletPdf": {
@@ -3694,7 +3883,13 @@
       "doubleFactorial": {
         "kind": "function"
       },
+      "douglasPeucker": {
+        "kind": "function"
+      },
       "dst": {
+        "kind": "function"
+      },
+      "dtw": {
         "kind": "function"
       },
       "durbinWatson": {
@@ -3703,8 +3898,17 @@
       "dwt": {
         "kind": "function"
       },
+      "earClipping": {
+        "kind": "function"
+      },
+      "ecdf": {
+        "kind": "function"
+      },
       "efimovFactor": {
         "kind": "number"
+      },
+      "egyptianFraction": {
+        "kind": "function"
       },
       "eigenvectorCentrality": {
         "kind": "function"
@@ -3713,6 +3917,9 @@
         "kind": "function"
       },
       "eigsh": {
+        "kind": "function"
+      },
+      "eigvals": {
         "kind": "function"
       },
       "elasticNet": {
@@ -3760,6 +3967,9 @@
       "enableGpu": {
         "kind": "function"
       },
+      "energyDistance": {
+        "kind": "function"
+      },
       "entropy": {
         "kind": "function"
       },
@@ -3781,13 +3991,31 @@
       "erfcScalar": {
         "kind": "function"
       },
+      "erfcinv": {
+        "kind": "function"
+      },
+      "erfcx": {
+        "kind": "function"
+      },
       "erfi": {
+        "kind": "function"
+      },
+      "erfinv": {
+        "kind": "function"
+      },
+      "etaSquared": {
         "kind": "function"
       },
       "eulerNumbers": {
         "kind": "function"
       },
       "eulerPhi": {
+        "kind": "function"
+      },
+      "eulerPolynomial": {
+        "kind": "function"
+      },
+      "eulerianNumber": {
         "kind": "function"
       },
       "evaluate": {
@@ -3803,6 +4031,9 @@
         "kind": "function"
       },
       "exp": {
+        "kind": "function"
+      },
+      "expIntegralE1": {
         "kind": "function"
       },
       "expIntegralEi": {
@@ -3823,6 +4054,9 @@
       "expm1": {
         "kind": "function"
       },
+      "expn": {
+        "kind": "function"
+      },
       "exponentialCDF": {
         "kind": "function"
       },
@@ -3830,6 +4064,9 @@
         "kind": "function"
       },
       "exponentialPDF": {
+        "kind": "function"
+      },
+      "exponentialWindow": {
         "kind": "function"
       },
       "fCDF": {
@@ -4048,6 +4285,9 @@
       "faraday": {
         "kind": "object"
       },
+      "fareySequence": {
+        "kind": "function"
+      },
       "fermiCoupling": {
         "kind": "object"
       },
@@ -4075,6 +4315,9 @@
       "fibonacci": {
         "kind": "function"
       },
+      "fiedlerMatrix": {
+        "kind": "function"
+      },
       "filter": {
         "kind": "function"
       },
@@ -4089,6 +4332,9 @@
       },
       "fineStructure": {
         "kind": "number"
+      },
+      "finiteDifferenceCoefficients": {
+        "kind": "function"
       },
       "firls": {
         "kind": "function"
@@ -4114,7 +4360,13 @@
       "fix": {
         "kind": "function"
       },
+      "fixedPoint": {
+        "kind": "function"
+      },
       "flatten": {
+        "kind": "function"
+      },
+      "flattopWindow": {
         "kind": "function"
       },
       "floor": {
@@ -4138,6 +4390,12 @@
       "fraction": {
         "kind": "function"
       },
+      "fractionalMatrixPower": {
+        "kind": "function"
+      },
+      "frechetDistance": {
+        "kind": "function"
+      },
       "freqz": {
         "kind": "function"
       },
@@ -4148,6 +4406,9 @@
         "kind": "function"
       },
       "friedmanTest": {
+        "kind": "function"
+      },
+      "frobeniusNumber": {
         "kind": "function"
       },
       "frontToJson": {
@@ -4180,6 +4441,9 @@
       "fuseUnaryChainReduceAsync": {
         "kind": "function"
       },
+      "gTest": {
+        "kind": "function"
+      },
       "gamma": {
         "kind": "function"
       },
@@ -4204,7 +4468,16 @@
       "gasConstant": {
         "kind": "object"
       },
+      "gaussHermiteIntegrate": {
+        "kind": "function"
+      },
+      "gaussLaguerreIntegrate": {
+        "kind": "function"
+      },
       "gaussLegendre4": {
+        "kind": "function"
+      },
+      "gaussPulse": {
         "kind": "function"
       },
       "gaussQuad": {
@@ -4214,6 +4487,9 @@
         "kind": "function"
       },
       "gaussianProcessRegression": {
+        "kind": "function"
+      },
+      "gaussianWindow": {
         "kind": "function"
       },
       "gcd": {
@@ -4235,6 +4511,18 @@
         "kind": "function"
       },
       "getMatrixDataType": {
+        "kind": "function"
+      },
+      "getWindow": {
+        "kind": "function"
+      },
+      "gevCDF": {
+        "kind": "function"
+      },
+      "gevPDF": {
+        "kind": "function"
+      },
+      "glassDelta": {
         "kind": "function"
       },
       "glm": {
@@ -4291,6 +4579,9 @@
       "gravity": {
         "kind": "object"
       },
+      "grayCode": {
+        "kind": "function"
+      },
       "griddata": {
         "kind": "function"
       },
@@ -4300,13 +4591,31 @@
       "groupDelay": {
         "kind": "function"
       },
+      "gstd": {
+        "kind": "function"
+      },
       "gumbelDist": {
+        "kind": "function"
+      },
+      "gzscore": {
+        "kind": "function"
+      },
+      "hadamardMatrix": {
         "kind": "function"
       },
       "halfspaceIntersection": {
         "kind": "function"
       },
       "halley": {
+        "kind": "function"
+      },
+      "hankelH1": {
+        "kind": "function"
+      },
+      "hankelH2": {
+        "kind": "function"
+      },
+      "hankelMatrix": {
         "kind": "function"
       },
       "harmonicCentrality": {
@@ -4321,7 +4630,16 @@
       "hasNumericValue": {
         "kind": "function"
       },
+      "hausdorffDistance": {
+        "kind": "function"
+      },
       "haversine": {
+        "kind": "function"
+      },
+      "hedgesG": {
+        "kind": "function"
+      },
+      "helmertMatrix": {
         "kind": "function"
       },
       "help": {
@@ -4331,6 +4649,9 @@
         "kind": "function"
       },
       "hermiteInterp": {
+        "kind": "function"
+      },
+      "hermiteNormalForm": {
         "kind": "function"
       },
       "hessenbergForm": {
@@ -4343,6 +4664,9 @@
         "kind": "function"
       },
       "highpassFilter": {
+        "kind": "function"
+      },
+      "hilbertMatrix": {
         "kind": "function"
       },
       "hilbertTransform": {
@@ -4358,6 +4682,9 @@
         "kind": "function"
       },
       "hungarian": {
+        "kind": "function"
+      },
+      "hurwitzZeta": {
         "kind": "function"
       },
       "hyp0f1": {
@@ -4396,10 +4723,22 @@
       "ifftshift": {
         "kind": "function"
       },
+      "iirNotch": {
+        "kind": "function"
+      },
+      "iirPeak": {
+        "kind": "function"
+      },
       "im": {
         "kind": "function"
       },
       "implicitDiff": {
+        "kind": "function"
+      },
+      "impulseResponse": {
+        "kind": "function"
+      },
+      "inCircle": {
         "kind": "function"
       },
       "incompleteCholesky": {
@@ -4432,6 +4771,15 @@
       "integerDigits": {
         "kind": "function"
       },
+      "integerNthRoot": {
+        "kind": "function"
+      },
+      "integerPartitionsGen": {
+        "kind": "function"
+      },
+      "integerSqrt": {
+        "kind": "function"
+      },
       "integrate": {
         "kind": "function"
       },
@@ -4462,8 +4810,17 @@
       "invGaussDist": {
         "kind": "function"
       },
+      "invHilbertMatrix": {
+        "kind": "function"
+      },
       "inverseConductanceQuantum": {
         "kind": "object"
+      },
+      "inverseGammaCDF": {
+        "kind": "function"
+      },
+      "inverseGammaPDF": {
+        "kind": "function"
       },
       "inverseLaplace": {
         "kind": "function"
@@ -4481,6 +4838,9 @@
         "kind": "function"
       },
       "isBounded": {
+        "kind": "function"
+      },
+      "isCarmichael": {
         "kind": "function"
       },
       "isConnected": {
@@ -4510,10 +4870,22 @@
       "isNumeric": {
         "kind": "function"
       },
+      "isPerfect": {
+        "kind": "function"
+      },
+      "isPerfectPower": {
+        "kind": "function"
+      },
       "isPositive": {
         "kind": "function"
       },
       "isPrime": {
+        "kind": "function"
+      },
+      "isPrimePower": {
+        "kind": "function"
+      },
+      "isSquarefree": {
         "kind": "function"
       },
       "isWasmLoaded": {
@@ -4522,7 +4894,13 @@
       "isZero": {
         "kind": "function"
       },
+      "isolateRealRoots": {
+        "kind": "function"
+      },
       "istft": {
+        "kind": "function"
+      },
+      "jackknife": {
         "kind": "function"
       },
       "jacobiCN": {
@@ -4555,6 +4933,9 @@
       "jsDivergence": {
         "kind": "function"
       },
+      "kaiserWindow": {
+        "kind": "function"
+      },
       "katzCentrality": {
         "kind": "function"
       },
@@ -4583,6 +4964,9 @@
         "kind": "function"
       },
       "kendalltau": {
+        "kind": "function"
+      },
+      "khatriRao": {
         "kind": "function"
       },
       "kldivergence": {
@@ -4622,6 +5006,9 @@
         "kind": "function"
       },
       "laguerreL": {
+        "kind": "function"
+      },
+      "lahNumber": {
         "kind": "function"
       },
       "lambertW": {
@@ -4675,7 +5062,13 @@
       "legendreP": {
         "kind": "function"
       },
+      "legendreSymbol": {
+        "kind": "function"
+      },
       "lerchPhi": {
+        "kind": "function"
+      },
+      "leslieMatrix": {
         "kind": "function"
       },
       "levenbergMarquardt": {
@@ -4696,6 +5089,9 @@
       "limit": {
         "kind": "function"
       },
+      "linearDiophantine": {
+        "kind": "function"
+      },
       "linearInterp": {
         "kind": "function"
       },
@@ -4711,7 +5107,13 @@
       "linsolve": {
         "kind": "function"
       },
+      "liouvilleLambda": {
+        "kind": "function"
+      },
       "ljungBox": {
+        "kind": "function"
+      },
+      "lll": {
         "kind": "function"
       },
       "loadWasm": {
@@ -4759,6 +5161,9 @@
       "logsumexp": {
         "kind": "function"
       },
+      "lombScargle": {
+        "kind": "function"
+      },
       "loschmidt": {
         "kind": "object"
       },
@@ -4769,6 +5174,9 @@
         "kind": "function"
       },
       "lowpassFilter": {
+        "kind": "function"
+      },
+      "lq": {
         "kind": "function"
       },
       "lsolve": {
@@ -4858,6 +5266,9 @@
       "matrixLogm": {
         "kind": "function"
       },
+      "matrixPinv": {
+        "kind": "function"
+      },
       "matrixPower": {
         "kind": "function"
       },
@@ -4903,6 +5314,9 @@
       "medianSelect": {
         "kind": "function"
       },
+      "mertens": {
+        "kind": "function"
+      },
       "min": {
         "kind": "function"
       },
@@ -4918,7 +5332,13 @@
       "minimize": {
         "kind": "function"
       },
+      "minimizeConstrained": {
+        "kind": "function"
+      },
       "minimizeScalar": {
+        "kind": "function"
+      },
+      "minimumEnclosingCircle": {
         "kind": "function"
       },
       "minimumSpanningTree": {
@@ -4927,10 +5347,16 @@
       "minkowskiDistance": {
         "kind": "function"
       },
+      "minkowskiSum": {
+        "kind": "function"
+      },
       "minres": {
         "kind": "function"
       },
       "mod": {
+        "kind": "function"
+      },
+      "modPow": {
         "kind": "function"
       },
       "mode": {
@@ -4955,6 +5381,12 @@
         "kind": "function"
       },
       "monteCarloIntegrate": {
+        "kind": "function"
+      },
+      "moodMedianTest": {
+        "kind": "function"
+      },
+      "motzkin": {
         "kind": "function"
       },
       "movingAverage": {
@@ -4996,10 +5428,19 @@
       "mutateOperator": {
         "kind": "function"
       },
+      "mutualInformation": {
+        "kind": "function"
+      },
       "mvnPdf": {
         "kind": "function"
       },
       "mvnSample": {
+        "kind": "function"
+      },
+      "nakagamiPDF": {
+        "kind": "function"
+      },
+      "narayana": {
         "kind": "function"
       },
       "nearestNeighbor": {
@@ -5101,6 +5542,9 @@
       "numericallyEquivalent": {
         "kind": "function"
       },
+      "nuttallWindow": {
+        "kind": "function"
+      },
       "oct": {
         "kind": "function"
       },
@@ -5119,10 +5563,19 @@
       "or": {
         "kind": "function"
       },
+      "orient2D": {
+        "kind": "function"
+      },
+      "orient3D": {
+        "kind": "function"
+      },
       "orth": {
         "kind": "function"
       },
       "outer": {
+        "kind": "function"
+      },
+      "owensT": {
         "kind": "function"
       },
       "pFq": {
@@ -5233,6 +5686,9 @@
       "parser": {
         "kind": "function"
       },
+      "partialCorrelation": {
+        "kind": "function"
+      },
       "partialDerivative": {
         "kind": "function"
       },
@@ -5240,6 +5696,12 @@
         "kind": "function"
       },
       "partitions": {
+        "kind": "function"
+      },
+      "parzenWindow": {
+        "kind": "function"
+      },
+      "pascalMatrix": {
         "kind": "function"
       },
       "pchip": {
@@ -5252,6 +5714,12 @@
         "kind": "function"
       },
       "pearsonr": {
+        "kind": "function"
+      },
+      "pell": {
+        "kind": "function"
+      },
+      "pellSolve": {
         "kind": "function"
       },
       "periodogram": {
@@ -5296,7 +5764,13 @@
       "planckTime": {
         "kind": "object"
       },
+      "pmean": {
+        "kind": "function"
+      },
       "pointInPolygon": {
+        "kind": "function"
+      },
+      "pointInTriangle": {
         "kind": "function"
       },
       "poissonDist": {
@@ -5321,6 +5795,12 @@
         "kind": "function"
       },
       "polygonArea": {
+        "kind": "function"
+      },
+      "polygonClip": {
+        "kind": "function"
+      },
+      "polygonIsConvex": {
         "kind": "function"
       },
       "polygonPerimeter": {
@@ -5353,10 +5833,19 @@
       "pow": {
         "kind": "function"
       },
+      "powerDivergence": {
+        "kind": "function"
+      },
       "powerExpand": {
         "kind": "function"
       },
+      "powerIteration": {
+        "kind": "function"
+      },
       "powerfit": {
+        "kind": "function"
+      },
+      "prevPrime": {
         "kind": "function"
       },
       "prime": {
@@ -5369,6 +5858,9 @@
         "kind": "function"
       },
       "primitiveRoot": {
+        "kind": "function"
+      },
+      "primorial": {
         "kind": "function"
       },
       "principalComponentAnalysis": {
@@ -5401,7 +5893,13 @@
       "ptp": {
         "kind": "function"
       },
+      "ql": {
+        "kind": "function"
+      },
       "qr": {
+        "kind": "function"
+      },
+      "qrPivoted": {
         "kind": "function"
       },
       "quad": {
@@ -5458,6 +5956,9 @@
       "qz": {
         "kind": "function"
       },
+      "radical": {
+        "kind": "function"
+      },
       "random": {
         "kind": "function"
       },
@@ -5471,6 +5972,9 @@
         "kind": "function"
       },
       "rank": {
+        "kind": "function"
+      },
+      "rankBiserial": {
         "kind": "function"
       },
       "rankdata": {
@@ -5495,6 +5999,9 @@
         "kind": "function"
       },
       "re": {
+        "kind": "function"
+      },
+      "realRoots": {
         "kind": "function"
       },
       "reduce": {
@@ -5545,6 +6052,12 @@
       "rfftfreq": {
         "kind": "function"
       },
+      "ricePDF": {
+        "kind": "function"
+      },
+      "ridders": {
+        "kind": "function"
+      },
       "ridge": {
         "kind": "function"
       },
@@ -5564,6 +6077,21 @@
         "kind": "function"
       },
       "root": {
+        "kind": "function"
+      },
+      "rootsChebyshevT": {
+        "kind": "function"
+      },
+      "rootsChebyshevU": {
+        "kind": "function"
+      },
+      "rootsHermite": {
+        "kind": "function"
+      },
+      "rootsJacobi": {
+        "kind": "function"
+      },
+      "rootsLaguerre": {
         "kind": "function"
       },
       "rootsLegendre": {
@@ -5593,7 +6121,13 @@
       "rowReduce": {
         "kind": "function"
       },
+      "rq": {
+        "kind": "function"
+      },
       "runWithConfig": {
+        "kind": "function"
+      },
+      "runsTest": {
         "kind": "function"
       },
       "rydberg": {
@@ -5605,6 +6139,9 @@
       "savgol": {
         "kind": "function"
       },
+      "sawtooth": {
+        "kind": "function"
+      },
       "scalar": {
         "kind": "object"
       },
@@ -5612,6 +6149,9 @@
         "kind": "function"
       },
       "scalarToTex": {
+        "kind": "function"
+      },
+      "schroder": {
         "kind": "function"
       },
       "schur": {
@@ -5701,6 +6241,9 @@
       "shouldParallelize": {
         "kind": "function"
       },
+      "siegelSlopes": {
+        "kind": "function"
+      },
       "siegelZ": {
         "kind": "function"
       },
@@ -5708,6 +6251,12 @@
         "kind": "function"
       },
       "sign": {
+        "kind": "function"
+      },
+      "signTest": {
+        "kind": "function"
+      },
+      "signm": {
         "kind": "function"
       },
       "simplify": {
@@ -5737,10 +6286,16 @@
       "simpsons": {
         "kind": "function"
       },
+      "simulatedAnnealing": {
+        "kind": "function"
+      },
       "sin": {
         "kind": "function"
       },
       "sinIntegral": {
+        "kind": "function"
+      },
+      "sinc": {
         "kind": "function"
       },
       "singularValues": {
@@ -5749,10 +6304,22 @@
       "sinh": {
         "kind": "function"
       },
+      "sinhIntegral": {
+        "kind": "function"
+      },
       "sinm": {
         "kind": "function"
       },
       "size": {
+        "kind": "function"
+      },
+      "skellamPMF": {
+        "kind": "function"
+      },
+      "skewNormalCDF": {
+        "kind": "function"
+      },
+      "skewNormalPDF": {
         "kind": "function"
       },
       "skewness": {
@@ -5764,10 +6331,16 @@
       "slu": {
         "kind": "function"
       },
+      "smallOmega": {
+        "kind": "function"
+      },
       "smaller": {
         "kind": "function"
       },
       "smallerEq": {
+        "kind": "function"
+      },
+      "smithNormalForm": {
         "kind": "function"
       },
       "softmax": {
@@ -5806,6 +6379,9 @@
       "sort": {
         "kind": "function"
       },
+      "sos2tf": {
+        "kind": "function"
+      },
       "sosfilt": {
         "kind": "function"
       },
@@ -5830,6 +6406,21 @@
       "speedOfLight": {
         "kind": "object"
       },
+      "sphericalBesselI": {
+        "kind": "function"
+      },
+      "sphericalBesselJ": {
+        "kind": "function"
+      },
+      "sphericalBesselK": {
+        "kind": "function"
+      },
+      "sphericalBesselY": {
+        "kind": "function"
+      },
+      "sphericalHarmonic": {
+        "kind": "function"
+      },
       "sphericalVoronoi": {
         "kind": "function"
       },
@@ -5851,13 +6442,22 @@
       "sqrt": {
         "kind": "function"
       },
+      "sqrtMod": {
+        "kind": "function"
+      },
       "sqrtm": {
         "kind": "function"
       },
       "square": {
         "kind": "function"
       },
+      "squareWave": {
+        "kind": "function"
+      },
       "squeeze": {
+        "kind": "function"
+      },
+      "ss2tf": {
         "kind": "function"
       },
       "std": {
@@ -5865,6 +6465,9 @@
       },
       "stefanBoltzmann": {
         "kind": "object"
+      },
+      "stepResponse": {
+        "kind": "function"
       },
       "stft": {
         "kind": "function"
@@ -5911,10 +6514,19 @@
       "studentizedRangeQuantile": {
         "kind": "function"
       },
+      "sturmRootCount": {
+        "kind": "function"
+      },
+      "sturmSequence": {
+        "kind": "function"
+      },
       "subfactorial": {
         "kind": "function"
       },
       "subset": {
+        "kind": "function"
+      },
+      "subspaceAngles": {
         "kind": "function"
       },
       "substitute": {
@@ -5929,6 +6541,9 @@
       "sum": {
         "kind": "function"
       },
+      "sumOfTwoSquares": {
+        "kind": "function"
+      },
       "summation": {
         "kind": "function"
       },
@@ -5939,6 +6554,9 @@
         "kind": "function"
       },
       "swapOperands": {
+        "kind": "function"
+      },
+      "sweepPoly": {
         "kind": "function"
       },
       "sylvester": {
@@ -5971,6 +6589,9 @@
       "tanh": {
         "kind": "function"
       },
+      "tanhSinh": {
+        "kind": "function"
+      },
       "taylor": {
         "kind": "function"
       },
@@ -5981,6 +6602,15 @@
         "kind": "function"
       },
       "terminateStatistics": {
+        "kind": "function"
+      },
+      "tf2ss": {
+        "kind": "function"
+      },
+      "tf2zpk": {
+        "kind": "function"
+      },
+      "theilSen": {
         "kind": "function"
       },
       "thomasSolve": {
@@ -6016,6 +6646,9 @@
       "topologicalSort": {
         "kind": "function"
       },
+      "tplquad": {
+        "kind": "function"
+      },
       "trace": {
         "kind": "function"
       },
@@ -6032,6 +6665,9 @@
         "kind": "function"
       },
       "triangularDist": {
+        "kind": "function"
+      },
+      "tribonacci": {
         "kind": "function"
       },
       "trigExpand": {
@@ -6055,7 +6691,19 @@
       "triu": {
         "kind": "function"
       },
+      "truncatedNormalCDF": {
+        "kind": "function"
+      },
+      "truncatedNormalMean": {
+        "kind": "function"
+      },
+      "truncatedNormalPDF": {
+        "kind": "function"
+      },
       "tukeyHSD": {
+        "kind": "function"
+      },
+      "tukeyWindow": {
         "kind": "function"
       },
       "typeOf": {
@@ -6124,6 +6772,9 @@
       "unit": {
         "kind": "function"
       },
+      "unitImpulse": {
+        "kind": "function"
+      },
       "unwrapPhase": {
         "kind": "function"
       },
@@ -6154,6 +6805,9 @@
       "variation": {
         "kind": "function"
       },
+      "vonMangoldt": {
+        "kind": "function"
+      },
       "vonMisesPDF": {
         "kind": "function"
       },
@@ -6161,6 +6815,9 @@
         "kind": "function"
       },
       "voronoiDiagram": {
+        "kind": "function"
+      },
+      "wassersteinDistance": {
         "kind": "function"
       },
       "wavedec": {
@@ -6175,7 +6832,19 @@
       "weibullDist": {
         "kind": "function"
       },
+      "weightedMean": {
+        "kind": "function"
+      },
+      "weightedMedian": {
+        "kind": "function"
+      },
       "weightedMutation": {
+        "kind": "function"
+      },
+      "weightedQuantile": {
+        "kind": "function"
+      },
+      "weightedVariance": {
         "kind": "function"
       },
       "welchPSD": {
@@ -6185,6 +6854,12 @@
         "kind": "object"
       },
       "wiener": {
+        "kind": "function"
+      },
+      "wigner3j": {
+        "kind": "function"
+      },
+      "wigner6j": {
         "kind": "function"
       },
       "wilcoxon": {
@@ -6205,10 +6880,16 @@
       "zTransform": {
         "kind": "function"
       },
+      "zeckendorf": {
+        "kind": "function"
+      },
       "zeros": {
         "kind": "function"
       },
       "zeta": {
+        "kind": "function"
+      },
+      "zipfPMF": {
         "kind": "function"
       },
       "zpk2sos": {
