@@ -1265,6 +1265,87 @@ describe('searchScalars: complexityWeights', () => {
       })
     ).resolves.toBeDefined();
   });
+
+  it('rejects non-plain weight containers and accessor or non-enumerable keys', async () => {
+    const reject = async (weights: unknown) => {
+      await expect(
+        runSearch(twoSeedProblem, {
+          ...twoSeeds,
+          complexityWeights: weights as ScalarSearchOptions['complexityWeights'],
+        })
+      ).rejects.toThrow(RangeError);
+    };
+    await reject(new Map([['number', 1]]));
+    await reject(new Date());
+    await reject(new Float64Array([1]));
+    await reject(/x/);
+    class Weights {
+      op = { '+': 1 };
+    }
+    await reject(new Weights());
+    await reject({
+      op: Object.defineProperty({ '+': 1 }, 'sin', {
+        value: 2,
+        enumerable: false,
+      }),
+    });
+    await reject({
+      get op() {
+        return { '+': 1 };
+      },
+    });
+    await reject({
+      op: Object.defineProperty({}, '+', {
+        get: () => 1,
+        enumerable: true,
+        configurable: true,
+      }),
+    });
+  });
+
+  it('rejects finite weights that would overflow complexity at grammar.maxSize', async () => {
+    await expect(
+      runSearch(twoSeedProblem, {
+        ...twoSeeds,
+        grammar: { ...weightsGrammar, maxSize: 4 },
+        complexityWeights: { symbol: Number.MAX_VALUE },
+      })
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('uses a snapshot so mutating caller weights after validation does not change the run', async () => {
+    const weights: { call: Record<string, number> } = { call: { sin: 5 } };
+    const gen = searchScalars(twoSeedProblem, {
+      ...twoSeeds,
+      maxEvaluations: 40,
+      complexityWeights: weights,
+    });
+    const progress: Awaited<ReturnType<typeof runSearch>>['progress'] = [];
+    let step = await gen.next();
+    while (!step.done) {
+      progress.push(step.value);
+      if (progress.length === 1) {
+        weights.call.sin = 0.001;
+      }
+      step = await gen.next();
+    }
+    const mutatedResult = step.value;
+    const baseline = await runSearch(twoSeedProblem, {
+      ...twoSeeds,
+      maxEvaluations: 40,
+      complexityWeights: { call: { sin: 5 } },
+    });
+    expect(trace(progress)).toBe(trace(baseline.progress));
+    expect(mutatedResult.front.map((row) => row.complexity)).toEqual(
+      baseline.result.front.map((row) => row.complexity)
+    );
+  });
+
+  it('call record keys use lowered names: ln is stored as log', () => {
+    const lnTree = b.call('ln', X);
+    expect(scalarComplexity(lnTree, { call: { log: 5 } })).toBe(6);
+    expect(scalarComplexity(lnTree, { call: { ln: 5 } } as never)).toBe(2);
+  });
 });
 
 describe('searchScalars: arguments', () => {
