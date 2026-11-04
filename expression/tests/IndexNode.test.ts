@@ -119,6 +119,35 @@ describe('IndexNode - _compile', () => {
   });
 });
 
+describe('IndexNode - BigNumber index values', () => {
+  // Minimal BigNumber-shaped class accepted by isBigNumber
+  class FakeBig {
+    isBigNumber = true;
+    constructor(private readonly v: number) {}
+    isInteger() {
+      return Number.isInteger(this.v);
+    }
+    toNumber() {
+      return this.v;
+    }
+    toString() {
+      return String(this.v);
+    }
+  }
+  (FakeBig.prototype as unknown as { isBigNumber: boolean }).isBigNumber = true;
+
+  it('coerces an integer BigNumber to a number', () => {
+    const fn = new IndexNode([makeConst(new FakeBig(3))])._compile(mathScope, {});
+    expect((fn(new Map(), {}, null) as MockIndex).dimensions).toEqual([3]);
+  });
+
+  it('throws a RangeError for a non-integer BigNumber instead of truncating', () => {
+    const fn = new IndexNode([makeConst(new FakeBig(2.5))])._compile(mathScope, {});
+    expect(() => fn(new Map(), {}, null)).toThrow(RangeError);
+    expect(() => fn(new Map(), {}, null)).toThrow(/got BigNumber 2.5/);
+  });
+});
+
 describe('IndexNode - forEach', () => {
   it('calls callback for each dimension with correct path', () => {
     const d0 = makeConst(1);

@@ -25,12 +25,14 @@ type EventHandler = (event: WorkbookEvent) => void;
 export class WorkbookExecutor {
   private workbook: Workbook;
   private graph: DependencyGraph;
+  private cellsById: Map<string, Cell>;
   private outputs: Map<string, unknown> = new Map();
   private handlers: EventHandler[] = [];
 
   constructor(workbook: Workbook) {
     this.workbook = workbook;
     this.graph = buildDependencyGraph(workbook.cells);
+    this.cellsById = new Map(workbook.cells.map((c) => [c.id, c]));
   }
 
   /**
@@ -59,8 +61,10 @@ export class WorkbookExecutor {
    * Run all cells in order
    */
   async runAll(): Promise<void> {
+    const pending = new Set(this.graph.executionOrder);
     for (const cellId of this.graph.executionOrder) {
-      await this.runCell(cellId);
+      pending.delete(cellId);
+      await this.runCellScheduled(cellId, pending);
     }
 
     this.emit({
@@ -73,7 +77,19 @@ export class WorkbookExecutor {
    * Run a specific cell
    */
   async runCell(cellId: string): Promise<unknown> {
-    const cell = this.workbook.cells.find((c) => c.id === cellId);
+    return this.runCellScheduled(cellId, undefined);
+  }
+
+  /**
+   * Run a cell. `pending` (internal) holds cells still scheduled later in the
+   * current batch run; in reactive mode they are about to be recomputed anyway,
+   * so no `cell:stale` is emitted for them. Omitted for a standalone runCell.
+   */
+  private async runCellScheduled(
+    cellId: string,
+    pending: ReadonlySet<string> | undefined
+  ): Promise<unknown> {
+    const cell = this.cellsById.get(cellId);
     if (!cell) {
       throw new Error(`Cell not found: ${cellId}`);
     }
@@ -99,6 +115,7 @@ export class WorkbookExecutor {
       if (this.workbook.runtime.execution === 'reactive') {
         const dependents = getDependents(this.graph, cellId);
         for (const depId of dependents) {
+          if (pending?.has(depId)) continue;
           this.emit({
             type: 'cell:stale',
             cellId: depId,
@@ -242,15 +259,23 @@ export class WorkbookExecutor {
       order = order.filter((id) => allowed.has(id));
     }
 
+    // Cells that will actually execute in this batch (for stale-event pruning).
+    const pending = new Set(
+      order.filter(
+        (id) => (options.runIds ? options.runIds.has(id) : true) && this.cellsById.has(id)
+      )
+    );
+
     for (const cellId of order) {
       // Incremental: when `runIds` is given, execute only those cells; the
       // others keep their seeded cached output (used as scope) and are skipped.
       if (options.runIds && !options.runIds.has(cellId)) continue;
-      const cell = this.workbook.cells.find((c) => c.id === cellId);
+      const cell = this.cellsById.get(cellId);
       if (!cell) continue;
+      pending.delete(cellId);
 
       try {
-        const output = await this.runCell(cellId);
+        const output = await this.runCellScheduled(cellId, pending);
         if (cell.type === 'test') {
           const passed = output === true;
           cells.push({

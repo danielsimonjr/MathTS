@@ -115,6 +115,54 @@ interface ParseOptions {
   nodes?: Record<string, NodeConstructor>;
 }
 
+// Operator lookup tables, hoisted so they are built once (not per parse call).
+// Consult with hasOwnProperty so inherited keys (e.g. 'constructor') never match.
+const RELATIONAL_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '==': 'equal',
+  '!=': 'unequal',
+  '<': 'smaller',
+  '>': 'larger',
+  '<=': 'smallerEq',
+  '>=': 'largerEq',
+});
+
+const SHIFT_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '<<': 'leftShift',
+  '>>': 'rightArithShift',
+  '>>>': 'rightLogShift',
+});
+
+const CONVERSION_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  to: 'to',
+  in: 'to', // alias of 'to'
+});
+
+const ADD_SUBTRACT_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '+': 'add',
+  '-': 'subtract',
+});
+
+const MULTIPLY_DIVIDE_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '*': 'multiply',
+  '.*': 'dotMultiply',
+  '/': 'divide',
+  './': 'dotDivide',
+  '%': 'mod',
+  mod: 'mod',
+});
+
+const UNARY_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '-': 'unaryMinus',
+  '+': 'unaryPlus',
+  '~': 'bitNot',
+  not: 'not',
+});
+
+const POSTFIX_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
+  '!': 'factorial',
+  "'": 'ctranspose',
+});
+
 export const createParse = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
@@ -995,17 +1043,8 @@ export const createParse = /* #__PURE__ */ factory(
       const params: MathNode[] = [parseShift(state)];
       const conditionals: Array<{ name: string; fn: string }> = [];
 
-      const operators: Record<string, string> = {
-        '==': 'equal',
-        '!=': 'unequal',
-        '<': 'smaller',
-        '>': 'larger',
-        '<=': 'smallerEq',
-        '>=': 'largerEq',
-      };
-
-      while (hasOwnProperty(operators, state.token)) {
-        const cond = { name: state.token, fn: operators[state.token] };
+      while (hasOwnProperty(RELATIONAL_OPERATORS, state.token)) {
+        const cond = { name: state.token, fn: RELATIONAL_OPERATORS[state.token] };
         conditionals.push(cond);
         getTokenSkipNewline(state);
         params.push(parseShift(state));
@@ -1036,15 +1075,9 @@ export const createParse = /* #__PURE__ */ factory(
 
       node = parseConversion(state);
 
-      const operators: Record<string, string> = {
-        '<<': 'leftShift',
-        '>>': 'rightArithShift',
-        '>>>': 'rightLogShift',
-      };
-
-      while (hasOwnProperty(operators, state.token)) {
+      while (hasOwnProperty(SHIFT_OPERATORS, state.token)) {
         name = state.token;
-        fn = operators[name];
+        fn = SHIFT_OPERATORS[name];
 
         getTokenSkipNewline(state);
         params = [node, parseConversion(state)];
@@ -1067,14 +1100,9 @@ export const createParse = /* #__PURE__ */ factory(
 
       node = parseRange(state);
 
-      const operators: Record<string, string> = {
-        to: 'to',
-        in: 'to', // alias of 'to'
-      };
-
-      while (hasOwnProperty(operators, state.token)) {
+      while (hasOwnProperty(CONVERSION_OPERATORS, state.token)) {
         name = state.token;
-        fn = operators[name];
+        fn = CONVERSION_OPERATORS[name];
 
         getTokenSkipNewline(state);
 
@@ -1166,13 +1194,9 @@ export const createParse = /* #__PURE__ */ factory(
 
       node = parseMultiplyDivideModulus(state);
 
-      const operators: Record<string, string> = {
-        '+': 'add',
-        '-': 'subtract',
-      };
-      while (hasOwnProperty(operators, state.token)) {
+      while (hasOwnProperty(ADD_SUBTRACT_OPERATORS, state.token)) {
         name = state.token;
-        fn = operators[name];
+        fn = ADD_SUBTRACT_OPERATORS[name];
 
         getTokenSkipNewline(state);
         const rightNode = parseMultiplyDivideModulus(state);
@@ -1200,20 +1224,11 @@ export const createParse = /* #__PURE__ */ factory(
 
       node = parseImplicitMultiplication(state);
 
-      const operators: Record<string, string> = {
-        '*': 'multiply',
-        '.*': 'dotMultiply',
-        '/': 'divide',
-        './': 'dotDivide',
-        '%': 'mod',
-        mod: 'mod',
-      };
-
       while (true) {
-        if (hasOwnProperty(operators, state.token)) {
+        if (hasOwnProperty(MULTIPLY_DIVIDE_OPERATORS, state.token)) {
           // explicit operators
           name = state.token;
-          fn = operators[name];
+          fn = MULTIPLY_DIVIDE_OPERATORS[name];
           getTokenSkipNewline(state);
           last = parseImplicitMultiplication(state);
           node = new OperatorNode(name, fn, [node, last]);
@@ -1371,15 +1386,9 @@ export const createParse = /* #__PURE__ */ factory(
       let name: string;
       let params: MathNode[];
       let fn: string;
-      const operators: Record<string, string> = {
-        '-': 'unaryMinus',
-        '+': 'unaryPlus',
-        '~': 'bitNot',
-        not: 'not',
-      };
 
-      if (hasOwnProperty(operators, state.token)) {
-        fn = operators[state.token];
+      if (hasOwnProperty(UNARY_OPERATORS, state.token)) {
+        fn = UNARY_OPERATORS[state.token];
         name = state.token;
 
         getTokenSkipNewline(state);
@@ -1446,14 +1455,9 @@ export const createParse = /* #__PURE__ */ factory(
 
       node = parseCustomNodes(state);
 
-      const operators: Record<string, string> = {
-        '!': 'factorial',
-        "'": 'ctranspose',
-      };
-
-      while (hasOwnProperty(operators, state.token)) {
+      while (hasOwnProperty(POSTFIX_OPERATORS, state.token)) {
         name = state.token;
-        fn = operators[name];
+        fn = POSTFIX_OPERATORS[name];
 
         getToken(state);
         params = [node];

@@ -243,3 +243,19 @@ describe('TikZ backend: caller color cannot leave its option value', () => {
     );
   });
 });
+
+describe('escAttr fast paths', () => {
+  it('returns numbers and clean strings unchanged', async () => {
+    const { escAttr } = await import('../src/svg.js');
+    expect(escAttr(12.5)).toBe('12.5');
+    expect(escAttr(-0)).toBe('0');
+    expect(escAttr(1e21)).toBe('1e+21');
+    expect(escAttr('plain text 123')).toBe('plain text 123');
+  });
+
+  it('still escapes all five entity characters, including in a mistyped string', async () => {
+    const { escAttr } = await import('../src/svg.js');
+    expect(escAttr(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#39;');
+    expect(escAttr('a"b' as unknown as number)).toBe('a&quot;b');
+  });
+});

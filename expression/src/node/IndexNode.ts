@@ -3,6 +3,7 @@ import { getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import {
   isArray,
+  isBigNumber,
   isConstantNode,
   isMatrix,
   isNode,
@@ -11,6 +12,7 @@ import {
   typeOf,
 } from '../utils/is.js';
 import { escape } from '../utils/string.js';
+import { toMathMLSymbol } from '../utils/mathml.js';
 import type { MathNode } from './Node.js';
 import { mapChildArray } from './Node.js';
 
@@ -29,6 +31,29 @@ interface StringOptions {
 interface Dependencies {
   Node: new (...args: unknown[]) => MathNode;
   size: (value: unknown) => number[];
+}
+
+/**
+ * Convert a BigNumber index value to a number. Index values must be integers;
+ * a non-integer or non-safe BigNumber is rejected rather than silently truncated.
+ * Non-BigNumber values (numbers, ranges, arrays, strings) pass through untouched.
+ */
+function coerceIndexValue(value: unknown): unknown {
+  if (isBigNumber(value)) {
+    const big = value as unknown as {
+      isInteger(): boolean;
+      toNumber(): number;
+      toString(): string;
+    };
+    const n = big.toNumber();
+    if (!big.isInteger() || !Number.isSafeInteger(n)) {
+      throw new RangeError(
+        `Index must be an integer within the safe range, got BigNumber ${big.toString()}`
+      );
+    }
+    return n;
+  }
+  return value;
 }
 
 const name = 'IndexNode';
@@ -91,8 +116,8 @@ export const createIndexNode = /* #__PURE__ */ factory(
        *                        evalNode(scope: Object, args: Object, context: *)
        */
       _compile(math: Record<string, unknown>, argNames: Record<string, boolean>): CompileFunction {
-        // TODO: implement support for bignumber (currently bignumbers are silently
-        //       reduced to numbers when changing the value to zero-based)
+        // BigNumber index values are converted to plain numbers explicitly
+        // (see coerceIndexValue): integers convert exactly, anything else throws.
 
         // TODO: Optimization: when the range values are ConstantNodes,
         //       we can beforehand resolve the zero-based value
@@ -149,7 +174,7 @@ export const createIndexNode = /* #__PURE__ */ factory(
           const dimensions = map(
             evalDimensions,
             function (evalDimension: CompileFunction): unknown {
-              return evalDimension(scope, args, context);
+              return coerceIndexValue(evalDimension(scope, args, context));
             }
           );
 
@@ -265,6 +290,19 @@ export const createIndexNode = /* #__PURE__ */ factory(
             '<span class="math-parenthesis math-square-parenthesis">]</span>'
           );
         }
+      }
+
+      /**
+       * Get the MathML representation of this node (mirrors `_toTex`): `.prop`
+       * for dot notation, otherwise the comma-separated dimensions (the
+       * AccessorNode places them as a subscript).
+       */
+      _toMathML(): string {
+        if (this.dotNotation) {
+          return `<mo>.</mo>${toMathMLSymbol(String(this.getObjectProperty()))}`;
+        }
+        const dims = this.dimensions.map((range: MathNode) => range.toMathML());
+        return `<mrow>${dims.join('<mo>,</mo>')}</mrow>`;
       }
 
       /**

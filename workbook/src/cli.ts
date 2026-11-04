@@ -131,12 +131,17 @@ function jsonEnvelope(
   data: unknown,
   problems: string[] = []
 ): string {
-  const seen = new WeakSet<object>();
-  const replacer = (_key: string, value: unknown): unknown => {
+  // Ancestor stack: only a value that is its own ancestor is circular. A shared
+  // (diamond) reference reached via two sibling paths is serialized in full both
+  // times. JSON.stringify calls the replacer with `this` = the parent holder, so
+  // unwinding the stack to `this` tracks the current path.
+  const ancestors: object[] = [];
+  const replacer = function (this: unknown, _key: string, value: unknown): unknown {
     if (typeof value === 'bigint') return `${value}n`;
     if (value !== null && typeof value === 'object') {
-      if (seen.has(value)) return '[Circular]';
-      seen.add(value);
+      while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) ancestors.pop();
+      if (ancestors.includes(value)) return '[Circular]';
+      ancestors.push(value);
     }
     return value;
   };

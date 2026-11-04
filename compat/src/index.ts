@@ -352,12 +352,31 @@ export function create(
   for (const key of Object.keys(instance)) {
     if (key === 'config' || key === 'chain') continue;
     const value = instance[key];
-    if (typeof value === 'function') {
-      (instance as Record<string, unknown>)[key] = wrapWithInstanceConfig(
-        value as (...args: unknown[]) => unknown,
-        currentConfig
-      );
-    }
+    if (typeof value !== 'function') continue;
+    // Lazy + memoized: the config-scoped wrapper is built on first access (a
+    // typical program touches a few dozen of the ~1,100 exports), then the
+    // accessor is replaced by a plain data property so `math.add === math.add`
+    // and later reads cost nothing. Enumerable, so `Object.keys(math)` is
+    // unchanged; assigning `math.add = ...` replaces it as before.
+    const raw = value as (...args: unknown[]) => unknown;
+    const replaceWith = (v: unknown): void => {
+      Object.defineProperty(instance, key, {
+        value: v,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    };
+    Object.defineProperty(instance, key, {
+      enumerable: true,
+      configurable: true,
+      get() {
+        const wrapped = wrapWithInstanceConfig(raw, currentConfig);
+        replaceWith(wrapped);
+        return wrapped;
+      },
+      set: replaceWith,
+    });
   }
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).

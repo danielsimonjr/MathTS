@@ -180,3 +180,20 @@ describe('assign - unsupported type throws', () => {
     );
   });
 });
+
+describe('assign - error messages name the offending type', () => {
+  it('names number / boolean for unsupported types', () => {
+    expect(() => assign(42 as never, makeSimpleNumericIndex(0) as never, 1 as never)).toThrow(
+      'got number'
+    );
+    expect(() => assign(true as never, makeSimpleNumericIndex(0) as never, 1 as never)).toThrow(
+      'got boolean'
+    );
+  });
+
+  it('names null for a numeric index on null', () => {
+    expect(() => assign(null as never, makeSimpleNumericIndex(0) as never, 1 as never)).toThrow(
+      'object is null'
+    );
+  });
+});

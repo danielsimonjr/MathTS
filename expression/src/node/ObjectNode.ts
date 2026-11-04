@@ -3,6 +3,7 @@ import { factory } from '../utils/factory.js';
 import { isNode } from '../utils/is.js';
 import { hasOwnProperty } from '../utils/object.js';
 import { escape, stringify } from '../utils/string.js';
+import { escapeMathML } from '../utils/mathml.js';
 import type { MathNode } from './Node.js';
 
 // Type definitions
@@ -229,6 +230,21 @@ export const createObjectNode = /* #__PURE__ */ factory(
             '<span class="math-parenthesis math-curly-parenthesis">{</span>' +
             joined +
             '<span class="math-parenthesis math-curly-parenthesis">}</span>'
+        );
+      }
+
+      /**
+       * Get the MathML representation of this node (mirrors `_toTex`: a
+       * braced two-column table of `key:` / value).
+       */
+      _toMathML(): string {
+        return renderObjectEntries(
+          this.properties,
+          (key, node) =>
+            `<mtr><mtd><mtext>${escapeMathML(key)}:</mtext></mtd><mtd>${node.toMathML()}</mtd></mtr>`,
+          '',
+          (joined) =>
+            `<mrow><mo>{</mo><mtable columnalign="left left">${joined}</mtable><mo>}</mo></mrow>`
         );
       }
 

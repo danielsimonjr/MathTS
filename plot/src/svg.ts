@@ -63,9 +63,15 @@ const ATTR_ENTITIES: Record<string, string> = {
   "'": '&#39;',
 };
 
+const NEEDS_ESCAPE = /[&<>"']/;
+const ATTR_ENTITY_RE = /[&<>"']/g;
+
 /** Escape a value for use inside a quoted XML attribute. Replaces `&`, `<`, `>`, `"` and `'` with entities. A number is converted with `String` first, so a value typed `number` but passed as a string at run time cannot end the attribute. */
 export function escAttr(v: string | number): string {
-  return String(v).replace(/[&<>"']/g, (c) => ATTR_ENTITIES[c]);
+  // A real number's decimal string cannot contain an entity character.
+  if (typeof v === 'number') return String(v);
+  const str = typeof v === 'string' ? v : String(v);
+  return NEEDS_ESCAPE.test(str) ? str.replace(ATTR_ENTITY_RE, (c) => ATTR_ENTITIES[c]) : str;
 }
 
 /** Attribute list for `el`, in output order. An entry whose value is `undefined` is left out. */

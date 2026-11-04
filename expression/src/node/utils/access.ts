@@ -1,5 +1,6 @@
 import { errorTransform } from '../../transform/utils/errorTransform.js';
 import { getSafeProperty } from '../../utils/customs.js';
+import { describeType } from './describeType.js';
 import { getStringSubset } from './stringSubset.js';
 
 /**
@@ -36,12 +37,16 @@ export function accessFactory({ subset }: { subset: (...args: unknown[]) => unkn
         return getStringSubset(object, index);
       } else if (typeof object === 'object') {
         if (!index.isObjectProperty()) {
-          throw new TypeError('Cannot apply a numeric index as object property');
+          throw new TypeError(
+            `Cannot apply a numeric index as object property (object is ${describeType(object)})`
+          );
         }
 
         return getSafeProperty(object, index.getObjectProperty());
       } else {
-        throw new TypeError('Cannot apply index: unsupported type of object');
+        throw new TypeError(
+          `Cannot apply index: unsupported type of object (got ${describeType(object)})`
+        );
       }
     } catch (err) {
       throw errorTransform(err);

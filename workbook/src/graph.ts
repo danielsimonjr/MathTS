@@ -42,48 +42,66 @@ export function topologicalSort(nodes: Map<string, DependencyNode>): string[] {
   const visited = new Set<string>();
   const result: string[] = [];
 
-  function visit(id: string) {
-    if (visited.has(id)) return;
-    visited.add(id);
-
-    const node = nodes.get(id);
-    if (node) {
-      for (const depId of node.dependencies) {
-        visit(depId);
+  // Iterative post-order DFS (explicit stack) so deep chains cannot overflow.
+  for (const root of nodes.keys()) {
+    if (visited.has(root)) continue;
+    visited.add(root);
+    const stack: Array<{ id: string; deps: readonly string[]; i: number }> = [
+      { id: root, deps: nodes.get(root)?.dependencies ?? [], i: 0 },
+    ];
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1]!;
+      if (frame.i < frame.deps.length) {
+        const depId = frame.deps[frame.i++]!;
+        if (!visited.has(depId)) {
+          visited.add(depId);
+          stack.push({ id: depId, deps: nodes.get(depId)?.dependencies ?? [], i: 0 });
+        }
+      } else {
+        result.push(frame.id);
+        stack.pop();
       }
     }
-
-    result.push(id);
-  }
-
-  for (const id of nodes.keys()) {
-    visit(id);
   }
 
   return result;
 }
 
 /**
- * Get all cells that depend on a given cell
+ * Get all cells that depend on a given cell (depth-first pre-order, iterative).
  */
 export function getDependents(graph: DependencyGraph, cellId: string): string[] {
+  return getDependentsOfMany(graph, [cellId]);
+}
+
+/**
+ * Multi-source variant of {@link getDependents}: every cell that transitively
+ * depends on any of `cellIds`, in one traversal (shared visited set). The
+ * sources themselves are only included if reachable from another source.
+ */
+export function getDependentsOfMany(graph: DependencyGraph, cellIds: Iterable<string>): string[] {
   const result: string[] = [];
   const visited = new Set<string>();
 
-  function collect(id: string) {
-    const node = graph.nodes.get(id);
-    if (!node) return;
-
-    for (const depId of node.dependents) {
-      if (!visited.has(depId)) {
-        visited.add(depId);
-        result.push(depId);
-        collect(depId);
+  for (const source of cellIds) {
+    const first = graph.nodes.get(source);
+    if (!first) continue;
+    const stack: Array<{ deps: readonly string[]; i: number }> = [{ deps: first.dependents, i: 0 }];
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1]!;
+      if (frame.i >= frame.deps.length) {
+        stack.pop();
+        continue;
       }
+      const depId = frame.deps[frame.i++]!;
+      if (visited.has(depId)) continue;
+      visited.add(depId);
+      result.push(depId);
+      const node = graph.nodes.get(depId);
+      if (node) stack.push({ deps: node.dependents, i: 0 });
     }
   }
 
-  collect(cellId);
   return result;
 }
 
@@ -94,16 +112,17 @@ export function getDependents(graph: DependencyGraph, cellId: string): string[] 
  */
 export function getAncestors(graph: DependencyGraph, id: string): string[] {
   const result = new Set<string>();
+  const stack: string[] = [id];
 
-  function visit(nodeId: string): void {
-    if (result.has(nodeId)) return;
+  while (stack.length > 0) {
+    const nodeId = stack.pop()!;
+    if (result.has(nodeId)) continue;
     const node = graph.nodes.get(nodeId);
-    if (!node) return;
+    if (!node) continue;
     result.add(nodeId);
-    for (const dep of node.dependencies) visit(dep);
+    for (const dep of node.dependencies) stack.push(dep);
   }
 
-  visit(id);
   // Return in topological (dependency-first) order so external callers get a
   // runnable sequence; `executionOrder` is the canonical topo order.
   return graph.executionOrder.filter((nodeId) => result.has(nodeId));

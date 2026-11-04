@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { compile } from '../../src/compiler/compile.js';
 import { createEvaluate } from '../../src/evaluator/evaluate.js';
 import type { MathNode } from '../../src/node/Node.js';
+import { createNode } from '../../src/node/Node.js';
+import { createConstantNode } from '../../src/node/ConstantNode.js';
+import { createSymbolNode } from '../../src/node/SymbolNode.js';
+import { createIndexNode } from '../../src/node/IndexNode.js';
+import { createAccessorNode } from '../../src/node/AccessorNode.js';
+import { createFunctionNode } from '../../src/node/FunctionNode.js';
 
 /**
  * Security regression tests — these validate the sandbox restored to the
@@ -229,5 +235,40 @@ describe('security: pre-compile AST validator (default-safe)', () => {
     };
     const evaluate = createEvaluate(mockParseFromNode(expr), mathScope);
     expect(evaluate('2+3')).toBe(5);
+  });
+});
+
+describe('security: optional-chained method calls (obj?.m())', () => {
+  const mathNs: Record<string, unknown> = {};
+  const Node = createNode({ mathWithTransform: mathNs });
+  const ConstantNode = createConstantNode({ Node, isBounded: () => true });
+  const SymbolNode = createSymbolNode({ math: mathNs, Node });
+  const IndexNode = createIndexNode({ Node, size: () => [] });
+  const AccessorNode = createAccessorNode({ subset: () => undefined, Node });
+  const FunctionNode = createFunctionNode({ math: mathNs, Node, SymbolNode });
+
+  function optionalCall(prop: string) {
+    const accessor = new AccessorNode(
+      new SymbolNode('obj'),
+      new IndexNode([new ConstantNode(prop)], true),
+      true
+    );
+    return new FunctionNode(accessor, [], true);
+  }
+  const run = (prop: string, obj: unknown) =>
+    optionalCall(prop)._compile(mathNs, {})(new Map([['obj', obj]]), {}, null);
+
+  it('still calls an ordinary method through ?.', () => {
+    expect(run('method', { method: () => 42 })).toBe(42);
+  });
+
+  it('short-circuits to undefined for a missing method or nullish base', () => {
+    expect(run('missing', { method: () => 42 })).toBeUndefined();
+    expect(run('method', null)).toBeUndefined();
+  });
+
+  it('rejects ?.__proto__() and ?.constructor() instead of probing them', () => {
+    expect(() => run('__proto__', {})).toThrow(/No access to method/);
+    expect(() => run('constructor', {})).toThrow(/No access to method/);
   });
 });

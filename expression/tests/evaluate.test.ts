@@ -183,3 +183,66 @@ describe('compileExpression', () => {
     expect(compiled.evaluate({ x: 99 })).toBe(100);
   });
 });
+
+describe('createEvaluate compile cache', () => {
+  function countingParser() {
+    const inner = createMockParser();
+    const state = { calls: 0 };
+    const parse = (expr: string): MathNode => {
+      state.calls++;
+      return inner(expr);
+    };
+    return { parse, state };
+  }
+
+  it('reuses the compiled expression for repeated text (parse runs once)', () => {
+    const { parse, state } = countingParser();
+    const evaluate = createEvaluate(parse, mathScope);
+    expect(evaluate('2+3')).toBe(5);
+    expect(evaluate('2+3')).toBe(5);
+    expect(evaluate('2+3')).toBe(5);
+    expect(state.calls).toBe(1);
+  });
+
+  it('gives different results for different scopes with the same cached expression', () => {
+    const { parse, state } = countingParser();
+    const evaluate = createEvaluate(parse, mathScope);
+    expect(evaluate('x+1', { x: 1 })).toBe(2);
+    expect(evaluate('x+1', { x: 10 })).toBe(11);
+    expect(evaluate('x+1', { x: -5 })).toBe(-4);
+    expect(state.calls).toBe(1);
+  });
+
+  it('does not leak across namespaces or evaluate instances sharing a parser', () => {
+    const { parse } = countingParser();
+    const nsA: Record<string, unknown> = { ...mathScope, add: () => 'A' };
+    const nsB: Record<string, unknown> = { ...mathScope, add: () => 'B' };
+    const evalA = createEvaluate(parse, nsA);
+    const evalB = createEvaluate(parse, nsB);
+    expect(evalA('2+3')).toBe('A');
+    expect(evalB('2+3')).toBe('B');
+    expect(evalA('2+3')).toBe('A');
+  });
+
+  it('does not cache failed compiles and still enforces the safe validator', () => {
+    const { parse } = countingParser();
+    const evaluate = createEvaluate(parse, mathScope);
+    // unsafe call to a forbidden function must keep throwing on every attempt
+    for (let i = 0; i < 3; i++) {
+      expect(() => evaluate('parse(1)')).toThrow(/Security/);
+    }
+    // the unsafe variant is a distinct entry and does not poison the safe one
+    expect(() => evaluate('parse(1)', undefined, { unsafe: true })).not.toThrow(/Security/);
+    expect(() => evaluate('parse(1)')).toThrow(/Security/);
+  });
+
+  it('stays correct past the LRU bound (more than 256 distinct expressions)', () => {
+    const { parse } = countingParser();
+    const evaluate = createEvaluate(parse, mathScope);
+    for (let i = 0; i < 600; i++) {
+      expect(evaluate(`${i}+1`)).toBe(i + 1);
+    }
+    expect(evaluate('0+1')).toBe(1);
+    expect(evaluate('599+1')).toBe(600);
+  });
+});

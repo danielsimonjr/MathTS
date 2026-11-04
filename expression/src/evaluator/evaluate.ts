@@ -141,6 +141,34 @@ function validateAst(node: unknown, depth = 0): void {
   }
 }
 
+/** Maximum compiled expressions kept per (namespace, parser) pair. */
+const COMPILE_CACHE_SIZE = 256;
+
+type CompileCache = Map<string, CompiledExpression>;
+
+/**
+ * Compiled-expression caches, keyed by namespace identity and then parser
+ * identity (so namespaces never share entries and are collectable). Entries are
+ * created only after `validateAst` and `compile` both succeeded. Assumption:
+ * a namespace is not mutated after expressions were compiled against it (the
+ * compiler binds operator functions at compile time).
+ */
+const compileCaches = new WeakMap<object, WeakMap<object, CompileCache>>();
+
+function cacheFor(mathScope: object, parseFn: object): CompileCache {
+  let byParser = compileCaches.get(mathScope);
+  if (!byParser) {
+    byParser = new WeakMap();
+    compileCaches.set(mathScope, byParser);
+  }
+  let cache = byParser.get(parseFn);
+  if (!cache) {
+    cache = new Map();
+    byParser.set(parseFn, cache);
+  }
+  return cache;
+}
+
 /**
  * Create an evaluate function bound to a math scope and parse function.
  *
@@ -198,16 +226,33 @@ export function createEvaluate(
     return evaluateOne(exprOrExprs, scope, options);
   }
 
+  const cache = cacheFor(mathScope, parseFn);
+
   function evaluateOne(
     expr: string,
     scope?: Record<string, unknown> | Scope,
     options?: EvaluateOptions
   ): unknown {
-    const node = parseFn(expr);
-    if (!options || options.unsafe !== true) {
-      validateAst(node);
+    const unsafe = options?.unsafe === true;
+    // Safe and unsafe compiles of the same text are distinct entries.
+    const key = (unsafe ? 'u:' : 's:') + expr;
+    let compiled = cache.get(key);
+    if (compiled !== undefined) {
+      // refresh recency (Map iterates in insertion order)
+      cache.delete(key);
+      cache.set(key, compiled);
+    } else {
+      const node = parseFn(expr);
+      if (!unsafe) {
+        validateAst(node);
+      }
+      compiled = compile(node, mathScope);
+      cache.set(key, compiled);
+      if (cache.size > COMPILE_CACHE_SIZE) {
+        const oldest = cache.keys().next().value;
+        if (oldest !== undefined) cache.delete(oldest);
+      }
     }
-    const compiled = compile(node, mathScope);
     return compiled.evaluate(scope);
   }
 

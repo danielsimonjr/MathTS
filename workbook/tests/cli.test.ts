@@ -291,6 +291,16 @@ describe('cli envelope robustness', () => {
     expect(JSON.stringify(env)).toContain('[Circular]');
   });
 
+  it('a shared NON-circular reference (diamond) is serialized in full, not "[Circular]"', async () => {
+    const wb =
+      'cells:\n  - code: "1"\n    id: a\n    output: &s\n      k: 1\n  - code: "2"\n    id: b\n    output: *s';
+    const r = await dispatch(['describe', fixture(wb), '--json']);
+    const text = r.stdout;
+    expect(text).not.toContain('[Circular]');
+    expect(JSON.parse(text).command).toBe('describe');
+    expect(text.match(/"k": 1/g)?.length).toBe(2);
+  });
+
   it('every command advertised by capabilities is routable (no drift)', async () => {
     const env = JSON.parse((await dispatch(['capabilities', '--json'])).stdout);
     for (const name of env.data.commands as string[]) {

@@ -6,7 +6,7 @@ The automation that ran the audit and this follow-up is restricted to read-only 
 
 ## I-1
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `.github/workflows/ci.yml` runs `node tools/test/bun-audit-retry.mjs`, which retries registry outages only (a real high+ advisory still fails on the first try); pinned by `tools/test/bun-audit-retry.test.mjs`, run as the "Bun audit retry tests" CI step.
 
 **Title:** CI: `bun audit` has no retry and fails the job on a registry 503
 
@@ -159,7 +159,7 @@ Two threshold tables disagree:
 
 ## I-9
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `create(all, config)` now keeps per-instance config; guarded by `compat/tests/instance-config-isolation.test.ts` (#425), which asserts that two instances keep distinct settings and that the process-wide barrel config is untouched.
 
 **Title:** `create(all, config)` writes the process-wide functions config
 
@@ -191,7 +191,9 @@ Fix by giving the activated graph a config object that one instance owns, or by 
 
 ## I-11
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `data.schemaVersion` is no longer `"[Circular]"`; guarded by `workbook/tests/cli.test.ts:172` (`capabilities --json` reports `{ major: 1, minor: 0 }` inside `data`) and the cycle guard test (`describe does not crash on a circular output`).
+
+**Follow-up fixed in this change:** the `WeakSet` replacer still marked every object it had visited, so any shared NON-circular reference (a diamond, for example two cells whose outputs alias one YAML anchor) was serialized as `"[Circular]"` the second time. `jsonEnvelope` now tracks the ancestor path only, so a shared reference is emitted in full each time and only a true cycle becomes `"[Circular]"`. Test: `workbook/tests/cli.test.ts` ("a shared NON-circular reference (diamond) is serialized in full").
 
 **Title:** `mtsw capabilities --json` prints `schemaVersion` as `"[Circular]"`
 
@@ -207,7 +209,7 @@ The replacer exists so a circular workbook value cannot throw (the envelope must
 
 ## I-12
 
-**Status:** open. No PR in this wave (Sprint 3R).
+**Status:** resolved. `functions/src/algebra/simplifyConstant.ts` now reads the core `Fraction` `numerator` / `denominator` (`_exactFraction`, `_fractionToNode`) instead of `n` / `d` / `s`.
 
 **Title:** `simplify` `exactFractions` does not turn `0.4 * x` into a fraction
 
@@ -223,7 +225,7 @@ Read `numerator` / `denominator` (and the core sign), or adapt once at the facto
 
 ## I-13
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `TARGETS` in `tools/generate-functions-reference.mjs` includes `expression`, `workbook` and `plot`, so the export-index gate covers them (`tests/integration/export-index-completeness.test.ts`).
 
 **Title:** Export-index gate skips expression, workbook, and plot
 
@@ -253,7 +255,7 @@ Refresh the comments against `policy.ts` (cite the benchmark rule: two Node runs
 
 ## I-15
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `assembly/COVERAGE_AUDIT.md` was regenerated on 2026-10-27 (`Last regenerated: 2026-10-27`, `coverage_matrix.py`).
 
 **Title:** `docs/BENCHMARK_RESULTS.md` and `assembly/COVERAGE_AUDIT.md` are older than the dispatch policy
 
@@ -267,7 +269,7 @@ Regenerate both from the commands that produced them, and date the files. Do not
 
 ## I-16
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `functions/src/typed/statistics.ts` exports `parallelStatMeanAD` and keeps `parallelStatMAD` as an alias; `functions/tests/mad-median-vs-mean-ad.test.ts` pins `mad` (median form) against the mean form.
 
 **Title:** `mad` is median absolute deviation; `parallelStatMAD` is mean absolute deviation
 
@@ -283,7 +285,7 @@ Same root, two definitions. Rename the parallel one (for example `parallelStatMe
 
 ## I-17
 
-**Status:** open. No PR in this wave.
+**Status:** resolved. `DependencyGraph`, `DependencyNode`, `toDOT` and `toTeX` are exported from the workbook barrel; guarded by `workbook/tests/barrel-graph-tex.test.ts`.
 
 **Title:** Workbook CLI uses `DependencyGraph`, `toDOT`, and `toTeX`, but the package does not export them
 
