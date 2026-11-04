@@ -305,11 +305,95 @@ describe('searchScalars: planted laws', () => {
       }
     });
 
+    it('clamps inherited parameters into bounds when a refit is discarded', async () => {
+      const { result } = await runSearch(problem, {
+        ...base,
+        optimizeProbability: 1,
+        fit: { restarts: 0, maxIterations: 0, bounds: [[50, 60]] },
+      });
+      for (const params of result.fittedParameters) {
+        expect(params[0]!).toBeGreaterThanOrEqual(50);
+        expect(params[0]!).toBeLessThanOrEqual(60);
+      }
+    });
+
+    it('discards an advisory refit when the fitter has no valid rows', async () => {
+      const oneOverP = b.op('/', [b.number(1), b.symbol('p')]);
+      const grammar1p: ScalarGrammar = {
+        variables: ['x'],
+        parameters: ['p'],
+        binary: ['+', '*', '/'],
+        unary: [],
+        literals: [1],
+        maxSize: 5,
+      };
+      const x = linspace(8, 0.5, 1.2);
+      const problem1p: ScalarSearchProblem = {
+        variables: ['x'],
+        columns: [x],
+        observed: compileScalar(oneOverP, { variables: ['x'], parameters: ['p'] }).evaluate(
+          [x],
+          new Float64Array([1])
+        ).values,
+        parameters: ['p'],
+      };
+      await expect(
+        runSearch(problem1p, {
+          grammar: grammar1p,
+          seeds: [oneOverP],
+          rng: createSeededRng(1),
+          maxEvaluations: 24,
+          optimizeProbability: 1,
+          fit: { initial: [0] },
+        })
+      ).resolves.toBeDefined();
+
+      const pOverPMinus2 = b.op('/', [b.symbol('p'), b.op('-', [b.symbol('p'), b.number(2)])]);
+      const grammarRat: ScalarGrammar = {
+        variables: ['x'],
+        parameters: ['p'],
+        binary: ['+', '-', '*', '/'],
+        unary: [],
+        literals: [1, 2],
+        maxSize: 7,
+      };
+      const problemRat: ScalarSearchProblem = {
+        variables: ['x'],
+        columns: [x],
+        observed: linspace(8, 1, 8),
+        parameters: ['p'],
+      };
+      await expect(
+        runSearch(problemRat, {
+          grammar: grammarRat,
+          seeds: [pOverPMinus2],
+          rng: createSeededRng(1),
+          maxEvaluations: 24,
+          optimizeProbability: 1,
+          fit: { bounds: [[2, 2]] },
+        })
+      ).resolves.toBeDefined();
+
+      await expect(
+        runSearch(problem1p, {
+          grammar: grammar1p,
+          seeds: [oneOverP],
+          rng: createSeededRng(1),
+          maxEvaluations: 24,
+          optimizeProbability: 1,
+          fit: { bounds: [[0, 0]] },
+        })
+      ).resolves.toBeDefined();
+    });
+
     it('rejects bad fit options with RangeError before the first yield', async () => {
-      const expectReject = async (fit: ScalarSearchOptions['fit']) => {
-        await expect(runSearch(problem, { ...base, optimizeProbability: 1, fit })).rejects.toThrow(
-          RangeError
-        );
+      const expectReject = async (
+        fit: ScalarSearchOptions['fit'],
+        extra?: Partial<ScalarSearchOptions>
+      ) => {
+        await expect(
+          runSearch(problem, { ...base, optimizeProbability: 1, fit, ...extra })
+        ).rejects.toThrow(RangeError);
       };
       // lower > upper
       await expectReject({ bounds: [[2, 1]] });
@@ -328,6 +412,12 @@ describe('searchScalars: planted laws', () => {
       await expectReject({ restarts: 1.5 });
       await expectReject({ maxIterations: -2 });
       await expectReject({ algorithm: 'gd' as 'lm' });
+      await expectReject({ bounds: [5] } as unknown as ScalarSearchOptions['fit']);
+      await expectReject({ bounds: [null] } as unknown as ScalarSearchOptions['fit']);
+      await expectReject(5 as unknown as ScalarSearchOptions['fit']);
+      await expectReject(null as unknown as ScalarSearchOptions['fit']);
+      await expectReject({ algorithm: 'lm' }, { loss: 'l1' });
+      await expectReject({ algorithm: 'lm' }, { loss: 'huber' });
     });
   });
 });

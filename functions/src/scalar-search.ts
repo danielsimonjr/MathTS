@@ -256,7 +256,44 @@ function nonNegativeFinite(name: string, value: number): void {
  * the first yield so a bad `fit` fails every run of the options, not only the
  * runs whose refit coin fires.
  */
-function assertFitOptions(fit: ScalarFitOptions, parameterCount: number): void {
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Keeps reported parameter vectors inside `fit.bounds` when bounds are set. */
+function clampParametersToBounds(
+  parameters: Float64Array,
+  bounds: readonly (readonly [number, number])[]
+): Float64Array {
+  const out = Float64Array.from(parameters);
+  for (let i = 0; i < out.length; i += 1) {
+    const [lo, hi] = bounds[i]!;
+    if (Number.isFinite(lo) && Number.isFinite(hi) && lo === hi) {
+      out[i] = lo;
+      continue;
+    }
+    let x = out[i]!;
+    if (Number.isFinite(lo)) {
+      x = Math.max(lo, x);
+    }
+    if (Number.isFinite(hi)) {
+      x = Math.min(hi, x);
+    }
+    out[i] = x;
+  }
+  return out;
+}
+
+function assertFitOptions(
+  fit: ScalarFitOptions,
+  parameterCount: number,
+  loss: NamedScalarLoss
+): void {
+  if (fit.algorithm === 'lm' && loss !== 'l2') {
+    throw new RangeError(
+      `searchScalars: fit.algorithm 'lm' is only valid for loss 'l2', got loss '${loss}'`
+    );
+  }
   if (fit.restarts !== undefined && (!Number.isInteger(fit.restarts) || fit.restarts < 0)) {
     throw new RangeError(
       `searchScalars: fit.restarts must be an integer >= 0, got ${fit.restarts}`
@@ -299,7 +336,14 @@ function assertFitOptions(fit: ScalarFitOptions, parameterCount: number): void {
       );
     }
     for (let i = 0; i < parameterCount; i += 1) {
-      const [lo, hi] = fit.bounds[i]!;
+      const entry = fit.bounds[i];
+      if (!Array.isArray(entry) || entry.length !== 2) {
+        throw new RangeError(
+          `searchScalars: fit.bounds[${i}] must be a [lo, hi] pair, got ${String(entry)}`
+        );
+      }
+      const lo = entry[0] as number;
+      const hi = entry[1] as number;
       const loOk = Number.isFinite(lo) || lo === Number.NEGATIVE_INFINITY;
       const hiOk = Number.isFinite(hi) || hi === Number.POSITIVE_INFINITY;
       if (!loOk || !hiOk) {
@@ -546,28 +590,45 @@ async function evaluateNodes(
     const first = firsts[i]!;
     let loss = first.loss;
     if (names.length > 0 && first.validRows > 0 && rng.next() < optimizeProbability) {
-      const fitResult = fitScalarParameters(
-        node,
-        problem.columns,
-        problem.observed,
-        problem.variables,
-        {
-          parameters: names,
-          initial: fit.initial ?? parameters,
-          restarts: fit.restarts ?? 2,
-          maxIterations: fit.maxIterations ?? 8,
-          rng: rng.fork('fit'),
-          loss: rank.name,
-          weights: rank.weights,
-          bounds: fit.bounds,
-          algorithm: fit.algorithm,
+      const rawStart =
+        fit.initial !== undefined ? Float64Array.from(fit.initial) : new Float64Array(parameters);
+      const fitStart =
+        fit.bounds !== undefined ? clampParametersToBounds(rawStart, fit.bounds) : rawStart;
+      let fitResult;
+      try {
+        fitResult = fitScalarParameters(
+          node,
+          problem.columns,
+          problem.observed,
+          problem.variables,
+          {
+            parameters: names,
+            initial: fitStart,
+            restarts: fit.restarts ?? 2,
+            maxIterations: fit.maxIterations ?? 8,
+            rng: rng.fork('fit'),
+            loss: rank.name,
+            weights: rank.weights,
+            bounds: fit.bounds,
+            algorithm: fit.algorithm,
+          }
+        );
+      } catch (err) {
+        if (!(err instanceof RangeError && err.message.includes('no valid rows to fit'))) {
+          throw err;
         }
-      );
-      const fitted = scoreOnProblem(node, problem, names, fitResult.parameters, rank);
-      if (fitted.loss < loss) {
-        loss = fitted.loss;
-        parameters = fitResult.parameters;
       }
+      if (fitResult !== undefined) {
+        const fitted = scoreOnProblem(node, problem, names, fitResult.parameters, rank);
+        if (fitted.loss < loss) {
+          loss = fitted.loss;
+          parameters = fitResult.parameters;
+        }
+      }
+    }
+    if (fit.bounds !== undefined) {
+      parameters = clampParametersToBounds(parameters, fit.bounds);
+      loss = scoreOnProblem(node, problem, names, parameters, rank).loss;
     }
     out.push(individual(node, loss, parameters));
   }
@@ -836,12 +897,15 @@ export async function* searchScalars(
     crossoverProbability
   );
   const names = paramNames(problem, options.grammar);
+  if (options.fit !== undefined && !isPlainObject(options.fit)) {
+    throw new RangeError(`searchScalars: fit must be a plain object, got ${String(options.fit)}`);
+  }
   const fit: ScalarFitOptions = options.fit ?? {};
-  assertFitOptions(fit, names.length);
   const rank: RankLoss = {
     name: options.loss ?? 'l2',
     weights: options.rowWeights,
   };
+  assertFitOptions(fit, names.length, rank.name);
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
