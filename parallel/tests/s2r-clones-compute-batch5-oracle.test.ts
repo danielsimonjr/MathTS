@@ -90,10 +90,8 @@ describe('S2R parallel batch5 — dot/distance (G65 oracle)', () => {
   it('length mismatch messages stay exact', async () => {
     const a = new Float64Array([1, 2, 3]);
     const b = new Float64Array([1, 2]);
-    await expect(pool.dot(a, b)).rejects.toThrow('dot: vectors must have the same length');
-    await expect(pool.distance(a, b)).rejects.toThrow(
-      'distance: vectors must have the same length'
-    );
+    await expect(pool.dot(a, b)).rejects.toThrow('dot: lengths must match (3 vs 2)');
+    await expect(pool.distance(a, b)).rejects.toThrow('distance: lengths must match (3 vs 2)');
   });
 
   it('large n stays sequential (dot/distance thresholds never)', async () => {
@@ -123,12 +121,12 @@ describe('S2R parallel batch5 — bitwise binary (G66 oracle)', () => {
     expect(Array.from((await pool.bitXor(a, b)).result)).toEqual([0b0110, 0b1100]);
   });
 
-  it('length mismatch throws Array lengths must match', async () => {
+  it('length mismatch throws `<op>: lengths must match (a vs b)`', async () => {
     const a = new Int32Array([1, 2, 3]);
     const b = new Int32Array([1, 2]);
-    await expect(pool.bitAnd(a, b)).rejects.toThrow('Array lengths must match: 3 vs 2');
-    await expect(pool.bitOr(a, b)).rejects.toThrow('Array lengths must match: 3 vs 2');
-    await expect(pool.bitXor(a, b)).rejects.toThrow('Array lengths must match: 3 vs 2');
+    await expect(pool.bitAnd(a, b)).rejects.toThrow('bitAnd: lengths must match (3 vs 2)');
+    await expect(pool.bitOr(a, b)).rejects.toThrow('bitOr: lengths must match (3 vs 2)');
+    await expect(pool.bitXor(a, b)).rejects.toThrow('bitXor: lengths must match (3 vs 2)');
   });
 
   it('large n stays sequential (bitAnd/bitOr/bitXor thresholds never)', async () => {

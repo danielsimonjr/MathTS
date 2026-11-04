@@ -22,7 +22,13 @@ export {
 
 export { WorkerPool } from './WorkerPool.js';
 
-export type { ComputePoolConfig, ParallelResult, OpName, OpThreshold } from './ComputePool.js';
+export type {
+  ComputePoolConfig,
+  ParallelResult,
+  OpName,
+  OpThreshold,
+  DispatchOptions,
+} from './ComputePool.js';
 
 // =============================================================================
 // Operations

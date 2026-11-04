@@ -5,6 +5,7 @@
 
 import { WorkerPool } from './WorkerPool.js';
 import { gemmRows } from './gemm-rows.js';
+import { assertMatmulShape } from './validate.js';
 
 /**
  * Describes a matrix as a flat row-major buffer and its dimensions.
@@ -134,6 +135,10 @@ export class ParallelMatrix {
     if (!this.config.useSharedMemory) {
       return data instanceof Float64Array ? data : new Float64Array(data);
     }
+    // Already shared: hand it over as is instead of copying it into a second shared buffer.
+    if (data instanceof Float64Array && data.buffer instanceof SharedArrayBuffer) {
+      return data;
+    }
 
     const buffer = new SharedArrayBuffer(data.length * Float64Array.BYTES_PER_ELEMENT);
     const sharedArray = new Float64Array(buffer);
@@ -218,6 +223,8 @@ export class ParallelMatrix {
     bRows: number,
     bCols: number
   ): Promise<Float64Array> {
+    // Validate before choosing a path, so a mismatch fails the same way at every size.
+    assertMatmulShape('multiply', aData.length, aRows, aCols, bData.length, bRows, bCols);
     const totalSize = aRows * aCols + bRows * bCols;
 
     if (!this.shouldUseParallel(totalSize)) {

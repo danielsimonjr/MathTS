@@ -65,11 +65,13 @@ export {
   UNIT_PREFIX_SETS,
   unitPrefixExactScale,
   getUnitPrefix,
+  REFUSED_UNIT_SPELLINGS,
 } from '@danielsimonjr/mathts-core';
 
 export type {
   Dimensions,
   UnitDef,
+  UnitInstance,
   SiDimensionVector,
   SiDimensionOptions,
   SiDimensionExponent,

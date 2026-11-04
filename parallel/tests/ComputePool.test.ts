@@ -464,7 +464,9 @@ describe('ComputePool', () => {
         const a = new Float64Array([1, 2, 3]);
         const b = new Float64Array([1, 2]);
 
-        await expect(pool.divide(a, b)).rejects.toThrow(/Array lengths must match/);
+        await expect(pool.divide(a, b)).rejects.toThrow(
+          /divide: lengths must match \(\d+ vs \d+\)/
+        );
       });
     });
 
@@ -1152,13 +1154,15 @@ describe('ComputePool', () => {
       it('throws on length mismatch (bitAnd)', async () => {
         const a = Int32Array.from([1, 2, 3]);
         const b = Int32Array.from([1, 2]);
-        await expect(pool.bitAnd(a, b)).rejects.toThrow('lengths must match');
+        await expect(pool.bitAnd(a, b)).rejects.toThrow('bitAnd: lengths must match (3 vs 2)');
       });
 
       it('throws on length mismatch (leftShift with Int32 b)', async () => {
         const a = Int32Array.from([1, 2, 3]);
         const b = Int32Array.from([1, 2]);
-        await expect(pool.leftShift(a, b)).rejects.toThrow('lengths must match');
+        await expect(pool.leftShift(a, b)).rejects.toThrow(
+          'leftShift: lengths must match (3 vs 2)'
+        );
       });
     });
   });
@@ -1231,7 +1235,7 @@ describe('ComputePool', () => {
     it('pow: mismatched-length inputs throw a descriptive error', async () => {
       const a = new Float64Array([1, 2, 3]);
       const b = new Float64Array([1, 2]);
-      await expect(pool.pow(a, b)).rejects.toThrow(/Array lengths must match/);
+      await expect(pool.pow(a, b)).rejects.toThrow(/pow: lengths must match \(\d+ vs \d+\)/);
     });
   });
 

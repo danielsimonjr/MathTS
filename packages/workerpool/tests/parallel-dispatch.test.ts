@@ -15,6 +15,7 @@ import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { pairwiseSum, pairwiseDot, norm2, scaledDistance } from '@danielsimonjr/mathts-core';
 import { MathWorkerPool } from '../src/index.js';
 
 const pkgRoot = fileURLToPath(new URL('..', import.meta.url));
@@ -125,5 +126,138 @@ describe('parallel kernel dispatch (real workers)', () => {
     expect(hyp.parallelized).toBe(true);
     expect(hyp.result[3]).toBeCloseTo(Math.sqrt(9 + 16), 12);
     expect(hyp.result[99]).toBeCloseTo(Math.sqrt(99 * 99 + 100 * 100), 12);
+  });
+});
+
+describe('stable kernels, transfers and view normalization (real workers)', () => {
+  let pool: MathWorkerPool;
+
+  beforeAll(async () => {
+    pool = new MathWorkerPool({ maxWorkers: 3, parallelThreshold: 10, chunkSize: 64 });
+    await pool.initialize();
+  }, 60_000);
+
+  afterAll(async () => {
+    await pool?.terminate();
+  });
+
+  it('parallel norm of a 1e200-scaled vector is finite and matches the sequential norm', async () => {
+    const data = Float64Array.from({ length: 1000 }, (_, i) => (1 + (i % 9)) * 1e200);
+    const par = await pool.norm(data, { forceParallel: true });
+    const seq = await pool.norm(data, { forceSequential: true });
+    expect(par.parallelized).toBe(true);
+    expect(Number.isFinite(par.result)).toBe(true);
+    expect(Math.abs(par.result - seq.result) / seq.result).toBeLessThan(1e-14);
+    expect(Math.abs(par.result - norm2(data)) / seq.result).toBeLessThan(1e-14);
+  });
+
+  it('parallel distance of 1e-200-scaled vectors does not flush to zero', async () => {
+    const a = Float64Array.from({ length: 500 }, (_, i) => (i + 1) * 1e-200);
+    const b = new Float64Array(500);
+    const par = await pool.distance(a, b, { forceParallel: true });
+    expect(par.result).toBeGreaterThan(0);
+    expect(Math.abs(par.result - scaledDistance(a, b)) / par.result).toBeLessThan(1e-14);
+  });
+
+  it('parallel sum and dot match the pairwise kernels on ill-conditioned data', async () => {
+    const x = Float64Array.from({ length: 5000 }, (_, i) => 1e6 + (i % 13) * 1e-3);
+    const y = Float64Array.from({ length: 5000 }, (_, i) => 1 + (i % 7) * 1e-9);
+    const sum = await pool.sum(x, { forceParallel: true });
+    const dot = await pool.dot(x, y, { forceParallel: true });
+    expect(Math.abs(sum.result - pairwiseSum(x)) / sum.result).toBeLessThan(1e-15);
+    expect(Math.abs(dot.result - pairwiseDot(x, y)) / dot.result).toBeLessThan(1e-15);
+  });
+
+  it('operands are not detached by the transfer of their slices', async () => {
+    const a = Float64Array.from({ length: 300 }, (_, i) => i);
+    const b = Float64Array.from({ length: 300 }, (_, i) => 2 * i);
+    const r = await pool.elementwise(a, b, 'add', { forceParallel: true });
+    expect(r.parallelized).toBe(true);
+    expect(a.length).toBe(300);
+    expect(b.length).toBe(300);
+    expect(r.result[299]).toBe(897);
+  });
+
+  it('matmul, transpose, matvec and outer read a subarray view with a byteOffset correctly', async () => {
+    const padded = (len: number, f: (i: number) => number) => {
+      const buf = new Float64Array(len + 16);
+      for (let i = 0; i < len; i++) buf[8 + i] = f(i);
+      return buf.subarray(8, 8 + len); // byteOffset 64, buffer longer than the view
+    };
+    const rows = 12;
+    const cols = 9;
+    const A = padded(rows * cols, (i) => (i % 11) - 4);
+    const B = padded(cols * 5, (i) => (i % 7) - 3);
+    const v = padded(cols, (i) => i + 1);
+    const u = padded(rows, (i) => i - 5);
+    expect(A.byteOffset).toBe(64);
+
+    const exactOf = (x: Float64Array) => Float64Array.from(x);
+    const force = { forceParallel: true };
+
+    const mm = await pool.matmul(A, rows, cols, B, 5, force);
+    const mmRef = await pool.matmul(exactOf(A), rows, cols, exactOf(B), 5, {
+      forceSequential: true,
+    });
+    expect(mm.parallelized).toBe(true);
+    expect(Array.from(mm.result)).toEqual(Array.from(mmRef.result));
+
+    const tr = await pool.transpose(A, rows, cols, force);
+    expect(tr.parallelized).toBe(true);
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) expect(tr.result[j * rows + i]).toBe(A[i * cols + j]);
+    }
+
+    const mv = await pool.matvec(A, rows, cols, v, force);
+    const mvRef = await pool.matvec(exactOf(A), rows, cols, exactOf(v), { forceSequential: true });
+    expect(Array.from(mv.result)).toEqual(Array.from(mvRef.result));
+
+    const ou = await pool.outer(u, v, force);
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) expect(ou.result[i * cols + j]).toBe(u[i] * v[j]);
+    }
+  });
+
+  it('matmul rejects mismatched buffer sizes at every size', async () => {
+    const small = new Float64Array(6);
+    await expect(pool.matmul(small, 2, 3, new Float64Array(5), 2)).rejects.toThrow(
+      /inner dimensions must match/
+    );
+    await expect(pool.matmul(new Float64Array(5), 2, 3, new Float64Array(6), 2)).rejects.toThrow(
+      /a has 5 elements/
+    );
+    const big = new Float64Array(400);
+    await expect(
+      pool.matmul(big, 20, 20, new Float64Array(399), 20, { forceParallel: true })
+    ).rejects.toThrow(/inner dimensions must match/);
+  });
+
+  it('histogram validates bins, ignores non-finite samples and handles a constant range', async () => {
+    const data = Float64Array.from({ length: 200 }, () => 3);
+    await expect(pool.histogram(data, 0)).rejects.toThrow(/bins must be a positive integer/);
+    await expect(pool.histogram(data, 2.5)).rejects.toThrow(/bins must be a positive integer/);
+    for (const options of [{ forceParallel: true }, { forceSequential: true }]) {
+      const flat = await pool.histogram(data, 4, undefined, undefined, options);
+      expect(flat.result).toEqual([200, 0, 0, 0]);
+      const dirty = Float64Array.from([
+        1,
+        2,
+        NaN,
+        Infinity,
+        -Infinity,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+      ]);
+      const h = await pool.histogram(dirty, 2, undefined, undefined, options);
+      // 11 finite samples (1..11); NaN and +-Infinity are dropped.
+      expect(h.result.reduce((x: number, y: number) => x + y, 0)).toBe(11);
+    }
   });
 });

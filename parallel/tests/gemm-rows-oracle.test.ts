@@ -61,7 +61,7 @@ describe('ParallelMatrix multiply gemm oracle', () => {
   it('zero rows yields empty result buffer', async () => {
     ParallelMatrix.configure({ minSizeForParallel: Infinity, useSharedMemory: false });
     const a = new Float64Array(0);
-    const b = new Float64Array(0);
+    const b = new Float64Array(3 * 2); // b must hold bRows*bCols elements even when A has no rows
     const result = await ParallelMatrix.multiply(a, 0, 3, b, 3, 2);
     expect(result.length).toBe(0);
   });

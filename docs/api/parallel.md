@@ -314,6 +314,39 @@ const tiny = new Float64Array([1, 2, 3]);
 // Just use: tiny.reduce((a, b) => a + b, 0)
 ```
 
+## Types
+
+Type-only exports do not appear in the generated index below (it lists runtime values).
+The main ones:
+
+| Type                 | Description                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OpName`             | Union of the operation names that `shouldParallelize(length, op)` and `thresholdByOp` accept (`'add'`, `'sum'`, `'matmul'`, `'tensordot'`, ...). |
+| `OpThreshold`        | A per-op cutoff: an element count, `'never'` (never parallelize) or `'always'` (threshold 0).                                                    |
+| `ThresholdConfig`    | Category-level thresholds (`matmul`, `elementwise`, `reduce`, `map`, `sort`, `decomposition`, `general`) used by `ThresholdDispatcher`.          |
+| `PoolOptions`        | Options of the underlying `workerpool` pool (`minWorkers`, `maxWorkers`, `workerType`, `script`, ...).                                           |
+| `ExecOptions`        | Options for one `exec` call: `on` (progress callback), `transfer` (transferables to move instead of clone), `metadata`.                          |
+| `DispatchOptions`    | Per-call `forceParallel` / `forceSequential` accepted by the `ComputePool` operations. `forceSequential` wins when both are set.                 |
+| `ElementwiseOptions` | Options of the standalone `parallel*` element-wise functions: `pool`, `forceParallel`, `forceSequential`.                                        |
+| `ChunkOptions`       | Chunk planning: `minChunkSize`, `maxChunks`, `targetChunkSize`, `balanced`.                                                                      |
+
+### Forcing a branch
+
+Every standalone function in `operations/` (`parallelAdd`, `parallelSum`, `parallelMatmul`,
+`parallelMap`, ...) takes `forceParallel` / `forceSequential`, and so does the matching
+`ComputePool` method as a last argument. `forceSequential` computes inline whatever the
+size. `forceParallel` skips the threshold checks; it still needs a pool that was
+`initialize()`d, and on one that was not, the call runs inline.
+
+### Argument checks
+
+Shapes and lengths are checked before a path is chosen, so a mistake fails the same way at
+every size: binary operations throw `<op>: lengths must match (<a> vs <b>)`, `matmul`
+checks `aCols` against the `b` buffer, `transpose` and `matvec` check their buffer
+lengths, and `histogram` requires a positive integer `bins`.
+
+---
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->

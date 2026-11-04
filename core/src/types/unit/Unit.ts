@@ -27,6 +27,7 @@ import type {
   UnitSystemEntry,
 } from './unit-types.js';
 import { DimensionMismatchError, UnitParseError } from './errors.js';
+import { isEffectivelyImaginary } from './va-var.js';
 import {
   type ExactScale,
   addExactScales,
@@ -982,7 +983,13 @@ export const createUnitClass = /* #__PURE__ */ factory(
 
         return null;
       },
-      { hasher: (args: unknown[]): string => args[0] as string, limit: 100 }
+      // The scan above is linear in the number of units (~200 built in). 100 entries is fewer
+      // than the distinct spellings one expression-heavy document uses, so it thrashed; 1000
+      // keeps them all at a few hundred KB. A prefix-split fast path was NOT added: the scan
+      // returns the first name in UNITS insertion order whose suffix and prefix both match, and
+      // a split-based lookup cannot reproduce that order without an insertion-order index that
+      // would have to track every UNITS mutation.
+      { hasher: (args: unknown[]): string => args[0] as string, limit: 1000 }
     );
 
     /**
@@ -1930,8 +1937,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
     function handleVAandVARUnits(simp: UnitInstance): void {
       let isImaginary = false;
       if (typeof simp.value !== 'undefined' && simp.value !== null && isComplex(simp.value)) {
-        // TODO: Make this better, for example, use relative magnitude of re and im rather than absolute
-        isImaginary = Math.abs(simp.value.re) < 1e-14;
+        isImaginary = isEffectivelyImaginary(simp.value.re, simp.value.im);
       }
       for (const i in simp.units) {
         if (hasOwnProperty(simp.units, i)) {
@@ -2601,17 +2607,54 @@ export const createUnitClass = /* #__PURE__ */ factory(
         }
       }
 
-      // TODO: traverse multiple times until all units have been added
-      let lastUnit: UnitInstance | undefined;
+      const keys: string[] = [];
       for (const key in obj) {
         if (hasOwnProperty(obj, key)) {
           if (isPollutingKey(key)) {
             throw new TypeError(`unsafe unit name '${key}'`);
           }
-          lastUnit = Unit.createUnitSingle(key, obj[key]);
+          keys.push(key);
         }
       }
-      return lastUnit;
+
+      // A definition may name a unit that appears later in the object (`{ bar: '40 foo',
+      // foo: ... }`). Keep sweeping the definitions that failed only because a unit was
+      // not found yet, until a sweep creates nothing; then report what is left over. Any other
+      // error (bad name, duplicate, malformed definition) is thrown at once. A failed
+      // definition registers nothing, so retrying it later is safe.
+      const created = new Map<string, UnitInstance>();
+      let pending = keys;
+      while (pending.length > 0) {
+        const stillPending: string[] = [];
+        let lastNotFound: unknown;
+        for (const key of pending) {
+          try {
+            created.set(key, Unit.createUnitSingle(key, obj[key]));
+          } catch (ex) {
+            if (ex instanceof UnitParseError && /not found\./.test(ex.message)) {
+              stillPending.push(key);
+              lastNotFound = ex;
+            } else {
+              throw ex;
+            }
+          }
+        }
+        if (stillPending.length === pending.length) {
+          // One definition on its own is the old single-unit failure: keep its error as is.
+          if (stillPending.length === 1) throw lastNotFound;
+          const err = new Error(
+            `Cannot create unit${stillPending.length > 1 ? 's' : ''} ` +
+              stillPending.map((k) => `"${k}"`).join(', ') +
+              ': ' +
+              (lastNotFound as Error).message
+          );
+          (err as Error & { cause?: unknown }).cause = lastNotFound;
+          throw err;
+        }
+        pending = stillPending;
+      }
+      // "the last created unit" is the one for the last key, as it was before retries existed.
+      return keys.length > 0 ? created.get(keys[keys.length - 1]) : undefined;
     };
 
     /**
@@ -2654,7 +2697,10 @@ export const createUnitClass = /* #__PURE__ */ factory(
         throw new Error('Cannot create unit "' + name + '": a unit with that name already exists');
       }
 
-      // TODO: Validate name for collisions with other built-in functions (like abs or cos, for example), and for acceptable variable names. For example, '42' is probably not a valid unit. Nor is '%', since it is also an operator.
+      // Name checks: an existing unit or alias is refused above, and `assertUnitNameIsValid`
+      // below refuses anything that is not an identifier ('42', '%', 'a-b'). A clash with a
+      // function name such as `abs` or `cos` is not detectable here: this table has no access
+      // to the host's function registry, so a unit with such a name is accepted.
 
       assertUnitNameIsValid(name);
 

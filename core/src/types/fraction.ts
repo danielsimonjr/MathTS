@@ -41,6 +41,13 @@ function reducePair(num: bigint, den: bigint): [bigint, bigint] {
 }
 
 /**
+ * Set by {@link Fraction.fromReduced} for the duration of one constructor call: the arguments
+ * are already in lowest terms with a positive denominator, so the constructor skips the gcd.
+ * Module-private on purpose; it keeps the public constructor signature unchanged.
+ */
+let reducedPending = false;
+
+/**
  * Fraction class for exact rational arithmetic
  * Uses bigint for arbitrary precision numerator and denominator.
  * All fractions are automatically reduced to lowest terms.
@@ -54,6 +61,13 @@ export class Fraction implements IFraction {
     numerator: bigint | number | string | Fraction,
     denominator: bigint | number | string | Fraction = 1n
   ) {
+    // Trusted path (Fraction.fromReduced): lowest terms, positive denominator, nothing to do.
+    if (reducedPending) {
+      reducedPending = false;
+      this.numerator = numerator as bigint;
+      this.denominator = denominator as bigint;
+      return;
+    }
     // Hot path: both arguments already integers. Every arithmetic method lands
     // here, so skip the toRatio closure / type walk / cross-multiply.
     if (typeof numerator === 'bigint' && typeof denominator === 'bigint') {
@@ -126,6 +140,19 @@ export class Fraction implements IFraction {
   // ============================================================
   // Static Factory Methods
   // ============================================================
+
+  /**
+   * Build a Fraction from a pair the caller has already reduced (coprime, `den > 0`), skipping
+   * the gcd of the public constructor. For results of operations on reduced fractions only.
+   */
+  private static fromReduced(numerator: bigint, denominator: bigint): Fraction {
+    reducedPending = true;
+    try {
+      return new Fraction(numerator, denominator);
+    } finally {
+      reducedPending = false;
+    }
+  }
 
   /**
    * Create a Fraction from a number (with optional precision)
@@ -373,11 +400,20 @@ export class Fraction implements IFraction {
   }
 
   /**
-   * Multiplication: a/b * c/d = ac / bd
+   * Multiplication: a/b * c/d = ac / bd.
+   *
+   * Cross-reduces first (Knuth, TAOCP 4.5.1): with both operands in lowest terms only `gcd(a, d)`
+   * and `gcd(c, b)` can be common factors, so the product is already reduced and the two gcds run
+   * on the small operands rather than on the full-size products.
    */
   multiply(other: Scalar): Fraction {
     if (other instanceof Fraction) {
-      return new Fraction(this.numerator * other.numerator, this.denominator * other.denominator);
+      const g1 = gcd(this.numerator, other.denominator);
+      const g2 = gcd(other.numerator, this.denominator);
+      return Fraction.fromReduced(
+        (this.numerator / g1) * (other.numerator / g2),
+        (this.denominator / g2) * (other.denominator / g1)
+      );
     }
     return this.multiply(Fraction.fromNumber(Number(other.valueOf())));
   }
@@ -390,7 +426,16 @@ export class Fraction implements IFraction {
       if (other.numerator === 0n) {
         throw new Error('Division by zero');
       }
-      return new Fraction(this.numerator * other.denominator, this.denominator * other.numerator);
+      // a/b ÷ c/d = a/b * d/c, with the sign of c moved onto the numerator of d/c.
+      const negative = other.numerator < 0n;
+      const p = negative ? -other.denominator : other.denominator;
+      const q = negative ? -other.numerator : other.numerator;
+      const g1 = gcd(this.numerator, q);
+      const g2 = gcd(p, this.denominator);
+      return Fraction.fromReduced(
+        (this.numerator / g1) * (p / g2),
+        (this.denominator / g2) * (q / g1)
+      );
     }
     return this.divide(Fraction.fromNumber(Number(other.valueOf())));
   }
@@ -415,14 +460,17 @@ export class Fraction implements IFraction {
    * Negation: -(a/b) = -a/b
    */
   negate(): Fraction {
-    return new Fraction(-this.numerator, this.denominator);
+    return Fraction.fromReduced(-this.numerator, this.denominator);
   }
 
   /**
    * Absolute value: |a/b|
    */
   abs(): Fraction {
-    return new Fraction(this.numerator < 0n ? -this.numerator : this.numerator, this.denominator);
+    return Fraction.fromReduced(
+      this.numerator < 0n ? -this.numerator : this.numerator,
+      this.denominator
+    );
   }
 
   /**
@@ -432,32 +480,32 @@ export class Fraction implements IFraction {
     if (this.numerator === 0n) {
       throw new Error('Cannot invert zero');
     }
-    return new Fraction(this.denominator, this.numerator);
+    // The reciprocal of a reduced fraction is reduced; only the sign moves to the numerator.
+    return this.numerator < 0n
+      ? Fraction.fromReduced(-this.denominator, -this.numerator)
+      : Fraction.fromReduced(this.denominator, this.numerator);
   }
 
   /**
-   * Power (integer exponent)
+   * Power (integer exponent).
+   *
+   * Raises numerator and denominator separately: powers of coprime integers stay coprime, so the
+   * result is already in lowest terms and no gcd or intermediate Fraction is needed.
+   *
+   * @throws TypeError if `n` is not an integer (a non-integer power is generally irrational)
    */
   pow(n: number | bigint): Fraction {
+    if (typeof n === 'number' && !Number.isInteger(n)) {
+      throw new TypeError(`Fraction.pow: exponent must be an integer (got ${n})`);
+    }
     const exp = typeof n === 'bigint' ? n : BigInt(n);
     if (exp === 0n) {
-      return new Fraction(1n, 1n);
+      return Fraction.fromReduced(1n, 1n);
     }
     if (exp < 0n) {
       return this.inverse().pow(-exp);
     }
-    // Use binary exponentiation
-    let result = new Fraction(1n, 1n);
-    let base: Fraction = this.clone();
-    let e = exp;
-    while (e > 0n) {
-      if (e % 2n === 1n) {
-        result = result.multiply(base);
-      }
-      base = base.multiply(base) as Fraction;
-      e = e / 2n;
-    }
-    return result;
+    return Fraction.fromReduced(this.numerator ** exp, this.denominator ** exp);
   }
 
   /**

@@ -62,7 +62,9 @@ function instrument(pool: MathWorkerPool, totalWorkers?: number) {
     params: unknown[],
     ...rest: unknown[]
   ) {
-    events.push({ kind: 'exec', method, params, extra: rest.length });
+    // Snapshot buffers: an owned slice is transferred, which detaches it as soon as it is sent.
+    const seen = params.map((p) => (p instanceof ArrayBuffer ? p.slice(0) : p));
+    events.push({ kind: 'exec', method, params: seen, extra: rest.length });
     return originals.exec.call(this, method, params, ...rest);
   };
   return {
@@ -369,7 +371,8 @@ describe('runParallel envelope pins (P6-7)', () => {
         ]);
         const calls = execEvents(probe.events);
         expect(calls.map((e) => e.method)).toEqual(['sumChunk', 'sumChunk', 'sumChunk']);
-        expect(calls.map((e) => e.extra)).toEqual([0, 0, 0]);
+        // One trailing argument: the `{ transfer }` options that move each owned slice.
+        expect(calls.map((e) => e.extra)).toEqual([1, 1, 1]);
         expect(calls.map((e) => [e.params[1], e.params[2]])).toEqual([
           [0, 4],
           [0, 4],
@@ -405,7 +408,8 @@ describe('runParallel envelope pins (P6-7)', () => {
       const probe = instrument(pool, 5);
       try {
         const r = await pool.norm(F64);
-        expect(r.result).toBe(Math.sqrt(385));
+        // Scale-aware combine of the dnrm2 partials: equal to sqrt(385) up to rounding.
+        expect(Math.abs(r.result - Math.sqrt(385)) / Math.sqrt(385)).toBeLessThan(4e-16);
         expectEnvelope(r, { chunks: 3, parallelized: true, workersUsed: 3 });
         expect(execEvents(probe.events).map((e) => e.method)).toEqual([
           'normChunk',

@@ -14,6 +14,7 @@ import {
 } from '../../src/index';
 import { DimensionMismatchError, UnitParseError } from '../../src/types/unit/errors';
 import { REFUSED_UNIT_SPELLINGS } from '../../src/types/unit/unit-table';
+import { isEffectivelyImaginary } from '../../src/types/unit/va-var';
 
 const twoPi = exactScaleToNumber(multiplyExactScales(ratioExactScale(2), PI_EXACT_SCALE));
 
@@ -182,6 +183,85 @@ describe('createUnit exact scales', () => {
       Unit.deleteUnit('shannon');
       Unit.deleteUnit('shannons');
       Unit.deleteUnit('floater');
+    }
+  });
+});
+
+describe('createUnit with definitions in any order', () => {
+  it('creates a unit whose definition names a unit that comes later in the object', () => {
+    Unit.createUnit({
+      zzfoo: '3 zzbar',
+      zzbar: '2 m',
+    });
+    expect(new Unit(1, 'zzfoo').to('m').toNumeric()).toBeCloseTo(6, 12);
+    Unit.deleteUnit('zzfoo');
+    Unit.deleteUnit('zzbar');
+  });
+
+  it('resolves a chain written in reverse dependency order', () => {
+    Unit.createUnit({
+      zzc: '2 zzb',
+      zzb: '5 zza',
+      zza: '10 cm',
+    });
+    expect(new Unit(1, 'zzc').to('cm').toNumeric()).toBeCloseTo(100, 10);
+    for (const n of ['zza', 'zzb', 'zzc']) Unit.deleteUnit(n);
+  });
+
+  it('returns the unit of the last key, as before', () => {
+    const last = Unit.createUnit({ zzx: '2 zzy', zzy: '1 m' });
+    expect(last?.toString()).toBe(new Unit(null, 'zzy').toString());
+    Unit.deleteUnit('zzx');
+    Unit.deleteUnit('zzy');
+  });
+
+  it('names every unresolved unit when a definition can never resolve', () => {
+    expect(() =>
+      Unit.createUnit({ zzp: '2 zzmissing', zzq: '3 zzalsomissing', zzok: '1 m' })
+    ).toThrow(/Cannot create units "zzp", "zzq".*not found/s);
+    // The resolvable one was still created.
+    expect(Unit.isValuelessUnit('zzok')).toBe(true);
+    Unit.deleteUnit('zzok');
+  });
+
+  it('keeps the original error when a single definition cannot resolve', () => {
+    expect(() => Unit.createUnit({ zzsolo: '2 zznothere' })).toThrow(UnitParseError);
+  });
+
+  it('does not retry other errors: an invalid name fails at once', () => {
+    expect(() => Unit.createUnit({ '9bad': '1 m', zzlater: '1 m' })).toThrow(/Invalid unit name/);
+    expect(Unit.isValuelessUnit('zzlater')).toBe(false);
+  });
+
+  it('refuses a name that already exists', () => {
+    expect(() => Unit.createUnit({ m: '2 cm' })).toThrow(/already exists/);
+  });
+});
+
+describe('VA and VAR follow the relative size of the real part', () => {
+  it('calls a value imaginary only when the real part is negligible next to the imaginary part', () => {
+    expect(isEffectivelyImaginary(0, 5)).toBe(true);
+    expect(isEffectivelyImaginary(1e-30, 1)).toBe(true);
+    expect(isEffectivelyImaginary(1e-20, 1e-3)).toBe(true);
+    expect(isEffectivelyImaginary(1e-20, 1e-20)).toBe(false); // tiny, but not imaginary
+    expect(isEffectivelyImaginary(1e-20, 0)).toBe(false); // a real 1e-20 was called imaginary
+    expect(isEffectivelyImaginary(5, 0)).toBe(false);
+    expect(isEffectivelyImaginary(3, 4)).toBe(false);
+  });
+
+  it('keeps the old verdict for zero and rejects NaN', () => {
+    expect(isEffectivelyImaginary(0, 0)).toBe(true);
+    expect(isEffectivelyImaginary(Number.NaN, 1)).toBe(false);
+    expect(isEffectivelyImaginary(0, Number.NaN)).toBe(false);
+  });
+
+  it('agrees with the old absolute test wherever the old test was right (|im| >= 1)', () => {
+    for (const re of [0, 1e-16, 1e-15, 1e-13, 1, 100]) {
+      for (const im of [1, 7, 1e3]) {
+        const old = Math.abs(re) < 1e-14;
+        // Differs only in the band where re sits between 1e-14 and 1e-14 * |im|.
+        if (re < 1e-14 || re > 1e-14 * im) expect(isEffectivelyImaginary(re, im)).toBe(old);
+      }
     }
   });
 });
