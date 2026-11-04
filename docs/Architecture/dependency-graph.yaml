@@ -11845,6 +11845,7 @@ modules:
             - scalarCanonicalKey
             - scalarComplexity
             - scalarGrammarAccepts
+            - ScalarComplexityWeights
             - ScalarGrammar
             - ScalarNode
       exports:
@@ -41166,7 +41167,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1237
   totalModules: 82
-  totalLinesOfCode: 206573
+  totalLinesOfCode: 206650
   totalExports: 6457
   totalClasses: 60
   totalInterfaces: 576

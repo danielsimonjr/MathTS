@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** SR-1 through SR-5 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
+**Status:** SR-1 through SR-6 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -119,7 +119,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 | 3    | One loss for ranking and fitting        | SR-3  | **Done.** `l1`, `huber`, and row weights already exist on the fitter and now also rank the hall.  |
 | 4    | Fit budget, bounds, and a start vector  | SR-4  | **Done.** The constants `2` and `8` and the vector of ones are now `fit` options.                 |
 | 5    | Invalid-row policy                      | SR-5  | **Done.** `invalidRows: 'penalize'` reuses the fitter's penalty in the ranker.                    |
-| 6    | Complexity weights on the hall          | SR-6  | The weight type exists. The front cannot see it.                                                  |
+| 6    | Complexity weights on the hall          | SR-6  | **Done.** The weight type existed; the hall, the tie-break, and parsimony now use it.             |
 | 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.      |
 | 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                  |
 | 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.           |
@@ -197,7 +197,7 @@ Add `invalidRows?: 'reject' | 'penalize'`, default `'reject'`. `'reject'` is tod
 
 ## SR-6 — Complexity weights on the hall
 
-**Independent.** Touches `functions/src/scalar-search.ts` and its test. `ScalarComplexityWeights` stays in `expression`.
+**Status: implemented.** Independent. Touches `functions/src/scalar-search.ts` and its test. `ScalarComplexityWeights` stays in `expression`.
 
 Add `complexityWeights?: ScalarComplexityWeights`. The hall, truncation's complexity tie-break, and adaptive parsimony's complexity key all call `scalarComplexity(node, weights)`. Omitted weights are `{}`, which is today's size.
 
@@ -387,7 +387,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.**     |
 | 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.** |
 | 5     | SR-5  | `invalidRows` defaults to `'reject'`. **Done.**                               |
-| 6     | SR-6  | `complexityWeights` reach the hall.                                           |
+| 6     | SR-6  | `complexityWeights` reach the hall. **Done.**                                 |
 | 7     | SR-7  | `simplify` defaults to `'off'`.                                               |
 | 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |
 | 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                             |

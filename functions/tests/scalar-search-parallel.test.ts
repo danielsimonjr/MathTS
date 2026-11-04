@@ -177,6 +177,19 @@ describe('searchScalars with parallel evaluation', () => {
     expectSameRun(parallel.progress, serial.progress);
   });
 
+  it('equals the serial run with complexityWeights', async () => {
+    const problem = problemOf(120, planted);
+    const weighted = { ...base, rng: createSeededRng(7), complexityWeights: { symbol: { x: 2 } } };
+    const serial = await drain(problem, weighted);
+    const parallel = await drain(problem, { ...weighted, parallel: {} });
+    expectSameRun(parallel.progress, serial.progress);
+    // The weights really moved a complexity: some front row no longer counts nodes.
+    const weightedRows = parallel.result.front.filter(
+      (row) => row.complexity !== serial.result.front.find((o) => o.item === row.item)?.complexity
+    );
+    expect(weightedRows.length).toBeGreaterThan(0);
+  });
+
   it('starts no pool below 100 rows', async () => {
     const before = world.pools.length;
     const problem = problemOf(99, planted);

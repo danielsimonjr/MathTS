@@ -3,6 +3,7 @@ import {
   createScalarBuilder,
   forEachScalar,
   scalarCanonicalKey,
+  scalarComplexity,
   scalarGrammarAccepts,
   type ScalarGrammar,
   type ScalarNode,
@@ -1063,6 +1064,206 @@ describe('searchScalars: invalidRows policy', () => {
         }
       )
     ).rejects.toThrow(RangeError);
+  });
+});
+
+describe('searchScalars: complexityWeights', () => {
+  // The same recorded rows the reproducibility pin holds; restated here because the
+  // pin's own `describe` scopes it.
+  const WEIGHT_PIN = [
+    { complexity: 1, loss: 4.870097681877825, key: '{"k":"s","v":"x"}' },
+    {
+      complexity: 5,
+      loss: 6.317050217590134e-32,
+      key: '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+    },
+    {
+      complexity: 7,
+      loss: 0,
+      key: '{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},{"k":"s","v":"x"}]}',
+    },
+  ] as const;
+
+  // Seeds only: with `maxEvaluations: 2` the initial population is exactly the two
+  // seeds, so the front is these two trees and nothing enumerated joins it.
+  const weightsGrammar: ScalarGrammar = {
+    variables: ['x'],
+    binary: ['+'],
+    unary: ['sin'],
+    literals: [],
+    maxSize: 5,
+  };
+  const sinTree = b.call('sin', X);
+  const plusTree = b.op('+', [X, X]);
+  const twoSeedProblem: ScalarSearchProblem = {
+    ...quadProblem,
+    observed: xs, // y = x: neither seed is exact, both are finite on every row
+  };
+  const twoSeeds = {
+    grammar: weightsGrammar,
+    seeds: [sinTree, plusTree],
+    rng: createSeededRng(7),
+    maxEvaluations: 2,
+    optimizeProbability: 0,
+  } as const;
+
+  it('weights omitted: the seed-7 pin holds, including the complexities 1, 5, 7', async () => {
+    const pinned = {
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 120,
+    } as const;
+    for (const complexityWeights of [undefined, {}] as const) {
+      const { progress, result } = await runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        tournamentP: 0.982,
+        complexityWeights,
+        ...pinned,
+      });
+      expect(result.front.map((row) => row.complexity)).toEqual(
+        WEIGHT_PIN.map((r) => r.complexity)
+      );
+      expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        WEIGHT_PIN.map((r) => r.key)
+      );
+      result.front.forEach((row, i) => {
+        expect(Object.is(row.loss, WEIGHT_PIN[i]!.loss)).toBe(true);
+      });
+      expect(progress.map((p) => p.evaluations)).toEqual(
+        Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+      );
+      expect(result.seed).toBe(7);
+    }
+  });
+
+  it('call weights make a sin tree report the weighted complexity and a +-only tree keep its own', async () => {
+    const weights = { call: { sin: 5 } } as const;
+    const weighted = await runSearch(twoSeedProblem, { ...twoSeeds, complexityWeights: weights });
+    // sin(x) no longer shares the complexity-1 hall slot with x, so both seeds survive.
+    expect(weighted.result.front.map((row) => row.complexity)).toEqual([3, 6]);
+    expect(weighted.result.front.map((row) => row.item)).toEqual([plusTree, sinTree]);
+    expect(weighted.result.front[1]!.complexity).toBe(scalarComplexity(sinTree, weights));
+    expect(weighted.result.front[0]!.complexity).toBe(scalarComplexity(plusTree));
+
+    // Unweighted: sin(x) competes with x at complexity 1 and loses the slot to it.
+    const unweighted = await runSearch(twoSeedProblem, {
+      ...twoSeeds,
+      seeds: [sinTree, X],
+    });
+    expect(unweighted.result.front.map((row) => row.complexity)).toEqual([1]);
+    expect(scalarCanonicalKey(unweighted.result.front[0]!.item)).toBe(scalarCanonicalKey(X));
+  });
+
+  it('the front stays ordered by the weighted complexity', async () => {
+    const { result } = await runSearch(twoSeedProblem, {
+      ...twoSeeds,
+      maxEvaluations: 40,
+      complexityWeights: { call: { sin: 5 }, number: 0.5, symbol: { x: 2 } },
+    });
+    const complexities = result.front.map((row) => row.complexity);
+    expect(complexities).toEqual([...complexities].sort((a, b) => a - b));
+    for (const row of result.front) {
+      expect(Number.isFinite(row.complexity)).toBe(true);
+      expect(Number.isInteger(row.complexity)).toBe(true);
+    }
+  });
+
+  it('the truncation tie-break and adaptive parsimony rank by the weighted complexity', async () => {
+    // Same seed, same problem: weighting x triples its complexity, which moves the
+    // parsimony share keys, so a multi-island run evolves differently. The run is
+    // still deterministic under the weights.
+    const run = (complexityWeights?: ScalarSearchOptions['complexityWeights']) =>
+      runSearch(hardProblem, {
+        grammar: hardGrammar,
+        rng: createSeededRng(7),
+        populationSize: 8,
+        tournamentSize: 4,
+        maxEvaluations: 160,
+        populations: 2,
+        complexityWeights,
+      });
+    const plain = await run();
+    const weighted = await run({ symbol: { x: 3 } });
+    expect(trace(plain.progress)).not.toBe(trace(weighted.progress));
+    const again = await run({ symbol: { x: 3 } });
+    expect(trace(weighted.progress)).toBe(trace(again.progress));
+    expect(weighted.progress).toHaveLength(again.progress.length);
+    weighted.progress.forEach((event, i) => {
+      expect(event.front.map((r) => scalarCanonicalKey(r.item))).toEqual(
+        again.progress[i]!.front.map((r) => scalarCanonicalKey(r.item))
+      );
+    });
+  });
+
+  it('two runs with the same weights match event by event and do not advance options.rng', async () => {
+    const rng = createSeededRng(7);
+    const options = {
+      ...twoSeeds,
+      rng,
+      maxEvaluations: 40,
+      complexityWeights: { call: { sin: 5 } },
+    } as const;
+    const a = await runSearch(twoSeedProblem, options);
+    const c = await runSearch(twoSeedProblem, options);
+    expect(a.progress).toHaveLength(c.progress.length);
+    a.progress.forEach((event, i) => {
+      expect(event.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        c.progress[i]!.front.map((row) => scalarCanonicalKey(row.item))
+      );
+      event.front.forEach((row, j) => {
+        expect(Object.is(row.loss, c.progress[i]!.front[j]!.loss)).toBe(true);
+      });
+    });
+    expect(rng.next()).toBe(createSeededRng(7).next());
+  });
+
+  it('zero and negative weights are accepted and the front stays ordered', async () => {
+    const { result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 30,
+      optimizeProbability: 0,
+      complexityWeights: { number: 0 },
+    });
+    const complexities = result.front.map((row) => row.complexity);
+    expect(complexities).toEqual([...complexities].sort((a, b) => a - b));
+    for (const c of complexities) {
+      expect(Number.isFinite(c)).toBe(true);
+      expect(Number.isInteger(c)).toBe(true);
+    }
+    // A tree of only symbols costs 0 now, and it exists on the front.
+    expect(complexities).toContain(0);
+  });
+
+  it('a non-finite weight anywhere throws RangeError before the first yield', async () => {
+    const bad = async (weights: unknown) => {
+      await expect(
+        runSearch(twoSeedProblem, {
+          ...twoSeeds,
+          complexityWeights: weights as ScalarSearchOptions['complexityWeights'],
+        })
+      ).rejects.toThrow(RangeError);
+    };
+    await bad({ number: Number.NaN });
+    await bad({ number: Number.POSITIVE_INFINITY });
+    await bad({ op: { '+': Number.NaN } });
+    await bad({ op: { '+': 1 }, call: { sin: Number.NEGATIVE_INFINITY } });
+    await bad({ symbol: Number.NaN });
+    await bad({ symbol: { x: Number.POSITIVE_INFINITY, y: 1 } });
+    // Shape errors, for the same reason a bad `fit` is rejected up front.
+    await bad(5);
+    await bad(null);
+    await bad({ op: 5 });
+    await bad({ call: [1] });
+    await bad({ symbol: ['x'] });
+    // An explicitly undefined weight is the omitted weight, not an error.
+    await expect(
+      runSearch(twoSeedProblem, {
+        ...twoSeeds,
+        complexityWeights: { number: undefined, op: { '+': undefined } } as never,
+      })
+    ).resolves.toBeDefined();
   });
 });
 

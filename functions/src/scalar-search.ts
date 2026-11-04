@@ -22,6 +22,7 @@ import {
   scalarCanonicalKey,
   scalarComplexity,
   scalarGrammarAccepts,
+  type ScalarComplexityWeights,
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
@@ -99,6 +100,17 @@ export interface ScalarSearchOptions {
    * Omitted is the default branch, so the seed-7 pin is unchanged.
    */
   readonly invalidRows?: 'reject' | 'penalize';
+  /**
+   * Per-node weights for the complexity the hall, the truncation tie-break, and
+   * adaptive parsimony rank by. `ScalarComplexityWeights` from
+   * `@danielsimonjr/mathts-expression`; omitted fields weigh 1, so `{}` (and an
+   * omitted option) is today's node count. Every weight must be a finite number;
+   * a non-finite one throws `RangeError` before the first yield, rather than
+   * producing a `NaN` complexity that `paretoFront` would silently drop. Zero and
+   * negative weights are accepted: they are summed and `Math.round`ed by
+   * `scalarComplexity` like any other weight.
+   */
+  readonly complexityWeights?: ScalarComplexityWeights;
   /**
    * Refit knobs forwarded to {@link fitScalarParameters}. An omitted field is
    * today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's
@@ -381,6 +393,57 @@ function assertFitOptions(
   }
 }
 
+function assertComplexityWeights(weights: ScalarComplexityWeights): void {
+  if (!isPlainObject(weights)) {
+    throw new RangeError(
+      `searchScalars: complexityWeights must be a plain object, got ${String(weights)}`
+    );
+  }
+  const weight = (path: string, value: unknown): void => {
+    if (value === undefined) {
+      return;
+    }
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      throw new RangeError(
+        `searchScalars: complexityWeights ${path} must be a finite number, got ${String(value)}`
+      );
+    }
+  };
+  weight('number', weights.number);
+  if (weights.op !== undefined) {
+    if (!isPlainObject(weights.op)) {
+      throw new RangeError(
+        `searchScalars: complexityWeights.op must be a plain object, got ${String(weights.op)}`
+      );
+    }
+    for (const [op, w] of Object.entries(weights.op)) {
+      weight(`op.${op}`, w);
+    }
+  }
+  if (weights.call !== undefined) {
+    if (!isPlainObject(weights.call)) {
+      throw new RangeError(
+        `searchScalars: complexityWeights.call must be a plain object, got ${String(weights.call)}`
+      );
+    }
+    for (const [fn, w] of Object.entries(weights.call)) {
+      weight(`call.${fn}`, w);
+    }
+  }
+  if (weights.symbol !== undefined && typeof weights.symbol !== 'number') {
+    if (!isPlainObject(weights.symbol)) {
+      throw new RangeError(
+        `searchScalars: complexityWeights.symbol must be a number or a plain object, got ${String(weights.symbol)}`
+      );
+    }
+    for (const [name, w] of Object.entries(weights.symbol)) {
+      weight(`symbol.${name}`, w);
+    }
+  } else {
+    weight('symbol', weights.symbol);
+  }
+}
+
 function assertSearchInputs(
   problem: ScalarSearchProblem,
   options: ScalarSearchOptions,
@@ -592,12 +655,17 @@ function scoreOnWorkers(
   };
 }
 
-function individual(node: ScalarNode, loss: number, parameters: Float64Array): EvaluatedIndividual {
+function individual(
+  node: ScalarNode,
+  loss: number,
+  parameters: Float64Array,
+  weights: ScalarComplexityWeights
+): EvaluatedIndividual {
   return {
     node,
     key: scalarCanonicalKey(node),
     loss,
-    complexity: scalarComplexity(node),
+    complexity: scalarComplexity(node, weights),
     parameters,
   };
 }
@@ -647,7 +715,8 @@ async function evaluateNodes(
   optimizeProbability: number,
   rng: SeededRng,
   rank: RankLoss,
-  fit: ScalarFitOptions
+  fit: ScalarFitOptions,
+  weights: ScalarComplexityWeights
 ): Promise<EvaluatedIndividual[]> {
   const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
@@ -701,7 +770,7 @@ async function evaluateNodes(
       parameters = clampParametersToBounds(parameters, fit.bounds);
       loss = scoreOnProblem(node, problem, names, parameters, rank).loss;
     }
-    out.push(individual(node, loss, parameters));
+    out.push(individual(node, loss, parameters, weights));
   }
   return out;
 }
@@ -945,7 +1014,9 @@ function pickSelected(
  * adds {@link INVALID_ROW_PENALTY} per positively weighted invalid row on top of the
  * valid-row loss (absolute, not target-scaled). Under `'penalize'` the advisory refit
  * still runs when every weighted row is invalid; refit acceptance uses the ranker on
- * both sides. `fit`
+ * both sides. `complexityWeights` weighs the nodes of the complexity the hall, the
+ * truncation tie-break, and adaptive parsimony use; omitted, it is today's size.
+ * `fit`
  * forwards `restarts` (default 2), `maxIterations` (default 8), `bounds`,
  * `algorithm`, and `initial` (default the inherited vector) to the fitter; a bad
  * bound or length throws before the first yield. Omitted fields are today's call.
@@ -977,6 +1048,10 @@ export async function* searchScalars(
     throw new RangeError(`searchScalars: fit must be a plain object, got ${String(options.fit)}`);
   }
   const fit: ScalarFitOptions = options.fit ?? {};
+  if (options.complexityWeights !== undefined) {
+    assertComplexityWeights(options.complexityWeights);
+  }
+  const complexityWeights: ScalarComplexityWeights = options.complexityWeights ?? {};
   const rank: RankLoss = {
     name: options.loss ?? 'l2',
     weights: options.rowWeights,
@@ -1045,7 +1120,8 @@ export async function* searchScalars(
         optimizeProbability,
         rng,
         rank,
-        fit
+        fit,
+        complexityWeights
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -1124,7 +1200,8 @@ export async function* searchScalars(
           optimizeProbability,
           island.rng,
           rank,
-          fit
+          fit,
+          complexityWeights
         );
         evaluations += offspring.length;
         for (const ind of offspring) {
