@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** planning only. This file is the contract for the implementation PRs below. It changes no runtime source.
+**Status:** SR-1 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -96,7 +96,7 @@ No benchmark times `searchScalars`, mutation, fitting inside the search, or the 
 
 These are facts about `5db1f780`, in the order of the PRs.
 
-1. **`admit` does not bind the search.** `enumerateScalars` drops trees `admit` rejects. `initialTrees` filters seeds with `scalarGrammarAccepts` only. Offspring go through `weightedMutation`, which also uses `scalarGrammarAccepts` only. A seed, or a mutation, can enter the population when `admit` would reject it. `functions/src` has no reference to `admit`.
+1. **`admit` does not bind the search.** Closed by SR-1: `initialTrees` and the offspring loop call `scalarGrammarAccepts` and then `grammar.admit` when it is set. `enumerateScalars` already applied `admit`. `scalarGrammarAccepts` still does not call it.
 2. **Crossover is not in the loop.** `crossoverSubtrees` is exported and tested. `searchScalars` never calls it. Offspring are mutations, or a copy of the parent after 10 failed attempts. The copy is scored again, and the refit coin can run again, because the random stream must stay in order.
 3. **The ranker and the fitter do not share a loss.** The hall ranks by sum of squares. The fitter can do `l1`, `huber`, weights, and bounds, but the search never passes them. A tree that is invalid on one row is `Infinity` in the hall even when the fitter would have penalized that row and kept going.
 4. **The refit budget is a private constant.** `restarts: 2` and `maxIterations: 8` are not options. The start vector is ones. There is no bounds argument.
@@ -112,25 +112,25 @@ These are facts about `5db1f780`, in the order of the PRs.
 
 ## Ranking
 
-| Rank | Improvement                             | PR    | Why this rank                                                                                                        |
-| ---- | --------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------- |
-| 1    | Honor `admit` on seeds and offspring    | SR-1  | A constraint the grammar already has and the search ignores. Small, and every later search change should respect it. |
-| 2    | Opt-in subtree crossover                | SR-2  | The operator is already tested. The loop never uses a second parent.                                                 |
-| 3    | One loss for ranking and fitting        | SR-3  | `l1`, `huber`, and row weights already exist on the fitter and cannot affect which tree wins.                        |
-| 4    | Fit budget, bounds, and a start vector  | SR-4  | The constants `2` and `8` and the vector of ones are private.                                                        |
-| 5    | Invalid-row policy                      | SR-5  | One non-positive row makes every `log` tree unscorable.                                                              |
-| 6    | Complexity weights on the hall          | SR-6  | The weight type exists. The front cannot see it.                                                                     |
-| 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.                         |
-| 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                                     |
-| 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.                              |
-| 10   | `sqrt` and `atan`                       | SR-10 | The only operator additions in this program. Dual rules already exist.                                               |
-| 11   | Benchmark harness                       | SR-11 | No later speed claim is legal until this exists. It changes no search behavior.                                      |
-| 12   | Compile a structure once per generation | SR-12 | The score path recompiles every tree, including copies.                                                              |
-| 13   | Overlapped islands, ordered merge       | SR-13 | Islands are sequential even though their random streams are independent.                                             |
-| 14   | Worker threshold from a measurement     | SR-14 | The constant 100 is a caller-thread tape result, not a worker result.                                                |
-| 15   | Cancel and optional early stop          | SR-15 | Enumeration can abort. The search cannot.                                                                            |
-| 16   | `runScalarSearch` and `bestLossFactor`  | SR-16 | The public call is wider than a regression needs to be.                                                              |
-| 17   | Walkthrough and example                 | SR-17 | Docs describe the knobs and never run a search.                                                                      |
+| Rank | Improvement                             | PR    | Why this rank                                                                                     |
+| ---- | --------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
+| 1    | Honor `admit` on seeds and offspring    | SR-1  | **Done.** A constraint the grammar already has; the search now applies it to seeds and offspring. |
+| 2    | Opt-in subtree crossover                | SR-2  | The operator is already tested. The loop never uses a second parent.                              |
+| 3    | One loss for ranking and fitting        | SR-3  | `l1`, `huber`, and row weights already exist on the fitter and cannot affect which tree wins.     |
+| 4    | Fit budget, bounds, and a start vector  | SR-4  | The constants `2` and `8` and the vector of ones are private.                                     |
+| 5    | Invalid-row policy                      | SR-5  | One non-positive row makes every `log` tree unscorable.                                           |
+| 6    | Complexity weights on the hall          | SR-6  | The weight type exists. The front cannot see it.                                                  |
+| 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.      |
+| 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                  |
+| 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.           |
+| 10   | `sqrt` and `atan`                       | SR-10 | The only operator additions in this program. Dual rules already exist.                            |
+| 11   | Benchmark harness                       | SR-11 | No later speed claim is legal until this exists. It changes no search behavior.                   |
+| 12   | Compile a structure once per generation | SR-12 | The score path recompiles every tree, including copies.                                           |
+| 13   | Overlapped islands, ordered merge       | SR-13 | Islands are sequential even though their random streams are independent.                          |
+| 14   | Worker threshold from a measurement     | SR-14 | The constant 100 is a caller-thread tape result, not a worker result.                             |
+| 15   | Cancel and optional early stop          | SR-15 | Enumeration can abort. The search cannot.                                                         |
+| 16   | `runScalarSearch` and `bestLossFactor`  | SR-16 | The public call is wider than a regression needs to be.                                           |
+| 17   | Walkthrough and example                 | SR-17 | Docs describe the knobs and never run a search.                                                   |
 
 ## Rules for every implementation PR
 
@@ -145,7 +145,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 
 ## SR-1 — Honor `admit` on seeds and offspring
 
-**Independent of the other PRs.** Touches `functions/src/scalar-search.ts` and `functions/tests/scalar-search.test.ts`.
+**Status: implemented.** Independent of the other PRs. Touches `functions/src/scalar-search.ts` and `functions/tests/scalar-search.test.ts`.
 
 Add an internal check used by `initialTrees` and by the offspring loop: `scalarGrammarAccepts`, and then `grammar.admit(node)` when `admit` is set. A child that fails is a failed attempt and counts toward the existing 10 attempts. A seed that fails is skipped, as a seed that fails the grammar is skipped today. `enumerateScalars` already applies `admit`, so the enumerated half of the initial population does not change. `scalarGrammarAccepts` stays as documented: it does not call `admit`. Operator functions stay as documented: they return a tree the grammar structure accepts, and the search applies `admit`.
 
@@ -382,7 +382,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 
 | Order | PR    | One-line contract                                                   |
 | ----- | ----- | ------------------------------------------------------------------- |
-| 1     | SR-1  | `admit` binds seeds and offspring.                                  |
+| 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                        |
 | 2     | SR-2  | `crossoverProbability` defaults to 0.                               |
 | 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`.     |
 | 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. |

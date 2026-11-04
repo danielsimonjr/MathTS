@@ -63,7 +63,10 @@ export interface ScalarSearchOptions {
   readonly maxEvaluations: number;
   /** Second cap on tree evaluations, reported as `'max-candidates'`. */
   readonly maxCandidates?: number;
-  /** Trees injected into the initial population (`seeds`); the grammar filters them. */
+  /**
+   * Trees injected into the initial population (`seeds`). The grammar's structural
+   * rules filter them, and so does `grammar.admit` when it is set.
+   */
   readonly seeds?: readonly ScalarNode[];
   /** Constant-perturbation scale handed to the mutations. Default 0.25. */
   readonly perturbationFactor?: number;
@@ -538,7 +541,19 @@ export function migrateIslands(islands: Island[], fractionReplaced: number, rng:
   }
 }
 
-/** Seeds that the grammar accepts, then enumerated trees, up to `limit` distinct trees. */
+/**
+ * Structural grammar check, then `admit` when the caller set it. `scalarGrammarAccepts`
+ * does not call `admit`; the search applies it here so seeds and mutation offspring
+ * cannot enter when `admit` would reject them. `admit` must be a pure function of
+ * the node — the search does not copy it.
+ */
+function grammarAdmits(grammar: ScalarGrammar, node: ScalarNode): boolean {
+  return (
+    scalarGrammarAccepts(grammar, node) && (grammar.admit === undefined || grammar.admit(node))
+  );
+}
+
+/** Seeds that the grammar (and `admit`, when set) accepts, then enumerated trees. */
 function initialTrees(
   grammar: ScalarGrammar,
   seeds: readonly ScalarNode[] | undefined,
@@ -551,7 +566,7 @@ function initialTrees(
       break;
     }
     const key = scalarCanonicalKey(seed);
-    if (!seen.has(key) && scalarGrammarAccepts(grammar, seed)) {
+    if (!seen.has(key) && grammarAdmits(grammar, seed)) {
       seen.add(key);
       out.push(seed);
     }
@@ -617,7 +632,11 @@ function pickSelected(
  * The generator yields one {@link SearchProgress} after the initial population
  * and one after every generation, and returns a {@link ScalarSearchResult}.
  * Evaluations never exceed `maxEvaluations`. `options.rng` is not advanced, so two
- * runs with the same inputs and seed agree bit for bit.
+ * runs with the same inputs and seed agree bit for bit. When `grammar.admit` is
+ * set it binds seeds and mutation offspring (`scalarGrammarAccepts`, then `admit`).
+ * A rejected child is a failed attempt; a rejected seed is skipped. `admit` must
+ * be a pure function of the node — a predicate that reads a clock or a random
+ * stream makes the run unreproducible. `admitMonotone` is left to enumeration.
  *
  * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
@@ -739,7 +758,10 @@ export async function* searchScalars(
           );
           let child: ScalarNode | null = null;
           for (let attempt = 0; attempt < MUTATION_ATTEMPTS && child === null; attempt += 1) {
-            child = mutate(parent.node, island.rng, mutationCtx);
+            const candidate = mutate(parent.node, island.rng, mutationCtx);
+            if (candidate !== null && grammarAdmits(options.grammar, candidate)) {
+              child = candidate;
+            }
           }
           nodes.push(child ?? parent.node);
           inherited.push(new Float64Array(parent.parameters));

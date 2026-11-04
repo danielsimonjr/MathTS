@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`searchScalars` honors `grammar.admit` on seeds and mutation offspring (SR-1).** When `admit` is set, a seed that fails it is skipped and a mutation that fails it is a failed attempt (the existing 10-attempt budget). `scalarGrammarAccepts` still does not call `admit`. `admit` must be a pure function of the node. When `admit` is omitted the seed-7 pin is unchanged. Tests: `functions/tests/scalar-search.test.ts`.
+
 ### Changed
 - **Sprint 2R assembly clone-merge (G0–G5, `f64-buffer.ts`).** `array_min`/`matrix_min`, `array_max`/`matrix_max`, element-wise add/sub/mul/div exports for array, matrix, and interleaved complex buffers share `@inline` `f64Min`/`f64Max`/`f64Add`/`f64Sub`/`f64Mul`/`f64Div`. Wasm export names and semantics unchanged (empty min/max → NaN; complex add/sub remain componentwise f64 over the buffer). Oracle pins in `assembly/tests/f64-buffer-clone.test.mjs`.
 - **Remaining clone pairs after Sprint 2R.** `docs/roadmap/CLONES_REMAINING.md` records the 12 exact groups `repo-tools clones` still reports after `4f1d0fc6` (43 units), the 638 remaining near pairs (115 at jStruct ≥ 0.9, 165 at 0.8–0.9), skip reasons pinned to headers or tests, and the counts against the `b24e3ec2` baseline.
