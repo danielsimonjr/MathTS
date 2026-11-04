@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   createScalarBuilder,
+  forEachScalar,
   scalarCanonicalKey,
   scalarGrammarAccepts,
   type ScalarGrammar,
@@ -332,6 +333,27 @@ describe('searchScalars: reproducibility', () => {
     expect(await fingerprint(7)).not.toBe(await fingerprint(8));
   });
 
+  it('an always-true admit leaves the recorded seed-7 front unchanged', async () => {
+    const { progress, result } = await runSearch(quadProblem, {
+      grammar: { ...quadGrammar, admit: () => true },
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      ...pinned,
+    });
+    expect(result.front.map((row) => row.complexity)).toEqual(PINNED_ROWS.map((r) => r.complexity));
+    expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+      PINNED_ROWS.map((r) => r.key)
+    );
+    result.front.forEach((row, i) => {
+      expect(Object.is(row.loss, PINNED_ROWS[i]!.loss)).toBe(true);
+    });
+    expect(progress.map((p) => p.evaluations)).toEqual(
+      Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+    );
+    expect(result.evaluations).toBe(120);
+    expect(result.seed).toBe(7);
+  });
+
   it('populations: 1 reproduces the recorded front whatever migration is asked for', async () => {
     const plain = await runSearch(quadProblem, {
       grammar: quadGrammar,
@@ -541,6 +563,133 @@ describe('searchScalars: arguments', () => {
   it('rejects a grammar that admits no tree instead of failing later', async () => {
     const empty: ScalarGrammar = { variables: [], binary: ['+'], unary: [], maxSize: 5 };
     await reject(quadProblem, { ...base, grammar: empty });
+  });
+});
+
+describe('searchScalars: admit', () => {
+  function containsSin(node: ScalarNode): boolean {
+    let found = false;
+    forEachScalar(node, (n) => {
+      if (n.kind === 'call' && n.fn === 'sin') {
+        found = true;
+      }
+    });
+    return found;
+  }
+
+  function reportedNodes(
+    progress: readonly SearchProgress[],
+    result: ScalarSearchResult
+  ): ScalarNode[] {
+    return [
+      ...progress.flatMap((event) => event.front.map((row) => row.item)),
+      ...result.front.map((row) => row.item),
+    ];
+  }
+
+  const noSin = (node: ScalarNode): boolean => !containsSin(node);
+
+  // unary-only `sin` so addNode / randomizeTree wrap a subtree in `sin`. The planted
+  // law is `sin(x)` so a `sin` seed or wrap has the lowest loss and stays on the
+  // front (on `x^2+x` it is Pareto-dominated by `x`). Enumeration already applies
+  // `admit`; any `sin` that still appears is a seed or a mutation.
+  const sinGrammar: ScalarGrammar = {
+    variables: ['x'],
+    binary: [],
+    unary: ['sin'],
+    literals: [],
+    maxSize: 5,
+  };
+  const plantedSin = b.call('sin', X);
+  const sinProblem: ScalarSearchProblem = {
+    ...quadProblem,
+    observed: observedOf(plantedSin, xs),
+  };
+
+  it('never reports a sin node when admit rejects sin, including a sin seed and a mutation wrap', async () => {
+    const shared = {
+      rng: createSeededRng(7),
+      seeds: [plantedSin],
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 80,
+    } as const;
+
+    const open = await runSearch(sinProblem, { ...shared, grammar: sinGrammar });
+    expect(reportedNodes(open.progress, open.result).some(containsSin)).toBe(true);
+
+    const closed = await runSearch(sinProblem, {
+      ...shared,
+      grammar: { ...sinGrammar, admit: noSin },
+    });
+    for (const node of reportedNodes(closed.progress, closed.result)) {
+      expect(containsSin(node)).toBe(false);
+    }
+  });
+
+  it('never reports a sin node from a mutation wrap when admit rejects sin and no sin seed is given', async () => {
+    // No seed: enumeration already applies admit, so the initial population is
+    // only `x`. Any later `sin` would be an addNode / randomizeTree wrap.
+    const closed = await runSearch(sinProblem, {
+      grammar: { ...sinGrammar, admit: noSin },
+      rng: createSeededRng(7),
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 80,
+    });
+    expect(closed.result.front.length).toBeGreaterThan(0);
+    for (const node of reportedNodes(closed.progress, closed.result)) {
+      expect(containsSin(node)).toBe(false);
+    }
+  });
+
+  it('is identical across two runs with the same seed and the same admit', async () => {
+    const rng = createSeededRng(11);
+    const options = {
+      grammar: { ...sinGrammar, admit: noSin, binary: ['+', '*'] as const, literals: [1] },
+      rng,
+      seeds: [b.call('sin', X)],
+      populationSize: 8,
+      tournamentSize: 4,
+      maxEvaluations: 64,
+    } as const;
+    const a = await runSearch(sinProblem, options);
+    const c = await runSearch(sinProblem, options);
+    expect(a.progress).toHaveLength(c.progress.length);
+    a.progress.forEach((event, i) => {
+      const other = c.progress[i]!;
+      expect(event.evaluations).toBe(other.evaluations);
+      expect(event.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        other.front.map((row) => scalarCanonicalKey(row.item))
+      );
+      event.front.forEach((row, j) => {
+        expect(Object.is(row.loss, other.front[j]!.loss)).toBe(true);
+      });
+    });
+    expect(rng.next()).toBe(createSeededRng(11).next());
+    for (const node of reportedNodes(a.progress, a.result)) {
+      expect(containsSin(node)).toBe(false);
+    }
+  });
+
+  it('throws the existing RangeError when admit rejects every tree', async () => {
+    const grammar: ScalarGrammar = { ...quadGrammar, admit: () => false };
+    // A structure-ok seed that admit rejects: without the search-side check this
+    // seed would enter the population and the run would return a front.
+    await expect(
+      runSearch(quadProblem, {
+        grammar,
+        rng: createSeededRng(7),
+        seeds: [X],
+        maxEvaluations: 10,
+      })
+    ).rejects.toThrow('searchScalars: the grammar admits no tree');
+  });
+
+  it('scalarGrammarAccepts still does not call admit', () => {
+    const grammar: ScalarGrammar = { ...sinGrammar, admit: () => false };
+    expect(scalarGrammarAccepts(grammar, b.call('sin', X))).toBe(true);
+    expect(scalarGrammarAccepts(grammar, X)).toBe(true);
   });
 });
 

@@ -17,6 +17,12 @@ MathTS ships a **ScalarNode** toolkit: build trees with `createScalarBuilder` (`
 
 `searchScalars` is the shipped evolutionary driver over `ScalarNode` trees; it is not extended here. The expansion contract is [`docs/plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md`](../plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md). This page stays the record of the shipped surface.
 
+## Grammar `admit`
+
+`admit` is an optional predicate on `ScalarGrammar`. `enumerateScalars` already drops trees `admit` rejects. `searchScalars` applies the same check to seeds and to mutation offspring: `scalarGrammarAccepts`, then `grammar.admit(node)` when `admit` is set. A rejected seed is skipped, as a seed that fails the grammar is skipped. A rejected child is a failed mutation attempt and counts toward the existing 10 attempts. `scalarGrammarAccepts` does not call `admit`. Mutation operators still return a tree the grammar structure accepts; the search applies `admit`. `admitMonotone` is left to enumeration; the search does not reimplement pool pruning.
+
+`admit` must be a pure function of the node. The search does not copy it. A predicate that reads a clock or a random stream makes the run unreproducible. When `admit` is omitted, the seed-7 pin is unchanged.
+
 ## Pareto scores and model selection
 
 Definitions match `functions/src/pareto-front.ts`.
