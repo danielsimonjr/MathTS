@@ -34,3 +34,29 @@ describe('real (non-integer) order Bessel', () => {
     close(besselJ(1, 1), 0.4400505857449335);
   });
 });
+
+describe('real-order Bessel: Temme/Steed regime coverage (Copilot review)', () => {
+  const sq = (x: number) => Math.sqrt(2 / (Math.PI * x));
+  it('no cancellation for large x below ν² (J_{10.5}(80))', () => {
+    expect(besselJ(10.5, 80) as number).toBeCloseTo(0.0750484455895156, 13);
+  });
+  it('small x at large order matches the ascending series (J_{20.3}(5))', () => {
+    // Independent reference: Σ (−1)^k (x/2)^{2k+ν} / (k! Γ(k+ν+1)) in double precision.
+    expect(besselJ(20.3, 5) as number).toBeCloseTo(1.4766695817810275e-11, 24);
+  });
+  it('stable near integer orders (Y_ν → Y_n as ν → n, with the ∂Y/∂ν correction)', () => {
+    // Y_0(1) = 0.08825696421567696 and ∂Y_ν/∂ν|_{ν=0} = (π/2) J_0(x) ≈ 1.2019,
+    // so Y_{1e-12}(1) − Y_0(1) ≈ 1.2e-12: the value must sit within 2e-12 of Y_0(1).
+    expect(Math.abs((besselY(1e-12, 1) as number) - 0.08825696421567696)).toBeLessThan(2e-12);
+    expect(Math.abs((besselJ(1 + 1e-12, 1) as number) - 0.4400505857449335)).toBeLessThan(2e-12);
+    expect(Math.abs((besselY(2 - 1e-11, 3) as number) - -0.16040039348492374)).toBeLessThan(2e-11);
+  });
+  it('half-integer closed forms across x (series, CF2 and Hankel regimes)', () => {
+    expect(besselJ(0.5, 0.01) as number).toBeCloseTo(sq(0.01) * Math.sin(0.01), 15);
+    expect(besselY(0.5, 0.5) as number).toBeCloseTo(-sq(0.5) * Math.cos(0.5), 15);
+    expect(besselJ(1.5, 50) as number).toBeCloseTo(sq(50) * (Math.sin(50) / 50 - Math.cos(50)), 14);
+    expect(besselJ(-0.5, 1) as number).toBeCloseTo(sq(1) * Math.cos(1), 15);
+    expect(besselY(-0.5, 2) as number).toBeCloseTo(sq(2) * Math.sin(2), 15);
+    expect(besselJ(0.5, 2e5) as number).toBeCloseTo(sq(2e5) * Math.sin(2e5), 12);
+  });
+});

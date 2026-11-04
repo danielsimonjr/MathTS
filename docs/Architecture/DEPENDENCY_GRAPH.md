@@ -11431,7 +11431,7 @@ graph LR
 | `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
 | `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
 | `./parallel-map.js`                  | `mapArray, kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, besselJRealOrder, besselYRealOrder, besselHankelReal, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                             | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, erfcScalar, factorial, betaScalar, gammaincScalar, gammaincpScalar, upperGammaQ, betaincScalar, besselIScalar, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, airyAiScalar, airyBiScalar, incompleteBetaFraction, ellipticKScalar, ellipticECompleteScalar`                                                                                                                              | Import |
 | `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
@@ -12287,7 +12287,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselJRealOrder`, `besselHankelReal`, `besselYRealOrder`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
+- Functions: `_lgamma`, `erfcSelfContained`, `erfcScalar`, `normalCDFScalar`, `besselHankel`, `besselJ0Series`, `besselJ1Series`, `besselY0Series`, `besselY1Series`, `besselJ0Scalar`, `besselJ1Scalar`, `besselY0Scalar`, `besselY1Scalar`, `besselGammaAux`, `besselJYTemme`, `besselHankelReal`, `besselJRealOrder`, `besselYRealOrder`, `besselJScalar`, `besselYScalar`, `ellipticKScalar`, `ellipticECompleteScalar`, `airyUCoeffs`, `airyAsymPQ`, `airyScalar`, `airyAiScalar`, `airyBiScalar`, `factorial`, `betaScalar`, `incompleteBetaFraction`, `betaincClosedScalar`, `chooseScalar`, `upperGammaQ`, `gammaincScalar`, `gammaincpScalar`, `betaincScalar`, `besselIScalar`
 
 ---
 
@@ -19973,12 +19973,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 212548 |
-| Total Exports           | 6875   |
+| Total Lines of Code     | 212732 |
+| Total Exports           | 6877   |
 | Total Re-exports        | 2977   |
 | Total Classes           | 60     |
 | Total Interfaces        | 592    |
-| Total Functions         | 2277   |
+| Total Functions         | 2279   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

@@ -20,15 +20,28 @@ export function wassersteinDistance(
   if (uv.length === 0 || vv.length === 0) throw new RangeError('wassersteinDistance: empty sample');
   const uw = normWeights(uv, opts?.uWeights);
   const vw = normWeights(vv, opts?.vWeights);
-  const points = [...new Set([...uv, ...vv])].sort((a, b) => a - b);
+  // ∫|F_u − F_v| dt over the merged support, sweeping both sorted samples
+  // once (O(n log n)); the two CDFs are running weight sums.
+  const su = sortedWithWeights(uv, uw);
+  const sv = sortedWithWeights(vv, vw);
+  let iu = 0;
+  let iv = 0;
+  let cu = 0;
+  let cv = 0;
   let total = 0;
-  for (let k = 0; k < points.length - 1; k++) {
-    const t = points[k];
-    const cu = cdfAt(uv, uw, t);
-    const cv = cdfAt(vv, vw, t);
-    total += Math.abs(cu - cv) * (points[k + 1] - t);
+  let prev = Number.NaN;
+  while (iu < su.length || iv < sv.length) {
+    const t = iu < su.length && (iv >= sv.length || su[iu][0] <= sv[iv][0]) ? su[iu][0] : sv[iv][0];
+    if (!Number.isNaN(prev) && t > prev) total += Math.abs(cu - cv) * (t - prev);
+    while (iu < su.length && su[iu][0] === t) cu += su[iu++][1];
+    while (iv < sv.length && sv[iv][0] === t) cv += sv[iv++][1];
+    prev = t;
   }
   return total;
+}
+
+function sortedWithWeights(x: number[], w: number[]): Array<[number, number]> {
+  return x.map((v, i): [number, number] => [v, w[i]]).sort((a, b) => a[0] - b[0]);
 }
 
 function normWeights(x: number[], w: Vec | undefined): number[] {
@@ -39,13 +52,6 @@ function normWeights(x: number[], w: Vec | undefined): number[] {
   const s = ws.reduce((acc, v) => acc + v, 0);
   if (s === 0) throw new RangeError('weights must not sum to zero');
   return ws.map((v) => v / s);
-}
-
-/** Weighted CDF F(t) = Σ_{xᵢ ≤ t} wᵢ. */
-function cdfAt(x: number[], w: number[], t: number): number {
-  let f = 0;
-  for (let i = 0; i < x.length; i++) if (x[i] <= t) f += w[i];
-  return f;
 }
 
 /**

@@ -85,7 +85,7 @@ export function sinhIntegral(x: number): number {
   let a = x; // x^{2k+1} / (2k+1)!
   let sum = x;
   for (let k = 1; k < MAX_ITER; k += 1) {
-    a = (a * x2) / (2 * k * (2 * k + 1));
+    a *= x2 / (2 * k * (2 * k + 1)); // divide first: a·x² overflows near x ≈ 710
     const term = a / (2 * k + 1);
     sum += term;
     if (term <= EPS * sum) break;
@@ -108,7 +108,7 @@ export function coshIntegral(x: number): number {
   let b = 1; // x^{2k} / (2k)!
   let sum = 0;
   for (let k = 1; k < MAX_ITER; k += 1) {
-    b = (b * x2) / ((2 * k - 1) * (2 * k));
+    b *= x2 / ((2 * k - 1) * (2 * k)); // divide first: b·x² overflows near x ≈ 710
     const term = b / (2 * k);
     sum += term;
     if (term <= EPS * sum) break;

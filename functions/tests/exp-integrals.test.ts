@@ -46,3 +46,13 @@ describe('coshIntegral', () => {
     expect(Number.isNaN(coshIntegral(-1))).toBe(true);
   });
 });
+
+describe('Shi/Chi at large finite arguments (Copilot review)', () => {
+  it('do not overflow before the series terms are divided', () => {
+    // Shi(x) ~ Chi(x) ~ e^x / (2x) for large x: e^710/1420 ≈ 1.5755e305.
+    expect(sinhIntegral(710)).toBeCloseTo(1.5754578441031017e305, -291);
+    expect(coshIntegral(710)).toBeCloseTo(1.5754578441030993e305, -291);
+    expect(Number.isFinite(sinhIntegral(710))).toBe(true);
+    expect(Number.isFinite(coshIntegral(710))).toBe(true);
+  });
+});

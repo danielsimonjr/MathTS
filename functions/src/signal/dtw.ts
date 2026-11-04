@@ -64,13 +64,19 @@ export function dtw(a: Vec, b: Vec, opts?: DtwOptions): DtwResult {
   let j = m - 1;
   path.push([i, j]);
   while (i > 0 || j > 0) {
-    const diag = i > 0 && j > 0 ? D[i - 1][j - 1] : Infinity;
-    const up = i > 0 ? D[i - 1][j] : Infinity;
-    const left = j > 0 ? D[i][j - 1] : Infinity;
-    if (diag <= up && diag <= left) {
+    // Only moves that stay inside the matrix are candidates: with infinite
+    // costs (an overflowing distance, or a custom metric returning Infinity)
+    // `Infinity <= Infinity` would otherwise pick a predecessor at index −1.
+    const canDiag = i > 0 && j > 0;
+    const canUp = i > 0;
+    const canLeft = j > 0;
+    const diag = canDiag ? D[i - 1][j - 1] : Infinity;
+    const up = canUp ? D[i - 1][j] : Infinity;
+    const left = canLeft ? D[i][j - 1] : Infinity;
+    if (canDiag && diag <= up && diag <= left) {
       i -= 1;
       j -= 1;
-    } else if (up <= left) {
+    } else if (canUp && (up <= left || !canLeft)) {
       i -= 1;
     } else {
       j -= 1;

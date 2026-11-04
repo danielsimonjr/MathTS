@@ -7569,7 +7569,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 84
+      "loc": 90
     },
     {
       "file": "functions/src/signal/fft-core-f64.ts",
@@ -7884,7 +7884,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 118
+      "loc": 124
     },
     {
       "file": "functions/src/stats/distributions-extra.ts",
@@ -7961,7 +7961,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 138
+      "loc": 142
     },
     {
       "file": "functions/src/stats/timeseries.ts",
@@ -8703,7 +8703,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1469
+      "loc": 1473
     },
     {
       "file": "functions/src/typed/statistics.ts",
@@ -9088,7 +9088,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 762
+      "loc": 926
     },
     {
       "file": "functions/src/wasm/special/wasm-bridge.ts",
@@ -9172,7 +9172,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 37
+      "loc": 63
     },
     {
       "file": "functions/tests/betainc-order.test.ts",
@@ -9529,7 +9529,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 57
+      "loc": 77
     },
     {
       "file": "functions/tests/distributions-extra.test.ts",
@@ -9564,7 +9564,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 29
+      "loc": 38
     },
     {
       "file": "functions/tests/effect-sizes.test.ts",
@@ -9641,7 +9641,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 49
+      "loc": 59
     },
     {
       "file": "functions/tests/expression-transforms.test.ts",
@@ -11251,7 +11251,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 75
+      "loc": 83
     },
     {
       "file": "functions/tests/run-with-config.test.ts",

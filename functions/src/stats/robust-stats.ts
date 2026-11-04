@@ -36,7 +36,11 @@ export function pmean(x: Vec, p: number): number {
     if (a.some((v) => v < 0)) throw new RangeError('pmean: p = 0 requires entries >= 0');
     return Math.exp(meanOf(a.map(Math.log)));
   }
-  return meanOf(a.map((v) => v ** p)) ** (1 / p);
+  const m = meanOf(a.map((v) => v ** p));
+  // An odd integer p admits negative entries, and the real odd root of a
+  // negative mean keeps its sign (`(-8) ** (1/3)` is NaN in JavaScript).
+  if (m < 0 && Math.abs(p) % 2 === 1) return -((-m) ** (1 / p));
+  return m ** (1 / p);
 }
 
 /** Geometric standard deviation: exp(std(ln x)). Default ddof 1 (scipy). */

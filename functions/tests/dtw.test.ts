@@ -26,3 +26,12 @@ describe('dtw', () => {
     expect(dtw([0], [3], { dist: (x, y) => (x - y) ** 2 }).distance).toBe(9);
   });
 });
+
+describe('dtw backtracking with infinite costs (Copilot review)', () => {
+  it('stays inside the matrix when the distance overflows to Infinity', () => {
+    const r = dtw([1e308], [-1e308, -1e308, -1e308]);
+    expect(r.distance).toBe(Infinity);
+    expect(r.path[0]).toEqual([0, 0]);
+    expect(r.path[r.path.length - 1]).toEqual([0, 2]);
+  });
+});

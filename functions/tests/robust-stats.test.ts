@@ -72,3 +72,11 @@ describe('robust-stats small samples', () => {
     expect(m.gstd([2], { ddof: 0 })).toBeCloseTo(1, 12);
   });
 });
+
+describe('pmean odd-order roots of negative means (Copilot review)', () => {
+  it('keeps the sign for odd integer p', () => {
+    expect(pmean([-2, -2], 3)).toBeCloseTo(-2, 12);
+    expect(pmean([-2, -2], -3)).toBeCloseTo(-2, 12);
+    expect(pmean([-1, -8], 3)).toBeCloseTo(-Math.cbrt(256.5), 12); // mean of cubes = −256.5
+  });
+});

@@ -54,3 +54,23 @@ describe('ecdf', () => {
     expect(() => ecdf([])).toThrow(RangeError);
   });
 });
+
+describe('wassersteinDistance sweep (Copilot review)', () => {
+  it('matches the closed form on shifted and weighted samples', () => {
+    expect(wassersteinDistance([0, 1, 3], [5, 6, 8])).toBeCloseTo(5, 12);
+    expect(wassersteinDistance([0, 1, 1, 2], [0, 1, 2])).toBeCloseTo(1 / 6, 12); // |¼−⅓| + |¾−⅔|
+    expect(wassersteinDistance([0, 1], [0, 1], { uWeights: [1, 3], vWeights: [3, 1] })).toBeCloseTo(
+      0.5,
+      12
+    );
+  });
+  it('is O(n log n): 50,000 points run in well under a second', () => {
+    const n = 50000;
+    const a = Array.from({ length: n }, (_, i) => Math.sin(i));
+    const b = Array.from({ length: n }, (_, i) => Math.cos(i));
+    const t = performance.now();
+    const d = wassersteinDistance(a, b);
+    expect(performance.now() - t).toBeLessThan(1000);
+    expect(d).toBeGreaterThanOrEqual(0);
+  });
+});
