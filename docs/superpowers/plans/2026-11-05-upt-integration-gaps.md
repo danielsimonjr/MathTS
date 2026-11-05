@@ -568,7 +568,7 @@ describe('U2 ton', () => {
 
 - [ ] **Step 2: RED** — `ton` parses and equals 2000 lb.
 
-- [ ] **Step 3: Add `shortton` and `longton` rows. Remove `ton` from the success table. Add `ton` and `tons` to `REFUSED_UNIT_SPELLINGS` with the reason `ambiguous: US short ton (shortton, 2000 lb), UK long ton (longton, 2240 lb), or metric tonne (t, tonne)`. The refused path throws before a scale is returned.
+- [ ] **Step 3: Add `shortton` and `longton` rows. Remove `ton` from the success table so a parse cannot return 2000 lb. When `AmbiguousUnitError` is already on `main` (MT-3), `Unit.parse('ton')` and `Unit.parse('tons')` throw that class with readings `shortton`, `longton`, and `t` (the message also names `tonne`). If this PR lands before MT-3, throw `UnitParseError` from `REFUSED_UNIT_SPELLINGS` with reason `ambiguous: US short ton (shortton, 2000 lb), UK long ton (longton, 2240 lb), or metric tonne (t, tonne)`, and switch the throw to `AmbiguousUnitError` in the MT-3 PR. Do not keep both a refused spelling and a successful `ton` row.
 
 - [ ] **Step 4: GREEN.**
 
@@ -749,7 +749,7 @@ describe('D1 search contract for a later UPT caller', () => {
 
 - [ ] **Step 2: Run.** Expected PASS. A failure means admit regressed; fix the call site in `scalar-search.ts` that skips seeds, using the SR-1 rule: rejected seed skipped, rejected offspring counts toward 10 attempts.
 
-- [ ] **Step 3: Docs paragraph.** State: formula strings are rejected; `admit` is the predicate a caller such as UPT `validate` supplies; `scalarToTex` is the printable form; omitting `dimensions` does not require a newer symbol than `searchScalars` itself. Published `@danielsimonjr/mathts-functions@0.72.0` already has SR-1 (`admit` on seeds and offspring). `[Unreleased]` still lists SR-1 only because the package version was not bumped.
+- [ ] **Step 3: Docs paragraph.** State: formula strings are rejected; `admit` is the predicate a caller such as UPT `validate` supplies; `scalarToTex` is the printable form; omitting `dimensions` does not require a newer symbol than `searchScalars` itself. Published `@danielsimonjr/mathts-functions@0.72.0` already has SR-1 (`admit` on seeds and offspring); `functions/CHANGELOG.md` `## 0.72.0` is the package record. The root `[Unreleased]` list still repeats SR-1; it does not mean the version was not bumped.
 
 - [ ] **Step 4: GREEN.**
 
