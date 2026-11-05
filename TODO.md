@@ -17,6 +17,7 @@ Location: relocated to repo root in 2026-05-23 (was `docs/refactoring/TODO.md`)
       `bun run build` completes. CI is unaffected (it builds first). **Fix at root cause:** declare the edges that exist (per-package
       `typecheck` `dependsOn` for `expression` -> `@danielsimonjr/mathts-matrix#build` and `@danielsimonjr/mathts-functions#build`), or give
       `expression`'s test tsconfig `paths` to the source.
+- [ ] **Bun 1.4.4 reports lower `bun test --coverage` line coverage than 1.4.2 for the same code.** Measured 2026-11-05 on `packages/typed-function`: 95.52% (1.4.2) vs 92.68% (1.4.4). CI on a 1.4.4 pin (PR 604) also gave matrix 83.92, autograd 95.88, workbook 54.42, plot 86.76, each under its floor. Before a Bun bump: diff the two `lcov.info` files per line, find what 1.4.4 counts differently, and re-derive the floors from that evidence. Do not lower a floor without it. The release machine runs 1.4.4 (sciengjs pin), so local `check:bun-version` fails there.
 - [ ] **Dependabot cannot update this repo's dependencies in ANY configuration, and the config entry that
       pretended otherwise was removed (2026-10-01).** Both ecosystems abort: `bun` with "Unsupported bun.lock
       'lockfileVersion' 2" (Dependabot's bundled bun reads v1; Bun 1.4.2 writes v2), and `npm` with "Dependabot's
