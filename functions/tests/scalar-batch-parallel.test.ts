@@ -259,11 +259,12 @@ describe('runScalarBatchTask', () => {
     const task: ScalarBatchTask = {
       variables: ['x'],
       columns: [],
-      tapes: [{ tape: built.tape, rootReg: built.rootReg, nRegs: built.nRegs }],
       items: [
         {
           candidateIndex: 0,
-          tapeIndex: 0,
+          tape: built.tape,
+          rootReg: built.rootReg,
+          nRegs: built.nRegs,
           params: [],
           parameters: built.parameters,
         },
@@ -273,8 +274,9 @@ describe('runScalarBatchTask', () => {
   });
 });
 
-describe('SR-12: one compile per structure', () => {
+describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () => {
   const sqrtNode = b.call('sqrt', x);
+  const shared = b.op('+', [b.op('*', [x, x]), x]);
 
   it('gives two same-structure trees with different parameters different results (serial)', async () => {
     const columns = column(120);
@@ -287,21 +289,15 @@ describe('SR-12: one compile per structure', () => {
         { index: 1, node: trees[1]!, params: [2] },
       ],
     });
-    expect(results).toHaveLength(2);
-    const first = results[0]!.batch;
-    const second = results[1]!.batch;
-    expect(sameBits(first.values, second.values)).toBe(false);
-    const reference = compileScalar(trees[1]!, {
-      variables: ['x'],
-      parameters: ['p'],
-    });
-    expect(sameBits(first.values, reference.evaluate(columns, [1]).values)).toBe(true);
-    expect(sameBits(second.values, reference.evaluate(columns, [2]).values)).toBe(true);
+    const reference = compileScalar(trees[1]!, { variables: ['x'], parameters: ['p'] });
+    expect(sameBits(results[0]!.batch.values, results[1]!.batch.values)).toBe(false);
+    expect(sameBits(results[0]!.batch.values, reference.evaluate(columns, [1]).values)).toBe(true);
+    expect(sameBits(results[1]!.batch.values, reference.evaluate(columns, [2]).values)).toBe(true);
   });
 
   it('gives two same-structure trees with different parameters different results (workers)', async () => {
     const columns = column(120);
-    const { pool, calls } = loopback();
+    const { pool } = loopback();
     const results = await evaluateScalarPopulation({
       variables: ['x'],
       parameters: ['p'],
@@ -309,60 +305,22 @@ describe('SR-12: one compile per structure', () => {
       items: [
         { index: 0, node: trees[1]!, params: [1] },
         { index: 1, node: trees[1]!, params: [2] },
-        { index: 2, node: trees[1]!, params: [3] },
-        { index: 3, node: trees[1]!, params: [4] },
       ],
       parallel: { pool },
     });
+    const reference = compileScalar(trees[1]!, { variables: ['x'], parameters: ['p'] });
     expect(sameBits(results[0]!.batch.values, results[1]!.batch.values)).toBe(false);
-    const reference = compileScalar(trees[1]!, {
-      variables: ['x'],
-      parameters: ['p'],
-    });
-    for (const [i, params] of [1, 2, 3, 4].entries()) {
-      expect(sameBits(results[i]!.batch.values, reference.evaluate(columns, [params]).values)).toBe(
-        true
-      );
-    }
-    expect(calls.length).toBeGreaterThanOrEqual(1);
-    // Two workers (stubbed) split four copies into two messages of two items; each
-    // message carries the one shared tape and both items reference it by index.
-    vi.stubGlobal('navigator', { hardwareConcurrency: 3 });
-    try {
-      const { pool: singlePool, calls: singleCalls } = loopback();
-      const single = await evaluateScalarPopulation({
-        variables: ['x'],
-        parameters: ['p'],
-        columns,
-        items: [
-          { index: 0, node: trees[1]!, params: [1] },
-          { index: 1, node: trees[1]!, params: [2] },
-          { index: 2, node: trees[1]!, params: [3] },
-          { index: 3, node: trees[1]!, params: [4] },
-        ],
-        parallel: { pool: singlePool },
-      });
-      expect(singleCalls).toHaveLength(2);
-      for (const call of singleCalls) {
-        expect(call.payload.tapes).toHaveLength(1);
-        expect(call.payload.items.map((item) => item.tapeIndex)).toEqual([0, 0]);
-      }
-      expect(sameBits(single[0]!.batch.values, results[0]!.batch.values)).toBe(true);
-    } finally {
-      vi.unstubAllGlobals();
-    }
+    expect(sameBits(results[0]!.batch.values, reference.evaluate(columns, [1]).values)).toBe(true);
+    expect(sameBits(results[1]!.batch.values, reference.evaluate(columns, [2]).values)).toBe(true);
   });
 
   it('marks only the invalid tree invalid in a mixed batch (serial and workers)', async () => {
     const columns = column(120);
-    const serial = await evaluateScalarPopulation({
-      variables: ['x'],
-      columns,
-      items: [
-        { index: 0, node: b.op('+', [x, b.number(1)]) },
-        { index: 1, node: sqrtNode },
-      ],
-    });
+    const items: ScalarPopulationEvalItem[] = [
+      { index: 0, node: b.op('+', [x, b.number(1)]) },
+      { index: 1, node: sqrtNode },
+    ];
+    const serial = await evaluateScalarPopulation({ variables: ['x'], columns, items });
     expect(serial[0]!.batch.allValid).toBe(true);
     expect(serial[1]!.batch.allValid).toBe(false);
     expect(serial[1]!.batch.valid.some((v) => v === 1)).toBe(true);
@@ -375,10 +333,7 @@ describe('SR-12: one compile per structure', () => {
     const parallel = await evaluateScalarPopulation({
       variables: ['x'],
       columns,
-      items: [
-        { index: 0, node: b.op('+', [x, b.number(1)]) },
-        { index: 1, node: sqrtNode },
-      ],
+      items,
       parallel: { pool },
     });
     expect(sameBits(parallel[0]!.batch.values, serial[0]!.batch.values)).toBe(true);
@@ -386,105 +341,30 @@ describe('SR-12: one compile per structure', () => {
     expect(sameBits(parallel[1]!.batch.values, serial[1]!.batch.values)).toBe(true);
   });
 
-  it('keeps same-key stored shapes that evaluate differently on separate tapes', async () => {
-    const triple = b.op('*', [b.op('*', [x, x]), x]);
-    const cube = b.op('^', [x, b.number(3)]);
-    const columns = [Float64Array.of(1.0142857142857142, 2, -3, 0.5)];
-    const serial = await evaluateScalarPopulation({
-      variables: ['x'],
-      columns,
-      items: [
-        { index: 0, node: triple },
-        { index: 1, node: cube },
-      ],
-    });
-    expect(serial[0]!.batch.values[0]).toBe(1.0434723032069968);
-    expect(serial[1]!.batch.values[0]).toBe(1.043472303206997);
-
-    const big = column(SCALAR_PARALLEL_MIN_ROWS);
-    big[0]![0] = 1.0142857142857142;
-    const { pool } = loopback();
-    const parallel = await evaluateScalarPopulation({
-      variables: ['x'],
-      columns: big,
-      items: [
-        { index: 0, node: triple },
-        { index: 1, node: cube },
-        { index: 2, node: triple },
-        { index: 3, node: cube },
-      ],
-      parallel: { pool },
-    });
-    expect(Object.is(parallel[0]!.batch.values[0], serial[0]!.batch.values[0])).toBe(true);
-    expect(Object.is(parallel[1]!.batch.values[0], serial[1]!.batch.values[0])).toBe(true);
-    expect(sameBits(parallel[2]!.batch.values, parallel[0]!.batch.values)).toBe(true);
-    expect(sameBits(parallel[3]!.batch.values, parallel[1]!.batch.values)).toBe(true);
-    // Two workers (stubbed) split the four items into two messages of two; each
-    // message carries both distinct tapes and its items reference them by index.
-    vi.stubGlobal('navigator', { hardwareConcurrency: 3 });
-    try {
-      const { pool: singlePool, calls: singleCalls } = loopback();
-      const single = await evaluateScalarPopulation({
-        variables: ['x'],
-        columns: big,
-        items: [
-          { index: 0, node: triple },
-          { index: 1, node: cube },
-          { index: 2, node: triple },
-          { index: 3, node: cube },
-        ],
-        parallel: { pool: singlePool },
-      });
-      expect(singleCalls).toHaveLength(2);
-      for (const call of singleCalls) {
-        expect(call.payload.tapes).toHaveLength(2);
-        expect(call.payload.items.map((item) => item.tapeIndex)).toEqual([0, 1]);
-      }
-      expect(Object.is(single[0]!.batch.values[0], 1.0434723032069968)).toBe(true);
-      expect(Object.is(single[1]!.batch.values[0], 1.043472303206997)).toBe(true);
-    } finally {
-      vi.unstubAllGlobals();
-    }
-  });
-
-  it('reuses one tape for copies of the same tree (serial and workers)', async () => {
+  it('scores two copies of one tree separately, each with its own parameters', async () => {
     const columns = column(120);
+    const items: ScalarPopulationEvalItem[] = [
+      { index: 0, node: shared, params: [0.5] },
+      { index: 1, node: shared, params: [0.5] },
+    ];
     const serial = await evaluateScalarPopulation({
       variables: ['x'],
       parameters: ['p'],
       columns,
-      items: [
-        { index: 0, node: trees[4]!, params: [1] },
-        { index: 1, node: trees[4]!, params: [1] },
-      ],
+      items,
     });
     expect(sameBits(serial[0]!.batch.values, serial[1]!.batch.values)).toBe(true);
     expect(serial[0]!.batch.values).not.toBe(serial[1]!.batch.values);
 
-    // Two workers (stubbed) split the four copies into two messages of two; each
-    // message carries the one shared tape.
-    vi.stubGlobal('navigator', { hardwareConcurrency: 3 });
-    try {
-      const { pool: singlePool, calls: singleCalls } = loopback();
-      await evaluateScalarPopulation({
-        variables: ['x'],
-        parameters: ['p'],
-        columns,
-        items: [
-          { index: 0, node: trees[4]!, params: [1] },
-          { index: 1, node: trees[4]!, params: [1] },
-          { index: 2, node: trees[4]!, params: [1] },
-          { index: 3, node: trees[4]!, params: [1] },
-        ],
-        parallel: { pool: singlePool },
-      });
-      expect(singleCalls).toHaveLength(2);
-      for (const call of singleCalls) {
-        expect(call.payload.tapes).toHaveLength(1);
-        expect(call.payload.items.map((item) => item.tapeIndex)).toEqual([0, 0]);
-      }
-    } finally {
-      vi.unstubAllGlobals();
-    }
+    const { pool } = loopback();
+    const parallel = await evaluateScalarPopulation({
+      variables: ['x'],
+      parameters: ['p'],
+      columns,
+      items,
+      parallel: { pool },
+    });
+    expect(sameBits(parallel[0]!.batch.values, serial[0]!.batch.values)).toBe(true);
+    expect(sameBits(parallel[1]!.batch.values, serial[1]!.batch.values)).toBe(true);
   });
 });

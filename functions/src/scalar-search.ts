@@ -44,12 +44,7 @@ import {
   resolveParallelTimeout,
   type ScalarPopulationParallelOptions,
 } from './scalar-batch-parallel.js';
-import {
-  compileScalar,
-  createBatchTapeCache,
-  type CompileScalarOptions,
-  type ScalarBatchResult,
-} from './scalar-compile.js';
+import { compileScalar, type ScalarBatchResult } from './scalar-compile.js';
 import {
   crossoverSubtrees,
   simplifyConstants,
@@ -978,25 +973,8 @@ function scoreOnCallerThread(
   names: readonly string[],
   rank: RankLoss
 ): ScoreTrees {
-  const compileOptions: CompileScalarOptions = {
-    variables: problem.variables,
-    parameters: names,
-  };
-  return async (nodes, inherited) => {
-    // One compile per distinct structure within this batch (SR-12): copies of a parent
-    // reuse the tape, and same-key stored shapes share it only when they evaluate
-    // `Object.is`-identically on the problem's columns. The refit path below compiles
-    // again, outside this cache.
-    const probe = new Float64Array(names.length).fill(1);
-    const tapeFor = createBatchTapeCache(
-      probe,
-      (node) => compileScalar(node, compileOptions),
-      (compiled, params) => compiled.evaluate(problem.columns, params)
-    );
-    return nodes.map((node, i) =>
-      scoreBatch(tapeFor(node).evaluate(problem.columns, inherited[i]!), problem.observed, rank)
-    );
-  };
+  return async (nodes, inherited) =>
+    nodes.map((node, i) => scoreOnProblem(node, problem, names, inherited[i]!, rank));
 }
 
 function scoreOnWorkers(

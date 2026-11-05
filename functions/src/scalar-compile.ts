@@ -8,12 +8,7 @@
  */
 
 import { DUAL_UNARY_RULES, type DualUnaryRule } from '@danielsimonjr/mathts-core';
-import {
-  scalarCanonicalKey,
-  type LoweredScalarFn,
-  type ScalarNode,
-  type ScalarOperator,
-} from '@danielsimonjr/mathts-expression';
+import type { LoweredScalarFn, ScalarNode, ScalarOperator } from '@danielsimonjr/mathts-expression';
 import { NUMERIC_LITERAL, ScalarEvalError } from './scalar-eval.js';
 
 const LOWERED_UNARY_RULES: Record<LoweredScalarFn, DualUnaryRule> = {
@@ -736,67 +731,6 @@ export function buildTape(
     nRegs: ctx.nextReg,
     variables,
     parameters,
-  };
-}
-
-/**
- * Whether two batch results over the same columns carry bit-identical values and
- * validity: every pair of entries compared with `Object.is` on the values, and equal
- * validity masks. Used by {@link createBatchTapeCache} to decide whether two stored
- * shapes that share a canonical key may share one compiled tape.
- */
-export function scalarBatchesAgree(a: ScalarBatchResult, b: ScalarBatchResult): boolean {
-  if (a.values.length !== b.values.length || a.valid.length !== b.valid.length) {
-    return false;
-  }
-  for (let i = 0; i < a.values.length; i += 1) {
-    if (!Object.is(a.values[i], b.values[i]) || a.valid[i] !== b.valid[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Compiles each distinct structure once within one batch (SR-12).
- *
- * The returned function memoizes by the stored node's `JSON.stringify`, so copies of a
- * parent reuse one compile. When two *different* stored shapes share a
- * `scalarCanonicalKey`, they share the representative's compile only when both
- * evaluate `Object.is`-identically over the caller's columns with `probeParams` (a
- * probe the caller picks; a vector of ones is a reasonable choice); otherwise the
- * second shape keeps its own compile, keyed by the stored string. Canonical keys are
- * therefore never allowed to mix two shapes that evaluate differently.
- *
- * Generic over the compiled representation: the caller thread caches
- * {@link CompiledScalar} objects, the batch worker path caches `buildTape` entries.
- */
-export function createBatchTapeCache<T>(
-  probeParams: ArrayLike<number>,
-  compile: (node: ScalarNode) => T,
-  evaluate: (compiled: T, params: ArrayLike<number>) => ScalarBatchResult
-): (node: ScalarNode) => T {
-  const byStored = new Map<string, T>();
-  const byKey = new Map<string, T>();
-  return (node) => {
-    const stored = JSON.stringify(node);
-    const hit = byStored.get(stored);
-    if (hit !== undefined) {
-      return hit;
-    }
-    const compiled = compile(node);
-    byStored.set(stored, compiled);
-    const key = scalarCanonicalKey(node);
-    const shared = byKey.get(key);
-    if (shared === undefined) {
-      byKey.set(key, compiled);
-      return compiled;
-    }
-    if (scalarBatchesAgree(evaluate(shared, probeParams), evaluate(compiled, probeParams))) {
-      byStored.set(stored, shared);
-      return shared;
-    }
-    return compiled;
   };
 }
 

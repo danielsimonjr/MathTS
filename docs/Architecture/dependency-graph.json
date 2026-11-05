@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6886
+    "totalExports": 6884
   },
   "entryPoints": [
     {
@@ -13100,14 +13100,7 @@
         "internalDependencies": [
           {
             "file": "./scalar-compile.js",
-            "imports": [
-              "buildTape",
-              "compileScalar",
-              "createBatchTapeCache",
-              "evaluateScalarTape",
-              "CompileScalarOptions",
-              "ScalarBatchResult"
-            ]
+            "imports": ["buildTape", "compileScalar", "CompileScalarOptions", "ScalarBatchResult"]
           },
           {
             "file": "./scalar-batch-task.js",
@@ -13115,8 +13108,7 @@
               "SCALAR_BATCH_MESSAGE_PREFIX",
               "ScalarBatchTask",
               "ScalarBatchTaskItem",
-              "ScalarBatchTaskResult",
-              "ScalarBatchTaskTape"
+              "ScalarBatchTaskResult"
             ]
           }
         ],
@@ -13167,7 +13159,6 @@
         "workspaceDependencies": [],
         "exports": ["SCALAR_BATCH_MESSAGE_PREFIX", "runScalarBatchTask"],
         "interfaces": [
-          "ScalarBatchTaskTape",
           "ScalarBatchTaskItem",
           "ScalarBatchTask",
           "ScalarBatchTaskRow",
@@ -13208,31 +13199,17 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["scalarCanonicalKey", "LoweredScalarFn", "ScalarNode", "ScalarOperator"]
+            "imports": ["LoweredScalarFn", "ScalarNode", "ScalarOperator"]
           }
         ],
-        "exports": [
-          "evaluateScalarTape",
-          "buildTape",
-          "scalarBatchesAgree",
-          "createBatchTapeCache",
-          "compileScalar",
-          "compileScalarGradient"
-        ],
+        "exports": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"],
         "interfaces": [
           "CompileScalarOptions",
           "ScalarBatchResult",
           "CompiledScalar",
           "CompiledScalarGradient"
         ],
-        "functions": [
-          "evaluateScalarTape",
-          "buildTape",
-          "scalarBatchesAgree",
-          "createBatchTapeCache",
-          "compileScalar",
-          "compileScalarGradient"
-        ]
+        "functions": ["evaluateScalarTape", "buildTape", "compileScalar", "compileScalarGradient"]
       },
       "functions/src/scalar-dimension.ts": {
         "description": "SI dimension inference and parameter-dimension solving over {@link ScalarNode}.",
@@ -13465,12 +13442,7 @@
           },
           {
             "file": "./scalar-compile.js",
-            "imports": [
-              "compileScalar",
-              "createBatchTapeCache",
-              "CompileScalarOptions",
-              "ScalarBatchResult"
-            ]
+            "imports": ["compileScalar", "ScalarBatchResult"]
           },
           {
             "file": "./scalar-mutate.js",
@@ -45313,11 +45285,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213659,
-    "totalExports": 6886,
+    "totalLinesOfCode": 213489,
+    "totalExports": 6884,
     "totalClasses": 60,
-    "totalInterfaces": 594,
-    "totalFunctions": 2285,
+    "totalInterfaces": 593,
+    "totalFunctions": 2283,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,

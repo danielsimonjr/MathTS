@@ -4905,10 +4905,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                     | Imports                                                                                                         | Type   |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------- | ------ |
-| `./scalar-compile.js`    | `buildTape, compileScalar, createBatchTapeCache, evaluateScalarTape, CompileScalarOptions, ScalarBatchResult`   | Import |
-| `./scalar-batch-task.js` | `SCALAR_BATCH_MESSAGE_PREFIX, ScalarBatchTask, ScalarBatchTaskItem, ScalarBatchTaskResult, ScalarBatchTaskTape` | Import |
+| File                     | Imports                                                                                    | Type   |
+| ------------------------ | ------------------------------------------------------------------------------------------ | ------ |
+| `./scalar-compile.js`    | `buildTape, compileScalar, CompileScalarOptions, ScalarBatchResult`                        | Import |
+| `./scalar-batch-task.js` | `SCALAR_BATCH_MESSAGE_PREFIX, ScalarBatchTask, ScalarBatchTaskItem, ScalarBatchTaskResult` | Import |
 
 **Exports:**
 
@@ -4928,7 +4928,7 @@ graph LR
 
 **Exports:**
 
-- Interfaces: `ScalarBatchTaskTape`, `ScalarBatchTaskItem`, `ScalarBatchTask`, `ScalarBatchTaskRow`, `ScalarBatchTaskResult`
+- Interfaces: `ScalarBatchTaskItem`, `ScalarBatchTask`, `ScalarBatchTaskRow`, `ScalarBatchTaskResult`
 - Functions: `runScalarBatchTask`
 - Constants: `SCALAR_BATCH_MESSAGE_PREFIX`
 
@@ -4948,10 +4948,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                            |
-| ---------------------------------- | ----------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`       | `DUAL_UNARY_RULES, DualUnaryRule`                                 |
-| `@danielsimonjr/mathts-expression` | `scalarCanonicalKey, LoweredScalarFn, ScalarNode, ScalarOperator` |
+| Package                            | Import                                        |
+| ---------------------------------- | --------------------------------------------- |
+| `@danielsimonjr/mathts-core`       | `DUAL_UNARY_RULES, DualUnaryRule`             |
+| `@danielsimonjr/mathts-expression` | `LoweredScalarFn, ScalarNode, ScalarOperator` |
 
 **Internal Dependencies:**
 
@@ -4962,7 +4962,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `CompileScalarOptions`, `ScalarBatchResult`, `CompiledScalar`, `CompiledScalarGradient`
-- Functions: `evaluateScalarTape`, `buildTape`, `scalarBatchesAgree`, `createBatchTapeCache`, `compileScalar`, `compileScalarGradient`
+- Functions: `evaluateScalarTape`, `buildTape`, `compileScalar`, `compileScalarGradient`
 
 ---
 
@@ -5078,7 +5078,7 @@ graph LR
 | `./factories/index.js`       | `* as scalarFactories`                                                                                                | Import |
 | `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                                          | Import |
 | `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions`            | Import |
-| `./scalar-compile.js`        | `compileScalar, createBatchTapeCache, CompileScalarOptions, ScalarBatchResult`                                        | Import |
+| `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                                    | Import |
 | `./scalar-mutate.js`         | `crossoverSubtrees, simplifyConstants, weightedMutation, ScalarMutationContext`                                       | Import |
 | `./scalar-dimension.js`      | `inferScalarDimension, rationalDimensionsEqual, solveParameterDimensions, validateDimensionVector, RationalDimension` | Import |
 
@@ -19975,12 +19975,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 213659 |
-| Total Exports           | 6886   |
+| Total Lines of Code     | 213489 |
+| Total Exports           | 6884   |
 | Total Re-exports        | 2979   |
 | Total Classes           | 60     |
-| Total Interfaces        | 594    |
-| Total Functions         | 2285   |
+| Total Interfaces        | 593    |
+| Total Functions         | 2283   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |
