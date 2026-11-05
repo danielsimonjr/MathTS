@@ -20,17 +20,16 @@ The published graph has **11** third-party runtime packages. `js-yaml` is a twel
 | `escape-latex`                  | 1.2.0         | `functions`                                                                                          | Rebuild (DR-1)                                            |
 | `javascript-natural-sort`       | 0.7.1         | `functions`                                                                                          | Rebuild (DR-2)                                            |
 | `tiny-emitter`                  | 2.1.0         | `functions`                                                                                          | Rebuild (DR-3)                                            |
-| `seedrandom`                    | 3.0.5         | `functions`                                                                                          | Rebuild (DR-4)                                            |
-| `js-yaml`                       | 5.5.0         | tool + root devDependency                                                                            | Rebuild the one call onto `yaml` (DR-5)                   |
-| `fraction.js`                   | 5.3.4         | `functions`                                                                                          | Rebuild: delete; `core` `Fraction` already exists (DR-6)  |
-| `bignumber.js`                  | 11.1.5        | `functions`                                                                                          | Rebuild: delete; type-only today (DR-7)                   |
-| `complex.js`                    | 2.4.3         | `functions`                                                                                          | Rebuild onto the in-tree complex type (DR-8)              |
-| `decimal.js`                    | 10.6.0        | `functions`                                                                                          | Rebuild onto `functions/src/type/local/Decimal.ts` (DR-9) |
-| `@danielsimonjr/typed-function` | 5.0.0-alpha.4 | `core`, `functions`, root, `packages/typed-function` (all via the npm alias `typed-function`)        | Vendor (DR-10)                                            |
-| `@danielsimonjr/workerpool`     | 10.2.2        | root and `packages/workerpool` (npm alias `workerpool`); `parallel` depends on the workspace wrapper | Vendor (DR-11)                                            |
+| `fraction.js`                   | 5.3.4         | `functions`                                                                                          | Rebuild: delete; `core` `Fraction` already exists (DR-4)  |
+| `bignumber.js`                  | 11.1.5        | `functions`                                                                                          | Rebuild: delete; type-only today (DR-5)                   |
+| `seedrandom`                    | 3.0.5         | `functions`                                                                                          | Rebuild (DR-6)                                            |
+| `complex.js`                    | 2.4.3         | `functions`                                                                                          | Rebuild: delete; types onto `core` `Complex` (DR-7)      |
+| `decimal.js`                    | 10.6.0        | `functions`                                                                                          | Rebuild: drop remaining value imports (DR-8)                |
+| `@danielsimonjr/typed-function` | 5.0.0-alpha.4 | `core`, `functions`, root, `packages/typed-function` (all via the npm alias `typed-function`)        | Vendor (DR-9)                                             |
+| `@danielsimonjr/workerpool`     | 10.2.2        | root and `packages/workerpool` (npm alias `workerpool`); `parallel` depends on the workspace wrapper | Vendor (DR-10)                                            |
 | `yaml`                          | 2.9.0         | `workbook`                                                                                           | **Keep.** No removal sprint.                              |
 
-`js-yaml` is in the table because the owner named it. It is not one of the 11 published-runtime packages. Count of decisions on third-party names in this plan: **9 rebuild, 2 vendor, 23 keep** (the keep set is `yaml` plus the 22 dev packages in the next table). Transitive `argparse` leaves with `js-yaml`. The root `overrides` pins `shell-quote` and `source-map-js` stay; they are not direct dependencies.
+`js-yaml` is **not** one of the 11 published-runtime packages; it is listed in its own inventory subsection (DR-11, tooling-last). Count of decisions on third-party names in this plan: **9 rebuild, 2 vendor, 23 keep** (the keep set is `yaml` plus the 22 dev packages in the next table). Transitive `argparse` leaves with `js-yaml`. The root `overrides` pins `shell-quote` and `source-map-js` stay; they are not direct dependencies.
 
 ## Decision rules
 
@@ -47,13 +46,13 @@ Every sprint below repeats this card so a fresh agent can execute that section a
 - Do not merge, release, tag, publish, force-push, rebase, amend, or pass `--no-verify`.
 - Do not set `RELEASES_ENABLED`. A changeset may be added; do not merge the release PR that changesets opens.
 - Before opening the PR, from the repo root, all of these exit 0:
-  - `repo-tools check . --docs=docs/Architecture` with `@danielsimonjr/repo-tools` **2.2.4** (the pin `REPO_TOOLS_VERSION` in `.github/workflows/ci.yml`). Do not bump the pin. If a Verification cell fails, set it to the number the checker prints. Do not hand-edit `FILE_INVENTORY.md`, `dependency-graph.json`, or the other generated architecture files.
+  - `repo-tools check . --docs=docs/Architecture` with `@danielsimonjr/repo-tools` **2.2.4** (the pin `REPO_TOOLS_VERSION` in `.github/workflows/ci.yml`). Do not bump the pin. If Verification cells fail after your sprint changes line counts, regenerate via `bun run docs:map` and re-run `repo-tools check`; apply only what the checker prints. Do not hand-edit generated architecture files without that workflow.
   - `bun run typecheck` (0 errors).
   - `bun run lint`.
   - `node tools/test/check-export-lock.mjs` with no `--write`, unless the section says the lock changes. It does not, for DR-1 through DR-12.
   - The tests named in the section, then `bun run test` if the section's diff touches a package that other packages import.
 - Public API: no export added, removed, or renamed. `node tools/test/check-export-lock.mjs` stays green without `--write`. A signature-only change still has to pass `node tools/test/consumer-typecheck.mjs --skip-build` on Node 22 after `bun run build` when the section touches published `.d.ts`.
-- Docs: a changeset for each **published** package whose `package.json` or runtime behavior changed (patch). A `CHANGELOG.md` bullet in the repo style. `docs/Architecture/OVERVIEW.md` on `30afc17b` does **not** state an npm dependency count. Do not invent one in Key Metrics or in a Verification table. DR-12 is the sprint that writes the remaining-dependency sentence. If `repo-tools check` fails because line counts moved, fix only the cells it names.
+- Docs: a changeset for each **published** package whose `package.json` or runtime behavior changed (patch). A `CHANGELOG.md` bullet in the repo style. `docs/Architecture/OVERVIEW.md` on `30afc17b` does **not** state an npm dependency count. Do not invent one in Key Metrics or in a Verification table. DR-12 is the sprint that writes the remaining-dependency sentence. If a sprint changes source or generated doc line counts and `repo-tools check` fails on Verification cells, regenerate the Architecture map/check output (`bun run docs:map` / `repo-tools check . --docs=docs/Architecture` per the repo-tools workflow). Do not hand-edit `FILE_INVENTORY.md`, `dependency-graph.json`, or other generated architecture files except to satisfy what the checker prints after regeneration.
 - Bundle: after `bun run build`, `node tools/test/check-bundle-budget.mjs`. If the budget fails because this PR's package shrank or grew, refresh with `--write` only for the entries this PR moved, and say so in the PR body.
 - Commit with Conventional Commits. Push with `git push -u origin <branch>`. Open the PR with the repository's PR tool. Do not merge it.
 
@@ -141,7 +140,7 @@ Semantics of 2.1.0 `index.js` (this is the contract):
 | API used | The default call. No options object, no `Math.seedrandom`, no named PRNG. The default algorithm in 3.0.5 is **Alea**.                                                                                                                                                                                                                                                                        |
 | Risk     | High for reproducibility, low for size. Any bit difference changes `random`, `randomInt`, `pickRandom`, and seeded optimizers. It does **not** feed `searchScalars`.                                                                                                                                                                                                                         |
 
-`createSeededRng` in `core/src/numeric/rng.ts` is a different generator. `searchScalars` uses that one. The seed-7 front in `functions/tests/scalar-search.test.ts` is pinned to it. DR-4 does not import Alea from `core`, and it does not change `core`.
+`createSeededRng` in `core/src/numeric/rng.ts` is a different generator. `searchScalars` uses that one. The seed-7 front in `functions/tests/scalar-search.test.ts` is pinned to it. DR-6 does not import Alea from `core`, and it does not change `core`.
 
 Port `lib/alea.js` from the 3.0.5 tarball (MIT) as a function `(seed: string) => () => number`. Do not port ARC4 or the entropy autoseed. The two null-seed call sites stay time-based and unreproducible: `seededRNG.ts` keeps one `Date.now()` singleton; `makeRng(null)` keeps one unreproducible generator per call. Do not silently switch null seeds onto Alea of `''`.
 
@@ -166,34 +165,34 @@ Reason: the implementation already lives in `core`. Keeping a 148 KB runtime dep
 | License  | MIT (Mike Mclaughlin). Unpacked size **500,493** bytes.                                                                                                                                                                |
 | Declared | `functions/package.json`.                                                                                                                                                                                              |
 | Used     | `import type BigNumber from 'bignumber.js'` in `functions/src/matrix/det.ts`, `diag.ts`, `eigs.ts`, `eigs/complexEigs.ts`, `eigs/realSymmetric.ts`, `inv.ts`, `pinv.ts`, `sqrtm.ts`. No value import.                  |
-| API used | The type. The matrix files were written against the bignumber.js instance shape. The value type MathTS actually constructs is either `core` `BigNumber` or the local `Decimal` (DR-9). Those two are not bignumber.js. |
-| Risk     | Low at runtime. A wrong structural type makes `typecheck` fail, which is the point of doing this in its own PR before DR-9.                                                                                            |
+| API used | The type. The matrix files were written against the bignumber.js instance shape. Runtime values on those paths are `core` `BigNumber` (see `functions/src/factories/scope.ts`). |
+| Risk     | Low at runtime. A wrong structural type makes `typecheck` fail, which is the point of doing this in its own PR before DR-8 removes `decimal.js`.                              |
 
 Reason: nothing calls the library. A local structural type of the members those files read replaces the import. Do not switch the files onto `decimal.js` in this sprint.
 
-### `complex.js@2.4.3` — rebuild
+### `complex.js@2.4.3` — rebuild (delete)
 
-|          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| License  | MIT (Robert Eisele). Unpacked size **143,858** bytes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Declared | `functions/package.json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Used     | Value: `functions/src/type/complex/Complex.ts` imports `Complex as ComplexClass` and describes a mathjs-shaped constructor (`fromPolar`, `fromJSON`, `compare`, `ZERO`, `ONE`, `I`, `PI`, `E`, `INFINITY`, `NAN`, `EPSILON`, callable and `new`). Type: `functions/src/types.ts`; `import type { Complex }` in `det.ts`, `eigs.ts`, `eigs/complexEigs.ts`, `inv.ts`, `pinv.ts`, `sqrtm.ts`. `core/src/types/complex.ts` is a separate class (`re`, `im`, methods on the core type). `functions/src/signal/zpk2tf.ts` and `freqz.ts` already comment that injected `Complex` is the core class, not the complex.js factory. |
-| API used | The class as the factory's underlying implementation, plus the type in the matrix factories.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Risk     | High. `acosh`, `sqrt`, branch cuts, and formatting are user-visible. `core` `Complex` is the public numeric type; this factory is the mathjs-compat shape.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| License  | MIT (Robert Eisele). Unpacked size **143,858** bytes.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Declared | `functions/package.json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Used     | Almost entirely types and interface `extends`. `functions/src/types.ts` aliases `Complex` to `import('complex.js').default`. `functions/src/type/complex/Complex.ts` imports `Complex as ComplexClass` only so `interface Complex extends ComplexClass` compiles; it does not construct complex.js instances. Matrix factories: `import type { Complex } from 'complex.js'` in `det.ts`, `eigs.ts`, `eigs/complexEigs.ts`, `inv.ts`, `pinv.ts`, `sqrtm.ts`. Live construction and the public `complex` factory use `core` `Complex` (`functions/src/factories/scope.ts`, `functions/src/typed/complex.ts`). No value import under tests. |
+| API used | The type name and the structural fields those signatures reference. Not complex.js runtime methods.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Risk     | Low at runtime (the package is not called). Medium for published `.d.ts` if a consumer still sees `complex.js` in a type query.                                                                                                                                                                                                                                                                                                                                                                     |
 
-Reason: two complex implementations is how the dependency survived. DR-8 makes the factory delegate to `core` `Complex` where the methods match, and implements the factory-only statics (`fromJSON`, constants) in `functions` without `complex.js`. Where a method disagrees, the parity test names the complex.js 2.4.3 result and the PR keeps that result. Do not change `core` `Complex` method results in this sprint. If a core method is wrong relative to complex.js, file the difference in the PR body and keep the previous public result.
+Reason: the numeric implementation is already `core` `Complex`. Keeping complex.js is a mathjs-port typing accident. DR-7 retargets declarations onto `core` `Complex` (same pattern as DR-4 / DR-5). Do not add a second complex implementation, rebuild the factory, or chase complex.js branch-cut parity.
 
 ### `decimal.js@10.6.0` — rebuild
 
-|          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| License  | MIT (Mike Mclaughlin). Unpacked size **284,347** bytes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Declared | `functions/package.json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Used     | Value imports of `{ Decimal }` from `decimal.js`: `functions/src/type/bignumber/BigNumber.ts` (the mathjs BigNumber factory; `Decimal.Value`, `Decimal.Config`), `functions/src/arithmetic/ceil.ts`, `floor.ts`, `functions/src/trigonometry/acot.ts`, `acoth.ts`, `acsc.ts`, `acsch.ts`, `asec.ts`, `asech.ts`. Type-only: `functions/src/type/unit/physicalConstants.ts`. `functions/src/types.ts` already aliases `BigNumber` to `import('./type/local/Decimal.js').Decimal`. `functions/src/type/local/Decimal.ts` is a BigInt decimal that the header says replaces decimal.js, and it is not what those value imports construct. Tests that import `decimal.js` directly: `functions/tests/s2r-clones-batch4-oracle.test.ts` (`max` / `min` oracles). Other tests mention the decimal.js API in comments (`plus` / `minus` / `cmp`) because `core` `BigNumber` does not have that API. |
-| API used | Constructor, `Decimal.clone` / config if `BigNumber.config` forwards it, and the methods the trig and ceil/floor factories call on instances. Read those files at the start of DR-9 and list every method in the PR. Do not port the whole of decimal.js.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Risk     | High. Precision, rounding mode, and non-finite values change numeric results. `core` `BigNumber` (96 methods, bigint) is a different type and must not become the factory's implementation in this sprint.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| License  | MIT (Mike Mclaughlin). Unpacked size **284,347** bytes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Declared | `functions/package.json`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Used     | The public `bignumber` factory already constructs `core` `BigNumber` (`functions/src/factories/scope.ts`). `functions/src/type/bignumber/BigNumber.ts` is interface-only: it imports `Decimal` for `Decimal.Value` / `Decimal.Config` in type positions, not for runtime construction. Remaining **value** imports: `functions/src/arithmetic/ceil.ts` and `floor.ts` (`const bigTen = new Decimal(10)` and `Decimal` casts in the BigNumber decimal-place paths), and the six inverse-trig factories (`acot.ts`, `acoth.ts`, `acsc.ts`, `acsch.ts`, `asec.ts`, `asech.ts`) that cast through `Decimal` in the BigNumber branch. Type-only: `functions/src/type/unit/physicalConstants.ts`, `functions/types/index.d.ts` (`import { Decimal } from 'decimal.js'`). Test oracle: `functions/tests/s2r-clones-batch4-oracle.test.ts` imports `decimal.js` for `max` / `min`. |
+| API used | `new Decimal(10)` (replace with `core` `BigNumber` or a literal ten the factories already use elsewhere), the casts in the trig files, and the `Decimal` namespace types in `BigNumber.ts` / `index.d.ts`. Do not port decimal.js or rebind the factory onto `functions/src/type/local/Decimal.ts`.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Risk     | Medium. Wrong replacement of `bigTen` or a cast can change `ceil` / `floor` / inverse-trig on BigNumber inputs. The factory path is already core; this sprint only removes the leftover imports.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
-Reason: `Decimal.ts` exists for this replacement. DR-9 wires it and deletes the dependency. Oracles against decimal.js 10.6.0 are written first and then inlined.
+Reason: delete the dependency once those call sites and declarations no longer import `decimal.js`. Inline or retarget the one test oracle; do not keep the package for comparison.
 
 ### `@danielsimonjr/typed-function@5.0.0-alpha.4` — vendor
 
@@ -202,10 +201,10 @@ Reason: `Decimal.ts` exists for this replacement. DR-9 wires it and deletes the 
 | License  | MIT. Unpacked size **2,343,074** bytes.                                                                                                                                                                                                                                                                                                                                                     |
 | Declared | npm alias `typed-function` in root `dependencies`, `core/package.json`, `functions/package.json`, and `packages/typed-function/package.json`. The workspace package `@danielsimonjr/mathts-typed-function` re-exports `typed` and `create` and then adds MathTS helpers (`TYPED_FUNCTION_TYPE` and the rest of `packages/typed-function/src/index.ts`). It does not contain the dispatcher. |
 | Used     | `core/src/typed/mathts-typed.ts` (`typed`, `create`, and type imports). `functions/src/core/create.ts`, `functions/src/core/function/typed.ts`, `functions/src/utils/optimizeCallback.ts`. Ambient shim `core/src/typed-function.d.ts` (consumers of the published package do not see this shim; `consumer-typecheck` uses the published `.d.ts`).                                          |
-| API used | `typed`, `create`, signature maps, `referTo`, `referToSelf` if `create.ts` uses them, and the `TypedFunction` type. Read the import lists at the start of DR-10 and vendor the files that export those names.                                                                                                                                                                               |
+| API used | `typed`, `create`, signature maps, `referTo`, `referToSelf` if `create.ts` uses them, and the `TypedFunction` type. Read the import lists at the start of DR-9 and vendor the files that export those names.                                                                                                                                                                                |
 | Risk     | Highest of the runtime set. Every factory dispatches through it. A behavior change fails thousands of tests. The unpacked tarball is large because of bundles and docs; vendor the source the entry point loads, not a second copy of `dist`.                                                                                                                                               |
 
-Reason: the repo already wraps this fork, but the implementation is still downloaded. Vendoring removes the npm edge. Publishing a new `@danielsimonjr/typed-function` is out of scope. After DR-10 the workspace package **is** the implementation.
+Reason: the repo already wraps this fork, but the implementation is still downloaded. Vendoring removes the npm edge. Publishing a new `@danielsimonjr/typed-function` is out of scope. After DR-9 the workspace package **is** the implementation.
 
 ### `@danielsimonjr/workerpool@10.2.2` — vendor
 
@@ -215,9 +214,9 @@ Reason: the repo already wraps this fork, but the implementation is still downlo
 | Declared | npm alias `workerpool` in root `dependencies` and `packages/workerpool/package.json`. `parallel` depends on `@danielsimonjr/mathts-workerpool` (workspace).                                                                                                                                                                               |
 | Used     | `packages/workerpool/src/index.ts` imports `pool as createPool`, `Pool`, `Transfer`, `PoolOptions`, `ExecOptions`, `PoolStats`. `packages/workerpool/src/worker.ts` imports `worker` and `Transfer`. `packages/workerpool/scripts/postbuild.mjs` exists so the emitted `.d.ts` does not keep a bare `from 'workerpool'` that drops types. |
 | API used | Those exports only. The MathTS wrapper adds chunking, FFT, and numerics on top.                                                                                                                                                                                                                                                           |
-| Risk     | High for workers, timeouts, and `Transfer`. The security invariant is `parallel/src/WorkerPool.ts` `timeoutMs` and hung-worker replacement. DR-11 must not edit that plumbing. The unpacked size is not a reason to rewrite the pool.                                                                                                     |
+| Risk     | High for workers, timeouts, and `Transfer`. The security invariant is `parallel/src/WorkerPool.ts` `timeoutMs` and hung-worker replacement. DR-10 must not edit that plumbing. The unpacked size is not a reason to rewrite the pool.                                                                                                   |
 
-Reason: same as typed-function. The wrapper is in-repo; the pool is not. Apache-2.0 attribution has to travel with the files (see DR-11).
+Reason: same as typed-function. The wrapper is in-repo; the pool is not. Apache-2.0 attribution has to travel with the files (see DR-10).
 
 ### `yaml@2.9.0` — keep
 
@@ -228,16 +227,16 @@ Reason: same as typed-function. The wrapper is in-repo; the pool is not. Apache-
 | API used          | `parse` options `schema`, `merge`, `logLevel`. `stringify` for round-trip of a workbook.                                                                                   |
 | Risk of replacing | A YAML 1.2 parser written for this repo will get anchors, tags, or merge keys wrong. The hardened options are a security boundary (`workbook` tests cover pollution keys). |
 
-Reason to keep: one maintained parser, already shared, ISC, and the options we need are a small part of a spec that is expensive to reimplement. DR-5 moves `js-yaml`'s single emitter onto this package. No sprint deletes `yaml`.
+Reason to keep: one maintained parser, already shared, ISC, and the options we need (`parse` with `schema: 'core'`, `merge: false`, `logLevel: 'silent'` in `workbook/src/yaml-safe.ts`) are a small part of a spec that is expensive to reimplement. DR-11 moves the dependency-graph tool's emitter onto this package; that is not the workbook hardened parser. No sprint deletes `yaml`.
 
-### `js-yaml@5.5.0` — rebuild the call
+### `js-yaml@5.5.0` — rebuild the call (DR-11; tooling-last band)
 
 |          |                                                                                                                                                                                                                                                                                                |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | License  | MIT. Unpacked size **1,626,579** bytes. Dependency: `argparse` (locked transitively; license Python-2.0 / PSF).                                                                                                                                                                                |
 | Declared | `tools/create-dependency-graph/package.json` `dependencies`. Root `devDependencies`. Root `overrides` `"js-yaml": "^5.5.0"`. `tools/create-dependency-graph/package-lock.json` is a stale separate lock (it still resolves js-yaml 4.3.2) and is not `bun.lock`.                               |
 | Used     | `tools/create-dependency-graph/create-dependency-graph.ts` imports `{ dump as yamlDump }`. `tools/create-dependency-graph/check-duplicates.mjs` only mentions the override in a comment (npx walks overrides and dies with `EOVERRIDE`).                                                       |
-| API used | `dump` of the dependency-graph document. No `load`, no schema, no the CLI.                                                                                                                                                                                                                     |
+| API used | `dump` of the dependency-graph document, with whatever options the call passes today (typical js-yaml knobs include `indent`, `lineWidth`, `noRefs`, `sortKeys`, `quoteStyle`, `forceQuotes` — read the call and match observable output). No `load`, no schema, no CLI. This sprint is not `workbook/src/yaml-safe.ts`. |
 | Risk     | Medium for generated YAML byte equality. `docs:deps` output is committed. A stringify change that is still valid YAML can fail `repo-tools check` or a byte-compare test. The sprint must regenerate and commit the generated docs if the bytes change, and the PR body must say they changed. |
 
 Reason: the repo already depends on `yaml` for the same job. `js-yaml` plus `argparse` is the large one.
@@ -268,25 +267,25 @@ Versions below are the ranges in `package.json`. Locked versions move; do not pi
 | `@xmldom/xmldom`                                                       | dev of `plot` and `workbook` `^0.9.12`                                                                                                    | MIT                                                                                | `DOMParser` in tests                        | `plot/tests/svg-attr-escape.test.ts`, `workbook/tests/chart-markup.test.ts`, `workbook/tests/markup-escape.test.ts`. Not on the published entry. A homegrown XML parser for three test files is not a dependency reduction.                                                                                                                                                                                                      |
 | `@yao-pkg/pkg`                                                         | dev of the three `tools/*` packages that declare it                                                                                       | MIT                                                                                | optional single-file tool builds            | Not used by the published packages.                                                                                                                                                                                                                                                                                                                                                                                              |
 
-Root `overrides` that are not direct dependencies: `shell-quote` `^1.11.0`, `source-map-js` `^1.2.2`, and today `js-yaml` `^5.5.0`. DR-5 removes the `js-yaml` override after nothing depends on it. The other two stay. They are security pins, not sprints.
+Root `overrides` that are not direct dependencies: `shell-quote` `^1.11.0`, `source-map-js` `^1.2.2`, and today `js-yaml` `^5.5.0`. DR-11 removes the `js-yaml` override after nothing depends on it. The other two stay. They are security pins, not sprints.
 
 ## Sprint order
 
-Smallest behavior surface first. Number libraries after the four tiny ports. typed-function and workerpool last. DR-12 is the keep record. DR-13 deletes this plan.
+Smallest behavior surface first: the three tiny runtime ports (DR-1–DR-3), then **type-only** declaration cleanups (DR-4–DR-5), then high-risk runtime ports (DR-6–DR-8), then the two large vendors (DR-9–DR-10), then **tooling** (`js-yaml`, DR-11) in the last band before the keep record. DR-12 is the keep record. DR-13 deletes this plan.
 
 | Sprint | Package                   | Decision                     | PR shape                                                                          |
 | ------ | ------------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
 | DR-1   | `escape-latex`            | Rebuild                      | One helper, delete the dep                                                        |
 | DR-2   | `javascript-natural-sort` | Rebuild                      | One comparator, delete the dep                                                    |
 | DR-3   | `tiny-emitter`            | Rebuild                      | `mixin` emitter, delete the dep                                                   |
-| DR-4   | `seedrandom`              | Rebuild Alea only            | Two call sites, delete the dep                                                    |
-| DR-5   | `js-yaml`                 | Switch `dump` to `yaml`      | Tooling, delete js-yaml                                                           |
-| DR-6   | `fraction.js`             | Delete type-only dep         | Types point at `core`                                                             |
-| DR-7   | `bignumber.js`            | Delete type-only dep         | Structural type                                                                   |
-| DR-8   | `complex.js`              | Rebuild factory              | Parity, then delete                                                               |
-| DR-9   | `decimal.js`              | Rebuild onto local `Decimal` | Parity, then delete                                                               |
-| DR-10  | `typed-function`          | Vendor                       | Copy source, delete alias                                                         |
-| DR-11  | `workerpool`              | Vendor                       | Copy source, delete alias                                                         |
+| DR-4   | `fraction.js`             | Delete type-only dep         | Types point at `core`                                                             |
+| DR-5   | `bignumber.js`            | Delete type-only dep         | Structural type onto `core` `BigNumber`                                           |
+| DR-6   | `seedrandom`              | Rebuild Alea only            | Two call sites, delete the dep                                                    |
+| DR-7   | `complex.js`              | Delete type-only dep         | Types onto `core` `Complex`                                                       |
+| DR-8   | `decimal.js`              | Drop leftover value imports  | Factory stays on `core`; delete dep                                               |
+| DR-9   | `typed-function`          | Vendor                       | Copy source, delete alias                                                         |
+| DR-10  | `workerpool`              | Vendor                       | Copy source, delete alias                                                         |
+| DR-11  | `js-yaml`                 | Switch `dump` to `yaml`      | Tool/root dev only; delete js-yaml (not a published-runtime sprint)               |
 | DR-12  | dev tooling and `yaml`    | Keep                         | One sentence in OVERVIEW, no removals except a package DR-1–DR-11 already dropped |
 | DR-13  | this file                 | Delete the plan              | Docs only                                                                         |
 
@@ -408,7 +407,73 @@ Do not add `insensitive`. Do not locale-compare.
 
 ---
 
-## DR-4 — Rebuild Alea for the two `seedrandom` call sites
+## DR-4 — Delete `fraction.js`
+
+**Decision.** Rebuild by deletion. `core` `Fraction` is the implementation. `fraction.js` has no value import.
+
+**Scope.** Point `functions/src/types.ts` `Fraction` at the core type (`import type { Fraction } from '@danielsimonjr/mathts-core'` or the relative type the package already uses for other core types; match the file's import style). Remove the `fraction.js` import from `functions/types/index.d.ts` the same way, or delete that import if the file is not on the published entry. Confirm with the `exports` map in `functions/package.json` before editing. Remove the dependency. `bun install`.
+
+**Files.**
+
+- `functions/src/types.ts`.
+- `functions/types/index.d.ts` if it is still compiled or shipped.
+- `functions/package.json`, `bun.lock`.
+- A type-level test if `tsc` is not enough: `functions/tests` already constructs `new Fraction(1, 3)` from core. Do not add a fraction.js oracle.
+- Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`: no behavior change; the unused dependency is gone.
+- If `consumer-typecheck` reports a public type that was `import('fraction.js').default`, stop and keep the public type shape by re-exporting core `Fraction`. Do not publish a type that references `fraction.js`.
+
+**Contract.** No runtime change. `new Fraction(1n, 3n)` and the existing fraction tests stay. `fraction.js` methods (`gcd`, `div`, `toFraction`) are not part of this sprint.
+
+**Tests.** `bunx vitest run functions/tests/typed-relational.test.ts functions/tests/typed-arithmetic.test.ts`. `node tools/test/consumer-typecheck.mjs --skip-build` after `bun run build`.
+
+**Public API.** Export lock unchanged. If the lock does not record types, `consumer-typecheck` is the type gate.
+
+**Bundle / perf.** The functions bundle must not contain `fraction.js`. No numeric perf change is expected. Bundle budget may shrink; `--write` only if the checker reports this package.
+
+**Docs.** Changeset and changelog.
+
+**Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
+
+**Done.** No `package.json` lists `fraction.js`. `rg "fraction\\.js"` in `*.ts` is empty. Gates exit 0. PR opened, not merged.
+
+---
+
+## DR-5 — Delete `bignumber.js`
+
+**Decision.** Rebuild by deletion. Type-only imports. Do not adopt the library, and do not point these files at `decimal.js` (DR-8 removes that next).
+
+**Scope.** Replace `import type BigNumber from 'bignumber.js'` in the eight matrix files with a type that matches what those files actually receive at runtime: `core` `BigNumber` (constructed in `functions/src/factories/scope.ts`). Put a shared alias in one module if that is clearer than eight duplicates. Remove the dependency.
+
+**Files.**
+
+- The eight files named in the inventory (`det`, `diag`, `eigs`, `eigs/complexEigs`, `eigs/realSymmetric`, `inv`, `pinv`, `sqrtm`).
+- One new type module if a shared import is clearer.
+- `functions/package.json`, `bun.lock`.
+- Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`.
+
+**Contract.** No runtime change. `rg bignumber.js` in `*.ts` is empty. Do not add bignumber.js as a devDependency to "compare".
+
+**Tests.** `bun run typecheck`. Existing matrix coverage:
+
+- `functions/tests/det-native-accel.test.ts`
+- `functions/tests/eigs-correctness.test.ts`
+- `functions/tests/inv-native-accel.test.ts`
+- `functions/tests/typed-matrix-ops.test.ts` (`pinv`, `sqrtm`, and related)
+- `functions/tests/gap-linalg-decomposition-oracle.test.ts`
+
+**Public API.** Export lock unchanged. The retargeted type is not a new export from `functions/src/index.ts`.
+
+**Bundle / perf.** Bundle must not contain `bignumber.js`. No perf claim.
+
+**Docs.** Changeset and changelog.
+
+**Builder card.** As in the top card. This sprint does not change decimal arithmetic. Do not start DR-8 here. Do not touch the seed-7 test. Do not merge.
+
+**Done.** `bignumber.js` is absent from `package.json` and `bun.lock`. Gates exit 0, plus the matrix tests above. PR opened, not merged.
+
+---
+
+## DR-6 — Rebuild Alea for the two `seedrandom` call sites
 
 **Decision.** Rebuild the default Alea generator only. Do not vendor the 374,034 byte package.
 
@@ -448,190 +513,84 @@ Do not add `insensitive`. Do not locale-compare.
 
 ---
 
-## DR-5 — Replace `js-yaml` `dump` with `yaml`
+## DR-7 — Delete `complex.js`
 
-**Decision.** Rebuild the call. Keep `yaml` (see inventory). Delete `js-yaml`.
+**Decision.** Rebuild by deletion. `complex.js` is not called at runtime; live construction uses `core` `Complex` (`functions/src/factories/scope.ts`, `functions/src/typed/complex.ts`). The dependency survives in type positions and in `functions/src/type/complex/Complex.ts`, where `interface Complex extends ComplexClass` only needed the npm class as a typing base.
 
-**Scope.** `create-dependency-graph.ts` imports `stringify` from `yaml` instead of `dump` from `js-yaml`. Add `yaml` to `tools/create-dependency-graph/package.json` at the same range workbook uses (`^2.3.0`). Remove `js-yaml` from that package, from the root `devDependencies`, and from root `overrides`. Update the comment in `tools/create-dependency-graph/check-duplicates.mjs` so it no longer says the override is `js-yaml`. Do not revive `tools/create-dependency-graph/package-lock.json`; if that file is unused by Bun, leave it, but do not let it be the only lock that still requires js-yaml 4. If `bun install` does not read it, say so in the PR. `argparse` must disappear from `bun.lock` if nothing else depends on it. Check with `rg '"argparse"' bun.lock`.
+**Scope.** Retarget every `complex.js` import to `core` `Complex` (same approach as DR-4 / DR-5):
 
-**Files.**
+- `functions/src/types.ts` — export `Complex` from `@danielsimonjr/mathts-core` (or the relative type pattern the file already uses for other core types).
+- `functions/src/type/complex/Complex.ts` — drop the value import from `complex.js`; express the mathjs-shaped interfaces against `core` `Complex` (or a local type alias to it). Do not import complex.js to construct instances.
+- Matrix files (`det`, `eigs`, `eigs/complexEigs`, `inv`, `pinv`, `sqrtm`) — `import type { Complex }` from core or from the local `Complex.ts` interfaces, not from `complex.js`.
+- Remove `complex.js` from `functions/package.json`; `bun install`.
 
-- `tools/create-dependency-graph/create-dependency-graph.ts`.
-- `tools/create-dependency-graph/package.json`.
-- `tools/create-dependency-graph/check-duplicates.mjs` (comment only).
-- Root `package.json` `devDependencies` and `overrides`.
-- `bun.lock`.
-- Generated `docs/Architecture/*` if `bun run docs:deps` changes bytes. Commit the generator output. Do not hand-edit the graphs.
-- `CHANGELOG.md`. No changeset if no published package changed. If `workbook` is untouched, do not bump it.
-
-**Contract.** `stringify` from `yaml` 2.x of the same plain-data document `dump` used to receive. The tool's YAML is an emitted report, not a workbook, so do not pass `{ schema: 'core' }` unless the current `dump` options were restricting the schema. Read the call. If `dump` is called with no options, call `stringify` with no options first and diff `docs/Architecture/dependency-graph.yaml`. If the diff is comments or key order only, prefer `yaml`'s default and commit the new file. If a test compares YAML bytes, update the fixture in this PR and show a short before/after in the PR body. Do not keep both libraries "temporarily".
-
-**Tests.** `bun run docs:deps:test`. `repo-tools check` after the regen. `bun run docs:deps` itself must exit 0.
-
-**Public API.** None. The tool is not a published package. Export lock unchanged.
-
-**Bundle / perf.** Not a published bundle. No perf gate.
-
-**Docs.** Changelog bullet: `js-yaml` and its `argparse` transitive are gone; architecture YAML is emitted by `yaml`. OVERVIEW counts unchanged unless `repo-tools check` says a Verification cell moved because generated files changed length.
-
-**Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
-
-**Done.** `rg js-yaml` finds no `package.json` dependency and no import. The root override key `js-yaml` is gone. Gates exit 0. PR opened, not merged.
-
----
-
-## DR-6 — Delete `fraction.js`
-
-**Decision.** Rebuild by deletion. `core` `Fraction` is the implementation. `fraction.js` has no value import.
-
-**Scope.** Point `functions/src/types.ts` `Fraction` at the core type (`import type { Fraction } from '@danielsimonjr/mathts-core'` or the relative type the package already uses for other core types; match the file's import style). Remove the `fraction.js` import from `functions/types/index.d.ts` the same way, or delete that import if the file is not on the published entry. Confirm with the `exports` map in `functions/package.json` before editing. Remove the dependency. `bun install`.
+Do not add a second complex implementation, rebuild the factory, implement complex.js-only statics, or write branch-cut parity tests against complex.js 2.4.3. Do not change `core` `Complex` numeric results in this sprint.
 
 **Files.**
 
 - `functions/src/types.ts`.
-- `functions/types/index.d.ts` if it is still compiled or shipped.
-- `functions/package.json`, `bun.lock`.
-- A type-level test if `tsc` is not enough: `functions/tests` already constructs `new Fraction(1, 3)` from core. Do not add a fraction.js oracle.
-- Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`: no behavior change; the unused dependency is gone.
-- If `consumer-typecheck` reports a public type that was `import('fraction.js').default`, stop and keep the public type shape by re-exporting core `Fraction`. Do not publish a type that references `fraction.js`.
-
-**Contract.** No runtime change. `new Fraction(1n, 3n)` and the existing fraction tests stay. `fraction.js` methods (`gcd`, `div`, `toFraction`) are not part of this sprint.
-
-**Tests.** `bunx vitest run functions/tests/typed-relational.test.ts functions/tests/typed-arithmetic.test.ts`. `node tools/test/consumer-typecheck.mjs --skip-build` after `bun run build`.
-
-**Public API.** Export lock unchanged. If the lock does not record types, `consumer-typecheck` is the type gate.
-
-**Bundle / perf.** The functions bundle must not contain `fraction.js`. No numeric perf change is expected. Bundle budget may shrink; `--write` only if the checker reports this package.
-
-**Docs.** Changeset and changelog.
-
-**Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
-
-**Done.** No `package.json` lists `fraction.js`. `rg "fraction\\.js"` in `*.ts` is empty. Gates exit 0. PR opened, not merged.
-
----
-
-## DR-7 — Delete `bignumber.js`
-
-**Decision.** Rebuild by deletion. Type-only imports. Do not adopt the library, and do not point these files at `decimal.js` (DR-9 removes that next).
-
-**Scope.** Replace `import type BigNumber from 'bignumber.js'` in the eight matrix files with a structural type that has the members those files actually read. Put the type in one module, for example `functions/src/matrix/bignumber-like.ts`, and import it. If the files only need it in signatures, prefer the existing local `Decimal` type or `core`'s `BigNumber` **only when** `typecheck` shows the values are that class. Read each use. A wrong class in a signature is a behavior comment, not a runtime change, but it will fail `tsc`. Remove the dependency.
-
-**Files.**
-
-- The eight files named in the inventory (`det`, `diag`, `eigs`, `eigs/complexEigs`, `eigs/realSymmetric`, `inv`, `pinv`, `sqrtm`).
-- One new type module if a shared structural type is clearer than eight duplicates.
-- `functions/package.json`, `bun.lock`.
-- Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`.
-
-**Contract.** No runtime change. `rg bignumber.js` in `*.ts` is empty. Tests that already cover `det` / `inv` / `eigs` on the number path stay green. Do not add bignumber.js as a devDependency to "compare".
-
-**Tests.** The existing matrix factory tests those files already have. `bun run typecheck`.
-
-**Public API.** Export lock unchanged. The structural type is not exported from `functions/src/index.ts`.
-
-**Bundle / perf.** Bundle must not contain `bignumber.js`. No perf claim.
-
-**Docs.** Changeset and changelog.
-
-**Builder card.** As in the top card. This sprint does not change decimal arithmetic. Do not start DR-9 here. Do not touch the seed-7 test. Do not merge.
-
-**Done.** `bignumber.js` is absent from `package.json` and `bun.lock`. Gates exit 0. PR opened, not merged.
-
----
-
-## DR-8 — Rebuild the complex factory without `complex.js`
-
-**Decision.** Rebuild. `complex.js` 2.4.3 is 143,858 bytes, MIT, and it is the value behind `functions/src/type/complex/Complex.ts`. `core` already ships `Complex`.
-
-**Scope.** The factory file stops importing `complex.js`. It constructs `core` `Complex` or a thin subclass in `functions` that adds only the mathjs fields the factory's interface requires (`type`, `isComplex`, `toJSON`, `format`, `toPolar`). Static `fromPolar`, `fromJSON`, `compare`, and the constants `ZERO`, `ONE`, `I`, `PI`, `E`, `INFINITY`, `NAN`, `EPSILON` live in that file. Matrix files that `import type { Complex } from 'complex.js'` switch to the local type. `functions/src/types.ts` stops saying `import('complex.js').default`.
-
-Do not change results of methods on `core` `Complex`. If a factory test expected a complex.js branch cut that core does not match, keep the previous observable result by wrapping in the factory, and write the pair down in the PR body.
-
-**Files.**
-
 - `functions/src/type/complex/Complex.ts`.
-- `functions/src/types.ts`.
-- Matrix files that import the type from `complex.js` (inventory list).
+- The six matrix files listed above.
 - `functions/package.json`, `bun.lock`.
-- New `functions/tests/complex-factory-parity.test.ts`.
 - Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`.
 
-**Contract.** For these inputs, the factory's `re` and `im` match the previous implementation (`Object.is` on both parts):
+**Contract.** No runtime behavior change on paths that already used `core` `Complex`. `rg "complex\\.js"` in `*.ts` is empty. Published types must not reference the module name `complex.js` (`consumer-typecheck` after `bun run build`).
 
-- `0`, `1`, `-1`, `Infinity`, `-Infinity`, `NaN`.
-- `new (re, im)` for `(0, 0)`, `(1, -1)`, `(Number.MIN_VALUE, Number.MAX_VALUE)`.
-- `fromPolar` of `r = 1`, `phi = 0`, `phi = Math.PI / 2`, `phi = Math.PI`, `phi = -Math.PI / 2`.
-- `sqrt(-1)` if the factory exposes sqrt through the class (complex.js does). If the factory does not add `sqrt` and only core has it, do not reimplement sqrt here; call core and record the result.
-- `toJSON()` is `{ mathjs: 'Complex', re, im }` as the interface in `Complex.ts` already says.
-- `compare` ordering: real part, then imaginary part. Document equality of NaNs: if complex.js treated NaN as unordered, match that.
+**Tests.** `bun run typecheck`. `node tools/test/consumer-typecheck.mjs --skip-build` after build. Existing `functions/tests/typed-complex.test.ts` and `core/tests/types/complex-oracle.test.ts` stay green without importing complex.js.
 
-Build the golden pairs against `complex.js@2.4.3` in a scratch script, paste `Object.is` expectations, delete the import before the PR.
+**Public API.** Export lock unchanged. Factory and typed complex helpers keep the same names.
 
-**Tests.** The parity file. Existing `core/tests/types/complex-oracle.test.ts` and `functions` complex tests stay green without edits, unless an assertion imported `complex.js`.
+**Bundle / perf.** Bundle must not contain `complex.js`. No perf claim.
 
-**Public API.** Names of `Complex` exports stay. Export lock unchanged. `consumer-typecheck` after the build.
-
-**Bundle / perf.** No speed claim. Bundle must not contain `complex.js`. Budget `--write` only on a real delta.
-
-**Docs.** Changeset and changelog. Do not claim core `Complex` changed.
+**Docs.** Changeset and changelog: type-only dependency removal; implementation was already core.
 
 **Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
 
-**Done.** `complex.js` is absent from `package.json` and `bun.lock`. `rg "complex\\.js"` in `*.ts` is empty. Gates exit 0, plus the new parity file. PR opened, not merged.
+**Done.** `complex.js` is absent from `functions/package.json` and `bun.lock`. Gates exit 0, plus `bunx vitest run functions/tests/typed-complex.test.ts`. PR opened, not merged.
 
 ---
 
-## DR-9 — Rebuild decimal factories on local `Decimal`
+## DR-8 — Remove remaining `decimal.js` imports
 
-**Decision.** Rebuild. `decimal.js` 10.6.0 is 284,347 bytes. `functions/src/type/local/Decimal.ts` was written to replace it and is already the `BigNumber` alias in `functions/src/types.ts`. The value imports still construct `decimal.js`.
+**Decision.** Rebuild by deletion of the dependency. The public `bignumber` factory already uses `core` `BigNumber` in `functions/src/factories/scope.ts`. `functions/src/type/bignumber/BigNumber.ts` is interface-only and uses `decimal.js` only for `Decimal.Value` / `Decimal.Config` type names. Remaining **value** uses are narrow: `ceil.ts` / `floor.ts` (`new Decimal(10)` and casts), the six inverse-trig factories' BigNumber branches, plus type-only `physicalConstants.ts` and `functions/types/index.d.ts`.
 
-**Scope.** Switch every value import listed in the inventory to the local `Decimal`. Implement any missing method those call sites use, in `Decimal.ts`, with an oracle against decimal.js 10.6.0. Then delete the dependency and inline the oracles. `physicalConstants.ts` switches its type import to the local class.
+**Scope.** Remove every `from 'decimal.js'` import:
 
-Do not replace the factory with `core` `BigNumber`. Call sites throughout `functions` still distinguish `.add` (core) from `.plus` (decimal.js). The factory's public methods stay the decimal.js names that `BigNumber.ts` already declares. Read `BigNumber.ts` and keep `config` behavior: precision and rounding mode must keep working for the modes the factory tests set.
+- Replace `const bigTen = new Decimal(10)` (and the floor twin) with an equivalent using `core` `BigNumber` or a numeric ten already used on those code paths — no behavior change on the BigNumber decimal-place signatures.
+- Replace trig-file `Decimal` casts with casts through `core` `BigNumber` (or drop the cast if `typecheck` shows it is redundant).
+- Retarget `BigNumber.ts`, `physicalConstants.ts`, and `functions/types/index.d.ts` so published types do not import `decimal.js` (local config/value types or `core` types as appropriate).
+- Retarget or inline `functions/tests/s2r-clones-batch4-oracle.test.ts`; do not keep decimal.js as a devDependency.
 
-`functions/tests/s2r-clones-batch4-oracle.test.ts` imports `decimal.js` as an oracle for `max` / `min`. Retarget the oracle at the local `Decimal` or inline the expected values. Do not keep the dependency for one test.
+Do **not** rebind the factory onto `functions/src/type/local/Decimal.ts`. Do **not** port decimal.js or expand `local/Decimal.ts` unless a file you must edit already uses that class — these call sites do not.
 
 **Files.**
 
-- `functions/src/type/local/Decimal.ts`.
-- `functions/src/type/bignumber/BigNumber.ts`.
 - `functions/src/arithmetic/ceil.ts`, `floor.ts`.
 - `functions/src/trigonometry/acot.ts`, `acoth.ts`, `acsc.ts`, `acsch.ts`, `asec.ts`, `asech.ts`.
+- `functions/src/type/bignumber/BigNumber.ts`.
 - `functions/src/type/unit/physicalConstants.ts`.
+- `functions/types/index.d.ts`.
 - `functions/tests/s2r-clones-batch4-oracle.test.ts`.
-- New `functions/tests/decimal-parity.test.ts`.
 - `functions/package.json`, `bun.lock`.
 - Changeset patch `@danielsimonjr/mathts-functions`. `CHANGELOG.md`.
 
-**Contract.** For each method the call sites use (the PR lists them), these inputs match decimal.js 10.6.0 with its default config (precision 20, rounding `ROUND_HALF_UP` in decimal.js; local `Decimal.ts` defaults to precision 28 in the file header — **do not silently change the factory default**). If the factory today uses decimal.js defaults, the factory keeps those defaults. If local `Decimal` defaults differ, set the factory's config explicitly so observable results match the old factory, and test that.
+**Contract.** Observable results unchanged on the BigNumber paths those files implement: same `ceil` / `floor` / inverse-trig outputs as before the import removal (prove with existing tests, not a full decimal.js oracle suite). `rg "decimal\\.js"` in `*.ts` is empty except comments and this plan.
 
-Required oracle rows, default factory config:
+**Tests.** `bunx vitest run functions/tests/bignumber-operations.test.ts functions/tests/s2r-clones-batch4-oracle.test.ts` plus any test file that covers `ceil` / `floor` on BigNumber (read `functions/tests` for `ceil` / `floor` if present). `bun run typecheck`. `consumer-typecheck` after build because `functions/types/index.d.ts` changes.
 
-- Integers: `0`, `1`, `-1`, `10`, `-10`.
-- Fractions: `'0.1'`, `'0.2'`, `'1e-20'`, `'1e+20'`.
-- Non-finite: `NaN`, `Infinity`, `-Infinity`, if the constructor accepts them. Match decimal.js, including the string it formats.
-- `ceil` / `floor` of `'1.5'`, `'-1.5'`, `'2'`, `'-2'`.
-- One inverse trig value the `acot` family actually computes. Read the function and oracle that input, not a random one.
-- Rounding: a tie at the last digit (`'1.25'` at precision 2, or whatever precision the factory uses). Record the mode.
+**Public API.** Factory name `bignumber` and exports stay. Export lock unchanged.
 
-`Object.is` is the wrong tool for decimal objects. Compare `toString()` and, when both are finite, a numeric `cmp` or `comparedTo` result of `0`.
+**Bundle / perf.** Bundle must not contain `decimal.js`. No speed claim.
 
-**Tests.** `decimal-parity.test.ts` with the inlined expected strings. Existing `functions/tests/bignumber-operations.test.ts` and `core` bignumber tests stay. Core tests must not start importing local `Decimal`.
-
-**Public API.** Factory name `bignumber` and the `BigNumber` type stay. Export lock unchanged. `consumer-typecheck` after the build.
-
-**Bundle / perf.** No speed claim required. A note in the PR if `toString` of a 100-digit value is slower than decimal.js is acceptable; a wrong digit is not. Bundle must not contain `decimal.js`.
-
-**Docs.** Changeset and changelog. Say the factory is the local `Decimal`, not `core` `BigNumber`.
+**Docs.** Changeset and changelog: dependency removed; factory remained on `core` `BigNumber`.
 
 **Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
 
-**Done.** `decimal.js` is absent from every `package.json` and from `bun.lock`. `rg "decimal\\.js"` in `*.ts` is comments or this plan. Gates exit 0, plus `bunx vitest run functions/tests/decimal-parity.test.ts functions/tests/bignumber-operations.test.ts functions/tests/s2r-clones-batch4-oracle.test.ts`. PR opened, not merged.
+**Done.** `decimal.js` is absent from every `package.json` and from `bun.lock`. Gates exit 0. PR opened, not merged.
 
 ---
 
-## DR-10 — Vendor `typed-function`
+## DR-9 — Vendor `typed-function`
 
 **Decision.** Vendor `@danielsimonjr/typed-function@5.0.0-alpha.4` (MIT, unpacked 2,343,074 bytes) into `packages/typed-function`. Delete the npm alias.
 
@@ -668,7 +627,7 @@ Required oracle rows, default factory config:
 
 ---
 
-## DR-11 — Vendor `workerpool`
+## DR-10 — Vendor `workerpool`
 
 **Decision.** Vendor `@danielsimonjr/workerpool@10.2.2`. License **Apache-2.0**. Unpacked size 9,575,706 bytes. Vendor the files the entry loads, plus `LICENSE` and `NOTICE`. Do not check in a second copy of browser bundles the wrapper never imports.
 
@@ -706,6 +665,38 @@ Required oracle rows, default factory config:
 
 ---
 
+## DR-11 — Replace `js-yaml` `dump` with `yaml`
+
+**Decision.** Rebuild the call in the dependency-graph tool only. Keep `yaml` for `workbook` (see inventory). Delete `js-yaml`. This sprint is **not** the workbook hardened parser in `workbook/src/yaml-safe.ts`; do not change `parse` options there.
+
+**Scope.** `create-dependency-graph.ts` imports `stringify` from `yaml` instead of `dump` from `js-yaml`. Read the existing `dump` call and preserve its observable output (including any options such as `indent`, `lineWidth`, `noRefs`, `sortKeys`, `quoteStyle`, `forceQuotes`). Add `yaml` to `tools/create-dependency-graph/package.json` at the same range workbook uses (`^2.3.0`). Remove `js-yaml` from that package, from the root `devDependencies`, and from root `overrides`. Update the comment in `tools/create-dependency-graph/check-duplicates.mjs` so it no longer says the override is `js-yaml`. Do not revive `tools/create-dependency-graph/package-lock.json`; if that file is unused by Bun, leave it, but do not let it be the only lock that still requires js-yaml 4. If `bun install` does not read it, say so in the PR. `argparse` must disappear from `bun.lock` if nothing else depends on it. Check with `rg '"argparse"' bun.lock`.
+
+**Files.**
+
+- `tools/create-dependency-graph/create-dependency-graph.ts`.
+- `tools/create-dependency-graph/package.json`.
+- `tools/create-dependency-graph/check-duplicates.mjs` (comment only).
+- Root `package.json` `devDependencies` and `overrides`.
+- `bun.lock`.
+- Generated `docs/Architecture/*` if `bun run docs:deps` changes bytes. Commit the generator output. Do not hand-edit the graphs.
+- `CHANGELOG.md`. No changeset if no published package changed. If `workbook` is untouched, do not bump it.
+
+**Contract.** `stringify` from `yaml` 2.x of the same plain-data document `dump` used to receive, with equivalent options to the current `dump` call. The tool's YAML is an emitted architecture report, not a workbook document, so do not pass `{ schema: 'core' }` from `yaml-safe.ts`. Read the call. If `dump` is called with no options, call `stringify` with no options first and diff `docs/Architecture/dependency-graph.yaml`. If the diff is comments or key order only, prefer `yaml`'s default and commit the new file. If a test compares YAML bytes, update the fixture in this PR and show a short before/after in the PR body. Do not keep both libraries "temporarily".
+
+**Tests.** `bun run docs:deps:test`. `repo-tools check` after the regen. `bun run docs:deps` itself must exit 0.
+
+**Public API.** None. The tool is not a published package. Export lock unchanged.
+
+**Bundle / perf.** Not a published bundle. No perf gate.
+
+**Docs.** Changelog bullet: `js-yaml` and its `argparse` transitive are gone; architecture YAML is emitted by `yaml`. If generated doc line counts move, regenerate Architecture output (`bun run docs:map`, then `repo-tools check`) rather than hand-editing Verification cells.
+
+**Builder card.** As in the top card. Do not touch the seed-7 test. Do not merge.
+
+**Done.** `rg js-yaml` finds no `package.json` dependency and no import. The root override key `js-yaml` is gone. Gates exit 0. PR opened, not merged.
+
+---
+
 ## DR-12 — Record the keep set
 
 **Decision.** Keep `yaml` and every dev package in the inventory table. This sprint does not remove a library that is still imported. It may delete a dependency only if DR-1 through DR-11 left a `package.json` entry and the import is already gone.
@@ -714,7 +705,7 @@ Required oracle rows, default factory config:
 
 - Confirm with a script you run locally (do not commit the script unless it is the one-liner in the PR body): every `dependencies` / `devDependencies` / `peerDependencies` key, ignoring `workspace:` and `@danielsimonjr/mathts-*`. The expected remaining third-party **runtime** dependency of a published package is `yaml` on `workbook`, plus `@webgpu/types` as a **peer** of `gpu` and `matrix`. If you find another, stop and add a section to this plan in a docs PR rather than deleting it on a hunch.
 - Optional: align the three `tools/*` `typescript` ranges with the root `^7.0.2` only if those tools still typecheck. If they do not, leave the ranges and say so.
-- Add one sentence under the Packages section of `docs/Architecture/OVERVIEW.md`, after the sentence that versions live in each `package.json`. Text: the published packages' only third-party runtime dependency is `yaml` (`workbook`); `@webgpu/types` is a peer of `gpu` and `matrix`; dev tooling is intentionally external. Do not edit Key Metrics, the package file-count table, or any Verification cell except to satisfy `repo-tools check`.
+- Add one sentence under the Packages section of `docs/Architecture/OVERVIEW.md`, after the sentence that versions live in each `package.json`. Text: the published packages' only third-party runtime dependency is `yaml` (`workbook`); `@webgpu/types` is a peer of `gpu` and `matrix`; dev tooling is intentionally external. Do not edit Key Metrics or the package file-count table by hand. If Verification cells fail, regenerate Architecture map/check output (`bun run docs:map`, `repo-tools check . --docs=docs/Architecture`) and apply only what the checker prints.
 - `CHANGELOG.md` bullet listing the keep set in one sentence and pointing here. If DR-13 is next, the pointer may be temporary; still write it.
 
 **Files.** `docs/Architecture/OVERVIEW.md` (one sentence). `CHANGELOG.md`. Tool `package.json` files only for the TypeScript range, if you proved it.
