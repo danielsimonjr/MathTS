@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1319 exports).
+> `@danielsimonjr/mathts-functions` (1320 exports).
 
 ### Functions by category
 
@@ -705,6 +705,8 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 **Expression Evaluation** (39): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `frontToJson`, `frontToLatexTable`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
 
 **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
+
+**Other exports (uncategorized)** (1): `runScalarSearch`
 
 ### Constants & values (72)
 

@@ -88,13 +88,15 @@ export type {
   ScalarMutationContext,
   ScalarMutationOperator,
 } from './scalar-mutate.js';
-export { searchScalars } from './scalar-search.js';
+export { runScalarSearch, searchScalars } from './scalar-search.js';
 export type {
   ScalarDimensionFilter,
   ScalarFitOptions,
   ScalarSearchOptions,
   ScalarSearchProblem,
   ScalarSearchResult,
+  ScalarSearchRunOptions,
+  ScalarSearchRunProblem,
   ScalarSearchStopReason,
   SearchProgress,
 } from './scalar-search.js';

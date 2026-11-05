@@ -29,7 +29,7 @@ Definitions match `functions/src/pareto-front.ts`.
 
 **`scoreFront`** on the log scale walks the array in the order given. It does not sort and it does not drop rows. The first row scores `0`. Each later row with `loss > 0` scores `-Math.log(loss / previousLoss) / (complexity - previousComplexity)`. `loss <= 0` scores `+Infinity`. A zero complexity gap is IEEE division (`NaN` or an infinity); there is no special case. On the linear scale every score is `null`, and a zero loss does not become `+Infinity`. Any other `lossScale` throws `ParetoFrontError`.
 
-**`selectFrontModel`** defaults to `best` with factor `1.5` (the `bestLossFactor` option). `accuracy` is the minimum loss. `score` is the maximum score. `best` keeps rows with `loss <= 1.5 * min(loss)` and then takes the maximum score. If every score is `null`, `score` and `best` both fall back to `accuracy`. A mix of `null` and numeric scores throws. Ties: lower complexity, then the earlier input index. `NaN` is worse than every other score, including `-Infinity`. The return value is the same object as the chosen row.
+**`selectFrontModel`** defaults to `best` with factor `1.5` (the `bestLossFactor` option). `accuracy` is the minimum loss. `score` is the maximum score. `best` keeps rows with `loss <= bestLossFactor * min(loss)` and then takes the maximum score. If every score is `null`, `score` and `best` both fall back to `accuracy`. A mix of `null` and numeric scores throws. Ties: lower complexity, then the earlier input index. `NaN` is worse than every other score, including `-Infinity`. The return value is the same object as the chosen row. A `bestLossFactor` in `(0, 1)` can throw `ParetoFrontError` mid-run when that filter keeps no row; `1` is the safe lower boundary.
 
 ## Mutation weights
 

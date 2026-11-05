@@ -2893,6 +2893,12 @@
       "ScalarSearchResult": {
         "kind": "type"
       },
+      "ScalarSearchRunOptions": {
+        "kind": "type"
+      },
+      "ScalarSearchRunProblem": {
+        "kind": "type"
+      },
       "ScalarSearchStopReason": {
         "kind": "type"
       },
@@ -6125,6 +6131,9 @@
         "kind": "function"
       },
       "rq": {
+        "kind": "function"
+      },
+      "runScalarSearch": {
         "kind": "function"
       },
       "runWithConfig": {
