@@ -1,13 +1,13 @@
 {
   "generated": "2026-11-05",
-  "totalFiles": 2157,
+  "totalFiles": 2158,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
     "test-only": 0,
     "orphan": 0,
     "test": 826,
-    "tool": 28,
+    "tool": 29,
     "config": 29,
     "example": 5
   },
@@ -16,7 +16,7 @@
     "tests": 826,
     "config": 29,
     "examples": 5,
-    "tools": 28
+    "tools": 29
   },
   "byPackage": {
     "@danielsimonjr/mathts-arithmetic": 4,
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 108,
     "@danielsimonjr/mathts-evaluator": 4,
-    "(root)": 52,
+    "(root)": 53,
     "@danielsimonjr/mathts-expression": 562,
     "@danielsimonjr/mathts-functions": 955,
     "@danielsimonjr/mathts-gpu": 17,
@@ -14500,6 +14500,13 @@
       "area": "tools",
       "disposition": "tool",
       "loc": 118
+    },
+    {
+      "file": "tools/benchmark/scalar-search/bench.ts",
+      "package": "(root)",
+      "area": "tools",
+      "disposition": "tool",
+      "loc": 377
     },
     {
       "file": "tools/benchmark/tensor/contract-network.bench.ts",

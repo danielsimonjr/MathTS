@@ -145,6 +145,9 @@ jobs:
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
+      - name: Scalar-search harness tests
+        run: node --test tools/test/scalar-search-harness.test.mjs
+
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
       # tag lands on. No other job runs the script. These tests run the real script against
