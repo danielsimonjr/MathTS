@@ -3652,6 +3652,7 @@
       "scalarMul",
       "ScalarMutationContext",
       "ScalarMutationOperator",
+      "scalarParallelWorkerCount",
       "ScalarPopulationParallelOptions",
       "ScalarScope",
       "ScalarSearchOptions",

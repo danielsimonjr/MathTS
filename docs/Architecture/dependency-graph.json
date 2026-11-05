@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6884
+    "totalExports": 6885
   },
   "entryPoints": [
     {
@@ -13130,6 +13130,7 @@
           "resolveScalarBatchWorkerScript",
           "createScalarBatchPool",
           "resolveParallelTimeout",
+          "scalarParallelWorkerCount",
           "evaluateScalarPopulation"
         ],
         "interfaces": [
@@ -13142,6 +13143,7 @@
           "resolveScalarBatchWorkerScript",
           "createScalarBatchPool",
           "resolveParallelTimeout",
+          "scalarParallelWorkerCount",
           "evaluateScalarPopulation"
         ],
         "constants": ["SCALAR_PARALLEL_MIN_ROWS", "DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS"]
@@ -45285,11 +45287,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213489,
-    "totalExports": 6884,
+    "totalLinesOfCode": 213574,
+    "totalExports": 6885,
     "totalClasses": 60,
     "totalInterfaces": 593,
-    "totalFunctions": 2283,
+    "totalFunctions": 2284,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,

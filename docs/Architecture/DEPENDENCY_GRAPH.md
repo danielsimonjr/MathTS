@@ -4913,7 +4913,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `ScalarPopulationParallelOptions`, `ScalarPopulationEvalItem`, `EvaluateScalarPopulationOptions`, `ScalarPopulationEvalResult`
-- Functions: `resolveScalarBatchWorkerScript`, `createScalarBatchPool`, `resolveParallelTimeout`, `evaluateScalarPopulation`
+- Functions: `resolveScalarBatchWorkerScript`, `createScalarBatchPool`, `resolveParallelTimeout`, `scalarParallelWorkerCount`, `evaluateScalarPopulation`
 - Constants: `SCALAR_PARALLEL_MIN_ROWS`, `DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS`
 
 ---
@@ -5086,7 +5086,7 @@ graph LR
 
 - Classes: `ComplexityFrequency`
 - Interfaces: `ScalarSearchProblem`, `ScalarDimensionFilter`, `ScalarSearchOptions`, `ScalarFitOptions`, `SearchProgress`, `ScalarSearchResult`, `EvaluatedIndividual`, `Island`
-- Types: `ScalarSearchStopReason`
+- Types: `FrequencyRecordTiming`, `ScalarSearchStopReason`
 - Functions: `simplifyCandidateForTest`, `hallFrontForTest`, `parsimonyKey`, `tournamentSelect`, `migrateIslands`
 
 ---
@@ -19975,12 +19975,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 213489 |
-| Total Exports           | 6884   |
+| Total Lines of Code     | 213574 |
+| Total Exports           | 6885   |
 | Total Re-exports        | 2979   |
 | Total Classes           | 60     |
 | Total Interfaces        | 593    |
-| Total Functions         | 2283   |
+| Total Functions         | 2284   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |

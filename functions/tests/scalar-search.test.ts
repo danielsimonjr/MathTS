@@ -1887,6 +1887,204 @@ describe('searchScalars: islands', () => {
     }
   });
 
+  // Recorded from the sequential island schedule (before SR-13): each generation
+  // awaited island 0, then island 1, and so on. The overlapped schedule must
+  // reproduce this event by event — complexities, keys, and Object.is losses —
+  // because each island keeps its own rng, frequency records flush at island
+  // boundaries, and the merge after the scores runs in island-index order.
+  const PINNED_ISLAND_TRACE: readonly {
+    readonly evaluations: number;
+    readonly rows: readonly (readonly [number, string, number])[];
+  }[] = [
+    {
+      evaluations: 32,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+      ],
+    },
+    {
+      evaluations: 64,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+      ],
+    },
+    {
+      evaluations: 96,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+      ],
+    },
+    {
+      evaluations: 128,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+      ],
+    },
+    {
+      evaluations: 160,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+      ],
+    },
+    {
+      evaluations: 192,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+        [
+          9,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"3"}},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          2.1572822789567526e-31,
+        ],
+      ],
+    },
+    {
+      evaluations: 224,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+        [
+          9,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"3"}},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          2.1572822789567526e-31,
+        ],
+      ],
+    },
+    {
+      evaluations: 240,
+      rows: [
+        [1, '{"k":"n","v":"1"}', 11.281760749346166],
+        [3, '{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}}', 3.2503791284982104],
+        [
+          5,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          0.4821554023870981,
+        ],
+        [
+          9,
+          '{"k":"*","a":[{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"3"}},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+          2.1572822789567526e-31,
+        ],
+      ],
+    },
+  ];
+
+  it('reproduces the multi-island trace recorded from the sequential schedule', async () => {
+    const { progress, result } = await runSearch(hardProblem, {
+      grammar: hardGrammar,
+      populationSize: 8,
+      tournamentSize: 4,
+      tournamentP: 0.982,
+      maxEvaluations: 240,
+      populations: 4,
+      rng: createSeededRng(2),
+    });
+    expect(progress).toHaveLength(PINNED_ISLAND_TRACE.length);
+    progress.forEach((event, g) => {
+      const pinned = PINNED_ISLAND_TRACE[g]!;
+      expect(event.evaluations).toBe(pinned.evaluations);
+      expect(event.front.map((row) => row.complexity)).toEqual(pinned.rows.map((r) => r[0]));
+      expect(event.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        pinned.rows.map((r) => r[1])
+      );
+      event.front.forEach((row, j) => {
+        expect(Object.is(row.loss, pinned.rows[j]![2])).toBe(true);
+      });
+    });
+    expect(result.evaluations).toBe(240);
+  });
+
+  it('diverges when parsimony records at the merge or per offspring instead of the island boundary', async () => {
+    // Ten seeds × populations 2–9 (80 configs), hardProblem, adaptive parsimony on.
+    const matrixBase = {
+      grammar: hardGrammar,
+      populationSize: 8,
+      tournamentSize: 4,
+      tournamentP: 0.982,
+      maxEvaluations: 340,
+      adaptiveParsimony: true,
+      adaptiveParsimonyScaling: 1040,
+    } as const;
+    let mergeDiverges = 0;
+    let immediateDiverges = 0;
+    let pinnedMergeMatches = true;
+    for (let seed = 0; seed < 10; seed += 1) {
+      for (let populations = 2; populations <= 9; populations += 1) {
+        const opts = { ...matrixBase, populations, rng: createSeededRng(seed) };
+        const reference = trace((await runSearch(hardProblem, opts)).progress);
+        const atMerge = trace(
+          (
+            await runSearch(hardProblem, {
+              ...opts,
+              frequencyRecordTiming: 'after-merge',
+            })
+          ).progress
+        );
+        const perOffspring = trace(
+          (
+            await runSearch(hardProblem, {
+              ...opts,
+              frequencyRecordTiming: 'per-offspring',
+            })
+          ).progress
+        );
+        if (reference !== atMerge) {
+          mergeDiverges += 1;
+        }
+        if (reference !== perOffspring) {
+          immediateDiverges += 1;
+        }
+        if (seed === 2 && populations === 4) {
+          pinnedMergeMatches = reference === atMerge;
+        }
+      }
+    }
+    expect(mergeDiverges).toBeGreaterThanOrEqual(45);
+    expect(mergeDiverges).toBeLessThanOrEqual(55);
+    expect(immediateDiverges).toBeGreaterThanOrEqual(30);
+    expect(pinnedMergeMatches).toBe(true);
+  });
+
   it('survives a grammar with fewer trees than islands', async () => {
     const tiny: ScalarGrammar = {
       variables: ['x'],

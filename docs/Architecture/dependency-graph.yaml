@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-05'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6884
+  totalExports: 6885
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12441,6 +12441,7 @@ modules:
         - resolveScalarBatchWorkerScript
         - createScalarBatchPool
         - resolveParallelTimeout
+        - scalarParallelWorkerCount
         - evaluateScalarPopulation
       interfaces:
         - ScalarPopulationParallelOptions
@@ -12451,6 +12452,7 @@ modules:
         - resolveScalarBatchWorkerScript
         - createScalarBatchPool
         - resolveParallelTimeout
+        - scalarParallelWorkerCount
         - evaluateScalarPopulation
       constants:
         - SCALAR_PARALLEL_MIN_ROWS
@@ -42841,11 +42843,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213489
-  totalExports: 6884
+  totalLinesOfCode: 213574
+  totalExports: 6885
   totalClasses: 60
   totalInterfaces: 593
-  totalFunctions: 2283
+  totalFunctions: 2284
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635

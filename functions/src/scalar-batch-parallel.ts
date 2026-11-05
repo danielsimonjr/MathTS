@@ -52,9 +52,12 @@ export function createScalarBatchPool(): WorkerPool {
 /** How to run a population on workers. */
 export interface ScalarPopulationParallelOptions {
   /**
-   * Milliseconds a worker call may take, queueing included, before it is cancelled, the
+   * Milliseconds a worker task may take, queueing included, before it is cancelled, the
    * worker replaced and the evaluation rejected. Must be positive: `0` would switch the
-   * pool's timeout off. Default 30000.
+   * pool's timeout off. Default 30000. The limit applies per {@link WorkerPool.execute}
+   * call; when several islands score in one generation, later island chunks queue behind
+   * earlier submissions on the same pool, so callers with many `populations` should scale
+   * this value.
    */
   readonly timeoutMs?: number;
   /** A pool to use, which the caller owns and terminates. Default: one for the call. */
@@ -93,6 +96,11 @@ function defaultWorkerCount(): number {
     return Math.max(2, navigator.hardwareConcurrency - 1);
   }
   return 4;
+}
+
+/** @internal Worker chunk count for {@link evaluateScalarPopulation}; not on the barrel. */
+export function scalarParallelWorkerCount(): number {
+  return defaultWorkerCount();
 }
 
 /** Splits `items` into at most `chunks` runs of consecutive items whose sizes differ by at most 1. */
