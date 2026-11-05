@@ -4999,10 +4999,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                              | Type   |
-| ------------------------- | ------------------------------------------------------------------------------------ | ------ |
-| `./typed/arithmetic.js`   | `abs, add, cosh, divide, exp, log, log10, log2, multiply, pow, sinh, subtract, tanh` | Import |
-| `./typed/trigonometry.js` | `cos, sin, tan`                                                                      | Import |
+| File                      | Imports                                                                                    | Type   |
+| ------------------------- | ------------------------------------------------------------------------------------------ | ------ |
+| `./typed/arithmetic.js`   | `abs, add, cosh, divide, exp, log, log10, log2, multiply, pow, sinh, sqrt, subtract, tanh` | Import |
+| `./typed/trigonometry.js` | `atan, cos, sin, tan`                                                                      | Import |
 
 **Exports:**
 
@@ -5044,7 +5044,7 @@ graph LR
 | Package                            | Import                                                 |
 | ---------------------------------- | ------------------------------------------------------ |
 | `@danielsimonjr/mathts-expression` | `LoweredScalarFn, MathNode, ScalarNode, StringOptions` |
-| `@danielsimonjr/mathts-expression` | `ScalarBuildError`                                     |
+| `@danielsimonjr/mathts-expression` | `SCALAR_FUNCTION_LOWERING, ScalarBuildError`           |
 
 **Internal Dependencies:**
 
@@ -19975,7 +19975,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 213459 |
+| Total Lines of Code     | 213489 |
 | Total Exports           | 6884   |
 | Total Re-exports        | 2979   |
 | Total Classes           | 60     |

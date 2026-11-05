@@ -2774,7 +2774,6 @@ describe('searchScalars: dimensions (SR-9)', () => {
   });
 
   it('p + x with p fixed dimensionless is inconsistent and does not enter the hall', async () => {
-
     const grammar: ScalarGrammar = {
       variables: ['x'],
       binary: ['+'],
@@ -2998,6 +2997,8 @@ describe('searchScalars: dimensions (SR-9)', () => {
         },
       })
     ).rejects.toThrow(RangeError);
+  });
+});
 
 describe('searchScalars: sqrt and atan', () => {
   it('a grammar that does not list sqrt or atan still rejects their nodes', () => {
@@ -3141,6 +3142,7 @@ describe('searchScalars: sqrt and atan', () => {
       seeds: [law],
       optimizeProbability: 0,
     });
+    expect(result.front.some((row) => row.score === 0 && row.loss === 0)).toBe(true);
     expect(() => frontToJson(result.front)).not.toThrow();
     expect(frontToLatexTable(result.front).includes('\\sqrt')).toBe(true);
   });

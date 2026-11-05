@@ -12578,10 +12578,12 @@ modules:
             - multiply
             - pow
             - sinh
+            - sqrt
             - subtract
             - tanh
         - file: ./typed/trigonometry.js
           imports:
+            - atan
             - cos
             - sin
             - tan
@@ -12692,6 +12694,7 @@ modules:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
           imports:
+            - SCALAR_FUNCTION_LOWERING
             - ScalarBuildError
       exports:
         - createScalarNodeBridge
@@ -42838,7 +42841,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213459
+  totalLinesOfCode: 213489
   totalExports: 6884
   totalClasses: 60
   totalInterfaces: 593

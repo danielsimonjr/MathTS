@@ -180,16 +180,13 @@ describe('compileScalarGradient', () => {
       const node = scalar.call('sqrt', scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]));
       const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a'] });
       const xs = new Float64Array([0, 1, 4, 9]);
-      const prim = compileScalar(node, { variables: ['x'], parameters: ['a'] }).evaluate(
-        [xs],
-        [0]
-      );
+      const prim = compileScalar(node, { variables: ['x'], parameters: ['a'] }).evaluate([xs], [0]);
       const batch = g.evaluate([xs], [0]);
       for (let r = 0; r < xs.length; r++) {
         expect(batch.valid[r]).toBe(prim.valid[r]);
         expect(batch.values[r]).toBe(prim.values[r]);
       }
-      expect(Number.isNaN(batch.grad[0])).toBe(true);
+      expect(Number.isNaN(batch.grad[1])).toBe(true);
     });
 
     it('abs(-3) → -1; abs(0) → 0', () => {

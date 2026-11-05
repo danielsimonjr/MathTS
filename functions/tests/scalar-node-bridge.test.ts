@@ -333,7 +333,7 @@ describe('scalar-node-bridge sqrt and atan (SR-10)', () => {
       const back = nodeToScalar(wired);
       expect(back).toMatchObject({ kind: 'call', fn });
       expect(evaluateScalar(back, { x: 2 })).toBe(evaluateScalar(fromParse, { x: 2 }));
-      expect(scalarToTex(fromParse)).toContain(fn === 'sqrt' ? '\\sqrt' : '\\atan');
+      expect(scalarToTex(fromParse)).toContain(fn === 'sqrt' ? '\\sqrt' : '\\tan');
     }
   });
 
@@ -348,6 +348,7 @@ describe('scalar-node-bridge sqrt and atan (SR-10)', () => {
       item: scalar.call('sqrt', scalar.symbol('x')),
       complexity: 2,
       loss: 0,
+      score: 0,
     };
     expect(() => frontToJson([row])).not.toThrow();
     expect(frontToLatexTable([row]).split('\n').length).toBeGreaterThan(2);
