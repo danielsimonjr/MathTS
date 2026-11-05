@@ -20,6 +20,8 @@ interface FakePoolRecord {
   readonly script: string;
   readonly calls: { timeoutMs: unknown; items: number; rows: number }[];
   terminated: number;
+  inFlight: number;
+  maxInFlight: number;
 }
 
 const world = vi.hoisted(() => ({
@@ -34,7 +36,7 @@ vi.mock('@danielsimonjr/mathts-parallel', async (importOriginal) => {
   class FakeWorkerPool {
     private readonly record: FakePoolRecord;
     constructor(script: string) {
-      this.record = { script, calls: [], terminated: 0 };
+      this.record = { script, calls: [], terminated: 0, inFlight: 0, maxInFlight: 0 };
       world.pools.push(this.record);
     }
     async execute(data: unknown, _transferables?: unknown, timeoutMs?: unknown): Promise<unknown> {
@@ -47,10 +49,19 @@ vi.mock('@danielsimonjr/mathts-parallel', async (importOriginal) => {
         items: task.items.length,
         rows: task.columns[0]?.length ?? 0,
       });
-      if (world.failExecute) {
-        throw new Error('Worker task timed out after 30000ms');
+      this.record.inFlight += 1;
+      this.record.maxInFlight = Math.max(this.record.maxInFlight, this.record.inFlight);
+      try {
+        // One yield so genuinely concurrent calls register as in flight together;
+        // without it every continuation runs to completion back to back.
+        await Promise.resolve();
+        if (world.failExecute) {
+          throw new Error('Worker task timed out after 30000ms');
+        }
+        return structuredClone(runScalarBatchTask(task));
+      } finally {
+        this.record.inFlight -= 1;
       }
-      return structuredClone(runScalarBatchTask(task));
     }
     async terminate(): Promise<void> {
       this.record.terminated += 1;
@@ -175,6 +186,77 @@ describe('searchScalars with parallel evaluation', () => {
     const serial = await drain(problem, { ...islands, rng: createSeededRng(5) });
     const parallel = await drain(problem, { ...islands, rng: createSeededRng(5), parallel: {} });
     expectSameRun(parallel.progress, serial.progress);
+  });
+
+  // SR-13: one generation's island batches are in flight together. The initial
+  // population is dealt island by island and stays sequential, so two concurrent
+  // calls can only come from the overlapped generations.
+  it('has the islands score calls of one generation in flight together', async () => {
+    const problem = problemOf(120, planted);
+    const before = world.pools.length;
+    await drain(problem, {
+      ...base,
+      populations: 4,
+      maxEvaluations: 240,
+      rng: createSeededRng(2),
+      parallel: {},
+    });
+    const pool = world.pools[before]!;
+    expect(pool.terminated).toBe(1);
+    expect(pool.maxInFlight).toBeGreaterThanOrEqual(2);
+    expect(pool.calls.reduce((sum, call) => sum + call.items, 0)).toBe(240);
+  });
+
+  it('populations: 1 does not overlap islands because there is only one', async () => {
+    const problem = problemOf(120, planted);
+    const before = world.pools.length;
+    await drain(problem, { ...base, rng: createSeededRng(7), parallel: {} });
+    // One island still splits its own batch into worker chunks; that is the
+    // pre-SR-13 concurrency and `populations: 1` must not add to it.
+    const single = world.pools[before]!.maxInFlight;
+    await drain(problem, {
+      ...base,
+      populations: 4,
+      maxEvaluations: 240,
+      rng: createSeededRng(2),
+      parallel: {},
+    });
+    const multi = world.pools[before + 1]!.maxInFlight;
+    expect(single).toBeGreaterThanOrEqual(1);
+    expect(multi).toBeGreaterThan(single);
+  });
+
+  it('terminates the pool when the consumer stops early with several islands', async () => {
+    const before = world.pools.length;
+    const gen = searchScalars(problemOf(120, planted), {
+      ...base,
+      populations: 4,
+      rng: createSeededRng(2),
+      parallel: {},
+    });
+    await gen.next();
+    await gen.next();
+    expect(world.pools[before]!.terminated).toBe(0);
+    await gen.return(undefined as unknown as ScalarSearchResult);
+    expect(world.pools[before]!.terminated).toBe(1);
+  });
+
+  it('rejects, and terminates the pool, when an island batch fails on the workers', async () => {
+    const before = world.pools.length;
+    world.failExecute = true;
+    try {
+      await expect(
+        drain(problemOf(120, planted), {
+          ...base,
+          populations: 4,
+          rng: createSeededRng(2),
+          parallel: {},
+        })
+      ).rejects.toThrow(/timed out/);
+    } finally {
+      world.failExecute = false;
+    }
+    expect(world.pools[before]!.terminated).toBe(1);
   });
 
   it('equals the serial run with complexityWeights', async () => {

@@ -295,6 +295,8 @@ Inside one `scoreTrees` call, compile each distinct `scalarCanonicalKey` once an
 
 ## SR-13 — Overlapped islands, ordered merge
 
+**Status: shipped.** The islands' score calls overlap within one generation via `Promise.all` in the search's own process; the `parallel` worker scoring is untouched. Hall updates and population replacement run in island-index order after every island's batch finishes; migration stays after that merge on the `migration` stream. Each island keeps its own `SeededRng`; nothing is shared. One deliberate deviation from this section's prose: the **frequency-window update is recorded at breeding time**, staged per island and flushed at the island boundary (still in island-index and offspring order), not after the merge — the parsimony window is read by the _next island's_ breeding in the same generation, and deferring it to the merge changed the evolution. That ordering reproduces the sequential schedule's record sequence exactly, which is what the pinned trace demands. The multi-island trace test pins the sequential schedule's fronts (populations 4, seed 2, `x^4 + x^2` grammar, 240 evaluations) event by event, complexities, keys, and `Object.is` losses (including `2.1572822789567526e-31`); `populations: 1` still matches `PINNED_ROWS`; closing the generator early still terminates the pool the search owns.
+
 **Independent.** Touches `functions/src/scalar-search.ts` and the island tests.
 
 Today the generation `await`s island 0, then island 1, and so on. Each island's breeding and scoring uses only that island's `SeededRng`. Overlap the islands' score calls. Apply hall updates, frequency-window updates, and population replacement in island-index order after every island in the generation has finished, using the arrays those calls already return. Migration stays after that merge, on the `migration` stream, unchanged. `populations: 1` does not start a second task.
@@ -400,7 +402,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | 10    | SR-10 | Grammars may name `sqrt` and `atan`. **Done.**                                |
 | 11    | SR-11 | Node and Bun harness, no speed claim.                                         |
 | 12    | SR-12 | One compile per structure per generation, bit-identical.                      |
-| 13    | SR-13 | Islands overlap; merge in index order.                                        |
+| 13    | SR-13 | Islands overlap; merge in index order. **Done.**                              |
 | 14    | SR-14 | Worker threshold moves only when four runs agree.                             |
 | 15    | SR-15 | `AbortSignal` and opt-in `earlyStop`.                                         |
 | 16    | SR-16 | `runScalarSearch` and `bestLossFactor`.                                       |

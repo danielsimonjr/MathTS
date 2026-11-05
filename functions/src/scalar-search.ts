@@ -3,10 +3,12 @@
  *
  * `populations` islands each evolve by tournament selection and
  * {@link weightedMutation}. Each generation breeds `populationSize` offspring per
- * island from tournament winners, evaluates them in one batch, and keeps the best
- * `populationSize` distinct trees of parents and offspring (elitist truncation, not
- * age-based replacement). After every generation the islands exchange their
- * best trees (migration). A hall of fame shared by every island keeps the best loss
+ * island from tournament winners, evaluates every island's batch at the same time
+ * (the score calls overlap in this process; each island keeps its own rng), and
+ * keeps the best `populationSize` distinct trees of parents and offspring per
+ * island (elitist truncation, not age-based replacement), applied in island-index
+ * order after every island's batch has finished. After every generation the islands
+ * exchange their best trees (migration). A hall of fame shared by every island keeps the best loss
  * per complexity among stored trees and one evaluated tree per {@link scalarCanonicalKey}
  * (loss first, then complexity, then first recorded); its Pareto front is reported
  * through {@link paretoFront} and {@link scoreFront}. Subtree crossover
@@ -224,7 +226,8 @@ export interface ScalarSearchOptions {
   /**
    * Independent islands, each with `populationSize` trees and its own random stream
    * (`rng.fork('island:' + index)`). Default 1, which draws from `rng.fork('population')`.
-   * Evaluations are counted across all islands.
+   * Evaluations are counted across all islands. The islands' score calls overlap
+   * within one generation; the merge after them runs in island-index order.
    */
   readonly populations?: number;
   /**
@@ -1722,13 +1725,26 @@ export async function* searchScalars(
         perturbationFactor: options.perturbationFactor ?? DEFAULT_PERTURBATION_FACTOR,
         temperature,
       };
+      // The offspring counts depend only on the budget arithmetic, never on a score:
+      // every island takes `populationSize` offspring until the budget runs out. They
+      // are fixed up front so every island can breed here, in island-index order, and
+      // then score at the same time. Each island breeds from its own population with
+      // its own rng, so the draws match the sequential schedule.
+      const batches: {
+        island: Island;
+        nodes: ScalarNode[];
+        inherited: Float64Array[];
+      }[] = [];
+      let remaining = budget - evaluations;
       for (const island of islands) {
-        const offspringCount = Math.min(populationSize, budget - evaluations);
+        const offspringCount = Math.min(populationSize, remaining);
         if (offspringCount <= 0) {
           break;
         }
+        remaining -= offspringCount;
         const nodes: ScalarNode[] = [];
         const inherited: Float64Array[] = [];
+        const pending: number[] = [];
         for (let i = 0; i < offspringCount; i += 1) {
           const parent = tournamentSelect(
             island.population,
@@ -1767,26 +1783,52 @@ export async function* searchScalars(
           }
           nodes.push(child ?? parent.node);
           inherited.push(new Float64Array(parent.parameters));
+          // Staged, not recorded yet: the sequential schedule records an island's
+          // offspring complexities only after that island finished breeding, so its
+          // own later tournaments must not see them.
+          pending.push(scalarComplexity(nodes[nodes.length - 1]!, complexityWeights));
         }
-        const offspring = await evaluateNodes(
-          nodes,
-          inherited,
-          score,
-          problem,
-          names,
-          optimizeProbability,
-          island.rng,
-          rank,
-          fit,
-          complexityWeights,
-          dimensionsFilter
-        );
+        // The next island's breeding reads these, in the same island-index and
+        // offspring order the sequential schedule recorded them in. The complexity
+        // does not depend on the score, so the values match the scored trees.
+        for (const complexity of pending) {
+          parsimony?.frequency.record(complexity);
+        }
+        batches.push({ island, nodes, inherited });
+      }
+      // The islands' score calls overlap inside this process; each island keeps its
+      // own rng, so the refit draws stay on the island's own stream.
+      const scored = await Promise.all(
+        batches.map((batch) =>
+          evaluateNodes(
+            batch.nodes,
+            batch.inherited,
+            score,
+            problem,
+            names,
+            optimizeProbability,
+            batch.island.rng,
+            rank,
+            fit,
+            complexityWeights,
+            dimensionsFilter
+          )
+        )
+      );
+      // One island at a time, in island-index order: hall updates and population
+      // replacement. A tie keeps the earlier island because the merge reads the
+      // islands in this order. The frequency window was already updated at
+      // breeding time, above.
+      for (let b = 0; b < batches.length; b += 1) {
+        const offspring = scored[b]!;
         evaluations += offspring.length;
         for (const ind of offspring) {
           hallOfFame.add(ind);
-          parsimony?.frequency.record(ind.complexity);
         }
-        island.population = truncateDistinct([...island.population, ...offspring], populationSize);
+        batches[b]!.island.population = truncateDistinct(
+          [...batches[b]!.island.population, ...offspring],
+          populationSize
+        );
       }
       // After the last evaluation nothing breeds again, so migrating would change nothing.
       if (evaluations < budget) {
