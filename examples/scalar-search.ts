@@ -50,7 +50,7 @@ async function main() {
   });
 
   console.log(`stopReason: ${result.stopReason} after ${result.evaluations} evaluations\n`);
-  console.log('complexity  loss                  scalarCanonicalKey');
+  console.log('complexity\tloss\tscalarCanonicalKey');
   for (const row of result.front) {
     console.log(`${row.complexity}\t${row.loss}\t${scalarCanonicalKey(row.item)}`);
   }

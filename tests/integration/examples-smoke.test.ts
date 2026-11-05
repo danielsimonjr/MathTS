@@ -36,6 +36,11 @@ const EXAMPLE_RUNS: { label: string; command: string; args: string[] }[] = [
     args: ['--tsconfig-override=tsconfig.base.json', 'examples/mathjs-migration.ts'],
   },
   {
+    label: 'scalar-search',
+    command: 'bun',
+    args: ['--tsconfig-override=tsconfig.base.json', 'examples/scalar-search.ts'],
+  },
+  {
     label: 'basic-workbook',
     command: 'bun',
     args: ['workbook/dist/cli.js', 'run', 'examples/basic-workbook.mtsw'],
