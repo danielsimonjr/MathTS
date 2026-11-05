@@ -10,7 +10,7 @@ import type {
   ScalarNode,
   StringOptions,
 } from '@danielsimonjr/mathts-expression';
-import { ScalarBuildError } from '@danielsimonjr/mathts-expression';
+import { SCALAR_FUNCTION_LOWERING, ScalarBuildError } from '@danielsimonjr/mathts-expression';
 import type { SimplifyOptions } from '../types/index.js';
 import {
   isConstantNode,
@@ -24,19 +24,8 @@ export type { MathNode, StringOptions, SimplifyOptions };
 
 const PREFIX = 'scalar bridge: ';
 
-const LOWERED_CALL_NAMES = new Set([
-  'exp',
-  'log',
-  'log10',
-  'log2',
-  'sin',
-  'cos',
-  'tan',
-  'sinh',
-  'cosh',
-  'tanh',
-  'abs',
-]);
+/** Lowered MathTS names accepted on scalar `call` nodes — kept in sync with {@link SCALAR_FUNCTION_LOWERING}. */
+const LOWERED_CALL_NAMES = new Set<string>(Object.values(SCALAR_FUNCTION_LOWERING));
 
 const OP_TO_FN: Record<string, string> = {
   '+': 'add',

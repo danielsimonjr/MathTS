@@ -7,9 +7,9 @@
     "`unreferencedAnywhereNotes`'s dynamic-import check (`_dynamic_import_referrers`) only sees `import(...)` calls with a LITERAL string specifier. A dynamic import built from a variable or template literal (e.g. `import(`./cmds/${name}.js`)`, a command-dispatcher pattern) is invisible to it -- 'found none' in a note means no LITERAL match was found, NOT that nothing imports the file."
   ],
   "summary": {
-    "unusedExportCount": 1260,
+    "unusedExportCount": 1259,
     "unreferencedAnywhereCount": 440,
-    "referencedInModuleCount": 820,
+    "referencedInModuleCount": 819,
     "unclassifiedExportCount": 0,
     "noImporterFileCount": 13
   },
@@ -1068,7 +1068,6 @@
     ],
     "functions/src/scalar-node-bridge.ts": ["ScalarNodeBridgeDeps"],
     "functions/src/signal-filter-extra.ts": ["cAdd", "cSub", "zpkToTf"],
-    "functions/src/signal/conv.ts": ["ConvMode"],
     "functions/src/signal/fft-core-f64.ts": ["bitReverse"],
     "functions/src/signal/fft.ts": ["FFTResult", "rollBy"],
     "functions/src/signal/wavelet-filters.ts": ["WaveletFilters"],

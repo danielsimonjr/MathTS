@@ -9,7 +9,10 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, test } from 'node:test';
-import { buildScalarSearchBundle } from '../benchmark/scalar-search/bundle.mjs';
+import {
+  buildScalarSearchBundle,
+  assertBundleRelativeImportsResolve,
+} from '../benchmark/scalar-search/bundle.mjs';
 import pinnedFixture from '../benchmark/scalar-search/pinned-rows.json' with { type: 'json' };
 import { measurePair, median, nodeBinary, parseArgs } from '../benchmark/scalar-search/lib.mjs';
 
@@ -126,6 +129,14 @@ describe('node bundle', () => {
     const text = readFileSync(outfile, 'utf8');
     assert.ok(!text.includes('core/src'), 'bundle must not embed core/src sources');
     assert.ok(!text.includes('functions/src'), 'bundle must not embed functions/src sources');
+  });
+
+  test('every relative import in the production bundle path resolves on disk', async () => {
+    const outfile = join(repoRoot, 'functions', '.bench', 'scalar-search.mjs');
+    await buildScalarSearchBundle(repoRoot, outfile);
+    assertBundleRelativeImportsResolve(outfile);
+    const text = readFileSync(outfile, 'utf8');
+    assert.match(text, /from\s+['"]\.\.\/dist\/scalar-batch-parallel\.js['"]/);
   });
 });
 

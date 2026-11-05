@@ -28,6 +28,18 @@ describe('createScalarBuilder', () => {
     }
     expect(SCALAR_FUNCTIONS).toContain('abs');
     expect(SCALAR_FUNCTIONS).toContain('log');
+    expect(SCALAR_FUNCTIONS).toContain('sqrt');
+    expect(SCALAR_FUNCTIONS).toContain('atan');
+    expect(expression.SCALAR_FUNCTION_LOWERING.sqrt).toBe('sqrt');
+    expect(expression.SCALAR_FUNCTION_LOWERING.atan).toBe('atan');
+  });
+
+  it('stores sqrt and atan as themselves', () => {
+    const x = scalar.symbol('x');
+    expect(scalar.call('sqrt', x)).toEqual({ kind: 'call', fn: 'sqrt', arg: x });
+    expect(scalar.call('atan', x)).toEqual({ kind: 'call', fn: 'atan', arg: x });
+    expect(scalar.from(scalar.call('sqrt', x))).toEqual(scalar.call('sqrt', x));
+    expect(scalar.from(scalar.call('atan', x))).toEqual(scalar.call('atan', x));
   });
 
   it('lowers ln to natural log and log to log10', () => {
@@ -93,7 +105,7 @@ describe('createScalarBuilder', () => {
   });
 
   it('rejects unknown functions, a bad power arity, and non-scalar kinds', () => {
-    expect(() => scalar.call('sqrt' as 'ln', scalar.number(1))).toThrow(ScalarBuildError);
+    expect(() => scalar.call('cbrt' as 'ln', scalar.number(1))).toThrow(ScalarBuildError);
     expect(() => scalar.op('^', [scalar.number(2)])).toThrow(/exactly 2 args/);
     expect(() => scalar.from({ kind: 'integral', over: { kind: 'symbol', name: 'x' } })).toThrow(
       /integral/
