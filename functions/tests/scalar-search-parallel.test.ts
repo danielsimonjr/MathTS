@@ -8,7 +8,10 @@ import {
 } from '@danielsimonjr/mathts-expression';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import { compileScalar } from '../src/scalar-compile.js';
-import { scalarParallelWorkerCount } from '../src/scalar-batch-parallel.js';
+import {
+  scalarParallelWorkerCount,
+  SCALAR_PARALLEL_MIN_ROWS,
+} from '../src/scalar-batch-parallel.js';
 import {
   searchScalars,
   type ScalarSearchOptions,
@@ -70,6 +73,8 @@ vi.mock('@danielsimonjr/mathts-parallel', async (importOriginal) => {
   }
   return { ...original, WorkerPool: FakeWorkerPool };
 });
+
+const PARALLEL_ROWS = SCALAR_PARALLEL_MIN_ROWS;
 
 const b = createScalarBuilder();
 const X = b.symbol('x');
@@ -143,7 +148,7 @@ const base = {
 
 describe('searchScalars with parallel evaluation', () => {
   it('equals the serial run for the same seed, event by event', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const serial = await drain(problem, { ...base, rng: createSeededRng(7) });
     const before = world.pools.length;
     const parallel = await drain(problem, { ...base, rng: createSeededRng(7), parallel: {} });
@@ -153,20 +158,22 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('evaluates through the pool, one call per chunk of every generation, at 30000 ms', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const before = world.pools.length;
     await drain(problem, { ...base, rng: createSeededRng(7), parallel: {} });
     const pool = world.pools[before]!;
     expect(pool.script.endsWith('/scalar-batch.worker.js')).toBe(true);
     expect(pool.calls.length).toBeGreaterThan(0);
-    expect(pool.calls.every((call) => call.timeoutMs === 30_000 && call.rows === 120)).toBe(true);
+    expect(
+      pool.calls.every((call) => call.timeoutMs === 30_000 && call.rows === PARALLEL_ROWS)
+    ).toBe(true);
     // 300 evaluations: every tree was scored by the pool, none on the caller thread.
     expect(pool.calls.reduce((sum, call) => sum + call.items, 0)).toBe(300);
   });
 
   it('equals the serial run when parameters are refitted on the caller thread', async () => {
     const law = b.op('*', [P, X]);
-    const problem = problemOf(120, law, [2]);
+    const problem = problemOf(PARALLEL_ROWS, law, [2]);
     const fitting = {
       ...base,
       grammar: { ...grammar, parameters: ['p'] },
@@ -182,7 +189,7 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('equals the serial run with several islands', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const islands = { ...base, populations: 3, fractionReplaced: 0.3, maxEvaluations: 360 };
     const serial = await drain(problem, { ...islands, rng: createSeededRng(5) });
     const parallel = await drain(problem, { ...islands, rng: createSeededRng(5), parallel: {} });
@@ -194,7 +201,7 @@ describe('searchScalars with parallel evaluation', () => {
   // calls can only come from the overlapped generations.
   it('has the islands score calls of one generation in flight together', async () => {
     const populations = 4;
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const before = world.pools.length;
     await drain(problem, {
       ...base,
@@ -212,7 +219,7 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('populations: 1 does not overlap islands because there is only one', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const before = world.pools.length;
     await drain(problem, { ...base, rng: createSeededRng(7), parallel: {} });
     // One island still splits its own batch into worker chunks; that is the
@@ -232,7 +239,7 @@ describe('searchScalars with parallel evaluation', () => {
 
   it('terminates the pool when the consumer stops early with several islands', async () => {
     const before = world.pools.length;
-    const gen = searchScalars(problemOf(120, planted), {
+    const gen = searchScalars(problemOf(PARALLEL_ROWS, planted), {
       ...base,
       populations: 4,
       rng: createSeededRng(2),
@@ -250,7 +257,7 @@ describe('searchScalars with parallel evaluation', () => {
     world.failExecute = true;
     try {
       await expect(
-        drain(problemOf(120, planted), {
+        drain(problemOf(PARALLEL_ROWS, planted), {
           ...base,
           populations: 4,
           rng: createSeededRng(2),
@@ -264,7 +271,7 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('equals the serial run with complexityWeights', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const weighted = { ...base, rng: createSeededRng(7), complexityWeights: { symbol: { x: 2 } } };
     const serial = await drain(problem, weighted);
     const parallel = await drain(problem, { ...weighted, parallel: {} });
@@ -277,16 +284,16 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('equals the serial run with simplify', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const simplified = { ...base, rng: createSeededRng(7), simplify: 'algebraic' as const };
     const serial = await drain(problem, simplified);
     const parallel = await drain(problem, { ...simplified, parallel: {} });
     expectSameRun(parallel.progress, serial.progress);
   });
 
-  it('starts no pool below 100 rows', async () => {
+  it('starts no pool below the worker row threshold', async () => {
     const before = world.pools.length;
-    const problem = problemOf(99, planted);
+    const problem = problemOf(SCALAR_PARALLEL_MIN_ROWS - 1, planted);
     const serial = await drain(problem, { ...base, rng: createSeededRng(7) });
     const parallel = await drain(problem, { ...base, rng: createSeededRng(7), parallel: {} });
     expect(world.pools.length).toBe(before);
@@ -295,14 +302,18 @@ describe('searchScalars with parallel evaluation', () => {
 
   it('terminates the pool it started, once, when the search ends', async () => {
     const before = world.pools.length;
-    await drain(problemOf(120, planted), { ...base, rng: createSeededRng(7), parallel: {} });
+    await drain(problemOf(PARALLEL_ROWS, planted), {
+      ...base,
+      rng: createSeededRng(7),
+      parallel: {},
+    });
     expect(world.pools.length - before).toBe(1);
     expect(world.pools[before]!.terminated).toBe(1);
   });
 
   it('terminates the pool when the consumer stops early', async () => {
     const before = world.pools.length;
-    const gen = searchScalars(problemOf(120, planted), {
+    const gen = searchScalars(problemOf(PARALLEL_ROWS, planted), {
       ...base,
       rng: createSeededRng(7),
       parallel: {},
@@ -319,7 +330,7 @@ describe('searchScalars with parallel evaluation', () => {
     world.failExecute = true;
     try {
       await expect(
-        drain(problemOf(120, planted), { ...base, rng: createSeededRng(7), parallel: {} })
+        drain(problemOf(PARALLEL_ROWS, planted), { ...base, rng: createSeededRng(7), parallel: {} })
       ).rejects.toThrow(/timed out/);
     } finally {
       world.failExecute = false;
@@ -337,7 +348,7 @@ describe('searchScalars with parallel evaluation', () => {
       },
     } as unknown as Pick<WorkerPool, 'execute'>;
     const before = world.pools.length;
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const serial = await drain(problem, { ...base, rng: createSeededRng(7) });
     const parallel = await drain(problem, {
       ...base,
@@ -354,7 +365,7 @@ describe('searchScalars with parallel evaluation', () => {
     const before = world.pools.length;
     for (const timeoutMs of [0, -5, Number.NaN]) {
       await expect(
-        drain(problemOf(120, planted), {
+        drain(problemOf(PARALLEL_ROWS, planted), {
           ...base,
           rng: createSeededRng(7),
           parallel: { timeoutMs },
@@ -368,7 +379,7 @@ describe('searchScalars with parallel evaluation', () => {
   // between generations, so a worker-backed generation in flight still completes.
   it('a signal aborted before next() starts no pool and returns cancelled', async () => {
     const before = world.pools.length;
-    const gen = searchScalars(problemOf(120, planted), {
+    const gen = searchScalars(problemOf(SCALAR_PARALLEL_MIN_ROWS - 1, planted), {
       ...base,
       rng: createSeededRng(7),
       parallel: {},
@@ -387,7 +398,7 @@ describe('searchScalars with parallel evaluation', () => {
   it('terminates the pool it owns when the signal aborts after a yield', async () => {
     const before = world.pools.length;
     const controller = new AbortController();
-    const gen = searchScalars(problemOf(120, planted), {
+    const gen = searchScalars(problemOf(PARALLEL_ROWS, planted), {
       ...base,
       rng: createSeededRng(7),
       parallel: {},
@@ -409,7 +420,7 @@ describe('searchScalars with parallel evaluation', () => {
   it('a signal aborted during a worker-backed generation with islands ends after it', async () => {
     const before = world.pools.length;
     const controller = new AbortController();
-    const gen = searchScalars(problemOf(120, planted), {
+    const gen = searchScalars(problemOf(PARALLEL_ROWS, planted), {
       ...base,
       populations: 4,
       rng: createSeededRng(2),
@@ -429,7 +440,7 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('earlyStop matches the serial run through the workers, bit for bit', async () => {
-    const problem = problemOf(120, planted);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const stopped = {
       ...base,
       rng: createSeededRng(7),

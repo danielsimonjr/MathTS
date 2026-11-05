@@ -1661,6 +1661,13 @@ export async function* searchScalars(
     optimizeProbability,
     crossoverProbability
   );
+  const earlyStop =
+    options.earlyStop === undefined
+      ? undefined
+      : Object.freeze({
+          loss: options.earlyStop.loss,
+          generations: options.earlyStop.generations,
+        });
   const names = paramNames(problem, options.grammar);
   if (options.fit !== undefined && !isPlainObject(options.fit)) {
     throw new RangeError(`searchScalars: fit must be a plain object, got ${String(options.fit)}`);
@@ -1719,7 +1726,6 @@ export async function* searchScalars(
     // the bound has not been reached yet.
     let bestLoss = Number.POSITIVE_INFINITY;
     let earlyStreak = 0;
-    const earlyStop = options.earlyStop;
     const noteLosses = (individuals: readonly EvaluatedIndividual[]): void => {
       for (const ind of individuals) {
         if (ind.loss < bestLoss) {
@@ -1738,6 +1744,7 @@ export async function* searchScalars(
       }
     };
     const betweenGenerations = (): ScalarSearchStopReason | null => {
+      // When both fire on the same check, cancellation wins over early stop.
       if (options.signal?.aborted) {
         return 'cancelled';
       }
@@ -1992,15 +1999,12 @@ export async function* searchScalars(
       }
     }
 
-    // The budget is spent. An abort or an early-stop bound that this last
-    // generation satisfied still wins over the budget reason.
-    const finalStop = betweenGenerations();
     const last = report();
     return {
       front: last.front,
       parameterNames: names,
       fittedParameters: last.fittedParameters,
-      stopReason: finalStop ?? (candidatesBind ? 'max-candidates' : 'max-evaluations'),
+      stopReason: candidatesBind ? 'max-candidates' : 'max-evaluations',
       evaluations,
       seed: options.rng.seed,
       selected: last.selected,
