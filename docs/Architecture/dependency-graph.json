@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6885
+    "totalExports": 6889
   },
   "entryPoints": [
     {
@@ -9966,7 +9966,7 @@
           },
           {
             "file": "./scalar-search.js",
-            "imports": ["searchScalars"],
+            "imports": ["runScalarSearch", "searchScalars"],
             "reExport": true
           },
           {
@@ -10901,6 +10901,8 @@
               "ScalarSearchOptions",
               "ScalarSearchProblem",
               "ScalarSearchResult",
+              "ScalarSearchRunOptions",
+              "ScalarSearchRunProblem",
               "ScalarSearchStopReason",
               "SearchProgress"
             ],
@@ -11417,6 +11419,7 @@
           "simplifyConstants",
           "swapOperands",
           "weightedMutation",
+          "runScalarSearch",
           "searchScalars",
           "paretoFront",
           "scoreFront",
@@ -11942,6 +11945,8 @@
           "ScalarSearchOptions",
           "ScalarSearchProblem",
           "ScalarSearchResult",
+          "ScalarSearchRunOptions",
+          "ScalarSearchRunProblem",
           "ScalarSearchStopReason",
           "SearchProgress",
           "ScalarPopulationParallelOptions",
@@ -12142,6 +12147,7 @@
           "simplifyConstants",
           "swapOperands",
           "weightedMutation",
+          "runScalarSearch",
           "searchScalars",
           "paretoFront",
           "scoreFront",
@@ -12667,6 +12673,8 @@
           "ScalarSearchOptions",
           "ScalarSearchProblem",
           "ScalarSearchResult",
+          "ScalarSearchRunOptions",
+          "ScalarSearchRunProblem",
           "ScalarSearchStopReason",
           "SearchProgress",
           "ScalarPopulationParallelOptions",
@@ -13470,7 +13478,7 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["pairwiseSum", "SeededRng"]
+            "imports": ["createSeededRng", "pairwiseSum", "SeededRng"]
           },
           {
             "package": "@danielsimonjr/mathts-parallel",
@@ -13498,6 +13506,7 @@
           "parsimonyKey",
           "tournamentSelect",
           "migrateIslands",
+          "runScalarSearch",
           "ComplexityFrequency"
         ],
         "classes": ["ComplexityFrequency"],
@@ -13509,14 +13518,16 @@
           "SearchProgress",
           "ScalarSearchResult",
           "EvaluatedIndividual",
-          "Island"
+          "Island",
+          "ScalarSearchRunProblem"
         ],
         "functions": [
           "simplifyCandidateForTest",
           "hallFrontForTest",
           "parsimonyKey",
           "tournamentSelect",
-          "migrateIslands"
+          "migrateIslands",
+          "runScalarSearch"
         ]
       },
       "functions/src/signal-filter-extra.ts": {
@@ -45287,15 +45298,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213697,
-    "totalExports": 6885,
+    "totalLinesOfCode": 213795,
+    "totalExports": 6889,
     "totalClasses": 60,
-    "totalInterfaces": 593,
-    "totalFunctions": 2284,
+    "totalInterfaces": 594,
+    "totalFunctions": 2285,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,
-    "totalReExports": 2979,
+    "totalReExports": 2982,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

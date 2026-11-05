@@ -21,7 +21,7 @@
  * @packageDocumentation
  */
 
-import { pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import { createSeededRng, pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   enumerateScalars,
@@ -305,6 +305,14 @@ export interface ScalarSearchOptions {
    * still ends on `'max-evaluations'`.
    */
   readonly earlyStop?: { readonly loss: number; readonly generations: number };
+  /**
+   * Factor forwarded to {@link selectFrontModel}'s `bestLossFactor` when
+   * `modelSelection` is set (SR-16). Omitted: the factor `selectFrontModel`
+   * already defaults to (1.5), so today's call is unchanged. A non-finite value
+   * throws `RangeError` before the search starts, even when `modelSelection` is
+   * omitted. Only read when `modelSelection` is set.
+   */
+  readonly bestLossFactor?: number;
 }
 
 /** Budget, bounds, and start-vector knobs for the search's parameter refits. */
@@ -912,6 +920,11 @@ function assertSearchInputs(
       );
     }
     positiveInteger('earlyStop.generations', options.earlyStop.generations);
+  }
+  if (options.bestLossFactor !== undefined && !Number.isFinite(options.bestLossFactor)) {
+    throw new RangeError(
+      `searchScalars: bestLossFactor must be a finite number, got ${String(options.bestLossFactor)}`
+    );
   }
 }
 
@@ -1579,12 +1592,13 @@ class HallOfFame {
 
 function pickSelected(
   front: ScoredCandidate<ScalarNode>[],
-  mode: ScalarSearchOptions['modelSelection']
+  mode: ScalarSearchOptions['modelSelection'],
+  bestLossFactor: number | undefined
 ): ScoredCandidate<ScalarNode> | undefined {
   if (mode === undefined || front.length === 0) {
     return undefined;
   }
-  return selectFrontModel(front, mode);
+  return selectFrontModel(front, mode, { bestLossFactor });
 }
 
 /**
@@ -1762,7 +1776,7 @@ export async function* searchScalars(
         stopReason,
         evaluations,
         seed: options.rng.seed,
-        selected: pickSelected(front, options.modelSelection),
+        selected: pickSelected(front, options.modelSelection, options.bestLossFactor),
         simplifyFallbacks,
       };
     };
@@ -1841,7 +1855,7 @@ export async function* searchScalars(
         front,
         parameterNames: names,
         fittedParameters,
-        selected: pickSelected(front, options.modelSelection),
+        selected: pickSelected(front, options.modelSelection, options.bestLossFactor),
       };
     };
 
@@ -2014,4 +2028,86 @@ export async function* searchScalars(
     // A generator that is closed early lands here too, so no worker outlives its search.
     await ownedPool?.terminate();
   }
+}
+
+/**
+ * Problem input for {@link runScalarSearch}: like {@link ScalarSearchProblem},
+ * but `columns` may be a record keyed by variable name instead of the aligned
+ * array `searchScalars` requires.
+ */
+export interface ScalarSearchRunProblem extends Omit<ScalarSearchProblem, 'columns'> {
+  /**
+   * One column per variable. Either the aligned array `searchScalars` takes, or a
+   * record keyed by the names in `variables`; the wrapper reads a record in
+   * `variables` order to build that array. A name without an entry throws
+   * `RangeError`. A column whose length differs from `observed.length` throws
+   * `RangeError` from `searchScalars` as usual.
+   */
+  readonly columns: readonly Float64Array[] | Readonly<Record<string, Float64Array>>;
+}
+
+/**
+ * Options for {@link runScalarSearch}: {@link ScalarSearchOptions} with `rng`
+ * optional — exactly one of `seed` and `rng` must be set.
+ */
+export type ScalarSearchRunOptions = Omit<ScalarSearchOptions, 'rng'> & {
+  /** Seed for a fresh {@link createSeededRng}; required when `rng` is omitted. */
+  readonly seed?: number;
+  /** Caller-owned random stream; required when `seed` is omitted, never advanced. */
+  readonly rng?: SeededRng;
+};
+
+/**
+ * Consume {@link searchScalars} to its final {@link ScalarSearchResult} (SR-16).
+ * A thin wrapper: when `seed` is set and `rng` is omitted it builds
+ * {@link createSeededRng}(seed) and passes that; when both are set, or neither
+ * is, it throws `RangeError`. A `columns` record is read in `variables` order.
+ * It does not reimplement any search behavior, so every documented default and
+ * the seed-7 pin hold unchanged.
+ *
+ * @throws {RangeError} `seed` and `rng` are both set, neither is set, a variable
+ * has no entry in `columns`, `bestLossFactor` is non-finite, or any check
+ * {@link searchScalars} itself performs fails.
+ */
+export async function runScalarSearch(
+  problem: ScalarSearchRunProblem,
+  options: ScalarSearchRunOptions
+): Promise<ScalarSearchResult> {
+  const { seed, rng } = options;
+  if (seed !== undefined && rng !== undefined) {
+    throw new RangeError('runScalarSearch: pass seed or rng, not both');
+  }
+  let resolvedRng: SeededRng;
+  if (rng !== undefined) {
+    resolvedRng = rng;
+  } else if (seed !== undefined) {
+    resolvedRng = createSeededRng(seed);
+  } else {
+    throw new RangeError('runScalarSearch: one of seed or rng is required');
+  }
+  if (options.bestLossFactor !== undefined && !Number.isFinite(options.bestLossFactor)) {
+    throw new RangeError(
+      `runScalarSearch: bestLossFactor must be a finite number, got ${String(options.bestLossFactor)}`
+    );
+  }
+  let columns: readonly Float64Array[];
+  if (Array.isArray(problem.columns)) {
+    columns = problem.columns as readonly Float64Array[];
+  } else {
+    const record = problem.columns as Readonly<Record<string, Float64Array>>;
+    columns = problem.variables.map((name) => {
+      const column = record[name];
+      if (!(column instanceof Float64Array)) {
+        throw new RangeError(`runScalarSearch: columns has no Float64Array for variable '${name}'`);
+      }
+      return column;
+    });
+  }
+  const { seed: _seed, rng: _rng, ...rest } = options;
+  const iterator = searchScalars({ ...problem, columns }, { ...rest, rng: resolvedRng });
+  let next = await iterator.next();
+  while (!next.done) {
+    next = await iterator.next();
+  }
+  return next.value;
 }

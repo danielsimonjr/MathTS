@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-05'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6885
+  totalExports: 6889
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9360,6 +9360,7 @@ modules:
           reExport: true
         - file: ./scalar-search.js
           imports:
+            - runScalarSearch
             - searchScalars
           reExport: true
         - file: ./pareto-front.js
@@ -10246,6 +10247,8 @@ modules:
             - ScalarSearchOptions
             - ScalarSearchProblem
             - ScalarSearchResult
+            - ScalarSearchRunOptions
+            - ScalarSearchRunProblem
             - ScalarSearchStopReason
             - SearchProgress
           reExport: true
@@ -10738,6 +10741,7 @@ modules:
         - simplifyConstants
         - swapOperands
         - weightedMutation
+        - runScalarSearch
         - searchScalars
         - paretoFront
         - scoreFront
@@ -11263,6 +11267,8 @@ modules:
         - ScalarSearchOptions
         - ScalarSearchProblem
         - ScalarSearchResult
+        - ScalarSearchRunOptions
+        - ScalarSearchRunProblem
         - ScalarSearchStopReason
         - SearchProgress
         - ScalarPopulationParallelOptions
@@ -11462,6 +11468,7 @@ modules:
         - simplifyConstants
         - swapOperands
         - weightedMutation
+        - runScalarSearch
         - searchScalars
         - paretoFront
         - scoreFront
@@ -11987,6 +11994,8 @@ modules:
         - ScalarSearchOptions
         - ScalarSearchProblem
         - ScalarSearchResult
+        - ScalarSearchRunOptions
+        - ScalarSearchRunProblem
         - ScalarSearchStopReason
         - SearchProgress
         - ScalarPopulationParallelOptions
@@ -12752,6 +12761,7 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - createSeededRng
             - pairwiseSum
             - SeededRng
         - package: '@danielsimonjr/mathts-parallel'
@@ -12775,6 +12785,7 @@ modules:
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
+        - runScalarSearch
         - ComplexityFrequency
       classes:
         - ComplexityFrequency
@@ -12787,12 +12798,14 @@ modules:
         - ScalarSearchResult
         - EvaluatedIndividual
         - Island
+        - ScalarSearchRunProblem
       functions:
         - simplifyCandidateForTest
         - hallFrontForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
+        - runScalarSearch
     functions/src/signal-filter-extra.ts:
       description: Digital filter design + application (Wave D / remaining). FIR window design
       externalDependencies: []
@@ -42843,15 +42856,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213697
-  totalExports: 6885
+  totalLinesOfCode: 213795
+  totalExports: 6889
   totalClasses: 60
-  totalInterfaces: 593
-  totalFunctions: 2284
+  totalInterfaces: 594
+  totalFunctions: 2285
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635
-  totalReExports: 2979
+  totalReExports: 2982
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0
