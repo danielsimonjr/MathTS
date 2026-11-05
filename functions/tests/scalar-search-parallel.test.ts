@@ -184,8 +184,12 @@ describe('searchScalars with parallel evaluation', () => {
       maxEvaluations: 24,
     };
     const serial = await drain(problem, { ...fitting, rng: createSeededRng(3) });
+    const before = world.pools.length;
     const parallel = await drain(problem, { ...fitting, rng: createSeededRng(3), parallel: {} });
     expectSameRun(parallel.progress, serial.progress);
+    const pool = world.pools[before]!;
+    expect(pool.calls.length).toBeGreaterThan(0);
+    expect(pool.calls.every((call) => call.rows === PARALLEL_ROWS)).toBe(true);
     const best = parallel.result.front.reduce((a, c) => (c.loss < a.loss ? c : a));
     expect(best.loss).toBeLessThan(1e-12);
     expect(parallel.result.fittedParameters.length).toBeGreaterThan(0);
