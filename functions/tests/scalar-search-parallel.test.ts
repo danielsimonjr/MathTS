@@ -178,7 +178,10 @@ describe('searchScalars with parallel evaluation', () => {
       ...base,
       grammar: { ...grammar, parameters: ['p'] },
       optimizeProbability: 1,
-      maxEvaluations: 150,
+      // Still crosses the worker row threshold; a smaller budget keeps CI under vitest's
+      // 30s default now that each batch scores PARALLEL_ROWS (10_000) rows.
+      populationSize: 8,
+      maxEvaluations: 72,
     };
     const serial = await drain(problem, { ...fitting, rng: createSeededRng(3) });
     const parallel = await drain(problem, { ...fitting, rng: createSeededRng(3), parallel: {} });
