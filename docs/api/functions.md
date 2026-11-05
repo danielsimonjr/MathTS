@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1318 exports).
+> `@danielsimonjr/mathts-functions` (1319 exports).
 
 ### Functions by category
 
@@ -694,7 +694,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 **Set Operations** (13): `setCartesian`, `setDifference`, `setDisjoint`, `setDistinct`, `setEqual`, `setIntersect`, `setIsSubset`, `setIsSuperset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 
-**Units** (5): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`
+**Units** (6): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`, `unitToRationalDimension`
 
 **Complex Number Utilities** (4): `arg`, `complexCos`, `complexSin`, `im`
 

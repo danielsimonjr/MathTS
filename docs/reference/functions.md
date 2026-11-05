@@ -22,7 +22,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1318** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1319** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -2917,13 +2917,14 @@ setPowerset([1, 2]); // [[], [1], [2], [1, 2]]
 
 ## Units
 
-| Function                 | Description                                |
-| ------------------------ | ------------------------------------------ |
-| `unit(value, unit)`      | Construct a `Unit`                         |
-| `createUnit(defs)`       | Define custom units (`factory_createUnit`) |
-| `to(unit, target)`       | Convert between units                      |
-| `toBest(unit)`           | Convert to the best-fitting prefix         |
-| `splitUnit(unit, parts)` | Split a unit into components               |
+| Function                            | Description                                                                                                                                                                                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unit(value, unit)`                 | Construct a `Unit`                                                                                                                                                                                                                       |
+| `createUnit(defs)`                  | Define custom units (`factory_createUnit`)                                                                                                                                                                                               |
+| `to(unit, target)`                  | Convert between units                                                                                                                                                                                                                    |
+| `toBest(unit)`                      | Convert to the best-fitting prefix                                                                                                                                                                                                       |
+| `splitUnit(unit, parts)`            | Split a unit into components                                                                                                                                                                                                             |
+| `unitToRationalDimension(unitName)` | SI dimension of a unit name as a `RationalDimension` (seven `Fraction` exponents in BIPM order `[L, M, T, I, Θ, N, J]`); angles map to dimensionless, information units and unknown names throw `UnitParseError` (SR-9 dimension filter) |
 
 ### Details
 
@@ -3277,7 +3278,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1318 exports).
+> `@danielsimonjr/mathts-functions` (1319 exports).
 
 ### Functions by category
 
@@ -3323,7 +3324,7 @@ await terminatePool();
 
 **Set Operations** (13): `setCartesian`, `setDifference`, `setDisjoint`, `setDistinct`, `setEqual`, `setIntersect`, `setIsSubset`, `setIsSuperset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
 
-**Units** (5): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`
+**Units** (6): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`, `unitToRationalDimension`
 
 **Complex Number Utilities** (4): `arg`, `complexCos`, `complexSin`, `im`
 

@@ -2863,6 +2863,9 @@
       "ScalarComplexFunction": {
         "kind": "type"
       },
+      "ScalarDimensionFilter": {
+        "kind": "type"
+      },
       "ScalarEvalError": {
         "kind": "function"
       },
@@ -6773,6 +6776,9 @@
         "kind": "function"
       },
       "unitImpulse": {
+        "kind": "function"
+      },
+      "unitToRationalDimension": {
         "kind": "function"
       },
       "unwrapPhase": {
