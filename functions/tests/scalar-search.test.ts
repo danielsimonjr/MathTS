@@ -12,6 +12,8 @@ import {
 import { createSeededRng, Fraction } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
+  frontToJson,
+  frontToLatexTable,
   numericallyEquivalent,
   searchScalars,
   simplifyScalar,
@@ -2777,6 +2779,7 @@ describe('searchScalars: dimensions (SR-9)', () => {
       binary: ['+'],
       unary: [],
       literals: [],
+
       parameters: ['p'],
       maxSize: 3,
     };
@@ -2994,5 +2997,153 @@ describe('searchScalars: dimensions (SR-9)', () => {
         },
       })
     ).rejects.toThrow(RangeError);
+  });
+});
+
+describe('searchScalars: sqrt and atan', () => {
+  it('a grammar that does not list sqrt or atan still rejects their nodes', () => {
+    expect(scalarGrammarAccepts(quadGrammar, b.call('sqrt', X))).toBe(false);
+    expect(scalarGrammarAccepts(quadGrammar, b.call('atan', X))).toBe(false);
+  });
+
+  it('a seeded sqrt tree over a non-negative column scores exactly and enters the front', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(12, 0, 11);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 60,
+      seeds: [law],
+    });
+    expect(
+      result.front.some(
+        (row) =>
+          row.loss === 0 &&
+          row.complexity === 2 &&
+          scalarCanonicalKey(row.item) === scalarCanonicalKey(law)
+      )
+    ).toBe(true);
+  });
+
+  it('a seeded atan tree over a non-negative column scores exactly and enters the front', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['atan'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(12, 0, 5);
+    const law = b.call('atan', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 60,
+      seeds: [law],
+    });
+    expect(
+      result.front.some(
+        (row) =>
+          row.loss === 0 &&
+          row.complexity === 2 &&
+          scalarCanonicalKey(row.item) === scalarCanonicalKey(law)
+      )
+    ).toBe(true);
+  });
+
+  it('a seed the grammar rejects is skipped without throwing', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: [],
+      literals: [],
+      maxSize: 3,
+    };
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [xs],
+      observed: observedOf(plantedQuad, xs),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 20,
+      seeds: [b.call('sqrt', X)],
+    });
+    for (const row of result.front) {
+      expect(scalarCanonicalKey(row.item)).not.toBe(scalarCanonicalKey(b.call('sqrt', X)));
+    }
+  });
+
+  it("'algebraic' simplify does not fall back on a plain sqrt seed", async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(8, 0, 7);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [law],
+      optimizeProbability: 0,
+      simplify: 'algebraic',
+    });
+    expect(result.simplifyFallbacks).toBe(0);
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(law));
+  });
+
+  it('exports a sqrt front row through frontToJson and frontToLatexTable', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(6, 0, 5);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [law],
+      optimizeProbability: 0,
+    });
+    expect(result.front.some((row) => row.score === 0 && row.loss === 0)).toBe(true);
+    expect(() => frontToJson(result.front)).not.toThrow();
+    expect(frontToLatexTable(result.front).includes('\\sqrt')).toBe(true);
   });
 });

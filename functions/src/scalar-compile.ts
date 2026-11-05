@@ -23,6 +23,8 @@ const LOWERED_UNARY_RULES: Record<LoweredScalarFn, DualUnaryRule> = {
   cosh: DUAL_UNARY_RULES.cosh,
   tanh: DUAL_UNARY_RULES.tanh,
   abs: DUAL_UNARY_RULES.abs,
+  sqrt: DUAL_UNARY_RULES.sqrt,
+  atan: DUAL_UNARY_RULES.atan,
 };
 
 type TapeInstr =
@@ -177,10 +179,10 @@ export interface CompiledScalarGradient {
   readonly parameters: readonly string[];
   /**
    * Evaluate every row. Invalid rows store `NaN` in `values` and every
-   * gradient entry for that row. The mask matches {@link compileScalar} except
-   * when a consumed `^` partial is not finite (a live child lane of `0^0`, or
-   * `ln` of a negative base with a live exponent): those rows are extra-invalid.
-   * Throws {@link ScalarEvalError} for binding mismatches or bad `out` lengths.
+   * gradient entry for that row. The `valid` mask matches {@link compileScalar}
+   * (primal evaluation only). When a parameter partial is not finite the row
+   * stays valid and the affected gradient entries are `NaN`; the fitter treats
+   * non-finite Jacobian entries as a failed step.
    *
    * @example
    * ```ts
@@ -389,20 +391,16 @@ function runRow(
               if (dl !== 0) {
                 const factor = powBasePartial(exp, base);
                 if (!Number.isFinite(factor)) {
-                  valid = false;
-                  scratch[instr.dest] = Number.NaN;
-                  setRegisterGradNaN(grad, instr.dest, nParams);
-                  break;
+                  grad[destBase + p] = Number.NaN;
+                  continue;
                 }
                 g += dl * factor;
               }
               if (dr !== 0) {
                 const factor = powExpPartial(val, base);
                 if (!Number.isFinite(factor)) {
-                  valid = false;
-                  scratch[instr.dest] = Number.NaN;
-                  setRegisterGradNaN(grad, instr.dest, nParams);
-                  break;
+                  grad[destBase + p] = Number.NaN;
+                  continue;
                 }
                 g += dr * factor;
               }
@@ -461,10 +459,8 @@ function runRow(
             }
             const d = rule.deriv(x, y);
             if (!Number.isFinite(d)) {
-              valid = false;
-              scratch[instr.dest] = Number.NaN;
-              setRegisterGradNaN(grad, instr.dest, nParams);
-              break;
+              grad[destBase + p] = Number.NaN;
+              continue;
             }
             grad[destBase + p] = al * d;
           }

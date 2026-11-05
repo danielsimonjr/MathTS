@@ -381,6 +381,37 @@ describe('fitScalarParameters', () => {
     expect(optsObj.restarts).toBe(0);
     expect(optsObj.maxIterations).toBe(0);
   });
+
+  it('sqrt(a * x) at a = 0 scores every primal-valid row, not loss 0 on one row', () => {
+    const node = scalar.call('sqrt', scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]));
+    const xs = new Float64Array([0, 1, 2, 3, 4]);
+    const observed = new Float64Array([0, 5, 5, 5, 5]);
+    const r = fitScalarParameters(node, [xs], observed, ['x'], {
+      parameters: ['a'],
+      initial: [0],
+      restarts: 0,
+      maxIterations: 0,
+    });
+    expect(r.validRows).toBe(5);
+    expect(r.loss).toBe(100);
+  });
+
+  it('(a * x) ^ 0.5 at a = 0 has the same primal-valid scoring trap as sqrt', () => {
+    const node = scalar.op('^', [
+      scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]),
+      scalar.number(0.5),
+    ]);
+    const xs = new Float64Array([0, 1, 2, 3, 4]);
+    const observed = new Float64Array([0, 5, 5, 5, 5]);
+    const r = fitScalarParameters(node, [xs], observed, ['x'], {
+      parameters: ['a'],
+      initial: [0],
+      restarts: 0,
+      maxIterations: 0,
+    });
+    expect(r.validRows).toBe(5);
+    expect(r.loss).toBe(100);
+  });
 });
 
 describe('levenbergMarquardt jacobian option', () => {

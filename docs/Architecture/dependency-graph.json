@@ -13277,13 +13277,14 @@
               "multiply",
               "pow",
               "sinh",
+              "sqrt",
               "subtract",
               "tanh"
             ]
           },
           {
             "file": "./typed/trigonometry.js",
-            "imports": ["cos", "sin", "tan"]
+            "imports": ["atan", "cos", "sin", "tan"]
           }
         ],
         "workspaceDependencies": [
@@ -13400,7 +13401,7 @@
           {
             "package": "@danielsimonjr/mathts-expression",
             "directory": "expression",
-            "imports": ["ScalarBuildError"]
+            "imports": ["SCALAR_FUNCTION_LOWERING", "ScalarBuildError"]
           }
         ],
         "exports": ["createScalarNodeBridge"],
@@ -45284,7 +45285,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213459,
+    "totalLinesOfCode": 213489,
     "totalExports": 6884,
     "totalClasses": 60,
     "totalInterfaces": 593,

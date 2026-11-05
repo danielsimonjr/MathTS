@@ -605,4 +605,24 @@ describe('compileScalar', () => {
       expect(sawThrow).toBe(true);
     });
   });
+
+  it('compiles sqrt and atan, and marks a negative sqrt row invalid', () => {
+    const xs = new Float64Array([9, 4, -1]);
+    const sqrtNode = scalar.call('sqrt', scalar.symbol('x'));
+    const sqrtCompiled = compileScalar(sqrtNode, { variables: ['x'] });
+    const sqrtBatch = sqrtCompiled.evaluate([xs]);
+    expect([...sqrtBatch.valid]).toEqual([1, 1, 0]);
+    expect(sqrtBatch.values[0]).toBe(3);
+    expect(Number.isNaN(sqrtBatch.values[2])).toBe(true);
+    expectBatchMatchesEvaluateScalar(sqrtNode, { variables: ['x'] }, [xs], sqrtBatch);
+
+    const atans = new Float64Array([1, 0, -1]);
+    const atanNode = scalar.call('atan', scalar.symbol('x'));
+    const atanCompiled = compileScalar(atanNode, { variables: ['x'] });
+    const atanBatch = atanCompiled.evaluate([atans]);
+    expect([...atanBatch.valid]).toEqual([1, 1, 1]);
+    expect(atanBatch.allValid).toBe(true);
+    expect(atanBatch.values[0]).toBeCloseTo(Math.PI / 4, 15);
+    expectBatchMatchesEvaluateScalar(atanNode, { variables: ['x'] }, [atans], atanBatch);
+  });
 });

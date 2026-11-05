@@ -14,6 +14,8 @@ import {
   simplify,
   simplifyScalar,
   ScalarEvalError,
+  frontToJson,
+  frontToLatexTable,
 } from '../src/index.js';
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
 
@@ -68,6 +70,8 @@ const CALL_INPUTS = [
   'cosh',
   'tanh',
   'abs',
+  'sqrt',
+  'atan',
 ] as const;
 
 function randomTree(rng: () => number, depth: number): ScalarNode {
@@ -105,6 +109,8 @@ describe('scalar-node-bridge source lock', () => {
     expect(bridgeSource).not.toMatch(/parse\(/);
     expect(bridgeSource).not.toContain("from './factories/evaluate");
     expect(bridgeSource).not.toContain('normalForm');
+    expect(bridgeSource).toContain('SCALAR_FUNCTION_LOWERING');
+    expect(bridgeSource).not.toMatch(/const LOWERED_CALL_NAMES = new Set\(\[\s*'exp'/);
     expect(factoriesSource).toContain('createScalarNodeBridge');
   });
 
@@ -291,7 +297,6 @@ describe('scalar-node-bridge rejects unsupported nodes', () => {
     'not x',
     '~x',
     'a .* b',
-    'sqrt(x)',
     'sign(x)',
     'nthRoot(x, 3)',
     'true',
@@ -316,9 +321,41 @@ describe('scalar-node-bridge rejects unsupported nodes', () => {
 
   it('rejects unknown functions by name even when arity is not 1', () => {
     expect(() => nodeToScalar(parse('nthRoot(x, 3)'))).toThrow(/function 'nthRoot' is outside/);
-    expect(() => nodeToScalar(parse('sqrt(x)'))).toThrow(/function 'sqrt' is outside/);
+  });
+});
+
+describe('scalar-node-bridge sqrt and atan (SR-10)', () => {
+  it('parse → nodeToScalar → scalarToNode round-trip and TeX', () => {
+    for (const fn of ['sqrt', 'atan'] as const) {
+      const fromParse = nodeToScalar(parse(`${fn}(x)`));
+      expect(fromParse).toMatchObject({ kind: 'call', fn });
+      const wired = scalarToNode(fromParse);
+      const back = nodeToScalar(wired);
+      expect(back).toMatchObject({ kind: 'call', fn });
+      expect(evaluateScalar(back, { x: 2 })).toBe(evaluateScalar(fromParse, { x: 2 }));
+      expect(scalarToTex(fromParse)).toContain(fn === 'sqrt' ? '\\sqrt' : '\\tan');
+    }
   });
 
+  it('simplifyScalar accepts sqrt trees after the bridge fix', () => {
+    const tree = nodeToScalar(parse('sqrt(x)'));
+    expect(() => simplifyScalar(tree)).not.toThrow();
+    expect(evaluateScalar(simplifyScalar(tree), { x: 9 })).toBe(3);
+  });
+
+  it('front export accepts a hall row whose item is sqrt(x)', () => {
+    const row = {
+      item: scalar.call('sqrt', scalar.symbol('x')),
+      complexity: 2,
+      loss: 0,
+      score: 0,
+    };
+    expect(() => frontToJson([row])).not.toThrow();
+    expect(frontToLatexTable([row]).split('\n').length).toBeGreaterThan(2);
+  });
+});
+
+describe('scalar-node-bridge rejects boolean and non-symbol callees', () => {
   it('rejects boolean and non-symbol callees', () => {
     expect(() => nodeToScalar(parse('true'))).toThrow(/constant value type 'boolean'/);
     expect(() => nodeToScalar(parse('a.b(x)'))).toThrow(/function callee is not a symbol/);

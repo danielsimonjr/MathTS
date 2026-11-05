@@ -97,6 +97,22 @@ describe('scalar-enumerate', () => {
     };
     expect(scalarGrammarAccepts(grammar, mulXX)).toBe(true);
   });
+
+  it('a grammar may name sqrt and atan, and one that does not rejects their nodes', () => {
+    const grammar: ScalarGrammar = {
+      ...tinyGrammar(),
+      unary: ['sqrt', 'atan'],
+      maxSize: 2,
+    };
+    const { nodes, stop } = collect(grammar, 10);
+    expect(stop).toBe('exhausted-space');
+    expect(nodes.some((node) => node.kind === 'call' && node.fn === 'sqrt')).toBe(true);
+    expect(nodes.some((node) => node.kind === 'call' && node.fn === 'atan')).toBe(true);
+    expect(scalarGrammarAccepts(grammar, b.call('sqrt', x))).toBe(true);
+    expect(scalarGrammarAccepts(grammar, b.call('atan', x))).toBe(true);
+    expect(scalarGrammarAccepts(tinyGrammar(), b.call('sqrt', x))).toBe(false);
+    expect(scalarGrammarAccepts(tinyGrammar(), b.call('atan', x))).toBe(false);
+  });
 });
 
 describe('scalar-enumerate order and constraints', () => {
