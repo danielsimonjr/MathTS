@@ -11279,7 +11279,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 276
+      "loc": 421
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
