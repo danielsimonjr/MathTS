@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { MathNode, ScalarNode } from '@danielsimonjr/mathts-expression';
-import { Dual } from '@danielsimonjr/mathts-core';
+import { Dual, DUAL_UNARY_RULES } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
   compileScalarGradient,
@@ -151,6 +151,8 @@ describe('compileScalarGradient', () => {
       { fn: 'sinh', x: 0.4, primal: Math.sinh, deriv: (xv) => Math.cosh(xv) },
       { fn: 'cosh', x: 0.4, primal: Math.cosh, deriv: (xv) => Math.sinh(xv) },
       { fn: 'tanh', x: 0.5, primal: Math.tanh, deriv: (_x, y) => 1 - y * y },
+      { fn: 'sqrt', x: 4, primal: Math.sqrt, deriv: (_x, y) => 1 / (2 * y) },
+      { fn: 'atan', x: 0.5, primal: Math.atan, deriv: (xv) => 1 / (1 + xv * xv) },
     ];
 
     for (const { fn, x, primal, deriv } of loweredCases) {
@@ -161,6 +163,18 @@ describe('compileScalarGradient', () => {
         relClose(grad[0], deriv(x, primal(x)), 1e-12);
       });
     }
+
+    it('sqrt(a * x) gradient matches DUAL_UNARY_RULES.sqrt at that point', () => {
+      const node = scalar.call('sqrt', scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]));
+      const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a'] });
+      const a = 2;
+      const x = 8;
+      const { values, grad } = g.evaluate([new Float64Array([x])], [a]);
+      const arg = a * x;
+      const y = DUAL_UNARY_RULES.sqrt.primal(arg);
+      expect(values[0]).toBe(y);
+      relClose(grad[0], DUAL_UNARY_RULES.sqrt.deriv(arg, y) * x, 1e-12);
+    });
 
     it('abs(-3) → -1; abs(0) → 0', () => {
       const node = scalar.call('abs', scalar.symbol('a'));

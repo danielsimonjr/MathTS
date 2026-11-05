@@ -34,6 +34,8 @@ export const SCALAR_FUNCTION_LOWERING = {
   cosh: 'cosh',
   tanh: 'tanh',
   abs: 'abs',
+  sqrt: 'sqrt',
+  atan: 'atan',
 } as const;
 
 /** Names a caller may pass to {@link ScalarBuilder.call}. */
@@ -59,6 +61,8 @@ export const SCALAR_FUNCTIONS: readonly ScalarFunctionName[] = [
   'cosh',
   'tanh',
   'abs',
+  'sqrt',
+  'atan',
 ] as const;
 
 const LOWERED_FUNCTIONS: ReadonlySet<string> = new Set(Object.values(SCALAR_FUNCTION_LOWERING));

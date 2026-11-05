@@ -39,10 +39,11 @@ import {
   multiply,
   pow,
   sinh,
+  sqrt,
   subtract,
   tanh,
 } from './typed/arithmetic.js';
-import { cos, sin, tan } from './typed/trigonometry.js';
+import { atan, cos, sin, tan } from './typed/trigonometry.js';
 
 /** Scope for {@link evaluateScalar}. Caller bindings win over literal names. */
 export type ScalarScope = Readonly<Record<string, number>>;
@@ -70,6 +71,8 @@ const UNARY: Record<LoweredScalarFn, (value: number) => unknown> = {
   cosh,
   tanh,
   abs,
+  sqrt,
+  atan,
 };
 
 /**

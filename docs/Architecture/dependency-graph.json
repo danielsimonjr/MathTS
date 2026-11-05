@@ -2,7 +2,7 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-04",
+    "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
     "totalExports": 6879
@@ -13250,13 +13250,14 @@
               "multiply",
               "pow",
               "sinh",
+              "sqrt",
               "subtract",
               "tanh"
             ]
           },
           {
             "file": "./typed/trigonometry.js",
-            "imports": ["cos", "sin", "tan"]
+            "imports": ["atan", "cos", "sin", "tan"]
           }
         ],
         "workspaceDependencies": [
@@ -45246,7 +45247,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213208,
+    "totalLinesOfCode": 213224,
     "totalExports": 6879,
     "totalClasses": 60,
     "totalInterfaces": 592,

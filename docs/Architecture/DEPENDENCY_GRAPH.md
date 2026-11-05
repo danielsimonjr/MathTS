@@ -4999,10 +4999,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                              | Type   |
-| ------------------------- | ------------------------------------------------------------------------------------ | ------ |
-| `./typed/arithmetic.js`   | `abs, add, cosh, divide, exp, log, log10, log2, multiply, pow, sinh, subtract, tanh` | Import |
-| `./typed/trigonometry.js` | `cos, sin, tan`                                                                      | Import |
+| File                      | Imports                                                                                    | Type   |
+| ------------------------- | ------------------------------------------------------------------------------------------ | ------ |
+| `./typed/arithmetic.js`   | `abs, add, cosh, divide, exp, log, log10, log2, multiply, pow, sinh, sqrt, subtract, tanh` | Import |
+| `./typed/trigonometry.js` | `atan, cos, sin, tan`                                                                      | Import |
 
 **Exports:**
 
@@ -19974,7 +19974,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 213208 |
+| Total Lines of Code     | 213224 |
 | Total Exports           | 6879   |
 | Total Re-exports        | 2977   |
 | Total Classes           | 60     |

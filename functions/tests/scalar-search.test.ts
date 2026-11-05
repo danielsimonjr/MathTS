@@ -2597,3 +2597,96 @@ describe('searchScalars: simplify', () => {
     }
   });
 });
+
+describe('searchScalars: sqrt and atan', () => {
+  it('a grammar that does not list sqrt or atan still rejects their nodes', () => {
+    expect(scalarGrammarAccepts(quadGrammar, b.call('sqrt', X))).toBe(false);
+    expect(scalarGrammarAccepts(quadGrammar, b.call('atan', X))).toBe(false);
+  });
+
+  it('a seeded sqrt tree over a non-negative column scores exactly and enters the front', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(12, 0, 11);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 60,
+      seeds: [law],
+    });
+    expect(
+      result.front.some(
+        (row) =>
+          row.loss === 0 &&
+          row.complexity === 2 &&
+          scalarCanonicalKey(row.item) === scalarCanonicalKey(law)
+      )
+    ).toBe(true);
+  });
+
+  it('a seeded atan tree over a non-negative column scores exactly and enters the front', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['atan'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(12, 0, 5);
+    const law = b.call('atan', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 60,
+      seeds: [law],
+    });
+    expect(
+      result.front.some(
+        (row) =>
+          row.loss === 0 &&
+          row.complexity === 2 &&
+          scalarCanonicalKey(row.item) === scalarCanonicalKey(law)
+      )
+    ).toBe(true);
+  });
+
+  it('a seed the grammar rejects is skipped without throwing', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: [],
+      literals: [],
+      maxSize: 3,
+    };
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [xs],
+      observed: observedOf(plantedQuad, xs),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 20,
+      seeds: [b.call('sqrt', X)],
+    });
+    for (const row of result.front) {
+      expect(scalarCanonicalKey(row.item)).not.toBe(scalarCanonicalKey(b.call('sqrt', X)));
+    }
+  });
+});

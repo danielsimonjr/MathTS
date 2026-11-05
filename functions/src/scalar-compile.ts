@@ -23,6 +23,8 @@ const LOWERED_UNARY_RULES: Record<LoweredScalarFn, DualUnaryRule> = {
   cosh: DUAL_UNARY_RULES.cosh,
   tanh: DUAL_UNARY_RULES.tanh,
   abs: DUAL_UNARY_RULES.abs,
+  sqrt: DUAL_UNARY_RULES.sqrt,
+  atan: DUAL_UNARY_RULES.atan,
 };
 
 type TapeInstr =
