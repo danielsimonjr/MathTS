@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-04",
+    "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6879
+    "totalExports": 6884
   },
   "entryPoints": [
     {
@@ -9986,7 +9986,11 @@
           },
           {
             "file": "./scalar-dimension.js",
-            "imports": ["inferScalarDimension", "solveParameterDimensions"],
+            "imports": [
+              "inferScalarDimension",
+              "solveParameterDimensions",
+              "unitToRationalDimension"
+            ],
             "reExport": true
           },
           {
@@ -10892,6 +10896,7 @@
           {
             "file": "./scalar-search.js",
             "imports": [
+              "ScalarDimensionFilter",
               "ScalarFitOptions",
               "ScalarSearchOptions",
               "ScalarSearchProblem",
@@ -11423,6 +11428,7 @@
           "NumericEquivalenceError",
           "inferScalarDimension",
           "solveParameterDimensions",
+          "unitToRationalDimension",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -11931,6 +11937,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarDimensionFilter",
           "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
@@ -12146,6 +12153,7 @@
           "NumericEquivalenceError",
           "inferScalarDimension",
           "solveParameterDimensions",
+          "unitToRationalDimension",
           "propagateUncertainty",
           "UncertaintyExpression",
           "UncertaintyPropagationOptions",
@@ -12654,6 +12662,7 @@
           "MutationWeightKey",
           "ScalarMutationContext",
           "ScalarMutationOperator",
+          "ScalarDimensionFilter",
           "ScalarFitOptions",
           "ScalarSearchOptions",
           "ScalarSearchProblem",
@@ -13225,11 +13234,29 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
-            "imports": ["Fraction", "SI_DIMENSION_LENGTH", "SiDimensionVector"]
+            "imports": [
+              "Fraction",
+              "SI_DIMENSION_LENGTH",
+              "toSiDimensionVector",
+              "Unit",
+              "UnitParseError",
+              "SiDimensionVector"
+            ]
           }
         ],
-        "exports": ["inferScalarDimension", "solveParameterDimensions"],
-        "functions": ["inferScalarDimension", "solveParameterDimensions"]
+        "exports": [
+          "validateDimensionVector",
+          "rationalDimensionsEqual",
+          "inferScalarDimension",
+          "solveParameterDimensions",
+          "unitToRationalDimension"
+        ],
+        "functions": [
+          "rationalDimensionsEqual",
+          "inferScalarDimension",
+          "solveParameterDimensions",
+          "unitToRationalDimension"
+        ]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -13424,6 +13451,16 @@
               "weightedMutation",
               "ScalarMutationContext"
             ]
+          },
+          {
+            "file": "./scalar-dimension.js",
+            "imports": [
+              "inferScalarDimension",
+              "rationalDimensionsEqual",
+              "solveParameterDimensions",
+              "validateDimensionVector",
+              "RationalDimension"
+            ]
           }
         ],
         "workspaceDependencies": [
@@ -13463,6 +13500,7 @@
         "classes": ["ComplexityFrequency"],
         "interfaces": [
           "ScalarSearchProblem",
+          "ScalarDimensionFilter",
           "ScalarSearchOptions",
           "ScalarFitOptions",
           "SearchProgress",
@@ -45246,15 +45284,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213208,
-    "totalExports": 6879,
+    "totalLinesOfCode": 213459,
+    "totalExports": 6884,
     "totalClasses": 60,
-    "totalInterfaces": 592,
-    "totalFunctions": 2281,
+    "totalInterfaces": 593,
+    "totalFunctions": 2283,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,
-    "totalReExports": 2977,
+    "totalReExports": 2979,
     "totalTypeOnlyImports": 638,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 0,

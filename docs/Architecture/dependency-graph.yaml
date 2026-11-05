@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-04'
+  lastUpdated: '2026-11-05'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6879
+  totalExports: 6884
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9383,6 +9383,7 @@ modules:
           imports:
             - inferScalarDimension
             - solveParameterDimensions
+            - unitToRationalDimension
           reExport: true
         - file: ./numeric/propagate-uncertainty.js
           imports:
@@ -10240,6 +10241,7 @@ modules:
           typeOnly: true
         - file: ./scalar-search.js
           imports:
+            - ScalarDimensionFilter
             - ScalarFitOptions
             - ScalarSearchOptions
             - ScalarSearchProblem
@@ -10747,6 +10749,7 @@ modules:
         - NumericEquivalenceError
         - inferScalarDimension
         - solveParameterDimensions
+        - unitToRationalDimension
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -11255,6 +11258,7 @@ modules:
         - MutationWeightKey
         - ScalarMutationContext
         - ScalarMutationOperator
+        - ScalarDimensionFilter
         - ScalarFitOptions
         - ScalarSearchOptions
         - ScalarSearchProblem
@@ -11469,6 +11473,7 @@ modules:
         - NumericEquivalenceError
         - inferScalarDimension
         - solveParameterDimensions
+        - unitToRationalDimension
         - propagateUncertainty
         - UncertaintyExpression
         - UncertaintyPropagationOptions
@@ -11977,6 +11982,7 @@ modules:
         - MutationWeightKey
         - ScalarMutationContext
         - ScalarMutationOperator
+        - ScalarDimensionFilter
         - ScalarFitOptions
         - ScalarSearchOptions
         - ScalarSearchProblem
@@ -12539,13 +12545,21 @@ modules:
           imports:
             - Fraction
             - SI_DIMENSION_LENGTH
+            - toSiDimensionVector
+            - Unit
+            - UnitParseError
             - SiDimensionVector
       exports:
+        - validateDimensionVector
+        - rationalDimensionsEqual
         - inferScalarDimension
         - solveParameterDimensions
+        - unitToRationalDimension
       functions:
+        - rationalDimensionsEqual
         - inferScalarDimension
         - solveParameterDimensions
+        - unitToRationalDimension
     functions/src/scalar-eval.ts:
       description: Evaluate a scalar node with MathTS numeric functions.
       externalDependencies: []
@@ -12722,6 +12736,13 @@ modules:
             - simplifyConstants
             - weightedMutation
             - ScalarMutationContext
+        - file: ./scalar-dimension.js
+          imports:
+            - inferScalarDimension
+            - rationalDimensionsEqual
+            - solveParameterDimensions
+            - validateDimensionVector
+            - RationalDimension
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -12754,6 +12775,7 @@ modules:
         - ComplexityFrequency
       interfaces:
         - ScalarSearchProblem
+        - ScalarDimensionFilter
         - ScalarSearchOptions
         - ScalarFitOptions
         - SearchProgress
@@ -42816,15 +42838,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 213208
-  totalExports: 6879
+  totalLinesOfCode: 213459
+  totalExports: 6884
   totalClasses: 60
-  totalInterfaces: 592
-  totalFunctions: 2281
+  totalInterfaces: 593
+  totalFunctions: 2283
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635
-  totalReExports: 2977
+  totalReExports: 2979
   totalTypeOnlyImports: 638
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 0

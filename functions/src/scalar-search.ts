@@ -51,6 +51,13 @@ import {
   weightedMutation,
   type ScalarMutationContext,
 } from './scalar-mutate.js';
+import {
+  inferScalarDimension,
+  rationalDimensionsEqual,
+  solveParameterDimensions,
+  validateDimensionVector,
+  type RationalDimension,
+} from './scalar-dimension.js';
 
 /** Columnar regression target for {@link searchScalars}. */
 export interface ScalarSearchProblem {
@@ -62,6 +69,28 @@ export interface ScalarSearchProblem {
   readonly observed: Float64Array;
   /** Fitted constants. Defaults to `grammar.parameters`. */
   readonly parameters?: readonly string[];
+}
+
+/**
+ * Opt-in SI dimension filter for the scalar search
+ * ({@link ScalarSearchOptions.dimensions}).
+ *
+ * `symbols` binds variable and parameter names to dimensions. A name omitted
+ * from `symbols` is a solver unknown when it is a parameter and
+ * `unknown-symbol` when it is a variable. `target` is the dimension the scored
+ * tree's root must have. `onUnderdetermined` decides a solve whose parameter
+ * dimensions are not fixed by the equations implied by the tree: `'keep'` (the
+ * default) scores the tree normally — for example `x^p` with a free exponent
+ * parameter stays scorable under any `target` because the solver does not assign
+ * a unique dimension to `p`. `'reject'` scores it `Infinity`. Listed grammar
+ * parameters that do not appear in the tree are ignored for underdetermined
+ * detection. Before the first yield the filter is copied into a frozen snapshot
+ * (plain-data `symbols` only, same rules as `complexityWeights`).
+ */
+export interface ScalarDimensionFilter {
+  readonly symbols: Readonly<Record<string, RationalDimension>>;
+  readonly target: RationalDimension;
+  readonly onUnderdetermined?: 'keep' | 'reject';
 }
 
 /** Budget and evolution knobs for {@link searchScalars}. */
@@ -162,6 +191,23 @@ export interface ScalarSearchOptions {
    * made here.
    */
   readonly simplify?: 'off' | 'constants' | 'algebraic';
+  /**
+   * Opt-in SI dimension filter. Omitted: no dimension walk and the seed-7 pin is
+   * unchanged. Set: after the grammar check (and any simplification) and before
+   * the score, the tree that will be scored is checked. With parameters the
+   * check is {@link solveParameterDimensions} when the fitted parameter list is
+   * non-empty; an empty `problem.parameters` array forces infer mode even when
+   * the grammar lists parameters. Without fitted parameters the check is
+   * {@link inferScalarDimension}. In both modes the inferred or solved root
+   * dimension must equal `target`.
+   * An `add-mismatch`, `transcendental-arg-not-dimensionless`,
+   * `non-literal-exponent-on-dimensional-base`, or `unknown-symbol` violation,
+   * or an `inconsistent` solve, scores `Infinity` and never enters the hall —
+   * the same bucket as a numerical failure — but still counts as an evaluation.
+   * An underdetermined solve is scored normally (`'keep'`, the default) or
+   * scored `Infinity` (`'reject'`). The check draws no random numbers.
+   */
+  readonly dimensions?: ScalarDimensionFilter;
   /** Cap on tree evaluations, the initial population included. */
   readonly maxEvaluations: number;
   /** Second cap on tree evaluations, reported as `'max-candidates'`. */
@@ -514,6 +560,89 @@ function normalizeComplexityWeights(
   return Object.freeze(snapshot) as Readonly<ScalarComplexityWeights>;
 }
 
+function cloneDimensionVector(vector: RationalDimension, label: string): RationalDimension {
+  validateDimensionVector(vector, label);
+  return vector.map((entry) => entry.clone()) as unknown as RationalDimension;
+}
+
+function dimensionSymbolsDescriptorError(path: string, reason: string): never {
+  throw new RangeError(`searchScalars: dimensions.symbols ${path} ${reason}`);
+}
+
+function readDimensionSymbolsRecord(
+  symbolsVal: unknown
+): Readonly<Record<string, RationalDimension>> {
+  if (!isDataPlainObject(symbolsVal)) {
+    throw new RangeError(
+      `searchScalars: dimensions.symbols must be a plain object, got ${String(symbolsVal)}`
+    );
+  }
+  const out: Record<string, RationalDimension> = {};
+  for (const key of Reflect.ownKeys(symbolsVal)) {
+    if (typeof key !== 'string') {
+      dimensionSymbolsDescriptorError('', 'own keys must be strings');
+    }
+    const desc = Object.getOwnPropertyDescriptor(symbolsVal, key);
+    if (desc === undefined) {
+      continue;
+    }
+    if (!desc.enumerable) {
+      dimensionSymbolsDescriptorError(
+        key,
+        'must be an enumerable own property (non-enumerable keys are rejected)'
+      );
+    }
+    if (desc.get !== undefined || desc.set !== undefined) {
+      dimensionSymbolsDescriptorError(key, 'must be a data property, not an accessor');
+    }
+    if (desc.value === undefined) {
+      continue;
+    }
+    out[key] = cloneDimensionVector(
+      desc.value as RationalDimension,
+      `searchScalars: dimensions.symbols['${key}']`
+    );
+  }
+  return Object.freeze(out);
+}
+
+/**
+ * Copy caller `dimensions` into a frozen snapshot before the first yield, mirroring
+ * {@link normalizeComplexityWeights}.
+ */
+function normalizeDimensionFilter(raw: ScalarDimensionFilter): Readonly<ScalarDimensionFilter> {
+  if (!isDataPlainObject(raw)) {
+    throw new RangeError(`searchScalars: dimensions must be a plain object, got ${String(raw)}`);
+  }
+  const record = raw as Record<string, unknown>;
+  if (!('symbols' in record)) {
+    throw new RangeError('searchScalars: dimensions.symbols is required');
+  }
+  if (!('target' in record)) {
+    throw new RangeError('searchScalars: dimensions.target is required');
+  }
+  const symbols = readDimensionSymbolsRecord(record.symbols);
+  const target = cloneDimensionVector(
+    record.target as RationalDimension,
+    'searchScalars: dimensions.target'
+  );
+  const onUnderdetermined = record.onUnderdetermined;
+  if (
+    onUnderdetermined !== undefined &&
+    onUnderdetermined !== 'keep' &&
+    onUnderdetermined !== 'reject'
+  ) {
+    throw new RangeError(
+      `searchScalars: dimensions.onUnderdetermined must be 'keep' or 'reject', got ${String(onUnderdetermined)}`
+    );
+  }
+  return Object.freeze({
+    symbols,
+    target,
+    onUnderdetermined: onUnderdetermined === 'reject' ? 'reject' : 'keep',
+  });
+}
+
 /** Keeps reported parameter vectors inside `fit.bounds` when bounds are set. */
 function clampParametersToBounds(
   parameters: Float64Array,
@@ -719,6 +848,11 @@ function assertSearchInputs(
       `searchScalars: simplify must be 'off', 'constants', or 'algebraic', got ${String(options.simplify)}`
     );
   }
+  if (options.dimensions !== undefined && !isDataPlainObject(options.dimensions)) {
+    throw new RangeError(
+      `searchScalars: dimensions must be a plain object, got ${String(options.dimensions)}`
+    );
+  }
 }
 
 function defaultParameters(n: number): Float64Array {
@@ -808,6 +942,32 @@ type ScoreTrees = (
   inherited: readonly Float64Array[]
 ) => Promise<Scored[]>;
 
+/**
+ * The opt-in dimension filter for one tree: `true` lets the numeric score stand,
+ * `false` scores the tree `Infinity` before any numeric result is read.
+ */
+function dimensionAccepts(
+  node: ScalarNode,
+  filter: ScalarDimensionFilter,
+  parameters: readonly string[]
+): boolean {
+  if (parameters.length > 0) {
+    const result = solveParameterDimensions(node, filter.symbols, filter.target, parameters);
+    if ('solved' in result) {
+      return true;
+    }
+    if ('underdetermined' in result) {
+      return filter.onUnderdetermined !== 'reject';
+    }
+    return false;
+  }
+  const inferred = inferScalarDimension(node, filter.symbols);
+  if (!inferred.ok) {
+    return false;
+  }
+  return rationalDimensionsEqual(inferred.dimension, filter.target);
+}
+
 function scoreOnCallerThread(
   problem: ScalarSearchProblem,
   names: readonly string[],
@@ -896,8 +1056,16 @@ async function evaluateNodes(
   rng: SeededRng,
   rank: RankLoss,
   fit: ScalarFitOptions,
-  weights: ScalarComplexityWeights
+  weights: ScalarComplexityWeights,
+  dimensions?: ScalarDimensionFilter
 ): Promise<EvaluatedIndividual[]> {
+  // The dimension check runs before the score, on the tree that will be scored.
+  // The batch is still scored whole; the numeric result of a rejected tree is
+  // discarded in favor of `Infinity`.
+  const dimensionChecks =
+    dimensions === undefined
+      ? undefined
+      : nodes.map((node) => dimensionAccepts(node, dimensions, names));
   const firsts = await score(nodes, inherited);
   const out: EvaluatedIndividual[] = [];
   for (let i = 0; i < nodes.length; i += 1) {
@@ -905,50 +1073,59 @@ async function evaluateNodes(
     let parameters = inherited[i]!;
     const first = firsts[i]!;
     let loss = first.loss;
-    const tryRefit =
-      names.length > 0 &&
-      rng.next() < optimizeProbability &&
-      (first.validRows > 0 || rank.invalidRows === 'penalize');
-    if (tryRefit) {
-      const rawStart =
-        fit.initial !== undefined ? Float64Array.from(fit.initial) : new Float64Array(parameters);
-      const fitStart =
-        fit.bounds !== undefined ? clampParametersToBounds(rawStart, fit.bounds) : rawStart;
-      let fitResult;
-      try {
-        fitResult = fitScalarParameters(
-          node,
-          problem.columns,
-          problem.observed,
-          problem.variables,
-          {
-            parameters: names,
-            initial: fitStart,
-            restarts: fit.restarts ?? 2,
-            maxIterations: fit.maxIterations ?? 8,
-            rng: rng.fork('fit'),
-            loss: rank.name,
-            weights: rank.weights,
-            bounds: fit.bounds,
-            algorithm: fit.algorithm,
-          }
-        );
-      } catch (err) {
-        if (!(err instanceof RangeError && err.message.includes('no valid rows to fit'))) {
-          throw err;
-        }
-      }
-      if (fitResult !== undefined) {
-        const fitted = scoreOnProblem(node, problem, names, fitResult.parameters, rank);
-        if (fitted.loss < loss) {
-          loss = fitted.loss;
-          parameters = fitResult.parameters;
-        }
-      }
+    // A dimension failure is the same bucket as a numerical failure: `Infinity`.
+    // No refit and no clamp rescore runs — no fit can rescue the dimension — so
+    // the random stream draws nothing for a rejected tree.
+    const rejected = dimensionChecks !== undefined && !dimensionChecks[i]!;
+    if (rejected) {
+      loss = Number.POSITIVE_INFINITY;
     }
-    if (fit.bounds !== undefined) {
-      parameters = clampParametersToBounds(parameters, fit.bounds);
-      loss = scoreOnProblem(node, problem, names, parameters, rank).loss;
+    if (!rejected) {
+      const tryRefit =
+        names.length > 0 &&
+        rng.next() < optimizeProbability &&
+        (first.validRows > 0 || rank.invalidRows === 'penalize');
+      if (tryRefit) {
+        const rawStart =
+          fit.initial !== undefined ? Float64Array.from(fit.initial) : new Float64Array(parameters);
+        const fitStart =
+          fit.bounds !== undefined ? clampParametersToBounds(rawStart, fit.bounds) : rawStart;
+        let fitResult;
+        try {
+          fitResult = fitScalarParameters(
+            node,
+            problem.columns,
+            problem.observed,
+            problem.variables,
+            {
+              parameters: names,
+              initial: fitStart,
+              restarts: fit.restarts ?? 2,
+              maxIterations: fit.maxIterations ?? 8,
+              rng: rng.fork('fit'),
+              loss: rank.name,
+              weights: rank.weights,
+              bounds: fit.bounds,
+              algorithm: fit.algorithm,
+            }
+          );
+        } catch (err) {
+          if (!(err instanceof RangeError && err.message.includes('no valid rows to fit'))) {
+            throw err;
+          }
+        }
+        if (fitResult !== undefined) {
+          const fitted = scoreOnProblem(node, problem, names, fitResult.parameters, rank);
+          if (fitted.loss < loss) {
+            loss = fitted.loss;
+            parameters = fitResult.parameters;
+          }
+        }
+      }
+      if (fit.bounds !== undefined) {
+        parameters = clampParametersToBounds(parameters, fit.bounds);
+        loss = scoreOnProblem(node, problem, names, parameters, rank).loss;
+      }
     }
     out.push(individual(node, loss, parameters, weights));
   }
@@ -1390,7 +1567,11 @@ function pickSelected(
  * not simplified. Simplification draws no random numbers, but different accepted
  * trees can change mutation outcomes, so a run with `simplify` on may diverge from
  * `'off'`; two runs that share the same mode and seed still match. Progress event
- * count stays budget-driven.
+ * count stays budget-driven. `dimensions` (opt-in) checks the SI dimension of the
+ * tree that will be scored — after the grammar check, before the score — against
+ * `target`: a violation or an `inconsistent` solve scores `Infinity` (still an
+ * evaluation, never in the hall), an underdetermined solve is kept by default or
+ * rejected with `'reject'`, and the check draws no random numbers.
  *
  * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
@@ -1428,6 +1609,8 @@ export async function* searchScalars(
     invalidRows: options.invalidRows ?? 'reject',
   };
   assertFitOptions(fit, names.length, rank.name);
+  const dimensionsFilter =
+    options.dimensions === undefined ? undefined : normalizeDimensionFilter(options.dimensions);
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
@@ -1508,7 +1691,8 @@ export async function* searchScalars(
         rng,
         rank,
         fit,
-        complexityWeights
+        complexityWeights,
+        dimensionsFilter
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -1594,7 +1778,8 @@ export async function* searchScalars(
           island.rng,
           rank,
           fit,
-          complexityWeights
+          complexityWeights,
+          dimensionsFilter
         );
         evaluations += offspring.length;
         for (const ind of offspring) {

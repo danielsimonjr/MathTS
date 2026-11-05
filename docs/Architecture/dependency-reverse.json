@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "dependents": {
     "packages/workerpool/src/compile-function-source.ts": [
       "packages/workerpool/src/index.ts",
@@ -1817,7 +1817,10 @@
     "functions/src/scalar-search.ts": ["functions/src/index.ts"],
     "functions/src/front-export.ts": ["functions/src/index.ts"],
     "functions/src/numeric-equivalence.ts": ["functions/src/index.ts"],
-    "functions/src/scalar-dimension.ts": ["functions/src/index.ts"],
+    "functions/src/scalar-dimension.ts": [
+      "functions/src/index.ts",
+      "functions/src/scalar-search.ts"
+    ],
     "functions/src/numeric/propagate-uncertainty.ts": ["functions/src/index.ts"],
     "functions/src/help.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/extra.ts": ["functions/src/index.ts"],
