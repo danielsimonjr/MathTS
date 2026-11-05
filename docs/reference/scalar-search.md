@@ -12,10 +12,74 @@ MathTS ships a **ScalarNode** toolkit: build trees with `createScalarBuilder` (`
 | Front         | `functions/src/pareto-front.ts`, `functions/src/front-export.ts`                                         | `paretoFront`, `scoreFront`, `selectFrontModel`, `frontToLatexTable`, `frontToJson`                                                                                                                                                 |
 | Compare       | `functions/src/numeric-equivalence.ts`                                                                   | `numericallyEquivalent` (`consistent` is evidence, not proof)                                                                                                                                                                       |
 | Dimension     | `functions` scalar-dimension modules, `core/src/types/si-dimension-vector.ts`                            | `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `SiDimensionVector` of seven `Fraction`s in BIPM order `[L, M, T, I, Θ, N, J]`                                                                       |
-| Search        | `expression/src/scalar-enumerate.ts`, `functions/src/scalar-mutate.ts`, `functions/src/scalar-search.ts` | `enumerateScalars`, the mutation operators, `searchScalars`                                                                                                                                                                         |
+| Search        | `expression/src/scalar-enumerate.ts`, `functions/src/scalar-mutate.ts`, `functions/src/scalar-search.ts` | `enumerateScalars`, the mutation operators, `searchScalars`, `runScalarSearch`                                                                                                                                                      |
 | Units         | `core/src/types/unit/unit-table.ts`, `Unit.ts`                                                           | Supplementary units and spellings in the unit table (`nat`, `percent`, `ppm`, `ppb`, `d` as day, `Angstrom`, cycle rates, exact scales, the ISO 80000 solidus). Storage `bit` stays 8 per byte, not an information bit of `ln2` nat |
 
 `searchScalars` is the shipped evolutionary driver over `ScalarNode` trees; it is not extended here. The expansion contract is [`docs/plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md`](../plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md). This page stays the record of the shipped surface.
+
+## Running a search
+
+The walkthrough below fits the planted law `x^2 + x` from 20 samples on `[-1, 1]`. The tree is built with `createScalarBuilder` (a formula string is rejected), the data column is generated from that same tree, and `runScalarSearch` consumes the search to its final result. This is the same problem, grammar, seed, and budget as the recorded pin in `functions/tests/scalar-search.test.ts` (`PINNED_ROWS`).
+
+```ts
+import {
+  createScalarBuilder,
+  scalarCanonicalKey,
+  type ScalarGrammar,
+} from '@danielsimonjr/mathts-expression';
+import { compileScalar, runScalarSearch } from '@danielsimonjr/mathts-functions';
+
+const b = createScalarBuilder();
+const law = b.op('+', [b.op('*', [b.symbol('x'), b.symbol('x')]), b.symbol('x')]);
+const xs = new Float64Array(20);
+for (let i = 0; i < 20; i += 1) xs[i] = -1 + (2 * i) / 19;
+
+const problem = {
+  variables: ['x'],
+  columns: { x: xs },
+  observed: compileScalar(law, { variables: ['x'] }).evaluate([xs]).values,
+};
+
+const grammar: ScalarGrammar = {
+  variables: ['x'],
+  binary: ['+', '*', '^'],
+  unary: [],
+  literals: [1],
+  maxSize: 7,
+};
+
+const result = await runScalarSearch(problem, {
+  grammar,
+  seed: 7,
+  populationSize: 8,
+  tournamentSize: 4,
+  maxEvaluations: 120,
+});
+
+for (const row of result.front) {
+  console.log(row.complexity, row.loss, scalarCanonicalKey(row.item));
+}
+```
+
+The pinned configuration prints three rows, ordered by ascending complexity:
+
+```text
+1 4.870097681877825 {"k":"s","v":"x"}
+5 6.317050217590134e-32 {"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}
+7 0 {"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},{"k":"s","v":"x"}]}
+```
+
+What the result fields mean here:
+
+- **`front`** is the Pareto front of the hall of fame: the best loss found at each reported complexity, ordered by ascending complexity. Each row's `loss` is the ranking loss (`'l2'`, the sum of squared errors, here) of that tree on `observed`, with the parameter values behind the loss in `result.fittedParameters`. The complexity-7 row is the planted law itself with loss `0`. The complexity-5 row `(x+1)·x` is algebraically the same law but has a different `scalarCanonicalKey` than `x²+x` (SR-8 hall dedup keys on canonical form, not on numeric equality), so both rows can appear on the front; complexity 5 is the best finite loss at that complexity.
+- **`stopReason`** is `'max-evaluations'` when the run exhausted the budget — 120 evaluations here, initial population included. It is `'max-candidates'` when the `maxCandidates` cap binds first, `'early-stop'` when an `earlyStop` streak was met, and `'cancelled'` when a `signal` aborted the run.
+- **`seed`** echoes the seed the search ran with (`7`). The same seed, problem, and options reproduce the front event by event, because the search draws only from forks of `options.rng` (here the fresh `createSeededRng(seed)` that `runScalarSearch` builds) and never advances that stream in place.
+
+A `consistent` verdict from `numericallyEquivalent` — comparing the discovered front row against a candidate law over sampled rows — is **evidence, not proof**; it does not certify symbolic equality.
+
+Options omitted above take the values in the defaults table already on this page (the `searchScalars` defaults under [Mutation weights](#mutation-weights)): population 27, tournament 15, `tournamentP` 0.982, `loss` `'l2'`, and so on. The example sets `populationSize` and `tournamentSize` only to match the recorded pin, not because they are recommended.
+
+`examples/scalar-search.ts` runs this same search; see the examples README for how to run it.
 
 ## Grammar `admit`
 

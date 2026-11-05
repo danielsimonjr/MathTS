@@ -40,6 +40,7 @@ import {
   scalar,
   simplifyScalar,
   scalarToTex,
+  runScalarSearch,
 } from '@danielsimonjr/mathts-functions';
 
 const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
@@ -78,6 +79,30 @@ const id = scalar.op('+', [
   scalar.op('^', [scalar.call('cos', scalar.symbol('x')), scalar.number(2)]),
 ]);
 numericallyEquivalent(id, scalar.number(1), { domain: { x: [0, 1] }, rng }).verdict; // 'consistent' — evidence, not proof
+
+const quadGrammar = {
+  variables: ['x'],
+  binary: ['+', '*', '^'],
+  unary: [],
+  literals: [1],
+  maxSize: 7,
+} as const;
+const quad = scalar.op('+', [
+  scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
+  scalar.symbol('x'),
+]);
+const xs = new Float64Array(20);
+for (let i = 0; i < 20; i += 1) xs[i] = -1 + (2 * i) / 19;
+const quadResult = await runScalarSearch(
+  {
+    variables: ['x'],
+    columns: { x: xs },
+    observed: compileScalar(quad, { variables: ['x'] }).evaluate([xs]).values,
+  },
+  { grammar: quadGrammar, seed: 7, populationSize: 8, tournamentSize: 4, maxEvaluations: 120 }
+);
+quadResult.front.at(-1)?.item; // x^2 + x — the planted law, at loss 0
+quadResult.stopReason; // 'max-evaluations' — runScalarSearch consumes the generator for you
 ```
 
 - Per-domain focused entry points are also published: `@danielsimonjr/mathts-{arithmetic,trigonometry,statistics,signal}`.
