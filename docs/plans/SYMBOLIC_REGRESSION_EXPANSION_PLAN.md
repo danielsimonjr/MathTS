@@ -271,11 +271,11 @@ No other unary or binary operator is added. `ConditionalNode` stays outside the 
 
 Add `tools/benchmark/scalar-search/` and a root script that runs it. The harness follows the benchmarking rules in `AGENTS.md`:
 
-- The public symbols: `searchScalars`, `compileScalar`, `evaluateScalarPopulation`.
-- One tree per process. Node via a real `node` (`PERF_NODE` overrides). Bun via `bun --tsconfig-override=tsconfig.base.json`.
-- Cases: (1) compile and score the pinned `x^2 + x` population once, (2) the seed-7 pinned search of 120 evaluations, (3) `evaluateScalarPopulation` serial and with `parallel` at row counts 100, 1e3, 1e4, 1e5, on the mid-size tree the M3 bench already uses. Case (2) checks losses against `PINNED_ROWS` with `Object.is` before any timing and fails the process on a mismatch. A `null` or a throw fails the case.
+- The public symbols: `searchScalars`, `compileScalar`. Case (3) reaches the internal module `functions/src/scalar-batch-parallel.ts` through its built `dist/scalar-batch-parallel.js` entry (not the functions barrel); no new export or changeset.
+- One tree per process. Node via a real `node` (`PERF_NODE` overrides). Bun via `bun --tsconfig-override=tsconfig.base.json` (absolute path in the runner).
+- Cases: (1) compile and score the pinned `x^2 + x` population once, (2) the seed-7 pinned search of 120 evaluations, (3) `evaluateScalarPopulation` serial vs an explicit injected `WorkerPool` at row counts 100, 1e3, 1e4, 1e5, on the mid-size tree the M3 bench already uses — not the default `parallel: {}` path inside `searchScalars`. Case (2) checks losses against the shared pinned-rows fixture with `Object.is` before any timing and fails the process on a mismatch. A `null` or a throw fails the case.
 - Warm at least 5 reps, then time. Print medians. Do not assert a speedup in this PR.
-- An A/A control: two serial scores of the same closure. Its ratio over five runs stays inside ±2%, or the PR reports the wider band and does not tighten it by deleting the control.
+- An A/A control: two distinct but identical serial closures (same rule as `tools/benchmark/ab`). Its ratio over five runs stays inside ±2%, or the PR reports the wider band and does not tighten it by deleting the control.
 
 Commit the runner and a short note in `docs/BENCHMARK_RESULTS.md` that this harness exists and that it replaces no M3 number. The note records the machine only after the PR author runs it; this plan does not invent those numbers.
 

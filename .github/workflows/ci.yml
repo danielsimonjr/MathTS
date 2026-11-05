@@ -145,6 +145,9 @@ jobs:
       - name: A/B harness tests
         run: node --test tools/test/ab-harness.test.mjs
 
+      - name: Scalar-search harness tests
+        run: node --test tools/test/scalar-search-harness.test.mjs
+
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
       # from the working tree, so the step order in release.yml decides which commit a release
       # tag lands on. No other job runs the script. These tests run the real script against
@@ -238,16 +241,20 @@ jobs:
       - name: Build
         run: bun run build
 
+      # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
+      - name: Test (Bun runtime)
+        shell: bash
+        run: bun run test 2>&1 | tee test-output.log
+
+      # Runs after the Bun gate so `collectLockTree` does not import every built package
+      # entry in the same job immediately before turbo fans out ~48 package test processes.
+      # On 22.x that pairing OOM-killed `@danielsimonjr/mathts-expression#test` (exit 137)
+      # while individual suites still reported 0 fail.
       - name: Public export-name lock
         if: matrix.node-version == '22.x'
         run: |
           node --test tools/test/check-export-lock.test.mjs
           node tools/test/check-export-lock.mjs
-
-      # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
-      - name: Test (Bun runtime)
-        shell: bash
-        run: bun run test 2>&1 | tee test-output.log
 
       # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
       # every machine for months. Each suite's skip count is pinned in
