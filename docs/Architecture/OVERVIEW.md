@@ -24,8 +24,8 @@ There is one active code graph. Every file is reachable from a package `src/inde
 | Metric                       | Value                                                        |
 | ---------------------------- | ------------------------------------------------------------ |
 | TypeScript Files             | 1,269 (0 unused)                                             |
-| Lines of Code                | 213,692                                                      |
-| Total Exports                | 6,885 (2,979 re-exports)                                     |
+| Lines of Code                | 213,347                                                      |
+| Total Exports                | 6,883 (2,979 re-exports)                                     |
 | Modules                      | 82                                                           |
 | Circular Dependencies        | 0 runtime (0 type-only)                                      |
 | Classes / Interfaces / Funcs | 60 / 593 / 2,282 (168 type guards, 1,635 constants, 0 enums) |
@@ -200,7 +200,7 @@ Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=
 | Claim                | Value  | Source                                                                                                       |
 | -------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
 | totalTypeScriptFiles | 2270   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalLinesOfCode     | 402704 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| totalLinesOfCode     | 402369 | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalExports         | 8956   | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | totalModules         | 5      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
 | runtimeCircularDeps  | 0      | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |

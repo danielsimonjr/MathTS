@@ -9,8 +9,11 @@
  *      fails the process,
  *   3. internal `evaluateScalarPopulation` (from `functions/dist/scalar-batch-parallel.js`)
  *      serial vs an explicit injected `WorkerPool` at 100, 1e3, 1e4 and 1e5 rows on
- *      the mid-size M3 bench tree. This does not measure the default `parallel: {}`
- *      path inside `searchScalars`. A `null` result or a throw fails the case.
+ *      the mid-size M3 bench tree. Case (3) reports **cold** pool (create+terminate
+ *      per sample) and **reused** pool (one pool for warmup+samples, like
+ *      `searchScalars`). SR-14 uses the reused-pool ratios. This does not measure the
+ *      default `parallel: {}` path inside `searchScalars`. A `null` result or a throw
+ *      fails the case.
  *
  * Plus an A/A control: two distinct but identical serial closures (same as the A/B
  * harness). Its ratio is printed every run; over five runs report the band you
@@ -214,12 +217,38 @@ if (!scalarWorkerPath) {
   );
 }
 
-async function parallelCall(
+/** Cold pool: create and terminate on every call (mis-matches `searchScalars`). */
+async function parallelCallCold(
   base: Omit<EvaluateScalarPopulationOptions, 'parallel'>
 ): Promise<ScalarPopulationEvalResult[]> {
   const pool = new WorkerPool(scalarWorkerPath);
   try {
     return await evaluateScalarPopulation({ ...base, parallel: { pool } });
+  } finally {
+    await pool.terminate();
+  }
+}
+
+async function parallelCallReused(
+  pool: WorkerPool,
+  base: Omit<EvaluateScalarPopulationOptions, 'parallel'>
+): Promise<ScalarPopulationEvalResult[]> {
+  return evaluateScalarPopulation({ ...base, parallel: { pool } });
+}
+
+/**
+ * Serial vs parallel with one `WorkerPool` for warmup and all timed samples, like
+ * `searchScalars` (create once, terminate when the search ends).
+ */
+async function measureReusedPoolPair(
+  serial: () => Promise<ScalarPopulationEvalResult[]>,
+  base: Omit<EvaluateScalarPopulationOptions, 'parallel'>,
+  reps: number
+): Promise<{ aMs: number; bMs: number }> {
+  const pool = new WorkerPool(scalarWorkerPath);
+  try {
+    const parallel = () => parallelCallReused(pool, base);
+    return await measurePair(serial, parallel, reps, timed);
   } finally {
     await pool.terminate();
   }
@@ -314,8 +343,20 @@ async function main(): Promise<void> {
   console.log(
     '\ncase 3  evaluateScalarPopulation, serial vs explicit WorkerPool (8 items, mid tree)'
   );
-  console.log('        rows     serial (ms)   parallel (ms)   ratio');
-  const case3: Array<{ rows: number; serialMs: number; parallelMs: number; ratio: number }> = [];
+  console.log(
+    '        rows     serial (ms)   parallel cold (ms)  ratio cold   parallel reused (ms)  ratio reused'
+  );
+  console.log(
+    '        (reused pool: one WorkerPool for warmup + samples, matching searchScalars lifetime)'
+  );
+  const case3: Array<{
+    rows: number;
+    serialMs: number;
+    parallelColdMs: number;
+    ratioCold: number;
+    parallelReusedMs: number;
+    ratioReused: number;
+  }> = [];
   for (const rows of [100, 1_000, 10_000, 100_000]) {
     const column = uniformColumn(rows, 0.15, 0.85, 1);
     const base: Omit<EvaluateScalarPopulationOptions, 'parallel'> = {
@@ -324,14 +365,32 @@ async function main(): Promise<void> {
       items: POPULATION_ITEMS,
     };
     const serial = () => evaluateScalarPopulation(base);
-    assertPopulationsAgree(await serial(), await parallelCall(base), rows);
+    assertPopulationsAgree(await serial(), await parallelCallCold(base), rows);
+    {
+      const pool = new WorkerPool(scalarWorkerPath);
+      try {
+        assertPopulationsAgree(await serial(), await parallelCallReused(pool, base), rows);
+      } finally {
+        await pool.terminate();
+      }
+    }
     const reps = Math.max(minReps, rows <= 1_000 ? 15 : rows <= 10_000 ? 10 : 6);
-    const t = await measurePair(serial, () => parallelCall(base), reps, timed);
-    case3.push({ rows, serialMs: t.aMs, parallelMs: t.bMs, ratio: t.bMs / t.aMs });
+    const cold = await measurePair(serial, () => parallelCallCold(base), reps, timed);
+    const reused = await measureReusedPoolPair(serial, base, reps);
+    case3.push({
+      rows,
+      serialMs: cold.aMs,
+      parallelColdMs: cold.bMs,
+      ratioCold: cold.bMs / cold.aMs,
+      parallelReusedMs: reused.bMs,
+      ratioReused: reused.bMs / reused.aMs,
+    });
     console.log(
-      `        ${String(rows).padStart(7)}   ${t.aMs.toFixed(4).padStart(11)}   ${t.bMs
+      `        ${String(rows).padStart(7)}   ${cold.aMs.toFixed(4).padStart(11)}   ${cold.bMs
         .toFixed(4)
-        .padStart(13)}   ${(t.bMs / t.aMs).toFixed(2)}`
+        .padStart(17)}   ${(cold.bMs / cold.aMs).toFixed(2).padStart(10)}   ${reused.bMs
+        .toFixed(4)
+        .padStart(18)}   ${(reused.bMs / reused.aMs).toFixed(2)}`
     );
   }
 

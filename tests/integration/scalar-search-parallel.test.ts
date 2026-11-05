@@ -24,7 +24,8 @@ const WORKER_SCRIPT = resolve(REPO, 'functions', 'dist', 'scalar-batch.worker.js
 
 const b = createScalarBuilder();
 const X = b.symbol('x');
-const ROWS = 128;
+/** Row count ≥ worker threshold so `parallel: {}` uses real workers (SR-14). */
+const ROWS = 10_000;
 
 function problem(): ScalarSearchProblem {
   const xs = new Float64Array(ROWS);
