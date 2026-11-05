@@ -179,13 +179,17 @@ describe('searchScalars with parallel evaluation', () => {
       grammar: { ...grammar, parameters: ['p'] },
       optimizeProbability: 1,
       // Still crosses the worker row threshold; a smaller budget keeps CI under vitest's
-      // 30s default now that each batch scores PARALLEL_ROWS (10_000) rows.
+      // 30s default under full-suite load: each fit scores PARALLEL_ROWS (10_000) rows.
       populationSize: 8,
-      maxEvaluations: 72,
+      maxEvaluations: 24,
     };
     const serial = await drain(problem, { ...fitting, rng: createSeededRng(3) });
+    const before = world.pools.length;
     const parallel = await drain(problem, { ...fitting, rng: createSeededRng(3), parallel: {} });
     expectSameRun(parallel.progress, serial.progress);
+    const pool = world.pools[before]!;
+    expect(pool.calls.length).toBeGreaterThan(0);
+    expect(pool.calls.every((call) => call.rows === PARALLEL_ROWS)).toBe(true);
     const best = parallel.result.front.reduce((a, c) => (c.loss < a.loss ? c : a));
     expect(best.loss).toBeLessThan(1e-12);
     expect(parallel.result.fittedParameters.length).toBeGreaterThan(0);
