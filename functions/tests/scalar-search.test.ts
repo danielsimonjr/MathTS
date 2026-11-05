@@ -5,6 +5,7 @@ import {
   scalarCanonicalKey,
   scalarComplexity,
   scalarGrammarAccepts,
+  ScalarBuildError,
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
@@ -24,6 +25,8 @@ import {
   migrateIslands,
   parsimonyKey,
   tournamentSelect,
+  simplifyCandidateForTest,
+  hallFrontForTest,
   type EvaluatedIndividual,
   type Island,
 } from '../src/scalar-search.js';
@@ -570,6 +573,106 @@ describe('searchScalars: reproducibility', () => {
         expect(Object.is(row.loss, other.front[j]!.loss)).toBe(true);
       });
     });
+  });
+});
+
+describe('searchScalars: one front row per canonical key (SR-8)', () => {
+  // Two stored shapes of one canonical tree: `x*x` and `(x*x)*1` canonicalize to
+  // the same key (`x^2`) but are stored at complexities 3 and 5.
+  const square = b.op('*', [b.symbol('x'), b.symbol('x')]);
+  const padded = b.op('*', [b.op('*', [b.symbol('x'), b.symbol('x')]), b.number(1)]);
+  const ind = (node: ScalarNode, loss: number, complexity: number): EvaluatedIndividual => ({
+    node,
+    key: scalarCanonicalKey(node),
+    loss,
+    complexity,
+    parameters: new Float64Array([3]),
+  });
+
+  it('keeps one front row when two stored shapes share a canonical key', () => {
+    expect(scalarCanonicalKey(padded)).toBe(scalarCanonicalKey(square));
+    const { front, fittedParameters } = hallFrontForTest([ind(square, 4, 3), ind(padded, 2, 5)]);
+    expect(front).toHaveLength(1);
+    expect(front[0]!.loss).toBe(2);
+    expect(front[0]!.complexity).toBe(5);
+    expect(front[0]!.item).toBe(padded);
+    expect([...fittedParameters[0]!]).toEqual([3]);
+  });
+
+  it('a duplicate with a smaller loss replaces the survivor even at larger complexity', () => {
+    const { front } = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 5)]);
+    expect(front).toHaveLength(1);
+    expect(front[0]!.loss).toBe(1);
+    expect(front[0]!.item).toBe(padded);
+  });
+
+  it('at equal complexity the smaller loss wins; a full tie keeps the first recorded', () => {
+    const smaller = hallFrontForTest([ind(square, 4, 3), ind(padded, 1, 3)]);
+    expect(smaller.front).toHaveLength(1);
+    expect(smaller.front[0]!.item).toBe(padded);
+    const tied = hallFrontForTest([ind(square, 4, 3), ind(padded, 4, 3)]);
+    expect(tied.front).toHaveLength(1);
+    expect(tied.front[0]!.item).toBe(square);
+  });
+
+  it('B1: the better-loss same-key tree is not dropped from the front by Pareto domination', () => {
+    const other = b.number(2);
+    const { front } = hallFrontForTest([
+      ind(other, 1, 1),
+      ind(square, 10, 3),
+      ind(padded, 0.01, 5),
+    ]);
+    const keys = front.map((row) => scalarCanonicalKey(row.item));
+    expect(keys).toContain(scalarCanonicalKey(square));
+    const squareRow = front.find(
+      (row) => scalarCanonicalKey(row.item) === scalarCanonicalKey(square)
+    );
+    expect(squareRow!.loss).toBe(0.01);
+    expect(front).toHaveLength(2);
+  });
+
+  it('B4: evicting a same-key duplicate does not remove a Pareto-optimal tree at that complexity', () => {
+    const other = b.op('+', [b.symbol('x'), b.symbol('x')]);
+    expect(scalarCanonicalKey(other)).not.toBe(scalarCanonicalKey(square));
+    const { front } = hallFrontForTest([
+      ind(other, 2, 3),
+      ind(square, 10, 3),
+      ind(padded, 0.01, 5),
+    ]);
+    expect(front).toHaveLength(2);
+    expect(new Set(front.map((row) => row.item))).toEqual(new Set([other, padded]));
+  });
+
+  it('B2: penalized x/x does not hide a loss-0 same-key offspring on the front', () => {
+    const div = b.op('/', [X, X]);
+    const one = b.op('*', [b.op('^', [X, b.number(0)]), b.number(1)]);
+    expect(scalarCanonicalKey(div)).toBe(scalarCanonicalKey(one));
+    const { front } = hallFrontForTest([ind(div, 1e8, 3), ind(one, 0, 5)]);
+    expect(front).toHaveLength(1);
+    expect(front[0]!.loss).toBe(0);
+    expect(front[0]!.item).toBe(one);
+  });
+
+  it('B3: complexityWeights do not change which same-key survivor the hall keeps', () => {
+    const div = b.op('/', [X, X]);
+    const one = b.op('*', [b.op('^', [X, b.number(0)]), b.number(1)]);
+    const weightsList = [{}, { op: { '/': 100 } }, { op: { '^': 100 } }] as const;
+    const losses = weightsList.map((weights) => {
+      const cDiv = scalarComplexity(div, weights);
+      const cOne = scalarComplexity(one, weights);
+      const { front } = hallFrontForTest([ind(div, 1e8, cDiv), ind(one, 0, cOne)]);
+      expect(front).toHaveLength(1);
+      return front[0]!.loss;
+    });
+    expect(losses).toEqual([0, 0, 0]);
+  });
+
+  it('a unique-key row still ranks beside the survivor', () => {
+    const other = b.op('+', [b.symbol('x'), b.symbol('x')]);
+    expect(scalarCanonicalKey(other)).not.toBe(scalarCanonicalKey(square));
+    const { front } = hallFrontForTest([ind(square, 4, 3), ind(other, 2, 5)]);
+    expect(front).toHaveLength(2);
+    expect(new Set(front.map((row) => row.item))).toEqual(new Set([square, other]));
   });
 });
 
@@ -1218,7 +1321,7 @@ describe('searchScalars: complexityWeights', () => {
     expect(rng.next()).toBe(createSeededRng(7).next());
   });
 
-  it('zero and negative weights are accepted and the front stays ordered', async () => {
+  it('zero weights are accepted and the front stays ordered', async () => {
     const { result } = await runSearch(quadProblem, {
       grammar: quadGrammar,
       rng: createSeededRng(7),
@@ -1251,6 +1354,8 @@ describe('searchScalars: complexityWeights', () => {
     await bad({ op: { '+': 1 }, call: { sin: Number.NEGATIVE_INFINITY } });
     await bad({ symbol: Number.NaN });
     await bad({ symbol: { x: Number.POSITIVE_INFINITY, y: 1 } });
+    await bad({ op: { '*': -10 } });
+    await bad({ number: -1 });
     // Shape errors, for the same reason a bad `fit` is rejected up front.
     await bad(5);
     await bad(null);
@@ -2053,5 +2158,442 @@ describe('island defaults', () => {
     expect(several).not.toBe(
       trace((await run({ populations: 2, annealing: true, adaptiveParsimony: false })).progress)
     );
+  });
+});
+
+describe('searchScalars: simplify', () => {
+  // Restated from the reproducibility pin, which scopes PINNED_ROWS to its own
+  // describe. The expectations here are the same rows; the pin itself is untouched.
+  const SIMPLIFY_PIN = [
+    { complexity: 1, loss: 4.870097681877825, key: '{"k":"s","v":"x"}' },
+    {
+      complexity: 5,
+      loss: 6.317050217590134e-32,
+      key: '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+    },
+    {
+      complexity: 7,
+      loss: 0,
+      key: '{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},{"k":"s","v":"x"}]}',
+    },
+  ] as const;
+  const pinned = {
+    populationSize: 8,
+    tournamentSize: 4,
+    maxEvaluations: 120,
+  } as const;
+
+  for (const simplify of [undefined, 'off'] as const) {
+    it(`simplify ${String(simplify)}: the seed-7 pin is unchanged`, async () => {
+      const { progress, result } = await runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        tournamentP: 0.982,
+        simplify,
+        ...pinned,
+      });
+      expect(result.front.map((row) => row.complexity)).toEqual(
+        SIMPLIFY_PIN.map((r) => r.complexity)
+      );
+      expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+        SIMPLIFY_PIN.map((r) => r.key)
+      );
+      result.front.forEach((row, i) => {
+        expect(Object.is(row.loss, SIMPLIFY_PIN[i]!.loss)).toBe(true);
+      });
+      expect(progress.map((p) => p.evaluations)).toEqual(
+        Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+      );
+      expect(result.seed).toBe(7);
+      expect(result.simplifyFallbacks).toBe(0);
+    });
+  }
+
+  it('rejects an unknown simplify mode before the first yield', async () => {
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        simplify: 'fold' as unknown as ScalarSearchOptions['simplify'],
+      })
+    ).rejects.toThrow(RangeError);
+  });
+
+  // (2*3)*x and the folded 6*x are both structure-legal: literals [2,3,6] is the pool
+  // `randomizeTree` samples from (with replacement), not a whitelist of allowed numbers.
+  // One seed, one evaluation, no refit: the front row is exactly that tree.
+  const constGrammar: ScalarGrammar = {
+    variables: ['x'],
+    binary: ['*'],
+    unary: [],
+    literals: [2, 3, 6],
+    maxSize: 7,
+  };
+  const seed23x = b.op('*', [b.op('*', [b.number(2), b.number(3)]), X]);
+  const folded6x = b.op('*', [b.number(6), X]);
+  const constProblem: ScalarSearchProblem = {
+    variables: ['x'],
+    columns: [xs],
+    observed: observedOf(folded6x, xs),
+  };
+  const constSeed = {
+    grammar: constGrammar,
+    seeds: [seed23x],
+    rng: createSeededRng(7),
+    maxEvaluations: 1,
+    optimizeProbability: 0,
+  } as const;
+
+  it("'constants' scores (2*3)*x as the canonical key of 6*x", async () => {
+    const { result } = await runSearch(constProblem, { ...constSeed, simplify: 'constants' });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(folded6x));
+    // The keys alone cannot prove the fold (the canonical form already folds
+    // 2*3): the stored tree is the folded shape, at the folded tree's complexity,
+    // not the seed's.
+    expect(result.front[0]!.item).toEqual(folded6x);
+    expect(result.front[0]!.complexity).toBe(scalarComplexity(folded6x));
+    // The folded tree is the one scored: its loss is bit-equal to a run seeded with
+    // 6*x itself.
+    const direct = await runSearch(constProblem, { ...constSeed, seeds: [folded6x] });
+    expect(Object.is(result.front[0]!.loss, direct.result.front[0]!.loss)).toBe(true);
+  });
+
+  it("'constants' reports the folded tree's complexity under complexityWeights", async () => {
+    const weights = { number: 0.5 } as const;
+    const { result } = await runSearch(constProblem, {
+      ...constSeed,
+      simplify: 'constants',
+      complexityWeights: weights,
+    });
+    expect(result.front).toHaveLength(1);
+    expect(result.front[0]!.complexity).toBe(scalarComplexity(folded6x, weights));
+  });
+
+  it("'algebraic' scores a/(b/c) as the canonical key simplifyScalar produces", async () => {
+    const A = b.symbol('a');
+    const B = b.symbol('b');
+    const C = b.symbol('c');
+    const quotientGrammar: ScalarGrammar = {
+      variables: ['a', 'b', 'c'],
+      binary: ['/', '*'],
+      unary: [],
+      literals: [],
+      maxSize: 5,
+    };
+    const quotientSeed = b.op('/', [A, b.op('/', [B, C])]);
+    const simplified = simplifyScalar(quotientSeed);
+    // The premise of the acceptance item: the simplify result is still in the grammar.
+    expect(scalarGrammarAccepts(quotientGrammar, simplified)).toBe(true);
+    const columns = [xs, xs, xs];
+    const problem: ScalarSearchProblem = {
+      variables: ['a', 'b', 'c'],
+      columns,
+      observed: compileScalar(simplified, { variables: ['a', 'b', 'c'] }).evaluate(columns).values,
+    };
+    const { result } = await runSearch(problem, {
+      grammar: quotientGrammar,
+      seeds: [quotientSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      simplify: 'algebraic',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(simplified));
+    // The stored tree is the simplified shape (a/(b/c) and a*c/b share a canonical
+    // key, so only the structure and the rounding-sensitive loss tell them apart).
+    expect(result.front[0]!.item).toEqual(simplified);
+    const direct = await runSearch(problem, {
+      grammar: quotientGrammar,
+      seeds: [simplified],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+    });
+    expect(Object.is(result.front[0]!.loss, direct.result.front[0]!.loss)).toBe(true);
+  });
+
+  it('a simplify result with an operator outside the grammar is discarded and the original is scored', async () => {
+    const A = b.symbol('a');
+    const B = b.symbol('b');
+    const C = b.symbol('c');
+    // '*' is not in the grammar, so simplifyScalar's a*c/b is not acceptable.
+    const quotientGrammar: ScalarGrammar = {
+      variables: ['a', 'b', 'c'],
+      binary: ['/'],
+      unary: [],
+      literals: [],
+      maxSize: 5,
+    };
+    const quotientSeed = b.op('/', [A, b.op('/', [B, C])]);
+    expect(scalarGrammarAccepts(quotientGrammar, simplifyScalar(quotientSeed))).toBe(false);
+    const columns = [xs, xs, xs];
+    const problem: ScalarSearchProblem = {
+      variables: ['a', 'b', 'c'],
+      columns,
+      observed: compileScalar(quotientSeed, { variables: ['a', 'b', 'c'] }).evaluate(columns)
+        .values,
+    };
+    const { result } = await runSearch(problem, {
+      grammar: quotientGrammar,
+      seeds: [quotientSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      simplify: 'algebraic',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(quotientSeed));
+    // The stored tree is the unsimplified shape, and its loss is bit-equal to a run
+    // without the option.
+    expect(result.front[0]!.item).toEqual(quotientSeed);
+    const direct = await runSearch(problem, {
+      grammar: quotientGrammar,
+      seeds: [quotientSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+    });
+    expect(Object.is(result.front[0]!.loss, direct.result.front[0]!.loss)).toBe(true);
+  });
+
+  it('a ScalarBuildError from simplifyScalar keeps the unsimplified tree', async () => {
+    // (-8)^(1/3) simplifies into the complex numbers, which the bridge refuses with
+    // ScalarBuildError; the search must keep the unsimplified tree and score it.
+    const third = b.op('/', [b.number(1), b.number(3)]);
+    const complexSeed = b.op('+', [b.op('^', [b.number(-8), third]), X]);
+    expect(() => simplifyScalar(complexSeed)).toThrow(ScalarBuildError);
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+', '^', '/'],
+      unary: [],
+      literals: [-8, 1, 3],
+      maxSize: 7,
+    };
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [xs],
+      // The seed itself is invalid on every row (a negative base to a fractional
+      // power is NaN), so 'penalize' keeps it on the front at one penalty a row.
+      observed: new Float64Array(xs.length),
+    };
+    const { progress, result } = await runSearch(problem, {
+      grammar,
+      seeds: [complexSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      invalidRows: 'penalize',
+      simplify: 'algebraic',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(complexSeed));
+    expect(Object.is(result.front[0]!.loss, xs.length * 1e8)).toBe(true);
+    // The unsimplified tree scores exactly as it would without the option.
+    const plain = await runSearch(problem, {
+      grammar,
+      seeds: [complexSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      invalidRows: 'penalize',
+    });
+    expect(progress).toHaveLength(plain.progress.length);
+    expect(Object.is(result.front[0]!.loss, plain.result.front[0]!.loss)).toBe(true);
+  });
+
+  it('admit can keep the unsimplified seed when the simplified shape is rejected', async () => {
+    // The canonical keys of (2*3)*x and 6*x already agree, so admit must reject the
+    // folded shape structurally.
+    const isFoldedShape = (node: ScalarNode): boolean =>
+      node.kind === 'op' &&
+      node.op === '*' &&
+      node.args[0]!.kind === 'number' &&
+      node.args[0]!.value === 6;
+    const { result } = await runSearch(constProblem, {
+      ...constSeed,
+      simplify: 'constants',
+      grammar: { ...constGrammar, admit: (node) => !isFoldedShape(node) },
+    });
+    expect(result.front).toHaveLength(1);
+    expect(result.front[0]!.item).toEqual(seed23x);
+  });
+
+  it('the scored tree is the simplified one: its refitted parameters reproduce the loss', async () => {
+    const P = b.symbol('p');
+    const pGrammar: ScalarGrammar = {
+      variables: ['x'],
+      parameters: ['p'],
+      binary: ['*'],
+      unary: [],
+      literals: [2, 3, 6],
+      maxSize: 9,
+    };
+    const pSeed = b.op('*', [P, b.op('*', [b.op('*', [b.number(2), b.number(3)]), X])]);
+    const pFolded = b.op('*', [P, b.op('*', [b.number(6), X])]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [xs],
+      observed: observedOf(b.op('*', [b.number(12), X]), xs),
+      parameters: ['p'],
+    };
+    const { result } = await runSearch(problem, {
+      grammar: pGrammar,
+      seeds: [pSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 1,
+      simplify: 'constants',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(pFolded));
+    expect(Math.abs(result.fittedParameters[0]![0]! - 2)).toBeLessThan(1e-6);
+    expect(result.front[0]!.loss).toBeLessThan(1e-10);
+  });
+
+  it('a fold to a non-finite constant is not scored as a number node', async () => {
+    // 2/0 folds to Infinity, which simplifyConstants refuses; the original division
+    // stays and is invalid on every row, so 'penalize' reports 3 penalties.
+    const divGrammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['/'],
+      unary: [],
+      literals: [2, 0],
+      maxSize: 3,
+    };
+    const divSeed = b.op('/', [b.number(2), b.number(0)]);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [new Float64Array([1, 2, 3])],
+      observed: new Float64Array([0, 0, 0]),
+    };
+    const { result } = await runSearch(problem, {
+      grammar: divGrammar,
+      seeds: [divSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      invalidRows: 'penalize',
+      simplify: 'constants',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(divSeed));
+    expect(Object.is(result.front[0]!.loss, 3e8)).toBe(true);
+  });
+
+  it("'algebraic' does not accept x/x as 1 when x=0 is invalid under invalidRows:'reject'", async () => {
+    const fiveX = new Float64Array([0, 1, 2, 3, 4]);
+    const divSeed = b.op('/', [X, X]);
+    const divGrammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['/'],
+      unary: [],
+      literals: [],
+      maxSize: 3,
+    };
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [fiveX],
+      observed: new Float64Array([1, 1, 1, 1, 1]),
+    };
+    expect(() => simplifyScalar(divSeed)).not.toThrow();
+    expect(scalarGrammarAccepts(divGrammar, simplifyScalar(divSeed))).toBe(true);
+    const { result } = await runSearch(problem, {
+      grammar: divGrammar,
+      seeds: [divSeed],
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      optimizeProbability: 0,
+      invalidRows: 'penalize',
+      simplify: 'algebraic',
+    });
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(divSeed));
+    expect(result.front[0]!.loss).toBeGreaterThan(1e7);
+    expect(result.simplifyFallbacks).toBe(1);
+  });
+
+  it('RangeError from simplifyScalar keeps the original tree', async () => {
+    const factories = await import('../src/factories/index.js');
+    const spy = vi.spyOn(factories, 'simplifyScalar').mockImplementation(() => {
+      throw new RangeError('stack');
+    });
+    try {
+      expect(simplifyCandidateForTest(X, 'algebraic')).toEqual(X);
+      const { result } = await runSearch(constProblem, {
+        ...constSeed,
+        simplify: 'algebraic',
+      });
+      expect(result.front).toHaveLength(1);
+      expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(seed23x));
+      expect(result.simplifyFallbacks).toBe(1);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('calls admit once when constants simplify is a canonical no-op', async () => {
+    let admitCalls = 0;
+    const { result } = await runSearch(constProblem, {
+      ...constSeed,
+      seeds: [folded6x],
+      simplify: 'constants',
+      grammar: {
+        ...constGrammar,
+        admit: (node) => {
+          admitCalls += 1;
+          return scalarGrammarAccepts(constGrammar, node);
+        },
+      },
+    });
+    expect(result.front).toHaveLength(1);
+    expect(admitCalls).toBe(1);
+  });
+
+  it("'algebraic' at seed 7 can drop the exact loss-0 x^2+x row; SR-8 does not fix simplify:'algebraic'", async () => {
+    const { result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      simplify: 'algebraic',
+      ...pinned,
+    });
+    const lossZero = result.front.filter((row) => row.loss === 0);
+    expect(lossZero.some((row) => row.complexity === 7)).toBe(false);
+    expect(
+      result.front.some(
+        (row) =>
+          row.complexity === 5 &&
+          scalarCanonicalKey(row.item) ===
+            '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}'
+      )
+    ).toBe(true);
+  });
+
+  it('two runs with the same seed and simplify mode match event by event and do not advance options.rng', async () => {
+    for (const simplify of ['constants', 'algebraic'] as const) {
+      const rng = createSeededRng(7);
+      const options = {
+        grammar: quadGrammar,
+        rng,
+        tournamentP: 0.982,
+        simplify,
+        ...pinned,
+      } as const;
+      const a = await runSearch(quadProblem, options);
+      const c = await runSearch(quadProblem, options);
+      expect(a.progress).toHaveLength(c.progress.length);
+      a.progress.forEach((event, i) => {
+        expect(event.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+          c.progress[i]!.front.map((row) => scalarCanonicalKey(row.item))
+        );
+        event.front.forEach((row, j) => {
+          expect(Object.is(row.loss, c.progress[i]!.front[j]!.loss)).toBe(true);
+        });
+      });
+      expect(rng.next()).toBe(createSeededRng(7).next());
+    }
   });
 });

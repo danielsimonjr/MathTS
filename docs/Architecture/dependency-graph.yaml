@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-04'
+  lastUpdated: '2026-11-05'
   totalFiles: 1269
   totalModules: 82
-  totalExports: 6877
+  totalExports: 6879
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -12697,6 +12697,9 @@ modules:
             - rankScalarBatchLoss
             - INVALID_ROW_PENALTY
             - NamedScalarLoss
+        - file: ./factories/index.js
+          imports:
+            - '* as scalarFactories'
         - file: ./pareto-front.js
           imports:
             - paretoFront
@@ -12716,6 +12719,7 @@ modules:
         - file: ./scalar-mutate.js
           imports:
             - crossoverSubtrees
+            - simplifyConstants
             - weightedMutation
             - ScalarMutationContext
       workspaceDependencies:
@@ -12735,10 +12739,13 @@ modules:
             - scalarCanonicalKey
             - scalarComplexity
             - scalarGrammarAccepts
+            - ScalarBuildError
             - ScalarComplexityWeights
             - ScalarGrammar
             - ScalarNode
       exports:
+        - simplifyCandidateForTest
+        - hallFrontForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -12754,6 +12761,8 @@ modules:
         - EvaluatedIndividual
         - Island
       functions:
+        - simplifyCandidateForTest
+        - hallFrontForTest
         - parsimonyKey
         - tournamentSelect
         - migrateIslands
@@ -42807,11 +42816,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1269
   totalModules: 82
-  totalLinesOfCode: 212928
-  totalExports: 6877
+  totalLinesOfCode: 213208
+  totalExports: 6879
   totalClasses: 60
   totalInterfaces: 592
-  totalFunctions: 2279
+  totalFunctions: 2281
   totalTypeGuards: 168
   totalEnums: 0
   totalConstants: 1635

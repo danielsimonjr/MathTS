@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -2780,6 +2780,7 @@
       "HalfspaceIntersectionResult",
       "halley",
       "HalleyOptions",
+      "hallFrontForTest",
       "hankelH1",
       "hankelH2",
       "hankelMatrix",
@@ -3707,6 +3708,7 @@
       "signNumber",
       "signTest",
       "simplify",
+      "simplifyCandidateForTest",
       "simplifyConstant",
       "simplifyConstants",
       "simplifyCore",

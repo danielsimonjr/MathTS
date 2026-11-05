@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "totalFiles": 2157,
   "byDisposition": {
     "reachable": 26,
@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1354
+      "loc": 1634
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11328,14 +11328,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 273
+      "loc": 281
     },
     {
       "file": "functions/tests/scalar-search.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 2058
+      "loc": 2600
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

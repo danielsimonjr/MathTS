@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-04", "f": 1269, "e": 6877, "re": 2977 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-05", "f": 1269, "e": 6879, "re": 2977 },
   "s": {
-    "loc": 212928,
+    "loc": 213208,
     "cls": 60,
     "int": 592,
-    "fn": 2279,
+    "fn": 2281,
     "tg": 168,
     "en": 0,
     "co": 1635,
@@ -1892,7 +1892,7 @@
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
     { "p": "utils/factory.ts", "i": 1, "o": 260 },
-    { "p": "factories/index.ts", "i": 246, "o": 12 },
+    { "p": "factories/index.ts", "i": 246, "o": 13 },
     { "p": "function/typed.ts", "i": 3, "o": 204 },
     { "p": "src/index.ts", "i": 200, "o": 0 },
     { "p": "number/index.ts", "i": 9, "o": 53 },

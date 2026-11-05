@@ -1,6 +1,6 @@
 # Plan: Symbolic regression expansion
 
-**Status:** SR-1 through SR-6 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
+**Status:** SR-1 through SR-7 implemented. Remaining PRs are planning only. This file is the contract for the implementation PRs below.
 **Tree reviewed:** `5db1f780` (`main`, `chore: release packages` #581). Re-read a cited file if `main` has moved. Paths were checked on that commit; line numbers were not used, because they move.
 **Source of truth for the shipped surface:** [`docs/reference/scalar-search.md`](../reference/scalar-search.md). This plan does not rewrite that page's defaults, scores, or non-goals. SR-17 adds a walkthrough beside them.
 **Goal:** a stronger scalar symbolic-regression engine, landed as small PRs. Every PR merges to `main` on its own. The recommended order is the list below. A later PR does not import a symbol that only an earlier PR adds. New behavior is opt-in. With the new options omitted, the recorded seed-7 front stays byte-identical.
@@ -112,25 +112,25 @@ These are facts about `5db1f780`, in the order of the PRs.
 
 ## Ranking
 
-| Rank | Improvement                             | PR    | Why this rank                                                                                     |
-| ---- | --------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
-| 1    | Honor `admit` on seeds and offspring    | SR-1  | **Done.** A constraint the grammar already has; the search now applies it to seeds and offspring. |
-| 2    | Opt-in subtree crossover                | SR-2  | **Done.** `crossoverProbability` defaults to 0; the operator is unchanged.                        |
-| 3    | One loss for ranking and fitting        | SR-3  | **Done.** `l1`, `huber`, and row weights already exist on the fitter and now also rank the hall.  |
-| 4    | Fit budget, bounds, and a start vector  | SR-4  | **Done.** The constants `2` and `8` and the vector of ones are now `fit` options.                 |
-| 5    | Invalid-row policy                      | SR-5  | **Done.** `invalidRows: 'penalize'` reuses the fitter's penalty in the ranker.                    |
-| 6    | Complexity weights on the hall          | SR-6  | **Done.** The weight type existed; the hall, the tie-break, and parsimony now use it.             |
-| 7    | Simplify before scoring                 | SR-7  | Algebraic duplicates spend evaluations and can split one expression across two complexities.      |
-| 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                  |
-| 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.           |
-| 10   | `sqrt` and `atan`                       | SR-10 | The only operator additions in this program. Dual rules already exist.                            |
-| 11   | Benchmark harness                       | SR-11 | No later speed claim is legal until this exists. It changes no search behavior.                   |
-| 12   | Compile a structure once per generation | SR-12 | The score path recompiles every tree, including copies.                                           |
-| 13   | Overlapped islands, ordered merge       | SR-13 | Islands are sequential even though their random streams are independent.                          |
-| 14   | Worker threshold from a measurement     | SR-14 | The constant 100 is a caller-thread tape result, not a worker result.                             |
-| 15   | Cancel and optional early stop          | SR-15 | Enumeration can abort. The search cannot.                                                         |
-| 16   | `runScalarSearch` and `bestLossFactor`  | SR-16 | The public call is wider than a regression needs to be.                                           |
-| 17   | Walkthrough and example                 | SR-17 | Docs describe the knobs and never run a search.                                                   |
+| Rank | Improvement                             | PR    | Why this rank                                                                                                      |
+| ---- | --------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------ |
+| 1    | Honor `admit` on seeds and offspring    | SR-1  | **Done.** A constraint the grammar already has; the search now applies it to seeds and offspring.                  |
+| 2    | Opt-in subtree crossover                | SR-2  | **Done.** `crossoverProbability` defaults to 0; the operator is unchanged.                                         |
+| 3    | One loss for ranking and fitting        | SR-3  | **Done.** `l1`, `huber`, and row weights already exist on the fitter and now also rank the hall.                   |
+| 4    | Fit budget, bounds, and a start vector  | SR-4  | **Done.** The constants `2` and `8` and the vector of ones are now `fit` options.                                  |
+| 5    | Invalid-row policy                      | SR-5  | **Done.** `invalidRows: 'penalize'` reuses the fitter's penalty in the ranker.                                     |
+| 6    | Complexity weights on the hall          | SR-6  | **Done.** The weight type existed; the hall, the tie-break, and parsimony now use it.                              |
+| 7    | Simplify before scoring                 | SR-7  | **Done.** `simplify` defaults to `'off'`; the two existing simplifiers run before the grammar check and the score. |
+| 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                                   |
+| 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.                            |
+| 10   | `sqrt` and `atan`                       | SR-10 | The only operator additions in this program. Dual rules already exist.                                             |
+| 11   | Benchmark harness                       | SR-11 | No later speed claim is legal until this exists. It changes no search behavior.                                    |
+| 12   | Compile a structure once per generation | SR-12 | The score path recompiles every tree, including copies.                                                            |
+| 13   | Overlapped islands, ordered merge       | SR-13 | Islands are sequential even though their random streams are independent.                                           |
+| 14   | Worker threshold from a measurement     | SR-14 | The constant 100 is a caller-thread tape result, not a worker result.                                              |
+| 15   | Cancel and optional early stop          | SR-15 | Enumeration can abort. The search cannot.                                                                          |
+| 16   | `runScalarSearch` and `bestLossFactor`  | SR-16 | The public call is wider than a regression needs to be.                                                            |
+| 17   | Walkthrough and example                 | SR-17 | Docs describe the knobs and never run a search.                                                                    |
 
 ## Rules for every implementation PR
 
@@ -207,23 +207,23 @@ Add `complexityWeights?: ScalarComplexityWeights`. The hall, truncation's comple
 
 ## SR-7 — Simplify before scoring
 
-**Independent.** Touches `functions/src/scalar-search.ts` and its test. Reuse `simplifyConstants` and `simplifyScalar`. Do not add a simplifier.
+**Status: implemented.** Independent. Touches `functions/src/scalar-search.ts` and its test. Reuse `simplifyConstants` and `simplifyScalar`. Do not add a simplifier.
 
-Add `simplify?: 'off' | 'constants' | 'algebraic'`, default `'off'`. `'off'` does not call either function. `'constants'` runs `simplifyConstants` on the offspring before the grammar check and the score. `'algebraic'` runs `simplifyScalar`. If `simplifyScalar` throws `ScalarBuildError`, or the result fails the grammar (including `admit` once SR-1 has merged), the offspring keeps the unsimplified tree. Simplification runs once per offspring, before the refit coin, so the scored tree is the tree whose parameters are fitted.
+Add `simplify?: 'off' | 'constants' | 'algebraic'`, default `'off'`. `'off'` does not call either function. `'constants'` runs `simplifyConstants` on the offspring before the grammar check and the score. `'algebraic'` runs `simplifyScalar`. If `simplifyScalar` throws `ScalarBuildError` or `RangeError`, or the result fails the grammar (including `admit` once SR-1 has merged), or row-wise evaluation on positively weighted rows disagrees with the original, the offspring keeps the unsimplified tree. Simplification runs once per seed and per bred offspring, before the refit coin, so the scored tree is the tree whose parameters are fitted. Trees from `enumerateScalars` are not simplified.
 
 Algebraic simplification is expensive relative to a mutation. The Phase 7 survey timed expression `simplify` at about 1 ms on a short input. This option stays off by default. SR-12's harness is the place to time it; SR-7 makes no speed claim.
 
-**Acceptance.** Omitted `simplify`: seed-7 pin. `'constants'` folds a numeric subtree in a seed (`(2*3)*x` is scored as the canonical key of `6*x` when the grammar allows that tree). `'algebraic'` scores a seed `a/(b/c)` as the canonical key `simplifyScalar` produces, when that tree is still in the grammar. A simplify result that uses an operator the grammar does not list is discarded and the original seed is scored. Two runs match.
+**Acceptance.** Omitted `simplify`: seed-7 pin. `'constants'` folds a numeric subtree in a seed (`(2*3)*x` is scored as the canonical key of `6*x` when the grammar allows that tree). `'algebraic'` scores a seed `a/(b/c)` as the canonical key `simplifyScalar` produces, when that tree is still in the grammar and row-wise evaluation matches. A simplify result that uses an operator the grammar does not list is discarded and the original seed is scored. Domain-changing folds (for example `x/x` at `x=0` under `invalidRows:'reject'`) keep the original. Two runs with the same `simplify` mode and seed match.
 
 **Tests.** `cd functions && bunx vitest run tests/scalar-search.test.ts tests/scalar-node-bridge.test.ts tests/scalar-mutate.test.ts`.
 
 ## SR-8 — One front row per canonical tree
 
-**Independent.** Touches the hall in `functions/src/scalar-search.ts` and the search test.
+**Status: implemented.** Independent. Touches the hall in `functions/src/scalar-search.ts` and the search test.
 
-When two evaluated trees share a `scalarCanonicalKey`, the hall keeps one: the smaller stored complexity, then the smaller loss, then the one recorded first. The population already keeps one key. This PR makes the front do the same. Complexity reported for the survivor stays the stored-tree complexity unless SR-6 weights apply. Do not switch the default complexity onto the canonical tree; that would change `PINNED_ROWS` even when keys are unique.
+When two evaluated trees share a `scalarCanonicalKey`, the hall keeps one at add time: the smaller loss, then the smaller stored complexity, then the one recorded first; a better same-key tree evicts the older survivor and frees its complexity slot. Elitist truncation (`truncateDistinct`) already keeps one tree per key in the population with the same loss-first order. Complexity reported for the survivor stays the stored-tree complexity unless SR-6 weights apply; weights do not choose the survivor. Do not switch the default complexity onto the canonical tree; that would change `PINNED_ROWS` even when keys are unique.
 
-**Acceptance.** Run the seed-7 pin. If it passes, the pin stays. If it fails, inspect the trace. Update `PINNED_ROWS` in the same PR only when the sole difference is a dropped row whose key duplicates a row that remains, and quote both fronts in the PR body. If any surviving row's loss changes, revert the hall change. A direct test inserts two stored shapes of one key at two complexities and expects one front row.
+**Acceptance.** Run the seed-7 pin. If it passes, the pin stays. If it fails, inspect the trace. Update `PINNED_ROWS` in the same PR only when the sole difference is a dropped row whose key duplicates a row that remains, and quote both fronts in the PR body. If any surviving row's loss changes, revert the hall change. A direct test inserts two stored shapes of one key at two complexities and expects one front row with the better loss. Algebraic `simplify` at seed 7 can still drop the exact loss-0 `x^2+x` row when `(x+1)*x` shares its key at another complexity; that is an open limitation of `simplify:'algebraic'`, not fixed by SR-8 (different keys; the algebraic run never evaluates a zero-loss `x^2+x` tree).
 
 **Tests.** `cd functions && bunx vitest run tests/scalar-search.test.ts`.
 
@@ -388,7 +388,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.** |
 | 5     | SR-5  | `invalidRows` defaults to `'reject'`. **Done.**                               |
 | 6     | SR-6  | `complexityWeights` reach the hall. **Done.**                                 |
-| 7     | SR-7  | `simplify` defaults to `'off'`.                                               |
+| 7     | SR-7  | `simplify` defaults to `'off'`. **Done.**                                     |
 | 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |
 | 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                             |
 | 10    | SR-10 | Grammars may name `sqrt` and `atan`.                                          |
