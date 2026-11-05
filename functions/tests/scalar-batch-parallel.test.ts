@@ -86,7 +86,7 @@ function serialValues(columns: Float64Array[]) {
 
 describe('evaluateScalarPopulation', () => {
   it('uses the threshold the plan names and a positive default timeout', () => {
-    expect(SCALAR_PARALLEL_MIN_ROWS).toBe(100);
+    expect(SCALAR_PARALLEL_MIN_ROWS).toBe(10_000);
     expect(DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS).toBe(30_000);
   });
 
@@ -125,7 +125,7 @@ describe('evaluateScalarPopulation', () => {
   });
 
   it('puts results back in item order whatever order the workers answer in', async () => {
-    const columns = column(200);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const { pool } = loopback('reverse');
     const results = await evaluateScalarPopulation({ ...options(columns), parallel: { pool } });
     const reference = serialValues(columns);
@@ -136,7 +136,7 @@ describe('evaluateScalarPopulation', () => {
   });
 
   it('carries NaN and invalid rows across unchanged', async () => {
-    const columns = column(128);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const { pool } = loopback();
     const results = await evaluateScalarPopulation({ ...options(columns), parallel: { pool } });
     const log = results[3]!.batch;
@@ -150,7 +150,7 @@ describe('evaluateScalarPopulation', () => {
   });
 
   it('keeps two items that share an index apart', async () => {
-    const columns = column(150);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const { pool } = loopback();
     const results = await evaluateScalarPopulation({
       variables: ['x'],
@@ -170,7 +170,7 @@ describe('evaluateScalarPopulation', () => {
   it('forwards the timeout it was given', async () => {
     const { pool, calls } = loopback();
     await evaluateScalarPopulation({
-      ...options(column(100)),
+      ...options(column(SCALAR_PARALLEL_MIN_ROWS)),
       parallel: { pool, timeoutMs: 1_234 },
     });
     expect(calls.every((call) => call.timeoutMs === 1_234)).toBe(true);
@@ -181,7 +181,10 @@ describe('evaluateScalarPopulation', () => {
     const pool = { execute } as unknown as Pick<WorkerPool, 'execute'>;
     for (const timeoutMs of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(
-        evaluateScalarPopulation({ ...options(column(100)), parallel: { pool, timeoutMs } })
+        evaluateScalarPopulation({
+          ...options(column(SCALAR_PARALLEL_MIN_ROWS)),
+          parallel: { pool, timeoutMs },
+        })
       ).rejects.toThrow(RangeError);
     }
     // Also below the threshold: a bad option is a bad option, not something rows excuse.
@@ -199,7 +202,7 @@ describe('evaluateScalarPopulation', () => {
       }),
     } as unknown as Pick<WorkerPool, 'execute'>;
     await expect(
-      evaluateScalarPopulation({ ...options(column(100)), parallel: { pool } })
+      evaluateScalarPopulation({ ...options(column(SCALAR_PARALLEL_MIN_ROWS)), parallel: { pool } })
     ).rejects.toThrow(/timed out/);
   });
 
@@ -213,8 +216,8 @@ describe('evaluateScalarPopulation', () => {
       },
     } as unknown as Pick<WorkerPool, 'execute'>;
     await expect(
-      evaluateScalarPopulation({ ...options(column(100)), parallel: { pool } })
-    ).rejects.toThrow(/3 values for 100 rows/);
+      evaluateScalarPopulation({ ...options(column(SCALAR_PARALLEL_MIN_ROWS)), parallel: { pool } })
+    ).rejects.toThrow(/3 values for 10000 rows/);
   });
 
   it('rejects when a worker leaves out a tree', async () => {
@@ -225,7 +228,7 @@ describe('evaluateScalarPopulation', () => {
       },
     } as unknown as Pick<WorkerPool, 'execute'>;
     await expect(
-      evaluateScalarPopulation({ ...options(column(100)), parallel: { pool } })
+      evaluateScalarPopulation({ ...options(column(SCALAR_PARALLEL_MIN_ROWS)), parallel: { pool } })
     ).rejects.toThrow(/no worker result/);
   });
 
@@ -234,7 +237,7 @@ describe('evaluateScalarPopulation', () => {
     expect(
       await evaluateScalarPopulation({
         variables: ['x'],
-        columns: column(100),
+        columns: column(SCALAR_PARALLEL_MIN_ROWS),
         items: [],
         parallel: { pool },
       })
@@ -283,7 +286,7 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
   const shared = b.op('+', [b.op('*', [x, x]), x]);
 
   it('gives two same-structure trees with different parameters different results (serial)', async () => {
-    const columns = column(120);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const results = await evaluateScalarPopulation({
       variables: ['x'],
       parameters: ['p'],
@@ -300,7 +303,7 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
   });
 
   it('gives two same-structure trees with different parameters different results (workers)', async () => {
-    const columns = column(120);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const { pool } = loopback();
     const results = await evaluateScalarPopulation({
       variables: ['x'],
@@ -319,7 +322,7 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
   });
 
   it('marks only the invalid tree invalid in a mixed batch (serial and workers)', async () => {
-    const columns = column(120);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const items: ScalarPopulationEvalItem[] = [
       { index: 0, node: b.op('+', [x, b.number(1)]) },
       { index: 1, node: sqrtNode },
@@ -346,7 +349,7 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
   });
 
   it('scores two copies of one tree separately, each with its own parameters', async () => {
-    const columns = column(120);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const reference = compileScalar(shared, { variables: ['x'], parameters: ['p'] });
     const expected = reference.evaluate(columns, [0.5]);
     const items: ScalarPopulationEvalItem[] = [
@@ -381,7 +384,7 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
     expect(scalarCanonicalKey(shapeA)).toBe(scalarCanonicalKey(shapeC));
     expect(JSON.stringify(shapeA)).not.toBe(JSON.stringify(shapeC));
 
-    const columns = column(120);
+    const columns = column(SCALAR_PARALLEL_MIN_ROWS);
     const params: number[] = [0.1];
     const items: ScalarPopulationEvalItem[] = [
       { index: 0, node: shapeA, params },

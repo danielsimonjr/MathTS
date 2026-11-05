@@ -311,7 +311,16 @@ The overlap is inside one process (`Promise` concurrency), not a second worker p
 
 **Depends on SR-11 being on `main` for the number. The PR still merges as a docs-and-maybe-constant change of its own.**
 
-Run SR-11 case (3) twice on Node and twice on Bun. The candidate threshold is the smallest measured row count where the worker path's median is at or below 0.95 times the serial path in all four runs, and the row count below it is not. If no row on the grid qualifies, leave `SCALAR_PARALLEL_MIN_ROWS` at 100 and write the four runs into `docs/BENCHMARK_RESULTS.md`. If one qualifies, change the constant, quote the four runs in the PR, and keep the bit-identical parallel tests. Do not claim a speedup for `searchScalars` as a whole from this constant alone.
+Run SR-11 case (3) twice on Node and twice on Bun. **Use the reused-pool column**
+(one `WorkerPool` for warmup and all timed samples, matching `searchScalars`). The
+candidate threshold is the smallest measured row count where the worker path's median is
+at or below 0.95 times the serial path in all four runs, and the row count below it is not.
+The cold-pool column (create and terminate per sample) is recorded for comparison only; it
+cannot set the constant because it mis-measures the search driver. If no row on the grid
+qualifies, leave `SCALAR_PARALLEL_MIN_ROWS` at 100 and write the four runs into
+`docs/BENCHMARK_RESULTS.md`. If one qualifies, change the constant, quote the four reused-pool
+runs in the PR, and keep the bit-identical parallel tests. Do not claim a speedup for
+`searchScalars` as a whole from this constant alone.
 
 A Bun failure to start `worker_threads` is a result: record it, leave the constant, and do not special-case Bun with a silent fallback that skips the timeout. `WorkerPool` already selects `worker_threads` when `process.versions.node` is set, which Bun sets.
 
@@ -388,22 +397,22 @@ Also accept `columns` as a `Readonly<Record<string, Float64Array>>` on a small i
 
 Merge in this order. Each PR is reviewed and merged by itself. Skipping one leaves `main` consistent, because every new option defaults to today's behavior. SR-14's decision needs SR-11's harness on `main`. SR-17 is written against whatever subset has merged.
 
-| Order | PR    | One-line contract                                                             |
-| ----- | ----- | ----------------------------------------------------------------------------- |
-| 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                                  |
-| 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                               |
-| 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.**     |
-| 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.** |
-| 5     | SR-5  | `invalidRows` defaults to `'reject'`. **Done.**                               |
-| 6     | SR-6  | `complexityWeights` reach the hall. **Done.**                                 |
-| 7     | SR-7  | `simplify` defaults to `'off'`. **Done.**                                     |
-| 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |
-| 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                             |
-| 10    | SR-10 | Grammars may name `sqrt` and `atan`. **Done.**                                |
-| 11    | SR-11 | Node and Bun harness, no speed claim.                                         |
-| 12    | SR-12 | One compile per structure per generation, bit-identical.                      |
-| 13    | SR-13 | Islands overlap; merge in index order. **Done.**                              |
-| 14    | SR-14 | Worker threshold moves only when four runs agree.                             |
-| 15    | SR-15 | `AbortSignal` and opt-in `earlyStop`.                                         |
-| 16    | SR-16 | `runScalarSearch` and `bestLossFactor`.                                       |
-| 17    | SR-17 | Reference walkthrough and `examples/scalar-search.ts`.                        |
+| Order | PR    | One-line contract                                                                   |
+| ----- | ----- | ----------------------------------------------------------------------------------- |
+| 1     | SR-1  | `admit` binds seeds and offspring. **Done.**                                        |
+| 2     | SR-2  | `crossoverProbability` defaults to 0. **Done.**                                     |
+| 3     | SR-3  | Ranking loss and refit loss are the same `l2` / `l1` / `huber`. **Done.**           |
+| 4     | SR-4  | Fit restarts, iterations, bounds, and the start vector are options. **Done.**       |
+| 5     | SR-5  | `invalidRows` defaults to `'reject'`. **Done.**                                     |
+| 6     | SR-6  | `complexityWeights` reach the hall. **Done.**                                       |
+| 7     | SR-7  | `simplify` defaults to `'off'`. **Done.**                                           |
+| 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                            |
+| 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                                   |
+| 10    | SR-10 | Grammars may name `sqrt` and `atan`. **Done.**                                      |
+| 11    | SR-11 | Node and Bun harness, no speed claim.                                               |
+| 12    | SR-12 | One compile per structure per generation, bit-identical.                            |
+| 13    | SR-13 | Islands overlap; merge in index order. **Done.**                                    |
+| 14    | SR-14 | Worker threshold 10_000 rows from reused-pool measurement (SR-11 case 3). **Done.** |
+| 15    | SR-15 | `AbortSignal` and opt-in `earlyStop`.                                               |
+| 16    | SR-16 | `runScalarSearch` and `bestLossFactor`.                                             |
+| 17    | SR-17 | Reference walkthrough and `examples/scalar-search.ts`.                              |
