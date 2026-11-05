@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createScalarBuilder, type ScalarNode } from '@danielsimonjr/mathts-expression';
+import {
+  createScalarBuilder,
+  scalarCanonicalKey,
+  type ScalarNode,
+} from '@danielsimonjr/mathts-expression';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import { buildTape, compileScalar } from '../src/scalar-compile.js';
 import {
@@ -343,6 +347,8 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
 
   it('scores two copies of one tree separately, each with its own parameters', async () => {
     const columns = column(120);
+    const reference = compileScalar(shared, { variables: ['x'], parameters: ['p'] });
+    const expected = reference.evaluate(columns, [0.5]);
     const items: ScalarPopulationEvalItem[] = [
       { index: 0, node: shared, params: [0.5] },
       { index: 1, node: shared, params: [0.5] },
@@ -353,7 +359,8 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
       columns,
       items,
     });
-    expect(sameBits(serial[0]!.batch.values, serial[1]!.batch.values)).toBe(true);
+    expect(sameBits(serial[0]!.batch.values, expected.values)).toBe(true);
+    expect(sameBits(serial[1]!.batch.values, expected.values)).toBe(true);
     expect(serial[0]!.batch.values).not.toBe(serial[1]!.batch.values);
 
     const { pool } = loopback();
@@ -364,7 +371,50 @@ describe('SR-12 acceptance: batch semantics (cache measured and reverted)', () =
       items,
       parallel: { pool },
     });
-    expect(sameBits(parallel[0]!.batch.values, serial[0]!.batch.values)).toBe(true);
-    expect(sameBits(parallel[1]!.batch.values, serial[1]!.batch.values)).toBe(true);
+    expect(sameBits(parallel[0]!.batch.values, expected.values)).toBe(true);
+    expect(sameBits(parallel[1]!.batch.values, expected.values)).toBe(true);
+  });
+
+  it('scores same-key different-shape trees against standalone compileScalar (serial and workers)', async () => {
+    const shapeA = b.op('^', [b.op('*', [p, x]), b.number(2)]);
+    const shapeC = b.op('*', [b.op('^', [p, b.number(2)]), b.op('^', [x, b.number(2)])]);
+    expect(scalarCanonicalKey(shapeA)).toBe(scalarCanonicalKey(shapeC));
+    expect(JSON.stringify(shapeA)).not.toBe(JSON.stringify(shapeC));
+
+    const columns = column(120);
+    const params: number[] = [0.1];
+    const items: ScalarPopulationEvalItem[] = [
+      { index: 0, node: shapeA, params },
+      { index: 1, node: shapeC, params },
+    ];
+    const refA = compileScalar(shapeA, { variables: ['x'], parameters: ['p'] });
+    const refC = compileScalar(shapeC, { variables: ['x'], parameters: ['p'] });
+    const standaloneA = refA.evaluate(columns, params);
+    const standaloneC = refC.evaluate(columns, params);
+    expect(sameBits(standaloneA.values, standaloneC.values)).toBe(false);
+
+    const serial = await evaluateScalarPopulation({
+      variables: ['x'],
+      parameters: ['p'],
+      columns,
+      items,
+    });
+    expect(sameBits(serial[0]!.batch.values, standaloneA.values)).toBe(true);
+    expect(sameBits(serial[1]!.batch.values, standaloneC.values)).toBe(true);
+    expect([...serial[0]!.batch.valid]).toEqual([...standaloneA.valid]);
+    expect([...serial[1]!.batch.valid]).toEqual([...standaloneC.valid]);
+
+    const { pool } = loopback();
+    const parallel = await evaluateScalarPopulation({
+      variables: ['x'],
+      parameters: ['p'],
+      columns,
+      items,
+      parallel: { pool },
+    });
+    expect(sameBits(parallel[0]!.batch.values, standaloneA.values)).toBe(true);
+    expect(sameBits(parallel[1]!.batch.values, standaloneC.values)).toBe(true);
+    expect([...parallel[0]!.batch.valid]).toEqual([...standaloneA.valid]);
+    expect([...parallel[1]!.batch.valid]).toEqual([...standaloneC.valid]);
   });
 });
