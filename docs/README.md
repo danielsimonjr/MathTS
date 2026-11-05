@@ -192,6 +192,13 @@ items they still track.
 
 ## 11. Planning ✅/🗄️
 
+| Doc                                                                                        | Status                                                                   |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [plans/DEPENDENCY_REDUCTION_PLAN.md](plans/DEPENDENCY_REDUCTION_PLAN.md)                   | ✅ Active. DR-1…DR-13, third-party dependency reduction. Deletes itself. |
+| [plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md](plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md) | ✅ SR-1…SR-17 merged. The file stays until a later cleanup.              |
+
+Historical snapshots:
+
 | Doc                                                                                                              | Status                                               |
 | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | [Planning/MASTER_ROADMAP.md](Planning/MASTER_ROADMAP.md)                                                         | 🗄️ April 2026 master index snapshot.                 |
