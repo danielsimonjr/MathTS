@@ -9,9 +9,11 @@ import {
   type ScalarGrammar,
   type ScalarNode,
 } from '@danielsimonjr/mathts-expression';
-import { createSeededRng } from '@danielsimonjr/mathts-core';
+import { createSeededRng, Fraction } from '@danielsimonjr/mathts-core';
 import {
   compileScalar,
+  frontToJson,
+  frontToLatexTable,
   numericallyEquivalent,
   searchScalars,
   simplifyScalar,
@@ -20,6 +22,12 @@ import {
   type ScalarSearchResult,
   type SearchProgress,
 } from '../src/index.js';
+import type { RationalDimension } from '../src/scalar-dimension.js';
+import {
+  inferScalarDimension,
+  rationalDimensionsEqual,
+  solveParameterDimensions,
+} from '../src/scalar-dimension.js';
 import {
   ComplexityFrequency,
   migrateIslands,
@@ -2598,6 +2606,399 @@ describe('searchScalars: simplify', () => {
   });
 });
 
+describe('searchScalars: dimensions (SR-9)', () => {
+  // Restated from the reproducibility pin, which scopes PINNED_ROWS to its own
+  // describe. The pin itself is untouched; omitted `dimensions` must leave the
+  // recorded search byte for byte.
+  const DIM_PIN = [
+    { complexity: 1, loss: 4.870097681877825, key: '{"k":"s","v":"x"}' },
+    {
+      complexity: 5,
+      loss: 6.317050217590134e-32,
+      key: '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
+    },
+    {
+      complexity: 7,
+      loss: 0,
+      key: '{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},{"k":"s","v":"x"}]}',
+    },
+  ] as const;
+  const pinned = {
+    populationSize: 8,
+    tournamentSize: 4,
+    maxEvaluations: 120,
+  } as const;
+
+  const frac = (n: number, d: number): Fraction => new Fraction(BigInt(n), BigInt(d));
+  /** `[L, M, T, I, Θ, N, J]` in whole exponents. */
+  const si = (
+    l: number,
+    m: number,
+    t: number,
+    i: number,
+    th: number,
+    n: number,
+    j: number
+  ): RationalDimension => [
+    frac(l, 1),
+    frac(m, 1),
+    frac(t, 1),
+    frac(i, 1),
+    frac(th, 1),
+    frac(n, 1),
+    frac(j, 1),
+  ];
+  const length = si(1, 0, 0, 0, 0, 0, 0);
+  const time = si(0, 0, 1, 0, 0, 0, 0);
+  const dimensionless = si(0, 0, 0, 0, 0, 0, 0);
+  const lengthSquared = si(2, 0, 0, 0, 0, 0, 0);
+
+  it('omitted dimensions: the seed-7 pin is unchanged', async () => {
+    const { progress, result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      ...pinned,
+    });
+    expect(result.front.map((row) => row.complexity)).toEqual(DIM_PIN.map((r) => r.complexity));
+    expect(result.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+      DIM_PIN.map((r) => r.key)
+    );
+    result.front.forEach((row, i) => {
+      expect(Object.is(row.loss, DIM_PIN[i]!.loss)).toBe(true);
+    });
+    expect(progress.map((p) => p.evaluations)).toEqual(
+      Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+    );
+  });
+
+  it('x + x enters the front for a length target and is absent for a time target', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sin'],
+      literals: [],
+      maxSize: 3,
+    };
+    const problem: ScalarSearchProblem = {
+      ...quadProblem,
+      observed: observedOf(b.op('+', [X, X]), xs),
+    };
+    const base = {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 50,
+      dimensions: { symbols: { x: length }, target: length },
+    } as const;
+    const lengthRun = await runSearch(problem, base);
+    const sumKey = '{"k":"+","a":[{"k":"s","v":"x"},{"k":"s","v":"x"}]}';
+    const lengthKeys = lengthRun.result.front.map((row) => scalarCanonicalKey(row.item));
+    expect(lengthKeys).toContain(sumKey);
+    expect(lengthKeys.some((key) => key.includes('sin'))).toBe(false);
+    for (const row of lengthRun.result.front) {
+      expect(Number.isFinite(row.loss)).toBe(true);
+    }
+
+    const timeRun = await runSearch(problem, {
+      ...base,
+      dimensions: { symbols: { x: length }, target: time },
+    });
+    const timeKeys = timeRun.result.front.map((row) => scalarCanonicalKey(row.item));
+    expect(timeKeys).not.toContain(sumKey);
+    expect(timeKeys.some((key) => key.includes('sin'))).toBe(false);
+  });
+
+  it('a violating tree still counts as an evaluation but never enters the hall', async () => {
+    const sinX = b.call('sin', X);
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: [],
+      unary: ['sin'],
+      literals: [],
+      maxSize: 2,
+      admit: (node) => scalarCanonicalKey(node) === scalarCanonicalKey(sinX),
+    };
+    const { result } = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [sinX],
+      dimensions: { symbols: { x: length }, target: length },
+    });
+    expect(result.evaluations).toBe(1);
+    expect(result.front).toHaveLength(0);
+    expect(result.stopReason).toBe('max-evaluations');
+  });
+
+  it('a variable omitted from symbols is unknown: an empty symbols record rejects every tree', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: [],
+      unary: [],
+      literals: [],
+      maxSize: 1,
+    };
+    const { result } = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [X],
+      dimensions: { symbols: {}, target: dimensionless },
+    });
+    expect(result.evaluations).toBe(1);
+    expect(result.front).toHaveLength(0);
+  });
+
+  it('a parameter in p * x with a length target solves as dimensionless and is scored', async () => {
+    const product = b.op('*', [b.symbol('p'), X]);
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['*'],
+      unary: [],
+      literals: [],
+      parameters: ['p'],
+      maxSize: 3,
+      admit: (node) => scalarCanonicalKey(node) === scalarCanonicalKey(product),
+    };
+    const { result } = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [product],
+      dimensions: { symbols: { x: length }, target: length },
+    });
+    expect(result.evaluations).toBe(1);
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(product));
+    expect(Number.isFinite(result.front[0]!.loss)).toBe(true);
+  });
+
+  it('p + x with p fixed dimensionless is inconsistent and does not enter the hall', async () => {
+
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: [],
+      literals: [],
+
+      parameters: ['p'],
+      maxSize: 3,
+    };
+    const { result } = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 5,
+      seeds: [b.op('+', [b.symbol('p'), X])],
+      dimensions: {
+        symbols: { x: length, p: dimensionless },
+        target: length,
+      },
+    });
+    const keys = result.front.map((row) => scalarCanonicalKey(row.item));
+    expect(keys).not.toContain(scalarCanonicalKey(b.op('+', [b.symbol('p'), X])));
+  });
+
+  it('onUnderdetermined reject still scores a tree when a listed parameter is unused', async () => {
+    const law = b.op('+', [b.op('^', [X, b.number(2)]), X]);
+    const lawKey = scalarCanonicalKey(law);
+    const { result } = await runSearch(
+      { ...quadProblem, parameters: ['p'] },
+      {
+        grammar: {
+          ...quadGrammar,
+          parameters: ['p'],
+          admit: (node) => scalarCanonicalKey(node) === lawKey,
+        },
+        rng: createSeededRng(7),
+        maxEvaluations: 1,
+        seeds: [law],
+        dimensions: {
+          symbols: { x: dimensionless },
+          target: dimensionless,
+          onUnderdetermined: 'reject',
+        },
+      }
+    );
+    expect(result.evaluations).toBe(1);
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(lawKey);
+    expect(result.front[0]!.complexity).toBe(5);
+    expect(result.front[0]!.loss).toBe(0);
+  });
+
+  it('infer and solve both reject x^3 and x + x when the target dimension disagrees', () => {
+    const cube = b.op('^', [X, b.number(3)]);
+    const sum = b.op('+', [X, X]);
+    const cubeInf = inferScalarDimension(cube, { x: length });
+    const sumInf = inferScalarDimension(sum, { x: length });
+    expect(cubeInf.ok).toBe(true);
+    expect(sumInf.ok).toBe(true);
+    if (cubeInf.ok) {
+      expect(rationalDimensionsEqual(cubeInf.dimension, length)).toBe(false);
+    }
+    if (sumInf.ok) {
+      expect(rationalDimensionsEqual(sumInf.dimension, time)).toBe(false);
+    }
+    expect(solveParameterDimensions(cube, { x: length }, length, [])).toEqual({
+      inconsistent: true,
+    });
+    expect(solveParameterDimensions(sum, { x: length }, time, [])).toEqual({ inconsistent: true });
+  });
+
+  it('empty problem.parameters forces infer mode but still checks target', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: [],
+      literals: [],
+      maxSize: 2,
+      parameters: ['p'],
+    };
+    const problem: ScalarSearchProblem = { ...quadProblem, parameters: [] };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [b.op('+', [X, X])],
+      dimensions: { symbols: { x: length }, target: time },
+    });
+    expect(result.evaluations).toBe(1);
+    expect(result.front).toHaveLength(0);
+  });
+
+  it('an underdetermined solve is scored by default (keep) and dropped with reject', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['*'],
+      unary: [],
+      literals: [],
+      parameters: ['p1', 'p2'],
+      maxSize: 3,
+    };
+    const product = b.op('*', [b.symbol('p1'), b.symbol('p2')]);
+    const options = {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [product],
+      dimensions: {
+        symbols: { x: length },
+        target: length,
+        onUnderdetermined: undefined as 'keep' | 'reject' | undefined,
+      },
+    };
+    const kept = await runSearch(quadProblem, options);
+    expect(kept.result.evaluations).toBe(1);
+    expect(kept.result.front.map((row) => scalarCanonicalKey(row.item))).toContain(
+      scalarCanonicalKey(product)
+    );
+    const rejected = await runSearch(quadProblem, {
+      ...options,
+      rng: createSeededRng(7),
+      dimensions: { ...options.dimensions, onUnderdetermined: 'reject' },
+    });
+    expect(rejected.result.evaluations).toBe(1);
+    expect(rejected.result.front).toHaveLength(0);
+  });
+
+  it('simplify constants folds an exponent before the dimension check against target', async () => {
+    const exponentTree = b.op('^', [X, b.op('+', [b.number(1), b.number(1)])]);
+    const squared = b.op('^', [X, b.number(2)]);
+    const simplifiedKey = scalarCanonicalKey(squared);
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['^', '+'],
+      unary: [],
+      literals: [1],
+      maxSize: 5,
+      admit: (node) => scalarCanonicalKey(node) === scalarCanonicalKey(exponentTree),
+    };
+    const withSimplify = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [exponentTree],
+      simplify: 'constants',
+      dimensions: { symbols: { x: length }, target: lengthSquared },
+    });
+    expect(withSimplify.result.evaluations).toBe(1);
+    expect(withSimplify.result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(withSimplify.result.front[0]!.item)).toBe(simplifiedKey);
+    expect(Number.isFinite(withSimplify.result.front[0]!.loss)).toBe(true);
+
+    const withoutSimplify = await runSearch(quadProblem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [exponentTree],
+      simplify: 'off',
+      dimensions: { symbols: { x: length }, target: lengthSquared },
+    });
+    expect(withoutSimplify.result.evaluations).toBe(1);
+    expect(withoutSimplify.result.front).toHaveLength(0);
+  });
+
+  it('rejects a target that is not seven Fractions with TypeError before the first yield', async () => {
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        dimensions: {
+          symbols: { x: length },
+          target: [1, 0, 0, 0, 0, 0, 0] as unknown as RationalDimension,
+        },
+      })
+    ).rejects.toThrow(TypeError);
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        dimensions: {
+          symbols: { x: [frac(1, 1)] as unknown as RationalDimension },
+          target: length,
+        },
+      })
+    ).rejects.toThrow(TypeError);
+  });
+
+  it('rejects an unknown onUnderdetermined mode with RangeError', async () => {
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        dimensions: {
+          symbols: { x: length },
+          target: length,
+          onUnderdetermined: 'drop' as 'keep' | 'reject',
+        },
+      })
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('rejects dimensions null and non-plain symbols before the first yield', async () => {
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        dimensions: null as unknown as ScalarSearchOptions['dimensions'],
+      })
+    ).rejects.toThrow(RangeError);
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        dimensions: {
+          symbols: new Map([['x', length]]) as unknown as Record<string, RationalDimension>,
+          target: length,
+        },
+      })
+    ).rejects.toThrow(RangeError);
+
 describe('searchScalars: sqrt and atan', () => {
   it('a grammar that does not list sqrt or atan still rejects their nodes', () => {
     expect(scalarGrammarAccepts(quadGrammar, b.call('sqrt', X))).toBe(false);
@@ -2688,5 +3089,59 @@ describe('searchScalars: sqrt and atan', () => {
     for (const row of result.front) {
       expect(scalarCanonicalKey(row.item)).not.toBe(scalarCanonicalKey(b.call('sqrt', X)));
     }
+  });
+
+  it("'algebraic' simplify does not fall back on a plain sqrt seed", async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(8, 0, 7);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [law],
+      optimizeProbability: 0,
+      simplify: 'algebraic',
+    });
+    expect(result.simplifyFallbacks).toBe(0);
+    expect(result.front).toHaveLength(1);
+    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(law));
+  });
+
+  it('exports a sqrt front row through frontToJson and frontToLatexTable', async () => {
+    const grammar: ScalarGrammar = {
+      variables: ['x'],
+      binary: ['+'],
+      unary: ['sqrt'],
+      literals: [],
+      maxSize: 3,
+    };
+    const nonNegative = linspace(6, 0, 5);
+    const law = b.call('sqrt', X);
+    const problem: ScalarSearchProblem = {
+      variables: ['x'],
+      columns: [nonNegative],
+      observed: observedOf(law, nonNegative),
+    };
+    const { result } = await runSearch(problem, {
+      grammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 1,
+      seeds: [law],
+      optimizeProbability: 0,
+    });
+    expect(() => frontToJson(result.front)).not.toThrow();
+    expect(frontToLatexTable(result.front).includes('\\sqrt')).toBe(true);
   });
 });

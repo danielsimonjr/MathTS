@@ -123,7 +123,7 @@ These are facts about `5db1f780`, in the order of the PRs.
 | 7    | Simplify before scoring                 | SR-7  | **Done.** `simplify` defaults to `'off'`; the two existing simplifiers run before the grammar check and the score. |
 | 8    | One front row per canonical tree        | SR-8  | Dedup in the population does not dedup the hall.                                                                   |
 | 9    | Dimensional and unit filter             | SR-9  | Inference and the unit table exist. The search never asks the dimension of a candidate.                            |
-| 10   | `sqrt` and `atan`                       | SR-10 | The only operator additions in this program. Dual rules already exist.                                             |
+| 10   | `sqrt` and `atan`                       | SR-10 | **Done.** Dual rules already existed; bridge derives lowered names from `SCALAR_FUNCTION_LOWERING`. |
 | 11   | Benchmark harness                       | SR-11 | No later speed claim is legal until this exists. It changes no search behavior.                                    |
 | 12   | Compile a structure once per generation | SR-12 | The score path recompiles every tree, including copies.                                                            |
 | 13   | Overlapped islands, ordered merge       | SR-13 | Islands are sequential even though their random streams are independent.                                           |
@@ -229,11 +229,13 @@ When two evaluated trees share a `scalarCanonicalKey`, the hall keeps one at add
 
 ## SR-9 — Dimensional and unit filter
 
+**Status:** shipped (review fixes: infer/solve target match, unused-parameter underdetermined handling, `unitToRationalDimension` supplementary units, frozen `dimensions` snapshot).
+
 **Independent.** Touches `functions/src/scalar-dimension.ts`, `functions/src/scalar-search.ts`, `functions/src/index.ts`, and `functions/tests/scalar-dimension.test.ts`, `functions/tests/scalar-search.test.ts`. A patch changeset on `@danielsimonjr/mathts-functions`.
 
-Add `unitToRationalDimension(unitName: string): RationalDimension` next to the dimension helpers. It builds `new Unit(1, unitName)` and returns `toSiDimensionVector` of that unit's dimensions. An unknown unit name throws the error `Unit` already throws. No new unit table and no `UnitTensor`.
+Add `unitToRationalDimension(unitName: string): RationalDimension` next to the dimension helpers. It builds `new Unit(1, unitName)` and returns `toSiDimensionVector` of that unit's dimensions. Supplementary angle and solid-angle exponents map to a dimensionless 7-vector; information (`bit`, `byte`) throws `UnitParseError`. An unknown unit name throws the error `Unit` already throws. No new unit table and no `UnitTensor`.
 
-Add optional `dimensions?: { symbols: Readonly<Record<string, RationalDimension>>; target: RationalDimension; onUnderdetermined?: 'keep' | 'reject' }` on the search. Omitted: no dimension walk, today's search. Set: after the grammar check and before scoring, call `solveParameterDimensions` when the grammar has parameters, otherwise `inferScalarDimension`, and require the root dimension to match `target`.
+Add optional `dimensions?: { symbols: Readonly<Record<string, RationalDimension>>; target: RationalDimension; onUnderdetermined?: 'keep' | 'reject' }` on the search. Omitted: no dimension walk, today's search. Set: after the grammar check and before scoring, call `solveParameterDimensions` when the fitted parameter list is non-empty (an empty `problem.parameters` array forces infer mode), otherwise `inferScalarDimension`, and require the root dimension to match `target`.
 
 - A violation (`add-mismatch`, `transcendental-arg-not-dimensionless`, `non-literal-exponent-on-dimensional-base`, `unknown-symbol`) or an `inconsistent` solve scores `Infinity` and does not enter the hall. It still counts as an evaluation.
 - `onUnderdetermined` defaults to `'keep'`: the numeric fitter still runs. `'reject'` scores `Infinity`.
@@ -246,6 +248,8 @@ The check reads the tree that will be scored. If SR-7's `simplify` is on, that i
 **Tests.** `cd functions && bunx vitest run tests/scalar-search.test.ts tests/scalar-dimension.test.ts`.
 
 ## SR-10 — Operators `sqrt` and `atan`
+
+**Status: shipped** (Relay review: merge `main`, bridge sync, gradient valid mask aligned with primal scoring, fitter regression tests).
 
 **Independent of the search-loop PRs.** It extends the scalar subset those PRs already search. Touches the builder lowering table, `evaluateScalar`'s unary map, the compile-tape unary map, `scalar-dimension.ts`, and the tests under those modules. Patch changesets on `@danielsimonjr/mathts-expression` and `@danielsimonjr/mathts-functions`.
 
@@ -391,7 +395,7 @@ Merge in this order. Each PR is reviewed and merged by itself. Skipping one leav
 | 7     | SR-7  | `simplify` defaults to `'off'`. **Done.**                                     |
 | 8     | SR-8  | One hall entry per `scalarCanonicalKey`.                                      |
 | 9     | SR-9  | Opt-in SI filter, plus `unitToRationalDimension`.                             |
-| 10    | SR-10 | Grammars may name `sqrt` and `atan`.                                          |
+| 10    | SR-10 | Grammars may name `sqrt` and `atan`. **Done.**                                  |
 | 11    | SR-11 | Node and Bun harness, no speed claim.                                         |
 | 12    | SR-12 | One compile per structure per generation, bit-identical.                      |
 | 13    | SR-13 | Islands overlap; merge in index order.                                        |

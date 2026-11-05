@@ -14,8 +14,10 @@
  * arguments and calls MathTS `pow`. One-argument `-` does not negate; a
  * unary minus is `(-1) * x`.
  *
- * A non-finite operator or call result throws {@link ScalarEvalError}. A bare
- * symbol or number is returned as stored, including a non-finite value.
+ * A non-finite operator or call result throws {@link ScalarEvalError}. That
+ * includes `sqrt` of a negative argument (complex-valued in MathTS), and
+ * `sqrt(Infinity)` / `sqrt(NaN)`. A bare symbol or number is returned as
+ * stored, including a non-finite value.
  *
  * @packageDocumentation
  */
@@ -83,10 +85,26 @@ const UNARY: Record<LoweredScalarFn, (value: number) => unknown> = {
  */
 export const NUMERIC_LITERAL = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
 
+/** Plain numeric spellings for error messages (never a Complex or other typed wrapper). */
+function nonFiniteDetail(value: unknown): string {
+  if (typeof value === 'number') {
+    if (Number.isNaN(value)) {
+      return 'NaN';
+    }
+    if (value === Number.POSITIVE_INFINITY) {
+      return 'Infinity';
+    }
+    if (value === Number.NEGATIVE_INFINITY) {
+      return '-Infinity';
+    }
+  }
+  return 'non-finite';
+}
+
 function requireFinite(value: unknown, label: string): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new ScalarEvalError(
-      `evaluateScalar: '${label}' produced a non-finite value (${String(value)}).`
+      `evaluateScalar: '${label}' produced a non-finite value (${nonFiniteDetail(value)}).`
     );
   }
   return value;

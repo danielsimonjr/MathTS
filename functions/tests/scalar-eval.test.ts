@@ -128,6 +128,15 @@ describe('evaluateScalar', () => {
   it('a negative sqrt argument is a non-finite result', () => {
     expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(ScalarEvalError);
     expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(/non-finite/);
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(/\(non-finite\)/);
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).not.toThrow(/\(i\)/);
+  });
+
+  it('sqrt(Infinity) and sqrt(NaN) are rejected as non-finite', () => {
+    for (const x of [Number.POSITIVE_INFINITY, Number.NaN] as const) {
+      expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(x)))).toThrow(ScalarEvalError);
+      expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(x)))).toThrow(/non-finite/);
+    }
   });
 
   it('leaves pi, e, and pi-multiple names unbound', () => {

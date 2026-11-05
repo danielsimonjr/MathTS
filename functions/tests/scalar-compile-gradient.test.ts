@@ -176,6 +176,22 @@ describe('compileScalarGradient', () => {
       relClose(grad[0], DUAL_UNARY_RULES.sqrt.deriv(arg, y) * x, 1e-12);
     });
 
+    it('sqrt(a * x) at a = 0 keeps every primal-valid row on the gradient mask', () => {
+      const node = scalar.call('sqrt', scalar.op('*', [scalar.symbol('a'), scalar.symbol('x')]));
+      const g = compileScalarGradient(node, { variables: ['x'], parameters: ['a'] });
+      const xs = new Float64Array([0, 1, 4, 9]);
+      const prim = compileScalar(node, { variables: ['x'], parameters: ['a'] }).evaluate(
+        [xs],
+        [0]
+      );
+      const batch = g.evaluate([xs], [0]);
+      for (let r = 0; r < xs.length; r++) {
+        expect(batch.valid[r]).toBe(prim.valid[r]);
+        expect(batch.values[r]).toBe(prim.values[r]);
+      }
+      expect(Number.isNaN(batch.grad[0])).toBe(true);
+    });
+
     it('abs(-3) → -1; abs(0) → 0', () => {
       const node = scalar.call('abs', scalar.symbol('a'));
       const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
@@ -290,31 +306,31 @@ describe('compileScalarGradient', () => {
       expect(grad[0]).toBe(0);
     });
 
-    it('0^0 with parameter base invalidates row', () => {
+    it('0^0 with parameter base keeps a valid primal and NaN gradient', () => {
       const node = scalar.op('^', [scalar.symbol('a'), scalar.number(0)]);
       const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
       const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [0]);
       expect(m3.valid[0]).toBe(1);
       expect(m3.values[0]).toBe(1);
       const m6 = g.evaluate([], [0]);
-      expect(m6.valid[0]).toBe(0);
-      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(m6.valid[0]).toBe(1);
+      expect(m6.values[0]).toBe(1);
       expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 
-    it('0^0 with live exp lane invalidates row', () => {
+    it('0^0 with live exp lane keeps a valid primal and NaN gradient', () => {
       const node = scalar.op('^', [scalar.number(0), scalar.symbol('a')]);
       const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
       const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [0]);
       expect(m3.valid[0]).toBe(1);
       expect(m3.values[0]).toBe(1);
       const m6 = g.evaluate([], [0]);
-      expect(m6.valid[0]).toBe(0);
-      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(m6.valid[0]).toBe(1);
+      expect(m6.values[0]).toBe(1);
       expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 
-    it('extra-invalid ^ poisons a later + so the parent cannot resurrect', () => {
+    it('non-finite ^ partial does not invalidate a valid + sibling', () => {
       const node = scalar.op('+', [
         scalar.op('^', [scalar.number(0), scalar.symbol('a')]),
         scalar.number(1),
@@ -326,20 +342,20 @@ describe('compileScalarGradient', () => {
         [],
         [0]
       );
-      expect(m6.valid[0]).toBe(0);
-      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(m6.valid[0]).toBe(1);
+      expect(m6.values[0]).toBe(2);
       expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 
-    it('(-2)^2 with exp parameter: invalid', () => {
+    it('(-2)^2 with exp parameter: valid primal, NaN grad', () => {
       const node = scalar.op('^', [scalar.number(-2), scalar.symbol('a')]);
       const g = compileScalarGradient(node, { variables: [], parameters: ['a'] });
       const m3 = compileScalar(node, { variables: [], parameters: ['a'] }).evaluate([], [2]);
       expect(m3.valid[0]).toBe(1);
       expect(m3.values[0]).toBe(4);
       const m6 = g.evaluate([], [2]);
-      expect(m6.valid[0]).toBe(0);
-      expect(Number.isNaN(m6.values[0])).toBe(true);
+      expect(m6.valid[0]).toBe(1);
+      expect(m6.values[0]).toBe(4);
       expect(Number.isNaN(m6.grad[0])).toBe(true);
     });
 

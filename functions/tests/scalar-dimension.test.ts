@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createScalarBuilder } from '@danielsimonjr/mathts-expression';
-import { Fraction, toSiDimensionVector } from '@danielsimonjr/mathts-core';
+import { Fraction, toSiDimensionVector, UnitParseError } from '@danielsimonjr/mathts-core';
 import { gravitationConstant } from '../src/factories/index.js';
 import {
   inferScalarDimension,
   solveParameterDimensions,
+  unitToRationalDimension,
   type RationalDimension,
 } from '../src/scalar-dimension.js';
 
@@ -331,6 +332,13 @@ describe('sqrt and atan dimensions', () => {
       solved: { c: si(0, 0, -1, 0, 0, 0, 0) },
     });
   });
+
+  it('atan(p * t) solve mode resolves p as one over time', () => {
+    const tree = scalar.call('atan', scalar.op('*', [scalar.symbol('p'), scalar.symbol('t')]));
+    expect(solveParameterDimensions(tree, { t: time }, none, ['p'])).toEqual({
+      solved: { p: si(0, 0, -1, 0, 0, 0, 0) },
+    });
+  });
 });
 
 describe('solveParameterDimensions', () => {
@@ -476,5 +484,46 @@ describe('solveParameterDimensions equation emission', () => {
       expect(Object.keys(result.solved)).toEqual(['__proto__']);
       expect(Object.getPrototypeOf(result.solved)).toBe(Object.prototype);
     }
+  });
+});
+
+describe('unitToRationalDimension', () => {
+  it("maps 'm' to the length vector of seven Fractions", () => {
+    const dim = unitToRationalDimension('m');
+    expect(dim).toHaveLength(7);
+    for (const entry of dim) {
+      expect(entry).toBeInstanceOf(Fraction);
+    }
+    expectDimension(dim, si(1, 0, 0, 0, 0, 0, 0));
+  });
+
+  it("maps 's' to time and 'kg' to mass", () => {
+    expectDimension(unitToRationalDimension('s'), si(0, 0, 1, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('kg'), si(0, 1, 0, 0, 0, 0, 0));
+  });
+
+  it("maps the compound unit 'N' to force and 'm/s' to velocity", () => {
+    expectDimension(unitToRationalDimension('N'), si(1, 1, -2, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('m/s'), si(1, 0, -1, 0, 0, 0, 0));
+  });
+
+  it('maps angle and solid-angle units to a dimensionless 7-vector', () => {
+    expectDimension(unitToRationalDimension('rad'), si(0, 0, 0, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('deg'), si(0, 0, 0, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('sr'), si(0, 0, 0, 0, 0, 0, 0));
+  });
+
+  it('throws UnitParseError for information units not in the SI 7-vector', () => {
+    expect(() => unitToRationalDimension('bit')).toThrow(UnitParseError);
+    expect(() => unitToRationalDimension('byte')).toThrow(UnitParseError);
+  });
+
+  it('throws the error Unit already throws on an unknown unit name', () => {
+    expect(() => unitToRationalDimension('not-a-unit')).toThrow(UnitParseError);
+  });
+
+  it('throws on a non-string unitName', () => {
+    expect(() => unitToRationalDimension(undefined as unknown as string)).toThrow(TypeError);
+    expect(() => unitToRationalDimension(42 as unknown as string)).toThrow(TypeError);
   });
 });

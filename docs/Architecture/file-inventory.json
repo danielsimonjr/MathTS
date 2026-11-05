@@ -4433,7 +4433,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 241
+      "loc": 237
     },
     {
       "file": "expression/src/scalar-enumerate.ts",
@@ -5154,14 +5154,14 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 118
+      "loc": 106
     },
     {
       "file": "expression/tests/scalar-enumerate.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
       "disposition": "test",
-      "loc": 345
+      "loc": 329
     },
     {
       "file": "expression/tests/scalar-structure.test.ts",
@@ -6393,7 +6393,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 981
+      "loc": 986
     },
     {
       "file": "functions/src/linalg-extra.ts",
@@ -7436,21 +7436,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 891
+      "loc": 889
     },
     {
       "file": "functions/src/scalar-dimension.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 563
+      "loc": 617
     },
     {
       "file": "functions/src/scalar-eval.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 188
+      "loc": 185
     },
     {
       "file": "functions/src/scalar-mutate.ts",
@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1634
+      "loc": 1819
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11286,28 +11286,28 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 661
+      "loc": 647
     },
     {
       "file": "functions/tests/scalar-compile.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 629
+      "loc": 609
     },
     {
       "file": "functions/tests/scalar-dimension.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 481
+      "loc": 441
     },
     {
       "file": "functions/tests/scalar-eval.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 155
+      "loc": 131
     },
     {
       "file": "functions/tests/scalar-mutate.test.ts",
@@ -11335,7 +11335,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 2693
+      "loc": 2999
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",
