@@ -27,14 +27,15 @@ import {
 } from './scalar-batch-task.js';
 
 /**
- * Smallest row count that is sent to workers. 100 is the `n` from which the M3 tape beats
- * the per-row interpreter in every run of the `scalar` benchmark (`docs/BENCHMARK_RESULTS.md`,
- * section "`evaluateScalar` vs `compileScalar` (M3 batch evaluator) - 2026-10-25"). That
- * table compares the two evaluators on the caller thread; it did not time a worker round
- * trip, so this is the plan's floor for using the pool and not a measured break-even. The
- * pool is opt-in, and nothing here claims a speed-up.
+ * Smallest row count that is sent to workers when `parallel` is set. **10_000** is the
+ * SR-14 break-even on a reused `WorkerPool` (the lifetime `searchScalars` uses): case (3)
+ * of `tools/benchmark/scalar-search/` with one pool for warmup and samples, twice on Node
+ * and twice on Bun (2026-11-05, `docs/BENCHMARK_RESULTS.md`, section SR-14). At n = 1_000
+ * the reused-pool median is above 0.95× serial in at least one Bun run; at n = 10_000 all
+ * four runs are at or below 0.95×. The M3 caller-thread table at n = 100 is unrelated; a
+ * cold pool per call is not a valid threshold for the search driver.
  */
-export const SCALAR_PARALLEL_MIN_ROWS = 100;
+export const SCALAR_PARALLEL_MIN_ROWS = 10_000;
 
 /** Timeout applied to every worker call when the caller does not choose one. */
 export const DEFAULT_SCALAR_PARALLEL_TIMEOUT_MS = 30_000;

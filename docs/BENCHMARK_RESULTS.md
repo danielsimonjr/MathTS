@@ -328,8 +328,9 @@ It times `searchScalars` and `compileScalar`, checks the seed-7 pinned search of
 120 evaluations (front matched to `tools/benchmark/scalar-search/pinned-rows.json` with
 `Object.is` before any timing; mismatch fails the process), compile-and-score of that
 front, and the internal `evaluateScalarPopulation` module serial vs an **explicit injected
-`WorkerPool`** at 100 / 1e3 / 1e4 / 1e5 rows on the mid-size M3 tree. Case (3) does
-**not** measure the default `parallel: {}` path inside `searchScalars`. An A/A control
+`WorkerPool`** at 100 / 1e3 / 1e4 / 1e5 rows on the mid-size M3 tree. Case (3) reports
+cold pool (per sample) and reused pool (search lifetime). This does not measure the default
+`parallel: {}` path inside `searchScalars`. An A/A control
 uses two **distinct** but identical serial closures (same rule as `tools/benchmark/ab`).
 Warm-up is ≥ 5 reps, medians are printed, and the harness asserts no speedup; it is the
 measurement gate for later search-speed claims.
@@ -348,24 +349,29 @@ bun --tsconfig-override=tsconfig.base.json tools/benchmark/scalar-search/run.mjs
 above stays the record for the batch-evaluator threshold.
 
 **Environment (this snapshot):** Linux x64 VM, Node v22.23.4 and Bun 1.4.4, 2026-11-05.
-Two full runs per engine below (medians, ms). Parallel columns time pool create, worker
-work, and `pool.terminate()` for the explicit pool case (3) injects.
+Case (3) reports **cold** pool (create + `terminate()` on every timed sample) and **reused**
+pool (one `WorkerPool` for warmup and samples, matching `searchScalars`). Worker spawn
+dominates cold-pool times (~130–260 ms); `terminate()` is ~0.3 ms and is not the bottleneck.
 
-| case                                         | Node run 1 | Node run 2 | Bun run 1 | Bun run 2 |
-| -------------------------------------------- | ---------- | ---------- | --------- | --------- |
-| compile + score the pinned front (3 trees)   | 0.0303     | 0.0304     | 0.0095    | 0.0096    |
-| seed-7 pinned search, 120 evaluations        | 1.9512     | 2.0765     | 1.2366    | 1.2836    |
-| population serial, n = 100                   | 0.1910     | 0.1569     | 0.1368    | 0.1360    |
-| population parallel (explicit pool), n = 100 | 183.7226   | 187.3152   | 133.8712  | 133.8794  |
-| population serial, n = 1e3                   | 1.5806     | 1.2920     | 0.6291    | 0.6010    |
-| population parallel (explicit pool), n = 1e3 | 179.7302   | 188.7030   | 137.1184  | 137.6655  |
-| population serial, n = 1e4                   | 8.0990     | 8.2400     | 6.5811    | 7.5706    |
-| population parallel (explicit pool), n = 1e4 | 195.8059   | 197.8315   | 141.8017  | 142.5501  |
-| population serial, n = 1e5                   | 71.5959    | 71.2844    | 53.1186   | 54.6393   |
-| population parallel (explicit pool), n = 1e5 | 258.7916   | 255.1549   | 179.0449  | 174.3249  |
+| case                                       | Node run 1 | Node run 2 | Bun run 1 | Bun run 2 |
+| ------------------------------------------ | ---------- | ---------- | --------- | --------- |
+| compile + score the pinned front (3 trees) | 0.0301     | 0.0300     | 0.0091    | 0.0089    |
+| seed-7 pinned search, 120 evaluations      | 2.0955     | 1.9875     | 1.2972    | 1.3949    |
+| population serial, n = 100                 | 0.1346     | 0.1333     | 0.1341    | 0.1325    |
+| population parallel cold, n = 100          | 186.3623   | 182.1944   | 137.0332  | 136.0682  |
+| population parallel reused, n = 100        | 0.2397     | 0.3275     | 0.2242    | 0.2635    |
+| population serial, n = 1e3                 | 0.8135     | 0.8189     | 0.5505    | 0.5626    |
+| population parallel cold, n = 1e3          | 191.1687   | 191.5293   | 140.8056  | 137.7948  |
+| population parallel reused, n = 1e3        | 0.7132     | 0.7834     | 0.5310    | 0.7938    |
+| population serial, n = 1e4                 | 9.6098     | 9.3954     | 6.9114    | 7.1118    |
+| population parallel cold, n = 1e4          | 197.1643   | 200.8754   | 149.7926  | 148.2384  |
+| population parallel reused, n = 1e4        | 5.4783     | 5.2214     | 2.9770    | 2.9260    |
+| population serial, n = 1e5                 | 83.7314    | 85.4391    | 51.9887   | 51.2862   |
+| population parallel cold, n = 1e5          | 259.0763   | 253.2210   | 182.9947  | 177.5221  |
+| population parallel reused, n = 1e5        | 51.5150    | 54.8901    | 23.9071   | 23.8350   |
 
 **A/A control** (two distinct serial closures, n = 1e4), ratio over five runs: Node
-**0.9952–1.0017**, Bun **0.9874–1.0196** (both inside ±2% on this VM).
+**0.9889–1.0255**, Bun **0.9895–0.9929** (observed band on this VM; not a hard ±2% gate).
 
 ---
 
@@ -375,29 +381,43 @@ SR-14 of [`docs/plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md`](./plans/SYMBOLIC_R
 ran SR-11 case (3) (`evaluateScalarPopulation`, serial vs an explicit injected
 `WorkerPool`, 8 items, mid tree) **twice on Node and twice on Bun**, in fresh
 processes, on the same Linux x64 VM (Node v22.23.4, Bun 1.4.4, 2026-11-05).
-Medians, ms; ratio = parallel / serial:
+
+**Pool lifetime for the decision:** one reused `WorkerPool` for warmup and all timed
+samples (same lifetime as `searchScalars`). A **cold** column (new pool + `terminate()`
+per sample) is kept below; it always looks like ~130–260 ms parallel time because worker
+**create** dominates (~0.3 ms for **terminate**). One constant cannot serve both lifetimes;
+the cold path is diagnostic only.
+
+Medians, ms; ratio = parallel / serial.
+
+### Reused pool (decision column)
 
 | rows    | Node run 1 serial / parallel (ratio) | Node run 2 serial / parallel (ratio) | Bun run 1 serial / parallel (ratio) | Bun run 2 serial / parallel (ratio) |
 | ------- | ------------------------------------ | ------------------------------------ | ----------------------------------- | ----------------------------------- |
-| 100     | 0.1553 / 192.6389 (1240.67)          | 0.1700 / 205.1413 (1206.93)          | 0.1720 / 158.0239 (918.71)          | 0.1814 / 177.5374 (978.80)          |
-| 1 000   | 0.8294 / 198.1899 (238.95)           | 0.8224 / 206.2181 (250.76)           | 0.6757 / 175.4657 (259.70)          | 0.6322 / 173.2358 (274.01)          |
-| 10 000  | 8.3725 / 211.2120 (25.23)            | 9.7276 / 217.2928 (22.34)            | 7.5117 / 184.9894 (24.63)           | 6.4055 / 178.4875 (27.86)           |
-| 100 000 | 77.2345 / 285.5914 (3.70)            | 74.2252 / 287.5741 (3.87)            | 58.1985 / 211.3895 (3.63)           | 57.2462 / 220.9834 (3.86)           |
+| 100     | 0.1346 / 0.2397 (1.78)               | 0.1333 / 0.3275 (2.46)               | 0.1341 / 0.2242 (1.67)              | 0.1325 / 0.2635 (1.99)              |
+| 1 000   | 0.8135 / 0.7132 (0.88)               | 0.8189 / 0.7834 (0.96)               | 0.5505 / 0.5310 (0.96)              | 0.5626 / 0.7938 (1.41)              |
+| 10 000  | 9.6098 / 5.4783 (0.57)               | 9.3954 / 5.2214 (0.56)               | 6.9114 / 2.9770 (0.43)              | 7.1118 / 2.9260 (0.41)              |
+| 100 000 | 83.7314 / 51.5150 (0.62)             | 85.4391 / 54.8901 (0.64)             | 51.9887 / 23.9071 (0.46)            | 51.2862 / 23.8350 (0.46)            |
 
-A/A control (two distinct serial closures, n = 1e4), one run per process: Node
-**1.0054** and **0.9994**, Bun **0.9925** and **0.9923** — all inside ±2%.
+### Cold pool (per-sample create + terminate; not used for the constant)
 
-**Decision: no row on the grid qualifies.** The rule requires the worker path's
-median to be at or below 0.95× serial in all four runs at some row count, with
-the row count below it not qualifying. The smallest ratio observed anywhere is
-**3.63× (Bun run 1, n = 1e5)** — far above 1.0, let alone 0.95. The parallel
-median carries a near-constant ~130–210 ms per call from creating the explicit
-`WorkerPool` and terminating it (worker spawn dominates every row on the grid),
-while serial scoring of even 100 000 rows takes under 80 ms.
+| rows    | Node run 1 serial / parallel (ratio) | Node run 2 serial / parallel (ratio) | Bun run 1 serial / parallel (ratio) | Bun run 2 serial / parallel (ratio) |
+| ------- | ------------------------------------ | ------------------------------------ | ----------------------------------- | ----------------------------------- |
+| 100     | 0.1346 / 186.3623 (1385)             | 0.1333 / 182.1944 (1367)             | 0.1341 / 137.0332 (1022)            | 0.1325 / 136.0682 (1027)            |
+| 1 000   | 0.8135 / 191.1687 (235)              | 0.8189 / 191.5293 (234)              | 0.5505 / 140.8056 (256)             | 0.5626 / 137.7948 (245)             |
+| 10 000  | 9.6098 / 197.1643 (20.5)             | 9.3954 / 200.8754 (21.4)             | 6.9114 / 149.7926 (21.7)            | 7.1118 / 148.2384 (20.8)            |
+| 100 000 | 83.7314 / 259.0763 (3.09)            | 85.4391 / 253.2210 (2.96)            | 51.9887 / 182.9947 (3.52)           | 51.2862 / 177.5221 (3.46)           |
 
-Consequently `SCALAR_PARALLEL_MIN_ROWS` stays at **100** in
-`functions/src/scalar-batch-parallel.ts`; no changeset. Bun started
-`worker_threads` normally in all four runs (no startup failure to record).
-The seed-7 pinned search matched `pinned-rows.json` with `Object.is` before
-timing in all four runs. This measures the explicit-pool path of case (3) only;
-no speedup is claimed for `searchScalars` as a whole.
+A/A control (two distinct serial closures, n = 1e4), one ratio per process: Node **1.0255**
+and **0.9889**, Bun **0.9895** and **0.9929**.
+
+**Decision: `SCALAR_PARALLEL_MIN_ROWS` = 10_000.** The rule requires the reused-pool
+median at or below 0.95× serial in all four runs, with the next lower row count failing
+that bar in at least one run. At **n = 1_000**, Bun run 2 ratio is **1.41** (and Node
+run 2 is **0.96**, above 0.95). At **n = 10_000**, all four ratios are **0.41–0.57**.
+The earlier cold-pool-only pass incorrectly left the constant at 100.
+
+Patch changeset on `@danielsimonjr/mathts-functions`. Bun started `worker_threads`
+normally in all four runs. The seed-7 pin matched `pinned-rows.json` with `Object.is`
+before timing in all four runs. This measures case (3) only; **no speedup is claimed for
+`searchScalars` as a whole** from this constant alone.

@@ -7415,7 +7415,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 234
+      "loc": 235
     },
     {
       "file": "functions/src/scalar-batch-task.ts",
@@ -11328,7 +11328,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 367
+      "loc": 371
     },
     {
       "file": "functions/tests/scalar-search.test.ts",
@@ -14394,7 +14394,7 @@
       "package": "(root)",
       "area": "tests",
       "disposition": "test",
-      "loc": 114
+      "loc": 115
     },
     {
       "file": "tests/wasm/parallel-processing.test.ts",
@@ -14506,7 +14506,7 @@
       "package": "(root)",
       "area": "tools",
       "disposition": "tool",
-      "loc": 377
+      "loc": 436
     },
     {
       "file": "tools/benchmark/tensor/contract-network.bench.ts",
