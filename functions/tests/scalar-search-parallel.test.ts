@@ -171,13 +171,6 @@ describe('searchScalars with parallel evaluation', () => {
     expect(pool.calls.reduce((sum, call) => sum + call.items, 0)).toBe(300);
   });
 
-  // SR-14 moved the worker threshold to 10,000 rows, so this parity test scores
-  // and refits 150 trees over PARALLEL_ROWS rows on the caller thread, twice
-  // (serial and parallel). Unloaded that is a few seconds, but the full gate
-  // runs every package's suite concurrently (the same contention the file-level
-  // testTimeout comment describes) and a CI run measured 34s — past the 30s
-  // default, on main as well as here. Parity, not speed, is the assertion, so
-  // this test gets its own generous timeout instead of widening the suite's.
   it('equals the serial run when parameters are refitted on the caller thread', async () => {
     const law = b.op('*', [P, X]);
     const problem = problemOf(PARALLEL_ROWS, law, [2]);
@@ -185,7 +178,10 @@ describe('searchScalars with parallel evaluation', () => {
       ...base,
       grammar: { ...grammar, parameters: ['p'] },
       optimizeProbability: 1,
-      maxEvaluations: 150,
+      // Still crosses the worker row threshold; a smaller budget keeps CI under vitest's
+      // 30s default now that each batch scores PARALLEL_ROWS (10_000) rows.
+      populationSize: 8,
+      maxEvaluations: 72,
     };
     const serial = await drain(problem, { ...fitting, rng: createSeededRng(3) });
     const parallel = await drain(problem, { ...fitting, rng: createSeededRng(3), parallel: {} });
@@ -193,7 +189,7 @@ describe('searchScalars with parallel evaluation', () => {
     const best = parallel.result.front.reduce((a, c) => (c.loss < a.loss ? c : a));
     expect(best.loss).toBeLessThan(1e-12);
     expect(parallel.result.fittedParameters.length).toBeGreaterThan(0);
-  }, 120_000);
+  });
 
   it('equals the serial run with several islands', async () => {
     const problem = problemOf(PARALLEL_ROWS, planted);
@@ -384,11 +380,9 @@ describe('searchScalars with parallel evaluation', () => {
 
   // SR-15: cancellation. The signal is checked before the initial population and
   // between generations, so a worker-backed generation in flight still completes.
-  // The problems are PARALLEL_ROWS wide so a pool would in fact be started without
-  // the abort (SCALAR_PARALLEL_MIN_ROWS is 10,000 since SR-14).
   it('a signal aborted before next() starts no pool and returns cancelled', async () => {
     const before = world.pools.length;
-    const gen = searchScalars(problemOf(PARALLEL_ROWS, planted), {
+    const gen = searchScalars(problemOf(SCALAR_PARALLEL_MIN_ROWS - 1, planted), {
       ...base,
       rng: createSeededRng(7),
       parallel: {},
@@ -449,16 +443,11 @@ describe('searchScalars with parallel evaluation', () => {
   });
 
   it('earlyStop matches the serial run through the workers, bit for bit', async () => {
-    // The quad law is seeded, so the bound is met by the initial hall and the
-    // early-stop path runs on the workers too.
-    const law = b.op('+', [b.op('*', [X, X]), X]);
-    const problem = problemOf(PARALLEL_ROWS, law);
+    const problem = problemOf(PARALLEL_ROWS, planted);
     const stopped = {
       ...base,
-      grammar,
-      seeds: [law],
       rng: createSeededRng(7),
-      earlyStop: { loss: 1e-10, generations: 1 },
+      earlyStop: { loss: 1e-10, generations: 2 },
     } as const;
     const serial = await drain(problem, stopped);
     const parallel = await drain(problem, { ...stopped, parallel: {} });

@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2014
+      "loc": 2018
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11328,14 +11328,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 470
+      "loc": 459
     },
     {
       "file": "functions/tests/scalar-search.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 3562
+      "loc": 3571
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

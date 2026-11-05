@@ -3544,6 +3544,15 @@ describe('searchScalars: cancel and early stop (SR-15)', () => {
         earlyStop: 'now' as unknown as ScalarSearchOptions['earlyStop'],
       })
     ).rejects.toThrow(RangeError);
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        signal: AbortSignal.abort(),
+        earlyStop: { loss: Number.NaN, generations: 1 },
+      })
+    ).rejects.toThrow(RangeError);
   });
 
   it('two uninterrupted runs still match with earlyStop configured but never reached', async () => {
