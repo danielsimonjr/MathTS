@@ -1,7 +1,7 @@
 {
   "metadata": {
     "totalSourceFiles": 1272,
-    "totalTestFiles": 840,
+    "totalTestFiles": 841,
     "testedCount": 520,
     "untestedCount": 752,
     "coveragePercent": "40.9",
@@ -83186,6 +83186,7 @@
     "tools/test/dist-freshness.test.mjs": [],
     "tools/test/dist-node-imports.test.mjs": [],
     "tools/test/ensure-package-releases.test.mjs": [],
+    "tools/test/scalar-search-harness.test.mjs": [],
     "tools/test/sprint-baseline.test.mjs": [
       "core/src/index.ts",
       "core/src/types/interfaces.ts",

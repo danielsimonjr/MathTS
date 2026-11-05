@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relational &amp; Comparison — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Relational &amp; Comparison</div>
+  <h1><span>Relational &amp; Comparison</span> (13)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Relational &amp; Comparison..." oninput="filterFuncs()">
+<div class="func-card" id="compare" data-name="compare">
+  <div class="func-name">compare</div>
+  <div class="func-desc">Three-way compare → -1, 0, 1</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compare(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="compareNatural" data-name="comparenatural">
+  <div class="func-name">compareNatural</div>
+  <div class="func-desc">Natural ordering across mixed types</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compareNatural(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="compareText" data-name="comparetext">
+  <div class="func-name">compareText</div>
+  <div class="func-desc">Lexical string comparison</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compareText(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="compareUnits" data-name="compareunits">
+  <div class="func-name">compareUnits</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">compareUnits(…)</div>
+  </div>
+</div>
+<div class="func-card" id="deepEqual" data-name="deepequal">
+  <div class="func-name">deepEqual</div>
+  <div class="func-desc">Element-wise deep equality</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">deepEqual(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="equal" data-name="equal">
+  <div class="func-name">equal</div>
+  <div class="func-desc">Equality test</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">equal(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="equalScalar" data-name="equalscalar">
+  <div class="func-name">equalScalar</div>
+  <div class="func-desc">Scalar equality</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">equalScalar(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="equalText" data-name="equaltext">
+  <div class="func-name">equalText</div>
+  <div class="func-desc">String equality</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">equalText(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="larger" data-name="larger">
+  <div class="func-name">larger</div>
+  <div class="func-desc"><code>a &gt; b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">larger(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="largerEq" data-name="largereq">
+  <div class="func-name">largerEq</div>
+  <div class="func-desc"><code>a ≥ b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">largerEq(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="smaller" data-name="smaller">
+  <div class="func-name">smaller</div>
+  <div class="func-desc"><code>a &lt; b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">smaller(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="smallerEq" data-name="smallereq">
+  <div class="func-name">smallerEq</div>
+  <div class="func-desc"><code>a ≤ b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">smallerEq(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="unequal" data-name="unequal">
+  <div class="func-name">unequal</div>
+  <div class="func-desc">Inequality test</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">unequal(a, b)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

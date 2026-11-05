@@ -45,3 +45,6 @@ assembly/tests/audit/coverage_matrix.json
 # Codebase inventory - written by tools/build-mathts-inventory.py and
 # tools/scan-inventory.py (json.dump layout).
 tools/codebase-inventory.json
+
+# Generated static landing site (tools/generate-landing-site.mjs is authoritative)
+docs/landing/

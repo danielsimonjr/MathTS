@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trigonometry — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Trigonometry</div>
+  <h1><span>Trigonometry</span> (29)</h1>
+  <p class="cat-desc">Functions support <code>number</code>, <code>Complex</code>, <code>BigNumber</code>, and parallel <code>Float64Array</code>.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Trigonometry..." oninput="filterFuncs()">
+<div class="func-card" id="acos" data-name="acos">
+  <div class="func-name">acos</div>
+  <div class="func-desc">Inverse sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acos(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="acosh" data-name="acosh">
+  <div class="func-name">acosh</div>
+  <div class="func-desc">Inverse hyperbolic sine, cosine</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acosh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="acot" data-name="acot">
+  <div class="func-name">acot</div>
+  <div class="func-desc">Inverse cosecant, secant, cotangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acot(x)</div>
+  </div>
+</div>
+<div class="func-card" id="acoth" data-name="acoth">
+  <div class="func-name">acoth</div>
+  <div class="func-desc">Inverse hyperbolic csc/sec/cot (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acoth(x)</div>
+  </div>
+</div>
+<div class="func-card" id="acsc" data-name="acsc">
+  <div class="func-name">acsc</div>
+  <div class="func-desc">Inverse cosecant, secant, cotangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acsc(x)</div>
+  </div>
+</div>
+<div class="func-card" id="acsch" data-name="acsch">
+  <div class="func-name">acsch</div>
+  <div class="func-desc">Inverse hyperbolic csc/sec/cot (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">acsch(x)</div>
+  </div>
+</div>
+<div class="func-card" id="asec" data-name="asec">
+  <div class="func-name">asec</div>
+  <div class="func-desc">Inverse cosecant, secant, cotangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">asec(x)</div>
+  </div>
+</div>
+<div class="func-card" id="asech" data-name="asech">
+  <div class="func-name">asech</div>
+  <div class="func-desc">Inverse hyperbolic csc/sec/cot (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">asech(x)</div>
+  </div>
+</div>
+<div class="func-card" id="asin" data-name="asin">
+  <div class="func-name">asin</div>
+  <div class="func-desc">Inverse sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">asin(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="asinh" data-name="asinh">
+  <div class="func-name">asinh</div>
+  <div class="func-desc">Inverse hyperbolic sine, cosine</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">asinh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="atan" data-name="atan">
+  <div class="func-name">atan</div>
+  <div class="func-desc">Inverse sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">atan(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="atan2" data-name="atan2">
+  <div class="func-name">atan2</div>
+  <div class="func-desc">Two-argument arctangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">atan2(y, x)</div>
+  </div>
+</div>
+<div class="func-card" id="atanh" data-name="atanh">
+  <div class="func-name">atanh</div>
+  <div class="func-desc">Inverse hyperbolic tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">atanh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel, WASM (≥16384)</span></span></div>
+</div>
+<div class="func-card" id="cos" data-name="cos">
+  <div class="func-name">cos</div>
+  <div class="func-desc">Cosine</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cos(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†, WASM (≥16384)</span></span></div>
+</div>
+<div class="func-card" id="cosh" data-name="cosh">
+  <div class="func-name">cosh</div>
+  <div class="func-desc">Hyperbolic sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cosh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="cot" data-name="cot">
+  <div class="func-name">cot</div>
+  <div class="func-desc">Cosecant, cotangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cot(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="coth" data-name="coth">
+  <div class="func-name">coth</div>
+  <div class="func-desc">Hyperbolic cosecant, secant, cotangent (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">coth(x)</div>
+  </div>
+</div>
+<div class="func-card" id="csc" data-name="csc">
+  <div class="func-name">csc</div>
+  <div class="func-desc">Cosecant, cotangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csc(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="csch" data-name="csch">
+  <div class="func-name">csch</div>
+  <div class="func-desc">Hyperbolic cosecant, secant, cotangent (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csch(x)</div>
+  </div>
+</div>
+<div class="func-card" id="hypot" data-name="hypot">
+  <div class="func-name">hypot</div>
+  <div class="func-desc">Hypotenuse <code>sqrt(Σ xᵢ²)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hypot(a, b, …)</div>
+  </div>
+</div>
+<div class="func-card" id="number" data-name="number">
+  <div class="func-name">number</div>
+  <div class="func-desc">Convert to a primitive <code>number</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">number(x)</div>
+  </div>
+</div>
+<div class="func-card" id="sec" data-name="sec">
+  <div class="func-name">sec</div>
+  <div class="func-desc">Secant</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sec(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel, WASM ([16384, 1048576))</span></span></div>
+</div>
+<div class="func-card" id="sech" data-name="sech">
+  <div class="func-name">sech</div>
+  <div class="func-desc">Hyperbolic cosecant, secant, cotangent (factory)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sech(x)</div>
+  </div>
+</div>
+<div class="func-card" id="sin" data-name="sin">
+  <div class="func-name">sin</div>
+  <div class="func-desc">Sine</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sin(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†, WASM ([1024, 131072))</span></span></div>
+</div>
+<div class="func-card" id="sinh" data-name="sinh">
+  <div class="func-name">sinh</div>
+  <div class="func-desc">Hyperbolic sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sinh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="tan" data-name="tan">
+  <div class="func-name">tan</div>
+  <div class="func-desc">Tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tan(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="tanh" data-name="tanh">
+  <div class="func-name">tanh</div>
+  <div class="func-desc">Hyperbolic sine, cosine, tangent</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tanh(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="toDegrees" data-name="todegrees">
+  <div class="func-name">toDegrees</div>
+  <div class="func-desc">Convert radians to degrees</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">toDegrees(rad)</div>
+  </div>
+</div>
+<div class="func-card" id="toRadians" data-name="toradians">
+  <div class="func-name">toRadians</div>
+  <div class="func-desc">Convert degrees to radians</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">toRadians(deg)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arithmetic — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Arithmetic</div>
+  <h1><span>Arithmetic</span> (43)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Arithmetic..." oninput="filterFuncs()">
+<div class="func-card" id="abs" data-name="abs">
+  <div class="func-name">abs</div>
+  <div class="func-desc">Absolute value</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">abs(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†, WASM (≥1024)</span></span></div>
+</div>
+<div class="func-card" id="add" data-name="add">
+  <div class="func-name">add</div>
+  <div class="func-desc">Addition</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">add(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="addScalar" data-name="addscalar">
+  <div class="func-name">addScalar</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">addScalar(…)</div>
+  </div>
+</div>
+<div class="func-card" id="cbrt" data-name="cbrt">
+  <div class="func-name">cbrt</div>
+  <div class="func-desc">Cube root</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cbrt(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, BigNumber, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="ceil" data-name="ceil">
+  <div class="func-name">ceil</div>
+  <div class="func-desc">Round up</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ceil(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="clamp" data-name="clamp">
+  <div class="func-name">clamp</div>
+  <div class="func-desc">Clamp a number or each array element to <code>[lo, hi]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">clamp(x, lo, hi)</div>
+  </div>
+</div>
+<div class="func-card" id="cube" data-name="cube">
+  <div class="func-name">cube</div>
+  <div class="func-desc"><code>x³</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cube(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="divide" data-name="divide">
+  <div class="func-name">divide</div>
+  <div class="func-desc">Division</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">divide(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="divideScalar" data-name="dividescalar">
+  <div class="func-name">divideScalar</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">divideScalar(…)</div>
+  </div>
+</div>
+<div class="func-card" id="dot" data-name="dot">
+  <div class="func-name">dot</div>
+  <div class="func-desc">Vector dot product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dot(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">Float64Array, array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="dotDivide" data-name="dotdivide">
+  <div class="func-name">dotDivide</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dotDivide(…)</div>
+  </div>
+</div>
+<div class="func-card" id="dotMultiply" data-name="dotmultiply">
+  <div class="func-name">dotMultiply</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dotMultiply(…)</div>
+  </div>
+</div>
+<div class="func-card" id="dotPow" data-name="dotpow">
+  <div class="func-name">dotPow</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dotPow(…)</div>
+  </div>
+</div>
+<div class="func-card" id="exp" data-name="exp">
+  <div class="func-name">exp</div>
+  <div class="func-desc"><code>e^x</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">exp(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, BigNumber, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="expm1" data-name="expm1">
+  <div class="func-name">expm1</div>
+  <div class="func-desc"><code>e^x - 1</code> (stable near 0)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">expm1(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="fix" data-name="fix">
+  <div class="func-name">fix</div>
+  <div class="func-desc">Round toward zero</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fix(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="floor" data-name="floor">
+  <div class="func-name">floor</div>
+  <div class="func-desc">Round down</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">floor(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="gcd" data-name="gcd">
+  <div class="func-name">gcd</div>
+  <div class="func-desc">Greatest common divisor</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gcd(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint</span></span></div>
+</div>
+<div class="func-card" id="invmod" data-name="invmod">
+  <div class="func-name">invmod</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">invmod(…)</div>
+  </div>
+</div>
+<div class="func-card" id="lcm" data-name="lcm">
+  <div class="func-name">lcm</div>
+  <div class="func-desc">Least common multiple</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lcm(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint</span></span></div>
+</div>
+<div class="func-card" id="log" data-name="log">
+  <div class="func-name">log</div>
+  <div class="func-desc">Natural log (or log base)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">log(x[, base])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, BigNumber, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†, WASM (≥16384)</span></span></div>
+</div>
+<div class="func-card" id="log10" data-name="log10">
+  <div class="func-name">log10</div>
+  <div class="func-desc">Base-10 logarithm</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">log10(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, BigNumber, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel, WASM (≥1024)</span></span></div>
+</div>
+<div class="func-card" id="log1p" data-name="log1p">
+  <div class="func-name">log1p</div>
+  <div class="func-desc"><code>ln(1 + x)</code> (stable near 0)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">log1p(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel, WASM ([1024, 16384))</span></span></div>
+</div>
+<div class="func-card" id="log2" data-name="log2">
+  <div class="func-name">log2</div>
+  <div class="func-desc">Base-2 logarithm</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">log2(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex, BigNumber, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="matmul" data-name="matmul">
+  <div class="func-name">matmul</div>
+  <div class="func-desc">Matrix multiplication</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matmul(A, B)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">Float64Array, DenseMatrix</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="matrixPower" data-name="matrixpower">
+  <div class="func-name">matrixPower</div>
+  <div class="func-desc">Matrix power (non-integer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matrixPower(A, p)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="matvec" data-name="matvec">
+  <div class="func-name">matvec</div>
+  <div class="func-desc">Matrix–vector product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">matvec(A, x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">Float64Array, DenseMatrix</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="mod" data-name="mod">
+  <div class="func-name">mod</div>
+  <div class="func-desc">Modulo <code>a % b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mod(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint</span></span></div>
+</div>
+<div class="func-card" id="multiply" data-name="multiply">
+  <div class="func-name">multiply</div>
+  <div class="func-desc">Multiplication / matrix product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multiply(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="multiplyScalar" data-name="multiplyscalar">
+  <div class="func-name">multiplyScalar</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multiplyScalar(…)</div>
+  </div>
+</div>
+<div class="func-card" id="nthRoot" data-name="nthroot">
+  <div class="func-name">nthRoot</div>
+  <div class="func-desc">nth root</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nthRoot(x, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, Complex</span></span></div>
+</div>
+<div class="func-card" id="nthRoots" data-name="nthroots">
+  <div class="func-name">nthRoots</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nthRoots(…)</div>
+  </div>
+</div>
+<div class="func-card" id="outer" data-name="outer">
+  <div class="func-name">outer</div>
+  <div class="func-desc">Vector outer product</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">outer(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">Float64Array, array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="pow" data-name="pow">
+  <div class="func-name">pow</div>
+  <div class="func-desc">Power <code>x^y</code>; square-matrix power <code>A^n</code> for non-negative integer <code>n</code> (native-accelerated) — use <code>matrixPower</code> for negative/fractional</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">pow(x, y)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Array (matrix)</span></span></div>
+</div>
+<div class="func-card" id="round" data-name="round">
+  <div class="func-name">round</div>
+  <div class="func-desc">Round to n digits</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">round(x[, n])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="sigmoid" data-name="sigmoid">
+  <div class="func-name">sigmoid</div>
+  <div class="func-desc">Logistic sigmoid <code>1/(1+e^-x)</code> (numerically stable branch); scalar or array</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sigmoid(x)</div>
+  </div>
+</div>
+<div class="func-card" id="sign" data-name="sign">
+  <div class="func-name">sign</div>
+  <div class="func-desc">Sign of x: -1, 0, or 1 (nameless <code>shouldParallelize</code> at 50k; map <code>sign</code> is <code>'never'</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sign(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="square" data-name="square">
+  <div class="func-name">square</div>
+  <div class="func-desc"><code>x²</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">square(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="subtract" data-name="subtract">
+  <div class="func-name">subtract</div>
+  <div class="func-desc">Subtraction</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">subtract(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="subtractScalar" data-name="subtractscalar">
+  <div class="func-name">subtractScalar</div>
+  <div class="func-desc"><span class="prose">The factory layer additionally provides scalar variants used internally and by the expression evaluator: <code>addScalar</code>, <code>subtractScalar</code>, <code>multiplyScalar</code>, <code>divideScalar</code>, <code>dotMultiply</code>, <code>dotDivide</code>, <code>dotPow</code>, <code>invmod</code>, <code>nthRoots</code>.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">subtractScalar(…)</div>
+  </div>
+</div>
+<div class="func-card" id="unaryMinus" data-name="unaryminus">
+  <div class="func-name">unaryMinus</div>
+  <div class="func-desc">Negation <code>-x</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">unaryMinus(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction, Float64Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="unaryPlus" data-name="unaryplus">
+  <div class="func-name">unaryPlus</div>
+  <div class="func-desc">Identity <code>+x</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">unaryPlus(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, Complex, Fraction</span></span></div>
+</div>
+<div class="func-card" id="xgcd" data-name="xgcd">
+  <div class="func-name">xgcd</div>
+  <div class="func-desc">Extended GCD: <code>{gcd, x, y}</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">xgcd(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -44,6 +44,17 @@ evaluate('2 + 3 * i'); // Complex(2, 3)
 > globals/literals — they are **not** imported from this package, but they are
 > available as symbols inside the expression-evaluator scope (below).
 
+## Typed Singletons
+
+Shared values for each numeric type, exported from `@danielsimonjr/mathts-core` (`I` is listed above):
+
+| Export names                                                            | Values                                             |
+| ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `COMPLEX_ZERO`, `COMPLEX_ONE`, `COMPLEX_NEG_ONE`                        | `Complex(0, 0)`, `Complex(1, 0)`, `Complex(-1, 0)` |
+| `FRACTION_ZERO`, `FRACTION_ONE`, `FRACTION_NEG_ONE`                     | `0`, `1`, `-1` as `Fraction`                       |
+| `FRACTION_HALF`, `FRACTION_THIRD`, `FRACTION_QUARTER`                   | `1/2`, `1/3`, `1/4` as `Fraction`                  |
+| `BIGNUMBER_ZERO`, `BIGNUMBER_ONE`, `BIGNUMBER_NEG_ONE`, `BIGNUMBER_TEN` | `0`, `1`, `-1`, `10` as `BigNumber`                |
+
 ## Physical Constants
 
 CODATA physical constants are exported from `@danielsimonjr/mathts-functions`.
@@ -72,13 +83,16 @@ avogadro.toNumeric(); // 6.02214076e23
 
 ## BigNumber Constants
 
-For arbitrary-precision constants, use `BigNumber` arithmetic:
+For arbitrary-precision constants, use `BigNumber` arithmetic. Core exports
+`BIGNUMBER_PI`, `BIGNUMBER_E`, `BIGNUMBER_LN2`, and `BIGNUMBER_LN10` as high-precision
+`BigNumber` values, alongside the `BIGNUMBER_ZERO` / `BIGNUMBER_ONE` / `BIGNUMBER_NEG_ONE` / `BIGNUMBER_TEN` singletons:
 
 ```typescript
-import { BigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber, BIGNUMBER_PI } from '@danielsimonjr/mathts-core';
 
 BigNumber.config({ precision: 50 });
 const pi50 = BigNumber.parse('3.14159265358979323846264338327950288419716939937');
+BIGNUMBER_PI.toFixed(20); // '3.14159265358979323846'
 ```
 
 ## Examples
