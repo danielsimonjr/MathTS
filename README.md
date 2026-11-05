@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@danielsimonjr/mathts-core.svg)](https://www.npmjs.com/package/@danielsimonjr/mathts-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.x-blue.svg)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.4.2-fbf0df.svg)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-%3E%3D1.4.4-fbf0df.svg)](https://bun.sh/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-green.svg)](https://nodejs.org/)
 
 MathTS is a ground-up TypeScript rewrite of [mathjs](https://mathjs.org) packaged as an
@@ -285,7 +285,7 @@ included) runs on Bun. Node is needed only to reproduce the CI Node test matrix
 (`node tools/test/run-vitest-node.mjs`, `node tools/test/smoke-dist-node.mjs`).
 
 ```bash
-# Install Bun once: https://bun.sh  (engines.bun >=1.4.2; packageManager pins bun@1.4.2)
+# Install Bun once: https://bun.sh  (engines.bun >=1.4.4; packageManager pins bun@1.4.4)
 bun install
 
 # Build all packages
