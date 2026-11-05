@@ -14,6 +14,7 @@ import {
   SI_DIMENSION_LENGTH,
   toSiDimensionVector,
   Unit,
+  UnitParseError,
   type SiDimensionVector,
 } from '@danielsimonjr/mathts-core';
 import { hasOwnProperty } from './utils/object.js';
@@ -115,6 +116,18 @@ function validateDimensionVector(vector: RationalDimension, label = 'dimension v
  * barrel. The same length-and-`Fraction` check the inference entry points run.
  */
 export { validateDimensionVector };
+
+/** Exact equality of two {@link RationalDimension} vectors. */
+export function rationalDimensionsEqual(a: RationalDimension, b: RationalDimension): boolean {
+  validateDimensionVector(a, 'a');
+  validateDimensionVector(b, 'b');
+  for (let i = 0; i < SI_DIMENSION_LENGTH; i += 1) {
+    if (!a[i].equals(b[i]!)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 function readDimension(
   dims: Readonly<Record<string, RationalDimension>>,
@@ -461,7 +474,7 @@ function solveComponent(
   | { readonly underdetermined: readonly string[] } {
   const n = parameters.length;
   if (rows.length === 0) {
-    return { underdetermined: parameters };
+    return { values: Array.from({ length: n }, () => ZERO) };
   }
 
   const augmented = rows.map((row, rowIndex) => [...row, rhs[rowIndex].mul(NEG_ONE)]);
@@ -549,7 +562,12 @@ export function solveParameterDimensions(
   }
 
   if (underdetermined.size > 0) {
-    return { underdetermined: parameters.filter((name) => underdetermined.has(name)) };
+    const involved = new Set<string>();
+    collectParametersInNode(node, paramSet(parameters), involved);
+    const names = parameters.filter((name) => underdetermined.has(name) && involved.has(name));
+    if (names.length > 0) {
+      return { underdetermined: names };
+    }
   }
 
   const solved: Record<string, RationalDimension> = {};
@@ -570,9 +588,11 @@ export function solveParameterDimensions(
  * The SI dimension of a unit name as a {@link RationalDimension}.
  *
  * Builds `new Unit(1, unitName)` and maps its length-10 exponent vector through
- * {@link toSiDimensionVector}. An unknown unit name throws the error `Unit`
- * already throws (`UnitParseError`). No unit table is added here and no
- * `UnitTensor` exists: this is the read side of the existing table only.
+ * {@link toSiDimensionVector}. Supplementary angle and solid-angle exponents
+ * (`rad`, `deg`, `sr`, …) map to a dimensionless 7-vector. Information units
+ * (`bit`, `byte`, …) are not representable in the seven SI base dimensions and
+ * throw {@link UnitParseError}. An unknown unit name throws the same
+ * {@link UnitParseError} `Unit` already throws. `unitName` must be a string.
  *
  * @example
  * ```ts
@@ -581,6 +601,16 @@ export function solveParameterDimensions(
  * ```
  */
 export function unitToRationalDimension(unitName: string): RationalDimension {
+  if (typeof unitName !== 'string') {
+    throw new TypeError('unitToRationalDimension: unitName must be a string');
+  }
   const unit = new Unit(1, unitName);
-  return toSiDimensionVector(unit.dimensions as number[]);
+  const vector = unit.dimensions as number[];
+  if (vector[8] !== 0) {
+    throw new UnitParseError(
+      `unit "${unitName}" has an information (bit) dimension; SI dimensional analysis uses seven base dimensions only`
+    );
+  }
+  const ignoreExtra = vector[7] !== 0 || vector[9] !== 0;
+  return toSiDimensionVector(vector, ignoreExtra ? { ignoreExtra: true } : undefined);
 }

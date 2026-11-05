@@ -418,7 +418,23 @@ describe('unitToRationalDimension', () => {
     expectDimension(unitToRationalDimension('m/s'), si(1, 0, -1, 0, 0, 0, 0));
   });
 
+  it('maps angle and solid-angle units to a dimensionless 7-vector', () => {
+    expectDimension(unitToRationalDimension('rad'), si(0, 0, 0, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('deg'), si(0, 0, 0, 0, 0, 0, 0));
+    expectDimension(unitToRationalDimension('sr'), si(0, 0, 0, 0, 0, 0, 0));
+  });
+
+  it('throws UnitParseError for information units not in the SI 7-vector', () => {
+    expect(() => unitToRationalDimension('bit')).toThrow(UnitParseError);
+    expect(() => unitToRationalDimension('byte')).toThrow(UnitParseError);
+  });
+
   it('throws the error Unit already throws on an unknown unit name', () => {
     expect(() => unitToRationalDimension('not-a-unit')).toThrow(UnitParseError);
+  });
+
+  it('throws on a non-string unitName', () => {
+    expect(() => unitToRationalDimension(undefined as unknown as string)).toThrow(TypeError);
+    expect(() => unitToRationalDimension(42 as unknown as string)).toThrow(TypeError);
   });
 });

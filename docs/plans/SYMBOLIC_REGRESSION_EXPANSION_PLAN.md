@@ -229,11 +229,13 @@ When two evaluated trees share a `scalarCanonicalKey`, the hall keeps one at add
 
 ## SR-9 — Dimensional and unit filter
 
+**Status:** shipped (review fixes: infer/solve target match, unused-parameter underdetermined handling, `unitToRationalDimension` supplementary units, frozen `dimensions` snapshot).
+
 **Independent.** Touches `functions/src/scalar-dimension.ts`, `functions/src/scalar-search.ts`, `functions/src/index.ts`, and `functions/tests/scalar-dimension.test.ts`, `functions/tests/scalar-search.test.ts`. A patch changeset on `@danielsimonjr/mathts-functions`.
 
-Add `unitToRationalDimension(unitName: string): RationalDimension` next to the dimension helpers. It builds `new Unit(1, unitName)` and returns `toSiDimensionVector` of that unit's dimensions. An unknown unit name throws the error `Unit` already throws. No new unit table and no `UnitTensor`.
+Add `unitToRationalDimension(unitName: string): RationalDimension` next to the dimension helpers. It builds `new Unit(1, unitName)` and returns `toSiDimensionVector` of that unit's dimensions. Supplementary angle and solid-angle exponents map to a dimensionless 7-vector; information (`bit`, `byte`) throws `UnitParseError`. An unknown unit name throws the error `Unit` already throws. No new unit table and no `UnitTensor`.
 
-Add optional `dimensions?: { symbols: Readonly<Record<string, RationalDimension>>; target: RationalDimension; onUnderdetermined?: 'keep' | 'reject' }` on the search. Omitted: no dimension walk, today's search. Set: after the grammar check and before scoring, call `solveParameterDimensions` when the grammar has parameters, otherwise `inferScalarDimension`, and require the root dimension to match `target`.
+Add optional `dimensions?: { symbols: Readonly<Record<string, RationalDimension>>; target: RationalDimension; onUnderdetermined?: 'keep' | 'reject' }` on the search. Omitted: no dimension walk, today's search. Set: after the grammar check and before scoring, call `solveParameterDimensions` when the fitted parameter list is non-empty (an empty `problem.parameters` array forces infer mode), otherwise `inferScalarDimension`, and require the root dimension to match `target`.
 
 - A violation (`add-mismatch`, `transcendental-arg-not-dimensionless`, `non-literal-exponent-on-dimensional-base`, `unknown-symbol`) or an `inconsistent` solve scores `Infinity` and does not enter the hall. It still counts as an evaluation.
 - `onUnderdetermined` defaults to `'keep'`: the numeric fitter still runs. `'reject'` scores `Infinity`.

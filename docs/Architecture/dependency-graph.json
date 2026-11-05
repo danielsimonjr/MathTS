@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-04",
+    "lastUpdated": "2026-11-05",
     "totalFiles": 1269,
     "totalModules": 82,
-    "totalExports": 6883
+    "totalExports": 6884
   },
   "entryPoints": [
     {
@@ -13239,17 +13239,24 @@
               "SI_DIMENSION_LENGTH",
               "toSiDimensionVector",
               "Unit",
+              "UnitParseError",
               "SiDimensionVector"
             ]
           }
         ],
         "exports": [
           "validateDimensionVector",
+          "rationalDimensionsEqual",
           "inferScalarDimension",
           "solveParameterDimensions",
           "unitToRationalDimension"
         ],
-        "functions": ["inferScalarDimension", "solveParameterDimensions", "unitToRationalDimension"]
+        "functions": [
+          "rationalDimensionsEqual",
+          "inferScalarDimension",
+          "solveParameterDimensions",
+          "unitToRationalDimension"
+        ]
       },
       "functions/src/scalar-eval.ts": {
         "description": "Evaluate a scalar node with MathTS numeric functions.",
@@ -13449,6 +13456,7 @@
             "file": "./scalar-dimension.js",
             "imports": [
               "inferScalarDimension",
+              "rationalDimensionsEqual",
               "solveParameterDimensions",
               "validateDimensionVector",
               "RationalDimension"
@@ -45276,11 +45284,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1269,
     "totalModules": 82,
-    "totalLinesOfCode": 213347,
-    "totalExports": 6883,
+    "totalLinesOfCode": 213459,
+    "totalExports": 6884,
     "totalClasses": 60,
     "totalInterfaces": 593,
-    "totalFunctions": 2282,
+    "totalFunctions": 2283,
     "totalTypeGuards": 168,
     "totalEnums": 0,
     "totalConstants": 1635,

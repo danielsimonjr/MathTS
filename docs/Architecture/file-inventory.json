@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "totalFiles": 2157,
   "byDisposition": {
     "reachable": 26,
@@ -7443,7 +7443,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 587
+      "loc": 617
     },
     {
       "file": "functions/src/scalar-eval.ts",
@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1737
+      "loc": 1819
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11300,7 +11300,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 425
+      "loc": 441
     },
     {
       "file": "functions/tests/scalar-eval.test.ts",
@@ -11335,7 +11335,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 2898
+      "loc": 2999
     },
     {
       "file": "functions/tests/security/wasm-integrity.test.ts",

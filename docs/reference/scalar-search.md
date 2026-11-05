@@ -11,7 +11,7 @@ MathTS ships a **ScalarNode** toolkit: build trees with `createScalarBuilder` (`
 | Bridge        | `functions/src/scalar-node-bridge.ts`                                                                    | `scalarToNode`, `nodeToScalar`, `simplifyScalar`, `scalarToTex`                                                                                                                                                                     |
 | Front         | `functions/src/pareto-front.ts`, `functions/src/front-export.ts`                                         | `paretoFront`, `scoreFront`, `selectFrontModel`, `frontToLatexTable`, `frontToJson`                                                                                                                                                 |
 | Compare       | `functions/src/numeric-equivalence.ts`                                                                   | `numericallyEquivalent` (`consistent` is evidence, not proof)                                                                                                                                                                       |
-| Dimension     | `functions` scalar-dimension modules, `core/src/types/si-dimension-vector.ts`                            | `inferScalarDimension`, `solveParameterDimensions`, `SiDimensionVector` of seven `Fraction`s in BIPM order `[L, M, T, I, Θ, N, J]`                                                                                                  |
+| Dimension     | `functions` scalar-dimension modules, `core/src/types/si-dimension-vector.ts`                            | `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`, `SiDimensionVector` of seven `Fraction`s in BIPM order `[L, M, T, I, Θ, N, J]`                                                                       |
 | Search        | `expression/src/scalar-enumerate.ts`, `functions/src/scalar-mutate.ts`, `functions/src/scalar-search.ts` | `enumerateScalars`, the mutation operators, `searchScalars`                                                                                                                                                                         |
 | Units         | `core/src/types/unit/unit-table.ts`, `Unit.ts`                                                           | Supplementary units and spellings in the unit table (`nat`, `percent`, `ppm`, `ppb`, `d` as day, `Angstrom`, cycle rates, exact scales, the ISO 80000 solidus). Storage `bit` stays 8 per byte, not an information bit of `ln2` nat |
 
@@ -52,6 +52,17 @@ Definitions match `functions/src/pareto-front.ts`.
 The negation probability on perturbed constants is `MUTATE_CONSTANT_NEGATE_PROBABILITY` (`0.00743`).
 
 `searchScalars` defaults in `functions/src/scalar-search.ts`: `populationSize` 27, `tournamentSize` 15, `tournamentP` 0.982, `crossoverProbability` 0, `loss` `'l2'`, `fractionReplaced` 0.00036, annealing `initialTemperature` 3.17 decaying by 0.995 each generation, `adaptiveParsimonyScaling` 1040, migrant pool 12, frequency window 100000.
+
+## Opt-in SI dimension filter (SR-9)
+
+`dimensions` is optional. Omitted: no dimension walk and the seed-7 pin is unchanged. Set: after the grammar check (and any simplification) and before the score, the tree that will be scored is checked against `target`.
+
+- `symbols` binds variable and parameter names to a seven-`Fraction` `RationalDimension`. Omitted names are solver unknowns for parameters and `unknown-symbol` for variables.
+- With a non-empty fitted parameter list, the check is `solveParameterDimensions`; an empty `problem.parameters` array forces infer mode even when the grammar lists parameters. Otherwise the check is `inferScalarDimension`. In both modes the root dimension must equal `target`.
+- Violations (`add-mismatch`, `transcendental-arg-not-dimensionless`, `non-literal-exponent-on-dimensional-base`, `unknown-symbol`) and an `inconsistent` solve score `Infinity` (still an evaluation, never in the hall).
+- `onUnderdetermined` defaults to `'keep'`: underdetermined parameter dimensions (for example `x^p` with free exponent `p`) are scored normally. `'reject'` scores `Infinity`. Grammar parameters that do not appear in the tree are not counted as underdetermined.
+- `unitToRationalDimension(unitName)` maps a unit string through the existing `Unit` table. Angle and solid-angle units map to a dimensionless 7-vector; `bit` and `byte` throw `UnitParseError` because information dimensions are not in the SI base tuple. `unitName` must be a string.
+- Before the first yield, `dimensions` is copied into a frozen snapshot; `symbols` must be a plain data object (same rules as `complexityWeights`).
 
 ## Opt-in ranking loss
 

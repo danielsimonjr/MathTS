@@ -53,6 +53,7 @@ import {
 } from './scalar-mutate.js';
 import {
   inferScalarDimension,
+  rationalDimensionsEqual,
   solveParameterDimensions,
   validateDimensionVector,
   type RationalDimension,
@@ -78,8 +79,13 @@ export interface ScalarSearchProblem {
  * from `symbols` is a solver unknown when it is a parameter and
  * `unknown-symbol` when it is a variable. `target` is the dimension the scored
  * tree's root must have. `onUnderdetermined` decides a solve whose parameter
- * dimensions are not fixed: `'keep'` (the default) scores the tree normally,
- * `'reject'` scores it `Infinity`.
+ * dimensions are not fixed by the equations implied by the tree: `'keep'` (the
+ * default) scores the tree normally — for example `x^p` with a free exponent
+ * parameter stays scorable under any `target` because the solver does not assign
+ * a unique dimension to `p`. `'reject'` scores it `Infinity`. Listed grammar
+ * parameters that do not appear in the tree are ignored for underdetermined
+ * detection. Before the first yield the filter is copied into a frozen snapshot
+ * (plain-data `symbols` only, same rules as `complexityWeights`).
  */
 export interface ScalarDimensionFilter {
   readonly symbols: Readonly<Record<string, RationalDimension>>;
@@ -189,8 +195,11 @@ export interface ScalarSearchOptions {
    * Opt-in SI dimension filter. Omitted: no dimension walk and the seed-7 pin is
    * unchanged. Set: after the grammar check (and any simplification) and before
    * the score, the tree that will be scored is checked. With parameters the
-   * check is {@link solveParameterDimensions}; without them it is
-   * {@link inferScalarDimension}, and the root dimension must equal `target`.
+   * check is {@link solveParameterDimensions} when the fitted parameter list is
+   * non-empty; an empty `problem.parameters` array forces infer mode even when
+   * the grammar lists parameters. Without fitted parameters the check is
+   * {@link inferScalarDimension}. In both modes the inferred or solved root
+   * dimension must equal `target`.
    * An `add-mismatch`, `transcendental-arg-not-dimensionless`,
    * `non-literal-exponent-on-dimensional-base`, or `unknown-symbol` violation,
    * or an `inconsistent` solve, scores `Infinity` and never enters the hall —
@@ -551,6 +560,89 @@ function normalizeComplexityWeights(
   return Object.freeze(snapshot) as Readonly<ScalarComplexityWeights>;
 }
 
+function cloneDimensionVector(vector: RationalDimension, label: string): RationalDimension {
+  validateDimensionVector(vector, label);
+  return vector.map((entry) => entry.clone()) as unknown as RationalDimension;
+}
+
+function dimensionSymbolsDescriptorError(path: string, reason: string): never {
+  throw new RangeError(`searchScalars: dimensions.symbols ${path} ${reason}`);
+}
+
+function readDimensionSymbolsRecord(
+  symbolsVal: unknown
+): Readonly<Record<string, RationalDimension>> {
+  if (!isDataPlainObject(symbolsVal)) {
+    throw new RangeError(
+      `searchScalars: dimensions.symbols must be a plain object, got ${String(symbolsVal)}`
+    );
+  }
+  const out: Record<string, RationalDimension> = {};
+  for (const key of Reflect.ownKeys(symbolsVal)) {
+    if (typeof key !== 'string') {
+      dimensionSymbolsDescriptorError('', 'own keys must be strings');
+    }
+    const desc = Object.getOwnPropertyDescriptor(symbolsVal, key);
+    if (desc === undefined) {
+      continue;
+    }
+    if (!desc.enumerable) {
+      dimensionSymbolsDescriptorError(
+        key,
+        'must be an enumerable own property (non-enumerable keys are rejected)'
+      );
+    }
+    if (desc.get !== undefined || desc.set !== undefined) {
+      dimensionSymbolsDescriptorError(key, 'must be a data property, not an accessor');
+    }
+    if (desc.value === undefined) {
+      continue;
+    }
+    out[key] = cloneDimensionVector(
+      desc.value as RationalDimension,
+      `searchScalars: dimensions.symbols['${key}']`
+    );
+  }
+  return Object.freeze(out);
+}
+
+/**
+ * Copy caller `dimensions` into a frozen snapshot before the first yield, mirroring
+ * {@link normalizeComplexityWeights}.
+ */
+function normalizeDimensionFilter(raw: ScalarDimensionFilter): Readonly<ScalarDimensionFilter> {
+  if (!isDataPlainObject(raw)) {
+    throw new RangeError(`searchScalars: dimensions must be a plain object, got ${String(raw)}`);
+  }
+  const record = raw as Record<string, unknown>;
+  if (!('symbols' in record)) {
+    throw new RangeError('searchScalars: dimensions.symbols is required');
+  }
+  if (!('target' in record)) {
+    throw new RangeError('searchScalars: dimensions.target is required');
+  }
+  const symbols = readDimensionSymbolsRecord(record.symbols);
+  const target = cloneDimensionVector(
+    record.target as RationalDimension,
+    'searchScalars: dimensions.target'
+  );
+  const onUnderdetermined = record.onUnderdetermined;
+  if (
+    onUnderdetermined !== undefined &&
+    onUnderdetermined !== 'keep' &&
+    onUnderdetermined !== 'reject'
+  ) {
+    throw new RangeError(
+      `searchScalars: dimensions.onUnderdetermined must be 'keep' or 'reject', got ${String(onUnderdetermined)}`
+    );
+  }
+  return Object.freeze({
+    symbols,
+    target,
+    onUnderdetermined: onUnderdetermined === 'reject' ? 'reject' : 'keep',
+  });
+}
+
 /** Keeps reported parameter vectors inside `fit.bounds` when bounds are set. */
 function clampParametersToBounds(
   parameters: Float64Array,
@@ -756,26 +848,10 @@ function assertSearchInputs(
       `searchScalars: simplify must be 'off', 'constants', or 'algebraic', got ${String(options.simplify)}`
     );
   }
-  if (options.dimensions !== undefined) {
-    const { symbols, target, onUnderdetermined } = options.dimensions;
-    if (!isPlainObject(symbols)) {
-      throw new RangeError(
-        `searchScalars: dimensions.symbols must be a plain object, got ${String(symbols)}`
-      );
-    }
-    for (const [name, dim] of Object.entries(symbols)) {
-      validateDimensionVector(dim, `searchScalars: dimensions.symbols['${name}']`);
-    }
-    validateDimensionVector(target, 'searchScalars: dimensions.target');
-    if (
-      onUnderdetermined !== undefined &&
-      onUnderdetermined !== 'keep' &&
-      onUnderdetermined !== 'reject'
-    ) {
-      throw new RangeError(
-        `searchScalars: dimensions.onUnderdetermined must be 'keep' or 'reject', got ${String(onUnderdetermined)}`
-      );
-    }
+  if (options.dimensions !== undefined && !isDataPlainObject(options.dimensions)) {
+    throw new RangeError(
+      `searchScalars: dimensions must be a plain object, got ${String(options.dimensions)}`
+    );
   }
 }
 
@@ -885,7 +961,11 @@ function dimensionAccepts(
     }
     return false;
   }
-  return inferScalarDimension(node, filter.symbols).ok;
+  const inferred = inferScalarDimension(node, filter.symbols);
+  if (!inferred.ok) {
+    return false;
+  }
+  return rationalDimensionsEqual(inferred.dimension, filter.target);
 }
 
 function scoreOnCallerThread(
@@ -1529,6 +1609,8 @@ export async function* searchScalars(
     invalidRows: options.invalidRows ?? 'reject',
   };
   assertFitOptions(fit, names.length, rank.name);
+  const dimensionsFilter =
+    options.dimensions === undefined ? undefined : normalizeDimensionFilter(options.dimensions);
   const budget = Math.floor(Math.min(options.maxEvaluations, options.maxCandidates ?? Infinity));
   const candidatesBind =
     options.maxCandidates !== undefined && options.maxCandidates < options.maxEvaluations;
@@ -1610,7 +1692,7 @@ export async function* searchScalars(
         rank,
         fit,
         complexityWeights,
-        options.dimensions
+        dimensionsFilter
       );
       evaluations += population.length;
       for (const ind of population) {
@@ -1697,7 +1779,7 @@ export async function* searchScalars(
           rank,
           fit,
           complexityWeights,
-          options.dimensions
+          dimensionsFilter
         );
         evaluations += offspring.length;
         for (const ind of offspring) {

@@ -4970,10 +4970,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                            | Import                                                                        |
-| ---------------------------------- | ----------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-expression` | `ScalarNode`                                                                  |
-| `@danielsimonjr/mathts-core`       | `Fraction, SI_DIMENSION_LENGTH, toSiDimensionVector, Unit, SiDimensionVector` |
+| Package                            | Import                                                                                        |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-expression` | `ScalarNode`                                                                                  |
+| `@danielsimonjr/mathts-core`       | `Fraction, SI_DIMENSION_LENGTH, toSiDimensionVector, Unit, UnitParseError, SiDimensionVector` |
 
 **Internal Dependencies:**
 
@@ -4985,7 +4985,7 @@ graph LR
 **Exports:**
 
 - Types: `RationalDimension`, `DimensionInference`, `ParameterDimensionResult`
-- Functions: `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`
+- Functions: `rationalDimensionsEqual`, `inferScalarDimension`, `solveParameterDimensions`, `unitToRationalDimension`
 
 ---
 
@@ -5072,15 +5072,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                                                                    | Type   |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------- | ------ |
-| `./fit-scalar.js`            | `fitScalarParameters, namedScalarLossTerm, rankScalarBatchLoss, INVALID_ROW_PENALTY, NamedScalarLoss`      | Import |
-| `./factories/index.js`       | `* as scalarFactories`                                                                                     | Import |
-| `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                               | Import |
-| `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions` | Import |
-| `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                         | Import |
-| `./scalar-mutate.js`         | `crossoverSubtrees, simplifyConstants, weightedMutation, ScalarMutationContext`                            | Import |
-| `./scalar-dimension.js`      | `inferScalarDimension, solveParameterDimensions, validateDimensionVector, RationalDimension`               | Import |
+| File                         | Imports                                                                                                               | Type   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ |
+| `./fit-scalar.js`            | `fitScalarParameters, namedScalarLossTerm, rankScalarBatchLoss, INVALID_ROW_PENALTY, NamedScalarLoss`                 | Import |
+| `./factories/index.js`       | `* as scalarFactories`                                                                                                | Import |
+| `./pareto-front.js`          | `paretoFront, scoreFront, selectFrontModel, ScoredCandidate`                                                          | Import |
+| `./scalar-batch-parallel.js` | `createScalarBatchPool, evaluateScalarPopulation, resolveParallelTimeout, ScalarPopulationParallelOptions`            | Import |
+| `./scalar-compile.js`        | `compileScalar, ScalarBatchResult`                                                                                    | Import |
+| `./scalar-mutate.js`         | `crossoverSubtrees, simplifyConstants, weightedMutation, ScalarMutationContext`                                       | Import |
+| `./scalar-dimension.js`      | `inferScalarDimension, rationalDimensionsEqual, solveParameterDimensions, validateDimensionVector, RationalDimension` | Import |
 
 **Exports:**
 
@@ -19975,12 +19975,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1269   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 213347 |
-| Total Exports           | 6883   |
+| Total Lines of Code     | 213459 |
+| Total Exports           | 6884   |
 | Total Re-exports        | 2979   |
 | Total Classes           | 60     |
 | Total Interfaces        | 593    |
-| Total Functions         | 2282   |
+| Total Functions         | 2283   |
 | Total Type Guards       | 168    |
 | Total Enums             | 0      |
 | Type-only Imports       | 638    |
