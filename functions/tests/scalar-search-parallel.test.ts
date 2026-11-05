@@ -8,6 +8,7 @@ import {
 } from '@danielsimonjr/mathts-expression';
 import type { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import { compileScalar } from '../src/scalar-compile.js';
+import { scalarParallelWorkerCount } from '../src/scalar-batch-parallel.js';
 import {
   searchScalars,
   type ScalarSearchOptions,
@@ -192,18 +193,21 @@ describe('searchScalars with parallel evaluation', () => {
   // population is dealt island by island and stays sequential, so two concurrent
   // calls can only come from the overlapped generations.
   it('has the islands score calls of one generation in flight together', async () => {
+    const populations = 4;
     const problem = problemOf(120, planted);
     const before = world.pools.length;
     await drain(problem, {
       ...base,
-      populations: 4,
+      populations,
       maxEvaluations: 240,
       rng: createSeededRng(2),
       parallel: {},
     });
     const pool = world.pools[before]!;
+    const offspringPerIsland = base.populationSize;
+    const chunksPerIsland = Math.min(Math.max(1, scalarParallelWorkerCount()), offspringPerIsland);
     expect(pool.terminated).toBe(1);
-    expect(pool.maxInFlight).toBeGreaterThanOrEqual(2);
+    expect(pool.maxInFlight).toBeGreaterThanOrEqual(populations * chunksPerIsland);
     expect(pool.calls.reduce((sum, call) => sum + call.items, 0)).toBe(240);
   });
 

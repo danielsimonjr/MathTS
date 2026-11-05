@@ -1890,9 +1890,8 @@ describe('searchScalars: islands', () => {
   // Recorded from the sequential island schedule (before SR-13): each generation
   // awaited island 0, then island 1, and so on. The overlapped schedule must
   // reproduce this event by event — complexities, keys, and Object.is losses —
-  // because each island keeps its own rng and the merge after the scores runs in
-  // island-index order. Equal losses keep the earlier island only because of that
-  // order. A loss like 2.1572822789567526e-31 fails under any loss rounding.
+  // because each island keeps its own rng, frequency records flush at island
+  // boundaries, and the merge after the scores runs in island-index order.
   const PINNED_ISLAND_TRACE: readonly {
     readonly evaluations: number;
     readonly rows: readonly (readonly [number, string, number])[];
@@ -2033,6 +2032,57 @@ describe('searchScalars: islands', () => {
       });
     });
     expect(result.evaluations).toBe(240);
+  });
+
+  it('diverges when parsimony records at the merge or per offspring instead of the island boundary', async () => {
+    // Ten seeds × populations 2–9 (80 configs), hardProblem, adaptive parsimony on.
+    const matrixBase = {
+      grammar: hardGrammar,
+      populationSize: 8,
+      tournamentSize: 4,
+      tournamentP: 0.982,
+      maxEvaluations: 340,
+      adaptiveParsimony: true,
+      adaptiveParsimonyScaling: 1040,
+    } as const;
+    let mergeDiverges = 0;
+    let immediateDiverges = 0;
+    let pinnedMergeMatches = true;
+    for (let seed = 0; seed < 10; seed += 1) {
+      for (let populations = 2; populations <= 9; populations += 1) {
+        const opts = { ...matrixBase, populations, rng: createSeededRng(seed) };
+        const reference = trace((await runSearch(hardProblem, opts)).progress);
+        const atMerge = trace(
+          (
+            await runSearch(hardProblem, {
+              ...opts,
+              frequencyRecordTiming: 'after-merge',
+            })
+          ).progress
+        );
+        const perOffspring = trace(
+          (
+            await runSearch(hardProblem, {
+              ...opts,
+              frequencyRecordTiming: 'per-offspring',
+            })
+          ).progress
+        );
+        if (reference !== atMerge) {
+          mergeDiverges += 1;
+        }
+        if (reference !== perOffspring) {
+          immediateDiverges += 1;
+        }
+        if (seed === 2 && populations === 4) {
+          pinnedMergeMatches = reference === atMerge;
+        }
+      }
+    }
+    expect(mergeDiverges).toBeGreaterThanOrEqual(45);
+    expect(mergeDiverges).toBeLessThanOrEqual(55);
+    expect(immediateDiverges).toBeGreaterThanOrEqual(30);
+    expect(pinnedMergeMatches).toBe(true);
   });
 
   it('survives a grammar with fewer trees than islands', async () => {
