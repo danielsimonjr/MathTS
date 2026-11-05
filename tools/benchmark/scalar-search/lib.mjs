@@ -41,9 +41,9 @@ export function median(xs) {
  * @returns {BenchArgs}
  */
 export function parseArgs(argv, runtime = {}) {
-  const current = runtime.node ? 'node' : runtime.bun ? 'bun' : 'node';
+  void runtime;
   /** @type {BenchArgs} */
-  const out = { reps: 5, engine: current };
+  const out = { reps: 5, engine: 'node' };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === '--reps') {
@@ -89,4 +89,34 @@ export function nodeBinary() {
     if (!/^bun/i.test(realpathSync(candidate).split('/').pop() ?? '')) return candidate;
   }
   throw new Error('scalar-search bench needs a real Node.js on PATH (or PERF_NODE=/path/to/node)');
+}
+
+/**
+ * ABBA-interleaved medians of two thunks. Each sample is recorded in the lane of
+ * the thunk that ran, not the call order within the round.
+ *
+ * @param {() => unknown | Promise<unknown>} a
+ * @param {() => unknown | Promise<unknown>} b
+ * @param {number} reps timed rounds (each round times both thunks once)
+ * @param {(fn: () => unknown | Promise<unknown>) => Promise<number>} timeFn
+ * @param {number} [warmup]
+ * @returns {Promise<{ aMs: number, bMs: number }>}
+ */
+export async function measurePair(a, b, reps, timeFn, warmup = 5) {
+  for (let w = 0; w < warmup; w++) {
+    await timeFn(a);
+    await timeFn(b);
+  }
+  const aMs = [];
+  const bMs = [];
+  for (let r = 0; r < reps; r++) {
+    if (r % 2 === 0) {
+      aMs.push(await timeFn(a));
+      bMs.push(await timeFn(b));
+    } else {
+      bMs.push(await timeFn(b));
+      aMs.push(await timeFn(a));
+    }
+  }
+  return { aMs: median(aMs), bMs: median(bMs) };
 }

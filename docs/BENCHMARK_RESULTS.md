@@ -324,37 +324,45 @@ ratio **0.9853**; run 2 ratio **1.0400** (harness order bias ≈ 1.00).
 
 A dedicated harness for the scalar symbolic-regression engine exists since SR-11 of
 [`docs/plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md`](./plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md).
-It times the search and population-evaluation surface — the seed-7 pinned search of
-120 evaluations (its front is checked against the test's `PINNED_ROWS` with `Object.is`
-before any timing and a mismatch fails the process), a compile-and-score of the pinned
-front, and `evaluateScalarPopulation` serial vs parallel at 100 / 1e3 / 1e4 / 1e5 rows on
-the mid-size M3 tree — with an A/A control (two serial scores of the same closure) whose
-ratio must stay inside ±2% over five runs. Warm-up is ≥ 5 reps, medians are printed, and
-the harness asserts no speedup; it is the measurement gate for later search-speed claims.
+It times `searchScalars` and `compileScalar`, checks the seed-7 pinned search of
+120 evaluations (front matched to `tools/benchmark/scalar-search/pinned-rows.json` with
+`Object.is` before any timing; mismatch fails the process), compile-and-score of that
+front, and the internal `evaluateScalarPopulation` module serial vs an **explicit injected
+`WorkerPool`** at 100 / 1e3 / 1e4 / 1e5 rows on the mid-size M3 tree. Case (3) does
+**not** measure the default `parallel: {}` path inside `searchScalars`. An A/A control
+uses two **distinct** but identical serial closures (same rule as `tools/benchmark/ab`).
+Warm-up is ≥ 5 reps, medians are printed, and the harness asserts no speedup; it is the
+measurement gate for later search-speed claims.
 
-Reproduce (one process per engine; `--reps <n>` raises the rep floor):
+Reproduce (one process per engine; default engine is Node; `--reps <n>` raises the rep floor):
 
 ```bash
-node tools/benchmark/scalar-search/run.mjs                                            # Node (V8)
-bun --tsconfig-override=tsconfig.base.json tools/benchmark/scalar-search/run.mjs      # Bun (JSC)
+bun run bench:scalar-search                                                    # Node (V8)
+bun run bench:scalar-search:bun                                                # Bun (JSC)
+# or directly:
+node tools/benchmark/scalar-search/run.mjs --engine node
+bun --tsconfig-override=tsconfig.base.json tools/benchmark/scalar-search/run.mjs --engine bun
 ```
 
 **This harness replaces no M3 number.** The `evaluateScalar` vs `compileScalar` table
 above stays the record for the batch-evaluator threshold.
 
-**Environment (this snapshot):** Linux x64 VM, Node v22.23.4 and Bun 1.4.4, 2026-11-05
-(run 1 of each below; medians, ms). Parallel rows include pool creation and teardown —
-the default public path of `evaluateScalarPopulation` — which dominates at 100 and 1e3
-rows on this machine.
+**Environment (this snapshot):** Linux x64 VM, Node v22.23.4 and Bun 1.4.4, 2026-11-05.
+Two full runs per engine below (medians, ms). Parallel columns time pool create, worker
+work, and `pool.terminate()` for the explicit pool case (3) injects.
 
-| case                                       | Node     | Bun      |
-| ------------------------------------------ | -------- | -------- |
-| compile + score the pinned front (3 trees) | 0.0315   | 0.0093   |
-| seed-7 pinned search, 120 evaluations      | 2.3344   | 1.3188   |
-| population serial, n = 1e4                 | 104.2743 | 72.9633  |
-| population serial, n = 1e5                 | 161.9996 | 113.6555 |
-| population parallel, n = 1e4               | 98.4549  | 70.7481  |
-| population parallel, n = 1e5               | 160.9831 | 112.7170 |
+| case                                         | Node run 1 | Node run 2 | Bun run 1 | Bun run 2 |
+| -------------------------------------------- | ---------- | ---------- | --------- | --------- |
+| compile + score the pinned front (3 trees)   | 0.0303     | 0.0304     | 0.0095    | 0.0096    |
+| seed-7 pinned search, 120 evaluations        | 1.9512     | 2.0765     | 1.2366    | 1.2836    |
+| population serial, n = 100                   | 0.1910     | 0.1569     | 0.1368    | 0.1360    |
+| population parallel (explicit pool), n = 100 | 183.7226   | 187.3152   | 133.8712  | 133.8794  |
+| population serial, n = 1e3                   | 1.5806     | 1.2920     | 0.6291    | 0.6010    |
+| population parallel (explicit pool), n = 1e3 | 179.7302   | 188.7030   | 137.1184  | 137.6655  |
+| population serial, n = 1e4                   | 8.0990     | 8.2400     | 6.5811    | 7.5706    |
+| population parallel (explicit pool), n = 1e4 | 195.8059   | 197.8315   | 141.8017  | 142.5501  |
+| population serial, n = 1e5                   | 71.5959    | 71.2844    | 53.1186   | 54.6393   |
+| population parallel (explicit pool), n = 1e5 | 258.7916   | 255.1549   | 179.0449  | 174.3249  |
 
-**A/A control** (two serial scores of the same closure, n = 1e4), ratio over five runs:
-Node **1.0009–1.0110**, Bun **0.9920–1.0162** — both inside the ±2% band.
+**A/A control** (two distinct serial closures, n = 1e4), ratio over five runs: Node
+**0.9952–1.0017**, Bun **0.9874–1.0196** (both inside ±2% on this VM).

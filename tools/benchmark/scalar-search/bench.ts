@@ -5,26 +5,23 @@
  *
  *   1. compile and score the pinned `x^2 + x` front population once,
  *   2. the seed-7 pinned search of 120 evaluations, whose losses are checked
- *      against PINNED_ROWS with `Object.is` before any timing — a mismatch
+ *      against `pinned-rows.json` with `Object.is` before any timing — a mismatch
  *      fails the process,
- *   3. `evaluateScalarPopulation` serial vs `parallel` at 100, 1e3, 1e4 and
- *      1e5 rows on the mid-size M3 bench tree. A `null` result or a throw
- *      fails the case.
+ *   3. internal `evaluateScalarPopulation` (from `functions/dist/scalar-batch-parallel.js`)
+ *      serial vs an explicit injected `WorkerPool` at 100, 1e3, 1e4 and 1e5 rows on
+ *      the mid-size M3 bench tree. This does not measure the default `parallel: {}`
+ *      path inside `searchScalars`. A `null` result or a throw fails the case.
  *
- * Plus an A/A control: two serial scores of the same closure. Its ratio is
- * printed every run; over five runs it should stay inside ±2% (report the
- * wider band when it does not — never tighten it by deleting the control).
+ * Plus an A/A control: two distinct but identical serial closures (same as the A/B
+ * harness). Its ratio is printed every run; over five runs report the band you
+ * observe — do not tighten it by deleting the control.
  *
- * One code tree per process: this bench times only the packages it was
- * launched against and is never run twice in one process for a comparison.
- * Warm-up is >= 5 reps everywhere; medians are printed; nothing here asserts
- * a speedup.
+ * One code tree per process: warm-up is >= 5 reps everywhere; medians are printed;
+ * nothing here asserts a speedup.
  *
- * `evaluateScalarPopulation` lives in `functions/src/scalar-batch-parallel.ts`
- * (the plan's parallel-scoring audit row) but the functions barrel does not
- * re-export it on `main`, and SR-11 is tools-and-docs only, so this bench
- * imports the module directly instead of changing the package's export
- * surface. Everything else comes from the packages' public entries.
+ * Public symbols timed here: `searchScalars`, `compileScalar`. Population scoring
+ * uses the internal batch module the plan names; the functions barrel does not
+ * export it.
  */
 import { createSeededRng } from '@danielsimonjr/mathts-core';
 import {
@@ -42,13 +39,16 @@ import {
   evaluateScalarPopulation,
   type EvaluateScalarPopulationOptions,
   type ScalarPopulationEvalResult,
-} from '../../../functions/src/scalar-batch-parallel.js';
-import { median } from './lib.mjs';
+} from '../../../functions/dist/scalar-batch-parallel.js';
+import pinnedFixture from './pinned-rows.json' with { type: 'json' };
+import { measurePair } from './lib.mjs';
 
 const minReps = Number(process.env.SCALAR_BENCH_REPS ?? 5);
 if (!Number.isInteger(minReps) || minReps < 2) {
   throw new Error(`scalar-search bench: reps must be an integer >= 2, got ${minReps}`);
 }
+
+const PINNED_ROWS = pinnedFixture.rows;
 
 // ---------------------------------------------------------------------------
 // The pinned problem, byte-for-byte the fixture of functions/tests/scalar-search.test.ts
@@ -86,28 +86,17 @@ const pinnedOptions = {
   maxEvaluations: 120,
 };
 
-// Recorded by the seed-7 single-population run (M13a) — keep in step with
-// functions/tests/scalar-search.test.ts. Losses compare with Object.is.
-const PINNED_ROWS = [
-  { complexity: 1, loss: 4.870097681877825, key: '{"k":"s","v":"x"}' },
-  {
-    complexity: 5,
-    loss: 6.317050217590134e-32,
-    key: '{"k":"*","a":[{"k":"+","a":[{"k":"n","v":"1"},{"k":"s","v":"x"}]},{"k":"s","v":"x"}]}',
-  },
-  {
-    complexity: 7,
-    loss: 0,
-    key: '{"k":"+","a":[{"k":"^","b":{"k":"s","v":"x"},"e":{"k":"n","v":"2"}},{"k":"s","v":"x"}]}',
-  },
-] as const;
-
-/** Drives the generator to its final result. */
-async function runPinnedSearch(): Promise<ScalarSearchResult> {
+/** Drives the generator to its final result and records progress evaluations. */
+async function runPinnedSearch(): Promise<{
+  result: ScalarSearchResult;
+  progressEvaluations: number[];
+}> {
+  const progressEvaluations: number[] = [];
   const gen = searchScalars(quadProblem, { ...pinnedOptions, rng: createSeededRng(7) });
   for (;;) {
     const step = await gen.next();
-    if (step.done) return step.value;
+    if (step.done) return { result: step.value, progressEvaluations };
+    progressEvaluations.push(step.value.evaluations);
   }
 }
 
@@ -116,8 +105,15 @@ async function runPinnedSearch(): Promise<ScalarSearchResult> {
  * otherwise a description of the first difference.
  */
 function checkPinned(result: ScalarSearchResult): string | null {
-  if (result.evaluations !== 120) return `evaluations ${result.evaluations}, expected 120`;
-  if (result.seed !== 7) return `seed ${result.seed}, expected 7`;
+  if (result.evaluations !== pinnedFixture.expectedEvaluations) {
+    return `evaluations ${result.evaluations}, expected ${pinnedFixture.expectedEvaluations}`;
+  }
+  if (result.seed !== pinnedFixture.expectedSeed) {
+    return `seed ${result.seed}, expected ${pinnedFixture.expectedSeed}`;
+  }
+  if (result.stopReason !== pinnedFixture.expectedStopReason) {
+    return `stopReason ${result.stopReason}, expected ${pinnedFixture.expectedStopReason}`;
+  }
   if (result.front.length !== PINNED_ROWS.length) {
     return `front has ${result.front.length} rows, expected ${PINNED_ROWS.length}`;
   }
@@ -130,6 +126,19 @@ function checkPinned(result: ScalarSearchResult): string | null {
     const key = scalarCanonicalKey(row.item);
     if (key !== pin.key) return `row ${i} key ${key}, expected ${pin.key}`;
     if (!Object.is(row.loss, pin.loss)) return `row ${i} loss ${row.loss}, expected ${pin.loss}`;
+  }
+  return null;
+}
+
+function checkProgress(progressEvaluations: number[]): string | null {
+  const expected = pinnedFixture.progressEvaluations;
+  if (progressEvaluations.length !== expected.length) {
+    return `progress length ${progressEvaluations.length}, expected ${expected.length}`;
+  }
+  for (let i = 0; i < expected.length; i++) {
+    if (progressEvaluations[i] !== expected[i]) {
+      return `progress[${i}] ${progressEvaluations[i]}, expected ${expected[i]}`;
+    }
   }
   return null;
 }
@@ -152,28 +161,9 @@ async function measure(fn: () => unknown, reps: number, warmup = 5): Promise<num
   for (let w = 0; w < warmup; w++) await timed(fn);
   const samples: number[] = [];
   for (let r = 0; r < reps; r++) samples.push(await timed(fn));
-  return median(samples);
-}
-
-/** ABBA-interleaved medians of two thunks over `reps` rounds. */
-async function measurePair(
-  a: () => unknown,
-  bThunk: () => unknown,
-  reps: number,
-  warmup = 5
-): Promise<{ aMs: number; bMs: number }> {
-  for (let w = 0; w < warmup; w++) {
-    await timed(a);
-    await timed(bThunk);
-  }
-  const aMs: number[] = [];
-  const bMs: number[] = [];
-  for (let r = 0; r < reps; r++) {
-    const order = r % 2 === 0 ? [a, bThunk] : [bThunk, a];
-    aMs.push(await timed(order[0]!));
-    bMs.push(await timed(order[1]!));
-  }
-  return { aMs: median(aMs), bMs: median(bMs) };
+  const sorted = [...samples].sort((a, b) => a - b);
+  const m = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[m]! : (sorted[m - 1]! + sorted[m]!) / 2;
 }
 
 function mulberry32(seed: number): () => number {
@@ -217,7 +207,6 @@ const POPULATION_ITEMS = [
   { index: 7, node: buildSmallTree() },
 ];
 
-/** The default public parallel path: a pool per call, terminated after it. */
 const scalarWorkerPath = process.env.SCALAR_BENCH_WORKER;
 if (!scalarWorkerPath) {
   throw new Error(
@@ -225,11 +214,15 @@ if (!scalarWorkerPath) {
   );
 }
 
-function parallelCall(
+async function parallelCall(
   base: Omit<EvaluateScalarPopulationOptions, 'parallel'>
 ): Promise<ScalarPopulationEvalResult[]> {
   const pool = new WorkerPool(scalarWorkerPath);
-  return evaluateScalarPopulation({ ...base, parallel: { pool } }).finally(() => pool.terminate());
+  try {
+    return await evaluateScalarPopulation({ ...base, parallel: { pool } });
+  } finally {
+    await pool.terminate();
+  }
 }
 
 /** Fails the process when a serial and a parallel population result differ. */
@@ -273,16 +266,17 @@ async function main(): Promise<void> {
     : `Node ${process.versions.node}`;
   console.log(`scalar-search bench on ${engine}, ${process.platform} ${process.arch}`);
 
-  // Correctness first: the seed-7 pinned search must reproduce PINNED_ROWS
-  // before any timing happens.
-  const pinned = await runPinnedSearch();
+  const { result: pinned, progressEvaluations } = await runPinnedSearch();
   const mismatch = checkPinned(pinned);
   if (mismatch !== null) {
     throw new Error(`scalar-search bench: seed-7 front mismatch: ${mismatch}`);
   }
-  console.log('\npin: seed-7 front matches PINNED_ROWS (Object.is on losses)');
+  const progressMismatch = checkProgress(progressEvaluations);
+  if (progressMismatch !== null) {
+    throw new Error(`scalar-search bench: seed-7 progress mismatch: ${progressMismatch}`);
+  }
+  console.log('\npin: seed-7 front matches pinned-rows.json (Object.is on losses)');
 
-  // Case 1 — compile and score the pinned front population once.
   const frontTrees = pinned.front.map((row, i) => ({
     node: row.item,
     params: pinned.fittedParameters[i],
@@ -313,13 +307,13 @@ async function main(): Promise<void> {
   console.log(`\ncase 1  compile + score the pinned front (${frontTrees.length} trees)`);
   console.log(`        median ${case1Ms.toFixed(4)} ms`);
 
-  // Case 2 — the seed-7 pinned search of 120 evaluations.
-  const case2Ms = await measure(() => runPinnedSearch(), Math.max(minReps, 5));
+  const case2Ms = await measure(async () => (await runPinnedSearch()).result, Math.max(minReps, 5));
   console.log('\ncase 2  seed-7 pinned search, 120 evaluations');
   console.log(`        median ${case2Ms.toFixed(4)} ms per run`);
 
-  // Case 3 — evaluateScalarPopulation serial vs parallel on the M3 mid tree.
-  console.log('\ncase 3  evaluateScalarPopulation, serial vs parallel (8 items, mid tree)');
+  console.log(
+    '\ncase 3  evaluateScalarPopulation, serial vs explicit WorkerPool (8 items, mid tree)'
+  );
   console.log('        rows     serial (ms)   parallel (ms)   ratio');
   const case3: Array<{ rows: number; serialMs: number; parallelMs: number; ratio: number }> = [];
   for (const rows of [100, 1_000, 10_000, 100_000]) {
@@ -332,7 +326,7 @@ async function main(): Promise<void> {
     const serial = () => evaluateScalarPopulation(base);
     assertPopulationsAgree(await serial(), await parallelCall(base), rows);
     const reps = Math.max(minReps, rows <= 1_000 ? 15 : rows <= 10_000 ? 10 : 6);
-    const t = await measurePair(serial, () => parallelCall(base), reps);
+    const t = await measurePair(serial, () => parallelCall(base), reps, timed);
     case3.push({ rows, serialMs: t.aMs, parallelMs: t.bMs, ratio: t.bMs / t.aMs });
     console.log(
       `        ${String(rows).padStart(7)}   ${t.aMs.toFixed(4).padStart(11)}   ${t.bMs
@@ -341,19 +335,28 @@ async function main(): Promise<void> {
     );
   }
 
-  // A/A control: two serial scores of the same closure. Printed every run;
-  // the five-run band is reported in docs/BENCHMARK_RESULTS.md.
   const controlColumn = uniformColumn(10_000, 0.15, 0.85, 1);
-  const controlCall = () =>
+  const controlBase = {
+    variables: ['x'] as const,
+    columns: [controlColumn],
+    items: POPULATION_ITEMS,
+  };
+  const controlA = () =>
     evaluateScalarPopulation({
-      variables: ['x'],
-      columns: [controlColumn],
-      items: POPULATION_ITEMS,
+      variables: [...controlBase.variables],
+      columns: controlBase.columns,
+      items: controlBase.items,
     });
-  const control = await measurePair(controlCall, controlCall, Math.max(minReps, 10));
+  const controlB = () =>
+    evaluateScalarPopulation({
+      variables: [...controlBase.variables],
+      columns: controlBase.columns,
+      items: controlBase.items,
+    });
+  const control = await measurePair(controlA, controlB, Math.max(minReps, 10), timed);
   const controlRatio = control.bMs / control.aMs;
   console.log(
-    `\ncontrol (A/A, serial evaluateScalarPopulation twice, n = 1e4): ratio ${controlRatio.toFixed(4)}`
+    `\ncontrol (A/A, two distinct serial closures, n = 1e4): ratio ${controlRatio.toFixed(4)}`
   );
 
   console.log(
