@@ -168,7 +168,7 @@ git commit -m "fix(functions): return numbers from typed means on typed arrays"
 **Interfaces:**
 
 - Consumes: `_findUnit`, `UnitParseError`.
-- Produces: `Unit.parse` accepts `m2K`, `Vs`, `cm^2/Vs`, `mmin`, `NN`, `K²`, `m²`. `parse('mm')` stays millimetre.
+- Produces: `Unit.parse` accepts `m2K`, `Vs`, `cm^2/Vs`, `NN`, `K²`, `m²`. `parse('mm')` stays millimetre. `parse('mmin')` stays “not found” until MT-3 (two products). Do not greedy-pick `m·min` or `mm·in`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -192,8 +192,8 @@ describe('U5 glued products and U6 superscripts', () => {
   it('cm^2/Vs matches cm^2/(V*s)', () => {
     expect(scaleOf('cm^2/Vs')).toBeCloseTo(scaleOf('cm^2/(V*s)'), 12);
   });
-  it('mmin matches m*min', () => {
-    expect(scaleOf('mmin')).toBeCloseTo(scaleOf('m*min'), 12);
+  it('mmin is not a single silent product in MT-2', () => {
+    expect(() => Unit.parse('mmin')).toThrow(/not found|ambiguous/i);
   });
   it('NN matches N*N', () => {
     expect(scaleOf('NN')).toBeCloseTo(scaleOf('N*N'), 12);
@@ -241,9 +241,32 @@ function expandSuperscripts(input: string): string {
 
 Apply it to `text` before the cursor loop.
 
-When `_findUnit(uStr)` returns null and the token is alphanumeric, call `segmentGlued(uStr)`. Longest-left match: for length from `uStr.length` down to 1, if `_findUnit(uStr.slice(0, len))` hits, then either the rest is empty, or the rest is a digit run plus another successful segment, or the rest is another successful segment. A digit run becomes the power of the left unit. Push one `unit.units` entry per piece instead of one entry. If no full segmentation exists, keep today’s “not found” error.
+Implement the UPT `units.ts` enumerator (spec §4.3), not longest-left:
 
-Do not segment a token `_findUnit` already resolved. `mm` never reaches `segmentGlued`.
+```ts
+function prefixRun(leftName: string, rightName: string): boolean {
+  // X·X where XX is X's own prefix spelling (mm beside m·m). Not N·N.
+  return leftName === rightName && _findUnit(leftName + rightName)?.unit.name === leftName;
+}
+
+function segmentations(token: string): string[][] {
+  // DP: every way to cover token with _findUnit / prefix+unit / left+digits-as-power.
+  // Drop a step when prefixRun(prev, next). Return unique canonical spelling lists.
+}
+
+function tokenWays(token: string, compete: boolean, side: 'numerator' | 'denominator'): string[][] {
+  const single = _findUnit(token);
+  if (single && !compete) return [[token]]; // bare one-factor
+  if (single && side === 'numerator') return [[token]];
+  const products = segmentations(token).filter((w) => w.length > 1);
+  const ways = single ? [[token], ...products] : products;
+  if (ways.length === 1) return ways;
+  if (ways.length === 0) return [];
+  return ways; // MT-3 throws; MT-2 treats length>=2 as "not found"
+}
+```
+
+`compete` is true when the parse already has a solidus or another factor. Bare `mm` uses `compete=false`. `mL` in `mol/mL` is denominator → products compete. If `ways.length !== 1`, keep today’s “not found” in this task.
 
 - [ ] **Step 4: GREEN**
 
@@ -305,6 +328,10 @@ describe('U7 distinct dimension readings', () => {
     expect(() => Unit.parse('mAs')).toThrow(AmbiguousUnitError);
   });
 
+  it('mmin names metre-minute and millimetre-inch', () => {
+    expect(() => Unit.parse('mmin')).toThrow(AmbiguousUnitError);
+  });
+
   it('mm still parses', () => {
     expect(Unit.parse('mm').equalBase(Unit.parse('m'))).toBe(true);
   });
@@ -317,7 +344,7 @@ Confirm `equalBase` exists on the instance (`Unit.ts` uses it). If the public na
 
 - [ ] **Step 3: Implement**
 
-Collect every full segmentation, including the single `_findUnit` hit. Map each to its length-10 dimension vector (sum of `power * baseVector`). If two vectors differ by more than `1e-12` in any component, throw `AmbiguousUnitError` whose `readings` are the canonical spellings (`m*L` vs `mL`, and the cuts of `mAs`). Same vector: keep the fewest-cuts reading, then the whole-token hit, then lexicographic spelling.
+Reuse MT-2 `tokenWays`. When `ways.length >= 2`, map each to its length-10 vector. If two vectors differ by more than `1e-12` in any component, throw `AmbiguousUnitError` whose `readings` are the canonical spellings (`mL` vs `m*L`, `mA*s` vs `m*A*s`, `m*min` vs `mm*in`). Same vector: fewest cuts, then the one-factor hit, then lexicographic spelling. Do not reintroduce `m·m` as a way (bare `mm` must still parse).
 
 Export the class from the same barrel as `UnitParseError`.
 
@@ -722,7 +749,7 @@ describe('D1 search contract for a later UPT caller', () => {
 
 - [ ] **Step 2: Run.** Expected PASS. A failure means admit regressed; fix the call site in `scalar-search.ts` that skips seeds, using the SR-1 rule: rejected seed skipped, rejected offspring counts toward 10 attempts.
 
-- [ ] **Step 3: Docs paragraph.** State: formula strings are rejected; `admit` is the predicate a caller such as UPT `validate` supplies; `scalarToTex` is the printable form; omitting `dimensions` does not require a newer symbol than `searchScalars` itself. Name the release that first ships this paragraph’s behavior when the owner publishes. Do not write “0.72.0 has SR-1” unless that version’s changelog says so. On this date, SR-1 is `[Unreleased]` on `main`.
+- [ ] **Step 3: Docs paragraph.** State: formula strings are rejected; `admit` is the predicate a caller such as UPT `validate` supplies; `scalarToTex` is the printable form; omitting `dimensions` does not require a newer symbol than `searchScalars` itself. Published `@danielsimonjr/mathts-functions@0.72.0` already has SR-1 (`admit` on seeds and offspring). `[Unreleased]` still lists SR-1 only because the package version was not bumped.
 
 - [ ] **Step 4: GREEN.**
 
@@ -741,7 +768,40 @@ describe('D1 search contract for a later UPT caller', () => {
 
 - Produces: cell type `number | Fraction | bigint`. `bigint` becomes `new Fraction(cell, 1n)`. A non-integer `number` still uses `Fraction.fromNumber`. A mix of `bigint` and a non-integer `number` throws `TypeError`. Integer `number[][]` behavior unchanged.
 
-- [ ] **Step 1: Failing test** — a 7-column matrix of `bigint`s `[[1n, 0n, 0n, 0n, 0n, 0n, 0n], [0n, 1n, 0n, 0n, 0n, 0n, 0n]]` returns a basis of integer `Fraction`s (denominator `1n`) and does not throw. A second case passes the same matrix as `number`s and expects the same basis strings.
+- [ ] **Step 1: Failing test**
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { rationalNullspace } from '../src/index.js';
+
+const bigintA = [
+  [1n, 0n, 0n, 0n, 0n, 0n, 0n],
+  [0n, 1n, 0n, 0n, 0n, 0n, 0n],
+] as const;
+const numberA = [
+  [1, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0],
+];
+
+describe('D4 rationalNullspace bigint cells', () => {
+  it('accepts a 7-column bigint matrix', () => {
+    const { basis } = rationalNullspace(bigintA as unknown as bigint[][]);
+    expect(basis.length).toBeGreaterThanOrEqual(5);
+    for (const vec of basis) {
+      for (const cell of vec) expect(cell.denominator).toBe(1n);
+    }
+  });
+  it('matches the integer number[][] basis strings', () => {
+    const b = rationalNullspace(bigintA as unknown as bigint[][]).basis.map((row) =>
+      row.map((c) => c.toString()).join(',')
+    );
+    const n = rationalNullspace(numberA).basis.map((row) => row.map((c) => c.toString()).join(','));
+    expect(b).toEqual(n);
+  });
+});
+```
+
+If `Fraction` exposes `den` not `d`, use the sibling test’s property name (`functions/tests` files that call `rationalNullspace`).
 
 - [ ] **Step 2: RED** — `bigint` cell throws inside `fromNumber` or the fraction check.
 

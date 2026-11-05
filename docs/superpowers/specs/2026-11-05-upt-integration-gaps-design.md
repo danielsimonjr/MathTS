@@ -109,13 +109,13 @@ above matches each `package.json`.
 | core `pairwiseDot` on `Float32Array` is sync | True. `pairwiseDot(a, b, start?, end?)` takes `ArrayLike<number>` and returns `number` (`core/src/numeric/stable.ts`). |
 | `ton` is US short ton, 907.18474 kg | True. Row `ton` scale `2000*pound`. Alias `tons` → `ton`. `t` and `tonne` are 1000 kg and stay. |
 | `degC/s` parses; `.to('K')` adds 273.15 | True. `degC` has `offset: '273.15'`. `Unit.prototype.to` takes one argument. No `reading` option. |
-| `m2K`, `Vs`, `cm^2/Vs`, `mmin`, `NN` are “not found”; `K²` is `Unexpected "²"` | True. `parseUnit` consumes one alphanumeric token and `_findUnit` looks that token up. Superscripts are not rewritten. |
-| `mol/mL` is one reading (millilitre); `mAs` is “not found” | True today, because glued splits are not enumerated. U7 is specified against the parser **after** U5, when more than one split exists. |
+| `m2K`, `Vs`, `cm^2/Vs`, `mmin`, `NN` are “not found”; `K²` is `Unexpected "²"` | True today. After U5+U7 the answers are not all “parse as a product.” UPT `units.ts` (audit PR shape: copy that grammar): one legal product → parse (`m2K`, `Vs`, `NN`); two heterogeneous products → refuse (`mmin` is m·min or mm·in; `mAs` is mA·s or m·A·s). The audit U5 table listed `mmin` as a parse; that row is **wrong relative to UPT’s own grammar**. MathTS follows `units.ts`. |
+| `mol/mL` is one reading (millilitre); `mAs` is “not found” | True today. U7 is not “cuts only on a miss.” A **bare** token that is one factor stays that factor (`mm`). **Inside a compound**, a prefixed denominator factor competes with heterogeneous products (`mL` in `mol/mL` is millilitre or metre·litre). Homogeneous prefix-letter runs (`m·m`) are not readings. |
 | `exactScale('Hz') === 1`; `.to('rad/s')` multiplies by 2π | True. `Hz` has `cycles: true` and scale `1`. `cycleAngleBridge` returns the cycle-count delta; `to` multiplies by `(2π)^k` and does not attach `k` to the result. |
 | `mpc` not found; `kpc`/`Mpc`/`Gpc` parse | True. `pc` uses prefix set `SHORT_UP_ONLY` (`siShort(1, p => p >= 3)`). |
 | `Unit.exactScale('bit')` is 1; information is axis 8 | True. Row `b` base `BIT` scale `1`. `BASE_DIMENSIONS` index 8 is `BIT`. `toSiDimensionVector` throws when index 7, 8, or 9 is nonzero unless `ignoreExtra`. |
 | `UNIT_PREFIX_SETS` is not exported, so UPT must split prefixes itself | **Disagree.** `UNIT_PREFIX_SETS` and `unitPrefixExactScale` are already exported from `@danielsimonjr/mathts-core` (`core/src/index.ts`). U10’s remaining work is the `pc` row, not a new export. |
-| `searchScalars` has `grammar.admit` on 0.72 | True on this tree, and **stronger than 0.72.0**. Unreleased SR-1 through SR-7 are in `functions/src/scalar-search.ts` (`admit` on seeds and offspring, `loss`, `invalidRows`, `complexityWeights`, `simplify`). npm 0.72.0 is behind `main`. D1 does not add `admit`. |
+| `searchScalars` has `grammar.admit` on 0.72 | **True on npm 0.72.0 and on this tree.** A clean `npm pack` of `@danielsimonjr/mathts-functions@0.72.0` (published 2026-11-05T18:25:17Z) already documents and implements `grammar.admit` on seeds and offspring, plus `loss`, `invalidRows`, `complexityWeights`, and `simplify`. `[Unreleased]` still lists SR-1–SR-7 because `functions/package.json` was not bumped. D1 does not add `admit`. Do not write “0.72.0 lacks SR-1.” |
 | `scalarToTex` exists; no new printable form | True. Exported from functions. |
 | `dimensions` filter is a 7-vector of `Fraction`s; `unitToRationalDimension` throws on `bit` | True. `RationalDimension` is `SiDimensionVector` (seven `Fraction`s, BIPM `[L, M, T, I, Θ, N, J]`). `unitToRationalDimension` reads `vector[8]` and throws `UnitParseError` for a nonzero BIT exponent. There is no `mapUnit` and no `equal` hook. |
 | `leastSquares` throws `linsolve: singular matrix` | True. `leastSquares` forms normal equations and calls `linsolve`, which throws when the partial-pivot magnitude is `< 1e-15` (absolute, on `AᵀA`, not on `A`). The audit’s `1e-8` throw / `1e-6` numeric split is that composed behavior, not a named `1e-8` constant. N5, if done, changes this threshold’s meaning; it does not invent a second solver. |
@@ -167,20 +167,22 @@ Before tokenization, rewrite a superscript run that sits on a unit factor:
 
 ### 4.3 U5 — glued products (P1)
 
-`_findUnit` still wins first. `mm` is millimetre, `mL` is millilitre, `Hz` is hertz, `pc` is parsec. Only a token that is **not** a unit-plus-prefix is segmented.
+Copy the UPT `units.ts` splitter (audit MT-2 PR shape). Do **not** use greedy longest-left match (that reading of `mmin` is `mm·in`, not `m·min`).
 
-Segmentation of a leftover alphanumeric token:
+Enumerate every segmentation of an alphanumeric token into one or more factors (`_findUnit` / prefix+unit, plus a trailing digit run as an integer power of the left factor). Then apply these filters:
 
-- Greedy left-to-right longest match against built-in unit names and their legal prefixes.
-- A run of digits between two unit matches is an integer power of the unit on the left (`m2K` → m^2 · K). A digit run that is not a power stays a parse error.
-- `Vs` → V · s, `mmin` → m · min, `NN` → N · N, `cm^2/Vs` → cm^2 / (V · s) because `^` and `/` are already tokens and `Vs` is the leftover.
-- The product of the pieces replaces the single failed token. Powers and the solidus that already surround the token apply to the product as they would to a parenthesized group (`m2K/s` → (m^2 · K) / s).
+1. A split that puts a prefix letter’s own unit twice in a row is **not** a reading (`m·m` beside `mm`; `m·m·in` beside `mmin`). A unit that is not a prefix letter still juxtaposes with itself (`NN` → N·N).
+2. **Bare** expression (the whole string is one token): if the token is exactly one factor (exact unit or prefix+unit), that reading wins and products are not considered. `mm` is millimetre, `Hz` is hertz, `pc` is parsec, `mL` as a bare token is millilitre.
+3. **Compound** (a solidus, `*`, or a second factor exists): a **numerator** token that is one factor stays that factor (`mN/m` is millinewton / metre). A **denominator** prefixed factor competes with each remaining heterogeneous product (`W/mK`, `mol/mL`).
+4. After the filters, **exactly one** reading → that product replaces the token. `Vs` → V·s, `m2K` → m^2·K, `NN` → N·N, `cm^2/Vs` → cm^2/(V·s). Powers and the solidus already around the token apply to the product as a parenthesized group (`m2K/s` → (m^2·K)/s).
+5. **Zero** readings → today’s `UnitParseError` “not found.”
+6. **Two or more** readings → U7 (MT-3). Until MT-3 ships, keep “not found” rather than silently picking one. `mmin` is two products (m·min and mm·in); it is **not** a U5 success.
 
-Exact symbol wins over a cut: the algorithm must not split `mm`, `min`, `mol`, `bar`, or `ton` (until U2 refuses `ton`).
+Exact symbol still wins for `min`, `mol`, `bar`, and `ton` (until U2 refuses `ton`) as one-factor tokens.
 
 ### 4.4 U7 — dimensionally distinct readings (P1, after U5)
 
-When segmentation (including the “whole token is one unit” reading) yields two or more readings whose length-10 dimension vectors differ, throw:
+When the U5 enumerator, after the filters in §4.3, still has two or more readings, throw (do not require the vectors to differ before throwing: UPT names every remaining reading. If two spellings have the same length-10 vector, apply the tie-break below and keep one; throw only when at least two **distinct** dimension vectors remain):
 
 ```ts
 class AmbiguousUnitError extends UnitParseError {
@@ -188,9 +190,9 @@ class AmbiguousUnitError extends UnitParseError {
 }
 ```
 
-Message names every reading. `mol/mL` must not resolve silently to 10⁶ mol/m³ if a second segmentation is metre · litre (dimension of length × volume, not volume). `mAs` must not resolve silently if milliampere-second and metre-ampere-second (or any other legal cut) differ in dimension.
+Message names every reading. `mol/mL` throws: millilitre in the denominator vs metre·litre. `mAs` throws: milliampere·second vs metre·ampere·second. `mmin` throws: metre·minute vs millimetre·inch. `mm` as a **bare** token still parses (rule 2); `m·m` was never a reading (rule 1).
 
-When every reading has the same dimension vector, keep a single result. Tie-break: the reading with the fewest cuts; if still tied, the reading `_findUnit` would have returned for the whole token; if still tied, the lexicographically first canonical spelling. Document the tie-break in the `Unit.parse` JSDoc. Do not pick among different dimensions.
+When every remaining reading has the same dimension vector, keep a single result. Tie-break: the reading with the fewest cuts; if still tied, the one-factor `_findUnit` hit; if still tied, the lexicographically first canonical spelling. Document the tie-break in the `Unit.parse` JSDoc. Do not pick among different dimensions.
 
 `AmbiguousUnitError` is exported from `@danielsimonjr/mathts-core`.
 
@@ -275,7 +277,7 @@ No new search feature. The contract to lock in docs and a characterization test:
 - `searchScalars` rejects formula strings. Callers pass `ScalarNode`.
 - `grammar.admit?: (node: ScalarNode) => boolean` runs on seeds and on mutation offspring. A rejected seed is skipped. A rejected child counts as a failed attempt inside the existing 10-attempt budget. `scalarGrammarAccepts` does not call `admit`. Enumeration already applies `admit`.
 - `scalarToTex` / `nodeToScalar` / `scalarToNode` are the printable and lowering forms. Do not add another.
-- A call that uses the expression 0.11 grammar (through `abs`, no `sqrt` / `atan`) and omits `dimensions` does not require a functions bump past the 0.70 line for the symbol `searchScalars` to exist. `sqrt` / `atan` and `runScalarSearch` and `dimensions` are 0.12 / 0.72 surfaces. `main` is ahead of 0.72; the acceptance text must say which release first contains `admit` once this work is published, and must not claim 0.72.0 has SR-1 if the published changelog does not.
+- A call that uses the expression 0.11 grammar (through `abs`, no `sqrt` / `atan`) and omits `dimensions` does not require a functions bump past the 0.70 line for the symbol `searchScalars` to exist. `sqrt` / `atan` and `runScalarSearch` and `dimensions` are 0.12 / 0.72 surfaces. `admit` on seeds and offspring **is** in published `0.72.0` (and on this tree). Acceptance text may say 0.72.0 has SR-1. D1 still only documents and characterizes; it does not add a hook.
 
 UPT acceptance: pass `validate` as `admit`. Do not replace `upt discover` with `searchScalars`.
 
@@ -337,7 +339,7 @@ The implementation owner of every name `statistics` re-exports is `@danielsimonj
 
 ## 5. Algorithms that are easy to get wrong
 
-**Glued split vs prefix.** Run `_findUnit` on the whole token before any cut. A successful hit is that reading, not one candidate among cuts. Cuts run only on a miss, then U7 compares dimension vectors of the hit (if any) and the cuts.
+**Glued split vs prefix.** Use §4.3, not “cuts only on a miss.” A miss-only splitter never throws on `mol/mL` (`mL` is already millilitre). Enumerating every cut without dropping `m·m` makes bare `mm` ambiguous (L vs L²). Both of those algorithms fail the audit probes.
 
 **Affine vs value.** The leading-number production (`25 degC`) is a value. A `*` between a number and a unit is a product (`1*degC`) and is the compound U3 refuses. Tests must include both spellings.
 
@@ -392,9 +394,9 @@ Probes that must fail before the fix and pass after:
 | ID | Probe |
 | --- | --- |
 | N4 | `mean(Float32Array.of(1, 2, 3)) === 2` and `mean(Float64Array.of(1, 2, 3)) === 2` and the value is not a Promise |
-| U5 | `parse('m2K')`, `parse('Vs')`, `parse('cm^2/Vs')`, `parse('mmin')`, `parse('NN')` match the spelled-out products |
+| U5 | `parse('m2K')`, `parse('Vs')`, `parse('cm^2/Vs')`, `parse('NN')` match the spelled-out products. `parse('mmin')` is **not** a U5 success (two products; U7). |
 | U6 | `parse('K²')` matches `parse('K^2')` |
-| U7 | `parse('mol/mL')` and `parse('mAs')` throw `AmbiguousUnitError` with two readings once glued splits exist; `parse('mm')` still millimetre |
+| U7 | `parse('mol/mL')`, `parse('mAs')`, and `parse('mmin')` throw `AmbiguousUnitError` with ≥2 readings; `parse('mm')` still millimetre |
 | U3 | `parse('degC/s')` and `parse('1*degC')` throw; `parse('25 degC')` still 298.15 K |
 | U4 | `parse('25 degC').to('K', { reading: 'difference' }).value === 25` |
 | U9 | `exactScale('Hz')` numeric 1; `to('rad/s').cycles === 1`; value still 2π |
@@ -436,7 +438,7 @@ UPT can, after a release that contains the PR, flip the matching row in `tests/d
 ### UPT acceptance checklist (consumer, not implemented here)
 
 - N4: `mean` on a length-3 `Float64Array` column is a number; `numberFrom` does not see a Promise. `pairwiseDot` on `Float32Array` stays sync.
-- U5–U7: the five glued spellings and `K²` parse; `mol/mL` and `mAs` throw `AmbiguousUnitError`; `mm` is unchanged.
+- U5–U7: `m2K`, `Vs`, `cm^2/Vs`, `NN`, and `K²` parse; `mol/mL`, `mAs`, and `mmin` throw `AmbiguousUnitError`; `mm` is unchanged.
 - U3–U4: `degC/s` throws; difference `to` of `25 degC` to `K` is 25; absolute `to` of `1 degC` is still 274.15 K.
 - U9: `exactScale('Hz')` is 1; `to('rad/s').cycles === 1`.
 - U10: `mpc` parses as pc/1000.

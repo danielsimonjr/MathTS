@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Documented
-- **UPT ↔ MathTS integration gaps (design only).** Spec `docs/superpowers/specs/2026-11-05-upt-integration-gaps-design.md` and plan `docs/superpowers/plans/2026-11-05-upt-integration-gaps.md` map the open gaps from Universal-Physics-Tensor PR #581 (`4ceffef0`): P0 N4; P1 U3, U4, U5, U6, U7, U9, D1, D2; P2 U2, U10, N5, D4, D5, D6, D7; optional policy U8. Closed U1, U12, N1, N2, and N3 stay closed. No source change in this note.
+- **UPT ↔ MathTS integration gaps (design only).** Spec `docs/superpowers/specs/2026-11-05-upt-integration-gaps-design.md` and plan `docs/superpowers/plans/2026-11-05-upt-integration-gaps.md` map the open gaps from Universal-Physics-Tensor PR #581 (`4ceffef0`): P0 N4; P1 U3, U4, U5, U6, U7, U9, D1, D2; P2 U2, U10, N5, D4, D5, D6, D7; optional policy U8. Closed U1, U12, N1, N2, and N3 stay closed. Challenger pass: U5/U7 copy UPT `units.ts` (bare one-factor vs compound compete; `mmin` is U7, not a silent product); `grammar.admit` is already on npm `functions@0.72.0`; `UNIT_PREFIX_SETS` already exported. No source change in this note.
 
 ### Added
 - **SR-7 branch merged with `main` (#590); generated Architecture documents refreshed.** The merge conflicted only in generated files under `docs/Architecture`; those were taken from `main` and regenerated with `bun run docs:deps`. OVERVIEW.md `totalLinesOfCode` 398586 -> 399255 and `totalExports` 8939 -> 8940 (API.md, COMPONENTS.md and OVERVIEW.md), because `repo-tools check` fails on those claims until the values move. Two CHANGELOG lines that began with `+- ` now begin with `- `.
