@@ -36,20 +36,20 @@ Co-Authored-By: Cursor Agent <cursoragent@cursor.com>
 
 ## File map
 
-| File | Responsibility |
-| --- | --- |
-| `functions/src/typed/arithmetic.ts` | Sync `mean` / `sum` / `variance` / `std` for `Array`, `Float32Array`, `Float64Array` |
-| `functions/src/typed/statistics.ts` | Unchanged Promise path (`parallelStatMean` and siblings). Docs point here. |
-| `core/src/numeric/stable.ts` | `pairwiseDot` unchanged. Test only. |
-| `core/src/types/unit/Unit.ts` | Superscript rewrite, glued segment, affine gate, `to` reading, `cycles` |
-| `core/src/types/unit/unit-table.ts` | `pc` prefixes, `ton` refusal, `shortton` / `longton`, optional bit scale |
-| `core/src/types/unit/errors.ts` | `AmbiguousUnitError` |
-| `functions/src/scalar-dimension.ts` | `unitToRationalDimension` `mapUnit` |
-| `functions/src/scalar-search.ts` | `dimensions.equal` |
-| `functions/src/typed/numeric.ts` | Optional equilibrated `1e-13` pivot in `linsolve` used by `leastSquares` |
-| `functions/src/numeric/rational-nullspace.ts` | Optional `bigint` cells |
-| `docs/reference/scalar-search.md` | D1 and D5 sentences |
-| `statistics/README.md` | D7 owner sentence |
+| File                                          | Responsibility                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `functions/src/typed/arithmetic.ts`           | Sync `mean` / `sum` / `variance` / `std` for `Array`, `Float32Array`, `Float64Array` |
+| `functions/src/typed/statistics.ts`           | Unchanged Promise path (`parallelStatMean` and siblings). Docs point here.           |
+| `core/src/numeric/stable.ts`                  | `pairwiseDot` unchanged. Test only.                                                  |
+| `core/src/types/unit/Unit.ts`                 | Superscript rewrite, glued segment, affine gate, `to` reading, `cycles`              |
+| `core/src/types/unit/unit-table.ts`           | `pc` prefixes, `ton` refusal, `shortton` / `longton`, optional bit scale             |
+| `core/src/types/unit/errors.ts`               | `AmbiguousUnitError`                                                                 |
+| `functions/src/scalar-dimension.ts`           | `unitToRationalDimension` `mapUnit`                                                  |
+| `functions/src/scalar-search.ts`              | `dimensions.equal`                                                                   |
+| `functions/src/typed/numeric.ts`              | Optional equilibrated `1e-13` pivot in `linsolve` used by `leastSquares`             |
+| `functions/src/numeric/rational-nullspace.ts` | Optional `bigint` cells                                                              |
+| `docs/reference/scalar-search.md`             | D1 and D5 sentences                                                                  |
+| `statistics/README.md`                        | D7 owner sentence                                                                    |
 
 ---
 
@@ -127,7 +127,9 @@ In each of `mean`, `sum`, `variance`, and `std`, replace the `Float64Array` sign
 
 ```ts
 function asF64(data: ArrayLike<number>): Float64Array | number[] {
-  return data instanceof Float64Array || Array.isArray(data) ? (data as Float64Array | number[]) : new Float64Array(data);
+  return data instanceof Float64Array || Array.isArray(data)
+    ? (data as Float64Array | number[])
+    : new Float64Array(data);
 }
 ```
 
@@ -430,7 +432,7 @@ describe('U8 optional bit scale', () => {
   it('default bit scale is 1', () => {
     expect(exactScaleToNumber(Unit.exactScale('bit')!)).toBe(1);
   });
-  it("parse option ln2 uses Math.LN2 and a zero dimension vector", () => {
+  it('parse option ln2 uses Math.LN2 and a zero dimension vector', () => {
     const u = Unit.parse('bit', { bit: 'ln2' });
     expect(exactScaleToNumber(u.exactScale()!)).toBeCloseTo(Math.LN2, 12);
     expect(u.dimensions.every((d: number) => d === 0)).toBe(true);
@@ -654,13 +656,26 @@ import { leastSquares } from '../src/index.js';
 
 describe('N5 leastSquares pivot', () => {
   it('solves a well-conditioned system', () => {
-    expect(leastSquares([[1, 0], [0, 1], [1, 1]], [1, 1, 2])).toEqual([1, 1]);
+    expect(
+      leastSquares(
+        [
+          [1, 0],
+          [0, 1],
+          [1, 1],
+        ],
+        [1, 1, 2]
+      )
+    ).toEqual([1, 1]);
   });
   it('throws when a column is a 1e-14 copy of another', () => {
     const eps = 1e-14;
     expect(() =>
       leastSquares(
-        [[1, 1 + eps], [1, 1], [1, 1]],
+        [
+          [1, 1 + eps],
+          [1, 1],
+          [1, 1],
+        ],
         [1, 1, 1]
       )
     ).toThrow(/singular/);
@@ -846,7 +861,16 @@ import * as F from '../src/index.js';
 
 describe('D6 search linalg exports', () => {
   it('has the primitives search already uses', () => {
-    for (const name of ['inv', 'det', 'ols', 'matrixRank', 'rationalNullspace', 'svd', 'eigs', 'leastSquares'] as const) {
+    for (const name of [
+      'inv',
+      'det',
+      'ols',
+      'matrixRank',
+      'rationalNullspace',
+      'svd',
+      'eigs',
+      'leastSquares',
+    ] as const) {
       expect(typeof F[name]).toBe('function');
     }
     expect('eig' in F).toBe(false);
@@ -875,8 +899,14 @@ If `eig` is a value export, the assertion is wrong — check `functions/src/inde
 
 ```ts
 import { describe, it, expect } from 'vitest';
-import { chiSquaredCDF as fromFunctions, normalCDF as normalFunctions } from '@danielsimonjr/mathts-functions';
-import { chiSquaredCDF as fromStatistics, normalCDF as normalStatistics } from '@danielsimonjr/mathts-statistics';
+import {
+  chiSquaredCDF as fromFunctions,
+  normalCDF as normalFunctions,
+} from '@danielsimonjr/mathts-functions';
+import {
+  chiSquaredCDF as fromStatistics,
+  normalCDF as normalStatistics,
+} from '@danielsimonjr/mathts-statistics';
 
 describe('D7 one distribution owner', () => {
   it('re-exports the functions implementations', () => {
@@ -898,24 +928,24 @@ Place the file where those bare package imports already resolve (see `statistics
 
 Coverage against the spec:
 
-| ID | Task | Reopened? |
-| --- | --- | --- |
-| N4 P0 | MT-1 | no |
-| U5, U6 P1 | MT-2 | no |
-| U7 P1 | MT-3 | no |
-| U3, U4 P1 | MT-4 | no |
-| U9 P1 | MT-6 | no |
-| D1 P1 | D1 | no |
-| D2 P1 | MT-9 | no |
-| U2 P2 | MT-8 | no |
-| U10 P2 | MT-7 | no |
-| N5 P2 | MT-10 optional | no |
-| D4 P2 | D4 optional | no |
-| D5 P2 | D5 docs | no |
-| D6 P2 | D6 lock only | no |
-| D7 P2 | D7 docs + binding | no |
-| U8 policy | MT-5 optional | no |
-| U1, U12, N1, N2, N3 | none | closed, not tasks |
+| ID                  | Task              | Reopened?         |
+| ------------------- | ----------------- | ----------------- |
+| N4 P0               | MT-1              | no                |
+| U5, U6 P1           | MT-2              | no                |
+| U7 P1               | MT-3              | no                |
+| U3, U4 P1           | MT-4              | no                |
+| U9 P1               | MT-6              | no                |
+| D1 P1               | D1                | no                |
+| D2 P1               | MT-9              | no                |
+| U2 P2               | MT-8              | no                |
+| U10 P2              | MT-7              | no                |
+| N5 P2               | MT-10 optional    | no                |
+| D4 P2               | D4 optional       | no                |
+| D5 P2               | D5 docs           | no                |
+| D6 P2               | D6 lock only      | no                |
+| D7 P2               | D7 docs + binding | no                |
+| U8 policy           | MT-5 optional     | no                |
+| U1, U12, N1, N2, N3 | none              | closed, not tasks |
 
 Placeholder scan: no TBD. The D1 test contains the full `searchScalars` call. Type names (`AmbiguousUnitError`, `reading: 'difference'`, `mapUnit`, `cycles`, `bit: 'ln2'`) match the spec.
 

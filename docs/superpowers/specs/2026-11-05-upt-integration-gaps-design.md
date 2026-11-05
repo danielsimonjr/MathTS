@@ -34,13 +34,13 @@ a task in the MathTS plan.
 
 Closed on current npm and on this tree. Do not reopen them:
 
-| ID | Contract | Where it is closed |
-| --- | --- | --- |
-| U1 | `dB`, `dBm`, `dBW`, `Np`, `Mach`, `mach` throw | `REFUSED_UNIT_SPELLINGS` in `core/src/types/unit/unit-table.ts` |
-| U12 | `d` = 86400 s | built-in day row; `dm` stays decimetre |
-| N1 | `gammaincp` is the upper tail, not `1 - P` | functions since 0.68.3 |
-| N2 | `findRoot` `xtol` is independent of `tol` | `functions` root finder |
-| N3 | `quad` `atol` exists and may be `0` | `functions/src/numeric/adaptive-quad.ts` |
+| ID  | Contract                                       | Where it is closed                                              |
+| --- | ---------------------------------------------- | --------------------------------------------------------------- |
+| U1  | `dB`, `dBm`, `dBW`, `Np`, `Mach`, `mach` throw | `REFUSED_UNIT_SPELLINGS` in `core/src/types/unit/unit-table.ts` |
+| U12 | `d` = 86400 s                                  | built-in day row; `dm` stays decimetre                          |
+| N1  | `gammaincp` is the upper tail, not `1 - P`     | functions since 0.68.3                                          |
+| N2  | `findRoot` `xtol` is independent of `tol`      | `functions` root finder                                         |
+| N3  | `quad` `atol` exists and may be `0`            | `functions/src/numeric/adaptive-quad.ts`                        |
 
 ---
 
@@ -103,24 +103,24 @@ statistics/src/index.ts
 Probed by reading source at `f6205fec`. npm `version` for the five packages
 above matches each `package.json`.
 
-| Claim in the audit | This tree |
-| --- | --- |
-| `mean(Float32Array)` throws; `mean(Float64Array)` is a `Promise` | True. `functions/src/typed/arithmetic.ts` `mean` has `Array` (sync `pairwiseSum`) and `Float64Array` (`await computePool.mean`). No `Float32Array` signature. `ComputePool.mean` is `async`, so length 3 is still a Promise. |
-| core `pairwiseDot` on `Float32Array` is sync | True. `pairwiseDot(a, b, start?, end?)` takes `ArrayLike<number>` and returns `number` (`core/src/numeric/stable.ts`). |
-| `ton` is US short ton, 907.18474 kg | True. Row `ton` scale `2000*pound`. Alias `tons` → `ton`. `t` and `tonne` are 1000 kg and stay. |
-| `degC/s` parses; `.to('K')` adds 273.15 | True. `degC` has `offset: '273.15'`. `Unit.prototype.to` takes one argument. No `reading` option. |
-| `m2K`, `Vs`, `cm^2/Vs`, `mmin`, `NN` are “not found”; `K²` is `Unexpected "²"` | True today. After U5+U7 the answers are not all “parse as a product.” UPT `units.ts` (audit PR shape: copy that grammar): one legal product → parse (`m2K`, `Vs`, `NN`); two heterogeneous products → refuse (`mmin` is m·min or mm·in; `mAs` is mA·s or m·A·s). The audit U5 table listed `mmin` as a parse; that row is **wrong relative to UPT’s own grammar**. MathTS follows `units.ts`. |
-| `mol/mL` is one reading (millilitre); `mAs` is “not found” | True today. U7 is not “cuts only on a miss.” A **bare** token that is one factor stays that factor (`mm`). **Inside a compound**, a prefixed denominator factor competes with heterogeneous products (`mL` in `mol/mL` is millilitre or metre·litre). Homogeneous prefix-letter runs (`m·m`) are not readings. |
-| `exactScale('Hz') === 1`; `.to('rad/s')` multiplies by 2π | True. `Hz` has `cycles: true` and scale `1`. `cycleAngleBridge` returns the cycle-count delta; `to` multiplies by `(2π)^k` and does not attach `k` to the result. |
-| `mpc` not found; `kpc`/`Mpc`/`Gpc` parse | True. `pc` uses prefix set `SHORT_UP_ONLY` (`siShort(1, p => p >= 3)`). |
-| `Unit.exactScale('bit')` is 1; information is axis 8 | True. Row `b` base `BIT` scale `1`. `BASE_DIMENSIONS` index 8 is `BIT`. `toSiDimensionVector` throws when index 7, 8, or 9 is nonzero unless `ignoreExtra`. |
-| `UNIT_PREFIX_SETS` is not exported, so UPT must split prefixes itself | **Disagree.** `UNIT_PREFIX_SETS` and `unitPrefixExactScale` are already exported from `@danielsimonjr/mathts-core` (`core/src/index.ts`). U10’s remaining work is the `pc` row, not a new export. |
-| `searchScalars` has `grammar.admit` on 0.72 | **True on npm 0.72.0 and on this tree.** `functions/package.json` is `0.72.0`. `functions/CHANGELOG.md` under `## 0.72.0` records `grammar.admit` on seeds and offspring, plus `loss`, `invalidRows`, `complexityWeights`, and `simplify`. The root `CHANGELOG.md` `[Unreleased]` section still repeats those SR-1–SR-7 bullets; that section is not evidence the package version is behind npm. D1 does not add `admit`. Do not write “0.72.0 lacks SR-1.” |
-| `scalarToTex` exists; no new printable form | True. Exported from functions. |
-| `dimensions` filter is a 7-vector of `Fraction`s; `unitToRationalDimension` throws on `bit` | True. `RationalDimension` is `SiDimensionVector` (seven `Fraction`s, BIPM `[L, M, T, I, Θ, N, J]`). `unitToRationalDimension` reads `vector[8]` and throws `UnitParseError` for a nonzero BIT exponent. There is no `mapUnit` and no `equal` hook. |
-| `leastSquares` throws `linsolve: singular matrix` | True. `leastSquares` forms normal equations and calls `linsolve`, which throws when the partial-pivot magnitude is `< 1e-15` (absolute, on `AᵀA`, not on `A`). The audit’s `1e-8` throw / `1e-6` numeric split is that composed behavior, not a named `1e-8` constant. N5, if done, changes this threshold’s meaning; it does not invent a second solver. |
-| `rationalNullspace` needs a second `Fraction` | **Disagree for plain integers.** The signature is `(matrix: ReadonlyArray<ReadonlyArray<number \| Fraction>>, options?)`. A 7-column integer `number[][]` does not import `Fraction`. `Fraction.fromNumber` is the continued-fraction path the audit refuses for irrationals; safe integers stay exact. D4’s optional extra is a `bigint` cell type so a large integer never goes through `fromNumber`. |
-| statistics and functions are two CDF owners | **Disagree as implementations.** `statistics/src/index.ts` states the implementations live in functions and re-exports them (`mean`, `chiSquaredCDF`, hypothesis tests). D7 is a public owner sentence plus a binding test, not a new distribution. |
+| Claim in the audit                                                                          | This tree                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mean(Float32Array)` throws; `mean(Float64Array)` is a `Promise`                            | True. `functions/src/typed/arithmetic.ts` `mean` has `Array` (sync `pairwiseSum`) and `Float64Array` (`await computePool.mean`). No `Float32Array` signature. `ComputePool.mean` is `async`, so length 3 is still a Promise.                                                                                                                                                                                                                                |
+| core `pairwiseDot` on `Float32Array` is sync                                                | True. `pairwiseDot(a, b, start?, end?)` takes `ArrayLike<number>` and returns `number` (`core/src/numeric/stable.ts`).                                                                                                                                                                                                                                                                                                                                      |
+| `ton` is US short ton, 907.18474 kg                                                         | True. Row `ton` scale `2000*pound`. Alias `tons` → `ton`. `t` and `tonne` are 1000 kg and stay.                                                                                                                                                                                                                                                                                                                                                             |
+| `degC/s` parses; `.to('K')` adds 273.15                                                     | True. `degC` has `offset: '273.15'`. `Unit.prototype.to` takes one argument. No `reading` option.                                                                                                                                                                                                                                                                                                                                                           |
+| `m2K`, `Vs`, `cm^2/Vs`, `mmin`, `NN` are “not found”; `K²` is `Unexpected "²"`              | True today. After U5+U7 the answers are not all “parse as a product.” UPT `units.ts` (audit PR shape: copy that grammar): one legal product → parse (`m2K`, `Vs`, `NN`); two heterogeneous products → refuse (`mmin` is m·min or mm·in; `mAs` is mA·s or m·A·s). The audit U5 table listed `mmin` as a parse; that row is **wrong relative to UPT’s own grammar**. MathTS follows `units.ts`.                                                               |
+| `mol/mL` is one reading (millilitre); `mAs` is “not found”                                  | True today. U7 is not “cuts only on a miss.” A **bare** token that is one factor stays that factor (`mm`). **Inside a compound**, a prefixed denominator factor competes with heterogeneous products (`mL` in `mol/mL` is millilitre or metre·litre). Homogeneous prefix-letter runs (`m·m`) are not readings.                                                                                                                                              |
+| `exactScale('Hz') === 1`; `.to('rad/s')` multiplies by 2π                                   | True. `Hz` has `cycles: true` and scale `1`. `cycleAngleBridge` returns the cycle-count delta; `to` multiplies by `(2π)^k` and does not attach `k` to the result.                                                                                                                                                                                                                                                                                           |
+| `mpc` not found; `kpc`/`Mpc`/`Gpc` parse                                                    | True. `pc` uses prefix set `SHORT_UP_ONLY` (`siShort(1, p => p >= 3)`).                                                                                                                                                                                                                                                                                                                                                                                     |
+| `Unit.exactScale('bit')` is 1; information is axis 8                                        | True. Row `b` base `BIT` scale `1`. `BASE_DIMENSIONS` index 8 is `BIT`. `toSiDimensionVector` throws when index 7, 8, or 9 is nonzero unless `ignoreExtra`.                                                                                                                                                                                                                                                                                                 |
+| `UNIT_PREFIX_SETS` is not exported, so UPT must split prefixes itself                       | **Disagree.** `UNIT_PREFIX_SETS` and `unitPrefixExactScale` are already exported from `@danielsimonjr/mathts-core` (`core/src/index.ts`). U10’s remaining work is the `pc` row, not a new export.                                                                                                                                                                                                                                                           |
+| `searchScalars` has `grammar.admit` on 0.72                                                 | **True on npm 0.72.0 and on this tree.** `functions/package.json` is `0.72.0`. `functions/CHANGELOG.md` under `## 0.72.0` records `grammar.admit` on seeds and offspring, plus `loss`, `invalidRows`, `complexityWeights`, and `simplify`. The root `CHANGELOG.md` `[Unreleased]` section still repeats those SR-1–SR-7 bullets; that section is not evidence the package version is behind npm. D1 does not add `admit`. Do not write “0.72.0 lacks SR-1.” |
+| `scalarToTex` exists; no new printable form                                                 | True. Exported from functions.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `dimensions` filter is a 7-vector of `Fraction`s; `unitToRationalDimension` throws on `bit` | True. `RationalDimension` is `SiDimensionVector` (seven `Fraction`s, BIPM `[L, M, T, I, Θ, N, J]`). `unitToRationalDimension` reads `vector[8]` and throws `UnitParseError` for a nonzero BIT exponent. There is no `mapUnit` and no `equal` hook.                                                                                                                                                                                                          |
+| `leastSquares` throws `linsolve: singular matrix`                                           | True. `leastSquares` forms normal equations and calls `linsolve`, which throws when the partial-pivot magnitude is `< 1e-15` (absolute, on `AᵀA`, not on `A`). The audit’s `1e-8` throw / `1e-6` numeric split is that composed behavior, not a named `1e-8` constant. N5, if done, changes this threshold’s meaning; it does not invent a second solver.                                                                                                   |
+| `rationalNullspace` needs a second `Fraction`                                               | **Disagree for plain integers.** The signature is `(matrix: ReadonlyArray<ReadonlyArray<number \| Fraction>>, options?)`. A 7-column integer `number[][]` does not import `Fraction`. `Fraction.fromNumber` is the continued-fraction path the audit refuses for irrationals; safe integers stay exact. D4’s optional extra is a `bigint` cell type so a large integer never goes through `fromNumber`.                                                     |
+| statistics and functions are two CDF owners                                                 | **Disagree as implementations.** `statistics/src/index.ts` states the implementations live in functions and re-exports them (`mean`, `chiSquaredCDF`, hypothesis tests). D7 is a public owner sentence plus a binding test, not a new distribution.                                                                                                                                                                                                         |
 
 `ly` stays `SHORT_UP_ONLY`. This spec changes `pc` only.
 
@@ -158,10 +158,10 @@ Rules:
 
 Before tokenization, rewrite a superscript run that sits on a unit factor:
 
-| Character | Replacement |
-| --- | --- |
-| `⁰¹²³⁴⁵⁶⁷⁸⁹` | `^0` … `^9` |
-| `⁻` | `^-` when the next character is a superscript digit |
+| Character    | Replacement                                         |
+| ------------ | --------------------------------------------------- |
+| `⁰¹²³⁴⁵⁶⁷⁸⁹` | `^0` … `^9`                                         |
+| `⁻`          | `^-` when the next character is a superscript digit |
 
 `K²` parses as `K^2`. `m²` parses as `m^2`. ASCII `^` is unchanged. A superscript that is not on a factor (leading the string, or after an operator with no unit) still throws `UnitParseError`.
 
@@ -391,19 +391,19 @@ Each new test imports from the package entry (`@danielsimonjr/mathts-core` or th
 
 Probes that must fail before the fix and pass after:
 
-| ID | Probe |
-| --- | --- |
-| N4 | `mean(Float32Array.of(1, 2, 3)) === 2` and `mean(Float64Array.of(1, 2, 3)) === 2` and the value is not a Promise |
-| U5 | `parse('m2K')`, `parse('Vs')`, `parse('cm^2/Vs')`, `parse('NN')` match the spelled-out products. `parse('mmin')` is **not** a U5 success (two products; U7). |
-| U6 | `parse('K²')` matches `parse('K^2')` |
-| U7 | `parse('mol/mL')`, `parse('mAs')`, and `parse('mmin')` throw `AmbiguousUnitError` with ≥2 readings; `parse('mm')` still millimetre |
-| U3 | `parse('degC/s')` and `parse('1*degC')` throw; `parse('25 degC')` still 298.15 K |
-| U4 | `parse('25 degC').to('K', { reading: 'difference' }).value === 25` |
-| U9 | `exactScale('Hz')` numeric 1; `to('rad/s').cycles === 1`; value still 2π |
-| U10 | `parse('mpc')` scale is `parse('pc')` / 1000 |
-| U2 | `parse('ton')` throws; `parse('t')` still 1000 kg; `parse('shortton')` is 2000 lb |
-| D2 | `unitToRationalDimension('bit', { mapUnit: () => dimensionless })` returns the caller vector and does not throw |
-| N5 | only if MT-10 is attempted: a column pair whose equilibrated pivot is below `1e-13` throws; a well-conditioned 2×2 does not |
+| ID  | Probe                                                                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| N4  | `mean(Float32Array.of(1, 2, 3)) === 2` and `mean(Float64Array.of(1, 2, 3)) === 2` and the value is not a Promise                                             |
+| U5  | `parse('m2K')`, `parse('Vs')`, `parse('cm^2/Vs')`, `parse('NN')` match the spelled-out products. `parse('mmin')` is **not** a U5 success (two products; U7). |
+| U6  | `parse('K²')` matches `parse('K^2')`                                                                                                                         |
+| U7  | `parse('mol/mL')`, `parse('mAs')`, and `parse('mmin')` throw `AmbiguousUnitError` with ≥2 readings; `parse('mm')` still millimetre                           |
+| U3  | `parse('degC/s')` and `parse('1*degC')` throw; `parse('25 degC')` still 298.15 K                                                                             |
+| U4  | `parse('25 degC').to('K', { reading: 'difference' }).value === 25`                                                                                           |
+| U9  | `exactScale('Hz')` numeric 1; `to('rad/s').cycles === 1`; value still 2π                                                                                     |
+| U10 | `parse('mpc')` scale is `parse('pc')` / 1000                                                                                                                 |
+| U2  | `parse('ton')` throws; `parse('t')` still 1000 kg; `parse('shortton')` is 2000 lb                                                                            |
+| D2  | `unitToRationalDimension('bit', { mapUnit: () => dimensionless })` returns the caller vector and does not throw                                              |
+| N5  | only if MT-10 is attempted: a column pair whose equilibrated pivot is below `1e-13` throws; a well-conditioned 2×2 does not                                  |
 
 No new npm dependency. No benchmark claim. No `RELEASES_ENABLED` change.
 
@@ -415,23 +415,23 @@ Publish stays the owner’s decision. The plan’s tasks do not run `npm publish
 
 Suggested merge order, one PR each:
 
-| PR | IDs | Package surface |
-| --- | --- | --- |
-| MT-1 | N4 | `functions` typed reductions |
-| MT-2 | U5, U6 | `core` unit parse, glued + superscripts |
-| MT-3 | U7 | `core` ambiguity, depends on MT-2’s splitter |
-| MT-4 | U3, U4 | `core` affine + difference `to` |
-| MT-5 | U8 | `core` optional `bit: 'ln2'`, skippable |
-| MT-6 | U9 | `core` `cycles` on `to` |
-| MT-7 | U10 | `core` `pc` prefix set |
-| MT-8 | U2 | `core` `ton` plus `shortton` / `longton` |
-| MT-9 | D2 | `functions` `mapUnit` / `equal` |
-| MT-10 | N5 | `functions` `leastSquares`, skippable |
-| D1 | D1 | docs + characterization test, no behavior change |
-| D4 | D4 | optional `bigint` cells |
-| D5 | D5 | one paragraph in `docs/reference/scalar-search.md` |
-| D6 | D6 | export characterization only |
-| D7 | D7 | same-function binding test + README sentence |
+| PR    | IDs    | Package surface                                    |
+| ----- | ------ | -------------------------------------------------- |
+| MT-1  | N4     | `functions` typed reductions                       |
+| MT-2  | U5, U6 | `core` unit parse, glued + superscripts            |
+| MT-3  | U7     | `core` ambiguity, depends on MT-2’s splitter       |
+| MT-4  | U3, U4 | `core` affine + difference `to`                    |
+| MT-5  | U8     | `core` optional `bit: 'ln2'`, skippable            |
+| MT-6  | U9     | `core` `cycles` on `to`                            |
+| MT-7  | U10    | `core` `pc` prefix set                             |
+| MT-8  | U2     | `core` `ton` plus `shortton` / `longton`           |
+| MT-9  | D2     | `functions` `mapUnit` / `equal`                    |
+| MT-10 | N5     | `functions` `leastSquares`, skippable              |
+| D1    | D1     | docs + characterization test, no behavior change   |
+| D4    | D4     | optional `bigint` cells                            |
+| D5    | D5     | one paragraph in `docs/reference/scalar-search.md` |
+| D6    | D6     | export characterization only                       |
+| D7    | D7     | same-function binding test + README sentence       |
 
 UPT can, after a release that contains the PR, flip the matching row in `tests/dimensional/mathts-unit-gaps.test.ts` and extend `A5_DELEGATED_TEXTS`. That UPT PR is out of scope here. One grammar family per UPT PR, matching the audit’s UPT-4.
 
