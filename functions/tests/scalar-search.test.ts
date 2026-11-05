@@ -3345,3 +3345,217 @@ describe('searchScalars: sqrt and atan', () => {
     expect(frontToLatexTable(result.front).includes('\\sqrt')).toBe(true);
   });
 });
+
+describe('searchScalars: cancel and early stop (SR-15)', () => {
+  // The seed-7 pin of the reproducibility suite, restated here so a cancelled or
+  // early-stopped run can be compared against the uninterrupted one.
+  const pinned = {
+    populationSize: 8,
+    tournamentSize: 4,
+    maxEvaluations: 120,
+  } as const;
+
+  it('omitted signal and earlyStop keeps the seed-7 pin at the full 120 evaluations', async () => {
+    const options = {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      tournamentP: 0.982,
+      ...pinned,
+    } as const;
+    const a = await runSearch(quadProblem, options);
+    const c = await runSearch(quadProblem, options);
+    expect(a.result.evaluations).toBe(120);
+    expect(a.result.stopReason).toBe('max-evaluations');
+    expect(a.progress.map((p) => p.evaluations)).toEqual(
+      Array.from({ length: 15 }, (_, i) => 8 * (i + 1))
+    );
+    a.progress.forEach((event, i) => {
+      expect(event.front.map((r) => scalarCanonicalKey(r.item))).toEqual(
+        c.progress[i]!.front.map((r) => scalarCanonicalKey(r.item))
+      );
+      event.front.forEach((row, j) => {
+        expect(Object.is(row.loss, c.progress[i]!.front[j]!.loss)).toBe(true);
+      });
+    });
+  });
+
+  it('a signal aborted before next() returns cancelled with zero evaluations', async () => {
+    const gen = searchScalars(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 120,
+      signal: AbortSignal.abort(),
+    });
+    const step = await gen.next();
+    if (!step.done) {
+      throw new Error('expected the generator to finish immediately');
+    }
+    expect(step.value.stopReason).toBe('cancelled');
+    expect(step.value.evaluations).toBe(0);
+    expect(step.value.front).toEqual([]);
+    expect(step.value.fittedParameters).toEqual([]);
+    expect(step.value.seed).toBe(7);
+  });
+
+  it('a signal aborted after the first progress returns that front and emits no more', async () => {
+    const controller = new AbortController();
+    const gen = searchScalars(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 120,
+      signal: controller.signal,
+    });
+    const first = await gen.next();
+    expect(first.done).toBe(false);
+    expect(first.value.evaluations).toBe(27);
+    controller.abort();
+    const progress: SearchProgress[] = [];
+    for (;;) {
+      const step = await gen.next();
+      if (step.done) {
+        expect(step.value.stopReason).toBe('cancelled');
+        expect(step.value.evaluations).toBe(27);
+        expect(step.value.front).toEqual(first.value.front);
+        step.value.front.forEach((row, i) => {
+          expect(Object.is(row.loss, first.value.front[i]!.loss)).toBe(true);
+        });
+        break;
+      }
+      progress.push(step.value);
+    }
+    // No further generation started: the last progress is the only one.
+    expect(progress).toHaveLength(0);
+  });
+
+  it('a signal aborted mid-run stops after the generation in flight, not mid-draw', async () => {
+    const controller = new AbortController();
+    const gen = searchScalars(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 120,
+      signal: controller.signal,
+    });
+    await gen.next();
+    await gen.next();
+    controller.abort();
+    const progress: SearchProgress[] = [];
+    for (;;) {
+      const step = await gen.next();
+      if (step.done) {
+        expect(step.value.stopReason).toBe('cancelled');
+        break;
+      }
+      progress.push(step.value);
+    }
+    // The aborted run emits no more than the uninterrupted run's remaining events.
+    const uninterrupted = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 120,
+    });
+    expect(progress.length).toBeLessThan(uninterrupted.progress.length);
+  });
+
+  it('earlyStop { loss: 1e-10, generations: 1 } stops the x^2 + x run at 27 evaluations', async () => {
+    const { progress, result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 2_000,
+      earlyStop: { loss: 1e-10, generations: 1 },
+    });
+    // Default population of 27: the law is in the initial population, so the very
+    // first hall already satisfies the bound.
+    expect(result.evaluations).toBe(27);
+    expect(result.stopReason).toBe('early-stop');
+    expect(progress).toHaveLength(1);
+    expect(progress[0]!.evaluations).toBe(27);
+    expect(bestRow(result.front).loss).toBeLessThanOrEqual(1e-10);
+  });
+
+  it('earlyStop generations > 1 waits for that many consecutive generations', async () => {
+    const one = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 2_000,
+      earlyStop: { loss: 1e-10, generations: 1 },
+    });
+    const two = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 2_000,
+      earlyStop: { loss: 1e-10, generations: 2 },
+    });
+    expect(two.result.stopReason).toBe('early-stop');
+    expect(two.result.evaluations).toBeGreaterThan(one.result.evaluations);
+    // Default population 27: one generation past the initial population.
+    expect(two.result.evaluations).toBe(54);
+  });
+
+  it('earlyStop never reached still ends on max-evaluations', async () => {
+    const { result } = await runSearch(hardProblem, {
+      grammar: hardGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 200,
+      earlyStop: { loss: -1, generations: 1 },
+    });
+    expect(result.stopReason).toBe('max-evaluations');
+    expect(result.evaluations).toBe(200);
+  });
+
+  it('earlyStop works with several islands', async () => {
+    const { result } = await runSearch(quadProblem, {
+      grammar: quadGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 2_000,
+      populations: 4,
+      earlyStop: { loss: 1e-10, generations: 1 },
+    });
+    expect(result.stopReason).toBe('early-stop');
+    // Four islands deal 27 * 4 = 108 enumerated trees into the initial population.
+    expect(result.evaluations).toBe(108);
+  });
+
+  it('rejects a bad earlyStop before the first yield', async () => {
+    for (const loss of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      await expect(
+        runSearch(quadProblem, {
+          grammar: quadGrammar,
+          rng: createSeededRng(7),
+          maxEvaluations: 10,
+          earlyStop: { loss, generations: 1 },
+        })
+      ).rejects.toThrow(RangeError);
+    }
+    for (const generations of [0, -1, 1.5, Number.NaN]) {
+      await expect(
+        runSearch(quadProblem, {
+          grammar: quadGrammar,
+          rng: createSeededRng(7),
+          maxEvaluations: 10,
+          earlyStop: { loss: 1e-10, generations },
+        })
+      ).rejects.toThrow(RangeError);
+    }
+    await expect(
+      runSearch(quadProblem, {
+        grammar: quadGrammar,
+        rng: createSeededRng(7),
+        maxEvaluations: 10,
+        earlyStop: 'now' as unknown as ScalarSearchOptions['earlyStop'],
+      })
+    ).rejects.toThrow(RangeError);
+  });
+
+  it('two uninterrupted runs still match with earlyStop configured but never reached', async () => {
+    const options = {
+      grammar: hardGrammar,
+      rng: createSeededRng(7),
+      maxEvaluations: 200,
+      earlyStop: { loss: -1, generations: 3 },
+    } as const;
+    const a = await runSearch(hardProblem, options);
+    const c = await runSearch(hardProblem, options);
+    expect(trace(a.progress)).toBe(trace(c.progress));
+    expect(Object.is(a.result.front[0]!.loss, c.result.front[0]!.loss)).toBe(true);
+  });
+});

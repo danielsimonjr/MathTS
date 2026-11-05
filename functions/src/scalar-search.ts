@@ -280,6 +280,31 @@ export interface ScalarSearchOptions {
    * a pool when it first needs it and terminates it when the generator finishes or is closed.
    */
   readonly parallel?: ScalarPopulationParallelOptions;
+  /**
+   * Cancellation signal (SR-15). The search checks it before the initial population
+   * and between generations, never in the middle of a random draw or a scored batch.
+   * Already aborted before the first yield: the result has an empty front,
+   * `evaluations: 0`, and `stopReason: 'cancelled'`. Aborted after a yield: the
+   * generator returns the last progress as the result with `stopReason: 'cancelled'`
+   * and does not start another generation (a generation that was already breeding
+   * and scoring runs to completion first). A pool the search owns is still
+   * terminated. Omitted: no cancellation and the seed-7 pin is unchanged.
+   */
+  readonly signal?: AbortSignal;
+  /**
+   * Optional early stop (SR-15). Omitted: the search always runs to
+   * `max-evaluations` (or `'max-candidates'`). Set: after a generation whose best
+   * finite hall loss is `<= loss`, and that has stayed true for `generations`
+   * consecutive generations, the search returns `stopReason: 'early-stop'` after
+   * yielding that generation's progress. The streak is counted over the hall after
+   * the generation (the initial population included), and it resets when a
+   * generation leaves the best loss above `loss` — the best hall loss can only
+   * improve, so a reset happens only while the hall is still empty or the best
+   * loss has not yet reached `loss`. `loss` must be finite and `generations` an
+   * integer `>= 1` (`RangeError` otherwise). A run that never reaches `loss`
+   * still ends on `'max-evaluations'`.
+   */
+  readonly earlyStop?: { readonly loss: number; readonly generations: number };
 }
 
 /** Budget, bounds, and start-vector knobs for the search's parameter refits. */
@@ -317,7 +342,8 @@ export interface SearchProgress {
   readonly selected?: ScoredCandidate<ScalarNode>;
 }
 
-export type ScalarSearchStopReason = 'max-evaluations' | 'max-candidates';
+export type ScalarSearchStopReason =
+  'max-evaluations' | 'max-candidates' | 'cancelled' | 'early-stop';
 
 /** Final value of the async generator returned by {@link searchScalars}. */
 export interface ScalarSearchResult {
@@ -873,6 +899,19 @@ function assertSearchInputs(
     throw new RangeError(
       `searchScalars: dimensions must be a plain object, got ${String(options.dimensions)}`
     );
+  }
+  if (options.earlyStop !== undefined) {
+    if (!isDataPlainObject(options.earlyStop)) {
+      throw new RangeError(
+        `searchScalars: earlyStop must be a plain object, got ${String(options.earlyStop)}`
+      );
+    }
+    if (!Number.isFinite(options.earlyStop.loss)) {
+      throw new RangeError(
+        `searchScalars: earlyStop.loss must be a finite number, got ${String(options.earlyStop.loss)}`
+      );
+    }
+    positiveInteger('earlyStop.generations', options.earlyStop.generations);
   }
 }
 
@@ -1592,7 +1631,14 @@ function pickSelected(
  * tree that will be scored — after the grammar check, before the score — against
  * `target`: a violation or an `inconsistent` solve scores `Infinity` (still an
  * evaluation, never in the hall), an underdetermined solve is kept by default or
- * rejected with `'reject'`, and the check draws no random numbers.
+ * rejected with `'reject'`, and the check draws no random numbers. `signal`
+ * (opt-in) is checked before the initial population and between generations, never
+ * mid-draw: already aborted before the first yield the result carries an empty
+ * front and `evaluations: 0`; aborted after a yield the last progress is returned
+ * as the result, both with `stopReason: 'cancelled'`. `earlyStop` (opt-in) ends
+ * the run with `stopReason: 'early-stop'` once the best finite hall loss has been
+ * `<= loss` for `generations` consecutive generations (hall after the generation,
+ * initial population included).
  *
  * @throws {RangeError} A malformed problem or option, or a grammar that admits no tree.
  */
@@ -1667,6 +1713,53 @@ export async function* searchScalars(
     let simplifyFallbacks = 0;
     const hallOfFame = new HallOfFame();
 
+    // SR-15: the best finite loss the hall has stored (hall.add skips non-finite
+    // losses) and the run of consecutive generations whose hall best is within the
+    // early-stop bound. The best can only improve, so the streak resets only while
+    // the bound has not been reached yet.
+    let bestLoss = Number.POSITIVE_INFINITY;
+    let earlyStreak = 0;
+    const earlyStop = options.earlyStop;
+    const noteLosses = (individuals: readonly EvaluatedIndividual[]): void => {
+      for (const ind of individuals) {
+        if (ind.loss < bestLoss) {
+          bestLoss = ind.loss;
+        }
+      }
+    };
+    const noteEarlyStop = (): void => {
+      if (earlyStop === undefined) {
+        return;
+      }
+      if (bestLoss <= earlyStop.loss) {
+        earlyStreak += 1;
+      } else {
+        earlyStreak = 0;
+      }
+    };
+    const betweenGenerations = (): ScalarSearchStopReason | null => {
+      if (options.signal?.aborted) {
+        return 'cancelled';
+      }
+      if (earlyStop !== undefined && earlyStreak >= earlyStop.generations) {
+        return 'early-stop';
+      }
+      return null;
+    };
+    const resultWith = (stopReason: ScalarSearchStopReason): ScalarSearchResult => {
+      const { front, fittedParameters } = hallOfFame.front();
+      return {
+        front,
+        parameterNames: names,
+        fittedParameters,
+        stopReason,
+        evaluations,
+        seed: options.rng.seed,
+        selected: pickSelected(front, options.modelSelection),
+        simplifyFallbacks,
+      };
+    };
+
     const seedAccept: AcceptContext = {
       grammar: options.grammar,
       mode: simplifyMode,
@@ -1681,6 +1774,13 @@ export async function* searchScalars(
               simplifyFallbacks += 1;
             },
     };
+
+    // The signal is checked before the initial population, so an already-aborted
+    // run does not enumerate, score, or start a worker: the result carries the
+    // empty hall (front []) and zero evaluations.
+    if (options.signal?.aborted) {
+      return resultWith('cancelled');
+    }
 
     const trees = initialTrees(
       options.grammar,
@@ -1721,8 +1821,10 @@ export async function* searchScalars(
         hallOfFame.add(ind);
         parsimony?.frequency.record(ind.complexity);
       }
+      noteLosses(population);
       islands.push({ rng, population });
     }
+    noteEarlyStop();
 
     const report = (): SearchProgress => {
       const { front, fittedParameters } = hallOfFame.front();
@@ -1737,6 +1839,13 @@ export async function* searchScalars(
     };
 
     yield report();
+
+    // Between-generation checks: an abort or a met early-stop bound ends the run
+    // on the progress just yielded; no further generation starts.
+    const firstStop = betweenGenerations();
+    if (firstStop !== null) {
+      return resultWith(firstStop);
+    }
 
     while (evaluations < budget) {
       const mutationCtx: ScalarMutationContext = {
@@ -1854,6 +1963,7 @@ export async function* searchScalars(
         evaluations += offspring.length;
         for (const ind of offspring) {
           hallOfFame.add(ind);
+          noteLosses([ind]);
         }
         if (parsimony !== undefined && frequencyRecordTiming === 'after-merge') {
           for (const complexity of batches[b]!.pendingComplexities) {
@@ -1865,6 +1975,7 @@ export async function* searchScalars(
           populationSize
         );
       }
+      noteEarlyStop();
       // After the last evaluation nothing breeds again, so migrating would change nothing.
       if (evaluations < budget) {
         migrateIslands(islands, fractionReplaced, migrationRng);
@@ -1875,14 +1986,21 @@ export async function* searchScalars(
 
       yield report();
       await Promise.resolve();
+      const stop = betweenGenerations();
+      if (stop !== null) {
+        return resultWith(stop);
+      }
     }
 
+    // The budget is spent. An abort or an early-stop bound that this last
+    // generation satisfied still wins over the budget reason.
+    const finalStop = betweenGenerations();
     const last = report();
     return {
       front: last.front,
       parameterNames: names,
       fittedParameters: last.fittedParameters,
-      stopReason: candidatesBind ? 'max-candidates' : 'max-evaluations',
+      stopReason: finalStop ?? (candidatesBind ? 'max-candidates' : 'max-evaluations'),
       evaluations,
       seed: options.rng.seed,
       selected: last.selected,

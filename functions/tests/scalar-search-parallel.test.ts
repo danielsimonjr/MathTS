@@ -363,4 +363,82 @@ describe('searchScalars with parallel evaluation', () => {
     }
     expect(world.pools.length).toBe(before);
   });
+
+  // SR-15: cancellation. The signal is checked before the initial population and
+  // between generations, so a worker-backed generation in flight still completes.
+  it('a signal aborted before next() starts no pool and returns cancelled', async () => {
+    const before = world.pools.length;
+    const gen = searchScalars(problemOf(120, planted), {
+      ...base,
+      rng: createSeededRng(7),
+      parallel: {},
+      signal: AbortSignal.abort(),
+    });
+    const step = await gen.next();
+    if (!step.done) {
+      throw new Error('expected the generator to finish immediately');
+    }
+    expect(step.value.stopReason).toBe('cancelled');
+    expect(step.value.evaluations).toBe(0);
+    expect(step.value.front).toEqual([]);
+    expect(world.pools.length).toBe(before);
+  });
+
+  it('terminates the pool it owns when the signal aborts after a yield', async () => {
+    const before = world.pools.length;
+    const controller = new AbortController();
+    const gen = searchScalars(problemOf(120, planted), {
+      ...base,
+      rng: createSeededRng(7),
+      parallel: {},
+      signal: controller.signal,
+    });
+    const first = await gen.next();
+    expect(first.done).toBe(false);
+    controller.abort();
+    const step = await gen.next();
+    if (!step.done) {
+      throw new Error('expected the generator to finish after the abort');
+    }
+    expect(step.value.stopReason).toBe('cancelled');
+    expect(step.value.evaluations).toBe(first.value.evaluations);
+    expect(step.value.front).toEqual(first.value.front);
+    expect(world.pools[before]!.terminated).toBe(1);
+  });
+
+  it('a signal aborted during a worker-backed generation with islands ends after it', async () => {
+    const before = world.pools.length;
+    const controller = new AbortController();
+    const gen = searchScalars(problemOf(120, planted), {
+      ...base,
+      populations: 4,
+      rng: createSeededRng(2),
+      parallel: {},
+      signal: controller.signal,
+    });
+    const first = await gen.next();
+    expect(first.done).toBe(false);
+    controller.abort();
+    const step = await gen.next();
+    if (!step.done) {
+      throw new Error('expected the generator to finish after the abort');
+    }
+    expect(step.value.stopReason).toBe('cancelled');
+    expect(step.value.evaluations).toBe(first.value.evaluations);
+    expect(world.pools[before]!.terminated).toBe(1);
+  });
+
+  it('earlyStop matches the serial run through the workers, bit for bit', async () => {
+    const problem = problemOf(120, planted);
+    const stopped = {
+      ...base,
+      rng: createSeededRng(7),
+      earlyStop: { loss: 1e-10, generations: 2 },
+    } as const;
+    const serial = await drain(problem, stopped);
+    const parallel = await drain(problem, { ...stopped, parallel: {} });
+    expectSameRun(parallel.progress, serial.progress);
+    expect(parallel.result.stopReason).toBe(serial.result.stopReason);
+    expect(parallel.result.evaluations).toBe(serial.result.evaluations);
+  });
 });
