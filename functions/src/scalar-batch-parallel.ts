@@ -16,6 +16,8 @@ import { WorkerPool } from '@danielsimonjr/mathts-parallel';
 import {
   buildTape,
   compileScalar,
+  createBatchTapeCache,
+  evaluateScalarTape,
   type CompileScalarOptions,
   type ScalarBatchResult,
 } from './scalar-compile.js';
@@ -24,6 +26,7 @@ import {
   type ScalarBatchTask,
   type ScalarBatchTaskItem,
   type ScalarBatchTaskResult,
+  type ScalarBatchTaskTape,
 } from './scalar-batch-task.js';
 
 /**
@@ -117,29 +120,73 @@ function evaluateSerial(options: EvaluateScalarPopulationOptions): ScalarPopulat
     parameters: options.parameters,
     constants: options.constants,
   };
+  const probe = new Float64Array(compileOptions.parameters?.length ?? 0).fill(1);
+  const tapeFor = createBatchTapeCache(
+    probe,
+    (node) => compileScalar(node, compileOptions),
+    (compiled, params) => compiled.evaluate(options.columns, params)
+  );
   return options.items.map((item) => ({
     index: item.index,
-    batch: compileScalar(item.node, compileOptions).evaluate(options.columns, item.params),
+    batch: tapeFor(item.node).evaluate(options.columns, item.params),
   }));
 }
 
 function taskItem(
+  tapeIndex: number,
   item: ScalarPopulationEvalItem,
   position: number,
-  compileOptions: CompileScalarOptions
+  parameters: readonly string[]
 ): ScalarBatchTaskItem {
-  const { tape, rootReg, nRegs, parameters } = buildTape(
-    item.node,
-    compileOptions,
-    SCALAR_BATCH_MESSAGE_PREFIX
-  );
   return {
     candidateIndex: position,
-    tape,
-    rootReg,
-    nRegs,
+    tapeIndex,
     params: item.params === undefined ? [] : Array.from(item.params),
     parameters,
+  };
+}
+
+/**
+ * Compiles every item to a tape entry, one per distinct stored shape (SR-12). Items
+ * whose stored shapes share a canonical key share one tape only when both shapes
+ * evaluate `Object.is`-identically over the columns with a probe vector of ones;
+ * otherwise the shape keeps its own tape. The tapes stay caller-built, exactly as
+ * before, so worker results remain bit-identical to the serial batch.
+ */
+function buildTapeEntries(
+  options: EvaluateScalarPopulationOptions,
+  compileOptions: CompileScalarOptions
+): { tapes: ScalarBatchTaskTape[]; indexByNode: (node: ScalarNode) => number } {
+  const probe = new Float64Array(compileOptions.parameters?.length ?? 0).fill(1);
+  const tapeFor = createBatchTapeCache(
+    probe,
+    (node) => buildTape(node, compileOptions, SCALAR_BATCH_MESSAGE_PREFIX),
+    (entry, params) =>
+      evaluateScalarTape(
+        entry.tape,
+        entry.rootReg,
+        entry.nRegs,
+        options.columns,
+        options.variables,
+        params,
+        compileOptions.parameters ?? [],
+        SCALAR_BATCH_MESSAGE_PREFIX
+      )
+  );
+  const tapes: ScalarBatchTaskTape[] = [];
+  const indexOfTape = new Map<ScalarBatchTaskTape, number>();
+  return {
+    tapes,
+    indexByNode: (node) => {
+      const entry = tapeFor(node);
+      let index = indexOfTape.get(entry);
+      if (index === undefined) {
+        index = tapes.length;
+        tapes.push(entry);
+        indexOfTape.set(entry, index);
+      }
+      return index;
+    },
   };
 }
 
@@ -154,11 +201,34 @@ async function evaluateOnPool(
     parameters: options.parameters,
     constants: options.constants,
   };
-  const items = options.items.map((item, position) => taskItem(item, position, compileOptions));
+  const build = buildTapeEntries(options, compileOptions);
+  const items = options.items.map((item, position) => ({
+    item,
+    position,
+    tapeIndex: build.indexByNode(item.node),
+  }));
   const variables = options.variables.slice();
+  const parameters = compileOptions.parameters ?? [];
   const replies = await Promise.all(
     partition(items, defaultWorkerCount()).map((chunk) => {
-      const task: ScalarBatchTask = { items: chunk, columns: options.columns, variables };
+      // Each message carries only the tapes its chunk references, reindexed locally,
+      // so a shared tape is never shipped twice inside one message.
+      const localIndex = new Map<number, number>();
+      const tapes: ScalarBatchTaskTape[] = [];
+      const task: ScalarBatchTask = {
+        items: chunk.map(({ item, position, tapeIndex }) => {
+          let local = localIndex.get(tapeIndex);
+          if (local === undefined) {
+            local = tapes.length;
+            localIndex.set(tapeIndex, local);
+            tapes.push(build.tapes[tapeIndex]!);
+          }
+          return taskItem(local, item, position, parameters);
+        }),
+        tapes,
+        columns: options.columns,
+        variables,
+      };
       return pool.execute<ScalarBatchTask, ScalarBatchTaskResult>(task, undefined, timeoutMs);
     })
   );

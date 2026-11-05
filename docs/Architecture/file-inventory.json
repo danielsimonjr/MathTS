@@ -7415,14 +7415,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 226
+      "loc": 296
     },
     {
       "file": "functions/src/scalar-batch-task.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 68
+      "loc": 80
     },
     {
       "file": "functions/src/scalar-batch.worker.ts",
@@ -7436,7 +7436,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 885
+      "loc": 951
     },
     {
       "file": "functions/src/scalar-dimension.ts",
@@ -7471,7 +7471,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1819
+      "loc": 1841
     },
     {
       "file": "functions/src/set/flatten-pair.ts",
@@ -11279,7 +11279,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 276
+      "loc": 491
     },
     {
       "file": "functions/tests/scalar-compile-gradient.test.ts",
@@ -11293,7 +11293,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 629
+      "loc": 682
     },
     {
       "file": "functions/tests/scalar-dimension.test.ts",

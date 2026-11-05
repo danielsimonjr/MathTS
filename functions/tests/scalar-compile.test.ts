@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
-import { compileScalar } from '../src/scalar-compile.js';
+import { scalarCanonicalKey } from '@danielsimonjr/mathts-expression';
+import { compileScalar, createBatchTapeCache, type CompiledScalar } from '../src/scalar-compile.js';
 import type { CompileScalarOptions, ScalarBatchResult } from '../src/scalar-compile.js';
 import { compileScalar as compileFromIndex } from '../src/index.js';
 import { ScalarEvalError, evaluateScalar, scalar } from '../src/scalar-eval.js';
@@ -624,5 +625,57 @@ describe('compileScalar', () => {
     expect(atanBatch.allValid).toBe(true);
     expect(atanBatch.values[0]).toBeCloseTo(Math.PI / 4, 15);
     expectBatchMatchesEvaluateScalar(atanNode, { variables: ['x'] }, [atans], atanBatch);
+  });
+});
+
+describe('createBatchTapeCache (SR-12)', () => {
+  const columns = [Float64Array.of(1.0142857142857142, 2, -3, 0.5)];
+  const options: CompileScalarOptions = { variables: ['x'] };
+
+  function makeCache(): (node: ScalarNode) => CompiledScalar {
+    return createBatchTapeCache(
+      new Float64Array(0),
+      (node) => compileScalar(node, options),
+      (compiled, params) => compiled.evaluate(columns, params)
+    );
+  }
+
+  it('reuses one compile for copies of the same stored tree', () => {
+    const cache = makeCache();
+    const node = scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]);
+    expect(cache(node)).toBe(cache(node));
+  });
+
+  it('shares a tape across same-key stored shapes when they evaluate identically', () => {
+    const cache = makeCache();
+    const twoFirst = scalar.op('*', [scalar.number(2), scalar.symbol('x')]);
+    const xFirst = scalar.op('*', [scalar.symbol('x'), scalar.number(2)]);
+    expect(scalarCanonicalKey(twoFirst)).toBe(scalarCanonicalKey(xFirst));
+    expect(twoFirst).not.toBe(xFirst);
+    expect(cache(twoFirst)).toBe(cache(xFirst));
+  });
+
+  it('keeps separate tapes when same-key stored shapes evaluate differently', () => {
+    const cache = makeCache();
+    const tripleProduct = scalar.op('*', [
+      scalar.op('*', [scalar.symbol('x'), scalar.symbol('x')]),
+      scalar.symbol('x'),
+    ]);
+    const power = scalar.op('^', [scalar.symbol('x'), scalar.number(3)]);
+    expect(scalarCanonicalKey(tripleProduct)).toBe(scalarCanonicalKey(power));
+    const shared = cache(tripleProduct);
+    const own = cache(power);
+    expect(own).not.toBe(shared);
+    const batch = own.evaluate(columns);
+    expect(batch.values[0]).toBe(1.043472303206997);
+    expect(shared.evaluate(columns).values[0]).toBe(1.0434723032069968);
+  });
+
+  it('gives every cached compile the standalone result, copies included', () => {
+    const cache = makeCache();
+    const node = scalar.call('sqrt', scalar.symbol('x'));
+    const batch = cache(node).evaluate(columns);
+    expect([...batch.valid]).toEqual([1, 1, 0, 1]);
+    expectBatchMatchesEvaluateScalar(node, options, columns, batch);
   });
 });
