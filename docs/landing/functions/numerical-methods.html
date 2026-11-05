@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numerical Methods — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Numerical Methods</div>
+  <h1><span>Numerical Methods</span> (47)</h1>
+  <p class="cat-desc">Root-finding, optimization, linear systems, and differential equations.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Numerical Methods..." oninput="filterFuncs()">
+<div class="func-card" id="bfgs" data-name="bfgs">
+  <div class="func-name">bfgs</div>
+  <div class="func-desc">BFGS quasi-Newton minimization (inverse-Hessian update + Armijo line search; analytic <code>grad</code> optional, else central differences; optional box <code>bounds</code> via projection); returns <code>{ x, fval, iterations, converged }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bfgs(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="derivativeAt" data-name="derivativeat">
+  <div class="func-name">derivativeAt</div>
+  <div class="func-desc">Exact scalar derivative of <code>f: ℝ → ℝ</code> at <code>x</code> via forward-mode autodiff (the <code>Dual</code> type; no finite differences)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">derivativeAt(f, x)</div>
+  </div>
+</div>
+<div class="func-card" id="differentialEvolution" data-name="differentialevolution">
+  <div class="func-name">differentialEvolution</div>
+  <div class="func-desc">Global minimization by differential evolution (rand/1/bin, <code>F</code> 0.8, <code>CR</code> 0.9, <code>popSize</code> 15·dim); deterministic for a given <code>opts.seed</code> (default 0); returns <code>{ x, fx, iterations, evaluations, converged }</code>; empty or inverted bounds throw <code>RangeError</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">differentialEvolution(f, bounds[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="eventDetection" data-name="eventdetection">
+  <div class="func-name">eventDetection</div>
+  <div class="func-desc">ODE event detection</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">eventDetection(...)</div>
+  </div>
+</div>
+<div class="func-card" id="findRoot" data-name="findroot">
+  <div class="func-name">findRoot</div>
+  <div class="func-desc">Bracketed root-finding (bisection/Brent)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">findRoot(f, a, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="finiteDifferenceCoefficients" data-name="finitedifferencecoefficients">
+  <div class="func-name">finiteDifferenceCoefficients</div>
+  <div class="func-desc">Fornberg finite-difference weights for the <code>derivOrder</code>-th derivative at 0 on a stencil of <code>offsets</code> (in units of the step); e.g. <code>(2, [-1, 0, 1])</code> is <code>[1, -2, 1]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">finiteDifferenceCoefficients(derivOrder, offsets)</div>
+  </div>
+</div>
+<div class="func-card" id="fixedPoint" data-name="fixedpoint">
+  <div class="func-name">fixedPoint</div>
+  <div class="func-desc">Fixed point of <code>g</code> by iteration <code>x ← g(x)</code>; <code>opts.aitken: true</code> applies Aitken Δ² extrapolation; <code>opts.tol</code>, <code>opts.maxIter</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fixedPoint(g, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="fsolve" data-name="fsolve">
+  <div class="func-name">fsolve</div>
+  <div class="func-desc">Nonlinear system solver <code>F(x) = 0</code> for <code>F: ℝⁿ → ℝⁿ</code> (damped Newton)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fsolve(F, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="gaussLegendre4" data-name="gausslegendre4">
+  <div class="func-name">gaussLegendre4</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gaussLegendre4(…)</div>
+  </div>
+</div>
+<div class="func-card" id="GL4ConvergenceError" data-name="gl4convergenceerror">
+  <div class="func-name">GL4ConvergenceError</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">GL4ConvergenceError(…)</div>
+  </div>
+</div>
+<div class="func-card" id="globalMinimize" data-name="globalminimize">
+  <div class="func-name">globalMinimize</div>
+  <div class="func-desc">Global minimization</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">globalMinimize(f, bounds[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="gradient" data-name="gradient">
+  <div class="func-name">gradient</div>
+  <div class="func-desc">Numeric gradient of sampled data (second-order central differences, one-sided at edges; matches <code>numpy.gradient</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gradient(y[, x])</div>
+  </div>
+</div>
+<div class="func-card" id="gradientAt" data-name="gradientat">
+  <div class="func-name">gradientAt</div>
+  <div class="func-desc">Exact gradient of <code>f: ℝⁿ → ℝ</code> at <code>x</code> by <code>n</code> forward-mode passes</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gradientAt(f, x)</div>
+  </div>
+</div>
+<div class="func-card" id="gradientDescent" data-name="gradientdescent">
+  <div class="func-name">gradientDescent</div>
+  <div class="func-desc">Gradient descent with backtracking line search (analytic <code>grad</code> optional, else central differences); returns <code>{ x, fx, iterations, converged }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gradientDescent(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="halley" data-name="halley">
+  <div class="func-name">halley</div>
+  <div class="func-desc">Halley's method root-finding (cubic convergence)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">halley(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="hessian" data-name="hessian">
+  <div class="func-name">hessian</div>
+  <div class="func-desc">Numeric Hessian (second partials) of <code>f: ℝⁿ → ℝ</code> via central differences, symmetric by construction</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hessian(f, x[, h])</div>
+  </div>
+</div>
+<div class="func-card" id="interval" data-name="interval">
+  <div class="func-name">interval</div>
+  <div class="func-desc">Construct an <code>Interval</code> <code>[lo, hi]</code>; throws if <code>lo &gt; hi</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">interval(lo, hi)</div>
+  </div>
+</div>
+<div class="func-card" id="leastSquares" data-name="leastsquares">
+  <div class="func-name">leastSquares</div>
+  <div class="func-desc">Least-squares solution (normal equations, JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">leastSquares(A, b)</div>
+  </div>
+</div>
+<div class="func-card" id="levenbergMarquardt" data-name="levenbergmarquardt">
+  <div class="func-name">levenbergMarquardt</div>
+  <div class="func-desc">Levenberg–Marquardt nonlinear least squares (damped normal equations); <code>opts.jacobian?: (x) =&gt; number[][]</code> with <code>J[i][j] = ∂r_i/∂x_j</code>; default <code>numericJacobian(residual, x, { h: 1e-7, scheme: 'forward' })</code>; returns <code>{ x, residualNorm, iterations, converged }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">levenbergMarquardt(residual, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="linprog" data-name="linprog">
+  <div class="func-name">linprog</div>
+  <div class="func-desc">Linear programming (legacy positional form); returns <code>x</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">linprog(c, A_ub, b_ub)
+linprog(c, { A_ub, b_ub, A_eq, b_eq, bounds })</div>
+  </div>
+</div>
+<div class="func-card" id="lsqBounded" data-name="lsqbounded">
+  <div class="func-name">lsqBounded</div>
+  <div class="func-desc">Box-constrained least squares (projected-gradient); returns <code>{ x, residual }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lsqBounded(A, b, lower, upper[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="maximize" data-name="maximize">
+  <div class="func-name">maximize</div>
+  <div class="func-desc">Local maximization</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">maximize(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="minimize" data-name="minimize">
+  <div class="func-name">minimize</div>
+  <div class="func-desc">Local minimization</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minimize(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="minimizeConstrained" data-name="minimizeconstrained">
+  <div class="func-name">minimizeConstrained</div>
+  <div class="func-desc">Augmented-Lagrangian minimization with a BFGS inner solver; <code>opts.eq</code> (<code>h(x) = 0</code>), <code>opts.ineq</code> (<code>g(x) ≤ 0</code>), <code>opts.bounds</code>, <code>opts.tol</code> (1e-8), <code>opts.maxOuter</code> (50); returns <code>{ x, fx, constraintViolation, outerIterations, converged }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minimizeConstrained(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="minimizeScalar" data-name="minimizescalar">
+  <div class="func-name">minimizeScalar</div>
+  <div class="func-desc">1-D minimization via Brent's method (golden-section + parabolic interp)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">minimizeScalar(f[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="nelderMead" data-name="neldermead">
+  <div class="func-name">nelderMead</div>
+  <div class="func-desc">Derivative-free downhill-simplex minimization; <code>NelderMeadOptions.stepRule</code> / <code>tolRule</code> default <code>'relative'</code>; <code>minimize</code> is the <code>'absolute'</code> wrapper and returns <code>x</code> only. Result <code>{ x, fx, iterations, converged }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nelderMead(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="newton" data-name="newton">
+  <div class="func-name">newton</div>
+  <div class="func-desc">Newton–Raphson root-finding (analytic or central-difference derivative)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">newton(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="nnls" data-name="nnls">
+  <div class="func-name">nnls</div>
+  <div class="func-desc">Non-negative least squares (Lawson–Hanson active-set); returns <code>{ x, residual }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nnls(A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="nullspace" data-name="nullspace">
+  <div class="func-name">nullspace</div>
+  <div class="func-desc">Null-space basis</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nullspace(A)</div>
+  </div>
+</div>
+<div class="func-card" id="numericJacobian" data-name="numericjacobian">
+  <div class="func-name">numericJacobian</div>
+  <div class="func-desc">Numeric Jacobian of <code>f: ℝⁿ → ℝᵐ</code> (non-square OK) via central differences with a per-coordinate relative step; <code>jacobian(f, x0)</code> dispatches here when the first arg is a function</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">numericJacobian(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="odeAdaptiveStep" data-name="odeadaptivestep">
+  <div class="func-name">odeAdaptiveStep</div>
+  <div class="func-desc">Adaptive-step ODE integration</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">odeAdaptiveStep(...)</div>
+  </div>
+</div>
+<div class="func-card" id="propagateUncertainty" data-name="propagateuncertainty">
+  <div class="func-name">propagateUncertainty</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">propagateUncertainty(…)</div>
+  </div>
+</div>
+<div class="func-card" id="quadprog" data-name="quadprog">
+  <div class="func-name">quadprog</div>
+  <div class="func-desc">Quadratic programming</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">quadprog(Q, c, A, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="residue" data-name="residue">
+  <div class="func-name">residue</div>
+  <div class="func-desc">Partial-fraction residues</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">residue(b, a)</div>
+  </div>
+</div>
+<div class="func-card" id="ridders" data-name="ridders">
+  <div class="func-name">ridders</div>
+  <div class="func-desc">Ridders' bracketed root-finding (<code>opts.tol</code>, <code>opts.maxIter</code>); <code>f(a)</code> and <code>f(b)</code> must differ in sign</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ridders(f, a, b[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="root" data-name="root">
+  <div class="func-name">root</div>
+  <div class="func-desc">Alias of <code>fsolve</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">root(F, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="secant" data-name="secant">
+  <div class="func-name">secant</div>
+  <div class="func-desc">Secant-method root-finding (no derivative required)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">secant(f, x0, x1[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="simulatedAnnealing" data-name="simulatedannealing">
+  <div class="func-name">simulatedAnnealing</div>
+  <div class="func-desc">Seeded simulated annealing with <code>opts.T0</code>, <code>opts.cooling</code> and optional <code>opts.bounds</code>; same result shape as <code>differentialEvolution</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">simulatedAnnealing(f, x0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="solveBVP" data-name="solvebvp">
+  <div class="func-name">solveBVP</div>
+  <div class="func-desc">Boundary value problem solver for a general first-order system <code>y' = f(t,y)</code> via single shooting; <code>y0Guess</code> (default <code>[0, 0]</code>) sets the state dimension <code>n</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveBVP(f, bc, mesh[, y0Guess])</div>
+  </div>
+</div>
+<div class="func-card" id="solveDAE" data-name="solvedae">
+  <div class="func-name">solveDAE</div>
+  <div class="func-desc">Semi-explicit <strong>index-1 DAE</strong> <code>y' = f(t,y,z)</code>, <code>0 = g(t,y,z)</code> via variable-step BDF(1–2) with a coupled Newton solve for <code>(y,z)</code> each step; consistent-<code>z0</code> solve; returns <code>{ t, y[t], z[t] }</code> (higher-index input detected via singular <code>∂g/∂z</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveDAE(f, g, tspan, y0[, z0][, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="solveDDE" data-name="solvedde">
+  <div class="func-name">solveDDE</div>
+  <div class="func-desc">Constant-delay <strong>DDE</strong> <code>y'(t) = f(t, y(t), [y(t−τ₁), …])</code> via the method of steps: adaptive BS23 + cubic-Hermite continuous extension (dense output), step capped at <code>min(τ)</code> so delayed args lie in computed history; lands on <code>t0 + kτ</code> breakpoints; <code>history</code> is <code>φ(t)</code> (or a constant), <code>delays</code> an array of positive τ; returns <code>{ t, y[t], yInterp }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveDDE(f, tspan, history, delays[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="solveODE" data-name="solveode">
+  <div class="func-name">solveODE</div>
+  <div class="func-desc">ODE solver (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveODE(f, tspan, y0[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="solveODESystem" data-name="solveodesystem">
+  <div class="func-name">solveODESystem</div>
+  <div class="func-desc">System of ODEs (RK, JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveODESystem(f, y0, tspan[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="solveParabolicPDE" data-name="solveparabolicpde">
+  <div class="func-name">solveParabolicPDE</div>
+  <div class="func-desc">General 1-D parabolic PDE <code>u_t = D(x)·u_xx + c(x)·u_x + f(x,t,u)</code> via method-of-lines onto the BDF stiff solver; Dirichlet/Neumann BCs; returns <code>{ x, t, u[t][x] }</code> (O(h²) in space)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solveParabolicPDE({ diffusion, advection?, source?, x0, x1, T, nx, u0, bcLeft, bcRight, ... })</div>
+  </div>
+</div>
+<div class="func-card" id="solvePDE" data-name="solvepde">
+  <div class="func-name">solvePDE</div>
+  <div class="func-desc">1-D heat-equation PDE solver (explicit Euler, fixed step; legacy)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">solvePDE(...)</div>
+  </div>
+</div>
+<div class="func-card" id="stiffODESolver" data-name="stiffodesolver">
+  <div class="func-name">stiffODESolver</div>
+  <div class="func-desc">Stiff-ODE solver</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">stiffODESolver(...)</div>
+  </div>
+</div>
+<div class="func-card" id="valueAndDerivativeAt" data-name="valueandderivativeat">
+  <div class="func-name">valueAndDerivativeAt</div>
+  <div class="func-desc">Value plus the exact forward-mode derivative of <code>f</code> at <code>x</code>; returns <code>{ value, deriv }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">valueAndDerivativeAt(f, x)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

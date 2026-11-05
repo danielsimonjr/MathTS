@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypothesis Tests — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Hypothesis Tests</div>
+  <h1><span>Hypothesis Tests</span> (36)</h1>
+  <p class="cat-desc">All return structured result objects.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Hypothesis Tests..." oninput="filterFuncs()">
+<div class="func-card" id="andersonDarlingTest" data-name="andersondarlingtest">
+  <div class="func-name">andersonDarlingTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">andersonDarlingTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="anova" data-name="anova">
+  <div class="func-name">anova</div>
+  <div class="func-desc"><code>AnovaResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">anova(groups)</div>
+  </div>
+</div>
+<div class="func-card" id="anova2" data-name="anova2">
+  <div class="func-name">anova2</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">anova2(…)</div>
+  </div>
+</div>
+<div class="func-card" id="bartlettTest" data-name="bartletttest">
+  <div class="func-name">bartlettTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bartlettTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="binomialTest" data-name="binomialtest">
+  <div class="func-name">binomialTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">binomialTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="chi2Contingency" data-name="chi2contingency">
+  <div class="func-name">chi2Contingency</div>
+  <div class="func-desc"><code>Chi2ContingencyResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chi2Contingency(table[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="chiSquareTest" data-name="chisquaretest">
+  <div class="func-name">chiSquareTest</div>
+  <div class="func-desc"><code>ChiSquareResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chiSquareTest(observed, expected)</div>
+  </div>
+</div>
+<div class="func-card" id="cochranQ" data-name="cochranq">
+  <div class="func-name">cochranQ</div>
+  <div class="func-desc"><code>CochranQResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cochranQ(data)</div>
+  </div>
+</div>
+<div class="func-card" id="dagostinoTest" data-name="dagostinotest">
+  <div class="func-name">dagostinoTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dagostinoTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="fisherExact" data-name="fisherexact">
+  <div class="func-name">fisherExact</div>
+  <div class="func-desc"><code>FisherExactResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fisherExact(table)</div>
+  </div>
+</div>
+<div class="func-card" id="friedmanTest" data-name="friedmantest">
+  <div class="func-name">friedmanTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">friedmanTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="fTest" data-name="ftest">
+  <div class="func-name">fTest</div>
+  <div class="func-desc"><code>FTestResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fTest(x, y)</div>
+  </div>
+</div>
+<div class="func-card" id="gTest" data-name="gtest">
+  <div class="func-name">gTest</div>
+  <div class="func-desc"><code>{ statistic, pValue }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gTest(observed[, expected])</div>
+  </div>
+</div>
+<div class="func-card" id="hotellingT2" data-name="hotellingt2">
+  <div class="func-name">hotellingT2</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hotellingT2(…)</div>
+  </div>
+</div>
+<div class="func-card" id="jarqueBera" data-name="jarquebera">
+  <div class="func-name">jarqueBera</div>
+  <div class="func-desc"><code>JarqueBeraResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">jarqueBera(x)</div>
+  </div>
+</div>
+<div class="func-card" id="kendallTauTest" data-name="kendalltautest">
+  <div class="func-name">kendallTauTest</div>
+  <div class="func-desc"><code>KendallTauTestResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kendallTauTest(x, y)</div>
+  </div>
+</div>
+<div class="func-card" id="kolmogorovSmirnov2Test" data-name="kolmogorovsmirnov2test">
+  <div class="func-name">kolmogorovSmirnov2Test</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kolmogorovSmirnov2Test(…)</div>
+  </div>
+</div>
+<div class="func-card" id="kolmogorovSmirnovTest" data-name="kolmogorovsmirnovtest">
+  <div class="func-name">kolmogorovSmirnovTest</div>
+  <div class="func-desc"><code>KSTestResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kolmogorovSmirnovTest(sample[, sample2])</div>
+  </div>
+</div>
+<div class="func-card" id="kruskalWallis" data-name="kruskalwallis">
+  <div class="func-name">kruskalWallis</div>
+  <div class="func-desc"><code>KruskalResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kruskalWallis(...groups)</div>
+  </div>
+</div>
+<div class="func-card" id="leveneTest" data-name="levenetest">
+  <div class="func-name">leveneTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">leveneTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="mannWhitneyTest" data-name="mannwhitneytest">
+  <div class="func-name">mannWhitneyTest</div>
+  <div class="func-desc"><code>MannWhitneyResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mannWhitneyTest(sample1, sample2)</div>
+  </div>
+</div>
+<div class="func-card" id="mcnemar" data-name="mcnemar">
+  <div class="func-name">mcnemar</div>
+  <div class="func-desc"><code>McNemarResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">mcnemar(table[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="moodMedianTest" data-name="moodmediantest">
+  <div class="func-name">moodMedianTest</div>
+  <div class="func-desc"><code>{ statistic, pValue, grandMedian }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">moodMedianTest(groups)</div>
+  </div>
+</div>
+<div class="func-card" id="multipleComparison" data-name="multiplecomparison">
+  <div class="func-name">multipleComparison</div>
+  <div class="func-desc"><code>number[]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multipleComparison(pValues[, method])</div>
+  </div>
+</div>
+<div class="func-card" id="multipleTest" data-name="multipletest">
+  <div class="func-name">multipleTest</div>
+  <div class="func-desc"><code>number[]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multipleTest(pValues, method)</div>
+  </div>
+</div>
+<div class="func-card" id="permutationTest" data-name="permutationtest">
+  <div class="func-name">permutationTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">permutationTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="powerDivergence" data-name="powerdivergence">
+  <div class="func-name">powerDivergence</div>
+  <div class="func-desc"><code>{ statistic, pValue }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">powerDivergence(observed[, expected, lambda])</div>
+  </div>
+</div>
+<div class="func-card" id="principalComponentAnalysis" data-name="principalcomponentanalysis">
+  <div class="func-name">principalComponentAnalysis</div>
+  <div class="func-desc"><code>PCAResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">principalComponentAnalysis(data[, k])</div>
+  </div>
+</div>
+<div class="func-card" id="proportionZTest" data-name="proportionztest">
+  <div class="func-name">proportionZTest</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">proportionZTest(…)</div>
+  </div>
+</div>
+<div class="func-card" id="runsTest" data-name="runstest">
+  <div class="func-name">runsTest</div>
+  <div class="func-desc"><code>{ runs, z, pValue }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">runsTest(x[, { cutoff }])</div>
+  </div>
+</div>
+<div class="func-card" id="shapiroWilkTest" data-name="shapirowilktest">
+  <div class="func-name">shapiroWilkTest</div>
+  <div class="func-desc"><code>ShapiroWilkResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">shapiroWilkTest(sample)</div>
+  </div>
+</div>
+<div class="func-card" id="signTest" data-name="signtest">
+  <div class="func-name">signTest</div>
+  <div class="func-desc"><code>{ statistic, pValue, nPos, nNeg }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">signTest(x[, median])</div>
+  </div>
+</div>
+<div class="func-card" id="studentTTest" data-name="studentttest">
+  <div class="func-name">studentTTest</div>
+  <div class="func-desc"><code>TTestResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTTest(sample1[, sample2])</div>
+  </div>
+</div>
+<div class="func-card" id="studentTTestPaired" data-name="studentttestpaired">
+  <div class="func-name">studentTTestPaired</div>
+  <div class="func-desc"><span class="undocumented">Listed in the export index; see the source for details.</span></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">studentTTestPaired(…)</div>
+  </div>
+</div>
+<div class="func-card" id="tukeyHSD" data-name="tukeyhsd">
+  <div class="func-name">tukeyHSD</div>
+  <div class="func-desc"><code>TukeyComparison[]</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tukeyHSD(groups[, alpha])</div>
+  </div>
+</div>
+<div class="func-card" id="wilcoxon" data-name="wilcoxon">
+  <div class="func-name">wilcoxon</div>
+  <div class="func-desc"><code>WilcoxonResult</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">wilcoxon(x[, y])</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

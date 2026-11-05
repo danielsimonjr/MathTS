@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Processing — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Signal Processing</div>
+  <h1><span>Signal Processing</span> (103)</h1>
+  <p class="cat-desc"><code>parallelFFT</code>, <code>parallelIFFT</code>, <code>parallelConv</code>, and related <code>parallel*</code> helpers may return a <code>Promise</code>, but FFT/conv op thresholds in <code>ComputePool</code> are <code>'never'</code> today — they run the sequential radix-2 / FFT convolution core inline unless a future threshold retune enables workers. Optional WebGPU FFT (<code>enableGpu()</code>, power-of-two n ≥ 262 144) is separate from the worker pool.</p>
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Signal Processing..." oninput="filterFuncs()">
+<div class="func-card" id="autoCorrelation" data-name="autocorrelation">
+  <div class="func-name">autoCorrelation</div>
+  <div class="func-desc">Sync sliding dot products (not the async <code>parallel*</code> conv path)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">autoCorrelation(a)</div>
+  </div>
+</div>
+<div class="func-card" id="bandpassFilter" data-name="bandpassfilter">
+  <div class="func-name">bandpassFilter</div>
+  <div class="func-desc">Band-pass filter (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bandpassFilter(x, f1, f2)</div>
+  </div>
+</div>
+<div class="func-card" id="bartlettPSD" data-name="bartlettpsd">
+  <div class="func-name">bartlettPSD</div>
+  <div class="func-desc">Bartlett non-overlapped segment-averaging PSD (Welch with overlap 0, rectangular window) → <code>{ psd, frequencies, frameLength }</code> (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bartlettPSD(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="bilinear" data-name="bilinear">
+  <div class="func-name">bilinear</div>
+  <div class="func-desc">Analog → digital bilinear (Tustin) transform of a transfer function (<code>s = 2·fs·(z−1)/(z+1)</code>, no pre-warping) — <code>scipy.signal.bilinear(b, a, fs)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bilinear(b, a, fs)</div>
+  </div>
+</div>
+<div class="func-card" id="blackmanHarrisWindow" data-name="blackmanharriswindow">
+  <div class="func-name">blackmanHarrisWindow</div>
+  <div class="func-desc">Cosine-sum windows with the scipy coefficients (4-term Blackman–Harris, 4-term Nuttall, 5-term flat-top)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">blackmanHarrisWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="bohmanWindow" data-name="bohmanwindow">
+  <div class="func-name">bohmanWindow</div>
+  <div class="func-desc">Bohman, Parzen (4th-order B-spline) and half-sine windows</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bohmanWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="butter" data-name="butter">
+  <div class="func-name">butter</div>
+  <div class="func-desc">Butterworth IIR design; returns <code>{ b, a }</code> transfer-function coefficients. <code>N</code> = order, <code>Wn</code> = cutoff (scalar) or <code>[low, high]</code> band edges normalized to Nyquist (0 &lt; Wn &lt; 1), <code>btype</code> = <code>'low'</code> (default, unchanged 2-arg call) | <code>'high'</code> | <code>'bandpass'</code> | <code>'bandstop'</code> — <code>scipy.signal.butter(N, Wn, btype)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">butter(N, Wn[, btype])</div>
+  </div>
+</div>
+<div class="func-card" id="buttord" data-name="buttord">
+  <div class="func-name">buttord</div>
+  <div class="func-desc">Minimum Butterworth order + natural frequency meeting a passband/stopband spec → <code>{ N, Wn }</code> — scalar <code>wp</code>/<code>ws</code> for lowpass/highpass (scalar <code>Wn</code>), or <code>[lo, hi]</code> pairs for bandpass/bandstop (<code>[lo, hi]</code> <code>Wn</code>; bandstop uses scipy's <code>fminbound</code> passband-edge optimizer). Order exact, <code>Wn</code> ~1e-8 vs <code>scipy.signal.buttord</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">buttord(wp, ws, gpass, gstop)</div>
+  </div>
+</div>
+<div class="func-card" id="cheby1" data-name="cheby1">
+  <div class="func-name">cheby1</div>
+  <div class="func-desc">Chebyshev Type I IIR design — equiripple passband (<code>rp</code> dB ripple); same <code>Wn</code>/<code>btype</code> convention as <code>butter</code> — <code>scipy.signal.cheby1(N, rp, Wn, btype)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cheby1(N, rp, Wn[, btype])</div>
+  </div>
+</div>
+<div class="func-card" id="cheby2" data-name="cheby2">
+  <div class="func-name">cheby2</div>
+  <div class="func-desc">Chebyshev Type II IIR design — equiripple stopband (<code>rs</code> dB attenuation), monotone passband — <code>scipy.signal.cheby2(N, rs, Wn, btype)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cheby2(N, rs, Wn[, btype])</div>
+  </div>
+</div>
+<div class="func-card" id="chirp" data-name="chirp">
+  <div class="func-name">chirp</div>
+  <div class="func-desc">Swept cosine from <code>f0</code> Hz at <code>t = 0</code> to <code>f1</code> Hz at <code>t = t1</code>; <code>method</code> <code>'linear'</code> (default), <code>'quadratic'</code>, <code>'logarithmic'</code>, <code>'hyperbolic'</code>; <code>phi</code> phase offset in radians</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chirp(t, f0, t1, f1[, { method, phi }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="chirpZTransform" data-name="chirpztransform">
+  <div class="func-name">chirpZTransform</div>
+  <div class="func-desc">Chirp-Z (Bluestein) transform: <code>m</code> z-transform points along a chirp contour (<code>phiStart</code>/<code>phiStep</code> in turns; default <code>phiStep = -1/n</code>) → <code>{ re, im }</code> (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">chirpZTransform(x, m[, phiStart[, phiStep]])</div>
+  </div>
+</div>
+<div class="func-card" id="coherence" data-name="coherence">
+  <div class="func-name">coherence</div>
+  <div class="func-desc">Magnitude-squared coherence <code>|Pxy|² / (Pxx·Pyy)</code> per Welch frequency bin (values in <code>[0, 1]</code>) → <code>{ frequencies, coherence }</code> — <code>scipy.signal.coherence</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">coherence(x, y[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="cont2discrete" data-name="cont2discrete">
+  <div class="func-name">cont2discrete</div>
+  <div class="func-desc">Discretize <code>{ A, B, C, D }</code>; <code>method</code> <code>'zoh'</code> (default), <code>'bilinear'</code> or <code>'euler'</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cont2discrete(sys, dt[, method])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="conv2" data-name="conv2">
+  <div class="func-name">conv2</div>
+  <div class="func-desc">2-D convolution, <code>mode</code> <code>'full'</code> (default), <code>'same'</code> or <code>'valid'</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">conv2(image, kernel[, mode])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="convolve" data-name="convolve">
+  <div class="func-name">convolve</div>
+  <div class="func-desc">Convolution / correlation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">convolve(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="correlate" data-name="correlate">
+  <div class="func-name">correlate</div>
+  <div class="func-desc">Convolution / correlation</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">correlate(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="cosineWindow" data-name="cosinewindow">
+  <div class="func-name">cosineWindow</div>
+  <div class="func-desc">Bohman, Parzen (4th-order B-spline) and half-sine windows</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cosineWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="crossCorrelation" data-name="crosscorrelation">
+  <div class="func-name">crossCorrelation</div>
+  <div class="func-desc">Sync sliding dot products (not the async <code>parallel*</code> conv path)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">crossCorrelation(a, b)</div>
+  </div>
+</div>
+<div class="func-card" id="csd" data-name="csd">
+  <div class="func-name">csd</div>
+  <div class="func-desc">Cross-spectral density of <code>x</code>/<code>y</code> via Welch averaging (segment, window, FFT, average <code>X·conj(Y)</code>); <code>opts = { nperseg, noverlap, window, fs }</code> → <code>{ frequencies, power }</code> — <code>scipy.signal.csd</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">csd(x, y[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="cwt" data-name="cwt">
+  <div class="func-name">cwt</div>
+  <div class="func-desc">Continuous wavelet transform (Ricker/Morlet)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">cwt(x, scales[, wavelet])</div>
+  </div>
+</div>
+<div class="func-card" id="dct" data-name="dct">
+  <div class="func-name">dct</div>
+  <div class="func-desc">Discrete cosine transform / inverse (JS loops)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dct(x)</div>
+  </div>
+</div>
+<div class="func-card" id="decimate" data-name="decimate">
+  <div class="func-name">decimate</div>
+  <div class="func-desc">Anti-aliased downsampling by integer factor <code>q</code> (Butterworth lowpass + <code>filtfilt</code>, then every <code>q</code>-th sample) — <code>scipy.signal.decimate</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">decimate(x, q)</div>
+  </div>
+</div>
+<div class="func-card" id="deconvolve" data-name="deconvolve">
+  <div class="func-name">deconvolve</div>
+  <div class="func-desc">FIR/polynomial deconvolution via synthetic long division: <code>signal = conv(divisor, quotient) + remainder</code>, <code>quotient</code> length <code>signal.length − divisor.length + 1</code> — <code>scipy.signal.deconvolve</code>; pinned bit-for-bit including the non-exact-division remainder case</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">deconvolve(signal, divisor)</div>
+  </div>
+</div>
+<div class="func-card" id="dst" data-name="dst">
+  <div class="func-name">dst</div>
+  <div class="func-desc">Discrete sine transform / inverse (JS loops)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dst(x)</div>
+  </div>
+</div>
+<div class="func-card" id="dtw" data-name="dtw">
+  <div class="func-name">dtw</div>
+  <div class="func-desc">Dynamic time warping: <code>{ distance, path }</code> with the path of <code>[i, j]</code> pairs from <code>[0, 0]</code> to the last pair; <code>window</code> is a Sakoe–Chiba half-width, <code>dist</code> the local cost (default <code>|x − y|</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dtw(a, b[, { window, dist }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="dwt" data-name="dwt">
+  <div class="func-name">dwt</div>
+  <div class="func-desc">Discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">dwt(x[, wavelet])</div>
+  </div>
+</div>
+<div class="func-card" id="ellip" data-name="ellip">
+  <div class="func-name">ellip</div>
+  <div class="func-desc">Elliptic (Cauer) IIR design — equiripple in both bands, steepest roll-off for a given order; full nome-based closed-form port (not an approximation) — <code>scipy.signal.ellip(N, rp, rs, Wn, btype)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ellip(N, rp, rs, Wn[, btype])</div>
+  </div>
+</div>
+<div class="func-card" id="exponentialWindow" data-name="exponentialwindow">
+  <div class="func-name">exponentialWindow</div>
+  <div class="func-desc">Two-sided exponential <code>exp(−|i − center|/tau)</code> centred on <code>(n−1)/2</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">exponentialWindow(n, tau[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="fft" data-name="fft">
+  <div class="func-name">fft</div>
+  <div class="func-desc">Discrete Fourier transform / inverse (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fft(x)</div>
+  </div>
+</div>
+<div class="func-card" id="fft2d" data-name="fft2d">
+  <div class="func-name">fft2d</div>
+  <div class="func-desc">2D FFT (nameless <code>shouldParallelize</code> on batch size; map <code>fft2d</code> is <code>'never'</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fft2d(matrix)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="fftfreq" data-name="fftfreq">
+  <div class="func-name">fftfreq</div>
+  <div class="func-desc">DFT sample frequencies for a length-<code>n</code> <code>fft</code>, sample spacing <code>d</code> (default 1) — <code>numpy.fft.fftfreq</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fftfreq(n[, d])</div>
+  </div>
+</div>
+<div class="func-card" id="fftn" data-name="fftn">
+  <div class="func-name">fftn</div>
+  <div class="func-desc">2-D FFT: FFT each row, then FFT each column → <code>{ re, im }</code> — <code>numpy.fft.fft2</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fftn(x)</div>
+  </div>
+</div>
+<div class="func-card" id="fftshift" data-name="fftshift">
+  <div class="func-name">fftshift</div>
+  <div class="func-desc">Roll the zero-frequency component to the center of the spectrum (roll by <code>floor(n/2)</code>) — <code>numpy.fft.fftshift</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fftshift(x)</div>
+  </div>
+</div>
+<div class="func-card" id="filtfilt" data-name="filtfilt">
+  <div class="func-name">filtfilt</div>
+  <div class="func-desc">Zero-phase forward–backward filtering with odd-reflection padding (default padlen <code>3·max(len a, len b)</code>); no phase distortion — <code>scipy.signal.filtfilt</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">filtfilt(b, a, x)</div>
+  </div>
+</div>
+<div class="func-card" id="findPeaks" data-name="findpeaks">
+  <div class="func-name">findPeaks</div>
+  <div class="func-desc">Strict local-maxima peak indices (<code>x[i-1] &lt; x[i] &gt; x[i+1]</code>), optionally filtered by <code>opts.height</code> (min value), <code>opts.distance</code> (min index separation, greedily keeps the taller peak), and/or <code>opts.prominence</code> (min topographic prominence) — <code>scipy.signal.find_peaks</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">findPeaks(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="firls" data-name="firls">
+  <div class="func-name">firls</div>
+  <div class="func-desc">Least-squares linear-phase FIR design: <code>bands</code> is a flat <code>[lo, hi, lo, hi, …]</code> list of band-edge pairs (Nyquist-normalized) with <code>desired</code> the response at those edges (linearly interpolated within each band; gaps between bands are unconstrained transition regions) — <code>scipy.signal.firls</code>. A genuine (non-approximate) least-squares fit — dense trapezoid-quadrature sampling of the bands plus a cosine-basis normal-equations solve — not bit-pinned against scipy's exact closed-form integrals</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">firls(numtaps, bands, desired)</div>
+  </div>
+</div>
+<div class="func-card" id="firwin" data-name="firwin">
+  <div class="func-name">firwin</div>
+  <div class="func-desc">FIR lowpass tap design by the windowed-sinc method (Hamming window, unit DC gain); <code>cutoff</code> normalized to Nyquist (1 = Nyquist) — <code>scipy.signal.firwin(numtaps, cutoff)</code> with the default window</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">firwin(numtaps, cutoff)</div>
+  </div>
+</div>
+<div class="func-card" id="firwinBandpass" data-name="firwinbandpass">
+  <div class="func-name">firwinBandpass</div>
+  <div class="func-desc">FIR bandpass tap design by the windowed-sinc method (Hamming window): <code>h[n] = (f2·sinc(f2·(n−M/2)) − f1·sinc(f1·(n−M/2)))·hamming[n]</code>, cutoffs normalized to Nyquist — the array-cutoff case <code>firwin</code> didn't support (resolves the Phase-0 note)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">firwinBandpass(numtaps, [f1, f2])</div>
+  </div>
+</div>
+<div class="func-card" id="flattopWindow" data-name="flattopwindow">
+  <div class="func-name">flattopWindow</div>
+  <div class="func-desc">Cosine-sum windows with the scipy coefficients (4-term Blackman–Harris, 4-term Nuttall, 5-term flat-top)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">flattopWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="fourier" data-name="fourier">
+  <div class="func-name">fourier</div>
+  <div class="func-desc">Continuous Fourier transform</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">fourier(f)</div>
+  </div>
+</div>
+<div class="func-card" id="freqz" data-name="freqz">
+  <div class="func-name">freqz</div>
+  <div class="func-desc">Digital filter frequency response (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">freqz(b, a)</div>
+  </div>
+</div>
+<div class="func-card" id="gaussianWindow" data-name="gaussianwindow">
+  <div class="func-name">gaussianWindow</div>
+  <div class="func-desc">Gaussian window with standard deviation <code>std</code> samples</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gaussianWindow(n, std[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="gaussPulse" data-name="gausspulse">
+  <div class="func-name">gaussPulse</div>
+  <div class="func-desc">Gaussian-modulated cosine pulse at centre frequency <code>fc</code> Hz, fractional bandwidth <code>bw</code> (0.5) at reference level <code>bwr</code> dB (−6)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">gaussPulse(t, fc[, bw, bwr])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="getWindow" data-name="getwindow">
+  <div class="func-name">getWindow</div>
+  <div class="func-desc">Window by name: the ten above plus <code>hamming</code>, <code>hann</code>, <code>blackman</code>, <code>bartlett</code>, <code>rectangular</code>; <code>param</code> is beta / std / alpha / tau; the classic five delegate to <code>windowFunction</code> and are always symmetric</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">getWindow(name, n[, param])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">string, number</span></span></div>
+</div>
+<div class="func-card" id="goertzel" data-name="goertzel">
+  <div class="func-name">goertzel</div>
+  <div class="func-desc">Goertzel algorithm: power |X[k]|² at a single target frequency (Hz) (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">goertzel(x, targetFreq, sampleRate)</div>
+  </div>
+</div>
+<div class="func-card" id="groupDelay" data-name="groupdelay">
+  <div class="func-name">groupDelay</div>
+  <div class="func-desc">Filter group delay</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">groupDelay(b, a, w)</div>
+  </div>
+</div>
+<div class="func-card" id="highpassFilter" data-name="highpassfilter">
+  <div class="func-name">highpassFilter</div>
+  <div class="func-desc">High-pass filter (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">highpassFilter(x, fc)</div>
+  </div>
+</div>
+<div class="func-card" id="hilbertTransform" data-name="hilberttransform">
+  <div class="func-name">hilbertTransform</div>
+  <div class="func-desc">Hilbert transform (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">hilbertTransform(x)</div>
+  </div>
+</div>
+<div class="func-card" id="idct" data-name="idct">
+  <div class="func-name">idct</div>
+  <div class="func-desc">Discrete cosine transform / inverse (JS loops)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">idct(X)</div>
+  </div>
+</div>
+<div class="func-card" id="idst" data-name="idst">
+  <div class="func-name">idst</div>
+  <div class="func-desc">Discrete sine transform / inverse (JS loops)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">idst(X)</div>
+  </div>
+</div>
+<div class="func-card" id="idwt" data-name="idwt">
+  <div class="func-name">idwt</div>
+  <div class="func-desc">Inverse discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">idwt(cA, cD[, wavelet])</div>
+  </div>
+</div>
+<div class="func-card" id="ifft" data-name="ifft">
+  <div class="func-name">ifft</div>
+  <div class="func-desc">Discrete Fourier transform / inverse (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ifft(X)</div>
+  </div>
+</div>
+<div class="func-card" id="ifftshift" data-name="ifftshift">
+  <div class="func-name">ifftshift</div>
+  <div class="func-desc">Inverse of <code>fftshift</code> (roll by <code>ceil(n/2)</code>) — <code>numpy.fft.ifftshift</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ifftshift(x)</div>
+  </div>
+</div>
+<div class="func-card" id="iirNotch" data-name="iirnotch">
+  <div class="func-name">iirNotch</div>
+  <div class="func-desc">Second-order notch / peak filter <code>{ b, a }</code>; <code>w0</code> is normalized frequency in (0, 1) (× π rad/sample), <code>Q = w0 / bandwidth</code> with −3 dB bandwidth <code>w0·π/Q</code> (scipy convention)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">iirNotch(w0, Q)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="iirPeak" data-name="iirpeak">
+  <div class="func-name">iirPeak</div>
+  <div class="func-desc">Second-order notch / peak filter <code>{ b, a }</code>; <code>w0</code> is normalized frequency in (0, 1) (× π rad/sample), <code>Q = w0 / bandwidth</code> with −3 dB bandwidth <code>w0·π/Q</code> (scipy convention)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">iirPeak(w0, Q)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="impulseResponse" data-name="impulseresponse">
+  <div class="func-name">impulseResponse</div>
+  <div class="func-desc">First <code>n</code> samples of the impulse / step response of the digital filter <code>b/a</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">impulseResponse(b, a, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="invFourier" data-name="invfourier">
+  <div class="func-name">invFourier</div>
+  <div class="func-desc">Continuous Fourier transform</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">invFourier(F)</div>
+  </div>
+</div>
+<div class="func-card" id="irfft" data-name="irfft">
+  <div class="func-name">irfft</div>
+  <div class="func-desc">Inverse real FFT: rebuilds the conjugate-symmetric length-<code>n</code> spectrum from <code>rfft</code>'s half-spectrum, inverse-FFTs, and returns the real parts — <code>numpy.fft.irfft</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">irfft(spec, n)</div>
+  </div>
+</div>
+<div class="func-card" id="istft" data-name="istft">
+  <div class="func-name">istft</div>
+  <div class="func-desc">Inverse STFT via overlap-add, normalized by the running sum of squared window values (COLA) — <code>scipy.signal.istft</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">istft(S[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="kaiserWindow" data-name="kaiserwindow">
+  <div class="func-name">kaiserWindow</div>
+  <div class="func-desc">Kaiser window (<code>beta = 0</code> is rectangular)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">kaiserWindow(n, beta[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="lfilter" data-name="lfilter">
+  <div class="func-name">lfilter</div>
+  <div class="func-desc">Apply an IIR/FIR filter (numerator <code>b</code>, denominator <code>a</code>) to <code>x</code> via direct-form II transposed; <code>a[0]</code> normalizes — <code>scipy.signal.lfilter</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lfilter(b, a, x)</div>
+  </div>
+</div>
+<div class="func-card" id="lfilterZi" data-name="lfilterzi">
+  <div class="func-name">lfilterZi</div>
+  <div class="func-desc">Steady-state initial conditions for <code>lfilter</code> so a constant input is unchanged at the boundary — <code>scipy.signal.lfilter_zi</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lfilterZi(b, a)</div>
+  </div>
+</div>
+<div class="func-card" id="lombScargle" data-name="lombscargle">
+  <div class="func-name">lombScargle</div>
+  <div class="func-desc">Lomb–Scargle periodogram of unevenly sampled data at <strong>angular</strong> frequencies <code>freqs</code> (rad per time unit, with the Scargle τ phase offset); <code>opts.normalize</code> scales a unit sinusoid to ≈ 1, <code>opts.precenter</code> removes the mean</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lombScargle(t, y, freqs[, opts])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="lowpassFilter" data-name="lowpassfilter">
+  <div class="func-name">lowpassFilter</div>
+  <div class="func-desc">Low-pass filter (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">lowpassFilter(x, fc)</div>
+  </div>
+</div>
+<div class="func-card" id="medfilt" data-name="medfilt">
+  <div class="func-name">medfilt</div>
+  <div class="func-desc">Median filter</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">medfilt(x[, window])</div>
+  </div>
+</div>
+<div class="func-card" id="multiTaperPSD" data-name="multitaperpsd">
+  <div class="func-name">multiTaperPSD</div>
+  <div class="func-desc">Thomson multi-taper PSD; averages <code>K</code> Slepian-tapered periodograms to cut leakage; <code>opts = { nfft, K }</code> (default K=5) → <code>{ psd, frequencies }</code> (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">multiTaperPSD(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="nuttallWindow" data-name="nuttallwindow">
+  <div class="func-name">nuttallWindow</div>
+  <div class="func-desc">Cosine-sum windows with the scipy coefficients (4-term Blackman–Harris, 4-term Nuttall, 5-term flat-top)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nuttallWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="parallelAutoCorr" data-name="parallelautocorr">
+  <div class="func-name">parallelAutoCorr</div>
+  <div class="func-desc">Auto-correlation → <code>Promise&lt;Float64Array&gt;</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelAutoCorr(a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelConv" data-name="parallelconv">
+  <div class="func-name">parallelConv</div>
+  <div class="func-desc">Convolution → <code>Promise&lt;Float64Array&gt;</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelConv(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelFFTMagnitude" data-name="parallelfftmagnitude">
+  <div class="func-name">parallelFFTMagnitude</div>
+  <div class="func-desc">FFT magnitude spectrum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelFFTMagnitude(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelFFTPower" data-name="parallelfftpower">
+  <div class="func-name">parallelFFTPower</div>
+  <div class="func-desc">FFT power spectrum</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelFFTPower(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parallelXCorr" data-name="parallelxcorr">
+  <div class="func-name">parallelXCorr</div>
+  <div class="func-desc">Cross-correlation → <code>Promise&lt;Float64Array&gt;</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parallelXCorr(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="parzenWindow" data-name="parzenwindow">
+  <div class="func-name">parzenWindow</div>
+  <div class="func-desc">Bohman, Parzen (4th-order B-spline) and half-sine windows</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">parzenWindow(n[, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="peakWidths" data-name="peakwidths">
+  <div class="func-name">peakWidths</div>
+  <div class="func-desc">Width (in samples) of each peak at <code>relHeight</code> down from the peak toward its topographic base, with linearly-interpolated crossing points — <code>scipy.signal.peak_widths</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">peakWidths(x, peaks[, relHeight=0.5])</div>
+  </div>
+</div>
+<div class="func-card" id="periodogram" data-name="periodogram">
+  <div class="func-name">periodogram</div>
+  <div class="func-desc">Power spectral density estimate (JS)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">periodogram(x)</div>
+  </div>
+</div>
+<div class="func-card" id="remez" data-name="remez">
+  <div class="func-name">remez</div>
+  <div class="func-desc">Optimal equiripple FIR design via the <strong>exact</strong> Parks-McClellan / Remez exchange (faithful port of the McClellan-Parks-Rabiner program that <code>scipy.signal.remez</code> wraps). <strong>scipy convention</strong> (distinct from <code>firls</code>): band edges normalized to <code>[0, 0.5]</code> (<code>fs = 1</code>, <code>0.5 = Nyquist</code>); <code>desired</code>/<code>weight</code> are one value per band (<code>bands.length / 2</code>); <code>type</code> is <code>'bandpass'</code> (default, symmetric), <code>'differentiator'</code>, or <code>'hilbert'</code> (antisymmetric). Taps match <code>scipy.signal.remez</code> to machine precision</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">remez(numtaps, bands, desired[, weight, type])</div>
+  </div>
+</div>
+<div class="func-card" id="resample" data-name="resample">
+  <div class="func-name">resample</div>
+  <div class="func-desc">Signal resampling</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">resample(x, ratio)</div>
+  </div>
+</div>
+<div class="func-card" id="rfft" data-name="rfft">
+  <div class="func-name">rfft</div>
+  <div class="func-desc">Real FFT: full <code>fft(x)</code> truncated to the non-redundant first <code>floor(n/2)+1</code> bins → <code>{ re, im }</code> — <code>numpy.fft.rfft</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rfft(x)</div>
+  </div>
+</div>
+<div class="func-card" id="rfftfreq" data-name="rfftfreq">
+  <div class="func-name">rfftfreq</div>
+  <div class="func-desc">DFT sample frequencies for an <code>rfft</code> output (<code>0..floor(n/2)</code>) — <code>numpy.fft.rfftfreq</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rfftfreq(n[, d])</div>
+  </div>
+</div>
+<div class="func-card" id="savgol" data-name="savgol">
+  <div class="func-name">savgol</div>
+  <div class="func-desc">Savitzky-Golay smoothing: fits a degree-<code>polyorder</code> polynomial (normal equations over a Vandermonde of window offsets) to each <code>windowLength</code>-point window and takes the center value; edges reuse the nearest boundary window's fit evaluated at the edge point's offset (scipy's <code>mode='interp'</code>) — exact on polynomials of degree &lt;= <code>polyorder</code>; pinned bit-for-bit against <code>scipy.signal.savgol_filter</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">savgol(x, windowLength, polyorder)</div>
+  </div>
+</div>
+<div class="func-card" id="sawtooth" data-name="sawtooth">
+  <div class="func-name">sawtooth</div>
+  <div class="func-desc">Sawtooth/triangle of period 2π (scipy): <code>−1</code> at 0 rising to <code>+1</code> at <code>width·2π</code> (default 1)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sawtooth(t[, width])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="sinc" data-name="sinc">
+  <div class="func-name">sinc</div>
+  <div class="func-desc">Normalized sinc <code>sin(πx)/(πx)</code> with <code>sinc(0) = 1</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sinc(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="sos2tf" data-name="sos2tf">
+  <div class="func-name">sos2tf</div>
+  <div class="func-desc">Cascade of second-order sections (rows <code>[b0, b1, b2, a0, a1, a2]</code>) to one <code>{ b, a }</code>; <strong>not</strong> normalized by <code>a0</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sos2tf(sos)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[][]</span></span></div>
+</div>
+<div class="func-card" id="sosfilt" data-name="sosfilt">
+  <div class="func-name">sosfilt</div>
+  <div class="func-desc">Apply a cascade of second-order sections (from <code>zpk2sos</code>) to <code>x</code>, each biquad in direct-form-II transposed — <code>scipy.signal.sosfilt</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sosfilt(sos, x)</div>
+  </div>
+</div>
+<div class="func-card" id="spectrogram" data-name="spectrogram">
+  <div class="func-name">spectrogram</div>
+  <div class="func-desc">Spectrogram</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">spectrogram(x[, opts])</div>
+  </div>
+  <div class="meta"><span><span class="k">Accel</span><span class="accel">parallel</span></span></div>
+</div>
+<div class="func-card" id="squareWave" data-name="squarewave">
+  <div class="func-name">squareWave</div>
+  <div class="func-desc">Square wave of period 2π: <code>+1</code> while <code>frac(t/2π) &lt; duty</code> (default 0.5), else <code>−1</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">squareWave(t[, duty])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="ss2tf" data-name="ss2tf">
+  <div class="func-name">ss2tf</div>
+  <div class="func-desc">Transfer function to controllable-canonical state space <code>{ A, B, C, D }</code> (scipy), and SISO state space back to <code>{ num, den }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">ss2tf(A, B, C, D)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[][]</span></span></div>
+</div>
+<div class="func-card" id="stepResponse" data-name="stepresponse">
+  <div class="func-name">stepResponse</div>
+  <div class="func-desc">First <code>n</code> samples of the impulse / step response of the digital filter <code>b/a</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">stepResponse(b, a, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="stft" data-name="stft">
+  <div class="func-name">stft</div>
+  <div class="func-desc">Short-time Fourier transform (windowed overlapping frames → per-frame FFT) — <code>scipy.signal.stft</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">stft(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="sweepPoly" data-name="sweeppoly">
+  <div class="func-name">sweepPoly</div>
+  <div class="func-desc">Cosine whose instantaneous frequency is a polynomial in <code>t</code>; <code>polyCoeffs</code> <strong>highest order first</strong> (numpy <code>poly1d</code>), Hz</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">sweepPoly(t, polyCoeffs[, phi])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="tf2ss" data-name="tf2ss">
+  <div class="func-name">tf2ss</div>
+  <div class="func-desc">Transfer function to controllable-canonical state space <code>{ A, B, C, D }</code> (scipy), and SISO state space back to <code>{ num, den }</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tf2ss(b, a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[], number[][]</span></span></div>
+</div>
+<div class="func-card" id="tf2zpk" data-name="tf2zpk">
+  <div class="func-name">tf2zpk</div>
+  <div class="func-desc">Zeros, poles and gain <code>{ z, p, k }</code>, roots sorted by real then imaginary part</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tf2zpk(b, a)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number[]</span></span></div>
+</div>
+<div class="func-card" id="tukeyWindow" data-name="tukeywindow">
+  <div class="func-name">tukeyWindow</div>
+  <div class="func-desc">Tapered-cosine window; <code>alpha = 0</code> rectangular, <code>alpha = 1</code> Hann (default 0.5)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">tukeyWindow(n[, alpha, { sym }])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="unitImpulse" data-name="unitimpulse">
+  <div class="func-name">unitImpulse</div>
+  <div class="func-desc">Length-<code>n</code> impulse at <code>idx</code> (default 0, or <code>'mid'</code>)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">unitImpulse(n[, idx])</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number</span></span></div>
+</div>
+<div class="func-card" id="unwrapPhase" data-name="unwrapphase">
+  <div class="func-name">unwrapPhase</div>
+  <div class="func-desc">Remove 2π phase discontinuities</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">unwrapPhase(phase)</div>
+  </div>
+</div>
+<div class="func-card" id="wavedec" data-name="wavedec">
+  <div class="func-name">wavedec</div>
+  <div class="func-desc">Multilevel discrete wavelet decomposition (haar/db1-4/sym2-4/coif1-2)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">wavedec(x[, wavelet, level])</div>
+  </div>
+</div>
+<div class="func-card" id="waverec" data-name="waverec">
+  <div class="func-name">waverec</div>
+  <div class="func-desc">Multilevel inverse discrete wavelet transform (haar/db1-4/sym2-4/coif1-2)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">waverec(coeffs[, wavelet])</div>
+  </div>
+</div>
+<div class="func-card" id="welchPSD" data-name="welchpsd">
+  <div class="func-name">welchPSD</div>
+  <div class="func-desc">Welch overlapped-segment-averaging PSD; <code>opts = { frameLength, overlap, window }</code> (defaults 256, frameLength/2, <code>'hann'</code>) → <code>{ psd, frequencies, frameLength }</code> (JS; WASM refused by policy)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">welchPSD(x[, opts])</div>
+  </div>
+</div>
+<div class="func-card" id="wiener" data-name="wiener">
+  <div class="func-name">wiener</div>
+  <div class="func-desc">Wiener adaptive filter: local mean <code>m</code>/variance <code>v</code> over a <code>mysize</code>-window (same-length, zero-padded edges), noise <code>= mean(v)</code>; output <code>m + max(0, v−noise)/max(v, noise)·(x−m)</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">wiener(x[, mysize])</div>
+  </div>
+</div>
+<div class="func-card" id="windowFunction" data-name="windowfunction">
+  <div class="func-name">windowFunction</div>
+  <div class="func-desc">Window functions (Hamming, Hann, …)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">windowFunction(n, type)</div>
+  </div>
+</div>
+<div class="func-card" id="zpk2sos" data-name="zpk2sos">
+  <div class="func-name">zpk2sos</div>
+  <div class="func-desc">Group zeros/poles/gain into cascaded second-order sections <code>[[b0,b1,b2,a0,a1,a2], …]</code> — <code>scipy.signal.zpk2sos</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">zpk2sos(z, p, k)</div>
+  </div>
+</div>
+<div class="func-card" id="zpk2tf" data-name="zpk2tf">
+  <div class="func-name">zpk2tf</div>
+  <div class="func-desc">Zero-pole-gain → transfer function (factory layer)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">zpk2tf(z, p, k)</div>
+  </div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

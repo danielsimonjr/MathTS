@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logical &amp; Bitwise — MathTS Reference</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+  --pink: #f778ba; --red: #f85149; --code-bg: #1c2128;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+.search-box { width: 100%; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin: 1.5rem 0; }
+.search-box:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text2); font-size: 0.85rem; text-align: center; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem; }
+header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+h1 { font-size: 1.75rem; font-weight: 600; }
+h1 span { color: var(--accent); }
+.breadcrumb { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.cat-desc { color: var(--text2); margin-top: 0.5rem; }
+.func-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.func-card:target { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.func-name { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+.func-desc { margin: 0.5rem 0; color: var(--text); }
+.func-section { margin-top: 0.75rem; }
+.func-section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text2); letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+.example { background: var(--code-bg); padding: 0.5rem 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-top: 0.25rem; color: var(--green); white-space: pre-wrap; }
+.meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; margin-top: 0.5rem; }
+.meta .k { color: var(--text2); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; margin-right: 0.35rem; }
+.types { color: var(--purple); font-family: monospace; }
+.accel { color: var(--orange); font-family: monospace; }
+.undocumented { color: var(--text2); font-style: italic; }
+.prose { color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="breadcrumb"><a href="../index.html">MathTS Reference</a> &rsaquo; Logical &amp; Bitwise</div>
+  <h1><span>Logical &amp; Bitwise</span> (14)</h1>
+  
+</header>
+
+<input type="text" class="search-box" id="search" placeholder="Filter Logical &amp; Bitwise..." oninput="filterFuncs()">
+<div class="func-card" id="and" data-name="and">
+  <div class="func-name">and</div>
+  <div class="func-desc">Logical AND — true when both operands are truthy</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">and(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">any, number, bigint, BigNumber, Complex</span></span></div>
+</div>
+<div class="func-card" id="bigint" data-name="bigint">
+  <div class="func-name">bigint</div>
+  <div class="func-desc">Convert to a <code>bigint</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bigint(x)</div>
+  </div>
+</div>
+<div class="func-card" id="bitAnd" data-name="bitand">
+  <div class="func-name">bitAnd</div>
+  <div class="func-desc">Bitwise AND</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bitAnd(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="bitNot" data-name="bitnot">
+  <div class="func-name">bitNot</div>
+  <div class="func-desc">Bitwise NOT (unary)</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bitNot(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="bitOr" data-name="bitor">
+  <div class="func-name">bitOr</div>
+  <div class="func-desc">Bitwise OR</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bitOr(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="bitXor" data-name="bitxor">
+  <div class="func-name">bitXor</div>
+  <div class="func-desc">Bitwise XOR</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">bitXor(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="leftShift" data-name="leftshift">
+  <div class="func-name">leftShift</div>
+  <div class="func-desc">Bitwise left shift</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">leftShift(x, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="not" data-name="not">
+  <div class="func-name">not</div>
+  <div class="func-desc">Logical NOT — flips truthiness</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">not(x)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">any, number, bigint, BigNumber, Complex</span></span></div>
+</div>
+<div class="func-card" id="nullish" data-name="nullish">
+  <div class="func-name">nullish</div>
+  <div class="func-desc">Returns <code>a</code> unless <code>a</code> is <code>null</code>/<code>undefined</code>, else <code>b</code></div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">nullish(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">any (returns one operand, not a boolean)</span></span></div>
+</div>
+<div class="func-card" id="or" data-name="or">
+  <div class="func-name">or</div>
+  <div class="func-desc">Logical OR — true when at least one operand is truthy</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">or(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">any, number, bigint, BigNumber, Complex</span></span></div>
+</div>
+<div class="func-card" id="re" data-name="re">
+  <div class="func-name">re</div>
+  <div class="func-desc">Real part — identity for real types, <code>re</code> for Complex</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">re(z)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Complex, Array</span></span></div>
+</div>
+<div class="func-card" id="rightArithShift" data-name="rightarithshift">
+  <div class="func-name">rightArithShift</div>
+  <div class="func-desc">Arithmetic (sign-preserving) right shift</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rightArithShift(x, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="rightLogShift" data-name="rightlogshift">
+  <div class="func-name">rightLogShift</div>
+  <div class="func-desc">Logical (zero-filling) right shift</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">rightLogShift(x, n)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">number, bigint, BigNumber, Int32Array</span></span><span><span class="k">Accel</span><span class="accel">parallel†</span></span></div>
+</div>
+<div class="func-card" id="xor" data-name="xor">
+  <div class="func-name">xor</div>
+  <div class="func-desc">Logical XOR — true when exactly one operand is truthy</div>
+  <div class="func-section">
+    <div class="func-section-title">Syntax</div>
+    <div class="example">xor(a, b)</div>
+  </div>
+  <div class="meta"><span><span class="k">Types</span><span class="types">any, number, bigint, BigNumber, Complex</span></span></div>
+</div>
+
+<footer>
+  <p>Generated 2026-11-05 from <a href="https://github.com/danielsimonjr/MathTS/blob/main/docs/reference/functions.md">docs/reference/functions.md</a> · <a href="https://github.com/danielsimonjr/MathTS">GitHub</a> · <a href="https://www.npmjs.com/package/@danielsimonjr/mathts-functions">npm</a></p>
+</footer>
+</div>
+<script>
+function filterFuncs() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.func-card').forEach(card => {
+    card.style.display = (!q || card.dataset.name.includes(q) || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

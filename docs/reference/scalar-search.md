@@ -29,11 +29,11 @@ Definitions match `functions/src/pareto-front.ts`.
 
 **`scoreFront`** on the log scale walks the array in the order given. It does not sort and it does not drop rows. The first row scores `0`. Each later row with `loss > 0` scores `-Math.log(loss / previousLoss) / (complexity - previousComplexity)`. `loss <= 0` scores `+Infinity`. A zero complexity gap is IEEE division (`NaN` or an infinity); there is no special case. On the linear scale every score is `null`, and a zero loss does not become `+Infinity`. Any other `lossScale` throws `ParetoFrontError`.
 
-**`selectFrontModel`** defaults to `best` with factor `1.5`. `accuracy` is the minimum loss. `score` is the maximum score. `best` keeps rows with `loss <= 1.5 * min(loss)` and then takes the maximum score. If every score is `null`, `score` and `best` both fall back to `accuracy`. A mix of `null` and numeric scores throws. Ties: lower complexity, then the earlier input index. `NaN` is worse than every other score, including `-Infinity`. The return value is the same object as the chosen row.
+**`selectFrontModel`** defaults to `best` with factor `1.5` (the `bestLossFactor` option). `accuracy` is the minimum loss. `score` is the maximum score. `best` keeps rows with `loss <= 1.5 * min(loss)` and then takes the maximum score. If every score is `null`, `score` and `best` both fall back to `accuracy`. A mix of `null` and numeric scores throws. Ties: lower complexity, then the earlier input index. `NaN` is worse than every other score, including `-Infinity`. The return value is the same object as the chosen row.
 
 ## Mutation weights
 
-`DEFAULT_MUTATION_WEIGHTS` in `functions/src/scalar-mutate.ts` keeps these numbers. Draw order is `MUTATION_DRAW_ORDER`, the same as the object key order. Optimize and backsolve are omitted (weight 0).
+`DEFAULT_MUTATION_WEIGHTS` in `functions/src/scalar-mutate.ts` keeps these numbers. Draw order is the module-internal `MUTATION_DRAW_ORDER` (not exported), the same as the object key order. Optimize and backsolve are omitted (weight 0).
 
 | Operator            | Weight     |
 | ------------------- | ---------- |
@@ -80,7 +80,7 @@ The hall keeps one evaluated tree per `scalarCanonicalKey` at add time: smaller 
 
 ## Opt-in fit options
 
-`fit` forwards refit knobs to `fitScalarParameters`; the values are not reimplemented. An omitted field is today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's default algorithm (`'lm'` for `'l2'`, `'bfgs'` otherwise), and `initial` set to the tree's inherited vector (ones at the initial population). `bounds` is one `[lo, hi]` pair per parameter, endpoints finite or `±Infinity`, `lo <= hi`, length equal to the parameter count; `initial` must have that length and finite values. `fit` must be a plain object when set. Each bounds entry must be a two-element array. `fit.algorithm` `'lm'` requires `loss` `'l2'`. A bad bound, length, algorithm, restart count, or start vector throws `RangeError` before the first yield. When bounds are set, every reported parameter vector is clamped into those bounds and rescored with the ranking loss. A refit that the fitter cannot run (`no valid rows to fit`) is discarded and the inherited vector is kept, like any other unfittable tree. Omitted `fit` leaves the seed-7 pin unchanged.
+`fit` forwards refit knobs to `fitScalarParameters`; the values are not reimplemented. `fit.algorithm` is `'lm' | 'bfgs' | 'nelder-mead'`. An omitted field is today's call: `restarts` 2, `maxIterations` 8, no bounds, the fitter's default algorithm (`'lm'` for `'l2'`, `'bfgs'` otherwise), and `initial` set to the tree's inherited vector (ones at the initial population). `bounds` is one `[lo, hi]` pair per parameter, endpoints finite or `±Infinity`, `lo <= hi`, length equal to the parameter count; `initial` must have that length and finite values. `fit` must be a plain object when set. Each bounds entry must be a two-element array. `fit.algorithm` `'lm'` requires `loss` `'l2'`. A bad bound, length, algorithm, restart count, or start vector throws `RangeError` before the first yield. When bounds are set, every reported parameter vector is clamped into those bounds and rescored with the ranking loss. A refit that the fitter cannot run (`no valid rows to fit`) is discarded and the inherited vector is kept, like any other unfittable tree. Omitted `fit` leaves the seed-7 pin unchanged.
 
 ## Opt-in complexity weights
 
