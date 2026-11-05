@@ -310,7 +310,10 @@ export interface ScalarSearchOptions {
    * `modelSelection` is set (SR-16). Omitted: the factor `selectFrontModel`
    * already defaults to (1.5), so today's call is unchanged. A non-finite value
    * throws `RangeError` before the search starts, even when `modelSelection` is
-   * omitted. Only read when `modelSelection` is set.
+   * omitted. Only read when `modelSelection` is set. Values in `(0, 1)` can make
+   * the `'best'` filter keep no row once selection runs, which throws
+   * {@link ParetoFrontError} mid-run; `1` is the safe lower boundary (only
+   * minimum-loss rows qualify).
    */
   readonly bestLossFactor?: number;
 }

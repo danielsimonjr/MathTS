@@ -14,7 +14,6 @@ import {
   type ScalarSearchOptions,
   type ScalarSearchProblem,
   type ScalarSearchResult,
-  type ScoredCandidate,
 } from '../src/index.js';
 
 const b = createScalarBuilder();
@@ -73,8 +72,13 @@ async function searchResult(
   return step.value;
 }
 
-function bestRow(front: readonly ScoredCandidate<ScalarNode>[]): ScoredCandidate<ScalarNode> {
-  return front.reduce((a, c) => (c.loss < a.loss ? c : a), front[0]!);
+function noisyObserved(clean: Float64Array, noiseSeed: number, amplitude: number): Float64Array {
+  const rng = createSeededRng(noiseSeed);
+  const out = new Float64Array(clean.length);
+  for (let i = 0; i < clean.length; i += 1) {
+    out[i] = clean[i] + (rng.next() - 0.5) * amplitude;
+  }
+  return out;
 }
 
 describe('runScalarSearch', () => {
@@ -135,6 +139,60 @@ describe('runScalarSearch', () => {
     });
   });
 
+  it('reads a columns record in variables order (asymmetric 3u + 2v target)', async () => {
+    const U = b.symbol('u');
+    const V = b.symbol('v');
+    const us = linspace(10, 0, 1);
+    const vs = linspace(10, -0.5, 0.5);
+    const target = b.op('+', [b.op('*', [b.number(3), U]), b.op('*', [b.number(2), V])]);
+    const observed = compileScalar(target, { variables: ['u', 'v'] }).evaluate([us, vs]).values;
+    const twoVarGrammar: ScalarGrammar = {
+      variables: ['u', 'v'],
+      binary: ['+', '*'],
+      unary: [],
+      literals: [1, 2, 3],
+      maxSize: 5,
+    };
+    const searchOpts = {
+      grammar: twoVarGrammar,
+      seed: 5,
+      maxEvaluations: 80,
+      populationSize: 8,
+    };
+    const fromArray = await runScalarSearch(
+      { variables: ['u', 'v'], columns: [us, vs], observed },
+      searchOpts
+    );
+    const fromRecord = await runScalarSearch(
+      { variables: ['u', 'v'], columns: { u: us, v: vs }, observed },
+      searchOpts
+    );
+    expect(fromRecord.front.map((row) => row.loss)).toEqual(fromArray.front.map((row) => row.loss));
+    const swappedRecord = await runScalarSearch(
+      { variables: ['u', 'v'], columns: { u: vs, v: us }, observed },
+      searchOpts
+    );
+    expect(swappedRecord.front.map((row) => row.loss)).not.toEqual(
+      fromRecord.front.map((row) => row.loss)
+    );
+  });
+
+  it('accepts rng without seed and reproduces for the same stream', async () => {
+    const { seed: _seed, ...withoutSeed } = pinnedOptions;
+    const rngA = createSeededRng(11);
+    const a = await runScalarSearch(quadProblem, { ...withoutSeed, rng: rngA });
+    const rngB = createSeededRng(11);
+    const b = await runScalarSearch(quadProblem, { ...withoutSeed, rng: rngB });
+    expect(a.front.map((row) => scalarCanonicalKey(row.item))).toEqual(
+      b.front.map((row) => scalarCanonicalKey(row.item))
+    );
+    a.front.forEach((row, i) => {
+      expect(Object.is(row.loss, b.front[i]!.loss)).toBe(true);
+    });
+    expect(a.seed).toBe(11);
+    expect(b.seed).toBe(11);
+  });
+
   it('throws when the columns record is missing a variable', async () => {
     await expect(
       runScalarSearch({ ...quadRecordProblem, columns: {} }, pinnedOptions)
@@ -172,16 +230,28 @@ describe('runScalarSearch', () => {
 });
 
 describe('bestLossFactor', () => {
-  it('with modelSelection best and factor 1 selects the minimum-loss row', async () => {
-    const result = await runScalarSearch(quadProblem, {
+  it('forwards to selectFrontModel so factor 1 and 1.5 can pick different rows', async () => {
+    const noisyProblem = {
+      ...quadProblem,
+      observed: noisyObserved(quadProblem.observed, 7, 0.05),
+    };
+    const searchOpts = {
       ...pinnedOptions,
-      modelSelection: 'best',
-      bestLossFactor: 1,
-    });
-    const min = bestRow(result.front);
-    expect(result.selected).toBeDefined();
-    expect(Object.is(result.selected!.loss, min.loss)).toBe(true);
-    expect(scalarCanonicalKey(result.selected!.item)).toBe(scalarCanonicalKey(min.item));
+      modelSelection: 'best' as const,
+    };
+    const result = await runScalarSearch(noisyProblem, searchOpts);
+    const at1 = selectFrontModel(result.front, 'best', { bestLossFactor: 1 });
+    const at15 = selectFrontModel(result.front, 'best', { bestLossFactor: 1.5 });
+    expect(at1).not.toBe(at15);
+
+    const run1 = await runScalarSearch(noisyProblem, { ...searchOpts, bestLossFactor: 1 });
+    const run15 = await runScalarSearch(noisyProblem, { ...searchOpts, bestLossFactor: 1.5 });
+    expect(run1.selected).toBe(selectFrontModel(run1.front, 'best', { bestLossFactor: 1 }));
+    expect(run15.selected).toBe(selectFrontModel(run15.front, 'best', { bestLossFactor: 1.5 }));
+    expect(scalarCanonicalKey(run1.selected!.item)).toBe(scalarCanonicalKey(at1.item));
+    expect(scalarCanonicalKey(run15.selected!.item)).toBe(scalarCanonicalKey(at15.item));
+    expect(Object.is(run1.selected!.loss, at1.loss)).toBe(true);
+    expect(Object.is(run15.selected!.loss, at15.loss)).toBe(true);
   });
 
   it('omitted bestLossFactor matches selectFrontModel with the default factor 1.5', async () => {
