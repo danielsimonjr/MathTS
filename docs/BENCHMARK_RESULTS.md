@@ -366,3 +366,38 @@ work, and `pool.terminate()` for the explicit pool case (3) injects.
 
 **A/A control** (two distinct serial closures, n = 1e4), ratio over five runs: Node
 **0.9952–1.0017**, Bun **0.9874–1.0196** (both inside ±2% on this VM).
+
+---
+
+## Worker threshold from a measurement (`SCALAR_PARALLEL_MIN_ROWS`) — SR-14
+
+SR-14 of [`docs/plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md`](./plans/SYMBOLIC_REGRESSION_EXPANSION_PLAN.md)
+ran SR-11 case (3) (`evaluateScalarPopulation`, serial vs an explicit injected
+`WorkerPool`, 8 items, mid tree) **twice on Node and twice on Bun**, in fresh
+processes, on the same Linux x64 VM (Node v22.23.4, Bun 1.4.4, 2026-11-05).
+Medians, ms; ratio = parallel / serial:
+
+| rows    | Node run 1 serial / parallel (ratio) | Node run 2 serial / parallel (ratio) | Bun run 1 serial / parallel (ratio) | Bun run 2 serial / parallel (ratio) |
+| ------- | ------------------------------------ | ------------------------------------ | ----------------------------------- | ----------------------------------- |
+| 100     | 0.1553 / 192.6389 (1240.67)          | 0.1700 / 205.1413 (1206.93)          | 0.1720 / 158.0239 (918.71)          | 0.1814 / 177.5374 (978.80)          |
+| 1 000   | 0.8294 / 198.1899 (238.95)           | 0.8224 / 206.2181 (250.76)           | 0.6757 / 175.4657 (259.70)          | 0.6322 / 173.2358 (274.01)          |
+| 10 000  | 8.3725 / 211.2120 (25.23)            | 9.7276 / 217.2928 (22.34)            | 7.5117 / 184.9894 (24.63)           | 6.4055 / 178.4875 (27.86)           |
+| 100 000 | 77.2345 / 285.5914 (3.70)            | 74.2252 / 287.5741 (3.87)            | 58.1985 / 211.3895 (3.63)           | 57.2462 / 220.9834 (3.86)           |
+
+A/A control (two distinct serial closures, n = 1e4), one run per process: Node
+**1.0054** and **0.9994**, Bun **0.9925** and **0.9923** — all inside ±2%.
+
+**Decision: no row on the grid qualifies.** The rule requires the worker path's
+median to be at or below 0.95× serial in all four runs at some row count, with
+the row count below it not qualifying. The smallest ratio observed anywhere is
+**3.63× (Bun run 1, n = 1e5)** — far above 1.0, let alone 0.95. The parallel
+median carries a near-constant ~130–210 ms per call from creating the explicit
+`WorkerPool` and terminating it (worker spawn dominates every row on the grid),
+while serial scoring of even 100 000 rows takes under 80 ms.
+
+Consequently `SCALAR_PARALLEL_MIN_ROWS` stays at **100** in
+`functions/src/scalar-batch-parallel.ts`; no changeset. Bun started
+`worker_threads` normally in all four runs (no startup failure to record).
+The seed-7 pinned search matched `pinned-rows.json` with `Object.is` before
+timing in all four runs. This measures the explicit-pool path of case (3) only;
+no speedup is claimed for `searchScalars` as a whole.
