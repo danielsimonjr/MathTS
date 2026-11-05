@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-05",
-  "totalFiles": 2159,
+  "totalFiles": 2160,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1243,
@@ -9,13 +9,13 @@
     "test": 827,
     "tool": 29,
     "config": 29,
-    "example": 5
+    "example": 6
   },
   "byArea": {
     "src": 1269,
     "tests": 827,
     "config": 29,
-    "examples": 5,
+    "examples": 6,
     "tools": 29
   },
   "byPackage": {
@@ -26,7 +26,7 @@
     "@danielsimonjr/mathts-compat": 16,
     "@danielsimonjr/mathts-core": 108,
     "@danielsimonjr/mathts-evaluator": 4,
-    "(root)": 53,
+    "(root)": 54,
     "@danielsimonjr/mathts-expression": 562,
     "@danielsimonjr/mathts-functions": 956,
     "@danielsimonjr/mathts-gpu": 17,
@@ -1403,6 +1403,13 @@
       "area": "examples",
       "disposition": "example",
       "loc": 119
+    },
+    {
+      "file": "examples/scalar-search.ts",
+      "package": "(root)",
+      "area": "examples",
+      "disposition": "example",
+      "loc": 64
     },
     {
       "file": "expression/src/compiler/compile.ts",

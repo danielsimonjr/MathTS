@@ -17,6 +17,7 @@ This directory contains example code demonstrating MathTS features.
 - [`matrix-operations.ts`](./matrix-operations.ts) - Matrix operations
 - [`parallel-computing.ts`](./parallel-computing.ts) - Parallel compute pool
 - [`mathjs-migration.ts`](./mathjs-migration.ts) - Migrating from mathjs
+- [`scalar-search.ts`](./scalar-search.ts) - Symbolic regression over scalar trees (`runScalarSearch`)
 
 ## Running Examples
 
@@ -33,6 +34,7 @@ bun --tsconfig-override=tsconfig.base.json examples/basic-matrix.ts
 bun --tsconfig-override=tsconfig.base.json examples/parallel-computing.ts
 bun --tsconfig-override=tsconfig.base.json examples/matrix-operations.ts
 bun --tsconfig-override=tsconfig.base.json examples/mathjs-migration.ts
+bun --tsconfig-override=tsconfig.base.json examples/scalar-search.ts
 ```
 
 ### Workbook examples
