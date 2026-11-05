@@ -92,7 +92,9 @@ The hall keeps one evaluated tree per `scalarCanonicalKey` at add time: smaller 
 
 ## ScalarNode ↔ expression Node
 
-`scalarToNode` / `nodeToScalar` live in `functions/src/scalar-node-bridge.ts`. A round trip keeps `scalarCanonicalKey`. Natural `log` becomes expression `log(x)`; `log10` stays `log10(x)`. Unary minus is `(-1)*x`. `ParenthesisNode` unwraps; any other node type, including `ConditionalNode`, throws `ScalarBuildError`. `simplifyScalar` does not round-trip through a formula string; `a/(b/c)` and `a·c/b`, and `a·a` and `a²`, share keys after simplify. The pin is `functions/tests/scalar-node-bridge.test.ts`.
+`scalarToNode` / `nodeToScalar` live in `functions/src/scalar-node-bridge.ts`. Lowered call names are derived from `SCALAR_FUNCTION_LOWERING` (including `sqrt` and `atan`), so the bridge cannot drift from the builder. A round trip keeps `scalarCanonicalKey`. Natural `log` becomes expression `log(x)`; `log10` stays `log10(x)`. Unary minus is `(-1)*x`. `ParenthesisNode` unwraps; any other node type, including `ConditionalNode`, throws `ScalarBuildError`. `simplifyScalar` does not round-trip through a formula string; `a/(b/c)` and `a·c/b`, and `a·a` and `a²`, share keys after simplify. The pin is `functions/tests/scalar-node-bridge.test.ts`.
+
+`compileScalarGradient`'s row `valid` mask matches `compileScalar` (primal rows only). Non-finite parameter partials store `NaN` in `grad` without dropping the row; `fitScalarParameters` scores on that primal mask and treats non-finite Jacobian entries as a failed optimizer step.
 
 ## Non-goals
 

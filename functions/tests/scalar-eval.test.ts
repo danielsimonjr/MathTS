@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { abs, add, cosh, exp, log, log10, log2, pow, sinh, tanh } from '../src/typed/arithmetic.js';
-import { cos, sin, tan } from '../src/typed/trigonometry.js';
+import {
+  abs,
+  add,
+  cosh,
+  exp,
+  log,
+  log10,
+  log2,
+  pow,
+  sinh,
+  sqrt,
+  tanh,
+} from '../src/typed/arithmetic.js';
+import { atan, cos, sin, tan } from '../src/typed/trigonometry.js';
 import { ScalarEvalError, evaluateScalar, scalar } from '../src/scalar-eval.js';
 import { evaluateScalar as evaluateFromIndex, scalar as scalarFromIndex } from '../src/index.js';
 
@@ -104,6 +116,27 @@ describe('evaluateScalar', () => {
         },
       })
     ).toBe(5);
+  });
+
+  it('evaluates sqrt and atan through MathTS', () => {
+    expect(evaluateScalar(scalar.call('sqrt', scalar.number(9)))).toBe(asNumber(sqrt(9)));
+    expect(evaluateScalar(scalar.call('sqrt', scalar.number(2)))).toBeCloseTo(Math.SQRT2, 15);
+    expect(evaluateScalar(scalar.call('atan', scalar.number(1)))).toBe(asNumber(atan(1)));
+    expect(evaluateScalar(scalar.call('atan', scalar.number(0)))).toBe(0);
+  });
+
+  it('a negative sqrt argument is a non-finite result', () => {
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(ScalarEvalError);
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(/non-finite/);
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).toThrow(/\(non-finite\)/);
+    expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(-1)))).not.toThrow(/\(i\)/);
+  });
+
+  it('sqrt(Infinity) and sqrt(NaN) are rejected as non-finite', () => {
+    for (const x of [Number.POSITIVE_INFINITY, Number.NaN] as const) {
+      expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(x)))).toThrow(ScalarEvalError);
+      expect(() => evaluateScalar(scalar.call('sqrt', scalar.number(x)))).toThrow(/non-finite/);
+    }
   });
 
   it('leaves pi, e, and pi-multiple names unbound', () => {

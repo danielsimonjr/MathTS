@@ -537,6 +537,10 @@ export function fitScalarParameters(
       for (let fi = 0; fi < freeIdx.length; fi++) {
         const pi = freeIdx[fi];
         const dPred = batch.grad[row * p + pi];
+        if (!Number.isFinite(dPred)) {
+          cols[fi][j] = Number.NaN;
+          continue;
+        }
         let dX = sw * dPred;
         if (inZ && zVec) {
           dX *= dxDz(x[pi], zVec[fi], boundsLo[pi], boundsHi[pi]);
@@ -620,7 +624,12 @@ export function fitScalarParameters(
       rVec[j] = sqrtW(row) * (pred - observed[row]);
     }
     const cols = buildJacobianColumns(x, batch, false, null);
-    return cols.map((col) => 2 * pairwiseDot(rVec, col));
+    return cols.map((col) => {
+      if (col.some((v) => !Number.isFinite(v))) {
+        return Number.POSITIVE_INFINITY;
+      }
+      return 2 * pairwiseDot(rVec, col);
+    });
   }
 
   function gradRobust(_x: number[], batch: EvalBatch, loss: 'l1' | 'huber'): number[] {
@@ -651,7 +660,11 @@ export function fitScalarParameters(
       const terms: number[] = [];
       for (let j = 0; j < mRows; j++) {
         const row = frozenRows[j];
-        terms.push(ws[j] * batch.grad[row * p + pi]);
+        const dPred = batch.grad[row * p + pi];
+        if (!Number.isFinite(dPred)) {
+          return freeIdx.map(() => Number.POSITIVE_INFINITY);
+        }
+        terms.push(ws[j] * dPred);
       }
       g[fi] = pairwiseSum(terms);
     }

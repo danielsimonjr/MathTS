@@ -252,6 +252,95 @@ describe('inferScalarDimension edge cases', () => {
   });
 });
 
+describe('sqrt and atan dimensions', () => {
+  const length = si(1, 0, 0, 0, 0, 0, 0);
+  const time = si(0, 0, 1, 0, 0, 0, 0);
+  const none = si(0, 0, 0, 0, 0, 0, 0);
+  const ZERO_F = new Fraction(0n, 1n);
+  const halfLength: RationalDimension = [
+    new Fraction(1n, 2n),
+    ZERO_F,
+    ZERO_F,
+    ZERO_F,
+    ZERO_F,
+    ZERO_F,
+    ZERO_F,
+  ];
+
+  it('sqrt of a length is length to the power one half', () => {
+    const result = inferScalarDimension(scalar.call('sqrt', scalar.symbol('x')), { x: length });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expectDimension(result.dimension, halfLength);
+    }
+  });
+
+  it('sqrt of a dimensionless argument stays dimensionless', () => {
+    const result = inferScalarDimension(scalar.call('sqrt', scalar.symbol('n')), { n: none });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expectDimension(result.dimension, none);
+    }
+  });
+
+  it('sqrt(x) and x ^ (1/2) infer the same vector', () => {
+    const viaSqrt = inferScalarDimension(scalar.call('sqrt', scalar.symbol('x')), { x: length });
+    const viaPow = inferScalarDimension(scalar.op('^', [scalar.symbol('x'), scalar.number(0.5)]), {
+      x: length,
+    });
+    expect(viaPow.ok).toBe(true);
+    expect(viaSqrt.ok).toBe(true);
+    if (viaSqrt.ok && viaPow.ok) {
+      expectDimension(viaSqrt.dimension, viaPow.dimension);
+    }
+  });
+
+  it('atan of a length is transcendental-arg-not-dimensionless', () => {
+    expect(inferScalarDimension(scalar.call('atan', scalar.symbol('x')), { x: length })).toEqual({
+      ok: false,
+      violation: 'transcendental-arg-not-dimensionless',
+      path: [],
+    });
+  });
+
+  it('atan of a dimensionless argument is dimensionless', () => {
+    const result = inferScalarDimension(scalar.call('atan', scalar.symbol('n')), { n: none });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expectDimension(result.dimension, none);
+    }
+  });
+
+  it('sqrt(p * x) with a length x and target length solves p as a length', () => {
+    const tree = scalar.call('sqrt', scalar.op('*', [scalar.symbol('p'), scalar.symbol('x')]));
+    const result = solveParameterDimensions(tree, { x: length }, length, ['p']);
+    expect(result).toEqual({ solved: { p: length } });
+  });
+
+  it('sqrt(p) with a length target solves p as a squared length', () => {
+    const result = solveParameterDimensions(scalar.call('sqrt', scalar.symbol('p')), {}, length, [
+      'p',
+    ]);
+    expect(result).toEqual({
+      solved: { p: si(2, 0, 0, 0, 0, 0, 0) },
+    });
+  });
+
+  it('atan(c * t) solves c as one over time', () => {
+    const tree = scalar.call('atan', scalar.op('*', [scalar.symbol('c'), scalar.symbol('t')]));
+    expect(solveParameterDimensions(tree, { t: time }, none, ['c'])).toEqual({
+      solved: { c: si(0, 0, -1, 0, 0, 0, 0) },
+    });
+  });
+
+  it('atan(p * t) solve mode resolves p as one over time', () => {
+    const tree = scalar.call('atan', scalar.op('*', [scalar.symbol('p'), scalar.symbol('t')]));
+    expect(solveParameterDimensions(tree, { t: time }, none, ['p'])).toEqual({
+      solved: { p: si(0, 0, -1, 0, 0, 0, 0) },
+    });
+  });
+});
+
 describe('solveParameterDimensions', () => {
   const force = si(1, 1, -2, 0, 0, 0, 0);
   const kilogram = si(0, 1, 0, 0, 0, 0, 0);

@@ -61,7 +61,11 @@ const TRANSCENDENTAL_CALLS = new Set<string>([
   'sinh',
   'cosh',
   'tanh',
+  'atan',
 ]);
+
+/** `sqrt` scales a dimensional argument like `^` with the literal exponent 1/2. */
+const HALF = new Fraction(1n, 2n);
 
 const ZERO = new Fraction(0n, 1n);
 const ONE = new Fraction(1n, 1n);
@@ -316,6 +320,9 @@ function walkScalar(
       if (!arg.ok) return arg;
       if (node.fn === 'abs') {
         return { ok: true, forms: arg.forms };
+      }
+      if (node.fn === 'sqrt') {
+        return { ok: true, forms: scaleForms(arg.forms, HALF) };
       }
       if (TRANSCENDENTAL_CALLS.has(node.fn)) {
         if (!requireZero(arg.forms, ctx)) {
