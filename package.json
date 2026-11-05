@@ -51,6 +51,8 @@
     "bench:parallel": "bun tools/benchmark/parallel/run.ts",
     "bench:tensor": "bun tools/benchmark/tensor/contract.bench.ts && bun tools/benchmark/tensor/contract-network.bench.ts && bun tools/benchmark/tensor/tensordot.bench.ts && bun tools/benchmark/tensor/decompositions.bench.ts",
     "bench:wasm": "bun tools/benchmark/wasm/run.ts",
+    "bench:scalar-search": "node tools/benchmark/scalar-search/run.mjs",
+    "bench:scalar-search:bun": "bun --tsconfig-override=tsconfig.base.json tools/benchmark/scalar-search/run.mjs",
     "bench:elementwise": "bun tools/benchmark/wasm/elementwise.bench.ts",
     "bench:special": "bun tools/benchmark/wasm/special.bench.ts",
     "bench:sort": "bun tools/benchmark/wasm/sort.bench.ts",
